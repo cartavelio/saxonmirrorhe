@@ -15,6 +15,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicateLambda;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.pattern.PortableNamedType;
@@ -22,7 +23,6 @@ import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
-import net.sf.saxon.pattern.qname.PortableQNameTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -38,7 +38,11 @@ import net.sf.saxon.tree.tiny.TinyTextualElement;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.gnode.*;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.type.gnode.XNodeType;
+import net.sf.saxon.z.IntPredicateLambda;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -46,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 
@@ -357,8 +360,7 @@ public final class Navigator {
         if (node.getLocalPart().isEmpty()) {
             same = NodeKindType.of(kind);
         } else {
-            StructuredQName requiredName = node.getQName();
-            same = new PortableNamedType(kind, new PortableQNameTest(requiredName));
+            same = new PortableNamedType(kind, node.getQName());
         }
 
         Controller controller = context == null ? null : context.getController();
@@ -422,16 +424,17 @@ public final class Navigator {
         boolean knownToMatch = false;
         NodePredicate countTest;
         if (count == null) {
-            countTest = n -> node.getQName().equals(((NodeInfo)n).getQName());
+            countTest = NodePredicateLambda.of(
+                    n -> node.getQName().equals(((NodeInfo)n).getQName()));
             knownToMatch = true;
         } else {
-            countTest = n -> {
+            countTest = NodePredicateLambda.of(n -> {
                     try {
                         return count.matches(n, context);
                     } catch (XPathException err) {
                         throw new UncheckedXPathException(err);
                     }
-            };
+            });
         }
 
         NodeInfo target = node;
@@ -530,16 +533,17 @@ public final class Navigator {
         int num = 0;
         NodePredicate countTest;
         if (count == null) {
-            countTest = n -> node.getQName().equals(((NodeInfo) n).getQName());
+            countTest = NodePredicateLambda.of(
+                    n -> node.getQName().equals(((NodeInfo) n).getQName()));
             num = 1;
         } else {
-            countTest = n -> {
+            countTest = NodePredicateLambda.of(n -> {
                 try {
                     return count.matches(n, context);
                 } catch (XPathException err) {
                     throw new UncheckedXPathException(err);
                 }
-            };
+            });
             if (count.matchesItem(node, context)) {
                 num = 1;
             }
@@ -622,15 +626,16 @@ public final class Navigator {
 
         NodePredicate countTest;
         if (count == null) {
-            countTest = n -> node.getQName().equals(((NodeInfo) n).getQName());
+            countTest = NodePredicateLambda.of(
+                    n -> node.getQName().equals(((NodeInfo) n).getQName()));
         } else {
-            countTest = n -> {
+            countTest = NodePredicateLambda.of(n -> {
                 try {
                     return count.matches(n, context);
                 } catch (XPathException err) {
                     throw new UncheckedXPathException(err);
                 }
-            };
+            });
         }
 
         NodeInfo curr = node;
@@ -1184,16 +1189,18 @@ public final class Navigator {
      * the tree has a large fan-out.
      */
 
-    public static IntPredicate getNumberedNodeMatcher(NodePredicate predicate, NodeVectorTree tree) {
+    public static IntPredicateProxy getNumberedNodeMatcher(NodePredicate predicate, NodeVectorTree tree) {
         if (predicate == null || predicate == AnyGNode.TEST) {
             final byte[] nodeKind = tree.getNodeKindArray();
-            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER;
+            return IntPredicateLambda.of(
+                    nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER);
         }
         if (predicate instanceof NodeVectorMatchMaker) {
             return ((NodeVectorMatchMaker)predicate).getMatcher(tree);
         } else {
             final byte[] nodeKind = tree.getNodeKindArray();
-            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER && predicate.test(tree.getNode(nodeNr));
+            return IntPredicateLambda.of(
+                    nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER && predicate.test(tree.getNode(nodeNr)));
         }
     }
 
@@ -1550,7 +1557,7 @@ public final class Navigator {
             } else {
                 // we're just starting...
                 if (start.hasChildNodes()) {
-                    children = start.iterateChildAxis(AnyGNodeType.getInstance());
+                    children = start.iterateChildAxis(AnyGNode.TEST);
                     if (!forwards) {
                         children = Reverse.getReverseIterator(children);
                     }

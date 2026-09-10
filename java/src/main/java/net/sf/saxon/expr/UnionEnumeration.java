@@ -26,9 +26,9 @@ public class UnionEnumeration implements SequenceIterator, LookaheadIterator {
 
     private final SequenceIterator e1;
     private final SequenceIterator e2;
-    /*@Nullable*/ private NodeInfo nextNode1 = null;
+    private final Comparator<? super GNode> comparer;
+    private NodeInfo nextNode1 = null;
     private NodeInfo nextNode2 = null;
-    private final Comparator<? super NodeInfo> comparer;
 
     /**
      * Create the iterator. The two input iterators must return nodes in document

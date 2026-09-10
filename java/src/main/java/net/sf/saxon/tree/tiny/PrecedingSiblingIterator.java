@@ -11,8 +11,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 /**
  * This class supports the preceding-sibling axis.
@@ -25,7 +24,7 @@ final class PrecedingSiblingIterator implements SequenceIterator {
     private final TinyTree tree;
     private int nextNodeNr;
     private final TinyNodeImpl parentNode;
-    private final IntPredicate matcher;
+    private final IntPredicateProxy matcher;
 
     PrecedingSiblingIterator(TinyTree doc, TinyNodeImpl node, NodePredicate predicate) {
         tree = doc;

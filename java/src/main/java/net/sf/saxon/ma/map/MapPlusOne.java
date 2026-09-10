@@ -69,7 +69,7 @@ public class MapPlusOne extends MapItem implements Iterable<KeyValuePair>{
     public Iterator<KeyValuePair> iterator() {
         Iterator<KeyValuePair> baseIter = baseMap.keyValuePairs().iterator();
         return new ConcatenatingIterator<>(baseIter,
-                                           () -> new MonoIterator<>(new KeyValuePair(extraKey, extraValue)));
+                                           () -> new MonoIterator<KeyValuePair>(new KeyValuePair(extraKey, extraValue)));
     }
 
     /**

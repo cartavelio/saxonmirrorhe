@@ -18,6 +18,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSetPredicate;
 
 import java.io.Reader;
@@ -25,7 +26,6 @@ import java.io.StringReader;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.IntPredicate;
 
 /**
  * A {@code JsonBuilder} is used to parse JSON documents. It can be instantiated by calling
@@ -113,7 +113,7 @@ public class JsonBuilder {
     public XdmValue parseJson(Reader jsonReader, Map<String, GroundedValue> options) throws SaxonApiException {
         try {
             XPathContext context = new Controller(config).newXPathContext();
-            IntPredicate checker = IntSetPredicate.ALWAYS_TRUE;
+            IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;
             IntIterator content = UnparsedTextFunction.codepoints(checker, jsonReader);
             Item result = ParseJsonFn.parse(content, options, context);
             return XdmValue.wrap(result);

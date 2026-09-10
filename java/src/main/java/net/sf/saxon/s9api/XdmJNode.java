@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
@@ -20,15 +21,16 @@ import net.sf.saxon.transpile.CSharpModifiers;
  * @since 13.0
  */
 @CSharpModifiers(code = {"internal"})
+@CSharpInjectMembers(code={"public override bool IsAtomic() { return false; }"})
 public class XdmJNode extends XdmItem {
 
 
     /**
-     * Construct an {@code XdmNode} as a wrapper around an existing JNode object. This constructor
+     * Construct an {@code XdmJNode} as a wrapper around an existing JNode object. This constructor
      * is intended primarily for system use.
      *
      * @param node the {@link JNode} object to be wrapped. This can be retrieved using the
-     *             {@link #getUnderlyingNode} method.
+     *             {@link #getUnderlyingValue()} method.
      */
 
     public XdmJNode(JNode node) {
@@ -36,12 +38,12 @@ public class XdmJNode extends XdmItem {
     }
 
     /**
-     * Get the wrapped XdmValue.
+     * Get the content property of the JNode.
      *
-     * @return the value wrapped by this object
+     * @return the value of the content property
      */
 
-    public XdmValue getValue() {
+    public XdmValue getContent() {
         return new XdmValue(getUnderlyingValue().getContent());
     }
 

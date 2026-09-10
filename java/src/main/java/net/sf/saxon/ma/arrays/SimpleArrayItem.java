@@ -344,5 +344,13 @@ public class SimpleArrayItem extends AbstractArrayItem {
             return buff.toString().trim();
         }
     }
+
+    /**
+     * Output a string representation of the array, suitable for diagnostics
+     */
+    @Override
+    public String toString() {
+        return toShortString();
+    }
 }
 

@@ -7,24 +7,22 @@
 
 package net.sf.saxon.z;
 
-import java.util.function.IntPredicate;
-
 /**
  * An IntPredicate formed as the difference of two other predicates: it matches
  * an integer if the first operand matches the integer and the second does not
  */
 
-public class IntExceptPredicate implements IntPredicate {
+public class IntExceptPredicate implements IntPredicateProxy {
 
-    private final IntPredicate p1;
-    private final IntPredicate p2;
+    private final IntPredicateProxy p1;
+    private final IntPredicateProxy p2;
 
-    private IntExceptPredicate(IntPredicate p1, IntPredicate p2) {
+    private IntExceptPredicate(IntPredicateProxy p1, IntPredicateProxy p2) {
         this.p1 = p1;
         this.p2 = p2;
     }
 
-    public static IntPredicate makeDifference(IntPredicate p1, IntPredicate p2) {
+    public static IntPredicateProxy makeDifference(IntPredicateProxy p1, IntPredicateProxy p2) {
         return new IntExceptPredicate(p1, p2);
     }
 
@@ -45,8 +43,8 @@ public class IntExceptPredicate implements IntPredicate {
      * @return an array containing the two operands
      */
 
-    public IntPredicate[] getOperands() {
-        return new IntPredicate[]{p1, p2};
+    public IntPredicateProxy[] getOperands() {
+        return new IntPredicateProxy[]{p1, p2};
     }
 }
 

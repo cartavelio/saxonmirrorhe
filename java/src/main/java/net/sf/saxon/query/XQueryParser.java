@@ -39,6 +39,7 @@ import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -47,7 +48,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.function.IntPredicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -4288,7 +4288,8 @@ public class XQueryParser extends XPathParser {
             grumble("Expected element name after '<'");
         }
         //Used LinkedHashMap because it is friendly to retain the order of attributes.
-        LinkedHashMap<String, AttributeDetails> attributes = new LinkedHashMap<>(10);
+        Set<String> lexicalNames = new HashSet<>(10);
+        List<AttributeDetails> attributes = new ArrayList<>(10);
         while (true) {
             // loop through the attributes
             // We must process namespace declaration attributes first;
@@ -4438,21 +4439,23 @@ public class XQueryParser extends XPathParser {
                 namespaceCount++;
                 ((QueryModule) env).declareActiveNamespace(prefix, uri);
             }
-            if (attributes.get(attName) != null) {
+            if (lexicalNames.contains(attName)) {
                 if (isNamespace) {
                     grumble("Duplicate namespace declaration " + attName, "XQST0071", attOffset);
                 } else {
                     grumble("Duplicate attribute name " + attName, "XQST0040", attOffset);
                 }
             }
+            lexicalNames.add(attName);
 //            if (attName.equals("xml:id") && !NameChecker.isValidNCName(rval)) {
 //                grumble("Value of xml:id must be a valid NCName", "XQST0082");
 //            }
             AttributeDetails a = new AttributeDetails();
+            a.lexicalName = attName;
             a.value = val;
             a.startOffset = attOffset;
             a.endOffset = end;
-            attributes.put(attName, a);
+            attributes.add(a);
 
             // on return, the current character is the closing quote
             //c = t.nextChar();
@@ -4494,9 +4497,8 @@ public class XQueryParser extends XPathParser {
 
         IntHashSet attFingerprints = new IntHashSet(attributes.size());
         // we've checked for duplicate lexical QNames, but not for duplicate expanded-QNames
-        for (Map.Entry<String, AttributeDetails> entry : attributes.entrySet()) {
-            String attName = entry.getKey();
-            AttributeDetails a = entry.getValue();
+        for (AttributeDetails a : attributes) {
+            String attName = a.lexicalName;
             String attValue = a.value;
             int attOffset = a.startOffset;
 
@@ -5100,9 +5102,9 @@ public class XQueryParser extends XPathParser {
 
     public static class Unescaper {
 
-        private final IntPredicate characterChecker;
+        private final IntPredicateProxy characterChecker;
 
-        public Unescaper(IntPredicate characterChecker) {
+        public Unescaper(IntPredicateProxy characterChecker) {
             this.characterChecker = characterChecker;
         }
 
@@ -5445,6 +5447,7 @@ public class XQueryParser extends XPathParser {
     }
 
     private static class AttributeDetails {
+        String lexicalName;
         String value;
         int startOffset;
         int endOffset;

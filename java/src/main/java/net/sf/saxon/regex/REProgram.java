@@ -31,9 +31,9 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.List;
-import java.util.function.IntPredicate;
 
 /**
  * A class that holds compiled regular expressions. These are created using the
@@ -47,7 +47,7 @@ public class REProgram {
     protected Operation operation;
     protected REFlags flags;
     protected UnicodeString prefix;              // Prefix string optimization
-    protected IntPredicate initialCharClass;
+    protected IntPredicateProxy initialCharClass;
     protected List<RegexPrecondition> preconditions = new java.util.ArrayList<>();
     protected int minimumLength = 0;
     protected int fixedLength = -1;

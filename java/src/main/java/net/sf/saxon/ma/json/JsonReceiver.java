@@ -24,12 +24,13 @@ import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.StringToDouble11;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntIterator;
+import net.sf.saxon.z.IntPredicateLambda;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
-import java.util.function.IntPredicate;
 
 /**
  * A Receiver which receives a stream of XML events using the vocabulary defined for the XML representation
@@ -417,7 +418,7 @@ public class JsonReceiver implements Receiver {
      */
 
     public static UnicodeString escape(UnicodeString in, boolean retainQuot,
-                                       boolean retainSlash, IntPredicate hexEscapes) throws XPathException {
+                                       boolean retainSlash, IntPredicateProxy hexEscapes) throws XPathException {
         TwineBuilder tb = TwineBuilder.make(in.length32());
         IntIterator cp = in.codePoints();
         while (cp.hasNext()) {
@@ -475,7 +476,8 @@ public class JsonReceiver implements Receiver {
         return String.format("%04X", c);
     }
 
-    private final static IntPredicate isControlChar = c -> c < 31 || (c >= 127 && c <= 159);
+    private final static IntPredicateProxy isControlChar =
+            IntPredicateLambda.of(c -> c < 31 || (c >= 127 && c <= 159));
 
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {

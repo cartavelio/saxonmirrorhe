@@ -354,7 +354,7 @@ public abstract class Pattern extends PseudoExpression {
             if (uType.equals(UType.ELEMENT)) {
                 nodeTest = NodeKindType.ELEMENT; // common case, enables use of getAllElements()
             } else {
-                nodeTest = uType::matches;
+                nodeTest = NodePredicateLambda.of(node -> uType.matches(node));
             }
             SequenceIterator allChildren = doc.iterateDescendantAxis(nodeTest);
             return ItemMappingIterator.filter(allChildren, item -> matchesItem(item, context));

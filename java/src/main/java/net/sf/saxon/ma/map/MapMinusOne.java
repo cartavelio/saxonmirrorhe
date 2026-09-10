@@ -68,7 +68,7 @@ public class MapMinusOne extends MapItem implements Iterable<KeyValuePair>{
         Iterator<KeyValuePair> baseIter = baseMap.keyValuePairs().iterator();
         java.util.function.Function<KeyValuePair, KeyValuePair> filter =
                 (kvp) -> kvp.key.asMapKey().equals(removedKey) ? null : kvp;
-        return new MappingJavaIterator<>(baseIter, filter);
+        return new MappingJavaIterator<KeyValuePair, KeyValuePair>(baseIter, filter);
     }
 
     /**

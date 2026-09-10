@@ -84,8 +84,7 @@ public class ParseOptions {
         VALIDATION_PARAMS,
         VALIDATION_STATISTICS_RECIPIENT,
         WRAP_DOCUMENT
-
-
+        
     }
 
     private final ImmutableHashTrieMap<Key, Object> properties;

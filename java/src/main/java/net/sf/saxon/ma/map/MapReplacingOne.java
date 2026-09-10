@@ -69,7 +69,7 @@ public class MapReplacingOne extends MapItem implements Iterable<KeyValuePair>{
         Iterator<KeyValuePair> baseIter = baseMap.keyValuePairs().iterator();
         java.util.function.Function<KeyValuePair, KeyValuePair> filter =
                 (kvp) -> kvp.key.asMapKey().equals(extraKey.asMapKey()) ? new KeyValuePair(extraKey, extraValue) : kvp;
-        return new MappingJavaIterator<>(baseIter, filter);
+        return new MappingJavaIterator<KeyValuePair, KeyValuePair>(baseIter, filter);
     }
 
     /**

@@ -2,8 +2,8 @@ package net.sf.saxon.pattern.nodetest;
 
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
+import net.sf.saxon.z.IntSetPredicate;
 
 public class AnyGNode implements NodePredicate, NodeVectorMatchMaker {
 
@@ -27,8 +27,8 @@ public class AnyGNode implements NodePredicate, NodeVectorMatchMaker {
      * matches the node predicate.
      */
     @Override
-    public IntPredicate getMatcher(NodeVectorTree tree) {
-        return nodeNr -> true;
+    public IntPredicateProxy getMatcher(NodeVectorTree tree) {
+        return IntSetPredicate.ALWAYS_TRUE;
     }
 }
 

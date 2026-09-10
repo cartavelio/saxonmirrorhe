@@ -12,13 +12,13 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Map;
-import java.util.function.IntPredicate;
 
 /**
  * Default handler class for accepting the result from parsing JSON strings
@@ -26,7 +26,7 @@ import java.util.function.IntPredicate;
 public class JsonHandler {
 
     public boolean escape;
-    protected IntPredicate charChecker;
+    protected IntPredicateProxy charChecker;
     private XPathContext context;
 
     private FunctionItem fallbackFunction = null;

@@ -1,4 +1,4 @@
-package net.sf.saxon.ma.trie;
+package net.sf.saxon.ma.map;
 
 import java.util.BitSet;
 
@@ -8,6 +8,9 @@ import java.util.BitSet;
  * hundred elements. The use of a Bloom filter means that contains() will usually be very
  * fast in the case where the value is absent from the set, whereas confirming presence may
  * be slower.
+ *
+ * <p>The class is currently used only to hold the set of removed entries in an
+ * {@link ExtensibleMap}, and is probably not suited to other applications.</p>
  */
 
 public class ImmutableIntSet {

@@ -5,9 +5,10 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.value.AtomicValue;
@@ -57,15 +58,40 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        Iterator<KeyValuePair> iter = ((MapItem)parent.getContent()).followingKeyValuePairs(getSelector());
-        final int startPos = serialNr + 1;
-        SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
-                iter,
-                (kvp, position) -> new JNodeForMapEntry(parent, getPosition(),
-                                                        kvp.key,
-                                                        kvp.value,
-                                                        position + startPos));
-        return Navigator.filter(all, predicate);
+        SequenceIterator iter = new FollowingSiblingIterator(this, serialNr);
+        if (predicate != null && predicate != AnyGNode.TEST) {
+            return Navigator.filter(iter, predicate);
+        }
+        return iter;
+    }
+
+    private static class FollowingSiblingIterator implements SequenceIterator {
+        private final JNode startJNode;
+        private final Iterator<KeyValuePair> pairs;
+        private int serialNr;
+
+        public FollowingSiblingIterator(JNode startJNode, int serialNr) {
+            this.startJNode = startJNode;
+            MapItem container = (MapItem) startJNode.getParent().getContent();
+            this.pairs = container.followingKeyValuePairs(startJNode.getSelector());
+            this.serialNr = serialNr;
+        }
+
+        /**
+         * Get the next item in the sequence.
+         */
+        @Override
+        public Item next() {
+            if (pairs.hasNext()) {
+                KeyValuePair next = pairs.next();
+                return new JNodeForMapEntry(startJNode.getParent(),
+                                            startJNode.getPosition(),
+                                            next.key,
+                                            next.value,
+                                            ++serialNr);
+            }
+            return null;
+        }
     }
 
     /**
@@ -77,12 +103,40 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        Iterator<KeyValuePair> iter = ((MapItem) parent.getContent()).precedingKeyValuePairs(getSelector());
-        final int endPos = serialNr - 1;
-        SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
-                iter,
-                (kvp, position) -> new JNodeForMapEntry(parent, getPosition(), kvp.key, kvp.value, endPos - position));
-        return Navigator.filter(all, predicate);
+        SequenceIterator iter = new PrecedingSiblingIterator(this, serialNr);
+        if (predicate != null && predicate != AnyGNode.TEST) {
+            return Navigator.filter(iter, predicate);
+        }
+        return iter;
+    }
+
+    private static class PrecedingSiblingIterator implements SequenceIterator {
+        private final JNode startJNode;
+        private final Iterator<KeyValuePair> pairs;
+        private int serialNr;
+
+        public PrecedingSiblingIterator(JNode startJNode, int serialNr) {
+            this.startJNode = startJNode;
+            MapItem container = (MapItem) startJNode.getParent().getContent();
+            this.pairs = container.precedingKeyValuePairs(startJNode.getSelector());
+            this.serialNr = serialNr;
+        }
+
+        /**
+         * Get the next item in the sequence.
+         */
+        @Override
+        public Item next() {
+            if (pairs.hasNext()) {
+                KeyValuePair next = pairs.next();
+                return new JNodeForMapEntry(startJNode.getParent(),
+                                            startJNode.getPosition(),
+                                            next.key,
+                                            next.value,
+                                            --serialNr);
+            }
+            return null;
+        }
     }
 
     /**
@@ -137,11 +191,12 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
         if (parent.getContent() instanceof AbstractFixedMap) {
             this.serialNr = ((AbstractFixedMap)parent.getContent()).getIndex(getSelector());
         }
+        // TODO: same logic for extensible maps
         Iterator<KeyValuePair> iter = ((MapItem) parent.getContent()).precedingKeyValuePairs(getSelector());
         int count = 0;
         while (iter.hasNext()) {
             count++;
-            iter.next();
+            KeyValuePair temp = iter.next();
         }
         this.serialNr = count;
     }

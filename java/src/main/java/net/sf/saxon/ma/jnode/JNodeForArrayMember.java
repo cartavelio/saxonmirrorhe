@@ -1,18 +1,15 @@
 package net.sf.saxon.ma.jnode;
 
-import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.IntegerValue;
-
-import java.util.Iterator;
 
 public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNode {
 
@@ -27,7 +24,7 @@ public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNo
      */
     @Override
     public int getSiblingPosition() {
-        return (int) ((Int64Value) selector).longValue();
+        return (int) ((Int64Value) selector).longValue() - 1;
     }
 
     /**
@@ -39,18 +36,45 @@ public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNo
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        ArrayItem wholeArray = (ArrayItem) parent.getContent();
-        ArrayItem subarray = wholeArray.subArray(((IntegerValue)getSelector()).asSubscript(), wholeArray.arrayLength());
-        Iterator<GroundedValue> iter = subarray.members().iterator();
-        final int startPos = getSiblingPosition() + 1;
-        SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
-                iter,
-                (mem, position) -> new JNodeForArrayMember(parent, getPosition(),
-                                                           new Int64Value(position + startPos + 1),
-                                                           mem
-                ));
-        return Navigator.filter(all, predicate);
+        SequenceIterator iter = new FollowingSiblingIterator(this, getSiblingPosition() + 1);
+        if (predicate != null && predicate != AnyGNode.TEST) {
+            return Navigator.filter(iter, predicate);
+        }
+        return iter;
     }
+
+    private static class FollowingSiblingIterator implements SequenceIterator {
+
+        private final JNode startJNode;
+        private final ArrayItem wholeArray;
+        private int index; // 0-based position of next item to be returned
+
+        public FollowingSiblingIterator(JNode startJNode, int startIndex) {
+            this.startJNode = startJNode;
+            this.wholeArray = (ArrayItem) startJNode.getParent().getContent();
+            this.index = startIndex;
+        }
+
+        /**
+         * Get the next item in the sequence. This method changes the state of the
+         * iterator.
+         */
+        @Override
+        public Item next() {
+            if (index >= wholeArray.arrayLength()) {
+                return null;
+            }
+            ;
+            GroundedValue val = wholeArray.get(index);
+            Int64Value selector = new Int64Value(index + 1);
+            index++;
+            return new JNodeForArrayMember(startJNode.getParent(),
+                                           startJNode.getPosition(),
+                                           selector,
+                                           val);
+        }
+    }
+
 
     /**
      * Get an iterator over the preceding-sibling axis, starting at this node; the nodes will
@@ -61,19 +85,42 @@ public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNo
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        ArrayItem wholeArray = (ArrayItem) parent.getContent();
-        int thisSubscript = getSiblingPosition();
-        ArrayItem subarray = wholeArray.subArray(0, thisSubscript - 1);
-        Iterator<GroundedValue> iter = subarray.members().iterator();
-        SequenceIterator forwards = new SequenceIteratorOverJavaIterator<>(
-                iter,
-                (mem, position) -> new JNodeForArrayMember(parent,
-                                                           getPosition(),
-                                                           new Int64Value(position + 1),
-                                                           mem
-                ));
-        SequenceIterator all = Reverse.getReverseIterator(forwards);
-        return Navigator.filter(all, predicate);
+        SequenceIterator iter = new PrecedingSiblingIterator(this, getSiblingPosition() - 1);
+        if (predicate != null && predicate != AnyGNode.TEST) {
+            return Navigator.filter(iter, predicate);
+        }
+        return iter;
+    }
+
+    private static class PrecedingSiblingIterator implements SequenceIterator {
+
+        private final JNode startJNode;
+        private final ArrayItem wholeArray;
+        private int index; // 0-based position of next item to be returned
+
+        public PrecedingSiblingIterator(JNode startJNode, int startIndex) {
+            this.startJNode = startJNode;
+            this.wholeArray = (ArrayItem) startJNode.getParent().getContent();
+            this.index = startIndex;
+        }
+
+        /**
+         * Get the next item in the sequence. This method changes the state of the
+         * iterator.
+         */
+        @Override
+        public Item next() {
+            if (index < 0) {
+                return null;
+            };
+            GroundedValue val = wholeArray.get(index);
+            Int64Value selector = new Int64Value(index + 1);
+            index--;
+            return new JNodeForArrayMember(startJNode.getParent(),
+                                    startJNode.getPosition(),
+                                    selector,
+                                    val);
+        }
     }
 
     /**

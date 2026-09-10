@@ -19,6 +19,7 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
+import net.sf.saxon.z.IntPredicateLambda;
 
 import javax.xml.transform.OutputKeys;
 import java.io.IOException;
@@ -369,7 +370,8 @@ public class JSONEmitter {
             cs = StringView.of(Normalizer.normalize(cs.toString(), normalizationForm));
         }
         return JsonReceiver.escape(cs, false, !escapeSolidus,
-                                   c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c));
+                                   IntPredicateLambda.of(
+                                           c -> c < 31 || (c >= 127 && c <= 159) || !characterSet.inCharset(c)));
     }
 
     private void emit(String s) throws XPathException {

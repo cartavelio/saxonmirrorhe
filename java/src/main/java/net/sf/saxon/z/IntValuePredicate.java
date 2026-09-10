@@ -7,13 +7,11 @@
 
 package net.sf.saxon.z;
 
-import java.util.function.IntPredicate;
-
 /**
  * An IntPredicate that matches a single specific integer
  */
 
-public class IntValuePredicate implements IntPredicate {
+public class IntValuePredicate implements IntPredicateProxy {
 
     private final int target;
 

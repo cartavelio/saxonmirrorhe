@@ -19,6 +19,7 @@ import net.sf.saxon.ma.jnode.*;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -585,17 +586,17 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                             if (selection.getLength() == 1) {
                                 AtomicValue key = (AtomicValue)selection.head();
                                 if (key instanceof NumericValue) {
-                                    int index;
+                                    int subscript;
                                     if (key instanceof IntegerValue) {
-                                        index = ((IntegerValue) key).asSubscript();
+                                        subscript = ((IntegerValue) key).asSubscript();
                                     } else if (((NumericValue) key).isWholeNumber()) {
-                                        index = (int) ((NumericValue) key).longValue();
+                                        subscript = (int) ((NumericValue) key).longValue();
                                     } else {
                                         return EmptyIterator.getInstance();
                                     }
-                                    if (index >= 1 && index <= ((ArrayItem) content).arrayLength()) {
-                                        GroundedValue val = ((ArrayItem) content).get(index - 1);
-                                        JNode j = new JNodeForArrayMember(((JNode) origin), 1, new Int64Value(index), val);
+                                    if (subscript >= 1 && subscript <= ((ArrayItem) content).arrayLength()) {
+                                        GroundedValue val = ((ArrayItem) content).get(subscript - 1);
+                                        JNode j = new JNodeForArrayMember(((JNode) origin), 1, new Int64Value(subscript), val);
                                         return new SingletonIterator(j);
                                     }
                                 }
@@ -639,7 +640,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                     matchKeys.add(((AtomicValue) it).asMapKey());
                 }
                 if (origin instanceof JNode) {
-                    SequenceIterator iter = Navigator.iterateAxis((JNode) origin, axis, node -> true);
+                    SequenceIterator iter = Navigator.iterateAxis((JNode) origin, axis, AnyGNode.TEST);
                     return new ItemMappingIterator(iter, item -> {
                         JNode jnode = (JNode) item;
                         if (jnode instanceof ChildJNode && matchKeys.contains(jnode.getSelector().asMapKey())) {
@@ -649,7 +650,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                         }
                     });
                 } else if (origin instanceof NodeInfo) {
-                    SequenceIterator iter = Navigator.iterateAxis((NodeInfo) origin, axis, node -> true);
+                    SequenceIterator iter = Navigator.iterateAxis((NodeInfo) origin, axis, AnyGNode.TEST);
                     return new ItemMappingIterator(iter, item -> {
                         NodeInfo node = (NodeInfo) item;
                         if (matchKeys.contains(new QNameValue(node.getQName(), BuiltInAtomicType.QNAME))) {

@@ -195,20 +195,6 @@ public class TypeHierarchy {
      */
 
     private static ItemType normalizeItemType(ItemType in) {
-//        if (in instanceof SameNameTest) {
-//            // we don't want to put a SameNameTest in the cache because it locks down the referenced document
-//            return ((SameNameTest)in).getEquivalentNameTest();
-//        }
-        // Convert element(a|b) to element(a)|element(b)
-//        if (in instanceof NameTestUnion) {
-//            Set<QNameTest> tests = ((UnionQNameTest)((NameTestUnion)in).getQNameTest()).getTests();
-//            int nodeKind = ((NameTestUnion) in).getNodeKind();
-//            List<ItemType> memberTypes = new ArrayList<>();
-//            for (QNameTest test : tests) {
-//                memberTypes.add(test.makeNodeTest(nodeKind));
-//            }
-//            return new ChoiceItemType(memberTypes);
-//        }
         // Convert element(a|b, T) to element(a, T) | element(b, T)
         if (in instanceof NamedXNodeType && ((NamedXNodeType)in).getAllowedNodeNames() instanceof UnionQNameTest) {
             Configuration config = ((NamedXNodeType) in).getConfiguration();

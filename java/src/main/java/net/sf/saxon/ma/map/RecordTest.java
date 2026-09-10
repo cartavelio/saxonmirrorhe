@@ -42,7 +42,8 @@ import java.util.function.Supplier;
  */
 public class RecordTest extends AnyFunctionType implements RecordType {
 
-    private final Map<String, SequenceType> fieldTypes = new LinkedHashMap<>();
+    private final Map<String, SequenceType> fieldTypes = new HashMap<>();
+    private final List<String> fieldNamesInOrder = new ArrayList<>();
     private final Set<String> optionalFields = new HashSet<>();
     private boolean _extensible;
     private StructuredQName name;
@@ -173,6 +174,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
      */
     public void setDetails(List<String> names, List<SequenceType> types, Collection<String> optionalFieldNames, boolean extensible) {
         for (int i = 0; i < names.size(); i++) {
+            fieldNamesInOrder.add(names.get(i));
             fieldTypes.put(names.get(i), types.get(i));
         }
         optionalFields.addAll(optionalFieldNames);
@@ -225,11 +227,11 @@ public class RecordTest extends AnyFunctionType implements RecordType {
     /**
      * Get the names of all the fields
      *
-     * @return the names of the fields (in arbitrary order)
+     * @return the names of the fields (in retained order)
      */
     @Override
     public Iterable<String> getFieldNames() {
-        return fieldTypes.keySet();
+        return fieldNamesInOrder;
     }
 
     /**
@@ -238,7 +240,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
      */
 
     public int getSize() {
-        return fieldTypes.size();
+        return fieldNamesInOrder.size();
     }
 
     /**
@@ -420,25 +422,26 @@ public class RecordTest extends AnyFunctionType implements RecordType {
         StringBuilder sb = new StringBuilder(100);
         sb.append("record(");
         boolean first = true;
-        for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
+        for (String key : fieldNamesInOrder) {
             if (first) {
                 first = false;
             } else {
                 sb.append(", ");
             }
-            if (NameChecker.isValidNCName(field.getKey())) {
-                sb.append(field.getKey());
+            if (NameChecker.isValidNCName(key)) {
+                sb.append(key);
             } else {
-                sb.append('"').append(field.getKey()).append('"');
+                sb.append('"').append(key).append('"');
             }
-            if (isOptionalField(field.getKey())) {
+            if (isOptionalField(key)) {
                 sb.append('?');
             }
             sb.append(" as ");
-            if (field.getValue().getPrimaryType() == this) {
-                sb.append("..").append(Cardinality.getOccurrenceIndicator(field.getValue().getCardinality()));
+            SequenceType fieldType = fieldTypes.get(key);
+            if (fieldType.getPrimaryType() == this) {
+                sb.append("..").append(Cardinality.getOccurrenceIndicator(fieldType.getCardinality()));
             } else {
-                sb.append(show.apply(field.getValue()));
+                sb.append(show.apply(fieldType));
             }
         }
         if (isExtensible()) {

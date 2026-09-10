@@ -15,8 +15,7 @@ import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.z.IntPredicateProxy;
 
 /**
  * This class implements the function fn:codepoints-to-string()
@@ -34,7 +33,7 @@ public class CodepointsToString extends SystemFunction implements Callable {
      *          if any of the integers is not the codepoint of a valid XML character
      */
 
-    private static TwineBuilder unicodeToString(TwineBuilder tb, SequenceIterator chars, IntPredicate checker) throws XPathException {
+    private static TwineBuilder unicodeToString(TwineBuilder tb, SequenceIterator chars, IntPredicateProxy checker) throws XPathException {
         while (true) {
             NumericValue nextInt = (NumericValue) chars.next();
             if (nextInt == null) {

@@ -9,6 +9,7 @@ package net.sf.saxon.sapling;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.ma.trie.ImmutableList;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.s9api.Serializer;
@@ -66,8 +67,8 @@ import javax.xml.transform.Source;
 public abstract class SaplingNode {
 
     @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableList<Saxon.Hej.sapling.SaplingNode>.Empty;")
-    protected io.vavr.collection.List<SaplingNode> emptyNodeList() {
-        return io.vavr.collection.List.empty();
+    protected ImmutableList<SaplingNode> emptyNodeList() {
+        return ImmutableList.empty();
     }
 
     /**

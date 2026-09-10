@@ -22,6 +22,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodePredicateLambda;
+import net.sf.saxon.pattern.PortableNamedType;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
@@ -624,8 +625,8 @@ public class DeepEqual extends CollatingFunctionFixed {
                 NodeInfo att1;
                 a1 = n1.iterateAttributeAxis(AnyGNode.TEST);
                 while ((att1 = ((NodeInfo)a1.next())) != null) {
-                    StructuredQName required = att1.getQName();
-                    SequenceIterator a2iter = n2.iterateAttributeAxis(n -> ((NodeInfo)n).getQName().equals(required));
+                    SequenceIterator a2iter = n2.iterateAttributeAxis(
+                            new PortableNamedType(Type.ATTRIBUTE, att1.getQName()));
                     NodeInfo att2 = (NodeInfo)a2iter.next();
 
                     if (att2 == null) {

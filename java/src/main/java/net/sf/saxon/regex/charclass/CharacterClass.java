@@ -8,9 +8,8 @@
 
 package net.sf.saxon.regex.charclass;
 
+import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
-
-import java.util.function.IntPredicate;
 
 /**
  * A character class represents a set of characters for regex matching purposes. It extends IntPredicate,
@@ -19,7 +18,7 @@ import java.util.function.IntPredicate;
  * optimizing regular expressions.
  */
 
-public interface CharacterClass extends IntPredicate {
+public interface CharacterClass extends IntPredicateProxy {
 
     /**
      * Test whether a particular codepoint is a member of the character class

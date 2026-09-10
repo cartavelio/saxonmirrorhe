@@ -16,7 +16,8 @@ import java.util.List;
 /**
  * An implementation of AttributeMap suitable for larger collections of attributes (say, more than five).
  * This provides direct access to an attribute by name, avoiding the cost of a sequential search. The
- * map preserves the order of insertion of attributes.
+ * map preserves the order of insertion of attributes. It is mutable, but allows addition only, not
+ * removal or replacement
  */
 
 public class LargeAttributeMap implements AttributeMap {

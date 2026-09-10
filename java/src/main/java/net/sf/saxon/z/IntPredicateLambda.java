@@ -7,8 +7,6 @@
 
 package net.sf.saxon.z;
 
-import net.sf.saxon.transpile.CSharpReplaceBody;
-
 import java.util.function.IntPredicate;
 
 /**
@@ -21,23 +19,25 @@ import java.util.function.IntPredicate;
  * when a method call such as {@code IntPredicateLambda.of(n -> n != 0)} is used.
  */
 
-public class IntPredicateLambda implements IntPredicate {
+public class IntPredicateLambda implements IntPredicateProxy {
 
     IntPredicate lambda;
+
     private IntPredicateLambda(IntPredicate lambda) {
         this.lambda = lambda;
     }
 
     /**
      * Implement an integer predicate as a lambda expression
+     *
      * @param lambda an implementation of the functional interface {@link IntPredicate}, generally
      *               supplied as a lambda expression (for example <code>{@literal i -> i > 0}</code> for a predicate
      *               that matches all positive integers).
      * @return the integer predicate
      */
-    @CSharpReplaceBody(code = "return new IntPredicateLambda(lambda);")
-    public static IntPredicate of(IntPredicate lambda) {
-        return lambda;
+
+    public static IntPredicateProxy of(IntPredicate lambda) {
+        return new IntPredicateLambda(lambda);
     }
 
     @Override

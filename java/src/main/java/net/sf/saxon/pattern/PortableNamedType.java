@@ -9,6 +9,8 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.qname.PortableQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
@@ -41,6 +43,20 @@ public class PortableNamedType extends XNodeType {
 
     public PortableNamedType(int nodeKind, QNameTest qNameTest) {
         this.qNameTest = qNameTest;
+        this.nodeKind = nodeKind;
+        this.uType = UType.fromTypeCode(nodeKind);
+    }
+
+    /**
+     * Create a NameTest to match nodes by name
+     *
+     * @param nodeKind  the kind of node, for example {@link Type#ELEMENT}
+     * @param requiredName the required name of the nodes
+     * @since 13.0
+     */
+
+    public PortableNamedType(int nodeKind, StructuredQName requiredName) {
+        this.qNameTest = new PortableQNameTest(requiredName);
         this.nodeKind = nodeKind;
         this.uType = UType.fromTypeCode(nodeKind);
     }

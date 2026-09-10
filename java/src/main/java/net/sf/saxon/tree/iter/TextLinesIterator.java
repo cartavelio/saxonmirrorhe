@@ -17,12 +17,12 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.net.URI;
-import java.util.function.IntPredicate;
 
 /**
  * An iterator that iterates over a file line by line, returning each line as a {@link StringValue}
@@ -31,7 +31,7 @@ import java.util.function.IntPredicate;
 public abstract class TextLinesIterator implements SequenceIterator {
 
     protected LineNumberReader reader;
-    protected IntPredicate checker;
+    protected IntPredicateProxy checker;
     StringValue current = null;
     int position = 0;
     protected Location location;
@@ -97,7 +97,7 @@ public abstract class TextLinesIterator implements SequenceIterator {
     }
 
 
-    private void checkLine(IntPredicate checker, /*@NotNull*/ String buffer) throws XPathException {
+    private void checkLine(IntPredicateProxy checker, /*@NotNull*/ String buffer) throws XPathException {
         for (int c = 0; c < buffer.length(); ) {
             int ch32 = buffer.charAt(c++);
             if (UTF16CharacterSet.isHighSurrogate(ch32)) {

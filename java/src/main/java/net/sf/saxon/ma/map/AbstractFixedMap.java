@@ -300,5 +300,27 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
         }
     }
 
+    /**
+     * Returns a string representation of the object.
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{");
+        int i = 0;
+        for (KeyValuePair kvp : this) {
+            if (i++ != 0) {
+                sb.append(", ");
+            }
+            sb.append(Err.depict(kvp.key))
+                    .append(": ")
+                    .append(Err.depictSequence(kvp.value));
+            if (i > 7) {
+                sb.append(" ...");
+                break;
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 }
 

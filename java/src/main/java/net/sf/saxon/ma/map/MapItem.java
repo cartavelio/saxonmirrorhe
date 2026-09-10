@@ -31,9 +31,9 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Stack;
 
 /**
@@ -149,7 +149,7 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      */
 
     public Iterator<KeyValuePair> followingKeyValuePairs(AtomicValue key) {
-        // This is inefficient. VAVR offers nothing better: see https://github.com/vavr-io/vavr/issues/3060
+        // TODO: provide a more efficient implementation for AbstractFixedMap and ExtensibleMap
         AtomicMatchKey matchKey = key.asMapKey();
         Iterator<KeyValuePair> all = keyValuePairs().iterator();
         while (all.hasNext()) {
@@ -158,7 +158,8 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
                 return all;
             }
         }
-        return null;
+        return Collections.emptyIterator();
+
     }
 
     /**
@@ -172,19 +173,19 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      */
 
     public Iterator<KeyValuePair> precedingKeyValuePairs(AtomicValue key) {
-        // This is inefficient. VAVR offers nothing better: see https://github.com/vavr-io/vavr/issues/3060
+        // TODO: provide a more efficient implementation for AbstractFixedMap and ExtensibleMap
         if (get(key) == null) {
             return null;
         }
         AtomicMatchKey matchKey = key.asMapKey();
         Iterator<KeyValuePair> all = keyValuePairs().iterator();
-        List<KeyValuePair> preceding = new LinkedList<>();
+        LinkedList<KeyValuePair> preceding = new LinkedList<>();
         while (all.hasNext()) {
             KeyValuePair current = all.next();
             if (current.key.asMapKey().equals(matchKey)) {
                 break;
             } else {
-                preceding.add(0, current);
+                preceding.addFirst(current);
             }
         }
         return preceding.iterator();

@@ -28,11 +28,11 @@ import java.util.HashMap;
 
 public class FixedMap extends AbstractFixedMap {
 
-    private final AtomicValue[] keys;
+    private final AtomicValue[] keyArray;
 
     @Override
     protected AtomicValue getKey(int offset) {
-        return keys[offset];
+        return keyArray[offset];
     }
 
     /**
@@ -49,10 +49,12 @@ public class FixedMap extends AbstractFixedMap {
 
     protected FixedMap(AtomicValue[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
         assert keys.length == values.length;
-        this.keys = keys;
+        this.keyArray = keys;
         this.values = values;
         this.index = index;
     }
+
+
 
 
 }

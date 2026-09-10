@@ -68,6 +68,7 @@ public class XdmValue implements Iterable<XdmItem> {
      * @param value the value to be wrapped.
      */
 
+    @CSharpModifiers(code={"public"})
     protected XdmValue(GroundedValue value) {
         this.value = value;
     }

@@ -19,11 +19,11 @@ import java.util.Map;
  */
 public class FixedMapWithStringKeys extends AbstractFixedMap {
 
-    private final UnicodeString[] keys;
+    private final UnicodeString[] keyArray;
 
     @Override
     protected AtomicValue getKey(int offset) {
-        return new StringValue(keys[offset]);
+        return new StringValue(keyArray[offset]);
     }
 
     /**
@@ -40,7 +40,7 @@ public class FixedMapWithStringKeys extends AbstractFixedMap {
 
     protected FixedMapWithStringKeys(UnicodeString[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
         assert keys.length == values.length;
-        this.keys = keys;
+        this.keyArray = keys;
         this.values = values;
         this.index = index;
     }

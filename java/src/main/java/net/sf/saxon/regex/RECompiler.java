@@ -39,7 +39,6 @@ import net.sf.saxon.z.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.IntPredicate;
 
 /**
  * A regular expression compiler.  This class compiles a pattern string into a
@@ -958,7 +957,7 @@ public class RECompiler {
 
             case '.':
                 idx++;
-                IntPredicate predicate;
+                IntPredicateProxy predicate;
                 if (reFlags.isSingleLine()) {
                     // in XPath with the 's' flag, '.' matches everything
                     predicate = IntSetPredicate.ALWAYS_TRUE;
@@ -1016,7 +1015,7 @@ public class RECompiler {
                     return trace(new OpBoundaryAssertion(((BoundaryAssertion) esc).getCodepoint() == 'b'));
 
                 } else if (esc instanceof IntSingletonSet) {
-                    // We had a simple escape and we want to have it end up in
+                    // We had a simple escape, and we want to have it end up in
                     // an atom, so we back up and fall though to the default handling
                     idx = idxBeforeEscape;
 

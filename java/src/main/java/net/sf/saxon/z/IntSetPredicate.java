@@ -7,13 +7,11 @@
 
 package net.sf.saxon.z;
 
-import java.util.function.IntPredicate;
-
 /**
  * An implementation of IntPredicate that tests whether a given integer is a member
  * of some IntSet
  */
-public class IntSetPredicate implements IntPredicate {
+public class IntSetPredicate implements IntPredicateProxy {
 
     private final IntSet set;
 
@@ -57,12 +55,12 @@ public class IntSetPredicate implements IntPredicate {
      * Convenience predicate that always matches
      */
 
-    public final static IntPredicate ALWAYS_TRUE = IntPredicateLambda.of(i -> true);
+    public final static IntPredicateProxy ALWAYS_TRUE = IntPredicateLambda.of(i -> true);
 
     /**
      * Convenience predicate that never matches
      */
 
-    public final static IntPredicate ALWAYS_FALSE = IntPredicateLambda.of(i -> false);
+    public final static IntPredicateProxy ALWAYS_FALSE = IntPredicateLambda.of(i -> false);
 
 }

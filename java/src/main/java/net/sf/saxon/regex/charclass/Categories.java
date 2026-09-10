@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.IntPredicate;
 
 /**
  * Singleton class holding data for Regular expression character categories.
@@ -49,9 +48,9 @@ public class Categories {
     public static class Category implements CharacterClass {
 
         private final String label;
-        private final IntPredicate predicate;
+        private final IntPredicateProxy predicate;
 
-        public Category(String label, IntPredicate predicate) {
+        public Category(String label, IntPredicateProxy predicate) {
             this.label = label;
             this.predicate = predicate;
         }
@@ -97,7 +96,7 @@ public class Categories {
             return extent(predicate);
         }
 
-        private static IntSet extent(IntPredicate predicate) {
+        private static IntSet extent(IntPredicateProxy predicate) {
             if (predicate instanceof IntSetPredicate) {
                 return ((IntSetPredicate) predicate).getIntSet();
             }
@@ -162,7 +161,7 @@ public class Categories {
         String c = "CLMNPSZ";
         for (int i = 0; i < c.length(); i++) {
             char ch = c.charAt(i);
-            IntPredicate ip = null;
+            IntPredicateProxy ip = null;
             for (Map.Entry<String, Category> entry : CATEGORIES.entrySet()) {
                 if (entry.getKey().charAt(0) == ch) {
                     ip = ip == null ? entry.getValue() : IntUnionPredicate.makeUnion(ip, entry.getValue());

@@ -120,8 +120,10 @@ public class LookupByKey extends BinaryExpression {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
 
-        Configuration config = visitor.getConfiguration();
-        TypeHierarchy th = config.getTypeHierarchy();
+        final Configuration config = visitor.getConfiguration();
+        final TypeHierarchy th = config.getTypeHierarchy();
+        final TypeChecker tc = config.getTypeChecker(false);
+
 
         if (Literal.isEmptySequence(getLhsExpression())) {
             return getLhsExpression();
@@ -161,8 +163,7 @@ public class LookupByKey extends BinaryExpression {
                             .withFailingExpression(this);
                 }
             } else {
-                final TypeChecker tc = config.getTypeChecker(false);
-                Supplier<RoleDiagnostic> role = () ->
+                Supplier<RoleDiagnostic> role0 = () ->
                         new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
                 setLhsExpression(tc.staticTypeCheck(
                         getLhsExpression(),
@@ -171,7 +172,7 @@ public class LookupByKey extends BinaryExpression {
                                                   ArrayItemType.ANY_ARRAY_TYPE,
                                                   AnyJNodeType.getInstance(),
                                                   AnyExternalObjectType.THE_INSTANCE)),
-                        role,
+                        role0,
                         visitor));
             }
         }
@@ -179,13 +180,12 @@ public class LookupByKey extends BinaryExpression {
         // Now check the second operand
 
         getRhs().typeCheck(visitor, contextInfo);
-        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
-        TypeChecker tc = config.getTypeChecker(false);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
         SequenceType req = BuiltInAtomicType.ANY_ATOMIC.zeroOrMore();
 //        if (isArrayLookup) {
 //            req = BuiltInAtomicType.INTEGER.zeroOrMore();
 //        }
-        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role, visitor));
+        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role1, visitor));
         isSingleEntry = getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
         isClassified = true;
@@ -509,7 +509,7 @@ public class LookupByKey extends BinaryExpression {
                                             optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) key))
                                     );
                                 }
-                                case JNODE:
+                                case JNODE: {
                                     SequenceIterator rhsIter = rhsVal.iterate();
                                     return MappingIterator.map(rhsIter, key -> {
                                                                    SequenceIterator all = ((JNode) baseItem).iterateChildAxis(AnyJNodeType.getInstance());
@@ -518,7 +518,7 @@ public class LookupByKey extends BinaryExpression {
                                                                }
 
                                     );
-
+                                }
                                 case EXTERNAL: {
                                     if (!(rhsVal instanceof StringValue)) {
                                         throw new XPathException(
@@ -581,16 +581,15 @@ public class LookupByKey extends BinaryExpression {
                                         optionalGroundedValueIterator(((MapItem) baseItem).get((AtomicValue) key))
                                 );
                             }
-                            case JNODE:
+                            case JNODE: {
                                 SequenceIterator rhsIter = rhsVal.iterate();
                                 final int axis = expr.axis;
                                 return MappingIterator.map(rhsIter, key -> {
                                     SequenceIterator all = ((JNode)baseItem).iterateChildAxis(AnyJNodeType.getInstance());
                                     return new ItemMappingIterator(all, jnode ->
                                             ((JNode)jnode).getSelector().equals(key) ? jnode : null);
-                                }
-
-                            );
+                                });
+                            }
 
                             case EXTERNAL: {
                                 if (!(rhsVal instanceof StringValue)) {
