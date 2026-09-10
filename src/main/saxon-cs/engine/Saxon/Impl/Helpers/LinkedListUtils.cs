@@ -1,5 +1,6 @@
 using System.Linq;
 using Saxon.Ejava.lang;
+using Saxon.Hej.om;
 
 namespace Saxon.Impl.Helpers {
     public class LinkedListUtils {
@@ -20,6 +21,32 @@ namespace Saxon.Impl.Helpers {
             }
             input.RemoveFirst();
             return first.Value;
+        }
+
+        public static SequenceIterator GetSequenceIterator<T>(System.Collections.Generic.LinkedList<T> input) where T : Item {
+            return new LinkedListIterator<T>(input);
+        }
+    }
+    
+    internal class LinkedListIterator<T> : SequenceIterator where T : Item {
+        private readonly System.Collections.Generic.IEnumerator<T> enumerator;
+        
+        public LinkedListIterator(System.Collections.Generic.LinkedList<T> input) {
+            enumerator = input.GetEnumerator();
+        }
+        public void close() {
+            // no action
+        }
+
+        public Item next() {
+            if (enumerator.MoveNext()) {
+                return enumerator.Current;
+            }
+            return null;
+        }
+
+        public void discharge() {
+            // no action
         }
     }
 }

@@ -802,6 +802,7 @@
          'isEmpty#0':     '%scope%.Count==0',
          'iterator#0':    '%scope%.GetEnumerator()',
          'offer#1':       '%scope%.AddLast(%args%)',
+         'peekFirst#0':   '%scope%.First.Value',
          'pollFirst#0':   'Saxon.Impl.Helpers.LinkedListUtils.PollFirst(%scope%)',
          'remove#1':      '%scope%.Remove(%args%)',
          'removeFirst#0': '%scope%.RemoveFirst()',
