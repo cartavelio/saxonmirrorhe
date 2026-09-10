@@ -5,59 +5,66 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.saxonica.functions.qt4.csv.TestHelpers.makeRow;
+import static com.saxonica.functions.qt4.csv.TestHelpers.makeRows;
 import static net.sf.saxon.test.Assertions.*;
-import static com.saxonica.functions.qt4.csv.TestHelpers.*;
+import static net.sf.saxon.test.OptionsParameterHelper.defaultOptionParameters;
+import static net.sf.saxon.test.OptionsParameterHelper.parsedOptionParameters;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class CsvContentHandlerTest {
     CsvContentHandler subject;
+    Map<String, GroundedValue> options = defaultOptionParameters(ParseCsv.OPTION_DETAILS);
+    Sequence result;
+
+    CsvContentHandlerTest() throws XPathException {
+    }
 
     @Test
     @DisplayName("returns an empty ParsedCsv by default")
     void defaultReturn() {
-        subject = new CsvContentHandler(CsvOptions.DEFAULT);
+        subject = new CsvContentHandler(options);
 
-        ParsedCSV result = subject.parsedCsv();
+        result = subject.getSequence();
 
-        assertEquals(ParsedCSV.EMPTY_CSV, result, "an empty ParsedCSV");
+        assertEmptySequence(result, "an empty ParsedCSV");
     }
 
     @Test
     @DisplayName("returns a ParsedCSV with a 1 row and 1 field if appendField called once")
     void oneField() {
-        subject = new CsvContentHandler(CsvOptions.DEFAULT);
+        subject = new CsvContentHandler(options);
 
         subject.appendField("abc");
 
-        ParsedCSV result = subject.parsedCsv();
+        result = subject.getSequence();
 
         assertAll(
-                () -> { assertEquals(1, Count.count(result.getSequence().iterate()), "expected one row"); },
-                () -> { assertXPathDeepEqual(makeRow(b -> b.row("abc")), result.getSequence(), "field 1 value is abc"); }
+                () -> { assertSequenceLength(1, result, "expected one row"); },
+                () -> { assertXPathDeepEqual(makeRow(b -> b.row("abc")), result, "field 1 value is abc"); }
         );
     }
 
     @Test
     @DisplayName("returns a ParsedCSV with a two rows if startNewRow also called")
     void twoRecords() {
-        subject = new CsvContentHandler(CsvOptions.DEFAULT);
+        subject = new CsvContentHandler(options);
 
         subject.appendField("abc");
         subject.startNewRow();
         subject.appendField("123");
 
-        ParsedCSV result = subject.parsedCsv();
+        result = subject.getSequence();
 
         assertAll(
-                () -> { assertSequenceLength(2, result.getSequence(), "expected two rows"); },
-                () -> { assertXPathDeepEqual(makeRows(b -> b.row("abc"), b -> b.row("123")), result.getSequence()); }
+                () -> { assertSequenceLength(2, result, "expected two rows"); },
+                () -> { assertXPathDeepEqual(makeRows(b -> b.row("abc"), b -> b.row("123")), result); }
         );
     }
 
@@ -66,7 +73,8 @@ class CsvContentHandlerTest {
     void trimmingWhitespace() throws XPathException {
         Map<String, GroundedValue> opts = new HashMap<>();
         opts.put("trim-whitespace", BooleanValue.TRUE);
-        subject = new CsvContentHandler(new CsvOptions(opts));
+        options = parsedOptionParameters(ParseCsv.OPTION_DETAILS, opts);
+        subject = new CsvContentHandler(options);
 
         subject.appendField("   abc");
         subject.appendField("def   ");
@@ -78,10 +86,10 @@ class CsvContentHandlerTest {
         subject.appendField("456\t  ");
         subject.appendField("  \t789   \t");
 
-        ParsedCSV result = subject.parsedCsv();
+        result = subject.getSequence();
 
         assertAll(
-                () -> { assertXPathDeepEqual(makeRow(b -> b.row("abc", "def", "ghi", "jkl", "mno", "pqr", "123", "456", "789")), result.getSequence()); }
+                () -> { assertXPathDeepEqual(makeRow(b -> b.row("abc", "def", "ghi", "jkl", "mno", "pqr", "123", "456", "789")), result); }
         );
 
     }

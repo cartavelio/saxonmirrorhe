@@ -3,12 +3,20 @@ package com.saxonica.functions.qt4.csv;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.EmptyAtomicSequence;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.*;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceExtent;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Implements XPath 4 fn:parse-csv() to parse CSV data from an xs:string into an array of sequences, with header row information optionally returned
@@ -21,9 +29,9 @@ public class ParseCsv extends SystemFunction {
     static {
         OptionsParameter o = new OptionsParameter();
         o.addAllowedOption("trim-whitespace", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        o.addAllowedOption("quote-character", SequenceType.SINGLE_STRING);
-        o.addAllowedOption("row-delimiter", SequenceType.SINGLE_STRING);
-        o.addAllowedOption("field-delimiter", SequenceType.SINGLE_STRING);
+        o.addAllowedOption("quote-character", SequenceType.SINGLE_STRING, new StringValue("\""));
+        o.addAllowedOption("row-delimiter", BuiltInAtomicType.STRING.oneOrMore(), SequenceExtent.makeSequenceExtent(Stream.of("\r\n", "\n", "\r").map(StringValue::new).collect(Collectors.toList())));
+        o.addAllowedOption("field-delimiter", SequenceType.SINGLE_STRING, new StringValue(","));
         OPTION_DETAILS = o;
 
     }
@@ -48,10 +56,8 @@ public class ParseCsv extends SystemFunction {
         if (arguments.length >= 2) {
             options = (MapItem) arguments[1].head();
         }
-        CsvOptions csvOptions = CsvOptions.build(options, context);
 
-        ParsedCSV parsedCsv = CsvParser.parse(input, csvOptions);
-        return parsedCsv.getSequence();
+        return CsvParser.parse(input, getDetails().optionDetails.processSuppliedOptions(options, context));
     }
 
 }

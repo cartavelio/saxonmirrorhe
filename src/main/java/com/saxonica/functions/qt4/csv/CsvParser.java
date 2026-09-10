@@ -1,20 +1,19 @@
 package com.saxonica.functions.qt4.csv;
 
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
-public class CsvParser {
-    public static ParsedCSV parse(StringValue input) throws XPathException{
-        CsvOptions csvOptions = CsvOptions.DEFAULT;
-        return parse(input, csvOptions);
-    }
+import java.util.Map;
 
-    public static ParsedCSV parse(StringValue input, CsvOptions csvOptions) throws XPathException{
+public class CsvParser {
+    public static Sequence parse(StringValue input, Map<String, GroundedValue> csvOptions) throws XPathException{
         return parse(input, csvOptions, new CsvContentHandler(csvOptions));
     }
 
-    public static ParsedCSV parse(StringValue input, CsvOptions csvOptions, CsvContentHandler handler) throws XPathException{
+    public static Sequence parse(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) throws XPathException{
         CsvParser parser = new CsvParser(input, csvOptions, handler);
         return parser.parseInput();
     }
@@ -25,10 +24,10 @@ public class CsvParser {
      */
     private class RowDelimiters {
         private final RowDelimiter[] delimiters;
-        public RowDelimiters(String[] delimiters) {
-            this.delimiters = new RowDelimiter[delimiters.length];
-            for (int i = 0; i < delimiters.length; i++) {
-                this.delimiters[i] = new RowDelimiter(delimiters[i].codePoints().toArray());
+        public RowDelimiters(GroundedValue delimiters) {
+            this.delimiters = new RowDelimiter[delimiters.getLength()];
+            for (int i = 0; i < delimiters.getLength(); i++) {
+                this.delimiters[i] = new RowDelimiter(delimiters.itemAt(i).toString().codePoints().toArray());
             }
         }
 
@@ -79,7 +78,11 @@ public class CsvParser {
         }
 
         public boolean hasNext() {
-            if (readPosition == writtenPosition ) return codepoints.hasNext();
+            if (readPosition == writtenPosition ) {
+                return codepoints.hasNext();
+            } else if (bufferFilled && writtenPosition == 0) {
+                return readPosition > writtenPosition;
+            }
             return readPosition < writtenPosition;
         }
 
@@ -138,7 +141,6 @@ public class CsvParser {
 
     private static final String ERR_QUOTING = "FOCV0001";
 
-    private final CsvOptions options;
     private final CsvContentHandler handler;
     private int[] fieldDelimiter;
     private RowDelimiters rowDelimiters;
@@ -151,13 +153,12 @@ public class CsvParser {
     private boolean inQuotedField = false;
     private boolean atFieldStart = true;
 
-    public CsvParser(StringValue input, CsvOptions csvOptions, CsvContentHandler handler) {
+    public CsvParser(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) {
         this.codepoints = new CodepointsRewindableIterator(input.codePoints());
-        this.options = csvOptions;
         this.handler = handler;
-        this.fieldDelimiter = options.getFieldDelimiter().codePoints().toArray();
-        this.rowDelimiters = new RowDelimiters(options.getRowDelimiters());
-        this.quoteCharacter = options.getQuoteCharacter().codePoints().toArray()[0];
+        this.fieldDelimiter = csvOptions.get("field-delimiter").toString().codePoints().toArray();
+        this.rowDelimiters = new RowDelimiters(csvOptions.get("row-delimiter"));
+        this.quoteCharacter = csvOptions.get("quote-character").toString().codePoints().toArray()[0];
     }
 
     /**
@@ -171,7 +172,7 @@ public class CsvParser {
         throw new XPathException(message, code);
     }
 
-    public ParsedCSV parseInput() throws XPathException {
+    public Sequence parseInput() throws XPathException {
         while (codepoints.hasNext()) {
             codepoints.next();
             checkStartOfQuotedField();
@@ -184,7 +185,7 @@ public class CsvParser {
             }
         }
         finishUnfinishedField();
-        return handler.parsedCsv();
+        return handler.getSequence();
     }
 
     private void checkStartOfQuotedField() {

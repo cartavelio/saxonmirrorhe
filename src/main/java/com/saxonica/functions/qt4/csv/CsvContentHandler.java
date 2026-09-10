@@ -2,10 +2,14 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -16,9 +20,10 @@ public class CsvContentHandler {
     private final List<List<GroundedValue>> rows = new ArrayList<>();
     private boolean trimWhitespace;
 
-    public CsvContentHandler(CsvOptions csvOptions) {
+    public CsvContentHandler(Map<String, GroundedValue> options) {
         currentRow = new ArrayList<>();
-        trimWhitespace = csvOptions.getTrimWhitespace();
+
+        trimWhitespace = ((BooleanValue) options.get("trim-whitespace")).getBooleanValue();
     }
     /**
      * Appends a field value to the current Record
@@ -38,10 +43,11 @@ public class CsvContentHandler {
         rows.add(currentRow);
     }
 
-    public ParsedCSV parsedCsv() {
-        if (rows.isEmpty()) {
-            return ParsedCSV.EMPTY_CSV;
-        }
-        return new ParsedCSV(rows.stream().map(SimpleArrayItem::new).collect(Collectors.toList()));
+    /**
+     * Generates a sequence containing the rows (XDM Arrays) in the CSV
+     * @return a sequence of rows
+     */
+    public Sequence getSequence() {
+        return SequenceExtent.makeSequenceExtent(rows.stream().map(SimpleArrayItem::new).collect(Collectors.toList()));
     }
 }
