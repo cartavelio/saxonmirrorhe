@@ -6,7 +6,7 @@
             href="../help-system" class="bodylink">guide to the documentation system</a>.
    </aside>
    
-   <p>This is the documentation for the Saxon version 11 series.</p>
+   <p>This is the documentation for the Saxon version 12 series.</p>
 
    <p>A full history of changes over successive releases appears in the <a class="bodylink" href="/changes">Change
          history</a>.</p>
@@ -29,7 +29,7 @@
    
    <h2 class="subtitle">XML technologies</h2>
 
-   <p>Saxon 11 includes highly conformant implementations of the current W3C Recommendations: XSLT
+   <p>Saxon 12 includes highly conformant implementations of the current W3C Recommendations: XSLT
       3.0, XQuery 3.1, XPath 3.1, and XSD 1.1. See <a class="bodylink" href="/conformance">Standards
          conformance</a> for more details.</p> 
 
@@ -47,7 +47,7 @@
       <p>For SaxonJ and SaxonC this documentation covers three Saxon editions: home, professional, and enterprise (HE, PE,
       and EE). The Home Edition remains open source (under the Mozilla Public License 2.0). An
       outline of what is present in each edition can be found in the <a class="bodylink"
-         href="http://www.saxonica.com/products/feature-matrix-11.xml">feature matrix</a>. Broadly
+         href="http://www.saxonica.com/products/feature-matrix-12.xml">feature matrix</a>. Broadly
       speaking:</p>
       <ul>
         <li>Saxon-HE includes support for published W3C recommendations at the minimum
@@ -67,7 +67,7 @@
    <h2 class="subtitle">Other documentation</h2>
 
    <p class="conly">Much of this documentation is applicable to the SaxonC product, but you should also check
-      the <a href="http://www.saxonica.com/saxon-c/documentation11" class="bodylink">SaxonC documentation</a>
+      the <a href="http://www.saxonica.com/saxon-c/documentation12" class="bodylink">SaxonC documentation</a>
       for aspects specific to that platform (including full details of the APIs for C/C++, PHP and Python).</p>
    
    <p>The documentation also contains information relevant to SaxonJS (in particular the Reference
@@ -82,7 +82,7 @@
 
    <aside>This documentation (including full API documentation for both the Java and .NET platforms)
       is provided on the <a href="http://www.saxonica.com/" class="bodylink">Saxonica</a> website.
-      It is also included in the <code>saxon-resources-11.zip</code> file available for download
+      It is also included in the <code>saxon-resources-12.zip</code> file available for download
       from the <a href="http://www.saxonica.com/download/download_page.xml" class="bodylink">Saxonica
             download page</a>. The resources file is separate from the software download, and it
       includes sample applications as well as this documentation for all Saxon editions.</aside>
@@ -108,7 +108,7 @@
       </nav>
       
       <p class="conly">For information on getting started with SaxonC, please see <a class="bodylink"
-         href="http://www.saxonica.com/saxon-c/documentation11/#!about/gettingstarted">Getting started</a> in
+         href="http://www.saxonica.com/saxon-c/documentation12/#!about/gettingstarted">Getting started</a> in
          the SaxonC documentation.</p>
 
       <section id="gettingstartedjava" title="Getting started with SaxonJ" class="javaonly">
@@ -124,7 +124,7 @@
             installation dependencies.</p>
          <ol>
             <li>
-               <p>Ensure that Java is installed. SaxonJ 11 requires Java 8 or later. If for some
+               <p>Ensure that Java is installed. SaxonJ 12 requires Java 8 or later. If for some
                   reason you need to run with an earlier Java release, SaxonJ 9.8 ran with Java SE 6 or later. 
                   To check that Java is installed, try typing <code>java -version</code>
                   at the command prompt. If it is not installed, you can <a
@@ -156,12 +156,12 @@
                <p>To check that the software is working, try running a simple query from the command
                   line, as follows. The filename after the "-cp" flag should match the location
                   where you installed the software. The file will be called
-                     <code>saxon-he-11.1.jar</code> for Saxon Home Edition, <code>saxon-pe-11.1.jar</code> for
-                  the Professional Edition, or <code>saxon-ee-11.1.jar</code> for the Enterprise
-                  Edition (where the "11.1" in the name will change to "11.2", "11.3", etc. in
+                     <code>saxon-he-12.1.jar</code> for Saxon Home Edition, <code>saxon-pe-12.1.jar</code> for
+                  the Professional Edition, or <code>saxon-ee-12.1.jar</code> for the Enterprise
+                  Edition (where the "12.1" in the name will change to "12.2", "12.3", etc. in
                   subsequent maintenance releases):</p>
 
-               <kbd>java -cp c:\saxon\saxon-he-11.1.jar net.sf.saxon.Query -t -qs:"current-date()"</kbd>
+               <kbd>java -cp c:\saxon\saxon-he-12.1.jar net.sf.saxon.Query -t -qs:"current-date()"</kbd>
 
                <p>Here:</p>
                   <ul>
@@ -186,7 +186,7 @@
             <li>
                <p>As a first-time user, you may find it useful to install the sample applications.
                   These are packaged together with a copy of this documentation in the file
-                  <code>saxon-resources-11.zip</code>. This can be downloaded from
+                  <code>saxon-resources-12.zip</code>. This can be downloaded from
                   either the SourceForge or Saxonica sites (it is the same file in both cases).
                   Unzip the contents of this file into the same directory as the Saxon software.
                   When you run a program that uses Saxon, this program as well as Saxon itself will
@@ -205,8 +205,8 @@
                      href="http://www.saxonica.com/" class="bodylink">www.saxonica.com</a> and
                   clicking on "Download / Evaluation License". The license key file will be sent by email
                   within 24 hours. This file, called <code>saxon-license.lic</code>, is best
-                  placed in the same directory where the file <code>saxon-pe-11.#.jar</code> or
-                     <code>saxon-ee-11.#.jar</code> is found. <i>When running Saxon from the command
+                  placed in the same directory where the file <code>saxon-pe-12.#.jar</code> or
+                     <code>saxon-ee-12.#.jar</code> is found. <i>When running Saxon from the command
                      line, it not usually necessary for the directory containing the license file
                      to be on the classpath. </i> For more details on Saxon license keys, see the <a
                      class="bodylink" href="../../license">Saxon licenses</a> section. </p>
@@ -220,13 +220,13 @@
          <p>
             <i>for XSLT (all on one line):</i>
          </p>
-         <kbd>java -cp saxon-he-11.1.jar net.sf.saxon.Transform -t -s:samples\data\books.xml 
+         <kbd>java -cp saxon-he-12.1.jar net.sf.saxon.Transform -t -s:samples\data\books.xml 
      -xsl:samples\styles\books.xsl -o:c:\temp.html</kbd>
 
          <p>
             <i>for XQuery (all on one line):</i>
          </p>
-         <kbd>java -cp saxon-he-11.1.jar net.sf.saxon.Query -t 
+         <kbd>java -cp saxon-he-12.1.jar net.sf.saxon.Query -t 
    -s:samples\data\books.xml -q:samples\query\books-to-html.xq -o:c:\temp.html</kbd>
 
          <p>Now open <code>c:\temp.html</code> in your browser to check that it worked.</p>
@@ -294,11 +294,11 @@
             <li>
                <p>As a first-time user, you may want to install the sample application <code>Example.cs</code>.
                   This is included in the file
-                  <code>saxon-resources-11.zip</code>, which can be downloaded from
+                  <code>saxon-resources-12.zip</code>, which can be downloaded from
                   the Saxonica site. Unzip the contents of this file into the same directory as the SaxonCS software.
                The easiest (or most productive) way to run the sample application is to create a command-line application in your IDE
                (for example, Visual Studio), copy the <code>Example.cs</code> source code into the IDE as your entry module,
-               and add a dependency on SaxonCS 11.</p>
+               and add a dependency on SaxonCS 12.</p>
             </li>
             
          </ol>
@@ -378,7 +378,7 @@
                plug-in replacement for the <code>System.Xml.Xsl</code> processor.
                However, it is possible to use it as a functional replacement with minor changes to
                your application code.</p>
-            <p>The SaxonCS product, available with Saxon 11, is a complete redesign. The previous
+            <p>The SaxonCS product, available from Saxon 11, is a complete redesign. The previous
             .NET product was built using the IKVM technology, which confined it to .NET Framework 4.x.
             SaxonCS is built by converting Java source code to C#, and runs on .NET 5, fitting
             in with Microsoft's strategic direction. The API for the new product retains many of the
@@ -451,7 +451,7 @@
       </ul>
 
       <p>For a full table showing the features available in each edition and licensing variant, on each
-         platform, see the <a href="http://www.saxonica.com/products/feature-matrix-11.xml" class="bodylink"
+         platform, see the <a href="http://www.saxonica.com/products/feature-matrix-12.xml" class="bodylink"
             >feature matrix</a>.</p>
 
       <p>For information on obtaining and setting up a license key, see the <a class="bodylink"
@@ -490,7 +490,7 @@
          <ul>
             <li>
                <p>To run SaxonJ you need at least a Java VM, and preferably a Java development
-                  environment. SaxonJ 11 requires at least Java SE 8 (also known as JDK 1.8). 
+                  environment. SaxonJ 12 requires at least Java SE 8 (also known as JDK 1.8). 
                   It should also run under all subsequent Java versions, but this may not be 
                   fully tested. </p>
             </li>
@@ -574,9 +574,9 @@
 
 
          <p>One of the files that will be created in this directory is the principal JAR file. This
-            is <strong>saxon-he-11.1.jar</strong>, <strong>saxon-pe-11.0.jar</strong>, or
-               <strong>saxon-ee-11.1.jar</strong> depending on which Saxon edition you are using.
-         The "11.1" in the name will change to "11.2", "11.3", etc. in subsequent maintenance releases.</p>
+            is <strong>saxon-he-12.1.jar</strong>, <strong>saxon-pe-12.0.jar</strong>, or
+               <strong>saxon-ee-12.1.jar</strong> depending on which Saxon edition you are using.
+         The "12.1" in the name will change to "12.2", "12.3", etc. in subsequent maintenance releases.</p>
 
          <p>There are some additional JAR files to support optional features such as the SQL
             interface and the ICU localization library. When running SaxonJ, the principal JAR file
@@ -596,8 +596,8 @@
          <h1>JAR files included in the product</h1>
 
 
-         <p>The full list of JAR files in the SaxonJ distribution is as follows. Here "11.#"
-         means "11.0", "11.1", "11.2", etc. depending on the maintenance release.</p>
+         <p>The full list of JAR files in the SaxonJ distribution is as follows. Here "12.#"
+         means "12.0", "12.1", "12.2", etc. depending on the maintenance release.</p>
          <table>
             <thead>
                <tr>
@@ -626,10 +626,10 @@
             <tbody>
                <tr>
                   <td>
-                     <p><span class="nowrap">saxon-he-11.#.jar</span></p>
+                     <p><span class="nowrap">saxon-he-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>5.1Mb</p>
+                   <p>4.9Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Home Edition. Contains all the software in SaxonJ-HE, except as noted
@@ -639,10 +639,10 @@
                </tr>
                <tr>
                   <td>
-                     <p><span class="nowrap">saxon-pe-11.#.jar</span></p>
+                     <p><span class="nowrap">saxon-pe-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>6Mb</p>
+                   <p>5.6Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Professional Edition. Contains all the software in SaxonJ-PE, except as
@@ -652,10 +652,10 @@
                </tr>
                <tr>
                   <td>
-                     <p><span class="nowrap">saxon-ee-11.#.jar</span></p>
+                     <p><span class="nowrap">saxon-ee-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>8.1Mb</p>
+                   <p>7.8Mb</p>
                  </td>
                   <td>
                      <p>SaxonJ Enterprise Edition. Contains all the software in SaxonJ-EE, except as
@@ -668,10 +668,10 @@
               
               <tr>
                 <td>
-                   <p><span class="nowrap">saxon-xqj-11.#.jar</span></p>
+                   <p><span class="nowrap">saxon-xqj-12.#.jar</span></p>
                 </td>
                 <td>
-                  <p>100Kb</p>
+                  <p>102Kb</p>
                 </td>
                 <td>
                   <p>Support for the XQJ (XQuery for Java) API. Provided as a separate JAR file in Saxon-HE
@@ -684,10 +684,10 @@
 
                <tr>
                   <td>
-                     <p><span class="nowrap">saxon-sql-11.#.jar</span></p>
+                     <p><span class="nowrap">saxon-sql-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>74Kb</p>
+                   <p>63Kb</p>
                  </td>
                   <td>
                      <p>Supports XSLT and XPath extensions for accessing and updating a relational database
@@ -700,10 +700,10 @@
 
                <tr>
                   <td>
-                     <p><span class="nowrap">saxon-he-test-11.#.jar</span></p>
+                     <p><span class="nowrap">saxon-he-test-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>127Kb</p>
+                   <p>132Kb</p>
                  </td>
                   <td>
                      <p>Test drivers for running the W3C test suites for XSLT and XQuery against
@@ -717,10 +717,10 @@
 
                <tr>
                   <td>
-                     <p><span class="nowrap">saxon-pe-test-11.#.jar</span></p>
+                     <p><span class="nowrap">saxon-pe-test-12.#.jar</span></p>
                   </td>
                  <td>
-                   <p>176Kb</p>
+                   <p>137Kb</p>
                  </td>
                   <td>
                      <p>Test drivers for running the W3C test suites for XSLT and XQuery
@@ -732,10 +732,10 @@
               
               <tr>
                 <td>
-                   <p><span class="nowrap">saxon-ee-test-11.#.jar</span></p>
+                   <p><span class="nowrap">saxon-ee-test-12.#.jar</span></p>
                 </td>
                 <td>
-                  <p>215Kb</p>
+                  <p>225Kb</p>
                 </td>
                 <td>
                   <p>Test drivers for running the W3C test suites for XSLT, XQuery, and XSD
@@ -820,7 +820,7 @@
             variable, or it can be included in the <code>java</code> command that invokes the
             application.</p>
          
-         <p>The manifest of the main Saxon JAR file (for example <code>saxon-he-11.1.jar</code>)
+         <p>The manifest of the main Saxon JAR file (for example <code>saxon-he-12.1.jar</code>)
             includes a <code>Class-Path</code> entry that automatically brings in the <code>jline</code>
             and <code>xmlresolver</code> dependencies, so you should not normally need to add these
             to the classpath manually. In fact these dependencies are present in two forms: a versioned
@@ -861,7 +861,7 @@
                      <p>License file. This is needed only for running SaxonJ-EE/SaxonJ-PE. The license
                         file is obtained when you purchase the product or when you apply for an
                         evaluation license. If the license file is placed in the same directory
-                        as the <code>saxon-pe-11.#.jar</code> or <code>saxon-ee-11.#.jar</code> JAR file, then
+                        as the <code>saxon-pe-12.#.jar</code> or <code>saxon-ee-12.#.jar</code> JAR file, then
                      SaxonJ will usually be able to find it without further assistance; in some class-loading
                      environments, however, the <em>directory containing the license file</em> 
                         (not the license file itself) needs to be listed
@@ -878,13 +878,13 @@
             can use to verify that the files have not been tampered with. The signatures are based on a digital certificate 
             issued to Saxonica by the security company GlobalSign.</p>
          
-         <p>You can verify that a particular JAR file (for example <code>saxon-ee-11.1.jar</code>) has a valid signature using the command:</p>
+         <p>You can verify that a particular JAR file (for example <code>saxon-ee-12.1.jar</code>) has a valid signature using the command:</p>
          
-         <kbd>jarsigner -verify saxon-ee-11.1.jar</kbd>
+         <kbd>jarsigner -verify saxon-ee-12.1.jar</kbd>
          
          <p>More usefully, you can check that it was signed by Saxonica with the command:</p>
          
-         <kbd>jarsigner -verify -verbose saxon-ee-11.1.jar</kbd>
+         <kbd>jarsigner -verify -verbose saxon-ee-12.1.jar</kbd>
          
          <p>This produces voluminous information about the contents of the JAR file, ending with details of the security certificate, 
             something like this:</p>
@@ -1042,7 +1042,7 @@
          a variety of use cases for invoking the Saxon API to perform queries and transformations.
          This is issued
          (together with this documentation and other resources) in a separate download file
-         <code>saxon-resources-11.zip</code>, available from the Saxonica
+         <code>saxon-resources-12.zip</code>, available from the Saxonica
          website. Once this is unzipped, the sample applications can be found in the directory
          <code>/samples</code>. They are described in <a class="bodylink" href="/samples"
             >Samples</a>.</p>
@@ -1089,7 +1089,7 @@
          but with degraded performance. Messages are logged when expiry is imminent.</i></p>
          
          <p>License files are interchangeable across the Java, .NET, and C/C++ products. License files issued
-         for previous releases continue to function with Saxon 11 until the date on which their upgrade 
+         for previous releases continue to function with Saxon 11 and subsequent releases until the date on which their upgrade 
          entitlement ends.</p>
 
          <p>When you order a license key, we will send you an email message containing a link
@@ -1116,7 +1116,7 @@
             </li>
             <li class="javaonly">
                <p>For SaxonJ only, the directory containing the executable SaxonJ software, that is
-                     <code>saxon-ee-11.#.jar</code> or <code>saxon-pe-11.#.jar</code>. This only works if SaxonJ is able
+                     <code>saxon-ee-12.#.jar</code> or <code>saxon-pe-12.#.jar</code>. This only works if SaxonJ is able
                   to discover where it was loaded from, which depends on the <code>ClassLoader</code> used to load it;
                   as a result this mechanism fails on some application servers.
                </p>
@@ -1164,10 +1164,10 @@
             simple commands, which will return various information from the license (including the
             Saxon edition covered, name of the licensee, date issued, etc.).</p>
          
-         <p>For example for SaxonJ-PE 11.2:</p>
-         <kbd>java -cp saxon-pe-11.2.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
-         <p>Similarly, for SaxonJ-EE 11.2:</p>
-         <kbd>java -cp saxon-ee-11.2.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
+         <p>For example for SaxonJ-PE 12.3:</p>
+         <kbd>java -cp saxon-pe-12.3.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
+         <p>Similarly, for SaxonJ-EE 12.3:</p>
+         <kbd>java -cp saxon-ee-12.3.jar com.saxonica.config.Verifier saxon-license.lic </kbd>
          
       </section>
       
@@ -1177,8 +1177,8 @@
          
          <p>To check that a valid license for SaxonJ-PE or SaxonJ-EE has been found and Saxon is
             running with full functionality, try running one of the following simple commands.</p>
-         <div class="javaonly"><p>On Java (for example, for SaxonJ-EE 11.1):</p>
-         <kbd>java -cp saxon-ee-11.1.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
+         <div class="javaonly"><p>On Java (for example, for SaxonJ-EE 12.1):</p>
+         <kbd>java -cp saxon-ee-12.1.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
          </div>
          <div class="csonly"><p>On .NET:</p>
          <kbd>dotnet SaxonCS query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
@@ -1320,7 +1320,7 @@
 
       <p>Source code, sample files, and documentation are not included in the same download file as
          the executable code. Instead, the samples and documentation are available in a separate
-         resources file <code>saxon-resources-11.zip</code>, which can be downloaded from either the
+         resources file <code>saxon-resources-12.zip</code>, which can be downloaded from either the
          <a href="https://sourceforge.net/projects/saxon/files/" class="bodylink">SourceForge Saxon
             project</a> or the <a href="http://www.saxonica.com/"
                class="bodylink">www.saxonica.com</a> sites. The documentation is also available
