@@ -3,14 +3,20 @@
    <h1>Experimental 4.0 extensions</h1>
 
    <p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which
-   could eventually become part of a version 4.0 set of specifications.</p>
+   could eventually become part of a version 4.0 set of specifications. Details are at
+      <a href="https://qt4cg.org/" class="bodylink">https://qt4cg.org</a>. </p>
 
-   <p>Some of these features have been implemented experimentally in Saxon. Generally, the features
+   <p>Some of the new features in these drafts have been implemented experimentally in Saxon. Generally, the features
    are not available unless you explicitly enable them. They should not be considered stable: the
    details are likely to change as the design progresses.</p>
    
-   <p>These extensions need to be
-   explicitly enabled. Use one of the following mechanisms to enable syntax extensions:</p>
+   <p>In some cases, the community group has agreed new features but Saxon has not yet implemented them.
+      In other cases, Saxon has implemented proposed features that the community group has not yet agreed.
+      In addition, the draft specifications are constantly changing.
+      So the specifications are only an approximate guide to what is implemented in Saxon.</p>
+   
+   
+   <p>Use one of the following mechanisms to enable syntax extensions:</p>
    
    <ul>
       <li>Set the configuration property
@@ -22,6 +28,7 @@
       <li>For XQuery, set the language level to 4.0 in the XQuery declaration in the query prolog.</li>
    </ul>
    
+   
    <p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This gives you an
    XSLT 3.0 processor running in forwards compatibility mode, rather than an XSLT 4.0 processor.</p>
 
@@ -31,7 +38,7 @@
    
    <p>Generally, Saxonica aims to avoid making incompatible changes except in major releases.
    But the features described in this section are experimental, so this policy does not apply: the aim
-   instead is to respond rapidly to changes in the developing specification.</p>
+   instead will be to respond rapidly to changes in the developing specification.</p>
 
       <p>Further information:</p>
       <nav>
@@ -133,6 +140,13 @@ local:format("2016-10-07", $fmt)]]></samp>
 
             <aside>Previously referred to as "tuple types". Saxon continues to recognize the keyword <code>tuple</code>
        as a synonym of <code>record</code>.</aside>
+            
+            <p>Record types do not introduce a new kind of XDM value; rather, they provide a new way
+            of constraining the content of a map. For example, the record type
+            <code>record(longitude as xs:double, latitude as xs:double)</code>
+            matches a map if it has exactly two entries, with the keys "longitude" and
+            "latitude" (as instances of <code>xs:string</code>), and associated values 
+            of type <code>xs:double</code>.</p>
 
 
             <p>Wherever an item type can be used (for example, in the type signature of a function or variable,
@@ -341,7 +355,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          </section>
 
          <section id="kindtests" title="KindTests">
-            <h1>KindTests</h1>
+            <h1>KindTests and NodeTests</h1>
 
             <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
 
@@ -361,6 +375,18 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                <code>X</code>, so for example the default priority of <code>element(my:*)</code> is -0.25. If a type is present, then we
                follow the principle that the default priority of <code>element(my:*, T)</code> is midway between the priorities of
                <code>element(*, T)</code> and <code>element(E, T)</code>: that is, 0.125.</p>
+            
+            <p>From Saxon 12, NodeTests used in steps are extended to allow, for example, <code>ancestor::(section|appendix)</code>.
+            This will select all ancestors named <code>section</code> or <code>appendix</code>. The meaning is similar to
+            <code>ancestor::section|ancestor::appendix</code>, except when a numeric predicate is used: because <code>ancestor</code>
+               is a reverse axis, <code>ancestor::(section|appendix)[1]</code> selects the innermost ancestor that satisfies the node
+            test. As well as simple names, the options used within the parentheses can include kind tests 
+            (such as <code>comment()</code> and <code>text()</code>) and wild cards (such as <code>*:code</code> and <code>ns:*</code>).
+            There must be an explicit axis, but <code>@</code> can be used as an abbreviation for <code>attribute::</code>. For example,
+            <code>@(name, id)</code> selects the <code>name</code> and <code>id</code> axes.</p>
+            
+            <p>In match patterns, union node tests work like union patterns, so <code>match="@(code, ns:*)"</code>
+            is equivalent to having two separate template rules, matching the two node tests, with different default priority.</p>
          </section>
 
          <section id="type-aliases" title="Type aliases">
@@ -430,87 +456,187 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <h1>New functions</h1>
       <p>A number of new experimental functions become available if XPath 4.0 is enabled.</p>
       
-      <p>Many of these functions are made available in Saxon 11 in two forms. They are available unconditionally
+      <p>A few of these functions are made available in Saxon in two forms. They are available unconditionally
       in the Saxon namespace; and if 4.0 extensions are available then they are also available in the
       standard <code>fn</code> (or where appropriate, the <code>map</code> or <code>array</code>) namespace.</p>
       
-      <h2>fn:all($sequence as item()*, $predicate as function(item()) as xs:boolean) as xs:integer*</h2>
+      <aside>Note the new notation <code>$param := expression</code>, indicating that a parameter is optional
+      and has a default value.</aside>
       
-      <p>Returns true if every item in <code>$sequence</code> satisfies the predicate.</p>
+      <kbd>fn:all(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	:= fn:identity#1
+         ) as xs:boolean</kbd>
+      
+      <p>Returns true if every item in <code>$input</code> satisfies the predicate.</p>
       
       <p>For example, <code>fn:all(*, ->{boolean(self::para)})</code> returns true if every child element of the
       context item is a <code>para</code> element.</p>
       
-      <h2>fn:characters($string as xs:string?) as xs:string*</h2>
+      <p>The second argument may be omitted and defaults to <code>fn:identity#1</code>, so 
+         <code>fn:all((1=1, 2=2, 3=4))</code> returns false.</p>
+      
+      <kbd>fn:all-different(
+         $values	as xs:anyAtomicType**,	
+         $collation	as xs:string := fn:default-collation()	
+         ) as xs:boolean</kbd>
+      
+      <p>Returns true if the values in <code>$values</code> are all different (that is, if no two values are equal). 
+         A collation may be supplied as the second argument.</p>
+      
+      
+      <kbd>fn:all-equal(
+         $values	as xs:anyAtomicType*,	
+         $collation	as xs:string := fn:default-collation()	
+         ) as xs:boolean</kbd>
+      
+      <p>Returns true if the values in <code>$values</code> are all equal. A collation may be supplied as the second argument.</p>
+      
+      
+      
+      <kbd>fn:characters(
+         $value	as xs:string?	
+         ) as xs:string*</kbd>
       
       <p>Splits a string into a sequence of single-character strings.</p>
       
       <p>For example, <code>fn:characters("red")</code> returns <code>("r", "e", "d")</code>.</p>
       
-      <h2>fn:foot($input as item()*) as item()?</h2>
+      <kbd>fn:contains-sequence(
+         $input	as item()*,	
+         $subsequence	as item()*,	
+         $compare	as function(item(), item()) as xs:boolean	:= fn:deep-equal#2
+         ) as xs:boolean</kbd>
+      
+      <p>Tests whether the first sequence contains the second as a subsequence; items are compared using the supplied
+      comparison function, which can be defaulted.</p>
+      
+      <kbd>fn:ends-with-sequence(
+         $input	as item()*,	
+         $subsequence	as item()*,	
+         $compare	as function(item(), item()) as xs:boolean	:= fn:deep-equal#2
+         ) as xs:boolean</kbd>
+      
+      <p>Tests whether the first sequence contains the second as a final subsequence; items are compared using the supplied
+         comparison function, which can be defaulted.</p>
+      
+      <kbd>fn:expanded-QName(
+         $qname	as xs:QName?	
+         ) as xs:string?</kbd>
+      
+      <p>Converts a QName into <code>Q{uri}local</code> notation.</p>
+      
+      <kbd>fn:foot(
+         $input	as item()*	
+         ) as item()?</kbd>
       
       <p>Returns the last item in a sequence.</p>
       
-      <h2>fn:highest($sequence as item()*) as item()*</h2>
+      <kbd>fn:highest(
+         $input	as item()*,	
+         $collation	as xs:string? := fn:default-collation(),	
+         $key	as function(item()) as xs:anyAtomicType* := fn:identity#1
+         ) as item()*</kbd>
       
-      <p>Equivalent to <code>fn:highest($sequence, default-collation())</code>.</p>
-      
-      <h2>fn:highest($sequence as item()*, $collation as xs:string) as item()*</h2>
-      
-      <p>Equivalent to <code>fn:highest($sequence, (), fn:data#1)</code>.</p>
-      
-      <h2>fn:highest($sequence as item()*, $collation as xs:string?, $key as function(item()) as xs:anyAtomicType) as item()*</h2>
-      
+     
       <p>Returns those items from the input sequence having the highest value for the supplied function,
       strings being compared using the supplied collation (which defaults to the default collation).</p>
       
       <p>For example, <code>fn:highest(//employee, (), ->{number(@salary)})</code> returns those
       employees having the highest salary.</p>
       
-      <h2>fn:identity($input as item()*) as item()*</h2>
+      <kbd>fn:identity(
+         $input	as item()*	
+         ) as item()*</kbd>
       
       <p>Returns the value of the argument, unchanged. Useful in situations where a function must be supplied,
          but the desired action is to do nothing.</p>
       
-      <h2>fn:in-scope-namespaces($in as element()) as map(xs:string, xs:string)</h2>
-      
-      <p>Returns the in-scope namespaces of an element as a map from prefixes to URIs.</p>
-      
-      <h2>fn:index-where($sequence as item()*, $predicate as function(item()) as xs:boolean) as xs:integer*</h2>
+      <kbd>fn:index-where(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	
+         ) as xs:integer*</kbd>
       
       <p>Returns the positions of the items in the input sequence that satisfy the supplied predicate.</p>
       
       <p>For example, <code>fn:index-where(("red", "pink", "white", "black"), ->{contains(., "e")})</code> returns <code>(1, 3)</code>.</p>
       
-      <h2>fn:is-NaN($in as xs:anyAtomicType) as xs:boolean</h2>
+      <kbd>fn:intersperse(
+         $input	as item()*,	
+         $separator	as item()*	
+         ) as item()*</kbd>
+      
+      <p>Inserts a copy of <code>$separator</code> between adjacent items in the input sequence.</p>
+      
+      
+      <kbd>fn:in-scope-namespaces(
+         $element	as element()	
+         ) as map(union(xs:NCName, enum('')), xs:anyURI)
+      </kbd>
+      
+      <p>Returns the in-scope namespaces of an element as a map from prefixes to URIs.</p>
+      
+       
+      <kbd>fn:is-NaN(
+         $value	as xs:anyAtomicType	
+         ) as xs:boolean
+      </kbd>
       
       <p>Returns true if the supplied value is the <code>xs:float</code> or <code>xs:double</code> value NaN.</p>
       
-      <h2>fn:items-after($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      <kbd>fn:items-after(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	
+         ) as item()*</kbd>
       
       <p>Returns the items in the input sequence that follow the first one that satisfies the supplied predicate.</p>
       
-      <h2>fn:items-before($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      <kbd>fn:items-at(
+         $input	as item()*,	
+         $at	as xs:integer*	
+         ) as item()*</kbd>
+      
+      <p>Returns the items at the given positions in the input sequence. For example <code>items-at(21 to 30, (3, 2, 1))</code>
+      returns <code>(23, 22, 21)</code>.</p>
+      
+      
+      <kbd>fn:items-before(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	
+         ) as item()*</kbd>
       
       <p>Returns the items in the input sequence that precede the first one that satisfies the supplied predicate.</p>
       
-      <h2>fn:items-ending-where($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      <kbd>fn:items-ending-where(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	
+         ) as item()*</kbd>
       
       <p>Returns the items in the input sequence up to and including the first one that satisfies the supplied predicate.</p>
       
-      <h2>fn:items-starting-where($sequence as item()*, $predicate as function(item()) as xs:boolean) as item()*</h2>
+      <kbd>fn:items-starting-where(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	
+         ) as item()*</kbd>
       
       <p>Returns the items in the input sequence starting with the first one that satisfies the supplied predicate.</p>
-           
-      <h2>fn:lowest($sequence as item()*) as item()*</h2>
       
-      <p>Equivalent to <code>fn:lowest($sequence, default-collation())</code>.</p>
+      <kbd>fn:iterate-while(
+         $input	as item()*,	
+         $predicate	as function(item()*) as xs:boolean,	
+         $action	as function(item()*) as item()*	
+         ) as item()*</kbd>
       
-      <h2>fn:lowest($sequence as item()*, $collation as xs:string?) as item()*</h2>
+      <p>Applies the <code>$action</code> function to the <code>$input</code> repeatedly so long as the <code>$predicate</code>
+         function returns true. For example <code>iterate-while(2, ->{. lt 20}, ->{.*.})</code> returns 16.</p>
+     
       
-      <p>Equivalent to <code>fn:lowest($sequence, (), fn:data#1)</code>.</p>
+      <kbd>fn:lowest(
+         $input	as item()*,	
+         $collation	as xs:string? := fn:default-collation(),	
+         $key	as function(item()) as xs:anyAtomicType* := fn:identity#1	
+         ) as item()*</kbd>
       
-      <h2>fn:lowest($sequence as item()*, $collation as xs:string?, function(item()) as xs:anyAtomicType) as item()*</h2>
       
       <p>Returns those items from the input sequence having the lowest value for the supplied function,
          strings being compared using the supplied collation (which defaults to the default collation).</p>
@@ -518,14 +644,28 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <p>For example, <code>fn:lowest(//employee, (), ->{number(@salary)})</code> returns those
          employees having the lowest salary.</p>
       
-      <h2>fn:parcel($sequence as item()*) as record(value)</h2>
+      <kbd>fn:op(
+         $operator	as xs:string	
+         ) as function(item()*, item()*) as item()*</kbd>
+      
+      <p>Returns an arity-2 function corresponding to a supplied binary operator, for example <code>op("is")</code>
+      returns <code>function($x, $y){$x is $y}</code>.</p>
+      
+      <kbd>fn:parcel($sequence as item()*) as record(value)</kbd>
       
       <p>Wraps an arbitrary sequence of items as a <i>parcel</i>: a parcel is a map with a single entry,
       whose key is the string <code>"value"</code> and whose value is the wrapped sequence. Parcels are
       useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
       array as a parcel.</p>
       
-      <h2>fn:parts($in as item()) as map(xs:string, xs:anyAtomicType)</h2>
+      <kbd>fn:parse-QName(
+         $eqname	as xs:string	
+         ) as xs:QName</kbd>
+      
+      <p>Parses a string as a QName (using namespace bindings from the static context where necessary). The string may
+         take one of the formats <code>"local"</code>, <code>"prefix:local"</code>, or <code>"Q{uri}local"</code>.</p>
+      
+      <kbd>fn:parts($in as item()) as map(xs:string, xs:anyAtomicType)</kbd>
       
       <p>Decomposes a composite "atomic" value into its parts, in the form of a map. For example, an <code>xs:dateTime</code>
       value is decomposed into year, month, day, hour, minute, second, and timezone. Other values that are decomposable include
@@ -533,53 +673,105 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       For values that are not decomposable, the resulting map contains a single entry whose key is "value" and whose corresponding
       value is the input value.</p>
       
-      <h2>fn:range()</h2>
+      <kbd>fn:range()</kbd>
       
-      <p>Not documented because the specification is likely to change.</p>
+      <p>Dropped from Saxon 12.</p>
       
-      <h2>fn:slice($input as item()*,
+      <kbd>fn:replicate(
+         $input	as item()*,	
+         $count	as xs:nonNegativeInteger	
+         ) as item()*</kbd>
+      
+      <p>Produces a sequence containing <code>$count</code> copies of <code>$input</code>.</p>
+      
+      <kbd>fn:slice($input as item()*,
          $start	 as xs:integer?,
          $end	 as xs:integer?,
-         $step	 as xs:integer?) as item()*</h2>
+         $step	 as xs:integer?) as item()*</kbd>
       
       <p>Selects items from an input sequence, starting at <code>$start</code> (default 1), ending at <code>$end</code> (defaulting
       to the length of the sequence), and stepping by <code>$step</code> (defaulting to 1). If <code>$start</code> or <code>$end</code>
       is negative, counting is from the end of the sequence. If <code>$step</code> is negative, the sequence runs backwards.</p>
       
-      <h2>fn:some($sequence as item()*, $predicate as function(item()) as xs:boolean) as xs:boolean</h2>
+      <kbd>fn:some(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	:= fn:identity#1
+         ) as xs:boolean</kbd>
       
-      <p>Returns true if at least one item in <code>$sequence</code> satisfies the predicate.</p>
+      <p>Returns true if at least one item in <code>$input</code> satisfies the predicate.</p>
       
-      <h2>fn:trunk($input as item()*) as item()*</h2>
+      <p>The second argument may be omitted and defaults to <code>fn:identity#1</code>, so 
+         <code>fn:some((1=1, 2=2, 3=4))</code> returns true.</p>
+      
+      <kbd>fn:starts-with-sequence(
+         $input	as item()*,	
+         $subsequence	as item()*,	
+         $compare	as function(item(), item()) as xs:boolean	:= fn:deep-equal#2
+         ) as xs:boolean</kbd>
+      
+      <p>Tests whether the first sequence contains the second as a leading subsequence; items are compared using the supplied
+         comparison function, which can be defaulted.</p>
+      
+      <kbd>fn:trunk(
+         $input	as item()*	
+         ) as item()*</kbd>
       
       <p>Returns all items in a sequence except the last.</p>
       
-      <h2>fn:unparcel($parcel as record(value, *)) as item()*</h2>
+      <kbd>fn:unparcel($parcel as record(value, *)) as item()*</kbd>
       
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
       
-      <h2>array:foot(array(*)) as item()*</h2>
+      <kbd>array:foot(
+         $array	as array(*)	
+         ) as item()*</kbd>
       
       <p>Returns the last member of an array.</p>
       
-      <h2>array:members(array(*)) as record(value)*</h2>
+      <kbd>array:members(array(*)) as record(value)*</kbd>
       
       <p>Accepts an array as input, and turns it into a sequence of parcels: the inverse of the <code>array:of()</code>
          function.</p>
       
-      <h2>array:of(record(value, *)*) as array(*)</h2>
+      <kbd>array:of(record(value, *)*) as array(*)</kbd>
       
       <p>Accepts a sequence of parcels (as produced by the <code>fn:parcel()</code> function), and returns an array
       whose members are the sequences obtained by applying <code>fn:unparcel()</code> to each parcel in turn.</p>
       
-      <h2>array:trunk(array(*)) as array(*)</h2>
+      <kbd>array:trunk(
+         $array	as array(*)	
+         ) as array(*)</kbd>
       
-      <p>Returns an array containing all members of the input array except the last.</p>     
+      <p>Returns an array containing all members of the input array except the last.</p> 
       
-      <h2>map:entries(map(*)) as record(key as xs:anyAtomicType, value as item()*)*</h2>
+      <kbd>map:build(
+         $input	as item()*,	
+         $key	as function(item()) as xs:anyAtomicType?	:= fn:identity#1,
+         $value	as function(item()) as item()*	:= fn:identity#1,
+         $combine	as function(item()*, item()*) as item()*	:= fn:op(',')
+         ) as map(*)</kbd>
+      
+      <p>Builds a map that indexes the <code>$input</code> sequence. For each item in <code>$input</code>,
+      a map entry is generated, with its key computed using the <code>$key</code> function, and the
+      corresponding value computed using the <code>$value</code> function. If there are duplicate keys,
+      the values are combined using the <code>$combine</code> function.</p>
+      
+      
+      <kbd>map:entries(map(*)) as map(*)*</kbd>
+      
+      <p>Accepts a map as input, and turns it into a sequence of singleton maps representing the key-value pairs contained in the map.
+      Equivalent to <code>map:for-each($map, ->($k, $v){map{$k : $v}})</code>.</p>
+      
+      <kbd>map:filter(map(*), function($key, $value) as xs:boolean) as map(*)*</kbd>
+      
+      <p>Accepts a map as input, and returns a new map containing those entries from the original map that satisfy the predicate function.</p>
+      
+      <kbd>map:key-value-pairs(map(*)) as record(key as xs:anyAtomicType, value as item()*)*</kbd>
       
       <p>Accepts a map as input, and turns it into a sequence of maps representing the key-value pairs contained in the map.
-      Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>.</p>
+         Equivalent to <code>map:for-each($map, ->($k, $v){map{"key":$k, "value":$v}})</code>. This differs from
+      <code>map:entries</code> in that each entry in the input map is turned into a map with two entries, named "key"
+      and "value", rather than a singleton map with one entry.</p>
       
       
       
@@ -603,7 +795,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          <section id="simple-inline-functions" title="Simple inline functions">
             <h1>Simple inline functions</h1>
 
-            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8.</aside>
+            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available (in various forms) since Saxon 9.8.</aside>
             
             <h2>Thin arrow notation</h2>
             
@@ -631,10 +823,10 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <p>Simple inline functions are particularly convenient when providing functions as arguments to higher-order functions,
         many of which accept a single item as their one argument.
         For example, to sort employees in order of salary, you can write:</p>
-            <samp>sort(//employee, ->{@salary})</samp>
+            <samp>sort(//employee, (), ->{@salary})</samp>
 
             <aside>Earlier Saxon releases experimented with the notations <code>.{@salary}</code> and <code>fn{@salary}</code>.
-          The former is still allowed in Saxon 11, the latter is dropped.</aside>
+          These forms have been dropped.</aside>
 
             <p>Simple inline functions can access externally-defined local variables in the usual way (that is, they have a closure).</p>
 
@@ -656,7 +848,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <p>Variadic functions can be called with a variable number of positional arguments,
             rather like the <code>concat()</code> function in previous XPath versions.</p>
             
-            <p>Saxon 11 implements variadic functions, but only for built-in system functions
+            <p>Saxon 12 implements variadic functions, but only for built-in system functions
             (not for user-defined functions).</p>
             
             <p>The sequence-variadic functions available include:</p>
@@ -669,29 +861,59 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             </ul>
          </section>
          
+         <section id="optional-parameters" title="Optional parameters">
+            <h1>Optional parameters</h1>
+            
+            <p>Function declarations in XSLT and XQuery can include optional parameters with a default value.</p>
+            
+            <ul>
+               <li>
+                  <p>XQuery syntax:</p>
+                  <p><code>declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S')) as xs:dateTime</code></p>
+               </li>
+               <li>
+                  <p>XSLT syntax:</p>
+                  <eg><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
+    <xsl:param name="x" as="xs:dateTime" required="yes"/>
+    <xsl:param name="x" as="xs:duration" required="no" select="xs:duration('PT0S')"/>
+</xsl:function>]]></eg>
+               </li>
+            </ul>
+            
+            <p>If a parameter is optional, then all subsequent parameters must also be optional.</p>
+            
+            <p>If two functions in a query or stylesheet have the same name, then they must have non-overlapping
+            arity ranges. The arity range indicates the number of arguments that must be supplied in a call to the
+            function: the minimum is the number of required parameters, the maximum is the number of required parameters
+            plus optional parameters.
+            </p>
+            
+            <aside>The rules for XSLT, where different functions may have different import precedence, are more complex:
+            see the spec for details.</aside>
+            
+         </section>
          <section id="keyword-arguments" title="Keyword arguments">
             <h1>Keyword arguments</h1>
             
-            <p>Where a function declaration requires or permits the last argument to be a map, the entries in the
-            map may be supplied as keyword arguments. For example as an alternative to writing <code>serialize($x, map{"method":"xml", "indent":true()})</code>,
-               you can now write:</p>
+            <p>In a static function call, arguments may be supplied either by position or by name. The call must have zero or more
+            positional parameters followed by zero or more keyword parameters. For example:</p>
             
-            <samp>serialize($x, method:="xml", indent:=true())</samp>
+            <samp>sort(//employee, key := ->{@salary})</samp>
             
-            <p>Positional arguments must always precede keyword arguments.</p>
+            <p>Although keywords will often be used for optional parameters as in this example, there is no rule requiring this.
+            Whether a parameter is optional or required, the corresponding argument may be supplied either positionally or by keyword.</p>
             
-            <p>Although the feature is most obviously useful for functions like <code>serialize</code> where the final argument is a map following
-            the "option parameter conventions", it can be used anywhere that it's appropriate to supply a map with string-valued keys as the
-            last argument of a function call (including calls to user-defined functions).</p>
-            
-            <aside>The current proposal is undecided as to whether ":" or ":=" should be used after the keyword. Saxon 11 allows either.</aside>
+            <p>The use of keyword arguments to supply options in an options parameter declared with a map type 
+               (for example <code>serialize($x, method:="xml", indent:=true())</code>) is dropped in Saxon 12.</p>
             
          </section>
          
          <section id="downcasting" title="Automatic downcasting">
             <h1>Automatic downcasting</h1>
             
-            <p>The function conversion rules (which determine how the supplied value for a function argument or XSLT variable can differ
+            <p>In 4.0, the term <emph>coercion rules</emph> replaces <emph>function conversion rules</emph>.</p>
+            
+            <p>The coercion rules (which determine how the supplied value for a function argument or XSLT variable can differ
                from the declared type) now allow downcasting. For example, if the required type is declared as <code>xs:positiveInteger</code>
                then the supplied value can be <code>42</code>: there is no longer any need for the caller to cast it as 
                <code>xs:positiveInteger(42)</code>. Of course, an error occurs if the cast fails. The effect of this is to make
@@ -750,25 +972,34 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
                
                <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled.</aside>
                
-               <p>Two additional boolean operators are proposed: <code class="bold">orElse</code> and
-                  <code class="bold">andAlso</code>.
-                  These have the same effect as <code>or</code> and <code>and</code>, except that there is a guarantee
-                  that the second operand will not be evaluated unnecessarily. This makes it possible to ensure that
-                  evaluating the second operand does not produce an error. For example, the expression:</p>
+               <p>Saxon 11 implemented two additional boolean operators: <code class="bold">orElse</code> and
+                  <code class="bold">andAlso</code>. These are retained in Saxon 12, but they are likely to be
+                  dropped as the community group has taken a different direction.</p>
                
-               <samp>//chapter[pages=0 orElse length div pages]</samp>
+               <p>The <code>and</code> and <code>or</code> operators now have stricter rules governing optimization.
+               It is still permitted to evaluate the operands in either order, but an error in evaluating the right-hand
+               operand must not be reported unless evaluation of that operand is actually necessary.</p>
                
-               <p>will never fail with a divide-by-zero error, because the division will never be executed if the
-                  value of <code>pages</code> is zero.</p>
+               <p>Saxon implements this rule as follows:</p>
                
-               <p>When the ordinary <code>or</code> and <code>and</code> operators are used, the W3C specification
-                  gives XPath processors license to re-arrange the order of execution, and Saxon will occasionally do so.
-                  Using these operators is therefore advised when the first condition is a guard to prevent the second condition
-                  failing.</p>
+               <ul>
+                  <li><p>In the case of <code>and</code>, an error evaluating one operand is reported only
+                  if evaluation of the other operand returns <code>true</code>.</p></li>
+                  <li><p>In the case of <code>or</code>, an error evaluating one operand is reported only
+                     if evaluation of the other operand returns <code>false</code>.</p></li>
+               </ul>
                
-               <p>The same effect can be achieved without relying on extensions, by writing
-                  <code>A orElse B</code> as <code>if (A) then true() else boolean(B)</code>, and rewriting 
-                  <code>X andAlso Y</code> as <code>if (X) then boolean(Y) else false()</code>.</p>
+               <p>This means that the expression:</p>
+               
+               <samp>//chapter[pages=0 or length div pages]</samp>
+               
+               <p>will never fail with a divide-by-zero error, even if the operands are evaluated in a different order.</p>
+               
+               <p>A similar rule is adopted for expressions with multiple predicates, for example 
+                  <code>@code[. castable as xs:integer][xs:integer(.) = 2]</code> is now guaranteed to return
+               no failure if <code>@code</code> is non-numeric.</p>
+               
+               
             </section>
                
                <section id="lookup-generalization" title="Lookup expressions">
@@ -844,7 +1075,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
 
       <aside>Requires Saxon-PE or Saxon-EE. Available in SaxonCS.</aside>
 
-      <p>This section describes features proposed for XSLT 4.0, to the extent they are implemented in Saxon 11.</p>
+      <p>This section describes features proposed for XSLT 4.0, to the extent they are implemented in Saxon 12.</p>
 
       <aside>Use of forwards compatibility mode (by specifying <code>version="4.0"</code>, say), does not
       affect the way these extensions are handled: they are allowed if extensions are enabled, and disallowed
@@ -1072,31 +1303,14 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
       <section id="iteration-maps-arrays" title="Iterating over maps and arrays">
          <h1>Iterating over maps and arrays</h1>
          
-         <aside>Although this is implemented, it's probably best to avoid using this feature as we think the design can be improved.
-         To iterate over arrays, use <code>&lt;xsl:for-each select="array:members($array)"></code> instead.
-            To iterate over maps, use <code>&lt;xsl:for-each select="map:entries($map)"></code>.</aside>
+         <p>The experimental use of an <code>@map</code> or <code>@array</code> attribute in 
+            <code>xsl:for-each</code>, <code>xsl:iterate</code>, and <code>xsl:for-each-group</code>
+            is dropped in Saxon 12.</p>
          
-         <p>The three instructions <a class="bodylink code" href="/xsl-elements/for-each">xsl:for-each</a>,
-            <a class="bodylink code" href="/xsl-elements/iterate">xsl:iterate</a>, and
-            <a class="bodylink code" href="/xsl-elements/for-each-group">xsl:for-each-group</a>
-         can take an attribute <code class="bold">array</code> or <code class="bold">map</code> in place of
-            the <code>select</code> attribute.</p>
+         <p>Instead, to iterate over arrays, use <code>&lt;xsl:for-each select="array:members($array)"></code>.
+            To iterate over maps, use <code>&lt;xsl:for-each select="map:entries($map)"></code>.</p>
          
-         <p>If <code>array</code> is specified, the instruction iterates over the selected array. Specifically, the
-         body of the instruction is evaluated with the context item being a <i>parcel</i> containing the items making
-         up the corresponding member of the array; these items may be extracted with the <code>fn:unparcel()</code>
-         function, or simply with the lookup expression <code>?value</code>. For example:</p>
-         
-         <samp><![CDATA[  <xsl:for-each array="[1, 3 to 5, 10 to 20, 31 to 32]" separator=" ">
-    {count(?value)}
-  </xsl:for-each>]]></samp>
-         
-         <p>outputs <code>1 3 11 2</code>.</p>
-         
-         <p>If <code>map</code> is specified, the instruction iterates over the selected map. Specifically, the
-            body of the instruction is evaluated with the context item being a map containing two entries:
-         an entry named "key" holding the key, and an entry named "value" holding the corresponding value.
-         The order of entries is undefined (but <code>&lt;xsl:sort select="?key"/></code> can be used to sort them).</p>
+ 
       </section>
       
       <section id="break-when" title="Grouping using break-when">
