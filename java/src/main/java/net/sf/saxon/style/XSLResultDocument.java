@@ -48,8 +48,11 @@ public class XSLResultDocument extends StyleElement {
         fans.add("allow-duplicate-names");
         fans.add("build-tree");
         fans.add("byte-order-mark");
-        fans.add("cdata-section-elements");
         fans.add("canonical");
+        fans.add("cdata-section-elements");
+        fans.add("csv-header");
+        fans.add("csv-quote-character");
+        fans.add("csv-separator");
         fans.add("doctype-public");
         fans.add("doctype-system");
         fans.add("encoding");
