@@ -158,6 +158,9 @@ public class XSDAttribute extends SchemaElement {
             attributeUse.setTargetComponentName(nc);
         }
 
+        if (nc == null) {
+            nc = StandardNames.SQ_XS_INVALID_NAME; // error already reported
+        }
 
         // @default
         attValue = atts.getValue(NamespaceUri.NULL, "default");
@@ -325,7 +328,8 @@ public class XSDAttribute extends SchemaElement {
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         String localTargetNamespace = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
-        if (localTargetNamespace != null && !localTargetNamespace.equals(getXSDSchema().getTargetNamespace())) {
+        if (localTargetNamespace != null &&
+                !NamespaceUri.of(localTargetNamespace).equals(getXSDSchema().getTargetNamespace())) {
             checkLocalTargetNamespace("attribute");
         }
 

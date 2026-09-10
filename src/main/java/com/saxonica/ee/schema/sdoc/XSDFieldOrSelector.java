@@ -63,8 +63,10 @@ public class XSDFieldOrSelector extends AnnotationParent {
                     defaultNS = getXSDSchema().getTargetNamespace();
                     break;
                 case "##local":
-                default:
                     defaultNS = NamespaceUri.NULL;
+                    break;
+                default:
+                    defaultNS = NamespaceUri.of(defaultNSstring);
                     break;
             }
         } else {

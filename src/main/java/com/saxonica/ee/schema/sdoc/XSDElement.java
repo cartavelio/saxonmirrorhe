@@ -364,7 +364,8 @@ public class XSDElement extends SchemaElement {
     public void validate(SchemaCompiler compiler) throws SchemaException {
 
         String localTargetNamespace = getAttributeValue(NamespaceUri.NULL, "targetNamespace");
-        if (localTargetNamespace != null && !localTargetNamespace.equals(getXSDSchema().getTargetNamespace())) {
+        if (localTargetNamespace != null &&
+                !NamespaceUri.of(localTargetNamespace).equals(getXSDSchema().getTargetNamespace())) {
             checkLocalTargetNamespace("element");
         }
 
