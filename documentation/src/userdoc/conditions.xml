@@ -390,25 +390,7 @@
           <p>2001?</p>
         </td>
       </tr>
-      <tr>
-        <td>
-          <p>Karel Goossens</p>
-        </td>
-        <td>
-          <p>BTR-Services, Belgium</p>
-        </td>
-        <td>
-          <p>1000</p>
-        </td>
-        <td>
-          <p>Number and date formatting for Danish, Swedish, Italian, Dutch, Belgian French, and
-            Flemish. Package <code>net.sf.saxon.number</code>, module <code>Numberer_XX</code> where
-            XX is da, sv, it, nl, frBE, nlBE</p>
-        </td>
-        <td>
-          <p>2007</p>
-        </td>
-      </tr>
+      
       <tr>
         <td>
           <p>Wolfgang Hoschek</p>
@@ -481,24 +463,7 @@
           <p>2002?</p>
         </td>
       </tr>
-      <tr>
-        <td>
-          <p>Luc Rochefort (with testing by Laurent Bourbeau and  Grégoire Djénandji</p>
-        </td>
-        <td>
-          <p> </p>
-        </td>
-        <td>
-          <p>250</p>
-        </td>
-        <td>
-          <p>Number and date formatting in French. Package <code>net.sf.saxon.number</code>, module
-              <code>Numberer_fr</code></p>
-        </td>
-        <td>
-          <p>2005?</p>
-        </td>
-      </tr>
+      
       <tr>
         <td>
           <p>Gunther Schadow</p>
