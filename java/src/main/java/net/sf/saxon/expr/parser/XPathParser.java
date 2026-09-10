@@ -2174,7 +2174,8 @@ public class XPathParser {
 
     /**
      * Parse an item type designated in the form NAME(ARGS) where name is the
-     * current token value.
+     * current token value. On entry we are positioned on a keyword (such as "item")
+     * and we know it is followed by a left paren.
      * @return the item type
      * @throws XPathException if invalid
      */
@@ -2244,7 +2245,9 @@ public class XPathParser {
     }
 
     /**
-     * Parse a record type (Saxon 9.8 / XPath 4.0 extension).
+     * Parse a record type XPath 4.0 extension.
+     * On entry we are positioned on the keyword ("record")
+     * and we know it is followed by a left paren.
      * Syntax: "record" "(" (name (":" sequenceType)?) ("," (name (":" sequenceType)?))* ")"
      */
 
@@ -2550,7 +2553,7 @@ public class XPathParser {
      * Syntax:
      *    array '(' '*' ') |
      *    array '(' SeqType ')'
-     * The "array(" has already been read
+     * The current token is the keyword "array"
      * @return the item type of the array
      * @throws XPathException if a parsing error occurs or if the array syntax
      *                        is not available
@@ -3924,7 +3927,8 @@ public class XPathParser {
     }
 
     /**
-     * Parse a KindTest
+     * Parse a KindTest. On entry we are positioned on a keyword (such as "item")
+     * and we know it is followed by a left paren.
      *
      * @return the KindTest, expressed as a NodeTest object
      * @throws net.sf.saxon.trans.XPathException if a static error is found
@@ -3935,97 +3939,52 @@ public class XPathParser {
         Configuration config = env.getConfiguration();
         NamePool pool = config.getNamePool();
 
-        boolean empty = false;
-
-        if (isKeyword("record")) {
-            // TODO: this is horrible, merge it into the switch
-            checkLanguageVersion40("nodeTest record(...)");
-            //nextToken();
-            ItemType type = parseRecordTest(this);
-            return new SpecificJNodeType(SequenceType.one(type),
-                                         env.getConfiguration().getTypeHierarchy());
-        }
-
         String kind = expectName();
-        nextToken();
-        readToken(Token.LPAREN);
-        if (t.currentToken == Token.RPAREN) {
-            empty = true;
-            nextToken();
-        }
         switch (kind) {
             case "item":
-                if (empty) {
-                    return AnyGNodeType.getInstance();
-                } else {
-                    grumble("Expected ')': no arguments are allowed in item()");
-                    return null;
-                }
+                expectEmptyParens();
+                return AnyGNodeType.getInstance();
             case "node":
-                if (empty) {
-                    return AnyXNodeType.getInstance();
-                } else {
-                    grumble("Expected ')': no arguments are allowed in node()");
-                    return null;
-                }
+                expectEmptyParens();
+                return AnyXNodeType.getInstance();
             case "text":
-                if (empty) {
-                    return NodeKindType.TEXT;
-                } else {
-                    grumble("Expected ')': no arguments are allowed in text()");
-                    return null;
-                }
+                expectEmptyParens();
+                return NodeKindType.TEXT;
             case "comment":
-                if (empty) {
-                    return NodeKindType.COMMENT;
-                } else {
-                    grumble("Expected ')': no arguments are allowed in comment()");
-                    return null;
-                }
+                expectEmptyParens();
+                return NodeKindType.COMMENT;
             case "namespace-node":
-                if (empty) {
-                    if (!isNamespaceTestAllowed()) {
-                        grumble("namespace-node() test is not allowed in XPath 2.0/XQuery 1.0");
-                    }
-                    return NodeKindType.NAMESPACE;
-                } else {
-                    if (language == ParsedLanguage.EXTENDED_ITEM_TYPE && t.currentToken instanceof Token.NameToken) {
-                        String nsName = t.currentName();
-                        nextToken();
-                        readToken(Token.RPAREN);
-                        StructuredQName qName = new StructuredQName("", NamespaceUri.NULL, nsName);
-                        return new NamedXNodeType(Type.NAMESPACE, qName, config);
-                    } else {
-                        grumble("No arguments are allowed in namespace-node()");
-                        return null;
-                    }
-                }
+                expectEmptyParens();
+                return NodeKindType.COMMENT;
             case "document-node":
-                if (empty) {
+                nextToken();
+                readToken(Token.LPAREN);
+                if (t.currentToken == Token.RPAREN) {
+                    nextToken();
                     return NodeKindType.DOCUMENT;
+                } else if (isKeyword("element") || isKeyword("schema-element")) {
+                    XNodeType inner = (XNodeType)parseKindTest();
+                    readToken(Token.RPAREN);
+                    return new DocumentNodeType(inner);
+                } else if (allowXPath40Syntax) {
+                    QNameTest qNameTest = parseNameTestUnion(Type.ELEMENT);
+                    readToken(Token.RPAREN);
+                    return new DocumentNodeType(
+                            new NamedXNodeType(Type.ELEMENT, qNameTest, config));
                 } else {
-                    if (isKeyword("element") || isKeyword("schema-element")) {
-                        XNodeType inner = (XNodeType)parseKindTest();
-                        readToken(Token.RPAREN);
-                        return new DocumentNodeType(inner);
-                    } else if (allowXPath40Syntax) {
-                        QNameTest qNameTest = parseNameTestUnion(Type.ELEMENT);
-                        readToken(Token.RPAREN);
-                        return new DocumentNodeType(
-                                new NamedXNodeType(Type.ELEMENT, qNameTest, config));
-                    } else {
-                        grumble("After 'document-node('", " expected 'element' or 'schema-element'");
-                        return null;
-                    }
+                    grumble("After 'document-node('", " expected 'element' or 'schema-element'");
+                    return null;
                 }
 
             case "processing-instruction":
+                Token piNameToken = readParenthesizedToken(true);
+                if (piNameToken == null) {
+                    return NodeKindType.PROCESSING_INSTRUCTION;
+                }
                 int fp = -1;
                 StructuredQName piQName = null;
-                if (empty) {
-                    return NodeKindType.PROCESSING_INSTRUCTION;
-                } else if (t.currentToken instanceof Token.StringLiteral) {
-                    String piName = Whitespace.trim(unescape(expectStringLiteral()));
+                if (piNameToken instanceof Token.StringLiteral) {
+                    String piName = Whitespace.trim(unescape(((Token.StringLiteral)piNameToken).getValue()));
                     if (!NameChecker.isValidNCName(StringTool.codePoints(piName))) {
                         // Became an error as a result of XPath erratum XP.E7
                         grumble("Processing instruction name must be a valid NCName", "XPTY0004");
@@ -4033,9 +3992,9 @@ public class XPathParser {
                         piQName = new StructuredQName("", NamespaceUri.NULL, piName);
                         fp = pool.allocateFingerprint(NamespaceUri.NULL, piName);
                     }
-                } else if (t.currentToken instanceof Token.NameToken) {
+                } else if (piNameToken instanceof Token.NameToken) {
                     try {
-                        String[] parts = NameChecker.getQNameParts(t.currentName());
+                        String[] parts = NameChecker.getQNameParts(((Token.NameToken)piNameToken).getValue());
                         if (parts[0].isEmpty()) {
                             piQName = new StructuredQName("", NamespaceUri.NULL, parts[1]);
                         } else {
@@ -4047,52 +4006,49 @@ public class XPathParser {
                 } else {
                     grumble("Processing instruction name must be a QName or a string literal");
                 }
-                nextToken();
-                readToken(Token.RPAREN);
                 assert(piQName != null);
                 return new NamedXNodeType(Type.PROCESSING_INSTRUCTION, piQName, config);
 
-            case "schema-attribute":
-                if (empty) {
-                    grumble("schema-attribute() requires a name to be supplied");
+            case "schema-attribute": {
+                Token name = readParenthesizedToken(false);
+                if (!(name instanceof Token.NameToken)) {
+                    grumble("Expected name after 'schema-attribute('");
                     return null;
-                } else {
-                    String name = readName();
-                    fp = makeFingerprint(name, false);
-                    expect(Token.RPAREN);
-                    nextToken();
-                    IAttributeDecl decl = env.getImportedSchema().getAttributeDecl(fp);
-                    if (decl == null) {
-                        grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
-                        return null;
-                    } else {
-                        return env.getImportedSchema().makeSchemaAttributeTest(fp);
-                    }
                 }
-            case "schema-element":
-                if (empty) {
-                    grumble("schema-element() requires a name to be supplied");
+                fp = makeFingerprint(((Token.NameToken)name).getValue(), false);
+                IAttributeDecl decl = env.getImportedSchema().getAttributeDecl(fp);
+                if (decl == null) {
+                    grumble("There is no declaration for attribute @" + name + " in an imported schema", "XPST0008");
                     return null;
                 } else {
-                    String name = readName();
-                    fp = makeFingerprint(name, true);
-                    expect(Token.RPAREN);
-                    nextToken();
-                    IElementDecl decl = env.getImportedSchema().getElementDecl(fp);
+                    return env.getImportedSchema().makeSchemaAttributeTest(fp);
+                }
+            }
+            case "schema-element": {
+                Token name = readParenthesizedToken(false);
+                if (!(name instanceof Token.NameToken)) {
+                    grumble("Expected name after 'schema-attribute('");
+                    return null;
+                }
+                fp = makeFingerprint(((Token.NameToken) name).getValue(), true);
+                IElementDecl decl = env.getImportedSchema().getElementDecl(fp);
 
-                    if (decl == null) {
-                        grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
-                        return null;
-                    } else {
-                        return env.getImportedSchema().makeSchemaElementTest(fp);
-                    }
+                if (decl == null) {
+                    grumble("There is no declaration for element " + name + " in an imported schema", "XPST0008");
+                    return null;
+                } else {
+                    return env.getImportedSchema().makeSchemaElementTest(fp);
                 }
+            }
 
             case "attribute":
             case "element":
                 boolean isElementTest = kind.equals("element");
                 short nodeKind = isElementTest ? Type.ELEMENT : Type.ATTRIBUTE;
-                if (empty) {
+                nextToken();
+                readToken(Token.LPAREN);
+                if (t.currentToken == Token.RPAREN) {
+                    nextToken();
                     return isElementTest ? NodeKindType.ELEMENT : NodeKindType.ATTRIBUTE;
                 }
                 QNameTest qNameTest2 = parseNameTestUnion(nodeKind);
@@ -4144,8 +4100,11 @@ public class XPathParser {
                     grumble("Expected ')' or ',' in SequenceType");
                 }
                 return null;
+
             case "jnode": {
                 checkLanguageVersion40("NodeTest jnode()");
+                nextToken();
+                readToken(Token.LPAREN);
                 if (t.currentToken == Token.RPAREN) {
                     return AnyJNodeType.getInstance();
                 }
@@ -4157,11 +4116,15 @@ public class XPathParser {
             }
             case "gnode":
                 checkLanguageVersion40("NodeTest gnode()");
+                expectEmptyParens();
+                // TODO: why create a JNodeType here????
                 return new SpecificJNodeType(AnyGNodeType.getInstance().one(),
                                              env.getConfiguration().getTypeHierarchy());
 
             case "type": {
                 checkLanguageVersion40("nodeTest type()");
+                nextToken();
+                readToken(Token.LPAREN);
                 SequenceType type = parseSequenceType();
                 readToken(Token.RPAREN);
                 return new SpecificJNodeType(type,
@@ -4175,6 +4138,7 @@ public class XPathParser {
                 return new SpecificJNodeType(SequenceType.one(type),
                                              env.getConfiguration().getTypeHierarchy());
             }
+
             case "array": {
                 checkLanguageVersion40("nodeTest " + kind + "()");
                 ItemType type = parseArrayItemType();
@@ -4198,6 +4162,53 @@ public class XPathParser {
                 grumble("Unknown node kind " + kind);
                 return null;
         }
+    }
+
+    /**
+     * Read a construct such as "item()". On entry, we are positioned on the keyword "item".
+     * If this is followed by "()", we return true, and the current position is the token
+     * after the "()". Otherwise, we throw an error.
+     * @throws XPathException if the current token is not followed by "()"
+     */
+    private void expectEmptyParens() throws XPathException {
+        Token keyword = t.currentToken;
+        nextToken();
+        readToken(Token.LPAREN);
+        if (t.currentToken == Token.RPAREN) {
+            nextToken();
+        } else {
+            grumble("Expected empty parentheses '()' after '" + keyword + "'");
+        }
+    }
+
+    /**
+     * Read a construct such as schema-element(N). On entry, we are positioned on the
+     * keyword (for example "schema-element"). The parameter "optional" indicates whether
+     * the name is required. If the syntax is correct, the method returns the name (if present);
+     * otherwise we throw an error.
+     * @param optional true if the name between the parentheses is optional
+     * @return the name found between the parentheses, or null if there was no name and it is not required
+     * @throws XPathException on  syntax error
+     */
+
+    private Token readParenthesizedToken(boolean optional) throws XPathException {
+        Token keyword = t.currentToken;
+        nextToken();
+        readToken(Token.LPAREN);
+        if (t.currentToken == Token.RPAREN) {
+            if (optional) {
+                nextToken();
+                return null;
+            } else {
+                grumble("Expected a name after '" + keyword + "('");
+            }
+        } else {
+            Token name = t.currentToken;
+            nextToken();
+            readToken(Token.RPAREN);
+            return name;
+        }
+        return null;
     }
 
 
@@ -4548,7 +4559,7 @@ public class XPathParser {
     }
 
     /**
-     * Parse a function call.
+     * Parse a static function call. On entry the current token is the function name.
      * function-name '(' ( Expression (',' Expression )* )? ')'
      *
      * @param prefixArgument left hand operand of arrow operator,
