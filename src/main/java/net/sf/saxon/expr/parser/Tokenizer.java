@@ -761,6 +761,35 @@ public final class Tokenizer {
                     CSharp.emitCode("goto case '0';");
                     // otherwise drop through: we have a number starting with a decimal point
                 case '0':
+                    if (inputOffset < inputLength && languageLevel >= 40) {
+                        if (input.charAt(inputOffset) == 'x') {
+                            inputOffset++;
+                            while (inputOffset < inputLength && "0123456789abcdefABCDEF_".indexOf(input.charAt(inputOffset)) >= 0) {
+                                inputOffset++;
+                            }
+                            String body = input.substring(nextTokenStartOffset + 2, inputOffset);
+                            if (body.startsWith("_") || body.endsWith("_")) {
+                                throw new XPathException("Underscore not allowed at start or end of hex literal");
+                            }
+                            nextTokenValue = body.replace("_", "");
+                            nextToken = Token.HEX_INTEGER;
+                            return;
+                        } else if (input.charAt(inputOffset) == 'b') {
+                            inputOffset++;
+                            while (inputOffset < inputLength && "01_".indexOf(input.charAt(inputOffset)) >= 0) {
+                                inputOffset++;
+                            }
+                            String body = input.substring(nextTokenStartOffset + 2, inputOffset);
+                            if (body.startsWith("_") || body.endsWith("_")) {
+                                throw new XPathException("Underscore not allowed at start or end of binary literal");
+                            }
+                            nextTokenValue = body.replace("_", "");
+                            nextToken = Token.BINARY_INTEGER;
+                            return;
+                        }
+                    }
+                    CSharp.emitCode("goto case '1';");
+                    // otherwise drop through: it's not a hex or binary numeric literal
                 case '1':
                 case '2':
                 case '3':
@@ -778,6 +807,7 @@ public final class Tokenizer {
                     boolean allowSign = false;
                     boolean allowDot = true;
                     boolean keepGoing = true;
+                    boolean allowUnderscore = languageLevel >= 40;
                     while (true) {
                         switch (c) {
                             case '0':
@@ -802,6 +832,19 @@ public final class Tokenizer {
                                     //break numloop;
                                 }
                                 break;
+                            case '_':
+                                if (allowUnderscore) {
+                                    //System.err.println("InputOffset = " + inputOffset + " InputLength = " + inputLength);
+                                    if (inputOffset >= inputLength || "0123456789_".indexOf(input.charAt(inputOffset)) < 0) {
+                                        throw new XPathException("Underscore must be followed by a digit (or another underscore)");
+                                    }
+                                    if (inputOffset < 2 || "0123456789_".indexOf(input.charAt(inputOffset-2)) < 0) {
+                                        throw new XPathException("Underscore must be preceded by a digit (or another underscore)");
+                                    }
+                                    break;
+                                } else {
+                                    throw new XPathException("Underscore is not allowed in numeric literal unless 4.0 is enabled");
+                                }
                             case 'E':
                             case 'e':
                                 if (allowE) {
@@ -838,7 +881,7 @@ public final class Tokenizer {
                         }
                         c = input.charAt(inputOffset++);
                     }
-                    nextTokenValue = input.substring(nextTokenStartOffset, inputOffset);
+                    nextTokenValue = input.substring(nextTokenStartOffset, inputOffset).replace("_", "");
                     nextToken = Token.NUMBER;
                     return;
                 case '"':

@@ -883,6 +883,14 @@ public class XQueryParser extends XPathParser {
                             arg = (Literal) parseNumericLiteral(false);
                             break;
 
+                        case Token.HEX_INTEGER:
+                            arg = (Literal) parseHexLiteral(false);
+                            break;
+
+                        case Token.BINARY_INTEGER:
+                            arg = (Literal) parseBinaryLiteral(false);
+                            break;
+
                         default:
                             grumble("Annotation parameter must be a literal");
                             return null;

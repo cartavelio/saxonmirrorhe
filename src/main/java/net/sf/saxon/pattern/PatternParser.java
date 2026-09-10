@@ -306,6 +306,8 @@ public class PatternParser extends XPathParser {
 
                 case Token.STRING_LITERAL:
                 case Token.NUMBER:
+                case Token.HEX_INTEGER:
+                case Token.BINARY_INTEGER:
                 case Token.KEYWORD_CURLY:
                 case Token.ELEMENT_QNAME:
                 case Token.ATTRIBUTE_QNAME:

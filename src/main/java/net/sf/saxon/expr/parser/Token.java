@@ -616,6 +616,9 @@ public abstract class Token {
 
     public static final int BACKTICK = 223;
 
+    public static final int HEX_INTEGER = 224;
+    public static final int BINARY_INTEGER = 225;
+
     /**
      * Unary minus sign
      */
@@ -720,6 +723,8 @@ public abstract class Token {
         tokens[STAR] = "*";
         tokens[PREFIX] = "<prefix:*>";
         tokens[NUMBER] = "<numeric-literal>";
+        tokens[HEX_INTEGER] = "<hex-integer>";
+        tokens[BINARY_INTEGER] = "<binary-integer>";
         tokens[NODEKIND] = "<node-type>()";
         tokens[FOR] = "for";
         tokens[SUFFIX] = "<*:local-name>";
