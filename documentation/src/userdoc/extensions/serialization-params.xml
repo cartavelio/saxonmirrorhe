@@ -10,7 +10,7 @@
         the Query prolog (XQuery only), as parameters in the <a class="bodylink code"
             href="/functions/fn/serialize">fn:serialize()</a> function, or as extra parameters on
         the Query or Transform command line. They can also be specified in the query or
-        transformation API.</p>
+        transformation API.</p>i
 
     <aside> Requires Saxon-PE or Saxon-EE.</aside>
 
@@ -147,7 +147,7 @@
                     The square brackets that enclose the internal subset within the Document Type Declaration 
                     should not be included in the value.</p>
             </desc>
-            <data-type name="integer"/>
+            <data-type name="string"/>
         </attribute>
 
         <attribute name="saxon:line-length" required="no">
