@@ -44,7 +44,7 @@ public class OptimizerOptions {
         int opt = 0;
         if (flags.startsWith("-")) {
             opt = -1;
-            for (int i = 0; i < flags.length(); i++) {
+            for (int i = 1; i < flags.length(); i++) {
                 char c = flags.charAt(i);
                 opt &= ~decodeFlag(c);
             }
