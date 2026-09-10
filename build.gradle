@@ -1479,7 +1479,7 @@ task javaArchiveEE(
 
 // ============================================================
 
-task testBug6024(type: JavaExec, dependsOn: ['eejJar']) {
+task testBug6024(type: JavaExec, dependsOn: ['eejJar', 'compileTestJava']) {
   mainClass = "bugs.bug6024.Bug6024"
 
   classpath = configurations.bug6024 \
