@@ -209,6 +209,9 @@ void SchemaValidator::validate(const char *sourceFile) {
   if (lax) {
     setProperty("lax", "1");
   }
+  if(!outputFile.empty()) {
+    setProperty("o", outputFile.c_str());
+  }
 
   int64_t processorDataRef =
       SaxonProcessor::createParameterJArray(parameters, properties);

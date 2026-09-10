@@ -455,29 +455,6 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
             </tr>
          </thead>
          <tr>
-            <td>![serialization property]</td>
-            <td>
-               <code>setProperty("!indent", "yes")</code>
-            </td>
-            <td>
-               <p>Influence the serialization of the result output. Serialization parameters are
-                  specified by name, preceded by a leading exclamation mark (!). This is equivalent
-                  to specifying the corresponding attribute on an <code>xsl:output</code>
-                  declaration in a stylesheet, or the corresponding output declaration in a query
-                  prolog.</p>
-            </td>
-         </tr>
-         <tr>
-            <td>'o'</td>
-            <td>
-               <code>setProperty("o", "output.xml")</code>
-            </td>
-            <td>
-               <p>Sets the destination for the result of evaluating the XPath expression to the
-                  specified filename.</p>
-            </td>
-         </tr>
-         <tr>
             <td>'dtd'</td>
             <td>
                <code>setProperty("dtd", "true")</code>
@@ -585,7 +562,10 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                   specified by name, preceded by a leading exclamation mark (!). This is equivalent
                   to specifying the corresponding attribute on an <code>xsl:output</code>
                   declaration in a stylesheet, or the corresponding output declaration in a query
-                  prolog.</p>
+                  prolog. For more details about the serialization parameters
+                  available, see the <a target="_blank"
+                                        href="https://www.saxonica.com/documentation12/index.html#!extensions/output-extras">Additional
+                     serialization parameters</a> section in the main Saxon documentation.</p>
             </td>
          </tr>
          <tr>
