@@ -10,7 +10,6 @@ package net.sf.saxon.expr;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.OperatorSymbol;
-import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -177,22 +176,15 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
      */
 
     public static boolean interpretComparisonResult(OperatorSymbol operator, int c) {
-        switch (operator) {
-            case FEQ:
-                return c == 0;
-            case FNE:
-                return c != 0;
-            case FGT:
-                return c > 0;
-            case FLT:
-                return c < 0;
-            case FGE:
-                return c >= 0;
-            case FLE:
-                return c <= 0;
-            default:
-                throw new UnsupportedOperationException("Unknown operator " + operator);
-        }
+        return switch (operator) {
+            case FEQ -> c == 0;
+            case FNE -> c != 0;
+            case FGT -> c > 0;
+            case FLT -> c < 0;
+            case FGE -> c >= 0;
+            case FLE -> c <= 0;
+            default -> throw new UnsupportedOperationException("Unknown operator " + operator);
+        };
     }
 }
 
