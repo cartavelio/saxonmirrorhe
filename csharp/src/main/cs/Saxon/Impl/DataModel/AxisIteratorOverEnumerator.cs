@@ -1,6 +1,8 @@
+using Saxon.Hej.om;
+
 namespace Saxon.Impl.DataModel {
 
-    public class AxisIteratorOverEnumerator<J>  : Saxon.Hej.tree.iter.AxisIterator {
+    public class AxisIteratorOverEnumerator<J>  : SequenceIterator {
         private readonly System.Collections.Generic.IEnumerator<J> baseEnumerator;
         private readonly System.Func<J,Saxon.Hej.om.Item> mapper;
         public AxisIteratorOverEnumerator(System.Collections.Generic.IEnumerator<J> baseEnumerator, System.Func<J,Saxon.Hej.om.Item> mapper)  {

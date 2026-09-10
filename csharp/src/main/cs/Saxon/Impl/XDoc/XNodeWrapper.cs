@@ -116,7 +116,7 @@ namespace Saxon.Impl.XDoc {
             return buffer.ToString().GetHashCode();
         }
 
-        public override int compareOrder(NodeInfo other) {
+        public override int compareOrder(GNode other) {
             if ((other is XNodeWrapper otherNode)) {
                 System.Collections.IComparer comparer = XNode.DocumentOrderComparer;
                 return comparer.Compare(node, otherNode.node);
@@ -202,7 +202,7 @@ namespace Saxon.Impl.XDoc {
             return parent;
         }
 
-        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
             if (node is XElement element) {
                 IList<NodeInfo> attList = new List<NodeInfo>(); 
                 foreach (XAttribute att in element.Attributes()) {
@@ -216,7 +216,7 @@ namespace Saxon.Impl.XDoc {
                 return new NodeListIterator(attList);
             }
 
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
             
         }
 
@@ -232,7 +232,7 @@ namespace Saxon.Impl.XDoc {
         private static readonly Predicate<XNode> docChildren =
             child => (child.NodeType != XmlNodeType.DocumentType
                       && !(child.NodeType == XmlNodeType.Text && ALL_WHITE.IsMatch(((XText)child).Value)));
-        protected internal override AxisIterator iterateChildren(NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodeTest nodeTest) {
             if (node is XContainer container) {
                 System.Collections.Generic.IEnumerator<XNode> childEnum = 
                     isElementOnly(nodeTest) 
@@ -243,7 +243,7 @@ namespace Saxon.Impl.XDoc {
                     childEnum = new FilterEnumerator<XNode>(childEnum, docChildren);
                 }
                 int index = 0;
-                AxisIterator axisIter = new AxisIteratorOverEnumerator<XNode>(
+                SequenceIterator axisIter = new AxisIteratorOverEnumerator<XNode>(
                     childEnum, xNode => makeWrapper(xNode, docTree, this, index++));
                 if (nodeTest != AnyNodeTest.getInstance()) {
                     axisIter = new Navigator.AxisFilter(axisIter, nodeTest);
@@ -252,11 +252,11 @@ namespace Saxon.Impl.XDoc {
                 return axisIter;
             }
 
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
         
-        protected internal override AxisIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
-            AxisIterator baseIter;
+        protected internal override SequenceIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
+            SequenceIterator baseIter;
             if (getParent().getNodeKind() == Type.DOCUMENT) {
                 if (forwards) {
                     baseIter = new IncrementalIterator(this, n => {
@@ -298,11 +298,11 @@ namespace Saxon.Impl.XDoc {
             return baseIter;
         }
         
-        protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
+        protected override SequenceIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
             bool includeSelf) {
-            AxisIterator descendants = new Navigator.DescendantIterator(this, includeSelf, true);
+            SequenceIterator descendants = new Navigator.DescendantIterator(this, includeSelf, true);
             if (nodeTest != AnyNodeTest.getInstance()) {
-                descendants = new Navigator.AxisFilter(descendants, nodeTest);
+                descendants = Navigator.filter(descendants, nodeTest);
             }
 
             return descendants;

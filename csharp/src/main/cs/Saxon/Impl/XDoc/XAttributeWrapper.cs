@@ -56,7 +56,7 @@ namespace Saxon.Impl.XDoc {
             return buffer.ToString().GetHashCode();
         }
 
-        public override int compareOrder(NodeInfo other) {
+        public override int compareOrder(GNode other) {
             if ((other is XAttributeWrapper aw)) {
                 if (parent.getUnderlyingNode() == aw.parent.getUnderlyingNode()) {
                     return index - aw.index;
@@ -109,22 +109,22 @@ namespace Saxon.Impl.XDoc {
         }
         
 
-        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+            return EmptyIterator.getInstance();
         }
 
 
-        protected internal override AxisIterator iterateChildren(NodeTest nodeTest) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateChildren(NodeTest nodeTest) {
+            return EmptyIterator.getInstance();
         }
         
-        protected internal override AxisIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
+            return EmptyIterator.getInstance();
         }
         
-        protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
+        protected override SequenceIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
             bool includeSelf) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
 
         public override string getAttributeValue(string uri, string local) {

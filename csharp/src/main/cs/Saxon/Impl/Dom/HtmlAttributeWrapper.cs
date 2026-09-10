@@ -94,14 +94,14 @@ namespace Saxon.Impl.Dom {
             return getLocalPart();
         }
 
-        public override NodeInfo getParent() {
+        public override GNode getParent() {
             return parent;
         }
 
         public int getSiblingPosition() {
             if ((index == -1)) {
                 int ix = 0;
-                AxisIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator iter = parent.iterateAttributes(null);
                 while (true) {
                     NodeInfo n = ((NodeInfo) iter.next());
                     if (((n == null) || Navigator.haveSameName(this, n))) {
@@ -113,21 +113,23 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+            return EmptyIterator.getInstance();
         }
 
-        protected internal override AxisIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
+            return EmptyIterator.getInstance();
         }
 
-        protected internal override AxisIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
+            return EmptyIterator.getInstance();
         }
 
-        protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest, bool includeSelf) {
+        protected override SequenceIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest, bool includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
         }
+        
+        
 
         public override string getAttributeValue(string uri, string local) {
             return null;

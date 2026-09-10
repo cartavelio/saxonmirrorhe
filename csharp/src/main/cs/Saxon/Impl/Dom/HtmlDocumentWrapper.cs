@@ -47,7 +47,7 @@ namespace Saxon.Impl.Dom {
             return buffer.ToString().GetHashCode();
         }
 
-        public override int compareOrder(NodeInfo other) {
+        public override int compareOrder(GNode other) {
             if ((other is SiblingCountingNode countingNode)) {
                 return Navigator.compareOrder(this, countingNode);
             }
@@ -100,14 +100,14 @@ namespace Saxon.Impl.Dom {
             return ((GenericTreeInfo)getTreeInfo()).getSystemId();
         }
 
-        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+            return EmptyIterator.getInstance();
         }
 
-        protected internal override AxisIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
             //return SingleNodeIterator.makeIterator(outermostElement);
             if (!htmlDocument.HasChildNodes) {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             }
             System.Collections.Generic.List<NodeInfo> childList = new ();
             int indexPosition = 0;
@@ -123,8 +123,8 @@ namespace Saxon.Impl.Dom {
             return new NodeListIterator(childList);
         }
 
-        protected internal override AxisIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
-            return EmptyIterator.ofNodes();
+        protected internal override SequenceIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
+            return EmptyIterator.getInstance();
         }
 
         public override string getAttributeValue(string uri, string local) {

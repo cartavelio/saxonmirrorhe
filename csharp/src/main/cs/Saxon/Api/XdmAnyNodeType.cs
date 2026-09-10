@@ -1,4 +1,6 @@
 using Saxon.Hej.pattern;
+using Saxon.Hej.pattern.nodetest;
+using Saxon.Hej.type.gnode;
 
 namespace Saxon.Api {
     /// <summary>
@@ -10,12 +12,12 @@ namespace Saxon.Api {
 
         /// <summary>
         /// The singleton instance of this class: an <c>XdmItemType</c> corresponding to the
-        /// item type <c>node()</c>, which matches any node.
+        /// item type <c>node()</c>, which matches any node (specifically, in 4.0, any XNode).
         /// </summary>
 
         public static readonly XdmAnyNodeType Instance = new();
 
-        private XdmAnyNodeType() : base (AnyNodeTest.getInstance()) {
+        private XdmAnyNodeType() : base (AnyXNodeType.getInstance()) {
         }
 
         /// <summary>

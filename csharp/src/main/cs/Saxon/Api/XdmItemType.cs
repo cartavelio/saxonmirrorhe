@@ -7,8 +7,10 @@ using Saxon.Hej.ma.arrays;
 using Saxon.Hej.ma.map;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.s9api;
 using Saxon.Hej.type;
+using Saxon.Hej.type.gnode;
 using Saxon.Hej.value;
 
 namespace Saxon.Api {
@@ -44,9 +46,9 @@ namespace Saxon.Api {
                 default: {
                     switch (type) {
                         case ErrorType:
-                        case AnyNodeTest:
+                        case AnyXNodeType:
                             return XdmAnyNodeType.Instance; // TODO: need to represent this properly
-                        case NodeTest test: {
+                        case XNodeType test: {
                             int kind = test.getPrimitiveType();
                             return XdmNodeKind.ForNodeKindTest((NodeKindTest)NodeKindTest.makeNodeKindTest(kind));
                         }

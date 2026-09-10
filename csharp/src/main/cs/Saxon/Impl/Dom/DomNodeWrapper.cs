@@ -5,11 +5,13 @@ using SysCollGen = System.Collections.Generic;
 using System.Xml;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.str;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
 using Saxon.Hej.type;
+using Saxon.Hej.type.gnode;
 using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Impl.Dom {
@@ -242,7 +244,7 @@ namespace Saxon.Impl.Dom {
             }
         }
 
-        public override NodeInfo getParent() {
+        public override GNode getParent() {
             if ((parent == null)) {
                 switch (getNodeKind()) {
                     case Saxon.Hej.type.Type.ATTRIBUTE:
@@ -315,10 +317,10 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
-            AxisIterator iter = new DomNodeWrapper.AttributeEnumeration(docTree, this);
+        protected internal override SequenceIterator iterateAttributes(NodeTest nodeTest) {
+            SequenceIterator iter = new DomNodeWrapper.AttributeEnumeration(docTree, this);
             if ((nodeTest != Saxon.Hej.pattern.AnyNodeTest.getInstance())) {
-                iter = new Navigator.AxisFilter(iter, nodeTest);
+                iter = Navigator.filter(iter, nodeTest);
             }
 
             return iter;
@@ -328,27 +330,27 @@ namespace Saxon.Impl.Dom {
             return nodeTest.getUType() == UType.ELEMENT; 
         }
 
-        protected internal override AxisIterator iterateChildren(NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodeTest nodeTest) {
             bool elementOnly = isElementOnly(nodeTest);
-            AxisIterator iter = new DomNodeWrapper.ChildEnumeration(docTree, this, true, true, elementOnly);
-            if ((nodeTest != Saxon.Hej.pattern.AnyNodeTest.getInstance())) {
-                iter = new Navigator.AxisFilter(iter, nodeTest);
+            SequenceIterator iter = new DomNodeWrapper.ChildEnumeration(docTree, this, true, true, elementOnly);
+            if ((nodeTest != AnyXNodeType.getInstance())) {
+                iter = Navigator.filter(iter, nodeTest);
             }
 
             return iter;
         }
         
-        protected internal override AxisIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
+        protected internal override SequenceIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
             bool elementOnly = isElementOnly(nodeTest);
-            AxisIterator iter = new Navigator.EmptyTextFilter(
+            SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this.docTree, this, false, forwards, elementOnly));
-            if (nodeTest != AnyNodeTest.getInstance()) {
-                iter = new Navigator.AxisFilter(iter, nodeTest);
+            if (nodeTest != AnyXNodeTest.getInstance()) {
+                iter = Navigator.filter(iter, nodeTest);
             }
             return iter;
         }
         
-        protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
+        protected override SequenceIterator iterateDescendants(NodeTest nodeTest,
             bool includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
         }
@@ -356,7 +358,7 @@ namespace Saxon.Impl.Dom {
         public override string getAttributeValue(NamespaceUri uri, string local) {
             Saxon.Hej.pattern.NameTest test =
                 new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, uri, local, getNamePool());
-            AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
+            SequenceIterator iterator = iterateAttributes(test);
             NodeInfo attribute = ((NodeInfo) iterator.next());
             return attribute?.getStringValue();
         }
@@ -442,7 +444,7 @@ namespace Saxon.Impl.Dom {
                             } else if (attName[5] == ':') {
                                 nsMap = nsMap.bind(attName.Substring(6), NamespaceUri.of(att.Value));
                             }
-                        } else if (attName.Contains(":")) {
+                        } else if (attName.Contains(':')) {
                             namespacedAtt = true;
                         }
                     }
@@ -461,7 +463,7 @@ namespace Saxon.Impl.Dom {
                     if (namespacedAtt) {
                         foreach (XmlAttribute att in atts) {
                             string attName = att.Name;
-                            if (attName.Contains(":") && !attName.StartsWith("xmlns:")) {
+                            if (attName.Contains(':') && !attName.StartsWith("xmlns:")) {
                                 string prefix = att.Prefix;
                                 string uri = att.NamespaceURI;
                                 if (nsMap.getNamespaceUri(prefix) != NamespaceUri.of(uri)) {
@@ -604,7 +606,7 @@ namespace Saxon.Impl.Dom {
             }
         }
 
-        private sealed class AttributeEnumeration : AxisIterator, LookaheadIterator {
+        private sealed class AttributeEnumeration : LookaheadIterator {
             private readonly SysCollGen.IList<XmlNode> attList = new SysCollGen.List<XmlNode>(10);
             private int ix = 0;
             private readonly DomDocumentTree _docTree;
@@ -654,7 +656,7 @@ namespace Saxon.Impl.Dom {
             
         }
 
-        private sealed class ChildEnumeration : AxisIterator {
+        private sealed class ChildEnumeration : SequenceIterator {
             private readonly DomDocumentTree _docTree;
             private readonly DomNodeWrapper start;
             private readonly DomNodeWrapper commonParent;

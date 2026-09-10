@@ -297,7 +297,7 @@ namespace Saxon.Api {
 
         public XdmNode Parent {
             get {
-                NodeInfo parent = ((NodeInfo) value).getParent();
+                NodeInfo parent = (NodeInfo)((NodeInfo) value).getParent();
                 return (parent == null ? null : (XdmNode) XdmValue.Wrap(parent));
             }
         }
@@ -386,7 +386,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns> an <c>Iterable</c> containing all nodes on the child axis.</returns>
         public IEnumerable<XdmNode> Children() {
-            return new SequenceEnumerable<XdmNode>(() => ((NodeInfo) value).iterateAxis(GetAxisNumber(XdmAxis.Child)));
+            return new SequenceEnumerable<XdmNode>(() => ((NodeInfo) value).iterateChildAxis(null));
         }
 
         /// <summary>

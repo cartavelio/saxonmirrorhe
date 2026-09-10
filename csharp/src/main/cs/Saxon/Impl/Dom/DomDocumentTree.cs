@@ -3,6 +3,7 @@ using System.Xml;
 using Saxon.Api;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.tree.iter;
 
 
@@ -22,8 +23,8 @@ namespace Saxon.Impl.Dom {
         public override Saxon.Hej.om.NodeInfo selectID(string id, bool getParent) {
             XmlNode node = (XmlNode)((DomNodeWrapper)getRootNode()).getUnderlyingNode();
             if (node is XmlDocument document) {
-                NodeInfo root = wrap(document);
-                AxisIterator descendants = root.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+                NodeInfo rootNode = wrap(document);
+                SequenceIterator descendants = rootNode.iterateDescendantAxis(NodeTypeTest.ELEMENT);
                 for (NodeInfo n; (n = (NodeInfo)descendants.next()) != null;) {
                     if (id.Equals(n.getAttributeValue(NamespaceUri.XML, "id"))) {
                         return n;
