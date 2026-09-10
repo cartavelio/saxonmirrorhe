@@ -778,9 +778,11 @@ public class ProfessionalConfiguration extends Configuration {
         result.addFunctionLibrary(ExsltCommonFunctionSet.getInstance());
         if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
             result.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
+            //#if CSHARP==false
             OnDemandFunctionSet sql = new OnDemandFunctionSet(
                     this, NamespaceConstant.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
             result.addFunctionLibrary(sql);
+            //#endif
         }
         return result;
     }
