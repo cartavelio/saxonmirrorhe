@@ -18,6 +18,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.FunctionStreamability;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -219,7 +220,7 @@ public class StreamingAdjunct {
         if (exp.getStreamerName() != null) {
             Supplier<StreamingAdjunct> supplier = adjunctMap.get(exp.getStreamerName());
             if (supplier == null) {
-                throw new AssertionError("No streaming support for " + exp.getStreamerName());
+                throw new UncheckedXPathException(new XPathException("No streaming support for " + exp.getStreamerName()));
             }
             try {
                 return supplier.get();

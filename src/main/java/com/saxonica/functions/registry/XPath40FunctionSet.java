@@ -392,9 +392,8 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, NodeKindTest.ELEMENT, ONE, null));
 
         register("path", 0, 2, e -> e.populate(Path_1::new, BuiltInAtomicType.STRING, OPT, 0)
-                .arg(0, AnyNodeTest.getInstance(), OPT | NAV, null)
+                .arg(0, AnyNodeTest.getInstance(), OPT | NAV, null, ContextValueExpression::new)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
-                .withDefault(0, new ContextValueExpression())
                 .setOptionDetails(Path_1.getOptionDetails()));
 
         register("sequence-join", 2, e -> e.populate(SequenceJoin::new, AnyItemType.getInstance(), STAR, LATE)
