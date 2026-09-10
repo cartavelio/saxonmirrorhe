@@ -4351,6 +4351,7 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor, parseJsonFromFile,arginfo_saxonc_parseJsonFromFile,ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor, parseJsonFromString,arginfo_saxonc_parseJsonFromString,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,ZEND_ACC_PUBLIC)
+    PHP_ME(SaxonProcessor, getcwd, arginfo_saxonc_getcwd,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, newXPathProcessor, arginfo_saxonc_newXPathProcessor, ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor, newDocumentBuilder,arginfo_saxonc_newDocumentBuilder,ZEND_ACC_PUBLIC)
 	PHP_ME(SaxonProcessor,newXslt30Processor,arginfo_saxonc_newXslt30Processor,ZEND_ACC_PUBLIC)
