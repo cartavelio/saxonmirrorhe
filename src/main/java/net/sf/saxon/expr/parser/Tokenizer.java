@@ -438,6 +438,11 @@ public final class Tokenizer {
                     nextToken = Token.PLUS;
                     return;
                 case '-':
+                    if (inputOffset < inputLength && isGreaterThanChar(input.charAt(inputOffset))) {
+                        inputOffset++;
+                        nextToken = Token.THIN_ARROW;
+                        return;
+                    }
                     nextToken = Token.MINUS;   // not detected if part of a name
                     return;
                 case '=':

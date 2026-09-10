@@ -28,7 +28,7 @@ public enum OperatorSymbol {
     UNION, INTERSECT, EXCEPT,
     OTHERWISE, CONCAT, TO,
     CAST_AS, CASTABLE_AS, TREAT_AS, INSTANCE_OF,
-    FAT_ARROW, MAPPING_ARROW,
+    FAT_ARROW, MAPPING_ARROW, THIN_ARROW,
     SLASH, SLASH_SLASH,
     BANG, LOOKUP, DEEP_LOOKUP,
     AM_FILTER,
@@ -73,6 +73,7 @@ public enum OperatorSymbol {
             case INSTANCE_OF: return "instance of";
             case TREAT_AS: return "treat as";
             case FAT_ARROW: return "=>";
+            case THIN_ARROW: return "->";
             case MAPPING_ARROW: return "=!>";
             case SLASH: return "/";
             case SLASH_SLASH: return "//";
