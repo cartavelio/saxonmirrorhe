@@ -3965,8 +3965,10 @@ public class XPathParser {
         String fname = t.currentTokenValue;
         int offset = t.currentTokenStartOffset;
         ArrayList<Expression> args = new ArrayList<>(10);
+        int position = 0;
         if (prefixArgument != null) {
             args.add(prefixArgument);
+            position++;
         }
 
         StructuredQName functionName = resolveFunctionName(fname);
@@ -3983,7 +3985,6 @@ public class XPathParser {
         Map<StructuredQName, Integer> keywordArgs = null;
         nextToken();
         if (t.currentToken != Token.RPAR) {
-            int position = 0;
             while (true) {
                 int peek = t.peekAhead();
                 Expression arg;
