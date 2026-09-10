@@ -5,6 +5,7 @@ import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SchemaURIResolver;
@@ -1446,8 +1447,8 @@ public class TestValidator {
             out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
             XsdCompiler sm = proc.newXsdCompiler();
-            StreamSource source_xsd = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xsd"));
-            StreamSource source_xml = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xml"));
+            StreamSource source_xsd = new StreamSource(Testdata.file("../bugs/4744/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(Testdata.file("../bugs/4744/UniqueKeyBug.xml"));
             ErrorListener listener = new ErrorListener() {
                 @Override
                 public void error(TransformerException exception) {
@@ -1571,8 +1572,8 @@ public class TestValidator {
             out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
             XsdCompiler sm = proc.newXsdCompiler();
-            StreamSource source_xsd = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xsd"));
-            StreamSource source_xml = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xml"));
+            StreamSource source_xsd = new StreamSource(Testdata.file("../bugs/4744/UniqueKeyBug.xsd"));
+            StreamSource source_xml = new StreamSource(Testdata.file("../bugs/4744/UniqueKeyBug.xml"));
             ErrorHandler handler = new ErrorHandler() {
                 @Override
                 public void error(SAXParseException exception) {
