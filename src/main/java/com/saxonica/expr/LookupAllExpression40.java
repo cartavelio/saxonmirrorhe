@@ -30,7 +30,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -309,7 +308,10 @@ public class LookupAllExpression40 extends LookupAllExpression {
                     } else if (item instanceof MapItem) {
                         return new MapEntriesIterator((MapItem) item);
                     } else {
-                        return EmptyIterator.getInstance();
+                        throw new XPathException("The value on the LHS of `?` must be a map or an array")
+                                .withErrorCode("XPTY0004")
+                                .withLocation(expr.getLocation())
+                                .asTypeError();
                     }
                 });
                 if (req != SequenceType.ANY_SEQUENCE) {

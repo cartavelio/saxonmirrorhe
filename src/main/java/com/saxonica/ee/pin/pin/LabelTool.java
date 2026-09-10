@@ -5,6 +5,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.ma.map.StringMap;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.Twine8;
@@ -44,6 +45,7 @@ public class LabelTool {
             case NODE:
                 return new LabeledNode((NodeInfo)item, label);
             case FUNCTION:
+                return new LabeledFunctionItem((FunctionItem)item, label);
             case EXTERNAL:
             case ANY:
             default:
