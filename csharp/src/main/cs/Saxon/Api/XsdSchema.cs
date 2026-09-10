@@ -7,7 +7,7 @@ namespace Saxon.Api {
 
         public abstract void ExportComponents(IDestination destination);
 
-        internal abstract Saxon.Hej.type.Schema UnderlyingSchema { get; }
+        public abstract Saxon.Hej.type.Schema UnderlyingSchema { get; }
     }
 
 }
