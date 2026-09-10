@@ -54,7 +54,7 @@ test_report = None
 old_xsd_version = "1.1"
 current_xsd_version = "1.1"
 
-spec: Spec
+spec = None
 
 globalEnvironments = {}
 localEnvironments = {}
@@ -78,37 +78,6 @@ run_assertion = None
 '''serialization-matches'''
 total_tests = 0
 exceptionList = []
-
-
-def process_spec(spec_str: str):
-    if spec_str == "XP20":
-        return Spec.XP20()
-    elif spec_str == "XP30":
-        return Spec.XP30()
-    elif spec_str == "XP31":
-        return Spec.XP31()
-        
-    elif spec_str == "XP40":
-        return Spec.XP40()
-                
-    elif spec_str == "XQ10":
-        return Spec.XQ10()
-        
-    elif spec_str == "XQ30":
-        return Spec.XQ30()
-
-    elif spec_str == "XQ31":
-        return Spec.XQ31()
-
-    elif spec_str == "XQ40":
-        return Spec.XQ40()
-
-    elif spec_str == "XT30":
-        return Spec.XT30()
-    else:
-        raise Exception("The specific language must be one of the following: XP20, XP30, XP31, XP40, XQ10, XQ30, XQ31, XQ40, XT30")
-
-
 
 def process_catalog(path: pathlib.Path, catalogi: pathlib.Path):
     att_name = None
@@ -769,7 +738,7 @@ def main(argv):
 
             elif opt in ("-l", "--lang"):
                 host_lang = arg
-                spec = process_spec(arg)
+                spec = Spec.process_spec(arg)
                 test_report = PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version)
 
     '''dir = os.getcwd()'''

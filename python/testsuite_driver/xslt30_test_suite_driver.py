@@ -3,7 +3,7 @@ import urllib.parse
 import os
 import psutil
 import re
-from Environment import Environment
+from Environment import Environment, Spec, process_environment
 from test_outcome import PyTestOutcome
 from test_report import PyTestReport
 import sys, getopt
@@ -53,7 +53,11 @@ xpathProcForCompareNodes = driver_proc.new_xpath_processor()
 xpathProcForCompareNodes.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
 
 schemaValidator = None
-test_report = PyTestReport("xslt30", "http://www.w3.org/2012/11/xslt30-test-results", "XT30",driver_proc.version[:8], saxon_version)
+test_report = None
+'''PyTestReport("xslt30", "http://www.w3.org/2012/11/xslt30-test-results", "XT30",driver_proc.version[:8], saxon_version)'''
+
+
+spec = None
 
 globalEnvironments = {}
 localEnvironments = {}
@@ -167,7 +171,7 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
             if envs is not None:
                 for i in range(envs.size):
                     env = envs.item_at(i)
-                    process_environment(xpathProcForEnv, env.get_node_value(), "spec", localEnvironments,
+                    process_environment(cwd_from_base_uri, xpathProcForEnv, env.get_node_value(), "spec", localEnvironments,
                                         localEnvironments['default'])
             if child0 is None:
                 print(f"Cannot find child node of test {test_set_file}")
@@ -273,7 +277,7 @@ def ensure_dependency_satisfied(dependency: saxonc.PyXdmNode, env: Environment):
     return True
 
 
-def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spec: str, environments_i: dict,
+def process_environmenti(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spec: str, environments_i: dict,
                         default_environment: Environment):
     environment = Environment()
     environment.create_processors()
@@ -458,7 +462,7 @@ def create_global_environment(catalog: saxonc.PyXdmNode, xpath_proc: saxonc.PyXP
     nodes = xpath_proc.evaluate("//environment")
     if nodes is not None:
         for env in nodes:
-            process_environment(xpath_proc, env, globalEnvironments, localEnvironments['default'])
+            process_environment(cwd_from_base_uri, xpath_proc, env, globalEnvironments, localEnvironments['default'])
 
 
 def create_local_environments(test_set_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathProcessor):
@@ -543,6 +547,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     global wrong_error_results
     global path
     global jit
+    global spec
 
     xpath_proc.set_context(xdm_item=test_case_node)
     test_name = test_case_node.get_attribute_value("name")
@@ -571,7 +576,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         if env_ref is None:
             if os.getenv("SAXONC_DEBUG_FLAG") is not None:
                 print('Creating new environment')
-            environment = process_environment(xpath_proc, env_node_i, "spec", globalEnvironments,
+            environment = process_environment(cwd_from_base_uri, xpath_proc, env_node_i, "spec", globalEnvironments,
                                               localEnvironments['default'])
         else:
             if os.getenv("SAXONC_DEBUG_FLAG") is not None:
@@ -665,7 +670,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
 
         if stylesheet is not None:
             file_name = stylesheet.get_node_value().get_attribute_value("file")
-            environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name)
+            environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, lang=spec.version)
         elif principle_package is not None:
             if used_package is not None:
                 print('used Package = ' + str(used_package.size))
@@ -682,8 +687,8 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
             file_name = principle_package.get_node_value().get_attribute_value("file")
             if file_name != "":
                 output_file = (file_name[-4] + "_created_from_test_driver.sef")
-                environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file)
-                environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file)
+                environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file, lang=spec.version)
+                environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file, lang=spec.version)
                 print("Checking the output file " + str(os.path.join(environment.xslt_proc.cwd, output_file)) +": ")
                 try:
                     output_file1 = str(os.path.join(environment.xslt_proc.cwd, output_file))
@@ -801,7 +806,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
         errorResult = ex
 
     assert_xpc = environment.proc.new_xpath_processor()
-    assert_xpc.set_property("sa", "true")
+    '''assert_xpc.set_property("sa", "true")'''
     assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
     assert_xpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")
     assert_xpc.declare_namespace("math", "http://www.w3.org/2005/xpath-functions/math")
@@ -853,6 +858,8 @@ def main(argv):
     global results_path
     global schemaValidator
     global saxon_version
+    global spec
+    global test_report
     global driver_proc
     global jit
 
@@ -870,14 +877,14 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:", ["testpattern", "testset", "resultdir", "jit="])
+            opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "jit=", "lang"])
         except getopt.GetoptError:
-            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off')
+            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off -l <processor language>')
             sys.exit(2)
 
         for opt, arg in opts:
             if opt == '-h':
-                print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off')
+                print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off -l <language>')
                 sys.exit()
             elif opt in ("-t", "--testpattern"):
                 test_case_name_pattern = re.compile(arg)
@@ -895,8 +902,17 @@ def main(argv):
                     jit = True
                 if "HE" in driver_proc.version:
                     jit = False
+            elif opt in ("-l", "--lang"):
+                spec = Spec.process_spec(arg)
+                test_report = PyTestReport("xslt30", "http://www.w3.org/2012/11/xslt30-test-results", spec.spec_and_version,driver_proc.version[:8], saxon_version)
 
-    '''dir = os.getcwd()'''
+                '''PyTestReport("qt3", "http://www.w3.org/2012/08/qt-fots-results", spec.spec_and_version, driver_proc.version[7:9], saxon_version)'''
+
+
+    if spec is None:
+        print("Error: lang option not given")
+        sys.exit(2)
+
     path = pathlib.Path(diri)
     catalog = path/"catalog.xml"
 

@@ -730,7 +730,7 @@ public class Xslt30Processor extends SaxonCAPI {
                     }
                     valueForCpp = convertObjectToXdmValue(values[i]);
                     compiler.setParameter(qname, valueForCpp);
-                } if (sparams[i].equals("importPack:")) {
+                } else if (sparams[i].equals("importPack:")) {
                     ProcessorDataAccumulator packageValue = (ProcessorDataAccumulator) values[i];
 
                     String[] packageFileNames = packageValue.getParameterNames();
@@ -741,8 +741,15 @@ public class Xslt30Processor extends SaxonCAPI {
                         compiler.importPackage(pack);
                     }
 
+                } else if (sparams[i].equals("sa")) {
+                        String value = ((String)values[i]).toLowerCase();
+                        if(value.equals("true") || value.equals("on")) {
+                            compiler.setSchemaAware(true);
+                        } else {
+                            compiler.setSchemaAware(false);
+                        }
 
-                } if (sparams[i].equals("!input-encoding")) {
+                } else if (sparams[i].equals("!input-encoding")) {
                     String value = (String) values[i];
                     encoding.setEncoding(value);
                 } else {
@@ -751,22 +758,22 @@ public class Xslt30Processor extends SaxonCAPI {
             }
 
             if(map.containsKey("-target")) {
-                String value = (String) map.get("target");
+                String value = (String) map.get("-target");
                 compiler.setTargetEdition(value);
             }
 
             if(map.containsKey("-relocate")) {
-                String value = (String) map.get("relocate");
+                String value = (String) map.get("-relocate");
                 compiler.setRelocatable(value.equals("1"));
             }
 
             if(map.containsKey("-lang")) {
-                String value = (String) map.get("lang");
+                String value = (String) map.get("-lang");
                 compiler.setXsltLanguageVersion(value);
             }
 
             if(map.containsKey("-fastCompile")) {
-                String value = (String) map.get("fastCompile");
+                String value = (String) map.get("-fastCompile");
                 compiler.setFastCompilation(true);
             }
 

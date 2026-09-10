@@ -138,6 +138,7 @@ protected:
   char *fname; /*!< The name of the function item */
 
 private:
+  XdmFunctionItem & operator=(XdmFunctionItem i);
   int arity; /*!< The arity of this function */
 };
 

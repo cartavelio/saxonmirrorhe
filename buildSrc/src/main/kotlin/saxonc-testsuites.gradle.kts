@@ -55,22 +55,30 @@ listOf("qt3", "qt4").forEach { qtVersion ->
     }
 }
 
-listOf("xslt30", "xslt40").forEach { xslt ->
-    val suite = tasks.register<TestSuiteTask>("test_suite_${xslt}") {
-        group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-        python = venv.map { it.pythonExe.get() }
-        environment("SAXONC_HOME" to saxonBuild.saxonLicenseDir,
-            "SAXON_LICENSE_DIR" to saxonBuild.saxonLicenseDir,
-            "SAXONC_EDITION" to saxonC.edition)
+listOf(Pair("XT30", "xslt30"),
+    Pair("XT40", "xslt40"),
+    Pair("XT40", "xslt30")).forEach { (lang, xslt) ->
 
-        driver = layout.projectDirectory.file("../testsuite_driver/xslt30_test_suite_driver.py")
-        suiteDir = layout.projectDirectory.dir("../../submodules/${xslt}")
-        outputDir = layout.buildDirectory.dir("test-results/${xslt}/${saxonBuild.dateStamp.get()}")
-        wheelInstaller(testsuiteInstallWheel)
-        driverRequirements(testsuitesPipInstall)
-    }
+        val suite = tasks.register<TestSuiteTask>("test_suite_${xslt}_${lang}") {
+            group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
+            python = venv.map { it.pythonExe.get() }
+            environment(
+                "SAXONC_HOME" to saxonBuild.saxonLicenseDir,
+                "SAXON_LICENSE_DIR" to saxonBuild.saxonLicenseDir,
+                "SAXONC_EDITION" to saxonC.edition
+            )
 
-    testSuites.configure {
-        dependsOn(suite)
-    }
+            driver = layout.projectDirectory.file("../testsuite_driver/xslt30_test_suite_driver.py")
+            suiteDir = layout.projectDirectory.dir("../../submodules/${xslt}")
+            outputDir = layout.buildDirectory.dir("test-results/${xslt}/${saxonBuild.dateStamp.get()}")
+            language = lang
+            wheelInstaller(testsuiteInstallWheel)
+            driverRequirements(testsuitesPipInstall)
+        }
+
+        testSuites.configure {
+            dependsOn(suite)
+        }
 }
+
+

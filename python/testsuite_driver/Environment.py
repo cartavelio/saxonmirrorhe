@@ -67,6 +67,38 @@ class Spec:
     def XT40():
         return Spec("4.0", "XSLT4.0", "XT", "XT40")
 
+    def process_spec(spec_str: str):
+        if spec_str == "XP20":
+            return Spec.XP20()
+        elif spec_str == "XP30":
+            return Spec.XP30()
+        elif spec_str == "XP31":
+            return Spec.XP31()
+
+        elif spec_str == "XP40":
+            return Spec.XP40()
+
+        elif spec_str == "XQ10":
+            return Spec.XQ10()
+
+        elif spec_str == "XQ30":
+            return Spec.XQ30()
+
+        elif spec_str == "XQ31":
+            return Spec.XQ31()
+
+        elif spec_str == "XQ40":
+            return Spec.XQ40()
+
+        elif spec_str == "XT30":
+            return Spec.XT30()
+
+        elif spec_str == "XT40":
+            return Spec.XT40()
+        else:
+            raise Exception(
+                "The specific language must be one of the following: XP20, XP30, XP31, XP40, XQ10, XQ30, XQ31, XQ40, XT30")
+
 
 
 class Environment:
