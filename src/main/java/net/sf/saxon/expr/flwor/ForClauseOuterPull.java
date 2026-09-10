@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.flwor;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.FocusTrackingIterator;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
@@ -40,7 +40,7 @@ public class ForClauseOuterPull extends ForClausePull {
                 if (!base.nextTuple(context)) {
                     return false;
                 }
-                currentIteration = new FocusTrackingIterator(
+                currentIteration = SequenceTool.focusTracker(
                         forClause.getSequenceOp().getOperandEvaluator(context).iterate(context));
                 next = currentIteration.next();
                 if (next == null) {

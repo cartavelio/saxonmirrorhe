@@ -43,7 +43,7 @@ public class ForClausePull extends TuplePull {
                 if (!base.nextTuple(context)) {
                     return false;
                 }
-                currentIteration = new FocusTrackingIterator(getIterator(context));
+                currentIteration = SequenceTool.focusTracker(getIterator(context));
             }
             Item next = currentIteration.next();
             if (next != null) {

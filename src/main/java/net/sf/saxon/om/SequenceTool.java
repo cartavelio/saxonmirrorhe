@@ -274,6 +274,21 @@ public class SequenceTool {
         return first;
     }
 
+    /**
+     * Factory method to create a FocusIterator wrapping a supplied SequenceIterator
+     * @param basis the SequenceIterator to be wrapped. This must be positioned at the start.
+     * @return a FocusIterator that returns the same items as the supplied iterator, while
+     * tracking position() and current().
+     */
+
+    public static FocusIterator focusTracker(SequenceIterator basis) {
+        if (basis instanceof FocusIterator) {
+            return (FocusIterator) basis;
+        } else {
+            return new FocusTrackingIterator(basis);
+        }
+    }
+
     //#if CSHARP==false
     /**
      * Convert an XPath value to a Java object.

@@ -29,7 +29,7 @@ import java.util.List;
  */
 
 
-public abstract class ArrayIterator implements SequenceIterator,
+public abstract class ArrayIterator implements SequenceIterator, FocusIterator,
         LastPositionFinder, LookaheadIterator, GroundedIterator, ReversibleIterator {
 
     protected int index;          // position in array of current item, zero-based
@@ -61,6 +61,15 @@ public abstract class ArrayIterator implements SequenceIterator,
         return true;
     }
 
+    @Override
+    public int position() {
+        return index - start + 1;
+    }
+
+    @Override
+    public int getLength() {
+        return end - start;
+    }
 
     /**
      * Parameterised subclass to accept items of a particular item type
@@ -156,6 +165,11 @@ public abstract class ArrayIterator implements SequenceIterator,
                 return null;
             }
             return items[index++];
+        }
+
+        @Override
+        public Item current() {
+            return index > 0 && index <= end ? items[index - 1] : null;
         }
 
         @Override

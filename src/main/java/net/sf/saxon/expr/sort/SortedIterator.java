@@ -132,7 +132,7 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
                     // (a) it wouldn't have failed unless there was something to sort, and
                     // (b) it's going to fail again when next() is called
                     count = -1;
-                    base = new FocusTrackingIterator(new ErrorIterator(err));
+                    base = SequenceTool.focusTracker(new ErrorIterator(err));
                     return true;
                 }
             }
