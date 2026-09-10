@@ -788,7 +788,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         ArithmeticExpression decrement = new ArithmeticExpression(
                                 comparand, OperatorSymbol.MINUS, Literal.makeLiteral(Int64Value.makeIntegerValue(1), start));
                         decrement.setCalculator(Calculator.getCalculator(      // bug 2704
-                                                                               StandardNames.XS_INTEGER, StandardNames.XS_INTEGER, Calculator.MINUS, true));
+                                                                               StandardNames.XS_INTEGER, StandardNames.XS_INTEGER, Calculator.MINUS, true, 31));
                         args[2] = decrement;
                     }
                     return SystemFunction.makeCall("subsequence", start.getRetainedStaticContext(), args);

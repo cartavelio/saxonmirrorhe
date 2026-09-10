@@ -186,8 +186,9 @@ public class ArithmeticExpression extends BinaryExpression {
         boolean mustResolve = !(type0.equals(BuiltInAtomicType.ANY_ATOMIC) || type1.equals(BuiltInAtomicType.ANY_ATOMIC)
                 || type0.equals(NumericType.getInstance()) || type1.equals(NumericType.getInstance()));
 
+        int version = visitor.getStaticContext().getXPathVersion();
         calculator = Calculator.getCalculator(
-                type0.getFingerprint(), type1.getFingerprint(), mapOpCode(operator), mustResolve);
+                type0.getFingerprint(), type1.getFingerprint(), mapOpCode(operator), mustResolve, version);
 
         if (calculator == null) {
             throw new XPathException("Arithmetic operator is not defined for arguments of types (" +
@@ -255,7 +256,7 @@ public class ArithmeticExpression extends BinaryExpression {
             throws XPathException {
         int p0 = value0.getPrimitiveType().getFingerprint();
         int p1 = value1.getPrimitiveType().getFingerprint();
-        Calculator calculator = Calculator.getCalculator(p0, p1, operator, false);
+        Calculator calculator = Calculator.getCalculator(p0, p1, operator, false, 31);
         return calculator.compute(value0, value1, context);
     }
 

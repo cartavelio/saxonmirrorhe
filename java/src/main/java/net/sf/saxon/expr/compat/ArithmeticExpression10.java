@@ -169,7 +169,7 @@ public class ArithmeticExpression10 extends ArithmeticExpression implements Call
 
     private Calculator assignCalculator(AtomicType type0, AtomicType type1, boolean mustResolve) throws XPathException {
         Calculator calculator = Calculator.getCalculator(type0.getFingerprint(), type1.getFingerprint(),
-                ArithmeticExpression.mapOpCode(operator), mustResolve);
+                                                         ArithmeticExpression.mapOpCode(operator), mustResolve, 31);
 
         if (calculator == null) {
             throw new XPathException("Arithmetic operator is not defined for arguments of types (" +

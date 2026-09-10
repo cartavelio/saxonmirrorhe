@@ -623,6 +623,35 @@ public class DurationValue extends AtomicValue implements XPathComparable, Atomi
     }
 
     /**
+     * Multiply a duration by a decimal: enhanced 4.0 semantics.
+     * Also used when dividing a duration by a decimal (or any other numeric)
+     *
+     * @param factor the number to multiply by
+     * @return the result of the multiplication
+     * @throws XPathException if an error is detected
+     */
+
+    public DurationValue multiply40(BigDecimal factor) throws XPathException {
+        try {
+            BigDecimal seconds2 = _seconds.multiply(factor);
+            if (this instanceof DayTimeDurationValue) {
+                return new DayTimeDurationValue(seconds2);
+            }
+            BigDecimal months2 = factor.multiply(BigDecimal.valueOf(_months));
+            if (months2.abs().compareTo(BigDecimal.valueOf(Integer.MAX_VALUE)) > 0) {
+                throw new ArithmeticException("Multiplication factor is too large");
+            }
+            int m = (int)new BigDecimalValue(months2).round(0).longValue();
+            if (this instanceof YearMonthDurationValue) {
+                return new YearMonthDurationValue(m, BuiltInAtomicType.YEAR_MONTH_DURATION);
+            }
+            return new DurationValue(m, seconds2, BuiltInAtomicType.DURATION);
+        } catch (ArithmeticException e) {
+            throw new XPathException("Failure multiplying duration by number", e);
+        }
+    }
+
+    /**
      * Divide a duration by a number
      *
      * @param factor the number to divide by
