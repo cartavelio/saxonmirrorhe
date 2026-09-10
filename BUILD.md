@@ -243,6 +243,10 @@ test suite against EE with bytecode and jit enabled, you can run just
 that task (e.g., `eeXslt30TestSuite_XT30_bcon_jit`).
 (The names get a little clunky.)
 
+The Python test suites are qt3 and xslt30. They can be run with any of
+the Python builds. The build target `all_python_test_suites` will run
+them all. The individual tests are `{h,e,p}ec_{xslt30,qt3}_test_suite`
+
 ### The test suites
 
 Instructions for configuring the test suites can be found at the top of 
