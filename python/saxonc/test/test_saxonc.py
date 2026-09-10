@@ -117,8 +117,10 @@ def test_version2():
 def test_schema_aware1(saxonproc):
     assert saxonproc.is_schema_aware == False
 
+
 def test_saxon_edition(saxonproc):
     assert saxonproc.edition == '@@edition@@'.upper()
+
 
 class myThread(threading.Thread):
     def __init__(self, threadID, name, saxon_proc):
