@@ -52,8 +52,8 @@ def sharedLibDir = "${buildDir}/c"
      }
  }
 
- task buildCWrappers {
-    dependsOn 'buildTransform'
+ task buildCWrappers (
+    dependsOn: ['buildTransform', 'buildQuery', 'buildValidate']){
  }
 
 task test_graalHome(
