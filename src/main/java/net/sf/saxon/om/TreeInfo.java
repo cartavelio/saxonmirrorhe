@@ -25,7 +25,6 @@ import java.util.Iterator;
  * the order of trees is based on their "document number", a unique number allocated by the
  * document number allocator for the Configuration.</p>
  *
- * @author Michael H. Kay
  * @since 9.7. Replaces the DocumentInfo interface which represented both a document as a whole, and
  * the document node at the root of a document, but which did not apply to trees rooted at a node other
  * than a document node.

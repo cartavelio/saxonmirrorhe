@@ -17,8 +17,6 @@ import net.sf.saxon.type.UType;
 
 /**
  * The UniversalPattern matches everything
- *
- * @author Michael H. Kay
  */
 
 public class UniversalPattern extends Pattern {

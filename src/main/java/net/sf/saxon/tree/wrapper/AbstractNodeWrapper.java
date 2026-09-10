@@ -29,7 +29,6 @@ import net.sf.saxon.value.UntypedAtomicValue;
  * <p>This implementation of the NodeInfo interface contains common code used by many "wrapper" implementations
  * for external data models.</p>
  *
- * @author Michael H. Kay
  */
 
 public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {

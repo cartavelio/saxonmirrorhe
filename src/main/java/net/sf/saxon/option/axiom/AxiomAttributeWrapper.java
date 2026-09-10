@@ -37,8 +37,6 @@ import java.util.Iterator;
  * Axiom nodes.</p>
  * <p>Note that in Axiom, an OMAttribute is not an OMNode. Therefore, we need a separate
  * class AttributeWrapper for attribute nodes.</p>
- *
- * @author Michael H. Kay
  */
 
 public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCountingNode {

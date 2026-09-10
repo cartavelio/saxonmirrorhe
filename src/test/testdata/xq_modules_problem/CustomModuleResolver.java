@@ -50,16 +50,15 @@
  */
 package net.sf.saxon.query;
 
-import java.io.File;
-import java.net.URI;
-
-import javax.xml.transform.stream.StreamSource;
-
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.trans.XPathException;
 
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.net.URI;
+
 /**
- * @author developer
+ *
  *
  */
 public class CustomModuleResolver extends StandardModuleURIResolver {

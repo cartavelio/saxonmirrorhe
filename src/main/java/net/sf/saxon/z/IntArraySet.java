@@ -22,7 +22,6 @@ import java.util.Arrays;
  * array each time you do that.</p>
  * <p>Not thread safe.</p>
  *
- * @author Michael Kay
  */
 public class IntArraySet extends IntSet {
 

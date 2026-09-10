@@ -22,7 +22,6 @@ import net.sf.saxon.value.StringItem;
  * ProcInstImpl is an implementation of ProcInstInfo used by the Propagator to construct
  * its trees.
  *
- * @author Michael H. Kay
  */
 
 

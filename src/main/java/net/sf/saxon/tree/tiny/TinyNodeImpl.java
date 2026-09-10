@@ -30,7 +30,6 @@ import net.sf.saxon.type.UType;
  * all those methods that can be defined using other primitive methods, without direct access
  * to data.</p>
  *
- * @author Michael H. Kay
  */
 
 public abstract class TinyNodeImpl implements NodeInfo {

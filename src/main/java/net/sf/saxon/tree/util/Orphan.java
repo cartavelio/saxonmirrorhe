@@ -30,7 +30,6 @@ import net.sf.saxon.value.UntypedAtomicValue;
  * of the client. For example, the class does not prevent you from creating a comment or text node that has
  * a name or a non-trivial type annotation.</p>
  *
- * @author Michael H. Kay
  */
 
 public final class Orphan implements MutableNodeInfo {

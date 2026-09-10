@@ -26,7 +26,6 @@ import java.util.*;
  * CDATAFilter: This ProxyReceiver converts character data to CDATA sections,
  * if the character data belongs to one of a set of element types to be handled this way.
  *
- * @author Michael Kay
  */
 
 

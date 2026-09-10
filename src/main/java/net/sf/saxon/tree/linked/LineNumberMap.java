@@ -14,7 +14,6 @@ import java.util.Arrays;
  * This class provides a map from element sequence numbers to line numbers: it is
  * linked to the root node of the tree.
  *
- * @author Michael H. Kay
  */
 
 public class LineNumberMap {

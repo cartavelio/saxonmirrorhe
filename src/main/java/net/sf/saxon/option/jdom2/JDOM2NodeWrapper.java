@@ -37,8 +37,6 @@ import java.util.ListIterator;
 /**
  * A node in the XML parse tree representing an XML element, character content, or attribute.
  * <p>This is the implementation of the NodeInfo interface used as a wrapper for JDOM2 nodes.</p>
- *
- * @author Michael H. Kay
  */
 
 public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCountingNode {

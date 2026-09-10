@@ -32,7 +32,6 @@ import java.util.Arrays;
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node
  * or a Document node)
  *
- * @author Michael H. Kay
  */
 
 

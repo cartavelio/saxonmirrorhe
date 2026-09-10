@@ -26,8 +26,6 @@ import java.util.Iterator;
 
 /**
  * A node in the XDM tree; specifically, a node that wraps an Axiom document node or element node.
- *
- * @author Michael H. Kay
  */
 public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
         implements SiblingCountingNode {

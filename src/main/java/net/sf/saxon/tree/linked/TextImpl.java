@@ -17,7 +17,6 @@ import net.sf.saxon.type.Type;
 /**
  * A node in the XML parse tree representing character content.
  *
- * @author Michael H. Kay
  */
 
 public class TextImpl extends NodeImpl {

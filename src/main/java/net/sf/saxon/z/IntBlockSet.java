@@ -11,7 +11,6 @@ package net.sf.saxon.z;
  * Set of int values. This immutable implementation of IntSet represents a dense monotonic
  * range of integers from A to B.
  *
- * @author Michael Kay
  */
 public class IntBlockSet extends IntSet {
 

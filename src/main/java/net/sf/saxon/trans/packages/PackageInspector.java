@@ -32,7 +32,6 @@ import java.io.File;
  * and extracts the package name and version from the root element; parsing is then
  * abandoned.
  *
- * @author Michael H. Kay
  */
 
 public class PackageInspector extends ProxyReceiver {

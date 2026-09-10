@@ -18,8 +18,6 @@ import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
  * A node in the XML parse tree representing character content
- *
- * @author Michael H. Kay
  */
 
 public final class TinyTextImpl extends TinyNodeImpl {
