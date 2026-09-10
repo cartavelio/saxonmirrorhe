@@ -367,6 +367,7 @@ public class RetainedStaticContext implements NamespaceResolver {
         ic.setDecimalFormatManager(getDecimalFormatManager());
         ic.setNamespaceResolver(this);
         ic.setPackageData(getPackageData());
+        ic.setImportedSchema(getImportedSchema());
         return ic;
     }
 

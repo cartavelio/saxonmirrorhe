@@ -22,12 +22,12 @@ import java.util.*;
 
 /**
  * Information about a unit of compilation: in XSLT, a package; in XQuery, a module. May also be a single
- * free-standing XPath expression.
+ * freestanding XPath expression.
  */
 public class PackageData {
 
     protected Configuration config;
-    private Map<String, Schema> importedSchemata;
+    private final Map<String, Schema> importedSchemata;
     private HostLanguage hostLanguage;
     protected int hostLanguageVersion;
     private boolean schemaAware;
