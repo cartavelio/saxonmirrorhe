@@ -382,7 +382,6 @@ public class QT3TestDriverHE extends TestDriver {
 
         hostLang = spec.shortSpecName;
         langVersion = spec.version;
-        xpath.setLanguageVersion(langVersion);
 
         if (isSlow(testCaseName)) {
             writeTestcaseElement(testCaseName, "tooBig", "test is excessively slow");
