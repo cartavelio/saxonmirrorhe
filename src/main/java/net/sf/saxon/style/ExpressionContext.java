@@ -363,7 +363,11 @@ public class ExpressionContext implements StaticContext {
 
     @Override
     public int getXPathVersion() {
-        return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
+        if (element.getEffectiveVersion() == 40) {
+            return 40;
+        } else {
+            return getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
+        }
     }
 
     /**

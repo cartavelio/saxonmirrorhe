@@ -65,6 +65,7 @@ public class ElementAvailable extends SystemFunction {
             case StandardNames.XSL_KEY:
             case StandardNames.XSL_MAP:
             case StandardNames.XSL_MAP_ENTRY:
+            case StandardNames.XSL_MATCH:
             case StandardNames.XSL_MATCHING_SUBSTRING:
             case StandardNames.XSL_MERGE:
             case StandardNames.XSL_MERGE_ACTION:
@@ -96,6 +97,7 @@ public class ElementAvailable extends SystemFunction {
             case StandardNames.XSL_SOURCE_DOCUMENT:
             case StandardNames.XSL_STRIP_SPACE:
             case StandardNames.XSL_STYLESHEET:
+            case StandardNames.XSL_SWITCH:
             case StandardNames.XSL_TEMPLATE:
             case StandardNames.XSL_TEXT:
             case StandardNames.XSL_TRANSFORM:

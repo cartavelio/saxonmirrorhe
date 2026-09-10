@@ -15,7 +15,6 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.Current;
-import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.style.ExpressionContext;
@@ -49,13 +48,13 @@ public abstract class Pattern extends PseudoExpression {
 
     public static Pattern make(String pattern, StaticContext env, PackageData packageData) throws XPathException {
 
-        int languageLevel = env.getConfiguration().getConfigurationProperty(Feature.XPATH_VERSION_FOR_XSLT);
+        int languageLevel = env.getXPathVersion();
         if (languageLevel == 30) {
             languageLevel = 305; // XPath 3.0 + XSLT extensions
         }
         int lineNumber = env instanceof ExpressionContext ? ((ExpressionContext) env).getStyleElement().getLineNumber() : -1;
-        PatternParser parser = (PatternParser) env.getConfiguration().newExpressionParser("PATTERN", false, languageLevel);
-        ((XPathParser) parser).setLanguage(XPathParser.ParsedLanguage.XSLT_PATTERN, 30);
+        PatternParser parser = (PatternParser)env.getConfiguration().newExpressionParser("PATTERN", false, languageLevel);
+        parser.setLanguage(XPathParser.ParsedLanguage.XSLT_PATTERN, languageLevel);
         Pattern pat = parser.parsePattern(pattern, env);
         pat.setRetainedStaticContext(env.makeRetainedStaticContext());
         // System.err.println("Simplified [" + pattern + "] to " + pat.getClass() + " default prio = " + pat.getDefaultPriority());
