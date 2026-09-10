@@ -209,8 +209,7 @@ public class RangeKey extends MapItem {
      */
     @Override
     public boolean deepEquals(FunctionItem other, XPathContext context, AtomicMatcher comparer, int flags)  {
-        if (other instanceof RangeKey) {
-            RangeKey rk = (RangeKey) other;
+        if (other instanceof RangeKey rk) {
             return min.equals(rk.min) && max.equals(rk.max) && index.equals(rk.index);
         } else {
             return false;
@@ -219,8 +218,7 @@ public class RangeKey extends MapItem {
 
     @Override
     public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) {
-        if (other instanceof RangeKey) {
-            RangeKey rk = (RangeKey) other;
+        if (other instanceof RangeKey rk) {
             return min.equals(rk.min) && max.equals(rk.max) && index.equals(rk.index);
         } else {
             return false;
