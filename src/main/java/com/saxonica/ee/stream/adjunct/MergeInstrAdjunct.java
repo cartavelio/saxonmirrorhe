@@ -130,6 +130,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
         Item uri;
         while ((uri = uriIter.next()) != null) {
             final ParseOptions options = c1.getConfiguration().getParseOptions()
+                    .withSchema(pd.getImportedSchema())
                     .withSchemaValidationMode(ms.validation)
                     .withTopLevelType(ms.schemaType)
                     .withApplicableAccumulators(ms.accumulators);
