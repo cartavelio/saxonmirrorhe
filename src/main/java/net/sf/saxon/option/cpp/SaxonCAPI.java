@@ -1226,9 +1226,14 @@ public class SaxonCAPI {
 
             return source;
         } catch (XPathException exception) {
-            //source = resolveFileToSource_fallback(cwd, filename);
-            //return source;
-            throw new SaxonApiException(exception);
+            if(debug) {
+                System.err.println("DEBUG: Exception thrown: "+exception.getMessage());
+                System.err.println("DEBUG: Using resolver fallback");
+
+            }
+            source = resolveFileToSource_fallback(cwd, filename);
+            return source;
+            //throw new SaxonApiException(exception);
         }
 
     }
