@@ -13,10 +13,7 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.EmptyUniString;
-import net.sf.saxon.str.StringTool;
-import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -662,7 +659,7 @@ public class ReceivingContentHandler
     private void flush(boolean compress) throws XPathException {
         if (charsUsed > 0) {
             //CharSlice slice = new CharSlice(buffer, 0, charsUsed);
-            CodePoints content = StringTool.compress(buffer, 0, charsUsed, compress);
+            UnicodeString content = StringTool.compress(buffer, 0, charsUsed, compress);
             receiver.characters(content, lastTextNodeLocator,
                     escapingDisabled ? ReceiverOption.DISABLE_ESCAPING : ReceiverOption.WHOLE_TEXT_NODE);
             charsUsed = 0;

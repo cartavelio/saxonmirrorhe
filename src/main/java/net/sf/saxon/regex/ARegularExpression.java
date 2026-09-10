@@ -54,9 +54,7 @@ public class ARegularExpression implements RegularExpression {
             comp2.setFlags(reFlags);
             regex = comp2.compile(rawPattern);
             if (warnings != null) {
-                for (String s : comp2.getWarnings()) {
-                    warnings.add(s);
-                }
+                warnings.addAll(comp2.getWarnings());
             }
             if (config != null) {
                 regex.setBacktrackingLimit(config.getConfigurationProperty(Feature.REGEX_BACKTRACKING_LIMIT));
@@ -73,6 +71,18 @@ public class ARegularExpression implements RegularExpression {
     public static ARegularExpression compile(String pattern, String flags) {
         try {
             return new ARegularExpression(BMPString.of(pattern), flags, "XP31", null, null);
+        } catch (XPathException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * Static factory method intended for simple static regular expressions known to be correcct
+     */
+
+    public static ARegularExpression compile(UnicodeString pattern, String flags) {
+        try {
+            return new ARegularExpression(pattern, flags, "XP31", null, null);
         } catch (XPathException e) {
             throw new IllegalArgumentException(e);
         }

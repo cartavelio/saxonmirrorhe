@@ -11,7 +11,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.ComparisonException;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -131,10 +131,6 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
         return err;
     }
 
-    private final static UnicodeString S_0 = BMPString.of("0");
-    private final static UnicodeString S_1 = BMPString.of("1");
-    private final static UnicodeString S_TRUE = BMPString.of("true");
-    private final static UnicodeString S_FALSE = BMPString.of("false");
 
     /**
      * Get the value
@@ -176,7 +172,7 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
 
     @Override
     public UnicodeString getPrimitiveStringValue() {
-        return value ? S_TRUE : S_FALSE;
+        return value ? StringConstants.TRUE : StringConstants.FALSE;
     }
 
     /**

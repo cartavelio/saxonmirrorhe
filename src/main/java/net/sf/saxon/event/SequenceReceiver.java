@@ -9,12 +9,11 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -176,7 +175,7 @@ public abstract class SequenceReceiver implements Receiver {
         if (item != null) {
             if (item instanceof AtomicValue || item instanceof ExternalObject) {
                 if (previousAtomic) {
-                    characters(SINGLE_SPACE, locationId, ReceiverOption.NONE);
+                    characters(StringConstants.SINGLE_SPACE, locationId, ReceiverOption.NONE);
                 }
                 characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 previousAtomic = true;
@@ -219,8 +218,6 @@ public abstract class SequenceReceiver implements Receiver {
             }
         }
     }
-
-    private static final CodePoints SINGLE_SPACE = BMPString.of(" ");
 
     protected String getErrorCodeForDecomposingFunctionItems() {
         return getPipelineConfiguration().isXSLT() ? "XTDE0450" : "XQTY0105";

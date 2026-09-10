@@ -19,7 +19,8 @@ import java.util.regex.Pattern;
  */
 public class Whitespace {
 
-    private final static ARegularExpression anyWhitespace = ARegularExpression.compile("[ \\n\\r\\t]+", "");
+    private final static ARegularExpression anyWhitespace =
+            ARegularExpression.compile(StringTool.fromLatin1("[ \\n\\r\\t]+"), "");
 
     private final static Pattern J_oneWhitespace = Pattern.compile("[ \\n\\r\\t]");
     private final static Pattern J_anyWhitespace = Pattern.compile("[ \\n\\r\\t]+");
@@ -164,11 +165,11 @@ public class Whitespace {
             true                                                     // 32
     };
 
-    private enum TokenCategory {INITIAL_WHITESPACE, SEPARATOR_WHITESPACE, FINAL_WHITESPACE, CONTENT};
+    private enum TokenCategory {INITIAL_WHITESPACE, SEPARATOR_WHITESPACE, FINAL_WHITESPACE, CONTENT}
 
     @FunctionalInterface
     private interface TokenHandler {
-        public void handleToken(int start, int end, TokenCategory category);
+        void handleToken(int start, int end, TokenCategory category);
     }
 
     /**
@@ -275,9 +276,7 @@ public class Whitespace {
                 case '\r':
                 case '\t':
                 case ' ':
-                    if (inWhitespace) {
-                        // remove the whitespace
-                    } else {
+                    if (!inWhitespace) {
                         sb.append(0x20);
                         inWhitespace = true;
                     }

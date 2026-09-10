@@ -30,8 +30,9 @@
 
 package net.sf.saxon.regex;
 
-import net.sf.saxon.str.*;
 import net.sf.saxon.regex.charclass.*;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.*;
 
@@ -515,16 +516,16 @@ public class RECompiler {
         IntRangeSet range = new IntRangeSet();
         CharacterClass addend = null;
         CharacterClass subtrahend = null;
-        if (thereFollows("^")) {
-            if (thereFollows("^-[")) {
+        if (thereFollows('^')) {
+            if (thereFollows('^', '-', '[')) {
                 syntaxError("Nothing before subtraction operator");
-            } else if (thereFollows("^]")) {
+            } else if (thereFollows('^', ']')) {
                 syntaxError("Empty negative character group");
             } else {
                 positive = false;
                 idx++;
             }
-        } else if (thereFollows("-[")) {
+        } else if (thereFollows('-','[')) {
             syntaxError("Nothing before subtraction operator");
         }
         while (idx < len && pattern.codePointAt(idx) != ']') {
@@ -552,13 +553,13 @@ public class RECompiler {
                     }
                 }
                 case '-':
-                    if (thereFollows("-[")) {
+                    if (thereFollows('-','[')) {
                         idx++;
                         subtrahend = parseCharacterClass();
-                        if (!thereFollows("]")) {
+                        if (!thereFollows(']')) {
                             syntaxError("Expected closing ']' after subtraction");
                         }
-                    } else if (thereFollows("-]")) {
+                    } else if (thereFollows('-',']')) {
                         simpleChar = '-';
                         idx++;
                     } else if (rangeStart >= 0) {
@@ -567,9 +568,9 @@ public class RECompiler {
                         continue;
                     } else if (definingRange) {
                         syntaxError("Bad range");
-                    } else if (thereFollows("--") && !thereFollows("--[")) {
+                    } else if (thereFollows('-','-') && !thereFollows('-','-','[')) {
                         syntaxError("Unescaped hyphen as start of range");
-                    } else if (!isXSD11 && pattern.codePointAt(idx - 1) != '[' && pattern.codePointAt(idx - 1) != '^' && !thereFollows("]") && !thereFollows("-[")) {
+                    } else if (!isXSD11 && pattern.codePointAt(idx - 1) != '[' && pattern.codePointAt(idx - 1) != '^' && !thereFollows(']') && !thereFollows('-','[')) {
                         syntaxError("In XSD 1.0, hyphen is allowed only at the beginning or end of a positive character group");
                     } else {
                         simpleChar = '-';
@@ -623,14 +624,14 @@ public class RECompiler {
                 rangeStart = -1;
             } else {
                 // If simple character and not start of range, include it (see XSD 1.1 rules)
-                if (thereFollows("-")) {
-                    if (thereFollows("-[")) {
+                if (thereFollows('-')) {
+                    if (thereFollows('-','[')) {
                         range.add(simpleChar);
-                    } else if (thereFollows("-]")) {
+                    } else if (thereFollows('-',']')) {
                         range.add(simpleChar);
-                    } else if (thereFollows("--[")) {
+                    } else if (thereFollows('-','-','[')) {
                         range.add(simpleChar);
-                    } else if (thereFollows("--")) {
+                    } else if (thereFollows('-','-')) {
                         syntaxError("Unescaped hyphen cannot act as end of range");
                     } else {
                         rangeStart = simpleChar;
@@ -668,15 +669,23 @@ public class RECompiler {
     }
 
     /**
-     * Test whether the string starting at the current position is equal to some specified string
+     * Test whether the string starting at the current position is equal to some specified
+     * sequence of characters
      *
-     * @param s the string being tested
+     * @param chars the string being tested, as an array of characters which must not include surrogates
      * @return true if the specified string is present
      */
 
-    private boolean thereFollows(String s) {
-        return idx + s.length() <= len &&
-                pattern.substring(idx, idx + s.length()).equals(BMPString.of(s));
+    private boolean thereFollows(int... chars) {
+        if (idx + chars.length > len) {
+            return false;
+        }
+        for (int i=0; i<chars.length; i++) {
+            if (pattern.codePointAt(idx + i) != chars[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -825,7 +834,7 @@ public class RECompiler {
                     IntPredicate charClass = escape(false);
 
                     // Check if it's a simple escape (as opposed to, say, a backreference)
-                    if (charClass instanceof BackReference || !(charClass instanceof IntValuePredicate)) {
+                    if (!(charClass instanceof IntValuePredicate)) {
                         // Not a simple escape, so backup to where we were before the escape.
                         idx = idxBeforeEscape;
                         break atomLoop;
@@ -1165,8 +1174,6 @@ public class RECompiler {
             if (capturing) {
                 op = new Operation.OpCapture(op, group);
                 captures.add(closeParens);
-            } else {
-                // return op unchanged
             }
         } else {
             op = makeSequence(op, new Operation.OpEndProgram());

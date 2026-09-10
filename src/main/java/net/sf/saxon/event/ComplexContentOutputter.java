@@ -417,7 +417,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         // if this is a duplicate attribute, overwrite the original in XSLT; throw an error in XQuery.
         // No check needed if the NOT_A_DUPLICATE property is set (typically, during a deep copy operation)
 
-        AttributeInfo attInfo = new AttributeInfo(attName, typeCode, value.toString(), locationId, properties);
+        AttributeInfo attInfo = new AttributeInfo(attName, typeCode, value, locationId, properties);
         if (level >= 0 && !ReceiverOption.contains(properties, ReceiverOption.NOT_A_DUPLICATE)) {
             for (int a = 0; a < pendingAttributes.size(); a++) {
                 if (pendingAttributes.get(a).getNodeName().equals(attName)) {
@@ -678,7 +678,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
                 @Override
                 public void open() throws XPathException {
                     if (previousAtomic && !asTextNode) {
-                        ComplexContentOutputter.this.characters(UnicodeString.SINGLE_SPACE, Loc.NONE, ReceiverOption.NONE);
+                        ComplexContentOutputter.this.characters(StringConstants.SINGLE_SPACE, Loc.NONE, ReceiverOption.NONE);
                     }
                 }
 
@@ -803,7 +803,7 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
         if (item != null) {
             if (item instanceof AtomicValue || item instanceof ExternalObject) {
                 if (previousAtomic) {
-                    characters(UnicodeString.SINGLE_SPACE, locationId, ReceiverOption.NONE);
+                    characters(StringConstants.SINGLE_SPACE, locationId, ReceiverOption.NONE);
                 }
                 characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                 previousAtomic = true;

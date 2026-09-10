@@ -435,16 +435,6 @@ public class JsonReceiver implements Receiver {
     }
 
     /**
-     * On completion, get the assembled JSON string
-     *
-     * @return the JSON string representing the supplied XML content.
-     */
-
-    //public String getJsonString() {
-//        return output.toString();
-//    }
-
-    /**
      * Add indentation whitespace to the buffer
      *
      * @param depth the level of indentation
@@ -453,7 +443,7 @@ public class JsonReceiver implements Receiver {
     private void indent(int depth) throws XPathException {
         output.append(BMPString.of("\n"));
         for (int i = 0; i < depth; i++) {
-            output.append(UnicodeString.SINGLE_SPACE);
+            output.append(StringConstants.SINGLE_SPACE);
         }
     }
 
@@ -504,7 +494,7 @@ public class JsonReceiver implements Receiver {
                     case 'u':
                         try {
                             String hex = literal.substring(i + 1, i + 5);
-                            int code = Integer.parseInt(hex.toString(), 16);
+                            int code = Integer.parseInt(hex, 16);
                             buffer.appendCodePoint(code);
                             i += 4;
                         } catch (Exception e) {

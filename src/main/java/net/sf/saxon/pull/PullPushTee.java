@@ -14,7 +14,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
@@ -153,7 +153,7 @@ public class PullPushTee extends PullFilter {
                     out.append(super.getAtomicValue(), loc, ReceiverOption.NONE);
                 } else {
                     if (previousAtomic) {
-                        out.characters(UnicodeString.SINGLE_SPACE, loc, ReceiverOption.NONE);
+                        out.characters(StringConstants.SINGLE_SPACE, loc, ReceiverOption.NONE);
                     }
                     out.characters(in.getStringValue(), loc, ReceiverOption.NONE);
                 }

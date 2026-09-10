@@ -16,7 +16,8 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -62,7 +63,7 @@ public final class Comment extends SimpleNodeConstructor {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables to be re-bound
      */
 
     /*@NotNull*/
@@ -138,15 +139,13 @@ public final class Comment extends SimpleNodeConstructor {
     public static UnicodeString checkContentXSLT(UnicodeString comment) {
         String message = invalidity(comment);
         if (message != null) {
-            int hh;
-            String cmt = comment.toString();
-            while ((hh = cmt.indexOf("--")) >= 0) {
-                cmt = cmt.substring(0, hh + 1) + ' ' + cmt.substring(hh + 1);
+            long hh;
+            while ((hh = comment.indexOf(TWO_HYPHENS, 0)) >= 0) {
+                comment = comment.substring(0, hh + 1).concat(StringConstants.SINGLE_SPACE).concat(comment.substring(hh + 1));
             }
-            if (cmt.endsWith("-")) {
-                cmt = cmt + ' ';
+            if (comment.codePointAt(comment.length()-1) == '-') {
+                comment = comment.concat(StringConstants.SINGLE_SPACE);
             }
-            comment = StringView.tidy(cmt);
         }
         return comment;
     }
@@ -170,7 +169,7 @@ public final class Comment extends SimpleNodeConstructor {
 
     private static String invalidity(UnicodeString comment) {
         String cmt = comment.toString();
-        if (cmt.contains("--")) {
+        if (comment.indexOf(TWO_HYPHENS, 0) >= 0) {
             return "Invalid characters (--) in comment";
         }
         if (cmt.length() > 0 && cmt.charAt(comment.length32() - 1) == '-') {
@@ -178,6 +177,8 @@ public final class Comment extends SimpleNodeConstructor {
         }
         return null;
     }
+
+    private final static UnicodeString TWO_HYPHENS = new Twine8(new byte[]{'-', '-'});
 
 
     /**

@@ -49,6 +49,17 @@ public final class EmptyUniString extends UnicodeString {
     }
 
     /**
+     * Concatenate another string
+     *
+     * @param other the string to be appended to this one
+     * @return the result of the concatenation (neither input string is altered)
+     */
+    @Override
+    public UnicodeString concat(UnicodeString other) {
+        return other;
+    }
+
+    /**
      * Get a substring of this string (following the rules of {@link String#substring}, but measuring
      * Unicode codepoints rather than 16-bit code units)
      *
@@ -198,7 +209,7 @@ public final class EmptyUniString extends UnicodeString {
 
     @Override
     public int compareTo(CodePoints other) {
-        return ((CodePoints)other).isEmpty() ? 0 : -1;
+        return other.isEmpty() ? 0 : -1;
     }
 
     /**
@@ -228,7 +239,7 @@ public final class EmptyUniString extends UnicodeString {
     @Override
     public long writeUntil(Writer writer, long start, long limit, IntPredicate stop) {
         return -1;
-    };
+    }
 
 
     public String details() {
