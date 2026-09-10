@@ -118,7 +118,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
     //#if STREAM==true
     @Override
     public boolean isMotionless() {
-        ContextItemStaticInfoEE cio = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(getItemType(), false);
+        ContextItemStaticInfoEE cio = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(getItemType());
         cio.setContextPostureStriding();
         Streamability.getStreamability(getPredicate(), cio, null);
         return Streamability.getSweep(getPredicate()) == Sweep.MOTIONLESS;

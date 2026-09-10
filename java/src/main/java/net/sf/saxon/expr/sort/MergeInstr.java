@@ -297,7 +297,7 @@ public class MergeInstr extends Instruction {
             ContextItemStaticInfo rowContextItemType = contextInfo;
             if (mergeSource.getForEachItem() != null) {
                 mergeSource.forEachItemOp.typeCheck(visitor, contextInfo);
-                rowContextItemType = config.makeContextItemStaticInfo(mergeSource.getForEachItem().getItemType(), false);
+                rowContextItemType = config.makeContextItemStaticInfo(mergeSource.getForEachItem().getItemType());
             } else if (mergeSource.getForEachSource() != null) {
                 mergeSource.forEachStreamOp.typeCheck(visitor, contextInfo);
 
@@ -306,7 +306,7 @@ public class MergeInstr extends Instruction {
                 mergeSource.setForEachStream(tc.staticTypeCheck(
                         mergeSource.getForEachSource(), SequenceType.STRING_SEQUENCE, role, visitor));
 
-                rowContextItemType = config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT, false);
+                rowContextItemType = config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
             }
             mergeSource.rowSelectOp.typeCheck(visitor, rowContextItemType);
             ItemType rowItemType = mergeSource.getRowSelect().getItemType();
@@ -315,7 +315,7 @@ public class MergeInstr extends Instruction {
             } else {
                 inputType = Type.getCommonSuperType(inputType, rowItemType, th);
             }
-            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(inputType, false);
+            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(inputType);
             if (mergeSource.mergeKeyDefinitions != null) {
                 for (SortKeyDefinition skd : mergeSource.mergeKeyDefinitions) {
                     Expression sortKey = skd.getSortKey();
@@ -327,7 +327,7 @@ public class MergeInstr extends Instruction {
 
                         skd.setSortKey(sortKey, true);
                     }
-                    Expression exp = skd.getLanguage().typeCheck(visitor, config.makeContextItemStaticInfo(inputType, false));
+                    Expression exp = skd.getLanguage().typeCheck(visitor, config.makeContextItemStaticInfo(inputType));
                     skd.setLanguage(exp);
 
                     exp = skd.getOrder().typeCheck(visitor, cit);
@@ -353,7 +353,7 @@ public class MergeInstr extends Instruction {
 
         }
 
-        actionOp.typeCheck(visitor, config.makeContextItemStaticInfo(inputType, false));
+        actionOp.typeCheck(visitor, config.makeContextItemStaticInfo(inputType));
 
         if (Literal.isEmptySequence(getAction())) {
             return getAction();
@@ -444,10 +444,10 @@ public class MergeInstr extends Instruction {
             ContextItemStaticInfo rowContextItemType = contextInfo;
             if (mergeSource.getForEachItem() != null) {
                 mergeSource.forEachItemOp.optimize(visitor, contextInfo);
-                rowContextItemType = config.makeContextItemStaticInfo(mergeSource.getForEachItem().getItemType(), false);
+                rowContextItemType = config.makeContextItemStaticInfo(mergeSource.getForEachItem().getItemType());
             } else if (mergeSource.getForEachSource() != null) {
                 mergeSource.forEachStreamOp.optimize(visitor, contextInfo);
-                rowContextItemType = config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT, false);
+                rowContextItemType = config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
             }
             mergeSource.rowSelectOp.optimize(visitor, rowContextItemType);
             ItemType rowItemType = mergeSource.getRowSelect().getItemType();
@@ -459,7 +459,7 @@ public class MergeInstr extends Instruction {
             //mergeSource.prepareForStreaming();
         }
 
-        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(inputType, false);
+        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(inputType);
         setAction(getAction().optimize(visitor, cit));
 
         if (Literal.isEmptySequence(getAction())) {

@@ -172,10 +172,10 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         flagsOp.typeCheck(visitor, contextInfo);
 
         if (matchingOp != null) {
-            matchingOp.typeCheck(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING, false));
+            matchingOp.typeCheck(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING));
         }
         if (nonMatchingOp != null) {
-            nonMatchingOp.typeCheck(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING, false));
+            nonMatchingOp.typeCheck(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING));
         }
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
@@ -205,10 +205,10 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         flagsOp.optimize(visitor, contextInfo);
 
         if (matchingOp != null) {
-            matchingOp.optimize(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING, false));
+            matchingOp.optimize(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING));
         }
         if (nonMatchingOp != null) {
-            nonMatchingOp.optimize(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING, false));
+            nonMatchingOp.optimize(visitor, config.makeContextItemStaticInfo(BuiltInAtomicType.STRING));
         }
 
         List<String> warnings = new ArrayList<>();

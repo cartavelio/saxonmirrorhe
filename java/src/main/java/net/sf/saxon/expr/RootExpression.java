@@ -57,7 +57,7 @@ public class RootExpression extends Expression {
             visitor.issueWarning(noContextMessage() + ": the context item is parentless and is not a document node", SaxonErrorCode.SXWN9026, getLocation());
             doneWarnings = true;
         }
-        contextMaybeUndefined = contextInfo.isPossiblyAbsent();
+        contextMaybeUndefined = contextInfo.getOptionality() != Optionality.REQUIRED;
         if (th.isSubType(contextInfo.getItemType(), NodeKindTest.DOCUMENT)) {
             // this rewrite is important for streamability analysis
             ContextItemExpression cie = new ContextItemExpression();

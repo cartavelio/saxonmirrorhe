@@ -380,14 +380,11 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             String use = varElement.getAttributeValue(NamespaceUri.NULL,"use");
             if ("opt".equals(use)) {
-                req.setMayBeOmitted(true);
-                req.setAbsentFocus(false);
+                req.setContextValueOptionality(Optionality.OPTIONAL);
             } else if ("pro".equals(use)) {
-                req.setMayBeOmitted(true);
-                req.setAbsentFocus(true);
+                req.setContextValueOptionality(Optionality.PROHIBITED);
             } else if ("req".equals(use)) {
-                req.setMayBeOmitted(false);
-                req.setAbsentFocus(false);
+                req.setContextValueOptionality(Optionality.REQUIRED);
             }
             ItemType requiredType = parseItemTypeAttribute(varElement, "type");
             if (requiredType != null) {
@@ -624,7 +621,14 @@ public class PackageLoaderHE implements IPackageLoader {
         template.setStackFrameMap(new SlotManager(slots));
         template.setPackageData(pack);
         template.setRequiredType(parseAlphaCode(templateElement, "as"));
-        template.setContextItemRequirements(contextItemType, flags.contains("o"), !flags.contains("s"));
+        Optionality optionality;
+        // 'o' = may be absent; 's' = may be present
+        if (flags.contains("o")) {
+            optionality = flags.contains("s") ? Optionality.OPTIONAL : Optionality.PROHIBITED;
+        } else {
+            optionality = Optionality.REQUIRED;
+        }
+        template.setContextItemRequirements(contextItemType, optionality);
         NodeInfo bodyElement = getChildWithRole(templateElement, "body");
         if (bodyElement == null) {
             template.setBody(Literal.makeEmptySequence());
@@ -856,7 +860,7 @@ public class PackageLoaderHE implements IPackageLoader {
             template.setPackageData(pack);
             template.setRequiredType(parseAlphaCode(templateRuleElement, "as"));
             template.setDeclaredStreamable(streamable);
-            template.setContextItemRequirements(contextItemType, !tflags.contains("s"));
+            template.setContextItemRequirements(contextItemType, tflags.contains("s") ? Optionality.PROHIBITED : Optionality.OPTIONAL);
             NodeInfo bodyElement = getChildWithRole(templateRuleElement, "action");
             if (bodyElement == null) {
                 template.setBody(Literal.makeEmptySequence());
@@ -2136,7 +2140,10 @@ public class PackageLoaderHE implements IPackageLoader {
             SequenceType st = loader.parseAlphaCode(element, "type");
             ItemType type = st.getPrimaryType();
             boolean maybeAbsent = "a".equals(element.getAttributeValue(NamespaceUri.NULL, "flags"));
-            ContextItemStaticInfo info = loader.getConfiguration().makeContextItemStaticInfo(type, maybeAbsent);
+            ContextItemStaticInfo info = loader.getConfiguration().makeContextItemStaticInfo(type);
+            if (maybeAbsent) {
+                info = info.withStatusUnknown();
+            }
             cie.setStaticInfo(info);
             return cie;
         });

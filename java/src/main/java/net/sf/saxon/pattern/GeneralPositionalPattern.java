@@ -108,7 +108,7 @@ public class GeneralPositionalPattern extends Pattern {
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
 
         // analyze each component of the pattern
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getItemType(), false);
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getItemType());
 
         positionExpr = positionExpr.typeCheck(visitor, cit);
         positionExpr = ExpressionTool.unsortedIfHomogeneous(positionExpr, false);
@@ -136,7 +136,7 @@ public class GeneralPositionalPattern extends Pattern {
     @Override
     public Pattern optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Configuration config = visitor.getConfiguration();
-        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(getItemType(), false);
+        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(getItemType());
         positionExpr = positionExpr.optimize(visitor, cit);
 
         if (Literal.isConstantBoolean(positionExpr, true)) {

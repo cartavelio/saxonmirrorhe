@@ -643,7 +643,7 @@ public final class AxisExpression extends Expression {
      */
 
     public boolean isContextPossiblyUndefined() {
-        return staticInfo.isPossiblyAbsent();
+        return staticInfo.getOptionality() != Optionality.REQUIRED;
     }
 
     public ContextItemStaticInfo getContextItemStaticInfo() {

@@ -11,6 +11,7 @@ package net.sf.saxon;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.expr.parser.CodeInjector;
+import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
@@ -1397,7 +1398,7 @@ public class Transform {
                     buildSourceTree = initialTemplate != null ||
                             !transformer.getUnderlyingController().getInitialMode().isDeclaredStreamable();
                 } else {
-                    buildSourceTree = !requirement.isAbsentFocus();
+                    buildSourceTree = requirement.getContextValueOptionality() != Optionality.PROHIBITED;
                 }
                 if (buildSourceTree) {
                     DocumentBuilder builder = processor.newDocumentBuilder();

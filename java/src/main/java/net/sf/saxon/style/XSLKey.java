@@ -207,7 +207,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
 
         // Do a further check that the use expression makes sense in the context of the match pattern
         if (use != null) {
-            use = use.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(match.getItemType(), false));
+            use = use.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(match.getItemType()));
         }
 
         if (collationName != null) {
@@ -288,7 +288,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
                         role, makeExpressionVisitor());
                 // Do a further check that the use expression makes sense in the context of the match pattern
                 assert match != null;
-                use = use.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(match.getItemType(), false));
+                use = use.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(match.getItemType()));
 
 
             } catch (XPathException err) {
@@ -354,7 +354,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
     @Override
     public void optimize(ComponentDeclaration declaration) throws XPathException {
         ExpressionVisitor visitor = makeExpressionVisitor();
-        ContextItemStaticInfo contextItemType = getConfiguration().makeContextItemStaticInfo(match.getItemType(), false);
+        ContextItemStaticInfo contextItemType = getConfiguration().makeContextItemStaticInfo(match.getItemType());
         Expression useExp = keyDefinition.getUse();
         useExp = useExp.optimize(visitor, contextItemType);
         allocateLocalSlots(useExp);

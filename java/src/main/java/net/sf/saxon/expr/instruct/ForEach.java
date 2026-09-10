@@ -315,8 +315,8 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
             return Literal.makeEmptySequence();
         }
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getSelect().getItemType(), false);
-        cit.setContextSettingExpression(getSelect());
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getSelect().getItemType())
+                .withContextSetter(getSelect());
         actionOp.typeCheck(visitor, cit);
 
         if (!Cardinality.allowsMany(getSelect().getCardinality())) {
@@ -331,8 +331,8 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         selectOp.optimize(visitor, contextInfo);
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getSelect().getItemType(), false);
-        cit.setContextSettingExpression(getSelect());
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getSelect().getItemType())
+                .withContextSetter(getSelect());
         actionOp.optimize(visitor, cit);
 
         if (!visitor.isOptimizeForStreaming()) {

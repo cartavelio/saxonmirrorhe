@@ -3446,8 +3446,16 @@ public class Configuration implements SourceResolver {
      * @return the ContextItemStaticInfo
      */
 
-    public ContextItemStaticInfo makeContextItemStaticInfo(ItemType itemType, boolean maybeUndefined) {
-        return new ContextItemStaticInfo(itemType, maybeUndefined);
+    public ContextItemStaticInfo makeContextItemStaticInfo(ItemType itemType, Optionality status) {
+        return new ContextItemStaticInfo(itemType, status);
+    }
+
+    public ContextItemStaticInfo makeContextItemStaticInfo(ItemType itemType) {
+        return new ContextItemStaticInfo(itemType);
+    }
+
+    public ContextItemStaticInfo makeContextItemStaticInfo(SequenceType sequenceType) {
+        return new ContextItemStaticInfo(sequenceType, Optionality.REQUIRED);
     }
 
     /**

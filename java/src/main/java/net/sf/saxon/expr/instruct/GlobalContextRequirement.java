@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -30,8 +31,7 @@ import java.util.List;
  */
 public class GlobalContextRequirement {
 
-    private boolean mayBeOmitted = true;
-    private boolean absentFocus;
+    private Optionality optionality = Optionality.OPTIONAL;
     private boolean external;   // XQuery only
     private final List<ItemType> requiredItemTypes = new ArrayList<>();
     private Expression defaultValue = null;  // Used in XQuery only
@@ -97,15 +97,17 @@ public class GlobalContextRequirement {
 
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("glob");
-        String use;
-        if (isMayBeOmitted()) {
-            if (isAbsentFocus()) {
+        String use = null;
+        switch (optionality) {
+            case PROHIBITED:
                 use = "pro";
-            } else {
+                break;
+            case REQUIRED:
+                use = "req";
+                break;
+            case OPTIONAL:
                 use = "opt";
-            }
-        } else {
-            use = "req";
+                break;
         }
         out.emitAttribute("use", use);
         if (!getRequiredItemType().equals(AnyItemType.getInstance())) {
@@ -114,14 +116,21 @@ public class GlobalContextRequirement {
         out.endElement();
     }
 
+    public void setContextValueOptionality(Optionality status) {
+        this.optionality = status;
+    }
+
+    public Optionality getContextValueOptionality() {
+        return optionality;
+    }
+
     /**
-     * Say whether the global context item for a query or stylesheet will be absent. This is relevant
-     * only for XSLT.
+     * Say whether the global context item for a query or stylesheet will be absent.
      * @param absent true if there will be no context item (externally or internally supplied).
      */
 
     public void setAbsentFocus(boolean absent) {
-        this.absentFocus = absent;
+        this.optionality = absent ? Optionality.PROHIBITED : Optionality.OPTIONAL;
     }
 
     /**
@@ -132,25 +141,12 @@ public class GlobalContextRequirement {
      */
 
     public boolean isAbsentFocus() {
-        return absentFocus;
+        return this.optionality == Optionality.PROHIBITED;
     }
 
-    /**
-     * Say whether it is OK for the application to supply no context item
-     * @param mayOmit true if it is OK for the application to supply to context item
-     */
 
-    public void setMayBeOmitted(boolean mayOmit) {
-        this.mayBeOmitted = mayOmit;
-    }
-
-    /**
-     * Ask whether it is OK for the application to supply no context item
-     * @return true if it is OK for the application to supply to context item
-     */
-
-    public boolean isMayBeOmitted() {
-        return mayBeOmitted;
+    public Optionality getOptionality() {
+        return optionality;
     }
 
     /**
@@ -178,7 +174,7 @@ public class GlobalContextRequirement {
      */
     public ContextItemStaticInfo makeGlobalContextInfo(Configuration config) {
         ItemType type = isAbsentFocus() ? ErrorType.getInstance() : getRequiredItemType();
-        return config.makeContextItemStaticInfo(type, isMayBeOmitted());
+        return config.makeContextItemStaticInfo(type, getOptionality());
     }
 }
 

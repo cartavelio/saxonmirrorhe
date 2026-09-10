@@ -10,6 +10,7 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
@@ -135,12 +136,12 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
      * Set the required context item type. Used when there is an xsl:context-item child element
      *
      * @param type        the required context item type
-     * @param absentFocus true if the context item is treated as absent even if supplied (use="absent")
+     * @param contextItemOptionality indicates if the context item is treated as absent even if supplied (use="absent")
      */
 
-    public void setContextItemRequirements(ItemType type, boolean absentFocus) {
+    public void setContextItemRequirements(ItemType type, Optionality contextItemOptionality) {
         requiredContextItemType = type;
-        this.absentFocus = absentFocus;
+        this.absentFocus = contextItemOptionality == Optionality.PROHIBITED;
     }
 
     public int getComponentKind() {

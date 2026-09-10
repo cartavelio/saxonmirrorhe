@@ -22,10 +22,8 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -101,7 +99,7 @@ public class ContextItemExpression extends Expression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, /*@Nullable*/ ContextItemStaticInfo contextInfo) throws XPathException {
-        if (contextInfo.getItemType() == ErrorType.getInstance()) {
+        if (contextInfo.getOptionality() == Optionality.PROHIBITED) {
             visitor.issueWarning("Evaluation will always fail: there is no context item", SaxonErrorCode.SXWN9027, getLocation());
             ErrorExpression ee = new ErrorExpression(
                     "There is no context item",
@@ -110,7 +108,7 @@ public class ContextItemExpression extends Expression {
             ee.setOriginalExpression(this);
             ExpressionTool.copyLocationInfo(this, ee);
             return ee;
-        } else if (Cardinality.allowsMany(contextInfo.getCardinality())) {
+        } else if (contextInfo.getCardinality() != StaticProperty.EXACTLY_ONE) {
             // context item is generalized to context value in 4.0 - but only in restricted circumstances
             return new ContextValueExpression();
         } else {
@@ -178,7 +176,7 @@ public class ContextItemExpression extends Expression {
      */
 
     public boolean isContextPossiblyUndefined() {
-        return staticInfo.isPossiblyAbsent();
+        return staticInfo.getOptionality() != Optionality.REQUIRED;
     }
 
     /**
@@ -331,7 +329,7 @@ public class ContextItemExpression extends Expression {
             SequenceType st = SequenceType.one(type);
             destination.emitAttribute("type", st.toAlphaCode());
         }
-        if (staticInfo.isPossiblyAbsent()) {
+        if (staticInfo.getOptionality() != Optionality.REQUIRED) {
             destination.emitAttribute("flags", "a");
         }
         destination.endElement();

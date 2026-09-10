@@ -168,20 +168,17 @@ public class FilterExpressionAM extends BinaryExpression
             return Literal.makeEmptySequence();
         }
 
-        ItemType iterandType = AnyItemType.getInstance();
-        int iterandCardinality = StaticProperty.ALLOWS_ONE;
+        SequenceType entryType = SequenceType.ANY_SEQUENCE;
         if (startType instanceof ArrayItemType) {
-            iterandType = ((ArrayItemType)startType).getMemberType().getPrimaryType();
-            iterandCardinality = ((ArrayItemType) startType).getMemberType().getCardinality();
+            entryType = ((ArrayItemType)startType).getMemberType();
         } else if (startType instanceof MapType) {
-            iterandType = RecordTest.nonExtensible(
+            entryType = SequenceType.one(RecordTest.nonExtensible(
                     new RecordTest.Field("key", SequenceType.SINGLE_ATOMIC, false),
-                    new RecordTest.Field("value", SequenceType.ANY_SEQUENCE, false));
+                    new RecordTest.Field("value", SequenceType.ANY_SEQUENCE, false)));
         }
+        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(entryType)
+                .withContextSetter(getStart());
 
-        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(iterandType, false);
-        cit.setCardinality(iterandCardinality);
-        cit.setContextSettingExpression(getStart());
         getRhs().typeCheck(visitor, cit);
 
         Supplier<RoleDiagnostic> roleSupplier1 =
@@ -202,8 +199,8 @@ public class FilterExpressionAM extends BinaryExpression
         getLhsExpression().setFiltered(true);
 
         ContextItemStaticInfo baseItemType = visitor.getConfiguration().makeContextItemStaticInfo(
-                AnyItemType.getInstance(), false);     // TODO: improve this
-        baseItemType.setContextSettingExpression(getSelectExpression());
+                AnyItemType.getInstance())      // TODO: improve this
+                .withContextSetter(getSelectExpression());
         getRhs().optimize(visitor, baseItemType);
         // TODO: recognize positional filters such as position() lt 5.
         return this;

@@ -91,7 +91,8 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             exp.checkForUpdatingSubexpressions();
             GlobalContextRequirement contextReq = exec.getGlobalContextRequirement();
             ItemType req = contextReq == null ? AnyItemType.getInstance() : contextReq.getRequiredItemType();
-            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(req, true);
+            ContextItemStaticInfo cit = config.makeContextItemStaticInfo(req)
+                    .withStatusUnknown();
             Expression e2 = exp.typeCheck(visitor, cit);
             if (e2 != exp) {
                 e2.setRetainedStaticContext(exp.getRetainedStaticContext());

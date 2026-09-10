@@ -212,8 +212,8 @@ public class SlashExpression extends BinaryExpression
             return Literal.makeEmptySequence();
         }
 
-        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(startType, false);
-        cit.setContextSettingExpression(getStart());
+        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(startType)
+                .withContextSetter(getStart());
         getRhs().typeCheck(visitor, cit);
 
         // Give a warning if people write a/[x = 3]
@@ -375,8 +375,8 @@ public class SlashExpression extends BinaryExpression
             return Literal.makeEmptySequence();
         }
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getStart().getItemType(), false);
-        cit.setContextSettingExpression(getStart());
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(getStart().getItemType())
+                .withContextSetter(getStart());
         getRhs().optimize(visitor, cit);
 
         if (Literal.isEmptySequence(getStep())) {

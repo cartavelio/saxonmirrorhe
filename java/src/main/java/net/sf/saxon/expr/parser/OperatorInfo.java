@@ -141,8 +141,9 @@ public class OperatorInfo {
             case TREAT_AS: return ( 16);
             case CASTABLE_AS: return ( 17);
             case CAST_AS: return ( 18);
-            case FAT_ARROW: return ( 19);
-            case MAPPING_ARROW: return ( 19);
+            case THIN_ARROW: return (19);
+            case FAT_ARROW: return (20);
+            case MAPPING_ARROW: return (21);
             default: return -1;
 
             // remainder commented out because not used in precedence parsing (but perhaps they could be)

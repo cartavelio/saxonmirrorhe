@@ -122,7 +122,7 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        ContextItemStaticInfo cit = new ContextItemStaticInfo(AnyNodeTest.getInstance(), false);
+        ContextItemStaticInfo cit = new ContextItemStaticInfo(AnyNodeTest.getInstance());
         equivalentExpr = equivalentExpr.typeCheck(visitor, cit);
         makeTopNodeEquivalent();
         return this;

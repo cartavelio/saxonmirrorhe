@@ -879,7 +879,8 @@ public class UseWhenFilter extends ProxyReceiver {
 
     private Expression typeCheck(Expression expr, UseWhenStaticContext staticContext) throws XPathException {
         ItemType contextItemType = Type.ITEM_TYPE;
-        ContextItemStaticInfo cit = getConfiguration().makeContextItemStaticInfo(contextItemType, true);
+        ContextItemStaticInfo cit = getConfiguration().makeContextItemStaticInfo(contextItemType)
+                .withStatusUnknown();
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
         return expr.typeCheck(visitor, cit);
     }

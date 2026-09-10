@@ -130,7 +130,7 @@ public class SourceDocument extends Instruction {
         hrefOp.setChildExpression(tc.staticTypeCheck(
                 hrefOp.getChildExpression(), SequenceType.SINGLE_STRING, role, visitor));
         ContextItemStaticInfo newType =
-                getConfiguration().makeContextItemStaticInfo(NodeKindTest.DOCUMENT, false);
+                getConfiguration().makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
         newType.setContextPostureStriding();
         bodyOp.typeCheck(visitor, newType);
         return this;
@@ -155,7 +155,7 @@ public class SourceDocument extends Instruction {
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         ContextItemStaticInfo newType =
-                getConfiguration().makeContextItemStaticInfo(NodeKindTest.DOCUMENT, false);
+                getConfiguration().makeContextItemStaticInfo(NodeKindTest.DOCUMENT);
         newType.setContextPostureStriding();
 
         hrefOp.optimize(visitor, contextItemType);

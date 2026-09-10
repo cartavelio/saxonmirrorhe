@@ -247,8 +247,8 @@ public class ForEachGroup extends Instruction
 
         fixupGroupReferences(this, this, selectedItemType, false);
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectedItemType, false);
-        cit.setContextSettingExpression(getSelectExpression());
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectedItemType)
+                .withContextSetter(getSelectExpression());
 
         actionOp.typeCheck(visitor, cit);
         keyOp.typeCheck(visitor, cit);
@@ -331,8 +331,8 @@ public class ForEachGroup extends Instruction
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         selectOp.optimize(visitor, contextItemType);
         ItemType selectedItemType = getSelectExpression().getItemType();
-        ContextItemStaticInfo sit = visitor.getConfiguration().makeContextItemStaticInfo(selectedItemType, false);
-        sit.setContextSettingExpression(getSelectExpression());
+        ContextItemStaticInfo sit = visitor.getConfiguration().makeContextItemStaticInfo(selectedItemType)
+                .withContextSetter(getSelectExpression());
         actionOp.optimize(visitor, sit);
         keyOp.optimize(visitor, sit);
 

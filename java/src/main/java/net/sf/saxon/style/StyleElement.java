@@ -1615,19 +1615,9 @@ public abstract class StyleElement extends ElementImpl {
             return exp;
         }
         try {
-            exp = exp.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(Type.ITEM_TYPE, true));
+            exp = exp.typeCheck(makeExpressionVisitor(), config.makeContextItemStaticInfo(Type.ITEM_TYPE)
+                    .withStatusUnknown());
             exp = ExpressionTool.resolveCallsToCurrentFunction(exp);
-            //            if (explaining) {
-            //                System.err.println("Attribute '" + name + "' of element '" + getDisplayName() + "' at line " + getLineNumber() + ':');
-            //                System.err.println("Static type: " +
-            //                        SequenceType.makeSequenceType(exp.getItemType(), exp.getCardinality()));
-            //                System.err.println("Optimized expression tree:");
-            //                exp.display(10, getNamePool(), System.err);
-            //            }
-//            CodeInjector injector = getCompilation().getCompilerInfo().getCodeInjector();
-//            if (injector != null) {
-//                return injector.inject(exp, getStaticContext(), LocationKind.XPATH_IN_XSLT, new StructuredQName("", "", name));
-//            }
             return exp;
         } catch (XPathException err) {
             // we can't report a dynamic error such as divide by zero unless the expression
@@ -1692,7 +1682,8 @@ public abstract class StyleElement extends ElementImpl {
         try {
             ExpressionVisitor visitor = makeExpressionVisitor();
             ItemType cit = Type.ITEM_TYPE;
-            ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(cit, true);
+            ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(cit)
+                    .withStatusUnknown();
             pattern = pattern.typeCheck(visitor, cisi);
             boolean usesCurrent = false;
 

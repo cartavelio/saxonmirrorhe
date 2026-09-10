@@ -9,6 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
+import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeSelector;
@@ -58,9 +59,11 @@ public class XSLUsePackage extends StyleElement {
                 usedPackage.setJustInTimeCompilation(info.isJustInTimeCompilation());
             }
             GlobalContextRequirement gcr = usedPackage.getContextItemRequirements();
-            if (gcr != null && !gcr.isMayBeOmitted()) {
-                compileError("Package " + getAttributeValue("name") +
-                                     " requires a global context item, so it cannot be used as a library package", "XTTE0590");
+            if (gcr != null) {
+                if (!(gcr.getOptionality() != Optionality.REQUIRED)) {
+                    compileError("Package " + getAttributeValue("name") +
+                                         " requires a global context item, so it cannot be used as a library package", "XTTE0590");
+                }
             }
         }
     }

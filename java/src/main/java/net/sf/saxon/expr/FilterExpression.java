@@ -274,8 +274,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             return getBase();
         }
 
-        ContextItemStaticInfo baseItemType = config.makeContextItemStaticInfo(getSelectExpression().getItemType(), false);
-        baseItemType.setContextSettingExpression(getBase());
+        ContextItemStaticInfo baseItemType = config.makeContextItemStaticInfo(getSelectExpression().getItemType())
+                .withContextSetter(getBase());
         getRhs().typeCheck(visitor, baseItemType);
 
         // The filter expression usually doesn't need to be sorted
@@ -356,8 +356,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         }
         getBase().setFiltered(true);
         
-        ContextItemStaticInfo baseItemType = config.makeContextItemStaticInfo(getSelectExpression().getItemType(), false);
-        baseItemType.setContextSettingExpression(getBase());
+        ContextItemStaticInfo baseItemType = config.makeContextItemStaticInfo(getSelectExpression().getItemType())
+                .withContextSetter(getBase());
         getRhs().optimize(visitor, baseItemType);
 
         // The filter expression usually doesn't need to be sorted

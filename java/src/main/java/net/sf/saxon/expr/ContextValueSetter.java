@@ -22,12 +22,11 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.value.SequenceType;
 
 
 /**
- * Abstract expression of the form "with context value A evaluate B". There is currently
- * no concrete syntax for this (see QT4 issue 755, which proposes one), but it is used
- * internally to set the context value for the body of a focus function.
+ * Abstract 4.0 expression of the form "A -> B".
  */
 
 public class ContextValueSetter extends BinaryExpression
@@ -113,9 +112,10 @@ public class ContextValueSetter extends BinaryExpression
         getLhs().typeCheck(visitor, contextInfo);
 
         final Configuration config = visitor.getConfiguration();
-        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(getLhsExpression().getItemType(), false);
-        cit.setCardinality(getLhsExpression().getCardinality());
-        cit.setContextSettingExpression(getLhsExpression());
+        SequenceType type = SequenceType.makeSequenceType(
+                getLhsExpression().getItemType(), getLhsExpression().getCardinality());
+        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(type)
+                .withContextSetter(getLhsExpression());
         getRhs().typeCheck(visitor, cit);
 
         return this;

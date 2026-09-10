@@ -65,8 +65,8 @@ public final class SimpleStepExpression extends SlashExpression {
             return Literal.makeEmptySequence();
         }
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectType, false);
-        cit.setContextSettingExpression(getStart());
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectType)
+                .withContextSetter(getStart());
 
         getRhs().typeCheck(visitor, cit);
 

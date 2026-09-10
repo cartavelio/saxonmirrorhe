@@ -124,7 +124,8 @@ public class XPathEvaluator {
         exp.setRetainedStaticContext(rsc);
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
         ItemType contextItemType = staticContext.getRequiredContextItemType();
-        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, true);
+        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType)
+                .withStatusUnknown();
         cit.setParentless(staticContext.isContextItemParentless());
         exp = exp.typeCheck(visitor, cit);
         if (opt.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
@@ -174,7 +175,7 @@ public class XPathEvaluator {
         Executable exec = new Executable(config);
         Pattern pat = Pattern.make(pattern, staticContext, new PackageData(config));
         ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
-        pat.typeCheck(visitor, config.makeContextItemStaticInfo(Type.NODE_TYPE, true));
+        pat.typeCheck(visitor, config.makeContextItemStaticInfo(Type.NODE_TYPE).withStatusUnknown());
         SlotManager map = staticContext.getStackFrameMap();
         int slots = map.getNumberOfVariables();
         slots = pat.allocateSlots(map, slots);

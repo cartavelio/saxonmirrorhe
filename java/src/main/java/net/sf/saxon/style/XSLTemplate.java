@@ -60,8 +60,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
     private boolean declaresRequiredType = false;
     private Visibility visibility = Visibility.PRIVATE;
     private ItemType requiredContextItemType = AnyItemType.getInstance();
-    private boolean mayOmitContextItem = true;
-    private boolean absentFocus = false;
+    private Optionality contextItemOptionality = Optionality.OPTIONAL;
+    //private boolean absentFocus = false;
     private boolean jitCompilationDone = false;
     private boolean explaining;
     private List<Pattern> subPatterns;
@@ -137,14 +137,12 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
      * Set the required context item type. Used when there is an xsl:context-item child element
      *
      * @param type         the required context item type
-     * @param mayBeOmitted true if the context item may be absent
-     * @param absentFocus  true if use=absent is specified
+     * @param status  indicates whether the context value is required, optional, or disallowed
      */
 
-    public void setContextItemRequirements(ItemType type, boolean mayBeOmitted, boolean absentFocus) {
+    public void setContextItemRequirements(ItemType type, Optionality status) {
         requiredContextItemType = type;
-        mayOmitContextItem = mayBeOmitted;
-        this.absentFocus = absentFocus;
+        this.contextItemOptionality = status;
     }
 
     /**
@@ -193,10 +191,6 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         return requiredContextItemType;
     }
 
-    public boolean isMayOmitContextItem() {
-        return mayOmitContextItem;
-    }
-
     public SequenceType getRequiredType() {
         return requiredType;
     }
@@ -216,9 +210,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
 
         if (!requiredContextItemType.equals(other.getRequiredContextItemType()) ||
-                mayOmitContextItem != other.isMayOmitContextItem() ||
-                absentFocus != other.isAbsentFocus()) {
-            compileError("The required context item for the overriding template differs from that of the overridden template", "XTSE3070");
+                contextItemOptionality != other.getContextItemOptionality()) {
+            compileError("The context item requirement for the overriding template differs from that of the overridden template", "XTSE3070");
             return;
         }
 
@@ -737,7 +730,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         compiledNamedTemplate.setLineNumber(getLineNumber());
         compiledNamedTemplate.setColumnNumber(getColumnNumber());
         compiledNamedTemplate.setRequiredType(requiredType);
-        compiledNamedTemplate.setContextItemRequirements(requiredContextItemType, mayOmitContextItem, absentFocus);
+        compiledNamedTemplate.setContextItemRequirements(requiredContextItemType, contextItemOptionality);
         compiledNamedTemplate.setRetainedStaticContext(rsc);
         compiledNamedTemplate.setDeclaredVisibility(getDeclaredVisibility());
         Component overridden = getOverriddenComponent();
@@ -745,7 +738,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             checkCompatibility(overridden);
         }
 
-        ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(requiredContextItemType, mayOmitContextItem);
+        ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(requiredContextItemType, contextItemOptionality);
         Expression body2 = refineTemplateBody(body, cisi);
         compiledNamedTemplate.setBody(body2);
 
@@ -819,7 +812,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
             // if the match pattern can't match anything, we produce a warning, not a hard error
             contextItemType = AnyItemType.getInstance();
         }
-        cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
+        cisi = config.makeContextItemStaticInfo(contextItemType, contextItemOptionality);
         body = refineTemplateBody(body, cisi);
 
         boolean first = true;
@@ -863,7 +856,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         templateRule.setLineNumber(getLineNumber());
         templateRule.setColumnNumber(getColumnNumber());
         //templateRule.setRequiredType(requiredType);
-        templateRule.setContextItemRequirements(requiredContextItemType, absentFocus);
+        templateRule.setContextItemRequirements(requiredContextItemType, contextItemOptionality);
     }
 
     /**
@@ -981,7 +974,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                             throw e.maybeWithLocation(this);
                         }
                         if (localPattern2 != match) {
-                            ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
+                            ContextItemStaticInfo info =
+                                    getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), contextItemOptionality);
                             ExpressionTool.copyLocationInfo(match, localPattern2);
                             localPattern2.setOriginalText(match.toString());
                             localPattern2 = localPattern2.typeCheck(visitor, info);
@@ -1005,7 +999,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                                 throw e.maybeWithLocation(this);
                             }
                             if (localSubPattern2 != localSubPattern1) {
-                                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), mayOmitContextItem);
+                                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(
+                                        AnyItemType.getInstance(), contextItemOptionality);
                                 ExpressionTool.copyLocationInfo(match, localSubPattern2);
                                 localSubPattern2.setOriginalText(match.toString());
                                 localSubPattern2 = localSubPattern2.typeCheck(visitor, info);
@@ -1065,7 +1060,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         Configuration config = getConfiguration();
         if (compiledNamedTemplate != null) {
             Expression body = compiledNamedTemplate.getBody();
-            ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(requiredContextItemType, mayOmitContextItem);
+            ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(
+                    requiredContextItemType, contextItemOptionality);
 
             ExpressionVisitor visitor = makeExpressionVisitor();
             body = body.typeCheck(visitor, cisi);
@@ -1083,7 +1079,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
         if (match != null) {
             ItemType contextItemType = getContextItemTypeForTemplateRule();
-            ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, mayOmitContextItem);
+            ContextItemStaticInfo cisi = config.makeContextItemStaticInfo(contextItemType, contextItemOptionality);
             cisi.setContextPostureStriding();
             ExpressionVisitor visitor = makeExpressionVisitor();
 
@@ -1120,7 +1116,8 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                             allocateLocalSlots(templateRuleBody);
                             for (Rule r : compiledTemplateRule.getRules()) {
                                 Pattern match = r.getPattern();
-                                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(match.getItemType(), mayOmitContextItem);
+                                ContextItemStaticInfo info =
+                                        getConfiguration().makeContextItemStaticInfo(match.getItemType(), contextItemOptionality);
                                 info.setContextPostureStriding();
                                 Pattern m2 = match.optimize(visitor, info);
                                 if (m2 != match) {

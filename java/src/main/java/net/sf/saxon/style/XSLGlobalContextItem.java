@@ -54,8 +54,7 @@ public class XSLGlobalContextItem extends XSLContextItem {
     public void index(ComponentDeclaration decl, PrincipalStylesheetModule top) throws XPathException {
         prepareAttributes();
         GlobalContextRequirement req = new GlobalContextRequirement();
-        req.setMayBeOmitted(isMayBeOmitted());
-        req.setAbsentFocus(isAbsentFocus());
+        req.setContextValueOptionality(getContextValueOptionality());
         req.addRequiredItemType(getRequiredContextItemType());
         try {
             top.getStylesheetPackage().setContextItemRequirements(req);

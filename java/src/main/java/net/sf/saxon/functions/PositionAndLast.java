@@ -13,6 +13,7 @@ import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
@@ -93,7 +94,7 @@ public abstract class PositionAndLast extends ContextAccessorFunction {
         if (contextInfo.getItemType() == ErrorType.getInstance()) {
             throw new XPathException("The context item is absent at this point", "XPDY0002");
         } else {
-            contextPossiblyUndefined = contextInfo.isPossiblyAbsent();
+            contextPossiblyUndefined = contextInfo.getOptionality() != Optionality.REQUIRED;
         }
     }
 

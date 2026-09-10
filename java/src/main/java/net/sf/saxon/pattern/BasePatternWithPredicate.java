@@ -209,7 +209,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         basePatternOp.setChildExpression(getBasePattern().typeCheck(visitor, contextItemType));
         ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(
-                getBasePattern().getItemType(), false);
+                getBasePattern().getItemType());
         predicateOp.setChildExpression(getPredicate().typeCheck(visitor, cit));
         return this;
     }
@@ -233,7 +233,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
     public Pattern optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         basePatternOp.setChildExpression(getBasePattern().optimize(visitor, contextInfo));
         ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(
-                getBasePattern().getItemType(), false);
+                getBasePattern().getItemType());
         predicateOp.setChildExpression(getPredicate().optimize(visitor, cit));
         predicateOp.setChildExpression(visitor.obtainOptimizer().eliminateCommonSubexpressions(getPredicate()));
         return this;
@@ -261,7 +261,7 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
     //#if STREAM==true
     @Override
     public boolean isMotionless() {
-        ContextItemStaticInfoEE cio = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(getItemType(), false);
+        ContextItemStaticInfoEE cio = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(getItemType());
         cio.setContextPostureStriding();
         Streamability.getStreamability(getPredicate(), cio, new ArrayList<>());
         return getBasePattern().isMotionless() &&

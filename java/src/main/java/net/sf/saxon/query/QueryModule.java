@@ -921,7 +921,8 @@ public class QueryModule implements StaticContext {
         if (isMainModule()) {
             GlobalContextRequirement gcr = executable.getGlobalContextRequirement();
             if (gcr != null && gcr.getDefaultValue() != null) {
-                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), true);
+                ContextItemStaticInfo info = getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance())
+                        .withStatusUnknown();
                 gcr.setDefaultValue(gcr.getDefaultValue().typeCheck(visitor, info));
             }
         }

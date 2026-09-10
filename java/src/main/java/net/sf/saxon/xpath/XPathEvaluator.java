@@ -217,13 +217,15 @@ public class XPathEvaluator implements XPath {
             throw new NullPointerException("expr");
         }
         try {
-            Executable exec = new Executable(getConfiguration());
+            Configuration config = getConfiguration();
+            Executable exec = new Executable(config);
             exec.setSchemaAware(staticContext.getPackageData().isSchemaAware());
             Expression exp = ExpressionTool.make(expr, staticContext, 0, Tokenizer.END_OF_INPUT, null);
             ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
-            final ContextItemStaticInfo contextItemType = getConfiguration().makeContextItemStaticInfo(Type.ITEM_TYPE, true);
+            final ContextItemStaticInfo contextItemType =
+                    config.makeContextItemStaticInfo(Type.ITEM_TYPE).withStatusUnknown();
             exp = exp.typeCheck(visitor, contextItemType).optimize(visitor, contextItemType);
-            SlotManager map = staticContext.getConfiguration().makeSlotManager();
+            SlotManager map = config.makeSlotManager();
             ExpressionTool.allocateSlots(exp, 0, map);
             XPathExpressionImpl xpe = new XPathExpressionImpl(exp, exec);
             xpe.setStackFrameMap(map);

@@ -197,7 +197,7 @@ public class XSLSourceDocument extends StyleElement {
         try {
             ExpressionVisitor visitor = makeExpressionVisitor();
             action = action.simplify();
-            action = action.typeCheck(visitor, config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT, false));
+            action = action.typeCheck(visitor, config.makeContextItemStaticInfo(NodeKindTest.DOCUMENT));
 
             return config.makeStreamInstruction(
                         href, action, streaming, parseOptions, null, saveLocation(),

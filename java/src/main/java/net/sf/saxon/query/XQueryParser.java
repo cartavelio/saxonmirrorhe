@@ -1747,7 +1747,8 @@ public class XQueryParser extends XPathParser {
             exp = CardinalityChecker.makeCardinalityChecker(exp, StaticProperty.EXACTLY_ONE, role);
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             exp = exp.simplify();
-            ContextItemStaticInfo info = env.getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance(), true);
+            ContextItemStaticInfo info = env.getConfiguration().makeContextItemStaticInfo(AnyItemType.getInstance())
+                    .withStatusUnknown();
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
             exp = exp.typeCheck(visitor, info);
             req.setDefaultValue(exp);

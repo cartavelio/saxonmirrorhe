@@ -1142,28 +1142,14 @@ public class XPathParser {
             case IDIV:
             case MOD:
                 return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, operator, rhs);
-//            case TIMES:
-//                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, OperatorSymbol.TIMES, rhs);
-//            case DIV:
-//                return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeArithmeticExpression(lhs, OperatorSymbol.DIV, rhs);
             case OTHERWISE:
                 return makeOtherwiseExpression(lhs, rhs);
             case UNION:
             case INTERSECT:
             case EXCEPT:
                 return new VennExpression(lhs, operator, rhs);
-//            case OR_ELSE: {
-//                // Compile ($x orElse $y) as (if ($x) then true() else boolean($y))
-//                RetainedStaticContext rsc = new RetainedStaticContext(env);
-//                rhs = SystemFunction.makeCall("boolean", rsc, rhs);
-//                return Choose.makeConditional(lhs, Literal.makeLiteral(BooleanValue.TRUE), rhs);
-//            }
-//            case AND_ALSO: {
-//                // Compile ($x andAlso $y) as (if ($x) then boolean($y) else false())
-//                RetainedStaticContext rsc = new RetainedStaticContext(env);
-//                rhs = SystemFunction.makeCall("boolean", rsc, rhs);
-//                return Choose.makeConditional(lhs, rhs, Literal.makeLiteral(BooleanValue.FALSE));
-//            }
+            case THIN_ARROW:
+                return new ContextValueSetter(lhs, rhs);
             default:
                 throw new IllegalArgumentException(operator.toString());
         }

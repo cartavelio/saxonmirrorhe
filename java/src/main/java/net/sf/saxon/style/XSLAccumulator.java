@@ -201,11 +201,11 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             Pattern pattern = rule.getMatch();
             Expression newValueExp = rule.getNewValueExpression(compilation, decl);
             ExpressionVisitor visitor = ExpressionVisitor.make(getStaticContext());
-            newValueExp = newValueExp.typeCheck(visitor, config.makeContextItemStaticInfo(pattern.getItemType(), false));
+            newValueExp = newValueExp.typeCheck(visitor, config.makeContextItemStaticInfo(pattern.getItemType()));
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
-            newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
+            newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType()));
             // Note, rather unnecessarily, all rules for an accumulator allocate slots on the same stackframe
             int valueSlot = slotManager.allocateSlotNumber(NamespaceUri.NULL.qName("value"), null);
             ExpressionTool.allocateSlots(newValueExp, valueSlot+1, slotManager);
@@ -360,7 +360,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
                 String message = "The patterns for the accumulator rules in a streaming accumulator must be motionless";
                 notStreamable(rule, message);
             }
-            ContextItemStaticInfoEE csi = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false);
+            ContextItemStaticInfoEE csi = (ContextItemStaticInfoEE)getConfiguration().makeContextItemStaticInfo(pattern.getItemType());
             csi.setContextPostureStriding();
             csi.setAccumulatorPhase(rule.isPostDescent() ? AccumulatorFn.Phase.AFTER : AccumulatorFn.Phase.BEFORE);
             List<String> reasons = new ArrayList<>(4);

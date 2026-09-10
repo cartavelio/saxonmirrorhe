@@ -143,8 +143,8 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
             selectType = AnyItemType.getInstance();
         }
 
-        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectType, false);
-        cit.setContextSettingExpression(getSelectExpression());
+        ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(selectType)
+                .withContextSetter(getSelectExpression());
         actionOp.typeCheck(visitor, cit);
 
         onCompletionOp.typeCheck(visitor, ContextItemStaticInfo.ABSENT);
@@ -164,8 +164,8 @@ public final class IterateInstr extends Instruction implements ContextSwitchingE
         selectOp.optimize(visitor, contextInfo);
         initiallyOp.optimize(visitor, contextInfo);
 
-        ContextItemStaticInfo cit2 = visitor.getConfiguration().makeContextItemStaticInfo(getSelectExpression().getItemType(), false);
-        cit2.setContextSettingExpression(getSelectExpression());
+        ContextItemStaticInfo cit2 = visitor.getConfiguration().makeContextItemStaticInfo(getSelectExpression().getItemType())
+                .withContextSetter(getSelectExpression());
         actionOp.optimize(visitor, cit2);
 
         onCompletionOp.optimize(visitor, ContextItemStaticInfo.ABSENT);

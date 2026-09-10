@@ -8,6 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.parser.Optionality;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
@@ -24,8 +25,7 @@ import net.sf.saxon.value.Whitespace;
 public class XSLContextItem extends StyleElement {
 
     private ItemType requiredType = AnyItemType.getInstance();
-    private boolean mayBeOmitted = true;
-    private boolean absentFocus = false;
+    private Optionality optionality = Optionality.OPTIONAL;
 
 
     @Override
@@ -67,20 +67,20 @@ public class XSLContextItem extends StyleElement {
         if (useAtt != null) {
             switch (useAtt) {
                 case "required":
-                    mayBeOmitted = false;
+                    optionality = Optionality.REQUIRED;
                     break;
                 case "optional":
                     // no action, this is the default
                     break;
                 case "absent":
-                    absentFocus = true;
+                    optionality = Optionality.PROHIBITED;
                     break;
                 default:
                     invalidAttribute("use", "required|optional|absent");
                     break;
             }
         }
-        if (asAtt != null && absentFocus) {
+        if (asAtt != null && optionality == Optionality.PROHIBITED) {
             compileError("The 'as' attribute must be omitted when use='absent' is specified",
                          this instanceof XSLGlobalContextItem ? "XTSE3089": "XTSE3088");
         }
@@ -102,11 +102,11 @@ public class XSLContextItem extends StyleElement {
             compileError("xsl:context-item can appear only as a child of xsl:template");
             return;
         }
-        if (mayBeOmitted && ((XSLTemplate) getParent()).getTemplateName() == null) {
+        if (optionality != Optionality.REQUIRED && ((XSLTemplate) getParent()).getTemplateName() == null) {
             compileError("xsl:context-item appearing in an xsl:template declaration with no name attribute must specify use=required",
                 "XTSE0020");
         }
-        ((XSLTemplate)getParent()).setContextItemRequirements(requiredType, mayBeOmitted, absentFocus);
+        ((XSLTemplate)getParent()).setContextItemRequirements(requiredType, optionality);
         SequenceTool.supply(iterateAxis(AxisInfo.PRECEDING_SIBLING), (ItemConsumer<? super Item>) prec -> {
             if (((NodeInfo) prec).getNodeKind() != Type.TEXT || !Whitespace.isAllWhite(prec.getUnicodeStringValue())) {
                 compileError("xsl:context-item must be the first child of xsl:template");
@@ -118,12 +118,8 @@ public class XSLContextItem extends StyleElement {
         return requiredType;
     }
 
-    public boolean isMayBeOmitted() {
-        return mayBeOmitted;
-    }
-
-    public boolean isAbsentFocus() {
-        return absentFocus;
+    public Optionality getContextValueOptionality() {
+        return optionality;
     }
 
 

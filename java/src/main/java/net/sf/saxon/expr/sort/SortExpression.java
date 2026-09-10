@@ -150,7 +150,7 @@ public class SortExpression extends Expression
             SortKeyDefinition sortKeyDef = getSortKeyDefinition(i);
             Expression sortKey = sortKeyDef.getSortKey();
             if (sortKeyDef.isSetContextForSortKey()) {
-                ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(sortedItemType, false);
+                ContextItemStaticInfo cit = visitor.getConfiguration().makeContextItemStaticInfo(sortedItemType);
                 sortKey = sortKey.typeCheck(visitor, cit);
             } else {
                 sortKey = sortKey.typeCheck(visitor, contextInfo);
@@ -206,7 +206,7 @@ public class SortExpression extends Expression
         ContextItemStaticInfo cit;
         if (getSortKeyDefinition(0).isSetContextForSortKey()) {
             ItemType sortedItemType = getSelect().getItemType();
-            cit = visitor.getConfiguration().makeContextItemStaticInfo(sortedItemType, false);
+            cit = visitor.getConfiguration().makeContextItemStaticInfo(sortedItemType);
         } else {
             cit = contextItemType;
         }

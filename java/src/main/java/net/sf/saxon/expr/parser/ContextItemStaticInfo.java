@@ -13,6 +13,7 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.value.SequenceType;
 
 /**
  * A data structure that represents the required type of the context item, together
@@ -23,23 +24,44 @@ import net.sf.saxon.type.UType;
 
 public class ContextItemStaticInfo {
 
-
-    private final ItemType itemType;
-    private final boolean contextMaybeUndefined;
+    private final SequenceType sequenceType;
+    private final Optionality status;
     private Expression contextSettingExpression;
     private boolean parentless;
-    private int cardinality = StaticProperty.ALLOWS_ONE;
+
+    public ContextItemStaticInfo(ItemType itemType) {
+        this(itemType, Optionality.REQUIRED);
+    }
 
     /**
      * Create a ContextItemStaticInfo
      * @param itemType the item type of the context item. If the context item is absent, set this to
      * {@link net.sf.saxon.type.ErrorType#getInstance()}.
-     * @param maybeUndefined set to true if it is possible (or certain) that the context item will be absent.
+     * @param status indicates whether the context value is required, optional, or disallowed.
      */
 
-    public ContextItemStaticInfo(ItemType itemType, boolean maybeUndefined) {
-        this.itemType = itemType;
-        this.contextMaybeUndefined = maybeUndefined;
+    public ContextItemStaticInfo(ItemType itemType, Optionality status) {
+        this.sequenceType = SequenceType.makeSequenceType(itemType, StaticProperty.EXACTLY_ONE);
+        this.status = status;
+    }
+
+    public ContextItemStaticInfo(SequenceType sequenceType, Optionality status) {
+        this.sequenceType = sequenceType;
+        this.status = status;
+    }
+
+    private ContextItemStaticInfo(SequenceType sequenceType, Optionality status,
+                                  boolean parentless) {
+        this(sequenceType, status);
+        this.parentless = parentless;
+    }
+
+    public ContextItemStaticInfo withStatusUnknown() {
+        return new ContextItemStaticInfo(sequenceType, Optionality.OPTIONAL, parentless);
+    }
+
+    public ContextItemStaticInfo withContextSetter(Expression setter) {
+        return new ContextItemStaticInfo(sequenceType, status, parentless);
     }
 
     public void setContextSettingExpression(Expression setter) {
@@ -57,7 +79,7 @@ public class ContextItemStaticInfo {
      */
 
     public ItemType getItemType() {
-        return itemType;
+        return sequenceType.getPrimaryType();
     }
 
     /**
@@ -66,15 +88,7 @@ public class ContextItemStaticInfo {
      */
 
     public UType getContextItemUType() {
-        return itemType.getUType();
-    }
-
-    /**
-     * Set the cardinality of the context value. XPath 4.0 allows the context value to be any sequence
-     * @param cardinality the cardinality of the context value
-     */
-    public void setCardinality(int cardinality) {
-        this.cardinality = cardinality;
+        return getItemType().getUType();
     }
 
     /**
@@ -82,16 +96,11 @@ public class ContextItemStaticInfo {
      * @return the cardinality of the context value
      */
     public int getCardinality() {
-        return cardinality;
+        return sequenceType.getCardinality();
     }
 
-    /**
-     * Ask whether it is possible that the context item is absent
-     * @return true if the context item might be absent
-     */
-
-    public boolean isPossiblyAbsent() {
-        return contextMaybeUndefined;
+    public Optionality getOptionality() {
+        return status;
     }
 
     /**
@@ -125,9 +134,9 @@ public class ContextItemStaticInfo {
      */
 
     public final static ContextItemStaticInfo DEFAULT =
-            new ContextItemStaticInfo(AnyItemType.getInstance(), true);
+            new ContextItemStaticInfo(AnyItemType.getInstance(), Optionality.OPTIONAL);
 
     public final static ContextItemStaticInfo ABSENT =
-            new ContextItemStaticInfo(ErrorType.getInstance(), true);
+            new ContextItemStaticInfo(ErrorType.getInstance(), Optionality.PROHIBITED);
 
 }

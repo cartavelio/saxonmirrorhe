@@ -415,8 +415,7 @@ public class StylesheetPackage extends PackageData {
     public void setContextItemRequirements(GlobalContextRequirement requirement) throws XPathException {
         if (containsGlobalContextItemDeclaration) {
             // the new requirements must be consistent with the existing requirements
-            if ((!requirement.isAbsentFocus() && globalContextRequirement.isAbsentFocus()) ||
-                    (requirement.isMayBeOmitted() && !globalContextRequirement.isMayBeOmitted())) {
+            if ((requirement.getContextValueOptionality() != globalContextRequirement.getContextValueOptionality())) {
                 throw new XPathException(
                         "The package contains two xsl:global-context-item declarations with conflicting @use attributes", "XTSE3087");
             }

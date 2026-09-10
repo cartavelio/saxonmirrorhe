@@ -600,8 +600,10 @@ public final class EvaluateInstr extends Expression {
                     ContextItemStaticInfo cit;
                     if (instr.getContextItemExpr() != null) {
                         cit = config.makeContextItemStaticInfo(
-                                instr.getContextItemExpr().getItemType(),
-                                Cardinality.allowsZero(instr.getContextItemExpr().getCardinality()));
+                                instr.getContextItemExpr().getItemType());
+                        if (Cardinality.allowsZero(instr.getContextItemExpr().getCardinality())) {
+                            cit = cit.withStatusUnknown();
+                        };
                     } else {
                         cit = ContextItemStaticInfo.ABSENT;
                     }

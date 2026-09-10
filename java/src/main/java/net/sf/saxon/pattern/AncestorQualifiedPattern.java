@@ -154,7 +154,8 @@ public final class AncestorQualifiedPattern extends Pattern {
                     step = new AxisExpression(AxisInfo.CHILD, (NodeTest) type);
                 }
                 ExpressionTool.copyLocationInfo(this, step);
-                Expression exp = step.typeCheck(visitor, visitor.getConfiguration().makeContextItemStaticInfo(upperPattern.getItemType(), false));
+                Expression exp = step.typeCheck(visitor,
+                                                visitor.getConfiguration().makeContextItemStaticInfo(upperPattern.getItemType()));
                 refinedItemType = exp.getItemType();
             }
         }
