@@ -204,13 +204,14 @@ public class SaxonOutputKeys {
     /*@NotNull*/ public static final String NEWLINE = "{http://saxon.sf.net/}newline";
 
     /**
-     * stylesheet-version. This serialization parameter is set automatically by the XSLT processor
-     * to the value of the version attribute on the principal stylesheet module. This is because
-     * in backwards compatibility mode (version="1.0") the default output method for an XHTML result
-     * document is XML rather than XHTML.
+     * spec-version. This serialization parameter controls which version of the serialization
+     * specification applies. The default is "3.1", meaning version 3.1. The decimal point
+     * is optional: "31" is treated as "3.1".
+     *
+     * <p>In earlier Saxon releases this parameter was named "stylesheet version".</p>
      */
 
-    /*@NotNull*/ public static final String STYLESHEET_VERSION = "{http://saxon.sf.net/}stylesheet-version";
+    /*@NotNull*/ public static final String SPEC_VERSION = "{http://saxon.sf.net/}spec-version";
 
     /**
      * use-character-map = list-of-qnames.

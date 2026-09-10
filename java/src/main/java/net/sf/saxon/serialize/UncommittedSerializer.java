@@ -139,8 +139,8 @@ public class UncommittedSerializer extends ProxyReceiver {
             if (name.equalsIgnoreCase("html") && uri.isEmpty()) {
                 switchToMethod("html");
             } else if (name.equals("html") && uri.equals(NamespaceUri.XHTML)) {
-                String version = this.properties.getProperties().getProperty(SaxonOutputKeys.STYLESHEET_VERSION);
-                if ("10".equals(version)) {
+                String version = this.properties.getProperties().getProperty(SaxonOutputKeys.SPEC_VERSION);
+                if ("10".equals(version) || "1.0".equals(version)) {
                     switchToMethod("xml");
                 } else {
                     switchToMethod("xhtml");

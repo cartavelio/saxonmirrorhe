@@ -465,6 +465,13 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
 
     public void setDestination(Destination destination) {
         this.destination = destination;
+        if (destination instanceof Serializer serializer &&
+                serializer.getOutputProperty(Serializer.Property.SAXON_SPEC_VERSION) == null) {
+            serializer.setOutputProperty(
+                    Serializer.Property.SAXON_SPEC_VERSION,
+                    expression.getPackageData().getHostLanguageVersion() + "");
+
+        }
     }
 
     /**

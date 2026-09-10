@@ -90,6 +90,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption(sx("recognize-binary"), SequenceType.SINGLE_BOOLEAN); //boolean
         op.addAllowedOption(sx("require-well-formed"), SequenceType.SINGLE_BOOLEAN); //boolean
         op.addAllowedOption(sx("single-quotes"), SequenceType.SINGLE_BOOLEAN); //boolean
+        op.addAllowedOption(sx("spec-version"), SequenceType.SINGLE_STRING);
         op.addAllowedOption(sx("supply-source-locator"), SequenceType.SINGLE_BOOLEAN); //boolean
         return op;
     }
@@ -116,7 +117,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     private final String[] paramNamesSaxon = new String[]{
             "attribute-order", "canonical", "character-representation", "double-space", "indent-spaces", "line-length",
-            /*"next-in-chain",*/ "newline", "property-order", "recognize-binary", "require-well-formed", "single-quotes",
+            /*"next-in-chain",*/ "newline", "property-order", "recognize-binary", "require-well-formed", "spec-version", "single-quotes",
             "supply-source-locator", "suppress-indentation"
     };
 
@@ -179,7 +180,8 @@ public class Serialize extends SystemFunction implements Callable {
         //requiredTypes.put("next-in-chain", SequenceType.SINGLE_STRING); //uri
         requiredTypesSaxon.put("recognize-binary", SequenceType.SINGLE_BOOLEAN); //boolean
         requiredTypesSaxon.put("require-well-formed", SequenceType.SINGLE_BOOLEAN); //boolean
-        requiredTypesSaxon.put("single-quotes", SequenceType.SINGLE_BOOLEAN); //boolean
+        requiredTypesSaxon.put("single-quotes", SequenceType.SINGLE_BOOLEAN);
+        requiredTypesSaxon.put("spec-version", SequenceType.SINGLE_STRING);//boolean
         requiredTypesSaxon.put("supply-source-locator", SequenceType.SINGLE_BOOLEAN); //boolean
         requiredTypesSaxon.put("suppress-indentation", BuiltInAtomicType.QNAME.zeroOrMore());
         //eqnames
@@ -538,6 +540,9 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if (props.getProperty(OutputKeys.OMIT_XML_DECLARATION) == null) {
             props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        }
+        if (props.getProperty(SaxonOutputKeys.SPEC_VERSION) == null) {
+            props.setProperty(SaxonOutputKeys.SPEC_VERSION, getRetainedStaticContext().getPackageData().getHostLanguageVersion() + "");
         }
                                                                                   
         // TODO add more spec-defined defaults here (for both cases)

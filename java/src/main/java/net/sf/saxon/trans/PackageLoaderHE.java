@@ -955,7 +955,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     name = name.substring(1);
                 }
                 String value = propertyElement.getAttributeValue(NamespaceUri.NULL, "value");
-                if (name.startsWith("{http://saxon.sf.net/}") && !name.equals(SaxonOutputKeys.STYLESHEET_VERSION)) {
+                if (name.startsWith("{http://saxon.sf.net/}") && !name.equals(SaxonOutputKeys.SPEC_VERSION)) {
                     needsPELicense("Saxon output properties");
                 }
                 props.setProperty(name, value);

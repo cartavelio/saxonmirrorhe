@@ -59,6 +59,7 @@ public class JSONEmitter {
     private boolean escapeSolidus = true;
     private boolean canonical = false;
     private boolean unfailing = false;
+    private boolean is40 = false;
     private JsonReceiver.EscapeOptions escapeOptions;
     private JsonReceiver.EscapeOptions canonicalEscapeOptions;
 
@@ -66,6 +67,10 @@ public class JSONEmitter {
         config = pipe.getConfiguration();
         setOutputProperties(outputProperties);
         this.writer = writer;
+        String specVn = outputProperties.getProperty(SaxonOutputKeys.SPEC_VERSION);
+        if ("40".equals(specVn) || "4.0".equals(specVn)) {
+            is40 = true;
+        }
     }
 
     /**
@@ -199,12 +204,14 @@ public class JSONEmitter {
             } else if (num.isNaN()) {
                 if (unfailing) {
                     emit("NaN");
+                } else if (is40) {
+                    emit("null");
                 } else {
                     throw new XPathException("JSON has no way of representing NaN", "SERE0020");
                 }
             } else if (Double.isInfinite(num.getDoubleValue())) {
-                if (unfailing) {
-                    emit(num.getDoubleValue() < 0 ? "-INF" : "INF");
+                if (unfailing || is40) {
+                    emit(num.getDoubleValue() < 0 ? "-1e9999" : "1e9999");
                 } else {
                     throw new XPathException("JSON has no way of representing Infinity", "SERE0020");
                 }

@@ -417,7 +417,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         // Gather the output properties
 
         Properties props = gatherOutputProperties(null);
-        props.setProperty(SaxonOutputKeys.STYLESHEET_VERSION, top.getEffectiveVersion() + "");
+        props.setProperty(SaxonOutputKeys.SPEC_VERSION, top.getEffectiveVersion() + "");
         getStylesheetPackage().setDefaultOutputProperties(props);
 
         // Handle named output formats for use at run-time

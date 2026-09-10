@@ -276,5 +276,20 @@ public class XdmArray extends XdmFunctionItem {
         return new XdmArray(result);
     }
 
+    /**
+     * Make an XDM Array whose members are {@code xs:double} values
+     *
+     * @param input the input array of integers
+     * @return an {@link XdmArray} whose members are xs:integer values corresponding one-to-one with the input
+     */
+
+    public static XdmArray makeArray(double[] input) {
+        List<XdmValue> result = new ArrayList<>(input.length);
+        for (double o : input) {
+            result.add(new XdmAtomicValue(o));
+        }
+        return new XdmArray(result);
+    }
+
 }
 

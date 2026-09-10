@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.lib.OutputURIResolver;
 import net.sf.saxon.lib.SaxonOutputKeys;
@@ -326,6 +327,12 @@ public class Serializer extends AbstractDestination {
          * using single quotes (apostrophes) rather than double quotes.
          */
         SAXON_SINGLE_QUOTES(SaxonOutputKeys.SINGLE_QUOTES),
+
+        /**
+         * Set to the version of the serialization specification to be used, for example
+         * "3.1" or "4.0". Defaults to 3.1.
+         */
+        SAXON_SPEC_VERSION(SaxonOutputKeys.SPEC_VERSION),
 
         /**
          * Saxon extension for interfacing with debuggers; indicates that location information is
@@ -823,6 +830,34 @@ public class Serializer extends AbstractDestination {
             throw new SaxonApiException(e);
         }
     }
+
+    /**
+     * Serialize an arbitrary value using this serializer
+     *
+     * <p>The default serialization properties used by this method correspond to the properties used
+     * by an XSLT 3.0 stylesheet with no <code>xsl:output</code> declaration. In particular, the default output
+     * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
+     * encountered.</p>
+     *
+     * @param value The value to be serialized
+     * @return the serialized representation of the value
+     * @throws SaxonApiException if a serialization error occurs
+     * @since 13.0
+     */
+
+    public String serializeToString(XdmValue value) throws SaxonApiException {
+        StringWriter sw = new StringWriter();
+        StreamResult sr = new StreamResult(sw);
+        Configuration config = processor.getUnderlyingConfiguration();
+        SerializationProperties props = new SerializationProperties(getLocallyDefinedProperties(), characterMapIndex);
+        try {
+            QueryResult.serializeSequence(value.getUnderlyingValue().iterate(), config, sr, props);
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+        return sw.toString();
+    }
+
 
     /**
      * Serialize an XdmNode to a string using this serializer

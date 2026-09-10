@@ -1207,7 +1207,7 @@ public class SerializerFactory {
         } else if (key.startsWith("{http://saxon.sf.net/}")) {
             // Some Saxon serialization parameters are recognized in HE if they are used for internal purposes
             switch (key) {
-                case SaxonOutputKeys.STYLESHEET_VERSION:
+                case SaxonOutputKeys.SPEC_VERSION:
                     // return
                     break;
                 case SaxonOutputKeys.PARAMETER_DOCUMENT_BASE_URI:

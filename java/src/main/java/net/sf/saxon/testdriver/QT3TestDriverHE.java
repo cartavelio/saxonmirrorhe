@@ -640,21 +640,11 @@ public class QT3TestDriverHE extends TestDriver {
                             testXqc.setErrorReporter(errorCollector);
                             String decVars = env.paramDecimalDeclarations.toString();
                             if (!decVars.isEmpty()) {
-//                                int x = exp.indexOf("(:%DECL%:)");  // TODO: Mechanism no longer used?
-//                                if (x < 0) {
-                                    exp = decVars + exp;
-//                                } else {
-//                                    exp = exp.substring(0, x) + decVars + exp.substring(x + 13);
-//                                }
+                                exp = decVars + exp;
                             }
                             String vars = env.paramDeclarations.toString();
                             if (!vars.isEmpty()) {
-//                                int x = exp.indexOf("(:%VARDECL%:)");
-//                                if (x < 0) {
                                     exp = vars + exp;
-//                                } else {
-//                                    exp = exp.substring(0, x) + vars + exp.substring(x + 13);
-//                                }
                             }
                             ModuleResolver mr = new ModuleResolver(xpc);
                             mr.setTestCase(testCase);
@@ -755,6 +745,7 @@ public class QT3TestDriverHE extends TestDriver {
                                     if (needSerializedResult) {
                                         StringWriter sw = new StringWriter();
                                         Serializer serializer = env.processor.newSerializer(sw);
+                                        serializer.setOutputProperty(Serializer.Property.SAXON_SPEC_VERSION, langVersion);
                                         selector.setDestination(serializer);
                                         selector.run();
                                         outcome.setPrincipalSerializedResult(sw.toString());
