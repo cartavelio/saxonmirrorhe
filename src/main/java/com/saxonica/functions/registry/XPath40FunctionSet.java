@@ -1,6 +1,6 @@
 package com.saxonica.functions.registry;
 
-import com.saxonica.ee.pin.pin.LabelFn;
+import com.saxonica.functions.qt4.pin.LabelFn;
 import com.saxonica.functions.qt4.*;
 import com.saxonica.functions.qt4.csv.CsvToArrays;
 import com.saxonica.functions.qt4.csv.CsvToXml;

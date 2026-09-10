@@ -1,4 +1,4 @@
-package com.saxonica.functions.qt4.pin.pin;
+package com.saxonica.functions.qt4.pin;
 
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.OperandRole;

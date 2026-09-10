@@ -1,7 +1,7 @@
 package com.saxonica.functions.extfn;
 
-import com.saxonica.ee.pin.pin.LabeledMapItem;
-import com.saxonica.ee.pin.pin.LabeledArrayItem;
+import com.saxonica.functions.qt4.pin.LabeledMapItem;
+import com.saxonica.functions.qt4.pin.LabeledArrayItem;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;

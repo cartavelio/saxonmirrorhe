@@ -1,6 +1,6 @@
 package com.saxonica.expr;
 
-import com.saxonica.ee.pin.pin.LabelTool;
+import com.saxonica.functions.qt4.pin.LabelTool;
 import com.saxonica.functions.extfn.PinFn;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
