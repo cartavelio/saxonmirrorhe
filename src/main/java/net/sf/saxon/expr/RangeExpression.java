@@ -36,27 +36,9 @@ import java.util.function.Supplier;
 
 public class RangeExpression extends Expression {
 
-    private Operand start;
-    private Operand step;
-    private Operand end;
+    private final Operand start;
+    private final Operand end;
     private boolean defaultedStep;
-
-    /**
-     * Construct a stepping range expression of the form S by B. If S is a RangeExpression,
-     * we collapse this into a 3-operand RangeExpression. If S is anything else, we generate
-     * a function call saxon:_step-over-sequence(S, B). Experimental feature.
-     * @param lhs the first operand
-     * @param rhs the second operand
-     * @return the constructed expression
-     * @throws XPathException if not valid
-     */
-
-    public static RangeExpression makeSteppingExpression(Expression lhs, Expression rhs) throws XPathException {
-        if (!(lhs instanceof RangeExpression && ((RangeExpression)lhs).defaultedStep)) {
-            throw new XPathException("Temporary restriction: 'by' operator must be preceded by 'x to y'");
-        }
-        return new RangeExpression(((RangeExpression) lhs).getStartExpression(), rhs, ((RangeExpression) lhs).getEndExpression());
-    }
 
     public boolean isDefaultedStep() {
         return defaultedStep;
@@ -69,33 +51,14 @@ public class RangeExpression extends Expression {
      */
 
     public RangeExpression(Expression start, Expression end) {
-        this(start, new Literal(Int64Value.PLUS_ONE), end);
-        defaultedStep = true;
-    }
-
-    /**
-     * Construct a RangeExpression with specified increment
-     *
-     * @param start expression that computes the start of the range
-     * @param step expression to compute interval between successive values
-     * @param end   expression that computes the end of the range
-     */
-
-    public RangeExpression(Expression start, Expression step, Expression end) {
         this.start = new Operand(this, start, OperandRole.SINGLE_ATOMIC);
-        this.step = new Operand(this, step, OperandRole.SINGLE_ATOMIC);
         this.end = new Operand(this, end, OperandRole.SINGLE_ATOMIC);
         adoptChildExpression(start);
-        adoptChildExpression(step);
         adoptChildExpression(end);
     }
 
     public Expression getStartExpression() {
         return start.getChildExpression();
-    }
-
-    public Expression getStepExpression() {
-        return step.getChildExpression();
     }
 
     public Expression getEndExpression() {
@@ -110,7 +73,6 @@ public class RangeExpression extends Expression {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         start.typeCheck(visitor, contextInfo);
-        step.typeCheck(visitor, contextInfo);
         end.typeCheck(visitor, contextInfo);
 
         boolean backCompat = visitor.getStaticContext().isInBackwardsCompatibleMode();
@@ -118,10 +80,6 @@ public class RangeExpression extends Expression {
         Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 0);
         start.setChildExpression(tc.staticTypeCheck(
                 getStartExpression(), SequenceType.OPTIONAL_INTEGER, role0, visitor));
-
-        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "by", 1);
-        step.setChildExpression(tc.staticTypeCheck(
-                getStepExpression(), SequenceType.OPTIONAL_INTEGER, role1, visitor));
 
         Supplier<RoleDiagnostic> role2 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "to", 1);
         end.setChildExpression(tc.staticTypeCheck(
@@ -149,7 +107,6 @@ public class RangeExpression extends Expression {
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         start.optimize(visitor, contextInfo);
-        step.optimize(visitor, contextInfo);
         end.optimize(visitor, contextInfo);
         return makeConstantRange();
 
@@ -168,34 +125,30 @@ public class RangeExpression extends Expression {
      */
     @Override
     public Iterable<Operand> operands() {
-        return operandList(start, step, end);
+        return operandList(start, end);
     }
 
     private Expression makeConstantRange() throws XPathException {
         if (getStartExpression() instanceof Literal
-                && getStepExpression() instanceof Literal
                 && getEndExpression() instanceof Literal) {
             Expression result;
             GroundedValue v0 = ((Literal) getStartExpression()).getGroundedValue();
-            GroundedValue v1 = ((Literal) getStepExpression()).getGroundedValue();
             GroundedValue v2 = ((Literal) getEndExpression()).getGroundedValue();
-            if (v0.getLength()==0 || v1.getLength()==0 || v2.getLength()==0) {
+            if (v0.getLength()==0 || v2.getLength()==0) {
                 result = Literal.makeEmptySequence();
-            } else if (v0 instanceof Int64Value && v1 instanceof Int64Value && v2 instanceof Int64Value) {
+            } else if (v0 instanceof Int64Value && v2 instanceof Int64Value) {
                 long i0 = ((Int64Value) v0).longValue();
-                long i1 = ((Int64Value) v1).longValue();
                 long i2 = ((Int64Value) v2).longValue();
-                if (i1 == 0 || i0 > i2) {
+                if (i0 > i2) {
                     result = Literal.makeEmptySequence();
                 } else {
-                    if (Math.abs((i2 - i0)/i1) > Integer.MAX_VALUE) {
+                    if (Math.abs((i2 - i0)) > Integer.MAX_VALUE) {
                         throw new XPathException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE, "XPDY0130");
                     }
-                    result = Literal.makeLiteral(i1 < 0 ? new IntegerRange(i2, i1, i0) : new IntegerRange(i0, i1, i2), this);
+                    result = Literal.makeLiteral(new IntegerRange(i0, 1, i2), this);
                 }
             } else {
                 BigInteger i0 = ((IntegerValue) v0).asBigInteger();
-                BigInteger i1 = ((IntegerValue) v1).asBigInteger();
                 BigInteger i2 = ((IntegerValue) v2).asBigInteger();
                 if (i0.equals(BigInteger.ZERO) || i0.compareTo(i2) > 0) {
                     result = Literal.makeEmptySequence();
@@ -283,7 +236,6 @@ public class RangeExpression extends Expression {
     public Expression copy(RebindingMap rebindings) {
         RangeExpression exp = new RangeExpression(
                 getStartExpression().copy(rebindings),
-                getStepExpression().copy(rebindings),
                 getEndExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
@@ -335,12 +287,10 @@ public class RangeExpression extends Expression {
         if (other instanceof RangeExpression && hasCompatibleStaticContext((Expression) other)) {
             RangeExpression b = (RangeExpression) other;
             Expression start1 = getStartExpression();
-            Expression step1 = getStepExpression();
             Expression end1 = getEndExpression();
             Expression start2 = b.getStartExpression();
-            Expression step2 = b.getStepExpression();
             Expression end2 = b.getEndExpression();
-            return start1.equals(start2) && step1.equals(step2) && end1.equals(end2);
+            return start1.equals(start2) && end1.equals(end2);
         }
         return false;
     }
@@ -352,7 +302,7 @@ public class RangeExpression extends Expression {
      */
     @Override
     protected int computeHashCode() {
-        return getStartExpression().hashCode() ^ (getStepExpression().hashCode()<<3) ^ (getEndExpression().hashCode()<<7);
+        return getStartExpression().hashCode() ^ (getEndExpression().hashCode()<<7);
     }
 
     /**
@@ -370,16 +320,12 @@ public class RangeExpression extends Expression {
      */
     @Override
     public String toString() {
-        String by = getStepExpression().toString();
-        return getStartExpression().toString() + " to " + getEndExpression().toString()
-                + (by.equals("1") ? "" : (" by " + by));
+        return getStartExpression().toString() + " to " + getEndExpression().toString();
     }
 
     @Override
     public String toShortString() {
-        String by = getStepExpression().toShortString();
-        return getStartExpression().toShortString() + " to " + getEndExpression().toShortString()
-                + (by.equals("1") ? "" : (" by " + by));
+        return getStartExpression().toShortString() + " to " + getEndExpression().toShortString();
     }
 
     /**
@@ -405,9 +351,8 @@ public class RangeExpression extends Expression {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         IntegerValue av1 = (IntegerValue) getStartExpression().evaluateItem(context);
-        IntegerValue av2 = (IntegerValue) getStepExpression().evaluateItem(context);
         IntegerValue av3 = (IntegerValue) getEndExpression().evaluateItem(context);
-        return AscendingRangeIterator.makeRangeIterator(av1, av2, av3);
+        return AscendingRangeIterator.makeRangeIterator(av1, Int64Value.PLUS_ONE, av3);
     }
 
     @Override
@@ -420,13 +365,11 @@ public class RangeExpression extends Expression {
         public PullEvaluator elaborateForPull() {
             RangeExpression expr = (RangeExpression) getExpression();
             ItemEvaluator iv1 = expr.getStartExpression().makeElaborator().elaborateForItem();
-            ItemEvaluator iv2 = expr.getStepExpression().makeElaborator().elaborateForItem();
             ItemEvaluator iv3 = expr.getEndExpression().makeElaborator().elaborateForItem();
             return (context) -> {
                 IntegerValue av1 = (IntegerValue) iv1.eval(context);
-                IntegerValue av2 = (IntegerValue) iv2.eval(context);
                 IntegerValue av3 = (IntegerValue) iv3.eval(context);
-                return AscendingRangeIterator.makeRangeIterator(av1, av2, av3);
+                return AscendingRangeIterator.makeRangeIterator(av1, Int64Value.PLUS_ONE, av3);
             };
         }
 

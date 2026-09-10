@@ -15,7 +15,7 @@ import net.sf.saxon.value.*;
 /**
  * An Iterator that produces numeric values in a monotonic sequence,
  * ascending or descending. Applying the reverse() function will produce
- * a DescendinggRangeIterator.
+ * a DescendingRangeIterator.
  */
 
 public class AscendingRangeIterator extends RangeIterator implements AtomicIterator,
@@ -28,6 +28,8 @@ public class AscendingRangeIterator extends RangeIterator implements AtomicItera
     long step;
     long currentValue;
     long limit;
+
+    // TODO: the step is currently always +1.
 
     public static AtomicIterator makeRangeIterator(IntegerValue start, IntegerValue step, IntegerValue end) throws XPathException {
         if (start == null || step == null || end == null) {

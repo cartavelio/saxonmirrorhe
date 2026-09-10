@@ -2305,7 +2305,7 @@ public class XQueryParser extends XPathParser {
                 List<SortSpec> sortSpecList;
                 t.setState(Tokenizer.BARE_NAME_STATE);
                 nextToken();
-                if (!(t.currentToken == Token.BY || isKeyword("by"))) {
+                if (!isKeyword("by")) {
                     grumble("'order' must be followed by 'by'");
                 }
                 t.setState(Tokenizer.DEFAULT_STATE);
