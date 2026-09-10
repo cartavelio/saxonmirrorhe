@@ -608,9 +608,7 @@ public class FLWORExpression extends Expression {
         return this;
     }
 
-    private static class WhereClauseStruct {
-        int whereIndex = 0;
-        WhereClause whereClause;
+    private record WhereClauseStruct(WhereClause whereClause, int whereIndex) {
     }
 
     /**
@@ -631,19 +629,18 @@ public class FLWORExpression extends Expression {
 
         for (Clause c : clauses) {
             if (c instanceof WhereClause) {
-                WhereClauseStruct wStruct = new WhereClauseStruct();
-                wStruct.whereClause = (WhereClause) c;
+                WhereClauseStruct wStruct = new WhereClauseStruct((WhereClause) c, clauses.size() - whereIndex);
 
-                //keep track of whereclause from the end of the list of clauses.
-                //We are always attempting to rewrite whereclauses from left to right,
-                // therefore index will always be in snyc
-                wStruct.whereIndex = clauses.size() - whereIndex;
+                // keep track of where clause from the end of the list of clauses.
+                // We are always attempting to rewrite where clauses from left to right,
+                // therefore index will always be in sync
+
                 whereList.add(wStruct);
             }
             whereIndex++;
         }
 
-        if (whereList.size() == 0) {
+        if (whereList.isEmpty()) {
             return null;
         }
 

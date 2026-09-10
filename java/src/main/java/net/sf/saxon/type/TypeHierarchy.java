@@ -191,39 +191,12 @@ public class TypeHierarchy {
         return s;
     }
 
-
-    private static class ItemTypePair {
-        ItemType s;
-        ItemType t;
-
-        public ItemTypePair(ItemType s, ItemType t) {
-            this.s = s;
-            this.t = t;
-        }
-
-        /**
-         * Returns a hash code value for the object.
-         *
-         * @return a hash code value for this object.
-         * @see Object#equals(Object)
-         * @see java.util.Hashtable
-         */
-        public int hashCode() {
-            return s.hashCode() ^ t.hashCode();
-        }
-
-        /**
-         * Indicates whether some other object is "equal to" this one.
-         */
-
-        public boolean equals(Object obj) {
-            if (obj instanceof ItemTypePair) {
-                final ItemTypePair pair = (ItemTypePair) obj;
-                return s.equals(pair.s) && t.equals(pair.t);
-            } else {
-                return false;
-            }
-        }
+    /**
+     * A pair of item types, used as a cache key
+     * @param s one item type
+     * @param t another item type
+     */
+    private record ItemTypePair (ItemType s, ItemType t) {
     }
 
 

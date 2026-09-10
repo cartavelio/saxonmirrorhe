@@ -233,27 +233,13 @@ public class AccumulatorData implements IAccumulatorData {
             return search(mid + 1, end, sought);
         }
 
-        // 9.6:
-//        int mid = (start + end) / 2;
-//        if (sought.compareTo(values.get(mid).visit) <= 0) {
-//            return search(start, mid, sought);
-//        } else {
-//            return search(mid + 1, end, sought);
-//        }
     }
 
     /**
      * Class representing one of the two visits to a node during a tree-walk
      */
 
-    private static class Visit implements Comparable<Visit> {
-        public NodeInfo node;
-        public boolean isPostDescent;
-
-        public Visit(NodeInfo node, boolean isPostDescent) {
-            this.node = node;
-            this.isPostDescent = isPostDescent;
-        }
+    private record Visit (NodeInfo node, boolean isPostDescent) implements Comparable<Visit> {
 
         /**
          * Compare the order of two node visits.
@@ -265,24 +251,14 @@ public class AccumulatorData implements IAccumulatorData {
         @Override
         public int compareTo(Visit other) {
             int relation = Navigator.comparePosition(node, other.node);
-            switch (relation) {
-                case AxisInfo.SELF:
-                    if (isPostDescent == other.isPostDescent) {
-                        return 0;
-                    } else {
-                        return isPostDescent ? +1 : -1;
-                    }
-                case AxisInfo.PRECEDING:
-                    return -1;
-                case AxisInfo.FOLLOWING:
-                    return +1;
-                case AxisInfo.ANCESTOR:
-                    return isPostDescent ? +1 : -1;
-                case AxisInfo.DESCENDANT:
-                    return other.isPostDescent ? -1 : +1;
-                default:
-                    throw new IllegalStateException();
-            }
+            return switch (relation) {
+                case AxisInfo.SELF -> (isPostDescent == other.isPostDescent) ? 0 : (isPostDescent ? +1 : -1);
+                case AxisInfo.PRECEDING -> -1;
+                case AxisInfo.FOLLOWING -> +1;
+                case AxisInfo.ANCESTOR -> isPostDescent ? +1 : -1;
+                case AxisInfo.DESCENDANT -> other.isPostDescent ? -1 : +1;
+                default -> throw new IllegalStateException();
+            };
         }
     }
 
@@ -290,14 +266,7 @@ public class AccumulatorData implements IAccumulatorData {
      * Class representing a value of the accumulator immediately after a particular visit to a node.
      */
 
-    private static class DataPoint {
-        public Visit visit;
-        public Sequence value;
-
-        public DataPoint(Visit visit, Sequence value) {
-            this.visit = visit;
-            this.value = value;
-        }
+    private record DataPoint(Visit visit, Sequence value) {
     }
 
 }

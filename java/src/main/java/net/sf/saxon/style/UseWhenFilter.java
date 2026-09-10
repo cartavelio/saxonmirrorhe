@@ -213,6 +213,13 @@ public class UseWhenFilter extends ProxyReceiver {
         return false;
     }
 
+    /**
+     * Get the effective version, as defined by [xsl]:version attributes in the stylesheet
+     * @param pa the attributes of the current element
+     * @param fp the fingerprint of the name of the current element
+     * @return the effective version
+     * @throws XPathException if things go wrong (for example, bad version attribute)
+     */
     private int getVersion(ParsedAttributes pa, int fp) throws XPathException {
         int version = Integer.MIN_VALUE;
         if (pa.versionAtt != null && fp != StandardNames.XSL_OUTPUT) {
@@ -385,7 +392,8 @@ public class UseWhenFilter extends ProxyReceiver {
                 case StandardNames.XSL_STYLESHEET:
                 case StandardNames.XSL_TRANSFORM:
                 case StandardNames.XSL_PACKAGE:
-                    if (getVersion(pa, fp) >= 40) {
+                    int processorVersion = compilation.getCompilerInfo().getXsltVersion();
+                    if (processorVersion >= 40) {
                         String fixedNamespacesAtt = attributes.getValue("fixed-namespaces");
                         if (fixedNamespacesAtt != null) {
                             fixedNamespaces = parseFixedNamespacesAtt(fixedNamespacesAtt, namespaces, baseUri);
@@ -415,7 +423,8 @@ public class UseWhenFilter extends ProxyReceiver {
                     // We need to process the included/imported stylesheet now, because its static variables
                     // can be used later in this module
                     String href = attributes.getValue("href");
-                    boolean is40 = getVersion(pa, fp) >= 40;
+                    int processorVersion = compilation.getCompilerInfo().getXsltVersion();
+                    boolean is40 = processorVersion >= 40;
                     boolean isImport = fp == StandardNames.XSL_IMPORT;
                     includedDoc = processIncludeImport(elemName, location, baseUri, href, isImport, is40);
                     break;

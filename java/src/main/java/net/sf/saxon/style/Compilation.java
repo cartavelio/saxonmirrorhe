@@ -36,25 +36,21 @@ import java.util.*;
  */
 public class Compilation {
 
-    private static class ModuleInfo {
-        DocumentKey key;
-        NestedIntegerValue precedence;
-        public ModuleInfo(DocumentKey key, NestedIntegerValue precedence) {
-            this.key = key;
-            this.precedence = precedence;
-        }
+    /**
+     * Information about a stylesheet module
+     * @param key URI-based unique identifier for the module
+     * @param precedence precedence of the module
+     */
+    private record ModuleInfo(DocumentKey key, NestedIntegerValue precedence) {
+    }
 
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof ModuleInfo
-                    && ((ModuleInfo) obj).key.equals(this.key)
-                    && ((ModuleInfo) obj).precedence.equals(this.precedence);
-        }
-
-        @Override
-        public int hashCode() {
-            return key.hashCode() ^ precedence.hashCode();
-        }
+    /**
+     * Information about a static variable or parameter
+     * @param value the value of the variable
+     * @param precedence the import precedence of the variable
+     * @param isParam true if this is a parameter, falso for a variable.
+     */
+    private record ValueAndPrecedence(GroundedValue value, NestedIntegerValue precedence, boolean isParam) {
     }
 
     // diagnostic switch to control output of timing information
@@ -81,17 +77,7 @@ public class Compilation {
     public Timer timer = null;
     private HashSet<ModuleInfo> loadedModules = new HashSet<>();
 
-    private static class ValueAndPrecedence {
-        public ValueAndPrecedence(GroundedValue v, NestedIntegerValue p, boolean isParam) {
-            this.value = v;
-            this.precedence = p;
-            this.isParam = isParam;
-        }
 
-        public GroundedValue value;
-        public NestedIntegerValue precedence;
-        public boolean isParam;
-    }
 
     /**
      * Create a compilation object ready to perform an XSLT compilation
