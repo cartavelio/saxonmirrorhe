@@ -3,7 +3,7 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.resource.Loader;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -27,7 +27,7 @@ public class ReadBinaryResource extends SystemFunction {
             InputStream stream;
             try {
                 URL url = new URL(arg);
-                stream = Loader.urlStream(url);
+                stream = ResourceLoader.urlStream(url);
             } catch (RuntimeException e) {
                 throw new XPathException("saxon:read-binary-resource - invalid or inaccessible URL " + arg, SaxonErrorCode.SXJE0053);
             }

@@ -6,7 +6,7 @@ import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.resource.Loader;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.EmptySequence;
@@ -71,7 +71,7 @@ public class LastModified extends SystemFunction {
         }
         long lastMod;
         try {
-            URLConnection connection = Loader.urlConnection(absoluteURL);
+            URLConnection connection = ResourceLoader.urlConnection(absoluteURL);
             lastMod = connection.getLastModified();
         } catch (IOException e) {
             XPathException err = new XPathException("Cannot read from URI supplied to saxon:last-modified(). Base='"
