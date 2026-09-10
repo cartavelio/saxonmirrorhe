@@ -104,6 +104,9 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
     @get:InputFile
     abstract val sourceJar: RegularFileProperty
 
+    @get:InputDirectory
+    abstract val libsaxoncIncludeDir: DirectoryProperty
+
     @get:Input
     abstract val specifiedArgs: ListProperty<String>
 
@@ -205,6 +208,7 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
             "-H:Log=registerResource:3",
             "-H:+AddAllCharsets",
             "-Dfile.encoding=UTF-8",
+            "-Dlibsaxonc.include_path=${libsaxoncIncludeDir.get().asFile.absolutePath}",
             "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
             "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
             "--trace-class-initialization=jdk.xml.internal.SecuritySupport",

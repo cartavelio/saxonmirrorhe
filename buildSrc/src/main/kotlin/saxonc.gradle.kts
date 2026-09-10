@@ -52,6 +52,11 @@ fun javaEditionProject(edition: String): String {
     return if (edition == "ee") ":java" else ":java:${edition}"
 }
 
+val libsaxoncSourceIncludeDirBucket by configurations.dependencyScope("libsaxoncSourceIncludeDirBucket")
+val libsaxoncSourceIncludeDir by configurations.resolvable("libsaxoncSourceIncludeDir") {
+    extendsFrom(libsaxoncSourceIncludeDirBucket)
+}
+
 dependencies {
     javaRuntime(extension.edition.map { edition ->
         project(path = javaEditionProject(edition), configuration = "runtimeElements")
@@ -64,6 +69,9 @@ dependencies {
     })
     javaResources(extension.edition.map { edition ->
         project(path = javaEditionProject(edition), configuration = "resources")
+    })
+    libsaxoncSourceIncludeDirBucket(extension.edition.map { edition ->
+        project(path = ":libsaxonc:${edition}", configuration = "sourceIncludeDir")
     })
 
     javaDependencies
@@ -237,6 +245,7 @@ fun setupConfigTasks(config: String, debug: Boolean, taskBlock: Action<Task>): T
         version = saxonBuild.version
         majorVersion = saxonBuild.majorVersion
         macosx_min_version = saxonBuild.macosx_min_version
+        libsaxoncIncludeDir = libsaxoncSourceIncludeDir.elements.map { it.first().asFile }
         this.debug = debug
         specifiedArgs = saxonBuild.targetHost.map {
             if (it.isWindows && it.isX86_64) listOf("-march=x86-64-v1") else listOf()

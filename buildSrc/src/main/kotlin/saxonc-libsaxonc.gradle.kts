@@ -58,6 +58,7 @@ val saxonCCoreJavaSrcDir by configurations.resolvable("saxonCCoreJavaSrcDir") {
 }
 
 project.layout.projectDirectory.dir("src/include")
+val sourceIncludeDir by configurations.consumable("sourceIncludeDir")
 val includeDir by configurations.consumable("includeDir")
 val libDir by configurations.consumable("libDir")
 val releaseArtifactsDir by configurations.consumable("releaseArtifactsDir")
@@ -428,6 +429,7 @@ val release = tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
     dependsOn(if (saxonBuild.targetHost.get().isWindows) releaseZipWindowsTask else releaseZipUnicesTask)
 }
 
+sourceIncludeDir.outgoing.artifact(layout.projectDirectory.dir("../src/include"))
 libDir.outgoing.artifact(stagingPath.map { it.dir("lib") }) { builtBy(stage) }
 includeDir.outgoing.artifact(stagingPath.map { it.dir("include") }) { builtBy(stage) }
 releaseArtifactsDir.outgoing.artifact(stagingPath) { builtBy(stage) }
