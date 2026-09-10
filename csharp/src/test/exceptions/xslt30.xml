@@ -1,0 +1,84 @@
+<exceptions>
+  
+  <exception test-case="su-absorbing-204" run="false" report="error">
+    <created by="Norm Tovey-Walsh" on="2026-01-22"/>
+    <reason>Work around temporary stack overflow</reason>
+  </exception>
+
+  <!--<exception test-case="function-available-1008" run="false" report="bug">
+    <created by="Michael Kay" on="2021-10-01"/>
+    <reason>Saxon 11 wrongly accepts concat#0 (and other 4.0 functions?) when 4.0 is not enabled</reason>
+  </exception>-->
+  
+  <exception test-case="for-each-group-068" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>
+      The test is specifically testing non-transitivity of grouping, which is acknowledged
+      as a bug in the spec, fixed in version 4.0. We decided to fix the bug and make 
+      grouping use a transitive equality comparison whether or not 4.0 conformance is requested.</reason>
+  </exception>
+  
+  <exception test-case="package-017" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>Bug 29233</reason>
+  </exception>
+  
+  <exception test-case="package-018" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>Bug 29233</reason>
+  </exception>
+  
+  <exception test-case="package-908" run="false" report="disputed">
+    <created by="Michael Kay" on="2015-11-02"/>
+    <reason>Bug 29234</reason>
+  </exception>
+
+  <exception test-case="regex-syntax-0986" run="false" report="tooBig">
+    <created by="Michael Kay" on="2012-11-05"/>
+    <reason>Slow running</reason>
+  </exception>
+  
+  <exception test-case="regex-syntax-0987" run="false" report="tooBig">
+    <created by="Michael Kay" on="2012-11-05"/>
+    <reason>Slow running</reason>
+  </exception>
+  
+ 
+  <exception test-case="override-f-029" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2016-02-14"/>
+    <reason>Saxon bug 2781</reason>
+  </exception>
+  
+  <exception test-case="si-group-064" run="false" report="Not implemented">
+    <created by="Michael Kay" on="2020-09-09"/>
+    <reason>The streaming spec allows calling last() on a grounding consuming sequence but we don't know how to implement this.</reason>
+  </exception>
+  
+  <exception test-case="stream-001" run="true" strict="no">
+    <created by="Michael Kay" on="2022-05-12"/>
+    <reason>Not reporting early exit because the streamed input isn't actually read.</reason>
+  </exception>
+  
+  <exception test-case="stream-005" run="true" strict="no">
+    <created by="Michael Kay" on="2022-05-12"/>
+    <reason>We make no attempt to exit early.</reason>
+  </exception>
+  
+  <exception test-case="sort-079" run="false" edition="HE">
+    <created by="Michael Kay" on="2023-02-02"/>
+    <reason>Saxon-HE sorts this one incorrectly because of Java collations.</reason>
+  </exception>
+  
+  <exception test-case="docbook-001" run="false" edition="HE">
+    <created by="Michael Kay" on="2023-02-02"/>
+    <reason>Stylesheet says "Can't make chunks with Saxonica's processor. Uses saxon:output which required PE.</reason>
+  </exception>
+  
+  <!--<exception test-case="function-available-1017" run="false" report="bug">
+    <created by="Michael Kay" on="2022-08-15"/>
+    <reason>We report map:key-value-pairs as available though it shouldn't be available with a 3.0 processor.</reason>
+  </exception>-->
+
+
+</exceptions>
+  
