@@ -1471,7 +1471,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             return parser;
         } else {
             XPathParser parser = super.newExpressionParser(language, updating, env);
-            parser.setAccelerator(new QuickXPathParser());
+            if (isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
+                parser.setAccelerator(new QuickXPathParser());
+            }
             return parser;
         }
     }
