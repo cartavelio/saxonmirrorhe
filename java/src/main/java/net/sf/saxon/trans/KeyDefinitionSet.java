@@ -7,7 +7,10 @@
 
 package net.sf.saxon.trans;
 
+import net.sf.saxon.expr.sort.AtomicMatchKeyMaker;
+import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.type.UType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -168,6 +171,29 @@ public class KeyDefinitionSet {
 
     public boolean isReusable() {
         return reusable;
+    }
+
+    /**
+     * Get a function to compute a match key for any given atomic value.
+     * This function is used during retrieval (that is, evaluation of
+     * the key() function).
+     *
+     * @param timezone the implicit timezone (an offset in minutes).
+     * @return a function to compute a match key for a given atomic value
+     */
+
+    public AtomicMatchKeyMaker getMatchKeyMaker(int timezone) {
+        if (keyDefinitions.size() == 1) {
+            return keyDefinitions.get(0).getMatchKeyMaker(timezone);
+        }
+        int xpathVersion = keyDefinitions.get(0).getXPathVersion();
+        StringCollator collation = keyDefinitions.get(0).getCollation();
+        if (xpathVersion >= 40) {
+            return a -> UType.STRING_LIKE.subsumes(a.getUType())
+                    ? collation.getCollationKey(a.getUnicodeStringValue())
+                    : a.asMapKey(xpathVersion);
+        }
+        return a -> a.getXPathMatchKey(collation, timezone, xpathVersion);
     }
 }
 

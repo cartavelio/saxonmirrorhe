@@ -13,6 +13,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.SlotManager;
+import net.sf.saxon.expr.sort.AtomicMatchKeyMaker;
+import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.StructuredQName;
@@ -22,6 +24,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.value.AtomicValue;
 
 import java.util.Map;
 
@@ -42,6 +45,7 @@ public class KeyDefinition extends Actor implements ContextOriginator {
     private boolean rangeKey = false;
     private boolean composite = false;
     private PullEvaluator useExpressionEvaluator;
+    private final int xpathVersion;
 
     /**
      * Constructor to create a key definition
@@ -57,8 +61,9 @@ public class KeyDefinition extends Actor implements ContextOriginator {
         this.symbolicName = symbolicName;
         this.match = match;
         setBody(use);
-        this.collation = collation;
-        this.collationName = collationName;
+        this.collation = collation == null ? CodepointCollator.getInstance() : collation;
+        this.collationName = collationName == null ? NamespaceConstant.CODEPOINT_COLLATION_URI : collationName;
+        this.xpathVersion = use.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
     }
 
     /**
@@ -111,6 +116,54 @@ public class KeyDefinition extends Actor implements ContextOriginator {
     public boolean isComposite() {
         return composite;
     }
+
+    /**
+     * Get the XPath version (times ten)
+     * @return 30 for 3.0, 40 for 4.0
+     */
+
+    public int getXPathVersion() {
+        return xpathVersion;
+    }
+
+    /**
+     * Get a function to compute a match key for any given atomic value, following
+     * the rules of this key definition. Note that the KeyDefinition exists statically,
+     * and it contains some of the information required (the collation, the XPath version).
+     * But part of the calculation may depend on the implicit timezone, which is only
+     * known dynamically: the timezone is therefore supplied as a parameter.
+     *
+     * <p>This match key function is associated with this particular key definition,
+     * and can be used when constructing the index. It can also be used when retrieving
+     * from the index in the common case where a KeyDefinitionSet consists of
+     * a single key definition. In more complex cases (a KeyDefinitionSet derived
+     * from multiple xsl:key declarations) a more general match key function may
+     * be needed. </p>
+     * @param timezone the implicit timezone (an offset in minutes).
+     * @return a function to compute a match key for a given atomic value
+     */
+
+     public AtomicMatchKeyMaker getMatchKeyMaker(int timezone) {
+         if (xpathVersion < 40) {
+             return a -> a.getXPathMatchKey(collation, timezone, xpathVersion);
+         } else if (!UType.STRING_LIKE.overlaps(getIndexedItemType().getUType())) {
+             return a -> a.asMapKey(40);
+         } else if (collationName.equals(NamespaceConstant.CODEPOINT_COLLATION_URI)) {
+             if (UType.STRING_LIKE.subsumes(getIndexedItemType().getUType())) {
+                 return AtomicValue::getUnicodeStringValue;
+             }
+             return a -> UType.STRING_LIKE.subsumes(a.getUType())
+                                         ? a.getUnicodeStringValue()
+                                         : a.asMapKey(xpathVersion);
+         } else {
+             if (UType.STRING_LIKE.subsumes(getIndexedItemType().getUType())) {
+                 return a -> collation.getCollationKey(a.getUnicodeStringValue());
+             }
+             return a -> UType.STRING_LIKE.subsumes(a.getUType())
+                                            ? collation.getCollationKey(a.getUnicodeStringValue())
+                                            : a.asMapKey(xpathVersion);
+         }
+     }
 
     /**
      * Set the primitive item type of the values returned by the use expression

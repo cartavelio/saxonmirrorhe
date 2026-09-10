@@ -20,6 +20,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.QNameValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +104,17 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         if (arguments[0] instanceof StringLiteral && staticKeySet == null) {
             KeyManager keyManager = getKeyManager();
             String keyName = ((StringLiteral) arguments[0]).stringify();
-            staticKeySet = getKeyDefinitionSet(keyManager, keyName);
+            try {
+                StructuredQName qName = StructuredQName.fromLexicalQName(
+                        keyName, false, StructuredQName.QUPL,
+                        getNamespaceResolver());
+                staticKeySet = getKeyDefinitionSet(keyManager, qName);
+            } catch (XPathException err) {
+                throw new XPathException("Invalid key name: " + err.getMessage(), "XTDE1260");
+            }
+        } else if (arguments[0] instanceof Literal lit && lit.getGroundedValue() instanceof QNameValue q) {
+            KeyManager keyManager = getKeyManager();
+            staticKeySet = getKeyDefinitionSet(keyManager, q.getStructuredQName());
         }
         return null;
     }
@@ -134,7 +145,20 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         KeyDefinitionSet selectedKeySet = staticKeySet;
         KeyManager keyManager = getKeyManager();
         if (selectedKeySet == null) {
-            selectedKeySet = getKeyDefinitionSet(keyManager, arguments[0].head().getStringValue());
+            AtomicValue keyName = (AtomicValue) arguments[0].head();
+            StructuredQName qName;
+            if (keyName instanceof QNameValue) {
+                qName = ((QNameValue) keyName).getStructuredQName();
+            } else {
+                try {
+                    qName = StructuredQName.fromLexicalQName(
+                            keyName.getStringValue(), false, StructuredQName.QUPL,
+                            getNamespaceResolver());
+                } catch (XPathException err) {
+                    throw new XPathException("Invalid key name: " + err.getMessage(), "XTDE1260");
+                }
+            }
+            selectedKeySet = getKeyDefinitionSet(keyManager, qName);
         }
         return search(keyManager, context, arguments[1], origin, selectedKeySet);
 
@@ -170,17 +194,9 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         return arg2;
     }
 
-    private KeyDefinitionSet getKeyDefinitionSet(KeyManager keyManager, String keyName) throws XPathException {
+    private KeyDefinitionSet getKeyDefinitionSet(KeyManager keyManager, StructuredQName keyName) throws XPathException {
         KeyDefinitionSet selectedKeySet;
-        StructuredQName qName = null;
-        try {
-            qName = StructuredQName.fromLexicalQName(
-                    keyName, false, StructuredQName.QUPL,
-                    getNamespaceResolver());
-        } catch (XPathException err) {
-            throw new XPathException("Invalid key name: " + err.getMessage(), "XTDE1260");
-        }
-        selectedKeySet = keyManager.getKeyDefinitionSet(qName);
+        selectedKeySet = keyManager.getKeyDefinitionSet(keyName);
         if (selectedKeySet == null) {
             throw new XPathException("Key '" + keyName + "' has not been defined", "XTDE1260");
         }
