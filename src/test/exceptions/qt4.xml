@@ -3,46 +3,22 @@
 <exceptions>
 
    <!--<exception test-set="fn-deep-equal" 
-      test-case="deep-equal-40-functions-001
-      deep-equal-40-functions-002
-      deep-equal-40-functions-003
-      deep-equal-40-functions-004
-      deep-equal-40-functions-005
-      deep-equal-40-functions-006
-      deep-equal-40-functions-007" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-24"/>
-      <reason>change for comparing function items not yet implemented</reason>
+      test-case="  deep-equal-40-functions-004
+      deep-equal-40-unordered-004
+      deep-equal-40-unordered-005
+      deep-equal-40-unordered-011
+      deep-equal-40-unordered-012
+      deep-equal-40-unordered-013
+      deep-equal-40-unordered-014
+      deep-equal-40-unordered-018
+      deep-equal-40-unordered-021
+      deep-equal-40-unordered-022
+      deep-equal-40-unordered-024
+      deep-equal-40-unordered-error" run="false" report="n/a">
+      <created by="Michael Kay" on="2024-01-08"/>
+      <reason>change for unordered comparison not yet implemented</reason>
    </exception>-->
    
-   <!--<exception test-set="fn-deep-equal" 
-      test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>-->
-   
-   
-   
-   
-   <!--<exception test-set="op-same-key" 
-      test-case="same-key-006a" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-12-13"/>
-      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>-->
-   
-   <!--<exception test-set="fn-distinct-values" 
-      test-case="cbcl-distinct-values-002c
-                 fn-distinct-values-mixed-args-012a
-                 fn-distinct-values-mixed-args-013a" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
-   
-   <exception test-set="fn-distinct-values" 
-      test-case="fn-distinct-values-1a" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
-   </exception>
-   -->
  
  
   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
@@ -131,23 +107,17 @@
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
    
-  
  
-   
-<!--   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
-      <created by="Michael Kay" on="2022-11-23"/>
-      <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
-   </exception>-->
    
    <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
    </exception>
    
-   <exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
+   <!--<exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
       <created by="Michael Kay" on="2023-03-14"/>
       <reason>Placeholders currently not allowed as keyword arguments</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="prod-ForClause.map"  run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-18"/>
@@ -237,32 +207,7 @@
       <reason>Function fn:function-annotations not yet implemented</reason>
    </exception>
    
-<!--   <exception test-set="fn-iterate-while" test-case=" 
-      iterate-while-019
-      iterate-while-020
-      iterate-while-021
-      iterate-while-022
-      iterate-while-023" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Two-argument callback not yet implemented</reason>
-   </exception>
-   -->
-   
-<!--   <exception test-set="fn-duplicate-values" test-case="cbcl-duplicate-values-002c
-      fn-duplicate-values-1a
-      fn-duplicate-values-mixed-args-012
-      fn-duplicate-values-mixed-args-013" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-02-28"/>
-      <reason>Numeric precision changes not yet implemented</reason>
-   </exception>
-   -->
-   
-   
-   <!--<exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Bug 6104</reason>
-   </exception>
-   -->
+
    <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
       try-catch-map2
       try-catch-map3
@@ -275,7 +220,7 @@
    </exception>
    
  
-   <exception test-set="app-spec-examples" 
+ <!--  <exception test-set="app-spec-examples" 
       test-case="
       fo-test-map-values-001
       fo-test-map-values-002
@@ -283,7 +228,7 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-json-001
@@ -428,41 +373,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-array-filter-004
-      fo-test-array-fold-left-004
-      fo-test-array-fold-right-004
-      fo-test-array-for-each-004
-      fo-test-array-for-each-pair-003
-      fo-test-array-index-where-006
-      fo-test-fn-every-008
-      fo-test-fn-every-009
-      fo-test-fn-filter-003
-      fo-test-fn-fold-left-009
-      fo-test-fn-fold-right-004
-      fo-test-fn-for-each-004
-      fo-test-fn-for-each-pair-004
-      fo-test-fn-index-where-005
-      fo-test-fn-items-after-006
-      fo-test-fn-items-before-007
-      fo-test-fn-items-ending-where-006
-      fo-test-fn-items-starting-where-006
-      fo-test-fn-iterate-while-002
-      fo-test-fn-partition-006
-      fo-test-fn-some-008" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-11-16"/>
-      <reason>Position argument on callback function not yet implemented.</reason>
-   </exception>-->
-   
  
-   <!--<exception test-set="app-spec-examples" test-case="
-      fo-test-fn-transitive-closure-001" run="false" edition="HE PE" report="n/a">
-      <created by="Michael Kay" on="2023-11-21"/>
-      <reason>Spec has changed, implementation needs updating.</reason>
-   </exception>-->
-   
-   
  
    
 

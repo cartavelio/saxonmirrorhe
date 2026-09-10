@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
@@ -29,6 +30,7 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.tiny.WhitespaceTextImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.Orphan;
@@ -63,6 +65,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         o.addAllowedOption("namespace-prefixes", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("nilled-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("ordered", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("preserve-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("processing-instructions", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("text-boundaries", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
@@ -120,6 +123,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         public boolean typeVarietySignificant = true;
         public boolean typedValuesSignificant = true;
         public Set<StructuredQName> unorderedElements = Collections.emptySet();
+        public boolean orderedTopLevel = true;
         public boolean preserveSpace = true;
         public String collationName;
         public StringCollator stringCollator;
@@ -129,7 +133,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         private static final String[] booleanOptions = new String[]{
                 "base-uri", "comments", "debug", "false-on-error", "id-property", "idrefs-property",
                 "in-scope-namespaces", "namespace-prefixes", "nilled-property", "normalize-space",
-                "preserve-space", "processing-instructions", "text-boundaries", "timezones",
+                "ordered", "preserve-space", "processing-instructions", "text-boundaries", "timezones",
                 "type-annotations", "type-variety", "typed-values"};
 
 
@@ -228,6 +232,9 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     case "normalize-space":
                         normalizeSpace = booleanValue;
                         return;
+                    case "ordered":
+                        orderedTopLevel = booleanValue;
+                        return;
                     case "preserve-space":
                         preserveSpace = booleanValue;
                         return;
@@ -256,6 +263,71 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         }
     }
 
+    /**
+     * Compute a hash code for a given item (used when doing unordered comparisons)
+     * @param item the given item
+     * @param options the comparison options
+     * @return the hash code
+     */
+
+    private static long hash(Item item, DeepEqualOptions options) {
+        switch (item.getGenre()) {
+            case ATOMIC:
+                return 0x01L << 56 | ((AtomicValue)item).asMapKey().hashCode();
+            case NODE:
+                return 0x02L << 56 | nodeHashCode(((NodeInfo)item), options);
+            case MAP:
+                return 0x03L << 56 | ((MapItem)item).size();   // TODO: improve this
+            case ARRAY:
+                return 0x04L << 56 | ((ArrayItem) item).arrayLength();   // TODO: improve this
+            case FUNCTION:
+                return 0x05L << 56 | System.identityHashCode(item);
+            case EXTERNAL:
+            default:
+                return 0x06L << 56 | ((ObjectValue<?>)item).getObject().hashCode();
+        }
+    }
+
+    private static Map<Long, List<Item>> makeHashMap(SequenceIterator iter, DeepEqualOptions options) {
+        Map<Long, List<Item>> result = new HashMap<>();
+        Item item;
+        //int count = 0;
+        while ((item = iter.next()) != null) {
+            //count++;
+            long itemHash = hash(item, options);
+            List<Item> bucket = result.computeIfAbsent(itemHash, k -> new ArrayList<>());
+            bucket.add(item);
+        }
+        //System.err.println("*** Hash: " + count + " items in " + result.size() + " buckets");
+        return result;
+    }
+
+    private static boolean cartesianCompare(List<Item> list0, List<Item> list1, XPathContext context, DeepEqualOptions options)
+    throws XPathException {
+        if (list0.size() != list1.size()) {
+            return false;
+        }
+        IntHashSet matched = new IntHashSet();
+        for (Item i0 : list0) {
+            int matchPos = -1;
+            for (int j=0; j<list1.size(); j++) {
+                if (!matched.contains(j)) {
+                    SequenceIterator iter0 = SingletonIterator.makeIterator(i0);
+                    SequenceIterator iter1 = SingletonIterator.makeIterator(list1.get(j));
+                    if (deepEqual(iter0, iter1, context, options)) {
+                        matchPos = j;
+                        matched.add(j);
+                        break;
+                    }
+                }
+            }
+            if (matchPos == -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Determine when two sequences are deep-equal
@@ -271,6 +343,33 @@ public class DeepEqual40 extends CollatingFunctionFixed {
     public static boolean deepEqual(SequenceIterator op1, SequenceIterator op2,
                                     XPathContext context, DeepEqualOptions options)
             throws XPathException {
+
+        if (!options.orderedTopLevel) {
+            // Group the items into hash buckets, then do N*N comparison within each hash bucket.
+            // The hashing is chosen (a) to be reasonably fast, and (b) to ignore anything that varies
+            // depending on the comparison options
+            Map<Long, List<Item>> hashMap1 = makeHashMap(op1, options);
+            Map<Long, List<Item>> hashMap2 = makeHashMap(op2, options);
+            if (hashMap1.size() != hashMap2.size()) {
+                return false;
+            }
+            options.orderedTopLevel = true;
+            for (Map.Entry<Long, List<Item>> bucket1 : hashMap1.entrySet()) {
+                List<Item> list2 = hashMap2.get(bucket1.getKey());
+                if (list2 == null) {
+                    return false;
+                }
+                if (!cartesianCompare(bucket1.getValue(), list2, context, options)) {
+                    return false;
+                }
+            }
+            return true;
+//            options.orderedTopLevel = true;
+//            return equalExistential(
+//                    makeList(op1),
+//                    makeList(op2), context, options);
+        }
+
         boolean result = true;
         String reason = null;
         ErrorReporter reporter = context.getErrorReporter();
@@ -727,13 +826,13 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         List<Integer> hashcodes1 = new ArrayList<>(children1.size());
         IntSet hashSet = new IntHashSet();
         for (NodeInfo nodeInfo : children1) {
-            final int hash = computeHashCode(nodeInfo, options);
+            final int hash = nodeHashCode(nodeInfo, options);
             hashSet.add(hash);
             hashcodes1.add(hash);
         }
 
         for (NodeInfo c0 : children0) {
-            final int hash = computeHashCode(c0, options);
+            final int hash = nodeHashCode(c0, options);
             if (!hashSet.contains(hash)) {
                 return "Node found among first node's children with no counterpart among the second node's children";
             }
@@ -754,9 +853,12 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         return null;
     }
 
-    private static int computeHashCode(NodeInfo node, DeepEqualOptions options) {
+    private static int nodeHashCode(NodeInfo node, DeepEqualOptions options) {
         // Keep it simple for now - independent of the options
-        return node.getNodeKind() << 24 ^ node.getFingerprint() ^ (node.attributes().size() << 10);
+        return node.getNodeKind() << 24
+                ^ node.getFingerprint()
+                ^ (node.attributes().size() << 10)
+                ^ Whitespace.normalize(node.getUnicodeStringValue()).hashCode();
 
     }
 
