@@ -125,7 +125,7 @@ public class TestXQueryUsingXQJ {
         try {
 			// setup common to all XQuery nodes.
 			Configuration config = new Configuration();
-			config.getSystemURIResolver().setRecognizeQueryParameters(true);
+			config.setBooleanProperty(Feature.RECOGNIZE_URI_QUERY_PARAMETERS, true);
 			config.setValidation(false);
 			config.getParseOptions().setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
 			XQDataSource dataSource   = new SaxonXQDataSource(config);

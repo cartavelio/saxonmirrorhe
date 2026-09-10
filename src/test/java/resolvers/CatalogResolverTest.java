@@ -138,6 +138,7 @@ public class CatalogResolverTest {
             System.out.println(destination.getXdmNode());
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             fail();
         }
     }

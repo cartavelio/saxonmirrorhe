@@ -904,7 +904,7 @@ public class TestXQueryEvaluator {
             Processor p = new Processor(false);
             XQueryCompiler c = p.newXQueryCompiler();
             XQueryEvaluator eval = c.compile("doc('file:///a.xml')/z").load();
-            eval.setURIResolver((href, base) -> new StreamSource(new StringReader("<z>17</z>")));
+            eval.setResourceResolver(request -> new StreamSource(new StringReader("<z>17</z>")));
 
             XdmItem result = eval.iterator().next();
             assertEquals("17", result.getStringValue());

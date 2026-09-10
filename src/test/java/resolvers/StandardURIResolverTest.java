@@ -1,21 +1,12 @@
 package resolvers;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.CommonResourceResolver;
 import net.sf.saxon.lib.StandardURIResolver;
-import net.sf.saxon.s9api.*;
 import org.junit.Assert;
 import org.junit.Test;
-import org.xml.sax.InputSource;
-import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import java.io.File;
-import java.io.FileInputStream;
 import java.net.URI;
-import java.util.Collections;
-import java.util.Iterator;
 
 import static org.junit.Assert.fail;
 
@@ -69,6 +60,7 @@ public class StandardURIResolverTest {
             Source source = resolver.resolve("src/test/testdata/my dir/Transform3.xsl", baseURI.toString());
             Assert.assertNotNull(source);
         } catch (Exception ex) {
+            ex.printStackTrace();
             fail();
         }
     }
