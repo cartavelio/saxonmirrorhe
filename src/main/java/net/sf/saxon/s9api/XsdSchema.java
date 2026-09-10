@@ -12,6 +12,7 @@ public abstract class XsdSchema {
 
     public abstract SchemaValidator newValidator();
 
+    //#if CSHARP==false
     /**
      * Create an {@link ItemTypeFactory} which can be used to create {@link ItemType}
      * objects based on the definitions in this schema.
@@ -19,7 +20,7 @@ public abstract class XsdSchema {
      */
 
     public abstract ItemTypeFactory newItemTypeFactory();
-
+    //#endif
     /**
      * Combine this schema with another, to form a new combined schema.
      * <p>Note: in relatively unusual circumstances, a document that is valid against one of the two input schemas

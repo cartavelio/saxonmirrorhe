@@ -1,6 +1,6 @@
 package ee;
-import com.saxonica.config.EnterpriseTransformerFactory;
 
+import com.saxonica.config.EnterpriseTransformerFactory;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Validation;
 import org.xml.sax.helpers.DefaultHandler;

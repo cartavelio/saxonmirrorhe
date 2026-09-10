@@ -1199,7 +1199,6 @@ public class StaticQueryContext {
     }
 
     public Schema getPreLoadedSchema() {
-        System.err.println("Get preloaded schema for SQC " + this + " = " + preLoadedSchema);
         return preLoadedSchema;
     }
 

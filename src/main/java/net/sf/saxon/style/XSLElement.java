@@ -157,6 +157,8 @@ public class XSLElement extends StyleElement {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
 
+        Schema schema = getContainingPackage().getImportedSchema();
+
         // deal specially with the case where the element name is known statically
 
         if (elementName instanceof StringLiteral) {
@@ -186,7 +188,6 @@ public class XSLElement extends StyleElement {
                 // Local name and namespace are both known statically: generate a FixedElement instruction
                 FingerprintedQName qn = new FingerprintedQName(parts[0], nsuri, parts[1]);
                 qn.obtainFingerprint(getNamePool());
-                Schema schema = getContainingPackage().getImportedSchema();
                 FixedElement FixedElementInst = new FixedElement(qn,
                                                                  NamespaceMap.emptyMap(),
                                                                  inheritNamespaces,
@@ -196,10 +197,10 @@ public class XSLElement extends StyleElement {
                 return compileContentExpression(exec, decl, FixedElementInst);
             }
         }
-        Schema schema = getContainingPackage().getImportedSchema();
         ComputedElement inst = new ComputedElement(elementName,
                                                    namespace,
-                                                   schema, schemaType,
+                                                   schema,
+                                                   schemaType,
                                                    validation,
                                                    inheritNamespaces,
                                                    false);

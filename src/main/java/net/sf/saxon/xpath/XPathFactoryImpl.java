@@ -13,6 +13,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.s9api.Processor;
 
 import javax.xml.XMLConstants;
 import javax.xml.xpath.*;
@@ -22,7 +23,8 @@ import javax.xml.xpath.*;
  */
 public class XPathFactoryImpl extends XPathFactory implements Configuration.ApiProvider {
 
-    private Configuration config;
+    protected Processor processor;
+    protected Configuration config;
     private XPathVariableResolver variableResolver;
     private XPathFunctionResolver functionResolver;
 
@@ -32,9 +34,16 @@ public class XPathFactoryImpl extends XPathFactory implements Configuration.ApiP
      */
 
     public XPathFactoryImpl() {
-        config = Configuration.newConfiguration();
-        setConfiguration(config);
-        Version.platform.registerAllBuiltInObjectModels(config);
+        processor = newProcessor();
+        initConfiguration(processor.getUnderlyingConfiguration());
+    }
+
+    protected Processor newProcessor() {
+        return new Processor();
+    }
+
+    protected Processor getProcessor() {
+        return processor;
     }
 
     /**
@@ -46,8 +55,8 @@ public class XPathFactoryImpl extends XPathFactory implements Configuration.ApiP
      */
 
     public XPathFactoryImpl(Configuration config) {
-        this.config = config;
-        config.setProcessor(this);
+        initConfiguration(config);
+        processor = new Processor(config);
     }
 
     /**
@@ -57,7 +66,13 @@ public class XPathFactoryImpl extends XPathFactory implements Configuration.ApiP
      */
 
     public void setConfiguration(Configuration config) {
+        initConfiguration(config);
+        processor = new Processor(config);
+    }
+
+    protected void initConfiguration(Configuration config) {
         this.config = config;
+        Version.platform.registerAllBuiltInObjectModels(config);
         config.setProcessor(this);
     }
 
