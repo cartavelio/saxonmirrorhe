@@ -964,7 +964,7 @@ public class PreparedSchema implements Schema, NotationSet {
 
     private void addTargetNamespaces(Map<NamespaceUri, List<String>> map) {
         if (targetNamespaces.isEmpty()) {
-            targetNamespaces = map;
+            targetNamespaces = new HashMap<>(map);
         } else {
             for (Map.Entry<NamespaceUri, List<String>> entry : map.entrySet()) {
                 if (targetNamespaces.containsKey(entry.getKey())) {
@@ -1584,7 +1584,7 @@ public class PreparedSchema implements Schema, NotationSet {
      *
      * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
      * @return one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
-     * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}}
      */
 
     public synchronized int getNamespaceStatus(NamespaceUri namespace) {
@@ -1596,7 +1596,7 @@ public class PreparedSchema implements Schema, NotationSet {
      *
      * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
      * @param status    one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
-     *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}}
      */
 
     public synchronized void setNamespaceStatus(NamespaceUri namespace, int status) {

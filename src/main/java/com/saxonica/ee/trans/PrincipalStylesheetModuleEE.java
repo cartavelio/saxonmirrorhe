@@ -51,9 +51,9 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
 
         CompilerInfo compilerInfo = getRootElement().getCompilation().getCompilerInfo();
         PreparedSchema preloadedSchema = (PreparedSchema) compilerInfo.getPreLoadedSchema();
-        if (preloadedSchema != null) {
-            getStylesheetPackage().setImportedSchema(preloadedSchema);
-        }
+//        if (preloadedSchema != null) {
+//            getStylesheetPackage().setImportedSchema(preloadedSchema);
+//        }
 
         boolean importsSchemas = false;
         for (ComponentDeclaration decl : topLevel) {
@@ -62,7 +62,7 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
                 break;
             }
         }
-        if (importsSchemas) {
+        if (importsSchemas || preloadedSchema != null) {
             EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
             List<Source> sources = new ArrayList<>();
             if (preloadedSchema != null) {
@@ -71,25 +71,24 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
             SchemaCompiler schemaCompiler = new SchemaCompiler(config);
 
             // Scan the declarations in reverse order, that is, highest precedence first
-            for (int i = topLevel.size() - 1; i >= 0; i--) {
-                ComponentDeclaration decl = topLevel.get(i);
-                if (decl.getSourceElement() instanceof XSLImportSchemaEE) {
-                    XSLImportSchemaEE is = (XSLImportSchemaEE) decl.getSourceElement();
-                    Source source = is.asSource(schemaCompiler);
-                    if (source != null) {
-                        sources.add(source);
+            if (importsSchemas) {
+                for (int i = topLevel.size() - 1; i >= 0; i--) {
+                    ComponentDeclaration decl = topLevel.get(i);
+                    if (decl.getSourceElement() instanceof XSLImportSchemaEE) {
+                        XSLImportSchemaEE is = (XSLImportSchemaEE) decl.getSourceElement();
+                        Source source = is.asSource(schemaCompiler);
+                        if (source != null) {
+                            sources.add(source);
+                        }
                     }
-                }
-                // TODO: this doesn't belong here
-                if (decl.getSourceElement() instanceof XSLItemType) {
-                    ((XSLItemType) decl.getSourceElement()).indexTypeAlias(decl, this);
+                    // TODO: this doesn't belong here
+                    if (decl.getSourceElement() instanceof XSLItemType) {
+                        ((XSLItemType) decl.getSourceElement()).indexTypeAlias(decl, this);
+                    }
                 }
             }
             if (!sources.isEmpty()) {
                 PreparedSchema assembledSchema = schemaCompiler.loadSources(sources);
-//                if (preloadedSchema != null) {
-//                    preloadedSchema.copyTo(assembledSchema, schemaCompiler);
-//                }
                 getStylesheetPackage().setImportedSchema(assembledSchema);
             }
             // Now seal all the schemas that have been imported to guarantee consistency with instance documents

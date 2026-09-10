@@ -431,16 +431,6 @@ public class ExperimentalXPathCompiler {
         }
 
         @Override
-        public boolean isImportedSchema(NamespaceUri namespace) {
-            return false;
-        }
-
-        @Override
-        public Set<NamespaceUri> getImportedSchemaNamespaces() {
-            return Collections.emptySet();
-        }
-
-        @Override
         public NamespaceResolver getNamespaceResolver() {
             return this;
         }
