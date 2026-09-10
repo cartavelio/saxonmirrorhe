@@ -638,6 +638,7 @@ task graal_eec_jar(
         into SAXONC_HOME
         from "${buildDir}/c"
         include "libsaxon-${edition}c-*"
+        include "setenv"
       }
     }
 
@@ -727,8 +728,6 @@ task graal_eec_jar(
         include "php8_XQueryProcessor.cpp"
         include "config.m4"
         include "config.w32"
-
-        
         filter { line ->
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
