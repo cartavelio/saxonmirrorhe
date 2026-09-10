@@ -158,15 +158,16 @@ XdmItem *XdmNode::getHead() { return this; }
 const char *XdmNode::getStringValue() { return XdmItem::getStringValue(); }
 
 const char *XdmNode::toString() {
-  if (nodeToString == nullptr) {
+  const char *nodeToStringi = nullptr;
+  //if (nodeToString == nullptr) {
     allocFn fn = operator new;
-    nodeToString = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
+    nodeToStringi = xdmNodeToString(SaxonProcessor::sxn_environ->thread,
                                    (void *)fn, (void *)value);
-    if (nodeToString == nullptr) {
+    if (nodeToStringi == nullptr) {
       throw SaxonApiException();
     }
-  }
-  return nodeToString;
+  //}
+  return nodeToStringi;
 }
 
 const char *XdmNode::getBaseUri() {
