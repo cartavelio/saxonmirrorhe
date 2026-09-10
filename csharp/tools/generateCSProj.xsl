@@ -145,7 +145,11 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
     </ItemGroup>
 
    <xsl:if test="$edition != 'ee'">
+<<<<<<< HEAD
      <!--<ItemGroup>
+=======
+     <ItemGroup>
+>>>>>>> 9c1168766 (SaxonCS-HE update to build)
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Api/**" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Callbacks/**" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Cmd/**" />
@@ -154,7 +158,11 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/DataModel/**" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Dom/**" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Helpers/**" />
+<<<<<<< HEAD
 
+=======
+       <!--<Compile Include="..\src\main\cs\Saxon/Impl/Overrides/**" /> -->
+>>>>>>> 9c1168766 (SaxonCS-HE update to build)
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/DotNetLocalizerFactory.cs" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/FormatNumberSubPicture.cs" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/LocalNumberer.cs" />
@@ -175,7 +183,11 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
        <Compile Remove="..\..\..\..\src\main\cs\Saxon/Api/Support/XsdSchemaEE.cs" />
        <Compile Remove="..\..\..\..\src\main\cs\Saxon/Impl/Parallel" />
        <Compile Remove="..\..\..\..\src\main\cs\Saxon/commands/*.cs" />
+<<<<<<< HEAD
      </ItemGroup> -->
+=======
+     </ItemGroup>
+>>>>>>> 9c1168766 (SaxonCS-HE update to build)
    </xsl:if>
   </Project>
 </xsl:template>
