@@ -433,7 +433,11 @@
         <xsl:variable name="maindiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id = 'main']"/>
         <xsl:variable name="platformdiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id eq 'platform']"/>
         
-        <xsl:for-each select="$maindiv//*[@class='csonly']">
+        <xsl:variable name="platformfndiv" select="ixsl:page()/html/body/div[@id = 'wrap']/div[@id =
+            'main']/div/div[@id eq 'platform-fn']"/>
+        <xsl:variable name="on-fn-list-page" select="exists($platformfndiv)"/>
+        
+        <xsl:for-each select="$maindiv//*[tokenize(@class)='csonly']">
             <ixsl:set-style name="display" 
                 select="if (ixsl:get($csswitch,'checked')) 
                 then if (self::tr) then 'table-row' 
@@ -441,7 +445,7 @@
                 else 'block' 
                 else 'none'"/>
         </xsl:for-each>
-        <xsl:for-each select="$maindiv//*[@class='javaonly']">
+        <xsl:for-each select="$maindiv//*[tokenize(@class)='javaonly']">
             <ixsl:set-style name="display" 
                 select="if (ixsl:get($javaswitch,'checked')) 
                 then if (self::tr) then 'table-row' 
@@ -449,7 +453,7 @@
                 else 'block' 
                 else 'none'"/>
         </xsl:for-each>
-        <xsl:for-each select="$maindiv//*[@class='conly']">
+        <xsl:for-each select="$maindiv//*[tokenize(@class)='conly']">
             <ixsl:set-style name="display" 
                 select="if (ixsl:get($cswitch,'checked')) 
                 then if (self::tr) then 'table-row' 
@@ -457,6 +461,36 @@
                 else 'block' 
                 else 'none'"/>
         </xsl:for-each>
+        
+        <xsl:if test="$on-fn-list-page">
+            <!-- If we're on a functions index page, then update the display of list items as necessary. -->
+            <xsl:for-each select="$maindiv//span[@class='flink']">
+                <ixsl:set-style name="display" 
+                    select="if ((tokenize(@data-platform)=('J','ALL') and ixsl:get($javaswitch,'checked')) or 
+                    (tokenize(@data-platform)=('CS','ALL') and ixsl:get($csswitch,'checked')) or 
+                    (tokenize(@data-platform)=('C','ALL') and ixsl:get($cswitch,'checked'))) 
+                    then 'inline'
+                    else 'none'"/>
+            </xsl:for-each>
+            
+            <xsl:variable name="count" select="count($maindiv//span[@class='flink'][ixsl:style(.)?display eq 'inline'])"/>
+            <!--<xsl:message>functions count: <xsl:value-of select="$count"/></xsl:message>-->
+            <xsl:result-document href="#platform-fn-count" method="ixsl:replace-content">
+                <xsl:value-of select="$count"/>
+            </xsl:result-document>
+            
+            <!-- If there are no available functions for the selected platforms, then display info in the
+                platform-fn div with a suggestion to switch platform checkboxes. -->
+            <xsl:choose>
+                <xsl:when test="$count eq 0">
+                    <xsl:call-template name="platform-fn-warning"/>
+                    <ixsl:set-style name="display" select="'block'" object="$platformfndiv"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <ixsl:set-style name="display" select="'none'" object="$platformfndiv"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
         
         <!-- Check whether there is anything displayed in the main div - if not, display info in the
             platform div with suggestion to switch platform checkboxes. -->
@@ -486,6 +520,7 @@
                 <ixsl:set-style name="display" select="'none'" object="$platformdiv"/>
             </xsl:otherwise>
         </xsl:choose>
+        
     </xsl:template>
     
     <xsl:template name="platform-warning">
@@ -495,6 +530,35 @@
                 <p><b>Page contains <xsl:value-of select="$platform"/> specific information only.</b></p>
                 <p>To switch to show the <xsl:value-of select="$platform"/> specific
                     information, use the checkbox below (or the checkbox in the footer).</p>
+                <label for="javacheckbox2"> Java: </label>
+                <input type="checkbox" id="javacheckbox2" name="platform" value="java">
+                    <xsl:if test="ixsl:get(ixsl:page()//input[@id = 'javacheckbox'],'checked')">
+                        <xsl:attribute name="checked" select="'checked'"/>
+                    </xsl:if>
+                </input>
+                <label for="cscheckbox2"> C#: </label>
+                <input type="checkbox" id="cscheckbox2" name="platform" value="cs">
+                    <xsl:if test="ixsl:get(ixsl:page()//input[@id = 'cscheckbox'],'checked')">
+                        <xsl:attribute name="checked" select="'checked'"/>
+                    </xsl:if>
+                </input>
+                <label for="ccheckbox2"> C: </label>
+                <input type="checkbox" id="ccheckbox2" name="platform" value="c">
+                    <xsl:if test="ixsl:get(ixsl:page()//input[@id = 'ccheckbox'],'checked')">
+                        <xsl:attribute name="checked" select="'checked'"/>
+                    </xsl:if>
+                </input>
+            </div>
+        </xsl:result-document>
+    </xsl:template>
+    
+    <xsl:template name="platform-fn-warning">
+        <!--<xsl:message>platform-fn-warning called</xsl:message>-->
+        <xsl:result-document href="#platform-fn" method="ixsl:replace-content">
+            <div class="warning">
+                <p><b>No functions available for the platforms selected.</b></p>
+                <p>To switch to show the functions available on other platforms, use the checkbox below (or
+                    the checkbox in the footer).</p>
                 <label for="javacheckbox2"> Java: </label>
                 <input type="checkbox" id="javacheckbox2" name="platform" value="java">
                     <xsl:if test="ixsl:get(ixsl:page()//input[@id = 'javacheckbox'],'checked')">
