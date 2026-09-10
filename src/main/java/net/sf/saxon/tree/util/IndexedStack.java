@@ -104,7 +104,7 @@ public class IndexedStack<T> implements Iterable<T>{
      * @param i the position of the required item, where the first item counting from
      *          the bottom of the stack is position 0 (zero)
      * @return the item at the specified position
-     * @throws IndexOutOfBoundsException if {code i} is negative, or greater than or equal to the stack size
+     * @throws IndexOutOfBoundsException if {@code i} is negative, or greater than or equal to the stack size
      */
 
     public T get(int i) {
@@ -117,7 +117,7 @@ public class IndexedStack<T> implements Iterable<T>{
      * @param i the position of the required item, where the first item counting from
      *          the bottom of the stack is position 0 (zero)
      * @param value the item to be put at the specified position
-     * @throws IndexOutOfBoundsException if {code i} is negative, or greater than or equal to the stack size
+     * @throws IndexOutOfBoundsException if {@code i} is negative, or greater than or equal to the stack size
      */
 
     public void set(int i, T value) {

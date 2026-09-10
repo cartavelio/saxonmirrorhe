@@ -151,21 +151,6 @@ public class XPathCompiler {
     }
 
     /**
-     * Set the {@link XsdSchema} to be used with this XPathCompiler.
-     *
-     * <p>This automatically marks the XPath expression as schema-aware.</p>
-     * <p>The method should only be called once; supplying a schema cancels the effect
-     * of any previous call. The method must be called before the XPath expression is compiled.</p>
-     * @param schema the schema to be imported
-     * @since 13.0
-     */
-
-    public void useSchema(XsdSchema schema) {
-        setSchemaAware(true);
-        env.getPackageData().setImportedSchema(schema.getUnderlyingSchema());
-    }
-
-    /**
      * Say whether an XPath 2.0, XPath 3.0, XPath 3.1 or XPath 4.0 processor is required.
      *
      * @param value One of the values 1.0, 2.0, 3.0, 3.05, 3.1, 4.0.
@@ -329,13 +314,14 @@ public class XPathCompiler {
      * @param uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      * @since 9.1
-     * @deprecated in 13.0. The method now has no effect.
-     * Since there is no longer a global schema at {@link Processor} level,
-     * the schema needs to be made available to the {@code XPathCompiler} by calling the
-     * {@link #useSchema(XsdSchema)} method.
      */
 
     public void importSchemaNamespace(String uri) {
+        if (cache != null) {
+            cache.clear();
+        }
+        env.getImportedSchemaNamespaces().add(NamespaceUri.of(uri));
+        env.setSchemaAware(true);
     }
 
     /**
@@ -700,7 +686,7 @@ public class XPathCompiler {
      * @param property The decimal symbols name to update, for example {@code "grouping-separator"}
      * @param value    The value to update the decimal symbol property
      * @throws SaxonApiException if an invalid value is supplied for a decimal format property
-     * @throws IllegalArgumentException if the value of {code property} is not one of the recognized
+     * @throws IllegalArgumentException if the value of {@code property} is not one of the recognized
      * decimal format properties
      * @since 9.4
      */

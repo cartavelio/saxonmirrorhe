@@ -174,7 +174,7 @@ public class AttributeCollectionImpl implements Attributes {
      * @param index The position of the attribute in the list.
      * @return The properties of the attribute. This is a set
      *         of bit-settings defined in class {@link net.sf.saxon.event.ReceiverOption}. The
-     *         most interesting of these is {{@link net.sf.saxon.event.ReceiverOption#DEFAULTED_VALUE},
+     *         most interesting of these is {@link net.sf.saxon.event.ReceiverOption#DEFAULTED_VALUE},
      *         which indicates an attribute that was added to an element as a result of schema validation.
      */
 

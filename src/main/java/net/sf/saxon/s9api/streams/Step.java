@@ -125,8 +125,8 @@ public abstract class Step<T extends XdmItem>
      * @param next the step which will be applied to the results of this step
      * @param <U> the static type of the result of the step
      * @return a new Step (that is, a function from one Stream of items to another) that
-     * performs this step and the next step in turn. The result is equivalent to the Java {code flatMap()}
-     * function or the XPath {code !} operator: there is no sorting of nodes into document order, and
+     * performs this step and the next step in turn. The result is equivalent to the Java {@code flatMap()}
+     * function or the XPath {@code !} operator: there is no sorting of nodes into document order, and
      * no elimination of duplicates.
      */
 
