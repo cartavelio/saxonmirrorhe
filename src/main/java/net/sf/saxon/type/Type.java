@@ -7,7 +7,7 @@
 
 package net.sf.saxon.type;
 
-import com.saxonica.ee.pin.pin.LabeledItem;
+import com.saxonica.functions.qt4.pin.LabeledItem;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;

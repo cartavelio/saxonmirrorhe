@@ -415,6 +415,9 @@ public class Environment implements ResourceResolver {
     }
 
     private static XsdSchema loadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, XsdCompiler compiler) throws SaxonApiException {
+        if (!"EE".equals(driver.getProductEdition())) {
+            return null;
+        }
         environment.validateSources = false;
         List<Source> sourceList = new ArrayList<>();
         for (XdmNode schema : env.children("schema")) {
