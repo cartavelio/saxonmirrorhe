@@ -810,12 +810,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     public synchronized int getNamespaceStatus(String namespace) {
-        Integer s = namespaceStatus.get(namespace);
-        if (s == null) {
-            return PreparedSchema.NAMESPACE_UNKNOWN;
-        } else {
-            return s;
-        }
+        return namespaceStatus.getOrDefault(namespace, PreparedSchema.NAMESPACE_UNKNOWN);
     }
 
     /**

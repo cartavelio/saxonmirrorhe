@@ -415,15 +415,15 @@ public class SerializerFactoryPE extends SerializerFactory {
         }
 
         return (n0, n1) -> {
-            Integer r0 = knownKeys.get(n0.getStringValue());
-            Integer r1 = knownKeys.get(n1.getStringValue());
-            if (r0 != null) {
-                if (r1 == null) {
-                    return r0.compareTo(MIDDLE_GROUND);
+            int r0 = knownKeys.getOrDefault(n0.getStringValue(), -1);
+            int r1 = knownKeys.getOrDefault(n1.getStringValue(), -1);
+            if (r0 != -1) {
+                if (r1 == -1) {
+                    return Integer.compare(r0, MIDDLE_GROUND);
                 } else {
-                    return r0.compareTo(r1);
+                    return Integer.compare(r0, r1);
                 }
-            } else if (r1 != null) {
+            } else if (r1 != -1) {
                 return Integer.compare(MIDDLE_GROUND, r1);
             } else {
                 // both null: sort on name

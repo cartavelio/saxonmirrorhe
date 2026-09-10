@@ -420,8 +420,8 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
         if (idTable == null) {
             return null;            // no ID values found
         }
-        Integer nodeNr = idTable.get(id);
-        if (nodeNr != null) {
+        Integer nodeNr = idTable.getOrDefault(id, -1);
+        if (nodeNr >= 0) {
             DominoNode node = getNode(nodeNr);
             if (getParent) {
                 node = node.getParent();
