@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -40,14 +41,18 @@ public abstract class CompiledFilterIterator implements SequenceIterator {
      */
 
     @Override
-    public final Item next() throws XPathException {
-        Item next;
-        while ((next = base.next()) != null) {
-            if (matches()) {
-                return next;
+    public final Item next() {
+        try {
+            Item next;
+            while ((next = base.next()) != null) {
+                if (matches()) {
+                    return next;
+                }
             }
+            return null;
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
-        return null;
     }
 
     /**

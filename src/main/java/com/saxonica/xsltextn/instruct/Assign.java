@@ -87,7 +87,7 @@ public class Assign extends Instruction implements BindingReference {
         if (binding == null) {
             throw new IllegalStateException("saxon:assign binding has not been fixed up");
         }
-        GroundedValue value = getSelectExpr().iterate(context).materialize();
+        GroundedValue value = SequenceTool.toGroundedValue(getSelectExpr().iterate(context));
         final Controller controller = context.getController();
         assert controller != null;
         controller.getBindery(getPackageData()).setGlobalVariable(binding, value);

@@ -19,6 +19,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -998,9 +999,9 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             return new SaxonXQSequence(((SaxonXQSequence) s).getValue(), this);
         } else if (s instanceof SaxonXQForwardSequence) {
             try {
-                GroundedValue extent = ((SaxonXQForwardSequence) s).getIterator().materialize();
+                GroundedValue extent = SequenceTool.toGroundedValue(((SaxonXQForwardSequence) s).getIterator());
                 return new SaxonXQSequence(extent, this);
-            } catch (XPathException de) {
+            } catch (UncheckedXPathException de) {
                 throw newXQException(de);
             }
         } else {

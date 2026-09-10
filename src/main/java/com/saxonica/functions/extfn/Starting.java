@@ -3,6 +3,7 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
@@ -75,18 +76,22 @@ public abstract class Starting extends SystemFunction {
         }
 
         @Override
-        public Item next() throws XPathException {
+        public Item next() {
             Item item;
             while ((item = baseIterator.next()) != null) {
                 if (started) {
                     return item;
                 }
-                BooleanValue matches = (BooleanValue) start.call(context, SequenceTool.fromItems(item)).head();
-                if (matches.getBooleanValue()) {
-                    started = true;
-                    if (inclusive) {
-                        return item;
+                try {
+                    BooleanValue matches = (BooleanValue) start.call(context, SequenceTool.fromItems(item)).head();
+                    if (matches.getBooleanValue()) {
+                        started = true;
+                        if (inclusive) {
+                            return item;
+                        }
                     }
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
                 }
             }
             return null;

@@ -11,8 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -69,7 +68,7 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
             for (int i = 0; i < consumingArg; i++) {
                 List<Item> member = new ArrayList<>();
                 Expression child = block.getOperanda().getOperand(i).getChildExpression();
-                child.iterate(getContext()).forEachOrFail(member::add);
+                SequenceTool.supply(child.iterate(getContext()), (ItemConsumer<? super Item>) member::add);
                 members.add(SequenceExtent.makeSequenceExtent(member));
             }
         }
@@ -102,7 +101,7 @@ public class ArrayBlockAdjunct extends TransmissionAdjunct implements FeedMaker 
             for (int i = consumingArg + 1; i < block.getOperanda().getNumberOfOperands(); i++) {
                 List<Item> member = new ArrayList<>();
                 Expression child = block.getOperand(i).getChildExpression();
-                child.iterate(getContext()).forEachOrFail(member::add);
+                SequenceTool.supply(child.iterate(getContext()), (ItemConsumer<? super Item>) member::add);
                 members.add(SequenceExtent.makeSequenceExtent(member));
             }
             ArrayItem resultArray = new SimpleArrayItem(members);

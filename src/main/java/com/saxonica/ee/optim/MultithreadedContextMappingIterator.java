@@ -6,10 +6,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.XPathContextMinor;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -76,7 +73,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     }
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         Item nextItem;
         while (true) {
             if (stepIterator != null) {
@@ -97,12 +94,12 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
                 try {
                     stepIterator = future.get().iterate();
                 } catch (InterruptedException e) {
-                    throw new XPathException(e);
+                    throw new UncheckedXPathException(e);
                 } catch (ExecutionException e) {
                     if (e.getCause() instanceof XPathException) {
-                        throw (XPathException) e.getCause();
+                        throw new UncheckedXPathException((XPathException) e.getCause());
                     }
-                    throw new XPathException(e);
+                    throw new UncheckedXPathException(e);
                 }
                 if (stepIterator == null) {
                     return null;
@@ -152,7 +149,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
                 future = service.submit(
                         () -> {
                             try {
-                                return action.iterate(c3).materialize();
+                                return SequenceTool.toGroundedValue(action.iterate(c3));
                             } catch (XPathException err) {
                                 close();
                                 throw err;

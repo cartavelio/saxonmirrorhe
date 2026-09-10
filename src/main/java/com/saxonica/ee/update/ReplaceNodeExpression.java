@@ -297,7 +297,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
                 NodeInfo root = builder.getCurrentRoot();
                 AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
-                GroundedValue extent = top.materialize();
+                GroundedValue extent = SequenceTool.toGroundedValue(top);
                 int len = extent.getLength();
                 NodeInfo[] array = new NodeInfo[len];
                 for (int i = 0; i < len; i++) {

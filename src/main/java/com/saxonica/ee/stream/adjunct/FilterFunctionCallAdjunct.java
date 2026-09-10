@@ -9,10 +9,8 @@ import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
@@ -54,7 +52,7 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
         final UserFunction target = exp.getTargetFunction(context);
         final Sequence[] argValues = SequenceTool.makeSequenceArray(target.getArity());
         for (int i=1; i<argValues.length; i++) {
-            argValues[i] = exp.getArg(i).iterate(context).materialize();
+            argValues[i] = SequenceTool.toGroundedValue(exp.getArg(i).iterate(context));
         }
         return new ItemFeed(out, context) {
 
@@ -65,7 +63,7 @@ public class FilterFunctionCallAdjunct extends TransmissionAdjunct {
                 c2.setCurrentComponent(targetComponent);
                 Sequence result =
                         ((UserFunction)targetComponent.getActor()).call(c2, argValues);
-                result.iterate().forEachOrFail(it -> {
+                SequenceTool.supply(result.iterate(), (ItemConsumer<? super Item>) it -> {
                     if (it instanceof FleetingParentNode) {
                         out.startSelectedParentNode((FleetingParentNode) it, locationId);
                     } else {

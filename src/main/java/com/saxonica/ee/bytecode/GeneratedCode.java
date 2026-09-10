@@ -7,7 +7,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -85,8 +87,7 @@ public abstract class GeneratedCode {
      */
 
     public void process(Outputter output, XPathContext context) throws XPathException {
-        iterate(context).forEachOrFail(
-                it -> output.append(it, Loc.NONE, ReceiverOption.ALL_NAMESPACES));
+        SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>) it -> output.append(it, Loc.NONE, ReceiverOption.ALL_NAMESPACES));
     }
 
     /**

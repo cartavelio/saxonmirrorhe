@@ -191,7 +191,8 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
                                     options, context, location, false));
                 SequenceIterator mapped = context.getConfiguration().getMultithreadedItemMappingIterator(
                         tokenIter, mapper);
-                mapped.materialize();  // discard the result; the aim was to put the documents in the document pool
+                // discard the result; the aim was to put the documents in the document pool
+                SequenceTool.toGroundedValue(mapped);
                 return new LazySequence(action.iterate(context));
             } else {
                 return EmptySequence.getInstance();
@@ -251,7 +252,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
                 List<Item> items = new ArrayList<>();
                 for (Object val : (Collection)result) {
                     SequenceIterator converted = convertFromJavaScript(val).iterate();
-                    converted.forEachOrFail(items::add);
+                    SequenceTool.supply(converted, (ItemConsumer<? super Item>) items::add);
                 }
                 return new SequenceExtent.Of<>(items);
             } else {
@@ -271,7 +272,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         } else {
             List<Object> list = new ArrayList<>();
             SequenceIterator iter = supplied.iterate();
-            iter.forEachOrFail(next -> list.add(convertToJavaScript(next)));
+            SequenceTool.supply(iter, (ItemConsumer<? super Item>) next -> list.add(convertToJavaScript(next)));
             if (list.isEmpty()) {
                 return null;
             } else if (list.size() > 1) {

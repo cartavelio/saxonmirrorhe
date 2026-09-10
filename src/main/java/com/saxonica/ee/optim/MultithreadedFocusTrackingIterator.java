@@ -2,6 +2,7 @@ package com.saxonica.ee.optim;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
@@ -54,7 +55,7 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * @since 8.4
      */
     @Override
-    public synchronized Item next() throws XPathException {
+    public synchronized Item next() {
         return super.next();
     }
 
@@ -106,7 +107,7 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * @throws XPathException if a failure occurs reading the sequence
      */
     @Override
-    public synchronized int getLength() throws XPathException {
+    public synchronized int getLength() {
         return super.getLength();
     }
 
@@ -116,7 +117,7 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
      * <p>This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link SequenceIterator#LOOKAHEAD}</p>
+     * includes the bit setting {@link SequenceIteratorProperty#LOOKAHEAD}</p>
      *
      * @return true if there are more items in the sequence
      * @throws ClassCastException if the base iterator does not support lookahead processing
@@ -131,13 +132,13 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * SequenceIterator. This should be an "in-memory" value, not a Closure.
      *
      * @return the corresponding Value
-     * @throws XPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
      * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
-    public synchronized GroundedValue materialize() throws XPathException {
-        return super.materialize();
+    public synchronized GroundedValue materialize()  {
+        return SequenceTool.toGroundedValue(this);
     }
 
     /**
@@ -145,12 +146,12 @@ public class MultithreadedFocusTrackingIterator extends FocusTrackingIterator {
      * SequenceIterator, starting at the current position. This should be an "in-memory" value, not a Closure.
      *
      * @return the corresponding Value
-     * @throws XPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException     in the cases of subclasses (such as the iterator over a MemoClosure)
      *                            which cause evaluation of expressions while materializing the value.
      * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
-    public synchronized GroundedValue getResidue() throws XPathException {
+    public synchronized GroundedValue getResidue() {
         return super.getResidue();
     }
 

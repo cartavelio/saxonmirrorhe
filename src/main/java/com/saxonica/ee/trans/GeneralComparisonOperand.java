@@ -4,7 +4,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.z.IntEmptySet;
@@ -33,7 +35,7 @@ public class GeneralComparisonOperand extends Characteristic<IntSet> {
         if (multiValued) {
             SequenceIterator iter = exp.iterate(context);
             IntHashSet keys = new IntHashSet();
-            iter.forEachOrFail(item -> {
+            SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> {
                 keys.add(collator.getCollationKey(item.getUnicodeStringValue()).hashCode());
             });
             return keys;

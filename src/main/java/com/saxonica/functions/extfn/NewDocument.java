@@ -4,8 +4,7 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 
@@ -35,7 +34,7 @@ public class NewDocument extends SystemFunction {
         cco.setHostLanguage(HostLanguage.XSLT);
         cco.open();
         cco.startDocument(0);
-        arguments[0].iterate().forEachOrFail(cco::append);
+        SequenceTool.supply(arguments[0].iterate(), (ItemConsumer<? super Item>) cco::append);
         cco.endDocument();
         cco.close();
         return builder.getCurrentRoot();

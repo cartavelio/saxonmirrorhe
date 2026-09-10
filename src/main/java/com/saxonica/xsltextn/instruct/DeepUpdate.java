@@ -185,7 +185,7 @@ public class DeepUpdate extends Instruction {
                 }
             }
             SequenceIterator actionIter = getActionExpression().iterate(c3);
-            GroundedValue actionVal = actionIter.materialize();
+            GroundedValue actionVal = SequenceTool.toGroundedValue(actionIter);
             Pedigree pedigree = ((PedigreeValue)selected).getPedigree();
             PedigreeValue parent = pedigree.getContainer();
             GroundedValue val = actionVal;

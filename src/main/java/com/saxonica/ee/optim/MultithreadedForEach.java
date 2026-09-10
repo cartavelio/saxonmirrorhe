@@ -9,8 +9,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.FocusIterator;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 
@@ -78,7 +77,7 @@ public class MultithreadedForEach extends ForEach {
         } else {
             MultithreadedContextMappingIterator mapper =
                     new MultithreadedContextMappingIterator(getAction(), c2, maxThreads);
-            mapper.forEachOrFail(output::append);
+            SequenceTool.supply(mapper, (ItemConsumer<? super Item>) output::append);
             mapper.close();
             return null;
         }

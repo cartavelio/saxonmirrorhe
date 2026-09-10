@@ -6,6 +6,7 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashSet;
@@ -43,11 +44,12 @@ public class TokenMatchOperand extends Characteristic<IntSet> {
         SequenceIterator iter = exp.iterate(context);
         IntHashSet keys = new IntHashSet();
         StringCollator collator = CodepointCollator.getInstance();
-        iter.forEachOrFail(item -> {
+        SequenceTool.supply(iter, item -> {
             Whitespace.Tokenizer seq = new Whitespace.Tokenizer(item.getUnicodeStringValue());
-            for (Item token : seq) {
+            Item token;
+            while ((token = seq.next()) != null) {
                 keys.add(collator.getCollationKey(token.getUnicodeStringValue()).hashCode());
-            };
+            }
         });
         return keys;
     }

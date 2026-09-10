@@ -6,6 +6,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 
@@ -63,7 +64,7 @@ public class GroupStarting extends SystemFunction {
         }
 
         @Override
-        public ArrayItem next() throws XPathException {
+        public ArrayItem next() {
             if (finished) {
                 return null;
             }
@@ -72,15 +73,19 @@ public class GroupStarting extends SystemFunction {
                 group.add(pending);
             }
             Item item;
-            while ((item = baseIterator.next()) != null) {
-                Sequence test = function.call(context, SequenceTool.fromItems(item));
-                boolean match = ExpressionTool.effectiveBooleanValue(test.head());
-                if (match) {
-                    pending = item;
-                    return makeSimpleArray(group);
-                } else {
-                    group.add(item);
+            try {
+                while ((item = baseIterator.next()) != null) {
+                    Sequence test = function.call(context, SequenceTool.fromItems(item));
+                    boolean match = ExpressionTool.effectiveBooleanValue(test.head());
+                    if (match) {
+                        pending = item;
+                        return makeSimpleArray(group);
+                    } else {
+                        group.add(item);
+                    }
                 }
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
             }
             pending = null;
             finished = true;

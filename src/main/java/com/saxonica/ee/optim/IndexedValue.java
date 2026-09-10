@@ -7,6 +7,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.UnfailingIterator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -97,7 +98,9 @@ public class IndexedValue extends SearchableValue {
     public synchronized boolean containsNode(NodeInfo sought) {
         if (distinctNodes == null) {
             distinctNodes = new HashSet<>();
-            for (Item it : iterate()) {
+            UnfailingIterator iter = iterate();
+            Item it;
+            while ((it = iter.next()) != null) {
                 if (it instanceof NodeInfo) {
                     distinctNodes.add((NodeInfo)it);
                 }

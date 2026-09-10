@@ -3,6 +3,7 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
@@ -75,26 +76,30 @@ public abstract class Ending extends SystemFunction {
         }
 
         @Override
-        public Item next() throws XPathException {
-            if (finished) {
-                return null;
-            }
-            Item item = baseIterator.next();
-            if (item == null) {
-                finished = true;
-                return null;
-            }
-            BooleanValue matches = (BooleanValue)end.call(context, SequenceTool.fromItems(item)).head();
-            if (matches.getBooleanValue()) {
-                finished = true;
-                if (inclusive) {
-                    return item;
-                } else {
-                    baseIterator.close();
+        public Item next() {
+            try {
+                if (finished) {
                     return null;
                 }
-            } else {
-                return item;
+                Item item = baseIterator.next();
+                if (item == null) {
+                    finished = true;
+                    return null;
+                }
+                BooleanValue matches = (BooleanValue)end.call(context, SequenceTool.fromItems(item)).head();
+                if (matches.getBooleanValue()) {
+                    finished = true;
+                    if (inclusive) {
+                        return item;
+                    } else {
+                        baseIterator.close();
+                        return null;
+                    }
+                } else {
+                    return item;
+                }
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
             }
         }
 

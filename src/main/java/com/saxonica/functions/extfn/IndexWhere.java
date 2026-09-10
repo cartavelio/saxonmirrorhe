@@ -4,6 +4,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Int64Value;
@@ -61,14 +62,18 @@ public class IndexWhere extends SystemFunction {
          * Get the next item in the sequence.
          */
         @Override
-        public Int64Value next() throws XPathException {
+        public Int64Value next() {
             Item baseItem;
             while ((baseItem = base.next()) != null) {
                 index++;
-                Sequence result = dynamicCall(predicate, context, new Sequence[]{baseItem});
-                BooleanValue val = (BooleanValue)result.head();
-                if (val != null && val.getBooleanValue()) {
-                    return new Int64Value(index);
+                try {
+                    Sequence result = dynamicCall(predicate, context, new Sequence[]{baseItem});
+                    BooleanValue val = (BooleanValue)result.head();
+                    if (val != null && val.getBooleanValue()) {
+                        return new Int64Value(index);
+                    }
+                } catch (XPathException e) {
+                    throw new UncheckedXPathException(e);
                 }
             }
             return null;

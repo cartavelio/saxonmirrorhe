@@ -3,7 +3,6 @@ package com.saxonica.ee.bytecode.iter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.trans.XPathException;
 
 /**
  * Iterate over the instructions in the Block, concatenating the result of each instruction
@@ -41,7 +40,7 @@ public abstract class CompiledBlockIterator implements SequenceIterator {
      */
 
     @Override
-    public abstract Item next() throws XPathException;
+    public abstract Item next();
 
 }
 

@@ -64,7 +64,7 @@ public class DoInstr extends Instruction  {
     /*@Nullable*/
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        GroundedValue value = getActionExpr().iterate(context).materialize();
+        GroundedValue value = SequenceTool.toGroundedValue(getActionExpr().iterate(context));
         return null;
     }
 

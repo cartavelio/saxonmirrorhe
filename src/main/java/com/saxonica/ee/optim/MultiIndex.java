@@ -401,7 +401,7 @@ public class MultiIndex {
          */
 
         @Override
-        public Item next() throws XPathException {
+        public Item next() {
             if (iter.hasNext()) {
                 current = iter.next();
                 return SequenceTool.itemAt(indexedValue, current);
@@ -419,7 +419,7 @@ public class MultiIndex {
          */
 
         @Override
-        public int getLength() throws XPathException {
+        public int getLength() {
             return selection.size();
         }
 

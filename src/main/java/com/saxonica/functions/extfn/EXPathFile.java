@@ -766,13 +766,9 @@ public class EXPathFile {
         }
 
         @Override
-        public StringItem next() throws XPathException {
+        public StringItem next() {
             StringItem result = null;
-            try {
-                result = super.next();
-            } catch (XPathException e) {
-                error("Error in reading text lines", e, ERROR_IO);
-            }
+            result = super.next();
             return result;
         }
 

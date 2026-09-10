@@ -5,10 +5,7 @@ import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -53,7 +50,7 @@ public class NewElement extends SystemFunction {
         cco.startElement(new FingerprintedQName(name.getStructuredQName(), context.getNamePool()),
                          Untyped.getInstance(),
                          Loc.NONE, 0);
-        arguments[1].iterate().forEachOrFail(cco::append);
+        SequenceTool.supply(arguments[1].iterate(), (ItemConsumer<? super Item>) cco::append);
         cco.endElement();
         cco.close();
         return builder.getCurrentRoot();

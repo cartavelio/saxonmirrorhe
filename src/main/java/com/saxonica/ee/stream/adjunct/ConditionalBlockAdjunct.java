@@ -125,7 +125,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
                         processItems(iter, result);
                     }
                 } else {
-                    child.iterate(getContext()).forEachOrFail(item -> {
+                    SequenceTool.supply(child.iterate(getContext()), (ItemConsumer<? super Item>) item -> {
                         if (empty && isSignificant(item)) {
                             empty = false;
                             flushIfNonEmpty();
@@ -171,7 +171,7 @@ public class ConditionalBlockAdjunct extends TransmissionAdjunct implements Feed
                         processItems(child.iterate(getContext()), result);
                     }
                 } else {
-                    child.iterate(getContext()).forEachOrFail(item -> {
+                    SequenceTool.supply(child.iterate(getContext()), (ItemConsumer<? super Item>) item -> {
                         if (isSignificant(item)) {
                             empty = false;
                             flushIfNonEmpty();

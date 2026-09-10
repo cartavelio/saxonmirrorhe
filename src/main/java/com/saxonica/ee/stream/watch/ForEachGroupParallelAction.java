@@ -305,7 +305,7 @@ public class ForEachGroupParallelAction extends ForEachAction {
             } else {
                 if (newGroup) {
                     Expression action = ((ForEachGroup) getExpression()).getActionExpression();
-                    action.iterate(gp.bodyContext).forEachOrFail(getResult()::append);
+                    SequenceTool.supply(action.iterate(gp.bodyContext), (ItemConsumer<? super Item>) getResult()::append);
                 }
             }
         }

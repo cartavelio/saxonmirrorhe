@@ -5,7 +5,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -64,7 +66,7 @@ public class BufferingFeed extends ItemFeed {
         inputValue = new ArrayList<>(4);
         SequenceIterator iter = getExpression().iterate(getContext());
         final Outputter out = getNextOutputter();
-        iter.forEachOrFail(out::append);
+        SequenceTool.supply(iter, (ItemConsumer<? super Item>) out::append);
         out.close();
     }
 

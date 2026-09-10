@@ -11,6 +11,7 @@ import net.sf.saxon.om.AbstractSequenceIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.QuitParsingException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.StringItem;
@@ -144,7 +145,7 @@ public class PushToPull {
 
             @Override
             @CSharpModifiers(code = {"public", "override"})
-            public Item next() throws XPathException {
+            public Item next() {
                 //System.err.println("Consumer.read()");
                 if (allDone) {
                     // Just in case the caller does another call on next() after completion
@@ -162,10 +163,12 @@ public class PushToPull {
                             return item;
                         }
                     } else {
-                        throw XPathException.makeXPathException(next.getException());
+                        XPathException xpe = XPathException.makeXPathException(next.getException());
+                        throw new UncheckedXPathException(xpe);
                     }
                 } catch (InterruptedException e) {
-                    throw new XPathException(e);
+                    XPathException xpie = XPathException.makeXPathException(e);
+                    throw new UncheckedXPathException(xpie);
                 }
             }
 

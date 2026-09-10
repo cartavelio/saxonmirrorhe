@@ -254,17 +254,13 @@ public class SaxonXQForwardSequence extends Closable implements XQResultSequence
         if (position < 0) {
             return false;
         }
-        try {
-            Item next = iterator.next();
-            if (next == null) {
-                position = -1;
-                return false;
-            } else {
-                position++;
-                return true;
-            }
-        } catch (XPathException e) {
-            throw newXQException(e);
+        Item next = iterator.next();
+        if (next == null) {
+            position = -1;
+            return false;
+        } else {
+            position++;
+            return true;
         }
     }
 

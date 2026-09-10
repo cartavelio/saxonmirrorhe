@@ -11,7 +11,9 @@ import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ErrorType;
@@ -73,7 +75,7 @@ public class ChooseAdjunct extends TransmissionAdjunct {
                             return actionInversion.getWatch(watchManager, out, context);
 
                         } else {
-                            action.iterate(context).forEachOrFail(out::append);
+                            SequenceTool.supply(action.iterate(context), (ItemConsumer<? super Item>) out::append);
                             break;
                         }
                     }

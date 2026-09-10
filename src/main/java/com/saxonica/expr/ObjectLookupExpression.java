@@ -141,7 +141,7 @@ public class ObjectLookupExpression extends LookupExpression {
                 return new CurriedFunction(reflexiveFunction, boundArgs);
             });
         } else {
-            GroundedValue rhs = getRhsExpression().iterate(context).materialize();
+            GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
             String key = rhs.getUnicodeStringValue().toString();
             return ItemMappingIterator.map(baseIterator,
                     item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringItem) rhs));

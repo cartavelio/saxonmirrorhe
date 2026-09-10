@@ -67,6 +67,7 @@ public class SlotManagerEE extends SlotManager {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             assert false;
             // better to display nothing than to crash when producing extra diagnostics
         }

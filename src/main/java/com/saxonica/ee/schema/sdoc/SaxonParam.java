@@ -78,7 +78,7 @@ public class SaxonParam extends AnnotationParent {
             XPathContext dynamicContext = controller.newXPathContext();
             dynamicContext = dynamicContext.newCleanContext();
             ((XPathContextMajor) dynamicContext).openStackFrame(stackFrameMap);
-            defaultValue = expr.iterate(dynamicContext).materialize();
+            defaultValue = SequenceTool.toGroundedValue(expr.iterate(dynamicContext));
         } catch (XPathException e) {
             error(e.getMessage());
         }

@@ -9,9 +9,12 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.QuitParsingException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ValidationException;
 
@@ -110,15 +113,16 @@ public abstract class ItemFeed extends ProxyOutputter {
 
     public static void processItems(SequenceIterator iter, Outputter result) throws XPathException {
         try {
-            iter.forEachOrFail(result::append);
-        } catch (QuitParsingException quit) {
-            throw quit;
-        } catch (XPathException e) {
-            if (result instanceof ItemFeed) {
+            SequenceTool.supply(iter, (ItemConsumer<? super Item>) result::append);
+        } catch (UncheckedXPathException unxe) {
+            XPathException xe = unxe.getXPathException();
+            if (xe instanceof QuitParsingException) {
+                throw xe;
+            } else if (result instanceof ItemFeed) {
                 // Try to pass the error up the pipeline to the next try/catch
-                ((ItemFeed) result).dynamicError(e);
+                ((ItemFeed) result).dynamicError(xe);
             } else {
-                throw e;
+                throw xe;
             }
         }
     }

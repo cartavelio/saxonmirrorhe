@@ -646,7 +646,7 @@ public class XQuery10TestSuiteDriver {
                 XQueryExpression subQuery = sqc2.compileQuery(subQueryFileReader);
                 subQueryFileReader.close();
                 SequenceIterator subQueryResult = subQuery.iterator(new DynamicQueryContext(eeConfig));
-                dqc.setParameter(new StructuredQName("", "", variableName), subQueryResult.materialize());
+                dqc.setParameter(new StructuredQName("", "", variableName), SequenceTool.toGroundedValue(subQueryResult));
             }
         }
     }

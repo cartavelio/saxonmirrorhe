@@ -5,6 +5,7 @@ import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ObjectValue;
 
@@ -52,7 +53,7 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
     }
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         while (true) {
             Item nextIn = getBaseIterator().next();
             try {
@@ -71,13 +72,13 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
                     }
                 }
             } catch (InterruptedException e) {
-                throw new XPathException(e);
+                throw new UncheckedXPathException(new XPathException(e));
             } catch (ExecutionException | RejectedExecutionException e) {
                 if (e.getCause() instanceof XPathException) {
-                    throw (XPathException) e.getCause();
+                    throw new UncheckedXPathException((XPathException) e.getCause());
                 }
                 if (!e.getMessage().contains("Shutting down")) {
-                    throw new XPathException(e);
+                    throw new UncheckedXPathException(new XPathException(e));
                 } // else {
                 // No action, error reported elsewhere
                 //}

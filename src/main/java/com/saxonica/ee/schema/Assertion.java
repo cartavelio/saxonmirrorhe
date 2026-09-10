@@ -11,10 +11,7 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.CollectionFn;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StandardURIResolver;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathStaticContext;
@@ -272,7 +269,7 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
         List<NodeInfo> result = new ArrayList<>();
         try {
             if (returnsFailingNodes) {
-                condition.iterate(context).forEachOrFail(item -> result.add((NodeInfo) item));
+                SequenceTool.supply(condition.iterate(context), (ItemConsumer<? super Item>) item -> result.add((NodeInfo) item));
                 return result;
             } else {
                 boolean ok = condition.effectiveBooleanValue(context);

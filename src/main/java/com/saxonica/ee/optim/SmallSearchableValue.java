@@ -6,9 +6,7 @@ import net.sf.saxon.expr.ValueComparison;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
@@ -47,7 +45,7 @@ class SmallSearchableValue extends SearchableValue {
         c2.setCurrentIterator(manual);
 
         List<AtomicValue> soughtValues = new ArrayList<>();
-        values.forEachOrFail(item -> soughtValues.add((AtomicValue)item));
+        SequenceTool.supply(values, (ItemConsumer<? super Item>) item -> soughtValues.add((AtomicValue) item));
         if (soughtValues.isEmpty()) {
             return EmptyIterator.emptyIterator();
         }

@@ -14,7 +14,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -166,7 +168,7 @@ public class ForEachAction extends ItemFeed {
             iterator.setContextItem(it);
             iterator.incrementPosition();
             Outputter out = getNextOutputter();
-            action.iterate(context).forEachOrFail(out::append);
+            SequenceTool.supply(action.iterate(context), (ItemConsumer<? super Item>) out::append);
         }
     }
 

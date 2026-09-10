@@ -1146,7 +1146,7 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
             List<Item> values = new ArrayList<>(20);
             while (enumerator.MoveNext()) {
                 Sequence v = convertFromDotNet(enumerator.get_Current(), CLI_OBJECT, context);
-                v.iterate().forEachOrFail(values::add);
+                SequenceTool.supply(v.iterate(), (ItemConsumer<? super Item>) values::add);
             }
             return new SequenceExtent.Of<>(values);
         } else {

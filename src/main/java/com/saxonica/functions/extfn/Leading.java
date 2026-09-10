@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -58,7 +59,7 @@ public class Leading extends SystemFunction {
         }
 
         @Override
-        public Item next() throws XPathException {
+        public Item next() {
             if (exhausted) {
                 return null;
             }
@@ -67,14 +68,18 @@ public class Leading extends SystemFunction {
                 return null;
             }
             args[0] = next;
-            boolean matches =
-                    ExpressionTool.effectiveBooleanValue(dynamicCall(function, context, args).iterate());
-            if (matches) {
-                return next;
-            } else {
-                exhausted = true;
-                base.close();
-                return null;
+            try {
+                boolean matches =
+                        ExpressionTool.effectiveBooleanValue(dynamicCall(function, context, args).iterate());
+                if (matches) {
+                    return next;
+                } else {
+                    exhausted = true;
+                    base.close();
+                    return null;
+                }
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
             }
         }
 

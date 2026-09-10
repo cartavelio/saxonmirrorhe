@@ -5,9 +5,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -272,7 +270,7 @@ public class CopyModifyExpression extends Expression {
         pul.apply(context, validationMode);
         // The set of updated trees must be a subset of the set of nodes created during the copy phase
         Set<NodeInfo> copiedNodes = new HashSet<>();
-        getCopyBindings().iterate(context).forEachOrFail(node -> copiedNodes.add((NodeInfo)node));
+        SequenceTool.supply(getCopyBindings().iterate(context), (ItemConsumer<? super Item>) node -> copiedNodes.add((NodeInfo) node));
         if (!copiedNodes.containsAll(pul.getAffectedTrees())) {
             XPathException err = new XPathException(
                     "A node that was not created during the copy phase has been updated during the modify phase");

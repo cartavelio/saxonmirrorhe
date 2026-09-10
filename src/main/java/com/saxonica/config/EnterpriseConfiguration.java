@@ -2239,7 +2239,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (ref == FilterExpression.FILTERED) {
             return SearchableValue.makeSearchableValue(expression.iterate(context));
         } else {
-            return expression.iterate(context).materialize();
+            return SequenceTool.toGroundedValue(expression.iterate(context));
         }
     }
     

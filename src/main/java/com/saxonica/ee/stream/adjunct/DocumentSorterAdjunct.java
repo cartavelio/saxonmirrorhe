@@ -19,9 +19,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -237,7 +235,7 @@ public class DocumentSorterAdjunct extends TransmissionAdjunct implements FeedMa
             SequenceIterator grounded = new ListIterator.Of<>(groundedItems);
             SequenceIterator sorted = new DocumentOrderIterator(grounded, GlobalOrderComparer.getInstance());
             Outputter out = getNextOutputter();
-            sorted.forEachOrFail(out::append);
+            SequenceTool.supply(sorted, (ItemConsumer<? super Item>) out::append);
             super.close();
         }
 

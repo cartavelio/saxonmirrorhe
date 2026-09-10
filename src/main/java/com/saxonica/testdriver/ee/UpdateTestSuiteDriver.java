@@ -677,7 +677,7 @@ public class UpdateTestSuiteDriver {
                 StaticQueryContext sqc2 = saConfig.newStaticQueryContext();
                 XQueryExpression subQuery = sqc2.compileQuery(new FileReader(subQueryFile));
                 SequenceIterator subQueryResult = subQuery.iterator(new DynamicQueryContext(saConfig));
-                dqc.setParameter(new StructuredQName("", "", variableName), subQueryResult.materialize());
+                dqc.setParameter(new StructuredQName("", "", variableName), SequenceTool.toGroundedValue(subQueryResult));
             }
         }
     }

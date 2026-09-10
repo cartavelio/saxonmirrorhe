@@ -1210,7 +1210,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
                 if (call instanceof JavaExtensionFunctionCall) {
                     ((JavaExtensionFunctionCall) call).prepareForDynamicCall(context.getConfiguration());
                 }
-                return call.iterate(context).materialize();
+                return SequenceTool.toGroundedValue(call.iterate(context));
             }
             //throw new XPathException("Cannot make a dynamic call to an overloaded external Java method");
         }

@@ -6,6 +6,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import java.sql.Connection;
@@ -32,7 +33,7 @@ public class SQLTable implements Sequence /* of MapItem */ {
     }
 
     @Override
-    public SequenceIterator /* of MapItem */ iterate() throws XPathException {
+    public SequenceIterator /* of MapItem */ iterate() {
         PreparedStatement ps = null;
 
         try {
@@ -43,9 +44,10 @@ public class SQLTable implements Sequence /* of MapItem */ {
             try {
                 ps = connection.prepareStatement(statement.toString());
             } catch (SQLException e) {
-                throw new XPathException("sql:table() failed: " + e.getMessage() +
+                XPathException xpe = new XPathException("sql:table() failed: " + e.getMessage() +
                                                  " Failed to prepare query {" + statement + '}',
                                          SaxonErrorCode.SXSQ0004, context);
+                throw new UncheckedXPathException(xpe);
 
             }
             // -- Execute Statement
@@ -58,7 +60,9 @@ public class SQLTable implements Sequence /* of MapItem */ {
             }
             return new ZeroOrMore<>(out).iterate();
         } catch (SQLException ex) {
-            throw new XPathException("Failed to materialize sql:table(): " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
+            XPathException xpe2 = new XPathException(
+                    "Failed to materialize sql:table(): " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
+            throw new UncheckedXPathException(xpe2);
         } finally {
             if (ps != null) {
                 try {

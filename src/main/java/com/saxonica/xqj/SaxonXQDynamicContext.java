@@ -8,8 +8,12 @@
 package com.saxonica.xqj;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.DynamicQueryContext;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
@@ -184,14 +188,14 @@ public abstract class SaxonXQDynamicContext extends Closable implements XQDynami
         checkNotNull(varname);
         try {
             if (value instanceof SaxonXQForwardSequence) {
-                GroundedValue extent = ((SaxonXQForwardSequence) value).getIterator().materialize();
+                GroundedValue extent = SequenceTool.toGroundedValue(((SaxonXQForwardSequence) value).getIterator());
                 getDynamicContext().setParameter(getStructuredQName(varname), extent);
             } else if (value instanceof SaxonXQSequence) {
                 bindExternalVariable(varname, ((SaxonXQSequence) value).getValue());
             } else {
                 throw new XQException("XQSequence value is not a Saxon sequence");
             }
-        } catch (XPathException de) {
+        } catch (UncheckedXPathException de) {
             XQException err = new XQException(de.getMessage());
             err.initCause(de);
             throw err;

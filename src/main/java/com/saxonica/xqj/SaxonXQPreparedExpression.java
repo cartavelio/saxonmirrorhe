@@ -91,7 +91,7 @@ public class SaxonXQPreparedExpression extends SaxonXQDynamicContext implements 
         try {
             SequenceIterator iter = expression.iterator(context);
             if (scrollable) {
-                GroundedValue value = iter.materialize();
+                GroundedValue value = SequenceTool.toGroundedValue(iter);
                 return new SaxonXQSequence(value, this);
             } else {
                 return new SaxonXQForwardSequence(new FocusTrackingIterator(iter), this);
