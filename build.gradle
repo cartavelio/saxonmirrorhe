@@ -742,9 +742,12 @@ task record_branch(
   commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"
   standardOutput = recordBranch
   doLast {
-    def output = new FileWriter(new File("build/built-branch"))
+    def output = new FileWriter(new File("${buildDir}/built-branch"))
     output.write(recordBranch.toString("utf-8"))
     output.close()
+  }
+  doFirst {
+    mkdir(buildDir)
   }
 }
 
