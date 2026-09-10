@@ -190,7 +190,18 @@ public class TestXQueryCompiler {
 
     }
 
-
+    @Test
+    public void testLineEndingNormalization() {
+        // Spec here seems to have changed between XQuery 1.0 and 3.0, with no mention in the changes appendix
+        try {
+            Processor p = new Processor(false);
+            XQueryCompiler c = p.newXQueryCompiler();
+            XdmValue result = c.compile("string-length('==\r\n==')").load().evaluate();
+            assertEquals("5", result.toString());
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
 
     @Test
     public void testSeparateCompilation() {
