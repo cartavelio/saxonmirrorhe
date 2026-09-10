@@ -68,8 +68,15 @@
             <li><p>Added documentation on <a href="/technical/memory">Memory management in
                C++</a>, and improved the C++ API documentation for relevant methods when the caller
                must deallocate the memory used.</p></li>
-            <li><p>The SaxonC C/C++ libraries can be imported into your application using the provided CMake files located:
-               <code>lib/cmake/SaxonCEE/</code>.</p></li>
+            <li><p>we have introduced a built C++ API library (.dll / .so / .dylib) along with
+               accompanying CMake files to simplify integration into C++ applications.The SaxonC
+               C/C++ libraries can be imported into your application using the provided CMake files located:
+               <code>lib/cmake/SaxonCEE/</code>.</p>
+               <p>To use SaxonC in a C++ project, users now only need the two compiled library files and the
+                  header files—greatly reducing setup complexity. Integrating with a project already using
+                  CMake is as simple as using FindPackage(SaxonCHE 12.6.0) (Or SaxonCEE, or SaxonCPE,
+                  if using the EE or PE editions). A sample CMake project is provided with the samples in the download ZIP.</p>
+            </li>
          </ul>
          
       </category>
