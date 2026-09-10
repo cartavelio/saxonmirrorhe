@@ -2676,7 +2676,7 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
          user interface.</p>
          
          <aside>Older interfaces for processing messages remain available for backwards compatibility;
-         but from 11.1, the <code>-m</code> option on the command line is not longer permitted, while the
+         but from 11.1, the <code>-m</code> option on the command line is no longer permitted, while the
             configuration property <a class="feature" href="MESSAGE_EMITTER_CLASS"/> is ignored.</aside>
       </section>
       
