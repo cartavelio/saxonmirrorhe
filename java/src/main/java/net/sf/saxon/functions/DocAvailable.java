@@ -80,6 +80,14 @@ public class DocAvailable extends SystemFunction  {
     private boolean docAvailable(String href, ParseOptions parseOptions, XPathContext context) {
         try {
             PackageData packageData = getRetainedStaticContext().getPackageData();
+
+            int schemaValidationMode = parseOptions.getSchemaValidationMode();
+            if (!packageData.isSchemaAware() && (schemaValidationMode > 0  && schemaValidationMode < 4)) {
+                // Regardless of whether it exists, the document will be unavailable because
+                // schema validation is required but not supported
+                return false;
+            }
+
             DocumentKey documentKey;
             documentKey = DocumentFn.computeDocumentKey(href, getStaticBaseUriString(), packageData, parseOptions);
             DocumentPool pool = context.getController().getDocumentPool();
