@@ -173,7 +173,7 @@ abstract class TestSuitesExtension
       this.language = language
       this.suiteDir = suiteDir(suite)
       this.testargs = testargs
-      this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
+      this.showOutput = project.findProperty("saxonicaTestDriverOutputRedirect") != "true"
       exceptionsFile = exceptions(suite, language)
       reportingRootDir = layout.buildDirectory.dir("test-results")
       classpath.from(testclasspath)
@@ -256,7 +256,7 @@ abstract class TestSuitesExtension
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       dependsOn("dotnetBuildTestDrivers")
       this.edition = plugin.edition
-      this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
+      this.showOutput = project.findProperty("saxonicaTestDriverOutputRedirect") != "true"
       this.suite = suite
       this.language = language
       this.suiteDir = suiteDir(suite)
