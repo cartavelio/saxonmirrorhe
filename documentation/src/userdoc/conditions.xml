@@ -149,7 +149,7 @@
     developed and owned by Saxonica. The transpiler is written largely in XSLT 3.0, but also makes use of the open-source 
         <a href="http://javaparser.org" class="bodylink">javaparser</a> library.</p>
     
-    <p>SaxonCS products are targeted at .NET 10, and do not run on .NET Framework.</p>
+    <p>SaxonCS products are targeted at .NET 8, and do not run on .NET Framework.</p>
     
     <p>From Saxon 13, two SaxonCS products are shipped: SaxonCS-HE and SaxonCS-EE. These are described in the 
     following sections. There is no product corresponding to SaxonJ-PE.</p>

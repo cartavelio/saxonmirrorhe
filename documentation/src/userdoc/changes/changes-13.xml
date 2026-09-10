@@ -38,7 +38,7 @@
         <p class="javaonly">SaxonJ 13 is built and tested using Java 21, but is supported with Java 17 or
             later.</p>
         
-        <p class="csonly">SaxonCS 13 is targeted at .NET 10.</p>
+        <p class="csonly">SaxonCS 13 is targeted at .NET 8.</p>
         
         <p class="csonly">From 13.0, the Home Edition of SaxonCS becomes available, so SaxonCS is
             now distributed in two editions: SaxonCS-HE and SaxonCS-EE.</p>

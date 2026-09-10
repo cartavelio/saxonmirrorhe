@@ -72,7 +72,7 @@ but will not be further developed.
 
 ## What's new in SaxonCS?
 
-SaxonCS is built with .NET Core (SaxonCS 13 supports .NET 10). SaxonCS-HE 13 is the 
+SaxonCS is built with .NET Core (SaxonCS 13 supports .NET 8). SaxonCS-HE 13 is the 
 first release of our Home Edition SaxonCS product for .NET.
 
 

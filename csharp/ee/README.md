@@ -82,7 +82,7 @@ but will not be further developed.
 
 ## What's new in SaxonCS?
 
-SaxonCS is built with .NET Core (SaxonCS 13 supports .NET 10). SaxonCS includes
+SaxonCS is built with .NET Core (SaxonCS 13 supports .NET 8). SaxonCS includes
 lots of new features to make processing JSON easier; it's getting close to
 the point where JSON is supported almost as well as XML. Certainly, there's
 no better library available for applications that need to mix and match XML

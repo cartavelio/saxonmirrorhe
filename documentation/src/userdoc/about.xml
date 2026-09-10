@@ -250,8 +250,8 @@
 
          <ol>
             <li>
-               <p>SaxonCS 13 is targeted at .NET 10, which you will need to install separately. 
-                  For details, see  <a  class="bodylink"
+               <p>SaxonCS 13 is targeted at .NET 8 (or later), which you will need to install separately. 
+                  For details, see, for example, <a  class="bodylink"
                      href="https://dotnet.microsoft.com/en-us/download/dotnet/10.0">https://dotnet.microsoft.com/en-us/download/dotnet/10.0</a>.
                There's a bewildering variety of options. Choose the latest version of the SDK (for example, SDK 10.0.203)
                corresponding to your chosen operating system (Windows, MacOS, or Linux) and CPU 
@@ -411,7 +411,7 @@
             <p>The SaxonCS product, available from Saxon 11, is a complete redesign. The previous
             .NET product was built using the IKVM technology, which confined it to .NET Framework 4.x.
             SaxonCS is built by converting Java source code to C#, and runs on .NET 5 (SaxonCS 11),
-            .NET 6 (SaxonCS 12.0 to 12.5), .NET 8 (from SaxonCS 12.6), or .NET 10 (SaxonCS 13) fitting
+            .NET 6 (SaxonCS 12.0 to 12.5), .NET 8 (from SaxonCS 12.6) fitting
             in with Microsoft's strategic direction. The API for the new product retains many of the
             classes and methods from the older product, but we have taken the opportunity to modernize
             the design (for example by using delegates rather than interfaces for callbacks), and it's therefore
@@ -1054,8 +1054,8 @@ any version number.</p>
          download.</p>
       <ul>
          <li>
-            <p>To run SaxonCS 13 you need to install .NET 10. This is the only release on which the product
-            has been validated; if you want to try it on other versions, please let us know your experience.</p>
+            <p>To run SaxonCS 13 you need to install .NET 8 or later. We have tested mostly with .NET 10;
+            if you want to try it on other versions, please let us know your experience.</p>
          </li>
          <li>
             <p>SaxonCS validation has taken place primarily on MacOS, with extensive regression testing on Windows and Linux.
