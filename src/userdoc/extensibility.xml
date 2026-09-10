@@ -866,9 +866,8 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
       <p><strong>Static methods</strong> can be called directly.</p>
 
       <p>For example (in XSLT):</p>
-      <samp><![CDATA[<xsl:value-of select="math:sqrt($arg)"
-   xmlns:math="java:java.lang.Math"/>
-]]></samp>
+      <samp><![CDATA[<xsl:value-of select="math:sqrt($arg)" 
+    xmlns:math="java:java.lang.Math"/>]]></samp>
 
       <p>This will invoke the static method <code>java.lang.Math#sqrt()</code>, applying it to the
         value of the variable <code>$arg</code>, and copying the value of the square root of
@@ -876,8 +875,8 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
 
       <p>Similarly (in XQuery):</p>
       <samp><![CDATA[<a xmlns:double="java:java.lang.Double"> 
-                              {double:MAX_VALUE()} </a>
-]]></samp>
+    { double:MAX_VALUE() } 
+</a>]]></samp>
 
       <p>This will output the value of the static field <code>java.lang.Double#MAX_VALUE</code>. (In
         practice, it is better to declare the namespace in the query prolog, because it will then
@@ -1043,7 +1042,7 @@ public static int lineNumber(XPathContext c) {
         Julian instant as a decimal number:</p>
 
       <samp><![CDATA[<xsl:value-of select="d:toJulianInstant(current-dateTime())"
-         xmlns:d="java:net.sf.saxon.value.DateTimeValue"/>]]></samp>
+    xmlns:d="java:net.sf.saxon.value.DateTimeValue"/>]]></samp>
 
       <p>This will only work if the value of the expression (<code>current-dateTime()</code> in this
         example) is implemented internally as an instance of the class defined in the namespace used
@@ -1798,11 +1797,11 @@ public static int lineNumber(XPathContext c) {
         <p>The third argument is the
           implementation of the function, which can conveniently be supplied as a simple lambda expression.
           For example, a square-root function might be:</p>
-        
-      <samp>proc.RegisterExtensionFunction(
-                       new QName("urn:math", "sqrt"), 
-                       proc.ParseItemType("function(xs:double) as xs:double"), 
-                       val => new XdmAtomicValue(Math.sqrt((XdmAtomicValue)val[0][0].AsDouble()))</samp>
+      
+      <samp><![CDATA[proc.RegisterExtensionFunction(
+    new QName("urn:math", "sqrt"), 
+    proc.ParseItemType("function(xs:double) as xs:double"), 
+    val => new XdmAtomicValue(Math.sqrt((XdmAtomicValue)val[0][0].AsDouble()))]]></samp>
         
         <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>, or as <code>m:sqrt(2)</code>
           if the namespace prefix <code>m</code> has been bound to the URI <code>urn:math</code>.</p>

@@ -46,12 +46,12 @@
          href="/localization/sorting-and-collations">Sorting and Collations</a>.</i>
    </p>
    <section id="commandline" title="From the Command Line">
-      <h1>Running XQuery from the Command Line</h1>
+      <h1>XQuery from the Command Line</h1>
 
 
       <p>A command is available to run a query contained in a file.</p> 
       <div class="javaonly">
-      <p >The form of command on the Java
+      <p>The form of command on the Java
          platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
       </div>
@@ -753,7 +753,7 @@
    </section>
    <section id="api-query" title="From a Java Application" class="javaonly">
       
-      <h1>Running Queries from a Java Application</h1>
+      <h1>XQuery from a Java Application</h1>
 
       <p>Saxon offers two different APIs allowing queries to be run from Java:</p>
       <ul>
@@ -960,11 +960,11 @@
             <p>Because the <code>XQueryEvaluator</code> is an <code>IEnumerable</code>, it is
                possible to iterate over the results directly using the C# "foreach"
                construct:</p>
-            <p><code>foreach(XdmItem item in compiler.Compile("1 to 10").Load()) {...}</code></p>
+            <samp>foreach(XdmItem item in compiler.Compile("1 to 10").Load()) {...}</samp>
          </li>
          <li><p>The result of the <code>XQueryEvaluator.Evaluate()</code> method is an
             <code>XdmValue</code>. Saxon provides powerful facilities (modeled on LINQ) to process
-            an <code>XdmValue</code> using steps and predictaes. For example, if the query returns
+            an <code>XdmValue</code> using steps and predicates. For example, if the query returns
             a single node <code>section</code>, (<code>XdmNode</code> is a subclass of <code>XdmValue</code>), then
             you could test whether it has any descendant <code>para</code> elements with <code>@class="normal"</code>
             by writing</p>
@@ -972,7 +972,7 @@
             
             <aside>This example assumes the presence of appropriate <code>using static</code> directives for the
                types <a class="cslink" href="Saxon.Api.Steps">Saxon.Api.Steps</a> and <a class="cslink"
-                     href="Saxon.Api.Predicates">Saxon.Api.Predicates</a></aside>
+                     href="Saxon.Api.Predicates">Saxon.Api.Predicates</a>.</aside>
          </li>
       </ol>
       
@@ -1052,9 +1052,9 @@
       
       <h1>Calling XQuery Functions from an Application</h1>
       
-      <p>Although the usual way to invoke XQuery from a Java application is to compile and execute a
+      <p>Although the usual way to invoke XQuery from a Java or C# application is to compile and execute a
          query as described above, it is also possible to invoke individual XQuery functions
-         directly from Java if required.</p>
+         directly from Java or C# if required.</p>
       
       <div class="javaonly">
       <h2 class="subtitle">Calling XQuery Functions from Java</h2>
@@ -1165,7 +1165,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
       
       <p>XQuery 3.1 defines the <b>adaptive</b> output method to handle non-XML output: you can select this
       with the command line option <code>!method=adaptive</code>. (On some shells, the "!" may need to
-      be escaped as "\!".). The adaptive output method attempts to display each of the items in the result
+      be escaped as "\!".) The adaptive output method attempts to display each of the items in the result
       in an intuitive format: XML format for nodes, string format for atomic values, JSON format for
       maps and arrays.</p>
 
@@ -1176,8 +1176,8 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
             <code>result:element</code> or <code>result:atomic-value</code>) according to its type.
          The sequence as a whole is wrapped in a <code>result:sequence</code> element.</p>
    </section>
-   <section id="querycompilation" title="Compiling Queries to ByteCode" class="javaonly">
-      <h1>Compiling Queries to ByteCode</h1>
+   <section id="querycompilation" title="Compiling Queries to Bytecode" class="javaonly">
+      <h1>Compiling Queries to Bytecode</h1>
 
       <aside>Bytecode generation requires SaxonJ-EE.</aside>
 

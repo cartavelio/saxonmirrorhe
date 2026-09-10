@@ -1534,7 +1534,7 @@ task. In particular, it is now possible (with Saxon-PE and Saxon-EE) to specify 
                   This implements the SAX2 <code>XMLReader</code>
 interface and accepts a number of Apache-defined properties, allowing it to be used as a plug-in replacement for Xerces to support
 the Ant <code>xmlvalidate</code> and <code>schemavalidate</code> tasks, using the Saxon schema processor including the option of
-using XSD 1.1 for validation. For details see <xref section="schema-processing" page="validation-from-ant">Running validation from Ant</xref>.</p>
+using XSD 1.1 for validation. For details see <xref section="schema-processing" page="validation-from-ant">Validation from Ant</xref>.</p>
       </category>
 
       <category name="sql">
@@ -3104,8 +3104,8 @@ control XSLT and XQuery, though all commonly-used options should continue to wor
 <code>-keyword:value</code>, with the values "on" and "off" for boolean options. Groups of related options have been combined,
 so <code>-ds</code> and <code>-dt</code> are now <code>-tree:linked</code> and <code>-tree:tiny</code>. For options that were
 previously in the form "-keyword value", the old form (with a space) is still accepted for the time being. Details of
-the commands are at <xref section="using-xsl" page="commandline">Running XSLT from the Command Line</xref> and
-<xref section="using-xquery" page="commandline">Running XQuery from the Command Line</xref>.</p>
+the commands are at <xref section="using-xsl" page="commandline">XSLT from the Command Line</xref> and
+<xref section="using-xquery" page="commandline">XQuery from the Command Line</xref>.</p>
 
          <p xmlns="">The option <code>-x:classname</code> has been added for XQuery to set the parser class name used for source files,
 this is to allow use of a catalog resolver.</p>

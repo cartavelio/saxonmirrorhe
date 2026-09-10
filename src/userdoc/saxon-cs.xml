@@ -34,17 +34,17 @@ as their Java counterparts, with some exceptions. They are described in the foll
       <ul>
          <li>
          <p>
-            <a class="bodylink" href="/using-xsl/commandline">Running XSLT from the Command Line</a>
+            <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a>
          </p>
       </li>
          <li>
          <p>
-            <a class="bodylink" href="/using-xquery/commandline">Running XQuery from the Command Line</a>
+            <a class="bodylink" href="/using-xquery/commandline">XQuery from the Command Line</a>
          </p>
       </li>
          <li>
          <p>
-            <a class="bodylink" href="/schema-processing/commandline">Running Validate from the Command Line</a>
+            <a class="bodylink" href="/schema-processing/commandline">Validation from the Command Line</a>
          </p>
       </li>
       </ul>
@@ -343,7 +343,8 @@ need to mix use of the .NET API with the internal classes converted from the ori
          <li><code>saxon:unparsed-entities</code></li>
       </ul>
       
-      <p>It is possible to wrap an external C# object in an <code>XdmExternalObject</code>. However, the external object lookup 
+      <p>It is possible to wrap an external C# object in an <a class="cslink"
+         href="Saxon.Api.XdmExternalObject">XdmExternalObject</a>. However, the external object lookup  
          expression (a Saxon extension) is not available.</p>
       
       <p>Status for extension functions in other namespaces:</p>
@@ -374,7 +375,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
          is implemented from SaxonCS 11.1. The data is obtained from the .NET platform interfaces: 
          <code>CultureInfo.DateTimeFormatInfo</code>.</p>
       
-      <p>Spelled-out formatting of numbers ("one", "two", "three"), which can be requested using <code>&lt;xsl:number&gt;</code>,
+      <p>Spelled-out formatting of numbers ("one", "two", "three"), which can be requested using <code>xsl:number</code>,
       <code>format-integer()</code>, or <code>format-date()</code>, is not available for languages other than English.
       (We have not been able to find a .NET library that provides this capability).</p>
       

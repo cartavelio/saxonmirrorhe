@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article id="using-xsl" title="Using XSLT">
-   <h1>Running XSLT Transformations</h1>
+   <h1>Using XSLT</h1>
 
 
    <p>This section describes how to use XSLT stylesheets with Saxon, either from the command line,
@@ -23,7 +23,7 @@
       specifications, see <a class="bodylink" href="/conformance">Conformance</a>.</p>
 
    <section id="commandline" title="From the Command Line">
-      <h1>Running XSLT from the Command Line</h1>
+      <h1>XSLT from the Command Line</h1>
 
 
       <p>A command is available to apply a given stylesheet to a given source XML document.</p>
@@ -972,11 +972,9 @@
          example <code>!saxon:indent-spaces=4</code>. See also <a class="bodylink"
             href="/extensions/output-extras">Additional serialization parameters</a>.</p>
 
-      <section id="aoption" title="Using the -a option">
+      <section id="aoption" title="Using the -a option" class="javaonly">
 
          <h1>Using the <code>-a</code> option</h1>
-         
-         <div class="javaonly">
 
          <p>If the <code>-a</code> option is used, the name of the stylesheet is omitted. The source
             document must contain a <code>&lt;?xml-stylesheet?&gt;</code> processing instruction
@@ -999,12 +997,12 @@
   ...
   </xsl:transform>
 </BOOKLIST>]]></samp>
-         </div>
+         
       </section>
    </section>
 
    <section id="embedding" title="From a Java Application" class="javaonly">
-      <h1>Running XSLT Transformations from a Java Application</h1>
+      <h1>XSLT Transformations from a Java Application</h1>
 
       <p>Rather than running XSLT transformations from the command line, you may want to invoke
          transformations from your own application, perhaps one that runs within a web-based
@@ -1372,7 +1370,7 @@
    </section>
    
    <section id="Saxon-Api-transformation" title="From a C# Application" class="csonly">
-      <h1>Running XSLT Transformations from C#</h1>
+      <h1>XSLT Transformations from C#</h1>
       
       
       <p>You can perform a transformation using the C# <code>Saxon.Api</code> interface as follows
@@ -1384,14 +1382,14 @@
                set any global configuration options on the <code>Processor</code>.
               It is recommended to create a single <code>Processor</code> for the entire
             application.</p>
-            <p><code>var processor = new Processor();</code></p>
+            <samp>var processor = new Processor();</samp>
          </li>
          <li>
             <p>Call <code>NewXsltCompiler()</code> to create an <a class="cslink"
                href="Saxon.Api.XsltCompiler">XsltCompiler</a> object, and set any options
                that are local to a specific compilation (for example, the destination of error
                messages).</p>
-            <p><code>var compiler = processor.NewXsltCompiler();</code></p>
+            <samp>var compiler = processor.NewXsltCompiler();</samp>
          </li>
          <li>
             <p>Decide how you want to handle compile-time errors. Some options are:</p>
@@ -1408,9 +1406,9 @@
                them to a log file, or you could display them on screen. Either way, you will want to
                register an <code cs="Saxon.Api.ErrorReporter">ErrorReporter</code> that deals with the messages. For example,
                you could capture the messages in a list (for later analysis) like this:</p>
-                  <p><code>compiler.ErrorReporter = err => errorList.Add(err)</code></p>
+                  <samp>compiler.ErrorReporter = err => errorList.Add(err)</samp>
                <p>Or you could send them to a log file like this:</p>
-                  <p><code>compiler.ErrorReporter = err => Console.Error.WriteLine(err.Message)</code></p>
+                  <samp>compiler.ErrorReporter = err => Console.Error.WriteLine(err.Message)</samp>
                <p>The error object that is passed to the <code>ErrorReporter</code> delegate
                   is not an exception (it cannot be thrown). It is an object of class 
                   <code cs="Saxon.Api.Error">Error</code>, and its main properties
@@ -1428,7 +1426,7 @@
             <p>Call the <code>Compile()</code> method to compile a stylesheet. The result is an
                <code cs="Saxon.Api.XsltExecutable">XsltExecutable</code>, which can be used as often as you like, in the same thread or
                in different threads.</p>
-            <p><code>var executable = compiler.Compile(...)</code></p>
+            <samp>var executable = compiler.Compile(...)</samp>
             <p>This method has a number of overloads, allowing the stylesheet to be supplied in different ways. It can be
             supplied as a URI, as a <code>Stream</code>, as a <code>TextReader</code>, or as an <code>XmlReader</code>.</p>
             <p>Except for trivial stylesheets containing a single module, it's important that the stylesheet should have
@@ -1437,19 +1435,19 @@
             calling functions such as <code>document()</code>, <code>unparsed-text()</code>, or <code>json-doc()</code>.
             You can supply a base URI either by setting the <code>BaseUri</code> property on the <code>XsltCompiler</code>,
             or as an (implicit or explicit) parameter on the call to the <code>Compile</code> method.</p>
-            <p>Compiling a stylesheet can often be an expensive processor in comparison with the actual
+            <p>Compiling a stylesheet can often be an expensive process in comparison with the actual
             execution (especially when the stylesheet is large and the source document is small). It's therefore
-            desirable to reuse the <code cs="Saxon.Api.XsltExecutable">XsltExecutable</code> for multiple transformations where possible.
-               Once created, the <code cs="Saxon.Api.XsltExecutable">XsltExecutable</code> is read-only and thread-safe.</p>
+            desirable to reuse the <code>XsltExecutable</code> for multiple transformations where possible.
+               Once created, the <code>XsltExecutable</code> is read-only and thread-safe.</p>
          </li>
          <li>
             <p>The next step is to create an <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code>, 
                or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code> object, by calling
                the <code>Load()</code> or
-               <code>Load30()</code> method on the  cs="Saxon.Api.XsltExecutable".</p>
+               <code>Load30()</code> method on the <code>XsltExecutable</code>.</p>
             
-            <p><code>var transformer = executable.Load();</code></p>
-            <p><code>var transformer = executable.Load30();</code></p>
+            <samp>var transformer = executable.Load();</samp>
+            <samp>var transformer = executable.Load30();</samp>
             
                <p>Either of these can be used to run the
                transformation (regardless of which XSLT version you are using), but they have
@@ -1475,19 +1473,17 @@
                      which delivers the result as an XDM node tree. (Read the <code>xdmDestination.XdmNode</code> property on completion
                      to access the root of the tree.)</p>
                   
-                  <p>Options for serializing the result can be set either on the 
-                     <a class="cslink" href="Saxon.Api.Serializer">Serializer</a> object,
+                  <p>Options for serializing the result can be set either on the <code>Serializer</code> object,
                      or using <code>&lt;xsl:output&gt;</code> declarations in the stylesheet.
                      Options set via the API take precedence.</p>
                   
-                  <p>Another option is to sending the result of a transformation to another 
-                     <a class="cslink" href="Saxon.Api.XsltTransformer">XsltTransformer</a>. The class
+                  <p>Another option is to send the result of a transformation to another 
+                     <code>XsltTransformer</code>. The class
                      <code>XsltTransformer</code> implements the <code>IDestination</code> interface,
                      so the output of one transformation can form the input to another, making it
                      easy to construct a pipeline of transformations.</p>
                   
-                  <p>The <a class="cslink" href="Saxon.Api.XsltTransformer"
-                     >XsltTransformer</a> also allows you to start executing the
+                  <p>The <code>XsltTransformer</code> also allows you to start executing the
                      stylesheet with a named template as the entry point. In this case there will
                      not necessarily be a source document, though you can still supply one, and
                      it will be used as the context item for global variables.</p>
@@ -1495,21 +1491,18 @@
                      global stylesheet parameters, but not for parameters declared at the level
                      of a particular <code>xsl:template</code> element.</p>
                   <p>Typical usage:</p>
-                  <samp><![CDATA[
- var transformer = executable.Load();
+                  <samp><![CDATA[ var transformer = executable.Load();
  transformer.SetInputStream(...);
  transformer.SetParameter(new QName("debug"), new XdmAtomicValue(true));
  var writer = new StringWriter();
  var serializer = processor.NewSerializer(writer);
  serializer.SetOutputProperty(Serializer.INDENT, "yes");
  transformer.Run(serializer);
- Console.WriteLine(writer.ToString());
-                  ]]></samp>
+ Console.WriteLine(writer.ToString());]]></samp>
                   
                </li>
                <li>
-                  <p>The <a class="cslink" href="Saxon.Api.Xslt30Transformer"
-                     >Xslt30Transformer</a> class was a later introduction, and as its name
+                  <p>The <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code> class was a later introduction, and as its name
                      suggests, it provides new ways of executing stylesheet code that are defined
                      in the XSLT 3.0 specification, though Saxon also allows you to use the same
                      entry points with 1.0 or 2.0 stylesheets. Among the new capabilities
@@ -1530,11 +1523,12 @@
                         other.</li>
                   </ul>
                   <p>It is still possible to wrap the output in a result tree and send it to a
-                     <code>Destination</code> (which might be a <code>Serializer</code>), but
+                     <code cs="Saxon.Api.IDestination">IDestination</code> (which might be a <code
+                        cs="Saxon.Api.Serializer">Serializer</code>), but
                      this is no longer mandatory.</p>
                   <p>The <code>Xslt30Transformer</code> does not implement the
                      <code>IDestination</code> interface so it is not quite as convenient
-                     as <code>Xslt30Transformer</code> when constructing a pipeline.</p>
+                     as <code>XsltTransformer</code> when constructing a pipeline.</p>
                </li>
             </ul>
             
@@ -1578,7 +1572,7 @@
    
    <section id="xsltfromant" title="From Ant" class="javaonly">
 
-      <h1>Running Saxon XSLT Transformations from Ant</h1>
+      <h1>XSLT Transformations from Ant</h1>
       
       <p>It is possible to run a Saxon transformation from Ant using the standard <a
          href="http://ant.apache.org/manual/Tasks/style.html" class="bodylink">xslt task</a>, by

@@ -216,7 +216,7 @@
                <p>&#x25BA; For information on Saxon's APIs for XSLT transformation, see 
                   <a class="bodylink" href="/using-xsl/embedding">Invoking XSLT from an application</a>.
                   Transformations can also be invoked from the command line (see 
-                  <a class="bodylink" href="/using-xsl/commandline">Running XSLT from the command line</a>).</p>
+                  <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a>).</p>
             </li>
             <li>
                <p>
@@ -820,6 +820,8 @@
          </ul></li>
          <li><p>Functions in the standard function library are added to the static context only if they were available in XPath 2.0</p></li>
       </ul>
+      
+      <p>TODO update for Saxon 11</p>
       
       <p>Saxon-EE 9.9 passes 15238 out of 15242 XPath 2.0 tests in the W3C test suite. The failures occur in cases where XPath 3.1 relaxes the rules
       and it is not practical or sensible for Saxon to enforce several different sets of constraints. In particular:</p>

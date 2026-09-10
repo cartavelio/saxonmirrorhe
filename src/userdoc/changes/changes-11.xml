@@ -341,14 +341,14 @@
         <p>A new argument <code>-json</code> is added to support transformation of a JSON input file. The argument works like the
             <code>-s</code> argument for XML input: the value is the filename of a JSON file, which is parsed; the resulting item
             (if non-null) becomes both the global context item and the initial match selection for the transformation. (For more
-            information, see <a class="bodylink" href="/using-xsl/commandline">Running XSLT from the Command Line</a>.)</p>
+            information, see <a class="bodylink" href="/using-xsl/commandline">XSLT from the Command Line</a>.)</p>
         
         <h2>XQuery</h2>
         
         <p>A new argument <code>-json</code> is added to support querying of a JSON input file. The argument works like the
             <code>-s</code> argument for XML input: the value is the filename of a JSON file, which is parsed; the resulting item
             (if non-null) becomes the global context item for the query. (For more information, see <a class="bodylink"
-                href="/using-xquery/commandline">Running XQuery from the Command Line</a>.)</p>
+                href="/using-xquery/commandline">XQuery from the Command Line</a>.)</p>
         
  
  
