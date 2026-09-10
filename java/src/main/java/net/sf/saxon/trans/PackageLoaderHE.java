@@ -2630,6 +2630,9 @@ public class PackageLoaderHE implements IPackageLoader {
                 } else if (uri == NamespaceUri.EXPATH_FILE) {
                     f = loader.makeEXPathFileFunction(qName, arity);
                 }
+                if (f != null) {
+                    f.setRetainedStaticContext(rsc);
+                }
             } else {
                 f = SystemFunction.makeFunction(name, rsc, arity);
             }
