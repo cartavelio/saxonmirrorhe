@@ -16,6 +16,7 @@ import net.sf.saxon.expr.instruct.Bindery;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.instruct.GlobalVariable;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.functions.AccessorFn;
@@ -477,6 +478,15 @@ public class Controller implements ContextOriginator {
      */
 
     public void warning(String message, String errorCode, Location locator) {
+        if (locator == null) {
+            locator = Loc.NONE;
+        }
+        if (errorCode == null) {
+            errorCode = SaxonErrorCode.SXWN9000;
+        }
+        if (message == null) {
+            message = "Unspecified warning";
+        }
         XmlProcessingIncident warning = new XmlProcessingIncident(message, errorCode, locator).asWarning();
         errorReporter.report(warning);
     }
