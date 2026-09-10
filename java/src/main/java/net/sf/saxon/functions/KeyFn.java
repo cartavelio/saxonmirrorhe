@@ -147,16 +147,10 @@ public class KeyFn extends SystemFunction implements StatefulSystemFunction {
         if (selectedKeySet == null) {
             AtomicValue keyName = (AtomicValue) arguments[0].head();
             StructuredQName qName;
-            if (keyName instanceof QNameValue) {
-                qName = ((QNameValue) keyName).getStructuredQName();
-            } else {
-                try {
-                    qName = StructuredQName.fromLexicalQName(
-                            keyName.getStringValue(), false, StructuredQName.QUPL,
-                            getNamespaceResolver());
-                } catch (XPathException err) {
-                    throw new XPathException("Invalid key name: " + err.getMessage(), "XTDE1260");
-                }
+            try {
+                qName = processStringOrQNameArgument(keyName, NamespaceUri.NULL);
+            } catch (XPathException err) {
+                throw new XPathException("Invalid key name: " + err.getMessage(), "XTDE1260");
             }
             selectedKeySet = getKeyDefinitionSet(keyManager, qName);
         }

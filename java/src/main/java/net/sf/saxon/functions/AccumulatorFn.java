@@ -8,7 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StringLiteral;
+import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorManager;
@@ -21,6 +21,7 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.value.AtomicValue;
 
 /**
  * Non-streaming implementation of accumulator-before() and accumulator-after()
@@ -39,7 +40,7 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
         return true;
     }
 
-    private Sequence getAccumulatorValue(String name, Phase phase, XPathContext context) throws XPathException {
+    private Sequence getAccumulatorValue(StructuredQName name, Phase phase, XPathContext context) throws XPathException {
         //System.err.println("getAccumulatorValue(" + name + ", " + phase);
         AccumulatorRegistry registry = getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
         Accumulator accumulator = getAccumulator(name, registry);
@@ -79,17 +80,8 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
      * @throws XPathException if the accumulator is not recognised or if the name is invalid
      */
 
-    private Accumulator getAccumulator(String name, AccumulatorRegistry registry) throws XPathException {
-        int qNameFormat = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40
-                ? StructuredQName.QUPL
-                : StructuredQName.QUL;
-        StructuredQName qName;
-        try {
-            qName = StructuredQName.fromLexicalQName(name, false, qNameFormat, getRetainedStaticContext());
-        } catch (XPathException err) {
-            throw new XPathException("Invalid accumulator name: " + err.getMessage(), "XTDE3340");
-        }
-        Accumulator accumulator = registry == null ? null : registry.getAccumulator(qName);
+    private Accumulator getAccumulator(StructuredQName name, AccumulatorRegistry registry) throws XPathException {
+        Accumulator accumulator = registry == null ? null : registry.getAccumulator(name);
         if (accumulator == null) {
             throw new XPathException("Accumulator " + name + " has not been declared", "XTDE3340");
         }
@@ -106,9 +98,10 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
     @Override
     public ItemType getResultItemType(Expression[] args) {
         try {
-            if (args[0] instanceof StringLiteral) {
+            if (args[0] instanceof Literal lit && lit.getGroundedValue() instanceof AtomicValue av) {
+                StructuredQName name = processStringOrQNameArgument(av, NamespaceUri.NULL);
                 AccumulatorRegistry registry = getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
-                Accumulator accumulator = getAccumulator(((StringLiteral) args[0]).stringify(), registry);
+                Accumulator accumulator = getAccumulator(name, registry);
                 return accumulator.getType().getPrimaryType();
             }
         } catch (Exception e) {
@@ -126,9 +119,10 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
     @Override
     public int getCardinality(Expression[] args) {
         try {
-            if (args[0] instanceof StringLiteral) {
+            if (args[0] instanceof Literal lit && lit.getGroundedValue() instanceof AtomicValue av) {
+                StructuredQName name = processStringOrQNameArgument(av, NamespaceUri.NULL);
                 AccumulatorRegistry registry = getRetainedStaticContext().getPackageData().getAccumulatorRegistry();
-                Accumulator accumulator = getAccumulator(((StringLiteral) args[0]).stringify(), registry);
+                Accumulator accumulator = getAccumulator(name, registry);
                 return accumulator.getType().getCardinality();
             }
         } catch (Exception e) {
@@ -165,8 +159,13 @@ public abstract class AccumulatorFn extends SystemFunction implements IContextAc
             context = context.newMinorContext();
             context.setCurrentIterator(boundContextItem);
         }
-        String name = arguments[0].head().getStringValue();
-        return getAccumulatorValue(name, getPhase(), context);
+        StructuredQName accName;
+        try {
+            accName = processStringOrQNameArgument(((AtomicValue) (arguments[0].head())), NamespaceUri.NULL);
+        } catch (XPathException e) {
+            throw e.withErrorCode("XTDE3340");
+        }
+        return getAccumulatorValue(accName, getPhase(), context);
     }
 
     /**

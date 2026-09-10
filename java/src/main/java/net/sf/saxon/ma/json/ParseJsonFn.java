@@ -14,6 +14,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
@@ -41,8 +42,8 @@ public class ParseJsonFn extends JsonToXMLFn {
         parseJsonOptions.setAllowedValues("duplicates", "FOJS0005", "reject", "use-first", "use-last");
         parseJsonOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("fallback", SequenceType.one(fallbackType), null);
-        parseJsonOptions.addAllowedOption("null", SequenceType.ANY_SEQUENCE, EmptySequence.INSTANCE);
-        parseJsonOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
+        parseJsonOptions.addAllowedOption("null", SequenceType.OPTIONAL_ITEM, EmptySequence.INSTANCE);
+        parseJsonOptions.addAllowedOption("number-format", SequenceType.one(EnumerationUnionType.of("decimal", "double", "adaptive")), null);
         parseJsonOptions.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         return parseJsonOptions;
     }
@@ -98,7 +99,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         if (options != null) {
             handler.setFallbackFunction(options, context);
             handler.setNullRepresentation(nullRepresentation);
-            parser.setNumberParser(options);
+            parser.setNumberFormat(options);
         }
         parser.parse(input, flags, handler, context);
         return handler.getResult().head();

@@ -20,9 +20,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -614,6 +612,40 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
             return getDescription();
         } else {
             return super.getUniqueIdentifier();
+        }
+    }
+
+    /**
+     * Helper method for use by functions that expect an argument that can be either
+     * a lexical QName or an {@code xs:QName} (for example, element-available, function-available, etc)
+     *
+     * <p>Note, we rely on the function signature to disallow xs:QName values if 4.0 is not enabled.
+     * We allow also EQNames in the format <code>Q{uri}prefix:local</code> only if 4.0 is enabled.</p>
+     *
+     * @param supplied the argument as supplied (after coercion against the choice type
+     *                 <code>(xs:string | xs:QName)</code>)
+     * @param defaultNS the default namespace to be used if an unprefixed lexical QName
+     *                  is supplied. Supply {@link NamespaceUri#NULL} if no prefix means
+     *                  no namespace.
+     * @throws XPathException if a lexical QName cannot be resolved. The exception is as returned
+     * by {@link StructuredQName#fromLexicalQName(String, boolean, int, NamespaceResolver)}
+     */
+
+    protected StructuredQName processStringOrQNameArgument(AtomicValue supplied, NamespaceUri defaultNS)
+    throws XPathException {
+        if (supplied instanceof QNameValue qName) {
+            return qName.getStructuredQName();
+        } else {
+            int qNameFormat = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40
+                    ? StructuredQName.QUPL
+                    : StructuredQName.QUL;
+            String lexicalForm = supplied.getStringValue();
+            if (defaultNS != NamespaceUri.NULL && NameChecker.isValidNCName(lexicalForm)) {
+                return new StructuredQName("", defaultNS, lexicalForm);
+            }
+            return StructuredQName.fromLexicalQName(
+                    supplied.getStringValue(), false, qNameFormat,
+                    getRetainedStaticContext());
         }
     }
 }

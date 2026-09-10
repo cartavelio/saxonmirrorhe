@@ -8,14 +8,14 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.StringLiteral;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.*;
-import net.sf.saxon.str.StringTool;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 
 /**
@@ -78,9 +78,8 @@ public class ElementAvailable extends SystemFunction {
     @Override
     public int getSpecialProperties(Expression[] arguments) {
         try {
-            if (arguments[0] instanceof StringLiteral) {
-                String arg = ((StringLiteral) arguments[0]).stringify();
-                StructuredQName elem = getElementName(arg);
+            if (arguments[0] instanceof Literal lit && lit.getGroundedValue() instanceof AtomicValue av) {
+                StructuredQName elem = processStringOrQNameArgument(av, getRetainedStaticContext().getDefaultElementNamespace());
                 if (elem.hasURI(NamespaceUri.XSLT) && elem.getLocalPart().equals("evaluate")) {
                     return super.getSpecialProperties(arguments) | StaticProperty.DEPENDS_ON_RUNTIME_ENVIRONMENT;
                 }
@@ -98,16 +97,16 @@ public class ElementAvailable extends SystemFunction {
      * This is a change from XSLT 2.0 where only elements classified as instructions
      * were recognized.
      *
-     * @param lexicalName the lexical QName of the element
+     * @param suppliedName the supplied QName of the element
      * @param targetEdition the target edition that the stylesheet is to run under, e.g. "HE", "JS"
      * @param context     the XPath evaluation context
      * @return true if the instruction is available, in the sense of the XSLT element-available() function
      * @throws XPathException if a dynamic error occurs (e.g., a bad QName)
      */
 
-    private boolean isElementAvailable(String lexicalName, String targetEdition, XPathContext context) throws XPathException {
+    private boolean isElementAvailable(AtomicValue suppliedName, String targetEdition, XPathContext context) throws XPathException {
 
-        StructuredQName qName = getElementName(lexicalName);
+        StructuredQName qName = getElementName(suppliedName);
 
         if (qName.hasURI(NamespaceUri.XSLT)) {
             int fp = context.getConfiguration().getNamePool().getFingerprint(NamespaceUri.XSLT, qName.getLocalPart());
@@ -127,21 +126,14 @@ public class ElementAvailable extends SystemFunction {
         return context.getConfiguration().isExtensionElementAvailable(qName);
     }
 
-    private StructuredQName getElementName(String lexicalName) throws XPathException {
+    private StructuredQName getElementName(AtomicValue supplied) throws XPathException {
         try {
-            if (NameChecker.isValidNCName(StringTool.codePoints(lexicalName))) {
-                NamespaceUri uri = getRetainedStaticContext().getURIForPrefix("", true);
-                return new StructuredQName("", uri, lexicalName);
-            } else {
-                return StructuredQName.fromLexicalQName(lexicalName, false,
-                                                        StructuredQName.QUPL, getRetainedStaticContext());
-            }
+            return processStringOrQNameArgument(supplied, getRetainedStaticContext().getURIForPrefix("", true));
         } catch (XPathException e) {
             XPathException err = new XPathException("Invalid element name passed to element-available(): " + e.getMessage());
             err.setErrorCode("XTDE1440");
             throw err;
         }
-
     }
 
     /**
@@ -155,8 +147,8 @@ public class ElementAvailable extends SystemFunction {
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        String lexicalQName = arguments[0].head().getStringValue();
-        boolean b = isElementAvailable(lexicalQName, getRetainedStaticContext().getPackageData().getTargetEdition(), context);
+        AtomicValue suppliedQName = (AtomicValue)arguments[0].head();
+        boolean b = isElementAvailable(suppliedQName, getRetainedStaticContext().getPackageData().getTargetEdition(), context);
         return BooleanValue.get(b);
     }
 }

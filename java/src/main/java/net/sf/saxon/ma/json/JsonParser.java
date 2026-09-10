@@ -8,7 +8,6 @@
 package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
@@ -19,10 +18,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
-import net.sf.saxon.type.StringToDouble;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntIterator;
 
 import java.util.HashMap;
@@ -57,7 +53,7 @@ public class JsonParser {
     private static final String ERR_OPTIONS = "FOJS0005";
     private static final String ERR_LIMITS = "FOJS0001";  // No specific code in spec
 
-    private FunctionItem numberParser = null;
+    private String numberFormat = "double";
     private int nesting;
     private Function<UnicodeString, UnicodeString> fallbackFunction = null;
     private HashMap<List<UnicodeString>, Shape> shapePool;
@@ -765,15 +761,37 @@ public class JsonParser {
                     }
                 }
             }
-            if (numberParser != null) {
-                Sequence[] args = new Sequence[1];
-                args[0] = StringValue.makeUntypedAtomic(StringTool.fromCharSequence(token));
-                Item parserResult = SystemFunction.dynamicCall(numberParser, context, args).head();
-                return (parserResult == null && ((flags & NUMERIC_FORMAT_RETAINED) != 0)) ? StringValue.EMPTY_STRING : parserResult;
-            } else if ((flags & NUMERIC_FORMAT_RETAINED) != 0) {
+//            if ("decimal".equals(numberFormat)) {
+//                DecimalValue val = DecimalValue.parseNumber(token);
+//                Sequence[] args = new Sequence[1];
+//                args[0] = StringValue.makeUntypedAtomic(StringTool.fromCharSequence(token));
+//                Item parserResult = SystemFunction.dynamicCall(numberParser, context, args).head();
+//                return (parserResult == null && ((flags & NUMERIC_FORMAT_RETAINED) != 0)) ? StringValue.EMPTY_STRING : parserResult;
+            if ((flags & NUMERIC_FORMAT_RETAINED) != 0) {
                 return new StringValue(token);
             } else {
-                return new DoubleValue(StringToDouble.getInstance().stringToNumber(StringView.tidy(token)));
+                NumericValue numericValue = NumericValue.parseNumber(token);
+                if (numberFormat == null || "double".equals(numberFormat)) {
+                    if (numericValue instanceof DoubleValue) {
+                        return numericValue;
+                    } else {
+                        return new DoubleValue(numericValue.getDoubleValue());
+                    }
+                } else if ("decimal".equals(numberFormat)) {
+                    if (numericValue instanceof IntegerValue integerValue) {
+                        return integerValue;
+                    }
+                    if (numericValue instanceof DecimalValue dec) {
+                        if (numericValue.isWholeNumber()) {
+                            return BigIntegerValue.makeIntegerValue(dec.getDecimalValue().toBigInteger());
+                        }
+                        return numericValue;
+                    }
+                    return new BigDecimalValue(numericValue.getDoubleValue());
+                } else {
+                    // adaptive
+                    return numericValue;
+                }
             }
         } catch (NumberFormatException e) {
             invalidJSON("Invalid numeric literal: " + e.getMessage(), ERR_GRAMMAR, lineNumber);
@@ -1022,14 +1040,12 @@ public class JsonParser {
     }
 
 
-    public void setNumberParser(Map<String, GroundedValue> options) throws XPathException {
-        Sequence val = options.get("number-parser");
+    public void setNumberFormat(Map<String, GroundedValue> options) throws XPathException {
+        Sequence val = options.get("number-format");
         if (val != null) {
-            Item fn = val.head();
-            if (fn instanceof FunctionItem) {
-                numberParser = (FunctionItem) fn;
-            } else {
-                throw new XPathException("Value of option 'number-parser' is not a function", "XPTY0004");
+            Item it = val.head();
+            if (it != null) {
+                numberFormat = it.getStringValue();
             }
         }
     }

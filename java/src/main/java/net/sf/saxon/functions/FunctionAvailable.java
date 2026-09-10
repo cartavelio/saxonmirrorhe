@@ -11,11 +11,13 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
-import net.sf.saxon.om.*;
-import net.sf.saxon.str.StringTool;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.NumericValue;
 
@@ -51,19 +53,19 @@ public class FunctionAvailable extends SystemFunction {
         // This is because the full static context is needed, not the (smaller) RetainedStaticContext. Instead, pre-evaluation
         // for calls with fixed arguments is done during the optimization phase, which makes the full static context available.
 
-        if (arguments[0] instanceof Literal && (arguments.length == 1 || arguments[1] instanceof Literal)) {
-            String lexicalQName = ((StringLiteral) arguments[0]).stringify();
+        if (arguments[0] instanceof Literal lit
+                && lit.getGroundedValue() instanceof AtomicValue av
+                && (arguments.length == 1 || arguments[1] instanceof Literal)) {
             StaticContext env = visitor.getStaticContext();
+            StructuredQName qName;
+            try {
+                qName = processStringOrQNameArgument(av, env.getDefaultFunctionNamespace());
+            } catch (XPathException e) {
+                throw e.withErrorCode("XTDE1400");
+            }
             boolean b = false;
 
-            QNameParser qp = new QNameParser(getRetainedStaticContext())
-                    .withAcceptEQName(true, env.getXPathVersion())
-                    .withErrorOnBadSyntax("XTDE1400")
-                    .withErrorOnUnresolvedPrefix("XTDE1400");
-
-            StructuredQName functionName = qp.parse(lexicalQName, env.getDefaultFunctionNamespace());
-
-            if (env.getConfiguration().isDisabledFunction(functionName)) {
+            if (env.getConfiguration().isDisabledFunction(qName)) {
                 return Literal.makeLiteral(BooleanValue.FALSE);
             }
 
@@ -79,7 +81,7 @@ public class FunctionAvailable extends SystemFunction {
             }
 
             for (int i = minArity; i <= maxArity; i++) {
-                SymbolicName.F sn = new SymbolicName.F(functionName, i);
+                SymbolicName.F sn = new SymbolicName.F(qName, i);
                 if (env.getFunctionLibrary().isAvailable(sn, env.getImportedSchema(), env.getXPathVersion())) {
                     b = true;
                     break;
@@ -92,35 +94,22 @@ public class FunctionAvailable extends SystemFunction {
         }
     }
 
-    private boolean isFunctionAvailable(String lexicalName, RetainedStaticContext rsc, int arity, XPathContext context) throws XPathException {
+    private boolean isFunctionAvailable(StructuredQName functionName, RetainedStaticContext rsc, int arity, XPathContext context) throws XPathException {
         if (arity == -1) {
             for (int i = 0; i < 20; i++) {
-                if (isFunctionAvailable(lexicalName, rsc, i, context)) {
+                if (isFunctionAvailable(functionName, rsc, i, context)) {
                     return true;
                 }
             }
             return false;
         }
-        StructuredQName qName;
-        try {
-            if (NameChecker.isValidNCName(StringTool.codePoints(lexicalName))) {
-                // we're in XSLT, where the default namespace for functions can't be changed
-                qName = new StructuredQName("", NamespaceUri.FN, lexicalName);
-            } else {
-                qName = StructuredQName.fromLexicalQName(lexicalName,
-                        false, StructuredQName.QUPL,
-                        getRetainedStaticContext());
-            }
-        } catch (XPathException e) {
-            throw e.withErrorCode("XTDE1400").withXPathContext(context);
-        }
 
-        if (context.getConfiguration().isDisabledFunction(qName)) {
+        if (context.getConfiguration().isDisabledFunction(functionName)) {
             return false;
         }
 
         final FunctionLibrary lib = context.getController().getExecutable().getFunctionLibrary();
-        SymbolicName.F sn = new SymbolicName.F(qName, arity);
+        SymbolicName.F sn = new SymbolicName.F(functionName, arity);
         // TODO: reinstate something along these lines. Removed because it doesn't build in HE 9.8
 //        if (known && qName.hasURI(NamespaceConstant.FN) && !context.getConfiguration().getEditionCode().equals(edition)) {
 //            // Target environment differs from compile-time environment: some functions might not be available
@@ -146,7 +135,7 @@ public class FunctionAvailable extends SystemFunction {
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        String lexicalQName = arguments[0].head().getStringValue();
+        StructuredQName functionName = processStringOrQNameArgument(((AtomicValue)(arguments[0].head())), NamespaceUri.FN);
         int arity = -1;
         if (arguments.length == 2) {
             NumericValue arg2 = ((NumericValue) arguments[1].head());
@@ -156,7 +145,7 @@ public class FunctionAvailable extends SystemFunction {
             }
         }
         return BooleanValue.get(
-                isFunctionAvailable(lexicalQName, getRetainedStaticContext(), arity, context));
+                isFunctionAvailable(functionName, getRetainedStaticContext(), arity, context));
     }
 }
 

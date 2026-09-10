@@ -10,7 +10,6 @@ package net.sf.saxon.functions;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -20,6 +19,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 
 /**
@@ -28,20 +28,7 @@ import net.sf.saxon.value.BooleanValue;
 
 public class TypeAvailable extends SystemFunction {
 
-    private boolean typeAvailable(String lexicalName, Configuration config) throws XPathException {
-        StructuredQName qName;
-        try {
-            if (lexicalName.indexOf(':') < 0 && !lexicalName.startsWith("Q{")) {
-                NamespaceUri defaultNS = getRetainedStaticContext().getURIForPrefix("", true);
-                qName = new StructuredQName("", defaultNS, lexicalName);
-            } else {
-                qName = StructuredQName.fromLexicalQName(lexicalName,
-                        false, StructuredQName.QUPL,
-                        getRetainedStaticContext());
-            }
-        } catch (XPathException e) {
-            throw e.withErrorCode("XTDE1428");
-        }
+    private boolean typeAvailable(StructuredQName qName, Configuration config) throws XPathException {
 
         NamespaceUri uri = qName.getNamespaceUri();
         if (uri.equals(NamespaceUri.JAVA_TYPE)) {
@@ -74,9 +61,14 @@ public class TypeAvailable extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public BooleanValue call(XPathContext context, Sequence[] arguments /*@NotNull*/) throws XPathException {
-        String lexicalQName = arguments[0].head().getStringValue();
-        return BooleanValue.get(typeAvailable(lexicalQName, context.getConfiguration()));
+    public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+        StructuredQName typeName;
+        try {
+            typeName = processStringOrQNameArgument(((AtomicValue) (arguments[0].head())), NamespaceUri.NULL);
+        } catch (XPathException e) {
+            throw e.withErrorCode("XTDE1428");
+        }
+        return BooleanValue.get(typeAvailable(typeName, context.getConfiguration()));
     }
 
     /**
@@ -90,10 +82,9 @@ public class TypeAvailable extends SystemFunction {
     @Override
     public Expression makeFunctionCall(Expression[] arguments) {
         try {
-            if (arguments[0] instanceof StringLiteral) {
-                boolean b = typeAvailable(
-                    ((StringLiteral)arguments[0]).stringify(),
-                    getRetainedStaticContext().getConfiguration());
+            if (arguments[0] instanceof Literal lit && lit.getGroundedValue() instanceof AtomicValue av) {
+                StructuredQName name = processStringOrQNameArgument(av, NamespaceUri.NULL);
+                boolean b = typeAvailable(name, getRetainedStaticContext().getConfiguration());
                 return Literal.makeLiteral(BooleanValue.get(b));
             }
         } catch (XPathException e) {
