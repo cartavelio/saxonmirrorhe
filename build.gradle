@@ -412,6 +412,16 @@ apply from: "run-samples.gradle"
   Task libs = task "${release}j_extras"(
     description: "Copy extra files for the ${RELEASE} release"
   ) {
+    outputs.files fileTree(dir: "${buildDir}/releases/${release}j/lib")
+    inputs.file jlineJar
+    inputs.file resolverJar
+    inputs.file resolverDataJar
+    inputs.files fileTree(dir: "${projectDir}/src/docs/doc")
+    inputs.files fileTree(dir: "${projectDir}/src/docs/notices")
+    if (release == "pe" || release == "ee") {
+      inputs.file icu4jJar
+    }
+
     doLast {
       copy {
         into "${buildDir}/releases/${release}j/lib"
@@ -455,8 +465,8 @@ apply from: "run-samples.gradle"
       }
       doLast {
         copy {
-          from "${icu4jJar}"
           into "${buildDir}/releases/${release}j/lib"
+          from icu4jJar
         }
       }
     }
