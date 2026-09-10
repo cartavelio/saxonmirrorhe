@@ -42,11 +42,6 @@ public final class Tokenizer {
     public static final int DEFAULT_STATE = 0;
 
     /**
-     * State in which a name is NOT to be merged with what comes next, for example "("
-     */
-    public static final int BARE_NAME_STATE = 1;
-
-    /**
      * State in which the next thing to be read is a SequenceType
      */
     public static final int SEQUENCE_TYPE_STATE = 2;
@@ -169,10 +164,6 @@ public final class Tokenizer {
             precedingToken = Token.UNKNOWN;
             precedingTokenValue = "";
             currentToken = Token.UNKNOWN;
-        } else if (state == OPERATOR_STATE) {
-            precedingToken = Token.RPAREN;
-            precedingTokenValue = ")";
-            currentToken = Token.RPAREN;
         }
     }
 
@@ -213,6 +204,14 @@ public final class Tokenizer {
 
         lookAhead();
         next();
+    }
+
+    /**
+     * Restart tokenisation after, for example, a direct element constructor
+     */
+
+    public void restart() throws XPathException {
+        tokenize(input, inputOffset, input.length());
     }
 
     //diagnostic version of next(): change real version to realnext()

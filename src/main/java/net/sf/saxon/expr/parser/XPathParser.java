@@ -903,19 +903,20 @@ public class XPathParser {
     /*@NotNull*/
     public Expression parseBinaryExpression(Expression lhs, int minPrecedence) throws XPathException {
         OperatorSymbol operator = readOperator();
-        while (operatorPrecedence(operator) >= minPrecedence) {
+        while (operator != null && operatorPrecedence(operator) >= minPrecedence) {
             int offset = t.currentTokenStartOffset;
             int prec = operatorPrecedence(operator);
             switch (operator) {
                 case INSTANCE_OF:
                 case TREAT_AS:
-                    nextToken();
+                    //nextToken();
                     SequenceType seq = parseSequenceType();
                     lhs = makeSequenceTypeExpression(lhs, operator, seq);
                     setLocation(lhs, offset);
 //                    if (operatorPrecedence(currentTokenAsOperator()) >= prec) {
 //                        grumble("Left operand of '" + Token.tokens[t.currentToken] + "' needs parentheses");
 //                    }
+                    operator = readOperator();
                     break;
                 case CAST_AS:
                 case CASTABLE_AS:
@@ -984,7 +985,7 @@ public class XPathParser {
                     lhs = parseMappingArrowPostfix(lhs);
                     break;
                 default:
-                    nextToken();
+                    //nextToken();
                     Expression rhs = parseUnaryExpression();
                     OperatorSymbol nextOperator = readOperator();
 //                    while (operatorPrecedence(nextOperator) > prec) {
@@ -1049,6 +1050,10 @@ public class XPathParser {
             case Token.NAME:
                 String first = t.currentTokenValue;
                 switch (first) {
+                    case "and":
+                        return OperatorSymbol.AND;
+                    case "or":
+                        return OperatorSymbol.OR;
                     case "div":
                         return OperatorSymbol.DIV;
                     case "idiv":
@@ -1075,6 +1080,10 @@ public class XPathParser {
                         return OperatorSymbol.EXCEPT;
                     case "is":
                         return OperatorSymbol.IS;
+                    case "to":
+                        return OperatorSymbol.TO;
+                    case "concat":
+                        return OperatorSymbol.CONCAT;
                     case "instance":
                         nextToken();
                         if (t.currentTokenValue.equals("of")) {
@@ -1769,7 +1778,7 @@ public class XPathParser {
             v.setVariableQName(makeStructuredQName(var, NamespaceUri.NULL));
             nextToken();
 
-            if (t.currentToken == Token.AS && language == ParsedLanguage.XQUERY) {
+            if (isKeyword("as") && language == ParsedLanguage.XQUERY) {
                 // We use this path for quantified expressions in XQuery, which permit an "as" clause
                 nextToken();
                 SequenceType type = parseSequenceType();
@@ -1781,7 +1790,7 @@ public class XPathParser {
             }
 
             // process the "in" clause
-            expect(Token.IN);
+            expectKeyword("in");
             nextToken();
             v.setSequence(parseExprSingle());
             declareRangeVariable(v);
@@ -1795,7 +1804,7 @@ public class XPathParser {
         } while (t.currentToken == Token.COMMA);
 
         // process the "return/satisfies" expression (called the "action")
-        expect(Token.SATISFIES);
+        expectKeyword("satisfies");
         nextToken();
         previous.setAction(parseExprSingle());
 
@@ -3234,8 +3243,8 @@ public class XPathParser {
                             nextToken();
                             return parseSwitchExpression();
                         case Token.NODE_TEST:
-                            nextToken();
-                            expect(Token.LPAREN);
+//                            nextToken();
+//                            expect(Token.LPAREN);
                             return parseNodeTestExpression(category, firstInPattern);
                         case Token.FUNCTION_LPAREN:
                             return parseInlineFunction(AnnotationList.EMPTY);
@@ -3248,9 +3257,13 @@ public class XPathParser {
                     switch (name) {
                         case "map":
                             nextToken();
+                            expect(Token.LCURLY);
+                            //nextToken();
                             return parseMapExpression();
                         case "array":
                             nextToken();
+                            expect(Token.LCURLY);
+                            //nextToken();
                             return parseArrayCurlyConstructor();
                         case "function":
                         case "fn":
@@ -3363,6 +3376,7 @@ public class XPathParser {
 
             case Token.START_TAG:
                 Expression constructor = getPendingDirectElementConstructor();
+                Objects.requireNonNull(constructor);
                 nextToken();
                 return constructor;
 
@@ -3827,8 +3841,7 @@ public class XPathParser {
         t.currentToken = Token.LPAREN;  // Hack to force following symbol to be recognised in post-operator mode
         nextToken();
         int token = t.currentToken;
-        t.setState(Tokenizer.OPERATOR_STATE);
-
+        
         Expression result;
         LookupExpression.Modifier modifier = LookupExpression.Modifier.CONTENT;
         if (token == Token.AXIS) {
@@ -4019,13 +4032,15 @@ public class XPathParser {
     private NodeTest parseKindTest() throws XPathException {
         NamePool pool = env.getConfiguration().getNamePool();
         boolean empty = false;
+        String kind = t.currentTokenValue;
+        nextToken();
         expect(Token.LPAREN);
         nextToken();
         if (t.currentToken == Token.RPAREN) {
             empty = true;
             nextToken();
         }
-        switch (t.currentTokenValue) {
+        switch (kind) {
             case "node":
                 if (empty) {
                     return AnyNodeTest.getInstance();
@@ -4401,7 +4416,6 @@ public class XPathParser {
                 }
             }
         }
-        t.lookAhead(); //manual lookahead after an RCURLY
         nextToken();
 
         Expression result;
@@ -4479,13 +4493,11 @@ public class XPathParser {
         int offset = t.currentTokenStartOffset;
         nextToken();
         if (t.currentToken == Token.RCURLY) {
-            t.lookAhead(); //manual lookahead after an RCURLY
             nextToken();
             return Literal.makeLiteral(SimpleArrayItem.EMPTY_ARRAY);
         }
         Expression body = parseExpression();
         expect(Token.RCURLY);
-        t.lookAhead(); //manual lookahead after an RCURLY
         nextToken();
 
         SystemFunction sf = ArrayFunctionSet.getInstance(40).makeFunction("_from-sequence", 1);
@@ -5041,9 +5053,8 @@ public class XPathParser {
                                 Token.tokens[t.currentToken] + '\'');
             }
         }
-        t.setState(Tokenizer.BARE_NAME_STATE);
         nextToken();
-        if (t.currentToken == Token.AS) {
+        if (isKeyword("as")) {
             t.setState(Tokenizer.SEQUENCE_TYPE_STATE);
             nextToken();
             resultType = parseSequenceType();
@@ -5092,7 +5103,6 @@ public class XPathParser {
         } else {
             body = parseExpression();
             expect(Token.RCURLY);
-            t.lookAhead();  // must be done manually after an RCURLY
             nextToken();
         }
         ExpressionTool.setDeepRetainedStaticContext(body, getStaticContext().makeRetainedStaticContext());
@@ -5468,7 +5478,6 @@ public class XPathParser {
         } else {
             body = parseExpression();
             expect(Token.RCURLY);
-            t.lookAhead();  // must be done manually after an RCURLY
             nextToken();
             body.setRetainedStaticContext(getStaticContext().makeRetainedStaticContext());
 

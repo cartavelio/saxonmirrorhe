@@ -361,23 +361,29 @@ public class XQueryParser extends XPathParser {
         } catch (XPathException err) {
             grumble(err.getMessage());
         }
-        parseVersionDeclaration();
-        allowXPath40Syntax =
-                t.allowSaxonExtensions =
-                        allowXPath40Syntax
-                                || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)
-                                || languageVersion >= 40;
+        if (t.currentToken == Token.START_TAG) {
+            // The tokenizer has identified a direct element constructor at the start of the content,
+            // but it hasn't yet been parsed.
+            pendingDirectElementConstructor = parseDirectElementConstructor(false);
+        } else {
+            parseVersionDeclaration();
+            allowXPath40Syntax =
+                    t.allowSaxonExtensions =
+                            allowXPath40Syntax
+                                    || env.getConfiguration().getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS)
+                                    || languageVersion >= 40;
 
-        env.setXPathVersion(languageVersion);
-        env.initializeFunctionLibraries();
-        QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
-                .withAcceptEQName(true)
-                .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
+            env.setXPathVersion(languageVersion);
+            env.initializeFunctionLibraries();
+            QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
+                    .withAcceptEQName(true)
+                    .withUnescaper(new Unescaper(env.getConfiguration().getValidCharacterChecker()));
 
-        setQNameParser(qp);
+            setQNameParser(qp);
 
-        parseProlog();
-        processPreamble();
+            parseProlog();
+            processPreamble();
+        }
 
         Expression exp = parseExpression();
         exp = makeTracer(exp, null);
@@ -1773,7 +1779,6 @@ public class XQueryParser extends XPathParser {
         }
         nextToken();
         expect(Token.DOLLAR);
-        t.setState(Tokenizer.BARE_NAME_STATE);
         nextToken();
         expectName();
         String varName = t.currentTokenValue;
@@ -1881,11 +1886,9 @@ public class XQueryParser extends XPathParser {
         GlobalContextRequirement req = new GlobalContextRequirement();
         req.setAbsentFocus(false);
 
-        t.setState(Tokenizer.BARE_NAME_STATE);
-
         nextToken();
         ItemType requiredType = AnyItemType.getInstance();
-        if (t.currentToken == Token.AS) {
+        if (isKeyword("as")) {
             t.setState(Tokenizer.SEQUENCE_TYPE_STATE);
             nextToken();
             requiredType = parseItemType();
@@ -2042,7 +2045,7 @@ public class XQueryParser extends XPathParser {
                 paramNames.add(argQName);
                 SequenceType paramType = SequenceType.ANY_SEQUENCE;
                 nextToken();
-                if (t.currentToken == Token.AS) {
+                if (isKeyword("as")) {
                     nextToken();
                     paramType = parseSequenceType();
                 }
@@ -2083,9 +2086,8 @@ public class XQueryParser extends XPathParser {
                 declareRangeVariable(p);
             }
         }
-        t.setState(Tokenizer.BARE_NAME_STATE);
         nextToken();
-        if (t.currentToken == Token.AS) {
+        if (isKeyword("as")) {
             if (func.isUpdating()) {
                 grumble("Cannot specify a return type for an updating function", "XUST0028");
             }
@@ -2110,7 +2112,6 @@ public class XQueryParser extends XPathParser {
                 ExpressionTool.setDeepRetainedStaticContext(body, env.makeRetainedStaticContext());
             }
             expect(Token.RCURLY);
-            lookAhead();  // must be done manually after an RCURLY
         }
         UserFunctionParameter[] params = func.getParameterDefinitions();
         //noinspection UnusedDeclaration
@@ -2391,7 +2392,6 @@ public class XQueryParser extends XPathParser {
                 }
                 tupleExpression.setVariables(vars);
                 List<SortSpec> sortSpecList;
-                t.setState(Tokenizer.BARE_NAME_STATE);
                 nextToken();
                 if (!isKeyword("by")) {
                     grumble("'order' must be followed by 'by'");
@@ -2486,7 +2486,7 @@ public class XQueryParser extends XPathParser {
      */
     private void parseForClause(FLWORExpression flwor, List<Clause> clauseList) throws XPathException {
         boolean first = true;
-        int iterand = t.currentToken;
+        int iterand = Token.FOR;
 
         // "for member $x as T in $array" compiles to
         // "for $temp in array:members($array) let $x as T := $temp?value"
@@ -2959,7 +2959,6 @@ public class XQueryParser extends XPathParser {
         nextToken();
         clause.initSequence(flwor, parseExprSingle());
         if (isKeyword("start")) {
-            t.setState(Tokenizer.BARE_NAME_STATE);
             nextToken();
             if (t.currentToken == Token.DOLLAR) {
                 LocalVariableBinding startItemVar = new LocalVariableBinding(readVariableName(), windowItemTypeMandatory);
@@ -3003,7 +3002,6 @@ public class XQueryParser extends XPathParser {
             nextToken();
         }
         if (isKeyword("end")) {
-            t.setState(Tokenizer.BARE_NAME_STATE);
             nextToken();
 
             if (t.currentToken == Token.DOLLAR) {
@@ -3283,7 +3281,6 @@ public class XQueryParser extends XPathParser {
         outerLet.setAction(lastAction);
         if (braced) {
             expect(Token.RCURLY);
-            t.lookAhead();
             nextToken();
         }
         return makeTracer(outerLet, null);
@@ -3450,7 +3447,6 @@ public class XQueryParser extends XPathParser {
 
         if (braced) {
             expect(Token.RCURLY);
-            t.lookAhead();
             nextToken();
         }
         return makeTracer(outerLet, null);
@@ -3545,7 +3541,6 @@ public class XQueryParser extends XPathParser {
         }
 
         expect(Token.RCURLY);
-        t.lookAhead();      // always done manually after an RCURLY
         nextToken();
         return makeTracer(exp, null);
     }
@@ -3630,7 +3625,6 @@ public class XQueryParser extends XPathParser {
             }
             expr = parseExpression();
             expect(Token.RCURLY);
-            t.lookAhead();      // always done manually after an RCURLY
             nextToken();
         }
         if (validateType) {
@@ -3668,14 +3662,12 @@ public class XQueryParser extends XPathParser {
     /*@NotNull*/
     @Override
     protected Expression parseConstructor() throws XPathException {
-        System.err.println("parseConstructor inputOffset " + t.inputOffset);
         int offset = t.currentTokenStartOffset;
         int tok = Token.isNameToken(t.currentToken) ? Token.NAME : t.currentToken;
         switch (tok) {
             case Token.START_TAG:
                 Expression tag = parsePseudoXML(false);
                 lookAhead();
-                t.setState(Tokenizer.OPERATOR_STATE);
                 nextToken();
                 return tag;
             case Token.NAME:
@@ -3701,8 +3693,6 @@ public class XQueryParser extends XPathParser {
                                 content = parseExpression();
                             }
                             expect(Token.RCURLY);
-                            lookAhead();  // must be done manually after an RCURLY
-
                             nextToken();
                             return content;
                         case "document":
@@ -3820,7 +3810,6 @@ public class XQueryParser extends XPathParser {
             content = parseExpression();
         }
         expect(Token.RCURLY);
-        lookAhead();  // must be done manually after an RCURLY
         nextToken();
         DocumentInstr doc = new DocumentInstr(false, null);
         if (!((QueryModule) env).isPreserveNamespaces()) {
@@ -3847,7 +3836,6 @@ public class XQueryParser extends XPathParser {
         // get the expression that yields the element name
         Expression name = parseExpression();
         expect(Token.RCURLY);
-        lookAhead();  // must be done manually after an RCURLY
         nextToken();
         expect(Token.LCURLY);
         t.setState(Tokenizer.DEFAULT_STATE);
@@ -3863,7 +3851,6 @@ public class XQueryParser extends XPathParser {
             }
             expect(Token.RCURLY);
         }
-        lookAhead();  // done manually after an RCURLY
         nextToken();
 
         Instruction inst;
@@ -3954,7 +3941,6 @@ public class XQueryParser extends XPathParser {
             content = parseExpression();
             expect(Token.RCURLY);
         }
-        lookAhead();  // after an RCURLY
         nextToken();
         FixedElement el2 = new FixedElement(nodeName,
                                             ((QueryModule) env).getActiveNamespaceBindings(),
@@ -3986,7 +3972,6 @@ public class XQueryParser extends XPathParser {
         nextToken();
         Expression name = parseExpression();
         expect(Token.RCURLY);
-        lookAhead();  // must be done manually after an RCURLY
         nextToken();
         expect(Token.LCURLY);
         t.setState(Tokenizer.DEFAULT_STATE);
@@ -3996,7 +3981,6 @@ public class XQueryParser extends XPathParser {
             content = parseExpression();
             expect(Token.RCURLY);
         }
-        lookAhead();  // after an RCURLY
         nextToken();
         if (name instanceof Literal) {
             GroundedValue vName = ((Literal) name).getGroundedValue();
@@ -4080,7 +4064,6 @@ public class XQueryParser extends XPathParser {
             attContent = parseExpression();
             expect(Token.RCURLY);
         }
-        lookAhead();  // after an RCURLY
         nextToken();
         if (warningMessage == null) {
             FixedAttribute att2 = new FixedAttribute(attributeName,
@@ -4105,7 +4088,6 @@ public class XQueryParser extends XPathParser {
             value = parseExpression();
         }
         expect(Token.RCURLY);
-        lookAhead(); // after an RCURLY
         nextToken();
         Expression select = stringify(value, true, env);
         ValueOf vof = new ValueOf(select, false, true);
@@ -4122,7 +4104,6 @@ public class XQueryParser extends XPathParser {
             value = parseExpression();
         }
         expect(Token.RCURLY);
-        lookAhead(); // after an RCURLY
         nextToken();
         Comment com = new Comment();
         makeSimpleContent(value, com, offset);
@@ -4142,7 +4123,6 @@ public class XQueryParser extends XPathParser {
         nextToken();
         Expression name = parseExpression();
         expect(Token.RCURLY);
-        lookAhead();  // must be done manually after an RCURLY
         nextToken();
         expect(Token.LCURLY);
         t.setState(Tokenizer.DEFAULT_STATE);
@@ -4152,7 +4132,6 @@ public class XQueryParser extends XPathParser {
             content = parseExpression();
             expect(Token.RCURLY);
         }
-        lookAhead();  // after an RCURLY
         nextToken();
         ProcessingInstruction pi = new ProcessingInstruction(name);
         makeSimpleContent(content, pi, offset);
@@ -4184,7 +4163,6 @@ public class XQueryParser extends XPathParser {
             piContent = parseExpression();
             expect(Token.RCURLY);
         }
-        lookAhead();  // after an RCURLY
         nextToken();
         if (warningMessage == null) {
             ProcessingInstruction pi2 = new ProcessingInstruction(piName);
@@ -4219,7 +4197,6 @@ public class XQueryParser extends XPathParser {
         TryCatch tryCatch = new TryCatch(tryExpr);
         setLocation(tryCatch, offset);
         expect(Token.RCURLY);
-        lookAhead();  // must be done manually after an RCURLY
         nextToken();
         boolean foundOneCatch = false;
         List<QNameTest> tests = new ArrayList<>();
@@ -4296,7 +4273,6 @@ public class XQueryParser extends XPathParser {
             }
             tryCatch.addCatchExpression(test, catchExpr);
             expect(Token.RCURLY);
-            lookAhead();  // must be done manually after an RCURLY
             nextToken();
             catchDepth--;
         }
@@ -4324,7 +4300,6 @@ public class XQueryParser extends XPathParser {
         nextToken();
         Expression nameExpr = parseExpression();
         expect(Token.RCURLY);
-        lookAhead();  // must be done manually after an RCURLY
         nextToken();
         expect(Token.LCURLY);
         t.setState(Tokenizer.DEFAULT_STATE);
@@ -4334,7 +4309,6 @@ public class XQueryParser extends XPathParser {
             content = parseExpression();
             expect(Token.RCURLY);
         }
-        lookAhead();  // after an RCURLY
         nextToken();
 
         NamespaceConstructor instr = new NamespaceConstructor(nameExpr);
@@ -4368,7 +4342,6 @@ public class XQueryParser extends XPathParser {
             nsContent = parseExpression();
             expect(Token.RCURLY);
         }
-        lookAhead();  // after an RCURLY
         nextToken();
         NamespaceConstructor instr = new NamespaceConstructor(nsName);
         makeSimpleContent(nsContent, instr, offset);
@@ -4405,7 +4378,7 @@ public class XQueryParser extends XPathParser {
             // The tokenizer has identified a direct element constructor, but it hasn't yet
             // been parsed.
             pendingDirectElementConstructor = parseDirectElementConstructor(false);
-            t.lookAhead();
+            //t.lookAhead();
         }
     }
 
@@ -4804,6 +4777,7 @@ public class XQueryParser extends XPathParser {
             ((QueryModule) env).undeclareNamespace();
         }
 
+        t.restart();
         return makeTracer(elInst, qName);
     }
 
@@ -5124,6 +5098,7 @@ public class XQueryParser extends XPathParser {
                     }
                     components.add(exp);
                     expect(Token.RCURLY);
+                    t.unreadChar();
                 }
                 afterEnclosedExpr = true;
             }
