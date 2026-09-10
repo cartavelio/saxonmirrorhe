@@ -33,6 +33,10 @@ public:
      */
     ~XsdSchema();
 
+    /**
+     * Create a SchemaValidator which can be used to validate instance documents against this schema
+     * @return SchemaValidator - a new SchemaValidator
+     */
     SchemaValidator * newValidator();
 
 

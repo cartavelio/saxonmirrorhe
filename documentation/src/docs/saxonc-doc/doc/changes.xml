@@ -14,15 +14,77 @@
    <category name="main">
       <ul>
          <li>SaxonC is compiled to a native executable using GraalVM Native Image, now using Community
-            Edition version 25.0.1.</li>
-         <li>User extension functions are now supported in C++, Python and PHP.</li>
+            Edition version 25.0.1. This includes all the JVM, JIT, and language improvements from Java 22–25. Just to mention
+         improved virtual threads, lower memory usage and performance improvements.</li>
+         <li>User written extension functions are now supported in C++, Python and PHP.</li>
       </ul>
    </category>
    <category name="api">
       <p>From SaxonC 13.0:</p>
       <ul>
-         <li>User extension functions</li>
-         <li>Schema API</li>
+         <li><h3>User extension functions</h3>
+         <p>Extension functions allow code written in a host programming language such as C++, Python and PHP to be invoked
+            directly from a function call in an XPath expression (whether in XSLT, XQuery, or pure XPath).</p></li>
+         <li><h3>Schema API</h3>
+
+            <p>Some changes have been made to the schema processing API across all the programming languages such as C++, Python and PHP.
+               These arise from the fact that a <code>SaxonProcessor</code> can now hold multiple
+               independent schemas. A schema (meaning a compiled and consistent collection of schema components) is
+               now represented by an <code>XsdSchema</code> object. This is created using a
+               <code>XsdCompiler</code>, which in turn is created using the factory method
+               <code>SaxonProcessor.newXsdCompiler()</code>.</p>
+
+            <p>It is possible to continue using the old <code>SaxonProcessor.newSchemaValidator()</code> method to
+               create a <code>SchemaValdiator</code> and register the schemas in that class rather than
+               switching to the new <code>XsdCompiler</code>, but there are a few changes in behavior that
+               may cause incompatibilities:</p>
+
+            <ul>
+               <li><p>The schema must allow be registered before calling any  <code>SchemaValidator.validate()</code> method.</p></li>
+               <li><p>The schema is only made available to a <code>XsltCompiler</code>, <code>XQueryCompiler</code>,
+                  or <code>XPathCompiler</code> that is instantiated from the <code>SaxonProcessor</code>
+                  <em>after</em> the schema has been loaded.</p></li>
+               <li><p>The schema, once loaded, is immutable. Two schemas can be combined into one
+                  (using the method <code>XsdSchema.combine()</code>), but the original schemas are
+                  not affected. In particular, loading additional schema components using
+                  <code>xsi:schemaLocation</code> attributes in an instance document will no longer
+                  affect the baseline schema used for validation.</p></li>
+
+            </ul>
+
+            <p>Although Saxon now allows multiple schemas to be held in a <code>SaxonProcessor</code> (and indeed,
+               XSLT 4.0 allows multiple schemas to be used within a single transformation – for example one schema for
+               the source document and another for the result document), the schemas must be consistent with each other.
+               This primarily means that two schemas within a <code>Processor</code> must not hold conflicting definitions
+               of the same component (for example, different definitions of the same complex type).</p>
+
+            <p>If a schema-aware stylesheet is exported to a SEF file, the SCM representation of any schema imported by
+               the stylesheet is included in the SEF file and is automatically incorporated in any compiled stylesheet
+               reconstituted from the SEF file.</p>
+
+            <p>The handling of a schema referenced from a source document using <code>xsi:schemaLocation</code>
+               or <code>xsi:noNamespaceSchemaLocation</code>
+               has changed. In Saxon 13, the schema constructed by
+               reading these components is transient, and does not affect the result of any subsequent validation task.</p>
+
+            <p>Building a validated document tree using a <code>DocumentBuilder</code> now requires a
+               <code>SchemaValidator</code> associated with a specific schema to be supplied.</p>
+
+            <p>Saxon has built-in ("born binary") schemas for the XML, XSI, and FN namespaces; when these schemas
+               are referenced (for example in an <code>xs:import</code> declaration), Saxon will use its built-in copies
+               and will ignore any schema location hint. This means it is not possible to load custom variants of these schemas.
+               Other W3C-defined schemas, notably the XLink namespace, do allow such variation, although Saxon will load
+               its own copy of the schema by default.</p>
+
+            <p>Once created, an <code>XsdSchema</code> object is immutable. This affects the interpretation
+               of <code>xs:override</code> and <code>xs:redefines</code> declarations: these are now scoped to the
+               <code>XsdSchema</code> in which they appear. It also affects the interpretation of other XSD
+               features that were previously global, for example a strict wildcard
+               (<code>&lt;xs:any processContents="strict"/></code>) will only match an element whose
+               declaration appears in the containing <code>XsdSchema</code>.</p>
+         </li>
+         <li>If the schema is to be imported into a schema-aware XSLT stylesheet, XQuery, or XPath expression, it can be
+            supplied to the relevant Xslt30Processor, XQueryProcessor, or XPathProcessor via its useSchema() method.</li>
       </ul>
 
    </category>
