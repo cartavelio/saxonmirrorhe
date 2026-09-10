@@ -23,7 +23,7 @@
     <xsl:template match="features" mode="FeatureCode.java">
         <xsl:result-document href="FeatureCode.java" method="text">
         <xsl:text><![CDATA[////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can
@@ -61,7 +61,7 @@ public abstract class FeatureCode {
     <xsl:template match="features" mode="FeatureKeys.java">
         <xsl:result-document href="FeatureKeys.java" method="text">
             <xsl:text><![CDATA[////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can
@@ -99,7 +99,7 @@ public abstract class FeatureKeys {
         <xsl:result-document href="FeatureData.java" method="text">
             <xsl:text><![CDATA[
 ////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can
@@ -155,7 +155,7 @@ public class FeatureData {
         
         <xsl:result-document href="Feature.java" method="text">
             <xsl:text><![CDATA[////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2018-2020 Saxonica Limited
+// Copyright (c) 2018-2023 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can
