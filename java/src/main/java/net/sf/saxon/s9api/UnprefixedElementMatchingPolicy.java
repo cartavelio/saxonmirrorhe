@@ -51,6 +51,12 @@ public enum UnprefixedElementMatchingPolicy {
      * of DOM, this policy allows use of unprefixed names both when matching elements in the XHTML
      * namespace and when matching no-namespace elements</p>
      */
-    DEFAULT_NAMESPACE_OR_NONE
+    DEFAULT_NAMESPACE_OR_NONE,
+
+    /**
+     * Default policy when none has been explicitly defined
+     */
+
+    UNSPECIFIED
 }
 

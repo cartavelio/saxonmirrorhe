@@ -44,7 +44,7 @@ public class ExpressionContext implements StaticContext {
     private Location containingLocation = null;
     private RetainedStaticContext retainedStaticContext = null;
     private NamespaceMap prologNamespaces = NamespaceMap.emptyMap();
-    private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = null;
+    private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy = UnprefixedElementMatchingPolicy.UNSPECIFIED;
 
     /**
      * Create a static context for XPath expressions in an XSLT stylesheet
@@ -488,7 +488,7 @@ public class ExpressionContext implements StaticContext {
      */
     @Override
     public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
-        if (unprefixedElementMatchingPolicy == null) {
+        if (unprefixedElementMatchingPolicy == UnprefixedElementMatchingPolicy.UNSPECIFIED) {
             return element.getCompilation().getCompilerInfo().getUnprefixedElementMatchingPolicy();
         }
         return unprefixedElementMatchingPolicy;

@@ -466,8 +466,13 @@ public final class DoubleValue extends NumericValue {
         } else if (Math.floor(value) == value && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
             return new net.sf.saxon.ma.map.Int32MapKey((int)value);
         } else {
-            return new BigDecimalMapKey(new BigDecimal(value));
+            return new BigDecimalMapKey(fromDouble(value));
         }
+    }
+
+    @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(value);")
+    private static BigDecimal fromDouble(double value) {
+        return new BigDecimal(value);
     }
 
     /**

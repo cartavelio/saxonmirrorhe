@@ -16,6 +16,7 @@ import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -711,8 +712,13 @@ public final class Int64Value extends IntegerValue {
         if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
             return new net.sf.saxon.ma.map.Int32MapKey((int) value);
         } else {
-            return new BigDecimalMapKey(new BigDecimal(value));
+            return new BigDecimalMapKey(fromLong(value));
         }
+    }
+
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(value);")
+    private static BigDecimal fromLong(long value) {
+        return new BigDecimal(value);
     }
 
 }

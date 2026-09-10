@@ -468,8 +468,13 @@ public final class FloatValue extends NumericValue {
         } else if (Math.floor(value) == value && value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
             return new net.sf.saxon.ma.map.Int32MapKey((int) value);
         } else {
-            return new BigDecimalMapKey(new BigDecimal(value));
+            return new BigDecimalMapKey(fromFloat(value));
         }
+    }
+
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.BigDecimalUtils.ValueOf(value);")
+    private static BigDecimal fromFloat(float value) {
+        return new BigDecimal(value);
     }
 
     /**

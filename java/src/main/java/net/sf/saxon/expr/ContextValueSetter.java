@@ -246,20 +246,20 @@ public class ContextValueSetter extends BinaryExpression
                 XPathContext c2 = context.newMinorContext();
                 Sequence lhs = select.evaluate(context);
                 if (lhs instanceof Item) {
-                    ManualIterator iter = new ManualIterator((Item) lhs);
-                    c2.setCurrentIterator(iter);
+                    ManualIterator lhsIter = new ManualIterator((Item) lhs);
+                    c2.setCurrentIterator(lhsIter);
                     return action.iterate(c2);
                 } else {
                     GroundedValue val = lhs.materialize();
                     if (val.getLength() == 1) {
                         // We're being defensive here because there are many paths that can't yet
                         // deal with generalized context values
-                        ManualIterator iter = new ManualIterator(val.head());
-                        c2.setCurrentIterator(iter);
+                        ManualIterator valIter = new ManualIterator(val.head());
+                        c2.setCurrentIterator(valIter);
                         return action.iterate(c2);
                     }
-                    ManualIterator iter = new ManualIterator(new Parcel(val));
-                    c2.setCurrentIterator(iter);
+                    ManualIterator parcelIter = new ManualIterator(new Parcel(val));
+                    c2.setCurrentIterator(parcelIter);
                     return action.iterate(c2);
                 }
             };

@@ -114,7 +114,8 @@ public class LookupExpression extends BinaryExpression {
         return getItemType().getUType();
     }
 
-    @CSharpReplaceBody(code="ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.ANY_ARRAY_TYPE)")
+    @CSharpReplaceBody(code="return Saxon.Hej.type.ChoiceItemType.of(Saxon.Hej.ma.map.MapType.ANY_MAP_TYPE,\n"
+            + "                Saxon.Hej.ma.arrays.ArrayItemType.ANY_ARRAY_TYPE);")
     public static ItemType getRequiredItemTypeOfLHS() {
         return ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.ANY_ARRAY_TYPE, ExternalObjectType.THE_INSTANCE);
     }
