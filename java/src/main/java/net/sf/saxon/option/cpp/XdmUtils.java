@@ -1009,7 +1009,7 @@ public class XdmUtils {
             throw new SaxonApiException("XdmMap object is null");
         }
         XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
-        if(xdmMap.isEmpty()) {
+        if(xdmMap.isEmptyMap()) {
             return WordFactory.nullPointer();
         }
         XdmValue [] values = getXdmMapValues(xdmMap);
@@ -1070,7 +1070,7 @@ public class XdmUtils {
         }
         XdmMap xdmMap = SaxonCAPI.objectHandles.get(mapRef);
 
-        boolean b = xdmMap.isEmpty();
+        boolean b = xdmMap.isEmptyMap();
         return  CTypeConversion.toCBoolean(b);
 
     }
