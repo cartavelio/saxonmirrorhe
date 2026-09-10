@@ -361,7 +361,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 String select = param.attribute("select");
                 XdmValue value;
                 try {
-                    value = xpath.evaluate(select, null);
+                    value = env.xpathCompiler.evaluate(select, null);
                 } catch (SaxonApiException e) {
                     System.err.println("*** Error evaluating parameter " + name + ": " + e.getMessage());
                     throw e;
