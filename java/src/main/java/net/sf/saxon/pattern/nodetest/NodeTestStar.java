@@ -66,6 +66,14 @@ public class NodeTestStar implements NodeTest {
     }
 
     /**
+     * Convert to a test that only matches XNodes
+     */
+
+    public NodeTest asXNodeTest() {
+        return NodeKindType.of(defaultNodeKind);
+    }
+
+    /**
      * Test whether this node test is satisfied by a given node. 
      *
      * @param node the node to be matched

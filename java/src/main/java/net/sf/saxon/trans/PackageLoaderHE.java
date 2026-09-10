@@ -3491,7 +3491,12 @@ public class PackageLoaderHE implements IPackageLoader {
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             boolean doe = flags != null && flags.contains("d");
             boolean notIfEmpty = flags != null && flags.contains("e");
-            return new ValueOf(select, doe, notIfEmpty);
+            ValueOf result = new ValueOf(select, doe, notIfEmpty);
+            Expression cdata = loader.getExpressionWithRole(element, "cdata");
+            if (cdata != null) {
+                result.setCdataExpression(cdata);
+            }
+            return result;
         });
 
         eMap.put("varRef", (loader, element) -> {

@@ -1088,19 +1088,6 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         if (!isPositional(th)) {
             return new BasePatternWithPredicate(basePattern, filter);
         } else {
-//            NodeTest test;
-//            if (base instanceof AxisExpression) {
-//                test = ((AxisExpression)base).getNodeTest();
-//            } else if (base.getItemType() instanceof NodeTest) {
-//                test = (NodeTest) base.getItemType();
-//            } else {
-//                ItemType itemType = base.getItemType();
-//                if (itemType instanceof GNodeType g) {
-//                    test = g;
-//                } else if (itemType instanceof ChoiceItemType choice) {
-//
-//                }
-//            }
             if (basePattern instanceof NodeTestPattern ntp &&
                     //basePattern.getItemType().getGenre() == Genre.XNODE &&
                     filterIsPositional &&

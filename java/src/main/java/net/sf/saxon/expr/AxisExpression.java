@@ -763,8 +763,11 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             pat = new JNodePattern(null, SequenceType.ANY_SEQUENCE);
         } else {
 
-            if (test instanceof SelectorTest && firstInPath) {
-                test = ((SelectorTest) test).asXNodeTest(config);
+            if (test instanceof SelectorTest selector/* && firstInPath */) {
+                test = selector.asXNodeTest(config);
+            }
+            if (test instanceof NodeTestStar star /* && firstInPath */) {
+                test = star.asXNodeTest();
             }
             if (test instanceof AnyXNodeType
                     && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {

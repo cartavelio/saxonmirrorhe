@@ -21,7 +21,6 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UniStringConsumer;
@@ -32,6 +31,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Whitespace;
 
@@ -396,7 +396,12 @@ public final class ValueOf extends SimpleNodeConstructor {
         if (!flags.isEmpty()) {
             out.emitAttribute("flags", flags);
         }
+        out.setChildRole("select");
         getSelect().export(out);
+        if (cdataOperand != null) {
+            out.setChildRole("cdata");
+            getCdataExpression().export(out);
+        }
         out.endElement();
     }
 
