@@ -672,17 +672,19 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem separator = null;
             if (arguments.length == 2) {
-                separator = ((ArrayItem)arguments[1].materialize());
+                separator = ((ArrayItem)arguments[1].head());
             }
             SequenceIterator iterator = arguments[0].iterate();
             ArrayItem array = SimpleArrayItem.EMPTY_ARRAY;
             ArrayItem nextArray;
             boolean atStart = true;
             while ((nextArray = (ArrayItem) iterator.next()) != null) {
-                if (atStart) {
-                    atStart = false;
-                } else {
-                    array = array.concat(separator);
+                if (separator != null) {
+                    if (atStart) {
+                        atStart = false;
+                    } else {
+                        array = array.concat(separator);
+                    }
                 }
                 array = array.concat(nextArray);
             }
