@@ -255,15 +255,20 @@ public abstract class Verifier {
             licenseDesc += " (serial number " + serial + ")";
             int daysLeft = license.daysLeft();
             if (daysLeft < 0) {
-                if ("yes".equals(features.getProperty("Evaluation")) || daysLeft < -30) {
+                if ("yes".equals(features.getProperty("Evaluation")) || daysLeft < -45) {
                     license.clearFeatures();
                     throw new LicenseException("The " + licenseDesc + " has expired",
                                                LicenseException.EXPIRED);
+                } else if (daysLeft < -15) {
+                    System.err.println("Saxon " + licenseDesc + " has expired. \n*** You are using the software without lawful authority. ***"
+                                               + "\nYou must obtain a new license immediately.");
+
                 } else {
-                    System.err.println("Saxon " + licenseDesc + " has expired. \n*** You are using the software without legal authority. ***"
-                                               + "\nYou must obtain a new license immediately; meanwhile a delay of " + Math.abs(daysLeft)*2 + " seconds will be imposed.");
+                    System.err.println("Saxon " + licenseDesc + " has expired. \n*** You are using the software without lawful authority. ***"
+                                               + "\nYou must obtain a new license immediately; meanwhile a delay of " + Math.abs(daysLeft) * 2 +
+                                               " seconds will be imposed. This delay will increase every day.");
                     try {
-                        Thread.sleep(Math.abs(daysLeft)*2000);
+                        Thread.sleep(Math.abs(daysLeft) * 2000);
                     } catch (InterruptedException e) {
                         throw new LicenseException("Saxon license " + licenseDesc + " has expired",
                                                    LicenseException.EXPIRED);
