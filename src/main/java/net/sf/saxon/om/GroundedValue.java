@@ -162,7 +162,7 @@ public interface GroundedValue extends Sequence {
      * @return an iterable delivering the contents of this value
      */
     default Iterable<? extends Item> asIterable() {
-        return new GroundedValueAsIterable<Item>(this);
+        return new GroundedValueAsIterable(this);
     }
 
     /**
