@@ -1,7 +1,7 @@
 package com.saxonica.ee.trans;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.optim.GeneralComparisonEE;
+import com.saxonica.ee.optim.GeneralEqualityEE;
 import com.saxonica.ee.optim.IndexedFilterExpression;
 import com.saxonica.ee.optim.SwitchExpression;
 import com.saxonica.ee.stream.StreamInstr;
@@ -58,7 +58,7 @@ public class PackageLoaderEE extends PackageLoaderPE {
             Expression rhs = loader.getSecondChildExpression(element);
             String compAtt = element.getAttributeValue(NamespaceUri.NULL, "comp");
             AtomicComparer comp = loader.makeAtomicComparer(compAtt, element);
-            GeneralComparison gc = new GeneralComparisonEE(lhs, op, rhs);
+            GeneralComparison gc = new GeneralEqualityEE(lhs, op, rhs);
             gc.setAtomicComparer(comp);
             return gc;
         });

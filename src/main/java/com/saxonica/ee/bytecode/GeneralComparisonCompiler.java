@@ -5,12 +5,16 @@ import net.sf.saxon.expr.ComparisonExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.GeneralComparison;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.expr.sort.*;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.ContextFreeAtomicComparer;
+import net.sf.saxon.expr.sort.UntypedNumericComparer;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -260,15 +264,14 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
         final Generator ga = compiler.getCurrentGenerator();
 
         // evaluate using the interpreter
-        // TODO: generate code for this case (though it's uncommon)
-        Expression arg0 = comparison.getLhsExpression();
-        Expression arg1 = comparison.getRhsExpression();
+//        Expression arg0 = comparison.getLhsExpression();
+//        Expression arg1 = comparison.getRhsExpression();
         allocateStatic(compiler, comparison);
-        compiler.compileToIterator(arg0);
-        compiler.compileToIterator(arg1);
+        // makeElaborator().elaborateForBoolean().eval(context)
+        ga.invokeInstanceMethod(GeneralComparison.class, "makeElaborator");
+        ga.invokeInstanceMethod(Elaborator.class, "elaborateForBoolean");
         compiler.generateGetContext();
-        ga.invokeInstanceMethod(GeneralComparison.class, "evaluateManyToMany", SequenceIterator.class, SequenceIterator.class, XPathContext.class);
-
+        ga.invokeInstanceMethod(BooleanEvaluator.class, "eval", XPathContext.class);
     }
 
 

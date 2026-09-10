@@ -433,7 +433,7 @@ public class OptimizerEE extends Optimizer {
     @Override
     public Expression optimizeGeneralComparison(ExpressionVisitor visitor,
                                                 GeneralComparison gc, boolean backwardsCompatible, ContextItemStaticInfo contextItemType) {
-        if (gc instanceof GeneralComparisonEE) {
+        if (gc instanceof GeneralEqualityEE) {
             return gc;
         }
         if (!"EE".equals(visitor.getTargetEdition())) {
@@ -459,7 +459,7 @@ public class OptimizerEE extends Optimizer {
                         }
                     }
                 }
-                GeneralComparisonEE gcee = new GeneralComparisonEE(p0, gc.getOperator(), p1);
+                GeneralEqualityEE gcee = new GeneralEqualityEE(p0, gc.getOperator(), p1);
                 gcee.setRetainedStaticContext(gc.getRetainedStaticContext());
                 gcee.setAtomicComparer(gc.getAtomicComparer());
                 gcee.setComparisonCardinality(gc.getComparisonCardinality());

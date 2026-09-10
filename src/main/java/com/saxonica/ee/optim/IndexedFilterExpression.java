@@ -188,13 +188,13 @@ public final class IndexedFilterExpression extends Expression {
                 let.setVariableQName(new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "vv" + computeHashCode()));
                 let.setSequence(getSearchExpression());
                 let.setRequiredType(getSearchExpression().getStaticType());
-                Expression filter = new GeneralComparisonEE(getUseExpression(), Token.EQUALS, new LocalVariableReference(let));
+                Expression filter = new GeneralEqualityEE(getUseExpression(), Token.EQUALS, new LocalVariableReference(let));
                 filter = filter.typeCheck(visitor, contextItemType);
                 let.setAction(new FilterExpression(getBaseExpression(), filter));
                 ExpressionTool.copyLocationInfo(this, let);
                 return let.optimize(visitor, contextItemType);
             } else {
-                Expression filter = new GeneralComparisonEE(getUseExpression(), Token.EQUALS, getSearchExpression());
+                Expression filter = new GeneralEqualityEE(getUseExpression(), Token.EQUALS, getSearchExpression());
                 ItemType type = getBaseExpression().getItemType();
                 ContextItemStaticInfo cisi = visitor.getConfiguration().makeContextItemStaticInfo(type, false);
                 filter = filter.typeCheck(visitor, cisi);
