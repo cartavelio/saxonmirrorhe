@@ -1,6 +1,7 @@
 package he;
+
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -96,7 +97,7 @@ public class SaxonServlet extends HttpServlet {
                 String name = (String)p.nextElement();
                 if (!(name.equals("style") || name.equals("source"))) {
                     String value = req.getParameter(name);
-                    transformer.setParameter(name, new StringValue(value));
+                    transformer.setParameter(name, new StringItem(value));
                 }
             }
 

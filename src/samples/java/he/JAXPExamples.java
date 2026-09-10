@@ -1,9 +1,10 @@
 package he;
+
 import net.sf.saxon.jaxp.TransformerImpl;
+import net.sf.saxon.str.BMPString;
 import net.sf.saxon.tree.util.Orphan;
 import net.sf.saxon.type.Type;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.*;
 import org.xml.sax.helpers.XMLFilterImpl;
@@ -1147,7 +1148,7 @@ public class JAXPExamples {
                     }
                     Orphan textNode = new Orphan(((TransformerImpl) transformer).getConfiguration());
                     textNode.setNodeKind(Type.TEXT);
-                    textNode.setStringValue(sb.toString());
+                    textNode.setStringValue(BMPString.of(sb.toString()));
                     return textNode;
                 } catch (Exception err) {
                     throw new TransformerException(err);
