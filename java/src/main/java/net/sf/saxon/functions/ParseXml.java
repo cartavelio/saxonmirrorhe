@@ -34,7 +34,9 @@ import org.xml.sax.*;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +70,7 @@ public class ParseXml extends SystemFunction implements Callable {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue input = (StringValue) arguments[0].head();
+        AtomicValue input = (AtomicValue) arguments[0].head();
         Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
         if (getArity() >= 2) {
             MapItem options = (MapItem) arguments[1].head();
@@ -209,7 +211,7 @@ public class ParseXml extends SystemFunction implements Callable {
      */
     @CSharpReplaceBody(code="return null;")
     private NodeInfo parseXmlPush(
-            StringValue inputArg,
+            AtomicValue inputArg,
             ParseOptions options,
             String baseUri,
             XPathContext context) throws XPathException {
@@ -222,15 +224,23 @@ public class ParseXml extends SystemFunction implements Callable {
                 throw new XPathException("parse-xml() function is not available in this environment");
             }
 
-            String inputXml = inputArg.getStringValue();
-            if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
-                inputXml = inputXml.substring(1);
+            Source source;
+            if (inputArg instanceof StringValue) {
+                String inputXml = inputArg.getStringValue();
+                if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
+                    inputXml = inputXml.substring(1);
+                }
+                StringReader sr = new StringReader(inputXml);
+                source = new StreamSource(sr);
+                source.setSystemId(baseUri);
+            } else if (inputArg instanceof BinaryValue) {
+                byte[] binaryXml = ((BinaryValue)inputArg).getBinaryValue();
+                InputStream stream = new ByteArrayInputStream(binaryXml);
+                source = new StreamSource(stream);
+                source.setSystemId(baseUri);
+            } else {
+                throw new XPathException("Input to parse-xml() must be either a string or a binary value", "XPTY0004");
             }
-            StringReader sr = new StringReader(inputXml);
-//            InputSource is = new InputSource(sr);
-//            is.setSystemId(baseUri);
-            Source source = new StreamSource(sr);
-            source.setSystemId(baseUri);
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;
@@ -310,7 +320,7 @@ public class ParseXml extends SystemFunction implements Callable {
      * @throws XPathException if parsing fails
      */
     private NodeInfo parseXmlPull(
-            StringValue inputArg,
+            AtomicValue inputArg,
             ParseOptions options,
             String baseUri,
             XPathContext context) throws XPathException {
@@ -321,12 +331,21 @@ public class ParseXml extends SystemFunction implements Callable {
             }
             Configuration config = context.getConfiguration();
 
-            String inputXml = inputArg.getStringValue();
-            if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) { // Strip a leading BOM
-                inputXml = inputXml.substring(1);
+            StreamSource ss;
+            if (inputArg instanceof StringValue) {
+                String inputXml = inputArg.getStringValue();
+                if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) { // Strip a leading BOM
+                    inputXml = inputXml.substring(1);
+                }
+                StringReader sr = new StringReader(inputXml);
+                ss = new StreamSource(sr, baseUri);
+            } else if (inputArg instanceof BinaryValue) {
+                byte[] binaryXml = ((BinaryValue) inputArg).getBinaryValue();
+                InputStream stream = new ByteArrayInputStream(binaryXml);
+                ss = new StreamSource(stream, baseUri);
+            } else {
+                throw new XPathException("Input to parse-xml() must be either a string or a binary value", "XPTY0004");
             }
-            StringReader sr = new StringReader(inputXml);
-            StreamSource ss = new StreamSource(sr, baseUri);
             Source pullSource = Version.platform.resolveSource(ss, options, config);
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());

@@ -29,14 +29,13 @@ import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 import javax.xml.transform.sax.SAXSource;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,7 +62,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue input = (StringValue) arguments[0].head();
+        AtomicValue input = (AtomicValue) arguments[0].head();
         if (input == null) {
             return EmptySequence.getInstance();
         } else {
@@ -90,14 +89,17 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
 
     @CSharpReplaceBody(code="return Saxon.Impl.Helpers.ParseXmlFragment.eval(inputArg, baseUri, stripSpace, context);")
     private NodeInfo evalParseXmlFragment(
-            StringValue inputArg, String baseUri, boolean stripSpace, XPathContext context)
+            AtomicValue inputArg, String baseUri, boolean stripSpace, XPathContext context)
             throws XPathException {
         NodeInfo node = null;
         ParseXml.RetentiveErrorHandler errorHandler = new ParseXml.RetentiveErrorHandler();
 
-        String inputXml = inputArg.getStringValue();
-        if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
-            inputXml = inputXml.substring(1);
+        if (inputArg instanceof StringValue) {
+            String inputXml = inputArg.getStringValue();
+            if (!inputXml.isEmpty() && inputXml.charAt(0) == 0xFEFF) {  // Strip a leading BOM
+                inputXml = inputXml.substring(1);
+            }
+            inputArg = new StringValue(inputXml);
         }
 
         int attempt = 0;
@@ -108,9 +110,8 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                     throw new XPathException("parse-xml-fragment() function is not available in this environment");
                 }
                 Configuration configuration = controller.getConfiguration();
-                final StringReader fragmentReader = new StringReader(inputXml);
 
-                String skeleton = "<!DOCTYPE z [<!ENTITY e SYSTEM \"http://www.saxonica.com/parse-xml-fragment/actual.xml\">]>\n<z>&e;</z>";
+                String skeleton = "<!DOCTYPE z [<!ENTITY e SYSTEM \"http://www.saxonica.com/parse-xml-fragment/actual.xml\">]><z>&e;</z>";
                 StringReader skeletonReader = new StringReader(skeleton);
 
                 InputSource is = new InputSource(skeletonReader);
@@ -142,16 +143,34 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                         .withSchemaValidationMode(Validation.SKIP)
                         .withDTDValidationMode(Validation.SKIP);
                 List<Boolean> safetyCheck = new ArrayList<>();
-                reader.setEntityResolver((publicId, systemId) -> {
-                    if ("http://www.saxonica.com/parse-xml-fragment/actual.xml".equals(systemId)) {
-                        safetyCheck.add(true);
-                        InputSource is1 = new InputSource(fragmentReader);
-                        is1.setSystemId(baseUri);
-                        return is1;
-                    } else {
-                        return null;
-                    }
-                });
+
+                if (inputArg instanceof StringValue) {
+                    String xml = inputArg.getStringValue();
+                    reader.setEntityResolver((publicId, systemId) -> {
+                        if ("http://www.saxonica.com/parse-xml-fragment/actual.xml".equals(systemId)) {
+                            safetyCheck.add(true);
+                            StringReader fragmentReader = new StringReader(xml);
+                            InputSource is1 = new InputSource(fragmentReader);
+                            is1.setSystemId(baseUri);
+                            return is1;
+                        } else {
+                            return null;
+                        }
+                    });
+                } else if (inputArg instanceof BinaryValue) {
+                    byte[] xml = ((BinaryValue)inputArg).getBinaryValue();
+                    InputStream stream = new ByteArrayInputStream(xml);
+                    reader.setEntityResolver((publicId, systemId) -> {
+                        if ("http://www.saxonica.com/parse-xml-fragment/actual.xml".equals(systemId)) {
+                            safetyCheck.add(true);
+                            InputSource is1 = new InputSource(stream);
+                            is1.setSystemId(baseUri);
+                            return is1;
+                        } else {
+                            return null;
+                        }
+                    });
+                }
                 if (stripSpace) {
                     options = options.withSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                 } else {
