@@ -10,8 +10,12 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.functions.registry.FunctionDefinition;
@@ -62,6 +66,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     private SequenceType resultType;
     private SequenceType declaredResultType;
     protected SequenceEvaluator bodyEvaluator = null;
+    protected PushEvaluator pushEvaluator = null;
     private boolean updating = false;
     private int inlineable = -1; // 0:no 1:yes -1:don't know
     private int inliningCount = 0;
@@ -673,9 +678,11 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     @Override
     public Sequence call(XPathContext context, Sequence[] actualArgs)
             throws XPathException {
-        if (bodyEvaluator == null) {
-            // first time through
-            computeEvaluationMode();
+        synchronized (this) {
+            if (bodyEvaluator == null) {
+                // first time through
+                computeEvaluationMode();
+            }
         }
 
         XPathContextMajor c2 = (XPathContextMajor) context;
@@ -715,7 +722,12 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     public void process(XPathContextMajor context, Sequence[] actualArgs, Outputter output)
             throws XPathException {
         context.setStackFrame(getStackFrameMap(), actualArgs);
-        TailCall tc = getBody().makeElaborator().elaborateForPush().processLeavingTail(output, context);
+        synchronized(this) {
+            if (pushEvaluator == null) {
+                pushEvaluator = getBody().makeElaborator().elaborateForPush();
+            }
+        }
+        TailCall tc = pushEvaluator.processLeavingTail(output, context);
         Expression.dispatchTailCall(tc);
     }
 

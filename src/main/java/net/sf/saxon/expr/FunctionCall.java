@@ -644,12 +644,6 @@ public abstract class FunctionCall extends Expression {
     public static abstract class FunctionCallElaborator extends PullElaborator {
         protected SequenceEvaluator[] argumentEvaluators;
 
-        @Override
-        public void setExpression(Expression expr) {
-            super.setExpression(expr);
-            allocateArgumentEvaluators((FunctionCall)expr, true);
-        }
-
         /**
          * Allocate evaluation functions for each argument (in field {@code argumentEvaluators})
          * @param expr the function call

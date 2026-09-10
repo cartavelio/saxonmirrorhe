@@ -133,12 +133,10 @@ public class LocalParamBlock extends Instruction {
 
     public static class LocalParamBlockElaborator extends PushElaborator {
 
-        SequenceEvaluator[] paramEval;
-
         @Override
         public PushEvaluator elaborateForPush() {
             LocalParamBlock expr = (LocalParamBlock) getExpression();
-            paramEval = new SequenceEvaluator[expr.operanda.length];
+            SequenceEvaluator[] paramEval = new SequenceEvaluator[expr.operanda.length];
             for (int i=0; i<expr.operanda.length; i++) {
                 paramEval[i] = expr.operanda[i].getChildExpression().makeElaborator().eagerly();
             }
