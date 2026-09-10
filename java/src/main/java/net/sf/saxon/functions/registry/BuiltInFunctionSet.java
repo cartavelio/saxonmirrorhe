@@ -617,7 +617,12 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         }
 
         /**
-         * Add information to a function entry about the argument types of the function
+         * Add information to a function entry about the argument types of the function.
+         * This version of the method allows the default value of the argument to be defined.
+         * TODO: However, this mechanism isn't fully working. It works for static function calls,
+         *   but not for dynamic calls of a reduced-arity version of the function. The function
+         *   implementation still needs to be aware in its call() method that some arguments
+         *   might be missing.
          *
          * @param a             the position of the argument, counting from zero
          * @param type          the item type of the argument
