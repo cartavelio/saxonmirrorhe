@@ -33,7 +33,7 @@
             </xsl:for-each>
             <xsl:result-document href="#foundPaths" method="ixsl:replace-content">
                 <p><i>Search result links:</i></p>
-                <xsl:for-each select="doc(concat($location, '/catalog.xml'))/cat:catalog/cat:section">
+                <xsl:for-each select="doc(f:doc-uri(concat($location, '/catalog.xml')))/cat:catalog/cat:section">
                     <div id="{@ref}" class="foundP" _searching="true"></div>
                 </xsl:for-each>
             </xsl:result-document>
@@ -95,7 +95,7 @@
         <!--<xsl:message>searching for <xsl:value-of select="$search"/></xsl:message>-->
         <!--<xsl:message>searching $location: <xsl:value-of select="$location"/> </xsl:message>-->
         <xsl:for-each select="$navlist/ul/li">
-            <xsl:variable name="docName" select="concat($location, '/', @id,'.xml')"/>
+            <xsl:variable name="docName" select="f:doc-uri(concat($location, '/', @id,'.xml'))"/>
             <ixsl:schedule-action document="{$docName}">
                 <xsl:call-template name="search-doc">
                     <xsl:with-param name="search" select="$search"/>

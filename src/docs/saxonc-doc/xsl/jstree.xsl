@@ -13,15 +13,18 @@
     extension-element-prefixes="ixsl"
     version="3.0">
     
-    <!-- Stylesheet to generate the Saxon/C documentation viewer app using Saxon-JS in the browser. 
+    <xsl:variable name="pubstamp" static="yes"
+        select="substring(string(current-dateTime()), 1, 16)"/>
+    
+    <!-- Stylesheet to generate the SaxonC documentation viewer app using SaxonJS in the browser. 
         The initial template is named 'main'.
         
         Note that functions-body.xsl and elements-body.xsl are adapted from the versions for the
         main Saxon documentation viewer_app: 
-            - The versions here are as used for the Saxon-JS documentation.
+            - The versions here are as used for the SaxonJS documentation.
             - e.g. Various simplifications are made to assume all instructions and functions referenced are
             those in the ixsl namespace
-            - But these are not actually currently used in Saxon/C documentation
+            - But these are not actually currently used in SaxonC documentation
             
             - use shared templates in el-fnd-body.xsl for corresponding elements in fnd and el namespaces
     -->
@@ -35,12 +38,11 @@
     <xsl:import href="elements-body.xsl"/>
     <!--<xsl:import href="changes.xsl"/>-->
    
-    <xsl:param name="product" select="'Saxon/C'" as="xs:string"/>
-    <xsl:param name="SEFbuildDate" select="'2020-08-24'" as="xs:string" static="yes"/>
+    <xsl:param name="product" select="'SaxonC'" as="xs:string"/>
     <xsl:param name="showStatusMessage" select="false()" as="xs:boolean"/>
 
     <xsl:variable name="location" select="resolve-uri('doc', ixsl:location())"/>
-    <xsl:variable name="implement-doc" select="concat($location, '/implement.xml')"/>
+    <xsl:variable name="implement-doc" select="f:doc-uri(concat($location, '/implement.xml'))"/>
     
     <!--<xsl:variable name="docChanges" select="doc(concat($location, '/changes.xml'))"
         as="document-node()"/>-->
@@ -48,10 +50,10 @@
     <xsl:variable name="navlist" as="node()" select="ixsl:page()/html/body/div/div[@id = 'nav']"/>
 
     <xsl:template name="main">
-        <xsl:variable name="catDocName" select="concat($location, '/catalog.xml')"/>
+        <xsl:variable name="catDocName" select="f:doc-uri(concat($location, '/catalog.xml'))"/>
         
         <xsl:if test="$showStatusMessage">
-            <xsl:message expand-text="yes">{$SEFbuildDate} {$product} documentation app running with Saxon-JS {ixsl:eval('SaxonJS.getProcessorInfo()["productVersion"]')}</xsl:message>
+            <xsl:message expand-text="yes">{$pubstamp} {$product} documentation app running with SaxonJS {ixsl:eval('SaxonJS.getProcessorInfo()["productVersion"]')}</xsl:message>
         </xsl:if>
         <ixsl:schedule-action document="{$catDocName}">
             <xsl:call-template name="list">
@@ -135,7 +137,7 @@
     </xsl:template>
 
     <xsl:template match="span[@data-href][@class eq 'flink']" mode="ixsl:onmouseover">
-        <xsl:variable name="docName" select="concat($location, '/ixsl-extension.xml')"/>
+        <xsl:variable name="docName" select="f:doc-uri(concat($location, '/ixsl-extension.xml'))"/>
         <ixsl:schedule-action document="{$docName}">
             <xsl:call-template name="show-fn">
                 <xsl:with-param name="span" select="."/>
@@ -165,8 +167,7 @@
         <xsl:variable name="hash-parts" select="tokenize(f:get-hash(),'/')"/>
         <xsl:variable name="start" select="$hash-parts[1]"/>
         <xsl:variable name="docName"
-            select="concat($location, '/', $start,'.xml')"/>
-
+            select="f:doc-uri(concat($location, '/', $start,'.xml'))"/>
 
         <ixsl:schedule-action document="{$docName}">
             <xsl:call-template name="render-page">
@@ -401,17 +402,6 @@
         </xsl:choose>
     </xsl:function>
 
-    <xsl:function name="f:get-function">
-        <xsl:param name="prefix" as="xs:string"/>
-        <xsl:param name="local" as="xs:string"/>
-        <!-- This function is called from navpage template, when stepping through functions pages, in which case
-            the document 'saxonc-extension.xml' has certainly already been loaded -->
-        <xsl:sequence
-            select="doc(concat($location, '/ixsl-extension.xml'))//fnd:function[fnd:name[. = $local
-            and 'ixsl' = $prefix]]"
-        />
-    </xsl:function>
-
     <xsl:template name="get-trail">
         <xsl:param name="ids" as="xs:string*"/>
         <xsl:param name="parent" as="node()?"/>
@@ -638,6 +628,22 @@
         <xsl:variable name="hash"
             select="if(contains($url, '%21')) then substring-after($url, '%21') else substring(ixsl:get(ixsl:window() , 'location.hash'),3)"/>
         <xsl:sequence select="if (string-length($hash) gt 0) then $hash else ($navlist/ul/li)[1]/@id"/>
+    </xsl:function>
+    
+    <xsl:function name="f:doc-uri" as="xs:string">
+        <xsl:param name="uri" as="xs:string"/>
+        
+        <!-- The publication timestamp is used to force cache misses when
+           we republish the documentation. -->
+        
+        <xsl:choose>
+            <xsl:when test="contains($uri, '?')">
+                <xsl:sequence select="$uri || '&amp;pubstamp=' || $pubstamp"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:sequence select="$uri || '?pubstamp=' || $pubstamp"/>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:function>
 
 </xsl:transform>
