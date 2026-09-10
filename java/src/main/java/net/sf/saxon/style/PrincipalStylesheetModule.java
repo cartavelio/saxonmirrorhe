@@ -314,7 +314,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         XSLModuleRoot sheet = moduleCache.get(key);
         if (sheet != null && sheet.getCompilation().getCompilerInfo().getXsltVersion() < 40) {
             sheet.issueWarning("Stylesheet module " + key + " is included or imported more than once. " +
-                                       "This is permitted, but may lead to errors or unexpected behavior", SaxonErrorCode.SXWN9019);
+                                       "This is permitted, but may lead to errors or unexpected behavior. " +
+                                       "Furthermore, the effect in XSLT 4.0 may be different.", SaxonErrorCode.SXWN9019);
         }
         return sheet;
     }
