@@ -69,6 +69,21 @@ public class XSDImport extends AnnotationParent {
 
         String documentBase = getBaseURI();
 
+        // For the XML namespace, use the built-in version if the schema location is known or if already loaded
+
+        if (namespace.equals(NamespaceConstant.XML)) {
+            if (schemaLocation == null ||
+                    schemaLocation.equals("http://www.w3.org/2001/xml.xsd") ||
+                    schemaLocation.equals("http://www.w3.org/2001/03/xml.xsd")) {
+                // Use the built-in version, or none if already loaded
+                if (config.getNamespaceStatus(namespace) != PreparedSchema.NAMESPACE_KNOWN) {
+                    importedSchema = XMLNamespaceSchema.buildSchema(config);
+                    config.addSchema(importedSchema);
+                }
+                return;
+            }
+        }
+
         Source source = null;
         if (schemaLocation != null) {
             try {
@@ -150,21 +165,6 @@ public class XSDImport extends AnnotationParent {
                 warning(message);
             }
             return;
-        }
-
-        // For the XML namespace, use the built-in version if the schema location is known or if already loaded
-
-        if (namespace.equals(NamespaceConstant.XML)) {
-            if (schemaLocation == null ||
-                    schemaLocation.equals("http://www.w3.org/2001/xml.xsd") ||
-                    schemaLocation.equals("http://www.w3.org/2001/03/xml.xsd")) {
-                // Use the built-in version, or none if already loaded
-                if (status != PreparedSchema.NAMESPACE_KNOWN) {
-                    importedSchema = XMLNamespaceSchema.buildSchema(config);
-                    config.addSchema(importedSchema);
-                }
-                return;
-            }
         }
 
         //-- if schemaLocation not provided, give up, unless it's the XSI or FN Namespace
