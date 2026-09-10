@@ -208,20 +208,7 @@
             and <code>integer_value()</code> are available to convert in the other direction.</p></li>
       </ul>
          
-      
-      <p>In Java and C#, as an alternative to use of XPath, the <code>select()</code> (or <code>Select()</code>) 
-         method on <code>XdmValue</code> provides powerful
-         navigation capability around XDM trees. This method takes as argument a
-         <code java="net.sf.saxon.s9api.streams.Step">Step</code> (<code cs="Saxon.Api.Step">Step</code> in C#) (which is
-         a function from one node to related nodes) and returns a sequence of nodes as a result. There
-         is a library (<code java="net.sf.saxon.s9api.streams.Steps">Steps</code> in Java, and <code
-            cs="Saxon.Api.Steps">Steps</code> in C#)
-         of <code>Step</code> functions corresponding to all the XPath axes, and the results of applying a <code>Step</code>
-         can be filtered using predicates: there is also a library (<code
-            java="net.sf.saxon.s9api.streams.Predicates">Predicates</code> in Java, and <code
-               cs="Saxon.Api.Predicates">Predicates</code> in C#) of commonly-used
-         <code>Predicate</code>s.</p>
-      
+   
       <p class="javaonly">A Java example: if <code>root</code> is a document node, then <code>root.select(descendant("p")).asXdmValue()</code>
          selects all the descendant elements with local name "p" in the form of an <code>XdmValue</code>.</p>
       
@@ -234,7 +221,17 @@
          interface which provides more detailed access to information associated with nodes. The <code>NodeInfo</code> interface
          is designed primarily for internal use within Saxon, whereas <code>XdmNode</code> is designed for application use.</p>
    </section>
-   
+
+<section id="java-xpath" title="From a Java application" class="javaonly">
+  <h1>From a Java application</h1>
+
+  <p>There are two common programming APIs from Java:</p>
+
+  <ul>
+    <li><a class="bodylink" href="s9api-xpath">The Saxon s9api</a></li>
+    <li><a class="bodylink" href="jaxp-xpath">The JAXP XPath API</a></li>
+  </ul>
+
    <section id="s9api-xpath" title="Evaluating XPath expressions using s9api" class="javaonly">
       <h1>Evaluating XPath expressions using s9api</h1>
       
@@ -576,7 +573,7 @@ XPath xpath = xpathFactory.newXPath();
          
       </section>
    </section>
-   
+ </section>   
    <section id="dotnet-xpath" title="From a C# application" class="csonly">
          <h1>Evaluating XPath expressions from a C# application</h1>
          
@@ -1125,4 +1122,393 @@ XPath xpath = xpathFactory.newXPath();
          reduce the amount of code you need to write to achieve this. See the implementations that
          map <code>NodeInfo</code> to DOM, DOM4J, JDOM or XOM to see how it is done.</p>
    </section>
+
+   <section id="select" title="The select() API">
+      <h1>The select() API</h1>
+
+      <p>In Java and C#, as an alternative to use of XPath, the
+      <code>select()</code> (or <code>Select()</code>) method on
+      <code>XdmValue</code> provides powerful navigation capability around XDM
+      trees. This method takes as argument a
+      <code java="net.sf.saxon.s9api.streams.Step">Step</code>
+      (<code cs="Saxon.Api.Step">Step</code> in C#) (which is a function from one node
+      to related nodes) and returns a sequence of nodes as a result. There is a
+      library (<code java="net.sf.saxon.s9api.streams.Steps">Steps</code> in
+      Java, and <code cs="Saxon.Api.Steps">Steps</code> in C#) of
+      <code>Step</code> functions corresponding to all the XPath axes, and the
+      results of applying a <code>Step</code> can be filtered using predicates:
+      there is also a library
+      (<code java="net.sf.saxon.s9api.streams.Predicates">Predicates</code> in Java,
+      and <code cs="Saxon.Api.Predicates">Predicates</code> in C#) of
+      commonly-used <code>Predicate</code>s.</p>
+
+<p>The select API is a Java API designed to perform navigation over, and selection
+of, nodes and values in XML trees. It provides functionality roughly equivalent
+to the standard XPath navigation and selection operations, but is much more
+convenient than constructing, evaluating, and interpreting the results of an
+XPath expression.</p>
+
+<p>Suppose, for example, that you have a book where individual chapters have
+authors where each chapter may be in either a draft or final status. Something
+like this:</p>
+
+<samp><![CDATA[<book>
+  ...
+  <chapter status="draft">
+    <author>John Smith</author>
+    <title>...</title>
+    ...
+  </chapter>
+  ...
+</book>]]></samp>
+
+<p>An XPath expression like this one would select all of the authors we’re
+interested in:</p>
+
+<samp>//chapter[@status='draft']/author/text()</samp>
+
+<p>You could evaluate that XPath expression using Saxon using code along these
+lines:</p>
+
+<samp><![CDATA[// processor = … make a Processor
+// document = … load the book
+
+ArrayList<String> authors = new ArrayList<>();
+try {
+  XPathCompiler compiler = processor.newXPathCompiler();
+  XPathExecutable exec = compiler.compile("//chapter[@status='draft']/author/text()");
+  XPathSelector selector = exec.load();
+  selector.setContextItem(document);
+  for (XdmValue author : selector.evaluate()) {
+      authors.add(author.toString());
+  } catch (SaxonApiExcption ex) {
+    // do something
+  }
+}]]></samp>
+
+<p>Alternatively, you could use the select API:</p>
+
+<samp><![CDATA[// processor = … make a Processor
+// document = … load the book
+
+ArrayList<String> authors = new ArrayList<>();
+document.select(descendant("chapter")
+                .where(attributeEq("status", "draft"))
+                .then(child("author"))
+                .then(text()))
+                .asList().forEach(item -> authors.add(item.toString()));
+}]]></samp>
+
+<p>The <code>select()</code> API provides three different ways to match nodes by name: with a
+simple string, with a pair of strings representing the namespace and local name,
+or with a QName. Unlike XPath, in the select() API, the simple string form
+matches names in any namespace. </p>
+
+<p>Here are a few examples:</p>
+
+<table>
+  <tr>
+    <td><code>child("*")</code></td>
+    <td>Matches any elements in any namespace, including none</td>
+  </tr>
+  <tr>
+    <td><code>child("div")</code></td>
+    <td>Matches div elements in any namespace, including none</td>
+  </tr>
+  <tr>
+    <td><code>child("http://www.w3.org/1999/xhtml", "div")</code></td>
+    <td>Matches div elements in the HTML namespace</td>
+  </tr>
+  <tr>
+    <td><code>child(QName("div"))</code></td>
+    <td>Matches div elements in no namespace</td>
+  </tr>
+</table>
+
+<h2>Steps</h2>
+
+<p>The select API is built on top of the host language’s underlying stream interface.
+The <code>select()</code> (or <code>Select()</code>) in C#) method on an
+<code>XdmValue</code> returns an <code>XdmStream</code> which wraps a Java or C#
+<code>Stream</code>. A selection takes
+as input a <code>Step</code>. There are many possible steps, most correspond to XPath axes:
+</p>
+
+<table>
+<tr>
+<th>The method:</th>
+<th>Returns a step that selects:</th>
+</tr>
+<tr>
+<td>root()</td>
+<td>The root of the tree, if started on a node</td>
+</tr>
+<tr>
+<td>ancestor(*)</td>
+<td>The ancestors</td>
+</tr>
+<tr>
+<td>ancestorOrSelf(*)</td>
+<td>The ancestors and self</td>
+</tr>
+<tr>
+<td>attribute(*)</td>
+<td>The attributes</td>
+</tr>
+<tr>
+<td>child(*)</td>
+<td>The children</td>
+</tr>
+<tr>
+<td>descendant(*)</td>
+<td>The descendants</td>
+</tr>
+<tr>
+<td>descendantOrSelf(*)</td>
+<td>The descendants and self</td>
+</tr>
+<tr>
+<td>following(*)</td>
+<td>The following nodes</td>
+</tr>
+<tr>
+<td>followingSibling(*)</td>
+<td>The following siblings</td>
+</tr>
+<tr>
+<td>followingOrSelf(*)</td>
+<td>The following nodes and self</td>
+</tr>
+<tr>
+<td>followingSiblingOrSelf(*)</td>
+<td>The following siblings and self</td>
+</tr>
+<tr>
+<td>namespace()</td>
+<td>The namespaces</td>
+</tr>
+<tr>
+<td>namespace(String localName)</td>
+<td>The namespaces with the prefix localName</td>
+</tr>
+<tr>
+<td>parent(*)</td>
+<td>The parent</td>
+</tr>
+<tr>
+<td>precedingSibling(*)</td>
+<td>The preceding siblings</td>
+</tr>
+<tr>
+<td>preceding(*)</td>
+<td>The preceding nodes</td>
+</tr>
+<tr>
+<td>precedingOrSelf(*)</td>
+<td>The preceding nodes or self</td>
+</tr>
+<tr>
+<td>precedingSiblingOrSelf(*)</td>
+<td>The preceding siblings or self</td>
+</tr>
+<tr>
+<td>self(*)</td>
+<td>Self</td>
+</tr>
+<tr>
+<td>text()</td>
+<td>Text nodes</td>
+</tr>
+<tr>
+<td>nothing()</td>
+<td>Nothing</td>
+</tr>
+</table>
+
+<p>The steps marked “(*)” take optional arguments:</p>
+
+<ol>
+<li>A string, that matches the local name in any namespace</li>
+<li>A namespace URI and local name, as strings, that match just that name</li>
+<li>A QName, that matches just that name</li>
+<li>A Predicate (see below)</li>
+</ol>
+
+<p>There are also a few additional steps for convenience.</p>
+
+<ul>
+<li><code>atomize()</code>
+<p>Returns the original value atomized.</p>
+</li>
+<li><code>castAs(type)</code>
+<p>Returns the original value cast as the specified type.</p>
+</li>
+<li><code>path(steps)</code>
+<p>Joins a sequence of steps together into a compound path.</p>
+</li>
+<li><code>path(strings)~ Joins a sequence of strings (simple XPath fragments) into </code>
+<p>compound path. The strings may be “/”, “//”, “..”, “*”, “name” or “@name”.</p>
+</li>
+<li><code>tokenize()</code>
+<p>Returns the original value tokenized on whitespace boundaries.</p>
+</li>
+<li><code>id(doc)</code>
+<p>Returns the node in ~doc~ that has an ID value equal to the original value.</p>
+</li>
+</ul>
+
+<p>All steps have several methods for selecting and combining items from the list.</p>
+
+<table>
+<tr>
+<th>The method:</th>
+<th>Has the effect of:</th>
+</tr>
+<tr>
+<td>where(predicate)</td>
+<td>Selecting items that match the predicate</td>
+</tr>
+<tr>
+<td>cat(otherStep)</td>
+<td>Concatenates the stream so far with the stream from otherStep</td>
+</tr>
+<tr>
+<td>first()</td>
+<td>Returns a stream that only contains the first item</td>
+</tr>
+<tr>
+<td>last()</td>
+<td>Returns a stream that only contains the last item</td>
+</tr>
+<tr>
+<td>at(position)</td>
+<td>Returns a stream that only contains the item at the position</td>
+</tr>
+<tr>
+<td>then(next)</td>
+<td>Continues navigation from the current point</td>
+</tr>
+</table>
+
+<h2>Predicates</h2>
+
+<p>Predicates allow you to select items from the stream.</p>
+
+<table>
+<tr>
+<th>The predicate:</th>
+<th>Selects that:</th>
+</tr>
+<tr>
+<td><code>isNode()</code></td>
+<td>are nodes</td>
+</tr>
+<tr>
+<td><code>isElement()</code></td>
+<td>are elements</td>
+</tr>
+<tr>
+<td><code>isAttribute()</code></td>
+<td>are attributes</td>
+</tr>
+<tr>
+<td><code>isText()</code></td>
+<td>are text nodes</td>
+</tr>
+<tr>
+<td><code>isComment()</code></td>
+<td>are comments</td>
+</tr>
+<tr>
+<td><code>isProcessingInstruction()</code></td>
+<td>are processing instructions</td>
+</tr>
+<tr>
+<td><code>isDocument()</code></td>
+<td>are documents</td>
+</tr>
+<tr>
+<td><code>isNamespace()</code></td>
+<td>are namespaces</td>
+</tr>
+<tr>
+<td><code>isAtomic()</code></td>
+<td>are atomic values</td>
+</tr>
+<tr>
+<td><code>isFunction()</code></td>
+<td>are functions</td>
+</tr>
+<tr>
+<td><code>isMap()</code></td>
+<td>are maps</td>
+</tr>
+<tr>
+<td><code>isArray()</code></td>
+<td>are arrays</td>
+</tr>
+<tr>
+<td><code>empty(step)</code></td>
+<td>where step is empty</td>
+</tr>
+<tr>
+<td><code>not(predicate)</code></td>
+<td>where predicate is false</td>
+</tr>
+<tr>
+<td><code>exists(step)</code></td>
+<td>where step exists</td>
+</tr>
+<tr>
+<td><code>hasName(name)</code></td>
+<td>where the item has the specified name</td>
+</tr>
+<tr>
+<td><code>hasLocalName(name)</code></td>
+<td>where the item has the specified local name</td>
+</tr>
+<tr>
+<td><code>hasNamespace(uri)</code></td>
+<td>where the item has the specified namespace</td>
+</tr>
+<tr>
+<td><code>hasAttribute(name)</code></td>
+<td>where the item has an attribute with the specified name</td>
+</tr>
+<tr>
+<td><code>attributeEq(name, value)</code></td>
+<td>where the item has an attribute with the specified name and value</td>
+</tr>
+<tr>
+<td><code>hasType(type)</code></td>
+<td>where the item has the specified type</td>
+</tr>
+<tr>
+<td><code>some(step, predicate)</code></td>
+<td>where at least one of the steps satisfies the predicate</td>
+</tr>
+<tr>
+<td><code>every(step, predicate)</code></td>
+<td>where every step satisfies the predicate</td>
+</tr>
+<tr>
+<td><code>eq(value)</code></td>
+<td>where the item equal value</td>
+</tr>
+<tr>
+<td><code>matchesRegex(regex)</code></td>
+<td>where the item matches the regex</td>
+</tr>
+<tr>
+<td><code>eq(step, value)</code></td>
+<td>where the step has the specified value</td>
+</tr>
+</table>
+
+<p>The XdmStream object also provides appropriate implementations for the
+methods defined on the underlying Stream object: <code>filter</code>, <code>map</code>,
+<code>distinct</code>, etc.</p>
+
+   </section>
+
 </article>

@@ -919,15 +919,15 @@ public class StreamAxisTest {
 
     }
 
-
-    @Disabled
+    @Test
     public void theHardWay() {
         // document = ... some process that loaded the book
 
         ArrayList<String> authors = new ArrayList<>();
         try {
             XPathCompiler compiler = processor.newXPathCompiler();
-            XPathExecutable exec = compiler.compile("//chapter[@status='draft']/author/text()");
+            compiler.declareNamespace("ex", "http://example.org/ns");
+            XPathExecutable exec = compiler.compile("//ex:chapter[@status='draft']/ex:author/text()");
             XPathSelector selector = exec.load();
             selector.setContextItem(document);
             XdmValue value = selector.evaluate();
@@ -937,10 +937,10 @@ public class StreamAxisTest {
         } catch (SaxonApiException ex) {
             // do something
         }
-        Assertions.assertEquals(2, authors.size());
+        Assertions.assertEquals(3, authors.size());
     }
 
-    @Disabled
+    @Test
     public void theEasyWay() {
         // document = ... some process that loaded the book
 
@@ -951,7 +951,7 @@ public class StreamAxisTest {
                         .then(text()))
                         .asList().forEach(item -> authors.add(item.toString()));
 
-        Assertions.assertEquals(2, authors.size());
+        Assertions.assertEquals(3, authors.size());
     }
 
 }
