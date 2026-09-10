@@ -392,7 +392,11 @@ public abstract class SchemaElement extends ElementImpl {
         }
 
         if (reporter != null) {
-            reporter.report(new XmlProcessingIncident(err, SaxonErrorCode.SXSQ0001, this));
+            XmlProcessingIncident incident = new XmlProcessingIncident(err, SaxonErrorCode.SXSQ0001, this);
+            reporter.report(incident);
+            if (incident.getTerminationMessage() != null) {
+                throw new SchemaException(incident.getTerminationMessage());
+            }
         }
     }
 
@@ -400,6 +404,7 @@ public abstract class SchemaElement extends ElementImpl {
      * This method is called for a general error. The location of this message is the current element.
      *
      * @param exception the error message to report
+     * @throws SchemaException if the user-written error handler chooses to treat the error as fatal
      */
 
     protected void error(SchemaException exception) throws SchemaException {
@@ -412,7 +417,11 @@ public abstract class SchemaElement extends ElementImpl {
         }
 
         if (reporter != null) {
-            reporter.report(new XmlProcessingException(exception));
+            XmlProcessingException incident = new XmlProcessingException(exception);
+            reporter.report(incident);
+            if (incident.getTerminationMessage() != null) {
+                throw new SchemaException(incident.getTerminationMessage());
+            }
         } else {
             throw exception;
         }
@@ -422,14 +431,17 @@ public abstract class SchemaElement extends ElementImpl {
      * Report a warning
      *
      * @param err the warning message
+     * @throws SchemaException if the user-supplied error handler chooses to treat the warning as fatal
      */
 
-    protected void warning(String err) {
+    protected void warning(String err) throws SchemaException {
         XmlProcessingIncident exception = new XmlProcessingIncident(err, SaxonErrorCode.SXWN9018, this).asWarning();
         ErrorReporter reporter = getSchemaNodeFactory().getPipelineConfiguration().getErrorReporter();
         reporter.report(exception);
+        if (exception.getTerminationMessage() != null) {
+            throw new SchemaException(exception.getTerminationMessage());
+        }
     }
-
 
     /**
      * This method is called to check that a QName is valid and allocate a
