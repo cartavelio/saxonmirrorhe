@@ -38,6 +38,19 @@ target_sources(${saxonc_core}
 )
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
+generate_export_header(${saxonc_core} BASE_NAME saxonc-core)
+
+target_sources(${saxonc_core}
+    PUBLIC
+        FILE_SET export_header
+        TYPE HEADERS
+        BASE_DIRS
+            ${CMAKE_CURRENT_BINARY_DIR}
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/saxonc-core_export.h
+)
+
 
 configure_package_config_file(../cmake/SaxonCCoreConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}Config.cmake
@@ -58,6 +71,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonCCore${SAXON_EDITION}Config.cmake
 install(TARGETS ${saxonc_core}
         EXPORT "SaxonCCore${SAXON_EDITION}"
         LIBRARY DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
+        FILE_SET export_header
         FILE_SET HEADERS
 )
 install(EXPORT "SaxonCCore${SAXON_EDITION}"

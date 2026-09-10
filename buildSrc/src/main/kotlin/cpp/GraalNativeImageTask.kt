@@ -6,6 +6,7 @@ import org.gradle.api.file.*
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
@@ -97,15 +98,15 @@ using SONAME.
 
 This task will produce correctly named headers and incorrectly named binaries that have the right SONAME or Dylib ID.
  */
-abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+abstract class GraalNativeImageTask
+        @Inject constructor(private val ex: ExecOperations,
+                            private val layout: ProjectLayout,
+                            private val pf: ProviderFactory): DefaultTask() {
     @get:Internal
     abstract val targetHost: Property<TargetHost>
 
     @get:InputFile
     abstract val sourceJar: RegularFileProperty
-
-    @get:InputDirectory
-    abstract val libsaxoncIncludeDir: DirectoryProperty
 
     @get:Input
     abstract val specifiedArgs: ListProperty<String>
@@ -142,12 +143,12 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
     }
 
     @get:Internal
-    val sharedLibFilename: Provider<String> = project.providers.provider {
+    val sharedLibFilename: Provider<String> = pf.provider {
         platformSharedLibFilename()
     }
 
     @get:Internal
-    val importLibFilename: Provider<List<String>> = project.providers.provider {
+    val importLibFilename: Provider<List<String>> = pf.provider {
         platformImportLibFilename().map { it }
     }
 
@@ -157,25 +158,28 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
             listOf("graal_isolate", filename).map { name ->
                 "${name}${suffix}.h"
             }
-        }.flatten()
+        }.flatten().plus(listOf("saxon_error.h"))
     }
 
+    @get:InputFiles
+    abstract val extraHeaderFiles: ConfigurableFileCollection
+
     @get:OutputFiles
-    val sharedLibFiles: ConfigurableFileCollection = project.files(sharedLibFilename.map { name ->
+    val sharedLibFiles: FileCollection = layout.files(sharedLibFilename.map { name ->
         outputDir.get().file(name)
     })
 
     // Only on Windows
     @get:OutputFiles
-    val importLibFiles: ConfigurableFileCollection = project.files(importLibFilename.map { names ->
+    val importLibFiles: FileCollection = layout.files(importLibFilename.map { names ->
         names.map { name -> outputDir.get().file(name) }
     })
 
     @get:OutputFiles
-    val headerFiles: ConfigurableFileCollection = project.files(headerFilenames.map { names ->
+    val headerFiles: FileCollection = layout.files(headerFilenames.map { names ->
         val dir = outputDir.get()
         names.map { dir.file(it) }
-    })
+    }).plus(extraHeaderFiles)
 
     // This gets cast to a Provider so it's not updateable
     @get:Internal
@@ -208,7 +212,8 @@ abstract class GraalNativeImageTask @Inject constructor(private val ex: ExecOper
             "-H:Log=registerResource:3",
             "-H:+AddAllCharsets",
             "-Dfile.encoding=UTF-8",
-            "-Dlibsaxonc.include_path=${libsaxoncIncludeDir.get().asFile.absolutePath}",
+            "-Dlibsaxonc-core.include_path=${layout.projectDirectory.dir("../src/main/c/include").asFile.absolutePath}",
+            "-Dlibsaxonc-core.cmake_include_path=${layout.buildDirectory.dir("ersatz/build-release").get().asFile.absolutePath}",
             "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
             "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
             "--trace-class-initialization=jdk.xml.internal.SecuritySupport",

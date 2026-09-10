@@ -13,9 +13,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class SaxonCHeaders implements CContext.Directives {
-    private List<String> headerFileNames = List.of("saxonc/saxon_error.h");
+    private List<String> headerFileNames = List.of("saxon_error.h");
 
     @Override
     public List<String> getHeaderFiles() {
@@ -24,16 +25,22 @@ public final class SaxonCHeaders implements CContext.Directives {
 
     @Override
     public List<String> getOptions() {
-        //TODO This path is currently hard coded we need to change this in the build to be relative
-        String include_path_str = System.getProperty("libsaxonc.include_path");
-        Path include_path = Paths.get(include_path_str);
+        Path projectIncludePath = Paths.get(System.getProperty("libsaxonc-core.include_path"));
+        Path cmakeIncludePath = Paths.get(System.getProperty("libsaxonc-core.cmake_include_path"));
+
+        List<Path> fullPaths = List.of(projectIncludePath, cmakeIncludePath);
         for (String headerFileName : headerFileNames) {
-            if (!Files.exists(include_path.resolve(headerFileName))) {
-                throw new RuntimeException(headerFileName + " does not exist in " + include_path_str);
+            boolean found = false;
+            for (Path path : fullPaths) {
+                if(Files.exists(path.resolve(headerFileName))) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                String searchedPaths = String.join(", ", fullPaths.stream().map(p -> p.toString()).toList());
+                throw new RuntimeException(headerFileName + " does not exist in " + searchedPaths);
             }
         }
-        return List.of(
-                "-I" + include_path
-        );
+        return fullPaths.stream().map( includePath -> "-I" + includePath).toList();
     }
 }

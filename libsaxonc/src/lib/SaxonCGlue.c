@@ -2,7 +2,6 @@
 
 char *resources_dir;
 
-saxon_error_t SAXON_ERROR_DEFAULT = {SAXON_OK, NULL, NULL, NULL, -1, 0};
 /*jobject cpp;
 char * dllname;
 

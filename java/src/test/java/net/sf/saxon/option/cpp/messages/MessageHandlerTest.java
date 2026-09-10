@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -71,7 +73,16 @@ public class MessageHandlerTest {
 
     @Nested
     public class FileHandlerTest {
-        private MessageHandler handler;
+        private FileHandler handler;
+
+        private String expectedMessageFileOutput(Message... messages) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            for (Message message : messages) {
+                pw.println(message.toString());
+            }
+            return sw.toString();
+        }
 
         @Test
         @DisplayName("FileHandler should write the message contents to the specified file")
@@ -82,8 +93,8 @@ public class MessageHandlerTest {
                 handler = fh;
                 List.of(messageFixture).forEach(handler);
             }
-
-            assertEquals(messageFixture.toString() + "\n", Files.readString(f));
+            String expected = expectedMessageFileOutput(messageFixture);
+            assertEquals(expected, Files.readString(f));
         }
 
         @Test
@@ -104,13 +115,12 @@ public class MessageHandlerTest {
         void canBeSeparatelyClosed(@TempDir Path temp) throws Exception {
             Path f = temp.resolve("messages.txt");
 
-            FileHandler fh = new FileHandler(f.toFile());
-            handler = fh;
+            handler = new FileHandler(f.toFile());
             List.of(messageFixture).forEach(handler);
 
             handler.close();
-
-            assertEquals(messageFixture.toString() + "\n", Files.readString(f));
+            String expected = expectedMessageFileOutput(messageFixture);
+            assertEquals(expected, Files.readString(f));
         }
 
 
@@ -119,11 +129,12 @@ public class MessageHandlerTest {
         void messagesAreFlushedToFileImmediately(@TempDir Path temp) throws Exception {
             Path f = temp.resolve("messages.txt");
 
-            FileHandler fh = new FileHandler(f.toFile());
-            handler = fh;
-            List.of(messageFixture).forEach(handler);
+            try (FileHandler handler = new FileHandler(f.toFile())) {
+                List.of(messageFixture).forEach(handler);
 
-            assertEquals(messageFixture.toString() + "\n", Files.readString(f));
+                String expected = expectedMessageFileOutput(messageFixture);
+                assertEquals(expected, Files.readString(f));
+            };
         }
 
         @Test
@@ -131,16 +142,15 @@ public class MessageHandlerTest {
         void canBeReused(@TempDir Path temp) throws Exception {
             Path f = temp.resolve("messages.txt");
 
-            FileHandler fh = new FileHandler(f.toFile());
-            handler = fh;
-            List.of(messageFixture).forEach(handler);
+            try (FileHandler handler = new FileHandler(f.toFile())) {
+                List.of(messageFixture).forEach(handler);
+                handler.close();
 
-            handler.close();
+                List.of(messageFixture).forEach(handler);
 
-            List.of(messageFixture).forEach(handler);
-            String expected = List.of(messageFixture, messageFixture).stream().map(m -> m.toString() + "\n")
-                    .collect(Collectors.joining());
-            assertEquals(expected, Files.readString(f));
+                String expected = expectedMessageFileOutput(messageFixture, messageFixture);
+                assertEquals(expected, Files.readString(f));
+            }
         }
     }
 

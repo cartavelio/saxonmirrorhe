@@ -11,7 +11,7 @@
 #define SAXONCGLUE2_H
 
 #include "saxonc_export.h"
-#include <saxonc/saxon_error.h>
+#include "saxon_error.h"
 #include <saxonc/saxonc-core.h>
 
 #include <stdint.h>
@@ -70,6 +70,7 @@ static const int SXN_CPP = 0;
 EXTERN_SAXONC
 
 extern char *dllname;
+static const saxon_error_t SAXON_ERROR_DEFAULT = {SAXON_OK, NULL, NULL, NULL, -1, 0};
 
 extern char *resources_dir;
 

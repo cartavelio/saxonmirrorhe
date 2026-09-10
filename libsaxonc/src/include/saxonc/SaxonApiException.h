@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "saxonc_export.h"
-#include "saxonc/saxon_error.h"
+#include "saxon_error.h"
 #include "saxonc/SaxonProcessor.h"
 #include <exception>
 #include <iostream>

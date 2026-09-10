@@ -44,7 +44,6 @@ target_sources(${saxonc}
             ${SAXONC_SRC_DIR}/include
         FILES
             ${SAXONC_SRC_DIR}/include/saxonc/saxonc_version.h
-            ${SAXONC_SRC_DIR}/include/saxonc/saxon_error.h
             ${SAXONC_SRC_DIR}/include/saxonc/DocumentBuilder.h
             ${SAXONC_SRC_DIR}/include/saxonc/SaxonApiException.h
             ${SAXONC_SRC_DIR}/include/saxonc/SaxonCGlue.h

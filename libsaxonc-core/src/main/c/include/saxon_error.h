@@ -1,8 +1,6 @@
 #ifndef SAXON_ERROR_H
 #define SAXON_ERROR_H
 
-#include <stdio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,7 +21,7 @@ typedef struct saxon_error_t {
   int num_of_errors;
 } saxon_error_t;
 
-  extern  saxon_error_t SAXON_ERROR_DEFAULT;
+// SAXONC_CORE_EXPORT extern saxon_error_t SAXON_ERROR_DEFAULT;
 
 #ifdef __cplusplus
 }
