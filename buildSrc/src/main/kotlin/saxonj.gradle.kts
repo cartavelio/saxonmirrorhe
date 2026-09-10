@@ -459,7 +459,6 @@ val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
     if (extension.edition.get().uppercase() == "HE") {
       from(tasks.named<Jar>("editionSourceMavenJar"))
     }
-    from(tasks.named<Jar>("testDriversMavenJar"))
     from(tasks.named<Jar>("testDriversSourceMavenJar"))
 }
 
