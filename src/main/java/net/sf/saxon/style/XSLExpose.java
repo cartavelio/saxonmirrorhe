@@ -26,6 +26,10 @@ import java.util.List;
 public class XSLExpose extends XSLAcceptExpose {
 
     protected void checkCompatibility(SymbolicName name, Visibility declared, Visibility exposed) {
+        if (exposed == Visibility.ABSTRACT && declared != Visibility.ABSTRACT) {
+            compileError("The " + name + " cannot be exposed as " + Err.describeVisibility(exposed)
+                    + " because it is not originally declared as abstract", "XTSE3025");
+        }
         if (!isCompatible(declared, exposed)) {
             String code =  "XTSE3010";
             compileError("The " + name + " is declared as " + Err.describeVisibility(declared)
@@ -119,8 +123,7 @@ public class XSLExpose extends XSLAcceptExpose {
                             checkCompatibility(sName, mode.getDeclaredVisibility(), getVisibility());
                         }
                         if (getVisibility() == Visibility.ABSTRACT) {
-                            // obviously wrong, though I don't see a rule in the spec
-                            compileError("The visibility of a mode cannot be abstract");
+                            compileError("The visibility of a mode cannot be abstract", "XTSE3025");
                         }
                         break;
                     case StandardNames.XSL_FUNCTION:

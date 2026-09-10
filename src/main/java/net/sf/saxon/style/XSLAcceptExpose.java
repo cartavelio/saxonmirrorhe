@@ -175,7 +175,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
                     compileErrorInAttribute("When component='*' is specified, all names must be wildcards",
                                  this instanceof XSLAccept ? "XTSE3032" : "XTSE3022", "names");
                 } else if (componentTypeCode == StandardNames.XSL_FUNCTION) {
-                    compileErrorInAttribute("When the name identifies a function, the arity must be given (XSLT 3.0 erratum E36)",
+                    compileErrorInAttribute("The name " + tok + " identifies a function, so the arity must be given (XSLT 3.0 erratum E36)",
                                             "XTSE3020", "names");
 
                 } else {
