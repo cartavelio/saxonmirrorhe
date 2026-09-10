@@ -95,7 +95,7 @@
 				arithmetic results.</p>
 			<p class="qt4">Since XPath 4.0, numeric integer literals can be written in hex
 					(<code>0xFFFF0000</code>) or binary (<code>0b101010</code>), and underscores can be
-				used as separators (<code>1_000_000</code>).</p>
+				used as separators (<code>1_000_000</code>). (Implemented from Saxon 12.1.)</p>
 			<p>There are no boolean constants as such: instead use the function calls <a
 					class="bodylink code" href="/functions/fn/true">true()</a> and <a
 					class="bodylink code" href="/functions/fn/false">false()</a>.</p>
@@ -109,6 +109,11 @@
 					<code>xs:dateTime("1966-07-31T15:00:00Z")</code>.</p>
 			<p>The argument to a constructor can contain leading or trailing whitespace, as determined
 				by the whitespace facet for the target data type.</p>
+			<p class="qt4"><strong>QName literals</strong> are introduced in XPath 4.0, as an
+				alternative to using the <code>xs:QName</code> constructor function. A QName literal
+				is written as the character <code>#</code> followed by an EQName: for example,
+				<code>#xml:space</code> is the QName with local part <code>space</code> and namespace
+				URI <code>http://www.w3.org/XML/1998/namespace</code>. (Implemented from Saxon 13.)</p>
 		</section>
 
 		<section id="variables" title="Variable references">
@@ -182,10 +187,11 @@
 
 				<p>Although keywords will often be used for optional parameters as in this example,
 					there is no rule requiring this. Whether a parameter is optional or required, the
-					corresponding argument may be supplied either positionally or by keyword.</p>
+					corresponding argument may be supplied either positionally or by keyword.
+					(Implemented from Saxon 12.)</p>
 
-				<p>Keywords can also be used in a partial function application (for example <code>f(x :=
-						?, y := ?)</code>).</p>
+				<p>Keywords can also be used in a partial function application, for example: <code>f(x
+					:= ?, y := ?)</code>. (Implemented from Saxon 13.)</p>
 			</div>
 
 		</section>
@@ -209,7 +215,8 @@
 			</ul>
 			
 			<p class="qt4">From XPath 4.0, function items have an identity property, which can be used to
-				test whether two variables refer to the same function item or not.</p>
+				test whether two variables refer to the same function item or not. (Implemented from
+				Saxon 13.)</p>
 
 			<p>The following subsections provide more information about the use of function items, and
 				in particular describe new syntax and semantics introduced in the 4.0
@@ -229,20 +236,18 @@
 
 				<div class="qt4">
 					<p>From XPath 4.0, in inline functions the keyword <code>function</code> may be
-						abbreviated as <code>fn</code>.</p>
+						abbreviated as <code>fn</code>. (Implemented from Saxon 13.)</p>
 					<p>The concise syntax is helpful when writing simple callbacks, for example
 							<code>fold-left($seq, 1, fn($x, $y){$x*$y})</code> to calculate the product of
 						a sequence of numbers.</p>
 					<p>A zero-arity function can be written as, for example,
-							<code>fn(){doc('abc.xml')//z}</code>.</p>
-				</div>
-
-				<aside>Various forms of experimental lambda notation syntax for anonymous inline
-					functions was available in earlier versions of Saxon, but is now dropped from the
-					XPath 4.0 proposal. For instance Saxon 12 allowed <code>($a, $b)->{$a + $b}</code>,
-					but this is dropped in Saxon 13.</aside>
-
-				<div class="qt4">
+						<code>fn(){doc('abc.xml')//z}</code>.</p>
+					
+					<aside>Various forms of experimental lambda notation syntax for anonymous inline
+						functions was available in earlier versions of Saxon, but is now dropped from the
+						XPath 4.0 proposal. For instance Saxon 12 allowed <code>($a, $b)->{$a + $b}</code>,
+						but this is dropped in Saxon 13.</aside>
+					
 					<h2 class="subtitle">Focus functions</h2>
 
 					<p>From XPath 4.0, simple inline functions taking a single argument can be simplified
@@ -309,12 +314,11 @@
 		<section id="maps" title="Maps">
 			<h1>Maps</h1>
 
-			<aside>Since Saxon 9.7, maps are available in all Saxon editions.</aside>
+			<aside>Since Saxon 9.7, maps are available in all Saxon editions. Before this, maps were
+				available as an advanced feature in the XPath 3.0 implementation in Saxon-PE and higher, since
+				Saxon 9.5.</aside>
 
-			<p>An important new feature in XPath 3.1 was the definition of maps. (This feature is in
-				fact included in the XPath 3.0 implementation in Saxon, and thus was available as an
-				advanced feature since Saxon 9.5, before the full implementation of XPath 3.1 in Saxon
-				9.7).</p>
+			<p>An important new feature in XPath 3.1 was the definition of maps.</p>
 
 			<p>A map is a kind of XDM item (alongside nodes and atomic values). In fact, a map is a
 				kind of function: you can think of it as a function defined extensionally (by tabulating
@@ -329,9 +333,8 @@
 				the original is unchanged. Saxon provides an efficient implementation of maps that
 				achieves this without copying the whole map every time an entry is added.</p>
 
-			<p class="qt4">Since XDM 4.0, all the entries in map are ordered (see <a
-					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#map-ordering"
-					>Ordering of Maps</a>). Prior to that, order was not preserved.</p>
+			<p class="qt4">Since XPath 4.0, the entries in a map are ordered. Prior to that, order was not
+				preserved. </p>
 
 			<p>Also like sequences, maps do not have an intrinsic type of their own, but rather have a
 				type that can be inferred from what they contain. A map conforms to the type
@@ -383,7 +386,7 @@
 					<code>http://www.w3.org/2005/xpath-functions/map</code>.</p>
 
 			<ul>
-				<li>
+				<li class="qt4">
 					<p><code>map:build</code>: returns a map that typically contains one entry for each
 						item in a supplied input sequence. <i>New in 4.0.</i></p>
 				</li>
@@ -391,11 +394,11 @@
 					<p><code>map:contains</code>: returns <code>true</code> if the given key is present
 						in the map. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>map:empty</code>: returns <code>true</code> if the supplied map contains no
 						entries. <i>New in 4.0.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>map:entries</code>: returns a sequence containing all the key-value pairs
 						present in a map, each represented as a single-entry map. <i>New in 4.0.</i></p>
 				</li>
@@ -404,7 +407,7 @@
 						key-value pair. Useful as an argument to <code>map:merge()</code>. <i>Since XSLT
 							3.0 and XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>map:filter</code>: Selects entries from a map, returning a new map. <i>New
 							in 4.0.</i></p>
 				</li>
@@ -424,7 +427,7 @@
 						or the empty sequence otherwise. Equivalent to calling <code>$map($key)</code>.
 							<i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>map:items</code>: returns a sequence containing all the values present in a
 						map, in order. <i>New in 4.0.</i></p>
 				</li>
@@ -432,7 +435,7 @@
 					<p><code>map:keys</code>: returns the keys that are present in a map, in
 						unpredictable order. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>map:keys-where</code>: returns a sequence containing selected keys present
 						in a map. <i>New in 4.0.</i></p>
 				</li>
@@ -1612,7 +1615,8 @@
 					<code>$a</code> with argument value 2, and then selects the third item in the
 				resulting sequence.</p>
 			<p class="qt4">From XPath 4.0, filter expressions accept a sequence of integer positions, for
-				example <code>$in[3 to 5]</code> or <code>$in[1, 4, 7]</code>.</p>
+				example <code>$in[3 to 5]</code> or <code>$in[1, 4, 7]</code>. (Implemented from Saxon
+				13.)</p>
 		</section>
 
 		<section id="lookup" title="Lookup expressions">
@@ -1634,12 +1638,12 @@
 					be followed by:</p>
 
 				<ul>
-					<li>A string literal, for example <code>$person?'date of birth'</code></li>
+					<li>A literal, for example <code>$person?'date of birth'</code></li>
 					<li>A variable reference, for example <code>$array?$index</code></li>
 				</ul>
 
 				<p>The effect is the same as if the string literal or variable were written in
-					parentheses.</p>
+					parentheses. (Implemented from Saxon 10.)</p>
 			</div>
 
 		</section>
@@ -1671,9 +1675,16 @@
 				substring-before(']')</code>.</p>
 
 			<div class="qt4">
+				<p>From XPath 4.0, a dynamic function call provided as the right-hand side for an
+					arrow expression can now be an inline function, or a map or array constructor.
+					(Implemented from Saxon 13.)</p>
+				
 				<h2 class="subtitle">Mapping arrow operator</h2>
+				
+				<aside>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.3 provided that syntax
+					extensions are enabled.</aside>
 
-				<p>XPath 4.0 introduces the <em>mapping arrow</em> operator <code>=&gt;</code>. The
+				<p>XPath 4.0 introduces the <em>mapping arrow</em> operator <code>=!&gt;</code>. The
 					expression <code>LHS =!> f()</code> applies the function on the right-hand side to
 					each item delivered by the left-hand side individally. For example <code>(-2 to +2)
 						=!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>. The effect is similar to
@@ -1688,6 +1699,8 @@
 		
 		<section id="pipeline" title="Pipeline expressions" class="qt4">
 			<h1>Pipeline expressions</h1>
+			
+			<aside>Available since Saxon 13 in XPath 4.0.</aside>
 			
 			<p>XPath 4.0 introduces the <em>pipeline</em> operator <code>-&gt;</code>. The expression <code>A
 				-> B</code> evaluates expression <code>B</code> with the context value bound to the result
@@ -1795,8 +1808,7 @@
 				returns the duration two days.</p>
 			<p class="qt4">Since XPath 4.0, the non-ASCII characters <code>×</code> (xD7) and
 					<code>÷</code> (xF7) can be used in place of <code>*</code> and <code>div</code> to
-				represent the multiplication and division operators. This feature is implemented from
-				Saxon 12.3.</p>
+				represent the multiplication and division operators. (Implemented from Saxon 12.3.)</p>
 
 			<h2 class="subtitle">Addition and subtraction</h2>
 			<p>The operators <code>+</code> and <code>-</code> perform addition and subtraction of
@@ -1838,6 +1850,9 @@
 
 		<section id="otherwise" title="Otherwise operator" class="qt4">
 			<h1>Otherwise operator</h1>
+			
+			<aside>Available since Saxon 13 in XPath 4.0. Available since Saxon 10 provided that syntax
+				extensions are enabled.</aside>
 
 			<p>XPath 4.0 introduces an additional operator: <code class="bold">otherwise</code>. The
 				expression <code>A otherwise B</code> returns the value of <code>A</code> unless it is
@@ -1881,21 +1896,25 @@
 				will usually be treated as false).</p>
 			<p>The operators <code>&lt;&lt;</code> and <code>&gt;&gt;</code> test whether one node
 				precedes or follows another in document order.</p>
-
-			<p class="qt4">The non-ASCII characters <code>＜</code> and <code>＞</code> (xFF1C and xFF1E)
-				can be used in place of <code>&lt;</code> and <code>&gt;</code> to represent the
-				less-than and greater-than operators; these characters can also be used in place of
-					<code>&lt;</code> and <code>&gt;</code> in the compound tokens <code>&lt;=</code>,
-					<code>>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>=&gt;</code>,
-					<code>-&gt;</code>, and <code>=!&gt;</code>. This feature is implemented from Saxon
-				12.3.</p>
 			
-			<p class="qt4">In XDM 4.0, an ordering is defined over all instances of <code>xs:duration</code>,
-				not just the subtypes.</p>
-			<p class="qt4">In XDM 4.0, atomic types are categorized into type families to make it clear which
-				values are comparable: atomic items belonging to types in the same family are mutually
-				comparable, items belonging to different type families are not. For more information, see <a
-					class="bodylink" href="/expressions/types">Types</a>.</p>
+			<div class="qt4">
+				<p>From XPath 4.0:</p>
+				<ul>
+					<li><p>The non-ASCII characters <code>＜</code> and <code>＞</code> (xFF1C and xFF1E)
+						can be used in place of <code>&lt;</code> and <code>&gt;</code> to represent the
+						less-than and greater-than operators; these characters can also be used in place of
+						<code>&lt;</code> and <code>&gt;</code> in the compound tokens <code>&lt;=</code>,
+						<code>>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>=&gt;</code>,
+						<code>-&gt;</code>, and <code>=!&gt;</code>. (Implemented from Saxon 12.3.)</p></li>
+					<li><p>An ordering is defined over all instances of <code>xs:duration</code>, not
+						just the subtypes. (Implemented from Saxon 13.)</p></li>
+					<li><p>Atomic types are categorized into type families to make it clear which values
+						are comparable: atomic items belonging to types in the same family are mutually
+						comparable, items belonging to different type families are not. For more
+						information, see <a class="bodylink" href="/expressions/types">Types</a>.</p></li>
+				</ul>
+			</div>
+			
 		</section>
 
 		<section id="boolean" title="Logical operators">
@@ -1917,7 +1936,7 @@
 				<p>Saxon 11 implemented two additional boolean operators: <code class="bold"
 						>orElse</code> and <code class="bold">andAlso</code>. These are retained in Saxon
 					12, but they are likely to be dropped as the community group has taken a different
-					direction.</p>
+					direction. TODO check</p>
 
 				<p>The <code>and</code> and <code>or</code> operators now have stricter rules governing
 					optimization. It is still permitted to evaluate the operands in either order, but an
@@ -1963,6 +1982,9 @@
 
 			<div class="qt4">
 				<h2 class="subtitle">Braced conditionals</h2>
+				
+				<aside>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.1 provided that syntax
+					extensions are enabled.</aside>
 
 				<p>XPath 4.0 introduces an alternate syntax for conditionals, known as a
 						<i>braced expression</i>. For example, <code>if (<i>condition</i>) then <i>thenExpr</i>
@@ -1987,6 +2009,8 @@
 				item is an element that has at least one zero-length attribute value.</p>
 			<p>Similarly, the expression <code>every $x in E1 satisfies E2</code> returns true if every
 				item in the sequence given by <code>E1</code> satisfies the condition.</p>
+			<p class="qt4">From XPath 4.0, quantified expressions can include a type declaration,
+				previously available only in XQuery. (Implemented from Saxon 13.)</p>
 		</section>
 
 		<section id="let" title="Let expressions">
@@ -1996,13 +2020,32 @@
 				example the expression <code>let $x := . return //a[@status=$x]</code> binds the
 				variable <code>$x</code> to the context item, and then evaluates the expression
 					<code>//a[@status=$x]</code> which makes use of this variable.</p>
-
+			
 			<div class="qt4">
-				<p>XPath 4.0 allows multiple <code>let</code> clauses in an expression. For example:</p>
-
-				<pre><code class="language-xquery">let $i := 2 let $j := 3 return $i + $j</code></pre>
-
-				<p>This feature is implemented from Saxon 12.3.</p>
+				<p>From XPath 4.0:</p>
+				<ul>
+					<li>
+						<p>Multiple <code>for</code> and  <code>let</code> clauses are allowed to be
+							combined in an expression. For example:</p>
+						
+						<pre><code class="language-xquery">let $i := 2 let $j := 3 return $i + $j</code></pre>
+						
+						<p>(The use of multiple <code>let</code> clauses is implemented from Saxon 12.3; while
+							combining with <code>for</code> clauses is implemented from Saxon 13.)</p>
+					</li>
+					<li>
+						<p>The type of variables can be declared in a <code>let</code> expression.
+							(Implemented from Saxon 13.)</p>
+					</li>
+					<li>
+						<p>Sequences, arrays, and maps can be destructured to extract their components into
+							multiple variables. (Implemented from Saxon 13.) For example:</p>
+						
+						<pre><code class="language-xquery">let $[ $x, $y, $z ] := [3, 4, 5] return `x={$x} y={$y} z={$z}`</code></pre>
+						
+						<p>returns <code>"x=3 y=4 z=5"</code>.</p>
+					</li>
+				</ul>
 			</div>
 		</section>
 
@@ -2014,68 +2057,59 @@
 				item being tested; it does not become the context item. For example, <code>sum(for $v in
 					order-item return $v/price * $v/quantity)</code> returns the total value of (price
 				times quantity) for all the selected <code>order-item</code> elements.</p>
-
+			
 			<div class="qt4">
-				<p>XPath 4.0 allows multiple <code>for</code> clauses in an expression. For example:</p>
-
-				<pre><code class="language-xquery">for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></pre>
-
-				<p>This feature is implemented from Saxon 12.3.</p>
-			</div>
-
-			<div class="qt4">
-				<h2 class="subtitle">For-member expressions</h2>
-
-				<p>The <code class="bold">for member</code> expression was a Saxon extension to XPath
-					3.1 syntax introduced in Saxon 10 and since adopted into XPath 4.0. It allows
-					convenient iterative processing of the members of an array.</p>
-
-				<p>For example: </p>
+				<p>From XPath 4.0:</p>
+				<ul>
+					<li>
+						<p>Multiple <code>for</code> and  <code>let</code> clauses are allowed to be
+							combined in an expression. For example:</p>
+						
+						<pre><code class="language-xquery">for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></pre>
+						
+						<p>(The use of multiple <code>for</code> clauses is implemented from Saxon 12.3; while
+							combining with <code>let</code> clauses is implemented from Saxon 13.)</p>
+					</li>
+					<li>
+						<p>Positional variables can be defined, and the type of variables can be declared in
+							a <code>for</code> expression. (Implemented from Saxon 13.)</p>
+					</li>
+				</ul>
+				
+				<h2 class="subtitle">For member expressions</h2>
+				
+				<aside>Available since Saxon 13 in XPath 4.0. Available since Saxon 10 provided that syntax
+					extensions are enabled.</aside>
+				
+				<p>A <code class="bold">for member</code> expression allows convenient iterative
+					processing of the members of an array. Note that the result of the expression is a
+					sequence, not an array.</p>
+				
+				<p>Examples:</p>
 				<pre><code class="language-xquery">for member $m in [(3,5,6), (8,12)] return sum($m)</code></pre>
 				<p>returns the sequence <code>(14, 20)</code>.</p>
-
-				<p>A <code>ForMemberExpr</code> is a new kind of <code>ExprSingle</code>; this means it
-					can be used anywhere a <code>ForExpr</code> or <code>LetExpr</code> is allowed. The
-					syntax is:</p>
-
-				<samp><![CDATA[ForMemberExpr ::= "for" "member" SimpleForBinding ("," SimpleForBinding)* "return" ExprSingle]]></samp>
-
-				<p>Here <code>SimpleForBinding</code> takes the same form as in a <code>ForExpr</code>: </p>
-				<samp>"$" VarName "in" ExprSingle</samp>
-
-				<p>The semantics are as follows:</p>
-
-				<ul>
-					<li>Each expression in a <code>SimpleForBinding</code> must evaluate to a single
-						array.</li>
-					<li>The expression <code>for member $x in X, $y in Y return R</code> is equivalent to
-							<code>for member $x in X return for member $y in Y return R</code>.</li>
-					<li>The expression <code>for $x in X return R</code> binds the variable
-							<code>$x</code> to each member of the array <code>X</code> in turn, evaluates
-							<code>R</code> with this variable binding in scope, and returns the
-						sequence-concatenation of all the evaluations of <code>R</code>, in order.</li>
-				</ul>
-
-				<aside>The expression <code>for member $x in $X return f($x)</code> is equivalent to
-						<code>for $x in array:members($x) return f(unparcel($x))</code>.</aside>
-
-				<p>The <code>for member</code> expression is currently available only as a free-standing
-					expression; it cannot be used as a clause within an XQuery FLWOR expression.</p>
-
-				<p>Some further examples:</p>
-
+				
 				<pre><code class="language-xquery"><![CDATA[let $json := '[{"x":1, "y":"one"}, {"x":2, "y":"two"}]'
 return for member $map in parse-json($json) return $map?y]]></code></pre>
-
+				
 				<p>returns <code>("one", "two")</code>.</p>
-
+				
 				<pre><code class="language-xquery"><![CDATA[let $json := '[[1,2,3], [4,5,6]]'
 return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
-
+				
 				<p>returns <code>(2, 4, 6, 8, 10, 12)</code>.</p>
-
-				<p>Note that the result of the expression is a sequence, not an array.</p>
-
+				
+				<h2 class="subtitle">For key/value expressions</h2>
+				
+				<aside>Available since Saxon 13 in XPath 4.0.</aside>
+				
+				<p>A <code class="bold">for key/value</code> expression allows iteration over the
+					entries in a map. For example:</p>
+				
+				<pre><code class="language-xquery"><![CDATA[for key $key value $value in { "x": 1, "y": 2, "z": 3 }
+return `{$key}={$value}`]]></code></pre>
+				
+				<p>returns <code>("x=1", "y=2", "z=3")</code>.</p>
 			</div>
 
 		</section>
@@ -3520,8 +3554,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 			<h1>Choice item types</h1>
 			<?source https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-choice-item-types ?>
 
-			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon
-				9.8.</aside>
+			<aside>Requires Saxon-PE or Saxon-EE.</aside>
 
 			<p>A construct of the form <code class="bold">(type1 | type2 | type3)</code> can be used to
 				define unions of arbitrary types. For example, <code>(xs:base64Binary |
@@ -3536,11 +3569,10 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 				is a type that matches maps and arrays, while <code>(document-node() | element())</code>
 				matches either a document or element node.</p>
 
-			<aside>
-				<p>In earlier drafts of the 4.0 specification, and in earlier Saxon versions, the
-					facility covered atomic types only, and the syntax used was <code>union(xs:date,
-						xs:time, xs:dateTime)</code>.</p>
-			</aside>
+			<aside>In earlier drafts of the 4.0 specification, and in earlier Saxon versions, the
+				facility covered atomic types only, and the syntax used was <code>union(xs:date,
+					xs:time, xs:dateTime)</code>. These "union types" are available in Saxon 9.8 to
+				Saxon 12, provided that syntax extensions are enabled.</aside>
 
 			<p>If the member types are atomic, then the choice type follows very similar rules to a
 				schema-defined union type: in particular, the order of member type names is significant,
@@ -3551,6 +3583,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 				and function declarations, or in <code>typeswitch</code> expressions. It can be used as
 				the target of a <code>cast as</code> or <code>castable as</code> expression only if all
 				the member types are atomic.</p>
+			
+			<p>TODO The following needs further updates...</p>
 
 			<p>Choice item types can also be used in XSLT match patterns, for example a template
 				defined with <code>match="type(xs:date, xs:time)"</code> will match values of those
@@ -3605,9 +3639,11 @@ local:format("2016-10-07", $fmt)]]></code></pre>
 
 		<section id="record-types" title="Record types" class="qt4">
 			<h1>Record types</h1>
-
-			<aside>Previously referred to as "tuple types". Saxon continues to recognize the keyword
-					<code>tuple</code> as a synonym of <code>record</code>.</aside>
+			
+			<aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 13 in XPath 4.0. Available
+				since Saxon 11 provided that syntax extensions are enabled. Previously referred to as
+				"tuple types". From Saxon 13, the keyword <code>tuple</code> is no longer recognised as a
+				synonym of <code>record</code>.</aside>
 
 			<p>Record types do not introduce a new kind of XDM value; rather, they provide a new way of
 				constraining the content of a map. For example, the record type <code>record(longitude
@@ -3840,6 +3876,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
 		<section id="enum-types" title="Enumeration types" class="qt4">
 			<h1>Enumeration types</h1>
+			<aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 13 in XPath 4.0. Available
+				since Saxon 11 provided that syntax extensions are enabled.</aside>
 			<p>An enumeration type defines a set of permitted <code>xs:string</code> values. For
 				example, an enumeration type might be defined as:</p>
 			<pre><code class="language-xquery">enum("red", "green", "blue")</code></pre>
@@ -3855,8 +3893,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
 		<section id="kindtests" title="KindTests and NodeTests" class="qt4">
 			<h1>KindTests and NodeTests</h1>
-			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon
-				10.</aside>
+			<aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 13 in XPath 4.0. Available
+				since Saxon 10 provided that syntax extensions are enabled.</aside>
 			<p>TODO Content updates required. The current 4.0 spec does not call these "KindTests", or
 				include ElementNameOrWildCard in the grammar.</p>
 			<p>The syntax for the <code>element()</code> and <code>attribute()</code>
@@ -4173,6 +4211,11 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<p>New <a class="bodylink" href="/expressions/operators/path">axes</a>:
 					<code>preceding-or-self</code>, <code>preceding-sibling-or-self</code>,
 					<code>following-or-self</code>, and <code>following-sibling-or-self</code></p>
+			</li>
+			<li>
+				<p>From 4.0, XPath expressions can be preceded by namespace declarations, allowing namespace
+					prefixes to be bound within the XPath expression, rather than relying entirely on the host
+					language to declare namespace prefixes.</p>
 			</li>
 		</ol>
 		

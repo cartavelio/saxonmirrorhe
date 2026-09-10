@@ -493,10 +493,24 @@ TODO: rethink redefines and override
         <p>A <code>URIQualifiedName</code> may now supply a prefix as well as a URI and local name,
             in the format <code>Q{uri}prefix:local</code>.</p>
         
+        <p>XPath expressions can be preceded by namespace declarations, allowing namespace
+            prefixes to be bound within the XPath expression, rather than relying entirely on the host
+            language to declare namespace prefixes.</p>
+        
+        <p>In decimal format properties, it is now possible to set composite values for some properties,
+            for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
+            in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
+        
         <h3>Changes to XPath Expressions</h3>
+        
+        <p>Four new axes are implemented: <code>following-or-self</code>, <code>preceding-or-self</code>,
+            <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>. (PR 1532)</p>
         
         <p>Filter expressions accept a sequence of integer positions, for example <code>$in[3 to 5]</code>
             or <code>$in[1, 4, 7]</code>.</p>
+        
+        <p>The pipeline operator <code>-></code> is implemented, but there has been limited testing
+            of the case where the context value is not a single item. (PR 1686)</p>
         
         <p>The precedence of the <code>otherwise</code> operator has changed. The expression
             <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
@@ -514,11 +528,10 @@ TODO: rethink redefines and override
                 <code>return</code>, for example <code>for $x in $X let $y := $x + 1 return f($y)</code>.</p></li>
         </ul>
         
-        <p>Four new axes are implemented: <code>following-or-self</code>, <code>preceding-or-self</code>,
-            <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>. (PR 1532)</p>
-        
         <p>Both XQuery and XPath now allow the syntax <code>for key $k $value $v in $map</code> to iterate
             over the entries in a map (in undefined order).</p>
+        
+        <h3>Changes to XPath type syntax</h3>
         
         <p>Named item types can now be referenced directly by name, rather than using the syntax
             <code>type(alias)</code>.</p>
@@ -534,11 +547,6 @@ TODO: rethink redefines and override
             for a function or variable that accepts either a map or an array.</p>
         
         <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (PR 1501)</p>
-        
-        <p>In decimal format properties, it is now possible to set composite values for some properties,
-            for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
-            in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
-        
         
         <p>The implementation of enumeration types has been aligned with the current specification.
             Most practical use cases are unaffected, but:</p>
@@ -556,9 +564,6 @@ TODO: rethink redefines and override
             the current 4.0 specification in the case where the required type is a GNode or JNode. In this situation Saxon will automatically
             wrap a supplied map or array in a root JNode. The specification requires this implicit conversion only for the
             left-hand operand of the "/" operator.</p>
-        
-        <p>PR1686 - The pipeline operator <code>-></code> is implemented, but there has been limited testing
-            of the case where the context value is not a single item.</p>
         
     </category>
     

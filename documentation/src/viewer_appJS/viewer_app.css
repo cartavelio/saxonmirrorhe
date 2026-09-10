@@ -383,15 +383,16 @@ div.section h2{
 }
 .qt4 {
    padding-left: .5em;
-   padding-right: 70px;
+   padding-right: 2.5em;
    border-left: .5em;
    border-left-style: solid;
    border-color: #F7E44F;
    background-image: url("https://qt4cg.org/img/QT4_shaded-64.png");
    background-repeat: no-repeat;
-   background-position-x: right -70px;
+   background-position-x: right -2.5em;
    background-origin: content-box;
-   min-height: 60px;
+	background-size: 2em;
+	min-height: 2em;
 }
 td .qt4 {
 	background-size: 2em;
