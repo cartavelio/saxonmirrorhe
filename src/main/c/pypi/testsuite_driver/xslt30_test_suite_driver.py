@@ -250,7 +250,7 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
             '''Check this path'''
             return False
     elif typei == "year_component_values":
-        if (value == "support year above 9999" or value == "year_component_values"
+        if (value == "support year above 9999" or value == "support negative year"
                 or value == "support year zero"):
             return True
 

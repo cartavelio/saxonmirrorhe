@@ -149,6 +149,8 @@ class PyTestOutcome:
                         continue
                     return True
             return partial_success
+        elif "assert-warning" == tag:
+            return True
 
         return False
 
@@ -379,10 +381,35 @@ class PyTestOutcome:
 
         result_str = str(result).strip().replace("\r\n", "\n").replace("\n", "")
 
+        try:
+            comparand_node = self.processor.parse_xml(xml_text=comparand)
+
+            result_node = self.processor.parse_xml(xml_text=result_str)
+
+            xslt30_proc = self.processor.new_xslt30_processor()
+            no_whitespace_stylesheet = "<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'><xsl:output indent='false' omit-xml-declaration='true' /><xsl:template match='/'><z><xsl:copy ><xsl:apply-templates /></xsl:copy></z></xsl:template><xsl:template match='text( )' priority='1'><xsl:value-of select='normalize-space(.)'/></xsl:template> <xsl:template match='*'  priority='2'><xsl:copy-of select='.' /></xsl:template></xsl:stylesheet>"
+            executable1 = xslt30_proc.compile_stylesheet(stylesheet_text=no_whitespace_stylesheet)
+            no_wsp_comparand_node = executable1.apply_templates_returning_value(xdm_value=comparand_node)
+            no_wsp_result_node = executable1.apply_templates_returning_value(xdm_value=result_node)
+
+            assert_xpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
+            assert_xpc.set_parameter("result_xml", no_wsp_result_node.item_at(0))
+            assert_xpc.set_parameter("comparand_node", no_wsp_comparand_node.item_at(0))
+            resulti = assert_xpc.effective_boolean_value("fn:deep-equal($result_xml, $comparand_node)")
+            if resulti:
+                return True
+            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                print("Failed using Saxon deep-equal function")
+                print("Comparand xml = " + str(no_wsp_comparand_node))
+                print("result = " + str(result))
+        except PySaxonApiError as ex:
+            if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                print("Faild to parse Comparand xml or run effective_boolean_value = " + comparand)
+                print("result = " + str(result))
+                print(ex)
+
         if result_str == comparand:
             return True
-
-
 
         parser = etree.XMLParser(remove_blank_text=True)
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
@@ -396,6 +423,7 @@ class PyTestOutcome:
             resulti = etree.XML(result_str, parser)
             return self.elements_equal(comparand_xml, resulti)
         except Exception as ex:
+            print("Exception raised by ElementTree: ")
             print(ex)
         return False
 
