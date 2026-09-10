@@ -770,7 +770,7 @@ public class Gizmo {
                     for (NodeInfo att : replacementAtts) {
                         final NodeName attName = NameOfNode.makeName(att);
                         NodeInfo existing = (NodeInfo)target.iterateAttributeAxis(
-                                NamedXNodeType.make(Type.ATTRIBUTE, att.getFingerprint(), config)).next();
+                                NamedXNodeType.make(Type.ATTRIBUTE, att.getNamespaceUri(), att.getLocalPart(), config)).next();
                         if (existing != null) {
                             target.removeAttribute(existing);
                         }
