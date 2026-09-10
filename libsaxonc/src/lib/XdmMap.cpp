@@ -214,7 +214,7 @@ bool XdmMap::isEmpty() {
 }
 
 bool XdmMap::containsKey(XdmAtomicValue *key) {
-  if(key==nullptr && value == SXN_UNSET) {
+  if(key==nullptr || value == SXN_UNSET) {
     return false;
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
