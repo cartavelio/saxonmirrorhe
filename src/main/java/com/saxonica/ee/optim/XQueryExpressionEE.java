@@ -380,18 +380,15 @@ public class XQueryExpressionEE extends XQueryExpression {
         PipelineConfiguration pipe = controller.makePipelineConfiguration();
         pipe.setHostLanguage(HostLanguage.XQUERY);
 
+        Receiver receiver;
+        if (result instanceof Receiver) {
+            receiver = (Receiver) result;
+        } else {
+            SerializerFactory sf = context.getConfiguration().getSerializerFactory();
+            Properties actualProperties = validateOutputProperties(controller, outputProperties);
+            receiver = sf.getReceiver(result, new SerializationProperties(actualProperties), pipe);
+        }
 
-        SerializerFactory sf = context.getConfiguration().getSerializerFactory();
-        Properties actualProperties = validateOutputProperties(controller, outputProperties);
-
-
-        Receiver receiver = sf.getReceiver(result, new SerializationProperties(actualProperties), pipe);
-        //context.setReceiver(new ComplexContentOutputter(receiver));
-//        String itemSeparator = actualProperties.getProperty(SaxonOutputKeys.ITEM_SEPARATOR);
-//        if (receiver instanceof ComplexContentOutputter && itemSeparator != null && !"#absent".equals(itemSeparator)) {
-//            receiver = new SequenceNormalizerWithItemSeparator(receiver, itemSeparator);
-//            context.setReceiver(receiver);
-//        }
         receiver.open();
 
 
