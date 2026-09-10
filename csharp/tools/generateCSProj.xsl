@@ -44,7 +44,6 @@
             <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/MappingEnumerator.cs" />
             <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ResourceLoader.cs" />
             <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ICULibrary.cs" />
-            <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/Vavr.cs" />
             <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ZenoStringCodepoints.cs" />
             <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/XDoc/**" />
 
@@ -167,7 +166,6 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/MappingEnumerator.cs" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ResourceLoader.cs" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ICULibrary.cs" />
-       <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/Vavr.cs" />
        <Compile Include="..\..\..\..\src\main\cs\Saxon/Impl/Overrides/ZenoStringCodepoints.cs" />
 
 

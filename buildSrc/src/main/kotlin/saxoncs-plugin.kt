@@ -139,6 +139,7 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
            "-xsl:${generateTestCsProj}",
            "-o:${testCsProj.get()}",
            "saxonVersion=${saxonBuild.version.get()}",
+           "configuration=${configuration.get()}",
            "edition=${saxonCS.edition.get()}",
            "optimize=true",
            "csrid=${csrid}")
