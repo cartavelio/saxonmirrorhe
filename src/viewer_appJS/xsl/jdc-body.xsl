@@ -632,8 +632,8 @@
         <xsl:param name="method" as="element()"/>
         <!--<xsl:message>find-super of method: <xsl:value-of select="$method/@id"/> </xsl:message>-->
         <xsl:variable name="seq" 
-            select="($method/parent::methods/parent::class/(implements|extends)//interface/@fulltype/f:get-super($method,
-            f:get-class(.)))[comment][1]"/>
+            select="($method/parent::methods/parent::class/(implements|extends)//interface[@fulltype
+            ne 'java.lang.Object']/@fulltype/f:get-super($method, f:get-class(.)))[comment][1]"/>
         <!--<xsl:message>find-super exists($seq): <xsl:value-of select="exists($seq)"/></xsl:message>-->
         <xsl:sequence select="$seq"/>
     </xsl:function>
@@ -697,7 +697,7 @@
         
         <xsl:variable name="requiredDocs" as="xs:string*">
             <xsl:if test="exists(methods/method[not(comment)])">
-                <xsl:sequence select="(implements|extends)//interface/@fulltype/f:get-package-doc-name(.)"/>
+                <xsl:sequence select="(implements|extends)//interface[@fulltype ne 'java.lang.Object']/@fulltype/f:get-package-doc-name(.)"/>
             </xsl:if>
         </xsl:variable>
         
@@ -769,10 +769,14 @@
         
             <xsl:if test="not($isInterface)">
             <ul class="extends">
+                <xsl:variable name="base-superclass" select="(extends|extends//extends)[last()]"/>
                 <li>
                     <xsl:choose>
                         <xsl:when test="$isDotNetApiMember">
                             <xsl:text>System.Object</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="$base-superclass/interface[@fulltype='java.lang.Object']">
+                            <xsl:sequence select="f:showType($base-superclass/interface, true(), false())"/>
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:text>java.lang.Object</xsl:text>
@@ -790,19 +794,39 @@
                                     </ul>
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    <xsl:apply-templates select="(extends|extends//extends)[last()]" mode="extends"/>
+                                    <xsl:apply-templates select="$base-superclass" mode="extends"/>
                                 </xsl:otherwise>
                             </xsl:choose>
                         </xsl:when>
                         <xsl:otherwise>
-                            <xsl:apply-templates select="(extends|extends//extends)[last()]" mode="extends"/>
-                            <xsl:if test="empty(extends)">
-                                <ul>
-                                    <li>
-                                        <xsl:value-of select="concat(@fulltype, f:flatParamTypes(.))"/>
-                                    </li>
-                                </ul>
-                            </xsl:if>
+                            <xsl:choose>
+                                <xsl:when test="empty(extends)">
+                                    <ul>
+                                        <li>
+                                            <xsl:value-of select="concat(@fulltype, f:flatParamTypes(.))"/>
+                                        </li>
+                                    </ul>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:choose>
+                                        <xsl:when test="$base-superclass/interface[@fulltype='java.lang.Object']
+                                            and $base-superclass/parent::class">
+                                            <ul>
+                                                <li>
+                                                    <xsl:value-of select="$base-superclass/parent::class/concat(@fulltype, f:flatParamTypes(.))"/>
+                                                </li>
+                                            </ul>
+                                        </xsl:when>
+                                        <xsl:when
+                                            test="$base-superclass/interface[@fulltype='java.lang.Object'] and $base-superclass/parent::interface">
+                                            <xsl:apply-templates select="$base-superclass/parent::interface/parent::extends" mode="extends"/>
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <xsl:apply-templates select="$base-superclass" mode="extends"/>
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:otherwise>
+                            </xsl:choose>
                         </xsl:otherwise>
                     </xsl:choose>
                 </li>
@@ -1165,7 +1189,7 @@
                 <p>
                     <xsl:for-each select="methods/method">
                         <xsl:variable name="this-superclass-method"
-                            select="substring-before(text(), '(')"/>
+                            select="tokenize(text(), '\(')[1]"/>
                         <xsl:choose>
                             <xsl:when test="f:isJavaType($this-superclass)">
                                 <span class="{if ($isDotNetApiMember) then 'cslink' else 'javalink'}"

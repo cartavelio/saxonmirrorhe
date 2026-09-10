@@ -308,6 +308,7 @@ task product_xmljavadoc(
     command = ["javadoc",
                "-sourcepath", "${buildDir}/javadoc_src",
                "-d", "${buildDir}/xmljavadoc",
+               "-private",
                "-classpath", cp,
                "-doclet", "com.saxonica.xmldoclet.XmlDoclet",
                "-docletpath", cp] + packages.keySet()
