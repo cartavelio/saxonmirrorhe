@@ -19,15 +19,15 @@ import java.util.stream.Stream;
 
 /**
  * The class XdmItem represents an item in a sequence, as defined by the XDM data model.
- * An item is either an atomic value or a node.
+ * An item may be an atomic value, a node, a function item (including maps and arrays), or an external object.
  * <p>An item is a member of a sequence, but it can also be considered as a sequence
  * (of length one) in its own right. <code>XdmItem</code> is a subtype of <code>XdmValue</code> because every
  * Item in the XDM data model is also a value.</p>
  * <p>It cannot be assumed that every sequence of length one will be represented by
  * an <code>XdmItem</code>. It is quite possible for an <code>XdmValue</code> that is not an <code>XdmItem</code> to hold
  * a singleton sequence.</p>
- * <p>Saxon provides two concrete subclasses of <code>XdmItem</code>, namely
- * {@link XdmNode} and {@link XdmAtomicValue}. Users must not attempt to create
+ * <p>Saxon provides a number of concrete subclasses of <code>XdmItem</code>, namely {@link XdmAtomicValue},
+ * {@link XdmNode}, {@link XdmFunctionItem} and {@link XdmExternalObject}. Users must not attempt to create
  * additional subclasses.</p>
  */
 
