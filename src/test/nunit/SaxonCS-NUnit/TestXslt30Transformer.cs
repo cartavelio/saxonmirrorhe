@@ -1166,6 +1166,163 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
         }
+        
+        [Test]
+        public void TestSchemaAwareStreaming() {
+            try {
+                Processor proc = new Processor(true);
+                proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                proc.SetProperty("http://saxon.sf.net/feature/xsd-version", "1.1");
+                XsltCompiler comp = proc.NewXsltCompiler();
+                comp.SchemaAware = true;
+                StringReader src = new("<e><p/></e>");
+                StringReader sr = new (
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:import-schema><xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
+                    "<xs:element name='e'><xs:complexType><xs:sequence><xs:element name='p'/></xs:sequence><xs:assert test='exists(p)'/></xs:complexType></xs:element>" +
+                    "</xs:schema></xsl:import-schema>" +
+                    "<xsl:variable name='v'><e><p/></e></xsl:variable>" +
+                    "<xsl:template match='schema-element(e)'><ok/></xsl:template>" +
+                    "<xsl:mode streamable='yes'/>" +
+                    "</xsl:stylesheet>");
+                XsltExecutable exec = comp.Compile(sr);
+                Xslt30Transformer transformer = exec.Load30();
+                transformer.SchemaValidationMode = SchemaValidationMode.Strict;
+                StringWriter sw = new StringWriter();
+                Serializer serializer = proc.NewSerializer(sw);
+                serializer.SetOutputProperty(Serializer.INDENT, "no");
+                transformer.ApplyTemplates(src, serializer);
+                Assert.True(sw.ToString().Contains("<ok/>"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+        
+        [Test]
+        public void TestSchemaAwareStreamingFromXmlReader() {
+            try {
+                Processor proc = new Processor(true);
+                proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                proc.SetProperty("http://saxon.sf.net/feature/xsd-version", "1.1");
+                XsltCompiler comp = proc.NewXsltCompiler();
+                comp.SchemaAware = true;
+                StringReader src = new("<e><p/></e>");
+                StringReader sr = new (
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:import-schema><xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>" +
+                    "<xs:element name='e'><xs:complexType><xs:sequence><xs:element name='p'/></xs:sequence><xs:assert test='exists(p)'/></xs:complexType></xs:element>" +
+                    "</xs:schema></xsl:import-schema>" +
+                    "<xsl:variable name='v'><e><p/></e></xsl:variable>" +
+                    "<xsl:template match='schema-element(e)'><ok/></xsl:template>" +
+                    "<xsl:mode streamable='yes'/>" +
+                    "</xsl:stylesheet>");
+                XsltExecutable exec = comp.Compile(sr);
+                Xslt30Transformer transformer = exec.Load30();
+                XmlReader reader = XmlReader.Create(src);
+                transformer.SchemaValidationMode = SchemaValidationMode.Strict;
+                StringWriter sw = new StringWriter();
+                Serializer serializer = proc.NewSerializer(sw);
+                serializer.SetOutputProperty(Serializer.INDENT, "no");
+                transformer.ApplyTemplates(reader, serializer);
+                Assert.True(sw.ToString().Contains("<ok/>"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+        
+        [Test]
+        public void TestStreamedFragment() {
+            try {
+                Processor proc = new Processor(true);
+                proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                proc.SetProperty("http://saxon.sf.net/feature/xsd-version", "1.1");
+                XsltCompiler comp = proc.NewXsltCompiler();
+                comp.SchemaAware = false;
+                StringReader src = new("<e/><e/><e/>");
+                StringReader sr = new (
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:template match='/'><out><xsl:apply-templates/></out></xsl:template>" +
+                    "<xsl:template match='e'><ok/></xsl:template>" +
+                    "<xsl:mode streamable='yes'/>" +
+                    "</xsl:stylesheet>");
+                XsltExecutable exec = comp.Compile(sr);
+                Xslt30Transformer transformer = exec.Load30();
+                XmlReader reader = XmlReader.Create(src, new XmlReaderSettings() { ConformanceLevel = ConformanceLevel.Fragment });
+                transformer.SchemaValidationMode = SchemaValidationMode.None;
+                StringWriter sw = new ();
+                Serializer serializer = proc.NewSerializer(sw);
+                serializer.SetOutputProperty(Serializer.INDENT, "no");
+                transformer.ApplyTemplates(reader, serializer);
+                Assert.True(sw.ToString().Contains("<out><ok/><ok/><ok/></out>"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+        
+        [Test]
+        public void TestStreamedInputWithStripping() {
+            try {
+                Processor proc = new Processor(true);
+                proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                proc.SetProperty("http://saxon.sf.net/feature/xsd-version", "1.1");
+                XsltCompiler comp = proc.NewXsltCompiler();
+                comp.SchemaAware = false;
+                StringReader src = new("<a><x> </x><z> </z></a>");
+                StringReader sr = new (
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:template match='/'><out><xsl:apply-templates/></out></xsl:template>" +
+                    "<xsl:mode streamable='yes' on-no-match='shallow-copy'/>" +
+                    "<xsl:strip-space elements='z'/>" +
+                    "</xsl:stylesheet>");
+                XsltExecutable exec = comp.Compile(sr);
+                Xslt30Transformer transformer = exec.Load30();
+                XmlReader reader = XmlReader.Create(src);
+                transformer.SchemaValidationMode = SchemaValidationMode.None;
+                StringWriter sw = new ();
+                Serializer serializer = proc.NewSerializer(sw);
+                serializer.SetOutputProperty(Serializer.INDENT, "no");
+                XdmValue result = transformer.ApplyTemplates(reader);
+                serializer.SerializeXdmNode((XdmNode)result[0]);
+                Assert.True(sw.ToString().Contains("<out><a><x> </x><z/></a></out>"));
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
+        
+        [Test]
+        public void TestNonDocumentResult() {
+            try {
+                Processor proc = new Processor(true);
+                proc.SetProperty("http://saxon.sf.net/feature/timing", "true");
+                proc.SetProperty("http://saxon.sf.net/feature/xsd-version", "1.1");
+                XsltCompiler comp = proc.NewXsltCompiler();
+                comp.SchemaAware = false;
+                StringReader src = new("<a><x> </x><z> </z></a>");
+                StringReader sr = new (
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                    "<xsl:template match='/'><xsl:map><xsl:apply-templates/></xsl:map></xsl:template>" +
+                    "<xsl:template match='*'><xsl:map-entry key='name(.)'>1</xsl:map-entry><xsl:apply-templates select='*'/></xsl:template>" +
+                    "<xsl:mode streamable='yes' on-no-match='shallow-copy'/>" +
+                    "<xsl:strip-space elements='*'/>" +
+                    "</xsl:stylesheet>");
+                XsltExecutable exec = comp.Compile(sr);
+                Xslt30Transformer transformer = exec.Load30();
+                XmlReader reader = XmlReader.Create(src);
+                transformer.SchemaValidationMode = SchemaValidationMode.None;
+                XdmValue result = transformer.ApplyTemplates(reader);
+                Assert.True(result[0] is XdmMap);
+                XdmMap map = (XdmMap)result[0];
+                Assert.True(map.ContainsKey(new XdmAtomicValue("x")));
+                Assert.True(map.Get(new XdmAtomicValue("x")).ToString() == "1");
+            }
+            catch (Exception e) {
+                Assert.Fail(e.Message);
+            }
+        }
 
         [Test]
         public void TestValidationWarnings() {
@@ -1512,7 +1669,7 @@ namespace SaxonCS_NUnit {
             }
         }
 
-        /**
+     /**
      * Test calling a stylesheet with an initial template with parameters
      * @throws net.sf.saxon.s9api.SaxonApiException if the call fails
      */
