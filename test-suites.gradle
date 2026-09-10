@@ -223,6 +223,53 @@ task qt3ExtraTestsJava() {
 }
 
 // ============================================================
+// Tasks to run QT4 test driver with a variety of options
+
+task qt4TestsJava() {
+  // Just somewhere to hang dependencies
+}
+
+["he", "pe", "ee"].each { rel ->
+  def languages = ["XP31", "XP40", "XQ30", "XQ31"]
+  if (rel == "ee") {
+    languages = ["XP31", "XP40", "XQ10", "XQ30", "XQ31"]
+  }
+
+  def bytecodes = [""]
+  if (rel == "ee") {
+    bytecodes = ["off", "on"]
+  }
+
+  languages.each { lang ->
+    bytecodes.each { bc ->
+
+      def unfolds = [""]
+      if (rel == "ee" && (lang == "XQ30" || lang == "XQ31")) {
+        unfolds = ["", "yes"]
+      }
+
+      unfolds.each { uoption ->
+        if (bc == "off" && uoption != "") {
+          // ignore this combination
+        } else {
+          testSuite.qt4 {
+            language lang
+            release rel
+            directory testsuites.w3cQT4TestSuiteDir
+            if (bc != "" || rel == "ee") {
+              bytecode (bc == "on")
+            }
+            if (uoption != "") {
+              unfolded (uoption == "yes")
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
 // Tasks to run XSLT3.0 test driver with a variety of options
 
 task xslt30TestsJava() {
