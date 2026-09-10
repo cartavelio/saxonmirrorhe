@@ -200,32 +200,6 @@ public class DictionaryMap extends StringMapItem {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Ask whether the map conforms to a given map type
-     *
-     * @param keyType   the required keyType
-     * @param valueType the required valueType
-     * @param th        the type hierarchy cache for the configuration
-     * @return true if the map conforms to the required type
-     */
-    @Override
-    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
-        if (isEmpty()) {
-            return true;
-        }
-        if (!(keyType == BuiltInAtomicType.STRING || keyType == BuiltInAtomicType.ANY_ATOMIC)) {
-            return false;
-        }
-        if (valueType.equals(SequenceType.ANY_SEQUENCE)) {
-            return true;
-        }
-        for (GroundedValue val : map.values()) {
-            if (!valueType.matches(val, th)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Get the type of the map. This method is used largely for diagnostics, to report
@@ -278,7 +252,7 @@ public class DictionaryMap extends StringMapItem {
         for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {
             target.put(new StringValue(entry.getKey()), entry.getValue());
         }
-        return (HashTrieMap)target.getCompletedMap();
+        return target.getCompletedMap();
     }
 
     protected static class KeyIteratorImpl implements AtomicIterator {

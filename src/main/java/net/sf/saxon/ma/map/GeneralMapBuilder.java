@@ -1,6 +1,5 @@
 package net.sf.saxon.ma.map;
 
-import com.saxonica.functions.qt4.ma.OrderedMap;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trace.Instrumentation;
@@ -59,6 +58,17 @@ public class GeneralMapBuilder {
     public void put(AtomicValue key, GroundedValue value) {
         keys.add(key);
         values.add(value);
+    }
+
+    /**
+     * Copy all the keys and values from an existing map
+     * @param map the map to be copied
+     */
+
+    public void copy(MapItem map) {
+        for (KeyValuePair pair : map.keyValuePairs()) {
+            put(pair.key, pair.value);
+        }
     }
 
     /**

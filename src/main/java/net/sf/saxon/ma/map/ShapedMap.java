@@ -208,7 +208,10 @@ public class ShapedMap extends StringMapItem {
                 return new ShapedMap(shape, v2);
             }
         }
-        return HashTrieMap.copy(this).put(key, value);
+        GeneralMapBuilder target = new GeneralMapBuilder();
+        target.copy(this);
+        MapItem map = target.getCompletedMapConfidently();
+        return map.put(key, value);
     }
 
     @Override
@@ -233,26 +236,6 @@ public class ShapedMap extends StringMapItem {
         return HashTrieMap.copy(this).remove(key);
     }
 
-    /**
-     * Ask whether the map conforms to a given map type
-     *
-     * @param keyType   the required keyType
-     * @param valueType the required valueType
-     * @param th        the type hierarchy cache for the configuration
-     * @return true if the map conforms to the required type
-     */
-    @Override
-    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
-        if (!th.isSubType(BuiltInAtomicType.STRING, keyType)) {
-            return false;
-        }
-        for (int i=0; i<size(); i++) {
-            if (!valueType.matches(values[i], th)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Get the type of the map. This method is used largely for diagnostics, to report

@@ -10,7 +10,6 @@ package net.sf.saxon.ma.map;
 //import com.saxonica.functions.qt4.ma.OrderedDictionaryMap;
 //import com.saxonica.functions.qt4.ma.OrderedMap;
 
-import com.saxonica.functions.qt4.ma.OrderedMap;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;

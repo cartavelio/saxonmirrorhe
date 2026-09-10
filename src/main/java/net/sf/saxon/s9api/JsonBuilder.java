@@ -89,19 +89,39 @@ public class JsonBuilder {
      */
 
     public XdmValue parseJson(Reader jsonReader) throws SaxonApiException {
+        Map<String, GroundedValue> options = new HashMap<>();
+        options.put("liberal", BooleanValue.get(liberal));
+        options.put("escape", BooleanValue.TRUE);
+        return parseJson(jsonReader, options);
+    }
+
+    /**
+     * Parse a JSON input string, supplied as a {@code Reader} and construct an {@code XdmValue} representing
+     * its content. The {@link XdmValue} will usually be an {@link XdmMap} or {@link XdmArray}.
+     * If the JSON input consists simply of a string, number, or boolean, then the result will be an
+     * {@code XdmAtomicValue}. If the input is the JSON string "null", the method returns an
+     * {@code XdmEmptySequence}.
+     *
+     * @param jsonReader supplies the input JSON as a stream of characters
+     * @param options options, as defined by the fn:parse-json function
+     * @return the result of parsing the JSON input. This will be an {@code XdmItem} in all cases except
+     * where the input JSON text is the string "null".
+     * @throws SaxonApiException if the JSON input is invalid, or if the reader throws an IOException
+     * @since 11
+     */
+
+    public XdmValue parseJson(Reader jsonReader, Map<String, GroundedValue> options) throws SaxonApiException {
         try {
             XPathContext context = new Controller(config).newXPathContext();
             IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;
             IntIterator content = UnparsedTextFunction.codepoints(checker, jsonReader);
-            Map<String, GroundedValue> options = new HashMap<>();
-            options.put("liberal", BooleanValue.get(liberal));
-            options.put("escape", BooleanValue.TRUE);
             Item result = ParseJsonFn.parse(content, options, context);
             return XdmValue.wrap(result);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
     }
+
 
     /**
      * Parse a JSON input string, supplied as a {@code String} and construct an {@code XdmValue} representing

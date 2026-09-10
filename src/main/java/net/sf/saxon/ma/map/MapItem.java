@@ -7,10 +7,7 @@
 
 package net.sf.saxon.ma.map;
 
-import net.sf.saxon.expr.ContextOriginator;
-import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.SaxonDeepEqual;
@@ -28,6 +25,7 @@ import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
@@ -137,13 +135,24 @@ public abstract class MapItem implements FunctionItem {
     abstract public MapItem remove(AtomicValue key);
 
     /**
-     * Ask whether the map conforms to a given map type
+     * Ask whether the map conforms to a given map type. This implementation performs
+     * no optimization, it simply scans the entries in the map.
      * @param keyType the required keyType
      * @param valueType the required valueType
      * @param th the type hierarchy cache for the configuration
      * @return true if the map conforms to the required type
      */
-    abstract public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th);
+    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
+        for (KeyValuePair pair : keyValuePairs()) {
+            if (!keyType.matches(pair.key, th)) {
+                return false;
+            }
+            if (!valueType.matches(pair.value, th)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Get the type of the map. This method is used largely for diagnostics, to report
@@ -152,7 +161,48 @@ public abstract class MapItem implements FunctionItem {
      * @return the type of this map
      */
 
-    abstract public ItemType getItemType(TypeHierarchy th);
+    public ItemType getItemType(TypeHierarchy th) {
+        if (isEmpty()) {
+            return MapType.EMPTY_MAP_TYPE;
+        }
+        ItemType commonKeyType = ErrorType.getInstance();
+        ItemType commonValueType = ErrorType.getInstance();
+        int minCardinality = Integer.MAX_VALUE;
+        int maxCardinality = 0;
+        for (KeyValuePair pair : keyValuePairs()) {
+            commonKeyType = combinedItemType(th, commonKeyType, pair.key.getItemType());
+            maxCardinality = Integer.max(maxCardinality, pair.value.getLength());
+            minCardinality = Integer.min(minCardinality, pair.value.getLength());
+            for (Item item : pair.value.asIterable()) {
+                commonValueType = combinedItemType(th,commonValueType, Type.getItemType(item,th));
+            }
+        }
+        SequenceType valueType;
+        if (maxCardinality == 0) {
+            valueType = SequenceType.EMPTY_SEQUENCE;
+        } else {
+            valueType = SequenceType.makeSequenceType(commonValueType,
+                                                      Cardinality.fromMinAndMax(minCardinality, maxCardinality));
+
+        }
+        if (!(commonKeyType instanceof PlainType)) {
+            commonKeyType = BuiltInAtomicType.ANY_ATOMIC;
+        }
+        return new MapType((PlainType)commonKeyType, valueType);
+    }
+
+    private static ItemType combinedItemType(TypeHierarchy th, ItemType commonItemType, ItemType thisItemType) {
+        Affinity affinity = th.relationship(commonItemType, thisItemType);
+        switch (affinity) {
+            case SAME_TYPE:
+            case SUBSUMES:
+                return commonItemType;
+            case SUBSUMED_BY:
+                return thisItemType;
+            default:
+                return Type.getCommonSuperType(commonItemType, thisItemType, th);
+        }
+    }
 
     /**
      * Get the lowest common item type of the keys in the map

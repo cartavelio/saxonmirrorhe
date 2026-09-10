@@ -1,6 +1,5 @@
 package net.sf.saxon.ma.map;
 
-import com.saxonica.functions.qt4.ma.OrderedStringMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;

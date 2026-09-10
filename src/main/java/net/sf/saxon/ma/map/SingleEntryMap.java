@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.map;
 
-import com.saxonica.functions.qt4.ma.OrderedMap;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;

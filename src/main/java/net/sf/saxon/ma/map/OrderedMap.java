@@ -1,11 +1,8 @@
-package com.saxonica.functions.qt4.ma;
+package net.sf.saxon.ma.map;
 
 import io.vavr.collection.LinkedHashMap;
 import io.vavr.control.Option;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapBuilder;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
 import net.sf.saxon.type.UType;

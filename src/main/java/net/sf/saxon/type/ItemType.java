@@ -31,7 +31,6 @@ import java.util.Optional;
  * @see net.sf.saxon.pattern.NodeTest
  * @see FunctionItemType
  */
-
 public interface ItemType {
 
     /**

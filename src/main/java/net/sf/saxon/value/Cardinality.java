@@ -160,7 +160,7 @@ public final class Cardinality {
         }
     }
 
-    static int fromMinAndMax(int min, int max) {
+    public static int fromMinAndMax(int min, int max) {
         boolean zero = min == 0;
         boolean one = min <= 1 || max <= 1;
         boolean many = max > 1;
@@ -239,7 +239,7 @@ public final class Cardinality {
     }
 
     /**
-     * Get the occurence indicator representing the cardinality
+     * Get the occurrence indicator representing the cardinality
      *
      * @param cardinality the cardinality value
      * @return the occurrence indicator, for example "*", "+", "?", "".
@@ -285,25 +285,6 @@ public final class Cardinality {
         }
     }
 
-    /**
-     * Generate Javascript code to check whether a number satisfies the cardinality property.
-     *
-     * @param card the cardinality value
-     * @return a Javascript function which checks whether a number satisfies the cardinality property.
-     */
 
-    public static String generateJavaScriptChecker(int card) {
-        if (Cardinality.allowsZero(card) && Cardinality.allowsMany(card)) {
-            return "function c() {return true;};";
-        } else if (card == StaticProperty.EXACTLY_ONE) {
-            return "function c(n) {return n==1;};";
-        } else if (card == StaticProperty.EMPTY) {
-            return "function c(n) {return n==0;};";
-        } else if (!Cardinality.allowsZero(card)) {
-            return "function c(n) {return n>=1;};";
-        } else {
-            return "function c(n) {return n<=1;};";
-        }
-    }
 }
 

@@ -7,18 +7,14 @@
 
 package net.sf.saxon.ma.map;
 
-import com.saxonica.functions.qt4.ma.OrderedStringMap;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.MappedAtomicIterator;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.util.*;
@@ -351,62 +347,6 @@ public class LazyStringMap extends StringMapItem implements Iterable<KeyValuePai
     @Override
     public MapItem removeU(UnicodeString key) {
         return remove(new StringValue(key));
-    }
-
-    /**
-     * Ask whether the map conforms to a given map type
-     *
-     * @param keyType   the required keyType
-     * @param valueType the required valueType
-     * @param th        the type hierarchy cache for the configuration
-     * @return true if the map conforms to the required type
-     */
-    @Override
-    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
-        if (isEmpty()) {
-            return true;
-        }
-        if (!(keyType == BuiltInAtomicType.STRING || keyType == BuiltInAtomicType.ANY_ATOMIC)) {
-            return false;
-        }
-        if (valueType.equals(SequenceType.ANY_SEQUENCE)) {
-            return true;
-        }
-        for (GroundedValue val : valueList) {
-            if (!valueType.matches(val, th)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Get the type of the map. This method is used largely for diagnostics, to report
-     * the type of a map when it differs from the required type.
-     *
-     * @param th the type hierarchy cache
-     * @return the type of this map
-     */
-    @Override
-    public ItemType getItemType(TypeHierarchy th) {
-        ItemType valueType = null;
-        int valueCard = 0;
-        // we need to test the entries individually
-        for (GroundedValue val : valueList) {
-            if (valueType == null) {
-                valueType = SequenceTool.getItemType(val, th);
-                valueCard = SequenceTool.getCardinality(val);
-            } else {
-                valueType = Type.getCommonSuperType(valueType, SequenceTool.getItemType(val, th), th);
-                valueCard = Cardinality.union(valueCard, SequenceTool.getCardinality(val));
-            }
-        }
-        if (valueType == null) {
-            // empty map
-            return MapType.EMPTY_MAP_TYPE;
-        } else {
-            return new MapType(BuiltInAtomicType.STRING, SequenceType.makeSequenceType(valueType, valueCard));
-        }
     }
 
     /**

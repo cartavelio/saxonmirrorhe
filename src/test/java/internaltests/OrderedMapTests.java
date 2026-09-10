@@ -1,7 +1,7 @@
 package internaltests;
 
-import com.saxonica.functions.qt4.ma.OrderedMap;
-import com.saxonica.functions.qt4.ma.OrderedStringMap;
+import net.sf.saxon.ma.map.OrderedMap;
+import net.sf.saxon.ma.map.OrderedStringMap;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.s9api.Processor;

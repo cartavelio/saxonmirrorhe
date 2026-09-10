@@ -1,10 +1,6 @@
-package com.saxonica.functions.qt4.ma;
+package net.sf.saxon.ma.map;
 
 import io.vavr.Tuple2;
-import net.sf.saxon.ma.map.GeneralMapBuilder;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.StringMapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
