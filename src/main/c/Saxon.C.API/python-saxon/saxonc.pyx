@@ -2181,17 +2181,16 @@ cdef class PyXsltExecutable:
 
         self.thisxptr.applyTemplatesReturningFile(c_outputfile)
 
-     def call_template_returning_value(self, str template_name=None, **kwds):
+     def call_template_returning_value(self, str template_name=None, str base_output_uri=None):
         """
-        call_template_returning_value(self, str template_name, **kwds)
+        call_template_returning_value(self, str template_name, base_output_uri)
         Invoke a transformation by calling a named template and return the result as a PyXdmValue. This method does not
         set the global context item for the transformation; if that is required, it can be done separately using the
         set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
-                base_output_uri (str) which is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction.
+            base_output_uri (str):  Is used for resolving relative URIs in the href attribute of the xsl:result-document instruction.
+            Accept None if no base_output_uri
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
@@ -2214,40 +2213,12 @@ cdef class PyXsltExecutable:
         py_source_string = None
         py_template_name_str = None
         py_stylesheet_string = None
-        for key, value in kwds.items():
-          if isinstance(value, str):
-            if key == "source_file":
-              '''c_sourcefile = make_c_str(value)'''
-              py_string_string = value.encode('utf-8') if value is not None else None
-              c_sourcefile = py_string_string if value is not None else ""
-              self.thisxptr.setInitialMatchSelectionAsFile(c_sourcefile)
-            if key == "base_output_uri":
+        if base_output_uri is not None:
               '''c_base_output_uri = make_c_str(value)'''
-              py_string_string = value.encode('utf-8') if value is not None else None
-              c_base_output_uri = py_string_string if value is not None else ""
+              py_string_string = base_output_uri.encode('utf-8') if base_output_uri is not None else None
+              c_base_output_uri = py_string_string if base_output_uri is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-          elif key == "xdm_node" or key == "xdm_value":
-              if isinstance(value, PyXdmValue):
-                value_ = value
-                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
-              elif isinstance(value, PyXdmItem):
-                  valuei_ = value
-                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
-              elif isinstance(value, PyXdmNode):
-                  valuen_ = value
-                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
-              elif isinstance(value, PyXdmAtomicValue):
-                      valueav_ = value
-                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
-              elif isinstance(value, PyXdmFunctionItem):
-                      valuef_ = value
-                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
-              elif isinstance(value, PyXdmMap):
-                      valuem_ = value
-                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
-              elif isinstance(value, PyXdmArray):
-                      valuear_ = value
-                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
+
         c_templateName = make_c_str(template_name)
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
@@ -2287,7 +2258,7 @@ cdef class PyXsltExecutable:
             val = PyXdmValue()
             val.thisvptr = xdmValue
             return val
-     def call_template_returning_string(self, str template_name=None, **kwds):
+     def call_template_returning_string(self, str template_name=None, str base_output_uri=None):
         """
         call_template_returning_string(self, str template_name, **kwds)
         Invoke a transformation by calling a named template and return the result as a string. This method does not
@@ -2295,9 +2266,8 @@ cdef class PyXsltExecutable:
         set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
-                base_output_uri (str) which is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction.
+            base_output_uri (str): Is used for resolving relative URIs in the href attribute
+                of the xsl:result-document instruction. Accept None if no base_output_uri
         Returns:
             PyXdmValue: Result of the transformation as a PyXdmValue object
         Example:
@@ -2322,40 +2292,12 @@ cdef class PyXsltExecutable:
         py_template_name_str = None
         py_stylesheet_string = None
         cdef const char* c_string = NULL
-        for key, value in kwds.items():
-          if isinstance(value, str):
-            if key == "source_file":
-              '''c_sourcefile = make_c_str(value)'''
-              py_string_string = value.encode('utf-8') if value is not None else None
-              c_sourcefile = py_string_string if value is not None else ""
-              self.thisxptr.setInitialMatchSelectionAsFile(c_sourcefile)
-            if key == "base_output_uri":
+        if base_output_uri is not None:
               '''c_base_output_uri = make_c_str(value)'''
-              py_string_string = value.encode('utf-8') if value is not None else None
-              c_base_output_uri = py_string_string if value is not None else ""
+              py_string_string = base_output_uri.encode('utf-8') if base_output_uri is not None else None
+              c_base_output_uri = py_string_string if base_output_uri is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
-          elif key == "xdm_value" or key == "xdm_node":
-              if isinstance(value, PyXdmValue):
-                value_ = value
-                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
-              elif isinstance(value, PyXdmItem):
-                  valuei_ = value
-                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
-              elif isinstance(value, PyXdmNode):
-                  valuen_ = value
-                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
-              elif isinstance(value, PyXdmAtomicValue):
-                      valueav_ = value
-                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
-              elif isinstance(value, PyXdmFunctionItem):
-                      valuef_ = value
-                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
-              elif isinstance(value, PyXdmMap):
-                      valuem_ = value
-                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
-              elif isinstance(value, PyXdmArray):
-                      valuear_ = value
-                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
+
         c_templateName = make_c_str(template_name)
         c_string  = self.thisxptr.callTemplateReturningString(c_templateName)
         return make_py_str(c_string)
@@ -2368,9 +2310,8 @@ cdef class PyXsltExecutable:
         for the transformation; if that is required, it can be done separately using the set_global_context_item method.
         Args:
 			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
-            **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str), and
-                base_output_uri (str) which is used for resolving relative URIs in the href attribute
-                of the xsl:result-document instruction.
+            **kwds: Possible keyword arguments: output_file (str), and base_output_uri (str) which is used for
+            resolving relative URIs in the href attribute of the xsl:result-document instruction.
         Example:
             executable = xslt30_proc.compile_stylesheet(stylesheet_file="test1.xsl")
             1) executable.call_template_returning_file("main", output_file="result.xml")
@@ -2396,11 +2337,6 @@ cdef class PyXsltExecutable:
         py_output_string = None
         for key, value in kwds.items():
           if isinstance(value, str):
-            if key == "source_file":
-              '''c_sourcefile = make_c_str(value)'''
-              py_string_string = value.encode('utf-8') if value is not None else None
-              c_sourcefile = py_string_string if value is not None else ""
-              self.thisxptr.setInitialMatchSelectionAsFile(c_sourcefile)
             if key == "base_output_uri":
               '''c_base_output_uri = make_c_str(value)'''
               py_string_string = value.encode('utf-8') if value is not None else None
@@ -2409,28 +2345,7 @@ cdef class PyXsltExecutable:
             if key == "output_file":
               py_output_string = value.encode('UTF-8') if value is not None else None
               c_outputfile = py_output_string if value is not None else ""
-          elif key == "xdm_value" or key == "xdm_node":
-              if isinstance(value, PyXdmValue):
-                value_ = value
-                self.thisxptr.setInitialMatchSelection(value_.thisvptr)
-              elif isinstance(value, PyXdmItem):
-                  valuei_ = value
-                  self.thisxptr.setInitialMatchSelection(valuei_.derivedptr)
-              elif isinstance(value, PyXdmNode):
-                  valuen_ = value
-                  self.thisxptr.setInitialMatchSelection(valuen_.derivednptr)
-              elif isinstance(value, PyXdmAtomicValue):
-                      valueav_ = value
-                      self.thisxptr.setInitialMatchSelection(valueav_.derivedaptr)
-              elif isinstance(value, PyXdmFunctionItem):
-                      valuef_ = value
-                      self.thisxptr.setInitialMatchSelection(valuef_.derivedfptr)
-              elif isinstance(value, PyXdmMap):
-                      valuem_ = value
-                      self.thisxptr.setInitialMatchSelection(valuem_.derivedmmptr)
-              elif isinstance(value, PyXdmArray):
-                      valuear_ = value
-                      self.thisxptr.setInitialMatchSelection(valuear_.derivedaaptr)
+
         c_templateName = make_c_str(template_name)
         self.thisxptr.callTemplateReturningFile(c_templateName, c_outputfile)
 
