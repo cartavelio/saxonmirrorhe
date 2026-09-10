@@ -10,6 +10,7 @@ namespace Saxon.Api {
     /// in conjunction with extension functions: an external object may be returned from one extension function,
     /// and passed as an argument to another. They can also be supplied as parameters to a stylesheet or query,
     /// which in turn might pass them to an extension function.
+    /// </remarks>
     /// <typeparam name="T">The type of the wrapped object</typeparam>
     public class XdmExternalObject<T> : XdmItem {
         
