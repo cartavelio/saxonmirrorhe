@@ -135,7 +135,7 @@ public class TestXslt30TransformerEE {
             Xslt30Transformer transformer = executable.load30();
 
             Serializer dest = processor.newSerializer();
-            dest.setOutputFile(Testdata.file("/sandpit/OutputStep2.xml"));
+            dest.setOutputStream(new ByteArrayOutputStream());
 
             transformer.callTemplate(new QName("main"), dest);
 

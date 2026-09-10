@@ -1,8 +1,11 @@
 package net.sf.saxon.test;
 
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.test.xdmfixtures.SequenceBuilder;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.StringValue;
@@ -18,10 +21,13 @@ public class TestXdmHelpers {
      * @return
      */
     public static MapItem buildXdmMap(Map<String, GroundedValue> options) {
-//        MapBuilder resultMap = DictionaryMap.getBuilder(options.size());
-//        options.forEach(resultMap::put);
-//        return resultMap.getCompletedMap();
-        return null;
+        try {
+            StringMapBuilder resultMap = new StringMapBuilder(40);
+            options.forEach((k, v) -> resultMap.put(StringView.of(k), v));
+            return resultMap.getCompletedMap();
+        } catch (XPathException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

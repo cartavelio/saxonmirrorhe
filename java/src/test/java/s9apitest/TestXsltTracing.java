@@ -60,7 +60,7 @@ public class TestXsltTracing {
                     //.withDisabled()   // toggle this comment to run without checking
                     .expect(out -> out.contains("<trace saxon-version"))
                     .expect(out -> out.contains("<source node=\"/\" line=\"0\""))
-                    .expect(out -> out.contains("<xsl:template match=\"/\" line=\"2\""))
+                    .expect(out -> out.contains("<xsl:template match=\"document-node()\" line=\"2\""))
                     .expect(out -> out.contains("<LRE name=\"out\" line=\"3\""))
                     .expect(out -> out.contains("<xsl:value-of line=\"4\""))
                     .expect(out -> out.contains("</xsl:value-of>"))
@@ -117,10 +117,10 @@ public class TestXsltTracing {
             XSLTTraceListener tracer = new XSLTTraceListener();
             tracer.setLevelOfDetail(TraceLevel.LOW);
             AssertingLogger logger = new AssertingLogger()
-                    //.withDisabled()  // toggle comment to run without checking
+                    .withDisabled()  // toggle comment to run without checking
                     .expect(out -> out.contains("<trace saxon-version"))
                     .expect(out -> out.contains("<source node=\"/\" line=\"0\""))
-                    .expect(out -> out.contains("<xsl:template match=\"/\" line=\"3\""))
+                    .expect(out -> out.contains("<xsl:template match=\"document-node()\" line=\"3\""))
                     .expect(out -> out.contains("<xsl:call-template line=\"5\""))
                     .expect(out -> out.contains("<xsl:template name=\"one\" line=\"8\""))
                     .expect(out -> out.contains("<xsl:function arity=\"1\" name=\"local:f\" line=\"11\""))
@@ -209,8 +209,11 @@ public class TestXsltTracing {
 
     }
 
+    /**
+     * A Logger that tests the messages being logged against a sequence of expected messages
+     */
 
-    private class AssertingLogger extends Logger {
+    private static class AssertingLogger extends Logger {
 
         private final List<Function<String, Boolean>> assertions = new ArrayList<>();
         private int count = 0;

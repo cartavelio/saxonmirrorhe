@@ -1828,8 +1828,8 @@ public class TestXslt30Transformer {
             serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
             transformer.applyTemplates(new StreamSource(new StringReader(xml)), serializer);
             assertTrue(log.size() > 10);
-            assertTrue(log.contains("matching element(Q{}a?)"));
-            assertTrue(log.contains("matching element(Q{}b?)"));
+            assertTrue(log.get(3).startsWith("matching element(Q{}a)"));
+            assertTrue(log.get(8).startsWith("matching element(Q{}b)"));
         } catch (SaxonApiException e) {
             e.printStackTrace();
             fail(e.getMessage());

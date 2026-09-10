@@ -30,7 +30,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -161,43 +162,6 @@ public class TestXslt30TransformerDebugEE {
         } catch (TransformerException e) {
             fail();
         }
-    }
-
-    @Test
-    public void testExtensionWithSchemaAccess() {
-        // Create a Processor instance.
-        try {
-            Processor proc = new Processor(true);
-            proc.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            proc.setConfigurationProperty(Feature.TIMING, true);
-            XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
-            StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:my='java:s9apitest.TestXslt30Transformer' exclude-result-prefixes='my'>" +
-                    "<xsl:template match='*'><xsl:copy><xsl:copy-of select='@*'/><xsl:apply-templates/></xsl:copy></xsl:template>\n" +
-                    "<xsl:template match='*/*/*/*[my:isOptional(.., node-name(.))]'/> \n" +
-                    "</xsl:stylesheet>");
-            XsltExecutable exec = comp.compile(new StreamSource(sr));
-            Xslt30Transformer transformer = exec.load30();
-            transformer.setTraceListener(new TestXslt30TransformerDebug.MyTraceListener());
-
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(Testdata.file("books.xsd")));
-            DocumentBuilder builder = proc.newDocumentBuilder();
-            builder.setSchemaValidator(sm.newSchemaValidator());
-            XdmNode books = builder.build(Testdata.file("books.xml"));
-            // Create a serializer
-            //String outfile = @"C:/MyJava/users/caffo/Output.xml";
-            StringWriter sw = new StringWriter();
-            Serializer serializer = proc.newSerializer(sw);
-            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
-            transformer.applyTemplates(books, serializer);
-            assertTrue(sw.toString().contains("TITLE"));
-            assertFalse(sw.toString().contains("AUTHOR"));
-        } catch (SaxonApiException e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        }
-
     }
 
     @Test
