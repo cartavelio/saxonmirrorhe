@@ -95,11 +95,13 @@
                <code>XsltExecutable</code> class.</li>
             <li>Added the method <code>PyXPathProcessor.set_base_uri()</code> (see bug issue <a
                href="https://saxonica.plan.io/issues/6064">#6064</a>).</li>
-            <li>Added the method <code>PyXdmNode.getLocalName()</code> (see bug issue <a
+            <li>Added the <code>PyXdmNode.local_name</code> property (see bug issue <a
                href="https://saxonica.plan.io/issues/6065">#6065</a>).</li>
             <li>Added the node axis feature to get the array of nodes reachable from the current node via a given axis. Axis options are as follows:
                <code>ANCESTOR = 0, ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3, DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
-                  FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10, PRECEDING_SIBLING = 11, SELF = 12</code>.</li>
+                  FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10, PRECEDING_SIBLING = 11,
+                  SELF = 12</code>. See the <code>axisNodes()</code> method on the <code>XdmNode</code> class (C++,
+               PHP and Python).</li>
          </ul>
       </category>
       
