@@ -1,6 +1,9 @@
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using Saxon.Api;
+using Saxon.Hej.functions;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
 using Saxon.Hej.pattern.nodetest;
@@ -24,6 +27,10 @@ namespace Saxon.Impl.Dom {
         public override Saxon.Hej.om.NodeInfo selectID(string id, bool getParent) {
             XmlNode node = (XmlNode)((DomNodeWrapper)getRootNode()).getUnderlyingNode();
             if (node is XmlDocument document) {
+                XmlElement target = document.GetElementById(id);
+                if (target != null) {
+                    return wrap(target);
+                }
                 NodeInfo rootNode = wrap(document);
                 SequenceIterator descendants = rootNode.iterateDescendantAxis(NodeKindType.ELEMENT);
                 for (NodeInfo n; (n = (NodeInfo)descendants.next()) != null;) {
@@ -34,7 +41,42 @@ namespace Saxon.Impl.Dom {
             }
             return null;
         }
+
+        public override System.Collections.Generic.IEnumerator<string> getUnparsedEntityNames() {
+            XmlNode node = (XmlNode)((DomNodeWrapper)getRootNode()).getUnderlyingNode();
+            List<string> result = new();
+            if (node is XmlDocument document) {
+                XmlDocumentType docType = document.DocumentType;
+                if (docType != null) {
+                    result.AddRange(
+                        from XmlEntity entity in docType.Entities 
+                        where entity.NotationName != null 
+                        select entity.Name);
+                }
+            }
+            return result.GetEnumerator();
+        }
+
+        public override string[] getUnparsedEntity(string name) {
+            XmlNode node = (XmlNode)((DomNodeWrapper)getRootNode()).getUnderlyingNode();
+            if (node is XmlDocument document) {
+                XmlDocumentType docType = document.DocumentType;
+                if (docType != null) {
+                    foreach (XmlEntity entity in docType.Entities) {
+                        if (entity.NotationName != null && entity.Name.Equals(name)) {
+                            string sysId = entity.SystemId;
+                            if (sysId != null && document.BaseURI != null) {
+                                sysId = ResolveURI.makeAbsolute(sysId, document.BaseURI).ToString();
+                            }
+                            return new[] { sysId, entity.PublicId };
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }
 
-// Copyright (c) 2021 - 2023 Saxonica Limited
+// Copyright (c) 2021 - 2026 Saxonica Limited

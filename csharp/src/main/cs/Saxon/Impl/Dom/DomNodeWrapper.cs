@@ -488,13 +488,16 @@ namespace Saxon.Impl.Dom {
             }
             if (currNode != null) {
                 XmlNodeType type = currNode.NodeType;
-                if (type == XmlNodeType.DocumentType || type == XmlNodeType.XmlDeclaration 
-                        || (type == XmlNodeType.Whitespace && currNode.ParentNode?.NodeType == XmlNodeType.Document)) {
+                while (type == XmlNodeType.DocumentType || type == XmlNodeType.XmlDeclaration 
+                                                               || (type == XmlNodeType.Whitespace && currNode.ParentNode?.NodeType == XmlNodeType.Document)) {
                     currNode = currNode.NextSibling;
                     if (currNode == null) {
                         return null;
                     }
-                } else if (type is XmlNodeType.Text or XmlNodeType.CDATA) {
+
+                    type = currNode.NodeType;
+                } 
+                if (type is XmlNodeType.Text or XmlNodeType.CDATA) {
                     return spannedWrapper(currNode);
                 }
                 return makeWrapper(currNode, docTree);
