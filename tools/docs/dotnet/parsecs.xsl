@@ -208,10 +208,10 @@
                   <xsl:when test="$is-generic-type and ($is-class or $is-interface)">
                     <!-- e.g. class (e.g Feature<T>) or interface (e.g. Predicate<T>) -->
                     <xsl:sequence select="substring-before($tokens[not(. = ('{',
-                      '{get;}','get;','set;','{set;}','}'))][contains(., '&lt;')][last()], '&lt;')"/>
+                      '{get;}','get;','set;','{set;}','init;','}'))][contains(., '&lt;')][last()], '&lt;')"/>
                   </xsl:when>
                   <xsl:otherwise>
-                    <xsl:sequence select="$tokens[not(. = ('{', '{get;}','get;','set;','{set;}','}'))][last()]"/>
+                    <xsl:sequence select="$tokens[not(. = ('{', '{get;}','get;','set;','{set;}','init;','}'))][last()]"/>
                   </xsl:otherwise>
                 </xsl:choose>
               </xsl:variable>
@@ -406,6 +406,9 @@
                   </xsl:if>
                   <xsl:if test="$tokens = 'set;'">
                     <set />
+                  </xsl:if>
+                  <xsl:if test="$tokens = 'init;' or $is-property-with-getter">
+                    <init />
                   </xsl:if>
                 </xsl:otherwise>
               </xsl:choose>
