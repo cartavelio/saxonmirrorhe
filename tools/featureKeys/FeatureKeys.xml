@@ -2985,7 +2985,7 @@
         <platforms>J</platforms>
         <setter class="net.sf.saxon.Configuration">setCommonResourceResolver</setter>
         <getter class="net.sf.saxon.Configuration">getCommonResourceResolver</getter>
-        <configfile>global/@CommonResourceResolver</configfile>
+        <configfile>global/@commonResourceResolver</configfile>
         <configfiledesc>
             <p>User-supplied class used to perform URI resolution.</p>
         </configfiledesc>

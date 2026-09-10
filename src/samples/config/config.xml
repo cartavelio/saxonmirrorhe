@@ -17,7 +17,6 @@
           expandAttributeDefaults="true"
           generateByteCode="true"
           versionOfXml="1.0"
-          preferJaxpParser="true"
           sourceResolver=""
           uriResolver="net.sf.saxon.lib.StandardURIResolver"
           collectionFinder="net.sf.saxon.resource.StandardCollectionFinder"
