@@ -18,11 +18,9 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.TypeInfoProvider;
 import javax.xml.validation.ValidatorHandler;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,12 +72,12 @@ public class ValidatorHandlerTest {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             if (localName.equals("AUTHOR")) {
-                assertEquals(provider.getElementTypeInfo().getTypeName(), "string");
-                assertEquals(provider.getElementTypeInfo().getTypeNamespace(), NamespaceConstant.SCHEMA);
+                assertEquals("string", provider.getElementTypeInfo().getTypeName());
+                assertEquals(NamespaceConstant.SCHEMA, provider.getElementTypeInfo().getTypeNamespace());
             }
             if (localName.equals("DIMENSIONS")) {
-                assertEquals(provider.getElementTypeInfo().getTypeName(), "dimensionsType");
-                assertEquals(provider.getElementTypeInfo().getTypeNamespace(), "");
+                assertEquals("dimensionsType", provider.getElementTypeInfo().getTypeName());
+                assertEquals("", provider.getElementTypeInfo().getTypeNamespace());
             }
             if (localName.equals("ITEM")) {
                 int index = attributes.getIndex("", "CAT");
@@ -98,6 +96,7 @@ public class ValidatorHandlerTest {
 
     @Test
     public void testDefaultErrorHandling() {
+        // No exception should be thrown when invalidities are found
         try {
             SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
             Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
@@ -105,6 +104,7 @@ public class ValidatorHandlerTest {
             parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books-invalid.xml"))));
 
         } catch (Exception e) {
+            e.printStackTrace();
             fail();
         }
     }
@@ -338,6 +338,58 @@ public class ValidatorHandlerTest {
 
         public int errorCount() {
             return errors;
+        }
+    }
+
+
+    @Test
+    public void testReuseValidatorHandler() {  // Bug 7165
+        try {
+            SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
+            ValidatorHandler validator = grammar.newValidatorHandler();
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books.xml"))));
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books.xml"))));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    private static class ElementCounter extends DefaultHandler2 {
+        int counter = 0;
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            counter++;
+        }
+
+        public int getCounter() {
+            return counter;
+        }
+
+    }
+
+    @Test
+    public void testReuseValidatorHandlerWithSuppliedContentHandler() {  // Bug 7165
+        try {
+            SchemaFactoryImpl schemaFactory = new SchemaFactoryImpl();
+            Schema grammar = schemaFactory.newSchema(Testdata.file("books.xsd"));
+            ElementCounter elementCounter = new ElementCounter();
+            ValidatorHandler validator = grammar.newValidatorHandler();
+            validator.setContentHandler(elementCounter);
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books.xml"))));
+            assertEquals(78, elementCounter.getCounter());
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books.xml"))));
+            assertEquals(156, elementCounter.getCounter());
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books-invalid.xml"))));
+            int count = elementCounter.getCounter();
+            assertTrue(count > 156);
+            parseToValidator(validator, new InputSource(Files.newInputStream(Testdata.path("books.xml"))));
+            assertEquals(count + 78, elementCounter.getCounter());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
         }
     }
 
