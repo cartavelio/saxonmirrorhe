@@ -640,7 +640,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">concat</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="values" type="xs:anyAtomicType*" default="()" desc="The first string"/>
+          <arg name="values" type="xs:anyAtomicType* ..." default="()" desc="A sequence of strings"/>
           <in-spec>xpath20</in-spec>
           <in-spec>xpath30</in-spec>
           <in-spec>xpath31</in-spec>
@@ -653,6 +653,11 @@
         <p>Concatenates the string-values of the arguments into a single string. There must be at
           least two arguments.</p>
       </description>
+      <details>
+        <p class="qt4">From XPath 4.0, the function can take any number of arguments, and the
+          arguments can be sequences of strings. Previously, there had to be at least two arguments,
+          and these had to be single strings.</p>
+      </details>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">contains</name>
@@ -2058,6 +2063,27 @@
             the XPath 3.1 version of the specification. These changes are implemented since Saxon
             9.7, and are available provided XPath 3.1 is enabled.</i>
         </p>
+        <div class="qt4">
+          <p>TODO work required</p>
+          <p>In XPath 4.0, from Saxon 13, changes to <code>fn:format-number</code>:</p>
+          <ul>
+            <li>
+              <p>The decimal format name can now be supplied as a value of type
+                <code>xs:QName</code>, as an alternative to supplying a lexical QName as an
+                instance of <code>xs:string</code></p>
+            </li>
+            <li>
+              <p>Decimal format parameters can now be supplied directly as a map in the third
+                argument, rather than referencing a format defined in the static context.</p>
+            </li>
+            <li>
+              <p>For selected properties including minus sign, exponent-separator, percent and
+                per-mille, it is now possible to specify a single-character marker to be used
+                in the picture string, together with a multi-character rendition to be used in
+                the formatted output.</p>
+            </li>
+          </ul>
+        </div>
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>
@@ -3893,6 +3919,7 @@
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">random-number-generator</name>
+      <!-- TODO what is the return type??? -->
       <signatures>
         <proto>
           <arg name="seed" type="xs:anyAtomicType?" default="()" desc="The supplied seed"/>
@@ -3958,9 +3985,9 @@
         </proto>
       </signatures>
       <status>
-        <p class="qt4">Since Saxon 12.3, the implementation conforms with the XPath 4.0
-          specification, in which the function is extended to allow several items to be removed at
-          the same time.</p>
+        <p class="qt4">In the XPath 4.0 specification, the function is extended to allow several
+          items to be removed at the same time. This extension is available since Saxon 13 in XPath
+          4.0, and available since Saxon 12.3 provided that syntax extensions are enabled.</p>
       </status>
       <saxon-edition>ALL</saxon-edition>
       <description>

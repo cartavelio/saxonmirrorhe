@@ -338,6 +338,14 @@ TODO: rethink redefines and override
         element now uses the form mandated by the HTML5 living standard (with a <code>charset</code>
         attribute). Technically this is a non-conformance with the XSLT 3.0 / XQuery 3.1 specifications,
         but compliance with HTML5 clearly takes precedence here.</p>
+        
+        
+        <h2>4.0 Features not yet implemented</h2>
+        
+        <ul>
+            <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
+            <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> with <code>canonical="yes"</code>)</p></li>
+        </ul>
   
     </category>
     
@@ -407,21 +415,17 @@ TODO: rethink redefines and override
             Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
-            <li><p>PR1355, PR1708 - Named record types in XSLT (<code>xsl:record-type</code>)</p></li>
-            <!--<li><p>PR1856: lookahead/behind in regular expressions. While the basic
-            capability is implemented, captured groups within lookahead expressions
-            aren't fully working. TODO: is this still true?</p></li>-->
+            <li><p>PR1355, PR1708 - named record types in XSLT (<code>xsl:record-type</code>)</p></li>
             <li><p>PR1875 - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
-            <li><p>PR1773 - intersect and except in patterns (especially across different kinds of pattern, e.g. (node() | jnode())</p></li>
-            <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
+            <li><p>PR1773 - intersect and except in patterns (especially across different kinds of
+                pattern, e.g. <code>(node() | jnode())</code>)</p></li>
+            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
+            <li><p>PR1674 - composite sort keys in <code>xsl:sort</code></p></li>
             <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
             <li><p>XSLT <code>fn:regex-groups</code> function</p></li>
-            <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, not well tested</p></li>
-            <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
-            <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
+            <li><p>PR2051 - <code>merge-when</code> attribute for <code>xsl:for-each-group</code></p></li>
             <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
-            <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> wih <code>canonical="yes"</code>code>)</p></li>
-            <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
+            <li><p>PR2337 - new values for <code>xsl:mode/@typed</code></p></li>
         </ul>
 
  
@@ -441,7 +445,7 @@ TODO: rethink redefines and override
             Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
-            <li><p>Item type declarations in XSLT and XQuery have restrictions:</p>
+            <li><p>Item type declarations in XQuery have restrictions:</p>
                 <ul>
                     <li><p>In XQuery, forwards references to named item type declarations are not allowed.</p></li>
                     <li><p>In XQuery, self-references within named item type declarations are not allowed.</p></li>
@@ -449,8 +453,8 @@ TODO: rethink redefines and override
                         is an approximation to the type defined in the specification.</p></li>
                 </ul>
             </li>
-            <li><p>PR1355, PR1708 - Named record types in XQuery (<code>declare record type</code>)</p></li>
-            <li><p>PR1817, PR1853 - Methods</p></li>
+            <li><p>PR1355, PR1708 - named record types in XQuery (<code>declare record type</code>)</p></li>
+            <li><p>PR1817, PR1853 - methods</p></li>
             <li><p>PR1914 - try/catch/finally in XQuery</p></li>
         </ul>
         
@@ -472,6 +476,22 @@ TODO: rethink redefines and override
             (for example in the result of <code>load-xquery-module</code>) sometimes use 40
             unconditionally. The choice is only relevant when entries with binary keys 
             <code>xs:base64Binary</code> or <code>xs:hexBinary</code> are added to the map.</p>
+        
+        <p>An ordering is now defined over all instances of <code>xs:duration</code>, not just the
+            subtypes. A duration is defined to consist of an integer number of months, and a decimal
+            number of seconds, and the ordering relation takes the number of the months as the primary
+            key and the number of seconds as the secondary key. This gives sensible results in cases
+            where the number of seconds in the duration is less than the number of seconds in the
+            shortest month; but in other cases, such as when comparing the durations
+            <code>P1M</code> (one month) and <code>P100D</code> (one hundred days), the results are
+            well defined and well behaved (for example, the relation is transitive and symmetric),
+            but the answer may make little sense in terms of the real-world calendar.</p>
+        
+        <p>Function items now have an identity property, enabling them to be compared with
+            <code>fn:deep-equal()</code>.</p>
+        
+        <p>A <code>URIQualifiedName</code> may now supply a prefix as well as a URI and local name,
+            in the format <code>Q{uri}prefix:local</code>.</p>
         
         <h3>Changes to XPath Expressions</h3>
         
@@ -508,6 +528,11 @@ TODO: rethink redefines and override
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
             is dropped.</p>
         
+        <p>The ItemType syntax <code>union(a, b)</code> has been dropped from the 4.0 specification,
+            but remains supported in Saxon for the time being. The replacement syntax is <code>(a|b)</code>
+            (the parentheses are mandatory). This allows, for example, <code>as="(map(*)|array(*))"</code>
+            for a function or variable that accepts either a map or an array.</p>
+        
         <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (PR 1501)</p>
         
         <p>In decimal format properties, it is now possible to set composite values for some properties,
@@ -526,11 +551,6 @@ TODO: rethink redefines and override
                 implicitly by applying the coercion rules.</p></li>
             <li><p>TODO: is that still the case?</p></li>
         </ul>
-        
-        <p>The ItemType syntax <code>union(a, b)</code> has been dropped from the 4.0 specification,
-            but remains supported in Saxon for the time being. The replacement syntax is <code>(a|b)</code>
-            (the parentheses are mandatory). This allows, for example, <code>as="(map(*)|array(*))"</code>
-            for a function or variable that accepts either a map or an array.</p>
         
         <p>Saxon's implementation of the coercion rules (formerly known as the "function conversion rules") differs from
             the current 4.0 specification in the case where the required type is a GNode or JNode. In this situation Saxon will automatically
@@ -749,6 +769,9 @@ TODO: rethink redefines and override
             Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
+            <!--<li><p>PR1856: lookahead/behind in regular expressions. While the basic
+            capability is implemented, captured groups within lookahead expressions
+            aren't fully working. TODO: is this still true?</p></li>-->
             <li><p>PR957 - scan-left and scan-right functions</p></li>
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
             <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This

@@ -207,6 +207,9 @@
 				<li>map constructor</li>
 				<li>array constructor</li>
 			</ul>
+			
+			<p class="qt4">From XPath 4.0, function items have an identity property, which can be used to
+				test whether two variables refer to the same function item or not.</p>
 
 			<p>The following subsections provide more information about the use of function items, and
 				in particular describe new syntax and semantics introduced in the 4.0
@@ -451,6 +454,23 @@
 							<i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 			</ul>
+			
+			<div class="qt4">
+				<p>TODO give more details about 4.0 changes</p>
+				<p>XPath 4.0 introduces some changes for map items:</p>
+				<ul>
+					<li>
+						<p>constructors are added</p>
+					</li>
+					<li>
+						<p>the single accessor function is now an iterator over the key/value pairs in the
+							map</p>
+					</li>
+					<li>
+						<p>the items in a map are now ordered</p>
+					</li>
+				</ul>
+			</div>
 		</section>
 
 		<section id="arrays" title="Arrays">
@@ -735,12 +755,50 @@
 				back to a <code>SimpleArrayItem</code> at the end of the construction phase: this can be
 				achieved by means of a call on <code>array:filter()</code> with a predicate that selects
 				all members.</p>
+			
+			<div class="qt4">
+				<p>TODO give more details about 4.0 changes</p>
+				<p>XPath 4.0 introduces some changes for array items:</p>
+				<ul>
+					<li>
+						<p>constructors are added</p>
+					</li>
+					<li>
+						<p>the single accessor function is now an iterator over members of the array.</p>
+					</li>
+				</ul>
+			</div>
+		</section>
+		
+		<section id="jnodes" title="JNodes" class="qt4">
+			<h1>JNodes</h1>
+			
+			<aside>Available since Saxon 13 in XPath 4.0.</aside>
+			
+			<p>TODO add info! JNodes are introduced in XPath 4.0.</p>
+			
+			<ul>
+				<li><p>Generic node (gnode())</p> - <i/>represents a node in a tree, regardless of
+					whether it's a JSON tree or an XML tree.</li>
+				<li><p>JSON node (jnode())</p> - <i>represents a node in a JSON tree, as opposed to an
+					XML tree</i></li>
+			</ul>
+			<p>To complement the above changes, from 4.0 onwards, a node in an XML tree is known as an
+				XNode (node()) but remains otherwise unchanged.</p>
 		</section>
 
 		<section id="string-templates" title="String templates" class="qt4">
 			<h1>String templates</h1>
+			
+			<aside>Available since Saxon 13 in XPath 4.0. Available since Saxon 12.1 provided that syntax
+				extensions are enabled.</aside>
 
-			<p>New in XPath 4.0. TODO add more info</p>
+			<p>String templates provide a new way to construct strings. The string template is enclosed by
+				back-ticks, and consists of a sequence of fixed and variable parts - where the variable parts
+				are XPath expressions enclosed by curly braces.</p>
+			
+			<p>For example, <code>`{$day} of {$month}, {$year}`</code> is equivalent to <code>$day || ' of '
+				|| $month || ', ' || $year</code>.</p>
 		</section>
 
 
@@ -886,19 +944,37 @@
 				</tr>
 				<tr>
 					<td>
-						<p>
-							<code>=&gt;</code>
+						<p class="qt4">
+							<code>=&gt;</code>, <code>=!&gt;</code>
 						</p>
 					</td>
 					<td>
-						<p>arrow operator</p>
+						<p>arrow operator, mapping arrow operator</p>
 					</td>
 					<td>
-						<p>3.1</p>
+						<p>3.1, 4.0</p>
 					</td>
 					<td>
 						<p>
 							<a class="bodylink" href="arrow">Arrow expressions</a>
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p class="qt4">
+							<code>-&gt;</code>
+						</p>
+					</td>
+					<td>
+						<p>pipeline operator</p>
+					</td>
+					<td>
+						<p>4.0</p>
+					</td>
+					<td>
+						<p>
+							<a class="bodylink" href="pipeline">Pipeline expressions</a>
 						</p>
 					</td>
 				</tr>
@@ -1338,10 +1414,26 @@
 				</tr>
 				<tr>
 					<td>
+						<p class="qt4">following-or-self</p>
+					</td>
+					<td>
+						<p>Selects the current node and all following nodes</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
 						<p>following-sibling</p>
 					</td>
 					<td>
 						<p>Selects all subsequent child nodes of the same parent node</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p class="qt4">following-sibling-or-self</p>
+					</td>
+					<td>
+						<p>Selects the current node and all following sibling nodes</p>
 					</td>
 				</tr>
 				<tr>
@@ -1372,10 +1464,26 @@
 				</tr>
 				<tr>
 					<td>
+						<p class="qt4">preceding-or-self</p>
+					</td>
+					<td>
+						<p>Selects the current node and all preceding nodes</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
 						<p>preceding-sibling</p>
 					</td>
 					<td>
 						<p>Selects all preceding child nodes of the same parent node</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p class="qt4">preceding-sibling-or-self</p>
+					</td>
+					<td>
+						<p>Selects the current node and all preceding sibling nodes</p>
 					</td>
 				</tr>
 				<tr>
@@ -1387,6 +1495,9 @@
 					</td>
 				</tr>
 			</table>
+			<p class="qt4">The four new XPath 4.0 axes are available from Saxon 13:
+				<code>preceding-or-self</code>, <code>preceding-sibling-or-self</code>, 
+				<code>following-or-self</code>, and <code>following-sibling-or-self</code>.</p>
 			<p>When the child axis is used, <code>child::</code> may be omitted, and when the attribute
 				axis is used, <code>attribute::</code> may be abbreviated to <code>@</code>. The
 				expression <code>parent::node()</code> may be shortened to <code>..</code></p>
@@ -1395,10 +1506,14 @@
 					since it may now select items that are not nodes. If the context item is not a node,
 					any use of a path expression will raise an error.</i>
 			</p>
+			
 			<p>The node-test may be, for example:</p>
 			<ul>
 				<li>
 					<p>a node name</p>
+					<p class="qt4">In XPath 4.0, the default namespace for elements and types can be set to the
+						value <code>##any</code>, allowing unprefixed names in axis steps to match
+						elements with a given local name in any namespace.</p>
 				</li>
 				<li>
 					<p><code>prefix:*</code> to select nodes in a given namespace</p>
@@ -1496,6 +1611,8 @@
 				calls it with the argument value 2; while <code>$a(2)[3]</code> calls the function item
 					<code>$a</code> with argument value 2, and then selects the third item in the
 				resulting sequence.</p>
+			<p class="qt4">From XPath 4.0, filter expressions accept a sequence of integer positions, for
+				example <code>$in[3 to 5]</code> or <code>$in[1, 4, 7]</code>.</p>
 		</section>
 
 		<section id="lookup" title="Lookup expressions">
@@ -1567,6 +1684,20 @@
 					individually; it thus combines the functions of <code>=></code> and <code>!</code>,
 					which accounts for the choice of operator symbol.</p>
 			</div>
+		</section>
+		
+		<section id="pipeline" title="Pipeline expressions" class="qt4">
+			<h1>Pipeline expressions</h1>
+			
+			<p>XPath 4.0 introduces the <em>pipeline</em> operator <code>-&gt;</code>. The expression <code>A
+				-> B</code> evaluates expression <code>B</code> with the context value bound to the result
+				of evaluating <code>A</code>. This is similar to the <a class="bodylink"
+					href="../simplemapping">simple map</a> operator, but when the result of the left-hand side is a
+				sequence, in a pipeline expression this result is bound to the context value and the right-hand
+				side evaluated just once, while in a simple mapping expression the right-hand side is evaluated
+				once for each item in the resulting sequence. The pipeline operator is also similar to the <a
+					class="bodylink" href="../arrow">arrow</a> operator, but in an arrow expression the right-hand
+				side must be a function call, while in a pipeline expression it can be any expression.</p>
 		</section>
 
 		<section id="cast" title="Cast as, Treat as">
@@ -1758,6 +1889,13 @@
 					<code>>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>=&gt;</code>,
 					<code>-&gt;</code>, and <code>=!&gt;</code>. This feature is implemented from Saxon
 				12.3.</p>
+			
+			<p class="qt4">In XDM 4.0, an ordering is defined over all instances of <code>xs:duration</code>,
+				not just the subtypes.</p>
+			<p class="qt4">In XDM 4.0, atomic types are categorized into type families to make it clear which
+				values are comparable: atomic items belonging to types in the same family are mutually
+				comparable, items belonging to different type families are not. For more information, see <a
+					class="bodylink" href="/expressions/types">Types</a>.</p>
 		</section>
 
 		<section id="boolean" title="Logical operators">
@@ -1963,6 +2101,12 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 
 		<p>There are two main categories of type: schema types and item types.</p>
 		<p>TODO add more of an introduction to what is included in this section.</p>
+		
+		<p class="qt4">From XPath 4.0, for the purpose of comparing atomic items, the primitive atomic types are
+			divided into a number of type families: atomic items belonging to types in the same family are
+			mutually comparable, items belonging to different type families are not.</p>
+		<p>TODO In the table below, "comparison families" includes families for nodes, and function types
+			not just atomic types, this reflects comparisons using <code>fn:deep-equal</code></p>
 
 		<h2>Pre-defined types</h2>
 
@@ -2054,7 +2198,10 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 					<td class="comparison-family">
 						<p>Function</p>
 					</td>
-					<td class="notes"> </td>
+					<td class="notes">
+						<p>For more information, see <a class="bodylink"
+							href="/expressions/primary/arrays">Arrays</a>.</p>
+					</td>
 				</tr>
 				<tr>
 					<td class="name">
@@ -2502,7 +2649,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 				</tr>
 				<tr>
 					<td class="name">
-						<p class="qt4">
+						<p>
 							<code>function(*)</code>
 						</p>
 					</td>
@@ -2524,15 +2671,10 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 						<p>Function</p>
 					</td>
 					<td class="notes">
-						<?source https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items ?>
-						<p class="qt4"><a
-								href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items"
-								>XDM 4.0</a> introduces the concept of function identity, an abstract
-							property that can be used to test whether two variables refer to the same
-							function or to different functions. This has an impact on
-								<code>fn:deep-equal</code> and also when establishing whether the arguments
-							and results of a function are <i>the same</i> when deciding whether the
-							function is deterministic.</p>
+						<p>For more information, see <a class="bodylink"
+							href="/expressions/primary/function-items">Function items</a>.</p>
+						<p class="qt4">From XPath 4.0, function items have an identity property, which can be used to
+							test whether two variables refer to the same function item or not.</p>
 					</td>
 				</tr>
 				<tr>
@@ -2867,6 +3009,8 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 						<p>Function</p>
 					</td>
 					<td class="notes">
+						<p>For more information, see <a class="bodylink"
+							href="/expressions/primary/maps">Maps</a>.</p>
 						<p>A <code>record</code> may be used to constrain the type of items that may be
 							added to a map.</p>
 					</td>
@@ -3340,75 +3484,36 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 			</tbody>
 		</table>
 
-		<div class="qt4">
-			<p>XQuery and XPath Data Model 4.0 introduces new types in the Item category:</p>
-			<ul>
-				<li><p>Generic node (gnode())</p> - <i/>represents a node in a tree, regardless of
-					whether it's a JSON tree or an XML tree.</li>
-				<li><p>JSON node (jnode())</p> - <i>represents a node in a JSON tree, as opposed to an
-						XML tree</i></li>
-			</ul>
-			<p>To complement the above changes, from 4.0 onwards, a node in an XML tree is known as an
-				XNode (node()) but remains otherwise unchanged.</p>
-
-			<p>New types were also added to the Schema category in 4.0 but these are more easily
-				considered methods for constraining how other types are used:</p>
-			<ul>
-				<li>
-					<p>
-						<a class="bodylink" href="/expressions/types/choice-types">Choice item types</a>
-					</p>
-				</li>
-				<li>
-					<p>
-						<a class="bodylink" href="/expressions/types/choice-types">Record types</a>
-					</p>
-				</li>
-				<li>
-					<p>
-						<a class="bodylink" href="/expressions/types/choice-types">Enumeration types</a>
-					</p>
-				</li>
-			</ul>
-
-			<p>Since 4.0, atomic items that belong to the same comparison family are mutually
-				comparable.</p>
-		</div>
-
 		<p>For more detailed information about types, see:</p>
 		<ul>
 			<li>
 				<p>
-					<a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types">Types</a>
+					<a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types">Types</a> in the
+					XPath 4.0 specification
 				</p>
 			</li>
 			<li>
 				<p>
 					<a
 						href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#schemas-and-types"
-						>Schemas and Types</a>
+						>Schemas and Types</a> in the XDM 4.0 specification
 				</p>
 			</li>
 			<li>
 				<p>
 					<a
 						href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#atomic-items"
-						>Atomic Items</a>
+						>Atomic Items</a> in the XDM 4.0 specification
 				</p>
 			</li>
 			<li>
 				<p>
 					<a
 						href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-atomic-comparisons"
-						>Atomic Comparisons: An Overview (Non-Normative)</a>
+						>Atomic Comparisons: An Overview (Non-Normative)</a> in the XPath 4.0 specification
 				</p>
 			</li>
 		</ul>
-
-
-
-
-
 
 
 		<section id="choice-types" title="Choice types" class="qt4">
@@ -3702,6 +3807,34 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<aside>It is not possible to define recursive structures using type aliases, because a type
 				alias name cannot be used within the definition of the type alias being
 				declared.</aside>
+			
+			<h2>Built-in record types</h2>
+			
+			<p>TODO What details do we want to include here?</p>
+			<p>In XPath 4.0, there are 5 built-in named record types:</p>
+			
+			<ul>
+				<li><a
+					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#load-xquery-module-record"
+					><code>fn:load-xquery-module-record</code></a> - holds the result
+						of <code>fn:load-xquery-module</code></li>
+				<li><a
+					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#parsed-csv-structure-record"
+					><code>fn:parsed-csv-structure-record</code></a> - holds the result
+						of <code>fn:parse-csv</code></li>
+				<li><a
+					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#random-number-generator-record"
+					><code>fn:random-number-generator-record</code></a> - holds the
+						result of <code>fn:random-number-generator</code></li>
+				<li><a
+					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#schema-type-record"
+					><code>fn:schema-type-record</code></a> - represents the properties
+						of a simple or complex type in a schema</li>
+				<li><a
+					href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#uri-structure-record"
+					><code>fn:uri-structure-record</code></a> - represents the
+						components of a URI</li>
+			</ul>
 
 		</section>
 
@@ -3724,6 +3857,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<h1>KindTests and NodeTests</h1>
 			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon
 				10.</aside>
+			<p>TODO Content updates required. The current 4.0 spec does not call these "KindTests", or
+				include ElementNameOrWildCard in the grammar.</p>
 			<p>The syntax for the <code>element()</code> and <code>attribute()</code>
 				<code>KindTests</code> is extended to allow constructs of the form</p>
 			<pre><code class="language-xquery">element(*:div)</code></pre>
@@ -3765,6 +3900,13 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
 			<p>A named item type is an <code>ItemType</code> identified by an expanded
 					<code>QName</code>: namespace-uri, namespace-prefix and local name.</p>
+			
+			<p>TODO the syntax has changed for Saxon 13. The content here needs to be updated accordingly.</p>
+			
+			<p>TODO The syntax <code>type(T)</code> is dropped. A type alias <code>T</code> is now referenced simply
+				as <code>T</code>, not <code>type(T)</code>. In XSLT patterns, a match for items
+				of type <code>T</code> is written <code>match="~T"</code> rather than
+				<code>match="type(T)"</code>.</p>
 
 			<aside>Prior to XPath 4.0, named item types were available as a Saxon extension and known
 				as type aliases. During the development of this feature, the syntax and Saxon
@@ -3974,223 +4116,95 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			data in JSON format. For details see the <a class="bodylink" href="/functions">Functions
 				library</a>.</p>
 	</section>
-
+	
 	<section id="xpath40new" title="New features in XPath 4.0" class="qt4">
 		<h1>New features in XPath 4.0</h1>
 		<aside>These features are available in Saxon only if explicitly enabled, either directly, or
 			by requesting support for XSLT 4.0 or XQuery 4.0. In both cases, this requires Saxon-PE or
 			higher. Note that streaming and schema-awareness requires Saxon-EE.</aside>
-
-		<p>The following is a complete list of new features and language changes introduced in XPath
-			4.0. For full details see the W3C specifications (in particular <a class="bodylink"
+		
+		<p>Some of the new features in XPath 4.0 are as follows. For full details, see the W3C
+			specifications (in particular <a class="bodylink"
 				href="https://qt4cg.org/specifications/xquery-40/xpath-40.html">XML Path Language
 				(XPath) 4.0</a> and <a class="bodylink"
-				href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html">XQuery and
-				XPath Data Model 4.0</a>), and for further Saxon implementation details see the <a
-				class="bodylink" href="/conformance/xpath40">Conformance</a> section.</p>
-
+					href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html">XQuery and
+					XPath Data Model 4.0</a>), and for further Saxon implementation details see the <a
+						class="bodylink" href="/conformance/xpath40">Conformance</a> section.</p>
+		<ol>
+			<li>
+				<p><a class="bodylink" href="/expressions/primary/jnodes">GNodes, JNodes and XNodes</a></p>
+			</li>
+			<li>
+				<p><a class="bodylink" href="/expressions/primary/maps">Ordered maps</a></p>
+			</li>
+			<li>
+				<p><a class="bodylink" href="/expressions/primary/string-templates">String templates</a></p>
+			</li>
+			<li>
+				<p>New operators: <a class="bodylink" href="/expressions/operators/otherwise">otherwise</a>, <a
+					class="bodylink" href="/expressions/operators/pipeline">pipeline operator</a>, <a
+						class="bodylink" href="/expressions/operators/arrow">mapping arrow operator</a></p>
+			</li>
+			<li>
+				<p>New item types: <a class="bodylink" href="/expressions/types/choice-types">choice types</a>,
+					<a class="bodylink" href="/expressions/types/enum-types">enumeration types</a>, <a
+						class="bodylink" href="/expressions/types/record-types">record types</a>, <a
+							class="bodylink" href="/expressions/types/named-item-types">named item types</a></p>
+			</li>
+			<li>
+				<p>New syntax relating to functions:</p>
+				<ul>
+					<li>
+						<p><a class="bodylink" href="/expressions/primary/functioncalls">Keyword arguments</a> used in
+							function calls</p>
+					</li>
+					<li>
+						<p>New syntax for <a class="bodylink"
+							href="/expressions/primary/function-items/inline-functions">inline functions</a>
+							(<code>fn</code> abbreviation, and focus functions)</p>
+					</li>
+					<li>
+						<p><a class="bodylink" href="/expressions/primary/function-items/optional-parameters">Optional
+							parameters</a> with default values in function declarations</p>
+					</li>
+				</ul>
+			</li>
+			<li>
+				<p>New <a class="bodylink" href="/expressions/operators/path">axes</a>:
+					<code>preceding-or-self</code>, <code>preceding-sibling-or-self</code>,
+					<code>following-or-self</code>, and <code>following-sibling-or-self</code></p>
+			</li>
+		</ol>
+		
+		<p>Many new functions are available, for details see the <a class="bodylink" href="/functions">Functions
+				library</a>.</p>
+		
+		<p>TODO where does the following information belong?? What is implemented in Saxon?</p> 
+		<p>The XPath language specification now includes a section on <i>External Resources and
+			Security</i>, which introduces the following changes:</p>
 		<ul>
 			<li>
-				<p>The previously optional Static Typing Feature has been dropped completely (see XPath
-					3.1 for a <a
-						href="https://www.w3.org/TR/2017/REC-xpath-31-20170321/#dt-xpath-static-typing-feature"
-						>description of the feature</a> prior to 4.0).</p>
-			</li>
-			<li>
-				<p>The rules have been relaxed regarding the use of <a
-						href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xml-and-xsd-versions"
-						>non-XML characters</a> in instances of <code>xs:string</code>. This has an impact
-					on <a
-						href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-parse-json"
-							><code>fn:parse-json</code></a>, <a
-						href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-json-to-xml"
-							><code>fn:json-to-xml</code></a> and the new function <a
-						href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#func-decode-from-uri"
-							><code>fn:decode-from-uri</code></a>.</p>
-			</li>
-			<li>
-				<p>The concept of a <i>context item</i> has been generalised so that it is no longer
-					restricted to representing a single item. Where this is the case, it may be referred
-					to as the <i>context value</i>. In XSLT, where the restriction still applies, it is
-					still referred to as the <i>context item</i>.</p>
-			</li>
-			<li>
-				<p>A <i>document-uri</i> is no longer guaranteed to always represent the same
-					document.</p>
-			</li>
-			<li>
-				<p>The term <i>atomic item</i> replaces <i>atomic value</i></p>
-			</li>
-			<li>
-				<p>It's now possible to compare and sort all types of atomic item:</p>
+				<p>Some functions now accept an option named <code>trusted</code>:</p>
 				<ul>
 					<li>
-						<p>Atomic types are categorized into type families to make it clear which values
-							are comparable.</p>
+						<p>for <code>fn:load-xquery-module</code>, <code>fn:transform</code> and
+							<code>xsl:evaluate</code>, to specify whether dynamically loaded code
+							is trusted</p>
 					</li>
 					<li>
-						<p>Every atomic type has a sort order, including <code>xs:duration</code>.</p>
+						<p>for <code>fn:parse-xml</code>, <code>fn:doc</code>,
+							<code>fn:xsd-validator</code>, to specify whether dynamically loaded
+							XML is allowed to reference further external resources (such as external
+							entities)</p>
 					</li>
 				</ul>
 			</li>
 			<li>
-				<p>Support for new item types:</p>
-				<ul>
-					<li>
-						<p>Generic nodes (GNode)</p>
-					</li>
-					<li>
-						<p>JSON nodes (JNode)</p>
-					</li>
-					<li>
-						<p>A new name for XML nodes: XNode</p>
-					</li>
-					<li>
-						<p>
-							<a class="bodylink" href="/expressions/types/choice-types">Choice item
-								types</a>
-						</p>
-					</li>
-					<li>
-						<p><a class="bodylink" href="/expressions/types/record-types">Record types</a>,
-							including 5 built-in named record types:</p>
-						<ul>
-							<li><a
-									href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#load-xquery-module-record"
-										><code>fn:load-xquery-module-record</code></a> - <i>holds the result
-									of <code>fn:load-xquery-module</code></i></li>
-							<li><a
-									href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#parsed-csv-structure-record"
-										><code>fn:parsed-csv-structure-record</code></a> - <i>holds the result
-									of <code>fn:parse-csv</code></i></li>
-							<li><a
-									href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#random-number-generator-record"
-										><code>fn:random-number-generator-record</code></a> - <i>holds the
-									result of <code>fn:random-number-generator</code></i></li>
-							<li><a
-									href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#schema-type-record"
-										><code>fn:schema-type-record</code></a> - <i>represents the properties
-									of a simple or complex type in a schema</i></li>
-							<li><a
-									href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#uri-structure-record"
-										><code>fn:uri-structure-record</code></a> - <i>represents the
-									components of a URI</i></li>
-						</ul>
-					</li>
-					<li>
-						<p>
-							<a class="bodylink" href="/expressions/types/enum-types">Enum types</a>
-						</p>
-					</li>
-					<li>
-						<p>
-							<a class="bodylink" href="/expressions/types/kindtests">KindTests and
-								NodeTests</a>
-						</p>
-					</li>
-					<li>
-						<p>
-							<a class="bodylink" href="/expressions/types/named-item-types">Named item
-								types</a>
-						</p>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<p>Function items now have identity, impacting <code>fn:deep-equal</code>.</p>
-			</li>
-			<li>
-				<p>Changes to map items:</p>
-				<ul>
-					<li>
-						<p>constructors are added</p>
-					</li>
-					<li>
-						<p>the single accessor function is now an iterator over the key/value pairs in the
-							map.</p>
-					</li>
-					<li>
-						<p>the items in a map are now ordered</p>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<p>Changes to array items:</p>
-				<ul>
-					<li>
-						<p>constructors are added</p>
-					</li>
-					<li>
-						<p>the single accessor function is now an iterator over members of the array.</p>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<p>The default namespace for elements and types can be set to the value <a
-						href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#static_context"
-							><code>##any</code></a>, allowing unprefixed names in axis steps to match
-					elements with a given local name in any namespace.</p>
-			</li>
-			<li>
-				<p>A URIQualifiedName <a
-						href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-namespaces-and-qnames"
-						>may now supply a prefix</a> as well as a URI and local name.</p>
-			</li>
-			<li>
-				<p>Changes to <code>fn:format-number</code>:</p>
-				<ul>
-					<li>
-						<p>The decimal format name can now be supplied as a value of type
-								<code>xs:QName</code>, as an alternative to supplying a lexical QName as an
-							instance of <code>xs:string</code></p>
-					</li>
-					<li>
-						<p>Decimal format parameters can now be supplied directly as a map in the third
-							argument, rather than referencing a format defined in the static context.</p>
-					</li>
-					<li>
-						<p>For selected properties including minus sign, exponent-separator, percent and
-							per-mille, it is now possible to specify a single-character marker to be used
-							in the picture string, together with a multi-character rendition to be used in
-							the formatted output.</p>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<p>The XPath language specification now includes a section on <i>External Resources and
-						Security</i>, which introduces the following changes:</p>
-				<ul>
-					<li>
-						<p>Some functions now accept an option named <code>trusted</code>:</p>
-						<ul>
-							<li>
-								<p>for <code>fn:load-xquery-module</code>, <code>fn:transform</code> and
-										<code>xsl:evaluate</code>, to specify whether dynamically loaded code
-									is trusted</p>
-							</li>
-							<li>
-								<p>for <code>fn:parse-xml</code>, <code>fn:doc</code>,
-										<code>fn:xsd-validator</code>, to specify whether dynamically loaded
-									XML is allowed to reference further external resources (such as external
-									entities)</p>
-							</li>
-						</ul>
-					</li>
-					<li>
-						<p>Some functions now accept an option named <code>xinclude</code>, to specify
-							whether <code>xi:include</code> elements in the input are to be expanded:
-								<code>fn:doc</code>, <code>fn:parse-xml</code></p>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<p>An <a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-conditionals"
-						>alternate syntax</a> has been introduced for conditional expressions. It uses
-					curly braces and the else sub-expression can be ommitted, for example: <code>if
-						($condition = true()) { $do_something }</code></p>
+				<p>Some functions now accept an option named <code>xinclude</code>, to specify
+					whether <code>xi:include</code> elements in the input are to be expanded:
+					<code>fn:doc</code>, <code>fn:parse-xml</code></p>
 			</li>
 		</ul>
-
 	</section>
 
 </article>

@@ -159,12 +159,12 @@
          <li><p>A small number of constructs that should be streamable according to the XSLT 3.0 specification are
          not streamable in Saxon; and vice versa.</p></li>
          
-         <li><p><p>From Saxon 13, there are a few cases where Saxon at run-time accepts values that are not
+         <li><p>From Saxon 13, there are a few cases where Saxon at run-time accepts values that are not
          allowed in XSLT 3.0 but are allowed by the draft XSLT 4.0 specification. For example,
          functions such as <code>key</code> and <code>element-available</code>
             may accept a <code>URIQualifiedName</code> in the format
          <code>Q{uri}prefix:local</code>, where the prefix has no effect on the functionality.
-        </p></p></li>
+        </p></li>
       </ol>
          
  
