@@ -150,8 +150,13 @@ public class XSLImportSchema extends StyleElement {
             }
             getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
         } catch (SchemaException err) {
-            compileError(new XPathException(err.getMessage())
-                                 .withErrorCode(err.getErrorCodeQName()).withLocation(this));
+            if (err.getErrorCodeQName() == null) {
+                compileError(err.getMessage(), "XTSE0220");
+            } else {
+                compileError(new XPathException(err.getMessage())
+                                     .withErrorCode(err.getErrorCodeQName())
+                                     .withLocation(this));
+            }
         }
 
     }

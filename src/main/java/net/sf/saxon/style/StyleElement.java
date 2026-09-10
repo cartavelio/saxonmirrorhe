@@ -366,11 +366,11 @@ public abstract class StyleElement extends ElementImpl {
             qName = StructuredQName.fromLexicalQName((lexicalQName), false,
                                                      true, this);
         } catch (XPathException e) {
+            String requestedError = errorCode == null ? "XTSE0020" : errorCode;
             XPathException e2 = e.asStaticError()
                     .replacingErrorCode("FONS0004", "XTSE0280")
-                    .replacingErrorCode("FOCA0002", "XTSE0020")
-                    .maybeWithErrorCode(errorCode == null ? "XTSE0020": errorCode)
-                    .asStaticError()
+                    .replacingErrorCode("FOCA0002", requestedError)
+                    .maybeWithErrorCode(requestedError)
                     .withLocation(attributeName == null ? this : new AttributeLocation(this, StructuredQName.fromEQName((attributeName))));
             compileError(e2);
             qName = new StructuredQName("saxon", NamespaceUri.SAXON, "error-name");
