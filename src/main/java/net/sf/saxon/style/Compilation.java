@@ -23,7 +23,7 @@ import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.UsePack;
 import net.sf.saxon.trans.packages.VersionedPackageName;
-
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NestedIntegerValue;
@@ -36,6 +36,15 @@ import java.util.*;
  */
 public class Compilation {
 
+    private static class ModuleInfo {
+        DocumentKey key;
+        NestedIntegerValue precedence;
+        public ModuleInfo(DocumentKey key, NestedIntegerValue precedence) {
+            this.key = key;
+            this.precedence = precedence;
+        }
+    }
+
     // diagnostic switch to control output of timing information
     public static boolean TIMING = false;
     private final Configuration config;
@@ -46,7 +55,7 @@ public class Compilation {
     private final QNameParser qNameParser;
     private final Map<StructuredQName, ValueAndPrecedence> staticVariables = new HashMap<>();
     private final Map<DocumentKey, TreeInfo> stylesheetModules = new HashMap<>();
-    private final Stack<DocumentKey> importStack = new Stack<>(); // handles both include and import
+    private final IndexedStack<ModuleInfo> importStack = new IndexedStack<>(); // handles both include and import
     private PackageData packageData;
     private boolean preScan = true;
     private boolean createsSecondaryResultDocuments = false;
@@ -634,13 +643,35 @@ public class Compilation {
     }
 
     /**
-     * Get the stack of include/imports, used to detect circularities
-     *
-     * @return the include/import stack
+     * Push details of a new included/imported module onto the module stack
+     * @param key represents the normalized URI of the module
+     * @param precedence the import precedence of the module
      */
 
-    public Stack<DocumentKey> getImportStack() {
-        return importStack;
+    public void pushModule(DocumentKey key, NestedIntegerValue precedence) {
+        importStack.push(new ModuleInfo(key, precedence));
+    }
+
+    /**
+     * Pop details of an included/imported module off the stack
+     */
+    public void popModule() {
+        importStack.pop();
+    }
+
+    /**
+     * Determine whether the include/import stack contains a stylesheet module with a given URI,
+     * and if so, return the precedence of the topmost such occurrence
+     * @param key the document key of the required stylesheet module
+     * @return the import precedence of the module if found, or null otherwise
+     */
+    public NestedIntegerValue stackContainsModule(DocumentKey key) {
+        for (int pos = importStack.size()-1; pos>=0; pos--) {
+            if (importStack.get(pos).key.equals(key)) {
+                return importStack.get(pos).precedence;
+            }
+        }
+        return null;
     }
 
     /**

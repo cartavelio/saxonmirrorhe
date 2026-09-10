@@ -63,27 +63,22 @@ public class StylesheetModule {
     /**
      * Build the tree representation of a stylesheet module
      *
-     *
      * @param styleSource the source of the module
      * @param topLevelModule true if this module is the outermost module of a package
      * @param compilation the XSLT compilation episode
      * @param precedence the import precedence for static variables declared
      * in the module. (This is handled differently from the precedence of other components
      * because it needs to be allocated purely sequentially).
-     * @return the tree representation of the XML document containing the stylesheet module
-     * @throws net.sf.saxon.trans.XPathException
-     *          if XML parsing or tree
-     *          construction fails
+     * @return the tree representation of the XML document containing the stylesheet module, or null if it is to be ignored
+     * @throws net.sf.saxon.trans.XPathException if XML parsing or tree construction fails
      */
     public static DocumentImpl loadStylesheetModule(
             Source styleSource, boolean topLevelModule, Compilation compilation, NestedIntegerValue precedence) throws XPathException {
 
-        String systemId = styleSource.getSystemId();
-        DocumentKey docURI = systemId == null ? null : new DocumentKey(systemId);
-        if (systemId != null && compilation.getImportStack().contains(docURI)) {
-            throw new XPathException("The stylesheet module includes/imports itself directly or indirectly", "XTSE0180");
+        boolean use = pushAndCheck(styleSource, compilation, precedence);
+        if (!use) {
+            return null;
         }
-        compilation.getImportStack().push(docURI);
 
         Configuration config = compilation.getConfiguration();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
@@ -113,7 +108,7 @@ public class StylesheetModule {
             sendStylesheetSource(styleSource, config, commentStripper, options);
             doc = (DocumentImpl)styleBuilder.getCurrentRoot();
             styleBuilder.reset();
-            compilation.getImportStack().pop();
+            compilation.popModule();
             return doc;
         } catch (XPathException err) {
             if (topLevelModule && !err.hasBeenReported()) {   // bug 2244
@@ -125,6 +120,33 @@ public class StylesheetModule {
                 ParseOptions.close(styleSource);
             }
         }
+    }
+
+    /**
+     * Push a module onto the include/import stack, checking that it is not already there (which implies a circularity).
+     * But in 4.0, a circular include within a stylesheet level is permitted, and causes the include to be ignored
+     * @param styleSource the source of the included stylesheet module
+     * @param compilation the compilation, which holds the module stack
+     * @param precedence the import precedence at which the module is to be loaded
+     * @return true if the module is to be processed, false if it is to be ignored (4.0 only)
+     * @throws XPathException if a disallowed circularity is detected
+     */
+    private static boolean pushAndCheck(Source styleSource, Compilation compilation, NestedIntegerValue precedence) throws XPathException {
+        String systemId = styleSource.getSystemId();
+        DocumentKey docURI = systemId == null ? null : new DocumentKey(systemId);
+        if (systemId != null) {
+            NestedIntegerValue prevPrecedence = compilation.stackContainsModule(docURI);
+            if (prevPrecedence != null) {
+                // Implies a cycle; in 4.0 this is OK provided it's within a stylesheet level
+                if (compilation.getCompilerInfo().getXsltVersion() >= 40 && prevPrecedence.equals(precedence)) {
+                    // Simply ignore the xsl:include
+                    return false;
+                }
+                throw new XPathException("The stylesheet module includes/imports itself directly or indirectly", "XTSE0180");
+            }
+        }
+        compilation.pushModule(docURI, precedence);
+        return true;
     }
 
     private static ParseOptions makeStylesheetParseOptions(Source styleSource, PipelineConfiguration pipe) {
@@ -182,13 +204,8 @@ public class StylesheetModule {
             ((SAXSource) styleSource).setXMLReader(null);
         }
         //#endif
-        
-        String systemId = styleSource.getSystemId();
-        DocumentKey docURI = systemId == null ? null : new DocumentKey(systemId);
-        if (systemId != null && compilation.getImportStack().contains(docURI)) {
-            throw new XPathException("The stylesheet module includes/imports itself directly or indirectly", "XTSE0180");
-        }
-        compilation.getImportStack().push(docURI);
+
+        pushAndCheck(styleSource, compilation, NestedIntegerValue.TWO);
         compilation.setMinimalPackageData();
 
         Configuration config = compilation.getConfiguration();
@@ -251,7 +268,7 @@ public class StylesheetModule {
                 // We loaded source XSLT (could be xsl:package or xsl:stylesheet or an LRE...
                 doc = styleBuilder.getCurrentRoot();
                 styleBuilder.reset();
-                compilation.getImportStack().pop();
+                compilation.popModule();
 
                 PreparedStylesheet pss = new PreparedStylesheet(compilation);
                 PrincipalStylesheetModule psm = compilation.compilePackage(doc.asActiveSource());
@@ -488,7 +505,7 @@ public class StylesheetModule {
                     StylesheetModule inc =
                             xslinc.getIncludedStylesheet(this, precedence);
                     if (inc == null) {
-                        return;  // error has been reported
+                        continue;  // error has been reported, or module is to be ignored
                     }
                     errors = ((XSLGeneralIncorporate) child).getCompilation().getErrorCount() - errors;
                     if (errors > 0) {

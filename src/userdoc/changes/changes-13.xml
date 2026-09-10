@@ -318,6 +318,10 @@
         
         <p>In XSLT, the <code>xsl:sequence</code> instruction now allows an <code>@as</code> attribute.</p>
         
+        <p>In XSLT, <code>xsl:include</code> declarations now allow cycles and "diamond" structures: if
+        the same module is included more than once at the same stylesheet (import) level. all but the first
+        <code>xsl:include</code> declarations are ignored.</p>
+        
         <h2>Dropped experimental features</h2>
         
         <p>Some proposed enhancements that didn't survive into the current 4.0 draft specifications

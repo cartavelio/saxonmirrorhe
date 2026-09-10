@@ -300,7 +300,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
     public XSLModuleRoot getStylesheetDocument(DocumentKey key) {
         XSLModuleRoot sheet = moduleCache.get(key);
-        if (sheet != null) {
+        if (sheet != null && sheet.getCompilation().getCompilerInfo().getXsltVersion() < 40) {
             sheet.issueWarning("Stylesheet module " + key + " is included or imported more than once. " +
                                        "This is permitted, but may lead to errors or unexpected behavior", SaxonErrorCode.SXWN9019);
         }
@@ -515,10 +515,12 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
                 if (includedTree == null) {
-                    throw new XPathException("Internal problem: the included stylesheet module '" + href + "' should be in the compiler's module store, but was not found");
+                    // In 4.0, this can be due to an ignored redundant include
+                    //throw new XPathException("Internal problem: the included stylesheet module '" + href + "' should be in the compiler's module store, but was not found");
+                } else {
+                    StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
+                    gatherUsePackageDeclarations(compilation, incWrapper, declarations);
                 }
-                StyleElement incWrapper = (StyleElement) ((DocumentImpl) includedTree.getRootNode()).getDocumentElement();
-                gatherUsePackageDeclarations(compilation, incWrapper, declarations);
             }
         }
     }

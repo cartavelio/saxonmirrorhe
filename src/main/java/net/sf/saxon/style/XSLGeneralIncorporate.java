@@ -84,7 +84,8 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
      *
      * @param importer   the module that requested the include or import (used to check for cycles)
      * @param precedence the import precedence to be allocated to the included or imported module
-     * @return the xsl:stylesheet element at the root of the included/imported module
+     * @return the xsl:stylesheet element at the root of the included/imported module, or null if
+     * it is to be ignored
      */
 
     /*@Nullable*/
@@ -112,6 +113,11 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 incModule = new StylesheetModule(includedSheet, precedence);
                 incModule.setImporter(importer);
 
+                // in 4.0, ignore the xsl:include if the import precedence is the same
+                if (getCompilation().getCompilerInfo().getXsltVersion() == 40 && incModule.getPrecedence() == precedence) {
+                    return null;
+                }
+
                 // check for recursion
                 if (checkForRecursion(importer, incModule.getRootElement().asActiveSource())) {
                     return null;
@@ -122,7 +128,10 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
 //                Map<DocumentURI, TreeInfo> map = getCompilation().getStylesheetModules();
 //                DocumentImpl includedDoc = (DocumentImpl)map.get(key);
                 DocumentImpl includedDoc = targetDoc;
-                assert includedDoc != null;
+                // In 4.0 this is null if the xsl:include was redundant
+                if (includedDoc == null) {
+                    return null;
+                }
                 ElementImpl outermost = includedDoc.getDocumentElement();
 
                 if (outermost instanceof LiteralResultElement) {

@@ -268,7 +268,9 @@ public class UseWhenFilter extends ProxyReceiver {
             }
             try {
                 DocumentImpl includedDoc = StylesheetModule.loadStylesheetModule(source, false, compilation, newPrecedence);
-                map.put(key, includedDoc);
+                if (includedDoc != null) {
+                    map.put(key, includedDoc);
+                }
                 return includedDoc;
             } catch (XPathException e) {
                 e.maybeSetErrorCode("XTSE0165");
