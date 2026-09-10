@@ -33,13 +33,13 @@ namespace Saxon.Api {
         private XQueryExecutable projectionQuery;
 
         private Saxon.Hej.s9api.DocumentBuilder s9Builder;
-
-
+        
         internal DocumentBuilder(Processor processor) {
             this.processor = processor;
             this.s9Builder = processor.JProcessor.newDocumentBuilder();
             this.config = processor.Implementation;
             this.xmlResolver = new StandardXmlResolver(this.config);
+
         }
 
         /// <summary>

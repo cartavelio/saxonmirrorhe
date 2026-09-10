@@ -15,8 +15,8 @@ namespace Saxon.Impl.Overrides {
         
         
         protected internal override void loadLicense(Saxon.Hej.Configuration config) {
-            String dir = System.Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR");
-            String path = dir + "/saxon-license.lic";
+            string dir = System.Environment.GetEnvironmentVariable("SAXON_LICENSE_DIR");
+            string path = dir + "/saxon-license.lic";
             loadLicense(path);
         }
 
