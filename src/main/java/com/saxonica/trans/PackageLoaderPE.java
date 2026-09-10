@@ -13,6 +13,7 @@ import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.MemoFunction;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.FunctionLibrary;
+import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.functions.hof.AtomicConstructorFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.hof.UserFunctionReference;
@@ -199,6 +200,11 @@ public class PackageLoaderPE extends PackageLoaderHE {
             return super.processComponentReference(pack, call);
         }
         return false;
+    }
+
+    @Override
+    protected void addVendorFunctionLibrary(FunctionLibraryList targetList, Configuration config) {
+        targetList.addFunctionLibrary(((ProfessionalConfiguration)config).getVendorFunctionSet());
     }
 
 
