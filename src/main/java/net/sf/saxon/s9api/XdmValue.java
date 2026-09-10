@@ -122,14 +122,16 @@ public class XdmValue implements Iterable<XdmItem> {
      *
      * @param value the supplied Sequence (which may be a singleton Item),
      * @return an XdmValue corresponding to the supplied Sequence. If the
-     *         supplied value is null, an empty sequence is returned. If the supplied
-     *         value is an atomic value, the result will be an instance of XdmAtomicValue.
+     *         supplied value is null, an empty sequence is returned.
      *         <ul>
-     *         <li>If the supplied value is a node, the result will be an instance of XdmNode.</li>
-     *         <li>If the supplied value is a map, the result will be an instance of XdmMap.</li>
-     *         <li>If the supplied value is an array, the result will be an instance of XdmArray.</li>
+     *         <li>If the supplied value is an empty sequence, the result will be an instance
+     *         (the singleton instance) of {@link XdmEmptySequence}.</li>
+     *         <li>If the supplied value is an atomic value, the result will be an instance of {@link XdmAtomicValue}.</li>
+     *         <li>If the supplied value is a node, the result will be an instance of {@link XdmNode}.</li>
+     *         <li>If the supplied value is a map, the result will be an instance of {@link XdmMap}.</li>
+     *         <li>If the supplied value is an array, the result will be an instance of {@link XdmArray}.</li>
      *         <li>If the supplied value is a function item, the result will be an instance of
-     *         XdmFunctionItem.</li>
+     *         {@link XdmFunctionItem}.</li>
      *         </ul>
      * @throws SaxonApiUncheckedException if the supplied Sequence is not yet fully evaluated, and evaluation
      *                                    of the underlying expression fails with a dynamic error.

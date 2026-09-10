@@ -7,6 +7,8 @@
 
 package net.sf.saxon.expr.parser;
 
+import net.sf.saxon.z.IntHashSet;
+
 import java.util.HashMap;
 
 /**
@@ -668,6 +670,8 @@ public abstract class Token {
     public static final int DIRECT_PI_CONSTRUCTOR = 231;
     public static final int DIRECT_COMMENT_CONSTRUCTOR = 232;
 
+    public static final int NODE_TEST = 240;
+
     /**
      * Unary minus sign
      */
@@ -679,14 +683,14 @@ public abstract class Token {
      * Pseudo-tokens that are now identified by the parser rather than the tokenizer
      */
 
-    public static final int ATTRIBUTE_LPAREN = 400;
-    public static final int ELEMENT_LPAREN = 401;
-    public static final int TEXT_LPAREN = 402;
-    public static final int COMMENT_LPAREN = 403;
-    public static final int PROCESSING_INSTRUCTION_LPAREN = 404;
-    public static final int DOCUMENT_NODE_LPAREN = 405;
-    public static final int NAMESPACE_NODE_LPAREN = 406;
-    public static final int NODE_LPAREN = 407;
+//    public static final int ATTRIBUTE_LPAREN = 400;
+//    public static final int ELEMENT_LPAREN = 401;
+//    public static final int TEXT_LPAREN = 402;
+//    public static final int COMMENT_LPAREN = 403;
+//    public static final int PROCESSING_INSTRUCTION_LPAREN = 404;
+//    public static final int DOCUMENT_NODE_LPAREN = 405;
+//    public static final int NAMESPACE_NODE_LPAREN = 406;
+//    public static final int NODE_LPAREN = 407;
     public static final int ITEM_LPAREN = 408;
     public static final int ARRAY_LPAREN = 409;
     public static final int MAP_LPAREN = 410;
@@ -695,7 +699,7 @@ public abstract class Token {
     public static final int TYPE_LPAREN = 413;
     public static final int ENUM_LPAREN = 414;
     public static final int EMPTY_SEQUENCE_LPAREN = 415;
-    public static final int SCHEMA_ATTRIBUTE_LPAREN = 416;
+    //public static final int SCHEMA_ATTRIBUTE_LPAREN = 416;
     public static final int SCHEMA_ELEMENT_LPAREN = 417;
 
 
@@ -704,120 +708,133 @@ public abstract class Token {
      */
 
     public final static String[] tokens = new String[300];
+    private final static HashMap<String, Integer> keywordTokens = new HashMap<>(150);
+    private final static IntHashSet keywordTokenSet = new IntHashSet(150);
+    
+    private static void reg(int token, String display) {
+        tokens[token] = display;
+    }
+
+    private static void regk(int token, String display) {
+        tokens[token] = display;
+        keywordTokens.put(display, token);
+        keywordTokenSet.add(token);
+    }
 
     static {
-        tokens[EOF] = "<eof>";
-        tokens[UNION] = "|";
-        tokens[SLASH] = "/";
-        tokens[AT] = "@";
-        tokens[LSQB] = "[";
-        tokens[LPAREN] = "(";
-        tokens[EQUALS] = "=";
-        tokens[COMMA] = ",";
-        tokens[SLASH_SLASH] = "//";
-        tokens[OR] = "or";
-        tokens[AND] = "and";
-        tokens[GT] = ">";
-        tokens[LT] = "<";
-        tokens[GE] = ">=";
-        tokens[LE] = "<=";
-        tokens[PLUS] = "+";
-        tokens[MINUS] = "-";
-        tokens[MULT] = "*";
-        tokens[MATH_MULT] = "×";
-        tokens[DIV] = "div";
-        tokens[MATH_DIVIDE] = "÷";
-        tokens[MOD] = "mod";
-        tokens[IS] = "is";
-        tokens[DOLLAR] = "$";
-        tokens[NE] = "!=";
-        tokens[BANG] = "!";
-        tokens[CONCAT] = "||";
-        tokens[INTERSECT] = "intersect";
-        tokens[EXCEPT] = "except";
-        tokens[RETURN] = "return";
-        tokens[THEN] = "then";
-        tokens[ELSE] = "else";
-        tokens[TO] = "to";
-        tokens[IN] = "in";
-        tokens[SOME] = "some";
-        tokens[EVERY] = "every";
-        tokens[SATISFIES] = "satisfies";
-        tokens[FUNCTION_CALL] = "<function>(";
-        tokens[AXIS] = "<axis>";
-        tokens[IF] = "if(";
-        tokens[PRECEDES] = "<<";
-        tokens[FOLLOWS] = ">>";
-        tokens[COLONCOLON] = "::";
-        tokens[COLONSTAR] = ":*";
-        tokens[HASH] = "#";
-        tokens[INSTANCE_OF] = "instance of";
-        tokens[CAST_AS] = "cast as";
-        tokens[TREAT_AS] = "treat as";
-        tokens[QMARK_QMARK] = "??";
-        tokens[BANG_BANG] = "!!";
-        tokens[FEQ] = "eq";
-        tokens[FNE] = "ne";
-        tokens[FGT] = "gt";
-        tokens[FGE] = "ge";
-        tokens[FLT] = "lt";
-        tokens[FLE] = "le";
-        tokens[IDIV] = "idiv";
-        tokens[CASTABLE_AS] = "castable as";
-        tokens[ASSIGN] = ":=";
-        tokens[SWITCH] = "switch";
-        tokens[TYPESWITCH] = "typeswitch";
-        tokens[CASE] = "case";
-        tokens[DEFAULT] = "default";
+        reg(EOF, "<eof>");
+        reg(UNION, "|");
+        reg(SLASH, "/");
+        reg(AT, "@");
+        reg(LSQB, "[");
+        reg(LPAREN, "(");
+        reg(EQUALS, "=");
+        reg(COMMA, ",");
+        reg(SLASH_SLASH, "//");
+        regk(OR, "or");
+        regk(AND, "and");
+        reg(GT, ">");
+        reg(LT, "<");
+        reg(GE, ">=");
+        reg(LE, "<=");
+        reg(PLUS, "+");
+        reg(MINUS, "-");
+        reg(MULT, "*");
+        reg(MATH_MULT, "×");
+        regk(DIV, "div");
+        reg(MATH_DIVIDE, "÷");
+        regk(MOD, "mod");
+        regk(IS, "is");
+        reg(DOLLAR, "$");
+        reg(NE, "!=");
+        reg(BANG, "!");
+        reg(CONCAT, "||");
+        regk(INTERSECT, "intersect");
+        regk(EXCEPT, "except");
+        regk(RETURN, "return");
+        regk(THEN, "then");
+        regk(ELSE, "else");
+        regk(TO, "to");
+        regk(IN, "in");
+        regk(SOME, "some");
+        regk(EVERY, "every");
+        regk(SATISFIES, "satisfies");
+        reg(FUNCTION_CALL, "<function>(");
+        reg(AXIS, "<axis>");
+        regk(IF, "if");
+        reg(PRECEDES, "<<");
+        reg(FOLLOWS, ">>");
+        reg(COLONCOLON, "::");
+        reg(COLONSTAR, ":*");
+        reg(HASH, "#");
+        reg(INSTANCE_OF, "instance of");
+        reg(CAST_AS, "cast as");
+        reg(TREAT_AS, "treat as");
+        reg(QMARK_QMARK, "??");
+        reg(BANG_BANG, "!!");
+        regk(FEQ, "eq");
+        regk(FNE, "ne");
+        regk(FGT, "gt");
+        regk(FGE, "ge");
+        regk(FLT, "lt");
+        regk(FLE, "le");
+        regk(IDIV, "idiv");
+        reg(CASTABLE_AS, "castable as");
+        reg(ASSIGN, ":=");
+        regk(SWITCH, "switch");
+        regk(TYPESWITCH, "typeswitch");
+        regk(CASE, "case");
+        regk(DEFAULT, "default");
         //tokens [ AS_FIRST ] = "as first";
         //tokens [ AS_LAST ] = "as last";
-        tokens[AFTER] = "after";
-        tokens[BEFORE] = "before";
-        tokens[INTO] = "into";
-        tokens[WITH] = "with";
-        tokens[MODIFY] = "modify";
-        tokens[AS] = "as";
-        tokens[REPLACE] = "replace";
+        regk(AFTER, "after");
+        regk(BEFORE, "before");
+        regk(INTO, "into");
+        regk(WITH, "with");
+        regk(MODIFY, "modify");
+        regk(AS, "as");
+        regk(REPLACE, "replace");
 
-        tokens[COLON] = ":";
-        tokens[FAT_ARROW] = "=>";
-        tokens[MAPPING_ARROW] = "=!>";
-        tokens[AND_ALSO] = "andAlso";
-        tokens[OR_ELSE] = "orElse";
-        tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";
-        tokens[STRING_LITERAL_BACKTICKED] = "``[<string>]``";
-        tokens[BACKTICK] = "`";
-        tokens[OTHERWISE] = "otherwise";
+        reg(COLON, ":");
+        reg(FAT_ARROW, "=>");
+        reg(MAPPING_ARROW, "=!>");
+        regk(AND_ALSO, "andAlso");
+        regk(OR_ELSE, "orElse");
+        reg(STRING_CONSTRUCTOR_INITIAL, "``[<string>`{");
+        reg(STRING_LITERAL_BACKTICKED, "``[<string>]``");
+        reg(BACKTICK, "`");
+        regk(OTHERWISE, "otherwise");
 
-        tokens[NAME] = "<name>";
-        tokens[STRING_LITERAL] = "<string-literal>";
-        tokens[RSQB] = "]";
-        tokens[RPAREN] = ")";
-        tokens[DOT] = ".";
-        tokens[DOTDOT] = "..";
-        tokens[STAR] = "*";
-        tokens[PREFIX] = "<prefix:*>";
-        tokens[NUMBER] = "<numeric-literal>";
-        tokens[HEX_INTEGER] = "<hex-integer>";
-        tokens[BINARY_INTEGER] = "<binary-integer>";
-        tokens[FOR] = "for";
-        tokens[SUFFIX] = "<*:local-name>";
-        tokens[QMARK] = "?";
-        tokens[QMARK_LSQB] = "?[";
-        tokens[LCURLY] = "{";
-        tokens[RCURLY] = "}";
-        tokens[LET] = "let";
-        tokens[WHERE] = "where";
-        tokens[WHILE] = "while";
-        tokens[VALIDATE] = "validate {";
-        tokens[START_TAG] = "<element>";
-        tokens[DIRECT_COMMENT_CONSTRUCTOR] = "<!-- comment -->";
-        tokens[DIRECT_PI_CONSTRUCTOR] = "<?pi?>";
-        tokens[PRAGMA] = "(# ... #)";
-        tokens[SEMICOLON] = ";";
-        tokens[COPY] = "copy";
-        tokens[NEGATE] = "-";
-        tokens[PERCENT] = "%";
+        reg(NAME, "<name>");
+        reg(STRING_LITERAL, "<string-literal>");
+        reg(RSQB, "]");
+        reg(RPAREN, ")");
+        reg(DOT, ".");
+        reg(DOTDOT, "..");
+        reg(STAR, "*");
+        reg(PREFIX, "<prefix:*>");
+        reg(NUMBER, "<numeric-literal>");
+        reg(HEX_INTEGER, "<hex-integer>");
+        reg(BINARY_INTEGER, "<binary-integer>");
+        regk(FOR, "for");
+        reg(SUFFIX, "<*:local-name>");
+        reg(QMARK, "?");
+        reg(QMARK_LSQB, "?[");
+        reg(LCURLY, "{");
+        reg(RCURLY, "}");
+        regk(LET, "let");
+        regk(WHERE, "where");
+        regk(WHILE, "while");
+        regk(VALIDATE, "validate");
+        reg(START_TAG, "<element>");
+        reg(DIRECT_COMMENT_CONSTRUCTOR, "<!-- comment -->");
+        reg(DIRECT_PI_CONSTRUCTOR, "<?pi?>");
+        reg(NODE_TEST, "node-test()");
+        reg(PRAGMA, "(# ... #)");
+        reg(SEMICOLON, ";");
+        regk(COPY, "copy");
+        reg(NEGATE, "-");
+        reg(PERCENT, "%");
     }
 
     /**
@@ -885,6 +902,15 @@ public abstract class Token {
     private static void mapDouble(String doubleKeyword, int token) {
         doubleKeywords.put(doubleKeyword, token);
         tokens[token] = doubleKeyword;
+    }
+
+    public static int tokenForKeyword(String keyword) {
+        Integer result = keywordTokens.get(keyword);
+        return result==null ? Token.NAME : result;
+    }
+
+    public static boolean isNameToken(int token) {
+        return token == Token.NAME || keywordTokenSet.contains(token);
     }
 
     /**

@@ -241,7 +241,7 @@ public class PatternParser extends XPathParser {
         Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
-        } else if (allowXPath40Syntax && t.currentToken == Token.NAME && t.peekAhead() == Token.LPAREN &&
+        } else if (allowXPath40Syntax && Token.isNameToken(t.currentToken) && t.peekAhead() == Token.LPAREN &&
                 (t.currentTokenValue.equals("record")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
             ItemType type = parseItemType();
             Expression expr = new ItemTypePattern(type);
@@ -251,10 +251,10 @@ public class PatternParser extends XPathParser {
                 expr = parsePredicate(expr).toPattern(env.getConfiguration());
             }
             return expr;
-        } else if (allowXPath40Syntax && t.currentToken == Token.NAME && t.peekAhead() == Token.LPAREN &&
+        } else if (allowXPath40Syntax && Token.isNameToken(t.currentToken) && t.peekAhead() == Token.LPAREN &&
                 t.currentTokenValue.equals("atomic")) {
             nextToken();
-            expect(Token.NAME);
+            expectName();
             StructuredQName typeName =
                     makeStructuredQName(t.currentTokenValue,env.getDefaultElementNamespace());
             nextToken();
@@ -295,7 +295,8 @@ public class PatternParser extends XPathParser {
         if (inPredicate > 0) {
             return super.parseBasicStep(firstInPattern);
         } else {
-            switch (t.currentToken) {
+            int tok = Token.isNameToken(t.currentToken) ? Token.NAME : t.currentToken;
+            switch (tok) {
                 case Token.DOLLAR:
                     if (!firstInPattern) {
                         grumble("In an XSLT 3.0 pattern, a variable reference is allowed only as the first step in a path");
@@ -308,7 +309,6 @@ public class PatternParser extends XPathParser {
                 case Token.NUMBER:
                 case Token.HEX_INTEGER:
                 case Token.BINARY_INTEGER:
-                //case Token.KEYWORD_CURLY:
                 case Token.ELEMENT_QNAME:
                 case Token.ATTRIBUTE_QNAME:
                 case Token.NAMESPACE_QNAME:

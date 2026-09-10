@@ -272,7 +272,7 @@ public final class Tokenizer {
         int oldPrecedingToken = precedingToken;
         lookAhead();
 
-        if (currentToken == Token.NAME) {
+        if (Token.isNameToken(currentToken)) {
 
             if (state == BARE_NAME_STATE) {
                 return;
@@ -286,86 +286,78 @@ public final class Tokenizer {
     }
 
     private void handleNextToken(int oldPrecedingToken) throws XPathException {
+        int tok = Token.isNameToken(nextToken) ? Token.NAME : nextToken;
+        switch (tok) {
 
-        switch (nextToken)
-        {
-//        case Token.LPAR:
-//            handleLPAR(oldPrecedingToken);
-//            break;
+            case Token.COLONCOLON:
+                handleCOLONCOLON();
+                break;
 
-//        case Token.LCURLY:
-//            handleLCURLY();
-//            break;
+            case Token.HASH:
+                handleHASH();
+                break;
 
-        case Token.COLONCOLON:
-            handleCOLONCOLON();
-            break;
+            case Token.COLONSTAR:
+                handleCOLONSTAR();
+                break;
 
-        case Token.HASH:
-            handleHASH();
-            break;
+            case Token.DOLLAR:
+                handleDOLLAR();
+                break;
 
-        case Token.COLONSTAR:
-            handleCOLONSTAR();
-            break;
+            case Token.PERCENT:
+                handlePERCENT();
+                break;
 
-        case Token.DOLLAR:
-            handleDOLLAR();
-            break;
+            case Token.NAME:
+                int candidate = getCandidate();
 
-        case Token.PERCENT:
-            handlePERCENT();
-            break;
-
-        case Token.NAME:
-            int candidate = getCandidate();
-
-            if (candidate != -1)
-            {
-                // <'element' QName '{'> constructor
-                // <'attribute' QName '{'> constructor
-                // <'processing-instruction' QName '{'> constructor
-                // <'namespace' QName '{'> constructor
-
-                String qname = nextTokenValue;
-                String saveTokenValue = currentTokenValue;
-                int savePosition = inputOffset;
-                lookAhead();
-                if (nextToken == Token.LCURLY)
+                if (candidate != -1)
                 {
-                    currentToken = candidate;
-                    currentTokenValue = qname;
+                    // <'element' QName '{'> constructor
+                    // <'attribute' QName '{'> constructor
+                    // <'processing-instruction' QName '{'> constructor
+                    // <'namespace' QName '{'> constructor
+
+                    String qname = nextTokenValue;
+                    String saveTokenValue = currentTokenValue;
+                    int savePosition = inputOffset;
                     lookAhead();
-                    return;
+                    if (nextToken == Token.LCURLY)
+                    {
+                        currentToken = candidate;
+                        currentTokenValue = qname;
+                        lookAhead();
+                        return;
+                    }
+                    else
+                    {
+                        // backtrack (we don't have 2-token lookahead; this is the
+                        // only case where it's needed. So we backtrack instead.)
+                        currentToken = Token.NAME;
+                        currentTokenValue = saveTokenValue;
+                        inputOffset = savePosition;
+                        nextToken = Token.NAME;
+                        nextTokenValue = qname;
+                    }
+
+                }
+
+                String composite = currentTokenValue + ' ' + nextTokenValue;
+                int possibleToken = Token.doubleKeywords.getOrDefault(composite, Token.UNKNOWN);
+
+                if (possibleToken == Token.UNKNOWN)
+                {
+                    break;
                 }
                 else
                 {
-                    // backtrack (we don't have 2-token lookahead; this is the
-                    // only case where it's needed. So we backtrack instead.)
-                    currentToken = Token.NAME;
-                    currentTokenValue = saveTokenValue;
-                    inputOffset = savePosition;
-                    nextToken = Token.NAME;
-                    nextTokenValue = qname;
+                    handleNotUnknown(composite, possibleToken);
+                    return;
                 }
-
+            default:
+                // no action needed
             }
-
-            String composite = currentTokenValue + ' ' + nextTokenValue;
-            int possibleToken = Token.doubleKeywords.getOrDefault(composite, Token.UNKNOWN);
-
-            if (possibleToken == Token.UNKNOWN)
-            {
-                break;
-            }
-            else
-            {
-                handleNotUnknown(composite, possibleToken);
-                return;
-            }
-        default:
-            // no action needed
-        }
     }
 
     private void handleCOLONCOLON() throws XPathException
@@ -1013,8 +1005,6 @@ public final class Tokenizer {
                 case '\r':
                     nextTokenStartOffset = inputOffset;
                     break;
-                case '\u00B6':
-
                 case 'Q':
                     if (inputOffset < inputLength && input.charAt(inputOffset) == '{') {
                         // EQName, revised syntax as per bug 15399
@@ -1069,7 +1059,7 @@ public final class Tokenizer {
                                     if (/*precedingToken == Token.QMARK ||*/ precedingToken == Token.SUFFIX) {
                                         // only NCName allowed after "? in a lookup expression, or after *:
                                         nextTokenValue = input.substring(nextTokenStartOffset, inputOffset);
-                                        nextToken = Token.NAME;
+                                        nextToken = Token.tokenForKeyword(nextTokenValue);
                                         return;
                                     }
                                     if (inputOffset + 1 < inputLength) {
@@ -1088,7 +1078,7 @@ public final class Tokenizer {
                                             // for example: "let $x:=2", "x:y:z", "x:2"
                                             // end the token before the colon
                                             nextTokenValue = input.substring(nextTokenStartOffset, inputOffset);
-                                            nextToken = Token.NAME;
+                                            nextToken = Token.tokenForKeyword(nextTokenValue);
                                             return;
                                         }
                                     }
@@ -1124,8 +1114,7 @@ public final class Tokenizer {
                         }
                     }
                     nextTokenValue = input.substring(nextTokenStartOffset, inputOffset);
-                    //nextTokenValue = nextTokenValue.intern();
-                    nextToken = Token.NAME;
+                    nextToken = Token.tokenForKeyword(nextTokenValue);
                     return;
             }
         }
@@ -1469,17 +1458,25 @@ public final class Tokenizer {
         // This method checks whether the content looks plausibly like a direct element constructor,
         // and if so it returns true.
         int pos = inputOffset;
-        while (pos < inputLength && NameChecker.isNCNameChar(input.charAt(pos++))) {
-            // continue
+        while (pos < inputLength) {
+            if (NameChecker.isNCNameChar(input.charAt(pos))) {
+                pos++;
+            } else {
+                break;
+            }
         }
-        while (pos < inputLength && Whitespace.isWhite(input.charAt(pos++))) {
-            // continue
+        while (pos < inputLength) {
+            if (Whitespace.isWhite(input.charAt(pos))) {
+                pos++;
+            } else {
+                break;
+            }
         }
         if (pos >= inputLength) {
             return false;
         }
         int ch = input.charAt(pos);
-        if (ch == '/' && input.charAt(pos) == '>') {
+        if (ch == '/' && pos+1 < inputLength && input.charAt(pos+1) == '>') {
             return true;
         }
         if (ch == '>') {

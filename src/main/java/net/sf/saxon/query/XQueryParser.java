@@ -541,7 +541,7 @@ public class XQueryParser extends XPathParser {
     private void parseModuleDeclaration() throws XPathException {
         expect(Token.MODULE_NAMESPACE);
         nextToken();
-        expect(Token.NAME);
+        expectName();
         String prefix = t.currentTokenValue;
         nextToken();
         expect(Token.EQUALS);
@@ -632,7 +632,7 @@ public class XQueryParser extends XPathParser {
                             grumble("expected 'default' after 'declare fixed");
                         }
                         nextToken();
-                        expect(Token.NAME);
+                        expectName();
                         switch (t.currentTokenValue) {
                             case "element":
                                 if (!allowDeclarations) {
@@ -653,7 +653,7 @@ public class XQueryParser extends XPathParser {
                         break;
                     case Token.DECLARE_DEFAULT:
                         nextToken();
-                        expect(Token.NAME);
+                        expectName();
                         switch (t.currentTokenValue) {
                             case "element":
                                 if (!allowDeclarations) {
@@ -855,7 +855,7 @@ public class XQueryParser extends XPathParser {
         while (true) {
             //t.setState(Tokenizer.BARE_NAME_STATE);
             nextToken();
-            expect(Token.NAME);
+            expectName();
             //t.setState(Tokenizer.DEFAULT_STATE);
             StructuredQName qName;
             NamespaceUri uri;
@@ -897,7 +897,8 @@ public class XQueryParser extends XPathParser {
                         nextToken();
                     }
                     Literal arg;
-                    switch (t.currentToken) {
+                    int tok = Token.isNameToken(t.currentToken) ? Token.NAME : t.currentToken;
+                    switch (tok) {
                         case Token.STRING_LITERAL:
                             arg = (Literal) parseStringLiteral(false);
                             break;
@@ -1079,7 +1080,7 @@ public class XQueryParser extends XPathParser {
         }
         foundBoundarySpaceDeclaration = true;
         nextToken();
-        expect(Token.NAME);
+        expectName();
         if ("preserve".equals(t.currentTokenValue)) {
             ((QueryModule) env).setPreserveBoundarySpace(true);
         } else if ("strip".equals(t.currentTokenValue)) {
@@ -1103,7 +1104,7 @@ public class XQueryParser extends XPathParser {
         }
         foundOrderingDeclaration = true;
         nextToken();
-        expect(Token.NAME);
+        expectName();
         if (!"ordered".equals(t.currentTokenValue) && !"unordered".equals(t.currentTokenValue)) {
             grumble("ordering mode must be 'ordered' or 'unordered'");
         }
@@ -1123,7 +1124,7 @@ public class XQueryParser extends XPathParser {
         }
         foundCopyNamespaces = true;
         nextToken();
-        expect(Token.NAME);
+        expectName();
         if ("preserve".equals(t.currentTokenValue)) {
             ((QueryModule) env).setPreserveNamespaces(true);
         } else if ("no-preserve".equals(t.currentTokenValue)) {
@@ -1134,7 +1135,7 @@ public class XQueryParser extends XPathParser {
         nextToken();
         expect(Token.COMMA);
         nextToken();
-        expect(Token.NAME);
+        expectName();
         if ("inherit".equals(t.currentTokenValue)) {
             ((QueryModule) env).setInheritNamespaces(true);
         } else if ("no-inherit".equals(t.currentTokenValue)) {
@@ -1159,7 +1160,7 @@ public class XQueryParser extends XPathParser {
         }
         foundConstructionDeclaration = true;
         nextToken();
-        expect(Token.NAME);
+        expectName();
         int val;
         if ("preserve".equals(t.currentTokenValue)) {
             val = Validation.PRESERVE;
@@ -1276,7 +1277,7 @@ public class XQueryParser extends XPathParser {
     private String readNamespaceBinding() throws XPathException {
         t.setState(Tokenizer.DEFAULT_STATE);
         nextToken();
-        expect(Token.NAME);
+        expectName();
         String prefix = t.currentTokenValue;
         nextToken();
         expect(Token.EQUALS);
@@ -1336,7 +1337,7 @@ public class XQueryParser extends XPathParser {
         mImport.locationURIs = new ArrayList<>(5);
         mImport.offset = t.currentTokenStartOffset;
         nextToken();
-        if (t.currentToken == Token.NAME && t.currentTokenValue.equals("namespace")) {
+        if (isKeyword("namespace")) {
             prefix = readNamespaceBinding();
         }
         if (t.currentToken == Token.STRING_LITERAL) {
@@ -1545,7 +1546,7 @@ public class XQueryParser extends XPathParser {
 
     private void parseDecimalFormatDeclaration() throws XPathException {
         nextToken();
-        expect(Token.NAME);
+        expectName();
         StructuredQName formatName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
         if (env.getDecimalFormatManager().getNamedDecimalFormat(formatName) != null) {
             grumble("Duplicate declaration of decimal-format " + formatName.getDisplayName(), "XQST0111");
@@ -1654,7 +1655,7 @@ public class XQueryParser extends XPathParser {
         }
         foundDefaultFunctionNamespace = true;
         nextToken();
-        expect(Token.NAME);
+        expectName();
         if (!"namespace".equals(t.currentTokenValue)) {
             grumble("After 'declare default function', expected 'namespace'");
         }
@@ -1681,7 +1682,7 @@ public class XQueryParser extends XPathParser {
         }
         foundDefaultElementNamespace = true;
         nextToken();
-        expect(Token.NAME);
+        expectName();
         if (!"namespace".equals(t.currentTokenValue)) {
             grumble("After 'declare default element', expected 'namespace'");
         }
@@ -1704,7 +1705,7 @@ public class XQueryParser extends XPathParser {
 
     private void parseNamespaceDeclaration() throws XPathException {
         nextToken();
-        expect(Token.NAME);
+        expectName();
         String prefix = t.currentTokenValue;
         if (!NameChecker.isValidNCName(prefix)) {
             grumble("Invalid namespace prefix " + Err.wrap(prefix));
@@ -1784,7 +1785,7 @@ public class XQueryParser extends XPathParser {
         expect(Token.DOLLAR);
         t.setState(Tokenizer.BARE_NAME_STATE);
         nextToken();
-        expect(Token.NAME);
+        expectName();
         String varName = t.currentTokenValue;
         StructuredQName varQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
         assert varQName != null;
@@ -1817,7 +1818,7 @@ public class XQueryParser extends XPathParser {
                 exp = checker.staticTypeCheck(exp, requiredType, role, visitor);
             }
             var.setBody(exp);
-        } else if (t.currentToken == Token.NAME) {
+        } else if (Token.isNameToken(t.currentToken)) {
             if ("external".equals(t.currentTokenValue)) {
                 GlobalParam par = new GlobalParam();
                 par.setPackageData(env.getPackageData());
@@ -1919,7 +1920,7 @@ public class XQueryParser extends XPathParser {
             exp = exp.typeCheck(visitor, info);
             req.setDefaultValue(exp);
             req.setExternal(false);
-        } else if (t.currentToken == Token.NAME && "external".equals(t.currentTokenValue)) {
+        } else if (isKeyword("external")) {
             req.setAbsentFocus(false);
             req.setExternal(true);
             nextToken();
@@ -1990,7 +1991,7 @@ public class XQueryParser extends XPathParser {
         int offset = t.currentTokenStartOffset;
         t.setState(Tokenizer.DEFAULT_STATE);
         nextToken();
-        expect(Token.NAME);
+        expectName();
         String fName = t.currentTokenValue;
         nextToken();
         expect(Token.LPAREN);
@@ -2043,7 +2044,7 @@ public class XQueryParser extends XPathParser {
                 //     Param       ::=     "$" VarName  TypeDeclaration?
                 expect(Token.DOLLAR);
                 nextToken();
-                expect(Token.NAME);
+                expectName();
                 StructuredQName argQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
                 if (paramNames.contains(argQName)) {
                     grumble("Duplicate parameter name " + Err.wrap(t.currentTokenValue, Err.VARIABLE), "XQST0039");
@@ -2168,7 +2169,7 @@ public class XQueryParser extends XPathParser {
 
     private void parseOptionDeclaration() throws XPathException {
         nextToken();
-        expect(Token.NAME);
+        expectName();
         NamespaceUri defaultUri = NamespaceUri.XQUERY;
         StructuredQName varName = makeStructuredQName(t.currentTokenValue, defaultUri);
         assert varName != null;
@@ -2536,7 +2537,7 @@ public class XQueryParser extends XPathParser {
 
             expect(Token.DOLLAR);
             nextToken();
-            expect(Token.NAME);
+            expectName();
             StructuredQName explicitQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
             StructuredQName iterationQName = explicitQName;
             if (iterand != Token.FOR) {
@@ -2601,7 +2602,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 expect(Token.DOLLAR);
                 nextToken();
-                expect(Token.NAME);
+                expectName();
                 explicitQName2 = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
                 if (!scanOnly && explicitQName2.equals(explicitQName)) {
                     grumble("Multiple variables declared in a single 'for' clause must have different names", "XQST0089");
@@ -2617,7 +2618,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
                 expect(Token.DOLLAR);
                 nextToken();
-                expect(Token.NAME);
+                expectName();
                 StructuredQName posQName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
                 if (!scanOnly && posQName.equals(explicitQName)) {
                     grumble("The two variables declared in a single 'for' clause must have different names", "XQST0089");
@@ -2725,7 +2726,7 @@ public class XQueryParser extends XPathParser {
             }
             expect(Token.DOLLAR);
             nextToken();
-            expect(Token.NAME);
+            expectName();
             String var = t.currentTokenValue;
 
             StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
@@ -2763,7 +2764,7 @@ public class XQueryParser extends XPathParser {
         nextToken();
         expect(Token.DOLLAR);
         nextToken();
-        expect(Token.NAME);
+        expectName();
         String var = t.currentTokenValue;
 
         StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
@@ -2928,7 +2929,7 @@ public class XQueryParser extends XPathParser {
     private StructuredQName readVariableName() throws XPathException {
         expect(Token.DOLLAR);
         nextToken();
-        expect(Token.NAME);
+        expectName();
         String name = t.currentTokenValue;
         nextToken();
         return makeStructuredQName(name, NamespaceUri.NULL);
@@ -3185,9 +3186,9 @@ public class XQueryParser extends XPathParser {
     /*@NotNull*/
     @Override
     protected Expression parseTypeswitchExpression() throws XPathException {
-
-        // On entry, the "(" has already been read
         int offset = t.currentTokenStartOffset;
+        nextToken();
+        expect(Token.LPAREN);
         nextToken();
         Expression operand = parseExpression();
         List<List<SequenceType>> types = new ArrayList<>(10);
@@ -3226,7 +3227,7 @@ public class XQueryParser extends XPathParser {
             nextToken();
             if (t.currentToken == Token.DOLLAR) {
                 nextToken();
-                expect(Token.NAME);
+                expectName();
                 final String var = t.currentTokenValue;
                 final StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
                 nextToken();
@@ -3259,7 +3260,7 @@ public class XQueryParser extends XPathParser {
         Expression defaultAction;
         if (t.currentToken == Token.DOLLAR) {
             nextToken();
-            expect(Token.NAME);
+            expectName();
             final String var = t.currentTokenValue;
             final StructuredQName varQName = makeStructuredQName(var, NamespaceUri.NULL);
             nextToken();
@@ -3362,8 +3363,8 @@ public class XQueryParser extends XPathParser {
 
         Expression operand;
         boolean braced = false;
+        nextToken();
         if (t.currentToken == Token.LPAREN) {
-            // On entry, the "(" has already been read
             nextToken();
             operand = parseExpression();
             expect(Token.RPAREN);
@@ -3498,7 +3499,7 @@ public class XQueryParser extends XPathParser {
 //                }
                 mode = Validation.BY_TYPE;
                 nextToken();
-                expect(Token.NAME);
+                expectName();
                 if (!NameChecker.isQName(StringTool.codePoints(t.currentTokenValue))) {
                     grumble("Schema type name expected after 'validate type");
                 }
@@ -3511,8 +3512,8 @@ public class XQueryParser extends XPathParser {
                 expect(Token.LCURLY);
                 foundCurly = true;
                 break;
-            case Token.NAME:
-                if (t.currentTokenValue.equals("validate") && t.peekAhead() == Token.LCURLY) {
+            default:
+                if (isKeyword("validate") && t.peekAhead() == Token.LCURLY) {
                     nextToken();
                     mode = Validation.STRICT;
                 } else {
@@ -3678,7 +3679,8 @@ public class XQueryParser extends XPathParser {
     @Override
     protected Expression parseConstructor() throws XPathException {
         int offset = t.currentTokenStartOffset;
-        switch (t.currentToken) {
+        int tok = Token.isNameToken(t.currentToken) ? Token.NAME : t.currentToken;
+        switch (tok) {
             case Token.START_TAG:
                 Expression tag = parsePseudoXML(false);
                 lookAhead();
@@ -4236,6 +4238,7 @@ public class XQueryParser extends XPathParser {
             boolean seenCurly = false;
             do {
                 nextToken();
+                int tok = Token.isNameToken(t.currentToken) ? Token.NAME : t.currentToken;
                 String tokv = t.currentTokenValue;
                 switch (t.currentToken) {
                     case Token.NAME:
@@ -4247,12 +4250,6 @@ public class XQueryParser extends XPathParser {
                         tests.add(makeQNameTest(Type.ELEMENT, tokv));
                         break;
 
-//                    case Token.KEYWORD_CURLY:
-//                        nextToken();
-//                        tests.add(makeQNameTest(Type.ELEMENT, tokv));
-//                        seenCurly = true;
-//                        break;
-
                     case Token.PREFIX:
                         nextToken();
                         tests.add(makeNamespaceTest(Type.ELEMENT, tokv));
@@ -4261,7 +4258,7 @@ public class XQueryParser extends XPathParser {
                     case Token.SUFFIX:
                         nextToken();
                         tokv = t.currentTokenValue;
-                        if (t.currentToken == Token.NAME) {
+                        if (Token.isNameToken(t.currentToken)) {
                             if (t.peekAhead() == Token.LCURLY) {
                                 nextToken();
                                 seenCurly = true;
