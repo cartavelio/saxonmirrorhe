@@ -6,17 +6,17 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.*;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class CsvToXdm extends CsvFunction {
     static SequenceType NUMBER_OF_COLUMNS_TYPE;
@@ -59,54 +59,90 @@ public class CsvToXdm extends CsvFunction {
         }
 
         options = getDetails().optionDetails.processSuppliedOptions(unparsedOptions, context);
+        OptionsParameterValidator.validate(options);
 
         CsvXdmGenerator generator = new CsvXdmGenerator(options);
-        return generator.fromRowSequence(CsvParser.parse(input, options));
+        Sequence result = generator.fromRowSequence(CsvParser.parse(input, options));
+        return result;
     }
 
-    //
-//    @FunctionalInterface
-//    public interface RowMapper<T extends Item, R extends Item> {
-//        /**
-//         * Map one item to another
-//         * @param item the item to be processed
-//         * @throws XPathException if the processing fails
-//         */
-//        Item apply(T item) throws XPathException;
-//    }
-//
-//    @FunctionalInterface
-//    public interface ItemSupplier<T extends Item> {
-//        /**
-//         * Supply Items from a sequence to a stream
-//         * @return An item from the sequence
-//         * @throws XPathException if the processing fails
-//         */
-//        T get() throws XPathException;
-//    }
-//
-//    public class SequenceSupplier implements ItemSupplier<Item> {
-//        private final SequenceIterator iter;
-//
-//        public SequenceSupplier(SequenceIterator iter) {
-//            this.iter = iter;
-//        }
-//
-//        @Override
-//        public Item get() throws XPathException {
-//            Item item = iter.next();
-//            return item;
-//        }
-//    }
-//
-//    public static void supply(SequenceIterator iter, ItemConsumer<? super Item> consumer) {
-//        try {
-//            for (Item item; (item = iter.next()) != null; ) {
-//                consumer.accept(item);
-//            }
-//        } catch (XPathException e) {
-//            throw new UncheckedXPathException(e);
-//        }
-//    }
+    static class OptionsParameterValidator {
+        private final Map<String, GroundedValue> options;
 
+        OptionsParameterValidator(Map<String, GroundedValue> options) {
+            this.options = options;
+        }
+
+        public static void validate(Map<String, GroundedValue> options) throws XPathException {
+            (new OptionsParameterValidator(options)).validate();
+        }
+
+        public boolean validate() throws XPathException {
+            return ensureMutuallyExclusiveOptionsOk() && ensureFilterColumnsValid() && ensureNumberOfColumnsValid() && ensureColumnNamesValid();
+        }
+
+        private boolean nonEmpty(String key) {
+            return (options.getOrDefault(key, EmptySequence.getInstance())).getLength() > 0;
+        }
+
+        private boolean ensureMutuallyExclusiveOptionsOk() throws XPathException {
+            if (nonEmpty("filter-columns") && nonEmpty("number-of-columns")) {
+                throw new XPathException("Cannot specify both number-of-columns and filter-columns as options for fn:csv-to-xdm", "FOCV0006");
+            }
+            return true;
+        }
+
+        private boolean ensureFilterColumnsValid() throws XPathException {
+            if (!options.containsKey("filter-columns")) return true;
+            GroundedValue filter = options.get("filter-columns").materialize();
+
+            Supplier<XPathException> invalid = invalidPositiveIntegerOptionException(filter, "filter-columns");
+
+            try {
+                SequenceTool.supply(filter.iterate(), verifyPositiveInteger(invalid));
+            } catch (UncheckedXPathException e) {
+                throw e.getXPathException();
+            }
+            return true;
+        }
+
+        private boolean ensureNumberOfColumnsValid() throws XPathException {
+            if (!options.containsKey("number-of-columns")) return true;
+
+            AtomicValue value = options.get("number-of-columns").head().atomize().head();
+            if (value.getPrimitiveType() == BuiltInAtomicType.INTEGER) {
+                verifyPositiveInteger(invalidPositiveIntegerOptionException(value, "number-of-columns")).accept(value);
+            }
+            return true;
+        }
+
+        private boolean ensureColumnNamesValid() throws XPathException {
+            if (!options.containsKey("column-names")) return true;
+            Item value = options.get("column-names").head();
+            if (value.getGenre() == Genre.MAP) {
+                IterationUtils.forEach(((MapItem) value).keyValuePairs(), kvPair -> {
+                    verifyPositiveInteger(invalidPositiveIntegerOptionException(value, "column-names")).accept(kvPair.value.head());
+                });
+            }
+            return true;
+        }
+
+        private ItemConsumer<Item> verifyPositiveInteger(Supplier<XPathException> exceptionSupplier) throws XPathException {
+            return (maybeNumber) -> {
+                if (maybeNumber == null) return;
+                if (((AtomicValue) maybeNumber).getPrimitiveType() != BuiltInAtomicType.INTEGER) throw exceptionSupplier.get();
+                if (maybeNumber instanceof IntegerValue && ((IntegerValue) maybeNumber).asSubscript() == -1) throw exceptionSupplier.get();
+            };
+        }
+
+        private Supplier<XPathException> invalidPositiveIntegerOptionException(Sequence actual, String key) {
+            return invalidOptionException(actual, key, "Must be a sequence of positive (>0) integers.", "FOCV0005");
+        }
+
+        private Supplier<XPathException> invalidOptionException(Sequence actual, String key, String message, String code) {
+            return () -> {
+                return new XPathException("Invalid option " + key + "=" + Err.depictSequence(actual) + ". " + message, code);
+            };
+        }
+    }
 }

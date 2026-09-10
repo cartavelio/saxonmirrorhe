@@ -3,6 +3,7 @@ package com.saxonica.functions.qt4.csv;
 import net.sf.saxon.expr.ItemMapper;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;

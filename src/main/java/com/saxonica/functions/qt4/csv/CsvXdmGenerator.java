@@ -21,8 +21,6 @@ import net.sf.saxon.value.*;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 class CsvXdmGenerator {
     public static MapItem EMPTY_COLUMNS_RECORD;
@@ -59,7 +57,6 @@ class CsvXdmGenerator {
         shouldExtractColumns = shouldExtractColumns();
         numberOfColumnsMode = numberOfColumnsMode();
         shouldFilterColumns = ((GroundedValue) options.getOrDefault("filter-columns", EmptySequence.getInstance())).getLength() > 0;
-        if (shouldFilterColumns && getNumberOfColumnsOpt().isPresent()) throw new XPathException("Cannot specify both number-of-columns and filter-columns as options for fn:csv-to-xdm", "FOCV0006");
     }
 
     private void verifyPositiveInteger(AtomicValue maybeNumber) throws XPathException {
@@ -98,12 +95,10 @@ class CsvXdmGenerator {
             return NumberOfColumns.SPECIFIED;
         } else {
             switch (value.getStringValue()) {
-                case "all":
-                    return NumberOfColumns.ALL;
                 case "first-row":
                     return NumberOfColumns.FIRST_ROW;
                 default:
-                    throw new XPathException("Invalid value for number-of-columns", "FOCV0007");
+                    return NumberOfColumns.ALL;
             }
         }
     }
@@ -119,12 +114,10 @@ class CsvXdmGenerator {
         return opt.effectiveBooleanValue();
     }
 
-    private List<Integer> getColumnFilter() throws XPathException {
+    private List<Integer> getColumnFilter() {
         ArrayList<Integer> columnFilter = new ArrayList<>();
-        IterationUtils.forEach(options.getOrDefault("filter-columns", EmptySequence.getInstance()).iterate(), item -> {
-            IntegerValue columnIndex = (IntegerValue) item;
-            verifyPositiveInteger(columnIndex);
-            columnFilter.add(columnIndex.asSubscript());
+        SequenceTool.supply(options.getOrDefault("filter-columns", EmptySequence.getInstance()).iterate(), columnIndex -> {
+            columnFilter.add(((IntegerValue) columnIndex).asSubscript());
         });
         return columnFilter;
     }
@@ -145,9 +138,10 @@ class CsvXdmGenerator {
                 default:
                     numberOfColumns = rowArray.arrayLength();
             }
-            columnIndexes = Stream.iterate(1, n -> n + 1)
-                    .limit(numberOfColumns)
-                    .collect(Collectors.toList());
+            columnIndexes = new ArrayList<>();
+            for (int i = 1; i <= numberOfColumns; i++) {
+                columnIndexes.add(i);
+            }
         }
         return columnIndexes;
     }
@@ -183,14 +177,13 @@ class CsvXdmGenerator {
         Map<Integer, GroundedValue> fieldsMap = new HashMap<>();
         IterationUtils.forEach(columnNamesMap.keyValuePairs(), kvPair -> {
             IntegerValue idx = (IntegerValue) kvPair.value.head();
-            verifyPositiveInteger(idx);
             fieldsMap.put((int) idx.longValue(), kvPair.key);
         });
 
         int fieldsLength = Collections.max(fieldsMap.entrySet(), Comparator.comparingInt(Map.Entry::getKey)).getKey();
 
-        for (int i = 0; i < fieldsLength; i ++) {
-            fields.add(fieldsMap.getOrDefault(i + 1, new StringValue("")));
+        for (int i = 1; i <= fieldsLength; i ++) {
+            fields.add(fieldsMap.getOrDefault(i, StringValue.EMPTY_STRING));
         }
         if (numberOfColumnsMode() == NumberOfColumns.FIRST_ROW) numberOfColumns = fieldsLength;
         DictionaryMap columns = new DictionaryMap();
@@ -224,7 +217,6 @@ class CsvXdmGenerator {
     }
 
     static class BoundedRowIterator implements Iterator<GroundedValue> {
-        private final StringValue EMPTY_STRING = new StringValue("");
         private final Iterator<GroundedValue> rowIterator;
         private final int size;
         private int idx = 0;
@@ -245,7 +237,7 @@ class CsvXdmGenerator {
             if (rowIterator.hasNext()) {
                 return rowIterator.next();
             } else {
-                return EMPTY_STRING;
+                return StringValue.EMPTY_STRING;
             }
         }
     }
@@ -271,7 +263,6 @@ class CsvXdmGenerator {
         if (shouldFilterColumns) {
             List<GroundedValue> filteredRowList = new ArrayList<>();
             IterationUtils.forEach(getColumnIndexes(row), oneBasedIndex -> {
-                verifyPositiveInteger(oneBasedIndex);
                 filteredRowList.add(row.get(oneBasedIndex - 1));
             });
             filteredRow = filteredRowList;
@@ -341,7 +332,7 @@ class CsvXdmGenerator {
             // keys are 1-based indexes, while the array item here is 0-based
             // TODO: deal with asSubscript == -1, idx OOB
             int zeroBasedIndex = idx.asSubscript() - 1;
-            if (zeroBasedIndex >= fields.size()) return new StringValue("");
+            if (zeroBasedIndex >= fields.size()) return StringValue.EMPTY_STRING;
             return fields.get(zeroBasedIndex);
         }
     }
