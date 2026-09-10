@@ -198,8 +198,10 @@
 
     <p>For backwards compatibility reasons the standard collation resolver in Saxon also accepts URIs in the
       form <code>http://saxon.sf.net/collation</code> followed by query parameters; the query parameters that
-      are recognized are the same as those defined by W3C UCA collation URIs.</p>
-
+      are recognized are the same as those defined by W3C UCA collation URIs. 
+      In SaxonJ these collations are implemented using a <code>RuleBasedCollator</code> supplied by the JDK; 
+      they do not use ICU collations. Similarly, in SaxonCS, they are implemented using the standard facilities
+      of the .NET platform.</p>
   </section>
 
   <section id="localizing-numbers-and-dates" title="Localizing numbers and dates" class="javaonly">
