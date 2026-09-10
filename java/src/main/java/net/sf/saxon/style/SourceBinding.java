@@ -7,12 +7,14 @@
 
 package net.sf.saxon.style;
 
+import com.saxonica.trans.XSLArray;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.DocumentInstr;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.XmlProcessingError;
@@ -22,10 +24,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.type.Affinity;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -508,19 +507,32 @@ public class SourceBinding {
         // to construct and return a document node.
         if (sourceElement.hasChildNodes()) {
             if (declaredType == null) {
+                boolean makeDocNode = true;
+                if (compilation.getCompilerInfo().getXsltVersion() >= 40) {
+                    for (NodeInfo child : sourceElement.children()) {
+                        if (child instanceof XSLMap || child instanceof XSLArray || child instanceof XSLSelect) {
+                            makeDocNode = false;
+                            break;
+                        }
+                    }
+                }
                 Expression b = sourceElement.compileSequenceConstructor(compilation, decl, true);
                 if (b == null) {
                     b = Literal.makeEmptySequence();
                 }
-                boolean textonly = UType.TEXT.subsumes(b.getItemType().getUType());
-                UnicodeString constant = null;  // bug 3748
-                if (textonly && b instanceof ValueOf && ((ValueOf) b).getSelect() instanceof StringLiteral) {
-                    constant = ((StringLiteral) ((ValueOf) b).getSelect()).getString();
+                if (makeDocNode) {
+                    boolean textonly = UType.TEXT.subsumes(b.getItemType().getUType());
+                    UnicodeString constant = null;  // bug 3748
+                    if (textonly && b instanceof ValueOf && ((ValueOf) b).getSelect() instanceof StringLiteral) {
+                        constant = ((StringLiteral) ((ValueOf) b).getSelect()).getString();
+                    }
+                    DocumentInstr doc = new DocumentInstr(textonly, constant);
+                    doc.setContentExpression(b);
+                    doc.setRetainedStaticContext(sourceElement.makeRetainedStaticContext());
+                    select = doc;
+                } else {
+                    select = b;
                 }
-                DocumentInstr doc = new DocumentInstr(textonly, constant);
-                doc.setContentExpression(b);
-                doc.setRetainedStaticContext(sourceElement.makeRetainedStaticContext());
-                select = doc;
             } else {
                 select = sourceElement.compileSequenceConstructor(compilation, decl, true);
                 if (select == null) {
@@ -616,7 +628,28 @@ public class SourceBinding {
         if (useContentRules) {
             if (sourceElement.hasChildNodes()) {
                 if (declaredType == null) {
-                    return SequenceType.one(NodeKindTest.DOCUMENT);
+                    if (getSourceElement().getCompilation().getCompilerInfo().getXsltVersion() >= 40) {
+                        ItemType atype = null;
+                        int count = 0;
+                        for (NodeInfo child : sourceElement.children()) {
+                            count++;
+                            if (child instanceof XSLMap) {
+                                atype = atype == null ? MapType.ANY_MAP_TYPE : ChoiceItemType.of(atype, MapType.ANY_MAP_TYPE);
+                            } else if (child instanceof XSLArray) {
+                                atype = atype == null ? MapType.ANY_MAP_TYPE : ChoiceItemType.of(atype, MapType.ANY_MAP_TYPE);
+                            } else if (child instanceof XSLSelect) {
+                                atype = AnyItemType.getInstance();
+                                break;
+                            }
+                        }
+                        if (atype != null) {
+                            return count == 1 ? SequenceType.one(atype) : SequenceType.zeroOrMore(atype);
+                        } else {
+                            return SequenceType.one(NodeKindTest.DOCUMENT);
+                        }
+                    } else {
+                        return SequenceType.one(NodeKindTest.DOCUMENT);
+                    }
                 } else {
                     return declaredType;
                 }
@@ -674,15 +707,6 @@ public class SourceBinding {
         //GroundedValue constantValue = null;
         int properties = 0;
         if (!hasProperty(BindingProperty.ASSIGNABLE) && !hasProperty(BindingProperty.PARAM) && !(visibility == Visibility.PUBLIC || visibility == Visibility.ABSTRACT)) {
-            /*if (select instanceof Literal) {
-                // we can't rely on the constant value because it hasn't yet been type-checked,
-                // which could change it (eg by numeric promotion). Rather than attempt all the type-checking
-                // now, we do a quick check. See test bug64
-                int relation = th.relationship(select.getItemType(), type.getPrimaryType());
-                if (relation == TypeHierarchy.SAME_TYPE || relation == TypeHierarchy.SUBSUMED_BY) {
-                    constantValue = ((Literal) select).getValue();
-                }
-            } */
             if (select != null) {
                 properties = select.getSpecialProperties();
             }
