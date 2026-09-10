@@ -57,7 +57,7 @@
       <xsl:param name="interfaceDecl" as="element()"/>
       <xsl:choose>
          <xsl:when test="$interfaceDecl/annotations/annotation/name/@identifier='CSharpDelegate'">
-            <xsl:sequence select="xs:boolean($interfaceDecl/annotations/annotation[name/@identifier='CSharpDelegate']/memberValue/@value)"/>
+            <xsl:sequence select="$interfaceDecl/annotations/annotation[name/@identifier='CSharpDelegate']/memberValue/@value = 'true'"/>
          </xsl:when>
          <xsl:otherwise>
             <xsl:sequence select="exists($interfaceDecl[@nodeType='ClassOrInterfaceDeclaration'][@isInterface='true']

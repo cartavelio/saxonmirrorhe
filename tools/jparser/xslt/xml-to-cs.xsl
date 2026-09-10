@@ -38,6 +38,11 @@
       <xsl:value-of select="string-join((1 to $indent*4)!' ', '')"/>
    </xsl:template>
    
+   <xsl:function name="f:indent">
+      <xsl:param name="indent" as="xs:integer"/>
+      <xsl:value-of select="string-join((1 to $indent*4)!' ', '')"/>
+   </xsl:function>
+   
    <xsl:template name="indent-extra">
       <xsl:param name="indent" as="xs:integer" tunnel="yes" select="0"/>
       <xsl:value-of select="string-join((1 to ($indent+1)*4)!' ', '')"/>
@@ -51,6 +56,7 @@
    <xsl:template match="root">
       <xsl:text>using System;{$NL}</xsl:text>
       <xsl:text>using System.Collections.Generic;{$NL}</xsl:text>
+      <xsl:text>using System.Linq;{$NL}</xsl:text>
       <xsl:apply-templates select="packageDeclaration"/>
       <xsl:text>{{{$NL}</xsl:text>
       <xsl:apply-templates select="* except packageDeclaration">
@@ -106,7 +112,14 @@
    <!-- This rule compensates for an inadequacy in the JavaParser symbol solver -->
    <xsl:template match="scope[@UNRESOLVED and ends-with(../@RESOLVED_TYPE, @UNRESOLVED)]" priority="10">
       <!--<xsl:message>Unresolved scope rule {@UNRESOLVED}</xsl:message>-->
-      <xsl:text>{f:escapeDottedName(../@RESOLVED_TYPE)}</xsl:text>
+      <xsl:choose>
+         <xsl:when test="matches(../@RESOLVED_TYPE, '^(java\.|javax\.|net\.sf\.saxon|com.\saxonica)')">
+            <xsl:text>{f:renameGenericType(../@RESOLVED_TYPE)}</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>{f:escapeDottedName(../@RESOLVED_TYPE)}</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>     
    </xsl:template>
    
    <xsl:template match="*[@nodeType = 'EnclosedExpr']">
@@ -153,7 +166,7 @@
          <!-- If the class implements java.lang.Iterable, then make it also implement IEnumerable so it
               can be used in a foreach loop -->
          <xsl:variable name="additionalSuperTypes" as="element(*)*">
-            <xsl:for-each select="extendedTypes/extendedType, implementedTypes/implementedType">
+            <!--<xsl:for-each select="extendedTypes/extendedType, implementedTypes/implementedType">
                <xsl:if test="starts-with(@RESOLVED_TYPE, 'java.lang.Iterable')">
                   <implementedType 
                      nodeType="ClassOrInterfaceType" 
@@ -162,7 +175,7 @@
                      <xsl:copy-of select="typeArguments"/>
                   </implementedType>
                </xsl:if>              
-            </xsl:for-each>
+            </xsl:for-each>-->
             <xsl:for-each select="annotations/annotation[name/@identifier='CSharpExtendInterface']/pairs/pair/value">
                <!--<xsl:message>Extending with {@value}</xsl:message>-->
                <implementedType nodeType="ClassOrInterfaceType" RESOLVED_TYPE="{@value}"/>                    
@@ -219,23 +232,47 @@
          <xsl:apply-templates select="members/member">
             <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
          </xsl:apply-templates>
+         
+         <!-- Anonymous inner classes anywhere in the body are now generated as named inner classes -->
          <xsl:call-template name="indent"/>
          <xsl:apply-templates select=".//anonymousClassBody">
             <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
          </xsl:apply-templates>
+         
+         <!-- Expand default methods inherited from interfaces -->
          <xsl:if test="not(@isInterface='true')">
             <xsl:call-template name="expand-defaulted-methods"/>
          </xsl:if>
-         <!--<xsl:call-template name="indent"/>-->
+         <xsl:text>{$NL}</xsl:text>
+         <xsl:call-template name="indent"/>
          <xsl:text>}}{$NL}</xsl:text>
       </xsl:if>
+      
+      <!-- Outside the class, create definitions of nested interfaces -->
+      
       <!--<xsl:message>Looking for nested interfaces: {$include-nested-interfaces}</xsl:message>-->
-      <xsl:if test="not($include-nested-interfaces)">
+      <xsl:if test="$kind = 'interface' and not($include-nested-interfaces)">
          <!-- interfaces nested within other interfaces are pushed up a level, renaming Push.Document as Push_Document -->
          <xsl:apply-templates select="members/member[@isInterface='true']">
             <xsl:with-param name="include-nested-interfaces" select="true()" tunnel="yes"/>
          </xsl:apply-templates>
       </xsl:if>
+   </xsl:template>
+   
+   <!-- Code to inject an implementation of IEnumerable to a class that already supports Iterable -->
+   <xsl:template name="addEnumeratorMethods">
+      <xsl:param name="deliveredType" as="xs:string"/>
+      <xsl:param name="indent" as="xs:integer" tunnel="yes"/>
+      <xsl:variable name="nl" select="f:indent($indent)"/>
+      <xsl:text>
+{$nl}object System.Collections.IEnumerator.Current => Current;
+{$nl}public {$deliveredType} Current {{ get; private set; }}
+{$nl}public bool MoveNext() {{
+{$nl}    if (hasNext()) {{Current = next(); return true;}} else return false;
+{$nl}}}
+{$nl}public void Reset() {{throw new NotImplementedException();}}
+{$nl}public void Dispose() {{throw new NotImplementedException();}}
+      </xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType='ClassOrInterfaceDeclaration']">
@@ -311,16 +348,12 @@
          [name/@identifier = 'iterator']
          [f:isIteratorType(type/@RESOLVED_TYPE)]
          [empty(parameters/parameter)]" priority="20">
-      <!-- If there's a method to implement java.lang.Iterable, then add a method to implement IEnumerable as well -->
+      <!-- If there's a method to implement java.lang.Iterable, it gets converted to implement
+           return System.Collections.Generic.IEnumerator, but we need another method to implement
+           a non-generic System.Collections.IEnumerator as well  -->
       <xsl:next-match/>
       <xsl:call-template name="indent"/>
-      <xsl:text>// Extra methods to make the class IEnumerable as well as Iterable{$NL}</xsl:text>
-      <xsl:call-template name="indent"/>
-      <xsl:text>public System.Collections.Generic.IEnumerator &lt;{f:extract-type-arguments(type/@RESOLVED_TYPE)}&gt; GetEnumerator() {{{$NL}</xsl:text>
-      <xsl:call-template name="indent-extra"/>
-      <xsl:text>return new Saxon.Impl.Helpers.EnumeratorFromIterator{replace(type/@RESOLVED_TYPE, '^[^&lt;]+', '')}(iterator());{$NL}</xsl:text>
-      <xsl:call-template name="indent"/>
-      <xsl:text>}}{$NL}</xsl:text>
+      <xsl:text>// Extra method to make the class IEnumerable as well as IEnumerable&lt;T&gt;{$NL}</xsl:text>
       <xsl:call-template name="indent"/>
       <xsl:text>System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {{{$NL}</xsl:text>
       <xsl:call-template name="indent-extra"/>
@@ -365,7 +398,7 @@
       
       <xsl:choose>
          <xsl:when test="f:isIteratorType(string(type/@RESOLVED_TYPE))">
-            <xsl:text>java.util.Iterator&lt;{f:extract-type-arguments(type/@RESOLVED_TYPE)}&gt;</xsl:text>
+            <xsl:text>System.Collections.Generic.IEnumerator&lt;{f:extract-type-arguments(type/@RESOLVED_TYPE)}&gt;</xsl:text>
          </xsl:when>
          <xsl:when test="$digestMethod/@csReturns">{f:escapeDottedName(f:renameType($digestMethod/@csReturns))}</xsl:when>
          <xsl:otherwise>
@@ -373,9 +406,19 @@
          </xsl:otherwise>
       </xsl:choose>
       
-      <!-- Method name and type arguments -->
+      <!-- Method name -->
       
-      <xsl:text> {f:escapeMethodName(name/@identifier)}</xsl:text>
+      <xsl:choose>
+         <xsl:when test="name/@identifier = 'iterator' and f:isIteratorType(string(type/@RESOLVED_TYPE))">
+            <xsl:text> GetEnumerator</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text> {f:escapeMethodName(name/@identifier)}</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+      
+      <!-- Type arguments -->
+      
       <xsl:apply-templates select="typeParameters"/>
       
       <!-- Parameter declarations -->
@@ -386,7 +429,7 @@
       
       <!-- Type bounds (where clauses) -->
       
-      <typeParameters>
+      <!--<typeParameters>
          <typeParameter nodeType="TypeParameter" UNRESOLVED="T extends XdmValue">
             <name nodeType="SimpleName" identifier="T"/>
             <typeBound>
@@ -396,10 +439,10 @@
                </typeBoun>
             </typeBound>
          </typeParameter>
-      </typeParameters>
+      </typeParameters>-->
       
       <xsl:for-each select="typeParameters/typeParameter[typeBound/typeBoun]">
-         <xsl:text> where {name/@identifier} : {typeBound/typeBoun/@RESOLVED_TYPE}</xsl:text>
+         <xsl:text> where {name/@identifier} : {f:renameGenericType(typeBound/typeBoun/@RESOLVED_TYPE)}</xsl:text>
       </xsl:for-each>
       
       <!-- Method body -->
@@ -493,7 +536,7 @@
       <xsl:text>enum {name/@identifier} {{{$NL}</xsl:text>
       <xsl:if test="$isFlags">
          <xsl:call-template name="indent-extra"/>
-         <xsl:text>NONE = 0,</xsl:text>
+         <xsl:text>NONE = 0,{$NL}</xsl:text>
       </xsl:if>
       <xsl:for-each select="entries/entrie">
          <xsl:call-template name="indent-extra"/>
@@ -1088,7 +1131,13 @@
    </xsl:template>
    
    <xsl:template match="modifier/@keyword[. = 'PRIVATE'][ancestor::member[1][@isInterface='true']]" priority="15">
-      <xsl:text>public </xsl:text>
+      <xsl:param name="include-nested-interfaces" as="xs:boolean" tunnel="yes" select="false()"/>
+      <xsl:choose>
+         <xsl:when test="$include-nested-interfaces">public </xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
    </xsl:template>
    
    <xsl:template match="modifier/@keyword[. = 'STATIC']" priority="5">
@@ -1283,26 +1332,6 @@
       <xsl:text>)</xsl:text>
    </xsl:template>
    
- <!--  
-   <annotation nodeType="NormalAnnotationExpr">
-      <name nodeType="Name" identifier="CSharpInnerClass"/>
-      <pairs>
-         <pair nodeType="MemberValuePair">
-            <name nodeType="SimpleName" identifier="outer"/>
-            <value nodeType="BooleanLiteralExpr" value="true"/>
-         </pair>
-         <pair nodeType="MemberValuePair">
-            <name nodeType="SimpleName" identifier="extra"/>
-            <value nodeType="ArrayInitializerExpr">
-               <values>
-                  <value nodeType="StringLiteralExpr"
-                     value="net.sf.saxon.expr.XPathContext context"/>
-               </values>
-            </value>
-         </pair>
-      </pairs>
-   </annotation>
-   -->
   
    <!-- For an anonymous inline inner class, generate a named inner class; in C# this is effectively static,
         so we pass a reference to the outer class as an extra argument in the constructor. The tricky part
@@ -1312,7 +1341,25 @@
       <xsl:variable name="allocatedName" as="xs:string" select="f:allocateInnerClassName(..)"/>
       <xsl:text>{$NL}</xsl:text>
       <xsl:call-template name="indent"/>
-      <xsl:text>private class {$allocatedName} : {f:escapeDottedName(f:resolveTypeName(../type))} {{{$NL}</xsl:text>
+      <xsl:text>private class {$allocatedName} : </xsl:text>
+      
+      <xsl:variable name="superclass" select="f:resolveTypeName(../type)" as="xs:string"/>
+      <xsl:variable name="isIterator" select="f:isIteratorType($superclass)" as="xs:boolean"/>
+      
+      <!-- The name of the implemented class/interface -->
+      
+      <xsl:choose>
+         <xsl:when test="$isIterator">
+            <xsl:text>System.Collections.Generic.IEnumerator&lt;{f:extract-type-arguments($superclass)}&gt;</xsl:text>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:text>{f:escapeDottedName($superclass)}</xsl:text>
+         </xsl:otherwise>
+      </xsl:choose>
+      
+      <xsl:text> {{{$NL}</xsl:text>
+      
+      <!-- Possible declaration of variable holding reference to outer class -->
       
       <xsl:variable name="containingMethod" select="ancestor::*[@nodeType='MethodDeclaration'][1]" as="element(*)?"/>
       <xsl:variable name="directive" select="$containingMethod/annotations/annotation[name/@identifier='CSharpInnerClass']"
@@ -1326,6 +1373,9 @@
          <xsl:text>private readonly {$containingClass} outerInstance;{$NL}</xsl:text>
       </xsl:if>
       <xsl:call-template name="indent-extra"/>
+      
+      <!-- Constructor -->
+      
       <xsl:text>public {$allocatedName}(</xsl:text>
       <xsl:variable name="extraParams" select="$directive/pairs/pair[name/@identifier='extra']//value/@value"/>
       <xsl:variable name="constructedParams" as="xs:string*">
@@ -1348,6 +1398,9 @@
       </xsl:variable>
       <xsl:value-of select="$constructedParams" separator=", "/>
       <xsl:text>)</xsl:text>
+      
+      <!-- Superclass initialization -->
+      
       <xsl:if test="exists(../arguments/argument)">
          <xsl:text> : base(</xsl:text>
          <xsl:for-each select="../arguments/argument">
@@ -1357,7 +1410,10 @@
          <!--<xsl:value-of select="../arguments/argument/name/@identifier" separator=", "/>-->
          <xsl:text>)</xsl:text>
       </xsl:if>
-      <xsl:text> {{{$NL}</xsl:text>     
+      <xsl:text> {{{$NL}</xsl:text>
+      
+      <!-- Initialize reference to outer class (must be done within the constructor -->
+      
       <xsl:if test="$includeThis">
          <xsl:call-template name="indent-plus-two"/>
          <xsl:text>this.outerInstance = outerInstance;{$NL}</xsl:text>
@@ -1392,6 +1448,16 @@
       </xsl:apply-templates>
       
       <xsl:call-template name="indent"/>
+      
+      <!-- If the class is an iterator, add methods to implement IEnumerator -->
+      
+      <xsl:if test="$isIterator">
+         <xsl:call-template name="addEnumeratorMethods">
+            <xsl:with-param name="deliveredType" select="f:extract-type-arguments($superclass)"/>
+            <xsl:with-param name="indent" select="$indent + 1" tunnel="yes"/>
+         </xsl:call-template>
+      </xsl:if>
+      
       <xsl:text>}}{$NL}</xsl:text>
    </xsl:template>
    
@@ -1718,7 +1784,19 @@
                </xsl:for-each-group>
             </xsl:if>
          </xsl:otherwise>
-      </xsl:choose>     
+      </xsl:choose>
+      
+      <xsl:variable name="iteratesOver" select="f:typeThatThisIteratesOver($thisDigest)"/>
+      <xsl:if test="$iteratesOver">
+         <xsl:call-template name="indent"/>
+         <xsl:text>{$NL}</xsl:text>
+         <xsl:call-template name="indent"/>
+         <xsl:text>/* Add methods to implement IEnumerable */{$NL}</xsl:text>
+         <xsl:call-template name="addEnumeratorMethods">
+            <xsl:with-param name="indent" select="$indent+1" tunnel="yes"/>
+            <xsl:with-param name="deliveredType" select="f:renameType($iteratesOver)"/>
+         </xsl:call-template>
+      </xsl:if>
    </xsl:template>
    
   
