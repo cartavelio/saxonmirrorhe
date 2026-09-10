@@ -1184,7 +1184,7 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
             <code>type(...)</code>
          </li>
          <li>
-            <code>atomic(...)</code>
+            <code>atomic(...)</code> (deprecated)
          </li>
          <li>
             <code>union(...)</code>
@@ -1213,6 +1213,12 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
 
       <p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for
       <code>.[. instance of type(T)]</code>.</p>
+         
+         <aside>Note that from 12.2 the syntax for type patterns changes so that <code>match="type(T)"</code> may specify any 
+            item type as <code>T</code> (including, for example, an atomic type name: <code>match="type(xs:integer)"</code>).
+            The syntax <code>match="atomic(T)"</code> has now been dropped from the draft specification, and
+            <code>match="type(T)"</code> should be used instead. For now Saxon still allows <code>match="atomic(T)"</code>
+            but will produce a warning; it will be removed in a future Saxon release.</aside>
          
          <p>Patterns for record types are particularly useful when JSON is processed using XSLT template rules. For example,
          a JSON object such as the following: </p>

@@ -468,9 +468,11 @@
         
         <p>From 12.2 the syntax for type patterns changes so that <code>match="type(T)"</code> may specify any 
             item type as <code>T</code> (including, for example, an atomic type name: <code>match="type(xs:integer)"</code>).
-        The syntax <code>match="atomic(T)"</code> is dropped. The priority rules for type patterns are not yet fully 
+            The syntax <code>match="atomic(T)"</code> is dropped from the draft specification, and
+            <code>match="type(T)"</code> should be used instead. For now Saxon still allows <code>match="atomic(T)"</code>
+            but will produce a warning; it will be removed in a future Saxon release. The priority rules for type patterns are not yet fully 
         aligned with the evolving specification: matching of atomic types works correctly according to the type hierarchy,
-        but if union types and/or record types are used in match patterns (for example <code>match="record(lat, long)"</code>
+        but if union types and/or record types are used in match patterns (for example <code>match="record(lat, long)"</code>)
         they should be disambiguated using explicit priorities.</p>
         
         <aside>Our general policy on implementation of new features in the draft 4.0 specifications is that
