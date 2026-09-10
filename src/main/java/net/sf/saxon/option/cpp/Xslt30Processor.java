@@ -742,12 +742,7 @@ public class Xslt30Processor extends SaxonCAPI {
         } else {
             throw new SaxonApiException("Source object is not of type (String, XdmValue or XdmValue[])");
         }
-        byte [] b = bStream.toByteArray();
-        CCharPointer a =  alloc.call(b.length + 1);
-            for (int i = 0; i < b.length; i++) {
-              a.write(i, b[i]);
-            }
-            a.write(b.length, (byte) 0);
+        CCharPointer a = SaxonCAPI.stringToNative(alloc, bStream);
         return a;
     }
 
