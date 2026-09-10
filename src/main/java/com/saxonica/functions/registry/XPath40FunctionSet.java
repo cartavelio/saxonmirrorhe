@@ -121,11 +121,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, BooleanValue.TRUE)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
-        register("contains-sequence", 2, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("contains-subsequence", 2, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
 
-        register("contains-sequence", 3, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("contains-subsequence", 3, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
@@ -156,11 +156,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, BooleanValue.TRUE)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
-        register("ends-with-sequence", 2, e -> e.populate(SequenceMatching.EndsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("ends-with-subsequence", 2, e -> e.populate(SequenceMatching.EndsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
 
-        register("ends-with-sequence", 3, e -> e.populate(SequenceMatching.EndsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("ends-with-subsequence", 3, e -> e.populate(SequenceMatching.EndsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
@@ -377,11 +377,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, BooleanValue.TRUE)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
-        register("starts-with-sequence", 2, e -> e.populate(SequenceMatching.StartsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("starts-with-subsequence", 2, e -> e.populate(SequenceMatching.StartsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE));
 
-        register("starts-with-sequence", 3, e -> e.populate(SequenceMatching.StartsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
+        register("starts-with-subsequence", 3, e -> e.populate(SequenceMatching.StartsWithSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, BooleanValue.FALSE)
                 .arg(2, compareFnType, ONE, null));
