@@ -493,15 +493,11 @@
                <p>-p[:(on|off)]</p>
             </td>
             <td>
-               <p>Enable recognition of query parameters (such as <code>xinclude=yes</code>)
-                 in the <code>StandardURIResolver</code>. This option is available in Saxon-PE and Saxon-EE only.
+               <p>Enable recognition of query parameters (such as <code>xinclude=yes</code>).
                   It cannot be used in conjunction with the <code>-r</code> option, and it
-                  automatically switches on the <code>-u</code> and <code>-sa</code> options. The
-                  effect is that Saxon-specific query parameters are recognized in a URI. One query
-                  parameter that is recognized is <code>validation</code>. This may take the values
-                     <code>strict</code>, <code>lax</code>, or <code>strip</code>. For example,
-                     <code>source.xml?validation=strict</code> loads a document with strict schema
-                  validation. </p>
+                  automatically switches on the <code>-u</code> option. The
+                  effect is that Saxon-specific query parameters are recognized in URIs
+                  passed on the command-line.</p>
             </td>
          </tr>
          <tr class="javaonly">
