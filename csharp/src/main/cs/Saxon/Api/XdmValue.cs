@@ -82,6 +82,10 @@ namespace Saxon.Api {
             value = SequenceExtent.makeSequenceExtent(list);
         }
 
+        /// <summary>
+        /// Create an XdmValue that wraps a GroundedValue. This method is intended primarily for internal use.
+        /// </summary>
+        
         public XdmValue(GroundedValue groundedValue) {
             this.value = groundedValue;
         }
