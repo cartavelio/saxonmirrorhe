@@ -1,7 +1,10 @@
 using System.Net;
+using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Web;
 using SysUri = System.Uri;
+using SysCollGen = System.Collections.Generic;
 
 namespace Saxon.Ejava.net {
     /// <summary>
@@ -31,7 +34,7 @@ namespace Saxon.Ejava.net {
             return uri.Scheme;
         }
 
-        public System.Uri toURI() {
+        public SysUri toURI() {
             return uri;
         }
 
@@ -50,31 +53,31 @@ namespace Saxon.Ejava.net {
             }
         }
 
-        private static Stream getDataResource(Uri resourceUri) {
+        private static Stream getDataResource(SysUri resourceUri) {
             string uri = resourceUri.ToString();
 
             // Can't use URI accessors because they percent decode the string incorrectly.
             var path = uri[5..];
-            var pos = path.IndexOf(",", StringComparison.Ordinal);
+            var pos = path.IndexOf(",", System.StringComparison.Ordinal);
 
             if (pos < 0) {
-                throw new UriFormatException(uri + ": comma separator missing");
+                throw new System.UriFormatException(uri + ": comma separator missing");
             }
 
             var mediaType = path[..pos];
-            String data = path[(pos + 1)..];
+            string data = path[(pos + 1)..];
             if (mediaType.EndsWith(";base64")) {
                 // Base64 decode it
-                var base64Bytes = Convert.FromBase64String(data);
+                var base64Bytes = System.Convert.FromBase64String(data);
                 return new MemoryStream(base64Bytes);
             }
             else {
                 // URL decode it
                 string charset = "UTF-8";
-                pos = mediaType.IndexOf(";charset=", StringComparison.Ordinal);
+                pos = mediaType.IndexOf(";charset=", System.StringComparison.Ordinal);
                 if (pos > 0) {
                     charset = mediaType[(pos + 9)..];
-                    pos = charset.IndexOf(";", StringComparison.Ordinal);
+                    pos = charset.IndexOf(";", System.StringComparison.Ordinal);
                     if (pos >= 0) {
                         charset = charset[..pos];
                     }
@@ -85,15 +88,15 @@ namespace Saxon.Ejava.net {
             }
         }
 
-        private static Stream getFileResource(Uri resourceUri) {
+        private static Stream getFileResource(SysUri resourceUri) {
             string filename = new Saxon.Ejava.io.File(resourceUri).getPath();
             return File.OpenRead(filename);
         }
 
         private static HttpClient _httpClient = new HttpClient();
 
-        private static Stream getHttpResource(Uri resourceUri) {
-            var seen = new HashSet<Uri>();
+        private static Stream getHttpResource(SysUri resourceUri) {
+            var seen = new SysCollGen.HashSet<SysUri>();
             var count = FollowRedirectLimit;
             var resolvedUri = resourceUri;
             HttpStatusCode status = HttpStatusCode.OK;

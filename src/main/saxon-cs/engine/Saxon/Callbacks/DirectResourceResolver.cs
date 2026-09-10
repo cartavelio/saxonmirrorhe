@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using Microsoft.Net.Http.Headers;
 using XmlResolver;
 using XmlResolver.Features;
