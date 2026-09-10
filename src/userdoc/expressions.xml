@@ -1361,7 +1361,7 @@
 
       </ul>
       
-      <h2>Arrays: Technical Implementation Details</h2>
+      <h2 class="subtitle">Arrays: Technical Implementation Details</h2>
       
       <p>Internally Saxon (from release 9.9) uses two implementations of arrays.</p>
       

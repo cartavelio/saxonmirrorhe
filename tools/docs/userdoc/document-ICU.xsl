@@ -263,7 +263,7 @@
           Belgian French), German, Italian and Swedish is provided as detailed in the table of <a
             href="/localization/localizing-numbers-and-dates/other-numberings">Numberings for selected
             languages</a>.</p>
-        <h2>Numbering</h2>
+        <h2 class="subtitle">Numbering</h2>
         <p>ICU supports a large set of language-specific rulesets for supporting different forms of
           spelled-out numbering and digit-ordinal treatment. For example:</p>
         <table>
@@ -387,7 +387,7 @@
           replaces the trailing 'e' on the generated ordinal. Thus
             <code>format-integer(1,'w;o(-en)','de')</code> produces
           "{format-integer(1,'w;o(-en)','de')}". </p>
-        <h2>Dates</h2>
+        <h2 class="subtitle">Dates</h2>
         <p>ICU also provides facilities for localized date formatting, principally for names of days
           of the week and months, though a variety of calendars and epoch naming facilities are also
           available. In Saxon-PE/EE naming of months and days (through picture fields on <a 
@@ -397,7 +397,7 @@
         <p>As is required from the specification, when the language locale requested is not
           implemented, the result of <code>format-date()</code> or <code>format-dateTime()</code> is
           prefixed with "[Language: <em>default language code</em>]". </p>
-        <h2>Title Case</h2>
+        <h2 class="subtitle">Title Case</h2>
         <p>Protocols for Title Case of sequences of words can differ markedly between languages,
           with many keeping strictly to lower-case throughout, and a very few (such as Dutch with
           'iJ') having very specialist rules. In Saxon, when title case is requested (e.g.
@@ -456,7 +456,7 @@
           </table>
         </div>
         <section id="ICU-numbering" title="Supported ICU Numbering Schemes">
-          <h2>Supported ICU Numbering Schemes</h2>
+          <h1>Supported ICU Numbering Schemes</h1>
           <aside>Since Saxon 9.8, the ICU library is updated from version 57.1 to 59.1; which brings
             Unicode 9.0 support.</aside>
           <p>The names of the numbering schemes and the codes to be used for them (ICU

@@ -126,7 +126,7 @@
       <p>For information on using packages, see <a class="bodylink" href="/using-xsl/compiling">Compiling a Stylesheet</a>.</p>
 
 
-      <h2>Non-Conformances</h2>
+      <h2 class="subtitle">Non-Conformances</h2>
       
       <p>The following non-conformances are known:</p>
       
