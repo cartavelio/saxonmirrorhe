@@ -1679,7 +1679,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public boolean isStreamabilityEnabled() {
-        if (streamabilityEnabled.isEmpty()) {
+        if (!streamabilityEnabled.isPresent()) {
             streamabilityEnabled = Optional.of(isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT)
                     || isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY));
         }

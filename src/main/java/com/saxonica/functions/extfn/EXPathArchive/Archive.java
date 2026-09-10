@@ -27,7 +27,6 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.*;
@@ -286,7 +285,7 @@ public class Archive {
         while ((av = ui.next()) != null) {
             MapItem entry = (MapItem) entries.get(av).iterate().next();
             Entry e = new Entry(av.getStringValue(),
-                    (Base64BinaryValue) entry.get(content).iterate().next());
+                                (Base64BinaryValue) entry.get(content).iterate().next());
             e.setCompression(defaultEntry.compression);
             if ((s = entry.get(compressionKey)) != null) {
                 String compressionValue = ((StringValue) s.iterate().next()).getStringValue();
@@ -318,17 +317,32 @@ public class Archive {
         byte[] supplied = in.getBinaryValue();
 
         byte[] zipID = new byte[]{0x50, 0x4b, 0x3, 0x4};
-        if (Arrays.equals(supplied, 0, 4, zipID, 0, 4)) {
+        if (arraysEqual(supplied, 0, 4, zipID, 0, 4)) {
             return ArchiveType.ZIP;
         }
 
         byte[] gzipID = new byte[]{0x1f, (byte) 0x8b};
-        if (Arrays.equals(supplied, 0, 2, gzipID, 0, 2)) {
+        if (arraysEqual(supplied, 0, 2, gzipID, 0, 2)) {
             return ArchiveType.GZIP;
         }
 
         return ArchiveType.UNKNOWN;
     }
+
+    @SuppressWarnings("SameParameterValue")
+    private static boolean arraysEqual(byte[] a, int aFrom, int aTo, byte[] b, int bFrom, int bTo) {
+        // TODO: from JDK 9, use Arrays.equal(a, aFrom, aTo, b, bFrom, bTo)
+        if (aTo - aFrom != bTo - bFrom) {
+            return false;
+        }
+        for (int i=aFrom, j=bFrom; i<aTo; ) {
+            if (a[i++] != b[j++]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     public static CompressionType compressionType(Base64BinaryValue in)
             throws XPathException {

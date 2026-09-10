@@ -528,7 +528,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     @Override
     public boolean isNamespaceSensitive() {
         // This is implemented as a memo function
-        if (namespaceSensitive.isEmpty()) {
+        if (!namespaceSensitive.isPresent()) {
             SimpleType base = this;
             int fp = base.getFingerprint();
             while (fp > 1023) {
