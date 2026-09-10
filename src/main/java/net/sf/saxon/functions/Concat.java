@@ -19,6 +19,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -72,7 +73,7 @@ public class Concat extends SystemFunction implements PushableFunction {
             visitor.getStaticContext().issueWarning(
                     "Did you intend to apply string concatenation to boolean operands? "
                             + "Perhaps you intended 'or' rather than '||'. "
-                            + "To suppress this warning, use string() on the arguments.", arguments[0].getLocation());
+                            + "To suppress this warning, use string() on the arguments.", SaxonErrorCode.SXWN9035, arguments[0].getLocation());
         }
         return new SystemFunctionCall.Optimized(this, arguments) {
             @Override

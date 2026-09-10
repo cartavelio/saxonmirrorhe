@@ -80,10 +80,11 @@ public interface StaticContext {
     /**
      * Issue a compile-time warning.
      * @param message The warning message. This should not contain any prefix such as "Warning".
+     * @param errorCode Error code identifying the warning condition
      * @param locator the location of the construct in question. May be null.
      */
 
-    void issueWarning(String message, Location locator);
+    void issueWarning(String message, String errorCode, Location locator);
 
     /**
      * Get the System ID of the container of the expression. This is the containing

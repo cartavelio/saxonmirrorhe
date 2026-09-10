@@ -19,6 +19,7 @@ import net.sf.saxon.pattern.CombinedNodeTest;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -143,7 +144,7 @@ public final class ItemChecker extends UnaryExpression {
                             requiredItemType, operand, th);
                     visitor.getStaticContext().issueWarning(
                             "The only value that can pass type-checking is an empty sequence. " +
-                                                                    message, getLocation());
+                                                                    message, SaxonErrorCode.SXWN9026, getLocation());
                 }
             } else {
                 RoleDiagnostic role = roleSupplier.get();

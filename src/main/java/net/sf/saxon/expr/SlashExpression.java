@@ -24,6 +24,7 @@ import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
@@ -220,7 +221,7 @@ public class SlashExpression extends BinaryExpression
             SquareArrayConstructor sq = (SquareArrayConstructor)getRhsExpression();
             if (sq.getOperanda().getNumberOfOperands() == 1) {
                 visitor.getStaticContext().issueWarning("An array constructor appears immediately after '/' or '//'. Perhaps " +
-                                "'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning.", getLocation());
+                                "'/*[predicate]' was intended? If not, consider using '!' rather than '/' to remove this warning.", SaxonErrorCode.SXWN9028, getLocation());
             }
         }
 

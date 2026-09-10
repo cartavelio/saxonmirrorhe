@@ -21,6 +21,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
@@ -57,7 +58,7 @@ public class RootExpression extends Expression {
             throw err;
         } else if (!doneWarnings && contextInfo.isParentless()
                 && th.relationship(contextInfo.getItemType(),NodeKindTest.DOCUMENT) == Affinity.DISJOINT) {
-            visitor.issueWarning(noContextMessage() + ": the context item is parentless and is not a document node", getLocation());
+            visitor.issueWarning(noContextMessage() + ": the context item is parentless and is not a document node", SaxonErrorCode.SXWN9026, getLocation());
             doneWarnings = true;
         }
         contextMaybeUndefined = contextInfo.isPossiblyAbsent();

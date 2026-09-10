@@ -19,6 +19,7 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Action;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -264,8 +265,8 @@ public class ConditionalBlock extends Instruction {
         }
         if (alwaysEmpty) {
             visitor.getStaticContext().issueWarning("The result of the sequence constructor will always be empty, so xsl:on-empty " +
-                "instructions will always be evaluated, and xsl:on-non-empty instructions will never be evaluated", getLocation());
-            List<Expression> retain = new ArrayList<Expression>();
+                "instructions will always be evaluated, and xsl:on-non-empty instructions will never be evaluated", SaxonErrorCode.SXWN9029, getLocation());
+            List<Expression> retain = new ArrayList<>();
             for (int c = 0; c < size(); c++) {
                 if (getChildExpression(c) instanceof OnNonEmptyExpr) {
                     // no action
@@ -279,8 +280,8 @@ public class ConditionalBlock extends Instruction {
         }
         if (alwaysNonEmpty) {
             visitor.getStaticContext().issueWarning("The result of the sequence constructor will never be empty, so xsl:on-empty " +
-                "instructions will never be evaluated, and xsl:on-non-empty instructions will always be evaluated", getLocation());
-            List<Expression> retain = new ArrayList<Expression>();
+                "instructions will never be evaluated, and xsl:on-non-empty instructions will always be evaluated", SaxonErrorCode.SXWN9029, getLocation());
+            List<Expression> retain = new ArrayList<>();
             for (int c = 0; c < size(); c++) {
                 if (getChildExpression(c) instanceof OnEmptyExpr) {
                     // no action
@@ -295,7 +296,7 @@ public class ConditionalBlock extends Instruction {
         if (lastOrdinaryInstruction == -1) {
             // all instructions are either xsl:on-empty or xsl:on-non-empty
             // We can discard the xsl:on-non-empty instructions, and make the on-empty instructions unconditional
-            List<Expression> retain = new ArrayList<Expression>();
+            List<Expression> retain = new ArrayList<>();
             for (int c = 0; c < size(); c++) {
                 if (getChildExpression(c) instanceof OnEmptyExpr) {
                     retain.add(((OnEmptyExpr) getChildExpression(c)).getBaseExpression());

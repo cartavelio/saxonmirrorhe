@@ -86,7 +86,7 @@ public class XSLMap extends StyleElement {
                     if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                         onDuplicates = makeExpression(value, att);
                     } else {
-                        compileWarning("saxon:on-duplicates ignored - requires Saxon-PE license",
+                        issueWarning("saxon:on-duplicates ignored - requires Saxon-PE license",
                                        SaxonErrorCode.SXWN9013);
                     }
                 }

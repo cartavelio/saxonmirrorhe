@@ -28,6 +28,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -114,7 +115,8 @@ public class LookupAllExpression extends UnaryExpression {
             if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
                     th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT) {
                 if (Cardinality.allowsZero(getBaseExpression().getCardinality())) {
-                    visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " + containerType, getLocation());
+                    visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "
+                                                 + containerType, SaxonErrorCode.SXWN9026, getLocation());
                 } else {
                     XPathException err = new XPathException("The left-hand operand of '?' must be a map or an array; the supplied expression is of type " + containerType, "XPTY0004");
                     err.setLocation(getLocation());

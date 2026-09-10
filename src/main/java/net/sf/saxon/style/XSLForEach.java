@@ -97,11 +97,11 @@ public class XSLForEach extends StyleElement {
             } else if (attName.getLocalPart().equals("threads") && attName.hasURI(NamespaceUri.SAXON)) {
                 threads = makeAttributeValueTemplate(Whitespace.trim(value), att);
                 if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
-                    compileWarning("saxon:threads - no multithreading takes place when compiling with trace enabled",
+                    issueWarning("saxon:threads - no multithreading takes place when compiling with trace enabled",
                             SaxonErrorCode.SXWN9012);
                     threads = new StringLiteral("0");
                 } else if (!"EE".equals(getConfiguration().getEditionCode())) {
-                    compileWarning("saxon:threads - ignored when not running Saxon-EE",
+                    issueWarning("saxon:threads - ignored when not running Saxon-EE",
                             SaxonErrorCode.SXWN9013);
                     threads = new StringLiteral("0");
                 }
@@ -128,7 +128,7 @@ public class XSLForEach extends StyleElement {
             threads = typeCheck("threads", threads);
         }
         if (!hasChildNodes()) {
-            compileWarning("An empty xsl:for-each instruction has no effect", SaxonErrorCode.SXWN9009);
+            issueWarning("An empty xsl:for-each instruction has no effect", SaxonErrorCode.SXWN9009);
         }
     }
 

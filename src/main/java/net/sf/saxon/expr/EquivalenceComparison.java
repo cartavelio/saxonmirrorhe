@@ -18,6 +18,7 @@ import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -128,7 +129,7 @@ public class EquivalenceComparison extends BinaryExpression implements Compariso
             if (Type.isGuaranteedComparable(pt0, pt1, false)) {
                 knownToBeComparable = true;
             } else if (!Type.isPossiblyComparable(pt0, pt1, false)) {
-                env.issueWarning("Cannot compare " + t0.toString() + " to " + t1.toString(), getLocation());
+                env.issueWarning("Cannot compare " + t0 + " to " + t1, SaxonErrorCode.SXWN9025, getLocation());
                 // This is not an error in a switch statement, but it means the branch will never be chosen
             }
         }

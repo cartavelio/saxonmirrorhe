@@ -127,7 +127,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                             overrideExtensionFunctionAtt = overrideAtt;
                             overrideExtensionFunction = override;
                         }
-                        compileWarning("The xsl:function/@override attribute is deprecated; use override-extension-function", SaxonErrorCode.SXWN9014);
+                        issueWarning("The xsl:function/@override attribute is deprecated; use override-extension-function", SaxonErrorCode.SXWN9014);
                         break;
                     case "override-extension-function":
                         String overrideExtAtt = Whitespace.trim(att.getValue());
@@ -139,9 +139,6 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                         } else {
                             overrideExtensionFunctionAtt = overrideExtAtt;
                             overrideExtensionFunction = overrideExt;
-                        }
-                        if (local.equals("override")) {
-                            compileWarning("The xsl:function/@override attribute is deprecated; use override-extension-function", SaxonErrorCode.SXWN9014);
                         }
                         break;
                     case "cache":
@@ -157,7 +154,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             } else if (uri.equals(NamespaceUri.SAXON)) {
                 if (isExtensionAttributeAllowed(att.getNodeName().getDisplayName())) {
                     if (local.equals("memo-function")) {
-                        compileWarning("saxon:memo-function is deprecated: use cache='yes'", SaxonErrorCode.SXWN9014);
+                        issueWarning("saxon:memo-function is deprecated: use cache='yes'", SaxonErrorCode.SXWN9014);
                         if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
                             memoFunction = processBooleanAttribute("saxon:memo-function", att.getValue());
                         }

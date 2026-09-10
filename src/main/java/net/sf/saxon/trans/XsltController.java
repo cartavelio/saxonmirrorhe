@@ -806,7 +806,7 @@ public class XsltController extends Controller {
     private void warningIfStreamable(Mode mode) {
         if (mode.isDeclaredStreamable()) {
             warning((initialMode == null ? "" : getInitialMode().getModeTitle(true)) +
-                            " is streamable, but the input is not supplied as a stream", SaxonErrorCode.SXWN9000, Loc.NONE);
+                            " is streamable, but the input is not supplied as a stream", SaxonErrorCode.SXWN9045, Loc.NONE);
         }
     }
 

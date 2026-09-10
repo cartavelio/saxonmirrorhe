@@ -540,7 +540,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         if (match != null) {
             match = typeCheck("match", match);
             if (match.getItemType() instanceof ErrorType) {
-                issueWarning(new XPathException("Pattern will never match anything", SaxonErrorCode.SXWN9015, this));
+                issueWarning("Pattern will never match anything", SaxonErrorCode.SXWN9015);
             }
             if (getPrincipalStylesheetModule().isDeclaredModes()) {
                 RuleManager manager = getPrincipalStylesheetModule().getRuleManager();
@@ -911,7 +911,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                         String message = "Template rule is declared streamable but the match pattern is not motionless";
                         if (fallback) {
                             message += "\n  * Falling back to non-streaming implementation";
-                            getStaticContext().issueWarning(message, this);
+                            getStaticContext().issueWarning(message, SaxonErrorCode.SXWN9024, this);
                             rule.setDeclaredStreamable(false);
                             getCompilation().setFallbackToNonStreaming(true);
                         } else {

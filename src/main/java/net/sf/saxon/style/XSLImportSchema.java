@@ -132,14 +132,14 @@ public class XSLImportSchema extends StyleElement {
             targetNamespace = NamespaceUri.of(namespace);
             boolean namespaceKnown = config.isSchemaAvailable(targetNamespace);
             if (schemaLoc == null && !namespaceKnown) {
-                compileWarning("No schema for this namespace is known, " +
+                issueWarning("No schema for this namespace is known, " +
                         "and no schema-location was supplied, so no schema has been imported",
                     SaxonErrorCode.SXWN9006);
                 return;
             }
             if (namespaceKnown && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
                 if (schemaLoc != null) {
-                    compileWarning("The schema document at " + schemaLoc +
+                    issueWarning("The schema document at " + schemaLoc +
                         " is ignored because a schema for this namespace is already loaded", SaxonErrorCode.SXWN9006);
                 }
             }

@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AxisIterator;
@@ -184,7 +185,7 @@ public final class AxisExpression extends Expression {
             if (warnings) {
                 visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select " +
                                              test.getUType().toStringWithIndefiniteArticle(),
-                                     getLocation());
+                                     SaxonErrorCode.SXWN9037, getLocation());
             }
             return Literal.makeEmptySequence();
         }
@@ -192,7 +193,7 @@ public final class AxisExpression extends Expression {
         if (test instanceof NameTest && axis == AxisInfo.NAMESPACE && !((NameTest) test).getNamespaceURI().isEmpty()) {
             if (warnings) {
                 visitor.issueWarning("The names of namespace nodes are never prefixed, so this axis step will never select anything",
-                                     getLocation());
+                                     SaxonErrorCode.SXWN9037, getLocation());
             }
             return Literal.makeEmptySequence();
         }
@@ -205,7 +206,7 @@ public final class AxisExpression extends Expression {
             if (warnings) {
                 visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
                                              originUType.toStringWithIndefiniteArticle() + " will never select anything",
-                                     getLocation());
+                                     SaxonErrorCode.SXWN9037, getLocation());
             }
             return Literal.makeEmptySequence();
         }
@@ -213,7 +214,7 @@ public final class AxisExpression extends Expression {
         if (contextInfo.isParentless() && (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
             if (warnings) {
                 visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select anything because the context item is parentless",
-                                     getLocation());
+                                     SaxonErrorCode.SXWN9037, getLocation());
             }
             return Literal.makeEmptySequence();
         }
@@ -224,7 +225,7 @@ public final class AxisExpression extends Expression {
                 visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis starting at " +
                                              originUType.toStringWithIndefiniteArticle() + " will never select " +
                                              test.getUType().toStringWithIndefiniteArticle(),
-                                     getLocation());
+                                     SaxonErrorCode.SXWN9037, getLocation());
             }
             return Literal.makeEmptySequence();
         }
@@ -268,7 +269,7 @@ public final class AxisExpression extends Expression {
                                 if (warnings) {
                                     visitor.issueWarning(
                                             "Starting at a document node, the step is selecting an element whose name " +
-                                                    "is not among the names of child elements permitted for this document node type", getLocation());
+                                                    "is not among the names of child elements permitted for this document node type", SaxonErrorCode.SXWN9037, getLocation());
                                 }
 
                                 return Literal.makeEmptySequence();
@@ -283,7 +284,7 @@ public final class AxisExpression extends Expression {
                                 if (decl == null) {
                                     if (warnings) {
                                         visitor.issueWarning("Element " + config.getNamePool().getEQName(outermostElementName) +
-                                                                     " is not declared in the schema", getLocation());
+                                                                     " is not declared in the schema", SaxonErrorCode.SXWN9037, getLocation());
                                     }
                                     itemType = elementTest;
                                 } else {
@@ -326,7 +327,7 @@ public final class AxisExpression extends Expression {
                         visitor.issueWarning(
                                 "The " + AxisInfo.axisName[axis] + " axis will never select any typed nodes, " +
                                         "because the expression is being compiled in an environment that is not schema-aware",
-                                getLocation());
+                                SaxonErrorCode.SXWN9037, getLocation());
                     }
                     return Literal.makeEmptySequence();
                 }
@@ -343,14 +344,14 @@ public final class AxisExpression extends Expression {
                                 "The " + AxisInfo.axisName[axis] + " axis will never select any " +
                                         kind + " nodes when starting at " +
                                         (origin == Type.ATTRIBUTE ? "an attribute node" : getStartingNodeDescription(contentType)),
-                                getLocation());
+                                SaxonErrorCode.SXWN9037, getLocation());
                     } else if (axis == AxisInfo.CHILD && kind.equals(UType.TEXT) &&
                             (getParentExpression() instanceof Atomizer)) {
                         visitor.issueWarning(
                                 "Selecting the text nodes of an element with simple content may give the " +
                                         "wrong answer in the presence of comments or processing instructions. It is usually " +
                                         "better to omit the '/text()' step",
-                                getLocation());
+                                SaxonErrorCode.SXWN9037, getLocation());
                     } else if (axis == AxisInfo.ATTRIBUTE) {
                         boolean found = false;
                         if (targetfp == -1) {
@@ -378,7 +379,7 @@ public final class AxisExpression extends Expression {
                                             (targetName == null ?
                                                      "any attribute nodes" :
                                                      "an attribute node named " + getDiagnosticName(targetName, env)) +
-                                            " when starting at " + getStartingNodeDescription(contentType), getLocation());
+                                            " when starting at " + getStartingNodeDescription(contentType), SaxonErrorCode.SXWN9037, getLocation());
                             // Despite the warning, leave the expression unchanged. This is because
                             // we don't necessarily know about all extended types at compile time:
                             // in particular, we don't seal the XML Schema namespace to block extensions
@@ -396,7 +397,7 @@ public final class AxisExpression extends Expression {
                                                  kind +
                                                  " nodes when starting at " +
                                                  getStartingNodeDescription(contentType) +
-                                                 ", as this type requires simple content", getLocation());
+                                                 ", as this type requires simple content", SaxonErrorCode.SXWN9037, getLocation());
                 }
                 return Literal.makeEmptySequence();
             } else if (((ComplexType) contentType).isEmptyContent() &&
@@ -410,7 +411,7 @@ public final class AxisExpression extends Expression {
                     visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select any" +
                                                  " nodes when starting at " +
                                                  getStartingNodeDescription(contentType) +
-                                                 ", as this type requires empty content", getLocation());
+                                                 ", as this type requires empty content", SaxonErrorCode.SXWN9037, getLocation());
                 }
                 return Literal.makeEmptySequence();
             } else if (axis == AxisInfo.ATTRIBUTE) {
@@ -420,7 +421,7 @@ public final class AxisExpression extends Expression {
                             visitor.issueWarning(
                                     "The complex type " + contentType.getDescription() +
                                             " allows no attributes other than the standard attributes in the xsi namespace",
-                                    getLocation());
+                                    SaxonErrorCode.SXWN9037, getLocation());
                         }
                     }
                 } else {
@@ -442,7 +443,7 @@ public final class AxisExpression extends Expression {
                                 visitor.issueWarning(
                                         "The complex type " + contentType.getDescription() +
                                                 " does not allow an attribute named " + getDiagnosticName(targetName, env),
-                                        getLocation());
+                                        SaxonErrorCode.SXWN9037, getLocation());
                                 return Literal.makeEmptySequence();
                             }
                         } else {
@@ -470,7 +471,7 @@ public final class AxisExpression extends Expression {
                                 visitor.issueWarning(
                                         "The complex type " + contentType.getDescription() +
                                                 " does not allow children",
-                                        getLocation());
+                                        SaxonErrorCode.SXWN9037, getLocation());
                             }
                             return Literal.makeEmptySequence();
                         }
@@ -507,7 +508,7 @@ public final class AxisExpression extends Expression {
                                     }
                                 }
                             }
-                            visitor.issueWarning(message, getLocation());
+                            visitor.issueWarning(message, SaxonErrorCode.SXWN9037, getLocation());
                         }
                         return Literal.makeEmptySequence();
                     } else {
@@ -525,7 +526,7 @@ public final class AxisExpression extends Expression {
                                     "The complex type " + contentType.getDescription() +
                                             " appears not to allow a child element named " +
                                             getDiagnosticName(childElement, env),
-                                    getLocation());
+                                    SaxonErrorCode.SXWN9037, getLocation());
                             return Literal.makeEmptySequence();
                         }
                         if (!Cardinality.allowsMany(computedCardinality) &&
@@ -606,7 +607,7 @@ public final class AxisExpression extends Expression {
                                     "The complex type " + contentType.getDescription() +
                                             " does not allow a descendant element named " +
                                             getDiagnosticName(targetName, env),
-                                    getLocation());
+                                    SaxonErrorCode.SXWN9037, getLocation());
                         }
                     }
                 } catch (SchemaException e) {

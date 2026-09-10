@@ -19,6 +19,7 @@ import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
@@ -215,7 +216,7 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         List<String> warnings = new ArrayList<>();
         precomputeRegex(config, warnings);
         for (String w : warnings) {
-            visitor.getStaticContext().issueWarning(w, getLocation());
+            visitor.getStaticContext().issueWarning(w, SaxonErrorCode.SXWN9022, getLocation());
         }
 
         return this;

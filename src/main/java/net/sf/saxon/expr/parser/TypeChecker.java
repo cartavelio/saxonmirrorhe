@@ -14,6 +14,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.TupleType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -408,7 +409,7 @@ public class TypeChecker {
                 if (suppliedCard != StaticProperty.EMPTY) {
                     String msg = role.composeErrorMessage(reqItemType, supplied, th);
                     msg += ". The expression can succeed only if the supplied value is an empty sequence.";
-                    visitor.issueWarning(msg, supplied.getLocation());
+                    visitor.issueWarning(msg, SaxonErrorCode.SXWN9026, supplied.getLocation());
                 }
             } else {
                 String msg = role.composeErrorMessage(reqItemType, supplied, th);
@@ -589,7 +590,7 @@ public class TypeChecker {
                             "; supplied value (" + supplied.toShortString() + ") has item type " +
                             suppliedItemType +
                             ". The expression can succeed only if the supplied value is an empty sequence.";
-                    env.issueWarning(msg, supplied.getLocation());
+                    env.issueWarning(msg, SaxonErrorCode.SXWN9026, supplied.getLocation());
                 }
             } else {
                 RoleDiagnostic role = roleSupplier.get();

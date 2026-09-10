@@ -1659,7 +1659,7 @@ public class QueryModule implements StaticContext {
      */
 
     @Override
-    public void issueWarning(String s, Location locator) {
+    public void issueWarning(String s, String errorCode, Location locator) {
         XmlProcessingIncident err = new XmlProcessingIncident(s).asWarning();
         err.setLocation(locator);
         err.setHostLanguage(HostLanguage.XQUERY);

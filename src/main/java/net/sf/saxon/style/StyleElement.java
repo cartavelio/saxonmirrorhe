@@ -40,7 +40,6 @@ import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
 
-import javax.xml.transform.SourceLocator;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -666,7 +665,7 @@ public abstract class StyleElement extends ElementImpl {
                                             " is not allowed on element " + Err.wrap(getDisplayName(), Err.ELEMENT),
                                     "XTSE0090", clarkName);
         } else if (NamespaceUri.SAXON.equals(attributeURI)) {
-            compileWarning("Unrecognized attribute in Saxon namespace: " + nc.getDisplayName(), "XTSE0090");
+            issueWarning("Unrecognized attribute in Saxon namespace: " + nc.getDisplayName(), "XTSE0090");
         }
     }
 
@@ -855,11 +854,11 @@ public abstract class StyleElement extends ElementImpl {
         boolean streamable = processBooleanAttribute("streamable", streamableAtt);
         if (streamable) {
             if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT)) {
-                compileWarning("Request for streaming ignored: this Saxon configuration does not support streaming", SaxonErrorCode.SXST0068);
+                issueWarning("Request for streaming ignored: this Saxon configuration does not support streaming", SaxonErrorCode.SXST0068);
                 return false;
             }
             if ("off".equals(getConfiguration().getConfigurationProperty(Feature.STREAMABILITY))) {
-                compileWarning("Request for streaming ignored: streaming is disabled in this Saxon configuration", SaxonErrorCode.SXST0068);
+                issueWarning("Request for streaming ignored: streaming is disabled in this Saxon configuration", SaxonErrorCode.SXST0068);
                 return false;
             }
         }
@@ -1016,10 +1015,10 @@ public abstract class StyleElement extends ElementImpl {
                 if (version < 20 && version != 10) {
                     // XSLT 2.0 says use backwards compatible mode. XSLT 3.0 says we can raise an error.
                     // Both allow a warning
-                    issueWarning("Unrecognized version " + val + ": treated as 1.0", SaxonErrorCode.SXWN9020, this);
+                    issueWarning("Unrecognized version " + val + ": treated as 1.0", SaxonErrorCode.SXWN9020);
                     version = 10;
                 } else if (version > 20 && version < 30) {
-                    issueWarning("Unrecognized version " + val + ": treated as 2.0", SaxonErrorCode.SXWN9020, this);
+                    issueWarning("Unrecognized version " + val + ": treated as 2.0", SaxonErrorCode.SXWN9020);
                     version = 20;
                 }
             }
@@ -1080,7 +1079,7 @@ public abstract class StyleElement extends ElementImpl {
             return true;
         } else {
             issueWarning("The option " + getDisplayName() + "/@" + attribute +
-                                 " is ignored because it requires a Saxon-PE license", SaxonErrorCode.SXWN9021, this);
+                                 " is ignored because it requires a Saxon-PE license", SaxonErrorCode.SXWN9021);
             return false;
         }
     }
@@ -1808,7 +1807,7 @@ public abstract class StyleElement extends ElementImpl {
         }
         if (lastChild instanceof XSLLocalVariable &&
                 !(this instanceof XSLStylesheet) && !endsWithTextTemplate) {
-            lastChild.compileWarning("A variable with no following sibling instructions has no effect",
+            lastChild.issueWarning("A variable with no following sibling instructions has no effect",
                                      SaxonErrorCode.SXWN9001);
         }
     }
@@ -2491,48 +2490,21 @@ public abstract class StyleElement extends ElementImpl {
         getCompilation().reportWarning(message, errorCode, this);
     }
 
-    public void compileWarning(String message, String errorCode, Location location) {
-        getCompilation().reportWarning(message, errorCode, location);
-    }
-
-    /**
-     * Report a warning to the error listener
-     *
-     * @param error an exception containing the warning text
-     */
-
-    protected void issueWarning(XPathException error) {
-        if (error.getLocator() == null) {
-            error.setLocator(this);
-        }
-        getCompilation().reportWarning(error);
-    }
 
     /**
      * Report a warning to the error listener
      *
      * @param message the warning message text
+     * @param errorCode error code identifying the condition
      * @param locator the location of the problem in the source stylesheet
      */
 
-    protected void issueWarning(String message, SourceLocator locator) {
-        XPathException tce = new XPathException(message);
-        if (locator == null) {
-            tce.setLocator(this);
-        } else {
-            tce.setLocator(locator);
-        }
-        issueWarning(tce);
+    public void issueWarning(String message, String errorCode, Location locator) {
+        getCompilation().reportWarning(message, errorCode, locator == null ? this : locator);
     }
 
-    protected void issueWarning(String message, String errorCode, SourceLocator locator) {
-        XPathException tce = new XPathException(message, errorCode);
-        if (locator == null) {
-            tce.setLocator(this);
-        } else {
-            tce.setLocator(locator);
-        }
-        issueWarning(tce);
+    public void issueWarning(String message, String errorCode) {
+        getCompilation().reportWarning(message, errorCode, this);
     }
 
     /**

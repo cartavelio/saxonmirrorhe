@@ -18,6 +18,7 @@ import net.sf.saxon.expr.sort.ComparisonException;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -236,7 +237,7 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
                 visitor.getStaticContext().issueWarning("Comparison of " + t0 +
                         (opt0 ? "?" : "") + " to " + t1 +
-                        (opt1 ? "?" : "") + " will fail unless " + which + " empty", getLocation());
+                        (opt1 ? "?" : "") + " will fail unless " + which + " empty", SaxonErrorCode.SXWN9026, getLocation());
                 needsRuntimeCheck = true;
             } else {
                 String message = "In {" + toShortString() + "}: cannot compare " +

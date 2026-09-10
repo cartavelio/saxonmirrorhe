@@ -407,15 +407,16 @@ public class XPathParser {
      * Output a warning message
      *
      * @param message the text of the message
+     * @param errorCode
      */
 
-    protected void warning(String message)  {
+    protected void warning(String message, String errorCode)  {
         if (!env.getConfiguration().getBooleanProperty(Feature.SUPPRESS_XPATH_WARNINGS)) {
             String s = t.recentText(-1);
             String prefix =
                     (message.startsWith("...") ? "near" : "in") +
                             ' ' + Err.wrap(s) + ":\n    ";
-            env.issueWarning(prefix + message, makeLocation());
+            env.issueWarning(prefix + message, errorCode, makeLocation());
         }
     }
 
@@ -1421,7 +1422,7 @@ public class XPathParser {
                 nextToken();
                 SequenceType type = parseSequenceType();
                 if (type.getCardinality() != StaticProperty.EXACTLY_ONE) {
-                    warning("Occurrence indicator on singleton range variable has no effect");
+                    warning("Occurrence indicator on singleton range variable has no effect", SaxonErrorCode.SXWN9039);
                     type = SequenceType.makeSequenceType(type.getPrimaryType(), StaticProperty.EXACTLY_ONE);
                 }
                 v.setRequiredType(type);
@@ -2355,13 +2356,13 @@ public class XPathParser {
                         (t.currentTokenValue.equals("true") || t.currentTokenValue.equals("false"))) {
                     warning("The expression is looking for a child element named '" + t.currentTokenValue +
                             "' - perhaps " + t.currentTokenValue + "() was intended? To avoid this warning, use child::" +
-                            t.currentTokenValue + " or ./" + t.currentTokenValue + ".");
+                            t.currentTokenValue + " or ./" + t.currentTokenValue + ".", SaxonErrorCode.SXWN9040);
                 }
                 if (t.currentToken == Token.NAME && t.getBinaryOp(t.currentTokenValue) != Token.UNKNOWN &&
                         language != ParsedLanguage.XSLT_PATTERN && (offset > 0 || t.peekAhead() != Token.EOF)) {
                     String s = t.currentTokenValue;
                     warning("The keyword '" + s + "' in this context means 'child::" + s +
-                                    "'. If this was intended, use 'child::" + s + "' or './" + s + "' to avoid this warning.");
+                                    "'. If this was intended, use 'child::" + s + "' or './" + s + "' to avoid this warning.", SaxonErrorCode.SXWN9040);
                 }
                 return parseRelativePath();
         }
@@ -3331,7 +3332,7 @@ public class XPathParser {
                             return null;
                         }
                         if (primaryType == Type.ATTRIBUTE && schemaType.isComplexType()) {
-                            warning("An attribute cannot have a complex type");
+                            warning("An attribute cannot have a complex type", SaxonErrorCode.SXWN9041);
                         }
                         ContentTypeTest typeTest = new ContentTypeTest(primaryType, schemaType, env.getConfiguration(), false);
                         if (fp == -1 && (nodeTest == null || nodeTest instanceof NodeKindTest)) {

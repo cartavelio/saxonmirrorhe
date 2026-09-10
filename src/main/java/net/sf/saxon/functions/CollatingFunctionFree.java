@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
 import java.net.URI;
@@ -65,7 +66,7 @@ public class CollatingFunctionFree extends SystemFunction {
                 }
             } catch (URISyntaxException e) {
                 visitor.getStaticContext().issueWarning(
-                        "Cannot resolve relative collation URI " + coll, c.getLocation());
+                        "Cannot resolve relative collation URI " + coll, SaxonErrorCode.SXWN9034, c.getLocation());
             }
             CollatingFunctionFixed fn = bindCollation(coll);
             Expression[] newArgs = new Expression[arguments.length - 1];

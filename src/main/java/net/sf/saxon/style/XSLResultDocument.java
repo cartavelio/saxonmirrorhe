@@ -154,7 +154,7 @@ public class XSLResultDocument extends StyleElement {
                 if (getCompilation().getCompilerInfo().isCompileWithTracing()) {
                     async = false;
                 } else if (!"EE".equals(getConfiguration().getEditionCode())) {
-                    compileWarning("saxon:asynchronous - ignored when not running Saxon-EE",
+                    issueWarning("saxon:asynchronous - ignored when not running Saxon-EE",
                             SaxonErrorCode.SXWN9013);
                     async = false;
                 }
@@ -232,7 +232,7 @@ public class XSLResultDocument extends StyleElement {
         while ((node = ai.next()) != null) {
             if (node instanceof XSLGeneralVariable || node instanceof XSLFunction) {
                 issueWarning("An xsl:result-document instruction inside " + node.getDisplayName() +
-                        " will always fail at run-time", "XTDE1480", this);
+                        " will always fail at run-time", "XTDE1480");
                 return new ErrorExpression("Call to xsl:result-document while in temporary output state", "XTDE1480", false);
             }
         }

@@ -26,7 +26,6 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -59,7 +58,7 @@ public abstract class AbstractStaticContext implements StaticContext {
     protected boolean usingDefaultFunctionLibrary;
     private final Map<StructuredQName, ItemType> typeAliases = new HashMap<>();
     private UnprefixedElementMatchingPolicy unprefixedElementPolicy = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
-    private BiConsumer<String, Location> warningHandler;
+    private WarningHandler warningHandler;
 
     /**
      * Set the Configuration. This is protected so it can be used only by subclasses;
@@ -71,8 +70,8 @@ public abstract class AbstractStaticContext implements StaticContext {
     protected void setConfiguration(Configuration config) {
         this.config = config;
         this.defaultCollationName = config.getDefaultCollationName();
-        warningHandler = (message, locator) -> {
-            XmlProcessingIncident incident = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9000, locator).asWarning();
+        warningHandler = (message, code, locator) -> {
+            XmlProcessingIncident incident = new XmlProcessingIncident(message, code, locator).asWarning();
             config.makeErrorReporter().report(incident);
         };
     }
@@ -271,18 +270,37 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     /**
      * Set a callback function that will be called to handle any static warnings found while
-     * processing warnings from the XPath parser
+     * processing warnings from the XPath parser.
+     * <p>Superseded in 12.0 by {@link #setWarningHandler(WarningHandler)}, which allows the callback
+     * to receive the error code information as well as the error message and originating location.</p>
      * @param handler the function to be called to handle static warnings. When a warning is
      *                issued, the handler's {@code accept} method is called, supplying the string
-     *                of the warning message as the argument.  The default warning handler sends
+     *                of the warning message and a location as the arguments.  The default warning handler sends
      *                the information to the default {@link ErrorReporter} associated with the
      *                Saxon {@link Configuration}.
      * @since 10.0
      */
 
     public void setWarningHandler(BiConsumer<String, Location> handler) {
+        warningHandler = (message, code, loc) -> handler.accept(message, loc);
+    }
+
+    /**
+     * Set a callback function that will be called to handle any static warnings found while
+     * processing warnings from the XPath parser
+     *
+     * @param handler the function to be called to handle static warnings. When a warning is
+     *                issued, the handler's {@code accept} method is called, supplying the string
+     *                of the warning message, an error code, and a location as the arguments.  The default warning handler sends
+     *                the information to the default {@link ErrorReporter} associated with the
+     *                Saxon {@link Configuration}.
+     * @since 12.0
+     */
+
+    public void setWarningHandler(WarningHandler handler) {
         warningHandler = handler;
     }
+
 
     /**
      * Get the callback function that will be called to handle any static warnings found while
@@ -292,10 +310,11 @@ public abstract class AbstractStaticContext implements StaticContext {
      *                When a warning is
      *                issued, the handler's {@code accept} method is called, supplying the string
      *                of the warning message and the location information as the two arguments.
-     * @since 10.0
+     * @since 10.0. Modified in 12.0 to return a {@link WarningHandler}, which is a three-argument
+     * callback accepting the error message, error code, and location.
      */
 
-    public BiConsumer<String, Location> getWarningHandler() {
+    public WarningHandler getWarningHandler() {
         return warningHandler;
     }
 
@@ -306,8 +325,8 @@ public abstract class AbstractStaticContext implements StaticContext {
      */
 
     @Override
-    public void issueWarning(String s, Location locator) {
-        getWarningHandler().accept(s, locator);
+    public void issueWarning(String s, String errorCode, Location locator) {
+        getWarningHandler().accept(s, errorCode, locator);
     }
 
     /**
@@ -520,6 +539,15 @@ public abstract class AbstractStaticContext implements StaticContext {
     @Override
     public UnprefixedElementMatchingPolicy getUnprefixedElementMatchingPolicy() {
          return unprefixedElementPolicy;
+    }
+
+    /**
+     * Interface defining a callback for handling warnings
+     */
+
+    @FunctionalInterface
+    public interface WarningHandler {
+        void accept(String message, String errorCode, Location location);
     }
 }
 

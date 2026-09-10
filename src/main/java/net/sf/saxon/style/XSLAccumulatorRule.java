@@ -80,8 +80,8 @@ public class XSLAccumulatorRule extends StyleElement {
         match = makePattern(matchAtt, "match");
 
         if (capture && !postDescent) {
-            compileWarning("saxon:capture has no effect on a pre-descent accumulator rule",
-                           SaxonErrorCode.SXWN9000);
+            issueWarning("saxon:capture has no effect on a pre-descent accumulator rule",
+                           SaxonErrorCode.SXWN9044);
         }
 
     }

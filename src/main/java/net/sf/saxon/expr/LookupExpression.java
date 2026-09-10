@@ -22,6 +22,7 @@ import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.ma.map.TupleType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.*;
@@ -159,7 +160,8 @@ public class LookupExpression extends BinaryExpression {
                     th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT &&
                     th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
                 if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
-                    visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " + containerType, getLocation());
+                    visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
+                                                 containerType, SaxonErrorCode.SXWN9026, getLocation());
                 } else {
                     XPathException err = new XPathException("The left-hand operand of '?' must be a map or an array; the supplied expression is of type " + containerType, "XPTY0004");
                     err.setLocation(getLocation());

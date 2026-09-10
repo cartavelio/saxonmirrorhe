@@ -25,6 +25,7 @@ import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.type.*;
@@ -247,7 +248,7 @@ public class FixedElement extends ElementCreator {
                 SchemaDeclaration decl = config.getElementDeclaration(fp);
                 if (decl == null) {
                     env.issueWarning("There is no global element declaration for " +
-                            elementName.getDisplayName(), instr.getLocation());
+                            elementName.getDisplayName(), SaxonErrorCode.SXWN9031, instr.getLocation());
                     itemType = new NameTest(Type.ELEMENT, fp, config.getNamePool());
                 } else {
                     schemaType = decl.getType();

@@ -18,6 +18,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AnyItemType;
@@ -101,7 +102,7 @@ public class ContextItemExpression extends Expression {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, /*@Nullable*/ ContextItemStaticInfo contextInfo) throws XPathException {
         if (contextInfo.getItemType() == ErrorType.getInstance()) {
-            visitor.issueWarning("Evaluation will always fail: there is no context item", getLocation());
+            visitor.issueWarning("Evaluation will always fail: there is no context item", SaxonErrorCode.SXWN9027, getLocation());
             ErrorExpression ee = new ErrorExpression(
                     "There is no context item",
                     getErrorCodeForUndefinedContext(),

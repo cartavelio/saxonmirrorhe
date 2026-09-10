@@ -12,7 +12,11 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.s9api.*;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.QName;
+import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -49,6 +53,7 @@ public class StandardErrorReporter
     protected transient Logger logger = new StandardLogger();
     private XmlProcessingError latestError;
     private boolean outputErrorCodes = true;
+    private Set<StructuredQName> suppressedWarnings;
 
     /**
      * Create a Standard Error Reporter
@@ -184,6 +189,35 @@ public class StandardErrorReporter
     }
 
     /**
+     * Suppress warning messages using a particular error code. The method may be called repeatedly
+     * to suppress multiple warnings.
+     * @param code the error code to be suppressed. For an error code in the standard error namespace,
+     * supply the local name. For an error code in another namespace, supply the code in the form
+     * <code>Q{uri}local</code>.
+     */
+
+    public void suppressWarning(String code) {
+        if (suppressedWarnings == null) {
+            suppressedWarnings = new HashSet<>();
+        }
+        if (code.startsWith("Q{")) {
+            suppressedWarnings.add(StructuredQName.fromEQName(code));
+        } else {
+            suppressedWarnings.add(new StructuredQName("err", NamespaceConstant.ERR, code));
+        }
+    }
+
+    /**
+     * Ask whether a particular warning is suppressed.
+     * @param errorCode the errorCode about which we are asking
+     * @return true if reporting of this warning condition has been suppressed.
+     */
+
+    public boolean isSuppressedWarning(StructuredQName errorCode) {
+        return suppressedWarnings != null && suppressedWarnings.contains(errorCode);
+    }
+
+    /**
      * Report an error or warning
      *
      * @param processingError the error or warning being reported
@@ -194,7 +228,9 @@ public class StandardErrorReporter
         if (processingError != latestError) {
             latestError = processingError;
             if (processingError.isWarning()) {
-                warning(processingError);
+                if (!isSuppressedWarning(processingError.getErrorCode().getStructuredQName())) {
+                    warning(processingError);
+                }
             } else {
                 error(processingError);
             }
@@ -240,6 +276,15 @@ public class StandardErrorReporter
 
     public boolean isReportingWarnings() {
         return warningCount < getMaximumNumberOfWarnings();
+    }
+
+    /**
+     * Get the number of warnings reported
+     * @return the number of warnings that have been reported
+     */
+
+    public int getNumberOfWarnings() {
+        return warningCount;
     }
 
     /**
@@ -301,6 +346,16 @@ public class StandardErrorReporter
                 outputStackTrace(logger, context);
             }
         }
+    }
+
+    /**
+     * Get the number of errors reported
+     *
+     * @return the number of errors that have been reported
+     */
+
+    public int getNumberOfErrors() {
+        return errorCount;
     }
 
     /**

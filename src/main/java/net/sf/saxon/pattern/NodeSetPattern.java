@@ -16,6 +16,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -91,12 +92,12 @@ public class NodeSetPattern extends Pattern {
         Supplier<RoleDiagnostic> role =
                 () ->  new RoleDiagnostic(RoleDiagnostic.MATCH_PATTERN, getSelectionExpression().toString(), 0);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        Expression checked = getSelectionExpression();
+        Expression checked;
         try {
             checked = tc.staticTypeCheck(
                     getSelectionExpression(), SequenceType.NODE_SEQUENCE, role, visitor);
         } catch (XPathException e) {
-            visitor.issueWarning("Pattern will never match anything. " + e.getMessage(), getLocation());
+            visitor.issueWarning("Pattern will never match anything. " + e.getMessage(), SaxonErrorCode.SXWN9015, getLocation());
             checked = Literal.makeEmptySequence();
         }
         selectionOp.setChildExpression(checked);

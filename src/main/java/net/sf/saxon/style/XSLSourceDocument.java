@@ -177,7 +177,7 @@ public class XSLSourceDocument extends StyleElement {
         //checkParamComesFirst(false);
         href = typeCheck("select", href);
         if (!hasChildNodes()) {
-            compileWarning("An empty xsl:source-document instruction has no effect", SaxonErrorCode.SXWN9009);
+            issueWarning("An empty xsl:source-document instruction has no effect", SaxonErrorCode.SXWN9009);
         }
     }
 

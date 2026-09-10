@@ -586,7 +586,7 @@ public class UserFunction extends Actor implements Function, ContextOriginator, 
                 && declaredResultType.getPrimaryType() != BuiltInAtomicType.STRING) {
             visitor.getStaticContext().issueWarning(
                     "A function that computes atomic values should use xsl:sequence rather than xsl:value-of",
-                    getLocation());
+                    SaxonErrorCode.SXWN9032, getLocation());
         }
         ExpressionTool.resetPropertiesWithinSubtree(exp);
         Expression exp2 = exp;
