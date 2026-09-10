@@ -1,5 +1,6 @@
 using AngleSharp.Dom;
 using Saxon.Hej.om;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
@@ -100,11 +101,11 @@ namespace Saxon.Impl.Dom {
             return ((GenericTreeInfo)getTreeInfo()).getSystemId();
         }
 
-        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
             return EmptyIterator.getInstance();
         }
 
-        protected internal override SequenceIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             //return SingleNodeIterator.makeIterator(outermostElement);
             if (!htmlDocument.HasChildNodes) {
                 return EmptyIterator.getInstance();
@@ -120,14 +121,14 @@ namespace Saxon.Impl.Dom {
                 }
             }
 
-            return new NodeListIterator(childList);
+            return new ListIterator.Of<NodeInfo>(childList);
         }
 
-        protected internal override SequenceIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
+        protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
             return EmptyIterator.getInstance();
         }
 
-        public override string getAttributeValue(string uri, string local) {
+        public override string getAttributeValue(NamespaceUri uri, string local) {
             return null;
         }
 

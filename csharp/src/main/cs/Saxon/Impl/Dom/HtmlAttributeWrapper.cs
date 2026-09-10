@@ -1,4 +1,5 @@
 using Saxon.Hej.om;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.str;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
@@ -57,7 +58,7 @@ namespace Saxon.Impl.Dom {
             return buffer.ToString().GetHashCode();
         }
 
-        public override int compareOrder(NodeInfo other) {
+        public override int compareOrder(GNode other) {
             if ((other is SiblingCountingNode countingNode)) {
                 return Navigator.compareOrder(this, countingNode);
             }
@@ -113,25 +114,25 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
             return EmptyIterator.getInstance();
         }
 
-        protected internal override SequenceIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             return EmptyIterator.getInstance();
         }
 
-        protected internal override SequenceIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
+        protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
             return EmptyIterator.getInstance();
         }
-
-        protected override SequenceIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest, bool includeSelf) {
+        
+        protected override SequenceIterator iterateDescendants(NodePredicate nodeTest, bool includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
         }
         
         
 
-        public override string getAttributeValue(string uri, string local) {
+        public override string getAttributeValue(NamespaceUri uri, string local) {
             return null;
         }
 

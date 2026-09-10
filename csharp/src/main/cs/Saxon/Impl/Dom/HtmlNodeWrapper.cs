@@ -3,6 +3,7 @@ using AngleSharp.Dom;
 using Saxon.Api;
 using Saxon.Ejava.lang;
 using Saxon.Hej.om;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
@@ -95,7 +96,7 @@ namespace Saxon.Impl.Dom {
             return buffer.ToString().GetHashCode();
         }
 
-        public override int compareOrder(NodeInfo other) {
+        public override int compareOrder(GNode other) {
             if ((other is SiblingCountingNode countingNode)) {
                 return Navigator.compareOrder(this, countingNode);
             }
@@ -176,7 +177,7 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override AxisIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
             List<NodeInfo> attList = new List<NodeInfo>();
             int indexPosition = 0;
             foreach (AngleSharp.Dom.IAttr att in ((AngleSharp.Dom.IElement)node).Attributes) {
@@ -187,12 +188,12 @@ namespace Saxon.Impl.Dom {
                     }
                 }
             }
-            return new NodeListIterator(attList);
+            return new ListIterator.Of<NodeInfo>(attList);
         }
 
-        protected internal override AxisIterator iterateChildren(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             if (!node.HasChildNodes) {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             }
             List<NodeInfo> childList = new List<NodeInfo>();
             int indexPosition = 0;
@@ -203,17 +204,17 @@ namespace Saxon.Impl.Dom {
                 }
             }
 
-            return new NodeListIterator(childList);
+            return new ListIterator.Of<NodeInfo>(childList);
         }
 
-        protected internal override AxisIterator iterateSiblings(Saxon.Hej.pattern.NodeTest nodeTest, bool forwards) {
+        protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
             List<NodeInfo> siblingList = new List<NodeInfo>();
             int ix = getSiblingPosition();
             AngleSharp.Dom.INode next = node;
             while (true) {
                 next = forwards ? next.NextSibling : next.PreviousSibling;
                 if (next == null) {
-                    return new NodeListIterator(siblingList);
+                    return new ListIterator.Of<NodeInfo>(siblingList);
                 }
                 if (next.NodeType == AngleSharp.Dom.NodeType.DocumentType) {
                     continue;
@@ -226,10 +227,6 @@ namespace Saxon.Impl.Dom {
         }
         
         public override string getAttributeValue(NamespaceUri uri, string local) {
-            return ((AngleSharp.Dom.Element)node).GetAttribute(local);
-        }
-
-        public override string getAttributeValue(string uri, string local) {
             return ((AngleSharp.Dom.Element)node).GetAttribute(local);
         }
 

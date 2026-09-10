@@ -2,6 +2,7 @@ using System;
 using System.Xml.Linq;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.str;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
@@ -109,25 +110,24 @@ namespace Saxon.Impl.XDoc {
         }
         
 
-        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
             return EmptyIterator.getInstance();
         }
 
 
-        protected internal override SequenceIterator iterateChildren(NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             return EmptyIterator.getInstance();
         }
         
-        protected internal override SequenceIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
+        protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
             return EmptyIterator.getInstance();
         }
         
-        protected override SequenceIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
-            bool includeSelf) {
+        protected override SequenceIterator iterateDescendants(NodePredicate nodeTest, bool includeSelf) {
             return EmptyIterator.getInstance();
         }
 
-        public override string getAttributeValue(string uri, string local) {
+        public override string getAttributeValue(NamespaceUri uri, string local) {
             return null;
         }
         

@@ -11,7 +11,10 @@ using Saxon.Hej.om;
 using Saxon.Hej.pattern;
 using Saxon.Hej.tree.wrapper;
 using Saxon.Api.Support;
+using Saxon.Hej.pattern.nodetest;
+using Saxon.Hej.tree.util;
 using Saxon.Hej.type;
+using Saxon.Hej.type.gnode;
 using Saxon.Impl.Helpers;
 using Type = Saxon.Hej.type.Type;
 
@@ -347,7 +350,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="name">The name of the attribute whose value is required</param>
         public string GetAttributeValue(QName name) {
-            return ((NodeInfo) value).getAttributeValue(name.Uri, name.LocalName);
+            return ((NodeInfo) value).getAttributeValue(name.NamespaceUri, name.LocalName);
         }
         
         /// <summary>
@@ -359,7 +362,7 @@ namespace Saxon.Api {
         /// </remarks>
         /// <param name="name">The name of the attribute whose value is required, interpreted as no-namespace name</param>
         public string GetAttributeValue(string name) {
-            return ((NodeInfo) value).getAttributeValue("", name);
+            return ((NodeInfo) value).getAttributeValue(NamespaceUri.NULL, name);
         }
 
         /// <summary>
@@ -424,7 +427,7 @@ namespace Saxon.Api {
         /// axis, reverse document order for a reverse axis.
         /// </remarks>
         public IEnumerable<XdmNode> EnumerableOverAxis(XdmAxis axis) {
-            return new SequenceEnumerable<XdmNode>(() => ((NodeInfo) value).iterateAxis(GetAxisNumber(axis)));
+            return new SequenceEnumerable<XdmNode>(() => Navigator.iterateAxis((NodeInfo) value, GetAxisNumber(axis), AnyGNode.TEST));
         }
 
 
@@ -440,7 +443,8 @@ namespace Saxon.Api {
         /// axis, reverse document order for a reverse axis.
         /// </remarks>
         public IEnumerator<XdmNode> EnumerateAxis(XdmAxis axis) {
-            return new SequenceEnumerator<XdmNode>(((NodeInfo) value).iterateAxis(GetAxisNumber(axis)));
+            return new SequenceEnumerator<XdmNode>(
+                Navigator.iterateAxis((NodeInfo) value, GetAxisNumber(axis), AnyGNode.TEST));
         }
 
         /// <summary>
@@ -474,9 +478,10 @@ namespace Saxon.Api {
                     break;
             }
 
-            NamePool pool = ((NodeInfo) value).getConfiguration().getNamePool();
-            NameTest test = new NameTest(kind, nodeName.NamespaceUri, nodeName.LocalName, pool);
-            return new SequenceEnumerator<XdmNode>(((NodeInfo) value).iterateAxis(GetAxisNumber(axis), test));
+            NamedXNodeType test = new NamedXNodeType(
+                kind, nodeName.GetStructuredQName(), ((NodeInfo) value).getConfiguration());
+            return new SequenceEnumerator<XdmNode>(
+                Navigator.iterateAxis((NodeInfo) value, GetAxisNumber(axis), test));
         }
 
         private static byte GetAxisNumber(XdmAxis axis) {

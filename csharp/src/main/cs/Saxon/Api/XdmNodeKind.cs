@@ -3,6 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.pattern.nodetest;
+using Saxon.Hej.type.gnode;
 using Type = Saxon.Hej.type.Type;
 
 namespace Saxon.Api {
@@ -14,47 +16,47 @@ namespace Saxon.Api {
     public class XdmNodeKind : XdmItemType {
         private readonly int kind;
 
-        internal XdmNodeKind(NodeKindTest test) : base(test) {
+        internal XdmNodeKind(NodeKindType test) : base(test) {
             kind = test.getNodeKind();
         }
 
         /// <summary>
         /// The item type <c>document-node()</c>
         /// </summary>
-        public static readonly XdmNodeKind Document = new(NodeKindTest.DOCUMENT);
+        public static readonly XdmNodeKind Document = new(NodeKindType.DOCUMENT);
 
         /// <summary>
         /// The item type <c>element()</c>
         /// </summary>
-        public static readonly XdmNodeKind Element = new(NodeKindTest.ELEMENT);
+        public static readonly XdmNodeKind Element = new(NodeKindType.ELEMENT);
 
         /// <summary>
         /// The item type <c>attribute()</c>
         /// </summary>
-        public static readonly XdmNodeKind Attribute = new(NodeKindTest.ATTRIBUTE);
+        public static readonly XdmNodeKind Attribute = new(NodeKindType.ATTRIBUTE);
 
         /// <summary>
         /// The item type <c>text()</c>
         /// </summary>
-        public static readonly XdmNodeKind Text = new(NodeKindTest.TEXT);
+        public static readonly XdmNodeKind Text = new(NodeKindType.TEXT);
 
         /// <summary>
         /// The item type <c>comment()</c>
         /// </summary>
-        public static readonly XdmNodeKind Comment = new(NodeKindTest.COMMENT);
+        public static readonly XdmNodeKind Comment = new(NodeKindType.COMMENT);
 
         /// <summary>
         /// The item type <c>processing-instruction()</c>
         /// </summary>
         public static readonly XdmNodeKind ProcessingInstruction =
-            new XdmNodeKind(NodeKindTest.PROCESSING_INSTRUCTION);
+            new XdmNodeKind(NodeKindType.PROCESSING_INSTRUCTION);
 
         /// <summary>
         /// The item type <c>namespace-node()</c>
         /// </summary>
-        public static readonly XdmNodeKind Namespace = new(NodeKindTest.NAMESPACE);
+        public static readonly XdmNodeKind Namespace = new(NodeKindType.NAMESPACE);
 
-        internal static XdmNodeKind ForNodeKindTest(NodeKindTest test) {
+        internal static XdmNodeKind ForNodeKindTest(NodeKindType test) {
             int kind = test.getPrimitiveType();
             switch (kind) {
                 case Type.DOCUMENT:

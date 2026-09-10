@@ -356,7 +356,7 @@ namespace Saxon.Api {
                     Item first = value.head();
 
                     return first.getGenre() switch {
-                        Genre.NODE => new XdmNode((NodeInfo)first),
+                        Genre.XNODE => new XdmNode((NodeInfo)first),
                         Genre.ATOMIC => new XdmAtomicValue((AtomicValue)first),
                         Genre.MAP => new XdmMap((MapItem)first),
                         Genre.ARRAY => new XdmArray((ArrayItem)first),

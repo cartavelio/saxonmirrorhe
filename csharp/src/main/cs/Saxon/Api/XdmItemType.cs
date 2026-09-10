@@ -50,7 +50,7 @@ namespace Saxon.Api {
                             return XdmAnyNodeType.Instance; // TODO: need to represent this properly
                         case XNodeType test: {
                             int kind = test.getPrimitiveType();
-                            return XdmNodeKind.ForNodeKindTest((NodeKindTest)NodeKindTest.makeNodeKindTest(kind));
+                            return XdmNodeKind.ForNodeKindTest((NodeKindType)NodeKindType.makeNodeKindTest(kind));
                         }
                         case MapType:
                             return XdmAnyMapType.Instance;
@@ -210,10 +210,11 @@ namespace Saxon.Api {
                 NodeInfo node = (NodeInfo)item.Unwrap();
                 int kind = node.getNodeKind();
                 if (node.getLocalPart() == "") {
-                    return new ConstructedItemType(NodeKindTest.makeNodeKindTest(kind), config);
+                    return new ConstructedItemType(NodeKindType.makeNodeKindTest(kind), config);
                 }
 
-                return new ConstructedItemType(new SameNameTest(node), config);
+                NamedXNodeType nodeType = new (kind, node.getQName(), config);
+                return new ConstructedItemType(nodeType, config);
             }
 
             Saxon.Hej.om.Item it = (Saxon.Hej.om.Item)item.Unwrap();

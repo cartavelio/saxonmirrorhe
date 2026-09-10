@@ -48,7 +48,7 @@ namespace Saxon.Impl.Dom {
             return makeWrapper(node, docTree, null, -1);
         }
 
-        protected internal static DomNodeWrapper makeWrapper(XmlNode node, DomDocumentTree docTree,
+        private static DomNodeWrapper makeWrapper(XmlNode node, DomDocumentTree docTree,
             DomNodeWrapper parent, int index) {
             DomNodeWrapper wrapper;
             switch (node.NodeType) {
@@ -115,7 +115,7 @@ namespace Saxon.Impl.Dom {
             return buffer.ToString().GetHashCode();
         }
 
-        public override int compareOrder(NodeInfo other) {
+        public override int compareOrder(GNode other) {
             if ((other is SiblingCountingNode countingNode)) {
                 return Navigator.compareOrder(this, countingNode);
             }
@@ -286,7 +286,7 @@ namespace Saxon.Impl.Dom {
                         }
                     case Saxon.Hej.type.Type.ATTRIBUTE:
                         ix = 0;
-                        AxisIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
+                        SequenceIterator iter = parent.iterateAttributeAxis(AnyGNode.TEST);
                         while (true) {
                             NodeInfo n = ((NodeInfo) iter.next());
                             if (((n == null) || Navigator.haveSameName(this, n))) {
@@ -298,7 +298,7 @@ namespace Saxon.Impl.Dom {
                         }
                     case Saxon.Hej.type.Type.NAMESPACE:
                         ix = 0;
-                        iter = parent.iterateAxis(AxisInfo.NAMESPACE);
+                        iter = parent.iterateNamespaceAxis(AnyGNode.TEST);
                         while (true) {
                             NodeInfo n = ((NodeInfo) iter.next());
                             if (((n == null) || Navigator.haveSameName(this, n))) {
@@ -317,48 +317,48 @@ namespace Saxon.Impl.Dom {
             return index;
         }
 
-        protected internal override SequenceIterator iterateAttributes(NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
             SequenceIterator iter = new DomNodeWrapper.AttributeEnumeration(docTree, this);
-            if ((nodeTest != Saxon.Hej.pattern.AnyNodeTest.getInstance())) {
+            if (nodeTest != AnyGNode.TEST) {
                 iter = Navigator.filter(iter, nodeTest);
             }
 
             return iter;
         }
 
-        private bool isElementOnly(NodeTest nodeTest) {
-            return nodeTest.getUType() == UType.ELEMENT; 
+        private bool isElementOnly(NodePredicate nodeTest) {
+            return Navigator.getPotentialNodeKinds(nodeTest).Equals(UType.ELEMENT) ; 
         }
 
-        protected internal override SequenceIterator iterateChildren(NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             bool elementOnly = isElementOnly(nodeTest);
             SequenceIterator iter = new DomNodeWrapper.ChildEnumeration(docTree, this, true, true, elementOnly);
-            if ((nodeTest != AnyXNodeType.getInstance())) {
+            if ((nodeTest != AnyGNode.TEST)) {
                 iter = Navigator.filter(iter, nodeTest);
             }
 
             return iter;
         }
         
-        protected internal override SequenceIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
+        protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
             bool elementOnly = isElementOnly(nodeTest);
             SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this.docTree, this, false, forwards, elementOnly));
-            if (nodeTest != AnyXNodeTest.getInstance()) {
+            if (nodeTest != AnyGNode.TEST) {
                 iter = Navigator.filter(iter, nodeTest);
             }
             return iter;
         }
         
-        protected override SequenceIterator iterateDescendants(NodeTest nodeTest,
+        protected override SequenceIterator iterateDescendants(NodePredicate nodeTest,
             bool includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
         }
 
         public override string getAttributeValue(NamespaceUri uri, string local) {
-            Saxon.Hej.pattern.NameTest test =
-                new Saxon.Hej.pattern.NameTest(Saxon.Hej.type.Type.ATTRIBUTE, uri, local, getNamePool());
-            SequenceIterator iterator = iterateAttributes(test);
+            NamedXNodeType type =
+                new (Type.ATTRIBUTE, new StructuredQName("", uri, local), getConfiguration());
+            SequenceIterator iterator = iterateAttributes(type);
             NodeInfo attribute = ((NodeInfo) iterator.next());
             return attribute?.getStringValue();
         }
@@ -428,9 +428,9 @@ namespace Saxon.Impl.Dom {
                 if (inScopeNamespaces != null) {
                     return inScopeNamespaces;
                 } else {
-                    NodeInfo parent = getParent();
-                    NamespaceMap nsMap = parent != null && parent.getNodeKind() == Saxon.Hej.type.Type.ELEMENT
-                        ? parent.getAllNamespaces()
+                    NodeInfo parentNode = (NodeInfo)getParent();
+                    NamespaceMap nsMap = parentNode != null && parentNode.getNodeKind() == Saxon.Hej.type.Type.ELEMENT
+                        ? parentNode.getAllNamespaces()
                         : NamespaceMap.emptyMap();
                     XmlElement elem = (XmlElement) node;
                     XmlAttributeCollection atts = elem.Attributes;

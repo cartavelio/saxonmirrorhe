@@ -8,6 +8,7 @@ using Saxon.Api.Support;
 using Saxon.Hej.@event;
 using Saxon.Hej.om;
 using Saxon.Hej.pattern;
+using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.str;
 using Saxon.Hej.tree.iter;
 using Saxon.Hej.tree.util;
@@ -202,7 +203,7 @@ namespace Saxon.Impl.XDoc {
             return parent;
         }
 
-        protected internal override SequenceIterator iterateAttributes(Saxon.Hej.pattern.NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateAttributes(NodePredicate nodeTest) {
             if (node is XElement element) {
                 IList<NodeInfo> attList = new List<NodeInfo>(); 
                 foreach (XAttribute att in element.Attributes()) {
@@ -213,15 +214,15 @@ namespace Saxon.Impl.XDoc {
                         }
                     }
                 }
-                return new NodeListIterator(attList);
+                return new ListIterator.Of<NodeInfo>(attList);
             }
 
             return EmptyIterator.getInstance();
             
         }
 
-        private bool isElementOnly(NodeTest nodeTest) {
-            return nodeTest.getUType() == UType.ELEMENT; 
+        private bool isElementOnly(NodePredicate predicate) {
+            return Navigator.getPotentialNodeKinds(predicate) == UType.ELEMENT; 
         }
 
         // Predicates to exclude unwanted children of the document node (specifically Doctype
@@ -232,7 +233,7 @@ namespace Saxon.Impl.XDoc {
         private static readonly Predicate<XNode> docChildren =
             child => (child.NodeType != XmlNodeType.DocumentType
                       && !(child.NodeType == XmlNodeType.Text && ALL_WHITE.IsMatch(((XText)child).Value)));
-        protected internal override SequenceIterator iterateChildren(NodeTest nodeTest) {
+        protected internal override SequenceIterator iterateChildren(NodePredicate nodeTest) {
             if (node is XContainer container) {
                 System.Collections.Generic.IEnumerator<XNode> childEnum = 
                     isElementOnly(nodeTest) 
@@ -245,8 +246,8 @@ namespace Saxon.Impl.XDoc {
                 int index = 0;
                 SequenceIterator axisIter = new AxisIteratorOverEnumerator<XNode>(
                     childEnum, xNode => makeWrapper(xNode, docTree, this, index++));
-                if (nodeTest != AnyNodeTest.getInstance()) {
-                    axisIter = new Navigator.AxisFilter(axisIter, nodeTest);
+                if (nodeTest != AnyGNode.TEST) {
+                    axisIter = Navigator.filter(axisIter, nodeTest);
                 }
 
                 return axisIter;
@@ -255,7 +256,7 @@ namespace Saxon.Impl.XDoc {
             return EmptyIterator.getInstance();
         }
         
-        protected internal override SequenceIterator iterateSiblings(NodeTest nodeTest, bool forwards) {
+        protected internal override SequenceIterator iterateSiblings(NodePredicate nodeTest, bool forwards) {
             SequenceIterator baseIter;
             if (getParent().getNodeKind() == Type.DOCUMENT) {
                 if (forwards) {
@@ -292,30 +293,20 @@ namespace Saxon.Impl.XDoc {
                 }
             }
 
-            if (nodeTest != AnyNodeTest.getInstance()) {
-                baseIter = new Navigator.AxisFilter(baseIter, nodeTest);
+            if (nodeTest != AnyGNode.TEST) {
+                baseIter = Navigator.filter(baseIter, nodeTest);
             }
             return baseIter;
         }
         
-        protected override SequenceIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
+        protected override SequenceIterator iterateDescendants(NodePredicate nodeTest,
             bool includeSelf) {
             SequenceIterator descendants = new Navigator.DescendantIterator(this, includeSelf, true);
-            if (nodeTest != AnyNodeTest.getInstance()) {
+            if (nodeTest != AnyGNode.TEST) {
                 descendants = Navigator.filter(descendants, nodeTest);
             }
 
             return descendants;
-        }
-
-        public override string getAttributeValue(string uri, string local) {
-            if (node is XElement element) {
-                // TODO: disallow requests for a namespace
-                XNamespace ns = uri ?? XNamespace.None;
-                XAttribute att = element.Attribute(ns + local);
-                return att?.Value;
-            }
-            return null;
         }
         
         public override string getAttributeValue(NamespaceUri uri, string local) {
