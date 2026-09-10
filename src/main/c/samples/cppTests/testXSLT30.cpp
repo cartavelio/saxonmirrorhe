@@ -1046,7 +1046,11 @@ void exampleTransformToString(SaxonProcessor * sproc, Xslt30Processor *proc, sRe
     executable->setGlobalContextItem(xmlfile);
     const char * result  =nullptr;
     try{
+        executable->setSaveXslMessage(true);
         result = executable->transformToString();
+        XdmValue * messages = executable->getXslMessages();
+        cerr<< "xsl:messages = " << messages->toString();
+        delete messages;
     } catch(SaxonApiException &e) {
                cerr << "exampleTransformToString: exception thrown" << endl;
                cout << e.what() << endl;
@@ -2255,8 +2259,7 @@ void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
     } else {
         const char *data2 = d2->toString();
         cout << "d2 result=" << data2 << endl;
-        delete data2;
-        data2 = nullptr;
+        
     }
     stage3->setProperty("!indent", "no");
     stage3->setInitialMatchSelection(d2);

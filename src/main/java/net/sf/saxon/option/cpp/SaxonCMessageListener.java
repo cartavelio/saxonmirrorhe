@@ -50,7 +50,7 @@ public class SaxonCMessageListener implements MessageListener2 {
             this.mode = 0;
         }  else {
             this.mode = 2;
-            messageFilename = cwd + mode.substring(1);
+            messageFilename = mode;
             sourceFile = SaxonCAPI.resolveFileToSource(processor, cwd, messageFilename, ResourceRequest.XML_NATURE);
         }
     }
