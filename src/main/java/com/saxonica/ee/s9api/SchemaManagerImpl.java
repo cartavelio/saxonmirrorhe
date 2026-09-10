@@ -24,9 +24,10 @@ public class SchemaManagerImpl extends SchemaManager {
 
     public SchemaManagerImpl(Processor processor) {
         this.processor = processor;
-        StandardErrorReporter reporter = new StandardErrorReporter();
-        reporter.setOutputErrorCodes(false);
-        errorReporter = reporter;
+        errorReporter = processor.getUnderlyingConfiguration().makeErrorReporter();
+        if (errorReporter instanceof StandardErrorReporter) {
+            ((StandardErrorReporter) errorReporter).setOutputErrorCodes(false);
+        }
     }
 
 
