@@ -43,12 +43,10 @@ public class Doc extends SystemFunction implements Callable {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter docOptions = new OptionsParameter(version);
-        //docOptions.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        //docOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
         docOptions.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -209,6 +207,7 @@ public class Doc extends SystemFunction implements Callable {
 
     //@CSharpReplaceBody(code="return new Saxon.Hej.lib.ParseOptions();")
     public static ParseOptions processOptions(Map<String, GroundedValue> checkedOptions, RetainedStaticContext retainedStaticContext) throws XPathException {
+        boolean is40 = retainedStaticContext.getPackageData().getHostLanguageVersion() >= 40;
         ParseOptions parseOptions = new ParseOptions();
 
         //#if CSHARP==false
@@ -242,15 +241,21 @@ public class Doc extends SystemFunction implements Callable {
         }
 
         val = checkedOptions.get("trusted");
-        if (!val.effectiveBooleanValue()) {
+        try {
+            parseOptions = parseOptions.withTrusted(val.effectiveBooleanValue());
+        } catch (Exception e) {
+            // Happens in SaxonCS
+            throw new XPathException(e.getMessage(), "FODC0013");
+        }
+        if (is40 && !val.effectiveBooleanValue()) {
             //#if CSHARP==false
             parser.setEntityResolver((publicId, systemId) -> {
                 throw new SAXException(
-                        new XPathException("The parse-xml input references '" + systemId +
-                                                   "' but external entity expansion is disallowed", "FODC0006"));
+                        new XPathException("The doc() input references '" + systemId +
+                                                   "' but access to external resources requires setting {'trusted':true()}", "FODC0016"));
             });
             //#endif
-            parseOptions = parseOptions.withTrusted(false);
+
         }
 
         val = checkedOptions.get("use-xsi-schema-location");
@@ -317,8 +322,12 @@ public class Doc extends SystemFunction implements Callable {
             val = checkedOptions.get("xinclude");
             if (val != null && val.effectiveBooleanValue()) {
 
-                parseOptions = parseOptions.withXIncludeAware(true);
-                //throw new XPathException("XIncude processing in fn:parse-xml is not supported", "FODC0013");
+                try {
+                    parseOptions = parseOptions.withXIncludeAware(true);
+                } catch (Exception e) {
+                    // SaxonCS path
+                    throw new XPathException(e.getMessage(), "FODC0013");
+                }
             }
 
 

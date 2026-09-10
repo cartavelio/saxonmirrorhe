@@ -40,28 +40,36 @@ public class DocAvailable extends SystemFunction  {
         AtomicValue hrefVal = (AtomicValue) arguments[0].head();
         if (hrefVal != null) {
 
-            ParseOptions parseOptions = context.getConfiguration().getParseOptions();
+            ParseOptions parseOptions = null;
+            try {
+                parseOptions = context.getConfiguration().getParseOptions();
 
-            MapItem options = null;
-            if (getArity() >= 2) {
-                options = (MapItem) arguments[1].head();
-            }
-            if (options != null && !options.isEmpty()) {
-                Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
-                parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
-
-            } else {
-
-                PackageData pd = getRetainedStaticContext().getPackageData();
-                if (pd instanceof StylesheetPackage) {
-                    parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
-                } else {
-                    parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+                MapItem options = null;
+                if (getArity() >= 2) {
+                    options = (MapItem) arguments[1].head();
                 }
+                if (options != null && !options.isEmpty()) {
+                    Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+                    parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
+
+                } else {
+
+                    PackageData pd = getRetainedStaticContext().getPackageData();
+                    if (pd instanceof StylesheetPackage) {
+                        parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                    } else {
+                        parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+                    }
 
 
+                }
+            } catch (XPathException e) {
+                if (e.hasErrorCode("FODC0013")) {
+                    return BooleanValue.FALSE;
+                } else {
+                    throw e;
+                }
             }
-
 
             String href = hrefVal.getStringValue();
             result = docAvailable(href, parseOptions, context);

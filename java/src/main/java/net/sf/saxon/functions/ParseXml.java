@@ -141,17 +141,20 @@ public class ParseXml extends SystemFunction implements Callable {
 
             val = checkedOptions.get("trusted");
             if (is40 && val != null) {
-                parseOptions = parseOptions.withTrusted(val.effectiveBooleanValue());
+                boolean trusted = val.effectiveBooleanValue();
+                parseOptions = parseOptions.withTrusted(trusted);
                 //#if CSHARP==false
-                parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
+                if (!trusted) {
+                    parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
 
-                    @Override
-                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
-                        throw new SAXException(
-                                new XPathException("The parse-xml input references '" + systemId +
-                                                       "' but external entity expansion is disallowed", "FODC0016"));
-                    }
-                });
+                        @Override
+                        public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
+                            throw new SAXException(
+                                    new XPathException("The parse-xml input references '" + systemId +
+                                                               "' but external entity expansion is disallowed", "FODC0016"));
+                        }
+                    });
+                }
                 //#endif
             }
 
