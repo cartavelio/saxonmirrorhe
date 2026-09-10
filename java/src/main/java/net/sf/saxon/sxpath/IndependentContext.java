@@ -414,6 +414,9 @@ public class IndependentContext extends AbstractStaticContext
             return useDefault ? getDefaultElementNamespace() : NamespaceUri.NULL;
         } else {
             NamespaceUri uri = prologNamespaces.getNamespaceUri(prefix);
+            if (uri == NamespaceUri.NULL && xpathLanguageLevel >= 40) {
+                return null; // Prefix binding has been undeclared
+            }
             if (uri == null) {
                 uri = namespaces.get(prefix);
             }
