@@ -445,6 +445,39 @@ task dotnetRelease(
   }
 }
 
+task dotnetPublish(
+  dependsOn: ['dotnetRelease']
+) {
+  def platform = null
+  def rid = null
+  if (systemOs.isWindows()) {
+    platform = "Windows"
+    rid = "win-x64"
+  }
+  if (systemOs.isMacOsX()) {
+    platform = "MacOS"
+    rid = "osx-x64"
+  }
+  if (systemOs.isLinux()) {
+    platform = "Linux"
+    rid= "linux-x64"
+  }
+  if (platform == null) {
+    throw new GradleException("Unrecognized OS: ${systemOs}")
+  }
+
+  doLast {
+    exec {
+      workingDir = "${buildDir}/cs"
+      commandLine dotnetex, 'publish', 'SaxonCS.sln',
+        '--configuration', 'Release', '-r', rid
+    }
+  }
+  doLast {
+    println("Published SaxonCS release for ${platform}")
+  }
+}
+
 task eecs_hello_world(
   dependsOn: ["eecs_dll"],
   description: "Execute a Hello World query"
