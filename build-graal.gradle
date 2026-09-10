@@ -1377,7 +1377,7 @@ tasks.register("all_python_test_suites") {
 
             def suitedir
             if (testsuite == "xslt30") {
-              suitedir = "${testsuites.w3cXslt30TestSuiteDir}/.."
+              suitedir = "${testsuites.w3cXslt30TestSuiteDir}"
             } else if (testsuite == "qt3") {
               suitedir = testsuites.w3cQT3TestSuiteDir
             } else {
@@ -1388,7 +1388,7 @@ tasks.register("all_python_test_suites") {
             environment SAXONC_HOME: saxonLicenseDir
             executable file(project.pythonEnv.venvPython)
             args "./${testsuite}_test_suite_driver.py",
-                    suitedir,
+                    suitedir, "-c", "catalog.xml",
                     "-o", file(output_path)
             if (testsuite == "qt3") {
               args "-l", lang
