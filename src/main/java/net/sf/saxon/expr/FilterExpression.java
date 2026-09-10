@@ -22,6 +22,7 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -1106,14 +1107,14 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                                 Sequence baseVal = ((VariableReference) getBase()).evaluateVariable(context);
                                 if (baseVal instanceof MemoClosure) {
                                     Item m = ((MemoClosure) baseVal).itemAt(pos - 1);
-                                    return m == null ? EmptyIterator.emptyIterator() : m.iterate();
+                                    return SingletonIterator.makeIterator(m);
                                 } else {
                                     Item m = baseVal.materialize().itemAt(pos - 1);
-                                    return m == null ? EmptyIterator.emptyIterator() : m.iterate();
+                                    return SingletonIterator.makeIterator(m);
                                 }
                             } else if (getBase() instanceof Literal) {
                                 Item i = ((Literal) getBase()).getGroundedValue().itemAt(pos - 1);
-                                return i == null ? EmptyIterator.emptyIterator() : i.iterate();
+                                return SingletonIterator.makeIterator(i);
                             } else {
                                 return SubsequenceIterator.make(getBase().iterate(context), pos, pos);
                             }

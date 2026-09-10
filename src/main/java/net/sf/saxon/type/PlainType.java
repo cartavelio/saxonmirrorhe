@@ -15,7 +15,7 @@ import net.sf.saxon.om.StructuredQName;
  * than those imposed by its member types, and (b) has exclusively plain types as its member types
  */
 
-public interface PlainType extends ItemType {
+public interface PlainType extends ItemType, HyperType {
 
     /**
      * Get the name of this type as a structured QName
@@ -23,17 +23,6 @@ public interface PlainType extends ItemType {
      */
 
     StructuredQName getTypeName();
-
-    /**
-     * Test whether this type is namespace sensitive, that is, if a namespace context is needed
-     * to translate between the lexical space and the value space. This is true for types derived
-     * from, or containing, QNames and NOTATIONs
-     *
-     * @return true if any of the member types is namespace-sensitive, or if namespace sensitivity
-     * cannot be determined because there are components missing from the schema.
-     */
-
-    boolean isNamespaceSensitive();
 
     /**
      * Get the list of plain types that are subsumed by this type

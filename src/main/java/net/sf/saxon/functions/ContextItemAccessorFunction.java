@@ -7,14 +7,11 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.ContextItemExpression;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
+import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
@@ -42,10 +39,10 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     public Function bindContext(XPathContext context) throws XPathException {
         final Item ci = context.getContextItem();
         if (ci == null) {
-            Callable callable = (context1, arguments) -> {
+            Callable callable = new CallableLambda((context1, arguments) -> {
                 throw new XPathException("Context item for " +
                     getFunctionName().getDisplayName() + " is absent", "XPDY0002");
-            };
+            });
             FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
             return new CallableFunction(0, callable, fit);
         }

@@ -35,7 +35,7 @@ import java.util.function.Predicate;
  */
 
 public abstract class NodeTest implements ItemTypeWithSequenceTypeCache
-        //#if CSHARP=false
+        //#if CSHARP==false
         , Predicate<NodeInfo>
         //#endif
 {

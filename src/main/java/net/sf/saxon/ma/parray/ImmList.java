@@ -23,7 +23,7 @@ public abstract class ImmList<E> implements Iterable<E> {
      */
 
     public static <E> ImmList<E> empty() {
-        return (ImmList<E>)ImmList0.INSTANCE;
+        return ImmList0.getInstance();
     }
 
     /**

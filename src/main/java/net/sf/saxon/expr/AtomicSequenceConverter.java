@@ -87,7 +87,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
                 /*@NotNull*/
                 @Override
                 public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
-                    Converter converter = rules.getConverter(input.getPrimitiveType(), (AtomicType) requiredItemType);
+                    Converter converter = getConversionRules().getConverter(
+                            input.getPrimitiveType(), (AtomicType) requiredItemType);
                     if (converter == null) {
                         return new ValidationFailure("Cannot convert value from " + input.getPrimitiveType() + " to " + requiredItemType);
                     } else {

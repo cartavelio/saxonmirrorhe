@@ -434,7 +434,15 @@ public class LetExpression extends Assignation implements TailCallReturner {
      */
 
     private boolean allReferencesAreFlattened() {
-        return references != null && references.stream().allMatch(VariableReference::isFlattened);
+        if (references != null) {
+            for (VariableReference ref : references) {
+                if (!ref.isFlattened()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**

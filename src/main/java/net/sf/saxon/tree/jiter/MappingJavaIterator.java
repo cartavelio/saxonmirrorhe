@@ -47,11 +47,12 @@ public class MappingJavaIterator<S, T> implements Iterator<T> {
             }
         }
     }
-
+    //#if CSHARP==false
+    //C# emulation of java.util.Iterator omits remove() method
     @Override
     public void remove() {
         input.remove();
     }
-
+    //#endif
 }
 

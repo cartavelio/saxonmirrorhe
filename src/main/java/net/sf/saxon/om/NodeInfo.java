@@ -59,7 +59,7 @@ import java.util.function.Predicate;
  * a new implementation of this interface.
  */
 
-@CSharpExtendInterface(key = "NodeInfoCSharpExtension")
+@CSharpExtendInterface(key = "net.sf.saxon.om.NodeInfoCSharpExtension")
 public interface NodeInfo extends Source, Item, Location {
 
     /**

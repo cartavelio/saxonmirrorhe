@@ -41,7 +41,8 @@ public abstract class CastingExpression extends UnaryExpression {
         super(source);
         this.allowEmpty = allowEmpty;
         targetType = target;
-        targetPrimitiveType = target.getPrimitiveItemType();
+        // Cast needed for C#
+        targetPrimitiveType = (AtomicType)target.getPrimitiveItemType();
     }
 
     /**

@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 
 /**
  * MappingIterator merges a sequence of sequences into a single flat
@@ -23,6 +24,9 @@ import net.sf.saxon.trans.XPathException;
  * used in the implementation of the document(), key(), and id() functions.</p>
  */
 
+@CSharpInjectMembers(code = {
+        "public MappingIterator(net.sf.saxon.om.SequenceIterator first, net.sf.saxon.expr.SequenceMapper.Lambda action) : this(first, net.sf.saxon.expr.SequenceMapper.of(action)) {}",
+})
 public class MappingIterator implements SequenceIterator {
 
     private final SequenceIterator base;

@@ -764,8 +764,8 @@ public class ExpressionTool {
         if (first == null) {
             return false;
         }
-
-        switch (first.getGenre()) {
+        Genre genre = first.getGenre();  // Variable introduced for C# type checking
+        switch (genre) {
             case NODE:
                 iterator.close();
                 return true;

@@ -932,7 +932,7 @@ public class SlashExpression extends BinaryExpression
             // See bug 4730: the step might have been changed to something else
             return new MappingIterator(
                     getStart().iterate(context),
-                    SequenceMapper.of(item -> ((AxisExpression) step).iterate((NodeInfo)item)));
+                    item -> ((AxisExpression) step).iterate((NodeInfo)item));
         }
 
         XPathContext context2 = context.newMinorContext();

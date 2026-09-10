@@ -21,10 +21,10 @@ import java.util.List;
  */
 
 
-public class ArrayIterator<T extends Item> implements UnfailingIterator,
+public class ArrayIterator implements UnfailingIterator,
         LastPositionFinder, LookaheadIterator, GroundedIterator {
 
-    protected T[] items;
+    protected Item[] items;
     private int index;          // position in array of current item, zero-based
     // set equal to end+1 when all the items required have been read.
     protected int start;          // position of first item to be returned, zero-based
@@ -37,7 +37,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
      *              processed by the iterator
      */
 
-    public ArrayIterator(/*@NotNull*/ T[] nodes) {
+    public <U extends Item> ArrayIterator(/*@NotNull*/ U[] nodes) {
         items = nodes;
         start = 0;
         end = nodes.length;
@@ -56,7 +56,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
      *              beween 1 and nodes.length; if not, undefined exceptions are likely to occur.
      */
 
-    public ArrayIterator(T[] items, int start, int end) {
+    public <U extends Item> ArrayIterator(U[] items, int start, int end) {
         this.items = items;
         this.end = end;
         this.start = start;
@@ -77,7 +77,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
      */
 
     public SequenceIterator makeSliceIterator(int min, int max) {
-        T[] items = getArray();
+        Item[] items = getArray();
         int currentStart = getStartPosition();
         int currentEnd = getEndPosition();
         if (min < 1) {
@@ -94,7 +94,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
         if (newEnd <= newStart) {
             return EmptyIterator.emptyIterator();
         }
-        return new ArrayIterator<>(items, newStart, newEnd);
+        return new ArrayIterator(items, newStart, newEnd);
     }
 
     /**
@@ -116,7 +116,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
 
     /*@Nullable*/
     @Override
-    public T next() {
+    public Item next() {
         if (index >= end) {
             index = end + 1;
             return null;
@@ -141,7 +141,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
      * @return the underlying array being processed by the iterator
      */
 
-    public T[] getArray() {
+    public Item[] getArray() {
         return items;
     }
 
@@ -180,7 +180,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
         if (start == 0 && end == items.length) {
             seq =  new SequenceExtent(items);
         } else {
-            List<T> sublist = Arrays.asList(items).subList(start, end);
+            List<Item> sublist = Arrays.asList(items).subList(start, end);
             seq = new SequenceExtent(sublist);
         }
         return seq.reduce();
@@ -192,7 +192,7 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
         if (start == 0 && index ==0 && end == items.length) {
             seq = new SequenceExtent(items);
         } else {
-            List<T> sublist = Arrays.asList(items).subList(start + index, end);
+            List<Item> sublist = Arrays.asList(items).subList(start + index, end);
             seq = new SequenceExtent(sublist);
         }
         return seq.reduce();
@@ -218,9 +218,12 @@ public class ArrayIterator<T extends Item> implements UnfailingIterator,
      * contains Nodes; it therefore implements the AxisIterator interface.
      */
 
-    public static class OfNodes extends ArrayIterator<NodeInfo> implements AxisIterator {
+    public static class OfNodes extends ArrayIterator implements AxisIterator {
         public OfNodes(NodeInfo[] list) {
             super(list);
+        }
+        public NodeInfo next() {
+            return (NodeInfo)super.next();
         }
     }
 

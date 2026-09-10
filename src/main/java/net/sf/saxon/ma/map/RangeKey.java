@@ -24,6 +24,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
@@ -111,13 +112,14 @@ public class RangeKey extends MapItem {
      */
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
-        // For .NEU - don't use a lambda expression here
+        // For C#- don't use a lambda expression here
+        //noinspection Convert2Lambda
         return new Iterable<KeyValuePair>() {
             @Override
-            public Iterator<KeyValuePair> iterator() {
+            public @NotNull Iterator<KeyValuePair> iterator() {
                 return new Iterator<KeyValuePair>() {
-                    AtomicIterator keys = keys();
-                    AtomicValue nextItem = keys.next();
+                    final AtomicIterator keyIter = keys();
+                    AtomicValue nextItem = keyIter.next();
 
                     @Override
                     public boolean hasNext() {
@@ -130,7 +132,7 @@ public class RangeKey extends MapItem {
                             return null;
                         } else {
                             KeyValuePair kvp = new KeyValuePair(nextItem, get(nextItem));
-                            nextItem = keys.next();
+                            nextItem = keyIter.next();
                             return kvp;
                         }
                     }

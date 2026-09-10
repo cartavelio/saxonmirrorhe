@@ -98,7 +98,11 @@ public class UnicodeChar extends UnicodeString {
      */
     @Override
     public UnicodeString substring(long start, long end) {
-        return start == 0 && end == 1 ? this : EmptyUniString.getInstance();
+        if (start == 0 && end == 1) {
+            return this;
+        } else {
+            return EmptyUniString.getInstance();
+        }
     }
 
     /**

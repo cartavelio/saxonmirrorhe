@@ -22,7 +22,6 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.PublicStylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
@@ -32,7 +31,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
-
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
@@ -355,13 +353,11 @@ public final class EvaluateInstr extends Expression {
 
             MapItem options = (optionsOp == null  ? new HashTrieMap() :(MapItem)optionsOp.getChildExpression().evaluateItem(context));
 
-            IndependentContext env = new IndependentContext(config) {
-                @Override
-                public void issueWarning(String s, Location locator) {
-                    String message = "In dynamic expression {" + exprText + "}: " + s;
-                    context.getController().warning(message, null, getLocation());
-                }
-            };
+            IndependentContext env = new IndependentContext(config);
+            env.setWarningHandler((str, loc) -> {
+                String message = "In dynamic expression {" + exprText + "}: " + str;
+                context.getController().warning(message, null, loc);
+            });
             env.setBaseURI(baseUri);
             env.setExecutable(context.getController().getExecutable());
             env.setXPathLanguageLevel(31);
@@ -529,10 +525,7 @@ public final class EvaluateInstr extends Expression {
         if (importedSchemaNamespaces != null && !importedSchemaNamespaces.isEmpty()) {
             StringBuilder buff = new StringBuilder(256);
             for (String s : importedSchemaNamespaces) {
-                if (s.isEmpty()) {
-                    s = "##";
-                }
-                buff.append(s);
+                buff.append(s.isEmpty() ? "##" : s);
                 buff.append(' ');
             }
             buff.setLength(buff.length() - 1);
