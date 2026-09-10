@@ -22,6 +22,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -138,6 +139,7 @@ public class SpecificFunctionType extends AnyFunctionType {
     }
 
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public String toExportString() {
         StringBuilder sb = new StringBuilder(100);
         sb.append("(function(");

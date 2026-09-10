@@ -317,7 +317,6 @@ public abstract class Operation {
 
             // The operation matches empty anywhere if every suboperation matches empty anywhere
             boolean matchesEmptyAnywhere = true;
-            boolean matchesEmptyNowhere = false;
             for (Operation o : operations) {
                 int m = o.matchesEmptyString();
                 if (m == MATCHES_ZLS_NEVER) {

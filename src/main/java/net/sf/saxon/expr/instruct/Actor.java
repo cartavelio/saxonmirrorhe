@@ -43,7 +43,7 @@ public abstract class Actor implements ExpressionOwner, Location {
     private SlotManager stackFrameMap;
     private PackageData packageData;
     private Component declaringComponent;
-    private Visibility declaredVisibility;
+    private Visibility declaredVisibility = Visibility.UNDEFINED;
     private RetainedStaticContext retainedStaticContext;
 
     public Actor() {

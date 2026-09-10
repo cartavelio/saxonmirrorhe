@@ -882,7 +882,7 @@ public class GlobalVariable extends Actor
         }
         if (getDeclaringComponent() != null) {
             Visibility vis = getDeclaringComponent().getVisibility();
-            if (vis != null) {
+            if (vis != Visibility.UNDEFINED) {
                 presenter.emitAttribute("visibility", vis.toString());
             }
         }

@@ -12,6 +12,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.SingletonIterator;
 
 /**
@@ -109,6 +110,7 @@ public class SingletonClosure extends Closure implements Sequence {
      */
 
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public GroundedValue materialize() {
         try {
             return SequenceTool.itemOrEmpty(asItem());

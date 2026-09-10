@@ -18,6 +18,7 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
 
 @CSharpSimpleEnum
 public enum HostLanguage {
+    UNKNOWN,
     XSLT,
     XQUERY,
     XML_SCHEMA,

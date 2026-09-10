@@ -118,7 +118,6 @@ public class OuterForExpression extends ForExpression {
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
         SequenceIterator base = getSequence().iterate(context);
-        int position = 1;
         int slot = getLocalSlotNumber();
         LookaheadIterator ahead = LookaheadIteratorImpl.makeLookaheadIterator(base);
         if (ahead.hasNext()) {
@@ -158,7 +157,6 @@ public class OuterForExpression extends ForExpression {
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
         SequenceIterator base = getSequence().iterate(context);
-        int position = 1;
         int slot = getLocalSlotNumber();
         LookaheadIterator ahead = LookaheadIteratorImpl.makeLookaheadIterator(base);
         if (ahead.hasNext()) {

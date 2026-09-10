@@ -670,8 +670,7 @@ public class SourceBinding {
 
     public void fixupReferences(GlobalVariable compiledGlobalVariable) {
         final SequenceType type = getInferredType(true);
-        final TypeHierarchy th = sourceElement.getConfiguration().getTypeHierarchy();
-        GroundedValue constantValue = null;
+        //GroundedValue constantValue = null;
         int properties = 0;
         if (!hasProperty(BindingProperty.ASSIGNABLE) && !hasProperty(BindingProperty.PARAM) && !(visibility == Visibility.PUBLIC || visibility == Visibility.ABSTRACT)) {
             /*if (select instanceof Literal) {

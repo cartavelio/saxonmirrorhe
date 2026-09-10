@@ -90,7 +90,7 @@ public class XSLOverride extends StyleElement {
                             return;
                         }
                         Visibility overriddenVis = overridden.getVisibility();
-                        if (overriddenVis == null) {
+                        if (overriddenVis == Visibility.UNDEFINED) {
                             overriddenVis = Visibility.PRIVATE;
                         }
                         if (overriddenVis == Visibility.FINAL || overriddenVis == Visibility.PRIVATE) {
