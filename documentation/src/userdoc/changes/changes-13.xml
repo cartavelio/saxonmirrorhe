@@ -49,6 +49,26 @@ TODO: rethink redefines and override
     
     -->
     
+    <category name="documentation">
+        
+        <p>The documentation has been updated to integrate information about features of the 4.0
+            specifications implemented in this release. Information in the reference sections <a
+                class="bodylink" href="/xsl-elements">XSLT elements</a>, <a class="bodylink"
+                    href="/expressions">XPath syntax</a> and <a class="bodylink"
+                        href="/functions">Function library</a> has been updated to align with the
+            4.0 specifications (dated 2026-XX-XX). In particular, note that the signatures for
+            functions in the Function library have been updated to align with the 4.0 specification,
+            and use the same updated notation (e.g. giving default values for parameters that can be
+            omitted), and these may have changed since XPath 3.1. The XPath syntax section has been
+            reorganised and expanded.</p>
+        <p>Information about new 4.0 features is highlighted in the Saxon documentation with a yellow
+            colored side-bar and the QT4 lightbulb image. The main objective of the Saxon
+            documentation is to inform users about the implementation status for 4.0 features, rather
+            than being an actual guide to the new 4.0 features. Users are recommended to see the
+            specifications for full details and examples.</p>
+        
+    </category>
+    
     
     <category name="installation">
         
@@ -553,6 +573,9 @@ TODO: rethink redefines and override
             prefixes to be bound within the XPath expression, rather than relying entirely on the host
             language to declare namespace prefixes.</p>
         
+        <p>A <code>URIQualifiedName</code> may now supply a prefix as well as a URI and local name,
+            in the format <code>Q{uri}prefix:local</code>.</p>
+        
         <p>In decimal format properties, it is now possible to set composite values for some properties,
             for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
             in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
@@ -599,11 +622,6 @@ TODO: rethink redefines and override
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
             is dropped.</p>
         
-        
-        
-        <p>A <code>URIQualifiedName</code> may now supply a prefix as well as a URI and local name,
-            in the format <code>Q{uri}prefix:local</code>.</p>
-        
         <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (PR 1501)</p>
         
         <p>The implementation of enumeration types has been aligned with the current specification.
@@ -621,7 +639,7 @@ TODO: rethink redefines and override
         <h3>XPath 4.0 features not yet implemented</h3>
         
         <ul>
-           <li><p>PR2541 - JNodes in a map constructor</p></li> <
+           <li><p>PR2541 - JNodes in a map constructor</p></li>
         </ul>
         
         
@@ -865,7 +883,13 @@ TODO: rethink redefines and override
         
         <ul>
             <li><p>The ternary conditional expression <code>test ?? A !! B</code>.</p></li>
-            <li><p>Record tests using the keyword "tuple" rather than "record".</p></li>
+            <li><p>Record types using the keyword "tuple" rather than "record".</p></li>
+            <li><p>Extensible record types.</p></li>
+            <li><p>The syntax for defining recursive record types has changed: the use of ".."
+                as a reference to the containing type has been dropped. (In the current 4.0
+                specification recursive record types can be created by allowing the definition
+                of a named record type to include a reference to itself; but note that named
+                record types are not yet implemented in Saxon.)</p></li>
             <li><p>Item types of the form <code>"atomic(X)"</code>.</p></li>
             <li><p>The syntax <code>type(T)</code> is dropped. A type alias <code>T</code> is now referenced simply
                     as <code>T</code>, not <code>type(T)</code>. In XSLT patterns, a match for items

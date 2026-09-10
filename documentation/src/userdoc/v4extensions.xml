@@ -36,8 +36,8 @@
 
 	<p>Further information and details of the current Saxon implementation has been integrated into the
 		relevant sections of this documentation. Content is highlighted (like this page) to indicate
-		details about QT4 features, using the QT4 lightbulb image. The main sections with new information
-		are as follows:</p>
+		details about QT4 features, using a yellow colored side-bar and the QT4 lightbulb image. The main
+		sections with new information are as follows:</p>
 	
 	<ul>
 		<li><a class="bodylink" href="/xsl-elements">XSLT elements reference</a> - for details on all new
