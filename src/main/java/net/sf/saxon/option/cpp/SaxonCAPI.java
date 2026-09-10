@@ -71,7 +71,7 @@ public class SaxonCAPI {
     public static ObjectHandles objectHandles = ObjectHandles.create();
 
     public static final long STATUS_OK = 0;
-    public static final long STATUS_FAIL = -2;
+    public static final long STATUS_FAIL = -1;
 
 
 
