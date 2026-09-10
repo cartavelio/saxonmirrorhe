@@ -23,7 +23,6 @@ import net.sf.saxon.value.SequenceType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -547,8 +546,7 @@ public class XPathCompiler {
             eval = new XPathEvaluator(processor.getUnderlyingConfiguration());
             ic = new IndependentContext(env);
             eval.setStaticContext(ic);
-            for (Iterator<XPathVariable> iter = env.iterateExternalVariables(); iter.hasNext(); ) {
-                XPathVariable var = iter.next();
+            for (XPathVariable var : env.getExternalVariables()) {
                 XPathVariable var2 = ic.declareVariable(var.getVariableQName());
                 var2.setRequiredType(var.getRequiredType());
             }

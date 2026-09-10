@@ -7,6 +7,8 @@
 
 package net.sf.saxon.ma.trie;
 
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -84,6 +86,7 @@ public abstract class ImmutableList<T> implements Iterable<T> {
      * elements of the two lists are pairwise equal.
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public boolean equals(Object o) {
         if (!(o instanceof ImmutableList)) {
             return false;

@@ -22,6 +22,7 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
@@ -486,6 +487,7 @@ public class Copy extends ElementCreator {
         return null;
     }
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static void copyUnparsedEntities(NodeInfo source, Outputter out) throws XPathException {
         Iterator<String> unparsedEntities = source.getTreeInfo().getUnparsedEntityNames();
         while (unparsedEntities.hasNext()) {

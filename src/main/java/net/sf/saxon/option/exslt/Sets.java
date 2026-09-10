@@ -172,7 +172,7 @@ public abstract class Sets {
 
         GlobalOrderComparer comp = GlobalOrderComparer.getInstance();
         final NodeInfo firstNode = first;
-        return new ItemMappingIterator(ns1, ItemFilter.of(it -> comp.compare(it, firstNode) > 0));
+        return new ItemMappingIterator(ns1, ItemFilter.of(it -> comp.compare((NodeInfo)it, firstNode) > 0));
 
     }
 

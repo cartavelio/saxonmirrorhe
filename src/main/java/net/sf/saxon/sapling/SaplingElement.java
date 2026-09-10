@@ -13,6 +13,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.ma.trie.ImmutableList;
 import net.sf.saxon.ma.trie.ImmutableMap;
@@ -229,7 +230,7 @@ public class SaplingElement extends SaplingNode {
     }
 
     @Override
-    public void sendTo(Receiver receiver) throws XPathException {
+    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
         final Configuration config = receiver.getPipelineConfiguration().getConfiguration();
         final NamePool namePool = config.getNamePool();
         NamespaceMap ns = namespaces;
@@ -250,7 +251,7 @@ public class SaplingElement extends SaplingNode {
 
         ImmutableList<SaplingNode> children = reversedChildren.reverse();
         for (SaplingNode node : children) {
-            node.sendTo(receiver);
+            node.deliver(receiver, null);
         }
         receiver.endElement();
     }
@@ -270,7 +271,7 @@ public class SaplingElement extends SaplingNode {
         TreeModel treeModel = config.getParseOptions().getModel();
         Builder builder = treeModel.makeBuilder(pipe);
         builder.open();
-        sendTo(builder);
+        deliver(builder, null);
         builder.close();
         return builder.getCurrentRoot();
     }

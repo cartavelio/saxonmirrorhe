@@ -27,7 +27,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -583,11 +582,9 @@ public class NamespaceNode implements NodeInfo {
     /*@NotNull*/
     public static AxisIterator makeIterator(final NodeInfo element, NodePredicate test) {
         List<NodeInfo> nodes = new ArrayList<>();
-        Iterator<NamespaceBinding> bindings = element.getAllNamespaces().iterator();
         int position = 0;
         boolean foundXML = false;
-        while (bindings.hasNext()) {
-            NamespaceBinding binding = bindings.next();
+        for (NamespaceBinding binding : element.getAllNamespaces()) {
             if (binding.getPrefix().equals("xml")) {
                 foundXML = true;
             }

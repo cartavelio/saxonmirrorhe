@@ -1185,9 +1185,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             // If any XQuery functions were imported, fix up all function calls
             // registered against these functions.
             XQueryFunctionLibrary queryFunctions = stylesheetPackage.getXQueryFunctionLibrary();
-            Iterator<XQueryFunction> qf = queryFunctions.getFunctionDefinitions();
-            while (qf.hasNext()) {
-                XQueryFunction f = qf.next();
+            for (XQueryFunction f : queryFunctions.getFunctionDefinitions()) {
                 f.fixupReferences();
             }
 

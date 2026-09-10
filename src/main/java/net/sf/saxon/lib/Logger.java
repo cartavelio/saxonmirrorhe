@@ -46,6 +46,7 @@ public abstract class Logger {
      */
     public void error(String message) {
         println(message, ERROR);
+        System.err.println("CC:" + message);
     }
 
     /**

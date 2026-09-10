@@ -9,6 +9,8 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -103,7 +105,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
         }
     }
 
-    @CSharpReplaceBody(code="System.Array.Sort(bindingArray, (x, y) => x.getPrefix().CompareTo(y.getPrefix());")
+    @CSharpReplaceBody(code="System.Array.Sort(bindingArray, (x, y) => System.String.Compare(x.getPrefix(), y.getPrefix(), System.StringComparison.Ordinal)")
     private void sortByPrefix(NamespaceBinding[] bindingArray) {
         Arrays.sort(bindingArray, Comparator.comparing(NamespaceBinding::getPrefix));
     }
@@ -114,6 +116,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      * @param resolver the NamespaceResolver
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static NamespaceMap fromNamespaceResolver(NamespaceResolver resolver) {
         Iterator<String> iter = resolver.iteratePrefixes();
         List<NamespaceBinding> bindings = new ArrayList<>();
@@ -441,7 +444,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
      */
 
     @Override
-    public Iterator<NamespaceBinding> iterator() {
+    public @NotNull Iterator<NamespaceBinding> iterator() {
         return new Iterator<NamespaceBinding>() {
             int i = 0;
             @Override

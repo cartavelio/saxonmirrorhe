@@ -1,6 +1,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
 import java.util.Iterator;
 
@@ -29,6 +30,7 @@ public class IteratorWrapper implements SequenceIterator {
      * on next() has returned null, no further calls should be made.
      */
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public Item next() throws XPathException {
         return iterator.hasNext() ? iterator.next() : null;
     }

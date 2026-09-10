@@ -9,6 +9,7 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -238,9 +239,12 @@ public class DictionaryMap extends MapItem {
 
     private class KeyIterator implements AtomicIterator {
         Iterator<String> keyIter;
+
         public KeyIterator(Map<String, GroundedValue> hashMap) {
             this.keyIter = hashMap.keySet().iterator();
         }
+
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public AtomicValue next() {
             if (this.keyIter.hasNext()) {
                 return new StringItem(this.keyIter.next());

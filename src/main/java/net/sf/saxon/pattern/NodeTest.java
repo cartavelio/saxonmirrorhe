@@ -10,6 +10,7 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.SequenceType;
@@ -250,6 +251,7 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
      * @return the type annotation that all nodes matching this NodeTest must satisfy
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public SchemaType getContentType() {
         Set<PrimitiveUType> m = getUType().decompose();
         Iterator<PrimitiveUType> it = m.iterator();

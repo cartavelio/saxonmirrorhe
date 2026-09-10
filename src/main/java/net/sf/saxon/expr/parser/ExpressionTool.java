@@ -33,6 +33,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
@@ -1749,6 +1750,7 @@ public class ExpressionTool {
      * @return a representation of the expression in parentheses
      */
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public static String parenthesize(Expression exp) {
         if (exp.operands().iterator().hasNext()) {
             return "(" + exp.toString() + ")";
@@ -1765,12 +1767,13 @@ public class ExpressionTool {
         }
     }
 
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     private static boolean hasTwoOrMoreOperands(Expression exp) {
         Iterator<Operand> ops = exp.operands().iterator();
         if (!ops.hasNext()) {
             return false;
         }
-        ops.next();
+        Operand o = ops.next();  // dummy variable needed for C# conversion
         return ops.hasNext();
     }
 

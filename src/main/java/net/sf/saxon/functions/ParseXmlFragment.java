@@ -17,12 +17,13 @@ import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.lib.Validation;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.EmptySequence;
@@ -47,6 +48,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
+    @CSharpReplaceBody(code="return net.sf.saxon.om.EmptySequence.getInstance();")  // TODO: implement me!
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringItem input = (StringItem) arguments[0].head();
         if (input == null) {
@@ -56,6 +58,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         }
     }
 
+    //#if CSHARP==false
     private NodeInfo evalParseXml(StringItem inputArg, XPathContext context) throws XPathException {
         NodeInfo node = null;
         final String baseURI = getStaticBaseUriString();
@@ -86,11 +89,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                         // with a clean parser
                     }
                 } else {
-                    //try {
-                        reader = Version.platform.loadParserForXmlFragments();//SAXParserFactoryImpl.newInstance().newSAXParser().getXMLReader();
-                    /*} catch (ParserConfigurationException | SAXException e) {
-                        throw XPathException.makeXPathException(e);
-                    } */
+                    reader = Version.platform.loadParserForXmlFragments();
                 }
 
                 source.setXMLReader(reader);
@@ -163,6 +162,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         }
         return node;
     }
+    //#endif
 
     /**
      * Filter to remove the element wrapper added to the document to satisfy the XML parser

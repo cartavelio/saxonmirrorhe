@@ -708,7 +708,7 @@ public class StaticQueryContext {
         return null;
     }
 
-    public Collection<QueryLibrary> getCompiledLibraries() {
+    public Iterable<QueryLibrary> getCompiledLibraries() {
         return Collections.emptySet();
     }
 
@@ -891,19 +891,18 @@ public class StaticQueryContext {
     }
 
     /**
-     * Iterate over all the declared global variables
+     * Iterator over all the declared global variables
      *
      * @return an iterator over all the global variables that have been declared. They are returned
      *         as instances of class {@link GlobalVariable}
      * @since 9.1
      */
 
-    public Iterator<GlobalVariable> iterateDeclaredGlobalVariables() {
+    public Iterable<GlobalVariable> iterateDeclaredGlobalVariables() {
         if (userDeclaredVariables == null) {
-            List<GlobalVariable> empty = Collections.emptyList();
-            return empty.iterator();
+            return Collections.emptyList();
         } else {
-            return userDeclaredVariables.iterator();
+            return userDeclaredVariables;
         }
     }
 

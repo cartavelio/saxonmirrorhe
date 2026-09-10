@@ -15,6 +15,7 @@ import net.sf.saxon.lib.Resource;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DateTimeValue;
@@ -92,7 +93,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
         final boolean metadata = metadataParam.isPresent() && metadataParam.get();
         Iterator<String> resourceURIs = getResourceURIs(context);
 
-        return new MappingJavaIterator<>(resourceURIs,
+        return new MappingJavaIterator<String, Resource>(resourceURIs,
              in -> {
                  try {
                      InputDetails details = getInputDetails(in);
@@ -232,6 +233,7 @@ public class DirectoryCollection extends AbstractResourceCollection {
             throw new UnsupportedOperationException();
         }
 
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         private void advance() {
             if (directories.isEmpty()) {
                 nextItem = null;

@@ -159,7 +159,7 @@ public class XdmArray extends XdmFunctionItem {
      */
     public List<XdmValue> asList() {
         Iterator<GroundedValue> members = getUnderlyingValue().members().iterator();
-        List<XdmValue> result = new ArrayList<XdmValue>(getUnderlyingValue().getLength());
+        List<XdmValue> result = new ArrayList<>(getUnderlyingValue().getLength());
         while (members.hasNext()) {
             result.add(XdmValue.wrap(members.next()));
         }

@@ -17,6 +17,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.z.*;
 
 import java.util.Iterator;
@@ -214,6 +215,7 @@ public abstract class Operation {
 
         @Override
         @CSharpInnerClass(outer=true, extra={"net.sf.saxon.regex.REMatcher matcher", "int position"})
+        @CSharpSuppressWarnings("UnsafeIteratorConversion")
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             return new IntIterator() {
                 final Iterator<Operation> branchIter = branches.iterator();

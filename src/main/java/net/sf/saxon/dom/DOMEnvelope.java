@@ -9,7 +9,6 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.expr.PJConverter;
 import net.sf.saxon.expr.XPathContext;
@@ -18,6 +17,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceExtent;
@@ -173,24 +173,22 @@ public class DOMEnvelope implements ExternalObjectModel {
     }
 
     /**
-     * Test whether this object model recognizes a particular kind of JAXP Source object,
-     * and if it does, send the contents of the document to a supplied Receiver, and return true.
-     * Otherwise, return false.
-     * <p>This implementation returns true only if the source is a DOMSource whose contained node is a
-     * a "NodeOverNodeInfo".</p>
+     * Give this ExternalObjectModel the opportunity of recognising a Source object and returning
+     * an ActiveSource, which will be used to send an instance of this external model to a supplied
+     * Receiver. The default implementation returns null.
+     *
+     * @param supplied a supplied Source
+     * @return an ActiveSource object if the source is recognised, or null if not
      */
-
     @Override
-    public boolean sendSource(Source source, Receiver receiver) throws XPathException {
-        if (source instanceof DOMSource) {
-            Node startNode = ((DOMSource) source).getNode();
+    public ActiveSource getActiveSource(Source supplied) {
+        if (supplied instanceof DOMSource) {
+            Node startNode = ((DOMSource) supplied).getNode();
             if (startNode instanceof NodeOverNodeInfo) {
-                NodeInfo base = ((NodeOverNodeInfo) startNode).getUnderlyingNodeInfo();
-                Sender.send(base, receiver, null);
-                return true;
+                return ((NodeOverNodeInfo) startNode).getUnderlyingNodeInfo();
             }
         }
-        return false;
+        return null;
     }
 
     /**

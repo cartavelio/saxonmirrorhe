@@ -184,8 +184,10 @@ public class Transform {
         options.setPermittedValues("Tlevel", new String[]{"none", "low", "normal", "high"}, "normal");
         options.addRecognizedOption("Tout", CommandLineOptions.TYPE_FILENAME,
                                     "File for trace listener output");
+        //#if CSHARP==false
         options.addRecognizedOption("TP", CommandLineOptions.TYPE_FILENAME,
                                     "Use profiling trace listener, with specified output file");
+        //#endif
         options.addRecognizedOption("threads", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
                                     "Run stylesheet on directory of files divided in N threads");
         options.addRecognizedOption("tree", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
@@ -518,6 +520,7 @@ public class Transform {
                 config.setBooleanProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE, true);
             }
 
+            //#if CSHARP==false
             value = options.getOptionValue("TP");
             if (value != null) {
                 traceListener = new TimingTraceListener();
@@ -529,6 +532,7 @@ public class Transform {
                             new StandardLogger(new File(value)));
                 }
             }
+            //#endif
 
             value = options.getOptionValue("traceout");
             if (value == null) {

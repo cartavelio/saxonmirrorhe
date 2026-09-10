@@ -7,10 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.sort.ItemOrderComparer;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+
+import java.util.Comparator;
 
 
 /**
@@ -27,7 +28,7 @@ public class DifferenceEnumeration implements SequenceIterator {
 
     /*@Nullable*/ private NodeInfo nextNode1 = null;
     private NodeInfo nextNode2 = null;
-    private final ItemOrderComparer comparer;
+    private final Comparator<? super NodeInfo> comparer;
 
     /**
      * Form an enumeration of the difference of two nodesets, that is, the nodes
@@ -40,7 +41,7 @@ public class DifferenceEnumeration implements SequenceIterator {
      */
 
     public DifferenceEnumeration(SequenceIterator p1, SequenceIterator p2,
-                                 ItemOrderComparer comparer) throws XPathException {
+                                 Comparator<? super NodeInfo> comparer) throws XPathException {
         this.p1 = p1;
         this.p2 = p2;
         this.comparer = comparer;

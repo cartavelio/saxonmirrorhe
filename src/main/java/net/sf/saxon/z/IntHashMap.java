@@ -24,10 +24,11 @@ import java.util.NoSuchElementException;
 
 
 @CSharpInjectMembers(code={""
-        + "public class IntHashMapValueSet<V> : Saxon.Impl.Helpers.AbstractIterable<V> {"
+        + "public class IntHashMapValueSet<V> : System.Collections.Generic.IEnumerable<V> {"
         + "    internal IntHashMap<V> container;"
         + "    public IntHashMapValueSet(IntHashMap<V> container) {this.container = container;}"
-        + "    public override java.util.Iterator<V> iterator() { return container.valueIterator(); }"
+        + "    public System.Collections.Generic.IEnumerator<V> GetEnumerator() {return container.valueIterator();}"
+        + "    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {return GetEnumerator();}}"
         + "}"})
 
 public class IntHashMap<T> {

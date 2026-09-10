@@ -16,7 +16,7 @@ import net.sf.saxon.tree.iter.NodeListIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Comparator;
 
 /**
  * DocumentOrderIterator takes as input an iteration of nodes in any order, and
@@ -28,8 +28,7 @@ import java.util.List;
 public final class DocumentOrderIterator implements SequenceIterator {
 
     private final SequenceIterator iterator;
-    private final List<NodeInfo> sequence;
-    private final ItemOrderComparer comparer;
+    private final ArrayList<NodeInfo> sequence; // explicit type ArrayList used so C# List.Sort() is available
     private NodeInfo current = null;
 
     /**
@@ -40,9 +39,7 @@ public final class DocumentOrderIterator implements SequenceIterator {
      * that is not a node
      */
 
-    public DocumentOrderIterator(SequenceIterator base, ItemOrderComparer comparer) throws XPathException {
-
-        this.comparer = comparer;
+    public DocumentOrderIterator(SequenceIterator base, Comparator<? super NodeInfo> comparer) throws XPathException {
 
         int len = base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)
                 ? ((LastPositionFinder) base).getLength() : 50;

@@ -370,8 +370,7 @@ public class PreparedStylesheet extends Executable {
         presenter.startElement("functions");
         for (FunctionLibrary lib : libraryList) {
             if (lib instanceof ExecutableFunctionLibrary) {
-                for (Iterator<UserFunction> f = ((ExecutableFunctionLibrary) lib).iterateFunctions(); f.hasNext(); ) {
-                    UserFunction func = f.next();
+                for (UserFunction func : ((ExecutableFunctionLibrary) lib).getAllFunctions()) {
                     func.export(presenter);
                 }
             }

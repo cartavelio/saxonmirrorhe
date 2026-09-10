@@ -21,7 +21,6 @@ import net.sf.saxon.transpile.CSharpInjectMembers;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
-import java.util.Collection;
 
 /**
  * This class exists to hold information associated with a specific XSLT compilation episode.
@@ -53,7 +52,7 @@ public class CompilerInfo {
     private boolean assertionsEnabled = false;
     private String targetEdition = "HE";
     private boolean relocatable = false;
-    private Collection<QueryLibrary> queryLibraries;
+    private Iterable<QueryLibrary> queryLibraries;
     private OptimizerOptions optimizerOptions;
     private String defaultNamespaceForElementsAndTypes = "";
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
@@ -658,11 +657,11 @@ public class CompilerInfo {
     }
 
 
-    public void setXQueryLibraries(Collection<QueryLibrary> libraries) {
+    public void setXQueryLibraries(Iterable<QueryLibrary> libraries) {
         this.queryLibraries = libraries;
     }
 
-    public Collection<QueryLibrary> getQueryLibraries() {
+    public Iterable<QueryLibrary> getQueryLibraries() {
         return queryLibraries;
     }
 

@@ -8,11 +8,11 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.expr.*;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.StyleElement;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLGlobalParam;
@@ -22,8 +22,6 @@ import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.VisibilityProvenance;
 import net.sf.saxon.trans.XPathException;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -276,18 +274,6 @@ public abstract class Actor implements ExpressionOwner, Location {
 
     public Visibility getDeclaredVisibility() {
         return declaredVisibility;
-    }
-
-
-    /**
-     * Get an iterator over all the properties available. The values returned by the iterator
-     * will be of type String, and each string can be supplied as input to the getProperty()
-     * method to retrieve the value of the property. The iterator may return properties whose
-     * value is null.
-     */
-
-    public Iterator<String> getProperties() {
-        return Collections.emptyIterator();
     }
 
     /**

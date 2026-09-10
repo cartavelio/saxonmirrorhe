@@ -8,6 +8,9 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.DocumentNumberAllocator;
 
 import java.util.*;
@@ -120,6 +123,19 @@ public class GenericTreeInfo implements TreeInfo {
      */
     public String getPublicId() {
         return null;
+    }
+
+    /**
+     * Deliver the content of the source to a supplied Receiver
+     *
+     * @param receiver the receiver to which events representing the parsed XML document will be sent
+     * @param options  options for parsing the source
+     * @throws XPathException if parsing fails for any reason. The detailed diagnostics will
+     *                        have been sent to the error reporter.
+     */
+    @Override
+    public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        getRootNode().deliver(receiver, options);
     }
 
     /**

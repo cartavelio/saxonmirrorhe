@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.Pattern;
@@ -21,6 +22,8 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Comparator;
+
 
 /**
  * A DocumentSorter is an expression that sorts a sequence of nodes into
@@ -28,7 +31,7 @@ import net.sf.saxon.value.SequenceType;
  */
 public class DocumentSorter extends UnaryExpression {
 
-    private final ItemOrderComparer comparer;
+    private final Comparator<? super NodeInfo> comparer;
 
     public DocumentSorter(Expression base) {
         super(base);
@@ -68,7 +71,7 @@ public class DocumentSorter extends UnaryExpression {
         return "docOrder";
     }
 
-    public ItemOrderComparer getComparer() {
+    public Comparator<? super NodeInfo> getComparer() {
         return comparer;
     }
 

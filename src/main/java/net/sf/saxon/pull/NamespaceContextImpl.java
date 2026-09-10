@@ -8,6 +8,7 @@
 package net.sf.saxon.pull;
 
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 
 import javax.xml.namespace.NamespaceContext;
 import java.util.ArrayList;
@@ -87,10 +88,11 @@ public class NamespaceContextImpl implements NamespaceResolver
      */
 
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public String getPrefix(String uri) {
-        Iterator prefixes = iteratePrefixes();
+        Iterator<String> prefixes = iteratePrefixes();
         while (prefixes.hasNext()) {
-            String p = (String) prefixes.next();
+            String p = prefixes.next();
             String u = resolver.getURIForPrefix(p, true);
             if (u.equals(uri)) {
                 return p;

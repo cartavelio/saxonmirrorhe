@@ -14,6 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.NodeListIterator;
 import net.sf.saxon.type.AnyType;
@@ -679,6 +680,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     @Override
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
         out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
 
