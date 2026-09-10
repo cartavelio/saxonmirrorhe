@@ -1055,7 +1055,7 @@ public final class Tokenizer {
                         switch (c) {
                             case ':':
                                 if (!foundColon) {
-                                    if (precedingToken == Token.QMARK || precedingToken == Token.SUFFIX) {
+                                    if (/*precedingToken == Token.QMARK ||*/ precedingToken == Token.SUFFIX) {
                                         // only NCName allowed after "? in a lookup expression, or after *:
                                         nextTokenValue = input.substring(nextTokenStartOffset, inputOffset);
                                         nextToken = Token.NAME;
