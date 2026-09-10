@@ -18,7 +18,6 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -528,7 +527,7 @@ public class Serialize extends SystemFunction implements Callable {
             props.setProperty(OutputKeys.METHOD, "xml");
         }
         if (props.getProperty(OutputKeys.OMIT_XML_DECLARATION) == null) {
-            props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "true");
+            props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
         }
                                                                                   
         // TODO add more spec-defined defaults here (for both cases)
