@@ -7,6 +7,7 @@ import net.sf.saxon.expr.instruct.Actor;
 import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.functions.AccumulatorFn;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
