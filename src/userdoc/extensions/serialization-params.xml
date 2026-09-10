@@ -137,9 +137,10 @@
         
         <attribute name="saxon:newline" required="no">
             <desc>
-                <p>Default value x10. Defines the string that is used by the text output method
-                    to represent a newline. The Windows line ending x0Cx0A (CRLF) may sometimes be preferred
-                to the default of a single newline character.</p>
+                <p>Default value 10. Defines the string that is used by the text output method
+                    to represent a newline. The Windows line ending x0Dx0A (CRLF) may sometimes be preferred
+                    to the default of a single newline character, this can be specified using
+                    <code>saxon:newline="&amp;#x0D;&amp;#x0A;"</code>.</p>
             </desc>
             <data-type name="string"/>
         </attribute>

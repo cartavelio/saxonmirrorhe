@@ -3926,6 +3926,12 @@
                     output definition. For full definitions of these attributes, see the
                     corresponding <a class="bodylink code" href="../output">xsl:output</a> element
                     documentation.</p>
+                
+                <p>See <a class="bodylink" href="/extensions/output-extras">Additional Serialization
+                    Parameters</a> for descriptions of additional attributes supported by Saxon-PE
+                    and Saxon-EE on <code>xsl:result-document</code> and <code>xsl:output</code>.
+                    Any values specified on the <code>xsl:result-document</code> instruction
+                    override the values specified on the <code>xsl:output</code> declaration.</p>
 
                 <p>Except for <code>use-character-maps</code>, any of these serialization attributes
                     may be an AVT, so the values can be decided at run-time. For any of these
@@ -3983,14 +3989,6 @@
                         <code>saxon:asynchronous="no"</code> to suppress multi-threading.
                     Asynchronous processing of <code>xsl:result-document</code> is automatically
                     suppressed if tracing (using a <code>TraceListener</code>) is enabled.</p>
-
-                <p>The <code>xsl:result-document</code> instruction may also take the extension <a
-                        class="bodylink" href="/extensions/output-extras/serialization-parameters"
-                        >serialization parameter</a>
-                    <code>saxon:indent-spaces</code>. This attribute may be an AVT, so the values
-                    can be decided at run-time. Any values specified on the
-                        <code>xsl:result-document</code> instruction override the values specified
-                    on the <code>xsl:output</code> declaration.</p>
 
                 <p>The new XSLT 3.0 attribute <code>parameter-document</code> is first implemented in
                     Saxon 9.8.</p>
