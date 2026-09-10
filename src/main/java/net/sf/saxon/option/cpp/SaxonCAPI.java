@@ -951,8 +951,9 @@ public class SaxonCAPI {
 
 
         if (debug) {
+            System.err.println("DEBUG: builder.getBaseURI= " + builder.getBaseURI());
             if(doc.getBaseURI() != null) {
-                System.err.println("DEBUG: builder.getBaseURI= " + doc.getBaseURI());
+                System.err.println("DEBUG: parseXML doc.getBaseURI= " + doc.getBaseURI());
             }
             System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
             System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
