@@ -13,6 +13,7 @@ import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicMatcher;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.ma.MapOrArray;
@@ -68,6 +69,7 @@ import java.util.Stack;
  * enabled for the stylesheet, query, or XPath expression that constructed the map.</p>
  */
 public abstract class MapItem extends MapOrArray implements FunctionItem {
+
 
     private int specVersion = 31;
 
@@ -743,6 +745,27 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
     }
 
 
+    public final static CallableFunction mapConstructorDuplicatesAction = new CallableFunction(
+            (context, arguments) -> {
+                throw new UncheckedXPathException("Duplicate key in map constructor", "XQDY0137");
+            },
+            new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
+    ).withTag("mapConstructorDuplicatesAction");
+
+    public final static CallableFunction xslMapDuplicatesAction = new CallableFunction(
+            (context, arguments) -> {
+                throw new UncheckedXPathException("Duplicate key in xsl:map instruction", "XTDE3365");
+            },
+            new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
+    ).withTag("xslMapDuplicatesAction");
+
+    public final static CallableFunction xslRecordDuplicatesAction = new CallableFunction(
+            (context, arguments) -> {
+                throw new UncheckedXPathException("Duplicate key in xsl:record instruction", "XTDE3365");
+            },
+            new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
+
+    ).withTag("xslRecordDuplicatesAction");
 
 
 }

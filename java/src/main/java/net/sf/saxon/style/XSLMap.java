@@ -13,14 +13,11 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.SequenceInstr;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
@@ -124,7 +121,7 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
         } else {
             GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(
                     getCompilation().getCompilerInfo().getXsltVersion());
-            optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
+            optionsBuilder.put(new StringValue("duplicates"), MapItem.xslMapDuplicatesAction);
             optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
             optionsExp = Literal.makeLiteral(optionsBuilder.getCompletedMap());
         }
@@ -137,12 +134,5 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
         }
         return exp;
     }
-
-    public final static CallableFunction mapConstructorDuplicatesAction = new CallableFunction(
-            (context, arguments) -> {
-                throw new UncheckedXPathException("Duplicate key in xsl:map instruction", "XTDE3365");
-            },
-            new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
-    ).withTag("xslMapOnDuplicates");
 
 }

@@ -7,7 +7,8 @@
 
 package net.sf.saxon.trans;
 
-import com.saxonica.trans.XSLRecord;
+//import com.saxonica.trans.XSLRecord;
+
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CheckSumFilter;
 import net.sf.saxon.event.FilterFactory;
@@ -38,6 +39,7 @@ import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.AbstractFixedMap;
 import net.sf.saxon.ma.map.GeneralMapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
@@ -56,7 +58,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.PackageVersion;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.style.XSLMap;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.packages.IPackageLoader;
@@ -1890,10 +1891,10 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("callable", (loader, element) -> {
             String tag = element.getAttributeValue(NamespaceUri.NULL, "tag");
             CallableFunction fn = switch (tag) {
-                case "onDuplicatesFail" -> XPathParser.mapConstructorDuplicatesAction;
-                case "xslMapOnDuplicates" -> XSLMap.mapConstructorDuplicatesAction;
-                case "mapConstructorDuplicatesAction" -> XSLRecord.mapConstructorDuplicatesAction;
-                default -> throw new IllegalStateException("Unknown tag: " + tag);
+                case "mapConstructorDuplicatesAction" -> MapItem.mapConstructorDuplicatesAction;
+                case "xslMapDuplicatesAction" -> MapItem.xslMapDuplicatesAction;
+                case "xslRecordDuplicatesAction" -> MapItem.xslRecordDuplicatesAction;
+                default -> throw new IllegalStateException("Unknown callable function tag: " + tag);
             };
             return Literal.makeLiteral(fn);
         });

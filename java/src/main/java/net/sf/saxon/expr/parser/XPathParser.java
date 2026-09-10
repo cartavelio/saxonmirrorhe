@@ -4404,7 +4404,7 @@ public class XPathParser {
                     result = Literal.makeLiteral(sem);
                 } else {
                     GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
-                    optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
+                    optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
                     optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
                     MapItem optionsMap = optionsBuilder.getCompletedMap();
                     result = MapFunctionSet.getInstance(languageVersion).makeFunction("merge", 2)
@@ -4468,7 +4468,7 @@ public class XPathParser {
                         optionsMap = EmptyMap.getInstance(languageVersion);
                     } else {
                         GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder(languageVersion);
-                        optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
+                        optionsBuilder.put(new StringValue("duplicates"), MapItem.mapConstructorDuplicatesAction);
                         optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
                         optionsMap = optionsBuilder.getCompletedMap();
                     }
@@ -4482,13 +4482,6 @@ public class XPathParser {
         return result;
 
     }
-
-    public final static CallableFunction mapConstructorDuplicatesAction = new CallableFunction(
-            (context, arguments) -> {
-                throw new UncheckedXPathException("Duplicate key in map constructor", "XQDY0137");
-            },
-            new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
-    ).withTag("onDuplicatesFail");
 
     /**
      * Parse a "square" array constructor
