@@ -7,10 +7,12 @@
 
 package net.sf.saxon.expr.elab;
 
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.trans.XPathException;
 
 /**
  * Abstract implementation of {@link Elaborator} for expressions that primarily evaluate in pull mode,
@@ -59,12 +61,15 @@ public abstract class PullElaborator extends Elaborator {
     }
 
     public BooleanEvaluator elaborateForBoolean() {
+        Expression expr = getExpression();
         PullEvaluator pull = elaborateForPull();
         return context -> {
             try {
                 return ExpressionTool.effectiveBooleanValue(pull.iterate(context));
             } catch (UncheckedXPathException err) {
-                throw err.getXPathException();
+                throw err.getXPathException().maybeWithLocation(expr.getLocation());
+            } catch (XPathException err) {
+                throw err.maybeWithLocation(expr.getLocation());
             }
         };
     }
