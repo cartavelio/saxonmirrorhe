@@ -81,6 +81,7 @@
     void DocumentBuilder::setDTDValidation(bool option) {
         dtdVal= option;
         int64_t  status = j_db_setDTDValidation(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject, (int)option);
+        std::cerr<<"setDTDValidation status="<<status<<std::endl;
         if(status== -2) {
             createException();
         }
@@ -112,7 +113,6 @@
 
     XdmNode* DocumentBuilder::parseXmlFromString(const char * source){
         int64_t result = j_main_parseXmlString(SaxonProcessor::sxn_environ->thread, (char *)cwdDB.c_str(), (void *)proc->procRef, (void *)docBuilderObject, (schemaValidator != nullptr ? (void *)schemaValidator->getUnderlyingValidator() : (void *) nullptr), (char *)source);
-       std::cerr<<"parseXmlFromString result="<<result<<std::endl;
         if(result > 0) {
             XdmNode * node = new XdmNode(result);
             return node;

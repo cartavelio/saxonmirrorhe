@@ -754,15 +754,18 @@ public class SaxonCAPI {
 
 
             StringReader reader = new StringReader(xml);
-            if(builder == null) {
+            if(builderRef == WordFactory.nullPointer()) {
                 builder = proci.newDocumentBuilder();
                 if (debug) {
 
                     System.err.println("New documentBuilder obj: " + System.identityHashCode(builder));
                 }
-            } else if (debug) {
+            } else {
+                builder = objectHandles.get(builderRef);
+                if (debug) {
 
-                System.err.println("documentBuilder obj passed as argument: " + System.identityHashCode(builder));
+                    System.err.println("documentBuilder obj passed as argument: " + System.identityHashCode(builder));
+                }
             }
             if (validatorRef != WordFactory.nullPointer()) {
                 validator = objectHandles.get(validatorRef);

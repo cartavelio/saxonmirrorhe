@@ -778,17 +778,15 @@ void exampleSimple1(Xslt30Processor *proc, sResultCount *sresult) {
         }
         return;
     }
-    std::cerr<<"examplesample1 cp0"<<endl;
     executable->setInitialMatchSelectionAsFile("../php/xml/foo.xml");
-    std::cerr<<"examplesample1 cp1"<<endl;
     const char *result = executable->applyTemplatesReturningString();
-    std::cerr<<"examplesample1 cp2"<<endl;
     if (result != NULL) {
         cout << result << endl;
         sresult->success++;
         delete result;
     } else {
         cout << "Result is null ====== FAIL ====== " << endl;
+        sresult->failureList.push_back("exampleSimple1");
         sresult->failure++;
     }
     proc->clearParameters();
@@ -1540,6 +1538,7 @@ void testInitialTemplate(SaxonProcessor *proc, Xslt30Processor *trans, sResultCo
         delete result;
     } else {
         sresult->failure++;
+        sresult->failureList.push_back("testInitialTemplate");
     }
     delete executable;
     delete a1;
@@ -2339,6 +2338,7 @@ void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
         } else {
             sresult->failure++;
             sresult->failureList.push_back("testSaxSourceDTDValidation-2");
+            delete d;
             delete builder;
             return;
         }
