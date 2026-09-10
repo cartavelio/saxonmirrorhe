@@ -157,7 +157,9 @@ public class FeatureData {
                 </xsl:text>
             </xsl:for-each>
     <xsl:text>
-        featuresByUri = featureList.stream().collect(Collectors.toMap(feature -> feature.uri, feature -> feature));
+       for (FeatureData fd : featureList) {
+           featuresByUri.put(fd.uri, fd);
+       }
     }
 }
     </xsl:text>   
