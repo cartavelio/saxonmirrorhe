@@ -1270,11 +1270,16 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
         switch (type) {
             case "spec":
-                boolean atLeast = value.endsWith("+");
-                value = value.replace("+", "");
                 String specName = spec.specAndVersion.replace("XT", "XSLT");
-                int order = value.compareTo(specName);
-                return atLeast ? order <= 0 : order == 0;
+                for (String token : value.split("\\s+")) {
+                    boolean atLeast = token.endsWith("+");
+                    token = token.replace("+", "");
+                    int order = token.compareTo(specName);
+                    if (atLeast ? order <= 0 : order == 0) {
+                        return true;
+                    };
+                }
+                return false;
 
             case "feature":
                 switch (value) {
