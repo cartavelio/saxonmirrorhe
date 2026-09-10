@@ -23,11 +23,11 @@ namespace Saxon.Impl.Overrides {
     public class LocalNumberer : Numberer_en {
 
         private readonly CultureInfo culture;     // Standard .NET version
+        private CultureInfo defaultLocale = null;
 
 #if EE        
         private readonly UCultureInfo uCulture;   // ICU4N version
         private readonly Dictionary<string, string> ordinalParamIndex = new ();
-        private CultureInfo defaultLocale = null;
 #else
         private readonly Numberer_en numberer = new Numberer_en();
 #endif
