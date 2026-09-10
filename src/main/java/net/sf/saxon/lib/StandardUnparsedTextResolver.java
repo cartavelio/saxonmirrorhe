@@ -28,9 +28,9 @@ import java.net.URI;
 /**
  * Default implementation of the UnparsedTextURIResolver, used if no other implementation
  * is nominated to the Configuration. This implementation
- * * handles anything that the java URL class will handle, plus the <code>classpath</code>
- * * URI scheme defined in the Spring framework, and the <code>data</code> URI scheme defined in
- * * RFC 2397.
+ * handles anything that the java URL class will handle, plus the <code>classpath</code>
+ * URI scheme defined in the Spring framework, and the <code>data</code> URI scheme defined in
+ * RFC 2397.
  */
 
 public class StandardUnparsedTextResolver
