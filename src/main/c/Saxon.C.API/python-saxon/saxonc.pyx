@@ -1681,44 +1681,40 @@ cdef class PyXsltExecutable:
         Clear all properties set on the processor
         """
         self.thisxptr.clearProperties()
-     def set_initial_template_parameters(self, bool tunnel, dict kwds):
+     def set_initial_template_parameters(self, bool tunnel, dict parameters):
         """
-        set_initial_template_parameters(self, bool tunnel, dict kwds)
+        set_initial_template_parameters(self, bool tunnel, dict parameters)
         Set parameters to be passed to the initial template. These are used
         whether the transformation is invoked by applying templates to an initial source item,
         or by invoking a named template. The parameters in question are the xsl:param elements
         appearing as children of the xsl:template element.
-        TODO: To fix issue where we pass PyXdmValue object created directly in the function argument. This causes seg error
-        e.g. set_initial_template_parameter(False, {a:saxonproc.make_integer_value(12)})
-        Do the following instead:
-        paramArr = {a:saxonproc.make_integer_value(12)}
-        set_initial_template_parameter(False, paramArr)
         Args:
         	tunnel (bool): True if these values are to be used for setting tunnel parameters;
         	    False if they are to be used for non-tunnel parameters. The default is false.
             parameters (dict): the parameters to be used for the initial template supplied as key-value pairs.
         Example:
-        	paramArr = {'a':saxonproc.make_integer_value(12), 'b':saxonproc.make_integer_value(5)}
-            xsltproc.set_initial_template_parameters(False, paramArr)
+        	1) paramArr = {'a':saxonproc.make_integer_value(12), 'b':saxonproc.make_integer_value(5)}
+               xsltproc.set_initial_template_parameters(False, paramArr)
+            2) set_initial_template_parameters(False, {a:saxonproc.make_integer_value(12)})
         """
-        cdef map[string, saxoncClasses.XdmValue * ] parameters
+        cdef map[string, saxoncClasses.XdmValue * ] c_params
         cdef bool c_tunnel
         cdef string key_str
         c_tunnel = tunnel
         cdef PyXdmAtomicValue value_
         global parametersDict
-        if kwds is not None:
-                parametersDict = kwds
-        for (key, value) in kwds.items():
+        if parameters is not None:
+                parametersDict = parameters
+        for (key, value) in parameters.items():
                 if isinstance(value, PyXdmAtomicValue):
                         value_ = value
                         key_str = key.encode('UTF-8')
                         value_.derivedptr.incrementRefCount()
-                        parameters[key_str] = <saxoncClasses.XdmValue *> value_.derivedaptr
+                        c_params[key_str] = <saxoncClasses.XdmValue *> value_.derivedaptr
                 else:
                         raise Exception("Initial template parameters can only be of type PyXdmValue")
-        if len(kwds) > 0:
-            self.thisxptr.setInitialTemplateParameters(parameters, c_tunnel)
+        if len(parameters) > 0:
+            self.thisxptr.setInitialTemplateParameters(c_params, c_tunnel)
 
      def set_save_xsl_message(self, show, str file_name = None):
         """
