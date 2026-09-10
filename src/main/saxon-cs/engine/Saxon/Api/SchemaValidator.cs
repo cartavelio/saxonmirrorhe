@@ -230,11 +230,8 @@ namespace Saxon.Api {
         /// if no value is supplied, there is no constraint on the required type
         /// </summary>
         public QName DocumentElementName {
-            get {
-                net.sf.saxon.s9api.QName qname = jSchemaValidator.getDocumentElementName();
-                return qname == null ? null : new QName(qname.getEQName());
-            }
-            set { jSchemaValidator.setDocumentElementName(value.UnderlyingQName()); }
+            get => jSchemaValidator.getDocumentElementName();
+            set => jSchemaValidator.setDocumentElementName(value);
         }
 
 
@@ -244,23 +241,16 @@ namespace Saxon.Api {
         /// If no value is supplied, there is no constrin on the required type
         /// </summary>
         public QName DocumentElementTypeName {
-            get {
-                net.sf.saxon.s9api.QName qtname = jSchemaValidator.getDocumentElementTypeName();
-                return qtname == null ? null : new QName(qtname.getEQName());
-            }
+            get => jSchemaValidator.getDocumentElementTypeName();
             set {
-                jSchemaValidator.setDocumentElementTypeName(value.UnderlyingQName());
+                jSchemaValidator.setDocumentElementTypeName(value);
                 documentElementType = config.getSchemaType(value.GetStructuredQName());
             }
         }
 
-        internal SchemaType DocumentElementType {
-            get { return documentElementType; }
-        }
+        internal SchemaType DocumentElementType => documentElementType;
 
-        internal net.sf.saxon.s9api.SchemaValidator UnderlyingSchemaValidator {
-            get { return jSchemaValidator; }
-        }
+        internal net.sf.saxon.s9api.SchemaValidator UnderlyingSchemaValidator => jSchemaValidator;
 
 
         /// <summary>
@@ -270,8 +260,7 @@ namespace Saxon.Api {
         /// <param name="value">the value of the schema  parameter, or null to clear a previously set value</param>
         public void SetParameter(QName name, XdmValue value) {
             try {
-                jSchemaValidator.setParameter(name.UnderlyingQName(),
-                    value == null ? null : XdmValue.FromGroundedValueToJXdmValue(value.value));
+                jSchemaValidator.setParameter(name, value);
             }
             catch (net.sf.saxon.s9api.SaxonApiUncheckedException ex) {
                 throw new StaticError(ex);
@@ -286,8 +275,7 @@ namespace Saxon.Api {
         /// <param name="name">the parameter whose name is required</param>
         /// <returns>the value that has been set for the parameter, or the EmptySequence if no value has been set</returns>
         public XdmValue GetParameter(QName name) {
-            net.sf.saxon.s9api.XdmValue value = jSchemaValidator.getParameter(name.UnderlyingQName());
-            return value == null ? null : XdmValue.Wrap(value.getUnderlyingValue());
+            return jSchemaValidator.getParameter(name);
         }
 
 
@@ -297,8 +285,8 @@ namespace Saxon.Api {
         /// the document during validation as if they were present in the instance being validated)
         /// </summary>
         public bool ExpendAttributeDefaults {
-            get { return jSchemaValidator.isExpandAttributeDefaults(); }
-            set { jSchemaValidator.setExpandAttributeDefaults(value); }
+            get => jSchemaValidator.isExpandAttributeDefaults();
+            set => jSchemaValidator.setExpandAttributeDefaults(value);
         }
 
         /// <summary>
@@ -321,7 +309,7 @@ namespace Saxon.Api {
                 errorList = value;
                 jSchemaValidator.setInvalidityHandler(new InvalidityGatherer(errorList));
             }
-            get { return errorList; }
+            get => errorList;
         }
 
 

@@ -36,9 +36,6 @@ namespace Saxon.Api {
 
         internal XQueryEvaluator(net.sf.saxon.s9api.XQueryEvaluator eval) {
             this.evaluator = eval;
-            //this.exp = exp;
-            //this.context =
-            //	new JDynamicQueryContext(exp.getConfiguration());
         }
 
         /// <summary>
@@ -50,9 +47,8 @@ namespace Saxon.Api {
         /// </remarks>
 
         public XdmItem ContextItem {
-            get => (XdmItem) XdmValue.Wrap(evaluator.getContextItem().getUnderlyingValue());
-            set => evaluator.setContextItem(
-                (net.sf.saxon.s9api.XdmItem) XdmValue.FromGroundedValueToJXdmValue(value.value));
+            get => evaluator.getContextItem();
+            set => evaluator.setContextItem(value);
         }
 
         /// <summary>
@@ -125,9 +121,9 @@ namespace Saxon.Api {
         /// <param name="value">The value to be given to the external variable.
         /// If the variable declaration defines a required type for the variable, then
         /// this value must match the required type: no conversions are applied.</param>
+        
         public void SetExternalVariable(QName name, XdmValue value) {
-            evaluator.setExternalVariable(new net.sf.saxon.s9api.QName(name.GetStructuredQName()),
-                value == null ? null : XdmValue.FromGroundedValueToJXdmValue(value.value));
+            evaluator.setExternalVariable(name, value);
         }
 
         /// <summary>
@@ -144,7 +140,7 @@ namespace Saxon.Api {
                 traceFunctionDestination = value;
                 evaluator.setTraceFunctionDestination(value);
             }
-            get { return traceFunctionDestination; }
+            get => traceFunctionDestination;
         }
 
 
@@ -159,8 +155,7 @@ namespace Saxon.Api {
         /// occurs while evaluating the query.</exception>
         public XdmValue Evaluate() {
             try {
-                net.sf.saxon.s9api.XdmValue value = evaluator.evaluate();
-                return XdmValue.Wrap(value.getUnderlyingValue());
+                return evaluator.evaluate();
             }
             catch (SaxonApiException err) {
                 throw new DynamicError(err);
@@ -180,7 +175,7 @@ namespace Saxon.Api {
         /// occurs while evaluating the expression.</exception>
         public XdmItem EvaluateSingle() {
             try {
-                return (XdmItem) XdmValue.Wrap(evaluator.evaluateSingle().getUnderlyingValue());
+                return evaluator.evaluateSingle();
             }
             catch (SaxonApiException err) {
                 throw new DynamicError(err);
@@ -245,8 +240,7 @@ namespace Saxon.Api {
                 List<XdmNode> resultList = new List<XdmNode>();
 
                 for (; updatedDocsIter.hasNext();) {
-                    resultList.Add((XdmNode) XdmValue.Wrap(((net.sf.saxon.s9api.XdmNode) updatedDocsIter.next())
-                        .getUnderlyingNode()));
+                    resultList.Add(updatedDocsIter.next();
                 }
 
                 XdmNode[] result = resultList.ToArray();
@@ -281,13 +275,7 @@ namespace Saxon.Api {
         /// </exception>
         public XdmValue CallFunction(QName function, XdmValue[] arguments) {
             try {
-                net.sf.saxon.s9api.XdmValue[] vr = new net.sf.saxon.s9api.XdmValue[arguments.Length];
-                for (int i = 0; i < arguments.Length; i++) {
-                    vr[i] = XdmValue.FromGroundedValueToJXdmValue(arguments[i].value);
-                }
-
-                Sequence result = evaluator.callFunction(function.UnderlyingQName(), vr).getUnderlyingValue();
-                return XdmValue.Wrap(result);
+                return evaluator.callFunction(function, arguments);
             }
             catch (SaxonApiException e) {
                 throw new DynamicError(e);

@@ -8,17 +8,11 @@ namespace Saxon.Api {
     /// constructing an XML tree, and without serialization. It corresponds to the serialization
     /// option <code>build-tree="no"</code>.
     /// </summary>
-
-    public class RawDestination : XmlDestination
-
-    {
-
+    public class RawDestination : XmlDestination {
         internal net.sf.saxon.s9api.RawDestination destination;
 
         /// <summary>Construct a <c>RawDestination</c></summary>
-
-        public RawDestination()
-        {
+        public RawDestination() {
             destination = new net.sf.saxon.s9api.RawDestination();
         }
 
@@ -36,8 +30,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <returns>returns the underlying Destination object</returns>
-        public Destination GetUnderlyingDestination()
-        {
+        public Destination GetUnderlyingDestination() {
             return destination;
         }
 
@@ -47,11 +40,9 @@ namespace Saxon.Api {
         /// <see cref="Close"/> to close the destination, then it calls <c>java.util.function.Consumer.accept()</c>
         /// on each of the listeners in turn to notify the fact that it has been closed.
         /// </summary>
-        public void CloseAndNotify()
-        {
+        public void CloseAndNotify() {
             destination.closeAndNotify();
         }
-
 
 
         /// <summary>This property determines the base URI of the constructed <c>XdmNode</c>. 
@@ -60,10 +51,9 @@ namespace Saxon.Api {
         /// has no effect.
         /// </summary>
 
-        public Uri BaseUri
-        {
-            get { return destination.getDestinationBaseURI(); }
-            set { destination.setDestinationBaseURI(value); }
+        public Uri BaseUri {
+            get => destination.getDestinationBaseURI();
+            set => destination.setDestinationBaseURI(value);
         }
 
 
@@ -72,8 +62,7 @@ namespace Saxon.Api {
         /// close any user-supplied OutputStream or Writer; those must be closed explicitly
         /// by the calling application.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             destination.close();
         }
 
@@ -84,13 +73,6 @@ namespace Saxon.Api {
         /// yet been run, or because the process produced no output.</para>
         /// </remarks>
 
-        public XdmValue XdmValue
-        {
-            get
-            {
-                net.sf.saxon.om.GroundedValue value = destination.getXdmValue().getUnderlyingValue();
-                return (value == null ? null : XdmValue.Wrap(value));
-            }
-        }
+        public XdmValue XdmValue => destination.getXdmValue();
     }
 }
