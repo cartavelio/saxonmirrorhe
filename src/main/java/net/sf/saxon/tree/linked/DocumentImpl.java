@@ -54,7 +54,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     private LineNumberMap lineNumberMap;
     private SystemIdMap systemIdMap = new SystemIdMap();
     private boolean imaginary;
-    private boolean mutable;
+    private Durability durability;
     private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
 
 
@@ -107,7 +107,17 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
 
     @Override
     public boolean isMutable() {
-        return mutable;
+        return durability == Durability.MUTABLE;
+    }
+
+    /**
+     * Get the durability of nodes in the tree. This affects how they are handled in a memo function
+     * cache, to optimize memory and garbage collection. By default, all nodes are considered durable
+     * unless otherwise specified
+     */
+    @Override
+    public Durability getDurability() {
+        return durability;
     }
 
     /**
@@ -117,7 +127,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     public void setMutable(boolean mutable) {
-        this.mutable = mutable;
+        this.durability = mutable ? Durability.MUTABLE : Durability.LASTING;
     }
 
     /**
@@ -138,7 +148,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     /*@NotNull*/
     @Override
     public Builder newBuilder() {
-        LinkedTreeBuilder builder = new LinkedTreeBuilder(config.makePipelineConfiguration());
+        LinkedTreeBuilder builder = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
         builder.setAllocateSequenceNumbers(false);
         return builder;
     }

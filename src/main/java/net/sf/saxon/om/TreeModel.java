@@ -46,6 +46,12 @@ public abstract class TreeModel {
     public final static TreeModel LINKED_TREE = new LinkedTree();
 
     /**
+     * Immutable variant of the LinkedTree. This takes more memory than the TinyTree, but offers flexibility
+     * for storing user-defined data in each element node.
+     */
+    public final static TreeModel IMMUTABLE_LINKED_TREE = new LinkedTree(false);
+
+    /**
      * Make a Builder, which can then be used to construct an instance of this tree model
      * from a stream of events
      *
@@ -174,10 +180,20 @@ public abstract class TreeModel {
 
     private static class LinkedTree extends TreeModel {
 
+        private final boolean mutable;
+
+        public LinkedTree() {
+            this.mutable = true;
+        }
+
+        public LinkedTree(boolean mutable) {
+            this.mutable = mutable;
+        }
+
         /*@NotNull*/
         @Override
         public Builder makeBuilder(PipelineConfiguration pipe) {
-            return new LinkedTreeBuilder(pipe);
+            return new LinkedTreeBuilder(pipe, mutable ? Durability.MUTABLE : Durability.LASTING);
         }
 
         @Override
@@ -193,6 +209,22 @@ public abstract class TreeModel {
         @Override
         public String getName() {
             return "LinkedTree";
+        }
+
+        /**
+         * Ask whether this tree model supports updating (that is, whether the nodes
+         * in the constructed tree will implement {@link MutableNodeInfo}, which is necessary
+         * if they are to support XQuery Update.
+         *
+         * <p>The LinkedTree supports mutability in principle, but this can be disabled for
+         * a particular tree.</p>
+         *
+         * @return true if the tree model implementation supports updating, that is, if its
+         * nodes support the MutableNodeInfo interface.
+         */
+        @Override
+        public boolean isMutable() {
+            return mutable;
         }
     }
 

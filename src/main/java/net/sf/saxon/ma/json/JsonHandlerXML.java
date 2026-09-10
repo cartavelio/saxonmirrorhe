@@ -101,6 +101,7 @@ public class JsonHandlerXML extends JsonHandler {
         builder = context.getController().makeBuilder();
         builder.setSystemId(staticBaseUri);
         builder.setTiming(false);
+        builder.setDurability(Durability.TEMPORARY);
         out = new ComplexContentOutputter(builder);
         out.open();
         out.startDocument(ReceiverOption.NONE);

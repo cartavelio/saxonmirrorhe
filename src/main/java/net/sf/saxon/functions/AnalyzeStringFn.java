@@ -114,6 +114,7 @@ public class AnalyzeStringFn extends RegexFunction {
         final ComplexContentOutputter out = new ComplexContentOutputter(builder);
         LocalRegexMatchHandler handler = new LocalRegexMatchHandler(out, vocab);
         builder.setBaseURI(getStaticBaseUriString());
+        builder.setDurability(Durability.TEMPORARY);
         out.open();
         out.startElement(vocab.resultName, vocab.resultType, Loc.NONE, ReceiverOption.NONE);
         out.startContent();

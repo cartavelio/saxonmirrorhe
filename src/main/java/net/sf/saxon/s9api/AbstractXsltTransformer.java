@@ -15,6 +15,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.SerializationProperties;
@@ -591,6 +592,7 @@ public abstract class AbstractXsltTransformer {
             }
         } else {
             final Builder sourceTreeBuilder = controller.makeBuilder();
+            sourceTreeBuilder.setDurability(Durability.LASTING);
             if (sourceTreeBuilder instanceof TinyBuilder) {
                 ((TinyBuilder) sourceTreeBuilder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
             }

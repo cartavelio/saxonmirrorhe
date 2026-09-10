@@ -409,7 +409,8 @@ public class LiteralResultElement extends StyleElement {
 
         try {
             DocumentImpl oldRoot = (DocumentImpl) getRoot();
-            LinkedTreeBuilder builder = new LinkedTreeBuilder(getConfiguration().makePipelineConfiguration());
+            LinkedTreeBuilder builder = new LinkedTreeBuilder(
+                    getConfiguration().makePipelineConfiguration(), Durability.LASTING);
             builder.setNodeFactory(nodeFactory);
             builder.setSystemId(this.getSystemId());
 

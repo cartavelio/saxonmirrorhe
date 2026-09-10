@@ -43,7 +43,7 @@ public class LinkedTreeBuilder extends Builder
     private final Stack<NamespaceMap> namespaceStack = new Stack<>();
     private boolean allocateSequenceNumbers = true;
     private int nextNodeNumber = 1;
-    private boolean mutable;
+    private Durability durability;
 
     /**
      * Create a Builder and initialise variables
@@ -61,12 +61,12 @@ public class LinkedTreeBuilder extends Builder
      * Create a Builder and initialise variables
      *
      * @param pipe the pipeline configuration
-     * @param mutable set to true if the tree is to be mutable
+     * @param durability the durability of the tree to be constructed
      */
 
-    public LinkedTreeBuilder(PipelineConfiguration pipe, boolean mutable) {
+    public LinkedTreeBuilder(PipelineConfiguration pipe, Durability durability) {
         super(pipe);
-        this.mutable = mutable;
+        this.durability = durability;
         nodeFactory = DefaultNodeFactory.THE_INSTANCE;
         // System.err.println("new TreeBuilder " + this);
     }
@@ -155,7 +155,7 @@ public class LinkedTreeBuilder extends Builder
     @Override
     public void startDocument(int properties) throws XPathException {
         DocumentImpl doc = new DocumentImpl();
-        doc.setMutable(mutable);
+        doc.setMutable(durability == Durability.MUTABLE);
         currentRoot = doc;
         doc.setSystemId(getSystemId());
         doc.setBaseURI(getBaseURI());

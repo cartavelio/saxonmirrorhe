@@ -267,6 +267,7 @@ public class DocumentFn extends SystemFunction implements Callable {
                 newdoc = startNode.getTreeInfo();
             } else {
                 Builder b = controller.makeBuilder();
+                b.setDurability(Durability.LASTING);
                 b.setUseEventLocation(true);
                 if (b instanceof TinyBuilder) {
                     ((TinyBuilder) b).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);

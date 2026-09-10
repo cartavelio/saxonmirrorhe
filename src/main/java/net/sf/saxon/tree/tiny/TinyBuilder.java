@@ -132,6 +132,7 @@ public class TinyBuilder extends Builder {
             }
             uniformBaseURI = true;
             tree.setUniformBaseUri(baseURI);
+            tree.setDurability(getDurability());
         }
         if (useEventLocation) {
             Object copier = getPipelineConfiguration().getComponent(CopyInformee.class.getName());

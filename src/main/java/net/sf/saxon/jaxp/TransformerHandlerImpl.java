@@ -15,6 +15,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceivingContentHandler;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -63,6 +64,7 @@ public class TransformerHandlerImpl extends ReceivingContentHandler implements T
         Configuration config = transformer.getConfiguration();
         int validation = controller.getSchemaValidationMode();
         builder = controller.makeBuilder();
+        builder.setDurability(Durability.LASTING);
         if (builder instanceof TinyBuilder) {
             ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
         }

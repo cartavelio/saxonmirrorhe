@@ -98,6 +98,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
                 source.setSystemId(baseURI);
 
                 Builder b = controller.makeBuilder();
+                b.setDurability(Durability.TEMPORARY);
                 if (b instanceof TinyBuilder) {
                     ((TinyBuilder) b).setStatistics(controller.getConfiguration().getTreeStatistics().FN_PARSE_STATISTICS);
                 }

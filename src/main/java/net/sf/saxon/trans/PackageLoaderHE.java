@@ -611,7 +611,7 @@ public class PackageLoaderHE implements IPackageLoader {
         SequenceType contextType = parseAlphaCode(templateElement, "cxt");
         ItemType contextItemType = contextType == null ? AnyItemType.getInstance() : contextType.getPrimaryType();
 
-        NamedTemplate template = new NamedTemplate(templateName, config);
+        NamedTemplate template = new NamedTemplate(templateName, getConfiguration());
         template.setStackFrameMap(new SlotManager(slots));
         template.setPackageData(pack);
         template.setRequiredType(parseAlphaCode(templateElement, "as"));
@@ -1216,8 +1216,8 @@ public class PackageLoaderHE implements IPackageLoader {
             pat.setLocation(makeLocation(element));
             pat.setRetainedStaticContext(makeRetainedStaticContext(element));
             if (pat instanceof GeneralNodePattern) {
-                //noinspection Convert2MethodRef
                 addCompletionAction(() -> ((GeneralNodePattern) pat).makeTopNodeEquivalent());
+                // Written this way for C# transpiler
             }
             return pat;
         }
@@ -1385,7 +1385,6 @@ public class PackageLoaderHE implements IPackageLoader {
 
     private ItemType parseItemType(NodeInfo element, String attValue) throws XPathException {
         IndependentContext env = makeStaticContext(element);
-        env.setXPathLanguageLevel(31);
         return parser.parseExtendedItemType(attValue, env);
     }
 
@@ -1720,7 +1719,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Component target = pack.getComponent(symbol);
             NamedTemplate t;
             if (target == null) {
-                t = new NamedTemplate(name, loader.getConfiguration());
+                t = new NamedTemplate(name, pack.getConfiguration());
             } else {
                 t = (NamedTemplate) target.getActor();
             }

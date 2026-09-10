@@ -184,6 +184,7 @@ public class Doc_2 extends SystemFunction implements Callable {
             newdoc = startNode.getTreeInfo();
         } else {
             Builder b = controller.makeBuilder();
+            b.setDurability(Durability.LASTING);
             if (b instanceof TinyBuilder) {
                 ((TinyBuilder) b).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
             }

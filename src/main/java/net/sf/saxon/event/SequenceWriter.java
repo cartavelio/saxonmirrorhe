@@ -85,11 +85,13 @@ public abstract class SequenceWriter extends SequenceReceiver {
                 TreeModel model = pipe.getController().getModel();
                 if (model.isMutable()) {
                     builder = pipe.getController().makeBuilder();
+                    builder.setDurability(Durability.MUTABLE);
                 } else {
-                    builder = new LinkedTreeBuilder(pipe);
+                    builder = new LinkedTreeBuilder(pipe, Durability.MUTABLE);
                 }
             } else {
                 builder = pipe.getController().makeBuilder();
+                builder.setDurability(Durability.TEMPORARY);
             }
         } else {
             TreeModel model = getConfiguration().getParseOptions().getModel();

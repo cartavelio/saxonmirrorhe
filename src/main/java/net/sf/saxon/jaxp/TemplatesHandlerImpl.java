@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CommentStripper;
 import net.sf.saxon.event.ReceivingContentHandler;
 import net.sf.saxon.event.Stripper;
+import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.StylesheetSpaceStrippingRule;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -67,7 +68,7 @@ public class TemplatesHandlerImpl extends ReceivingContentHandler implements Tem
         compilation.setMinimalPackageData();
         nodeFactory = compilation.getStyleNodeFactory(true);
 
-        builder = new LinkedTreeBuilder(getPipelineConfiguration());
+        builder = new LinkedTreeBuilder(getPipelineConfiguration(), Durability.LASTING);
         builder.setNodeFactory(nodeFactory);
         builder.setLineNumbering(true);
 

@@ -492,7 +492,7 @@ public class Gizmo {
     }
 
     private void saveCurrentDoc() throws XPathException {
-        Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration());
+        Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
         currentDoc.copy(builder, CopyOptions.ALL_NAMESPACES, Loc.NONE);
         final DocumentImpl copy = (DocumentImpl) builder.getCurrentRoot();
         undoBuffer.add(currentDoc);
@@ -505,7 +505,7 @@ public class Gizmo {
     private void copy(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         SequenceIterator iter = getSelectedItems(buffer, Token.EOF);
-        Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration());
+        Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
         builder.open();
         builder.startDocument(0);
         Item item;
@@ -868,7 +868,7 @@ public class Gizmo {
                 currentDoc = (DocumentImpl) value.itemAt(0);
             } else {
                 try {
-                    Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration());
+                    Builder builder = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
                     ComplexContentOutputter cco = new ComplexContentOutputter(builder);
                     cco.open();
                     cco.startDocument(0);
@@ -897,7 +897,7 @@ public class Gizmo {
         needCurrentDoc();
         saveCurrentDoc();
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        Builder builder = new LinkedTreeBuilder(pipe);
+        Builder builder = new LinkedTreeBuilder(pipe, Durability.MUTABLE);
         builder.open();
         ParseOptions options = new ParseOptions();
         options.setSchemaValidationMode(Validation.STRICT);
@@ -965,7 +965,7 @@ public class Gizmo {
             StreamSource ss = new StreamSource(new File(fileName));
             Templates templates = new TransformerFactoryImpl(config).newTemplates(ss);
             Transformer transformer = templates.newTransformer();
-            Builder result = new LinkedTreeBuilder(config.makePipelineConfiguration());
+            Builder result = new LinkedTreeBuilder(config.makePipelineConfiguration(), Durability.MUTABLE);
             result.open();
             transformer.transform(currentDoc.asActiveSource(), result);
             result.close();
