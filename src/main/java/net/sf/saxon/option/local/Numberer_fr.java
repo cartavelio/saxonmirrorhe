@@ -179,10 +179,10 @@ public class Numberer_fr extends AbstractNumberer {
             String suffix = "i\u00e8me";
             long mod100 = number % 100;
             long int100 = number / 100;
-            if (int100 == 70 || int100 == 90) {
-                int100 -= 10;
-                mod100 += 100;
-            }
+//            if ((int100 == 70 || int100 == 90)) {
+//                int100 -= 10;
+//                mod100 += 100;
+//            }
 
             String prefix = toWords(int100 * 100, false);
             if (int100 % 10000 == 0) {
