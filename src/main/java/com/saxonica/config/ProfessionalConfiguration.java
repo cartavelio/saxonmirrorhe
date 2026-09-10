@@ -997,7 +997,7 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    public Map<String, FunctionItem> makeMethodMap(Class javaClass, String required) {
+    public Map<String, FunctionItem> makeMethodMap(Class<?> javaClass, String required) {
         return ObjectMap.makeMethodMap(this, javaClass, required);
     }
     //#endif
@@ -1015,7 +1015,7 @@ public class ProfessionalConfiguration extends Configuration {
      */
 
     @Override
-    public MapItem externalObjectAsMap(ObjectValue value, String required) {
+    public MapItem externalObjectAsMap(ObjectValue<?> value, String required) {
         return ObjectMap.toMap(this, value, required);
     }
     //#endif
@@ -1028,11 +1028,10 @@ public class ProfessionalConfiguration extends Configuration {
      * @param lhs the left-hand operand
      * @param rhs the right-hand operand
      * @return the constructed expression
-     * @throws XPathException if anything goes wrong
      */
 
     @Override
-    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) throws XPathException {
+    public Expression makeObjectLookupExpression(Expression lhs, Expression rhs) {
         return new ObjectLookupExpression(lhs, rhs);
     }
     //#endif

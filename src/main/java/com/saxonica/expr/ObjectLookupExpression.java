@@ -3,6 +3,8 @@ package com.saxonica.expr;
 import com.saxonica.functions.extfn.ObjectMap;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.om.*;
@@ -17,7 +19,9 @@ import java.util.function.Supplier;
 
 /**
  * Saxon extension: a lookup expression of the form X?Y where X is a Java external object and Y
- * is a method defined on that object
+ * is a method defined on that object. This class is used only where it is statically known that
+ * X is a Java external object, in which case it is often possible to determine the Java method
+ * to be called statically.
  */
 
 public class ObjectLookupExpression extends LookupExpression {
@@ -76,7 +80,7 @@ public class ObjectLookupExpression extends LookupExpression {
             Map<String, FunctionItem> methodMap = ObjectMap.makeMethodMap(config, theClass, methodName);
             FunctionItem f = methodMap.get(methodName);
             if (f == null) {
-                throw new XPathException("No unique method " + methodName + " found in class " + theClass, "XPTY0004")
+                throw new XPathException("No unique method " + methodName + " found in " + theClass, "XPTY0004")
                         .asTypeError().withLocation(getLocation());
             } else {
                 reflexiveFunction = f;
@@ -129,22 +133,42 @@ public class ObjectLookupExpression extends LookupExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext context) throws XPathException {
-        Configuration config = context.getConfiguration();
+        return makeElaborator().elaborateForPull().iterate(context);
+    }
+//
+//    @Override
+//    public Elaborator getElaborator() {
+//        return new ObjectLookupElaborator();
+//    }
 
-        SequenceIterator baseIterator = getLhsExpression().iterate(context);
-        if (reflexiveFunction != null) {
-            return ItemMappingIterator.map(baseIterator, item -> {
-                Sequence[] boundArgs = new Sequence[reflexiveFunction.getArity()];
-                boundArgs[0] = item;
-                return new CurriedFunction(reflexiveFunction, boundArgs);
-            });
-        } else {
-            GroundedValue rhs = SequenceTool.toGroundedValue(getRhsExpression().iterate(context));
-            String key = rhs.getUnicodeStringValue().toString();
-            return ItemMappingIterator.map(baseIterator,
-                    item -> (Item) config.externalObjectAsMap((ObjectValue<?>) item, key).get((StringValue) rhs));
+    public static class ObjectLookupElaborator extends PullElaborator {
+
+        public PullEvaluator elaborateForPull() {
+            ObjectLookupExpression expr = (ObjectLookupExpression) getExpression();
+            PullEvaluator lhsPull = expr.getLhsExpression().makeElaborator().elaborateForPull();
+            if (expr.reflexiveFunction != null) {
+                FunctionItem reflexiveFunction = expr.reflexiveFunction;
+                int arity = reflexiveFunction.getArity();
+                return context -> {
+                    SequenceIterator baseIterator = lhsPull.iterate(context);
+                    return ItemMappingIterator.map(baseIterator, item -> {
+                        Sequence[] boundArgs = new Sequence[arity];
+                        boundArgs[0] = item;
+                        return new CurriedFunction(reflexiveFunction, boundArgs);
+                    });
+                };
+            } else {
+                return context -> {
+                    PullEvaluator rhsPull = expr.getRhsExpression().makeElaborator().elaborateForPull();
+                    SequenceIterator baseIterator = lhsPull.iterate(context);
+                    GroundedValue rhs = SequenceTool.toGroundedValue(rhsPull.iterate(context));
+                    String key = rhs.getUnicodeStringValue().toString();
+                    Configuration config = context.getConfiguration();
+                    return ItemMappingIterator.map(baseIterator,
+                                                   item -> (Item) config.externalObjectAsMap((ObjectValue<?>) item, key).get((StringValue) rhs));
+                };
+            }
         }
-
     }
 
 
