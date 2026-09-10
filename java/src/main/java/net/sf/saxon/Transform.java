@@ -105,8 +105,8 @@ public class Transform {
         options.addRecognizedOption("config", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use specified configuration file");
         //#if CSHARP==false
-        options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
-                                    "Use specified collection URI resolver class");
+//        options.addRecognizedOption("cr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
+//                                    "Use specified collection URI resolver class");
         //#endif
         options.addRecognizedOption("dtd", CommandLineOptions.TYPE_ENUMERATION,
                                     "Validate using DTD");

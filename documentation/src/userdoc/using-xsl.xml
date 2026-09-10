@@ -308,13 +308,13 @@
                   containing an embedded license key is being executed.</p>
             </td>
          </tr>
-         <tr class="javaonly">
+         <!--<tr class="javaonly">
             <td>
                <p>-m:classname</p>
             </td>
             <td>
                <p>From Saxon 11.1 this option has no effect.</p>
-               <!--<p>Use the specified <code>Receiver</code> to process the output from
+               <!-\-<p>Use the specified <code>Receiver</code> to process the output from
                      <code>xsl:message</code>. The class must implement the <a class="javalink"
                      href="net.sf.saxon.event.Receiver">Receiver</a> interface, and
                  it must have a public zero-argument constructor. This
@@ -337,9 +337,9 @@
                   or to <code>getLineNumber()</code> on the same object).</p> 
               <p>Select the class <code java="net.sf.saxon.serialize.MessageWarner">MessageWarner</code> to have <code>xsl:message</code>
                   output notified to the JAXP <code>ErrorListener</code>, as described in the JAXP
-                  documentation.</p>-->
+                  documentation.</p>-\->
             </td>
-         </tr>
+         </tr>-->
          <tr>
             <td>
                <p>-nogo</p>
@@ -815,6 +815,14 @@
                   with Saxon-EE, and this flag automatically switches on the <code>-sa</code>
                   option. Specify <code>-val</code> or <code>-val:strict</code> to request strict
                   validation, or <code>-val:lax</code> for lax validation.</p>
+            </td>
+         </tr>
+         <tr>
+            <td>
+               <p>-versionmsg:(on|off)</p>
+            </td>
+            <td>
+               <p>No longer used.</p>
             </td>
          </tr>
          <tr>
@@ -2668,8 +2676,8 @@ XdmValue * messages = executable->getXslMessages();]]></code></pre>
          user interface.</p>
          
          <aside>Older interfaces for processing messages remain available for backwards compatibility;
-         but from 11.1, the <code>-m</code> option on the command line is ignored, as is the
-            configuration property <a class="feature" href="MESSAGE_EMITTER_CLASS"/>.</aside>
+         but from 11.1, the <code>-m</code> option on the command line is not longer permitted, while the
+            configuration property <a class="feature" href="MESSAGE_EMITTER_CLASS"/> is ignored.</aside>
       </section>
       
    </section>
