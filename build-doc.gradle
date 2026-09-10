@@ -15,7 +15,8 @@ clone_expath_cg.onlyIf {
 
 task documentation(
   dependsOn: ["update_documentation", "gen_contents_ref", "gen_feature_matrix",
-              "copy_prod_desc_pdf"],
+              //"copy_prod_desc_pdf" // TODO not building product descriptions yet
+  ],
   description: "Build the documentation and pages for website"
 ) {
   // Just a place to hang dependencies
