@@ -18,7 +18,7 @@ namespace Saxon.Impl.DataModel {
         
         private readonly ImmutableList<GroundedValue> backing;
         
-        public ImmArray(Saxon.Hej.ma.arrays.SimpleArrayItem other) {
+        public ImmArray(Saxon.Hej.ma.arrays.ArrayItem other) {
             this.backing = ImmutableList<GroundedValue>.Empty.AddRange(other.members());
         }
         
@@ -71,7 +71,7 @@ namespace Saxon.Impl.DataModel {
                 return new ImmArray(backing.AddRange(((ImmArray) other).backing));
             }
             else {
-                Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray((SimpleArrayItem)other);
+                Saxon.Impl.DataModel.ImmArray a2 = new Saxon.Impl.DataModel.ImmArray(other);
                 return concat(a2);
             }
         }
