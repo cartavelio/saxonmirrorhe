@@ -617,7 +617,7 @@ public class XsltController extends Controller {
 
     @Override
     public void preEvaluateGlobals(XPathContext context) throws XPathException {
-        super.preEvaluateGlobals(context);
+        //super.preEvaluateGlobals(context);
     }
 
     /**

@@ -12,12 +12,13 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.pattern.NodePredicate;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
@@ -239,7 +240,18 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
             case Type.TEXT:
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return super.iterateAxis(axisNumber, nodeTest);
+                switch (axisNumber) {
+                    case AxisInfo.CHILD:
+                    case AxisInfo.DESCENDANT:
+                    case AxisInfo.DESCENDANT_OR_SELF:
+                    case AxisInfo.PRECEDING_SIBLING:
+                    case AxisInfo.FOLLOWING_SIBLING:
+                    case AxisInfo.PRECEDING:
+                    case AxisInfo.FOLLOWING:
+                        return EmptyIterator.ofNodes();
+                    default:
+                        return super.iterateAxis(axisNumber, nodeTest);
+                }
             default:
                 if (!original.isSameNodeInfo(pivot) && Navigator.isAncestorOrSelf(original, pivot)) {
                     // We're on a node above the pivot node
@@ -257,6 +269,11 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                                 iter = new Navigator.AxisFilter(iter, nodeTest);
                             }
                             return iter;
+                        case AxisInfo.PRECEDING_SIBLING:
+                        case AxisInfo.FOLLOWING_SIBLING:
+                        case AxisInfo.PRECEDING:
+                        case AxisInfo.FOLLOWING:
+                            return EmptyIterator.ofNodes();
                         default:
                             return super.iterateAxis(axisNumber, nodeTest);
                     }
