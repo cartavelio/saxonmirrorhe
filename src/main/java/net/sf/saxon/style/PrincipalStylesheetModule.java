@@ -278,7 +278,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
     public void declareXQueryFunction(XQueryFunction function) throws XPathException {
         XQueryFunctionLibrary lib = getStylesheetPackage().getXQueryFunctionLibrary();
         if (getStylesheetPackage().getFunction(function.getUserFunction().getSymbolicName()) != null) {
-            throw new XPathException("Duplication declaration of " +
+            throw new XPathException("Duplicate declaration of " +
                                              function.getUserFunction().getSymbolicName(), "XQST0034");
         }
         lib.declareFunction(function);
