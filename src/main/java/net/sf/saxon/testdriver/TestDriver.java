@@ -87,7 +87,7 @@ public abstract class TestDriver {
     public abstract String catalogNamespace();
 
     public boolean hasEECapability() {
-        return false;
+        return driverProc.getSaxonEdition().equals("EE");
     }
 
     public void go(String[] args) throws Exception {

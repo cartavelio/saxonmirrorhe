@@ -1049,7 +1049,6 @@ public class QT3TestDriverHE extends TestDriver {
         }
     }
 
-
     /**
      * Static method called as an external function call to evaluate a literal when running in "unfolded" mode.
      * The function simply returns the value of its argument - but the optimizer doesn't know that, so it

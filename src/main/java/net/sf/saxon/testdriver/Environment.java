@@ -156,8 +156,7 @@ public class Environment implements ResourceResolver {
             XPathCompiler xpc, XdmNode env, Map<String, Environment> environments, Environment defaultEnvironment)
             throws SaxonApiException {
         Environment environment = new Environment();
-        String name;
-        name = env.attribute("name");
+        String name = env.attribute("name");
         if (name != null && !driver.quiet) {
             System.err.println("Loading environment " + name);
         }
@@ -415,7 +414,7 @@ public class Environment implements ResourceResolver {
     }
 
     private static XsdSchema loadSchemaDocuments(TestDriver driver, XPathCompiler xpc, XdmNode env, Environment environment, XsdCompiler compiler) throws SaxonApiException {
-        if (!"EE".equals(driver.getProductEdition())) {
+        if (!driver.hasEECapability()) {
             return null;
         }
         environment.validateSources = false;

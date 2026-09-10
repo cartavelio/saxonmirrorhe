@@ -3040,6 +3040,7 @@ public class Configuration implements SourceResolver {
      * an {@link XsdCompiler}.
      */
 
+    @Deprecated
     public void addSchemaSource(Source schemaSource) throws SchemaException {
     }
 
@@ -5313,9 +5314,16 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
-    @CSharpModifiers(code={"virtual", "internal"})
-    public XsdCompiler makeXsdCompiler(Processor proc) {
-        return new XsdCompiler();
+    /**
+     * Create an XsdCompiler. This method throws an exception if called on a non-schema-aware
+     * configuration.
+     * @param proc the s9api processor
+     * @return an XsdCompiler, if the Configuration is a licensed Saxon-EE configuration
+     * @throws UnsupportedOperationException if called on a non-schema-aware configuration.
+     */
+    @CSharpModifiers(code={"internal", "virtual"})
+    public XsdCompiler makeXsdCompiler(Processor proc) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Creating an XsdCompiler requires Saxon-EE");
     }
 
     /**
