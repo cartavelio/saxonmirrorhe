@@ -36,7 +36,7 @@ provide any other feedback.</p>
     <h1>Installing on Linux</h1>
 
     <aside>In the following, [EDITION] means one of: HE, PE, EE; and [VERSION] is the
-    maintenance release version number (for instance 11.1). </aside>
+    maintenance release version number (for instance 12.1). </aside>
 
     <ol>
       <li>
@@ -55,13 +55,11 @@ provide any other feedback.</p>
         <p>The core SaxonC files which must be copied are:</p>
         <ul>
           <li><code>libsaxon[EDITION].so</code> - SaxonC library</li>
-          <li><code>rt</code> directory - Excelsior JET runtime which handles VM calls</li>
-          <li><code>saxon-data</code> directory</li>
         </ul>
                
         <p>On Linux, the expected install location is <code>/usr/lib</code>, and the following
-        commands use this default. If you choose to install to a different location, then
-        the SAXONC_HOME variable must be set accordingly (see the next step).</p>
+        commands use this default. If you choose to install to a different location, then you
+            can set the location of the library with the environment variable LD_LIBRARY_PATH.</p>
         
         <p>For instance, to copy the product files from the unpacked location
         <code>libsaxon-[EDITION]C-[VERSION]</code>, to <code>/usr/lib</code>:</p>
@@ -72,19 +70,19 @@ provide any other feedback.</p>
         <kbd>sudo cp -r saxon-data /usr/lib/.</kbd>
       </li>
       <li>
-        <p><b>Set the SAXONC_HOME environment variable</b></p>
-        <p>The SAXONC_HOME variable must be set to the location where the SaxonC files have
+        <p><b>Set the LD_LIBRARY_PATH environment variable</b></p>
+        <p>The LD_LIBRARY_PATH variable must be set to the location where the SaxonC files have
         been installed. For instance:</p>
-        <kbd>export SAXONC_HOME=/usr/lib</kbd>
+        <kbd>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib</kbd>
         <p>If the SaxonC files were installed to a location other than the default
-        <code>/usr/lib</code>, then the SAXONC_HOME variable must be set to the correct
+        <code>/usr/lib</code>, then the LD_LIBRARY_PATH variable must be set to the correct
         location.</p>
       </li>
     </ol>
          
-    <aside>The use of symbolic links to specify where the SaxonC
+    <!-- <aside>The use of symbolic links to specify where the SaxonC
     library is installed is no longer recommended. It is better to set
-    the SAXONC_HOME environment variable directly.</aside>
+    the SAXONC_HOME environment variable directly.</aside> -->
 
     <p>SaxonC is now installed, and ready to run. Please see <a href="../../running">Running
     SaxonC</a> to get started. Note that the commercial products SaxonC-PE and
@@ -115,14 +113,12 @@ provide any other feedback.</p>
         <p>The core SaxonC files which must be copied are:</p>
         <ul>
           <li><code>libsaxon[EDITION].dylib</code> - SaxonC library</li>
-          <li><code>rt</code> directory - Excelsior JET runtime which handles VM calls</li>
-          <li><code>saxon-data</code> directory</li>
         </ul>
                
         <p>On Mac OS, the expected install location is
         <code>/usr/local/lib</code>, and the following commands use
         this default. If you choose to install to a different
-        location, then the SAXONC_HOME variable must be set
+        location, then the LD_LIBRARY_PATH variable must be set
         accordingly (see the next step).</p>
                
         <p>For instance, to copy the product files from the unpacked
@@ -131,18 +127,17 @@ provide any other feedback.</p>
                
                <kbd>cd Saxonica/Saxon-[EDITION]C-[VERSION]/</kbd>
                <kbd>sudo cp libsaxon[EDITION].dylib /usr/local/lib/.</kbd>
-               <kbd>sudo cp -r rt /usr/local/lib/.</kbd>
-               <kbd>sudo cp -r saxon-data /usr/local/lib/.</kbd>
+               <!-- <kbd>sudo cp -r saxon-data /usr/local/lib/.</kbd> -->
                
          <aside>If you encounter permission issues after copying, then
          the privileges of the folders and files may need
          adjusting.</aside>
       </li>
       <li>
-        <p><b>Set the SAXONC_HOME environment variable</b></p>
-        <p>The SAXONC_HOME variable must be set to the location where the SaxonC files have
+        <p><b>Set the LD_LIBRARY_PATH environment variable</b></p>
+        <p>The LD_LIBRARY_PATH variable must be set to the location where the SaxonC files have
         been installed. For instance:</p>
-        <kbd>export SAXONC_HOME=/usr/local/lib</kbd>
+        <kbd>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib</kbd>
         <p>If the SaxonC files were installed to a location other than the default
         <code>/usr/local/lib</code>, then the SAXONC_HOME variable must be set to the correct
         location.</p>
