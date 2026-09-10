@@ -548,6 +548,8 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     xpath_proc.set_context(xdm_item=test_input_node)
     '''Get config for XSLT Processor'''
     stylesheet = xpath_proc.evaluate_single("stylesheet[not(@role = 'secondary')]")
+    principle_package = xpath_proc.evaluate_single("package[(@role = 'principal')]")
+    used_package = xpath_proc.evaluate_single("package[(@role = 'secondary')]")
     output_uri = xpath_proc.evaluate_single("string(output/@file)")
     serialize_check = xpath_proc.evaluate_single("string(output/@serialize)")
     base_output_uri = ""
@@ -567,6 +569,9 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
     global_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
                                       False, False)
+
+    static_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
+                                         True, False)
 
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print(test_case_node.base_uri)
@@ -601,9 +606,25 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     outcome = PyTestOutcome()
 
     try:
+        for key in static_params:
+            environment.xslt_proc.set_parameter(key, static_params[key])
+
+        if os.getenv("SAXONC_DEBUG_FLAG") is not None:
+            if used_package is not None:
+                print("WARNING - Import package currently not supported!")
+
+
         if stylesheet is not None:
             file_name = stylesheet.get_node_value().get_attribute_value("file")
             environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name)
+        elif principle_package is not None:
+            file_name = principle_package.get_node_value().get_attribute_value("file")
+            if file_name != "":
+                output_file = (file_name[-4] + "_created_from_test_driver.sef")
+                environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file)
+                environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file)
+
+
         if environment.sheet is None:
             print("Environment not is a clean state")
             return

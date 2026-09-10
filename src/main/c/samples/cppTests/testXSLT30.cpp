@@ -537,6 +537,11 @@ void testTransformFromstring2Err(SaxonProcessor *processor,
       cerr << "Static Errors with error code is null: " << endl;
     }
 
+    const char * systemID = e.getSystemId();
+    if(systemID != nullptr) {
+         cerr << "system ID for Exception =  "<< systemID << endl;
+    }
+
     return;
   }
 
@@ -648,6 +653,11 @@ void testTrackingOfValueReferenceError(SaxonProcessor *processor,
 
     std::cerr << "Success: Exception thrown " << e.getMessageWithErrorCode()
               << endl;
+
+    const char * systemID = e.getSystemId();
+    if(systemID != nullptr) {
+         cerr << "system ID for Exception =  "<< systemID << endl;
+    }
     sresult->success++;
     return;
   }
