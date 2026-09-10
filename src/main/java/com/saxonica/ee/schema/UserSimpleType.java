@@ -816,6 +816,7 @@ public abstract class UserSimpleType extends UserDefinedType
      */
 
     public static FunctionItem getComponentAsFunction(final SimpleType type) {
+        // Can't use the usual accessorFunction() approach because we need access to the configuration
         CallableDelegate callable = new CallableDelegate((context, arguments) -> {
             String key = arguments[0].head().getStringValue();
             switch (key) {

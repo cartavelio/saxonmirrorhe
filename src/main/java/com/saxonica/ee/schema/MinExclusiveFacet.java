@@ -45,16 +45,18 @@ public class MinExclusiveFacet extends ValueRangeFacet {
             }
         } else {
             BuiltInAtomicType bbase = (BuiltInAtomicType) base;
-            boolean ok = true;
-            if (requiredValue instanceof Int64Value) {
-                long v = ((Int64Value) requiredValue).longValue() + 1L;
-                ok = IntegerValue.checkRange(v, bbase);
-            } else if (requiredValue instanceof BigIntegerValue) {
-                BigInteger v = ((BigIntegerValue) requiredValue).asBigInteger().add(BigInteger.ONE);
-                ok = IntegerValue.checkBigRange(v, bbase);
-            }
-            if (!ok) {
-                throw new SchemaException("The value of the minExclusive facet is greater than or equal to the maxInclusive of the built-in base type");
+            if (bbase.getBasicAlphaCode().startsWith("ADI")) {
+                boolean ok = true;
+                if (requiredValue instanceof Int64Value) {
+                    long v = ((Int64Value) requiredValue).longValue() + 1L;
+                    ok = IntegerValue.checkRange(v, bbase);
+                } else if (requiredValue instanceof BigIntegerValue) {
+                    BigInteger v = ((BigIntegerValue) requiredValue).asBigInteger().add(BigInteger.ONE);
+                    ok = IntegerValue.checkBigRange(v, bbase);
+                }
+                if (!ok) {
+                    throw new SchemaException("The value of the minExclusive facet is greater than or equal to the maxInclusive of the built-in base type");
+                }
             }
         }
     }

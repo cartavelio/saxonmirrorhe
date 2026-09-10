@@ -1,8 +1,6 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -283,8 +281,8 @@ public abstract class Particle extends SimpleComponentReference implements UserS
     @Override
     public FunctionItem getComponentAsFunction() {
         Particle thisParticle = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-                String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+                String key = arg.head().getStringValue();
                 switch (key) {
                     case "class":
                         return StringValue.bmp("Particle");
@@ -304,7 +302,6 @@ public abstract class Particle extends SimpleComponentReference implements UserS
                         return EmptySequence.getInstance();
                 }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

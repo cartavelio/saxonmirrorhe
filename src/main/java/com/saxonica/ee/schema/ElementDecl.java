@@ -3,8 +3,6 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.XPathExpression;
@@ -1224,8 +1222,8 @@ public class ElementDecl extends SchemaStructure
     @Override
     public FunctionItem getComponentAsFunction() {
         ElementDecl thisDecl = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Element Declaration");
@@ -1239,8 +1237,8 @@ public class ElementDecl extends SchemaStructure
                     return getType().getComponentAsFunction();
                 case "type table":
                     if (hasTypeAlternatives()) {
-                        CallableDelegate typeTable = new CallableDelegate((context1, arguments1) -> {
-                            String key1 = arguments1[0].head().getStringValue();
+                        return accessorFunction(arg1 -> {
+                            String key1 = arg1.head().getStringValue();
                             switch (key1) {
                                 case "class":
                                     return StringValue.bmp("Type Table");
@@ -1256,13 +1254,12 @@ public class ElementDecl extends SchemaStructure
                                     return EmptySequence.getInstance();
                             }
                         });
-                        return new CallableFunction(1, typeTable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                     } else {
                         return EmptySequence.getInstance();
                     }
                 case "scope":
-                    CallableDelegate scopeFunction = new CallableDelegate((context12, arguments12) -> {
-                        String key12 = ((StringValue) arguments12[0].head()).getStringValue();
+                    return accessorFunction(arg2 -> {
+                        String key12 = arg2.head().getStringValue();
                         switch (key12) {
                             case "class":
                                 return StringValue.bmp("Scope");
@@ -1282,7 +1279,6 @@ public class ElementDecl extends SchemaStructure
                                 return EmptySequence.getInstance();
                         }
                     });
-                    return new CallableFunction(1, scopeFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "value constraint":
                     return getValueConstraintAsFunction(ElementDecl.this);
                 case "nillable":
@@ -1328,7 +1324,6 @@ public class ElementDecl extends SchemaStructure
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
     public boolean equals(Object other) {

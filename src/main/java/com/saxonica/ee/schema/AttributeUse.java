@@ -2,10 +2,8 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
@@ -14,7 +12,10 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
@@ -450,8 +451,8 @@ public final class AttributeUse extends SimpleComponentReference
     @Override
     public FunctionItem getComponentAsFunction() {
         AttributeUse thisAttributeUse = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Attribute Use");
@@ -469,7 +470,6 @@ public final class AttributeUse extends SimpleComponentReference
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

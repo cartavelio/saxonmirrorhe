@@ -1,8 +1,7 @@
 package com.saxonica.functions.qt4.csv;
 
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.ItemMappingIterator;
-import net.sf.saxon.functions.CallableFunction;
+import net.sf.saxon.functions.SimpleBinaryFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.FunctionItem;
@@ -196,27 +195,31 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      * @return the function item returned in the "get" field
      */
     private static FunctionItem makeGetterFunction(GroundedValue rows, MapItem columnIndex) {
-        CallableDelegate callable = new CallableDelegate(
-                (context, args) -> {
-                    int rowNum = ((IntegerValue)args[0].head()).asSubscript();
-                    ArrayItem row = (ArrayItem)rows.itemAt(rowNum - 1);
+        return new SimpleBinaryFunction(
+                (a0, a1) -> {
+                    int rowNum = ((IntegerValue) a0.head()).asSubscript();
+                    ArrayItem row = (ArrayItem) rows.itemAt(rowNum - 1);
                     if (row == null) {
                         return StringValue.EMPTY_STRING;
                     }
-                    AtomicValue col = (AtomicValue)args[1].head();
+                    AtomicValue col = (AtomicValue) a1.head();
                     int colNum;
                     if (col instanceof StringValue) {
                         IntegerValue colValue = ((IntegerValue) columnIndex.get(col));
                         if (colValue == null) {
-                            throw new XPathException("Column '" + col.getStringValue() + "' is not present in CSV", "FOCV0004");
+                            throw new XPathException("Column '" + col.getStringValue() +
+                                                             "' is not present in CSV", "FOCV0004");
                         }
                         colNum = colValue.asSubscript();
                     } else {
-                        colNum = ((IntegerValue)col).asSubscript();
+                        colNum = ((IntegerValue) col).asSubscript();
                     }
                     return row.get(colNum - 1);
-                });
-        callable.setDescription("fn:parse-csv()?get");
-        return new CallableFunction(2, callable, GETTER_TYPE);
+                },
+                SequenceType.one(BuiltInAtomicType.POSITIVE_INTEGER),
+                SequenceType.one(LocalUnionType.of(BuiltInAtomicType.POSITIVE_INTEGER,
+                                                   BuiltInAtomicType.STRING)),
+                SequenceType.SINGLE_STRING)
+                .withDescription("fn:parse-csv()?get");
     }
 }

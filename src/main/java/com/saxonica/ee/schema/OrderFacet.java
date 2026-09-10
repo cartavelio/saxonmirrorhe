@@ -1,16 +1,15 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
+
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 
 /**
  * The saxon:order facet on a list type can be used to constrain the list to be in ascending or descending order.
@@ -122,8 +121,8 @@ public class OrderFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         OrderFacet facet = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
@@ -137,7 +136,6 @@ public class OrderFacet extends Facet {
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

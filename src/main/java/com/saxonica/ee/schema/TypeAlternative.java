@@ -1,8 +1,6 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NamespaceUri;
@@ -10,7 +8,10 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.MissingComponentException;
+import net.sf.saxon.type.SchemaComponent;
+import net.sf.saxon.type.SchemaException;
+import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringValue;
@@ -219,8 +220,8 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
     @Override
     public FunctionItem getComponentAsFunction() {
         TypeAlternative thisTypeAlternative = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Type Alternative");
@@ -234,7 +235,6 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

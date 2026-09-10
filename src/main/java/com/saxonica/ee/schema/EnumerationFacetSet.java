@@ -1,20 +1,19 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.CustomMap;
 import net.sf.saxon.expr.sort.SimpleTypeIdentityComparison;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 
 /**
  * Represents the set of enumeration values defined on a single simple type, This is a "virtual" facet
@@ -185,8 +184,8 @@ public class EnumerationFacetSet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         EnumerationFacetSet facet = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
@@ -208,7 +207,6 @@ public class EnumerationFacetSet extends Facet {
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

@@ -3,9 +3,7 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.om.StandardNames;
@@ -16,6 +14,7 @@ import net.sf.saxon.value.*;
 
 import java.math.BigInteger;
 
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 import static net.sf.saxon.type.SchemaValidationStatus.INVALID;
 
 /**
@@ -219,8 +218,8 @@ public abstract class ValueRangeFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         ValueRangeFacet thisFacet = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp(getName());
@@ -234,7 +233,6 @@ public abstract class ValueRangeFacet extends Facet {
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

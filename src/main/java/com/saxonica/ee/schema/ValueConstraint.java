@@ -1,9 +1,7 @@
 package com.saxonica.ee.schema;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
@@ -17,6 +15,7 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
 
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 import static com.saxonica.ee.schema.ValueConstraint.Variety.FIXED;
 
 /**
@@ -132,8 +131,8 @@ public class ValueConstraint {
      */
 
     public Sequence asFunction() {
-        CallableDelegate constraintFunction = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Value Constraint");
@@ -148,7 +147,6 @@ public class ValueConstraint {
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, constraintFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
 
     }
 

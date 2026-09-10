@@ -1,13 +1,10 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashSet;
 import net.sf.saxon.z.IntIterator;
@@ -856,16 +853,16 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
     @Override
     public FunctionItem getComponentAsFunction() {
         Wildcard thisWildcard = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Wildcard");
                 case "implementation":
                     return new ObjectValue<>(thisWildcard);
                 case "namespace constraint":
-                    CallableDelegate constraintFunction = new CallableDelegate((context1, arguments1) -> {
-                        String key1 = arguments[0].head().getStringValue();
+                    return accessorFunction(arg1 -> {
+                        String key1 = arg1.head().getStringValue();
                         switch (key1) {
                             case "class":
                                 return StringValue.bmp("Namespace Constraint");
@@ -911,14 +908,12 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                         }
 
                     });
-                    return new CallableFunction(1, constraintFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "process contents":
                     return new StringValue(getProcessContents());
                 default:
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

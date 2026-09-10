@@ -1,7 +1,5 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.FunctionItem;
@@ -9,11 +7,12 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringValue;
+
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 
 /**
  * Represents an assertion facet on a schema-defined simple type.
@@ -134,8 +133,8 @@ public class AssertionFacet extends Facet {
     public FunctionItem getFacetAsFunctionItem() {
         // Contrary to the W3C SCM model, each assertion is delivered as a separate schema component
         AssertionFacet facet = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
@@ -148,7 +147,6 @@ public class AssertionFacet extends Facet {
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

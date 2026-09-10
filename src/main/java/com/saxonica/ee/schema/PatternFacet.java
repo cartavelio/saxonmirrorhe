@@ -1,8 +1,6 @@
 package com.saxonica.ee.schema;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.StringView;
@@ -10,13 +8,14 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SimpleType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringValue;
 
 import java.util.List;
+
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 
 /**
  * Represents a pattern facet on a schema-defined simple type
@@ -146,8 +145,8 @@ public class PatternFacet extends Facet {
     public FunctionItem getFacetAsFunctionItem() {
         // Contrary to the W3C SCM specification, multiple pattern facets are not merged into a single component
         PatternFacet facet = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
@@ -159,7 +158,6 @@ public class PatternFacet extends Facet {
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

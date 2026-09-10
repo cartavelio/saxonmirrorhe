@@ -1,18 +1,14 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaException;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.*;
+
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 
 /**
  * Abstract class for the three facets length, minLength, and maxLength.
@@ -98,10 +94,8 @@ public abstract class LengthRangeFacet extends Facet {
 
     @Override
     public FunctionItem getFacetAsFunctionItem() {
-        Callable callable = new Callable() {
-            @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-                String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+                String key = arg.head().getStringValue();
                 switch (key) {
                     case "class":
                         return new StringValue(getName());
@@ -114,9 +108,7 @@ public abstract class LengthRangeFacet extends Facet {
                     default:
                         return EmptySequence.getInstance();
                 }
-            }
-        };
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
+            });
     }
 
 }

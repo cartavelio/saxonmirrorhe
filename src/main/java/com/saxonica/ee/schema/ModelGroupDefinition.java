@@ -1,8 +1,6 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
@@ -243,8 +241,8 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
     public FunctionItem getComponentAsFunction() {
         ModelGroupDefinition thisDefinition = this;
         FunctionItem modelGroupFunction = super.getComponentAsFunction();
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Model Group Definition");
@@ -261,7 +259,6 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
             }
 
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

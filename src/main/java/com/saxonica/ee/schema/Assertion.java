@@ -5,9 +5,7 @@ import com.saxonica.ee.stream.Sweep;
 import com.saxonica.ee.validate.ValidationContext;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.CollectionFn;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.ResourceResolverDelegate;
@@ -20,7 +18,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.type.SchemaComponent;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.ValidationParams;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
@@ -351,8 +348,8 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
     @Override
     public FunctionItem getComponentAsFunction() {
         Assertion thisAssertion = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Assertion");
@@ -365,7 +362,6 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 }
 

@@ -1,13 +1,13 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+
+import static com.saxonica.ee.schema.SchemaStructure.accessorFunction;
 
 /**
  * Represents either of the facets totalDigits or fractionDigits
@@ -135,8 +135,8 @@ public abstract class DigitsFacet extends Facet {
     @Override
     public FunctionItem getFacetAsFunctionItem() {
         DigitsFacet facet = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return new StringValue(getName());
@@ -152,7 +152,6 @@ public abstract class DigitsFacet extends Facet {
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 

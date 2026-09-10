@@ -3,8 +3,6 @@ package com.saxonica.ee.schema;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.CallableDelegate;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -492,8 +490,8 @@ public final class AttributeDecl extends SchemaStructure
     @Override
     public FunctionItem getComponentAsFunction() {
         AttributeDecl thisAttributeDecl = this;
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Attribute Declaration");
@@ -506,8 +504,8 @@ public final class AttributeDecl extends SchemaStructure
                 case "type definition":
                     return getType().getComponentAsFunction();
                 case "scope":
-                    CallableDelegate scopeFunction = new CallableDelegate((context1, arguments1) -> {
-                        String key1 = arguments1[0].head().getStringValue();
+                    return accessorFunction(arg1 -> {
+                        String key1 = arg1.head().getStringValue();
                         switch (key1) {
                             case "class":
                                 return StringValue.bmp("Scope");
@@ -527,7 +525,6 @@ public final class AttributeDecl extends SchemaStructure
                                 return EmptySequence.getInstance();
                         }
                     });
-                    return new CallableFunction(1, scopeFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "value constraint":
                     return getValueConstraintAsFunction(AttributeDecl.this);
                 case "inheritable":
@@ -536,7 +533,6 @@ public final class AttributeDecl extends SchemaStructure
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
 }

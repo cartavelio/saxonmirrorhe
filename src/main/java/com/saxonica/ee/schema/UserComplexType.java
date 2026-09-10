@@ -1,13 +1,13 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.schema.fsa.*;
+import com.saxonica.ee.schema.fsa.FiniteStateMachine;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.stream.Sweep;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.sort.SimpleTypeComparison;
-import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
@@ -2564,8 +2564,8 @@ public class UserComplexType extends UserDefinedType
     }
 
     public static FunctionItem getComponentAsFunction(final ComplexType type) {
-        CallableDelegate callable = new CallableDelegate((context, arguments) -> {
-            String key = arguments[0].head().getStringValue();
+        return accessorFunction(arg -> {
+            String key = arg.head().getStringValue();
             switch (key) {
                 case "class":
                     return StringValue.bmp("Complex Type Definition");
@@ -2627,8 +2627,8 @@ public class UserComplexType extends UserDefinedType
                         return EmptySequence.getInstance();
                     }
                 case "content type":
-                    CallableDelegate content = new CallableDelegate((context2, arguments2) -> {
-                            String key2 = arguments2[0].head().getStringValue();
+                    return accessorFunction(arg2 -> {
+                            String key2 = arg2.head().getStringValue();
                             switch (key2) {
                                 case "class":
                                     return StringValue.bmp("Content Type");
@@ -2663,8 +2663,8 @@ public class UserComplexType extends UserDefinedType
                                         final UserComplexType ctype = (UserComplexType) type;
                                         final String mode = ctype.getOpenContentModeString();
                                         if ("interleave".equals(mode) || "suffix".equals(mode)) {
-                                            CallableDelegate open = new CallableDelegate((context3, arguments3) -> {
-                                                String key3 = arguments[0].head().getStringValue();
+                                            return accessorFunction(arg1 -> {
+                                                String key3 = arg1.head().getStringValue();
                                                 switch (key3) {
                                                     case "class":
                                                         return StringValue.bmp("Open Content");
@@ -2676,7 +2676,6 @@ public class UserComplexType extends UserDefinedType
                                                         return EmptySequence.getInstance();
                                                 }
                                             });
-                                            return new CallableFunction(1, open, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                                         } else {
                                             return EmptySequence.getInstance();
                                         }
@@ -2694,7 +2693,6 @@ public class UserComplexType extends UserDefinedType
                             }
 
                     });
-                    return new CallableFunction(1, content, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                 case "prohibited substitutions": {
                     List<AtomicValue> list = new ArrayList<>();
                     int s = type.getBlock();
@@ -2720,7 +2718,6 @@ public class UserComplexType extends UserDefinedType
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
     /**
