@@ -8,6 +8,7 @@
 package net.sf.saxon.type;
 
 
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.transpile.CSharpModifiers;
 
@@ -157,6 +158,9 @@ public enum PrimitiveUType {
                 return NodeKindTest.PROCESSING_INSTRUCTION;
             case NAMESPACE:
                 return NodeKindTest.NAMESPACE;
+
+            case JNODE:
+                return JNodeType.ANY_JNODE;
 
             case FUNCTION:
                 return AnyFunctionType.getInstance();

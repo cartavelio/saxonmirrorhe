@@ -3,7 +3,6 @@ package internaltests;
 import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.DocumentBuilder;
 import net.sf.saxon.s9api.Processor;
@@ -40,7 +39,7 @@ public class TinyTreeTest {
             DocumentBuilder builder = new Processor(false).newDocumentBuilder();
             XdmNode d = builder.build(source);
             TinyDocumentImpl doc = (TinyDocumentImpl)d.getUnderlyingNode();
-            SequenceIterator iter = doc.iterateDescendantAxis(_OR_SELF);
+            SequenceIterator iter = doc.iterateDescendantOrSelfAxis(null);
             while (true) {
                 TinyNodeImpl desc = (TinyNodeImpl)iter.next();
                 if (desc == null) break;

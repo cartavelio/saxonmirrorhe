@@ -46,6 +46,20 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
     private SequenceType _zeroOrMore;
 
     /**
+     * Specialize this NodeTest for use with nodes on a given axis starting at
+     * a specific origin. This enables a more efficient test to be used, for example
+     * if the origin is a fingerprinted node, because it is then known that all
+     * the nodes on the axis will be fingerprinted
+     * @param origin the origin node
+     * @param axis the axis (a constant in class {@link AxisInfo}
+     * @return the same or an optimized NodeTest
+     */
+
+    public NodePredicate specialize(GNode origin, int axis) {
+        return this;
+    }
+
+    /**
      * Determine the Genre (top-level classification) of this type
      *
      * @return the Genre to which this type belongs, specifically {@link Genre#XNODE}

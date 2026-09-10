@@ -11,6 +11,7 @@ import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
@@ -153,7 +154,8 @@ public class NodeKindTest extends NodeTest {
 
     @Override
     public boolean test(GNode node) {
-        return node.getNodeKind() == kind;
+        // TODO: Kludge, fix this
+        return node instanceof JNode ||node.getNodeKind() == kind;
     }
 
 

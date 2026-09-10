@@ -7,10 +7,12 @@
 
 package net.sf.saxon.pattern;
 
-import net.sf.saxon.ma.jnode.JNode;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -24,83 +26,31 @@ import net.sf.saxon.z.IntSingletonSet;
 import java.util.Optional;
 
 /**
- * NodeTest is an interface that enables a test of whether a node has a particular
- * name and type. A NameTest matches the node kind and the namespace URI and the local
- * name. Note that unlike the XPath production called NameTest, this is a test for a specific
- * name, and does not include wildcard matches.
+ * A FingerprintedNameTest matches nodes by node kind and fingerprint. It is used
+ * only when searching a tree whose nodes are fingerprinted, such as a TinyTree.
  */
 
-public class NameTest extends NodeTest {
+public class FingerprintedNameTest extends NodeTest {
 
     private final int nodeKind;
     private final int fingerprint;
     private final UType uType;
-    private final NamePool namePool;
-    /*@Nullable*/ private NamespaceUri uri = null;  // the URI corresponding to the fingerprint - computed lazily
-    /*@Nullable*/ private String localName = null; //the local name corresponding to the fingerprint - computed lazily
+//    private final NamePool namePool;
+//    /*@Nullable*/ private NamespaceUri uri = null;  // the URI corresponding to the fingerprint - computed lazily
+//    /*@Nullable*/ private String localName = null; //the local name corresponding to the fingerprint - computed lazily
 
     /**
-     * Create a NameTest to match nodes by name
+     * Create a NameTest to match nodes by fingerprint
      *
      * @param nodeKind  the kind of node, for example {@link Type#ELEMENT}
-     * @param uri       the namespace URI of the required nodes. Supply "" to match nodes that are in
-     *                  no namespace
-     * @param localName the local name of the required nodes. Supply "" to match unnamed nodes
-     * @param namePool  the namePool holding the name codes
-     * @since 9.0
+     * @param fingerprint  the fingerprint of the required nodes.
+     * @since 13.0
      */
 
-    public NameTest(int nodeKind, NamespaceUri uri, String localName, NamePool namePool) {
-        this.uri = uri;
-        this.localName = localName;
+    public FingerprintedNameTest(int nodeKind, int fingerprint) {
         this.nodeKind = nodeKind;
-        this.fingerprint = namePool.allocateFingerprint(uri, localName) & NamePool.FP_MASK;
-        this.namePool = namePool;
+        this.fingerprint = fingerprint;
         this.uType = UType.fromTypeCode(nodeKind);
-    }
-
-    /**
-     * Create a NameTest to match nodes by their nameCode allocated from the NamePool
-     *
-     * @param nodeKind the kind of node, for example {@link Type#ELEMENT}
-     * @param nameCode the nameCode representing the name of the node
-     * @param namePool the namePool holding the name codes
-     * @since 8.4
-     */
-
-    public NameTest(int nodeKind, int nameCode, NamePool namePool) {
-        this.nodeKind = nodeKind;
-        this.fingerprint = nameCode & NamePool.FP_MASK;
-        this.namePool = namePool;
-        this.uType = UType.fromTypeCode(nodeKind);
-    }
-
-    /**
-     * Create a NameTest to match nodes by name
-     *
-     * @param nodeKind the kind of node, for example {@link Type#ELEMENT}
-     * @param name     the name of the nodes that this NameTest will match
-     * @param pool     the namePool holding the name codes
-     * @since 9.4
-     */
-
-    public NameTest(int nodeKind, NodeName name, NamePool pool) {
-        this.uri = name.getNamespaceUri();
-        this.localName = name.getLocalPart();
-        this.nodeKind = nodeKind;
-        this.fingerprint = name.obtainFingerprint(pool);
-        this.namePool = pool;
-        this.uType = UType.fromTypeCode(nodeKind);
-    }
-
-    /**
-     * Get the NamePool associated with this NameTest
-     *
-     * @return the NamePool
-     */
-
-    public NamePool getNamePool() {
-        return namePool;
     }
 
     /**
@@ -114,7 +64,7 @@ public class NameTest extends NodeTest {
     }
 
     /**
-     * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
+     * Get the corresponding {@link UType}. A UType is a union of primitive item
      * types.
      *
      * @return the smallest UType that subsumes this item type
@@ -147,8 +97,7 @@ public class NameTest extends NodeTest {
         if (name.hasFingerprint()) {
             return name.getFingerprint() == this.fingerprint;
         } else {
-            computeUriAndLocal();
-            return name.hasURI(uri) && name.getLocalPart().equals(localName);
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -165,69 +114,13 @@ public class NameTest extends NodeTest {
      * method is used in the case of nodes where calculating the fingerprint is expensive,
      * for example DOM or JDOM nodes.
      *
-     * @param gnode the node to be matched
+     * @param node the node to be matched
      */
 
     @Override
-    public boolean test(GNode gnode) {
-
-        if (gnode instanceof JNode) {
-            // TODO, temporary kludge to get examples working
-            computeUriAndLocal();
-            return ((JNode)gnode).getSelector().getStringValue().equals(localName);
-        }
-
-        if (gnode.getNodeKind() != nodeKind) {
-            return false;
-        }
-
-        NodeInfo node = (NodeInfo) gnode;
-
-        // Two different algorithms are used for name matching. If the fingerprint of the node is readily
-        // available, we use it to do an integer comparison. Otherwise, we do string comparisons on the URI
-        // and local name. In practice, Saxon's native node implementations use fingerprint matching, while
-        // DOM and JDOM nodes use string comparison of names
-
-        if (node.hasFingerprint()) {
-            return node.getFingerprint() == fingerprint;
-        } else {
-            computeUriAndLocal();
-            return localName.equals(node.getLocalPart()) && uri.equals(node.getNamespaceUri());
-        }
+    public boolean test(GNode node) {
+        return ((NodeInfo)node).getFingerprint() == fingerprint;
     }
-
-    private void computeUriAndLocal() {
-        if (uri == null || localName == null) {
-            StructuredQName name = namePool.getUnprefixedQName(fingerprint);
-            uri = name.getNamespaceUri();
-            localName = name.getLocalPart();
-        }
-    }
-
-//    /**
-//     * Test whether the NameTest matches a given QName
-//     *
-//     * @param qname the QName to be matched
-//     * @return true if the name matches
-//     */
-//
-//    @Override
-//    public boolean matches(StructuredQName qname) {
-//        computeUriAndLocal();
-//        return qname.getLocalPart().equals(localName) && qname.hasURI(uri);
-//    }
-//
-//    /**
-//     * Test whether the QNameTest matches a given fingerprint
-//     *
-//     * @param namePool the name pool
-//     * @param fp       the fingerprint of the QName to be matched
-//     * @return true if the name matches, false if not
-//     */
-//    @Override
-//    public boolean matchesFingerprint(NamePool namePool, int fp) {
-//        return fp == fingerprint;
-//    }
 
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
@@ -246,8 +139,7 @@ public class NameTest extends NodeTest {
      */
 
     public QNameTest getQNameTest() {
-        computeUriAndLocal();
-        return new SpecificQNameTest(new StructuredQName("", uri, localName), namePool, fingerprint);
+        return AnyQNameTest.getInstance();
     }
 
 
@@ -258,16 +150,6 @@ public class NameTest extends NodeTest {
     @Override
     public int getFingerprint() {
         return fingerprint;
-    }
-
-    /**
-     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
-     * Return null if the node test matches nodes of more than one name
-     */
-    @Override
-    public StructuredQName getMatchingNodeName() {
-        computeUriAndLocal();
-        return new StructuredQName("", uri, localName);
     }
 
     /**
@@ -294,40 +176,20 @@ public class NameTest extends NodeTest {
         return Optional.of(new IntSingletonSet(fingerprint));
     }
 
-    /**
-     * Get the namespace URI matched by this nametest
-     *
-     * @return the namespace URI (using "" for the "null namepace")
-     */
-
-    public NamespaceUri getNamespaceURI() {
-        computeUriAndLocal();
-        return uri;
-    }
-
-    /**
-     * Get the local name matched by this nametest
-     *
-     * @return the local name
-     */
-
-    public String getLocalPart() {
-        computeUriAndLocal();
-        return localName;
-    }
 
     public String toString() {
         switch (nodeKind) {
             case Type.ELEMENT:
-                return "element(" + namePool.getEQName(fingerprint) + ")";
+                return "element(" + fingerprint + ")";
             case Type.ATTRIBUTE:
-                return "attribute(" + namePool.getEQName(fingerprint) + ")";
+                return "attribute(" + fingerprint + ")";
             case Type.PROCESSING_INSTRUCTION:
-                return "processing-instruction(" + namePool.getLocalName(fingerprint) + ')';
+                return "processing-instruction(" + fingerprint + ')';
             case Type.NAMESPACE:
-                return "namespace-node(" + namePool.getLocalName(fingerprint) + ')';
+                return "namespace-node(" + fingerprint + ')';
+            default:
+                return "node(" + fingerprint + ')';
         }
-        return namePool.getEQName(fingerprint);
     }
 
     /**
@@ -343,10 +205,9 @@ public class NameTest extends NodeTest {
      */
 
     public boolean equals(Object other) {
-        return other instanceof NameTest &&
-                ((NameTest) other).namePool == namePool &&
-                ((NameTest) other).nodeKind == nodeKind &&
-                ((NameTest) other).fingerprint == fingerprint;
+        return other instanceof FingerprintedNameTest &&
+                ((FingerprintedNameTest) other).nodeKind == nodeKind &&
+                ((FingerprintedNameTest) other).fingerprint == fingerprint;
     }
 
     @Override
@@ -354,17 +215,6 @@ public class NameTest extends NodeTest {
         return getBasicAlphaCode() + " n" + getMatchingNodeName().getEQName();
     }
 
-//    /**
-//     * Export the QNameTest as a string for use in a SEF file (typically in a catch clause).
-//     *
-//     * @return a string representation of the QNameTest, suitable for use in export files. The format is
-//     * a sequence of alternatives separated by vertical bars, where each alternative is one of '*',
-//     * '*:localname', 'Q{uri}*', or 'Q{uri}local'.
-//     */
-//    @Override
-//    public String exportQNameTest() {
-//        return getMatchingNodeName().getEQName();
-//    }
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this
@@ -382,18 +232,6 @@ public class NameTest extends NodeTest {
             return explanation;
         }
         return Optional.of("The node has the wrong name");
-    }
-
-    @Override
-    public String toShortString() {
-        switch (nodeKind) {
-            case Type.ELEMENT:
-                return getNamespaceURI().isEmpty() ? namePool.getLocalName(getFingerprint()) : toString();
-            case Type.ATTRIBUTE:
-                return "@" + (getNamespaceURI().isEmpty() ? namePool.getLocalName(getFingerprint()) : toString());
-            default:
-                return toString();
-        }
     }
 
 }

@@ -8,7 +8,6 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.jaxp.TransformerImpl;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.OutputURIResolver;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -899,7 +898,7 @@ public class TraxTest {
 
                 Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
                 NodeInfo saxonDoc = config.buildDocumentTree(new SAXSource(new InputSource(foo_xml))).getRootNode();
-                NodeInfo top = saxonDoc.iterateChildAxis(NodeKindTest.ELEMENT).next();
+                NodeInfo top = (NodeInfo)saxonDoc.iterateChildAxis(NodeKindTest.ELEMENT).next();
 
                 Node imported = doc.importNode(NodeOverNodeInfo.wrap(top), true);
 

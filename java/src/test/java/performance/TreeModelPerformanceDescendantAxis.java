@@ -5,7 +5,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.om.TreeModel;
@@ -37,7 +36,7 @@ public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
         NodeInfo documentElement = null;
         try {
             tree = config.buildDocumentTree(source, options);
-            documentElement = tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
+            documentElement = (NodeInfo)tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
         } catch (XPathException e) {
             e.printStackTrace();
             fail(e.getMessage());

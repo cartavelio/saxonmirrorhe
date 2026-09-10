@@ -4193,16 +4193,15 @@ public class XPathParser {
 
         // have read the "map {" or bare "{"
         int offset = t.currentTokenStartOffset;
-        List<Expression> keys = new ArrayList<>();
-        List<Expression> values = new ArrayList<>();
+        List<Expression> operands = new ArrayList<>();
         boolean allLiteralKeys = true;
         boolean allStringKeys = true;
         boolean allLiteralValues = true;
+        boolean includesSubExpressions = false;
         nextToken();
         if (t.currentToken != Token.RCURLY) {
             while (true) {
                 Expression key = parseExprSingle();
-                keys.add(key);
                 if (!(key instanceof Literal && ((Literal)key).getGroundedValue() instanceof AtomicValue)) {
                     allLiteralKeys = false;
                 }
@@ -4212,11 +4211,21 @@ public class XPathParser {
                 if (t.currentToken == Token.COLON_EQUALS) {
                     grumble("The ':=' notation is no longer accepted in map expressions: use ':' instead");
                 }
-                readToken(Token.COLON);
-                Expression value = parseExprSingle();
-                values.add(value);
-                if (!(value instanceof Literal)) {
+                if (t.currentToken == Token.COLON) {
+                    nextToken();
+                    Expression value = parseExprSingle();
+                    operands.add(
+                            MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, value));
+                    if (!(value instanceof Literal)) {
+                        allLiteralValues = false;
+                    }
+                } else {
+                    checkSyntaxExtensions("nested expressions in map constructors");
+                    includesSubExpressions = true;
+                    allLiteralKeys = false;
                     allLiteralValues = false;
+                    allStringKeys = false;
+                    operands.add(key);
                 }
                 if (t.currentToken == Token.RCURLY) {
                     break;
@@ -4230,60 +4239,78 @@ public class XPathParser {
         }
         nextToken();
 
-        Expression result = null;
-        switch (keys.size()) {
+        Expression result;
+        switch (operands.size()) {
             case 0:
                 result = Literal.makeLiteral(EmptyMap.getInstance());
                 break;
             case 1:
                 if (allLiteralKeys && allLiteralValues) {
+                    FunctionCall operand = (FunctionCall)operands.get(0);
+                    Literal key = (Literal)operand.getArguments()[0];
+                    Literal value = (Literal) operand.getArguments()[1];
                     SingleEntryMap sem = new SingleEntryMap(
-                            (AtomicValue)((Literal)keys.get(0)).getGroundedValue(),
-                            ((Literal)values.get(0)).getGroundedValue());
+                            (AtomicValue)(key.getGroundedValue()),
+                            value.getGroundedValue());
                     result = Literal.makeLiteral(sem);
                 } else {
-                    result = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(keys.get(0), values.get(0));
+                    MapBuilder optionsBuilder = SimpleMap.getBuilder();
+                    optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
+                    optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
+                    MapItem optionsMap = optionsBuilder.getCompletedMap();
+                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
+                            .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
                 }
+
                 break;
             default:
 
                 // Check for duplicates now, among key values that are statically known
                 Set<AtomicMatchKey> matchKeys = new HashSet<>();
-                for (Expression keyExp : keys) {
-                    if (keyExp instanceof Literal) {
-                        final AtomicValue keyValue = (AtomicValue) ((Literal) keyExp).getGroundedValue();
-                        AtomicMatchKey key = keyValue.asMapKey();
-                        boolean ok = matchKeys.add(key);
-                        if (!ok) {
-                            grumble("Duplicate key + " + Err.depict(keyValue) + " in map constructor", "XQDY0137");
-                            return null;
+                for (Expression operand : operands) {
+                    if (operand.isCallOn(MapFunctionSet.MapEntry.class)) {
+                        if (((FunctionCall)operand).getArg(0) instanceof Literal) {
+                            final AtomicValue keyValue =
+                                    (AtomicValue) ((Literal) ((FunctionCall) operand).getArg(0)).getGroundedValue();
+
+                            AtomicMatchKey key = keyValue.asMapKey();
+                            boolean ok = matchKeys.add(key);
+                            if (!ok) {
+                                grumble("Duplicate key + " + Err.depict(keyValue) + " in map constructor", "XQDY0137");
+                                return null;
+                            }
                         }
                     }
                 }
 
                 if (allLiteralKeys && allLiteralValues) {
                     if (allStringKeys) {
-                        StringMapBuilder mapBuilder = new StringMapBuilder(keys.size());
-                        for (int i = 0; i < keys.size(); i++) {
-                            UnicodeString key = ((StringLiteral) keys.get(i)).getString();
-                            GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
+                        StringMapBuilder mapBuilder = new StringMapBuilder(operands.size());
+                        for (Expression expression : operands) {
+                            FunctionCall operand = (FunctionCall) expression;
+                            Literal keyExp = (Literal) operand.getArguments()[0];
+                            Literal valueExp = (Literal) operand.getArguments()[1];
+                            UnicodeString key = ((StringLiteral) keyExp).getString();
+                            GroundedValue val = valueExp.getGroundedValue();
                             mapBuilder.put(key, val);
                         }
                         result = Literal.makeLiteral(mapBuilder.getCompletedMap());
                     } else {
                         GeneralMapBuilder builder = new GeneralMapBuilder();
-                        for (int i = 0; i < keys.size(); i++) {
-                            AtomicValue key = (AtomicValue) ((Literal) keys.get(i)).getGroundedValue();
-                            GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
+                        for (Expression expression : operands) {
+                            FunctionCall operand = (FunctionCall) expression;
+                            Literal keyExp = (Literal) operand.getArguments()[0];
+                            Literal valueExp = (Literal) operand.getArguments()[1];
+                            AtomicValue key = (AtomicValue) keyExp.getGroundedValue();
+                            GroundedValue val = valueExp.getGroundedValue();
                             builder.put(key, val);
                         }
                         result = Literal.makeLiteral(builder.getCompletedMap());
                     }
                 } else {
-                    Expression[] entriesArray = new Expression[keys.size()];
-                    for (int i=0; i<keys.size(); i++) {
-                         entriesArray[i] = MapFunctionSet.getInstance(31)
-                                 .makeFunction("entry", 2).makeFunctionCall(keys.get(i), values.get(i));
+                    Expression[] entriesArray = new Expression[operands.size()];
+                    for (int i=0; i<operands.size(); i++) {
+                        entriesArray[i] = operands.get(i);
                     }
                     Block block = new Block(entriesArray);
                     MapItem optionsMap;
@@ -4307,7 +4334,7 @@ public class XPathParser {
 
     private final static FunctionItem mapConstructorDuplicatesAction = new CallableFunction(
             (context, arguments) -> {
-                throw new UncheckedXPathException("Duplicate key in map constructor", "XQDY0037");
+                throw new UncheckedXPathException("Duplicate key in map constructor", "XQDY0137");
             },
             new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE)
     );

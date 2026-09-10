@@ -1103,8 +1103,8 @@ public class SlashExpression extends BinaryExpression
                 return (out, context) -> {
                     SequenceIterator outer = select.iterate(context);
                     for (Item a; (a = outer.next()) != null; ) {
-                        SequenceIterator inner = step.iterate((NodeInfo)a);
-                        for (NodeInfo b; (b = (NodeInfo)inner.next()) != null;) {
+                        SequenceIterator inner = step.iterate((GNode)a);
+                        for (GNode b; (b = (GNode)inner.next()) != null;) {
                            out.append(b, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                         }
                     }

@@ -212,7 +212,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
         NodeInfo documentElement = null;
         try {
             tree = config.buildDocumentTree(source, options);
-            documentElement = tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
+            documentElement = (NodeInfo)tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
         } catch (XPathException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -319,7 +319,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
         NodeInfo documentElement = null;
         try {
             tree = config.buildDocumentTree(source, options);
-            documentElement = tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
+            documentElement = (NodeInfo)tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
         } catch (XPathException e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -437,7 +437,7 @@ public class TreeModelPerformance extends PerformanceTestCase {
         NodeInfo documentElement = null;
         try {
             tree = config.buildDocumentTree(source, options);
-            documentElement = tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
+            documentElement = (NodeInfo)tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
         } catch (XPathException e) {
             e.printStackTrace();
             fail(e.getMessage());

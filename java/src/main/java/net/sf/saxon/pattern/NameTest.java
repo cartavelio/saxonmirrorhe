@@ -7,11 +7,15 @@
 
 package net.sf.saxon.pattern;
 
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
@@ -32,8 +36,8 @@ public class NameTest extends NodeTest {
     private final int fingerprint;
     private final UType uType;
     private final NamePool namePool;
-    /*@Nullable*/ private NamespaceUri uri = null;  // the URI corresponding to the fingerprint - computed lazily
-    /*@Nullable*/ private String localName = null; //the local name corresponding to the fingerprint - computed lazily
+    private NamespaceUri uri = null;  // the URI corresponding to the fingerprint - computed lazily
+    private String localName = null; //the local name corresponding to the fingerprint - computed lazily
 
     /**
      * Create a NameTest to match nodes by name
@@ -87,6 +91,26 @@ public class NameTest extends NodeTest {
         this.fingerprint = name.obtainFingerprint(pool);
         this.namePool = pool;
         this.uType = UType.fromTypeCode(nodeKind);
+    }
+
+    /**
+     * Specialize this NodeTest for use with nodes on a given axis starting at
+     * a specific origin. This enables a more efficient test to be used, for example
+     * if the origin is a fingerprinted node, because it is then known that all
+     * the nodes on the axis will be fingerprinted
+     *
+     * @param origin the origin node
+     * @param axis   the axis (a constant in class {@link AxisInfo}
+     * @return the same or an optimized NodeTest
+     */
+    @Override
+    public NodePredicate specialize(GNode origin, int axis) {
+        if (origin instanceof NodeInfo) {
+            if (((NodeInfo)origin).hasFingerprint()) {
+                return new FingerprintedNameTest(nodeKind, fingerprint);
+            }
+        }
+        return this;
     }
 
     /**
@@ -166,10 +190,18 @@ public class NameTest extends NodeTest {
 
     @Override
     public boolean test(GNode gnode) {
-        NodeInfo node = (NodeInfo)gnode;
-        if (node.getNodeKind() != nodeKind) {
+
+        if (gnode instanceof JNode) {
+            // TODO, temporary kludge to get examples working
+            computeUriAndLocal();
+            return ((JNode)gnode).getSelector().getStringValue().equals(localName);
+        }
+
+        if (gnode.getNodeKind() != nodeKind) {
             return false;
         }
+
+        NodeInfo node = (NodeInfo) gnode;
 
         // Two different algorithms are used for name matching. If the fingerprint of the node is readily
         // available, we use it to do an integer comparison. Otherwise, we do string comparisons on the URI

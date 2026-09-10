@@ -113,16 +113,16 @@ public class ChildJNode extends JNode {
         @Override
         public GNode next() {
             if (mapEntryIterator != null) {
-                KeyValuePair nextItem = mapEntryIterator.next();
-                if (nextItem != null) {
+                if (mapEntryIterator.hasNext()) {
+                    KeyValuePair nextItem = mapEntryIterator.next();
                     return new ChildJNode(origin, position, nextItem.key, nextItem.value);
                 } else {
                     mapEntryIterator = null;
                 }
             }
             if (arrayEntryIterator != null) {
-                GroundedValue nextMember = arrayEntryIterator.next();
-                if (nextMember != null) {
+                if (arrayEntryIterator.hasNext()) {
+                    GroundedValue nextMember = arrayEntryIterator.next();
                     return new ChildJNode(origin, position, Int64Value.makeIntegerValue(++arrayIndex), nextMember);
                 } else {
                     arrayEntryIterator = null;
