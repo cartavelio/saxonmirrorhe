@@ -25,8 +25,8 @@ val xmldocletBucket by configurations.dependencyScope("xmldocletBucket")
 val csharpApiSourcesBucket by configurations.dependencyScope("csharpApiSourcesBucket")
 val csharpXmlDocBucket by configurations.dependencyScope("csharpXmlDocBucket")
 val csharpHtmlDocBucket by configurations.dependencyScope("csharpHtmlDocBucket")
-val doxygenBucket by configurations.dependencyScope("doxygenBucket")
-val doxygenCBucket by configurations.dependencyScope("doxygenCBucket")
+val pythonDocBucket by configurations.dependencyScope("pythonDocBucket")
+val saxonCBucket by configurations.dependencyScope("saxonCBucket")
 
 val documentation by configurations.creating {
   extendsFrom(configurations["implementation"])
@@ -52,9 +52,9 @@ dependencies {
                                    "configuration" to "xmlDocArtifacts")))
   csharpHtmlDocBucket(project(mapOf("path" to ":csharp:ee",
                                     "configuration" to "htmlDocArtifacts")))
-  doxygenBucket(project(mapOf("path" to ":python:documentation",
-                              "configuration" to "pydocArtifact")))
-  doxygenCBucket(project(mapOf("path" to ":libsaxonc:ee",
+  pythonDocBucket(project(mapOf("path" to ":python:ee",
+                              "configuration" to "documentation")))
+  saxonCBucket(project(mapOf("path" to ":libsaxonc:ee",
                               "configuration" to "doxygenOutput")))
 
   // N.B. the gen_doc_icu_uca task depends on using the current build!
@@ -117,12 +117,12 @@ val csharpHtmlDocumentation = configurations.resolvable("csharpHtmlDocumentation
   extendsFrom(csharpHtmlDocBucket)
 }
 
-val doxygenDocumentation = configurations.resolvable("doxygenDocumentation") {
-  extendsFrom(doxygenBucket)
+val pythonDocumentation = configurations.resolvable("pythonDocumentation") {
+  extendsFrom(pythonDocBucket)
 }
 
-val doxygenCDocumentation = configurations.resolvable("doxygenCDocumentation") {
-  extendsFrom(doxygenCBucket)
+val saxonCDocumentation = configurations.resolvable("saxonCDocumentation") {
+  extendsFrom(saxonCBucket)
 }
 
 // ============================================================
@@ -813,29 +813,22 @@ val saxoncDocSef by configurations.consumable("saxoncDocSefArtifacts")
 saxoncDocSef.outgoing.artifact(saxonc_doc_sef) { builtBy(saxonc_doc_sef) }
 
 val saxonc_api_doc = tasks.register("saxonc_api_doc") {
-  inputs.files(doxygenDocumentation)
-  inputs.files(doxygenCDocumentation)
+  inputs.files(pythonDocumentation)
+  inputs.files(saxonCDocumentation)
   outputs.dir(layout.buildDirectory.dir("saxonc-doc"))
 
   val outputDir = layout.buildDirectory.dir("saxonc-doc/doc${saxonMajorVersion}")
 
   doLast {
     copy {
-      into(outputDir.map { it.dir("html") })
-      from(doxygenDocumentation)
-        include("saxoncee.html")
-        rename {
-          "saxonc.html"
-        }
-        filter { line ->
-          line.replace("saxoncee.html", "saxonc.html")
-        }
+      into(outputDir.map { it.dir("python") })
+      from(pythonDocumentation)
     }
   }
 
   doLast {
     copy {
-      from(doxygenCDocumentation)
+      from(saxonCDocumentation)
       into(outputDir)
     }
   }

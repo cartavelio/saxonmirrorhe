@@ -364,3 +364,5 @@ val packagedSamples by configurations.consumable("packagedSamples")
 packagedSamples.outgoing.artifact(packagedSamplesDir) { builtBy(packageSamples) }
 val sourceFiles by configurations.consumable("sourceFiles")
 sourceFiles.outgoing.artifact(releasableSrcDir) { builtBy(sourceFilesForRelease) }
+val documentationArtifact by configurations.consumable("documentation")
+documentationArtifact.outgoing.artifact(sphinxDocTask) { builtBy(sphinxDocTask) }
