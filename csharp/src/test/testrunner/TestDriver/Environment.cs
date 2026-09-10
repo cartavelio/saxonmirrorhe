@@ -435,6 +435,7 @@ namespace TestDriver {
                     return false;
                 }
 
+                environment.schemaAware = true;
                 if (xsdVersion != null) {
                     compiler.XsdVersion = xsdVersion;
                 }
