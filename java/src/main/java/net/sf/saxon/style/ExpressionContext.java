@@ -17,6 +17,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.DecimalFormatManager;
@@ -259,7 +260,7 @@ public class ExpressionContext implements StaticContext {
             if (comp != null) { // test variable-0118
                 // See tests variable-0118 and variable-0120
                 if (getPackageData().getHostLanguageVersion() < 40) {
-                    SequenceTool.supply(element.iterateAncestorOrSelfAxis(null), (ItemConsumer<? super Item>) parent -> {
+                    SequenceTool.supply(element.iterateAncestorOrSelfAxis(AnyGNode.TEST), (ItemConsumer<? super Item>) parent -> {
                         if (parent instanceof XSLGlobalVariable && ((XSLGlobalVariable) parent).getVariableQName().equals(qName)) {
                             XPathException err = new XPathException("Variable $" + qName.getDisplayName() +
                                                                             " cannot be used within its own declaration", "XPST0008");

@@ -32,6 +32,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.*;
+import net.sf.saxon.value.Cardinality;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -615,51 +616,74 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
         GNodeType gNodeType = (GNodeType)originNodeType;
-        int attFingerprint = test.getRequiredFingerprint(Type.ATTRIBUTE);
-        int elemFingerprint = test.getRequiredFingerprint(Type.ELEMENT);
-        if (axis == AxisInfo.ATTRIBUTE && attFingerprint != -1) {
-            StructuredQName attName = getConfiguration().getNamePool().getStructuredQName(attFingerprint);
-            Schema schema = getRetainedStaticContext().getImportedSchema();
-            SchemaType contentType = gNodeType.getContentType();
-            if (contentType instanceof ComplexType) {
-                try {
-                    return ((ComplexType) contentType).getAttributeUseCardinality(attName, schema);
-                } catch (SchemaException err) {
-                    // shouldn't happen; play safe
-                    return StaticProperty.ALLOWS_ZERO_OR_ONE;
-                }
-            } else if (contentType instanceof SimpleType) {
-                return StaticProperty.EMPTY;
-            }
-            return StaticProperty.ALLOWS_ZERO_OR_ONE;
-        } else if (axis == AxisInfo.CHILD && elemFingerprint != -1) {
-            Schema schema = getRetainedStaticContext().getImportedSchema();
-            SchemaType contentType = gNodeType.getContentType();
-            if (contentType instanceof ComplexType) {
-                return ((ComplexType) contentType).getElementParticleCardinality(elemFingerprint, schema, true);
-            } else {
-                return StaticProperty.EMPTY;
-            }
-        } else if (axis == AxisInfo.DESCENDANT && elemFingerprint != -1) {
-            Schema schema = getRetainedStaticContext().getImportedSchema();
-            SchemaType contentType = gNodeType.getContentType();
-            if (contentType instanceof ComplexType) {
-                try {
-                    return ((ComplexType) contentType).getDescendantElementCardinality(schema, elemFingerprint);
-                } catch (SchemaException err) {
-                    // shouldn't happen; play safe
-                    return StaticProperty.ALLOWS_ZERO_OR_MORE;
-                }
-            } else {
-                return StaticProperty.EMPTY;
-            }
 
-        } else if (axis == AxisInfo.SELF) {
-            return StaticProperty.ALLOWS_ZERO_OR_ONE;
-        } else {
-            return StaticProperty.ALLOWS_ZERO_OR_MORE;
+        if (axis == AxisInfo.ATTRIBUTE && test instanceof NamedXNodePredicate) {
+            NamedXNodePredicate fpTest = (NamedXNodePredicate) test;
+            int attFingerprint = fpTest.getRequiredFingerprint();
+            if (fpTest.getNodeKind() == Type.ATTRIBUTE && attFingerprint != -1) {
+                StructuredQName attName = getConfiguration().getNamePool().getStructuredQName(attFingerprint);
+                Schema schema = getRetainedStaticContext().getImportedSchema();
+                SchemaType contentType = gNodeType.getContentType();
+                if (contentType instanceof ComplexType) {
+                    try {
+                        int card = ((ComplexType) contentType).getAttributeUseCardinality(attName, schema);
+                        if (!fpTest.isFingerprintSufficient()) {
+                            card = Cardinality.union(card, StaticProperty.ALLOWS_ZERO);
+                        }
+                        return card;
+                    } catch (SchemaException err) {
+                        // shouldn't happen; play safe
+                        return StaticProperty.ALLOWS_ZERO_OR_ONE;
+                    }
+                } else if (contentType instanceof SimpleType) {
+                    return StaticProperty.EMPTY;
+                }
+                return StaticProperty.ALLOWS_ZERO_OR_ONE;
+            }
         }
-        // the parent axis isn't handled by this class
+        if (axis == AxisInfo.CHILD && test instanceof NamedXNodePredicate) {
+            NamedXNodePredicate fpTest = (NamedXNodePredicate) test;
+            int elemFingerprint = fpTest.getRequiredFingerprint();
+            if (fpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
+                Schema schema = getRetainedStaticContext().getImportedSchema();
+                SchemaType contentType = gNodeType.getContentType();
+                if (contentType instanceof ComplexType) {
+                    int card = ((ComplexType) contentType).getElementParticleCardinality(elemFingerprint, schema, true);
+                    if (!fpTest.isFingerprintSufficient()) {
+                        card = Cardinality.union(card, StaticProperty.ALLOWS_ZERO);
+                    }
+                    return card;
+                } else {
+                    return StaticProperty.EMPTY;
+                }
+            }
+        }
+        if (axis == AxisInfo.DESCENDANT && test instanceof NamedXNodePredicate) {
+            NamedXNodePredicate fpTest = (NamedXNodePredicate) test;
+            int elemFingerprint = fpTest.getRequiredFingerprint();
+            if (fpTest.getNodeKind() == Type.ELEMENT && elemFingerprint != -1) {
+                Schema schema = getRetainedStaticContext().getImportedSchema();
+                SchemaType contentType = gNodeType.getContentType();
+                if (contentType instanceof ComplexType) {
+                    try {
+                        int card = ((ComplexType) contentType).getDescendantElementCardinality(schema, elemFingerprint);
+                        if (!fpTest.isFingerprintSufficient()) {
+                            card = Cardinality.union(card, StaticProperty.ALLOWS_ZERO);
+                        }
+                        return card;
+                    } catch (SchemaException err) {
+                        // shouldn't happen; play safe
+                        return StaticProperty.ALLOWS_ZERO_OR_MORE;
+                    }
+                } else {
+                    return StaticProperty.EMPTY;
+                }
+            }
+        }
+        if (axis == AxisInfo.SELF) {
+            return StaticProperty.ALLOWS_ZERO_OR_ONE;
+        }
+        return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
     /**

@@ -15,6 +15,7 @@ import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.Type;
@@ -262,7 +263,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getPreviousSibling() {
-        return wrap((NodeInfo)node.iteratePrecedingSiblingAxis(null).next());
+        return wrap((NodeInfo)node.iteratePrecedingSiblingAxis(AnyGNode.TEST).next());
     }
 
     /**
@@ -274,7 +275,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getNextSibling() {
-        return wrap((NodeInfo)node.iterateFollowingSiblingAxis(null).next());
+        return wrap((NodeInfo)node.iterateFollowingSiblingAxis(AnyGNode.TEST).next());
     }
 
     /**
@@ -285,7 +286,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getFirstChild() {
-        return wrap((NodeInfo)node.iterateChildAxis(null).next());
+        return wrap((NodeInfo)node.iterateChildAxis(AnyGNode.TEST).next());
     }
 
     /**
@@ -296,7 +297,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getLastChild() {
-        SequenceIterator children = node.iterateChildAxis(null);
+        SequenceIterator children = node.iterateChildAxis(AnyGNode.TEST);
         NodeInfo last = null;
         while (true) {
             NodeInfo next = (NodeInfo)children.next();
@@ -644,7 +645,7 @@ public abstract class NodeOverNodeInfo implements Node {
         if (node.getNodeKind() == Type.DOCUMENT) {
             return null;
         } else if (node.getNodeKind() == Type.ELEMENT) {
-            SequenceIterator iter = node.iterateNamespaceAxis(null);
+            SequenceIterator iter = node.iterateNamespaceAxis(AnyGNode.TEST);
             NodeInfo ns;
             while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getUnicodeStringValue().equals(namespaceURI)) {
@@ -683,7 +684,7 @@ public abstract class NodeOverNodeInfo implements Node {
         if (node.getNodeKind() == Type.DOCUMENT) {
             return null;
         } else if (node.getNodeKind() == Type.ELEMENT) {
-            SequenceIterator iter = node.iterateNamespaceAxis(null);
+            SequenceIterator iter = node.iterateNamespaceAxis(AnyGNode.TEST);
             NodeInfo ns;
             while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getLocalPart().equals(prefix)) {

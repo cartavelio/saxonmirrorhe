@@ -171,8 +171,8 @@ public class BasePatternWithPredicate extends Pattern implements PatternWithPred
      * or it if matches atomic values
      */
     @Override
-    public int getFingerprint() {
-        return getBasePattern().getFingerprint();
+    public int getFingerprint(int nodeKind) {
+        return getBasePattern().getFingerprint(nodeKind);
     }
 
     /**

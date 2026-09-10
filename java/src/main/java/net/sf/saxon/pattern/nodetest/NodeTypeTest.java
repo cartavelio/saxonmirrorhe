@@ -2,12 +2,14 @@ package net.sf.saxon.pattern.nodetest;
 
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.z.IntPredicateLambda;
 
@@ -18,7 +20,7 @@ import java.util.function.IntPredicate;
  * a given node item type
  */
 
-public class NodeTypeTest extends NodeTest {
+public class NodeTypeTest extends NodeTest implements NodeVectorMatchMaker {
 
     private final GNodeType nodeType;
 
@@ -108,50 +110,61 @@ public class NodeTypeTest extends NodeTest {
                 }
             }
         }
-        // In all other cases, use the general-purpose implementation
-        return super.getMatcher(tree);
+        // In all other cases, use a general-purpose implementation
+        return nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER && test(tree.getNode(nodeNr));
     }
 
-    /**
-     * Get a fingerprint that can be used to match required nodes.
-     *
-     * @param nodeKind the kind of nodes required.
-     * @return if all nodes selected by the node test are of the required nodeKind, and
-     * have the same fingerprint, then return that fingerprint; otherwise return -1. Note
-     * that it is acceptable for the node test to impose further constraints, for example
-     * on the type annotation.
-     */
-    @Override
-    public int getRequiredFingerprint(int nodeKind) {
-        ItemType type = getItemType();
-        if (type instanceof NamedXNodeType) {
-            if (((NamedXNodeType)type).getNodeKind() != nodeKind) {
-                return -1;
-            }
-            QNameTest qNameTest = ((NamedXNodeType) type).getAllowedNodeNames();
-            if (qNameTest instanceof SpecificQNameTest) {
-                return ((SpecificQNameTest)qNameTest).getFingerprint();
-            }
-            return -1;
-        }
-        return -1;
-    }
+//    /**
+//     * Get a fingerprint that can be used to match required nodes.
+//     *
+//     * @return if all nodes selected by the node test are of the required nodeKind, and
+//     * have the same fingerprint, then return that fingerprint; otherwise return -1. Note
+//     * that it is acceptable for the node test to impose further constraints, for example
+//     * on the type annotation.
+//     */
+//    @Override
+//    public int getRequiredFingerprint() {
+//        ItemType type = getItemType();
+//        if (type instanceof NamedXNodeType) {
+//            if (((NamedXNodeType)type).getNodeKind() != nodeKind) {
+//                return -1;
+//            }
+//            QNameTest qNameTest = ((NamedXNodeType) type).getAllowedNodeNames();
+//            if (qNameTest instanceof SpecificQNameTest) {
+//                return ((SpecificQNameTest)qNameTest).getFingerprint();
+//            }
+//            return -1;
+//        }
+//        return -1;
+//    }
 
-    /**
-     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
-     * Return null if the node test matches nodes of more than one name
-     */
-    @Override
-    public StructuredQName getMatchingNodeName() {
-        ItemType type = getItemType();
-        if (type instanceof NamedXNodeType) {
-            QNameTest qNameTest = ((NamedXNodeType) type).getAllowedNodeNames();
-            if (qNameTest instanceof SpecificQNameTest) {
-                return ((SpecificQNameTest) qNameTest).getStructuredQName();
-            }
-        }
-        return null;
-    }
+//    /**
+//     * Ask whether having the required fingerprint and node kind is a sufficient
+//     * condition for a node to satisfy the predicate, or whether other conditions
+//     * (such as type annotation or nillability) must also be satisfied.
+//     *
+//     * @return true if matching the fingerprint is a sufficient condition.
+//     */
+//    @Override
+//    public boolean isFingerprintSufficient() {
+//        return true;
+//    }
+
+//    /**
+//     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
+//     * Return null if the node test matches nodes of more than one name
+//     */
+//    @Override
+//    public StructuredQName getMatchingNodeName() {
+//        ItemType type = getItemType();
+//        if (type instanceof NamedXNodeType) {
+//            QNameTest qNameTest = ((NamedXNodeType) type).getAllowedNodeNames();
+//            if (qNameTest instanceof SpecificQNameTest) {
+//                return ((SpecificQNameTest) qNameTest).getStructuredQName();
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * Get an item type that all matching nodes must satisfy

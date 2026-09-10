@@ -14,7 +14,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
-import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Visibility;
@@ -22,6 +22,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -353,7 +354,7 @@ public class SourceBinding {
         checkAgainstRequiredType(declaredType);
 
         if (select == null && !hasProperty(BindingProperty.DISALLOWS_CONTENT) && visibility != Visibility.ABSTRACT) {
-            SequenceIterator kids = sourceElement.iterateChildAxis(null);
+            SequenceIterator kids = sourceElement.iterateChildAxis(AnyGNode.TEST);
             NodeInfo first = (NodeInfo)kids.next();
             if (first == null) {
                 if (declaredType == null) {

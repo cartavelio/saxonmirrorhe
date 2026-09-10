@@ -12,8 +12,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 
@@ -55,7 +57,7 @@ public class DeepSkipRuleSet implements BuiltInRuleSet {
         if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
             XPathContextMajor c2 = context.newContext();
             c2.setOrigin(this);
-            c2.trackFocus(((NodeInfo) item).iterateChildAxis(null));
+            c2.trackFocus(((NodeInfo) item).iterateChildAxis(AnyGNode.TEST));
             c2.setCurrentComponent(c2.getCurrentMode());
             TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, output, c2, locationId);
             while (tc != null) {

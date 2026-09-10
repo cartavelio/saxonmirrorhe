@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.Nilled_1;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.UnionQNameTest;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.*;
@@ -28,7 +29,7 @@ import java.util.Optional;
  * the node is nilled.</p>
  */
 
-public class NamedXNodeType extends XNodeType {
+public class NamedXNodeType extends XNodeType implements NamedXNodePredicate {
 
     private final int kind;
     private final QNameTest nameTest;
@@ -132,18 +133,49 @@ public class NamedXNodeType extends XNodeType {
      * and one node name, return that node name, as an integer
      * fingerprint. In other cases, return -1.
      *
-     * @param nodeKind the kind of node required. If the {@code XNodeType}
-     *                 does not match this node kind, return -1.
      * @return an integer fingerprint in the case of a node type that
      * only matches one node kind and one qualified name. In other
      * cases return -1.
      */
     @Override
-    public int getMatchingFingerprint(int nodeKind) {
-        if (nodeKind == this.kind && nameTest instanceof SpecificQNameTest) {
+    public int getRequiredFingerprint() {
+        if (nameTest instanceof SpecificQNameTest) {
             return ((SpecificQNameTest)nameTest).getFingerprint();
         }
         return -1;
+    }
+
+    /**
+     * Get the corresponding StructuredQName: the name that all nodes must have
+     * if they are to satisfy the predicate
+     *
+     * @return if all nodes selected by the node test are of the required nodeKind, and
+     * have the same name, then return that name; otherwise return null.
+     */
+    @Override
+    public StructuredQName getMatchingNodeName() {
+        if (nameTest instanceof SpecificQNameTest) {
+            return ((SpecificQNameTest) nameTest).getStructuredQName();
+        }
+        return null;
+    }
+
+    /**
+     * Ask whether having the required fingerprint and node kind is a sufficient
+     * condition for a node to satisfy the predicate, or whether other conditions
+     * (such as type annotation or nillability) must also be satisfied.
+     *
+     * @return true if matching the fingerprint is a sufficient condition.
+     */
+    @Override
+    public boolean isFingerprintSufficient() {
+        if (kind == Type.ELEMENT) {
+            return (nillable && schemaType.equals(AnyType.getInstance()));
+        }
+        if (kind == Type.ATTRIBUTE) {
+            return schemaType.equals(BuiltInAtomicType.ANY_ATOMIC);
+        }
+        return true;
     }
 
     /**

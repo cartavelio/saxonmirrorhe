@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -81,8 +82,11 @@ public class NodeTestPattern extends Pattern {
      */
 
     @Override
-    public int getFingerprint() {
-        return nodeTest.getFingerprint();
+    public int getFingerprint(int nodeKind) {
+        if (nodeTest instanceof NamedXNodePredicate) {
+            return ((NamedXNodePredicate) nodeTest).getRequiredFingerprint();
+        }
+        return -1;
     }
 
     /**
@@ -129,25 +133,28 @@ public class NodeTestPattern extends Pattern {
      */
     @Override
     public Pattern convertToTypedPattern(String val) throws XPathException {
-        if (nodeTest.getRequiredFingerprint(Type.ELEMENT) != -1) {
-            StructuredQName qName = nodeTest.getMatchingNodeName();
-            Schema schema = getRetainedStaticContext().getImportedSchema();
-            IElementDecl decl = schema.getElementDecl(qName);
-            if (decl == null) {
-                if ("lax".equals(val)) {
-                    return this;
+        if (nodeTest instanceof NamedXNodePredicate) {
+            NamedXNodePredicate fpTest = (NamedXNodePredicate)nodeTest;
+            int fp = fpTest.getRequiredFingerprint();
+            if (fp != -1) {
+                StructuredQName qName = getRetainedStaticContext().getConfiguration().getNamePool().getStructuredQName(fp);
+                Schema schema = getRetainedStaticContext().getImportedSchema();
+                IElementDecl decl = schema.getElementDecl(qName);
+                if (decl == null) {
+                    if ("lax".equals(val)) {
+                        return this;
+                    } else {
+                        // See spec bug 25517
+                        throw new XPathException("The mode specifies typed='strict', " +
+                                                         "but there is no schema element declaration named " + nodeTest, "XTSE3105");
+                    }
                 } else {
-                    // See spec bug 25517
-                    throw new XPathException("The mode specifies typed='strict', " +
-                            "but there is no schema element declaration named " + nodeTest, "XTSE3105");
+                    GNodeType schemaNodeTest = schema.makeSchemaElementTest(fp);
+                    return new NodeTestPattern(new NodeTypeTest(schemaNodeTest));
                 }
-            } else {
-                GNodeType schemaNodeTest = schema.makeSchemaElementTest(decl.getFingerprint());
-                return new NodeTestPattern(new NodeTypeTest(schemaNodeTest));
             }
-        } else {
-            return this;
         }
+        return this;
     }
 
     @Override
@@ -167,7 +174,7 @@ public class NodeTestPattern extends Pattern {
     /*@NotNull*/
     @Override
     public Pattern copy(RebindingMap rebindings) {
-        NodeTestPattern n = new NodeTestPattern(nodeTest.copy());
+        NodeTestPattern n = new NodeTestPattern(nodeTest);
         n.setPriority(getDefaultPriority());
         ExpressionTool.copyLocationInfo(this, n);
         n.setOriginalText(getOriginalText());

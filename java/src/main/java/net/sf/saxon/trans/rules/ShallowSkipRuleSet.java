@@ -14,7 +14,11 @@ import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
@@ -64,7 +68,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
                 case Type.ELEMENT: {
                     XPathContextMajor c2 = context.newContext();
                     c2.setOrigin(this);
-                    c2.trackFocus(node.iterateAttributeAxis(null));
+                    c2.trackFocus(node.iterateAttributeAxis(AnyGNode.TEST));
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508
                     TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, output, c2, locationId);
                     while (tc != null) {
@@ -75,7 +79,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
                 case Type.DOCUMENT: {
                     XPathContextMajor c2 = context.newContext();
                     c2.setOrigin(this);
-                    c2.trackFocus(node.iterateChildAxis(null));
+                    c2.trackFocus(node.iterateChildAxis(AnyGNode.TEST));
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508
                     TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, output, c2, locationId);
                     while (tc != null) {

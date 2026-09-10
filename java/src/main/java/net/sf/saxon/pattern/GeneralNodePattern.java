@@ -20,6 +20,8 @@ import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -229,7 +231,7 @@ public final class GeneralNodePattern extends Pattern {
         if (precondition != null && !precondition.matches(item, context)) {
             return false;
         }
-        SequenceIterator anc = ((NodeInfo) item).iterateAncestorOrSelfAxis(null);
+        SequenceIterator anc = ((NodeInfo) item).iterateAncestorOrSelfAxis(AnyGNode.TEST);
         NodeInfo top = (NodeInfo)item;
         while (true) {
             NodeInfo a = (NodeInfo)anc.next();
@@ -272,7 +274,7 @@ public final class GeneralNodePattern extends Pattern {
         // equivalent expression
 
         if (anchor == null) {
-            SequenceIterator ancestors = node.iterateAncestorOrSelfAxis(null);
+            SequenceIterator ancestors = node.iterateAncestorOrSelfAxis(AnyGNode.TEST);
             while (true) {
                 NodeInfo ancestor = (NodeInfo)ancestors.next();
                 if (ancestor == null) {
@@ -332,8 +334,11 @@ public final class GeneralNodePattern extends Pattern {
      */
 
     @Override
-    public int getFingerprint() {
-        return nodeTest.getFingerprint();
+    public int getFingerprint(int nodeKind) {
+        if (nodeTest instanceof NamedXNodePredicate) {
+            return ((NamedXNodePredicate)nodeTest).getRequiredFingerprint();
+        }
+        return -1;
     }
 
     /**

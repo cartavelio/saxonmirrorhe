@@ -8,6 +8,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -397,15 +398,15 @@ public class SaxonDeepEqual extends SystemFunction {
                     explain(reporter, reason, flags, n1, n2);
                     return reason;
                 }
-                SequenceIterator a1 = n1.iterateAttributeAxis(null);
-                SequenceIterator a2 = n2.iterateAttributeAxis(null);
+                SequenceIterator a1 = n1.iterateAttributeAxis(AnyGNode.TEST);
+                SequenceIterator a2 = n2.iterateAttributeAxis(AnyGNode.TEST);
                 if (!SequenceTool.sameLength(a1, a2)) {
                     final String reason = "elements have different number of attributes";
                     explain(reporter, reason, flags, n1, n2);
                     return reason;
                 }
                 NodeInfo att1;
-                a1 = n1.iterateAttributeAxis(null);
+                a1 = n1.iterateAttributeAxis(AnyGNode.TEST);
                 while ((att1 = (NodeInfo)a1.next()) != null) {
                     StructuredQName required = att1.getQName();
                     SequenceIterator a2iter = n2.iterateAttributeAxis(n -> ((NodeInfo)n).getQName().equals(required));
@@ -497,8 +498,8 @@ public class SaxonDeepEqual extends SystemFunction {
                 CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
-                SequenceIterator c1 = n1.iterateChildAxis(null);
-                SequenceIterator c2 = n2.iterateChildAxis(null);
+                SequenceIterator c1 = n1.iterateChildAxis(AnyGNode.TEST);
+                SequenceIterator c2 = n2.iterateChildAxis(AnyGNode.TEST);
                 while (true) {
                     NodeInfo d1 = (NodeInfo)c1.next();
                     while (d1 != null && isIgnorable(d1, flags)) {

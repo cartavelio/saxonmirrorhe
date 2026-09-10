@@ -14,8 +14,10 @@ import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
+import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
 import net.sf.saxon.pattern.qname.LocalQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
@@ -49,7 +51,7 @@ import java.util.function.IntPredicate;
  * relevant when selecting XNodes.</p>
  */
 
-public class SelectorTest extends NodeTest {
+public class SelectorTest extends NodeTest implements NodeVectorMatchMaker, NamedXNodePredicate {
 
     private final QNameTest key;
     private final boolean asNCName;
@@ -59,6 +61,16 @@ public class SelectorTest extends NodeTest {
         this.key = key;
         this.asNCName = asNCName;
         this.nodeKind = nodeKind;
+    }
+
+    /**
+     * Get the kind of nodes that this node predicate matches
+     *
+     * @return the kind of nodes, for example {@link Type#ELEMENT} or {@link Type#ATTRIBUTE}
+     */
+    @Override
+    public int getNodeKind() {
+        return nodeKind;
     }
 
     /**
@@ -132,19 +144,30 @@ public class SelectorTest extends NodeTest {
     /**
      * Get a fingerprint that can be used to match required nodes.
      *
-     * @param nodeKind the kind of nodes required.
      * @return if all nodes selected by the node test are of the required nodeKind, and
      * have the same fingerprint, then return that fingerprint; otherwise return -1. Note
      * that it is acceptable for the node test to impose further constraints, for example
      * on the type annotation.
      */
 
-    public int getRequiredFingerprint(int nodeKind) {
+    public int getRequiredFingerprint() {
         if (this.nodeKind == nodeKind && key instanceof SpecificQNameTest) {
             return ((SpecificQNameTest)key).getFingerprint();
         } else {
             return -1;
         }
+    }
+
+    /**
+     * Ask whether having the required fingerprint and node kind is a sufficient
+     * condition for a node to satisfy the predicate, or whether other conditions
+     * (such as type annotation or nillability) must also be satisfied.
+     *
+     * @return true if matching the fingerprint is a sufficient condition.
+     */
+    @Override
+    public boolean isFingerprintSufficient() {
+        return true;
     }
 
     /**
@@ -207,36 +230,16 @@ public class SelectorTest extends NodeTest {
         return key;
     }
 
-
-    /**
-     * Get the fingerprint required
-     */
-
-    @Override
-    public int getFingerprint() {
-        return -1;
-    }
-
     /**
      * Get the name of the nodes matched by this nodetest, if it matches a specific name.
      * Return null if the node test matches nodes of more than one name
      */
     @Override
     public StructuredQName getMatchingNodeName() {
-        return key instanceof SpecificQNameTest ? ((SpecificQNameTest)key).getStructuredQName() : null;
+        return this.nodeKind == nodeKind && key instanceof SpecificQNameTest
+                ? ((SpecificQNameTest)key).getStructuredQName()
+                : null;
     }
-
-//    /**
-//     * Determine the types of nodes to which this pattern applies. Used for optimisation.
-//     * For patterns that match nodes of several types, return Type.NODE
-//     *
-//     * @return the type of node matched by this pattern. e.g. Type.ELEMENT or Type.TEXT
-//     */
-//
-//    @Override
-//    public int getPrimitiveType() {
-//        return Type.GNODE;
-//    }
 
     /**
      * Get the set of node names allowed by this NodeTest. This is returned as a set of Integer fingerprints.

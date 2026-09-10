@@ -7,10 +7,7 @@
 
 package net.sf.saxon.tree.tiny;
 
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.AtomizedValueIterator;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
@@ -20,23 +17,23 @@ import net.sf.saxon.type.Type;
  * an explicit name test for the required element nodes.
  */
 
-final class NamedChildIterator implements SequenceIterator, LookaheadIterator, AtomizedValueIterator {
+final class NamedElementChildIterator implements SequenceIterator, LookaheadIterator, AtomizedValueIterator {
 
     private final TinyTree tree;
-    private int nextNodeNr;
     private final int fingerprint;
-    private TinyNodeImpl startNode;
+    private final TinyNodeImpl startNode;
+    private int nextNodeNr;
     private boolean needToAdvance = false;
 
     /**
-     * Return an enumeration over children or siblings of the context node
+     * Return an iterator over children or siblings of the context node
      *
      * @param tree        The TinyTree containing the context node
      * @param node        The context node, the start point for the iteration
      * @param fingerprint The fingerprint of the required element children
      */
 
-    NamedChildIterator(TinyTree tree, TinyNodeImpl node, int fingerprint) {
+    NamedElementChildIterator(TinyTree tree, TinyNodeImpl node, int fingerprint) {
         this.tree = tree;
         this.fingerprint = fingerprint;
         this.startNode = node;
@@ -46,11 +43,10 @@ final class NamedChildIterator implements SequenceIterator, LookaheadIterator, A
         nextNodeNr = node.nodeNr + 1;
 
         // check if this matches the conditions
-        //if (nextNr >= 0) {
-            if (((tree.nodeKind[nextNodeNr] & 0xf) != Type.ELEMENT) || (tree.nameCode[nextNodeNr] & 0xfffff) != fingerprint) {
-                needToAdvance = true;
-            }
-        //}
+        if (((tree.nodeKind[nextNodeNr] & 0xf) != Type.ELEMENT)
+                || (tree.nameCode[nextNodeNr] & NamePool.FP_MASK) != fingerprint) {
+            needToAdvance = true;
+        }
     }
 
     /**
@@ -71,7 +67,8 @@ final class NamedChildIterator implements SequenceIterator, LookaheadIterator, A
                     needToAdvance = false;
                     return null;
                 }
-            } while (((tree.nameCode[nextNodeNr] & 0xfffff) != fingerprint) || ((tree.nodeKind[nextNodeNr] & 0xf) != Type.ELEMENT));
+            } while (((tree.nameCode[nextNodeNr] & NamePool.FP_MASK) != fingerprint)
+                    || ((tree.nodeKind[nextNodeNr] & 0xf) != Type.ELEMENT));
         } else if (nextNodeNr == -1) {
             return null;
         }

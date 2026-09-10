@@ -22,6 +22,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeSelector;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -613,15 +614,15 @@ public class DeepEqual extends CollatingFunctionFixed {
                     explain(reporter, reason, options, n1, n2);
                     return reason;
                 }
-                SequenceIterator a1 = n1.iterateAttributeAxis(null);
-                SequenceIterator a2 = n2.iterateAttributeAxis(null);
+                SequenceIterator a1 = n1.iterateAttributeAxis(AnyGNode.TEST);
+                SequenceIterator a2 = n2.iterateAttributeAxis(AnyGNode.TEST);
                 if (!SequenceTool.sameLength(a1, a2)) {
                     final String reason = "elements have different number of attributes";
                     explain(reporter, reason, options, n1, n2);
                     return reason;
                 }
                 NodeInfo att1;
-                a1 = n1.iterateAttributeAxis(null);
+                a1 = n1.iterateAttributeAxis(AnyGNode.TEST);
                 while ((att1 = ((NodeInfo)a1.next())) != null) {
                     StructuredQName required = att1.getQName();
                     SequenceIterator a2iter = n2.iterateAttributeAxis(n -> ((NodeInfo)n).getQName().equals(required));

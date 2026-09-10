@@ -9,6 +9,7 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
@@ -338,16 +339,16 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      * Return an iterator over the descendants of this node.
      * This method is only called after checking that the node is an element or document node.
      *
-     * @param nodeTest    a test that the returned descendants must satisfy
+     * @param predicate    a test that the returned descendants must satisfy
      * @param includeSelf true if this node is to be included in the result
      * @return an iterator over the sibling nodes, in axis order.
      */
 
     @CSharpModifiers(code={"protected", "virtual"})
-    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         SequenceIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
-        if (nodeTest != NodeTypeTest.GNODE) {
-            iter = Navigator.filter(iter, nodeTest);
+        if (predicate != NodeTypeTest.GNODE) {
+            iter = Navigator.filter(iter, predicate);
         }
         return iter;
     }
@@ -397,7 +398,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
     @Override
     @CSharpModifiers(code = {"public", "virtual"})
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
-        return new NamespaceBinding[0];
+        return NamespaceBinding.EMPTY_ARRAY;
     }
 
     /**
@@ -458,7 +459,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                return iterateChildAxis(null).next() != null;
+                return iterateChildAxis(AnyGNode.TEST).next() != null;
             default:
                 return false;
         }

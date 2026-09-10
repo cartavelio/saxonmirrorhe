@@ -15,6 +15,7 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -72,7 +73,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     out.startDocument(ReceiverOption.NONE);
                     XPathContextMajor c2 = context.newContext();
                     c2.setOrigin(this);
-                    c2.trackFocus(node.iterateChildAxis(null));
+                    c2.trackFocus(node.iterateChildAxis(AnyGNode.TEST));
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508
                     pipe.setXPathContext(c2);
                     TailCall tc = context.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, out, c2, locationId);
@@ -101,7 +102,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     pipe.setXPathContext(c2);
 
                     // apply-templates to all attributes
-                    SequenceIterator attributes = node.iterateAttributeAxis(null);
+                    SequenceIterator attributes = node.iterateAttributeAxis(AnyGNode.TEST);
                     if (attributes != EmptyIterator.getInstance()) {
                         c2.setOrigin(this);
                         c2.trackFocus(attributes);
@@ -113,7 +114,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
 
                     // apply-templates to all children
                     if (node.hasChildNodes()) {
-                        c2.trackFocus(node.iterateChildAxis(null));
+                        c2.trackFocus(node.iterateChildAxis(AnyGNode.TEST));
                         TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, out, c2, locationId);
                         while (tc != null) {
                             tc = tc.processLeavingTail();

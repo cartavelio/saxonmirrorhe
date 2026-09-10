@@ -13,11 +13,11 @@ import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.NextIteration;
 import net.sf.saxon.expr.instruct.WithParam;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NodeSelector;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
@@ -64,7 +64,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
 
         for (NodeInfo w : children(XSLWithParam.class::isInstance)) {
             XSLWithParam withParam = (XSLWithParam) w;
-            SequenceIterator formalParams = xslIterate.iterateChildAxis(null);
+            SequenceIterator formalParams = xslIterate.iterateChildAxis(AnyGNode.TEST);
             boolean ok = false;
             NodeInfo param;
             while ((param = (NodeInfo)formalParams.next()) != null) {
@@ -106,7 +106,7 @@ public class XSLNextIteration extends XSLBreakOrContinue {
         // actual parameters of the xsl:next-iteration, add an implicit <xsl:with-param name="p" select="$p"/>
 
         if (xslIterate != null) {
-            SequenceIterator declaredParams = xslIterate.iterateChildAxis(null);
+            SequenceIterator declaredParams = xslIterate.iterateChildAxis(AnyGNode.TEST);
             NodeInfo param;
             while ((param = (NodeInfo)declaredParams.next()) != null) {
                 if (param instanceof XSLLocalParam) {

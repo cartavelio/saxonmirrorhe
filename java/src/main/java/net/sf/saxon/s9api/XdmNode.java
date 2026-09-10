@@ -20,6 +20,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NamedXNodeType;
 
 import javax.xml.transform.Source;
@@ -316,7 +317,7 @@ public class XdmNode extends XdmItem {
      */
 
     public XdmSequenceIterator<XdmNode> axisIterator(Axis axis) {
-        SequenceIterator base = Navigator.iterateAxis(getUnderlyingNode(), axis.getAxisNumber(), null);
+        SequenceIterator base = Navigator.iterateAxis(getUnderlyingNode(), axis.getAxisNumber(), AnyXNodeType.getInstance());
         return XdmSequenceIterator.ofNodes(base);
     }
 

@@ -9,7 +9,8 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
 import java.util.function.IntPredicate;
@@ -25,24 +26,27 @@ import java.util.function.IntPredicate;
 final class DescendantIterator implements SequenceIterator {
 
     private final TinyTree tree;
-    private int nextNodeNr;
     private final int startDepth;
+    private final NodePredicate predicate;
     private final IntPredicate matcher;
+
+    private int nextNodeNr;
     private NodeInfo pending = null;
 
     /**
      * Create an iterator over the descendant axis
      *
-     * @param doc         the containing TinyTree
+     * @param tree        the containing TinyTree
      * @param node        the node whose descendants are required
-     * @param nodeTest    test to be satisfied by each returned node
+     * @param predicate   test to be satisfied by each returned node
      */
 
-    DescendantIterator(/*@NotNull*/ TinyTree doc, /*@NotNull*/ TinyNodeImpl node, NodeTest nodeTest) {
-        tree = doc;
+    DescendantIterator(TinyTree tree, TinyNodeImpl node, NodePredicate predicate) {
+        this.tree = tree;
+        this.predicate = predicate;
         nextNodeNr = node.nodeNr;
-        startDepth = doc.depth[nextNodeNr];
-        matcher = nodeTest.getMatcher(doc);
+        startDepth = tree.depth[nextNodeNr];
+        matcher = Navigator.getNumberedNodeMatcher(predicate, tree);
 
     }
 
@@ -70,9 +74,13 @@ final class DescendantIterator implements SequenceIterator {
                 return null;
             }
             if (tree.nodeKind[nextNodeNr] == Type.TEXTUAL_ELEMENT) {
-                pending = ((TinyTextualElement)tree.getNode(nextNodeNr)).getTextNode();
+                NodeInfo text = ((TinyTextualElement)tree.getNode(nextNodeNr)).getTextNode();
+                if (predicate.test(text)) {
+                    pending = text;
+                }
             }
         } while (!matcher.test(nextNodeNr));
+
         return tree.getNode(nextNodeNr);
     }
 

@@ -12,7 +12,6 @@ import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -374,42 +373,22 @@ public class CombinedNodeTest extends NodeTest {
 //        }
 //    }
 
-    /**
-     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
-     * Return -1 if the node test matches nodes of more than one name
-     */
 
-    @Override
-    public int getFingerprint() {
-        int fp1 = nodetest1.getFingerprint();
-        int fp2 = nodetest2.getFingerprint();
-        if (fp1 == fp2) {
-            return fp1;
-        }
-        if (fp2 == -1 && operator == OperatorSymbol.INTERSECT) {
-            return fp1;
-        }
-        if (fp1 == -1 && operator == OperatorSymbol.INTERSECT) {
-            return fp2;
-        }
-        return -1;
-    }
-
-    @Override
-    public StructuredQName getMatchingNodeName() {
-        StructuredQName n1 = nodetest1.getMatchingNodeName();
-        StructuredQName n2 = nodetest2.getMatchingNodeName();
-        if (n1 != null && n1.equals(n2)) {
-            return n1;
-        }
-        if (n1 == null && operator == OperatorSymbol.INTERSECT) {
-            return n2;
-        }
-        if (n2 == null && operator == OperatorSymbol.INTERSECT) {
-            return n1;
-        }
-        return null;
-    }
+//    @Override
+//    public StructuredQName getMatchingNodeName() {
+//        StructuredQName n1 = nodetest1.getMatchingNodeName();
+//        StructuredQName n2 = nodetest2.getMatchingNodeName();
+//        if (n1 != null && n1.equals(n2)) {
+//            return n1;
+//        }
+//        if (n1 == null && operator == OperatorSymbol.INTERSECT) {
+//            return n2;
+//        }
+//        if (n2 == null && operator == OperatorSymbol.INTERSECT) {
+//            return n1;
+//        }
+//        return null;
+//    }
 
     /**
      * Determine whether the content type (if present) is nillable

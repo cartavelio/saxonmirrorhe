@@ -4,33 +4,38 @@ import net.sf.saxon.om.StructuredQName;
 
 /**
  * Interface implemented by a node test that selects nodes of a specific node
- * kind (element or attribute) with a specific node name with a known
- * fingerprint. Having the right fingerprint and node kind is a sufficient
- * condition for satisfying the predicate.
+ * kind with a specific node name with a known
+ * fingerprint. Having the right name and node kind is a necessary
+ * condition for satisfying the predicate, and if {@link #isFingerprintSufficient()} returns
+ * true, it is also a sufficient condition.
  */
 
-public interface FingerprintedNameTest extends NodePredicate {
+public interface NamedXNodePredicate extends NodePredicate {
+
+    /**
+     * Get the kind of nodes that this node predicate matches
+     * @return the kind of nodes, for example {@link net.sf.saxon.type.Type.ELEMENT} or {@code Type.ATTRIBUTE}
+     */
+
+    int getNodeKind();
 
     /**
      * Get a fingerprint that all nodes (of the specified node kind) must have
      * if they are to satisfy the predicate.
      *
-     * @param nodeKind the kind of nodes required.
-     * @return if all nodes selected by the node test are of the required nodeKind, and
-     * have the same fingerprint, then return that fingerprint; otherwise return -1.
+     * @return the fingerprint of the name that a node must have if it is to satisfy the predicate
      */
 
-    int getRequiredFingerprint(int nodeKind);
+    int getRequiredFingerprint();
 
     /**
      * Get the corresponding StructuredQName: the name that all nodes must have
      * if they are to satisfy the predicate
-     * @param nodeKind the kind of nodes required.
-     * @return if all nodes selected by the node test are of the required nodeKind, and
-     * have the same name, then return that name; otherwise return null.
+     *
+     * @return the name that a node must have if it is to satisfy the predicate
      */
 
-    StructuredQName getMatchingNodeName(int nodeKind);
+    StructuredQName getMatchingNodeName();
 
     /**
      * Ask whether having the required fingerprint and node kind is a sufficient

@@ -14,23 +14,24 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.util.Navigator;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 
 /**
@@ -175,11 +176,18 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        NodeTest nodeTest = nodeTestFromPredicate(predicate);
         // Optimization to use document-level index by element name
-        int fingerprint = nodeTest.getRequiredFingerprint(Type.ELEMENT);
-        if (fingerprint != -1) {
-            return getAllElements(fingerprint);
+        if (predicate instanceof NamedXNodePredicate) {
+            NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
+            int fingerprint = fpTest.getRequiredFingerprint();
+            if (fingerprint != -1 && fpTest.getNodeKind() == Type.ELEMENT) {
+                SequenceIterator all = getAllElements(fingerprint);
+                if (fpTest.isFingerprintSufficient()) {
+                    return all;
+                } else {
+                    return Navigator.filter(all, predicate);
+                }
+            }
         }
         return super.iterateDescendantAxis(predicate);
     }

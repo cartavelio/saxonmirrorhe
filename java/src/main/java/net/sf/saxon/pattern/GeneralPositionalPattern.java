@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -292,8 +293,11 @@ public class GeneralPositionalPattern extends Pattern {
      */
 
     @Override
-    public int getFingerprint() {
-        return nodeTest.getFingerprint();
+    public int getFingerprint(int nodeKind) {
+        if (nodeTest instanceof NamedXNodePredicate) {
+            return ((NamedXNodePredicate) nodeTest).getRequiredFingerprint();
+        }
+        return -1;
     }
 
     /**
@@ -360,7 +364,7 @@ public class GeneralPositionalPattern extends Pattern {
     /*@NotNull*/
     @Override
     public Pattern copy(RebindingMap rebindings) {
-        GeneralPositionalPattern n = new GeneralPositionalPattern(nodeTest.copy(), positionExpr.copy(rebindings));
+        GeneralPositionalPattern n = new GeneralPositionalPattern(nodeTest, positionExpr.copy(rebindings));
         ExpressionTool.copyLocationInfo(this, n);
         n.setOriginalText(getOriginalText());
         return n;

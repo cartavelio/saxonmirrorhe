@@ -8,6 +8,8 @@
 package net.sf.saxon.option.jdom2;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -410,13 +412,13 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 case Type.TEXT:
                 case Type.COMMENT:
                 case Type.PROCESSING_INSTRUCTION:
-                    iter = parent.iterateChildAxis(null);
+                    iter = parent.iterateChildAxis(AnyGNode.TEST);
                     break;
                 case Type.ATTRIBUTE:
-                    iter = parent.iterateAttributeAxis(null);
+                    iter = parent.iterateAttributeAxis(AnyGNode.TEST);
                     break;
                 case Type.NAMESPACE:
-                    iter = parent.iterateNamespaceAxis(null);
+                    iter = parent.iterateNamespaceAxis(AnyGNode.TEST);
                     break;
                 default:
                     index = 0;
@@ -478,18 +480,19 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         Iterator<? extends Content> descendants;
-        final UType uType = nodeTest.getUType();
+        NodeTest test = Navigator.nodeTestFromPredicate(predicate);
+        final UType uType= test.getUType();
         if (uType.overlaps(UType.TEXT)) {
             // if selecting text nodes, we have to handle adjacent sibling text nodes. The best way
             // to achieve this is by using the recursive implementation of the descendant axis available
             // in the Navigator class, which works in terms of the child axis only. See bug #5348.
             SequenceIterator allDescendants = new Navigator.DescendantIterator(this, includeSelf, true);
-            if (nodeTest == NodeTypeTest.GNODE) {
+            if (predicate == NodeTypeTest.GNODE) {
                 return allDescendants;
             } else {
-                return Navigator.filter(allDescendants, nodeTest);
+                return Navigator.filter(allDescendants, predicate);
             }
         }
         if (uType == UType.ELEMENT) {
@@ -505,14 +508,14 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             }
         };
         SequenceIterator wrappedDescendants = new DescendantWrappingIterator<Content>(descendants, wrappingFunct);
-        if (includeSelf && nodeTest.test(this)) {
+        if (includeSelf && predicate.test(this)) {
             wrappedDescendants = new PrependIterator(this, wrappedDescendants);
         }
 
-        if (nodeTest == NodeTypeTest.GNODE) {
+        if (predicate == NodeTypeTest.GNODE) {
             return wrappedDescendants;
         } else {
-            return Navigator.filter(wrappedDescendants, nodeTest);
+            return Navigator.filter(wrappedDescendants, predicate);
         }
     }
 

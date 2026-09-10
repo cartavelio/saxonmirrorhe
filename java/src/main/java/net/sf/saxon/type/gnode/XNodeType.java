@@ -54,7 +54,7 @@ public abstract class XNodeType extends GNodeType {
      * cases return -1.
      */
 
-    public int getMatchingFingerprint(int nodeKind) {
+    public int getRequiredFingerprint(int nodeKind) {
         return -1;
     }
 

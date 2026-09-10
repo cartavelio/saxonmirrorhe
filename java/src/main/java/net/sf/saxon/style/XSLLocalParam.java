@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.FunctionStreamability;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
@@ -162,7 +163,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
         }
 
         // it must be a text node; allow it if all whitespace
-        SequenceTool.supply(iteratePrecedingSiblingAxis(null), (ItemConsumer<? super Item>) node -> {
+        SequenceTool.supply(iteratePrecedingSiblingAxis(AnyGNode.TEST), (ItemConsumer<? super Item>) node -> {
             if (node instanceof XSLLocalParam) {
                 if (name.equals(((XSLLocalParam) node).sourceBinding.getVariableQName())) {
                     compileError("The name of the parameter (" + name + ") is not unique", "XTSE0580");

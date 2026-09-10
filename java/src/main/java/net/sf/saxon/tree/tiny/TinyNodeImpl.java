@@ -9,16 +9,15 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependIterator;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
-
-import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 
 /**
@@ -367,39 +366,28 @@ public abstract class TinyNodeImpl implements NodeInfo {
         return tree.getNamePool().getLocalName(code);
     }
 
-    //    /**
-//     * Get an iterator over the child axis, starting at this node; the nodes will
-//     * be in document order.
-//     *
-//     * @param predicate a condition that the nodes must satisfy, or null
-//     * @return the required iterator
-//     */
-//    @Override
-//    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-//        if (hasChildNodes()) {
-//            return new SiblingIterator(tree, this, predicate, true);
-//        } else {
-//            return EmptyIterator.getInstance();
-//        }
-//    }
-
-
     @Override
     public SequenceIterator iterateAncestorAxis(NodePredicate nodeTest) {
         return new AncestorIterator(this, nodeTest);
     }
 
     @Override
-    public SequenceIterator iterateChildAxis(NodePredicate nodeTest) {
+    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
         if (hasChildNodes()) {
-            NodeTest test = nodeTestFromPredicate(nodeTest);
-            int fp = test.getRequiredFingerprint(Type.ELEMENT);
-            if (fp != -1) {
-                // fast path for common case
-                return new NamedChildIterator(tree, this, fp);
-            } else {
-                return new SiblingIterator(tree, this, nodeTest, true);
+            if (predicate instanceof NamedXNodePredicate) {
+                NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
+                int fp = ((NamedXNodePredicate) predicate).getRequiredFingerprint();
+                if (fp != -1 && fpTest.getNodeKind() == Type.ELEMENT) {
+                    // fast path for common case
+                    SequenceIterator namedElements = new NamedElementChildIterator(tree, this, fp);
+                    if (fpTest.isFingerprintSufficient()) {
+                        return namedElements;
+                    } else {
+                        return Navigator.filter(namedElements, predicate);
+                    }
+                }
             }
+            return new SiblingIterator(tree, this, predicate, true);
         } else {
             return EmptyIterator.getInstance();
         }
@@ -407,12 +395,11 @@ public abstract class TinyNodeImpl implements NodeInfo {
 
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        NodeTest nodeTest = nodeTestFromPredicate(predicate);
         if (hasChildNodes()) {
-            if (nodeTest.getUType().overlaps(UType.TEXT)) {
-                return new DescendantIterator(tree, this, nodeTest);
+            if (Navigator.getPotentialNodeKinds(predicate).overlaps(UType.TEXT)) {
+                return new DescendantIterator(tree, this, predicate);
             } else {
-                return new DescendantIteratorSansText(tree, this, nodeTest);
+                return new DescendantIteratorSansText(tree, this, predicate);
             }
         } else {
             return EmptyIterator.getInstance();

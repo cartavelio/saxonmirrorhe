@@ -11,6 +11,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
@@ -103,7 +104,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
             Node node = getAttributes().getNamedItem(name);
             return node == null ? "" : node.getNodeValue();
         }
-        SequenceIterator atts = node.iterateAttributeAxis(null);
+        SequenceIterator atts = node.iterateAttributeAxis(AnyGNode.TEST);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
@@ -133,7 +134,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
 
     @Override
     public Attr getAttributeNode(String name) {
-        SequenceIterator atts = node.iterateAttributeAxis(null);
+        SequenceIterator atts = node.iterateAttributeAxis(AnyGNode.TEST);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
@@ -310,7 +311,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
             Node node = getAttributes().getNamedItem(name);
             return node != null;
         }
-        SequenceIterator atts = node.iterateAttributeAxis(null);
+        SequenceIterator atts = node.iterateAttributeAxis(AnyGNode.TEST);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {

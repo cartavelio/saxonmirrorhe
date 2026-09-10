@@ -22,6 +22,7 @@ import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -320,25 +321,44 @@ public final class Atomizer extends UnaryExpression {
                 return newBlock.typeCheck(visitor, contextInfo).optimize(visitor, contextInfo);
             }
             if (untyped && operand instanceof AxisExpression &&
-                    ((AxisExpression) operand).getNodeTest().getRequiredFingerprint(Type.ATTRIBUTE) != -1 &&
                     !((AxisExpression) operand).isContextPossiblyUndefined()) {
-                StructuredQName name = ((AxisExpression) operand).getNodeTest().getMatchingNodeName();
-                FingerprintedQName qName = new FingerprintedQName(name, visitor.getConfiguration().getNamePool());
-                AttributeGetter ag = new AttributeGetter(qName);
-                ExpressionTool.copyLocationInfo(this, ag);
-                return ag;
+                StructuredQName name = getRequiredAttributeName(((AxisExpression) operand).getNodeTest());
+                if (name != null) {
+                    FingerprintedQName qName = new FingerprintedQName(name, visitor.getConfiguration().getNamePool());
+                    AttributeGetter ag = new AttributeGetter(qName);
+                    ExpressionTool.copyLocationInfo(this, ag);
+                    return ag;
+                }
             }
             if (untyped && operand instanceof SimpleStepExpression &&
-                    ((SimpleStepExpression) operand).getAxisExpression().getAxis() == AxisInfo.ATTRIBUTE &&
-                    ((SimpleStepExpression) operand).getAxisExpression().getNodeTest().getRequiredFingerprint(Type.ATTRIBUTE) != -1) {
-                StructuredQName name = ((SimpleStepExpression) operand).getAxisExpression().getNodeTest().getMatchingNodeName();
-                FingerprintedQName qName = new FingerprintedQName(name, visitor.getConfiguration().getNamePool());
-                AttributeGetter ag = new AttributeGetter(qName);
-                ExpressionTool.copyLocationInfo(this, ag);
-                return new SlashExpression(((SimpleStepExpression) operand).getStart(), ag);
+                    ((SimpleStepExpression) operand).getAxisExpression().getAxis() == AxisInfo.ATTRIBUTE) {
+                StructuredQName name = getRequiredAttributeName(
+                        ((SimpleStepExpression) operand).getAxisExpression().getNodeTest());
+                if (name != null) {
+                    FingerprintedQName qName = new FingerprintedQName(name, visitor.getConfiguration().getNamePool());
+                    AttributeGetter ag = new AttributeGetter(qName);
+                    ExpressionTool.copyLocationInfo(this, ag);
+                    return new SlashExpression(((SimpleStepExpression) operand).getStart(), ag);
+                }
             }
         }
         return exp;
+    }
+
+    /**
+     * If the supplied nodeTest is a test for a specific attribute name, return that name
+     * @param nodeTest the supplied nodeTest
+     * @return the attribute name required by the nodeTest if any; otherwise null
+     */
+
+    private static StructuredQName getRequiredAttributeName(NodeTest nodeTest) {
+        if (nodeTest instanceof NamedXNodePredicate) {
+            NamedXNodePredicate p = (NamedXNodePredicate) nodeTest;
+            if (p.getNodeKind() == Type.ATTRIBUTE && p.isFingerprintSufficient()) {
+                return p.getMatchingNodeName();
+            }
+        }
+        return null;
     }
 
     /**

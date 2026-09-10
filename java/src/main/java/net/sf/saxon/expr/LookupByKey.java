@@ -512,7 +512,7 @@ public class LookupByKey extends BinaryExpression {
                                 case JNODE:
                                     SequenceIterator rhsIter = rhsVal.iterate();
                                     return MappingIterator.map(rhsIter, key -> {
-                                                                   SequenceIterator all = ((JNode) baseItem).iterateChildAxis(null);
+                                                                   SequenceIterator all = ((JNode) baseItem).iterateChildAxis(AnyJNodeType.getInstance());
                                                                    return new ItemMappingIterator(all, jnode ->
                                                                            ((JNode) jnode).getSelector().equals(key) ? jnode : null);
                                                                }
@@ -585,7 +585,7 @@ public class LookupByKey extends BinaryExpression {
                                 SequenceIterator rhsIter = rhsVal.iterate();
                                 final int axis = expr.axis;
                                 return MappingIterator.map(rhsIter, key -> {
-                                    SequenceIterator all = ((JNode)baseItem).iterateChildAxis(null);
+                                    SequenceIterator all = ((JNode)baseItem).iterateChildAxis(AnyJNodeType.getInstance());
                                     return new ItemMappingIterator(all, jnode ->
                                             ((JNode)jnode).getSelector().equals(key) ? jnode : null);
                                 }

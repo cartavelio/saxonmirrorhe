@@ -130,8 +130,7 @@ public class SameNameTest extends NodeTest {
      * Get the fingerprint required
      */
 
-    @Override
-    public int getFingerprint() {
+    private int getFingerprint() {
         if (origin.hasFingerprint()) {
             return origin.getFingerprint();
         } else {

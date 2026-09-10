@@ -8,6 +8,7 @@
 package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.StringView;
@@ -299,7 +300,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     }
 
     @Override
-    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         throw new UnsupportedOperationException(); // shouldn't be called on this kind of node
     }
 

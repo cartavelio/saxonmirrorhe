@@ -16,6 +16,7 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
@@ -142,7 +143,7 @@ public class Path_1 extends SystemFunction {
             return StringValue.makeStringValue("/");
         }
         StringBuilder fsb = new StringBuilder(256);
-        SequenceIterator iter = node.iterateAncestorOrSelfAxis(null);
+        SequenceIterator iter = node.iterateAncestorOrSelfAxis(AnyGNode.TEST);
         NodeInfo n;
         boolean first = true;
         while ((n = (NodeInfo)iter.next()) != null) {
@@ -271,7 +272,7 @@ public class Path_1 extends SystemFunction {
             return StringValue.makeStringValue("/");
         }
         UnicodeString buffer = ZenoString.EMPTY;
-        SequenceIterator iter = node.iterateAncestorOrSelfAxis(null);
+        SequenceIterator iter = node.iterateAncestorOrSelfAxis(AnyGNode.TEST);
         JNode n;
         boolean first = true;
         boolean foundOrigin = origin == null;

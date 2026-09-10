@@ -10,11 +10,9 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.tree.util.Navigator;
 
 import java.util.function.IntPredicate;
-
-import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 /**
  * This class supports the preceding-sibling axis.
@@ -24,24 +22,19 @@ import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 final class PrecedingSiblingIterator implements SequenceIterator {
 
-    private final TinyTree document;
-    private final TinyNodeImpl startNode;
+    private final TinyTree tree;
     private int nextNodeNr;
-    private final NodeTest test;
     private final TinyNodeImpl parentNode;
     private final IntPredicate matcher;
 
-    PrecedingSiblingIterator(TinyTree doc, /*@NotNull*/ TinyNodeImpl node, NodePredicate predicate) {
-        document = doc;
-        document.ensurePriorIndex();
-        test = nodeTestFromPredicate(predicate);
-        startNode = node;
+    PrecedingSiblingIterator(TinyTree doc, TinyNodeImpl node, NodePredicate predicate) {
+        tree = doc;
+        tree.ensurePriorIndex();
         nextNodeNr = node.nodeNr;
         parentNode = node.parent;   // doesn't matter if this is null (unknown)
-        this.matcher = test.getMatcher(doc);
+        matcher = Navigator.getNumberedNodeMatcher(predicate, doc);
     }
 
-    /*@Nullable*/
     @Override
     public NodeInfo next() {
         if (nextNodeNr < 0) {
@@ -49,12 +42,12 @@ final class PrecedingSiblingIterator implements SequenceIterator {
             return null;
         }
         while (true) {
-            nextNodeNr = document.prior[nextNodeNr];
+            nextNodeNr = tree.prior[nextNodeNr];
             if (nextNodeNr < 0) {
                 return null;
             }
             if (matcher.test(nextNodeNr)) {
-                TinyNodeImpl next = document.getNode(nextNodeNr);
+                TinyNodeImpl next = tree.getNode(nextNodeNr);
                 next.setParentNode(parentNode);
                 return next;
             }

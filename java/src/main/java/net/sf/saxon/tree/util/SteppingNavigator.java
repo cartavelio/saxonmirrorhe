@@ -9,7 +9,8 @@ package net.sf.saxon.tree.util;
 
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.type.Type;
 
@@ -105,7 +106,7 @@ public abstract class SteppingNavigator {
     private static class FollowingFilteredNodeStepper implements Stepper {
 
         SteppingNode anchor;
-        NodeTest test;
+        NodePredicate test;
 
         /**
          * Create a stepper to step successively through selected nodes in a subtree
@@ -114,7 +115,7 @@ public abstract class SteppingNavigator {
          * @param test   the test that returned nodes must satisfy
          */
 
-        FollowingFilteredNodeStepper(SteppingNode anchor, NodeTest test) {
+        FollowingFilteredNodeStepper(SteppingNode anchor, NodePredicate test) {
             this.anchor = anchor;
             this.test = test;
         }
@@ -203,33 +204,35 @@ public abstract class SteppingNavigator {
         private final SteppingNode start;
         private SteppingNode current;
         private boolean done;
-        private final Stepper stepper;
+        private Stepper stepper;
 
         /**
          * Create an iterator over the descendant or descendant-or-self axis
          *
          * @param start       the root of the subtree whose descendants are required
          * @param includeSelf true if this is the descendant-or-self axis
-         * @param test        the node-test that selected nodes must satisfy
+         * @param predicate   the node-test that selected nodes must satisfy
          */
 
-        public DescendantAxisIterator(SteppingNode start, boolean includeSelf, NodeTest test) {
+        public DescendantAxisIterator(SteppingNode start, boolean includeSelf, NodePredicate predicate) {
             this.start = start;
 
-            if (!(includeSelf && test.test(start))) {
+            if (!(includeSelf && predicate.test(start))) {
                 // initialize currNode to the start node if and only if this is NOT a descendant-or-self scan
                 current = start;
             }
 
-            if (test == null || test == NodeTypeTest.GNODE) {
+            if (predicate == null || predicate == NodeTypeTest.GNODE) {
                 stepper = new FollowingNodeStepper(start);
-            } else {
-                int fingerprint = test.getRequiredFingerprint(Type.ELEMENT);
-                if (fingerprint != -1) {
+            } else if (predicate instanceof NamedXNodePredicate) {
+                NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
+                int fingerprint = fpTest.getRequiredFingerprint();
+                if (fingerprint != -1 && fpTest.getNodeKind() == Type.ELEMENT && fpTest.isFingerprintSufficient()) {
                     stepper = new FollowingFingerprintedElementStepper(start, fingerprint);
-                } else {
-                    stepper = new FollowingFilteredNodeStepper(start, test);
                 }
+            }
+            if (stepper == null) {
+                stepper = new FollowingFilteredNodeStepper(start, predicate);
             }
 //            } else if (test instanceof NodeKindType) {
 //                if (((NodeKindType)test).getPrimitiveType() == Type.ELEMENT) {

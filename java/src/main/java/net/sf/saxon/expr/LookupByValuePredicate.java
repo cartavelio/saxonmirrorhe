@@ -19,6 +19,7 @@ import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.MapOrArray;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.jnode.RootJNode;
@@ -357,7 +358,7 @@ public class LookupByValuePredicate extends UnaryExpression {
                     } else {
                         jNode = (JNode)item;
                     }
-                    SequenceIterator allNodes = jNode.iterateChildAxis(null);
+                    SequenceIterator allNodes = jNode.iterateChildAxis(AnyJNodeType.getInstance());
                     SequenceIterator selectedNodes =
                             predicate == null
                                     ? allNodes

@@ -17,6 +17,7 @@ import net.sf.saxon.expr.instruct.TemplateRule;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetModule;
@@ -375,9 +376,19 @@ public class SimpleMode extends Mode {
 
         if (pattern instanceof NodeTestPattern) {
             NodeTest test = ((NodeTestPattern)pattern).getNodeTest();
-            int fingerprint = test.getFingerprint();
-            if (fingerprint != -1) {
-                newRule.setAlwaysMatches(true);
+            UType uType = test.getUType();
+            int kind = Type.XNODE;
+            if (uType == UType.ELEMENT) {
+                kind = Type.ELEMENT;
+            } else if (uType == UType.ATTRIBUTE) {
+                kind = Type.ATTRIBUTE;
+            }
+            if (test instanceof NamedXNodePredicate) {
+                NamedXNodePredicate fpTest = (NamedXNodePredicate) test;
+                int fingerprint = fpTest.getRequiredFingerprint();
+                if (fingerprint != -1 && fpTest.getNodeKind() == kind && fpTest.isFingerprintSufficient()) {
+                    newRule.setAlwaysMatches(true);
+                }
             }
         }
         mostRecentRule = newRule;
@@ -407,11 +418,11 @@ public class SimpleMode extends Mode {
     public void addRule(Pattern pattern, Rule newRule) {
         UType uType = pattern.getUType();
         if (uType.equals(UType.ELEMENT)) {
-            int fp = pattern.getFingerprint();
+            int fp = pattern.getFingerprint(Type.ELEMENT);
             addRuleToNamedOrUnnamedChain(
                     newRule, fp, unnamedElementRuleChain, namedElementRuleChains);
         } else if (uType.equals(UType.ATTRIBUTE)) {
-            int fp = pattern.getFingerprint();
+            int fp = pattern.getFingerprint(Type.ATTRIBUTE);
             addRuleToNamedOrUnnamedChain(
                     newRule, fp, unnamedAttributeRuleChain, namedAttributeRuleChains);
         } else if (uType.equals(UType.DOCUMENT)) {

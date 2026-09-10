@@ -8,6 +8,7 @@
 package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.tree.NamespaceNode;
@@ -197,8 +198,9 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         if (!((OMElement) node).getAllAttributes().hasNext()) {
             return EmptyIterator.getInstance();
-        } else if (nodeTest.getRequiredFingerprint(Type.ATTRIBUTE) != -1) {
-            StructuredQName requiredName = nodeTest.getMatchingNodeName();
+        } else if (nodeTest instanceof NamedXNodePredicate) {
+            NamedXNodePredicate fpTest = ((NamedXNodePredicate) nodeTest);
+            StructuredQName requiredName = fpTest.getMatchingNodeName();
             String uri = requiredName.getURI();
             String local = requiredName.getLocalPart();
             OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));

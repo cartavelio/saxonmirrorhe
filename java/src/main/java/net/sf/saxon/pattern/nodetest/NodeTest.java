@@ -7,18 +7,19 @@
 
 package net.sf.saxon.pattern.nodetest;
 
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.type.gnode.AnyGNodeType;
-import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntUniversalSet;
 
 import java.util.Optional;
-import java.util.function.IntPredicate;
 
 /**
  * A NodeTest is a simple kind of pattern that enables a context-free test of whether
@@ -34,9 +35,6 @@ import java.util.function.IntPredicate;
  * an item type (such as {@code node()} or {@code element(e)}, the NodeTest will typically
  * be an {@code NodeTypeTest} that references the required item type. The {@code NodeTest}
  * class itself no longer implements {@code ItemType}</p>
-// * <p>For use in user-written application calling the iterateAXIS methods in {@link NodeInfo},
-// * it is possible to write a user-defined subclass of <code>NodeTest</code> that implements
-// * a single method, {@link #matches(int, NodeName, SchemaType)}</p>
  */
 
 public abstract class NodeTest implements NodePredicate {
@@ -57,22 +55,6 @@ public abstract class NodeTest implements NodePredicate {
      */
 
     public abstract QNameTest getQNameTest();
-
-    /**
-     * For an {@code XNodeType} that can only match one kind of node
-     * and one node name, return that node name, as an integer
-     * fingerprint. In other cases, return -1.
-     *
-     * @param nodeKind the kind of node required. If the {@code XNodeType}
-     *                 does not match this node kind, return -1.
-     * @return an integer fingerprint in the case of a node type that
-     * only matches one node kind and one qualified name. In other
-     * cases return -1.
-     */
-
-    public int getFingerprint() {
-        return -1;
-    }
 
     /**
      * Get an item type that all matching nodes must satisfy
@@ -99,25 +81,25 @@ public abstract class NodeTest implements NodePredicate {
      * Return null if the node test matches nodes of more than one name
      */
 
-    public StructuredQName getMatchingNodeName() {
-        return null;
-    }
+//    public StructuredQName getMatchingNodeName() {
+//        return null;
+//    }
 
-    /**
-     * Get a matching function that can be used to test whether numbered nodes in a TinyTree
-     * or DominoTree satisfy the node test. (Calling this matcher must give the same result
-     * as calling <code>matchesNode(tree.getNode(nodeNr))</code>, but it may well be faster).
-     * @param tree the tree against which the returned function will operate
-     * @return an IntPredicate; the matches() method of this predicate takes a node number
-     * as input, and returns true if and only if the node identified by this node number
-     * matches the node test.
-     */
-
-    public IntPredicate getMatcher(final NodeVectorTree tree) {
-        // Default implementation materialises the node
-        return IntPredicateLambda.of(nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER
-                                               && test(tree.getNode(nodeNr)));
-    }
+//    /**
+//     * Get a matching function that can be used to test whether numbered nodes in a TinyTree
+//     * or DominoTree satisfy the node test. (Calling this matcher must give the same result
+//     * as calling <code>matchesNode(tree.getNode(nodeNr))</code>, but it may well be faster).
+//     * @param tree the tree against which the returned function will operate
+//     * @return an IntPredicate; the matches() method of this predicate takes a node number
+//     * as input, and returns true if and only if the node identified by this node number
+//     * matches the node test.
+//     */
+//
+//    public IntPredicate getMatcher(final NodeVectorTree tree) {
+//        // Default implementation materialises the node
+//        return IntPredicateLambda.of(nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER
+//                                               && test(tree.getNode(nodeNr)));
+//    }
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative
@@ -153,9 +135,9 @@ public abstract class NodeTest implements NodePredicate {
      * on the type annotation.
      */
 
-    public int getRequiredFingerprint(int nodeKind) {
-        return -1;
-    }
+//    public int getRequiredFingerprint(int nodeKind) {
+//        return -1;
+//    }
 
     /**
      * Determine whether the content type (if present) is nillable
@@ -165,18 +147,6 @@ public abstract class NodeTest implements NodePredicate {
 
     public boolean isNillable() {
         return true;
-    }
-
-    /**
-     * Copy a NodeTest.
-     * Since they are never written to except in their constructors, returns the same.
-     *
-     * @return the original nodeTest
-     */
-
-    /*@NotNull*/
-    public NodeTest copy() {
-        return this;
     }
 
 

@@ -9,6 +9,8 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -557,7 +559,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         }
                     case Type.ATTRIBUTE:
                         ix = 0;
-                        SequenceIterator iter = parent.iterateAttributeAxis(null);
+                        SequenceIterator iter = parent.iterateAttributeAxis(AnyGNode.TEST);
                         while (true) {
                             NodeInfo n = (NodeInfo)iter.next();
                             if (n == null || Navigator.haveSameName(this, n)) {
@@ -569,7 +571,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
                     case Type.NAMESPACE:
                         ix = 0;
-                        iter = parent.iterateNamespaceAxis(null);
+                        iter = parent.iterateNamespaceAxis(AnyGNode.TEST);
                         while (true) {
                             NodeInfo n = (NodeInfo)iter.next();
                             if (n == null || Navigator.haveSameName(this, n)) {
@@ -623,8 +625,8 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
-        return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
+    protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
+        return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, predicate);
     }
 
     /**

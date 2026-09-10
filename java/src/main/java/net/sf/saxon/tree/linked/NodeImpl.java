@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
@@ -547,9 +546,8 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        NodeTest test = nodeTestFromPredicate(predicate);
         if (hasChildNodes()) {
-            return new SteppingNavigator.DescendantAxisIterator(this, false, test);
+            return new SteppingNavigator.DescendantAxisIterator(this, false, predicate);
         } else {
             return EmptyIterator.getInstance();
         }
@@ -564,7 +562,7 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
-        return new SteppingNavigator.DescendantAxisIterator(this, true, nodeTestFromPredicate(predicate));
+        return new SteppingNavigator.DescendantAxisIterator(this, true, predicate);
     }
 
     /**
@@ -576,7 +574,7 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
-        return new FollowingEnumeration(this, nodeTestFromPredicate(predicate));
+        return new FollowingEnumeration(this, predicate);
     }
 
     /**

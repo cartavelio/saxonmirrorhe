@@ -20,6 +20,7 @@ import net.sf.saxon.functions.ExecutableFunctionLibrary;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.query.XQueryFunction;
@@ -1481,7 +1482,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
         }
         NodeInfo child;
-        SequenceIterator kids = element.iterateChildAxis(null);
+        SequenceIterator kids = element.iterateChildAxis(AnyGNode.TEST);
         while ((child = (NodeInfo)kids.next()) != null) {
             if (child instanceof StyleElement) {
                 registerImplicitModes((StyleElement) child, manager);

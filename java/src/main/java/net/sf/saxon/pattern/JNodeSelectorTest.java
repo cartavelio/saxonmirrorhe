@@ -11,7 +11,6 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.Type;
@@ -122,25 +121,6 @@ public class JNodeSelectorTest extends NodeTest {
      */
 
     public QNameTest getQNameTest() {
-        return null;
-    }
-
-
-    /**
-     * Get the fingerprint required
-     */
-
-    @Override
-    public int getFingerprint() {
-        return -1;
-    }
-
-    /**
-     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
-     * Return null if the node test matches nodes of more than one name
-     */
-    @Override
-    public StructuredQName getMatchingNodeName() {
         return null;
     }
 

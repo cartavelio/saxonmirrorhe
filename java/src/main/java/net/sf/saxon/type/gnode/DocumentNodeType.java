@@ -10,6 +10,7 @@ package net.sf.saxon.type.gnode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.qname.NoQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
@@ -81,7 +82,7 @@ public class DocumentNodeType extends XNodeType {
             return false;
         }
         NodeInfo node = (NodeInfo)item;
-        SequenceIterator iter = node.iterateChildAxis(null);
+        SequenceIterator iter = node.iterateChildAxis(AnyGNode.TEST);
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;
@@ -231,7 +232,7 @@ public class DocumentNodeType extends XNodeType {
             return explanation;
         }
         NodeInfo node = (NodeInfo) item;
-        SequenceIterator iter = node.iterateChildAxis(null);
+        SequenceIterator iter = node.iterateChildAxis(AnyGNode.TEST);
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;

@@ -22,6 +22,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.str.UnicodeString;
@@ -283,8 +284,9 @@ public class Copy extends ElementCreator {
                 }
                 case Validation.STRICT:
                 case Validation.LAX:
-                    if (selectItemType instanceof NodeTest) {
-                        int fp = ((NodeTest) selectItemType).getRequiredFingerprint(Type.ELEMENT);
+                    if (selectItemType instanceof NamedXNodePredicate) {
+                        NamedXNodePredicate fpTest = (NamedXNodePredicate) selectItemType;
+                        int fp = fpTest.getRequiredFingerprint();
                         if (fp != -1) {
                             Affinity e = th.relationship(selectItemType, NodeKindType.ELEMENT);
                             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {

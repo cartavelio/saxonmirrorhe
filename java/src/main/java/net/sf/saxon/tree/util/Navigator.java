@@ -15,13 +15,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeSelector;
-import net.sf.saxon.pattern.NodeTestPattern;
-import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.pattern.SameNameTest;
-import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
+import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -29,13 +24,16 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.jiter.WrappingJavaIterator;
+import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.tiny.TinyTextualElement;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.GNodeType;
+import net.sf.saxon.type.gnode.XNodeType;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 
@@ -1159,6 +1158,50 @@ public final class Navigator {
     }
 
     /**
+     * For a tree that implements the {@link NodeVectorTree} interface, get a predicate
+     * function that accepts an integer node number and decides whether the node represented
+     * by that integer position satisfies the supplied node predicate. The purpose of this
+     * method is to avoid instantiating the node in cases where this is not necessary, for example
+     * when the node predicate can be implemented simply by a check on the node kind and/or
+     * fingerprint.
+     * @param predicate the NodePredicate to be satisfied
+     * @param tree the tree being searched
+     * @return an IntPredicate that tests a node number in this tree and determines whether the
+     * node at that position satisfies the node predicate. Note that it is the matcher's responsibility
+     * to deal appropriately with pseudo nodes such as the "nodes" used to hold parent pointers where
+     * the tree has a large fan-out.
+     */
+
+    public static IntPredicate getNumberedNodeMatcher(NodePredicate predicate, NodeVectorTree tree) {
+        if (predicate == null || predicate == AnyGNode.TEST) {
+            final byte[] nodeKind = tree.getNodeKindArray();
+            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER;
+        }
+        if (predicate instanceof NodeVectorMatchMaker) {
+            return ((NodeVectorMatchMaker)predicate).getMatcher(tree);
+        } else {
+            final byte[] nodeKind = tree.getNodeKindArray();
+            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER && predicate.test(tree.getNode(nodeNr));
+        }
+    }
+
+    /**
+     * Get a UType indicating the kind of nodes that can potentially be matched by a NodePredicate,
+     * assuming we are navigating within an XTree (as distinct from a JTree)
+     */
+
+    public static UType getPotentialNodeKinds(NodePredicate predicate) {
+        // TODO: refine this
+        if (predicate instanceof NodeTest) {
+            return ((NodeTest)predicate).getUType();
+        }
+        if (predicate instanceof XNodeType) {
+            return ((XNodeType) predicate).getUType();
+        }
+        return UType.XNODE;
+    }
+
+    /**
      * Create an iterator over a singleton node, if it exists and matches a nodetest;
      * otherwise return an empty iterator
      *
@@ -1195,6 +1238,9 @@ public final class Navigator {
      */
 
     public static SequenceIterator iterateAxis(GNode origin, int axisNumber, NodePredicate predicate) {
+        if (predicate == null) {
+            predicate = AnyGNode.TEST;
+        }
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
                 return origin.iterateAncestorAxis(predicate);
@@ -1303,7 +1349,7 @@ public final class Navigator {
     }
 
     public static SequenceIterator filter(SequenceIterator base, NodePredicate predicate) {
-        if (predicate == null) {
+        if (predicate == null || predicate == AnyGNode.TEST) {
             return base;
         }
         return new AxisFilter(base, predicate);
@@ -1316,21 +1362,21 @@ public final class Navigator {
 
     private static class AxisFilter implements SequenceIterator {
         private final SequenceIterator base;
-        private final NodePredicate nodeTest;
+        private final NodePredicate predicate;
 
         /**
          * Construct a AxisFilter
          *
          * @param base the underlying iterator that returns all the nodes on
          *             a required axis. This must not be an atomizing iterator!
-         * @param test a NodeTest that is applied to each node returned by the
-         *             underlying AxisIterator; only those nodes that pass the NodeTest are
+         * @param predicate a condition that is applied to each node returned by the
+         *             underlying AxisIterator; only those nodes that satisfy the condition are
          *             returned by the AxisFilter
          */
 
-        public AxisFilter(SequenceIterator base, NodePredicate test) {
+        public AxisFilter(SequenceIterator base, NodePredicate predicate) {
             this.base = base;
-             nodeTest = test;
+            this.predicate = predicate;
         }
 
         /*@Nullable*/
@@ -1341,7 +1387,7 @@ public final class Navigator {
                 if (next == null) {
                     return null;
                 }
-                if (nodeTest.test(next)) {
+                if (predicate.test(next)) {
                     return next;
                 }
             }
@@ -1492,7 +1538,7 @@ public final class Navigator {
             } else {
                 // we're just starting...
                 if (start.hasChildNodes()) {
-                    children = start.iterateChildAxis(null);
+                    children = start.iterateChildAxis(AnyGNodeType.getInstance());
                     if (!forwards) {
                         children = Reverse.getReverseIterator(children);
                     }
@@ -1534,7 +1580,7 @@ public final class Navigator {
                 case Type.PROCESSING_INSTRUCTION:
                 case Type.JNODE:
                     // gets following siblings
-                    siblingEnum = start.iterateFollowingSiblingAxis(null);
+                    siblingEnum = start.iterateFollowingSiblingAxis(AnyGNode.TEST);
                     break;
                 case Type.ATTRIBUTE:
                 case Type.NAMESPACE:
@@ -1544,7 +1590,7 @@ public final class Navigator {
                     if (parent == null) {
                         siblingEnum = EmptyIterator.getInstance();
                     } else {
-                        siblingEnum = parent.iterateChildAxis(null);
+                        siblingEnum = parent.iterateChildAxis(AnyGNode.TEST);
                     }
                     break;
                 default:
@@ -1582,7 +1628,7 @@ public final class Navigator {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
                     siblingEnum = EmptyIterator.getInstance();
                 } else {
-                    siblingEnum = nexta.iterateFollowingSiblingAxis(null);
+                    siblingEnum = nexta.iterateFollowingSiblingAxis(AnyGNode.TEST);
                 }
                 return next();
             } else {
@@ -1600,7 +1646,7 @@ public final class Navigator {
 
     public static SequenceIterator iteratePrecedingOrAncestorAxis(GNode origin, NodePredicate predicate) {
         PrecedingIterator iter = new PrecedingIterator(origin, true);
-        if (predicate != null && predicate != NodeTypeTest.GNODE) {
+        if (predicate != null && predicate != AnyGNode.TEST) {
             return new AxisFilter(iter, predicate);
         }
         return iter;
@@ -1638,7 +1684,7 @@ public final class Navigator {
                 case Type.PROCESSING_INSTRUCTION:
                 case Type.JNODE:
                     // get preceding-sibling enumeration
-                    siblingEnum = start.iteratePrecedingSiblingAxis(null);
+                    siblingEnum = start.iteratePrecedingSiblingAxis(AnyGNode.TEST);
                     break;
                 default:
                     siblingEnum = EmptyIterator.getInstance();
@@ -1676,7 +1722,7 @@ public final class Navigator {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
                     siblingEnum = EmptyIterator.getInstance();
                 } else {
-                    siblingEnum = nexta.iteratePrecedingSiblingAxis(null);
+                    siblingEnum = nexta.iteratePrecedingSiblingAxis(AnyGNode.TEST);
                 }
                 if (!includeAncestors) {
                     return next();

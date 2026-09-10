@@ -36,6 +36,7 @@ import net.sf.saxon.ma.map.GeneralMapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.*;
@@ -1045,7 +1046,7 @@ public class PackageLoaderHE implements IPackageLoader {
             } else {
                 symbols = decimalFormatManager.obtainNamedDecimalFormat(name);
             }
-            SequenceIterator attributeIter = formatElement.iterateAttributeAxis(null);
+            SequenceIterator attributeIter = formatElement.iterateAttributeAxis(AnyGNode.TEST);
             NodeInfo att;
             while ((att = (NodeInfo)attributeIter.next()) != null) {
                 if (DecimalSymbols.isValidPropertyName(att.getLocalPart())) {
@@ -2341,7 +2342,7 @@ public class PackageLoaderHE implements IPackageLoader {
             if (e instanceof SystemFunctionCall) {
                 final SystemFunction fn = ((SystemFunctionCall) e).getTargetFunction();
                 fn.setRetainedStaticContext(rsc);
-                SequenceIterator iter = element.iterateAttributeAxis(null);
+                SequenceIterator iter = element.iterateAttributeAxis(AnyGNode.TEST);
                 NodeInfo att;
                 Properties props = new Properties();
                 while ((att = (NodeInfo) iter.next()) != null) {
@@ -2583,7 +2584,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 if (exp instanceof SystemFunctionCall) {
                     SystemFunction fn = ((SystemFunctionCall) exp).getTargetFunction();
                     fn.setRetainedStaticContext(loader.makeRetainedStaticContext(element));
-                    SequenceIterator iter = element.iterateAttributeAxis(null);
+                    SequenceIterator iter = element.iterateAttributeAxis(AnyGNode.TEST);
                     NodeInfo att;
                     Properties props = new Properties();
                     while ((att = (NodeInfo) iter.next()) != null) {

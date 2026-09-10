@@ -17,6 +17,7 @@ import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -218,7 +219,7 @@ public class IndependentContext extends AbstractStaticContext
             return;
         }
 
-        SequenceIterator iter = node.iterateNamespaceAxis(null);
+        SequenceIterator iter = node.iterateNamespaceAxis(AnyGNode.TEST);
         while (true) {
             NodeInfo ns = (NodeInfo)iter.next();
             if (ns == null) {

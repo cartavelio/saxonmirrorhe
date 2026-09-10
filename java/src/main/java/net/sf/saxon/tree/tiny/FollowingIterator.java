@@ -10,12 +10,10 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 
 import java.util.function.IntPredicate;
-
-import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 /**
  * Iterate over the following axis starting at a given node.
@@ -27,7 +25,7 @@ final class FollowingIterator implements SequenceIterator {
     private final TinyTree tree;
     private final TinyNodeImpl startNode;
     private NodeInfo current;
-    private final NodeTest test;
+    private final NodePredicate predicate;
     private final boolean includeDescendants;
     int position = 0;
     private final IntPredicate matcher;
@@ -48,10 +46,10 @@ final class FollowingIterator implements SequenceIterator {
     public FollowingIterator(TinyTree doc, TinyNodeImpl node,
                              NodePredicate predicate, boolean includeDescendants) {
         tree = doc;
-        test = nodeTestFromPredicate(predicate);
+        this.predicate = predicate;
         startNode = node;
         this.includeDescendants = includeDescendants;
-        this.matcher = test.getMatcher(doc);
+        this.matcher = Navigator.getNumberedNodeMatcher(predicate, doc);
     }
 
     /*@Nullable*/
@@ -110,12 +108,12 @@ final class FollowingIterator implements SequenceIterator {
                 TinyTextualElement e = (TinyTextualElement)tree.getNode(nodeNr);
                 NodeInfo t = e.getTextNode();
                 if (matcher.test(nodeNr)) {
-                    if (test.test(t)) {
+                    if (predicate.test(t)) {
                         pending = t;
                     }
                     position++;
                     return current = tree.getNode(nodeNr);
-                } else if (test.test(t)) {
+                } else if (predicate.test(t)) {
                     position++;
                     return current = t;
                 }

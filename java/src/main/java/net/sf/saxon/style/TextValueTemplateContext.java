@@ -13,6 +13,7 @@ import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -54,7 +55,7 @@ public class TextValueTemplateContext extends ExpressionContext {
 
         // first search for a local variable declaration
 
-        SequenceIterator preceding = curr.iteratePrecedingSiblingAxis(null);
+        SequenceIterator preceding = curr.iteratePrecedingSiblingAxis(AnyGNode.TEST);
         while ((curr = (NodeInfo)preceding.next()) != null) {
             if (curr instanceof XSLGeneralVariable) {
                 SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);

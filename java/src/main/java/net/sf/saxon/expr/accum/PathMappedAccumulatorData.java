@@ -10,6 +10,7 @@ package net.sf.saxon.expr.accum;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
@@ -59,7 +60,7 @@ public class PathMappedAccumulatorData implements IAccumulatorData {
             NodeInfo target = origin;
             while (!path.isEmpty()) {
                 int pos = path.pop();
-                SequenceIterator kids = target.iterateChildAxis(null);
+                SequenceIterator kids = target.iterateChildAxis(AnyGNode.TEST);
                 while (pos-- > 0) {
                     target = (NodeInfo)kids.next();
                     assert (target != null);

@@ -7,6 +7,8 @@
 
 package net.sf.saxon.z;
 
+import net.sf.saxon.transpile.CSharpReplaceBody;
+
 import java.util.function.IntPredicate;
 
 /**
@@ -14,6 +16,9 @@ import java.util.function.IntPredicate;
  * expression, in a way that works both in Java and C#. It is needed because interfaces and delegates
  * are interchangeable in Java (through the mechanism of "functional interfaces"), but the same is not
  * the case in C#.
+ *
+ * The Java class is never instantiated. The C# transpiled version, however, is instantiated
+ * when a method call such as {@code IntPredicateLambda.of(n -> n != 0)} is used.
  */
 
 public class IntPredicateLambda implements IntPredicate {
@@ -30,8 +35,9 @@ public class IntPredicateLambda implements IntPredicate {
      *               that matches all positive integers).
      * @return the integer predicate
      */
+    @CSharpReplaceBody(code = "return new IntPredicateLambda(lambda);")
     public static IntPredicate of(IntPredicate lambda) {
-        return new IntPredicateLambda(lambda);
+        return lambda;
     }
 
     @Override

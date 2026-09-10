@@ -12,6 +12,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
 
@@ -77,7 +78,7 @@ public class XSLOnCompletion extends StyleElement {
             }
         };
 
-        if (select != null && iterateChildAxis(null).next() != null) {
+        if (select != null && iterateChildAxis(AnyGNode.TEST).next() != null) {
             compileError("An xsl:on-completion element with a select attribute must be empty", "XTSE3125");
         }
         select = typeCheck("select", select);

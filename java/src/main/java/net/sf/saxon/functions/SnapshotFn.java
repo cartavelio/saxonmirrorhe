@@ -15,6 +15,7 @@ import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
@@ -83,7 +84,7 @@ public class SnapshotFn extends SystemFunction {
 
     public static List<NodeInfo> makeAncestorList(NodeInfo origin) {
         List<NodeInfo> ancestors = new ArrayList<>(20);
-        SequenceIterator iter = origin.iterateAncestorAxis(null);
+        SequenceIterator iter = origin.iterateAncestorAxis(AnyGNode.TEST);
         for (NodeInfo item; (item = (NodeInfo)iter.next()) != null; ) {
             ancestors.add(item);
         }

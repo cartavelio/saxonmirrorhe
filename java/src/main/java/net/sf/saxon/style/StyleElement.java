@@ -24,6 +24,7 @@ import net.sf.saxon.pattern.BasePatternWithPredicate;
 import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.pattern.PatternThatSetsCurrent;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -2160,7 +2161,7 @@ public abstract class StyleElement extends ElementImpl {
             vars.addAll(onEmpties);
             return compileSequenceConstructor(compilation, decl, new ListIterator.Of<>(vars), includeParams);
         } else {
-            return compileSequenceConstructor(compilation, decl, iterateChildAxis(null), includeParams);
+            return compileSequenceConstructor(compilation, decl, iterateChildAxis(AnyGNode.TEST), includeParams);
         }
     }
 
@@ -2194,7 +2195,7 @@ public abstract class StyleElement extends ElementImpl {
                     compileContentValueTemplate((TextImpl) node, contents);
                 } else {
                     // handle literal text nodes by generating an xsl:value-of instruction, unless expand-text is enabled
-                    SequenceIterator lookahead = node.iterateFollowingSiblingAxis(null);
+                    SequenceIterator lookahead = node.iterateFollowingSiblingAxis(AnyGNode.TEST);
                     NodeInfo sibling = (NodeInfo)lookahead.next();
                     if (!(sibling instanceof XSLLocalParam || sibling instanceof XSLSort
                                   || sibling instanceof XSLContextItem || sibling instanceof XSLOnCompletion)) {
@@ -2763,7 +2764,7 @@ public abstract class StyleElement extends ElementImpl {
                 // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
                 curr = (NodeInfo)curr.getParent();
             }
-            SequenceIterator preceding = curr.iteratePrecedingSiblingAxis(null);
+            SequenceIterator preceding = curr.iteratePrecedingSiblingAxis(AnyGNode.TEST);
             while (true) {
                 curr = (NodeInfo)preceding.next();
                 while (curr == null) {
@@ -2782,7 +2783,7 @@ public abstract class StyleElement extends ElementImpl {
                     if (curr.getParent() instanceof XSLModuleRoot) {
                         break;   // top level
                     }
-                    preceding = curr.iteratePrecedingSiblingAxis(null);
+                    preceding = curr.iteratePrecedingSiblingAxis(AnyGNode.TEST);
                     curr = (NodeInfo)preceding.next();
                 }
                 if (curr.getParent() instanceof XSLModuleRoot) {

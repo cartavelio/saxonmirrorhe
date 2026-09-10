@@ -9,7 +9,10 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.OnEmptyExpr;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.XPathException;
 
 
@@ -22,7 +25,7 @@ public final class XSLOnEmpty extends XSLSequence {
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
         super.validate(decl);
-        SequenceTool.supply(iterateFollowingSiblingAxis(null), (ItemConsumer<? super Item>) next -> {
+        SequenceTool.supply(iterateFollowingSiblingAxis(AnyGNode.TEST), (ItemConsumer<? super Item>) next -> {
             if (!(next instanceof XSLFallback || next instanceof XSLCatch)) {
                 compileError("xsl:on-empty must be the last instruction in the sequence constructor");
             }

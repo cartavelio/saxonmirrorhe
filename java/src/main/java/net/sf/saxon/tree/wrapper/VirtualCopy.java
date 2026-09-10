@@ -10,6 +10,7 @@ package net.sf.saxon.tree.wrapper;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
@@ -141,7 +142,7 @@ public class VirtualCopy implements NodeInfo {
                 if (!ns.isEmpty()) {
                     nsMap = nsMap.put(getPrefix(), ns);
                 }
-                SequenceIterator iter = original.iterateAttributeAxis(null);
+                SequenceIterator iter = original.iterateAttributeAxis(AnyGNode.TEST);
                 NodeInfo att;
                 while ((att = (NodeInfo)iter.next()) != null) {
                     if (!att.getNamespaceUri().isEmpty()) {

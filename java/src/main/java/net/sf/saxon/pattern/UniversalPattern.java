@@ -70,7 +70,7 @@ public class UniversalPattern extends Pattern {
      */
 
     @Override
-    public int getFingerprint() {
+    public int getFingerprint(int nodeKind) {
         return -1;
     }
 

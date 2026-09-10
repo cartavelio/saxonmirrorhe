@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.EmptySequence;
@@ -62,7 +63,7 @@ public class Siblings_1 extends SystemFunction {
         if (parent == null || node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
             return node;
         }
-        return new LazySequence(parent.iterateChildAxis(null));
+        return new LazySequence(parent.iterateChildAxis(AnyGNode.TEST));
     }
 
 

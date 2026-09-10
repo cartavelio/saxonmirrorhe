@@ -8,6 +8,8 @@
 package net.sf.saxon.option.dom4j;
 
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
@@ -366,10 +368,10 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     throw new IllegalStateException("DOM4J node not linked to parent node");
                 }
                 case Type.ATTRIBUTE:
-                    iter = parent.iterateAttributeAxis(null);
+                    iter = parent.iterateAttributeAxis(AnyGNode.TEST);
                     break;
                 case Type.NAMESPACE:
-                    iter = parent.iterateNamespaceAxis(null);
+                    iter = parent.iterateNamespaceAxis(AnyGNode.TEST);
                     break;
                 default:
                     index = 0;
@@ -530,13 +532,13 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         if (includeSelf) {
-            return new SteppingNavigator.DescendantAxisIterator(this, true, nodeTest);
+            return new SteppingNavigator.DescendantAxisIterator(this, true, predicate);
 
         } else {
             if (hasChildNodes()) {
-                return new SteppingNavigator.DescendantAxisIterator(this, false, nodeTest);
+                return new SteppingNavigator.DescendantAxisIterator(this, false, predicate);
             } else {
                 return EmptyIterator.getInstance();
             }

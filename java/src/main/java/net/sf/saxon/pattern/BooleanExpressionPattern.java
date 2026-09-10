@@ -174,7 +174,7 @@ public class BooleanExpressionPattern extends Pattern implements PatternWithPred
      */
 
     @Override
-    public int getFingerprint() {
+    public int getFingerprint(int nodeKind) {
         return -1;
     }
 

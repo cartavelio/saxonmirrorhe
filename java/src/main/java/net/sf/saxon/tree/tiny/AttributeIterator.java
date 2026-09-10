@@ -11,7 +11,7 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AtomizedValueIterator;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -22,7 +22,7 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
 
     private final TinyTree tree;
     private final int element;
-    private final NodeTest nodeTest;
+    private final NodePredicate predicate;
     private int index;
     private TinyAttributeImpl current = null;
 
@@ -33,12 +33,12 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
      *
      * @param tree:     the containing TinyTree
      * @param element:  the node number of the element whose attributes are required
-     * @param nodeTest: condition to be applied to the names of the attributes selected
+     * @param predicate: condition to be applied to the names of the attributes selected
      */
 
-    AttributeIterator(/*@NotNull*/ TinyTree tree, int element, NodeTest nodeTest) {
+    AttributeIterator(TinyTree tree, int element, NodePredicate predicate) {
 
-        this.nodeTest = nodeTest;
+        this.predicate = predicate;
         this.tree = tree;
         this.element = element;
         index = tree.alpha[element];
@@ -59,7 +59,7 @@ final class AttributeIterator implements SequenceIterator, AtomizedValueIterator
                 return false;
             }
             TinyAttributeImpl att = tree.getAttributeNode(index);
-            if (nodeTest.test(att)) {
+            if (predicate.test(att)) {
                 current = att;
                 index++;
                 return true;

@@ -7,17 +7,18 @@
 
 package net.sf.saxon.testdriver;
 
-import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.AdaptiveEmitter;
@@ -836,13 +837,13 @@ public class TestOutcome {
                     return false;
                 }
                 if (value.size() == 1 && value.itemAt(0) instanceof XdmNode && ((XdmNode) value.itemAt(0)).getNodeKind() == XdmNodeKind.DOCUMENT) {
-                    iter0 = ((XdmNode) value.itemAt(0)).getUnderlyingNode().iterateChildAxis(null);
+                    iter0 = ((XdmNode) value.itemAt(0)).getUnderlyingNode().iterateChildAxis(AnyGNode.TEST);
                 } else {
                     iter0 = value.getUnderlyingValue().iterate();
                 }
                 GroundedValue val0 = SequenceTool.toGroundedValue(iter0);
                 SequenceIterator iter1 = expected.axisIterator(Axis.CHILD).next()
-                        .getUnderlyingValue().iterateChildAxis(null);
+                        .getUnderlyingValue().iterateChildAxis(AnyGNode.TEST);
                 GroundedValue val1 = SequenceTool.toGroundedValue(iter1);
                 AtomicMatcher matcher = GenericAtomicComparer.getTransitiveAtomicMatcher(CodepointCollator.getInstance(), 0);
                 boolean success = SaxonDeepEqual.deepEqual(

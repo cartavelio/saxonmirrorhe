@@ -9,6 +9,7 @@ package net.sf.saxon.option.xom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.StringView;
@@ -647,15 +648,15 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         if (includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(
-                    this, true, nodeTest);
+                    this, true, predicate);
 
         } else {
             if (hasChildNodes()) {
                 return new SteppingNavigator.DescendantAxisIterator(
-                        this, false, nodeTest);
+                        this, false, predicate);
             } else {
                 return EmptyIterator.getInstance();
             }

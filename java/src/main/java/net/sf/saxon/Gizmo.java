@@ -18,6 +18,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.query.QueryResult;
@@ -417,7 +418,7 @@ public class Gizmo {
      * and return an iterator over the result. As a side effect, modify the supplied
      * StringBuilder so that it contains whatever remains after parsing the expression.
      *
-     * @param selection the input buffer, which is modified as a side-effect
+     * @param selection the input buffer, which is modified as a side effect
      * @return an iterator over the results of the expression
      * @throws XPathException if evaluation of the expression fails
      */
@@ -576,7 +577,7 @@ public class Gizmo {
         while ((element = (NodeInfo)allElements.next()) != null) {
             names.add(element.getLocalPart());
             NodeInfo att;
-            SequenceIterator allAtts = element.iterateAttributeAxis(null);
+            SequenceIterator allAtts = element.iterateAttributeAxis(AnyGNode.TEST);
             while ((att = (NodeInfo)allAtts.next()) != null) {
                 names.add("@" + att.getLocalPart());
             }
@@ -826,7 +827,7 @@ public class Gizmo {
         out.close();
 
         NodeInfo root = builder.getCurrentRoot();
-        SequenceIterator top = root.iterateChildAxis(null);
+        SequenceIterator top = root.iterateChildAxis(AnyGNode.TEST);
         SequenceExtent extent = SequenceExtent.from(top);
         int len = extent.getLength();
         NodeInfo[] array = new NodeInfo[len];

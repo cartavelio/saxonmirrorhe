@@ -11,13 +11,14 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -26,8 +27,6 @@ import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 
 import java.util.*;
-
-import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
 
 
 /**
@@ -230,11 +229,18 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        NodeTest test = nodeTestFromPredicate(predicate);
-        int fp = test.getRequiredFingerprint(Type.ELEMENT);
-        if (fp != -1) {
-            // optimised search of descendant axis
-            return getAllElements(fp);
+        if (predicate instanceof NamedXNodePredicate) {
+            NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;
+            int fp = fpTest.getRequiredFingerprint();
+            if (fp != -1 && fpTest.getNodeKind() == Type.ELEMENT) {
+                // optimised search of descendant axis
+                SequenceIterator all = getAllElements(fp);
+                if (fpTest.isFingerprintSufficient()) {
+                    return all;
+                } else {
+                    return Navigator.filter(all, predicate);
+                }
+            }
         }
         return super.iterateDescendantAxis(predicate);
     }
@@ -511,12 +517,12 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     /*@NotNull*/
     SequenceIterator getAllElements(int fingerprint) {
         if (elementList == null) {
-            elementList = new IntHashMap<>(500);
+            elementList = new IntHashMap<>(20);
         }
         IntHashMap<List<NodeInfo>> eList = elementList;
         List<NodeInfo> list = eList.get(fingerprint);
         if (list == null) {
-            list = new ArrayList<>(500);
+            list = new ArrayList<>();
             NodeImpl next = getNextInDocument(this);
             while (next != null) {
                 if (next.getNodeKind() == Type.ELEMENT &&

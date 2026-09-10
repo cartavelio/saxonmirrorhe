@@ -10,7 +10,6 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
@@ -34,19 +33,19 @@ final class PrecedingIterator implements SequenceIterator {
     private final boolean includeAncestors;
     private final IntPredicate matcher;
     private NodeInfo pending = null;
-    private final NodeTest nodeTest;
+    private final NodePredicate predicate;
     private final boolean matchesTextNodes;
 
-    public PrecedingIterator(/*@NotNull*/ TinyTree doc, /*@NotNull*/ TinyNodeImpl node,
-                                          NodePredicate predicate, boolean includeAncestors) {
+    public PrecedingIterator(TinyTree doc, TinyNodeImpl node,
+                             NodePredicate predicate, boolean includeAncestors) {
 
         this.includeAncestors = includeAncestors;
         tree = doc;
         current = node;
         nextAncestorDepth = doc.depth[node.nodeNr] - 1;
-        this.nodeTest = Navigator.nodeTestFromPredicate(predicate);
-        this.matcher = nodeTest.getMatcher(doc);
-        matchesTextNodes = nodeTest.getUType().overlaps(UType.TEXT);
+        this.predicate = predicate;
+        this.matcher = Navigator.getNumberedNodeMatcher(predicate, doc);
+        matchesTextNodes = Navigator.getPotentialNodeKinds(predicate).overlaps(UType.TEXT);
     }
 
     /*@Nullable*/
@@ -86,12 +85,12 @@ final class PrecedingIterator implements SequenceIterator {
             if (matchesTextNodes && tree.nodeKind[nextNodeNr] == Type.TEXTUAL_ELEMENT) {
                 TinyTextualElement element = (TinyTextualElement)tree.getNode(nextNodeNr);
                 TinyTextualElement.TinyTextualElementText text = element.getTextNode();
-                if (nodeTest.test(text)) {
-                    if (nodeTest.test(element)) {
+                if (predicate.test(text)) {
+                    if (predicate.test(element)) {
                         pending = element;
                     }
                     return current = text;
-                } else if (nodeTest.test(element)) {
+                } else if (predicate.test(element)) {
                     return current = element;
                 }
             } else {

@@ -1,20 +1,34 @@
-package net.sf.saxon.pattern.nodetest;public class AnyGNode {
+package net.sf.saxon.pattern.nodetest;
+
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.tree.tiny.NodeVectorTree;
+
+import java.util.function.IntPredicate;
+
+public class AnyGNode implements NodePredicate, NodeVectorMatchMaker {
+
+    private AnyGNode(){};
+
+    public static AnyGNode TEST = new AnyGNode();
+
+    @Override
+    public boolean test(GNode node) {
+        return true;
+    }
+
+    /**
+     * Get a matching function that can be used to test whether numbered nodes in a TinyTree
+     * or DominoTree satisfy the node test. (Calling this matcher must give the same result
+     * as calling <code>matchesNode(tree.getNode(nodeNr))</code>, but it may well be faster).
+     *
+     * @param tree the tree against which the returned function will operate
+     * @return an IntPredicate; the matches() method of this predicate takes a node number
+     * as input, and returns true if and only if the node identified by this node number
+     * matches the node predicate.
+     */
+    @Override
+    public IntPredicate getMatcher(NodeVectorTree tree) {
+        return nodeNr -> true;
+    }
 }
 
-//
-// The contents of this file are subject to the Mozilla Public License Version 1.0 (the "License");
-// you may not use this file except in compliance with the License. You may obtain a copy of the
-// License at http://www.mozilla.org/MPL/
-//
-// Software distributed under the License is distributed on an "AS IS" basis,
-// WITHOUT WARRANTY OF ANY KIND, either express or implied.
-// See the License for the specific language governing rights and limitations under the License.
-//
-// The Original Code is: all this file.
-//
-// The Initial Developer of the Original Code is Saxonica Limited
-//
-// Portions created by (your name) are Copyright (C) (your legal entity). All Rights Reserved.
-//
-// Contributor(s): none.
-//

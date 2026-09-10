@@ -14,6 +14,7 @@ import net.sf.saxon.event.Sender;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
@@ -472,7 +473,7 @@ public interface NodeInfo extends GNode, Location
     default AttributeMap attributes() {
         AttributeMap atts = EmptyAttributeMap.getInstance();
         if (getNodeKind() == Type.ELEMENT) {
-            SequenceIterator iter = iterateAttributeAxis(null);
+            SequenceIterator iter = iterateAttributeAxis(AnyGNode.TEST);
             NodeInfo attr;
             while ((attr = ((NodeInfo)iter.next())) != null) {
                 atts = atts.put(new AttributeInfo(NameOfNode.makeName(attr), (SimpleType) attr.getSchemaType(),

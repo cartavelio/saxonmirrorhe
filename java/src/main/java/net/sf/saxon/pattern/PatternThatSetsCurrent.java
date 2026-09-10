@@ -164,8 +164,8 @@ public class PatternThatSetsCurrent extends Pattern {
      * or it if matches atomic values
      */
     @Override
-    public int getFingerprint() {
-        return wrappedPattern.getFingerprint();
+    public int getFingerprint(int nodeKind) {
+        return wrappedPattern.getFingerprint(nodeKind);
     }
 
     /**

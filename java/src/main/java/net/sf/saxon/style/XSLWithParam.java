@@ -9,9 +9,9 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.WithParam;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
@@ -44,7 +44,7 @@ public class XSLWithParam extends XSLGeneralVariable {
 
         // Check for duplicate parameter names
 
-        SequenceIterator iter = iteratePrecedingSiblingAxis(null);
+        SequenceIterator iter = iteratePrecedingSiblingAxis(AnyGNode.TEST);
         Item prev;
         while ((prev = iter.next()) != null) {
             if (prev instanceof XSLWithParam) {

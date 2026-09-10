@@ -306,8 +306,8 @@ public final class AncestorQualifiedPattern extends Pattern {
      */
 
     @Override
-    public int getFingerprint() {
-        return basePattern.getFingerprint();
+    public int getFingerprint(int nodeKind) {
+        return basePattern.getFingerprint(nodeKind);
     }
 
     /**
