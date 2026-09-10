@@ -29,7 +29,7 @@ import java.util.Map;
 public abstract class Clause {
 
     @CSharpSimpleEnum
-    public enum ClauseName { FOR, LET, WINDOW, GROUP_BY, COUNT, ORDER_BY, WHERE, TRACE, FOR_MEMBER}
+    public enum ClauseName { FOR, LET, WINDOW, GROUP_BY, COUNT, ORDER_BY, WHERE, TRACE, DIAG, FOR_MEMBER}
 
     private Location location;
     private PackageData packageData;
