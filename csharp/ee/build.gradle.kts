@@ -749,14 +749,13 @@ tasks.register<Exec>("ecsTest") {
   group = "Verification"
   description = "Run SaxonCS nUnit tests"
   dependsOn("dotnetBuild")
-  dependsOn("nunit-template")
+  dependsOn("csproj-template")
 
   val reportDir = layout.buildDirectory.dir("reports/tests/eecsTest")
   inputs.dir(layout.projectDirectory.dir("../src/test/nunit"))
   outputs.dir(reportDir)
 
-  workingDir = layout.projectDirectory.dir("../src/test/nunit").asFile
-  commandLine("${saxonBuild.dotnet.get()}", "test", "SaxonCSEE.sln",
+  commandLine("${saxonBuild.dotnet.get()}", "test", "SaxonCS.sln",
               "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
 }
 
@@ -798,30 +797,6 @@ tasks.register<JavaExec>("csproj-template") {
        "platform=${saxonCS.platform.get()}",
        "arch=${saxonCS.arch.get()}",
        "edition=${saxonCS.edition.get()}",
-       "framework=net${saxonBuild.dotnetversion.get()}",
-       "saxonVersion=${findProperty("saxonVersion")!!}",
-       "uuid1=${UUID.randomUUID()}",
-       "uuid2=${UUID.randomUUID()}",
-       "uuid3=${UUID.randomUUID()}",
-       "uuid4=${UUID.randomUUID()}")
-}
-
-tasks.register<JavaExec>("nunit-template") {
-  val edition = saxonCS.edition.get()
-  val EDITION = edition.uppercase()
-
-  inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
-  outputs.file(layout.projectDirectory.file("../src/test/nunit/${templateName}${EDITION}.csproj"))
-  outputs.file(layout.projectDirectory.file("../src/test/nunit/${templateName}${EDITION}.sln"))
-  classpath = preprocessorClasspath
-  mainClass = "net.sf.saxon.Transform"
-  args("-it",
-       "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
-       "-o:${layout.projectDirectory.file("../src/test/nunit/${templateName}${EDITION}.sln")}",
-       "nunitBuild=true",
-       "platform=${saxonCS.platform.get()}",
-       "arch=${saxonCS.arch.get()}",
-       "edition=${edition}",
        "framework=net${saxonBuild.dotnetversion.get()}",
        "saxonVersion=${findProperty("saxonVersion")!!}",
        "uuid1=${UUID.randomUUID()}",
