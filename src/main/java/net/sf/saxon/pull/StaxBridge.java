@@ -9,6 +9,7 @@ package net.sf.saxon.pull;
 
 
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.om.*;
@@ -44,7 +45,6 @@ public class StaxBridge implements PullProvider {
     private XMLStreamReader reader;
     private AttributeMap attributes;
     private PipelineConfiguration pipe;
-    private NamePool namePool;
     private final Stack<NamespaceMap> namespaceStack = new Stack<>();
     private List<?> unparsedEntities = null;
     PullEvent currentEvent = PullEvent.START_OF_INPUT;
@@ -107,7 +107,6 @@ public class StaxBridge implements PullProvider {
     @Override
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = new PipelineConfiguration(pipe);
-        this.namePool = pipe.getConfiguration().getNamePool();
         ignoreIgnorable = pipe.getConfiguration().getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance();
     }
 
@@ -194,7 +193,14 @@ public class StaxBridge implements PullProvider {
                                 fName = getNamespacedNodeName(name.getPrefix(), NamespaceUri.of(uri), name.getLocalPart());
                             }
                             String value = reader.getAttributeValue(i);
-                            AttributeInfo att = new AttributeInfo(fName, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, 0);
+                            String attType = reader.getAttributeType(i);
+                            int props = 0;
+                            if (attType.equals("ID")) {
+                                props = ReceiverOption.IS_ID;
+                            } else if (attType.equals("IDREF") || attType.equals("IDREFS")) {
+                                props = ReceiverOption.IS_IDREF;
+                            }
+                            AttributeInfo att = new AttributeInfo(fName, BuiltInAtomicType.UNTYPED_ATOMIC, value, Loc.NONE, props);
                             attList.add(att);
                         }
                         attributes = SequenceTool.attributeMapFromList(attList);
