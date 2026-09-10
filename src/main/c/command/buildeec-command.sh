@@ -2,20 +2,11 @@
 
 #Build file for SaxonC on C++
 
-#jdkdir=/usr/lib/jvm/java-7-oracle/include
+gcc -m64 -fPIC -I../Saxon.C.API/graalvm  -c ../Saxon.C.API/SaxonCGlue.c -o SaxonCGlue.o $1 $2
 
-# $jdkdir/bin/javac MyClassInDll.java
+gcc -m64 -fPIC -I../Saxon.C.API/graalvm  Transform.c  -o transform -ldl -lc -DEEC SaxonCGlue.o -lsaxon-eec-12.1 $1 $2
 
-#jc =p MyDll.prj
-#rm -rf MyDll_jetpdb
-export JET_HOME=/usr/lib/rt
-export PATH=$JET_HOME/bin:$PATH
-export LD_LIBRARY_PATH=$JET_HOME/lib/x86/shared:$LD_LIBRARY_PATH
+#gcc  Query.c -o query -ldl -lc -DEEC -I../../Saxon.C.API/graalvm -lsaxon-eec-12.1 $1 $2
 
-
-gcc  Transform.c -o transform -ldl -lc -DEEC -I../Saxon.C.API/jni $1 $2
-
-gcc  Query.c -o query -ldl -lc -DEEC -I../Saxon.C.API/jni $1 $2
-
-gcc  Validate.c -o validate -ldl -lc -DEEC -I../Saxon.C.API/jni $1 $2
+#gcc  Validate.c -o validate -ldl -lc -DEEC -I../../Saxon.C.API/graalvm -lsaxon-eec-12.1 $1 $2
 
