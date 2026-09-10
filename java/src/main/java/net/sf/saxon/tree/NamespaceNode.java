@@ -204,9 +204,9 @@ public class NamespaceNode implements NodeInfo {
      */
 
     @Override
-    public int compareOrder(/*@NotNull*/ GNode other) {
-        if (other instanceof NamespaceNode && element.equals(((NamespaceNode) other).element)) {
-            int c = position - ((NamespaceNode) other).position;
+    public int compareOrder(GNode other) {
+        if (other instanceof NamespaceNode otherNs && element.equals(otherNs.element)) {
+            int c = position - otherNs.position;
             return Integer.compare(c, 0);
         } else if (element.equals(other)) {
             return +1;
