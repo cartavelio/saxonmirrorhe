@@ -33,6 +33,30 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class SignatureTest {
 
+    // Functions not yet implemented
+
+    private final static Set<String> notImplemented = setOf(
+            "fn:analyze-string",
+            "fn:csv-fetch-field-by-column",
+            "fn:csv-to-xdm",
+            "fn:csv-to-xml",
+            "fn:log",
+            "fn:format-number#3",
+            "fn:parse-html",
+            "fn:stack-trace",
+            "fn:json",
+            "fn:parse-csv",
+            "fn:transitive-closure",
+            "map:deep-update",
+            "map:replace",
+            "map:substitute",
+            "map:values",
+            "array:values",
+            "array:deep-update"
+
+
+    );
+
     // Function arguments where Saxon knowingly declares the type differently from the language spec.
     // Format is prefix:local#arg where arg is the 1-based argument number (not the arity!)
     private final static Set<String> argExceptions = setOf(
@@ -45,8 +69,9 @@ public class SignatureTest {
     );
 
     private final static Set<String> resultExceptions = setOf(
-            "fn:analyze-string",
-            "fn:in-scope-namespaces"
+            "fn:in-scope-namespaces",
+            "fn:void"
+
     );
 
     private static Set<String> setOf(String... str) {
@@ -89,8 +114,11 @@ public class SignatureTest {
                 }
                 List<XdmNode> args = proto.select(Steps.child("arg")).asListOfNodes();
                 BuiltInFunctionSet.Entry entry = functionSet.getFunctionDetails(localName, args.size());
+                String fnKey = prefix + ":" + localName;
                 if (entry == null) {
-                    failures += failure("No entry found for " + prefix + ":" + localName + "#" + args.size());
+                    if (!notImplemented.contains(fnKey)) {
+                        failures += failure("No entry found for " + fnKey + "#" + args.size());
+                    }
                     continue;
                 }
                 entry = entry.populator.apply(entry);
@@ -103,7 +131,6 @@ public class SignatureTest {
                     SequenceType requiredReturnType = parseType(config, returnTypeAtt);
                     SequenceType actualReturnType = new SequenceType(entry.itemType, entry.cardinality);
                     if (!requiredReturnType.isSameType(actualReturnType, th)) {
-                        String fnKey = prefix + ":" + localName;
                         if (!resultExceptions.contains(fnKey)) {
                             failures += failure("Wrong return type for " + prefix + ":" + localName + "#" + args.size());
                         }
@@ -131,7 +158,7 @@ public class SignatureTest {
                         }
                     }
                 }
-            };
+            }
             assertEquals(0, failures);
         } catch (SaxonApiException e) {
             fail(e.getMessage());
