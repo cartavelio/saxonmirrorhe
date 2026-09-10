@@ -26,7 +26,7 @@ import net.sf.saxon.value.IntegerValue;
 
 public abstract class AccessorFn extends ScalarSystemFunction {
     
-    @CSharpSimpleEnum
+    @CSharpSimpleEnum(flags=true)
     public enum Component {
         YEAR, MONTH, DAY, HOURS, MINUTES, SECONDS, TIMEZONE,
         LOCALNAME, NAMESPACE, PREFIX, MICROSECONDS, NANOSECONDS, WHOLE_SECONDS, YEAR_ALLOWING_ZERO
