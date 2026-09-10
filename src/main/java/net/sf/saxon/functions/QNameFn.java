@@ -15,15 +15,12 @@ import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.value.Whitespace;
 
 
 /**
- * This class supports the fn:QName() function (previously named fn:expanded-QName())
- * The proposed 4.0 spec adds an arity-1 variant
+ * This class supports the fn:QName() function
  */
 
 public class QNameFn extends SystemFunction {
@@ -68,20 +65,10 @@ public class QNameFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        if (arguments.length == 1) {
-            StringValue argValue = (StringValue) arguments[0].head();
-            if (argValue == null) {
-                return EmptySequence.getInstance();
-            }
-            String input = Whitespace.trim(argValue.getStringValue());
-            StructuredQName qn = StructuredQName.fromLexicalQName(input, false, false, getRetainedStaticContext());
-            return new QNameValue(qn, BuiltInAtomicType.QNAME);
-        } else {
-            return expandedQName(
-                    (StringValue) arguments[0].head(),
-                    (StringValue) arguments[1].head()
-            );
-        }
+        return expandedQName(
+                (StringValue) arguments[0].head(),
+                (StringValue) arguments[1].head()
+        );
     }
 
     @Override

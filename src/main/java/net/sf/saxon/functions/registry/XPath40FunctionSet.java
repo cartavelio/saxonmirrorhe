@@ -198,8 +198,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        // 4.0 adds an arity-1 variant of fn:QName
-        register("QName", 1, e -> e.populate(QNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
+        register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
         register("slice", 2, e -> e.populate( Slice::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
