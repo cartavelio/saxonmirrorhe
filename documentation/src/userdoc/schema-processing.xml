@@ -830,7 +830,8 @@
          </ol>
 
          <p>Note that additional schemas referenced from the <code>xsi:schemaLocation</code>
-            attributes within the source documents will be loaded as necessary. By default a target
+            attributes within the source documents will be loaded as necessary: see 
+            <a class="bodylink" href="xsi-schema-location">Using xsi:schemaLocation</a>. By default a target
             namespace is ignored if there is already a loaded schema for that namespace; Saxon makes
             no attempt to load multiple schemas for the same namespace and check them for
             consistency. This behaviour can be changed using the configuration option <a
@@ -1149,6 +1150,41 @@
          </tr>
       </table>
    </section>
+   
+   <section id="xsi-schema-location" title="Using xsi:schemaLocation">
+      <head>The xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes</head>
+      
+      <aside>The effect of the <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes
+      changes in Saxon 13.</aside>
+      
+      <p>In general, these attributes have no effect on the validation process unless explicitly enabled. This is for security
+      reasons. Not only do these attributes cause the processor to read arbitrary resources, they also allow the intent of
+      validation to be subverted: for example they can be used to invoke validation using a schema quite different from the one
+      that the application intended.</p>
+      
+      <p>In Saxon 13, any schema loaded using these attributes affects the current validation episode only; it has no effect
+      on the validation of other documents. (In earlier releases, any schema definitions loaded using these attributes were added
+      to the global pool of schema components maintained at the level of the Saxon <code>Configuration</code>, meaning that they
+      impacted all subsequent validation episodes within that <code>Configuration</code>.)</p>
+      
+      <aside>This has performance implications if many source documents are being validated, and if all of them reference
+      the same schema using <code>xsi:schemaLocation</code>. It is possible to avoid this overhead by preloading the schema
+      when performing validation, and ensuring that <code>xsi:schemaLocation</code> attributes are ignored.</aside>
+      
+      <p>Schema components loaded using the <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code>
+      attributes coexist with schema components present in any base schema used for validation, and must be consistent with the
+      base schema. For example, it is not possible to override the definition of a type that is present in the base schema,
+      except by defining new types by restriction or extension.</p>
+      
+      <p>Use of these attributes may be enabled globally (for a <code>Configuration</code>) using the configuration
+      property <code>Feature.USE_XSI_SCHEMA_LOCATION</code>. This is not recommended because of the security implications.
+      It may also be enabled more selectively via interfaces such as <code>SchemaValidator.setUseXsiSchemaLocation()</code>.
+      If XPath 4.0 is enabled then it is also possible to control schema validation via options to the <code>fn:doc()</code>
+      and <code>fn:parse-xml()</code> functions.</p>
+      
+      
+   </section>
+   
    <section id="schema-aware-qt" title="Schema-aware queries and transformations">
       <h1>Schema-aware queries and transformations</h1>
       <p>Schema-awareness, in both XSLT and XQuery, has three effects:</p>
@@ -1730,6 +1766,8 @@
       is under development, rather than when it is deployed in the field.</li>
       <li>It is much easier to produce clear diagnostics if the error is reported
       early.</li>
+       <li>The draft 4.0 specifications for XSLT and XQuery make it clear that
+       the effect of using a schema with references to absent components is undefined.</li>
     </ul>
     <p>By default therefore, Saxon treats missing component references as a compile-time
     error in the schema.</p>
@@ -2225,15 +2263,16 @@
       
          
       <section id="xpath-31-in-xsd-11"
-         title="Using XPath 3.1 in assertions">
-         <h1>Using XPath 3.1 in assertions</h1>
+         title="Using XPath 3.1/4.0 in assertions">
+         <h1>Using XPath 3.1 or 4.0 in assertions</h1>
          
          <p>From Saxon 9.9 the XPath version used can be configured using the configuration 
-            property <a class="feature" href="XPATH_VERSION_FOR_XSD"/>.</p>
+            property <a class="feature" href="XPATH_VERSION_FOR_XSD"/>. The value is an integer: 20 for XPath 2.0,
+            31 for XPath 3.1, 40 for XPath 4.0.</p>
          
          <p>If the attribute <code>saxon:extensions="any-xpath-version"</code> is present on the <code>xs:schema</code>
          element of a schema document, then XPath expressions used within assertions and conditional type assignments
-         within that schema document are allowed to use XPath 3.1 syntax. By default, only XPath 2.0 is allowed.
+         within that schema document are allowed to use XPath 4.0 syntax. By default, only XPath 2.0 is allowed.
          <em>This feature was new in Saxon 9.8.0.5.</em></p>
          
          <p>The <code>saxon:extensions</code> attribute is a whitespace-separated list of keywords.</p>
