@@ -37,6 +37,19 @@ namespace Saxon.Api {
         internal static Step<XdmNode, XdmNode> AxisStep(XdmAxis axis) {
             return new Step<XdmNode, XdmNode>(item => item.EnumerableOverAxis(axis));
         }
+        
+        private static Predicate<XdmNode> MatchesLocalName(string localName) {
+            if (localName == "*") {
+                return Predicates.IsElement();
+            }
+            else {
+                return item => {
+                    QName name = item.NodeName;
+                    return name != null &&
+                           name.LocalName.Equals(localName);
+                };
+            }
+        }
 
 
         /// <summary>
@@ -58,8 +71,8 @@ namespace Saxon.Api {
         /// or "*" to select all ancestors that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the ancestors of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> Ancestor(String localName) {
-            return Ancestor().Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> Ancestor(string localName) {
+            return Ancestor().Where(MatchesLocalName(localName));
         }
 
 
@@ -72,7 +85,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the ancestors to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the ancestors (at most one) of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Ancestor(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Ancestor(string uri, string localName) {
             return Ancestor().Where(Predicates.HasName(uri, localName));
         }
 
@@ -108,8 +121,8 @@ namespace Saxon.Api {
         /// or "*" to select all ancestor-or-self nodes that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the ancestors-or-self of a supplied node that have 
         /// the required local name.</returns>
-        public static Step<XdmNode, XdmNode> AncestorOrSelf(String localName) {
-            return AncestorOrSelf().Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> AncestorOrSelf(string localName) {
+            return AncestorOrSelf().Where(MatchesLocalName(localName));
         }
 
 
@@ -122,7 +135,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the ancestors to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the ancestors-or-self of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> AncestorOrSelf(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> AncestorOrSelf(string uri, string localName) {
             return Ancestor().Where(Predicates.HasName(uri, localName));
         }
 
@@ -156,12 +169,12 @@ namespace Saxon.Api {
         /// "*" to select all attributes</param>
         /// <returns>A <c>Step</c>, which selects the attributes of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> Attribute(String localName) {
+        public static Step<XdmNode, XdmNode> Attribute(string localName) {
             if (localName.Equals("*")) {
                 return AxisStep(XdmAxis.Attribute);
             }
             else {
-                return AxisStep(XdmAxis.Attribute).Where(Predicates.HasLocalName(localName));
+                return AxisStep(XdmAxis.Attribute).Where(MatchesLocalName(localName));
             }
         }
 
@@ -175,7 +188,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the attributes to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the attributes (at most one) of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Attribute(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Attribute(string uri, string localName) {
             return AxisStep(XdmAxis.Attribute).Where(Predicates.HasName(uri, localName));
         }
 
@@ -206,7 +219,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the child elements to be selected by the <c>Step</c>,
         /// or "*" to select all children that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the element children of a supplied node that have the required local name.</returns>
-        public static Step<XdmNode, XdmNode> Child(String localName) {
+        public static Step<XdmNode, XdmNode> Child(string localName) {
             return AxisStep(XdmAxis.Child).Where(Predicates.LocalNamePredicate(localName));
         }
 
@@ -219,7 +232,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the child elements to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the element children of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Child(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Child(string uri, string localName) {
             return AxisStep(XdmAxis.Child).Where(Predicates.ExpandedNamePredicate(uri, localName));
         }
 
@@ -252,8 +265,8 @@ namespace Saxon.Api {
         /// or "*" to select all descendants that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the element descendants of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> Descendant(String localname) {
-            return Descendant().Where(Predicates.HasLocalName(localname));
+        public static Step<XdmNode, XdmNode> Descendant(string localname) {
+            return Descendant().Where(MatchesLocalName(localname));
         }
 
         /// <summary>
@@ -265,7 +278,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the elements to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the element descendants of a supplied node that have the required
         /// local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Descendant(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Descendant(string uri, string localName) {
             return Descendant().Where(Predicates.HasName(uri, localName));
         }
 
@@ -301,8 +314,8 @@ namespace Saxon.Api {
         /// or "*" to select all descendant-or-self that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the descendant-or-self elements of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> DescendantOrSelf(String localname) {
-            return DescendantOrSelf().Where(Predicates.HasLocalName(localname));
+        public static Step<XdmNode, XdmNode> DescendantOrSelf(string localname) {
+            return DescendantOrSelf().Where(MatchesLocalName(localname));
         }
 
         /// <summary>
@@ -314,7 +327,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the elements to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the descendant-or-self elements of a supplied node that have the required
         /// local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> DescendantOrSelf(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> DescendantOrSelf(string uri, string localName) {
             return DescendantOrSelf().Where(Predicates.HasName(uri, localName));
         }
 
@@ -351,8 +364,8 @@ namespace Saxon.Api {
         /// or "*" to select all following nodes that are elements</param>
         /// <returns>A <c>Step</c>, which selects the following elements of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> Following(String localName) {
-            return AxisStep(XdmAxis.Following).Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> Following(string localName) {
+            return AxisStep(XdmAxis.Following).Where(MatchesLocalName(localName));
         }
 
 
@@ -365,7 +378,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the following elements to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the following elements of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Following(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Following(string uri, string localName) {
             return AxisStep(XdmAxis.Following).Where(Predicates.HasName(uri, localName));
         }
 
@@ -399,8 +412,8 @@ namespace Saxon.Api {
         /// or "*" to select all following siblings that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the following sibling elements of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> FollowingSibling(String localName) {
-            return AxisStep(XdmAxis.FollowingSibling).Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> FollowingSibling(string localName) {
+            return AxisStep(XdmAxis.FollowingSibling).Where(MatchesLocalName(localName));
         }
 
 
@@ -413,7 +426,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the following sibling elements to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the following sibling elements of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> FollowingSibling(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> FollowingSibling(string uri, string localName) {
             return AxisStep(XdmAxis.FollowingSibling).Where(Predicates.HasName(uri, localName));
         }
 
@@ -448,12 +461,12 @@ namespace Saxon.Api {
         /// to be selected by the <c>Step</c>, or "*" to select all namespaces</param>
         /// <returns>A <c>Step</c>, which selects the namespaces of a supplied node that have a
         /// given local name (prefix).</returns>
-        public static Step<XdmNode, XdmNode> Namespace(String localName) {
+        public static Step<XdmNode, XdmNode> Namespace(string localName) {
             if (localName.Equals("*")) {
                 return AxisStep(XdmAxis.Namespace);
             }
             else {
-                return AxisStep(XdmAxis.Namespace).Where(Predicates.HasLocalName(localName));
+                return AxisStep(XdmAxis.Namespace).Where(MatchesLocalName(localName));
             }
         }
 
@@ -487,8 +500,8 @@ namespace Saxon.Api {
         ///  or "*" to select the parent node provided it is an element</param>
         /// <returns>A <c>Step</c>, which selects the parent of a supplied node provided it is an element with the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> Parent(String localName) {
-            return AxisStep(XdmAxis.Parent).Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> Parent(string localName) {
+            return AxisStep(XdmAxis.Parent).Where(MatchesLocalName(localName));
         }
 
 
@@ -501,7 +514,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the parent element to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the parent element of a supplied node provided it is an 
         /// element with the required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Parent(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Parent(string uri, string localName) {
             return AxisStep(XdmAxis.Parent).Where(Predicates.HasName(uri, localName));
         }
 
@@ -534,8 +547,8 @@ namespace Saxon.Api {
         /// or "*" to select all descendants that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the preceding sibling elements of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> PrecedingSibling(String localName) {
-            return PrecedingSibling().Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> PrecedingSibling(string localName) {
+            return PrecedingSibling().Where(MatchesLocalName(localName));
         }
 
 
@@ -548,7 +561,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the preceding sibling elements to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the preceding sibling elements of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> PrecedingSibling(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> PrecedingSibling(string uri, string localName) {
             return PrecedingSibling().Where(Predicates.ExpandedNamePredicate(uri, localName));
         }
 
@@ -585,8 +598,8 @@ namespace Saxon.Api {
         /// or "*" to select all descendants that are element nodes</param>
         /// <returns>A <c>Step</c>, which selects the preceding elements of a supplied node that have the
         /// required local name.</returns>
-        public static Step<XdmNode, XdmNode> Preceding(String localName) {
-            return Preceding().Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> Preceding(string localName) {
+            return Preceding().Where(MatchesLocalName(localName));
         }
 
 
@@ -599,7 +612,7 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the preceding elements to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the preceding elements of a supplied node that have the
         /// required local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Preceding(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Preceding(string uri, string localName) {
             return Preceding().Where(Predicates.ExpandedNamePredicate(uri, localName));
         }
 
@@ -634,8 +647,8 @@ namespace Saxon.Api {
         /// <param name="localName">The local name of the element to be selected by the <c>Step</c>,
         /// or "*" to select the node provided that it is an element node</param>
         /// <returns>A <c>Step</c>, which selects the supplied node provided it has a given local name.</returns>
-        public static Step<XdmNode, XdmNode> Self(String localName) {
-            return AxisStep(XdmAxis.Self).Where(Predicates.HasLocalName(localName));
+        public static Step<XdmNode, XdmNode> Self(string localName) {
+            return AxisStep(XdmAxis.Self).Where(MatchesLocalName(localName));
         }
 
 
@@ -647,7 +660,7 @@ namespace Saxon.Api {
         /// supply a zero-length string to indicate the null namespace</param>
         /// <param name="localName">The local name of the element to be selected by the <c>Step</c></param>
         /// <returns>A <c>Step</c>, which selects the supplied node provided it is an element with a given local name and namespace URI.</returns>
-        public static Step<XdmNode, XdmNode> Self(String uri, String localName) {
+        public static Step<XdmNode, XdmNode> Self(string uri, string localName) {
             return AxisStep(XdmAxis.Self).Where(Predicates.HasName(uri, localName));
         }
 
