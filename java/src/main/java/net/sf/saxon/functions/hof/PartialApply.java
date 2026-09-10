@@ -1,5 +1,5 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Copyright (c) 2020 Saxonica Limited
+/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2018-2026 Saxonica Limited
 // This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 // If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 // This Source Code Form is "Incompatible With Secondary Licenses", as defined by the Mozilla Public License, v. 2.0.
@@ -32,7 +32,35 @@ import java.util.function.Supplier;
 /**
  * This expression class implements the operation of currying (or performing partial application) of a function.
  * That is, it takes a function and a set of argument bindings as input, and produces a new function as output.
- */
+ * 
+ * <p>Here are some notes on how partial function application works.</p>
+ * 
+ * <p>A static function call that includes placeholders (for example fn:contains(?, 'e')
+ * is handled by the XPath parser as follows:</p>
+ *
+ * <ul>
+ *       <li>{@code Expression targetExp = XPathParser.makeNamedFunctionReference(name, target);}</li>
+ *       <li>{@code return XPathParser.curryFunction(targetExp, args, placeMarkerArgs);}</li>
+ * </ul>
+ *
+ * <pSo we first create a named function reference {@code fn:contains#2}, and then
+ *       pass this to {@code curryFunction}, passing (a) the function reference, (b) the
+ *       arguments as supplied, with null representing a placeholder `?`, and
+ *       (c) a list containing for each placeholder arguments, either its integer position
+ *       if supplied positionally, or its name (keyword) if written as a keyword argument.</p>
+ *      
+ * <p>The call {@code XPathParser.curryFunction} delivers a {@link PartialApply} expression.</p>
+ *      
+ * <p>Evaluation of the {@link PartialApply} expression returns a function item, specifically
+ *       a {@link CurriedFunction} instance. This implements the {@link FunctionItem} interface,
+ *       and can therefore be called in the same way as any other function item, by means of a
+ *       {@link DynamicFunctionCall}.</p>
+ *
+ * <p>The {@link CurriedFunction} instance is responsible for mapping the arguments supplied
+ * in the dynamic function call to the corresponding arguments of the underlying named
+ * function reference.</p>
+ *
+ **/
 
 public class PartialApply extends Expression {
 
@@ -137,7 +165,7 @@ public class PartialApply extends Expression {
             for (int i = 0, j = 0; i < boundArgumentsOp.length; i++) {
                 Expression bound = boundArgumentsOp[i].getChildExpression();
                 if (bound instanceof PlaceHolder) {
-                    // TODO: FIXME (KEYWORDS?)
+                    //  TODO: FIXME (KEYWORDS?)
                     argTypes[j++] = ((SpecificFunctionType) baseItemType).getArgumentTypes()[i];
                 }
             }
@@ -185,10 +213,7 @@ public class PartialApply extends Expression {
      */
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof PartialApply)) {
-            return false;
-        } else {
-            PartialApply pa2 = (PartialApply)other;
+        if (other instanceof PartialApply pa2) {
             if (!getBaseExpression().isEqual(pa2.getBaseExpression())) {
                 return false;
             }
@@ -196,7 +221,7 @@ public class PartialApply extends Expression {
                 return false;
             }
             for (int i=0; i<boundArgumentsOp.length; i++) {
-                // TODO: FIXME
+                //  TODO: FIXME
                 if ((boundArgumentsOp[i] == null) != (pa2.boundArgumentsOp[i] == null)) {
                     return false;
                 }
@@ -205,6 +230,8 @@ public class PartialApply extends Expression {
                 }
             }
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -263,7 +290,7 @@ public class PartialApply extends Expression {
      * <p>For subclasses of Expression that represent XPath expressions, the result should always be a string that
      * parses as an XPath 3.0 expression. The expression produced should be equivalent to the original making certain
      * assumptions about the static context. In general the expansion will make no assumptions about namespace bindings,
-     * except that (a) the prefix "xs" is used to refer to the XML Schema namespace, and (b) the default funcion namespace
+     * except that (a) the prefix "xs" is used to refer to the XML Schema namespace, and (b) the default function namespace
      * is assumed to be the "fn" namespace.</p>
      * <p>In the case of XSLT instructions and XQuery expressions, the toString() method gives an abstracted view of the syntax
      * that is not designed in general to be parseable.</p>
