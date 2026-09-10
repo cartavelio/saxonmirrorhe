@@ -121,7 +121,7 @@ public abstract class CsvRepresentationGenerator {
     protected List<String> generateColumnNames(ArrayItem firstRow) {
         List<String> result = new ArrayList<>(firstRow.arrayLength());
         for (GroundedValue value : firstRow.members()) {
-            result.add(((StringValue) value).getStringValue());
+            result.add(Whitespace.trim(((StringValue) value).getStringValue()));
         }
         return result;
     }
