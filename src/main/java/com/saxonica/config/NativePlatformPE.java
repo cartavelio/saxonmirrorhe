@@ -1,16 +1,25 @@
 package com.saxonica.config;
 
+import com.saxonica.Validate;
 import com.saxonica.ee.domino.DominoTreeModel;
 import com.saxonica.functions.extfn.EXPathArchive.Archive;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.Query;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.option.cpp.NativePlatform;
+import net.sf.saxon.option.cpp.ProcessorDataAccumulator;
+import net.sf.saxon.option.cpp.SaxonCAPI;
+import net.sf.saxon.option.cpp.SaxonCExceptionLongHandler;
 import net.sf.saxon.option.exslt.Random;
 import net.sf.saxon.option.exslt.Sets;
 import net.sf.saxon.trans.XPathException;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.word.WordFactory;
 
 
 /**
@@ -89,6 +98,30 @@ public class NativePlatformPE extends NativePlatform {
             }
 //#endif
         }
+    }
+
+
+    @CEntryPoint(name = "j_run_validate", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long run_query(IsolateThread thread, ObjectHandle processorDataRef){
+
+        String[] args;
+
+
+        if(processorDataRef == WordFactory.nullPointer()) {
+            return SaxonCAPI.STATUS_FAIL;
+        }   else {
+           ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataRef);
+           args = processorDataAccumulator.getParameterNames();
+        }
+
+       int status= new Validate().doValidate(args);
+
+       if(status == 2) {
+           return -2;
+       }
+
+
+        return status;
     }
 
 
