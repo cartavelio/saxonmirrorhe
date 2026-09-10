@@ -223,7 +223,7 @@ public class XSDImport extends AnnotationParent {
         // not yet available. But do remove the surrogate schema that was registered at the start
         // of the import, or subsequent operations may fail
 
-        config.removeSchema(namespace);
+        config.removeSchema(targetNamespace);
 
         if (!valid) {
             throw new SchemaException("Imported schema is invalid");

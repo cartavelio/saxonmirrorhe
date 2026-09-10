@@ -829,13 +829,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @param namespace the namespace of the schema to be removed
      */
 
-    public synchronized void removeSchema(String namespace) {
+    public synchronized void removeSchema(NamespaceUri namespace) {
         namespaceStatus.remove(namespace);
     }
 
     /**
      * Get the set of namespaces of imported schemas
-     * @return
+     * @return the set of namespaces of imported schemas
      */
 
     @Override

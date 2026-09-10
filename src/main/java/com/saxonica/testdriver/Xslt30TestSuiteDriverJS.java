@@ -195,7 +195,7 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
 
     @Override
     protected void setGlobalParameter(QName qName, XdmValue value) {
-        globalParams.put("Q{" + qName.getNamespaceURI() + "}" + qName.getLocalName(), value);
+        globalParams.put("Q{" + qName.getNamespaceUri() + "}" + qName.getLocalName(), value);
     }
 
     @Override

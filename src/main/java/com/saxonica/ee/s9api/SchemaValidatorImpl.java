@@ -615,7 +615,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
                     options.setTopLevelType(documentElementType);
                     if (documentElementName != null) {
                         options.setTopLevelElement(new StructuredQName(
-                                documentElementName.getPrefix(), documentElementName.getNamespaceURI(), documentElementName.getLocalName()));
+                                documentElementName.getPrefix(), documentElementName.getNamespaceUri(), documentElementName.getLocalName()));
                     }
 
                     Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
@@ -784,7 +784,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         options.setInvalidityHandler(invalidityHandler);
         if (documentElementName != null) {
             options.setTopLevelElement(new StructuredQName(
-                    documentElementName.getPrefix(), documentElementName.getNamespaceURI(), documentElementName.getLocalName()));
+                    documentElementName.getPrefix(), documentElementName.getNamespaceUri(), documentElementName.getLocalName()));
         }
         try {
             options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
