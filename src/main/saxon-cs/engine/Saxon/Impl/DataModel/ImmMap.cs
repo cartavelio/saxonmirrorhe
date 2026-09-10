@@ -420,6 +420,10 @@ namespace Saxon.Impl.DataModel {
             public void close() {
                 // no action
             }
+
+            public void discharge() {
+                // no action
+            }
             
         }
 
