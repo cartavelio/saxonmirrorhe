@@ -78,7 +78,7 @@
                   <a href="https://www.saxonica.com/saxon-c/doc13/html/classXsltExecutable.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_xsltexecutable">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc12/python/xslt/executable.html">Python</a>
+                  <a href="https://www.saxonica.com/saxon-c/doc13/python/xslt/executable.html">Python</a>
                </p>
             </td>
          </tr>
@@ -116,7 +116,7 @@
                   <a href="https://www.saxonica.com/saxon-c/doc13/html/classXPathProcessor.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_xpathprocessor">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc12/python/xpath_processor.html">Python</a>
+                  <a href="https://www.saxonica.com/saxon-c/doc13/python/xpath_processor.html">Python</a>
                </p>
             </td>
          </tr>
@@ -135,7 +135,7 @@
                   <a href="https://www.saxonica.com/saxon-c/doc13/html/classSchemaValidator.html"
                      >C++</a><br/>
                   <a href="/api/saxon_c_php_api/saxon_c_php_schemavalidator">PHP</a><br/>
-                  <a href="https://www.saxonica.com/saxon-c/doc12/python/schema_validator.html">Python</a>
+                  <a href="https://www.saxonica.com/saxon-c/doc13/python/schema_validator.html">Python</a>
                </p>
             </td>
          </tr>
@@ -178,7 +178,7 @@
    <section id="saxon_c_cpp_api" title="SaxonC C++ API">
       <h1>SaxonC C++ API</h1>
 
-      <p>SaxonC 12 is built from the SaxonJ 12 Java product by compiling using GraalVM Native Image.
+      <p>SaxonC 13 is built from the SaxonJ 13 Java product by compiling using GraalVM Native Image.
          This generates platform specific machine code, which is
          interfaced with C/C++ using the Native Image C API.</p>
       
@@ -3545,7 +3545,7 @@
    <section id="saxonc_c_api" title="SaxonC C API">
       <h1>SaxonC C API</h1>
       
-      <p>SaxonC 12 is built from the SaxonJ 12 Java product by compiling using GraalVM Native Image.
+      <p>SaxonC 13 is built from the SaxonJ 13 Java product by compiling using GraalVM Native Image.
          This generates platform specific machine code, which is
          interfaced with C/C++ using the Native Image C API.</p>
       
