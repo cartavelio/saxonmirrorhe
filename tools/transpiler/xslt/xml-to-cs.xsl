@@ -1167,7 +1167,7 @@
       </xsl:if>-->
       <xsl:choose>
          <xsl:when test="$digestMethod!(@override='1' 
-            or (@name='equals' and @sig='Object')
+            or (@name='equals' and @sig='java.lang.Object')
             or (@name='hashCode' and not(@sig))
             or (@name='toString' and not(@sig)))">override </xsl:when>
          <xsl:when test="($digestMethod[@virtual='1' and not(@abstract='1')] or $expandingDefaults)
