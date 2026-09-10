@@ -11,13 +11,15 @@
 
         <Authors>Saxonica Ltd.</Authors>
         <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
-latest W3C specifications (notably XSLT 3.0 and XPath 3.1).</Description>
+latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Description>
         <PackageTags>XML,XSLT,Saxonica</PackageTags>
         <Copyright>Copyright © 2021 Saxonica, Ltd.</Copyright>
         <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
         <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
-        <PackageSummary>An XSLT processor for .NET.</PackageSummary>
-  </PropertyGroup>
+        <PackageSummary>An XSLT 3.0 processor for .NET 5</PackageSummary>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>    
     
     <ItemGroup>
         <Compile Include="../../src/main/saxon-cs/**" />
@@ -26,6 +28,11 @@ latest W3C specifications (notably XSLT 3.0 and XPath 3.1).</Description>
         <Compile Remove="../../src/**/*.DS_Store" />
         <Compile Remove="../../src/main/saxon-cs/commands/*.cs" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <None Include="../../tools/saxon-cs/LICENSE.txt"/>
+        <None Include="../../tools/saxon-cs/README.md"/>
+    </ItemGroup>    
     
     <ItemGroup>
       <PackageReference Include="HtmlAgilityPack" Version="1.11.33" />
