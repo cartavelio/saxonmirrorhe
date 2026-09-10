@@ -304,7 +304,7 @@ namespace Saxon.Api {
 
             XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
             DotNetPullProvider dotNetPullProvider = new (parser);
-            if (WhitespacePolicy == WhitespacePolicy.StripIgnorable) {
+            if (WhitespacePolicy == WhitespacePolicy.StripIgnorable && DtdValidation) {
                 dotNetPullProvider.IgnoreIgnorableWhitespace = true;
             }
 
@@ -358,6 +358,9 @@ namespace Saxon.Api {
 
             XmlReader parser = XmlReader.Create(input, settings, baseUri.ToString());
             DotNetPullProvider dotNetPullProvider = new (parser);
+            if (WhitespacePolicy == WhitespacePolicy.StripIgnorable) {
+                dotNetPullProvider.IgnoreIgnorableWhitespace = true;
+            }
             Source source = new PullSource(dotNetPullProvider);
             source.setSystemId(baseUri.ToString());
 

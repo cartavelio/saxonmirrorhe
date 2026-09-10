@@ -1,6 +1,5 @@
 using System;
 using Saxon.Hej.expr;
-using Saxon.Hej.s9api;
 using Saxon.Hej.type;
 using ItemType = Saxon.Hej.type.ItemType;
 using SequenceType = Saxon.Hej.value.SequenceType;
@@ -28,7 +27,7 @@ namespace Saxon.Api {
         public const char ZERO = '0'; 
         public const char ONE = ' ';
 
-        public static readonly XdmSequenceType AnySequenceType = new XdmSequenceType(
+        public static readonly XdmSequenceType AnySequenceType = new(
             XdmItemType.MakeXdmItemType(AnyItemType.getInstance()), ZERO_OR_MORE);
 
         /// <summary>
@@ -90,6 +89,11 @@ namespace Saxon.Api {
         /// </summary>
 
         public XdmItemType ItemType => itemType;
+
+        /// <summary>
+        /// The occurrence indicator. One of "?", "*", "+", or " " (single space) meaning exactly 1, or "0" meaning exactly zero.
+        /// </summary>
+        public char OccurrenceIndicator => occurrenceIn;
 
         internal SequenceType ToSequenceType() {
             ItemType jit = itemType.Unwrap();
