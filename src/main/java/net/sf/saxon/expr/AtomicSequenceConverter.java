@@ -47,6 +47,12 @@ public class AtomicSequenceConverter extends UnaryExpression {
         this.requiredItemType = requiredItemType;
     }
 
+    public static AtomicSequenceConverter makeDownCaster(Expression sequence, AtomicType requiredItemType, Configuration config) {
+        AtomicSequenceConverter asc = new AtomicSequenceConverter(sequence, requiredItemType);
+        asc.setConverter(new Converter.DownCastingConverter(requiredItemType, config.getConversionRules()));
+        return asc;
+    }
+
     public void allocateConverterStatically(Configuration config, boolean allowNull) {
         converter = allocateConverter(config, allowNull, getBaseExpression().getItemType());
     }
@@ -167,7 +173,9 @@ public class AtomicSequenceConverter extends UnaryExpression {
                 return operand;
             }
             Configuration config = getConfiguration();
-            allocateConverterStatically(config, true);
+            if (converter == null) {
+                allocateConverterStatically(config, true);
+            }
             if (converter != null) {
                 GroundedValue val = iterate(new EarlyEvaluationContext(config)).materialize();
                 return Literal.makeLiteral(val, operand);

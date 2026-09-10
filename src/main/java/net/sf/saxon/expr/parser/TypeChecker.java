@@ -293,6 +293,29 @@ public class TypeChecker {
                         suppliedItemType = BuiltInAtomicType.STRING;
                         suppliedCard = -1;
                     }
+
+                    if (!itemTypeOK && reqItemType.getBasicAlphaCode().length() > 2 && visitor.getStaticContext().getXPathVersion() >= 40) {
+                        // allow down-conversion ("relabelling")
+                        if (reqItemType.getUType().overlaps(suppliedItemType.getUType())) {
+                            itemTypeOK = true;
+                            Expression cexp = makeDownCaster(exp, (AtomicType) reqItemType, config);
+                            if (cexp instanceof AtomicSequenceConverter) {
+                                ((AtomicSequenceConverter) cexp).setRoleDiagnostic(role);
+                            }
+                            ExpressionTool.copyLocationInfo(exp, cexp);
+                            exp = cexp;
+                            try {
+                                exp = exp.simplify().typeCheck(visitor, defaultContextInfo);
+                            } catch (XPathException err) {
+                                err.maybeSetLocation(exp.getLocation());
+                                err.setFailingExpression(supplied);
+                                err.setIsStaticError(true);
+                                throw err;
+                            }
+                            suppliedItemType = reqItemType;
+                        }
+                    }
+
                 }
 
             } else if (reqItemType instanceof FunctionItemType && !((FunctionItemType) reqItemType).isMapType()
@@ -440,6 +463,10 @@ public class TypeChecker {
         // Apply function coercion as defined in XPath 3.0.
 
         return reqItemType.makeFunctionSequenceCoercer(exp, role);
+    }
+
+    private Expression makeDownCaster(Expression exp, AtomicType reqItemType, Configuration config) throws XPathException {
+        return AtomicSequenceConverter.makeDownCaster(exp, reqItemType, config);
     }
 
     /**

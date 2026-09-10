@@ -1097,7 +1097,11 @@ public class Query {
      */
 
     protected void quit(String message, int code) {
-        config.getLogger().warning(message);
+        if (config != null && config.getLogger() != null) {
+            config.getLogger().warning(message);
+        } else {
+            System.err.println(message);
+        }
         if (allowExit) {
             System.exit(code);
         } else {
