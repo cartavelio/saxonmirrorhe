@@ -2,7 +2,7 @@
 
 Below is a list of the functions registered in `com.saxonica.functions.extfn.VendorFunctionSetPE`
 
-_Last checked: 2026-04-23T22:15:00+01:00_
+_Last checked: 2026-04-24T10:53:00+01:00_
 
 ## Still in 4.0
 
@@ -18,6 +18,7 @@ _Last checked: 2026-04-23T22:15:00+01:00_
 * `saxon:column-number`
 * `saxon:compile-query`
 * `saxon:compile-stylesheet`
+* `saxon:compose`
 * `saxon:configuration`
 * `saxon:context`
 * `saxon:controller`

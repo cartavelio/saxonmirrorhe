@@ -1,30 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <registry id="com.saxonica.ee.extfn.js.IXSLFunctionSet"
-          pulled="2026-04-23T22:15:00+01:00"
+          pulled="2026-04-24T10:53:00+01:00"
           name="IXSL 1.0 Function Set"
           catalog="saxon">
-   <function prefix="ixsl" local-name="page" name="ixsl:page"/>
-   <function prefix="ixsl" local-name="source" name="ixsl:source"/>
-   <function prefix="ixsl" local-name="window" name="ixsl:window"/>
-   <function prefix="ixsl" local-name="query-params" name="ixsl:query-params"/>
-   <function prefix="ixsl" local-name="event" name="ixsl:event"/>
-   <function prefix="ixsl" local-name="location" name="ixsl:location"/>
-   <function prefix="ixsl" local-name="style" name="ixsl:style"/>
-   <function prefix="ixsl" local-name="get" name="ixsl:get"/>
-   <function prefix="ixsl" local-name="call" name="ixsl:call"/>
-   <function prefix="ixsl" local-name="contains" name="ixsl:contains"/>
-   <function prefix="ixsl" local-name="eval" name="ixsl:eval"/>
-   <function prefix="ixsl" local-name="apply" name="ixsl:apply"/>
-   <function prefix="ixsl"
-             local-name="schedule-action"
-             name="ixsl:schedule-action"/>
-   <function prefix="ixsl" local-name="set-attribute" name="ixsl:set-attribute"/>
-   <function prefix="ixsl"
-             local-name="remove-attribute"
-             name="ixsl:remove-attribute"/>
-   <function prefix="ixsl" local-name="set-property" name="ixsl:set-property"/>
-   <function prefix="ixsl"
-             local-name="remove-property"
-             name="ixsl:remove-property"/>
-   <function prefix="ixsl" local-name="set-style" name="ixsl:set-style"/>
+   <function name="ixsl:page"/>
+   <function name="ixsl:source"/>
+   <function name="ixsl:window"/>
+   <function name="ixsl:query-params"/>
+   <function name="ixsl:event"/>
+   <function name="ixsl:location"/>
+   <function name="ixsl:style"/>
+   <function name="ixsl:get"/>
+   <function name="ixsl:call"/>
+   <function name="ixsl:contains"/>
+   <function name="ixsl:eval"/>
+   <function name="ixsl:apply"/>
+   <function name="ixsl:schedule-action"/>
+   <function name="ixsl:set-attribute"/>
+   <function name="ixsl:remove-attribute"/>
+   <function name="ixsl:set-property"/>
+   <function name="ixsl:remove-property"/>
+   <function name="ixsl:set-style"/>
 </registry>

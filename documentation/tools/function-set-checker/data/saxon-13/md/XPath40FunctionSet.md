@@ -2,7 +2,7 @@
 
 Below is a list of the functions registered in `com.saxonica.functions.registry.XPath40FunctionSet`
 
-_Last checked: 2026-04-23T22:15:00+01:00_
+_Last checked: 2026-04-24T10:53:00+01:00_
 
 ## Still in 4.0
 
@@ -57,7 +57,9 @@ _Last checked: 2026-04-23T22:15:00+01:00_
 * `fn:format-time`
 * `fn:function-annotations`
 * `fn:function-identity`
+* `fn:generate-id`
 * `fn:graphemes`
+* `fn:has-children`
 * `fn:hash`
 * `fn:highest`
 * `fn:hours-from-dateTime`
@@ -147,11 +149,6 @@ _Last checked: 2026-04-23T22:15:00+01:00_
 
 ## Not in 4.0
 
-* `fn:compose`
-* `fn:items-after`
-* `fn:items-before`
-* `fn:items-ending-where`
-* `fn:items-starting-where`
 * `fn:label`
 * `fn:parcel`
 * `fn:pin`

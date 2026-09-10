@@ -2,7 +2,7 @@
 
 Below is a list of the functions registered in `net.sf.saxon.ma.map.MapFunctionSet`
 
-_Last checked: 2026-04-23T22:15:00+01:00_
+_Last checked: 2026-04-24T10:53:00+01:00_
 
 ## Still in 4.0
 
@@ -24,5 +24,4 @@ _Last checked: 2026-04-23T22:15:00+01:00_
 
 ## Not in 4.0
 
-* `map:untyped-contains`
-* `map:values`
+* `map:_untyped-contains`

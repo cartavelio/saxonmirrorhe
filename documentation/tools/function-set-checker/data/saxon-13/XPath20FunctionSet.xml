@@ -1,183 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <registry id="net.sf.saxon.functions.registry.XPath20FunctionSet"
-          pulled="2026-04-23T22:15:00+01:00"
+          pulled="2026-04-24T10:53:00+01:00"
           name="XPath 2.0 Function Set"
           catalog="xpath">
-   <function prefix="fn" local-name="abs" name="fn:abs"/>
-   <function prefix="fn"
-             local-name="adjust-date-to-timezone"
-             name="fn:adjust-date-to-timezone"/>
-   <function prefix="fn"
-             local-name="adjust-dateTime-to-timezone"
-             name="fn:adjust-dateTime-to-timezone"/>
-   <function prefix="fn"
-             local-name="adjust-time-to-timezone"
-             name="fn:adjust-time-to-timezone"/>
-   <function prefix="fn" local-name="avg" name="fn:avg"/>
-   <function prefix="fn" local-name="base-uri" name="fn:base-uri"/>
-   <function prefix="fn" local-name="boolean" name="fn:boolean"/>
-   <function prefix="fn" local-name="ceiling" name="fn:ceiling"/>
-   <function prefix="fn" local-name="codepoint-equal" name="fn:codepoint-equal"/>
-   <function prefix="fn"
-             local-name="codepoints-to-string"
-             name="fn:codepoints-to-string"/>
-   <function prefix="fn" local-name="collection" name="fn:collection"/>
-   <function prefix="fn" local-name="compare" name="fn:compare"/>
-   <function prefix="fn" local-name="contains" name="fn:contains"/>
-   <function prefix="fn" local-name="count" name="fn:count"/>
-   <function prefix="fn" local-name="current-date" name="fn:current-date"/>
-   <function prefix="fn"
-             local-name="current-dateTime"
-             name="fn:current-dateTime"/>
-   <function prefix="fn" local-name="current-time" name="fn:current-time"/>
-   <function prefix="fn" local-name="data" name="fn:data"/>
-   <function prefix="fn" local-name="dateTime" name="fn:dateTime"/>
-   <function prefix="fn" local-name="day-from-date" name="fn:day-from-date"/>
-   <function prefix="fn"
-             local-name="day-from-dateTime"
-             name="fn:day-from-dateTime"/>
-   <function prefix="fn"
-             local-name="days-from-duration"
-             name="fn:days-from-duration"/>
-   <function prefix="fn" local-name="deep-equal" name="fn:deep-equal"/>
-   <function prefix="fn"
-             local-name="default-collation"
-             name="fn:default-collation"/>
-   <function prefix="fn" local-name="distinct-values" name="fn:distinct-values"/>
-   <function prefix="fn" local-name="doc" name="fn:doc"/>
-   <function prefix="fn" local-name="doc-available" name="fn:doc-available"/>
-   <function prefix="fn" local-name="document-uri" name="fn:document-uri"/>
-   <function prefix="fn" local-name="element-with-id" name="fn:element-with-id"/>
-   <function prefix="fn" local-name="empty" name="fn:empty"/>
-   <function prefix="fn" local-name="encode-for-uri" name="fn:encode-for-uri"/>
-   <function prefix="fn" local-name="ends-with" name="fn:ends-with"/>
-   <function prefix="fn" local-name="escape-html-uri" name="fn:escape-html-uri"/>
-   <function prefix="fn" local-name="error" name="fn:error"/>
-   <function prefix="fn" local-name="exactly-one" name="fn:exactly-one"/>
-   <function prefix="fn" local-name="exists" name="fn:exists"/>
-   <function prefix="fn" local-name="false" name="fn:false"/>
-   <function prefix="fn" local-name="floor" name="fn:floor"/>
-   <function prefix="fn"
-             local-name="hours-from-dateTime"
-             name="fn:hours-from-dateTime"/>
-   <function prefix="fn"
-             local-name="hours-from-duration"
-             name="fn:hours-from-duration"/>
-   <function prefix="fn" local-name="hours-from-time" name="fn:hours-from-time"/>
-   <function prefix="fn" local-name="id" name="fn:id"/>
-   <function prefix="fn" local-name="idref" name="fn:idref"/>
-   <function prefix="fn"
-             local-name="implicit-timezone"
-             name="fn:implicit-timezone"/>
-   <function prefix="fn"
-             local-name="in-scope-prefixes"
-             name="fn:in-scope-prefixes"/>
-   <function prefix="fn" local-name="index-of" name="fn:index-of"/>
-   <function prefix="fn" local-name="insert-before" name="fn:insert-before"/>
-   <function prefix="fn" local-name="iri-to-uri" name="fn:iri-to-uri"/>
-   <function prefix="fn" local-name="lang" name="fn:lang"/>
-   <function prefix="fn" local-name="last" name="fn:last"/>
-   <function prefix="fn" local-name="local-name" name="fn:local-name"/>
-   <function prefix="fn"
-             local-name="local-name-from-QName"
-             name="fn:local-name-from-QName"/>
-   <function prefix="fn" local-name="lower-case" name="fn:lower-case"/>
-   <function prefix="fn" local-name="matches" name="fn:matches"/>
-   <function prefix="fn" local-name="max" name="fn:max"/>
-   <function prefix="fn" local-name="min" name="fn:min"/>
-   <function prefix="fn"
-             local-name="minutes-from-dateTime"
-             name="fn:minutes-from-dateTime"/>
-   <function prefix="fn"
-             local-name="minutes-from-duration"
-             name="fn:minutes-from-duration"/>
-   <function prefix="fn"
-             local-name="minutes-from-time"
-             name="fn:minutes-from-time"/>
-   <function prefix="fn" local-name="month-from-date" name="fn:month-from-date"/>
-   <function prefix="fn"
-             local-name="month-from-dateTime"
-             name="fn:month-from-dateTime"/>
-   <function prefix="fn"
-             local-name="months-from-duration"
-             name="fn:months-from-duration"/>
-   <function prefix="fn" local-name="name" name="fn:name"/>
-   <function prefix="fn" local-name="namespace-uri" name="fn:namespace-uri"/>
-   <function prefix="fn"
-             local-name="namespace-uri-for-prefix"
-             name="fn:namespace-uri-for-prefix"/>
-   <function prefix="fn"
-             local-name="namespace-uri-from-QName"
-             name="fn:namespace-uri-from-QName"/>
-   <function prefix="fn" local-name="nilled" name="fn:nilled"/>
-   <function prefix="fn" local-name="node-name" name="fn:node-name"/>
-   <function prefix="fn" local-name="not" name="fn:not"/>
-   <function prefix="fn" local-name="normalize-space" name="fn:normalize-space"/>
-   <function prefix="fn"
-             local-name="normalize-unicode"
-             name="fn:normalize-unicode"/>
-   <function prefix="fn" local-name="number" name="fn:number"/>
-   <function prefix="fn" local-name="one-or-more" name="fn:one-or-more"/>
-   <function prefix="fn" local-name="position" name="fn:position"/>
-   <function prefix="fn"
-             local-name="prefix-from-QName"
-             name="fn:prefix-from-QName"/>
-   <function prefix="fn" local-name="QName" name="fn:QName"/>
-   <function prefix="fn" local-name="remove" name="fn:remove"/>
-   <function prefix="fn" local-name="replace" name="fn:replace"/>
-   <function prefix="fn" local-name="resolve-QName" name="fn:resolve-QName"/>
-   <function prefix="fn" local-name="resolve-uri" name="fn:resolve-uri"/>
-   <function prefix="fn" local-name="reverse" name="fn:reverse"/>
-   <function prefix="fn" local-name="root" name="fn:root"/>
-   <function prefix="fn" local-name="round" name="fn:round"/>
-   <function prefix="fn"
-             local-name="round-half-to-even"
-             name="fn:round-half-to-even"/>
-   <function prefix="fn"
-             local-name="seconds-from-dateTime"
-             name="fn:seconds-from-dateTime"/>
-   <function prefix="fn"
-             local-name="seconds-from-duration"
-             name="fn:seconds-from-duration"/>
-   <function prefix="fn"
-             local-name="seconds-from-time"
-             name="fn:seconds-from-time"/>
-   <function prefix="fn" local-name="starts-with" name="fn:starts-with"/>
-   <function prefix="fn" local-name="static-base-uri" name="fn:static-base-uri"/>
-   <function prefix="fn" local-name="string" name="fn:string"/>
-   <function prefix="fn" local-name="string-length" name="fn:string-length"/>
-   <function prefix="fn" local-name="string-join" name="fn:string-join"/>
-   <function prefix="fn"
-             local-name="string-to-codepoints"
-             name="fn:string-to-codepoints"/>
-   <function prefix="fn" local-name="subsequence" name="fn:subsequence"/>
-   <function prefix="fn" local-name="substring" name="fn:substring"/>
-   <function prefix="fn" local-name="substring-after" name="fn:substring-after"/>
-   <function prefix="fn"
-             local-name="substring-before"
-             name="fn:substring-before"/>
-   <function prefix="fn" local-name="sum" name="fn:sum"/>
-   <function prefix="fn"
-             local-name="timezone-from-date"
-             name="fn:timezone-from-date"/>
-   <function prefix="fn"
-             local-name="timezone-from-dateTime"
-             name="fn:timezone-from-dateTime"/>
-   <function prefix="fn"
-             local-name="timezone-from-time"
-             name="fn:timezone-from-time"/>
-   <function prefix="fn" local-name="tokenize" name="fn:tokenize"/>
-   <function prefix="fn" local-name="trace" name="fn:trace"/>
-   <function prefix="fn" local-name="translate" name="fn:translate"/>
-   <function prefix="fn" local-name="true" name="fn:true"/>
-   <function prefix="fn" local-name="unordered" name="fn:unordered"/>
-   <function prefix="fn" local-name="upper-case" name="fn:upper-case"/>
-   <function prefix="fn" local-name="year-from-date" name="fn:year-from-date"/>
-   <function prefix="fn"
-             local-name="year-from-dateTime"
-             name="fn:year-from-dateTime"/>
-   <function prefix="fn"
-             local-name="years-from-duration"
-             name="fn:years-from-duration"/>
-   <function prefix="fn" local-name="zero-or-one" name="fn:zero-or-one"/>
+   <function name="fn:abs"/>
+   <function name="fn:adjust-date-to-timezone"/>
+   <function name="fn:adjust-dateTime-to-timezone"/>
+   <function name="fn:adjust-time-to-timezone"/>
+   <function name="fn:avg"/>
+   <function name="fn:base-uri"/>
+   <function name="fn:boolean"/>
+   <function name="fn:ceiling"/>
+   <function name="fn:codepoint-equal"/>
+   <function name="fn:codepoints-to-string"/>
+   <function name="fn:collection"/>
+   <function name="fn:compare"/>
+   <function name="fn:contains"/>
+   <function name="fn:count"/>
+   <function name="fn:current-date"/>
+   <function name="fn:current-dateTime"/>
+   <function name="fn:current-time"/>
+   <function name="fn:data"/>
+   <function name="fn:dateTime"/>
+   <function name="fn:day-from-date"/>
+   <function name="fn:day-from-dateTime"/>
+   <function name="fn:days-from-duration"/>
+   <function name="fn:deep-equal"/>
+   <function name="fn:default-collation"/>
+   <function name="fn:distinct-values"/>
+   <function name="fn:doc"/>
+   <function name="fn:doc-available"/>
+   <function name="fn:document-uri"/>
+   <function name="fn:element-with-id"/>
+   <function name="fn:empty"/>
+   <function name="fn:encode-for-uri"/>
+   <function name="fn:ends-with"/>
+   <function name="fn:escape-html-uri"/>
+   <function name="fn:error"/>
+   <function name="fn:exactly-one"/>
+   <function name="fn:exists"/>
+   <function name="fn:false"/>
+   <function name="fn:floor"/>
+   <function name="fn:hours-from-dateTime"/>
+   <function name="fn:hours-from-duration"/>
+   <function name="fn:hours-from-time"/>
+   <function name="fn:id"/>
+   <function name="fn:idref"/>
+   <function name="fn:implicit-timezone"/>
+   <function name="fn:in-scope-prefixes"/>
+   <function name="fn:index-of"/>
+   <function name="fn:insert-before"/>
+   <function name="fn:iri-to-uri"/>
+   <function name="fn:lang"/>
+   <function name="fn:last"/>
+   <function name="fn:local-name"/>
+   <function name="fn:local-name-from-QName"/>
+   <function name="fn:lower-case"/>
+   <function name="fn:matches"/>
+   <function name="fn:max"/>
+   <function name="fn:min"/>
+   <function name="fn:minutes-from-dateTime"/>
+   <function name="fn:minutes-from-duration"/>
+   <function name="fn:minutes-from-time"/>
+   <function name="fn:month-from-date"/>
+   <function name="fn:month-from-dateTime"/>
+   <function name="fn:months-from-duration"/>
+   <function name="fn:name"/>
+   <function name="fn:namespace-uri"/>
+   <function name="fn:namespace-uri-for-prefix"/>
+   <function name="fn:namespace-uri-from-QName"/>
+   <function name="fn:nilled"/>
+   <function name="fn:node-name"/>
+   <function name="fn:not"/>
+   <function name="fn:normalize-space"/>
+   <function name="fn:normalize-unicode"/>
+   <function name="fn:number"/>
+   <function name="fn:one-or-more"/>
+   <function name="fn:position"/>
+   <function name="fn:prefix-from-QName"/>
+   <function name="fn:QName"/>
+   <function name="fn:remove"/>
+   <function name="fn:replace"/>
+   <function name="fn:resolve-QName"/>
+   <function name="fn:resolve-uri"/>
+   <function name="fn:reverse"/>
+   <function name="fn:root"/>
+   <function name="fn:round"/>
+   <function name="fn:round-half-to-even"/>
+   <function name="fn:seconds-from-dateTime"/>
+   <function name="fn:seconds-from-duration"/>
+   <function name="fn:seconds-from-time"/>
+   <function name="fn:starts-with"/>
+   <function name="fn:static-base-uri"/>
+   <function name="fn:string"/>
+   <function name="fn:string-length"/>
+   <function name="fn:string-join"/>
+   <function name="fn:string-to-codepoints"/>
+   <function name="fn:subsequence"/>
+   <function name="fn:substring"/>
+   <function name="fn:substring-after"/>
+   <function name="fn:substring-before"/>
+   <function name="fn:sum"/>
+   <function name="fn:timezone-from-date"/>
+   <function name="fn:timezone-from-dateTime"/>
+   <function name="fn:timezone-from-time"/>
+   <function name="fn:tokenize"/>
+   <function name="fn:trace"/>
+   <function name="fn:translate"/>
+   <function name="fn:true"/>
+   <function name="fn:unordered"/>
+   <function name="fn:upper-case"/>
+   <function name="fn:year-from-date"/>
+   <function name="fn:year-from-dateTime"/>
+   <function name="fn:years-from-duration"/>
+   <function name="fn:zero-or-one"/>
 </registry>

@@ -2,7 +2,7 @@
 
 Below is a list of the functions registered in `com.saxonica.functions.extfn.EXPathFileFunctionSet`
 
-_Last checked: 2026-04-23T22:15:00+01:00_
+_Last checked: 2026-04-24T10:53:00+01:00_
 
 ## Still in 4.0
 
