@@ -18,18 +18,21 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
+import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 
 /**
  * Non-streaming implementation of accumulator-before() and accumulator-after()
  */
-public abstract class AccumulatorFn extends SystemFunction {
+public abstract class AccumulatorFn extends SystemFunction implements IContextAccessorFunction {
 
     @CSharpSimpleEnum
     public enum Phase {AFTER, BEFORE, UNSPECIFIED}
 
     public abstract Phase getPhase();
+
+    private ManualIterator boundContextItem = null;
 
 
     private Sequence getAccumulatorValue(String name, Phase phase, XPathContext context) throws XPathException {
@@ -150,8 +153,25 @@ public abstract class AccumulatorFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        if (boundContextItem != null) {
+            context = context.newMinorContext();
+            context.setCurrentIterator(boundContextItem);
+        }
         String name = arguments[0].head().getStringValue();
         return getAccumulatorValue(name, getPhase(), context);
+    }
+
+    /**
+     * Bind context information to appear as part of the function's closure. If this method
+     * has been called, the supplied context will be used in preference to the
+     * context at the point where the function is actually called.
+     *
+     * @param context the context to which the function applies. Must not be null.
+     */
+    @Override
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
+        boundContextItem = new ManualIterator(context.getContextItem());
+        return this;
     }
 
     public static class AccumulatorBefore extends AccumulatorFn {
