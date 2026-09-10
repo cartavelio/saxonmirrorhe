@@ -145,7 +145,7 @@ public class PackageVersion implements Comparable<PackageVersion> {
      */
 
     public boolean equalsIgnoringSuffix(PackageVersion other) {
-        return parts.equals(other.parts);
+        return equalParts(parts, other.parts);
     }
 
     @Override
