@@ -344,6 +344,14 @@
         <p>Union NodeTests are implemented. This feature allows steps such as <code>ancestor::(div1|div2|div3)</code>,
         <code>@(id|name)</code>, and <code>following-sibling::(comment()|processing-instruction())</code>.</p>
         
+        <p>TODO: In 12.x, XPath string templates are implemented. Example: <code>let $message := `{$day} of {$month}, {$year}`</code>.</p>
+        
+        <p>TODO: In 12.x, XPath braced if expressions are implemented. Examples: 
+            (1) <code>if ($condition) {&lt;x>It's true&lt;/x>}</code>;
+            (2) <code>if ($condition) {&lt;x>It's true&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code>;
+            (2) <code>if ($condition) {&lt;x>It's true&lt;/x>} else if ($polite) {&lt;x>He mis-spoke&lt;/x>} else {&lt;x>It's a lie&lt;/x>}</code>;
+        </p>
+        
         <h2>XSLT extensions</h2>
         
         
