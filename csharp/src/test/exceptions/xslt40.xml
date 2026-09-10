@@ -1,4 +1,16 @@
 <exceptions>
+
+  <exception test-set="streamable"
+             test-case="streamable-091">
+    <created by="Norm Tovey-Walsh" on="2026-01-28"/>
+    <reason>Causes the processor to crash.</reason>
+  </exception>
+
+  <exception test-set="su-absorbing"
+             test-case="su-absorbing-204">
+    <created by="Norm Tovey-Walsh" on="2026-01-28"/>
+    <reason>Causes the processor to crash.</reason>
+  </exception>
   
   <!-- Exceptions file for Saxon-CS -->
   
