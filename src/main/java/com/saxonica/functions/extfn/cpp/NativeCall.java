@@ -47,9 +47,9 @@ public class NativeCall extends SystemFunction {
     }
 
     public static void loadLibrary(String cwd, String libraryName) {
-        String home = (cwd != null && !home.isEmpty() ? cwd : Version.platform.getInstallationDirectory(Version.softwareEdition, null));
+        String home = (cwd != null ? cwd : Version.platform.getInstallationDirectory(Version.softwareEdition, null));
 
-        String libName = (home == null || home.isEmpty() ? "" : home + "/") + libraryName + "." + getLibraryExtension();
+        String libName = (home == null  || home.isEmpty() ? "" : home + "/") + libraryName + "." + getLibraryExtension();
         try {
             //System.out.println("Library Name=. " + libName);
             //System.err.println("Err.println Library Name=. " + libName);
