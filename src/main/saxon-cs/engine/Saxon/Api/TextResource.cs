@@ -59,7 +59,6 @@ namespace Saxon.Api {
         /// with an inferred encoding
         /// </summary>
         /// <param name="stream">The <c>Stream</c> used to deliver the content</param>
-        /// <param name="encoding">The <c>Encoding</c> used to decode the binary contents of the stream</param>
         /// <param name="systemId">The base URI of the content</param>
         
         public TextResource(System.IO.Stream stream, Uri systemId) {

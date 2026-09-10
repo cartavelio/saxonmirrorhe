@@ -13,8 +13,7 @@ namespace Saxon.Api {
         /// <summary>
         /// Create a <c>NodeResource</c> whose content is supplied as an existing XDM node
         /// </summary>
-        /// <param name="content">The plain text content</param>
-        /// <param name="systemId">The base URI of the content</param>
+        /// <param name="node">The XDM node</param>
 
         public NodeResource(XdmNode node) {
             this.node = node;

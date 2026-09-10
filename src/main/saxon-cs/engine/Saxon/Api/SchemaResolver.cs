@@ -25,7 +25,7 @@ namespace Saxon.Api {
     /// the zero-length string otherwise.</param>
     /// <param name="baseUri">The base URI of the module containing the reference to a schema document
     /// declaration</param>
-    /// <param name="locationHint"Xslt>The URI (if any) provided as a location hint: typically,
+    /// <param name="locationHint">The URI (if any) provided as a location hint: typically,
     /// the value of the <c>schemaLocation</c> attribute on <c>xs:include</c> or <c>xs:import</c>.
     /// Note: the <c>import schema</c> declaration in XQuery permits several location hints; if
     /// there is more than one, all but the first are ignored</param>
