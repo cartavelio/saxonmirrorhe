@@ -159,7 +159,8 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(
                         RoleDiagnostic.AXIS_STEP, "", axis);
                 //Expression coercer = SequenceCoercer.makeSequenceCoercer(new ContextItemExpression(), AnyGNodeType.getInstance().zeroOrMore(), role, true);
-                Expression coercer = new ItemChecker(new ContextItemExpression(), AnyGNodeType.getInstance(), role);
+                //Expression coercer = new ItemChecker(new ContextItemExpression(), AnyGNodeType.getInstance(), role);
+                Expression coercer = new net.sf.saxon.type.coercion.GNodeSequenceConverter(new ContextItemExpression(), role);
                 return new SimpleStepExpression(coercer, this).typeCheck(visitor, contextInfo);
             }
         }

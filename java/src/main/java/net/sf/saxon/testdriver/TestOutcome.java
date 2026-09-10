@@ -652,6 +652,11 @@ public class TestOutcome {
             XPathExecutable exp = assertXpc.compile(assertion.getStringValue());
             XPathSelector s = exp.load();
 
+            if (result.value == null) {
+                driver.println("Actual results: NULL");
+                return false;
+            }
+
             s.setVariable(resultVarName, result.value);
             if (result.value instanceof XdmItem) { // this path used in XSLT tests
                 s.setContextItem((XdmItem) result.value);

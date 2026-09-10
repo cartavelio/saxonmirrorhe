@@ -87,7 +87,7 @@ public class SequenceCoercer extends UnaryExpression {
             return result;
         }
         if (requiredItemType == AnyGNodeType.getInstance()) {
-            return new GNodeSequenceCoercer(sequence, requiredType, role, allow40);
+            return new GNodeSequenceConverter(sequence, role);
         }
         return new SequenceCoercer(sequence, requiredType, role, allow40);
     }

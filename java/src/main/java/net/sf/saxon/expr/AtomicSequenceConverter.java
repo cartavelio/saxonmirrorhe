@@ -56,12 +56,6 @@ public class AtomicSequenceConverter extends UnaryExpression {
         this.requiredItemType = requiredItemType;
     }
 
-    public static AtomicSequenceConverter makeDownCaster(Expression sequence, AtomicType requiredItemType, Configuration config) {
-        AtomicSequenceConverter asc = new AtomicSequenceConverter(sequence, requiredItemType);
-        asc.setConverter(new Converter.DownCastingConverter(requiredItemType, config.getConversionRules(), "XPTY0004"));
-        return asc;
-    }
-
     public void allocateConverterStatically(Configuration config, boolean allowNull) {
         converter = allocateConverter(config, allowNull, getBaseExpression().getItemType());
     }
@@ -228,30 +222,26 @@ public class AtomicSequenceConverter extends UnaryExpression {
         if (e != this) {
             return e;
         }
-        if (getBaseExpression() instanceof UntypedSequenceConverter) {
-            UntypedSequenceConverter asc = (UntypedSequenceConverter) getBaseExpression();
-            ItemType ascType = asc.getItemType();
+        if (getBaseExpression() instanceof UntypedSequenceConverter usc) {
+            ItemType ascType = usc.getItemType();
             if (ascType == requiredItemType) {
                 return getBaseExpression();
             } else if ((requiredItemType == BuiltInAtomicType.STRING || requiredItemType == BuiltInAtomicType.UNTYPED_ATOMIC) &&
                     (ascType == BuiltInAtomicType.STRING || ascType == BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                UntypedSequenceConverter old = (UntypedSequenceConverter) getBaseExpression();
-                UntypedSequenceConverter asc2 = new UntypedSequenceConverter(
-                        old.getBaseExpression(),
+                UntypedSequenceConverter usc2 = new UntypedSequenceConverter(
+                        usc.getBaseExpression(),
                         requiredItemType);
-                return asc2.typeCheck(visitor, contextInfo)
+                return usc2.typeCheck(visitor, contextInfo)
                         .optimize(visitor, contextInfo);
             }
-        } else if (getBaseExpression() instanceof AtomicSequenceConverter) {
-            AtomicSequenceConverter asc = (AtomicSequenceConverter) getBaseExpression();
+        } else if (getBaseExpression() instanceof AtomicSequenceConverter asc) {
             ItemType ascType = asc.getItemType();
             if (ascType == requiredItemType) {
                 return getBaseExpression();
             } else if ((requiredItemType == BuiltInAtomicType.STRING || requiredItemType == BuiltInAtomicType.UNTYPED_ATOMIC) &&
                     (ascType == BuiltInAtomicType.STRING || ascType == BuiltInAtomicType.UNTYPED_ATOMIC)) {
-                AtomicSequenceConverter old = (AtomicSequenceConverter) getBaseExpression();
                 AtomicSequenceConverter asc2 = new AtomicSequenceConverter(
-                        old.getBaseExpression(),
+                        asc.getBaseExpression(),
                         requiredItemType
                 );
                 return asc2.typeCheck(visitor, contextInfo)
