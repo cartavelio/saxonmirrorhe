@@ -329,17 +329,13 @@ public class XPathCompiler {
      * @param uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      * @since 9.1
-     * @deprecated in 13.0. Since there is no longer a global schema at {@link Processor} level,
+     * @deprecated in 13.0. The method now has no effect.
+     * Since there is no longer a global schema at {@link Processor} level,
      * the schema needs to be made available to the {@code XPathCompiler} by calling the
      * {@link #useSchema(XsdSchema)} method.
      */
 
     public void importSchemaNamespace(String uri) {
-        if (cache != null) {
-            cache.clear();
-        }
-        env.getImportedSchemaNamespaces().add(NamespaceUri.of(uri));
-        env.setSchemaAware(true);
     }
 
     /**

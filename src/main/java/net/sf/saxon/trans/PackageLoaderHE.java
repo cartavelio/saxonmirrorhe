@@ -7,7 +7,6 @@
 
 package net.sf.saxon.trans;
 
-import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.CheckSumFilter;
 import net.sf.saxon.event.FilterFactory;
@@ -80,7 +79,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private final static NestedIntegerValue SAXON9911 = new NestedIntegerValue(new int[]{9,9,1,1});
 
     private final Configuration config;
-    private PreparedSchema importedSchema;
+    private Schema importedSchema;
     protected final Stack<StylesheetPackage> packStack = new Stack<>();
     private final XPathParser parser;
     public final Stack<List<ComponentInvocation>> fixups = new Stack<>();
@@ -1345,8 +1344,8 @@ public class PackageLoaderHE implements IPackageLoader {
         IndependentContext env = new IndependentContext(config);
         final NamespaceResolver resolver = element.getAllNamespaces();
         env.setNamespaceResolver(resolver);
-        env.setImportedSchemaNamespaces(pack.getImportedSchemaNamespaces());
-        env.getImportedSchemaNamespaces().add(NamespaceUri.ANONYMOUS);
+//        env.setImportedSchemaNamespaces(pack.getImportedSchemaNamespaces());
+//        env.getImportedSchemaNamespaces().add(NamespaceUri.ANONYMOUS);
         parser.setQNameParser(parser.getQNameParser().withNamespaceResolver(resolver));
         return env;
     }
@@ -2220,7 +2219,7 @@ public class PackageLoaderHE implements IPackageLoader {
             if (namespaces != null) {
                 String[] uris = namespaces.split(" ");
                 for (String nsUri : uris) {
-                    inst.importSchemaNamespace(nsUri.equals("##") ? NamespaceUri.NULL : NamespaceUri.of(nsUri));
+                    //inst.importSchemaNamespace(nsUri.equals("##") ? NamespaceUri.NULL : NamespaceUri.of(nsUri));
                 }
             }
 

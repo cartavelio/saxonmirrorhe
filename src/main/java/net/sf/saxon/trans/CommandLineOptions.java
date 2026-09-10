@@ -847,15 +847,16 @@ public class CommandLineOptions {
 
     public static void loadAdditionalSchemas(/*@NotNull*/ Configuration config, String additionalSchemas)
             throws SchemaException {
-        StringTokenizer st = new StringTokenizer(additionalSchemas, File.pathSeparator);
-        while (st.hasMoreTokens()) {
-            String schema = st.nextToken();
-            File schemaFile = new File(schema);
-            if (!schemaFile.exists()) {
-                throw new SchemaException("Schema document " + schema + " not found");
-            }
-            config.addSchemaSource(new StreamSource(schemaFile));
-        }
+        throw new UnsupportedOperationException();
+//        StringTokenizer st = new StringTokenizer(additionalSchemas, File.pathSeparator);
+//        while (st.hasMoreTokens()) {
+//            String schema = st.nextToken();
+//            File schemaFile = new File(schema);
+//            if (!schemaFile.exists()) {
+//                throw new SchemaException("Schema document " + schema + " not found");
+//            }
+//            config.addSchemaSource(new StreamSource(schemaFile));
+//        }
     }
 
     public static String featureKeys(String edition) {

@@ -791,12 +791,13 @@ public class ConfigurationReader implements Receiver {
                     }
                     //#endif
                 } else if ("schemaDocument".equals(localName)) {
-                    try {
-                        Source source = getInputSource(content);
-                        targetConfig.addSchemaSource(source);
-                    } catch (XPathException e) {
-                        errors.add(new XmlProcessingException(e));
-                    }
+                    throw new NotImplementedException();
+//                    try {
+//                        Source source = getInputSource(content);
+//                        targetConfig.addSchemaSource(source);
+//                    } catch (XPathException e) {
+//                        errors.add(new XmlProcessingException(e));
+//                    }
                 } else if ("schemaComponentModel".equals(localName)) {
                     throw new NotImplementedException();
 //                    try {

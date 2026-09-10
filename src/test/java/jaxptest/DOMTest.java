@@ -1077,10 +1077,16 @@ public class DOMTest {
 
             Configuration config = new EnterpriseConfiguration();
 
-            config.addSchemaSource(new StreamSource(new StringReader(fooXsd)));
-            config.addSchemaSource(new StreamSource(new StringReader(barXsd)));
+            Processor proc = new Processor(config);
+            XsdCompiler compiler = proc.newXsdCompiler();
+            XsdSchema schema = compiler.compile(
+                    new StreamSource(new StringReader(fooXsd)),
+                    new StreamSource(new StringReader(barXsd)));
+
 
             StaticQueryContext ctx = config.newStaticQueryContext();
+            ctx.preLoadSchema(schema.getUnderlyingSchema());
+
             XQueryExpression xq = ctx.compileQuery("validate{.}");
             final DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
 

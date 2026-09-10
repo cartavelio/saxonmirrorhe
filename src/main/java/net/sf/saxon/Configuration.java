@@ -3073,10 +3073,11 @@ public class Configuration implements SourceResolver {
      * @throws SchemaException               if the schema cannot be read or parsed or if it is invalid
      * @throws UnsupportedOperationException if the configuration is not schema-aware
      * @since 8.4
+     * @deprecated since 13.0. The method now has no effect. Schemas should be built using
+     * an {@link XsdCompiler}.
      */
 
     public void addSchemaSource(Source schemaSource) throws SchemaException {
-        addSchemaSource(schemaSource, makeErrorReporter());
     }
 
     /**

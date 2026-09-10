@@ -7,7 +7,8 @@
 
 package net.sf.saxon;
 
-import com.saxonica.ee.schema.PreparedSchema;
+//import com.saxonica.ee.schema.PreparedSchema;
+
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.lib.*;
@@ -32,7 +33,6 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -754,9 +754,9 @@ public class Query {
 
         String scmInput = options.getOptionValue("scmin");
         if (scmInput != null) {
-            PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
-            //compiler.useSchema(null);
-            throw new NotImplementedException();
+//            PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
+//            //compiler.useSchema(null);
+            throw new UnsupportedOperationException(); // TODO: implement me
         }
 
         if (additionalSchemas != null) {

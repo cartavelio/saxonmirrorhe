@@ -7,7 +7,7 @@
 
 package net.sf.saxon;
 
-import com.saxonica.ee.schema.PreparedSchema;
+//import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.lib.*;
@@ -694,9 +694,9 @@ public class Transform {
 
             value = options.getOptionValue("scmin");
             if (value != null) {
-                PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
-                compiler.useSchema(null);
-                throw new NotImplementedException();
+//                PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
+//                compiler.useSchema(null);
+                throw new UnsupportedOperationException();   // TODO: implement me
             }
 
             if (additionalSchemas != null) {

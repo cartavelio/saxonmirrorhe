@@ -7,7 +7,6 @@
 
 package net.sf.saxon.s9api;
 
-import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.Token;
@@ -34,7 +33,7 @@ import java.util.Map;
 public class ItemTypeFactory {
 
     private final Configuration config;
-    private PreparedSchema schema;
+    private Schema schema;
 
     /**
      * Create an ItemTypeFactory.
@@ -51,6 +50,22 @@ public class ItemTypeFactory {
     public ItemTypeFactory(Processor processor) {
         this.config = processor.getUnderlyingConfiguration();
     }
+
+    /**
+     * Create a schema-specific {@code ItemTypeFactory}.
+     *
+     * @param processor the processor used by this ItemTypeFactory. This must be supplied
+     *                  in the case of user-defined types or types that reference element or attribute names;
+     *                  for built-in types it can be omitted.
+     * @param schema    the schema to be used if any item types that depend on schema-specific types
+     *                  are to be constructed
+     */
+
+    public ItemTypeFactory(Processor processor, XsdSchema schema) {
+        this(processor);
+        this.schema = schema.getUnderlyingSchema();
+    }
+
 
     /**
      * Parse an item type in XPath syntax.
@@ -88,6 +103,9 @@ public class ItemTypeFactory {
      * the conversion rules configured for the supplied <code>Processor</code>.
      * <p>It is undefined whether two calls supplying the same QName will return the same ItemType
      * object.</p>
+     *
+     * <p>From 13.0, this method can only be used if the {@code ItemTypeFactory} was constructed
+     * supplying a specific schema in the {@link #ItemTypeFactory(Processor, XsdSchema)} constructor.</p>
      *
      * @param name the name of the built-in or user-defined atomic type required
      * @return an ItemType object representing this built-in  or user-defined atomic type
@@ -334,7 +352,7 @@ public class ItemTypeFactory {
      * is only available if the {@code ItemTypeFactory} is associated with a specific
      * {@link XsdSchema}.
      * <p>It is undefined whether two calls supplying the same argument values will
-     * return the same ItemType object.</p>
+     * return the same {@code ItemType} object.</p>
      *
      * @param name the element name
      * @return the ItemType

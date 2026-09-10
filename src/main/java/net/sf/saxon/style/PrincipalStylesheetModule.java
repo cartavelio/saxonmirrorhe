@@ -1526,7 +1526,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
      * @param targetNamespace The target namespace of the imported schema.
      */
 
-    protected void addImportedSchemaNamespace(NamespaceUri targetNamespace) {
+    public void addImportedSchemaNamespace(NamespaceUri targetNamespace) {
         stylesheetPackage.getImportedSchemaNamespaces().add(targetNamespace);
     }
 
