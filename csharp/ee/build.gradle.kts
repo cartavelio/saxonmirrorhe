@@ -646,8 +646,9 @@ val apiDocumentation = tasks.register<Copy>("apiDocumentation") {
   val dotnetver = saxonBuild.dotnetversion.get()
   val buildtask = tasks.named("dotnetBuild_${arch}")
   dependsOn(buildtask)
+
   into(layout.buildDirectory.dir("apidoc"))
-  from("${buildtask.get().outputs.getFiles().first()}/obj/${release}/net${dotnetver}/${archdir}") {
+  from("${buildtask.get().outputs.getFiles().first()}/bin/${release}/net${dotnetver}/${archdir}") {
     include("SaxonCS.xml")
   }
 }

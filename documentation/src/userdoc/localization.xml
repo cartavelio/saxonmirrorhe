@@ -315,11 +315,11 @@ config.setLocalizerFactory(new LocalizerFactory() {
         href="/configuration/configuration-file">configuration file</a>.</p>
 
 
+</section>
 
     
   
   <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-
 
   <section id="unicode-collation-algorithm" title="Unicode Collation Algorithm">
     <h1>Unicode Collation Algorithm</h1>

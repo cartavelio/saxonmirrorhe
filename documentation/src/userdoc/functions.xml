@@ -2588,7 +2588,7 @@
                 <li><code>'c': Pattern.CANON_EQ</code></li>
               </ul>
           
-          <li class="csonly"><p>For .NET: </p></li>
+          <li class="csonly"><p>For .NET: </p>
               <ul>
                 <li><code>'d': RegexOptions.Multiline</code></li>
                 <li><code>'m': RegexOptions.Multiline</code></li>
@@ -11686,6 +11686,5 @@ xs:duration('PT0.001S')}ms </xsl:message>]]></code></pre>
   <xi:include href="functions/EXPath/functions-binary.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="functions/EXPath/functions-file.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
   <xi:include href="functions/sql-functions.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-
   
 </article>

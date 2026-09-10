@@ -192,11 +192,12 @@ tasks.register<JavaExec>("viewer_app_sef") {
   outputs.file(layout.buildDirectory.file("userdoc/viewer_appJS/xsl/viewer_app.sef.json"))
   classpath = configurations.named("documentation").get()
   mainClass = "com.saxonica.Transform"
+
   args("-xsl:${layout.projectDirectory.file("src/viewer_appJS/xsl/viewer_app.xsl")}",
     "-export:${layout.buildDirectory.file("userdoc/viewer_appJS/xsl/viewer_app.sef.json").get().asFile}",
     "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
     "--generateByteCode:off",
-    "SEFbuildDate=${saxonBuild.dateStamp}")
+    "SEFbuildDate=${saxonBuild.dateStamp.get()}")
 }
 
 tasks.register<JavaExec>("product_xsljavadoc") {

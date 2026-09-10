@@ -2580,4 +2580,9 @@ Console.WriteLine("Square root of 2 is " + result);]]></code></pre>
         the value as given, after evaluation as an attribute value template.</p>
     </section>
 
+    <section id="trace-listeners" title="Trace listeners">
+      <h1>Trace listeners</h1>
+      
+      <p>…</p>
+    </section>
 </article>
