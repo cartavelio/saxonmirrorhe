@@ -20,6 +20,8 @@ XdmValue::XdmValue(const XdmValue &other) {
     if(jValues == SXN_EXCEPTION) {
       throw SaxonApiException();
     }
+  } else {
+    jValues = SXN_UNSET;
   }
   toStringValue = nullptr; // No longer used
   // values.resize(0);
