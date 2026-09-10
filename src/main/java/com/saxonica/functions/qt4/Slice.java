@@ -32,7 +32,10 @@ public class Slice extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        return slice(arguments);
+    }
 
+    public static GroundedValue slice(Sequence[] arguments) throws XPathException {
         GroundedValue input = arguments[0].materialize();
         int length = input.getLength();
         if (length == 0) {
@@ -86,7 +89,7 @@ public class Slice extends SystemFunction {
         }
     }
 
-    private Sequence positiveSlice(GroundedValue input, int start, int end, int step) {
+    private static GroundedValue positiveSlice(GroundedValue input, int start, int end, int step) {
         List<Item> result = new ArrayList<>(input.getLength());
         for (int i=0; i<input.getLength(); i++) {
             int pos = i+1;
