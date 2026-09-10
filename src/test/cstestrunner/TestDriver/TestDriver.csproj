@@ -7,7 +7,6 @@
 
     <ItemGroup>
       <Compile Remove="Program.cs" />
-      <Compile Remove="SchemaTestSuiteDriver.cs" />
     </ItemGroup>
 
     <ItemGroup>

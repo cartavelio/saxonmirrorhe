@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "uTT4nawbC3uw0p9/Z5ljOk6+CdOJSY/0poKTdydFBgahYjum1ZMdLAH5MIwH/5jzabzFROD7qCChRJ77bp52qw==",
+  "success": true,
+  "projectFilePath": "/Users/mike/GitHub/saxon2020/src/test/cstestrunner/TestDriver/TestDriver.csproj",
+  "expectedPackageFiles": [
+    "/Users/mike/.nuget/packages/htmlagilitypack/1.11.33/htmlagilitypack.1.11.33.nupkg.sha512",
+    "/Users/mike/.nuget/packages/singulink.numerics.bigdecimal/1.0.2/singulink.numerics.bigdecimal.1.0.2.nupkg.sha512",
+    "/Users/mike/.nuget/packages/singulink.numerics.bigintegerextensions/1.1.0/singulink.numerics.bigintegerextensions.1.1.0.nupkg.sha512",
+    "/Users/mike/.nuget/packages/system.collections.immutable/5.0.0/system.collections.immutable.5.0.0.nupkg.sha512",
+    "/Users/mike/.nuget/packages/system.runtime.compilerservices.unsafe/5.0.0/system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

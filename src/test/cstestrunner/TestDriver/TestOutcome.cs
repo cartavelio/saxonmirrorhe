@@ -1093,6 +1093,7 @@ namespace TestRunner {
                 return false;
             }
             else {
+                assertXpc.DeclareVariable(new QName("result"));
                 XPathSelector s = assertXpc.Compile("deep-equal($result , (" + assertion.StringValue + "))").Load();
                 s.SetVariable(new QName("result"), result.value);
                 return ((XdmAtomicValue) s.Evaluate()).GetBooleanValue();
@@ -1104,6 +1105,7 @@ namespace TestRunner {
                 return false;
             }
             else {
+                assertXpc.DeclareVariable(new QName("result"));
                 XPathSelector s = assertXpc.Compile("$result eq " + assertion.StringValue).Load();
                 s.SetVariable(new QName("result"), result.value);
                 XdmAtomicValue item = (XdmAtomicValue) s.EvaluateSingle();
@@ -1138,7 +1140,7 @@ namespace TestRunner {
                 fsb.Append(expectedErrorQ.LocalName);
                 fsb.Append("; got ");
                 foreach (QName e in errorsReported) {
-                    fsb.Append(e.LocalName);
+                    fsb.Append(e==null ? "ERR?????" : e.LocalName);
                     fsb.Append("|");
                 }
 

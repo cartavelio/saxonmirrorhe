@@ -38,6 +38,7 @@ namespace TestRunner {
         protected IFeedbackListener feedback = new DefaultFeedbackListener();
         protected bool useXslt30Transformer = true; // Temporary for controlling test processor
         protected bool strict = false;
+        protected string edition = "EE";
         public bool schemaAware = false;
 
 
@@ -102,19 +103,22 @@ namespace TestRunner {
         }
 
         public static void Main(string[] args) {
-            bool isXSLT = false;
+            string language = "XQ";
             foreach (string a in args)
             {
                 if (a.StartsWith("-lang:XT")) {
-                    isXSLT = true;
+                    language = "XT";
                     break;
-                } 
+                } else if (a.StartsWith("-lang:XSD")) {
+                    language = "XSD";
+                }
             }
 
-            if (isXSLT) {
+            if (language == "XT") {
                 Xslt30TestSuiteDriver.MainXSLT(args);
-            }
-            else {
+            } else if (language == "XSD") {
+                SchemaTestSuiteDriver.MainXSD(args);
+            } else {
                 QT3TestSuiteDriver.MainQT(args);
             }
         }
@@ -193,6 +197,7 @@ namespace TestRunner {
                     feedback.Message("No results document specified (use -lang option)", true);
                 }
 
+                schemaAware = edition == "EE";
                 driverSerializer.SetOutputStream(Console.OpenStandardError());
                 driverSerializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
                 processCatalog(catalog);

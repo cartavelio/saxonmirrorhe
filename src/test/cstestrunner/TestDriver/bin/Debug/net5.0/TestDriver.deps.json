@@ -1,0 +1,107 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "TestDriver/1.0.0": {
+        "dependencies": {
+          "SaxonCS3": "1.0.0"
+        },
+        "runtime": {
+          "TestDriver.dll": {}
+        }
+      },
+      "HtmlAgilityPack/1.11.33": {
+        "runtime": {
+          "lib/netstandard2.0/HtmlAgilityPack.dll": {
+            "assemblyVersion": "1.11.33.0",
+            "fileVersion": "1.11.33.0"
+          }
+        }
+      },
+      "Singulink.Numerics.BigDecimal/1.0.2": {
+        "dependencies": {
+          "Singulink.Numerics.BigIntegerExtensions": "1.1.0",
+          "System.Runtime.CompilerServices.Unsafe": "5.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.1/Singulink.Numerics.BigDecimal.dll": {
+            "assemblyVersion": "1.0.2.0",
+            "fileVersion": "1.0.2.0"
+          }
+        }
+      },
+      "Singulink.Numerics.BigIntegerExtensions/1.1.0": {
+        "runtime": {
+          "lib/netstandard2.0/Singulink.Numerics.BigIntegerExtensions.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.1.0.0"
+          }
+        }
+      },
+      "System.Collections.Immutable/5.0.0": {},
+      "System.Runtime.CompilerServices.Unsafe/5.0.0": {},
+      "SaxonCS3/1.0.0": {
+        "dependencies": {
+          "HtmlAgilityPack": "1.11.33",
+          "Singulink.Numerics.BigDecimal": "1.0.2",
+          "Singulink.Numerics.BigIntegerExtensions": "1.1.0",
+          "System.Collections.Immutable": "5.0.0"
+        },
+        "runtime": {
+          "SaxonCS3.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "TestDriver/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HtmlAgilityPack/1.11.33": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ccsOdeRuObzQNy3FGLHd0MTmPvEu9nKUYDAqLham1XD3azbU+gcyRF6Hu87A68b7WqGpCdBZiLU7CwJVVmTb6A==",
+      "path": "htmlagilitypack/1.11.33",
+      "hashPath": "htmlagilitypack.1.11.33.nupkg.sha512"
+    },
+    "Singulink.Numerics.BigDecimal/1.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ryrW8KiWyIwbixo7zL9IvcyeHqv2LE2qZcl7UhBohHaVvee0Y/mY4YkpbIzHE/g7j110yiaq5q8uFRlyOgG+3Q==",
+      "path": "singulink.numerics.bigdecimal/1.0.2",
+      "hashPath": "singulink.numerics.bigdecimal.1.0.2.nupkg.sha512"
+    },
+    "Singulink.Numerics.BigIntegerExtensions/1.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Lx6hqyI481nt//LvuGwtwtt+qJ7lTr45lsYFYo1bH6AfrxGkIVsqyqSbphnAuIF0G20SEKb+vyNncsd+q5IVwg==",
+      "path": "singulink.numerics.bigintegerextensions/1.1.0",
+      "hashPath": "singulink.numerics.bigintegerextensions.1.1.0.nupkg.sha512"
+    },
+    "System.Collections.Immutable/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-FXkLXiK0sVVewcso0imKQoOxjoPAj42R8HtjjbSjVPAzwDfzoyoznWxgA3c38LDbN9SJux1xXoXYAhz98j7r2g==",
+      "path": "system.collections.immutable/5.0.0",
+      "hashPath": "system.collections.immutable.5.0.0.nupkg.sha512"
+    },
+    "System.Runtime.CompilerServices.Unsafe/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ZD9TMpsmYJLrxbbmdvhwt9YEgG5WntEnZ/d1eH8JBX9LBp+Ju8BSBhUGbZMNVHHomWo2KVImJhTDl2hIgw/6MA==",
+      "path": "system.runtime.compilerservices.unsafe/5.0.0",
+      "hashPath": "system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512"
+    },
+    "SaxonCS3/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
