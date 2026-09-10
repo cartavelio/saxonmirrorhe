@@ -5,16 +5,14 @@ import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.FilteringFeed;
 import com.saxonica.ee.stream.feed.ItemFeed;
 import com.saxonica.ee.stream.feed.NoCloseFeed;
+import com.saxonica.ee.stream.om.FleetingNode;
 import com.saxonica.ee.stream.om.FleetingParentNode;
 import com.saxonica.ee.stream.watch.Terminator;
-import com.saxonica.ee.stream.watch.Trigger;
-import com.saxonica.ee.stream.watch.WatchMaker;
-import com.saxonica.ee.stream.watch.WatchManager;
+import com.saxonica.ee.stream.watch.*;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.expr.sort.LocalOrderComparer;
@@ -26,6 +24,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.NodeListIterator;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
+import net.sf.saxon.type.UType;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -187,15 +186,28 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          * @param context  the XPath evaluation context
          * @param label    the label to be used to identify events emanating from this feed
          */
-        public LabellingFeed(ItemFeed resultFeed, XPathContext context, int label) {
+        public LabellingFeed(CombiningFeed resultFeed, XPathContext context, int label) {
             super(resultFeed, context);
             this.label = label;
         }
 
         @Override
+        public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
+            ((CombiningFeed)getResultFeed()).setLabel(label);
+            return super.startSelectedParentNode(node, locationId);
+        }
+
+        @Override
+        public void endSelectedParentNode(Location locationId) throws XPathException {
+            ((CombiningFeed) getResultFeed()).setLabel(label);
+            super.endSelectedParentNode(locationId);
+        }
+
+        @Override
         public void append(Item item) throws XPathException {
             // Append an item, adding the label to identify its origin
-            getResultFeed().append(item, Loc.NONE, label);
+            ((CombiningFeed) getResultFeed()).setLabel(label);
+            getResultFeed().append(item);
         }
     }
 
@@ -210,7 +222,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
 
         private final VennExpressionAdjunct streamer;
         private final WatchManager watchManager;
-        private ItemFeed combiner;
+        private CombiningFeed combiner;
 
         VennTwoWayFeed(VennExpression exp, VennExpressionAdjunct streamer, ItemFeed result, XPathContext context, WatchManager watchManager) {
             super(exp, result, context);
@@ -235,11 +247,19 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                 case Token.INTERSECT:
                     combiner = new CombiningIntersectFeed(exp, getResultFeed(), getContext());
                     break;
+                case Token.EXCEPT:
+                    combiner = new CombiningExceptFeed(exp, getResultFeed(), getContext(), watchManager);
+                    break;
                 default:
                     combiner = null;
 
 
             }
+            // Note the order here. Intersect and Union are symmetric, so the order doesn't matter.
+            // With Except, we would ideally like to see the events for the second operand first, but
+            // we can't guarantee that (bug 5488 comment 11), so instead we arrange a finalization watch
+            // when the time comes.
+
             watchManager.addWatch(streamer.lhsInversion.getWatch(
                     watchManager, new LabellingFeed(combiner, getContext(), 0), getContext()), true);
             watchManager.addWatch(streamer.rhsInversion.getWatch(
@@ -299,6 +319,25 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
     }
 
     /**
+     * An ItemFeed that implements the CombiningFeed interface allows the caller
+     * to set a label indicating the origin of the next call on {@link ItemFeed#startSelectedParentNode(FleetingParentNode, Location)}
+     * or {@link ItemFeed#append(Item)}
+     */
+
+    abstract static class CombiningFeed extends ItemFeed {
+
+        protected int currentLabel;
+
+        public CombiningFeed(Expression exp, ItemFeed result, XPathContext context) {
+            super(exp, result, context);
+        }
+
+        void setLabel(int label) {
+            currentLabel = label;
+        }
+    }
+
+    /**
      * A CombiningUnionFeed accepts events from two input sources, where the events carry an identifying
      * label to indicate which source they came from. It combines events from the two sources into a
      * single output stream according to the rules of the union operator.
@@ -310,7 +349,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
      * only when we can be sure than no earlier node can possibly arrive on the other stream.</p>
      */
 
-    private static class CombiningUnionFeed extends ItemFeed {
+    private static class CombiningUnionFeed extends CombiningFeed {
 
         private NodeInfo previousNode = null;
         private final Stack<Boolean> duplicates = new Stack<>();
@@ -320,7 +359,6 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         CombiningUnionFeed(VennExpression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
         }
-
 
         /**
          * Signal that an element or document node has been found that matches the selection that this
@@ -369,19 +407,15 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          *
          * @param item the item to be supplied
          */
-        @Override
-        public void append(Item item) throws XPathException {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
-        public void append(Item item, Location loc, int label) throws XPathException {
+        public void append(Item item) throws XPathException {
             // The principle here is that we can flush a node from buffer A if it it is earlier
             // in document order than the last node in buffer B.
 //            System.err.println("CombiningUnionFeed.appendItem " + ((NodeInfo) item).getDisplayName()
 //                                       + " " + genId((NodeInfo) item) + " label=" + label);
-            LinkedList<NodeInfo> thisBuffer = label == 0 ? lhsBuffer : rhsBuffer;
-            LinkedList<NodeInfo> thatBuffer = label == 0 ? rhsBuffer : lhsBuffer;
+            LinkedList<NodeInfo> thisBuffer = currentLabel == 0 ? lhsBuffer : rhsBuffer;
+            LinkedList<NodeInfo> thatBuffer = currentLabel == 0 ? rhsBuffer : lhsBuffer;
 
             while (!thatBuffer.isEmpty()) {
                 NodeInfo next = thatBuffer.peekFirst();
@@ -418,9 +452,9 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
     }
 
     /**
-     * A CombiningUnionFeed accepts events from two input sources, where the events carry an identifying
+     * A CombiningIntersectFeed accepts events from two input sources, where the events carry an identifying
      * label to indicate which source they came from. It combines events from the two sources into a
-     * single output stream according to the rules of the union operator.
+     * single output stream according to the rules of the intersect operator.
      *
      * <p>The complication is that although each of the input streams is individually in document order,
      * an event from one stream may need to be buffered until the other stream catches up. This happens
@@ -429,7 +463,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
      * only when we can be sure than no earlier node can possibly arrive on the other stream.</p>
      */
 
-    private static class CombiningIntersectFeed extends ItemFeed {
+    private static class CombiningIntersectFeed extends CombiningFeed {
 
         private NodeInfo previousNode = null;
         private final Stack<Boolean> duplicates = new Stack<>();
@@ -491,19 +525,15 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          *
          * @param item the item to be supplied
          */
-        @Override
-        public void append(Item item) throws XPathException {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
-        public void append(Item item, Location loc, int label) throws XPathException {
+        public void append(Item item) throws XPathException {
             // The principle here is that we can flush a node from buffer A if it it is earlier
             // in document order than the last node in buffer B.
 //            System.err.println("CombiningUnionFeed.appendItem " + ((NodeInfo) item).getDisplayName()
 //                                       + " " + genId((NodeInfo) item) + " label=" + label );
-            LinkedList<NodeInfo> thisBuffer = label == 0 ? lhsBuffer : rhsBuffer;
-            LinkedList<NodeInfo> thatBuffer = label == 0 ? rhsBuffer : lhsBuffer;
+            LinkedList<NodeInfo> thisBuffer = currentLabel == 0 ? lhsBuffer : rhsBuffer;
+            LinkedList<NodeInfo> thatBuffer = currentLabel == 0 ? rhsBuffer : lhsBuffer;
 
             while (!thatBuffer.isEmpty()) {
                 NodeInfo next = thatBuffer.peekFirst();
@@ -540,6 +570,197 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
 
     }
 
+    /**
+     * A CombiningExceptFeed accepts events from two input sources, where the events carry an identifying
+     * label to indicate which source they came from. It combines events from the two sources into a
+     * single output stream according to the rules of the except operator.
+     *
+     * <p>The complication is that although each of the input streams is individually in document order,
+     * an event from one stream may need to be buffered until the other stream catches up. This happens
+     * when either or both streams selects nodes using the parent or ancestor axis (which is rare, but
+     * needs to be handled). Both streams are therefore buffered, and a node is released from the buffer
+     * only when we can be sure than no earlier node can possibly arrive on the other stream.</p>
+     *
+     * <p>Unlike union and intersect, the except operator is asymmetric. It would be useful if we
+     * could ensure that nodes were always reported in the same order as they appear in the expression,
+     * but this is not easy to guarantee. We therefore rely on the inputs being labelled to distinguish
+     * them, even on the {@link #startSelectedParentNode(FleetingParentNode, Location)} and
+     * {@link #endSelectedParentNode(Location)} method calls. This is achieved rather crudely
+     * by overloading the meaning of the <code>location</code> argument.</p>
+     */
+
+    private static class CombiningExceptFeed extends CombiningFeed {
+
+        private NodeInfo latestRhsNode = null;
+        private boolean emitted;
+        private final LinkedList<NodeInfo> lhsBuffer = new LinkedList<>();
+        private final LinkedList<NodeInfo> rhsBuffer = new LinkedList<>();
+        private final WatchManager watchManager;
+
+        CombiningExceptFeed(VennExpression exp, ItemFeed result, XPathContext context, WatchManager watchManager) {
+            super(exp, result, context);
+            this.watchManager = watchManager;
+        }
+
+
+        /**
+         * Signal that an element or document node has been found that matches the selection that this
+         * Watch is looking for. This method is called by the WatchManager while
+         * processing the startElement or startDocument event that matches the selection.
+         *
+         * @param node       the element or document node whose start event has been matched
+         * @param location the location associated with the element or document node (may be
+         *                   the location of the instruction that created it)
+         * @return a Receiver to be notified of all events starting with the startElement/startDocument event
+         * for the matched element, and ending with the endElement event for that element; or null if this
+         * feature is not required.
+         * @throws net.sf.saxon.trans.XPathException May be raised if a dynamic error occurs
+         */
+        @Override
+        public Receiver startSelectedParentNode(FleetingParentNode node, Location location) throws XPathException {
+            // The problem here is that we can't control whether we see the LHS event before or after the
+            // RHS event - see bug 5488 comment 11. So we add a new LastChanceWatch which will always be called after
+            // all the other watches for the current event, and once it fires, it is immediately deleted.
+            // System.err.println("CombiningExceptFeed.startSelectedParent " + node.getDisplayName() + " " + genId(node) + " label=" + currentLabel);
+            if (currentLabel == 0) {
+                Watch lastChanceWatch = new AbstractWatch() {
+                    @Override
+                    public boolean matchesNode(FleetingNode node, XPathContext context) throws XPathException {
+                        return true;
+                    }
+
+                    @Override
+                    public boolean matchesNodesOfKind(UType kind) {
+                        return true;
+                    }
+
+                    @Override
+                    public void setAnchorNode(FleetingParentNode anchor) {
+
+                    }
+
+                    @Override
+                    public FleetingParentNode getAnchorNode() {
+                        return node;
+                    }
+
+                    @Override
+                    public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
+                        // System.err.println("Last chance watch firing...");
+                        emitted = false;
+                        watchManager.removeWatch(this); // This was a very transient watch, we don't need it any more
+                        if (node != latestRhsNode) {
+                            // System.err.println("Emitting node...");
+                            emitted = true;
+                            return getResultFeed().startSelectedParentNode(node, location);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void endSelectedParentNode(Location locationId) {
+                        // no action
+                    }
+                };
+                watchManager.addWatch(lastChanceWatch, true);
+
+            } else {
+                // event comes from RH operand
+                latestRhsNode = node;
+            }
+            return null;
+        }
+
+        /**
+         * Signal that the endElement event has occurred for the element whose startElement
+         * event caused the Watch to be activated.
+         *
+         * @param locationId the location of the element
+         * @throws XPathException May be raised if a constraint implemented by this
+         *                        Watch is violated
+         */
+        @Override
+        public void endSelectedParentNode(Location locationId) throws XPathException {
+            //System.err.println("CombiningUnionFeed.endSelectedParent ");
+            if (currentLabel == 0 && emitted) {
+                getResultFeed().endSelectedParentNode(locationId);
+                emitted = false;
+            }
+        }
+
+        /**
+         * Supply one item towards the streamed input of the expression
+         *
+         * @param item the item to be supplied
+         */
+        @Override
+        public void append(Item item) throws XPathException {
+            // The principle here is that we can flush a node from buffer A if it it is earlier
+            // in document order than the last node in buffer B. When we flush a node from the LH
+            // buffer, we write it to the result; when we flush a node from the RH buffer, we remove
+            // the corresponding node from the LH buffer if present
+
+            // System.err.println("CombiningExceptFeed.appendItem " + ((NodeInfo) item).getDisplayName()
+            //                           + " " + genId((NodeInfo) item) + " label=" + currentLabel );
+
+            if (currentLabel == 0) {
+                // this is the LH operand
+                boolean exclude = false;
+                while (!rhsBuffer.isEmpty()) {
+                    NodeInfo next = rhsBuffer.peekFirst();
+                    int c = next.compareOrder((NodeInfo) item);
+                    if (c < 0) {
+                        // remove node from RH buffer - no longer needed
+                        rhsBuffer.pollFirst();
+                    } else if (c == 0) {
+                        exclude = true;
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                if (!exclude) {
+                    lhsBuffer.add((NodeInfo) item);
+                }
+            } else {
+                // this is the RH operand
+                while (!lhsBuffer.isEmpty()) {
+                    NodeInfo next = lhsBuffer.peekFirst();
+                    int c = next.compareOrder((NodeInfo) item);
+                    if (c < 0) {
+                        // flush node from LH buffer - we now know it's OK
+                        getResultFeed().append(lhsBuffer.pollFirst());
+                    } else if (c == 0) {
+                        // remove node from LH buffer
+                        lhsBuffer.pollFirst();
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                rhsBuffer.add((NodeInfo) item);
+            }
+
+        }
+
+        /**
+         * Finish evaluating the expression.
+         *
+         * @throws XPathException if a dynamic error occurs
+         */
+        @Override
+        public void close() throws XPathException {
+            //System.err.println("CombiningUnionFeed.close() ");
+            // Flush out any remaining buffered nodes, using the pull-mode intersection iterator to merge them
+            NodeListIterator iter0 = new NodeListIterator(lhsBuffer);
+            NodeListIterator iter1 = new NodeListIterator(rhsBuffer);
+            DifferenceEnumeration union = new DifferenceEnumeration(iter0, iter1, LocalOrderComparer.getInstance());
+            processItems(union, getResultFeed());
+            super.close();
+        }
+
+    }
+
     @Override
     public ItemFeed makeItemFeed(final WatchManager watchManager, ItemFeed out, final XPathContext context) throws XPathException {
         final VennExpression exp = (VennExpression) getExpression();
@@ -550,29 +771,24 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         boolean bothConsuming = s0 == Sweep.CONSUMING && s1 == Sweep.CONSUMING;
         boolean a0consuming = s0 == Sweep.CONSUMING;
 
+        if (bothConsuming) {
+            if (lhsInversion == null) {
+                lhsInversion = Inversion.invertExpression(exp.getLhsExpression(), false);
+                rhsInversion = Inversion.invertExpression(exp.getRhsExpression(), false);
+            }
+            return new VennTwoWayFeed(exp, this, out, context, watchManager);
+        }
+
         int operator = exp.getOperator();
         if (operator == Token.UNION) {
-            if (bothConsuming) {
-                if (lhsInversion == null) {
-                    lhsInversion = Inversion.invertExpression(exp.getLhsExpression(), false);
-                    rhsInversion = Inversion.invertExpression(exp.getRhsExpression(), false);
-                }
-                return new VennTwoWayFeed(exp, this, out, context, watchManager);
-            } else if (a0consuming) {
+            if (a0consuming) {
                 return new SemiStreamedUnionFeed(exp, exp.getRhsExpression(), out, context);
             } else {
                 return new SemiStreamedUnionFeed(exp, exp.getLhsExpression(), out, context);
             }
         } else if (operator == Token.INTERSECT) {
-            if (bothConsuming) {
-                if (lhsInversion == null) {
-                    lhsInversion = Inversion.invertExpression(exp.getLhsExpression(), false);
-                    rhsInversion = Inversion.invertExpression(exp.getRhsExpression(), false);
-                }
-                return new VennTwoWayFeed(exp, this, out, context, watchManager);
-            } else {
-                return new FilteringFeed(watchManager, out, context, FilteringFeed.OpaqueFilter);
-            }
+            return new FilteringFeed(watchManager, out, context, FilteringFeed.OpaqueFilter);
+
 
         } else if (operator == Token.EXCEPT) {
             if (a0consuming) {

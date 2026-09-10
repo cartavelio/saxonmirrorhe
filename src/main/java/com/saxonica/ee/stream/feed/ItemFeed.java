@@ -246,7 +246,7 @@ public abstract class ItemFeed extends ProxyOutputter {
      */
 
     @Override
-    public void append(Item item, Location locationId, int properties) throws XPathException {
+    public final void append(Item item, Location locationId, int properties) throws XPathException {
         append(item);
     }
 
