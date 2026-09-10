@@ -114,13 +114,14 @@ public final class BigDecimalValue extends DecimalValue {
      * @throws NumberFormatException if the value is invalid
      */
 
-    public static BigDecimalValue parse(CharSequence in) throws NumberFormatException {
+    public static NumericValue parse(CharSequence in) throws NumberFormatException {
         StringBuilder digits = new StringBuilder(in.length());
         int scale = 0;
         int state = 0;
         // 0 - in initial whitespace; 1 - after sign
         // 3 - after decimal point; 5 - in final whitespace
         boolean foundDigit = false;
+        boolean foundDot = false;
         int len = in.length();
         for (int i = 0; i < len; i++) {
             char c = in.charAt(i);
@@ -174,6 +175,7 @@ public final class BigDecimalValue extends DecimalValue {
                     if (state >= 3) {
                         throw new NumberFormatException("more than one decimal point");
                     }
+                    foundDot = true;
                     state = 3;
                     break;
                 default:
@@ -197,6 +199,10 @@ public final class BigDecimalValue extends DecimalValue {
         }
         if (digits.length() == 0 || (digits.length() == 1 && digits.charAt(0) == '-')) {
             return BigDecimalValue.ZERO;
+        }
+        if (!foundDot && digits.length() < 16) {
+            // For simple constructs like xs:decimal('2'), return an Int64Value. Altova MapForce generates this a lot.
+            return new Int64Value(Long.parseLong(digits.toString(), 10));
         }
         BigInteger bigInt = new BigInteger(digits.toString());
         BigDecimal bigDec = new BigDecimal(bigInt, scale);
