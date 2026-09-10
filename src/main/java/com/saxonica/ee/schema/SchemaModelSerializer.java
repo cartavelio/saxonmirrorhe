@@ -16,7 +16,6 @@ import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.QualifiedNameValue;
 
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 
@@ -27,7 +26,6 @@ import java.util.LinkedList;
 public class SchemaModelSerializer {
 
     private final EnterpriseConfiguration config;
-    private final PreparedSchema schema;
     private final Receiver receiver;
     private final ComplexContentOutputter cco;
     private final LinkedList<SchemaComponent> pendingComponents = new LinkedList<>();
@@ -41,43 +39,17 @@ public class SchemaModelSerializer {
     /**
      * Create a SchemaModelSerializer
      *
-     * @param schema the schema to be serialized
+     * @param config the Saxon Configuration. This must be a schema-aware configuration
      * @param out    the receiver to which the compiled schema document will be written
      * @throws IllegalArgumentException if the configuration is not schema-aware
      */
 
-    public SchemaModelSerializer(PreparedSchema schema, Receiver out) {
-        this.schema = schema;
-        config = schema.getConfiguration();
+    public SchemaModelSerializer(Configuration config, Receiver out) {
         config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
+        this.config = (EnterpriseConfiguration) config;
         NamespaceReducer reducer = new NamespaceReducer(out);
         this.receiver = new CheckSumFilter(reducer);
         this.cco = new ComplexContentOutputter(this.receiver);
-    }
-
-    public SchemaModelSerializer(PreparedSchema schema, ExpressionPresenter presenter) {
-        this.schema = schema;
-        config = schema.getConfiguration();
-        config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
-        this.receiver = presenter.getReceiver();
-        this.cco = presenter.getComplexContentOutputter();
-    }
-
-    public PreparedSchema getSchema() {
-        return schema;
-    }
-
-    public void serializeAsDocument() throws XPathException {
-        cco.open();
-        cco.startDocument(ReceiverOption.NONE);
-        serialize();
-        if (receiver instanceof CheckSumFilter) {
-            int c = ((CheckSumFilter) receiver).getChecksum();
-            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
-                                      Loc.NONE, ReceiverOption.NONE);
-        }
-        cco.endDocument();
-        cco.close();
     }
 
     /**
@@ -87,7 +59,8 @@ public class SchemaModelSerializer {
      */
 
     public void serialize() throws XPathException {
-
+        cco.open();
+        cco.startDocument(ReceiverOption.NONE);
         startElement("schema");
         emitAttribute("generatedAt", DateTimeValue.getCurrentDateTime(null).getStringValue());
         emitAttribute("xsdVersion", config.getConfigurationProperty(Feature.XSD_VERSION));
@@ -95,6 +68,7 @@ public class SchemaModelSerializer {
         if (dmk != null) {
             emitAttribute("dmk", dmk);
         }
+        PreparedSchema schema = config.getSuperSchema();
         // System.err.println("Serializing schema " + schema);
         for (SchemaType type : schema.getAllTypes()) {
             SchemaType sType = type;
@@ -133,7 +107,13 @@ public class SchemaModelSerializer {
         }
 
         endElement();
-
+        if (receiver instanceof CheckSumFilter) {
+            int c = ((CheckSumFilter) receiver).getChecksum();
+            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
+                                      Loc.NONE, ReceiverOption.NONE);
+        }
+        cco.endDocument();
+        cco.close();
 
     }
 
@@ -152,20 +132,17 @@ public class SchemaModelSerializer {
             cco.startContent();
             inStartTag = false;
         }
-        cco.endElement();
+        receiver.endElement();
     }
 
-    public void emitNamespaceContext(NamespaceResolver resolver) {
-        // TODO: maintain a stack of in-scope namespaces
-        for (Iterator<String> iter = resolver.iteratePrefixes(); iter.hasNext(); ) {
-            String prefix = iter.next();
-            NamespaceUri uri = resolver.getURIForPrefix(prefix, false);
-            namespaceMap = namespaceMap.put(prefix, uri);
-        }
+    public void emitNamespaceContext(NamespaceResolver resolver) throws XPathException {
+        NamespaceMap namespaces = NamespaceMap.fromNamespaceResolver(resolver);
+        String nsDisplay = ExpressionPresenter.getNamespacesAsString(namespaces);
+        emitAttribute("nsContext", nsDisplay);
     }
 
     public void declareNamespace(String prefix, NamespaceUri uri) throws XPathException {
-        namespaceMap = namespaceMap.put(prefix, uri);
+        cco.namespace(prefix, uri, 0);
     }
 
     public void emitAttribute(String attributeName, String value) throws XPathException {
