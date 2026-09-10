@@ -67,7 +67,7 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
     protected static void usage() {
         System.err.println("java com.saxonica.testdriver.Xslt30TestSuiteDriver[HE] testsuiteDir catalog [-o:resultsdir] [-s:testSetName]" +
-                " [-t:testNamePattern] [-bytecode:on|off|debug] [-export] [-tree] [-lang] [-save] [-streaming:off|std|ext]" +
+                " [-t:testNamePattern] [-export] [-tree] [-lang] [-save] [-streaming:off|std|ext]" +
                 " [-xt30:on] [-T] [-js] [-XX:compiler-location]");
     }
 
