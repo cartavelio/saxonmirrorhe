@@ -1,9 +1,9 @@
 package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.validate.ValidationContext;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceivingContentHandler;
-import net.sf.saxon.lib.ErrorReporter;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
@@ -128,8 +128,8 @@ public class ValidatorHandlerImpl extends ValidatorHandler
         if (errorHandler == null) {
             errorHandler = SchemaFactoryImpl.DRACONIAN_ERROR_HANDLER;
         }
-        ErrorReporter el = new SchemaFactoryImpl.ErrorReporterWrappingErrorHandler(errorHandler);
-        pipe.setErrorReporter(el);
+        ValidationContext vc = (ValidationContext)pipe.getComponent("com.saxonica.ee.validate.ValidationContext");
+        vc.setInvalidityHandler(new ValidatorImpl.InvalidityHandlerWrappingErrorHandler(errorHandler));
     }
 
     /**
@@ -142,18 +142,18 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      */
     @Override
     public ErrorHandler getErrorHandler() {
-        ErrorReporter el = pipe.getErrorReporter();
-        if (el instanceof SchemaFactoryImpl.ErrorReporterWrappingErrorHandler) {
-            ErrorHandler eh = ((SchemaFactoryImpl.ErrorReporterWrappingErrorHandler) el).getErrorHandler();
-            return eh == SchemaFactoryImpl.DRACONIAN_ERROR_HANDLER ? null : eh;
-        } else {
-            return null;
+        ValidationContext vc = (ValidationContext) pipe.getComponent("com.saxonica.ee.validate.ValidationContext");
+        if (vc != null && vc.getInvalidityHandler() instanceof ValidatorImpl.InvalidityHandlerWrappingErrorHandler) {
+            return ((ValidatorImpl.InvalidityHandlerWrappingErrorHandler) vc.getInvalidityHandler()).getErrorHandler();
         }
+        return null;
     }
 
     /**
      * Sets the {@link org.w3c.dom.ls.LSResourceResolver} to customize
-     * resource resolution while in a validation episode.
+     * resource resolution while in a validation episode. This method has no effect other than
+     * to affect the result of {@link #getResourceResolver()}, since no resources will be
+     * fetched in the course of XSD validation.
      *
      * @param resourceResolver A new resource resolver to be set. This parameter can be null.
      */

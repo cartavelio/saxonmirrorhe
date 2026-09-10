@@ -81,6 +81,11 @@ public class SchemaReference extends Schema {
                 .withCheckEntityReferences(true);
         pipe.setParseOptions(options);
 
+        // See bug 5953. The JAXP spec does not actually say that parse() should throw no exception
+        // in the event of a validation failure, but Xerces seems to have set this expectation.
+        pipe.setRecoverFromValidationErrors(true);
+
+
         Receiver realValidator = config.getDocumentValidator(proxy, proxy.getSystemId(), options, null);
 
         ReceivingContentHandler rch = new ReceivingContentHandler();

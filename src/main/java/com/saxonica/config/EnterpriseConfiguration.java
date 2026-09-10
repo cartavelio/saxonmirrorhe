@@ -1142,6 +1142,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             vc.setController(pipe.getController());
             vc.setValidationParams(params);
 
+            pipe.setComponent("com.saxonica.ee.validate.ValidationContext", vc);
+
             if (validationOptions.isCheckEntityReferences()) {
                 EntityValidator ev = new EntityValidator(destination);
                 ev.setValidationContext(vc);
