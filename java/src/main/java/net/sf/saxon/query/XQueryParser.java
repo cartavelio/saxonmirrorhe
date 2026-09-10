@@ -4293,7 +4293,7 @@ public class XQueryParser extends XPathParser {
         if (elname.isEmpty()) {
             grumble("Expected element name after '<'");
         }
-        //Used LinkedHashMap because it is friendly to retain the order of attributes.
+
         Set<String> lexicalNames = new HashSet<>(10);
         List<AttributeDetails> attributes = new ArrayList<>(10);
         while (true) {
