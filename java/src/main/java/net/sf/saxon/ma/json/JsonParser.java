@@ -261,7 +261,7 @@ public class JsonParser {
         if ((flags & ESCAPE) != 0) {
             return processStringWithEscape(literal);
         } else {
-            return processStringWithoutEscape(literal);
+            return processStringWithoutEscape(literal, flags);
         }
     }
 
@@ -419,7 +419,7 @@ public class JsonParser {
      * @return the literal after processing of escaped and special characters
      */
 
-    private UnicodeString processStringWithoutEscape(UnicodeString literal) throws XPathException {
+    private UnicodeString processStringWithoutEscape(UnicodeString literal, int flags) throws XPathException {
         /*
          * reject syntactically invalid JSON
          * for a valid escape sequence, unescape it
@@ -508,8 +508,11 @@ public class JsonParser {
                                 }
                                 break;
                             default:
-                                // TODO: allow if liberal is set?
-                                invalidJSON("Invalid JSON escape sequence \\" + ch, "FOJS0001", -1);
+                                if ((flags & LIBERAL) != 0) {
+                                    tb = tb.append(ch);
+                                } else {
+                                    invalidJSON("Invalid JSON escape sequence \\" + ch, "FOJS0001", -1);
+                                }
                                 break;
                         }
                     }
