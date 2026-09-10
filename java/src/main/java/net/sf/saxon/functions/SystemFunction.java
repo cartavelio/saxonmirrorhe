@@ -16,6 +16,7 @@ import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -404,8 +405,9 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
     public ItemType getResultItemType(Expression[] args) {
         if ((details.properties & BuiltInFunctionSet.AS_ARG0) != 0) {
             return args[0].getItemType();
-        } else if ((details.properties & BuiltInFunctionSet.AS_PRIM_ARG0) != 0) {
-            return args[0].getItemType().getPrimitiveItemType();
+        } else if ((details.properties & BuiltInFunctionSet.AS_NUM_ARG0) != 0) {
+            ItemType actual = args[0].getItemType().getAtomizedItemType().getPrimitiveItemType();
+            return actual == BuiltInAtomicType.UNTYPED_ATOMIC ? BuiltInAtomicType.DOUBLE : actual;
         } else {
             return details.itemType;
         }

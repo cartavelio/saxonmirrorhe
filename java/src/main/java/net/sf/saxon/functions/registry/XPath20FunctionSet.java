@@ -37,7 +37,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
     }
 
     private void init() {
-        register("abs", 1, e -> e.populate(Abs::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("abs", 1, e -> e.populate(Abs::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
 
         register("adjust-date-to-timezone", 1, e -> e.populate(Adjust_1::new, BuiltInAtomicType.DATE, OPT, LATE|CARD0)
@@ -73,7 +73,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("boolean", 1, e -> e.populate(BooleanFn::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, Type.ITEM_TYPE, STAR | INS, null));
 
-        register("ceiling", 1, e -> e.populate(Ceiling::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("ceiling", 1, e -> e.populate(Ceiling::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
 
         register("codepoint-equal", 2, e -> e.populate(CodepointEqual::new, BuiltInAtomicType.BOOLEAN, OPT, 0)
@@ -221,7 +221,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         register("false", 0, e -> e.populate(() -> new ConstantSystemFunction.False(), BuiltInAtomicType.BOOLEAN, ONE, 0));
 
-        register("floor", 1, e -> e.populate(Floor::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("floor", 1, e -> e.populate(Floor::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
 
         register("hours-from-dateTime", 1, e -> e.populate(() -> new AccessorFn.HoursFromDateTime(),
@@ -437,13 +437,13 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("root", 1, e -> e.populate(Root_1::new, Type.NODE_TYPE, OPT, CARD0)
                 .arg(0, Type.NODE_TYPE, OPT | NAV, EMPTY));
 
-        register("round", 1, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("round", 1, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
 
-        register("round-half-to-even", 1, e -> e.populate(RoundHalfToEven::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("round-half-to-even", 1, e -> e.populate(RoundHalfToEven::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY));
 
-        register("round-half-to-even", 2, e -> e.populate(RoundHalfToEven::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+        register("round-half-to-even", 2, e -> e.populate(RoundHalfToEven::new, NumericType.getInstance(), OPT, AS_NUM_ARG0)
                 .arg(0, NumericType.getInstance(), OPT, EMPTY)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
