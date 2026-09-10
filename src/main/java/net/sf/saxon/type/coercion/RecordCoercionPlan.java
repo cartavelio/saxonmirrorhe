@@ -1,5 +1,6 @@
 package net.sf.saxon.type.coercion;
 
+import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordTest;
@@ -12,6 +13,8 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
+
+import java.util.function.Supplier;
 
 /**
  * A coercion plan represents a process for implementing the coercion rules for converting
@@ -42,9 +45,11 @@ public final class RecordCoercionPlan extends CoercionPlan {
                     if (fieldType != null) {
                         CoercionPlan fieldPlan = fieldType.getPrimaryType().getCoercionPlan(40);
                         if (!fieldType.matches(kvp.value, th)) {
+                            Supplier<RoleDiagnostic> fieldRoleSupplier = () ->
+                                    new RoleDiagnostic(RoleDiagnostic.OPTION, kvp.key.getStringValue(), 0);
                             CoercionRequest subRequest = new CoercionRequest(
                                     SequenceType.ANY_SEQUENCE,
-                                    request.config, request.roleSupplier, request.locator);
+                                    request.config, fieldRoleSupplier, request.locator);
                             SequenceIterator convertedValue =
                                     fieldPlan.coerceSequence(kvp.value.iterate(), fieldType, subRequest);
                             m2 = m2.addEntry(kvp.key, SequenceTool.toGroundedValue(convertedValue));
