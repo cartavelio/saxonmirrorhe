@@ -1,6 +1,7 @@
 package com.saxonica.ee.optim;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
@@ -483,6 +484,46 @@ public class GeneralComparisonEE extends GeneralComparison {
     @Override
     protected String tag() {
         return "gcEE";
+    }
+
+    @Override
+    public Elaborator getElaborator() {
+        return new GeneralComparisonElaborator();
+    }
+
+    /**
+     * Elaborator for a general comparison expression such as (A = B).
+     */
+
+    public static class GeneralComparisonElaboratorEE extends BooleanElaborator {
+
+        public BooleanEvaluator elaborateForBoolean() {
+            final GeneralComparison exp = (GeneralComparison) getExpression();
+            ComparisonCardinality cardinality = exp.getComparisonCardinality();
+
+            switch (cardinality) {
+                case ONE_TO_ONE: {
+                    final ItemEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForItem();
+                    final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
+                    return context -> exp.evaluateOneToOne((AtomicValue) p0.eval(context), (AtomicValue) p1.eval(context), context);
+                }
+                case MANY_TO_ONE: {
+                    final PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                    final ItemEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForItem();
+                    return context -> exp.evaluateManyToOne(p0.iterate(context), (AtomicValue) p1.eval(context), context);
+                }
+                case MANY_TO_MANY: {
+                    final PullEvaluator p0 = exp.getLhsExpression().makeElaborator().elaborateForPull();
+                    final PullEvaluator p1 = exp.getRhsExpression().makeElaborator().elaborateForPull();
+                    return context -> exp.evaluateManyToMany(p0.iterate(context), p1.iterate(context), context);
+                }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+
+        }
+
+
     }
 }
 
