@@ -29,8 +29,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -78,7 +78,7 @@ public class StaxBridgeTest {
             ttw.setPipelineConfiguration(pipe);
             PullToStax xmlReader = new PullToStax(ttw);
 
-            assertNotNull("null XMLStreamReader", xmlReader);
+            assertNotNull(xmlReader, "null XMLStreamReader");
             assertEquals(XMLStreamReader.START_DOCUMENT, xmlReader.getEventType(), "unexpected first event returned by XMLStreamReader");
             assertEquals(XMLStreamReader.START_ELEMENT, xmlReader.next(), "unexpected second event returned by XMLStreamReader");
             assertEquals(XMLStreamReader.CHARACTERS, xmlReader.next(), "unexpected third event returned by XMLStreamReader");
@@ -101,7 +101,6 @@ public class StaxBridgeTest {
         try {
             // Use Woodstox as the pull parser by default. The Sun (Zephyr) parser is too buggy...
             System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
-            PipelineConfiguration pipe = new Configuration().makePipelineConfiguration();
             StaxBridge puller = new StaxBridge();
             String comment = null;
             String piName = null;
