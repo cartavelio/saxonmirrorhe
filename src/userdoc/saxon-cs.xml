@@ -271,6 +271,8 @@ class.)</p>
       parser by creating a user-defined implementation of the <code>ActiveSource</code> interface, and using this
       wherever a <code>Source</code> object is called for.</p>
       
+      <!-- TODO: but most interfaces don't accept a Source object.... -->
+      
       <h2>HTML Parsing</h2>
       
       <p>The <code>saxon:parse-html()</code> extension function is available. It parses the supplied
@@ -314,25 +316,35 @@ class.)</p>
    </section>
    <section id="restrictions">
       <h1>Restrictions</h1>
+      
+      <p>Absolute URIs with single-character scheme names (for example, a:/x/y/z) are not handled correctly. 
+         (This is a limitation of Microsoft's System.Uri class - it treates such names as DOS filenames).</p>
+      
       <h2>Restrictions Relative to Saxon-EE 11 on Java</h2>
       
       <h2>Restrictions Relative to Saxon-EE 10 on .NET</h2>
+      
+      <p>The only supported parser is the Microsoft System.Xml parser. (Saxon 10 on .NET also worked with
+      a port of Apache Xerces.) See <a href="xmlparsing"/>.</p>
       
       <p>There have been some changes to the API for declaring collections.</p>
       
       <p>JAR/ZIP file collections are not supported.</p>
       
-      <p>The classes Saxon.Api.Predicate and Saxon.Api.IPredicate have gone, 
-         replaced by use of System.Predicate. All the predicates obtained using the Saxon.Api.Predicates 
-         factory class (e.g. Predicates.IsElement()) remain available. 
+      <p>The classes <code>Saxon.Api.Predicate</code> and <code>Saxon.Api.IPredicate</code> have gone, 
+         replaced by use of <code>System.Predicate</code>. All the predicates obtained using the <code>Saxon.Api.Predicates</code> 
+         factory class (e.g. <code>Predicates.IsElement()</code>) remain available. 
          It's now possible to use a lambda expression wherever a predicate was expected, 
-         e.g. as the argument to Step.Where() or XdmNode.Children().
+         e.g. as the argument to <code>Step.Where()</code> or <code>XdmNode.Children()</code>.
       </p>
       <p>It's no longer possible to combine predicates using P.And(Q) or P.Or(Q). Instead you can do 
          Predicates.AllOf(P, Q, R, ...) or Predicates.AnyOf(P, Q, R, ...). 
          Also it's no longer possible to define a subclass of Saxon.Api.Predicate, 
          but there's not much of a use case for doing that anyway.
       </p>
+      <p>The <code>BaseUri</code> property of <code>Saxon.Api.XPathCompiler</code> and <code>Saxon.Api.XQueryCompiler</code>
+      is now a <code>Uri</code> rather than a <code>string</code>, bringing these classes into line with
+      <code>Saxon.Api.XsltCompiler</code>.</p>
    </section>
    
 </article>
