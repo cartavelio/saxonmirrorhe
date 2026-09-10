@@ -279,6 +279,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("unparcel", 1, e -> e.populate(UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));
 
+        register("xdm-to-json", 1, e -> e.populate(XdmToJsonFn::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null));
+
+        register("xdm-to-json", 2, e -> e.populate(XdmToJsonFn::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                .setOptionDetails(XdmToJsonFn.OPTION_DETAILS));
+
+
     }
 
 }
