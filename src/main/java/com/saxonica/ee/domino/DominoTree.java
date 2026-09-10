@@ -516,6 +516,8 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
     public int[] getNameCodeArray() {
         return nameCode;
     }
+
+
 }
 
 // Copyright (c) 2017-2023 Saxonica Limited
