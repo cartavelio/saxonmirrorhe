@@ -60,6 +60,21 @@ create signed jars. For example,
 ./gradlew -PsignJars=true javaZips
 ```
 
+## Debugging
+
+Many tasks in the build script come in two versions, one that begins with
+`debug_` and one that doesn’t. For example:
+
+* `eeXslt30TestSuite_XT30_bcon_jit` and `debug_eeXslt30TestSuite_XT30_bcon_jit` or
+* `run_he_samples_JAXPExamples_ee` and `debug_he_samples_JAXPExamples_ee`
+
+The distinction is this: the task with `debug_` prepended runs against
+the source code compiled without any preprocessing. This is the
+version that you will want to run in the debugger, for example.
+
+The version without `debug_` in the front runs against the production
+version of the release.
+
 ## Running JUnit tests
 
 The main entry point for running the JUnit tests is the `eejTests`
@@ -87,6 +102,23 @@ include a “#” will be assumed to be in the same class as the previous
 method. So `-PtestMethod=package.class#one,two` is the same as
 `-PtestMethod=package.class#one,package.class#two`.
 
+## Running the samples
+
+There are tasks to each of the samples programs under HE, PE, and EE
+(where appropriate). The non-debug versions write output to
+`build/samples/results` rather than to stdout.
+
+The umbrella tasks `he_samples` and `ee_samples` will run all of them.
+When run this way, the output is spot-checked with a Python program,
+`tools/sample-check.py`. The checking is not exhaustive, it simply
+matches a few regular expressions against the lines at the beginning
+of the file.
+
+To run that program, you need Python version 3 and the `click` module.
+
+The sample checker will cause the build to fail if any of the samples
+appear to have errors. If you want to run all the samples and ignore
+errors, set the Gradle property `ignoreSampleErrors`.
 
 ## Running the test suites
 
@@ -114,16 +146,6 @@ If you want to run just a single test suite, for example, the XSLT 3.0
 test suite against EE with bytecode and jit enabled, you can run just
 that task (e.g., `eeXslt30TestSuite_XT30_bcon_jit`).
 (The names get a little clunky.)
-
-Every test suite task has two versions, one with the plain name and
-one with `debug_` prepended to the name. (For example,
-`debug_eeXslt30TestSuite_XT30_bcon_jit`)
-
-The distinction is this: the task with `debug_` prepended runs against
-the source code compiled without any preprocessing. This is the
-version that you will want to run in the debugger, for example. The
-version without `debug_` in the front runs against the production
-version of the release.
 
 ### The testSuite closures
 
