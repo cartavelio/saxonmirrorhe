@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using Saxon.Api;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using NullDestination = Saxon.Api.NullDestination;
@@ -30,7 +32,7 @@ namespace TestDriver {
         private bool onwards;
         private bool debug;
         private string versionUnderTest = "1.1";
-        private StreamWriter results;
+        private XmlWriter results;
         private QName xlinkHref;
         private readonly SortedSet<string> failingTests = new();
 
@@ -172,13 +174,16 @@ namespace TestDriver {
                     new FileStream(testSuiteDir + "/suite.xml", FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 
-                results = new StreamWriter(outputDir + "/SaxonResults"
-                                                        + processor.ProductVersion + "n.xml");
-
-                results.Write("<testSuiteResults xmlns='" + testNS + "' xmlns:saxon='http://saxon.sf.net/' " +
-                              "suite='TS_2006' " +
-                              "processor='Saxon-SA (Java) 8.8++' submitDate='2007-01-05' publicationPermission='public'>\n");
-
+                results = XmlWriter.Create(File.OpenWrite(outputDir + "/SaxonResults"
+                                                        + processor.ProductVersion + "n.xml"),
+                    new XmlWriterSettings(){Indent = true});
+                results.WriteStartElement("testSuiteResults", testNS);
+                results.WriteAttributeString("xmlns", "saxon", null, NamespaceConstant.SAXON);
+                results.WriteAttributeString("suite", "TS_2006");
+                results.WriteAttributeString("processor", "Saxon-EE " + Saxon.Hej.Version.getProductVersion());
+                results.WriteAttributeString("submitDate", DateTime.Now.ToString(CultureInfo.InvariantCulture));
+                results.WriteAttributeString("pubicationPermission", "public");
+                
                 XdmNode exceptionsDoc = builder.Build(
                     new FileStream(exceptionsFile,
                         FileMode.Open, FileAccess.Read, FileShare.Read));
@@ -268,12 +273,15 @@ namespace TestDriver {
                             bugzillaRef = null;
                             string testName = schemaTest.GetAttributeValue("name");
                             if (isException) {
-                                results.Write("<testResult set='" + testSetName +
-                                              "' group='" + testGroupName +
-                                              "' test='" + testName +
-                                              "' validity='notKnown' saxon:outcome='notRun' saxon:comment='" +
-                                              exception +
-                                              "'/>\n");
+                                results.WriteStartElement("testResult");
+                                results.WriteAttributeString("set", testSetName);
+                                results.WriteAttributeString("group", testGroupName);
+                                results.WriteAttributeString("test", testName);
+                                results.WriteAttributeString("validity", "notKnown");
+                                results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, "notRun");
+                                results.WriteAttributeString("saxon", "comment", NamespaceConstant.SAXON, exception);
+                                results.WriteEndElement();
+                                
                                 continue;
                             }
                             
@@ -309,7 +317,7 @@ namespace TestDriver {
                                     // Happens with documents saying xml version="1.1"
                                     feedback(
                                         "Failed to parse schema document " + schemaDocumentRef + ": " + schemaParseErr.Message, true);
-                                    results.Write("<!--" + schemaParseErr.Message + "-->");
+                                    results.WriteComment(schemaParseErr.Message);
                                     schemaOK = false;
                                     break;
                                 }
@@ -334,7 +342,7 @@ namespace TestDriver {
                                     if (errorList.Count == 0) {
                                         feedback(
                                             "In " + testName + ", exception thrown but no errors in ErrorList\n", true);
-                                        results.Write("<!--" + e.Message + "-->");
+                                        results.WriteComment(e.Message);
                                         Console.Error.WriteLine(e);
                                         schemaOK = false;
                                         break;
@@ -377,13 +385,18 @@ namespace TestDriver {
                             }
 
                             //feedback("Passed " + passed + " failed " + failed + " total " + total, true);
-                            results.Write("<testResult set='" + testSetName +
-                                          "' group='" + testGroupName +
-                                          "' test='" + testName +
-                                          "' validity='" + (schemaOK ? "valid" : "invalid") +
-                                          (queried ? "' saxon:queried='true' saxon:bugzilla='" + bugzillaRef : "") +
-                                          "' saxon:outcome='" + (ok ? "same" : "different") +
-                                          "'/>\n");
+                            results.WriteStartElement("testResult");
+                            results.WriteAttributeString("set", testSetName);
+                            results.WriteAttributeString("group", testGroupName);
+                            results.WriteAttributeString("test", testName);
+                            if (queried) {
+                                results.WriteAttributeString("saxon", "queried", "true");
+                                results.WriteAttributeString("saxon", "bugzilla", bugzillaRef);
+                            }
+                            results.WriteAttributeString("validity", (schemaOK ? "valid" : "invalid"));
+                            results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, (ok ? "same" : "different"));
+                            results.WriteAttributeString("saxon", "comment", NamespaceConstant.SAXON, exception);
+                            results.WriteEndElement();
                         }
 
                         if (schemaOK) {
@@ -391,12 +404,14 @@ namespace TestDriver {
                                 string testName = instanceTest.GetAttributeValue("name");
 
                                 if (exception != null) {
-                                    results.Write("<testResult set='" + testSetName +
-                                                  "' group='" + testGroupName +
-                                                  "' test='" + testName +
-                                                  "' validity='notKnown' saxon:outcome='notRun' saxon:comment='" +
-                                                  exception +
-                                                  "'/>\n");
+                                    results.WriteStartElement("testResult");
+                                    results.WriteAttributeString("set", testSetName);
+                                    results.WriteAttributeString("group", testGroupName);
+                                    results.WriteAttributeString("test", testName);
+                                    results.WriteAttributeString("validity", "notKnown");
+                                    results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, "notRun");
+                                    results.WriteAttributeString("saxon", "comment", NamespaceConstant.SAXON, exception);
+                                    results.WriteEndElement();
                                     continue;
                                 }
                                 
@@ -459,13 +474,17 @@ namespace TestDriver {
                                 }
 
                                 //feedback("Passed " + passed + " failed " + failed + " total " + total, true);
-                                results.Write("<testResult set='" + testSetName +
-                                              "' group='" + testGroupName +
-                                              "' test='" + testName +
-                                              "' validity='" + (success ? "valid" : "invalid") +
-                                              (queried ? "' saxon:queried='true' saxon:bugzilla='" + bugzillaRef : "") +
-                                              "' saxon:outcome='" + (success == expectedSuccess ? "same" : "different") +
-                                              "'/>\n");
+                                results.WriteStartElement("testResult");
+                                results.WriteAttributeString("set", testSetName);
+                                results.WriteAttributeString("group", testGroupName);
+                                results.WriteAttributeString("test", testName);
+                                results.WriteAttributeString("validity", (success ? "valid" : "invalid"));
+                                if (queried) {
+                                    results.WriteAttributeString("saxon", "queried", "true");
+                                    results.WriteAttributeString("saxon", "bugzilla", bugzillaRef);
+                                }
+                                results.WriteAttributeString("saxon", "outcome", NamespaceConstant.SAXON, (success == expectedSuccess ? "same" : "different"));
+                                results.WriteEndElement();
                             }
                         }
                     }
@@ -475,7 +494,8 @@ namespace TestDriver {
                 {
                     feedback("Failed " + testDetails, true);
                 }
-                results.Write("</testSuiteResults>");
+                results.WriteEndElement();
+                results.WriteEndDocument();
                 results.Close();
             }
             catch (Exception e) {
