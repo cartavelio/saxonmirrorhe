@@ -14,11 +14,10 @@ import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.qname.NoQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -158,6 +157,13 @@ public class DocumentNodeType extends XNodeType {
         ItemType t2 = elementTest.normalizeItemType();
         if (t2 instanceof XNodeType x2) {
             return new DocumentNodeType(x2);
+        }
+        if (t2 instanceof ChoiceItemType c2) {
+            List<ItemType> members = new ArrayList<ItemType>();
+            for (ItemType it : c2.getMemberTypes()) {
+                members.add(new DocumentNodeType((XNodeType)it));
+            }
+            return new ChoiceItemType(members);
         }
         return this;
     }
