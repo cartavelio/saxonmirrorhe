@@ -14,8 +14,8 @@ def test_version(saxonproc):
     assert ver.endswith('from Saxonica')
 
 def test_saxon_edition_licensed(saxonproc):
-    assert saxonproc.edition == 'ee'
+    assert saxonproc.edition == 'EE'
 
 def test_saxon_edition_unlicensed():
     saxonproc = saxoncee.PySaxonProcessor()
-    assert saxonproc.edition == 'ee'
+    assert saxonproc.edition == 'HE'

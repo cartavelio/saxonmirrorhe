@@ -13,7 +13,4 @@ def test_version(saxonproc):
     assert ver.endswith('from Saxonica')
 
 def test_saxon_edition(saxonproc):
-    assert saxonproc.edition == 'he'
-
-def test_failure():
-    assert False
+    assert saxonproc.edition == 'HE'

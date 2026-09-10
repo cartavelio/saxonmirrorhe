@@ -576,6 +576,7 @@ def testXslMessageToListWithClear(saxonproc):
     executable.clear_xsl_messages()
     output3 = executable.apply_templates_returning_string(xdm_value=document)
     messages = executable.get_xsl_messages()
+    assert messages is not None
     assert messages.size == 1
 
 
