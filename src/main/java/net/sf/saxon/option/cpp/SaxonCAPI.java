@@ -380,6 +380,48 @@ public class SaxonCAPI {
         return holder.get();
     }
 
+    @CEntryPoint(name = "j_testProg")
+    public static CCharPointer j_testProg(IsolateThread thread, int flag) throws Exception{
+
+        if(flag == 2) {
+            Properties props = System.getProperties();
+            props.setProperty("xmlresolver.properties", "/home/ond1/work/repository/saxondev-11/build/releases/saxoncee/samples/data/xmlresolver.properties");
+
+        }
+        try {
+            Processor processor = new Processor(false);
+            String dir = "/home/ond1/work/repository/saxondev-11/build/releases/saxoncee/samples/data/";
+
+            XsltCompiler compilerx = processor.newXsltCompiler();
+            Xslt30Transformer transformerx = compilerx.compile(new File(dir + "example.xsl")).load30();
+            XdmValue valuex = processor.newDocumentBuilder().build(new File(dir + "example2.xml"));
+            XdmValue resultx = transformerx.applyTemplates(valuex);
+
+
+            System.err.println("Java Catalog result cp0 = " + resultx.toString());
+
+
+
+            String[] catalogs = {dir + "catalog.xml"};
+            processor.setCatalogFiles(catalogs);
+            XsltCompiler compiler = processor.newXsltCompiler();
+            Xslt30Transformer transformer = compiler.compile(new File(dir + "example.xsl")).load30();
+            XdmValue value = processor.newDocumentBuilder().build(new File(dir + "example.xml"));
+            XdmValue result = transformer.applyTemplates(value);
+
+            System.err.println("Java Catalog result cp1 = " + result.toString());
+            final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(result.toString());
+            return holder.get();
+        } catch (SaxonApiException ex) {
+            ex.printStackTrace();
+            System.err.println("SaxonException = " + ex.getMessage());
+            throw ex;
+        }  catch (Exception ex) {
+                    ex.printStackTrace() ;
+                    System.err.println("Exception = " + ex.getMessage());
+                    throw ex;
+                }
+    }
 
     @CEntryPoint(name = "j_setCatalogFile", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) {
