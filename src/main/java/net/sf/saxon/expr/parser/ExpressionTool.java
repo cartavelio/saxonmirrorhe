@@ -317,7 +317,7 @@ public class ExpressionTool {
     public static boolean changesXsltContext(Expression exp) {
         if (exp instanceof ResultDocument || exp instanceof CallTemplate || exp instanceof ApplyTemplates ||
                 exp instanceof NextMatch || exp instanceof ApplyImports || exp.isCallOn(RegexGroup.class)
-                || exp.isCallOn(CurrentGroup.class)) {
+                || exp.isCallOn(CurrentGroup.class) || exp instanceof DynamicFunctionCall) {
             return true;
         }
         for (Operand o : exp.operands()) {
