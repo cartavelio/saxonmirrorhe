@@ -2,6 +2,7 @@ package com.saxonica.build.python
 
 import SaxonCPythonExtension
 import com.saxonica.build.PyprojectToml
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.Directory
@@ -12,6 +13,9 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
+import org.gradle.process.ExecResult
+import org.gradle.process.ExecSpec
+import org.gradle.process.internal.ExecException
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
@@ -78,16 +82,69 @@ abstract class PythonVenv @Inject constructor(private val ex: ExecOperations): D
         return PyprojectToml.buildSystemRequires(buildSystemBootstrap).toTypedArray()
     }
 
+    class ExecContext(val envLogWhitelist: List<String> = listOf("SAXON*")) {
+        private var _executable: String = ""
+        private var _args = listOf<String>()
+        private var _env = mapOf<String, Any>()
+        var executable: String
+            get() = _executable
+            set(value) { _executable = value }
+        var args: List<String>
+            get() = _args
+            set(value) { _args = value }
+        var env: Map<String, Any>
+            get() = _env
+            set(value) {
+                _env = filterEnv(value)
+            }
+
+        private fun filterEnv(unfiltered: Map<String, Any>): Map<String, Any> {
+            val filters = envLogWhitelist.map { Regex(it) }
+            return unfiltered.filter { (k, _) ->
+                filters.any { it.matches(k) }
+            }
+        }
+
+        override fun toString(): String {
+            val out = listOf(executable, args.map { "\"${it}\"" }.joinToString(" ")) + env.map { (k, v) -> "$k = $v" }
+            return out.joinToString("\n")
+        }
+    }
+
+    private fun execWithLogging(execSpec: Action<ExecSpec>): ExecResult {
+        val output = ByteArrayOutputStream()
+        val context = ExecContext()
+        val res = ex.exec {
+            execSpec.execute(this)
+            context.executable = executable
+            context.args = args
+            context.env = environment
+            standardOutput = output
+            errorOutput = output
+            setIgnoreExitValue(true)
+        }
+        try {
+            res.assertNormalExitValue()
+        } catch (e: ExecException) {
+            logger.error(e.message)
+            logger.error("Exec context:")
+            logger.error(context.toString())
+            res.rethrowFailure()
+        }
+
+        return res
+    }
+
     @TaskAction
     fun execute() {
         logger.info("Creating Python Venv for ${branch.get()}: ${venvName.get()}")
 
-        ex.exec {
+        execWithLogging {
             executable(pyenvPythonExe.get())
             args("-m", "venv", venvPath.get())
         }
 
-        ex.exec {
+        execWithLogging {
             executable(pipExe.get().asFile.toString())
             args("install", "--require-virtualenv", *platformWheelFixupRequirements(), *buildSystemBootstrapRequirements())
         }
