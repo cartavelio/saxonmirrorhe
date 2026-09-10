@@ -267,17 +267,32 @@
                <ul>
                   <li><p>If you're planning to invoke SaxonCS from your own C# code, you can add it as a dependency
                      to your Visual Studio or Rider project, and it will be automatically downloaded from <a
-                        href="https://www.nuget.org" class="bodylink">Nuget</a>. No further installation is needed.</p></li>
+                        href="https://www.nuget.org" class="bodylink">Nuget</a>. Choose SaxonCS-EE or SaxonCS-HE
+                        as appropriate. No further installation is needed.</p></li>
+                  
                   <li><p>If you're planning to run SaxonCS from the command line, it's best to download an
                      executable built for the platform you are using: there are versions available for
                      Windows, Linux, and MacOS, from <a href="https://www.saxonica.com/download/dotnet.xml"
                         class="bodylink">www.saxonica.com/download/dotnet.xml</a>. For Windows and Linux, the
                      software comes as a zip file: unzip it into a suitable directory, for example <code>c:\saxon</code>.
                      For MacOS, the software is distributed as a signed, notarized "DMG" file: download the
-                     DMG file, open it up, and drag the "SaxonCS" application into the Applications folder;
-                     you can then run the executable <code>/Applications/SaxonCS.app/Contents/MacOS/SaxonCS</code>
-                     (for convenience, you may want to create an alias or link the application into another
-                     directory). For further installation details see <a class="bodylink"
+                     DMG file, open it up, and drag the application (either SaxonCS-EE or SaxonCS-HE) 
+                     into the Applications folder;
+                     you can then run the executable from the command line, either as</p>
+                     
+                     <kbd>/Applications/SaxonCS-HE.app/Contents/MacOS/SaxonCS-HE</kbd>
+                     
+                     <p>or</p>
+                     
+                     <kbd>/Applications/SaxonCS-EE.app/Contents/MacOS/SaxonCS-EE</kbd>
+                     
+                     <p>To check that it's working, enter the above command followed by the argument <code>version</code>,
+                     this will output a line such as</p>
+                     
+                     <p><code>SAXON-CS-HE 13.0 from Saxonica (build 112581689)</code></p>
+                     
+                     <p>For convenience, you may want to create an alias, or link the application into another
+                     directory. For further installation details see <a class="bodylink"
                         href="../../installationdotnet">Installation: .NET</a>.</p></li>
                </ul>
             </li>
