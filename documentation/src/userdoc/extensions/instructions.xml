@@ -155,7 +155,7 @@
           specified <code>action</code> has been applied.
         </p>
         <p><b>In Saxon 13, the functionality of <code>saxon:deep-update</code> has not yet been revised to take
-        account of the introduction of JNodes, but this is likely to happen at some stage in the future. For the time
+        account of the introduction of JNodes in 4.0, but this is likely to happen at some stage in the future. For the time
         being, it operates directly on trees of maps and arrays, and not on JNode wrappers of such trees. Downward
         selection in the tree should therefore use the lookup operator <code>?</code>, not the path operator <code>/</code>.</b></p>
         <p>More detailed rules:</p>

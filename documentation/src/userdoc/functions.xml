@@ -7131,12 +7131,12 @@
         <div>
           <p>This function combines a number of arity-one functions into a single arity-one function.
           The effect of the composed functions is to evaluate the first function with the supplied
-          argument value, then to evaluate the second function applied to the result of the first,a
+          argument value, then to evaluate the second function applied to the result of the first,
           and so on.</p>
-          <p>For example, <code>let $f := compose((is-NaN#1, not#1))</code> binds <code>$f</code> 
+          <p>For example, <code>let $f := saxon:compose((is-NaN#1, not#1))</code> binds <code>$f</code> 
             to a function such that <code>$f($x)</code> is true if <code>$x</code> is not NaN. It
           is logically equivalent to <code>fn($x){ is-NaN($x) => not() }</code>.</p>
-          <p>Similarly, <code>let $f := compose((1 to 3) ! fn{..})</code> binds <code>$f</code> to a function
+          <p>Similarly, <code>let $f := saxon:compose((1 to 3) ! fn{..})</code> binds <code>$f</code> to a function
           that selects the great-grandparent of a node (that is, it applies the parent axis three times).</p>
         </div>
       </details>

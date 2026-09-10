@@ -317,8 +317,8 @@
 
 		
 			<p>Maps were first introduced in XSLT 3.0 and in XPath 3.1. They correspond to the structures
-				known as <emph>dictionaries</emph> or <emph>associative arrays</emph> in other languages,
-				(or as <emph>objects</emph> in Javascript). There were two main motivations:</p>
+				known as <em>dictionaries</em> or <em>associative arrays</em> in other languages,
+				(or as <em>objects</em> in Javascript). There were two main motivations:</p>
 			
 			<ul>
 				<li><p>In streaming applications, it is not possible to visit nodes in a streamed XML
@@ -343,8 +343,8 @@
 				The <i>value</i> is any XDM value: a sequence of nodes, atomic item,
 				functions, or maps.</p>
 			
-			<aside>The 4.0 specifications use the term <emph>atomic item</emph> where earlier
-			versions used <emph>atomic value</emph>.</aside>
+			<aside>The 4.0 specifications use the term <em>atomic item</em> where earlier
+			versions used <em>atomic value</em>.</aside>
 
 			<p>Maps, like sequences, are immutable. When you add an entry to a map, you get a new map;
 				the original is unchanged. Saxon provides an efficient implementation of maps that
@@ -386,8 +386,8 @@
 					<p>A single-entry map can also be constructed using the function
 							<code>map:entry($key, $value)</code>.</p>
 				</li>
-				<li>
-					<p class="qt4">XPath 4.0 introduces the function <a class="bodylink code" href="/functions/map/merge">map:build</a>
+				<li class="qt4">
+					<p>XPath 4.0 introduces the function <a class="bodylink code" href="/functions/map/build">map:build</a>
 					This constructs a map from an input sequence supplied as the first argument. The second argument
 					is a function that computes the key for each input item; the third argument (if present) is a function
 					that computes the corresponding value. For example, <code>map:build(//employee, fn{@ssn})</code>
@@ -406,10 +406,12 @@
 			<ul>
 				<li><p>By invoking the map as a function: <code>$M($K)</code></p></li>
 				<li><p>By calling <code>map:get($M, $K)</code></p></li>
-				<li><p>By using a lookup expression: <code>$M ? $K</code></p></li>
-				<li><p class="qt4">In XPath 4.0, with a path expression: <code>$M/child::get($K)</code></p></li>
+				<li><p>By using a <a class="bodylink" href="/expressions/operators/lookup">lookup expression</a>: 
+					<code>$M ? $K</code></p></li> 
+				<li class="qt4"><p>In XPath 4.0, with a path expression: <code>$M/child::get($K)</code></p></li>
 			</ul>
 			
+			<h2 class="subtitle">Map functions</h2>
 
 			<p>The summary of the full list of functions that operate on maps is as follows; for full
 				details see the <a class="bodylink" href="/functions/map">Functions library</a>. The
@@ -490,6 +492,8 @@
 			</ul>
 			
 			<div class="qt4">
+				<h2 class="subtitle">Changes in XPath 4.0</h2>
+				
 				<p>The main changes introduced for map items in XPath 4.0 and XSLT 4.0 are:</p>
 				<ul>
 					<li>
@@ -526,7 +530,8 @@
 					</li>
 					<li>
 						<p>The type system allows maps whose keys are statically known to be described
-						using a <emph>record type</emph>: for example <code>record(first, middle, last)</code>
+							using a <a class="bodylink" href="/expressions/types/record-types">record type</a>: for example
+							<code>record(first, middle, last)</code> 
 						describes the type of a map having three entries with keys <code>"first"</code>,
 						<code>"middle"</code>, and <code>"last"</code>.</p>
 					</li>
@@ -582,7 +587,8 @@
 						argument, this function returns the member in position <code>$N</code>.</p>
 				</li>
 				<li>
-					<p>Alternatively, you can also use a so-called <emph>lookup expression</emph>:
+					<p>Alternatively, you can also use a so-called <a class="bodylink"
+						href="/expressions/operators/lookup">lookup expression</a>:
 							<code>$array?1</code> is equivalent to $array(1). The subscript can be
 					an integer literal, or any expression in parentheses (for example <code>$array?($i+1)</code>),
 					and in XPath 4.0 it can also be a variable reference: <code>$array?$i</code>.</p>
@@ -637,13 +643,14 @@
 			</ul>
 			<aside>
 				<p>XSLT 3.0 provides no instructions for creating arrays, analogous to the instructions
-						<code>xsl:map</code> and <code>xsl:map-entry</code>. Saxon filled this gap
-					with extension instructions <code>saxon:array</code> and <code>saxon:array-member</code>:
-					see <a class="bodylink" href="/extensions/instructions">Extension
-					instructions</a>. XSLT 4.0 introduces instructions <code>xsl:array</code> and 
+						<code>xsl:map</code> and <code>xsl:map-entry</code>. Earlier versions of Saxon filled this gap
+					with extension instructions <code>saxon:array</code> and <code>saxon:array-member</code>. XSLT 4.0
+					introduces instructions <code>xsl:array</code> and 
 					<code>xsl:array-member</code>, and Saxon 13 drops the extension instructions 
 				   in favor of the new XSLT 4.0 versions.</p>
 			</aside>
+			
+			<h2 class="subtitle">Array functions</h2>
 			<p>The summary of the full list of functions that operate on arrays is as follows; for full
 				details see the <a class="bodylink" href="/functions/array">Functions library</a>. The
 				prefix <code>array</code> represents the namespace URI
@@ -654,11 +661,11 @@
 						example, <code>array:append([], 5)</code> returns <code>[5]</code>. <i>Since XPath
 							3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:build</code>: Returns an array obtained by evaluating the supplied
 						function once for each item in the input sequence. <i>New in XPath 4.0</i>.</p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:empty</code>: Returns <code>true</code> if the supplied array contains
 						no members. <i>New in XPath 4.0</i>.</p>
 				</li>
@@ -691,7 +698,7 @@
 							3}, [], function($x, $y){[$x, $y]})</code> returns <code>[1, [2, [3,
 							[]]]]</code>. <i>Since XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:foot</code>: Returns the last member of an array. <i>New in XPath
 							4.0</i>.</p>
 				</li>
@@ -717,12 +724,12 @@
 							<code>array:head([1 to 5, 1 to 10])</code> returns <code>(1 to 5)</code> (a
 						sequence, not an array). <i>Since XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:index-of</code>: Returns a sequence of positive integers giving the
 						positions within the array <code>$array</code> of members that are equal to
 							<code>$target</code>. <i>New in XPath 4.0</i>.</p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:index-where</code>: Returns the positions in an input array of members
 						that match a supplied predicate. <i>New in XPath 4.0</i>.</p>
 				</li>
@@ -731,7 +738,7 @@
 						example, <code>array:insert-before([1, 2, 3, 4], 3, ())</code> returns <code>[1,
 							2, (), 3, 4]</code>. <i>Since XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:items</code>: Returns the sequence concatenation of the members of an
 						array. <i>New in XPath 4.0</i>.</p>
 				</li>
@@ -740,11 +747,11 @@
 						array. For example, <code>array:join(([1], [2 to 4], [3, [4, 5]]))</code> returns
 							<code>[1, (2, 3, 4), 3, [4, 5]]</code>. <i>Since XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:members</code>: Delivers the contents of an array as a sequence of
 						value records. <i>New in XPath 4.0</i>.</p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:of-members</code>: Constructs an array from the contents of a sequence
 						of value records. <i>New in XPath 4.0</i>.</p>
 				</li>
@@ -768,7 +775,7 @@
 							<code>array:size([[1,2], [3,4]])</code> returns <code>2</code>. <i>Since XPath
 							3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:slice</code>: Returns an array containing selected members of a
 						supplied input array based on their position. <i>New in XPath 4.0</i>.</p>
 				</li>
@@ -778,15 +785,15 @@
 						can also be specified. For example, <code>array:sort([4, 8, 2])</code> returns
 							<code>[2, 4, 8]</code>. <i>Since XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:sort-by</code>: Sorts a supplied array, based on the value of a number
 						of sort keys supplied as functions. <i>New in XPath 4.0</i>.</p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:sort-with</code>: Sorts a supplied array, according to the order
 						induced by the supplied comparator functions. <i>New in XPath 4.0</i>.</p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:split</code>: Delivers the contents of an array as a sequence of
 						single-member arrays. <i>New in XPath 4.0</i>.</p>
 				</li>
@@ -802,7 +809,7 @@
 							<code>array:tail([1 to 5, 1 to 10])</code> returns <code>[1 to 10]</code>.
 							<i>Since XPath 3.1.</i></p>
 				</li>
-				<li>
+				<li class="qt4">
 					<p><code>array:trunk</code>: Returns an array containing all members except the last
 						from a supplied array. <i>New in XPath 4.0</i>.</p>
 				</li>
@@ -833,6 +840,7 @@
 				all members.</p>
 			
 			<div class="qt4">
+				<h2 class="subtitle">Changes in XPath 4.0</h2>
 				<p>XPath 4.0 and XSLT 4.0 introduce some changes for array items:</p>
 				<ul>
 					<li>
@@ -864,12 +872,12 @@
 		<section id="jnodes" title="JNodes" class="qt4">
 			<h1>JNodes</h1>
 			
-			<p>JNodes (think <emph>JSON Nodes</emph>) encapsulate the values found in a tree of
+			<p>JNodes (think <em>JSON Nodes</em>) encapsulate the values found in a tree of
 			maps and arrays, such as the tree formed by parsing a JSON text. JNodes can be used
-			in path expressions in the same way as XML nodes (now called <emph>XNodes</emph> when
+			in path expressions in the same way as XML nodes (now called <em>XNodes</em> when
 			a distinction is needed) are used in a tree formed by parsing XML.</p>
 			
-			<p>Many operations apply both to JNodes and XNodes, so the term <emph>GNode</emph>
+			<p>Many operations apply both to JNodes and XNodes, so the term <em>GNode</em>
 			is introduced to refer to both kinds generically.</p>
 			
 			<aside>Available since Saxon 13 when XPath 4.0 is enabled.</aside>
@@ -877,8 +885,7 @@
 			<p>Consider the tree formed by applying the <code>parse-json</code> function to a 
 				(recursive) JSON text as follows:</p>
 			
-			<pre><code>
-let $tree := parse-json('{
+			<pre><code class="language-xquery"><![CDATA[let $tree := parse-json('{
   "type": "package",
   "name": "org",
   "content": [
@@ -897,7 +904,7 @@ let $tree := parse-json('{
                ]
             }]
      }]
-}')</code></pre>
+}')]]></code></pre>
 			
 			<p>The value of <code>$tree</code> is a map, and this can be wrapped in a JNode either explicitly
 			by a call on the function <code>jtree($tree)</code>, or implicitly by using <code>$tree</code>
@@ -906,7 +913,8 @@ let $tree := parse-json('{
 			<p>As a simple example, <code>$tree/type</code> (which is short for <code>$tree/child::type</code>)
 			returns a JNode that wraps the top-level map entry <code>"type":"package"</code>. The important
 			properties of this JNode are its key (<code>"type"</code>) and its value (<code>"package"</code>):
-			these properties are accessible using the functions <code>jkey</code> and <code>jvalue</code>.</p>
+			these properties are accessible using the functions <a class="bodylink code"
+				href="/functions/fn/jkey">jkey</a> and <a class="bodylink code" href="/functions/fn/jvalue">jvalue</a>.</p>
 			
 			<p>It is also possible to navigate from a JNode to its descendants: the expression <code>$tree//name</code>
 			returns six JNodes, whose <code>value</code> properties are respectively <code>"org"</code>, 
@@ -916,11 +924,11 @@ let $tree := parse-json('{
 			it is possible to navigate from a JNode to its parent using the parent axis, here abbreviated in the usual
 			way to <code>..</code>. The path expression can be written in full as:</p>
 			
-			<eg><code>jtree($tree)/descendant-or-self::*/child::name[parent::*/child::type="class"]/jvalue()</code></eg>
+			<pre><code class="language-xquery"><![CDATA[jtree($tree)/descendant-or-self::*/child::name[parent::*/child::type="class"]/jvalue()]]></code></pre>
 			
 			<p>All the axes available for XNodes are also available for JNodes (including four new axes introduced in
 			XPath 4.0: <code>following-or-self</code>, <code>preceding-or-self</code>, <code>following-sibling-or-self</code>,
-			and <code>preceding-sibling-or-self</code>. This works only because maps in 4.0 are ordered: in the above
+			and <code>preceding-sibling-or-self</code>). This works only because maps in 4.0 are ordered: in the above
 			example, the <code>preceding-sibling</code> axis starting at a JNode whose <code>key</code> is <code>"name"</code>
 			is in each case a JNode whose <code>key</code> is <code>"type"</code>.</p>
 			
@@ -934,7 +942,7 @@ let $tree := parse-json('{
 			The most common node tests are:</p>
 			
 			<ul>
-				<li><p><code>*</code> selects all the entries in a map, or all the members of an array</p></li>
+				<li><p><code>*</code> selects all the entries in a map, or all the members of an array.</p></li>
 				<li><p><code>name</code> selects the entry in a map whose key is the string <code>name</code>, which
 				must take the form of an NCName.</p></li>
 				<li><p><code>get("key value")</code> selects the entry in a map whose key is <code>"key value"</code>. In this
@@ -2215,7 +2223,7 @@ let $tree := parse-json('{
 						<p>(The use of multiple <code>let</code> clauses is implemented from Saxon 12.3; while
 							combining with <code>for</code> clauses is implemented from Saxon 13.)</p>
 						
-						<p>This example also demonstrates another new XPath 4.0 feature: the symbols <code>x</code>
+						<p>This example also demonstrates another new XPath 4.0 feature: the symbols <code>×</code>
 						and <code>÷</code> can be used for multiplication and division in place of <code>*</code>
 						and <code>div</code>.</p>
 					</li>
@@ -2223,7 +2231,7 @@ let $tree := parse-json('{
 						<p>The type of variables can be declared in a <code>let</code> expression.
 							(Implemented from Saxon 13.) In both XPath 4.0 and XQuery 4.0, unlike previous
 						XQuery versions, the value is coerced to the required type: so, for example, 
-						<code>let $x as xs:double := <a>1.234</a></code> binds <code>$x</code> to the
+						<code>let $x as xs:double := "1.234"</code> binds <code>$x</code> to the
 						result of casting the string <code>"1.234"</code> to type <code>xs:double</code>.</p>
 					</li>
 					<li>
@@ -2257,11 +2265,10 @@ let $tree := parse-json('{
 						<p>Multiple <code>for</code> and  <code>let</code> clauses are allowed to be
 							combined in an expression. For example:</p>
 						
-						<pre><code class="language-xquery"
-								>for $i in 0 to 9
+						<pre><code class="language-xquery"><![CDATA[for $i in 0 to 9
 let $ii := $i+1								
 for $j in 1 to 3 
-return $i * $j</code></pre>
+return $i * $j]]></code></pre>
 						
 						<p>(The use of multiple <code>for</code> clauses is implemented from Saxon 12.3; while
 							combining with <code>let</code> clauses is implemented from Saxon 13.)</p>
@@ -2278,7 +2285,7 @@ return $i * $j</code></pre>
 						<p>The type of variables can be declared in
 							a <code>for</code> expression:</p> 
 						
-						<pre><code><![CDATA[for $str as xs:string in (<a>red</a>, <a>green</a>, <a>blue</a>) return $str</code>]]></pre>
+						<pre><code><![CDATA[for $str as xs:string in (<a>red</a>, <a>green</a>, <a>blue</a>) return $str]]></code></pre>
 						
 						<p>returns the sequence <code>("red", "green", "blue")</code>. In both XPath 4.0 and XQuery 4.0,
 							unlike earlier XQuery versions, the supplied values are coerced to the declared type. In this example,

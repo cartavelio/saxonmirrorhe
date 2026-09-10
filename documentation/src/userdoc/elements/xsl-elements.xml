@@ -6156,7 +6156,7 @@
             </li>
         </ul>
         
-        <p>XSLT 4.0 introduces another kind of pattern, the <emph>type pattern</emph>. This simply matches
+        <p class="qt4">XSLT 4.0 introduces another kind of pattern, the <em>type pattern</em>. This simply matches
         items by their item type, introduced with the <code>~</code> (tilde) character. For example <code>~map(*)</code>
         matches any map, and <code>~xs:string</code> matches a string. The type can be followed by predicates, for
         example <code>~map(*)[?age gt 21]</code> matches any map having a field with key <code>age</code> whose
@@ -6467,7 +6467,7 @@
             if it is contained within a <code>table</code>.</p>
             
             <p>More generally, in the pattern <code>P/Q</code>, the node must match <code>Q</code>
-            and it must have a parent than matches <code>P</code>, while for a pattern <code>P//Q</code>
+            and it must have a parent that matches <code>P</code>, while for a pattern <code>P//Q</code>
             the node must match <code>Q</code> and must have an ancestor than matches <code>P</code>.
             In these examples <code>P</code> can be any pattern, so it can itself have qualifiers
             and predicates. Thus <code>chap[@nr='1']//para</code> matches any <code>para</code>
@@ -6628,7 +6628,7 @@
                     type patterns were changed so that coercion is attempted before matching the type. 
                     Saxon 13 implements the first change (extensible record types are no longer allowed), 
                     but not the second (the item must match the type strictly, without coercion). This 
-            has the unfortunate consequence that a pattern the form <code>match="~record(...)</code> must
+            has the unfortunate consequence that a pattern of the form <code>match="~record(...)</code> must
             list all the fields that are actually present. A replacement feature for more flexible matching
             of records and maps is likely to be included in an early maintenance release, depending
             on how this question is resolved in the specifications.</p></aside>
@@ -6645,7 +6645,7 @@
 }]]></code></pre>
 
             <p>can be matched with a pattern such as <code>match="~record(firstName, lastName,
-                email, age weight)"</code>. The order of properties is immaterial.</p>
+                email, age, weight)"</code>. The order of properties is immaterial.</p>
             
             
             <p>Predicates can be added as with any other pattern, for example
@@ -6668,14 +6668,14 @@
             Here <code>Selector</code> matches the <code>key</code> property of the JNode, and
             may be given either as <code>"*"</code> (which matches any key), or as a <code>Constant</code>
             (which may be a string literal, a numeric literal with optional minus sign, a QName literal
-            such as <code>#xsi:type</code>, or the constants <code>true()</code> and <code>false()</code>.
+            such as <code>#xsi:type</code>, or the constants <code>true()</code> and <code>false()</code>).
             So for example the pattern <code>jnode("name", xs:string)</code> matches a JNode whose key
             property is the string <code>"name"</code>, and whose value property is an instance of
             <code>xs:string</code>. The quotes may be omitted from the key value if it takes the form
             of an NCName, so this could also be written <code>jnode(name, xs:string)</code>.</p>
             
             <p>Like other node tests, a JNode test can be qualified with an ancestor path (for example
-            <code>jnode(products, array(*)//jnode(price, xs:decimal)</code> and/or with
+            <code>jnode(products, array(*))//jnode(price, xs:decimal)</code>) and/or with
             predicates (for example <code>jnode(price, xs:decimal)[empty(../discount)]</code>).</p>
             
             
