@@ -164,7 +164,7 @@ namespace Saxon.Api {
         /// <summary>
         /// The <c>XsltLanguageVersion</c> property determines the version of the XSLT language specification
         /// implemented by the compiler. In this Saxon release the values "3.0" and "4.0" are recognized.
-        /// The default is "3.1". Set the value to "4.0" to enable support for experimental features defined in
+        /// The default is "3.0". Set the value to "4.0" to enable support for experimental features defined in
         /// the XSLT 4.0 proposal (which is likely to change before it stabilizes).
         /// </summary>
 
