@@ -31,8 +31,10 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.jiter.FilteringJavaIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,14 +47,17 @@ import java.util.List;
 
 public class LookupAllExpression extends UnaryExpression {
 
+    SequenceType requiredType;
+
     /**
      * Constructor
      *
      * @param lhs The left hand operand (which must always select a sequence of maps or arrays).
      */
 
-    public LookupAllExpression(Expression lhs) {
+    public LookupAllExpression(Expression lhs, SequenceType requiredType) {
         super(lhs);
+        this.requiredType = requiredType;
     }
 
     @Override
@@ -70,13 +75,17 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public final ItemType getItemType() {
-        ItemType lhs = getBaseExpression().getItemType();
-        if (lhs instanceof MapType) {
-            return ((MapType)lhs).getValueType().getPrimaryType();
-        } else if (lhs instanceof ArrayItemType) {
-            return ((ArrayItemType) lhs).getMemberType().getPrimaryType();
+        if (requiredType.getPrimaryType() == AnyItemType.getInstance()) {
+            ItemType lhs = getBaseExpression().getItemType();
+            if (lhs instanceof MapType) {
+                return ((MapType) lhs).getValueType().getPrimaryType();
+            } else if (lhs instanceof ArrayItemType) {
+                return ((ArrayItemType) lhs).getMemberType().getPrimaryType();
+            } else {
+                return AnyItemType.getInstance();
+            }
         } else {
-            return AnyItemType.getInstance();
+            return requiredType.getPrimaryType();
         }
     }
 
@@ -203,7 +212,7 @@ public class LookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public LookupAllExpression copy(RebindingMap rebindings) {
-        return new LookupAllExpression(getBaseExpression().copy(rebindings));
+        return new LookupAllExpression(getBaseExpression().copy(rebindings), requiredType);
     }
 
     /**
@@ -256,6 +265,9 @@ public class LookupAllExpression extends UnaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("lookupAll", this);
+        if (requiredType != SequenceType.ANY_SEQUENCE) {
+            destination.emitAttribute("type", requiredType.toAlphaCode());
+        }
         getBaseExpression().export(destination);
         destination.endElement();
     }
@@ -317,9 +329,19 @@ public class LookupAllExpression extends UnaryExpression {
                         return null;
                     } else if (lhs instanceof ArrayItem) {
                         level1forArrays = ((ArrayItem)lhs).members().iterator();
+                        if (expr.requiredType != SequenceType.ANY_SEQUENCE) {
+                            TypeHierarchy th = expr.getConfiguration().getTypeHierarchy();
+                            level1forArrays = new FilteringJavaIterator<>(
+                                    level1forArrays, val -> expr.requiredType.matches(val, th));
+                        }
                         return next();
                     } else if (lhs instanceof MapItem) {
                         level1forMaps = ((MapItem)lhs).keyValuePairs().iterator();
+                        if (expr.requiredType != SequenceType.ANY_SEQUENCE) {
+                            TypeHierarchy th = expr.getConfiguration().getTypeHierarchy();
+                            level1forMaps = new FilteringJavaIterator<>(
+                                    level1forMaps, kvp -> expr.requiredType.matches(kvp.value, th));
+                        }
                         return next();
                     } else {
                         try {

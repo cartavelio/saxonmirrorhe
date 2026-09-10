@@ -2661,7 +2661,12 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("lookupAll", (loader, element) -> {
             Expression select = loader.getFirstChildExpression(element);
-            return new LookupAllExpression(select);
+            SequenceType type = SequenceType.ANY_SEQUENCE;
+            String typeAtt = element.getAttributeValue(NamespaceUri.NULL, "type");
+            if (typeAtt != null) {
+                type = AlphaCode.toSequenceType(typeAtt, loader.getConfiguration());
+            }
+            return new LookupAllExpression(select, type);
         });
 
         eMap.put("map", (loader, element) -> {

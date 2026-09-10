@@ -3339,7 +3339,15 @@ public class XPathParser {
             result = new LookupExpression(lhs, Literal.makeLiteral(number));
         } else if (token == Token.MULT || token == Token.STAR) {
             nextToken();
-            result = lookupStar(lhs);
+            SequenceType sequenceType = SequenceType.ANY_SEQUENCE;
+            if (t.currentToken == Token.COLONCOLON) {
+                checkLanguageVersion40();
+                nextToken();
+                ItemType it = parseItemType();  // See QT4 spec bug #859
+                sequenceType = new SequenceType(it,StaticProperty.ALLOWS_MANY);
+            }
+            result = lookupStar(lhs, sequenceType);
+
         } else if (token == Token.LPAR) {
             t.setState(Tokenizer.DEFAULT_STATE);
 
@@ -3381,8 +3389,8 @@ public class XPathParser {
      * @return the result of parsing the expression
      */
 
-    private static Expression lookupStar(Expression lhs) {
-        return new LookupAllExpression(lhs);
+    private static Expression lookupStar(Expression lhs, SequenceType type) {
+        return new LookupAllExpression(lhs, type);
     }
 
 
