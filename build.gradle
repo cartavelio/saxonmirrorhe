@@ -880,6 +880,11 @@ task eej_copyTestDrivers(
     .files
     .each { fileMap[it] = copySourceName(it, 'testdriver_classes/eej') }
 
+  files("${projectDir}/tools/nashorn")
+    .asFileTree
+    .files
+    .each { fileMap[it] = copySourceName(it, 'src/testdrivers/eej') }
+
   inputs.files fileMap.keySet()
   outputs.files fileMap.values()
 

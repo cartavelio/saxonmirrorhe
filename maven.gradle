@@ -128,6 +128,45 @@ task mavenEe() {
     }
     containerTask.dependsOn t
   }
+
+  t = task "maven${Release}TestJar"(
+    type: Jar,
+    dependsOn: ["${release}jCompile", "${release}j_compileTestDrivers"]
+  ) {
+    archiveBaseName = "Saxon-${RELEASE}"
+    classifier = 'test'
+    archiveVersion = saxonVersion
+    destinationDirectory = project.file("${buildDir}/maven")
+    from ("${buildDir}/testdriver_classes/${release}j")
+    doLast {
+      signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}-test.jar")
+    }
+  }
+  containerTask.dependsOn t
+
+  task "testMaven${Release}TestJar"(dependsOn: ["maven${Release}TestJar"]) {
+    Task jartask = tasks.findByName("maven${Release}TestJar")
+    def jarfile = jartask.outputs.getFiles().getSingleFile()
+    def jargold = project.file("${projectDir}/tools/java-manifests/saxon-${release}-test.list")
+    doLast {
+      compareManifests(jarfile, jargold)
+    }
+  }
+  t.finalizedBy(tasks.findByName("testMaven${Release}TestJar"))
+
+  t = task "maven${Release}TestSourcesJar"(
+    type: Jar, dependsOn: ["${release}j_copyTestDrivers"]
+  ) {
+    archiveBaseName = "Saxon-${RELEASE}"
+    classifier = 'test-sources'
+    archiveVersion = saxonVersion
+    destinationDirectory = project.file("${buildDir}/maven")
+    from ("${buildDir}/src/testdrivers/${release}j")
+    doLast {
+      signJar("${buildDir}/maven/Saxon-${RELEASE}-${saxonVersion}-test-sources.jar")
+    }
+  }
+  containerTask.dependsOn t
 }
 
 task mavenHeXqjJar(type: Jar, dependsOn: ["eejCompile"]) {
