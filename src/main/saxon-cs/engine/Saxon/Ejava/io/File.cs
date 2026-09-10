@@ -122,7 +122,8 @@ namespace Saxon.Ejava.io {
         }
 
         public File getParentFile() {
-            return new File(SysIO.Path.GetDirectoryName(fileName));
+            string dir = SysIO.Path.GetDirectoryName(fileName);
+            return string.IsNullOrEmpty(dir) ? null : new File(SysIO.Path.GetDirectoryName(fileName));
         }
         
         public string getParent() {
