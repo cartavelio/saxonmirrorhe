@@ -1128,6 +1128,7 @@ task saxonc_stage_wheels(
 }
 
 task saxonc_build_wheels(
+  dependsOn: ['saxonc_stage_wheels']
 ) {
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
 
