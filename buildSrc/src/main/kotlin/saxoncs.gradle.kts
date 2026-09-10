@@ -351,21 +351,21 @@ fun csZipArtifactTasks(configuration: CSReleaseConfiguration, publishTask: TaskP
   val stageZip = tasks.register("stage-${lowercaseConfiguration}-zip") {
     inputs.files(publishTask)
     inputs.files(layout.projectDirectory.dir("../../src/main/zipdoc"))
-    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
+    outputs.dir(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
 
     doFirst {
-      delete(layout.buildDirectory.dir("SaxonCS.app"))
+      delete(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
     }
 
     doLast {
       copy {
         from(publishTask.map { it.outputDir.get() })
-        into(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
+        into(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/SaxonCS-${extension.edition.get().uppercase()}"))
       }
 
       copy {
         from(layout.projectDirectory.dir("../../src/main/zipdoc"))
-        into(layout.buildDirectory.dir("SaxonCS.app/doc"))
+        into(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/doc"))
       }
     }
   }
@@ -414,32 +414,32 @@ if (!saxonBuild.targetHost.get().isMacOS) {
     group = LifecycleTasks.RELEASE_GROUP
 
     inputs.files(*makeAppTasks)
-    outputs.file(layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS"))
+    outputs.file(layout.buildDirectory.file("SaxonCS-${extension.edition.get().uppercase()}.app/Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}"))
 
     doFirst {
       // If a previous build put the docs in there, delete them; they aren't
       // allowed in a signed build
-      delete(layout.buildDirectory.dir("SaxonCS.app/doc"))
-      delete(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
+      delete(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/doc"))
+      delete(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app/SaxonCS-${extension.edition.get().uppercase()}"))
     }
 
     doFirst {
       copy {
         from(makeAppTask)
-        into(layout.buildDirectory.dir("SaxonCS.app"))
-        exclude("Contents/MacOS/SaxonCS")
+        into(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
+        exclude("Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}")
       }
     }
 
     workingDir = layout.buildDirectory.get().asFile
     commandLine("lipo", "-create", "-output",
-      "${layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS").get()}",
-      *makeAppTasks.map { it.map { it.outputDir.get().dir("Contents/MacOS/SaxonCS") }.get().asFile }.toTypedArray())
+      "${layout.buildDirectory.file("SaxonCS-${extension.edition.get().uppercase()}.app/Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}").get()}",
+      *makeAppTasks.map { it.map { it.outputDir.get().dir("Contents/MacOS/SaxonCS-${extension.edition.get().uppercase()}") }.get().asFile }.toTypedArray())
   }
 
   val signedMacOSAppTask = tasks.register<Exec>("macos-release-app") {
     inputs.files(buildUnsignedMacOSAppTask)
-    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
+    outputs.dir(layout.buildDirectory.dir("SaxonCS-${extension.edition.get().uppercase()}.app"))
 
     // Putting documentation in the app causes the signature to fail
     // "unsealed content is present in the bundle root"
@@ -448,7 +448,7 @@ if (!saxonBuild.targetHost.get().isMacOS) {
       "${layout.projectDirectory.file("../tools/entitlements.plist")}",
       "--deep", "--sign", "Developer ID Application: Saxonica Limited",
       "--timestamp",
-      "${layout.buildDirectory.file("SaxonCS.app").get()}")
+      "${layout.buildDirectory.file("SaxonCS-${extension.edition.get().uppercase()}.app").get()}")
   }
 
   val zipArtifactTask = tasks.register<Zip>(dotnetPublishZipArtifactTaskName("release")) {
@@ -456,7 +456,7 @@ if (!saxonBuild.targetHost.get().isMacOS) {
     archiveFileName = "SaxonCS-${saxonBuild.version.get().replace(".", "-")}-MacOS.zip"
 
     from(signedMacOSAppTask)
-    into("/SaxonCS.app/")
+    into("/SaxonCS-${extension.edition.get().uppercase()}.app/")
   }
 
   releaseZipArtifactTasks.add(zipArtifactTask)

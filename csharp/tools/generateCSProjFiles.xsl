@@ -18,6 +18,8 @@
 <xsl:param name="edition" as="xs:string" required="yes"/>
 <xsl:param name="framework" as="xs:string" required="yes"/>
 
+<xsl:variable name="EDITION" select="upper-case($edition)"/>
+
 <xsl:param name="includeTestDriver" as="xs:boolean"
            select="empty($releaseBuild) and not($nunitBuild = 'true')"/>
 <xsl:param name="core.csproj" as="xs:string" select="'core.csproj'"/>
@@ -100,11 +102,11 @@ EndGlobal
     <Project>
       <PropertyGroup>
         <UseArtifactsOutput>true</UseArtifactsOutput>
-        <DefineConstants>{upper-case($edition)}</DefineConstants>
+        <DefineConstants>{$EDITION}</DefineConstants>
         <xsl:choose>
           <xsl:when test="$nunitBuild = 'true'">
             <LangVersion>10.0</LangVersion>
-            <PackageSummary>NUnit tests for {upper-case($edition)}</PackageSummary>
+            <PackageSummary>NUnit tests for {$EDITION}</PackageSummary>
           </xsl:when>
           <xsl:otherwise>
             <LangVersion>9.0</LangVersion>
@@ -136,7 +138,7 @@ EndGlobal
         <xsl:if test="not($nunitBuild = 'true')">
           <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
           <PackageReadmeFile>README.md</PackageReadmeFile>
-          <DefineConstants>{upper-case($edition)}</DefineConstants>
+          <DefineConstants>{$EDITION}</DefineConstants>
         </xsl:if>
       </PropertyGroup>
 
@@ -199,7 +201,7 @@ EndGlobal
             <UseArtifactsOutput>true</UseArtifactsOutput>
             <Description>SaxonCS NUnit tests.</Description>
             <IsTestProject>true</IsTestProject>
-            <DefineConstants>{upper-case($edition)}</DefineConstants>
+            <DefineConstants>{$EDITION}</DefineConstants>
             <UseArtifactsOutput>true</UseArtifactsOutput>
           </PropertyGroup>
           <ItemGroup>
@@ -269,7 +271,7 @@ EndGlobal
             <UseArtifactsOutput>true</UseArtifactsOutput>
             <StartupObject>Saxon.Cmd.Command</StartupObject>
             <OutputType>Exe</OutputType>
-            <AssemblyName>SaxonCS</AssemblyName>
+            <AssemblyName>SaxonCS-{$EDITION}</AssemblyName>
             <Description>SaxonCS is a high-performance XSLT 3.0 processor. It conforms with the
             latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Description>
             <PackageReleaseNotes>Our first native C# release.</PackageReleaseNotes>
@@ -279,12 +281,12 @@ EndGlobal
                  And didn't see to have much performance benefit
             <PublishAot>True</PublishAot>
             -->
-            <CFBundleName>SaxonCS</CFBundleName>
-            <CFBundleDisplayName>SaxonCS</CFBundleDisplayName>
+            <CFBundleName>SaxonCS-{$EDITION}</CFBundleName>
+            <CFBundleDisplayName>SaxonCS-{$EDITION}</CFBundleDisplayName>
             <CFBundleIdentifier>com.saxonica.saxoncs</CFBundleIdentifier>
             <CFBundleVersion>{$saxonVersion}</CFBundleVersion>
             <CFBundleShortVersionString>{$saxonVersion}</CFBundleShortVersionString>
-            <CFBundleExecutable>SaxonCS</CFBundleExecutable>
+            <CFBundleExecutable>SaxonCS-{$EDITION}</CFBundleExecutable>
             <CFBundleIconFile>SaxonicaDisk.icns</CFBundleIconFile>
             <NSPrincipalClass>NSApplication</NSPrincipalClass>
             <NSHighResolutionCapable>true</NSHighResolutionCapable>

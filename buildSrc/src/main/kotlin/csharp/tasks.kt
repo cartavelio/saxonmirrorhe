@@ -334,7 +334,7 @@ abstract class DotNetCreateNupkg : DotNetImplementation() {
 
 abstract class DotNetMakeApp : DotNetImplementation() {
   @get:OutputDirectory
-  val outputDir = buildPublishArtifactsDir.map { it.dir("SaxonCS.app") }
+  val outputDir = buildPublishArtifactsDir.map { it.dir("SaxonCS-${edition.get().uppercase()}.app") }
 
   @TaskAction
   fun build() {
