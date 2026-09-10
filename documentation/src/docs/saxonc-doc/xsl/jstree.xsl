@@ -469,7 +469,7 @@
         <xsl:result-document href="#trail" method="ixsl:replace-content">
             <li id="trail1"><a href="https://saxonica.com">Saxonica ▷</a></li>
             <li id="trail2"><a
-                href="https://www.saxonica.com/saxon-c/index.xml">SaxonC ▷</a></li>
+                href="https://www.saxonica.com/saxon-c/index.xml">SaxonC 13 ▷</a></li>
             <xsl:call-template name="get-trail">
                 <xsl:with-param name="parent" select="$doc"/>
                 <xsl:with-param name="hash-parts" select="$hash-parts"/>
