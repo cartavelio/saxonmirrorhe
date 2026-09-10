@@ -58,8 +58,13 @@ namespace java.util
             return "Arrays.ToString not implemented";
         }
 
-        public static int hashCode(byte[] array) {
-            throw new NotImplementedException();
+        public static int hashCode<T>(T[] array) {
+            int h = 33862;
+            foreach (T member in array) {
+                h ^= member.GetHashCode();
+            }
+
+            return h;
         }
     }
 }

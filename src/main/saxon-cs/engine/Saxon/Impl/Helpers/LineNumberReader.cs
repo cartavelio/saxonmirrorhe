@@ -10,7 +10,7 @@ namespace Saxon.Impl.Helpers {
             this.reader = reader;
         }
 
-        public int getLineNumber() {}
+        public int getLineNumber() {
         {
             return this.line;
         }

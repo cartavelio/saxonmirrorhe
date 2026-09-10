@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Schema;
 using net.sf.saxon.om;
@@ -279,7 +280,7 @@ namespace Saxon.Impl.Helpers {
             return currentEvent;
         }
 
-        public java.util.List<net.sf.saxon.pull.UnparsedEntity> getUnparsedEntities() {
+        public IList<UnparsedEntity> getUnparsedEntities() {
             return null;
         }
 

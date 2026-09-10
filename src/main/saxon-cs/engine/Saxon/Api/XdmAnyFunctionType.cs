@@ -1,0 +1,23 @@
+using net.sf.saxon.om;
+using net.sf.saxon.type;
+
+namespace Saxon.Api {
+    /// <summary>
+    /// Singleton class representing the item type <c>function(*)</c>, which matches any function item.
+    /// </summary>
+    public class XdmAnyFunctionType : XdmItemType {
+        /// <summary>
+        /// The singleton instance of this class: an <c>XdmItemType</c> corresponding to the
+        /// item type <c>function(*)</c>, which matches any function item.
+        /// </summary>
+        public static readonly XdmAnyFunctionType Instance = new XdmAnyFunctionType();
+
+        private XdmAnyFunctionType() {
+            this.type = AnyFunctionType.ANY_FUNCTION;
+        }
+        
+        public override bool Matches(XdmItem item) {
+            return (Item) item.value is Function;
+        }
+    }
+}

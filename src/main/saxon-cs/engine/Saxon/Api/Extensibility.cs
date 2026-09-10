@@ -22,9 +22,9 @@ using System.Collections.Generic;
 using net.sf.saxon.expr;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
-using java.util;
 using net.sf.saxon;
 using net.sf.saxon.resource;
+using Saxon.Api.Support;
 
 namespace Saxon.Api
 {
@@ -579,57 +579,6 @@ namespace Saxon.Api
     }
 
 
-    internal class ResourceCollectionWrapper : JResourceCollection
-    {
-
-        IResourceCollection resourceCollection;
-
-        public ResourceCollectionWrapper(IResourceCollection rc) {
-            resourceCollection = rc;
-        }
-
-        public string getCollectionURI()
-        {
-            return resourceCollection.CollectionURI();
-        }
-
-        public Iterator getResources(JXPathContext xpc)
-        {
-            java.util.List iter = new java.util.ArrayList();
-            List<IResource> list = resourceCollection.GetResources(new DynamicContext(xpc));
-            foreach (IResource src in list)
-            {
-                iter.add(new ResourceWrapper(src));
-            }
-
-            return iter.iterator();
-
-        }
-
-        public Iterator getResourceURIs(JXPathContext xpc)
-        {
-            java.util.List iter = new java.util.ArrayList();
-            List<string> list = resourceCollection.GetResourceURIs(new DynamicContext(xpc));
-            foreach (string src in list)
-            {
-                iter.add(src);
-            }
-
-            return iter.iterator();
-        }
-
-        public bool isStable(JXPathContext xpc)
-        {
-           return false;
-        }
-
-        public bool stripWhitespace(net.sf.saxon.om.SpaceStrippingRule ssr)
-        {
-            return false;
-        }
-    }
-
-
     /// <summary>
     /// This interface defines a Resource. The Resource objects belong to a collection.
     /// It is used to support the fn:collection() and fn:uri-collection() functions.
@@ -942,7 +891,7 @@ namespace Saxon.Api
 
         public override JStructuredQName getFunctionQName()
         {
-            return definition.FunctionName.ToStructuredQName();
+            return definition.FunctionName.GetStructuredQName();
         }
 
         public override int getMinimumNumberOfArguments()

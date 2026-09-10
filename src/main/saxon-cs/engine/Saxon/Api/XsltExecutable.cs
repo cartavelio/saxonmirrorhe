@@ -18,32 +18,25 @@ namespace Saxon.Api {
     public class XsltExecutable
     {
 
-        // private JPreparedStylesheet pss;
         private Processor processor;
-        private net.sf.saxon.s9api.XsltExecutable executable;
+        private net.sf.saxon.s9api.XsltExecutable jExecutable;
 
         // internal constructor
 
         internal XsltExecutable(net.sf.saxon.s9api.XsltExecutable executable)
         {
-            //this.processor = proc;
-            this.executable = executable;
+            this.jExecutable = executable;
         }
 
         internal Processor InternalProcessor
         { 
-            set { processor = value;}
-
+            set => processor = value;
         }
 
         /// <summary>
         /// Get the Processor that was used to create this XsltExecutable
         /// </summary>
-        public Processor Processor
-        {
-            get { return processor; }
-
-        }
+        public Processor Processor => processor;
 
         /// <summary>
         /// Load the stylesheet to prepare it for execution.
@@ -55,8 +48,7 @@ namespace Saxon.Api {
 
         public XsltTransformer Load()
         {
-            // JXsltController c = pss.newController();
-            return new XsltTransformer(executable.load());
+            return new XsltTransformer(jExecutable.load());
         }
 
 
@@ -77,7 +69,7 @@ namespace Saxon.Api {
 
         public Xslt30Transformer Load30()
         {
-            return new Xslt30Transformer(executable.load30());
+            return new Xslt30Transformer(jExecutable.load30());
         }
 
         /// <summary>
@@ -88,7 +80,7 @@ namespace Saxon.Api {
 
         public void Explain(XmlDestination destination)
         {
-            executable.explain(destination.GetUnderlyingDestination());
+            jExecutable.explain(destination.GetUnderlyingDestination());
         }
 
         /// <summary>
@@ -99,7 +91,7 @@ namespace Saxon.Api {
         {
             get
             {
-                return executable;
+                return jExecutable;
             }
         }
 
@@ -111,7 +103,7 @@ namespace Saxon.Api {
         /// stylesheet. This policy can be used as input to a <see cref="DocumentBuilder"/>.</returns>
         
         public WhitespacePolicy getWhitespaceStrippingPolicy() {
-            return new WhitespacePolicy(executable);
+            return new WhitespacePolicy(jExecutable);
         }
 
 
@@ -126,16 +118,12 @@ namespace Saxon.Api {
         /// </returns>
         public Dictionary<QName, ParameterDetails> GetGlobalParameters()
         {
-            java.util.HashMap globals = executable.getGlobalParameters();
+            Dictionary<QName, net.sf.saxon.s9api.XsltExecutable.ParameterDetails> globals = jExecutable.getGlobalParameters();
             Dictionary<QName, ParameterDetails> params1 = new Dictionary<QName, ParameterDetails>();
-            int count = globals.size();
-            object[] names = globals.keySet().toArray();
-            for (int i = 0; i < count; i++) {
-                net.sf.saxon.s9api.XsltExecutable.ParameterDetails details = (net.sf.saxon.s9api.XsltExecutable.ParameterDetails)globals.get(names[i]);
-                XdmSequenceType sType = XdmSequenceType.FromSequenceType(details.getUnderlyingDeclaredType());
-                sType.itemType.SetJXdmItemType(details.getDeclaredItemType());
-                params1.Add(new QName((net.sf.saxon.s9api.QName)names[i]), new ParameterDetails(sType, false));
-
+            int count = globals.Count;
+            foreach (KeyValuePair<QName, net.sf.saxon.s9api.XsltExecutable.ParameterDetails> pair in globals) {
+                XdmSequenceType sType = XdmSequenceType.FromSequenceType(pair.Value.getUnderlyingDeclaredType());
+                params1.Add(pair.Key, new ParameterDetails(sType, false));
             }
             return params1;
         }

@@ -1,3 +1,4 @@
+using SysCollGen = System.Collections.Generic;
 namespace java.util
 {
     public class Collections
@@ -7,6 +8,30 @@ namespace java.util
             foreach (T extra in additions)
             {
                 c.add(extra);
+            }
+        }
+        
+        public static void addAll<T>(SysCollGen.IList<T> c, params T[] additions)
+        {
+            foreach (T extra in additions)
+            {
+                c.Add(extra);
+            }
+        }
+        
+        public static void addAll<T>(SysCollGen.ISet<T> c, SysCollGen.ISet<T> additions)
+        {
+            foreach (T extra in additions)
+            {
+                c.Add(extra);
+            }
+        }
+        
+        public static void addAll<T>(SysCollGen.ISet<T> c, T[] additions)
+        {
+            foreach (T extra in additions)
+            {
+                c.Add(extra);
             }
         }
         
@@ -22,9 +47,9 @@ namespace java.util
             return new ArrayList<T>();
         }
         
-        public static List<T> singletonList<T>(T entry) {
-            ArrayList<T> a =  new ArrayList<T>();
-            a.add(entry);
+        public static SysCollGen.List<T> singletonList<T>(T entry) {
+            SysCollGen.List<T> a =  new SysCollGen.List<T>();
+            a.Add(entry);
             return a;
         }
         

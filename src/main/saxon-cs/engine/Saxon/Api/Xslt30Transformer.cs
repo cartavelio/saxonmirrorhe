@@ -7,11 +7,11 @@ using net.sf.saxon.@event;
 using net.sf.saxon.lib;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
+using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
     /// <summary>An <code>Xslt30Transformer</code> represents a compiled and loaded stylesheet ready for execution.
     /// The <code>Xslt30Transformer</code> holds details of the dynamic evaluation context for the stylesheet.</summary>
-
     /// <remarks><para>The <code>Xslt30Transformer</code> differs from <see cref="XsltTransformer"/> 
     /// in supporting new options
     /// for invoking a stylesheet, corresponding to facilities defined in the XSLT 3.0 specification. However,
@@ -22,14 +22,11 @@ namespace Saxon.Api {
     /// It is safe, however, to reuse the object within a single thread to run the same
     /// stylesheet several times. Running the stylesheet does not change the context
     /// that has been established.</para>
-
     /// <para>An <code>Xslt30Transformer</code> is always constructed by running the <code>Load30</code>
     /// method of an <see cref="XsltExecutable"/>.</para>
-
     /// <para>Unlike <code>XsltTransformer</code>, an <code>Xslt30Transformer</code> is not a <code>Destination</code>.
     /// To pipe the results of one transformation into another, the target should be an <code>XsltTransfomer</code>
     /// rather than an <code>Xslt30Transformer</code>.</para>
-
     /// <para>Evaluation of an Xslt30Transformer proceeds in a number of phases:</para>
     /// <list type="number">
     /// <item>First, values may be supplied for stylesheet parameters and for the global context item. The
@@ -65,12 +62,8 @@ namespace Saxon.Api {
     /// should be created from the original <c>XsltExecutable</c>.</para>
     /// <para> @since 9.6</para> 
     /// </remarks>
-
     [Serializable]
-    public class Xslt30Transformer
-    {
-
-
+    public class Xslt30Transformer {
         private IResultDocumentHandler resultDocumentHandler;
         private StandardLogger traceFunctionDestination;
         private IMessageListener messageListener;
@@ -79,9 +72,7 @@ namespace Saxon.Api {
 
         // internal constructor
 
-        internal Xslt30Transformer(net.sf.saxon.s9api.Xslt30Transformer transformer)
-        {
-
+        internal Xslt30Transformer(net.sf.saxon.s9api.Xslt30Transformer transformer) {
             this.transformer = transformer;
             //this.globalParameterSet = new GlobalParameterSet(globalParameters);
         }
@@ -90,15 +81,9 @@ namespace Saxon.Api {
         /// <summary> Supply the context item to be used when evaluating global variables and parameters.
         /// This argument can be null if no context item is to be supplied.</summary>
 
-        public XdmItem GlobalContextItem
-        {
-            set
-            {
-                transformer.setGlobalContextItem(value == null ? null : XdmItem.FromXdmItemItemToJXdmItem(value));
-            }
-         
-            get { return (XdmItem)XdmItem.Wrap(transformer.getUnderlyingController().getGlobalContextItem()); }
-
+        public XdmItem GlobalContextItem {
+            set => transformer.setGlobalContextItem(value == null ? null : XdmItem.FromXdmItemItemToJXdmItem(value));
+            get => (XdmItem) XdmItem.Wrap(transformer.getUnderlyingController().getGlobalContextItem());
         }
 
 
@@ -106,15 +91,9 @@ namespace Saxon.Api {
         /// to lower-level methods not otherwise available in the Saxon.Api interface. Note that classes
         /// and methods obtained by this route cannot be guaranteed stable from release to release.</summary>
 
-        public XsltController GetUnderlyingController
-        {
-            get { return transformer.getUnderlyingController(); }
-        }
+        public XsltController GetUnderlyingController => transformer.getUnderlyingController();
 
-        internal net.sf.saxon.s9api.Xslt30Transformer GetUnderlyingXslt30Transformer
-        {
-            get { return transformer; }
-        }
+        internal net.sf.saxon.s9api.Xslt30Transformer GetUnderlyingXslt30Transformer => transformer;
 
 
         /// <summary>
@@ -145,18 +124,15 @@ namespace Saxon.Api {
         /// method: that is, by applying templates to the root node of the supplied XML document.
         /// </returns>
         public XmlDestination AsDocumentDestination(XmlDestination finalDestination) {
-
-            AbstractDestination localDestination = new AbstractDestination(this, finalDestination);
-            return localDestination;
+            return new AbstractDestination(this, finalDestination);
         }
 
         // internal method
-        internal Receiver GetDestinationReceiver(XmlDestination destination)
-        {
-            Receiver r = transformer.getDestinationReceiver(transformer.getUnderlyingController(), destination.GetUnderlyingDestination()); 
+        internal Receiver GetDestinationReceiver(XmlDestination destination) {
+            Receiver r = transformer.getDestinationReceiver(transformer.getUnderlyingController(),
+                destination.GetUnderlyingDestination());
             return r;
         }
-
 
 
         /// <summary>
@@ -172,16 +148,13 @@ namespace Saxon.Api {
         /// a file in filestore, using the <c>file:</c> URI scheme).
         /// </remarks>
 
-        public IResultDocumentHandler ResultDocumentHandler
-        {
-            get
-            {
-                return resultDocumentHandler;
-            }
-            set
-            {
+        public IResultDocumentHandler ResultDocumentHandler {
+            get => resultDocumentHandler;
+            set {
                 resultDocumentHandler = value;
-                transformer.getUnderlyingController().setResultDocumentResolver(new ResultDocumentHandlerWrapper(value, transformer.getUnderlyingController().makePipelineConfiguration()));
+                transformer.getUnderlyingController().setResultDocumentResolver(
+                    new ResultDocumentHandlerWrapper(value,
+                        transformer.getUnderlyingController().makePipelineConfiguration()));
             }
         }
 
@@ -190,12 +163,9 @@ namespace Saxon.Api {
         /// loaded using the <code>doc()</code>, <code>document()</code>, or <code>collection()</code> functions.
         /// </summary>
 
-        public SchemaValidationMode SchemaValidationMode
-        {
-            get
-            {
-                switch (transformer.getUnderlyingController().getSchemaValidationMode())
-                {
+        public SchemaValidationMode SchemaValidationMode {
+            get {
+                switch (transformer.getUnderlyingController().getSchemaValidationMode()) {
                     case Validation.STRICT:
                         return SchemaValidationMode.Strict;
                     case Validation.LAX:
@@ -211,10 +181,8 @@ namespace Saxon.Api {
             }
 
 
-            set
-            {
-                switch (value)
-                {
+            set {
+                switch (value) {
                     case SchemaValidationMode.Strict:
                         transformer.setSchemaValidationMode(ValidationMode.STRICT);
                         break;
@@ -236,34 +204,27 @@ namespace Saxon.Api {
         }
 
 
-
         /// <summary> Supply the values of global stylesheet variables and parameters.</summary>
         /// <param name="parameters"> A <c>Dictionary</c> whose keys are QNames identifying global stylesheet parameters,
         /// and whose corresponding values are the values to be assigned to those parameters. If necessary
         /// the supplied values are converted to the declared type of the parameter.
         /// The contents of the supplied <c>Dictionary</c> are copied by this method,
         /// so subsequent changes to the <c>Dictionary</c> have no effect.</param>
-        
-        public void SetStylesheetParameters(Dictionary<QName, XdmValue> parameters)
-        {
-            try
-            {
-                JMap map = new java.util.HashMap();
-                foreach (KeyValuePair<QName, XdmValue> entry in parameters)
-                {
+        public void SetStylesheetParameters(Dictionary<QName, XdmValue> parameters) {
+            try {
+                Dictionary<net.sf.saxon.s9api.QName, net.sf.saxon.s9api.XdmValue> map = 
+                    new Dictionary<net.sf.saxon.s9api.QName, net.sf.saxon.s9api.XdmValue>();
+                foreach (KeyValuePair<QName, XdmValue> entry in parameters) {
                     QName qname = entry.Key;
-                    map.put(qname.UnderlyingQName(), XdmValue.FromGroundedValueToJXdmValue(entry.Value.value));
+                    map[qname.UnderlyingQName()] = XdmValue.FromGroundedValueToJXdmValue(entry.Value.value));
                 }
-                transformer.setStylesheetParameters(map);
 
+                transformer.setStylesheetParameters(map);
             }
-            catch (net.sf.saxon.trans.XPathException e)
-            {
+            catch (net.sf.saxon.trans.XPathException e) {
                 throw new StaticError(e);
             }
-
         }
-
 
 
         /// <summary>Get the base output URI.</summary>
@@ -275,12 +236,8 @@ namespace Saxon.Api {
         /// of the <code>xsl:result-document</code> instruction.</para></remarks>
         /// <returns> The base output URI</returns>
 
-        public String BaseOutputURI
-        {
-            set
-            {
-                transformer.setBaseOutputURI(value);
-            }
+        public String BaseOutputURI {
+            set { transformer.setBaseOutputURI(value); }
             get { return transformer.getBaseOutputURI(); }
         }
 
@@ -289,16 +246,9 @@ namespace Saxon.Api {
         /// supplied to the <c>doc()</c> and <c>document()</c> functions.
         /// </summary>
 
-        public XmlResolver InputXmlResolver
-        {
-            get
-            {
-                return ((JDotNetURIResolver)transformer.getURIResolver()).getXmlResolver();
-            }
-            set
-            {
-                transformer.setURIResolver(new JDotNetURIResolver(value));
-            }
+        public XmlResolver InputXmlResolver {
+            get => ((DotNetURIResolver) transformer.getURIResolver()).getXmlResolver();
+            set => transformer.setURIResolver(new DotNetURIResolver(value));
         }
 
         /// <summary>
@@ -310,13 +260,9 @@ namespace Saxon.Api {
         /// disabled for others; at run time, they can only be enabled or disabled globally.</remarks>
         /// <returns>true if assertions are enabled at run time</returns>
         /// <remarks>Since 9.7</remarks>
- 
-        public bool AssertionsEnabled
-        {
-            get
-            {
-                return transformer.isAssertionsEnabled();
-            }
+
+        public bool AssertionsEnabled {
+            get { return transformer.isAssertionsEnabled(); }
         }
 
 
@@ -325,12 +271,8 @@ namespace Saxon.Api {
         /// This property name has been misspelt, use <c>AssertionsEnabled</c> instead.
         /// </summary>
         [Obsolete("This property has been replaced by AssertionsEnabled.")]
-        public bool ssAssertionsEnabled
-        {
-            get
-            {
-                return transformer.isAssertionsEnabled();
-            }
+        public bool ssAssertionsEnabled {
+            get { return transformer.isAssertionsEnabled(); }
         }
 
 
@@ -352,19 +294,13 @@ namespace Saxon.Api {
         /// which terminates the transformation.</para>
         /// </remarks>
 
-        public IMessageListener MessageListener
-        {
-            set
-            {
+        public IMessageListener MessageListener {
+            set {
                 messageListener = value;
                 transformer.setMessageListener(new MessageListenerProxy(value));
             }
-            get
-            {
-                return messageListener;
-            }
+            get { return messageListener; }
         }
-
 
 
         /// <summary>
@@ -387,17 +323,12 @@ namespace Saxon.Api {
         /// in allowing the error code supplied to xsl:message to be notified</para>
         /// </remarks>
 
-        public IMessageListener2 MessageListener2
-        {
-            set
-            {
+        public IMessageListener2 MessageListener2 {
+            set {
                 messageListener2 = value;
                 transformer.setMessageListener(new MessageListenerProxy2(value));
             }
-            get
-            {
-                return messageListener2;
-            }
+            get { return messageListener2; }
         }
 
         /// <summary>
@@ -409,17 +340,12 @@ namespace Saxon.Api {
         /// <para>The supplied destination is ignored if a <code>TraceListener</code> is in use.</para>
         /// </remarks>
 
-        public StandardLogger TraceFunctionDestination
-        {
-            set
-            {
+        public StandardLogger TraceFunctionDestination {
+            set {
                 traceFunctionDestination = value;
                 transformer.setTraceFunctionDestination(value);
             }
-            get
-            {
-                return traceFunctionDestination;
-            }
+            get { return traceFunctionDestination; }
         }
 
 
@@ -445,24 +371,18 @@ namespace Saxon.Api {
         /// template, as well as global stylesheet parameters. Although there is no similar provision
         /// in the XSLT 1.0 or 2.0 specifications, this method works for all stylesheets, regardless whether
         /// XSLT 3.0 is enabled or not.</para></remarks>
-
         /// <param name="parameters"> The parameters to be used for the initial template</param>
         /// <param name="tunnel"> true if these values are to be used for setting tunnel parameters;
         /// false if they are to be used for non-tunnel parameters</param>
-        
-        public void SetInitialTemplateParameters(Dictionary<QName, XdmValue> parameters, bool tunnel)
-        {
-
+        public void SetInitialTemplateParameters(Dictionary<QName, XdmValue> parameters, bool tunnel) {
             JMap templateParameters = new java.util.HashMap();
-            foreach (KeyValuePair<QName, XdmValue> entry in parameters)
-            {
+            foreach (KeyValuePair<QName, XdmValue> entry in parameters) {
                 QName qname = entry.Key;
-                templateParameters.put(qname.UnderlyingQName(), XdmValue.FromGroundedValueToJXdmValue(entry.Value.value));
+                templateParameters.put(qname.UnderlyingQName(),
+                    XdmValue.FromGroundedValueToJXdmValue(entry.Value.value));
             }
 
             transformer.setInitialTemplateParameters(templateParameters, tunnel);
-
-
         }
 
 
@@ -471,32 +391,23 @@ namespace Saxon.Api {
         /// <remarks><para>The value may be the name of the initial mode, or null to indicate the default
         /// (unnamed) mode</para></remarks>
 
-        public QName InitialMode
-        {
-
-            set
-            {
-                try
-                {
+        public QName InitialMode {
+            set {
+                try {
                     transformer.setInitialMode(value == null ? null : value.UnderlyingQName());
                 }
-                catch (net.sf.saxon.trans.XPathException e)
-                {
+                catch (net.sf.saxon.trans.XPathException e) {
                     throw new DynamicError(e);
                 }
             }
-            get
-            {
+            get {
                 net.sf.saxon.s9api.QName mode = transformer.getInitialMode();
                 if (mode == null)
                     return null;
-                else
-                {
+                else {
                     return new QName(mode);
                 }
             }
-
-
         }
 
 
@@ -506,25 +417,19 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
         /// <param name="destination">The destination of the result document produced by wrapping the result 
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
-
-        public void ApplyTemplates(Stream input, XmlDestination destination)
-        {
-            try
-            {
-                StreamSource streamSource = new StreamSource(new JDotNetInputStream(input));
+        public void ApplyTemplates(Stream input, XmlDestination destination) {
+            try {
+                StreamSource streamSource = new StreamSource(input);
                 transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
-            
             }
-            catch (SaxonApiException exp)
-            {
+            catch (SaxonApiException exp) {
                 throw new DynamicError(exp);
             }
-
         }
 
 
@@ -535,25 +440,21 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI used for the input document</param>
         /// <param name="destination">The destination of the result document produced by wrapping the result 
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
-
-        public void ApplyTemplates(Stream input, Uri baseUri, XmlDestination destination)
-        {
-            StreamSource streamSource = new StreamSource(new JDotNetInputStream(input), Uri.EscapeUriString(baseUri.ToString()));
-            try
-            {
+        public void ApplyTemplates(Stream input, Uri baseUri, XmlDestination destination) {
+            StreamSource streamSource =
+                new StreamSource(input, Uri.EscapeUriString(baseUri.ToString()));
+            try {
                 transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
             }
-            catch (SaxonApiException exp)
-            {
+            catch (SaxonApiException exp) {
                 throw new DynamicError(exp.getMessage());
             }
-
         }
 
 
@@ -564,7 +465,7 @@ namespace Saxon.Api {
         /// It also uses any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
         /// <param name="destination">The destination of the principal result of the transformation.
         /// If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
@@ -573,15 +474,12 @@ namespace Saxon.Api {
         public void Transform(Stream input, XmlDestination destination) {
             StreamSource streamSource = new StreamSource(input);
 
-            try
-            {
+            try {
                 transformer.transform(streamSource, destination.GetUnderlyingDestination());
             }
-            catch (SaxonApiException exp)
-            {
+            catch (SaxonApiException exp) {
                 throw new DynamicError(exp.getMessage());
             }
-
         }
 
         /// <summary>
@@ -592,28 +490,23 @@ namespace Saxon.Api {
         /// It also uses any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI used for the input document</param>
         /// <param name="destination">The destination of the principal result of the transformation.
         /// If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
         /// <remarks>since 9.9.1.5</remarks>
-        public void Transform(Stream input, Uri baseUri, XmlDestination destination)
-        {
-            StreamSource streamSource = new StreamSource(new JDotNetInputStream(input), Uri.EscapeUriString(baseUri.ToString()));
-            try
-            {
+        public void Transform(Stream input, Uri baseUri, XmlDestination destination) {
+            StreamSource streamSource =
+                new StreamSource(input), Uri.EscapeUriString(baseUri.ToString());
+            try {
                 transformer.transform(streamSource, destination.GetUnderlyingDestination());
             }
-            catch (SaxonApiException exp)
-            {
+            catch (SaxonApiException exp) {
                 throw new DynamicError(exp.getMessage());
             }
-
         }
-
-
 
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
@@ -623,27 +516,22 @@ namespace Saxon.Api {
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="input">The source document. To apply more than one transformation to the same source 
-        /// document, the source document tree can be pre-built using a <see cref="DocumentBuilder"/>.</param>
+        /// document, the source document tree can be pre-built using a <see cref="net.sf.saxon.s9api.DocumentBuilder"/>.</param>
         /// <param name="baseUri">Base URI</param>
         /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
+        public XdmValue ApplyTemplates(Stream input, Uri baseUri) {
+            StreamSource streamSource =
+                new StreamSource(input, Uri.EscapeUriString(baseUri.ToString()));
 
-        public XdmValue ApplyTemplates(Stream input, Uri baseUri)
-        {
-            StreamSource streamSource = new StreamSource(new JDotNetInputStream(input), Uri.EscapeUriString(baseUri.ToString()));
-
-            try
-            {
+            try {
                 net.sf.saxon.s9api.XdmValue value = transformer.applyTemplates(streamSource);
                 return XdmValue.Wrap(value.getUnderlyingValue());
-
             }
-            catch (SaxonApiException exp)
-            {
+            catch (SaxonApiException exp) {
                 throw new DynamicError(exp);
             }
-
         }
 
 
@@ -658,22 +546,16 @@ namespace Saxon.Api {
         /// call in a document node.  If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
-
-        public void ApplyTemplates(XdmValue selection, XmlDestination destination)
-        {
-            
-            try
-            {
-                transformer.applyTemplates(selection == null ? null : XdmValue.FromGroundedValueToJXdmValue(selection.value), destination.GetUnderlyingDestination());
+        public void ApplyTemplates(XdmValue selection, XmlDestination destination) {
+            try {
+                transformer.applyTemplates(
+                    selection == null ? null : XdmValue.FromGroundedValueToJXdmValue(selection.value),
+                    destination.GetUnderlyingDestination());
             }
-            catch (SaxonApiException ex)
-            {
-
+            catch (SaxonApiException ex) {
                 throw new DynamicError(ex);
             }
-
         }
-
 
 
         /// <summary>
@@ -686,21 +568,15 @@ namespace Saxon.Api {
         /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
-
-        public XdmValue ApplyTemplates(XdmValue selection)
-        {
-           
-            try
-            {
-                return XdmValue.Wrap(transformer.applyTemplates(selection == null ? null : XdmValue.FromGroundedValueToJXdmValue(selection.value)).getUnderlyingValue());
-               
+        public XdmValue ApplyTemplates(XdmValue selection) {
+            try {
+                return XdmValue.Wrap(transformer
+                    .applyTemplates(selection == null ? null : XdmValue.FromGroundedValueToJXdmValue(selection.value))
+                    .getUnderlyingValue());
             }
-            catch (SaxonApiException ex)
-            {
-
+            catch (SaxonApiException ex) {
                 throw new DynamicError(ex);
             }
-
         }
 
 
@@ -716,26 +592,18 @@ namespace Saxon.Api {
         /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param> 
-
-        public void CallTemplate(QName templateName, XmlDestination destination)
-        {
-           
-            if (templateName == null)
-            {
+        public void CallTemplate(QName templateName, XmlDestination destination) {
+            if (templateName == null) {
                 templateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             }
 
-            try
-            {
+            try {
                 transformer.callTemplate(templateName.UnderlyingQName(), destination.GetUnderlyingDestination());
-               
             }
-            catch (SaxonApiException exp)
-            {
+            catch (SaxonApiException exp) {
                 throw new DynamicError(exp);
             }
         }
-
 
 
         /// <summary>
@@ -746,20 +614,15 @@ namespace Saxon.Api {
         /// <param name="templateName">The name of the initial template. This must match the name of a
         /// public named template in the stylesheet. If the value is null, the QName <c>xsl:initial-template</c> is used.</param>
         /// <returns>the raw results of the called template, without wrapping in a document node or serialization.</returns>
-
-        public XdmValue CallTemplate(QName templateName)
-        {
-            if (templateName == null)
-            {
+        public XdmValue CallTemplate(QName templateName) {
+            if (templateName == null) {
                 templateName = new QName("xsl", NamespaceConstant.XSLT, "initial-template");
             }
 
-            try
-            {
+            try {
                 return XdmValue.Wrap(transformer.callTemplate(templateName.UnderlyingQName()).getUnderlyingValue());
             }
-            catch (SaxonApiException exp)
-            {
+            catch (SaxonApiException exp) {
                 throw new DynamicError(exp);
             }
         }
@@ -772,30 +635,21 @@ namespace Saxon.Api {
         /// the function conversion rules.</param>
         /// <returns> the result of calling the function. This is the raw result, without wrapping in a document
         /// node and without serialization.</returns>
-
-        public XdmValue CallFunction(QName function, XdmValue[] arguments)
-        {
-            try
-            {
+        public XdmValue CallFunction(QName function, XdmValue[] arguments) {
+            try {
                 int len = arguments.Length;
                 net.sf.saxon.s9api.XdmValue[] values = new net.sf.saxon.s9api.XdmValue[len];
 
-                for (int i=0; i<len; i++) {
+                for (int i = 0; i < len; i++) {
                     values[i] = XdmValue.FromGroundedValueToJXdmValue(arguments[i].value);
-
                 }
 
                 return XdmValue.Wrap(transformer.callFunction(function.UnderlyingQName(), values).getUnderlyingValue());
-
             }
-            catch (SaxonApiException ex)
-            {
+            catch (SaxonApiException ex) {
                 throw new DynamicError(ex);
-
             }
-
         }
-
 
 
         /// <summary>Call a public user-defined function in the stylesheet, wrapping the result in an XML document, 
@@ -808,28 +662,20 @@ namespace Saxon.Api {
         /// result of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
         /// then the serialization parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
-
-        public void CallFunction(QName function, XdmValue[] arguments, XmlDestination destination)
-        {
-
+        public void CallFunction(QName function, XdmValue[] arguments, XmlDestination destination) {
             int len = arguments.Length;
             net.sf.saxon.s9api.XdmValue[] values = new net.sf.saxon.s9api.XdmValue[len];
 
-            for (int i = 0; i < len; i++)
-            {
+            for (int i = 0; i < len; i++) {
                 values[i] = XdmValue.FromGroundedValueToJXdmValue(arguments[i].value);
-
             }
-            try
-            {
-                transformer.callFunction(function.UnderlyingQName(), values, destination.GetUnderlyingDestination());
 
+            try {
+                transformer.callFunction(function.UnderlyingQName(), values, destination.GetUnderlyingDestination());
             }
             catch (SaxonApiException ex) {
                 throw new DynamicError(ex);
             }
         }
-
-
     }
 }

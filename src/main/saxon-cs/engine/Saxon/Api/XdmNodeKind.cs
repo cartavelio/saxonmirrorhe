@@ -1,0 +1,154 @@
+using System;
+using System.Xml;
+using net.sf.saxon.pattern;
+using net.sf.saxon.s9api;
+using Type = net.sf.saxon.type.Type;
+
+namespace Saxon.Api {
+    /// <summary>
+    /// Instances of <c>XdmNodeKind</c> represent the item types denoted in XPath as <c>document-node()</c>,
+    /// <c>element()</c>, <c>attribute()</c>, <c>text()</c>, and so on. These are all represented by singular named instances.
+    /// </summary>
+
+    public class XdmNodeKind : XdmItemType
+    {
+
+        //public static XdmNodeKind Instance = new XdmNodeKind();
+        private NodeKindTest nodekind;
+        private int kind;
+
+        internal XdmNodeKind(NodeKindTest test, ItemType type)
+        {
+            nodekind = test;
+            this.type = type;
+            kind = test.getNodeKind();
+        }
+
+        /// <summary>
+        /// The item type <c>document-node()</c>
+        /// </summary>
+
+        public static XdmNodeKind Document = new XdmNodeKind(NodeKindTest.DOCUMENT, ItemType.DOCUMENT_NODE);
+
+        /// <summary>
+        /// The item type <c>element()</c>
+        /// </summary>
+
+        public static XdmNodeKind Element = new XdmNodeKind(NodeKindTest.ELEMENT, ItemType.ELEMENT_NODE);
+
+        /// <summary>
+        /// The item type <c>attribute()</c>
+        /// </summary>
+
+        public static XdmNodeKind Attribute = new XdmNodeKind(NodeKindTest.ATTRIBUTE, ItemType.ATTRIBUTE_NODE);
+
+        /// <summary>
+        /// The item type <c>text()</c>
+        /// </summary>
+
+        public static XdmNodeKind Text = new XdmNodeKind(NodeKindTest.TEXT, ItemType.TEXT_NODE);
+
+        /// <summary>
+        /// The item type <c>comment()</c>
+        /// </summary>
+
+        public static XdmNodeKind Comment = new XdmNodeKind(NodeKindTest.COMMENT, ItemType.COMMENT_NODE);
+
+        /// <summary>
+        /// The item type <c>processing-instruction()</c>
+        /// </summary>
+
+        public static XdmNodeKind ProcessingInstruction = new XdmNodeKind(NodeKindTest.PROCESSING_INSTRUCTION, ItemType.PROCESSING_INSTRUCTION_NODE);
+
+        /// <summary>
+        /// The item type <c>namespace-node()</c>
+        /// </summary>
+
+        public static XdmNodeKind Namespace = new XdmNodeKind(NodeKindTest.NAMESPACE, ItemType.NAMESPACE_NODE);
+
+        internal static XdmNodeKind ForNodeKindTest(NodeKindTest test)
+        {
+            int kind = test.getPrimitiveType();
+            switch (kind)
+            {
+                case Type.DOCUMENT:
+                    return Document;
+                case Type.ELEMENT:
+                    return Element;
+                case Type.ATTRIBUTE:
+                    return Attribute;
+                case Type.TEXT:
+                    return Text;
+                case Type.COMMENT:
+                    return Comment;
+                case Type.PROCESSING_INSTRUCTION:
+                    return ProcessingInstruction;
+                case Type.NAMESPACE:
+                    return Namespace;
+                default:
+                    throw new ArgumentException("Unknown node kind");
+            }
+        }
+
+        /// <summary>
+        /// Get the item type representing the node kind of a supplied node
+        /// </summary>
+        /// <param name="node">The node whose node kind is required</param>
+        /// <returns>The relevant node kind</returns>
+
+        public static XdmNodeKind ForNode(XdmNode node)
+        {
+            return ForNodeType(node.NodeKind);
+        }
+
+        /// <summary>
+        /// Determine whether this item type matches a given item.
+        /// </summary>
+        /// <param name="item">item the item to be tested against this item type</param>
+        /// <returns>true if the item matches this item type, false if it does not match.</returns>
+        public override bool Matches(XdmItem item)
+        {
+            return item.Unwrap() is NodeTest && kind == ((net.sf.saxon.om.NodeInfo)item.Unwrap()).getNodeKind();
+        }
+
+        /// <summary>
+        ///  Determine whether this ItemType subsumes another ItemType. Specifically,
+        /// <code>A.subsumes(B)</code> is true if every value that matches the ItemType B also matches
+        /// the ItemType A.
+        /// </summary>
+        /// <param name="other">the other ItemType</param>
+        /// <returns>true if this ItemType subsumes the other ItemType. This includes the case where A and B
+        ///         represent the same ItemType.</returns>
+        public override bool Subsumes(XdmItemType other)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Get the item type corresponding to an <c>XmlNodeType</c> as defined in the <c>System.Xml</c> package
+        /// </summary>
+        /// <param name="type">The <c>XmlNodeType</c> to be converted</param>
+        /// <returns>The corresponding <c>XdmNodeKind</c></returns>
+
+        public static XdmNodeKind ForNodeType(XmlNodeType type)
+        {
+            switch (type)
+            {
+                case XmlNodeType.Document:
+                    return Document;
+                case XmlNodeType.Element:
+                    return Element;
+                case XmlNodeType.Attribute:
+                    return Attribute;
+                case XmlNodeType.Text:
+                    return Text;
+                case XmlNodeType.Comment:
+                    return Comment;
+                case XmlNodeType.ProcessingInstruction:
+                    return ProcessingInstruction;
+                default:
+                    throw new ArgumentException("Unknown node kind");
+            }
+        }
+    }
+}

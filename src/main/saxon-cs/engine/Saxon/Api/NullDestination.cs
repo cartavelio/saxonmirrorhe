@@ -22,8 +22,8 @@ namespace Saxon.Api {
 
         public Uri BaseUri
         {
-            get { return new Uri(destination.getDestinationBaseURI().toASCIIString()); }
-            set { destination.setDestinationBaseURI(new java.net.URI(value.ToString())); }
+            get { return destination.getDestinationBaseURI(); }
+            set { destination.setDestinationBaseURI(value); }
         }
 
 

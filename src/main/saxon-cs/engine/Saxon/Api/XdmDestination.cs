@@ -19,15 +19,11 @@ namespace Saxon.Api {
     /// <para>An <c>XdmDestination</c> can be reused to hold the results of a second transformation only
     /// if the <c>Reset</c> method is first called to reset its state.</para>
     /// </remarks>
-
-    public class XdmDestination : XmlDestination
-    {
+    public class XdmDestination : XmlDestination {
         internal net.sf.saxon.s9api.XdmDestination destination;
 
         /// <summary>Construct an <c>XdmDestination</c></summary>
-
-        public XdmDestination()
-        {
+        public XdmDestination() {
             destination = new net.sf.saxon.s9api.XdmDestination();
         }
 
@@ -37,16 +33,9 @@ namespace Saxon.Api {
         /// updating is required (the <c>TinyTree</c> is not updateable).
         ///</summary>
 
-        public TreeModel TreeModel
-        {
-            get
-            {
-                return  (TreeModel)destination.getTreeModel().getSymbolicValue();
-            }
-            set
-            {
-                destination.setTreeModel(net.sf.saxon.om.TreeModel.getTreeModel((int)value));
-            }
+        public TreeModel TreeModel {
+            get => (TreeModel) destination.getTreeModel().getSymbolicValue();
+            set => destination.setTreeModel(net.sf.saxon.om.TreeModel.getTreeModel((int) value));
         }
 
         /// <summary>This property determines the base URI of the constructed <c>XdmNode</c>. 
@@ -55,18 +44,15 @@ namespace Saxon.Api {
         /// has no effect.
         /// </summary>
 
-        public Uri BaseUri
-        {
-            get { return new Uri(destination.getBaseURI().toASCIIString()); }
-            set { destination.setBaseURI(new java.net.URI(value.ToString())); }
+        public Uri BaseUri {
+            get => new Uri(destination.getBaseURI().toASCIIString());
+            set => destination.setBaseURI(new Uri(value.ToString()));
         }
 
 
         /// <summary>Reset the state of the <c>XdmDestination</c> so that it can be used to hold
         /// the result of another query or transformation.</summary>
-
-        public void Reset()
-        {
+        public void Reset() {
             destination.reset();
         }
 
@@ -77,12 +63,10 @@ namespace Saxon.Api {
         /// yet been run, or because the process produced no output.</para>
         /// </remarks>
 
-        public XdmNode XdmNode
-        {
-            get
-            {
+        public XdmNode XdmNode {
+            get {
                 NodeInfo jnode = destination.getXdmNode().getUnderlyingNode();
-                return (jnode == null ? null : (XdmNode)XdmValue.Wrap(jnode));
+                return (jnode == null ? null : (XdmNode) XdmValue.Wrap(jnode));
             }
         }
 
@@ -93,8 +77,7 @@ namespace Saxon.Api {
         /// use of the Saxon .NET API with direct use of the underlying objects
         /// and methods offered by the Java implementation.
         /// </summary>
-        public Destination GetUnderlyingDestination()
-        {
+        public Destination GetUnderlyingDestination() {
             return destination;
         }
 
@@ -103,8 +86,7 @@ namespace Saxon.Api {
         /// Set the base URI of the resource being written to this destination
         /// </summary>
         /// <param name="uri">the base URI to be used</param>
-        public void setDestinationBaseURI(java.net.URI uri)
-        {
+        public void setDestinationBaseURI(Uri uri) {
             destination.setDestinationBaseURI(uri);
         }
 
@@ -112,19 +94,16 @@ namespace Saxon.Api {
         /// Get the base URI of the resource being written to this destination
         /// </summary>
         /// <returns>the base URI, or null if none is known</returns>
-        public java.net.URI getDestinationBaseURI()
-        {
+        public Uri getDestinationBaseURI() {
             return destination.getDestinationBaseURI();
         }
-
 
 
         /// <summary>
         /// Close the destination, allowing resources to be released. Saxon calls this
         /// method when it has finished writing to the destination.
         /// </summary>
-        public void Close()
-        {
+        public void Close() {
             destination.close();
         }
 
@@ -132,10 +111,7 @@ namespace Saxon.Api {
         /// <c>TreeProtector</c> is a filter that ensures that the events reaching the <c>Builder</c> constitute a single
         /// tree rooted at an element or document node (because anything else will crash the builder)
         /// </summary>
-
-        public class TreeProtector : ProxyReceiver
-        {
-
+        public class TreeProtector : ProxyReceiver {
             private int level = 0;
             private bool ended = false;
 
@@ -144,22 +120,19 @@ namespace Saxon.Api {
             /// </summary>
             /// <param name="next">Set the underlying receiver</param>
             public TreeProtector(Receiver next)
-                : base(next)
-            {
-
+                : base(next) {
             }
 
             /// <summary>
             /// Start of a document node
             /// </summary>
             /// <param name="properties"></param>
-            public override void startDocument(int properties)
-            {
-                if (ended)
-                {
+            public override void startDocument(int properties) {
+                if (ended) {
                     XPathException e = new XPathException("Only a single document can be written to an XdmDestination");
                     throw new DynamicError(e);
                 }
+
                 base.startDocument(properties);
                 level++;
             }
@@ -167,12 +140,10 @@ namespace Saxon.Api {
             /// <summary>
             /// Notify the end of a document node
             /// </summary>
-            public override void endDocument()
-            {
+            public override void endDocument() {
                 base.endDocument();
                 level--;
-                if (level == 0)
-                {
+                if (level == 0) {
                     ended = true;
                 }
             }
@@ -186,13 +157,14 @@ namespace Saxon.Api {
             /// <param name="namespaces"></param>
             /// <param name="location"></param>
             /// <param name="properties"></param>
-            public override void startElement(NodeName nameCode, SchemaType typeCode, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties)
-            {
-                if (ended)
-                {
-                    XPathException e = new XPathException("Only a single root node can be written to an XdmDestination");
+            public override void startElement(NodeName nameCode, SchemaType typeCode, AttributeMap attributes,
+                NamespaceMap namespaces, Location location, int properties) {
+                if (ended) {
+                    XPathException e =
+                        new XPathException("Only a single root node can be written to an XdmDestination");
                     throw new DynamicError(e);
                 }
+
                 base.startElement(nameCode, typeCode, attributes, namespaces, location, properties);
                 level++;
             }
@@ -200,12 +172,10 @@ namespace Saxon.Api {
             /// <summary>
             /// End of element
             /// </summary>
-            public override void endElement()
-            {
+            public override void endElement() {
                 base.endElement();
                 level--;
-                if (level == 0)
-                {
+                if (level == 0) {
                     ended = true;
                 }
             }
@@ -216,13 +186,13 @@ namespace Saxon.Api {
             /// <param name="chars">Character data as input</param>
             /// <param name="location">Provides information such as line number and system ID</param>
             /// <param name="properties">Bit significant value. The following bits are defined</param>
-            public override void characters(CodePoints chars, Location location, int properties)
-            {
-                if (level == 0)
-                {
-                    XPathException e = new XPathException("When writing to an XdmDestination, text nodes are only allowed within a document or element node");
+            public override void characters(CodePoints chars, Location location, int properties) {
+                if (level == 0) {
+                    XPathException e = new XPathException(
+                        "When writing to an XdmDestination, text nodes are only allowed within a document or element node");
                     throw new DynamicError(e);
                 }
+
                 base.characters(chars, location, properties);
             }
 
@@ -233,13 +203,14 @@ namespace Saxon.Api {
             /// <param name="data">The data portion of the processing instruction</param>
             /// <param name="location">provides information about the PI</param>
             /// <param name="properties">Additional information about the PI</param>
-            public override void processingInstruction(String target, CodePoints data, Location location, int properties)
-            {
-                if (level == 0)
-                {
-                    XPathException e = new XPathException("When writing to an XdmDestination, processing instructions are only allowed within a document or element node");
+            public override void processingInstruction(String target, CodePoints data, Location location,
+                int properties) {
+                if (level == 0) {
+                    XPathException e = new XPathException(
+                        "When writing to an XdmDestination, processing instructions are only allowed within a document or element node");
                     throw new DynamicError(e);
                 }
+
                 base.processingInstruction(target, data, location, properties);
             }
 
@@ -249,12 +220,12 @@ namespace Saxon.Api {
             /// <param name="chars">The content of the comment</param>
             /// <param name="location">provides information such as line number and system ID</param>
             /// <param name="properties">Additional information about the comment</param>
-            public override void comment(CodePoints chars, Location location, int properties)
-            {
-                if (level == 0)
-                {
-                    XPathException e = new XPathException("When writing to an XdmDestination, comment nodes are only allowed within a document or element node");
+            public override void comment(CodePoints chars, Location location, int properties) {
+                if (level == 0) {
+                    XPathException e = new XPathException(
+                        "When writing to an XdmDestination, comment nodes are only allowed within a document or element node");
                 }
+
                 base.comment(chars, location, properties);
             }
 
@@ -266,15 +237,14 @@ namespace Saxon.Api {
             /// <param name="location">the location of the calling instruction, for diagnostics</param>
             /// <param name="copyNamespaces">if the item is an element node, this indicates whether its namespace need to be copied. 
             /// 0x80000 means ALL_NAMESPACE, 0x40000 means LOCAL_NAMESPACE and 0 means no namespace</param>
-            public override void append(Item item, Location location, int copyNamespaces)
-            {
-                if (level == 0)
-                {
-                    XPathException e = new XPathException("When writing to an XdmDestination, atomic values are only allowed within a document or element node");
+            public override void append(Item item, Location location, int copyNamespaces) {
+                if (level == 0) {
+                    XPathException e = new XPathException(
+                        "When writing to an XdmDestination, atomic values are only allowed within a document or element node");
                 }
+
                 base.append(item, location, copyNamespaces);
             }
-
         }
     }
 }
