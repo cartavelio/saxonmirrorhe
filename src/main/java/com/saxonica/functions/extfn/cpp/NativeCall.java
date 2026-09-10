@@ -53,86 +53,6 @@ public class NativeCall implements ExtensionFunction {
     }
 
 
-//    @Override
-//    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-//        String phpFuncName = args[0].head().getStringValue();
-//        int len = args.length;
-//        Object[] funcArgs = null;
-//        String[] funcArgTypes = null;
-//        if (SaxonCAPI.debug) {
-//            System.err.println("NativeCall.call: function name: " + phpFuncName + " Argument length: " + len);
-//        }
-//        SimpleArrayItem seqArray = (SimpleArrayItem) args[1].materialize();
-//        int seqLength = seqArray.arrayLength();
-//        funcArgs = new Object[seqLength];
-//        funcArgTypes = new String[seqLength];
-//        Sequence seq = null;
-//
-//        for (int i = 0; i < seqLength; i++) {
-//            seq = seqArray.get(i);
-//            if (SequenceTool.getLength(seq) == 1) {
-//                if (seq instanceof NodeInfo) {
-//                    funcArgTypes[i] = "node";
-//                    funcArgs[i] = XdmValue.wrap(seq);
-//                } else if (seq instanceof AtomicValue) {
-//                    AtomicValue value = (AtomicValue) seq;
-//                    BuiltInAtomicType operandType = value.getPrimitiveType();
-//                    TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-//                    boolean isInteger = th.isSubType(operandType, BuiltInAtomicType.INTEGER);
-//                    if (th.isSubType(operandType, BuiltInAtomicType.STRING)) {
-//                        funcArgTypes[i] = "string";
-//                        funcArgs[i] = value.getUnicodeStringValue();
-//                    } else if (isInteger) {
-//                        funcArgTypes[i] = "integer";
-//                        funcArgs[i] = new Integer((int) ((IntegerValue) value).longValue());
-//                    } else if (th.isSubType(operandType, BuiltInAtomicType.DOUBLE)) {
-//                        funcArgTypes[i] = "double";
-//                        funcArgs[i] = new Double(((DoubleValue) value).getDoubleValue());
-//                    } else if (th.isSubType(operandType, BuiltInAtomicType.LONG)) {
-//                        funcArgTypes[i] = "long";
-//                        funcArgs[i] = new Long(((Int64Value) value).longValue());
-//                    } else if (th.isSubType(operandType, BuiltInAtomicType.FLOAT)) {
-//                        funcArgTypes[i] = "float";
-//                        funcArgs[i] = new Float(((FloatValue) value).getFloatValue());
-//
-//                    } else if ((!isInteger) && th.isSubType(operandType, BuiltInAtomicType.DECIMAL)) {
-//                        funcArgTypes[i - 1] = "double";
-//                        funcArgs[i - 1] = new Double(((DecimalValue) value).getDoubleValue());
-//                    } else if (th.isSubType(operandType, BuiltInAtomicType.BOOLEAN)) {
-//                        funcArgTypes[i - 1] = "boolean";
-//                        funcArgs[i - 1] = new Boolean(((BooleanValue) value).getBooleanValue());
-//                    }
-//                } else {
-//
-//                    funcArgs[i] = XdmValueForCpp.makeArrayFromXdmValue(XdmValue.wrap(seq));
-//                    funcArgTypes[i] = "[xdmvalue";
-//
-//                }
-//            }
-//
-//        }
-//        if (SaxonCAPI.debug) {
-//            System.err.println("Phpcall.call: Before call to _phpCall ");
-//        }
-//        Object obj = null;//_nativeCall(/*phpFuncName, funcArgs, funcArgTypes*/);
-//        if (SaxonCAPI.debug) {
-//            System.err.println("Phpcall.call: After call to _phpCall ");
-//        }
-//        if (obj instanceof Object[]) {
-//            Object[] objects = (Object[]) obj;
-//            List<XdmItem> nodeList = new ArrayList<XdmItem>(objects.length);
-//
-//            for (int i = 0; i < objects.length; i++) {
-//                nodeList.add((XdmItem) XdmItem.wrap(convertValueObject(obj, phpFuncName)));
-//            }
-//            XdmValue values = new XdmValue(nodeList);
-//            return values.getUnderlyingValue();
-//
-//        } else {
-//            return convertValueObject(obj, phpFuncName);
-//        }
-//
-//    }
 
     public static Sequence convertValueObject(Object obj, String phpFuncName) throws XPathException {
         if (obj instanceof String) {
@@ -154,15 +74,6 @@ public class NativeCall implements ExtensionFunction {
         }
         throw new XPathException("Unknown return type from php:function: " + phpFuncName + ".");
 
-    }
-
-    @CEntryPoint(name = "j_testNativeC")
-    public static void testNativeC(IsolateThread thread){
-        System.err.println("In the testNativeC method");
-        //NativeCall call = new NativeCall();
-        //int value = c_nativeCall();
-        //System.err.println("cp1 testNativeC method value=" + value);
-        System.err.println("exit testNativeC method");
     }
 
 
@@ -188,12 +99,14 @@ public class NativeCall implements ExtensionFunction {
 
     @Override
     public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
-        if(SaxonCAPI.debug) {
-            System.err.println("Java SaxonC Debug: in the call method");
-        }
+
 
         String nameStr = name.getLocalName();
-System.err.println("Java SaxonC function name="+nameStr);
+        if(SaxonCAPI.debug) {
+            System.err.println("Java SaxonC Debug: in the call method");
+            System.err.println("Java SaxonC function name="+nameStr);
+        }
+
         try(CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(nameStr)) {
 
 
@@ -209,14 +122,15 @@ System.err.println("Java SaxonC function name="+nameStr);
                 addr = SaxonCAPI.longArrayToNative(alloc, argumentRefs);
             }
 
-            System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
+            if(SaxonCAPI.debug) {
+                System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
 
-            if(useNativeTypes) {
-                System.err.println("Java SaxonC Debug NativeCall.call useNativeType is True ");
+                if (useNativeTypes) {
+                    System.err.println("Java SaxonC Debug NativeCall.call useNativeType is True ");
 
-            } else {
-                System.err.println("Java SaxonC Debug NativeCall.call useNativeType is False ");
-
+                } else {
+                    System.err.println("Java SaxonC Debug NativeCall.call useNativeType is False ");
+                }
             }
 
 
@@ -229,15 +143,14 @@ System.err.println("Java SaxonC function name="+nameStr);
                 if (xdmValue != null) {
                     return xdmValue;
 
-                } else {
+                } else if (useNativeTypes) {
                     System.err.println("xdmValue in userFunction is null!!");
                 }
 
-            } else {
+            } else if (useNativeTypes) {
                 System.err.println("ObjectHandle value in userFunction is null!!");
             }
-        } 
-        System.err.println("after c_NativeCall method");
+        }
 
         return XdmEmptySequence.getInstance();
     }
