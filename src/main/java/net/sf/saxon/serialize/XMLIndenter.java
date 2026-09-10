@@ -217,6 +217,9 @@ public class XMLIndenter extends ProxyReceiver {
     @Override
     public void characters(UnicodeString chars, Location locationId, int properties) throws XPathException {
         if (suppressedAtLevel < 0 && Whitespace.isAllWhite(chars)) {
+            if (pendingWhitespace != null) {
+                flushPendingWhitespace(); // bug 6494
+            }
             pendingWhitespace = new Event.Text(chars, locationId, properties);
         } else {
             flushPendingWhitespace();
