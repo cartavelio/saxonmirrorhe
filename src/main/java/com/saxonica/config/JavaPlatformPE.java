@@ -1,5 +1,6 @@
 package com.saxonica.config;
 
+import com.saxonica.config.pe.DynamicLoaderPE;
 import com.saxonica.functions.extfn.EXPathArchive.Archive;
 import com.saxonica.functions.extfn.EXPathBinary;
 import com.saxonica.functions.extfn.EXPathFile;
@@ -8,6 +9,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.java.JavaPlatform;
+import net.sf.saxon.lib.IDynamicLoader;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.option.axiom.AxiomObjectModel;
@@ -93,6 +95,15 @@ public class JavaPlatformPE extends JavaPlatform {
         }
     }
 
+    /**
+     * Get the default DynamicLoader for the platform
+     *
+     * @return the default DynamicLoader
+     */
+
+    public IDynamicLoader getDefaultDynamicLoader() {
+        return new DynamicLoaderPE();
+    }
 
     /**
      * Add the platform-specific function libraries to a function library list.

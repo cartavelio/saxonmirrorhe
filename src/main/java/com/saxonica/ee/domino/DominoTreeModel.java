@@ -12,7 +12,7 @@ import net.sf.saxon.lib.ExternalObjectModel;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
-import net.sf.saxon.resource.ActiveSource;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;

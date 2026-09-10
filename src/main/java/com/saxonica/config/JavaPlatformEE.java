@@ -1,7 +1,9 @@
 package com.saxonica.config;
 
+import com.saxonica.ee.config.DynamicLoaderEE;
 import com.saxonica.ee.domino.DominoTreeModel;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.lib.IDynamicLoader;
 
 
 /**
@@ -30,7 +32,15 @@ public class JavaPlatformEE extends JavaPlatformPE {
         config.registerExternalObjectModel(DominoTreeModel.getInstance());
     }
 
+    /**
+     * Get the default DynamicLoader for the platform
+     *
+     * @return the default DynamicLoader
+     */
 
+    public IDynamicLoader getDefaultDynamicLoader() {
+        return new DynamicLoaderEE();
+    }
 
 
 }

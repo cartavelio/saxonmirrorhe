@@ -2,7 +2,6 @@ package com.saxonica.config;
 
 
 import com.saxonica.config.pe.ConfigurationReaderPE;
-import com.saxonica.config.pe.DynamicLoaderPE;
 import com.saxonica.config.pe.StyleNodeFactoryPE;
 import com.saxonica.expr.ObjectLookupExpression;
 import com.saxonica.expr.SaxonSyntaxExtension;
@@ -40,7 +39,6 @@ import net.sf.saxon.pull.PullProvider;
 import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryParser;
-import net.sf.saxon.resource.ActiveSource;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.StyleNodeFactory;
@@ -126,7 +124,6 @@ public class ProfessionalConfiguration extends Configuration {
                 "com.saxonica.config.EnterpriseConfiguration".equals(getClass().getName()))) {
             throw new LicenseException("Unauthorized subclass of Configuration", LicenseException.WRONG_CONFIGURATION);
         }
-        setDynamicLoader(new DynamicLoaderPE());
         verifier = new Verifier();
         declareBuiltInExtensionElementNamespaces();
         declareBuiltInExtensionFunctions();

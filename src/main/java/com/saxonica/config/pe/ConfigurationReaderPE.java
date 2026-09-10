@@ -2,9 +2,10 @@ package com.saxonica.config.pe;
 
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.xsltextn.ExtensionElementFactory;
+import net.sf.saxon.om.AttributeInfo;
+import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.trans.ConfigurationReader;
 import net.sf.saxon.trans.XPathException;
-import org.xml.sax.Attributes;
 
 /**
  * Subclass of ConfigurationReader providing functionality particular to Saxon Professional Edition
@@ -18,13 +19,14 @@ public class ConfigurationReaderPE extends ConfigurationReader {
      */
 
     @Override
-    protected void readExtensionElement(Attributes atts) {
+    protected void readExtensionElement(AttributeMap atts) {
         String namespace = null;
         String className = null;
-        for (int i = 0; i < atts.getLength(); i++) {
-            if (atts.getURI(i).isEmpty()) {
-                String attName = atts.getLocalName(i);
-                String value = atts.getValue(i);
+        for (AttributeInfo a : atts) {
+            String uri = a.getNodeName().getURI();
+            String attName = a.getNodeName().getLocalPart();
+            String value = a.getValue();
+            if (uri.isEmpty()) {
                 if ("namespace".equals(attName) && value.length() > 0) {
                     namespace = value;
                 }
@@ -35,7 +37,7 @@ public class ConfigurationReaderPE extends ConfigurationReader {
         }
         if (namespace != null && className != null) {
             try {
-                ((ProfessionalConfiguration) config).setExtensionElementNamespace(namespace, className);
+                ((ProfessionalConfiguration) targetConfig).setExtensionElementNamespace(namespace, className);
             } catch (XPathException e) {
                 errorClass("extensionElement", null, className, ExtensionElementFactory.class, e);
             }

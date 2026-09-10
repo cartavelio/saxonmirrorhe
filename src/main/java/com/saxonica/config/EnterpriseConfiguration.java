@@ -122,7 +122,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     public EnterpriseConfiguration() {
         super();
-        setDynamicLoader(new DynamicLoaderEE());
         internalSetBooleanProperty(FeatureCode.ALLOW_MULTITHREADING, FeatureKeys.ALLOW_MULTITHREADING, true);
         internalSetBooleanProperty(FeatureCode.GENERATE_BYTE_CODE, FeatureKeys.GENERATE_BYTE_CODE, true);
         setStaticQueryContextFactory(new StaticQueryContextFactory() {

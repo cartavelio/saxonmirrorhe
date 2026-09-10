@@ -20,13 +20,13 @@ import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * Parser extension for syntax in XPath that is accepted only in Saxon-PE and -EE. This means
@@ -100,14 +100,14 @@ public class SaxonSyntaxExtension extends ParserExtension {
         int offset = t.currentTokenStartOffset;
 
         XPathParser.InlineFunctionDetails details = new XPathParser.InlineFunctionDetails();
-        details.outerVariables = new Stack<>();
+        details.outerVariables = new IndexedStack<>();
         for (LocalBinding lb : p.getRangeVariables()) {
             details.outerVariables.push(lb);
         }
         details.outerVariablesUsed = new ArrayList<>(4);
         details.implicitParams = new ArrayList<>(4);
         p.inlineFunctionStack.push(details);
-        p.setRangeVariables(new Stack<>());
+        p.setRangeVariables(new IndexedStack<>());
         p.nextToken();
         List<UserFunctionParameter> params = new ArrayList<>(1);
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
@@ -151,14 +151,14 @@ public class SaxonSyntaxExtension extends ParserExtension {
         int offset = t.currentTokenStartOffset;
 
         UnderscoreFunctionDetails details = new UnderscoreFunctionDetails();
-        details.outerVariables = new Stack<>();
+        details.outerVariables = new IndexedStack<>();
         for (LocalBinding lb : p.getRangeVariables()) {
             details.outerVariables.push(lb);
         }
         details.outerVariablesUsed = new ArrayList<>(4);
         details.implicitParams = new ArrayList<>(4);
         p.inlineFunctionStack.push(details);
-        p.setRangeVariables(new Stack<>());
+        p.setRangeVariables(new IndexedStack<>());
         p.nextToken();
         SequenceType resultType = SequenceType.ANY_SEQUENCE;
 
