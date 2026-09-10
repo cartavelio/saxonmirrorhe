@@ -59,17 +59,13 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
                 compiler.generateGetContext();
                 ga.invokeInstanceMethod(XPathContext.class, "getConfiguration");
                 compiler.generateGetOutputter();
-                ga.newInstance(ParseOptions.class);
-                ga.dup();
                 allocateStatic(compiler, elementCreator.getValidationOptions());
-                ga.invokeConstructor(ParseOptions.class, ParseOptions.class);
-                ga.dup();
                 pushNodeName(compiler, elementCreator);
                 nodeNameVar = methodInfo.allocateLocal(NodeName.class);
                 ga.dup();
                 ga.storeLocal(nodeNameVar);
                 ga.invokeInstanceMethod(NodeName.class, "getStructuredQName");
-                ga.invokeInstanceMethod(ParseOptions.class, "setTopLevelElement", StructuredQName.class);
+                ga.invokeInstanceMethod(ParseOptions.class, "withTopLevelElement", StructuredQName.class);
                 allocateStatic(compiler, expression.getLocation());
                 ga.invokeInstanceMethod(Configuration.class, "getElementValidator",
                                         Receiver.class, ParseOptions.class, Location.class);

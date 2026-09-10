@@ -2039,18 +2039,18 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
 
-    /**
-     * Make a Closure, given the expected reference count
-     */
-
-    @Override
-    public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
-        if (ref == FilterExpression.FILTERED) {
-            return SearchableValue.makeSearchableValue(expression.iterate(context));
-        } else {
-            return super.makeClosure(expression, ref, context);
-        }
-    }
+//    /**
+//     * Make a Closure, given the expected reference count
+//     */
+//
+//    @Override
+//    public Sequence makeClosure(Expression expression, int ref, XPathContext context) throws XPathException {
+//        if (ref == FilterExpression.FILTERED) {
+//            return SearchableValue.makeSearchableValue(expression.iterate(context));
+//        } else {
+//            return super.makeClosure(expression, ref, context);
+//        }
+//    }
 
     /**
      * Make a SequenceExtent, given the expected reference count

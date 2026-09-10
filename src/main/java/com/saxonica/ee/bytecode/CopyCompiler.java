@@ -194,13 +194,7 @@ public class CopyCompiler extends ToPushCompiler {
 
 
         if (!expression.isPreservingTypes()) {
-            ga.newInstance(ParseOptions.class);
-            //-- ParseOptions
-            ga.dup();
-            //-- ParseOptions ParseOptions
             allocateStatic(compiler, expression.getValidationOptions());
-            //-- ParseOptions ParseOptions ValidationOptions
-            ga.invokeConstructor(ParseOptions.class, ParseOptions.class);
             //-- ParseOptions
             int optionsVar = ga.newLocal(ParseOptions.class);
             ga.storeLocal(optionsVar);
@@ -208,7 +202,8 @@ public class CopyCompiler extends ToPushCompiler {
             //-- ParseOptions
             allocateStatic(compiler, NoElementsSpaceStrippingRule.getInstance());
             //-- ParseOptions SpaceStrippingRule
-            ga.invokeInstanceMethod(ParseOptions.class,"setSpaceStrippingRule", SpaceStrippingRule.class);
+            ga.invokeInstanceMethod(ParseOptions.class, "withSpaceStrippingRule", SpaceStrippingRule.class);
+            ga.storeLocal(optionsVar);
             compiler.generateGetContext();
             //-- context
             ga.dup();
@@ -333,19 +328,14 @@ public class CopyCompiler extends ToPushCompiler {
             //-- config
             compiler.generateGetOutputter();
             //-- config outputter
-            ga.newInstance(ParseOptions.class);
-            ga.dup();
             allocateStatic(compiler, expression.getValidationOptions());
-            //-- config outputter options options validationOptions
-            ga.invokeConstructor(ParseOptions.class, ParseOptions.class);
             //-- config outputter options
-            ga.dup();
-            //-- config outputter options options
             ga.loadLocal(nodeNameVar);
-            //-- config outputter options options nodename
+            //-- config outputter options nodename
             ga.invokeInstanceMethod(NodeName.class, "getStructuredQName");
-            //-- config outputter options options qname
-            ga.invokeInstanceMethod(ParseOptions.class, "setTopLevelElement", StructuredQName.class);
+            //-- config outputter options qname
+            ga.invokeInstanceMethod(ParseOptions.class, "withTopLevelElement", StructuredQName.class);
+            //-- config outputter options
             allocateStatic(compiler, locationId);
             //-- config outputter options location
             ga.invokeInstanceMethod(Configuration.class, "getElementValidator",

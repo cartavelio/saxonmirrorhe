@@ -196,8 +196,8 @@ public class CompilerService implements ICompilerService {
     }
 
     /**
-     * Compile code to evaluate a variable reference, or any other expresssion,
-     * leaving a Sequence on the stack
+     * Compile code to evaluate an expression eagerly,
+     * leaving a GroundedValue on the stack
      *
      * @param expression the expression to be compiled
      * @throws CannotCompileException if the expression cannot be compiled
