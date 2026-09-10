@@ -16,7 +16,6 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Int64Value;
 
 import java.util.function.Predicate;
@@ -51,9 +50,9 @@ public class IndexOf extends CollatingFunctionFixed  {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator seq = arguments[0].iterate();
         AtomicValue val = (AtomicValue) arguments[1].head();
-        if (val.isNaN()) {
-            return EmptySequence.INSTANCE;
-        }
+//        if (val.isNaN()) {
+//            return EmptySequence.INSTANCE;
+//        }
         return SequenceTool.toLazySequence(new IndexIterator(seq, val, getStringCollator(),
                                                              context.getImplicitTimezone(),
                                                              getRetainedStaticContext().getPackageData().getHostLanguageVersion()));
@@ -104,7 +103,7 @@ public class IndexOf extends CollatingFunctionFixed  {
             AtomicValue baseItem;
             while ((baseItem = (AtomicValue) base.next()) != null) {
                 index++;
-                if (!baseItem.isNaN() && matcher.test(baseItem)) {
+                if (matcher.test(baseItem)) {
                     return new Int64Value(index);
                 }
             }
