@@ -39,11 +39,6 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
-val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
-val testdriverJar = configurations.resolvable("testdriverJar") {
-  extendsFrom(testdriverJarBucket)
-}
-
 val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 sourceSets.named("editionTest") {
@@ -224,7 +219,6 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
-  testdriverJarBucket(project(":java:testdriver"))
 
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}")
   testImplementation("org.xmlresolver:xmlresolver:${findProperty("xmlresolverVersion")}:data")
@@ -233,6 +227,7 @@ dependencies {
   testImplementation("nu.validator:htmlparser:${findProperty("htmlparserVersion")}")
 }
 
+val testdriverJar = configurations.named("testdriverJar")
 configurations {
   testImplementation { extendsFrom(testdriverJar) }
 }

@@ -20,11 +20,6 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
-val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
-val testdriverJar = configurations.resolvable("testdriverJar") {
-  extendsFrom(testdriverJarBucket)
-}
-
 sourceSets.named("editionTest") {
   java {
     // Exclude everything that won't build in HE...
@@ -186,7 +181,6 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
-  testdriverJarBucket(project(":java:testdriver"))
   xqjDownloadJarBucket(project(path = ":java", configuration = "xqjDownloadJarArtifact"))
   xqjMavenJarBucket(project(path = ":java", configuration = "xqjMavenJarArtifact"))
   xqjSourceMavenJarBucket(project(path = ":java", configuration = "xqjSourceMavenJarArtifact"))
@@ -298,6 +292,7 @@ tasks.register<Exec>("samples") {
 
 // ============================================================
 
+val testdriverJar = configurations.named("testdriverJar")
 val testSuitesClasspath = files(sourceSets["edition"].output)
     .from(testdriverJar)
     .from(testsuiteExtra)
@@ -345,6 +340,7 @@ val pseudoXqjSourceMavenJar = tasks.register("pseudoXqjSourceMavenJar") {
   inputs.file(xqjSourceMavenJar)
   outputs.file(xqjSourceMavenJar)
 }
+
 
 tasks.named<Sync>("signingMavenJars") {
   into(layout.buildDirectory.dir("signing/mavendownload"))

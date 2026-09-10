@@ -29,11 +29,6 @@ saxonj {
 
 val saxonBuild = the<SaxonBuildExtension>()
 
-val testdriverJarBucket by configurations.dependencyScope("testdriverJarBucket")
-val testdriverJar = configurations.resolvable("testdriverJar") {
-  extendsFrom(testdriverJarBucket)
-}
-
 val signedReleaseArtifacts = findProperty("signedReleaseArtifacts") != "false"
 
 sourceSets.named("editionTest") {
@@ -104,7 +99,6 @@ dependencies {
                                     "configuration" to "sampleSources")))
   javaSampleSourcesBucket(project(mapOf("path" to ":samples",
                                         "configuration" to "javaSampleSources")))
-  testdriverJarBucket(project(":java:testdriver"))
 
   testImplementation(files(layout.projectDirectory.dir("../lib/Tidy.jar")))
   testImplementation("javax.mail:javax.mail-api:${findProperty("mailVersion")}")
@@ -114,6 +108,7 @@ dependencies {
   downloadReleaseBundled("com.ibm.icu:icu4j:${findProperty("icu4jVersion")}")
 }
 
+val testdriverJar = configurations.named("testdriverJar")
 configurations {
   testImplementation { extendsFrom(testdriverJar) }
 }
