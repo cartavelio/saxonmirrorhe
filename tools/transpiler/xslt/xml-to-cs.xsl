@@ -94,7 +94,7 @@
    <!-- This rule compensates for an inadequacy in the JavaParser symbol solver -->
    <xsl:template match="scope[@UNRESOLVED and ends-with(../@RESOLVED_TYPE, @UNRESOLVED)]" priority="10">
       <xsl:choose>
-         <xsl:when test="matches(../@RESOLVED_TYPE, '^(java\.|javax\.|net\.sf\.saxon|com.\saxonica)')">
+         <xsl:when test="matches(../@RESOLVED_TYPE, '^(java\.|javax\.|net\.sf\.saxon|com\.saxonica)')">
             <xsl:text>{f:renameGenericType(../@RESOLVED_TYPE)}</xsl:text>
          </xsl:when>
          <xsl:otherwise>

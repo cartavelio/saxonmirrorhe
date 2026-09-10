@@ -1401,7 +1401,7 @@
                  then f:renameGenericType($digestMethod/@returns) 
                  else ''"/>
       <!--<xsl:message> cast = {$optionalCast}</xsl:message>-->
-      <xsl:if test="$optionalCast">((/*1430*/{$optionalCast})</xsl:if>
+      <xsl:if test="$optionalCast">(({$optionalCast})</xsl:if>
       
       <xsl:if test="scope">
          <xsl:choose>

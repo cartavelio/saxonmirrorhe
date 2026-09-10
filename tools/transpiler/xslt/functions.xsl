@@ -12,6 +12,8 @@
       This stylesheet module contains supporting functions used by the
       Java-to-C# transpiler stylesheet, and global variables and key
       definitions used by these functions.
+      
+      It also contains a mapping table from Java class names to C# class names.
    -->
    
    <xsl:key name="digestClassKey" match="class | interface | enum" 
@@ -79,6 +81,9 @@
       'com.saxonica.ee.parallel.PushToPull': 'Saxon.Impl.Parallel.PushToPull',
       'com.saxonica.ee.parallel.PushToPull.Pusher': 'Saxon.Impl.Parallel.PushToPull.Pusher',
       'com.saxonica.functions.qt4.ParseHtml': 'Saxon.Impl.Helpers.ParseHtml',
+      'com.saxonica.functions.qt4.ma.OrderedMap': 'Saxon.Impl.DataModel.ImmOrderedMap',
+      'io.vavr.collection.LinkedHashMap': 'System.Collections.Immutable.ImmutableDictionary', 
+      'io.vavr.collection.TreeMap': 'System.Collections.Immutable.ImmutableSortedDictionary', 
       'java.io.BufferedInputStream': 'System.IO.BufferedStream',
       'java.io.BufferedOutputStream': 'System.IO.BufferedStream',
       'java.io.BufferedReader': 'Saxon.Impl.Helpers.BufferedReader',
@@ -374,9 +379,15 @@
       <xsl:choose>
          <xsl:when test="exists($specialTypes($degen))">
             <xsl:sequence select="$specialTypes($degen)"/>
+            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
+               <xsl:message>Mapped {$degen} to {$specialTypes($degen)}</xsl:message>
+            </xsl:if>
          </xsl:when>
          <xsl:otherwise>
             <xsl:sequence select="f:adjustTypeNamespace($degen)"/>
+            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
+               <xsl:message>Mapped {$degen} to {f:adjustTypeNamespace($degen)}</xsl:message>
+            </xsl:if>
          </xsl:otherwise>
       </xsl:choose>
    </xsl:function>
