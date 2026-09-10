@@ -1,0 +1,80 @@
+// class version 49.0 (49)
+// access flags 0x1
+public class EE__28548761351 extends com/saxonica/ee/bytecode/GeneratedCode  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/GeneratedCode.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public iterate(Lnet/sf/saxon/expr/XPathContext;)Lnet/sf/saxon/om/SequenceIterator; throws net/sf/saxon/trans/XPathException 
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getReceiver ()Lnet/sf/saxon/event/SequenceReceiver;
+    ASTORE 2
+   L0
+    LDC "ItemCheckerCompiler"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC EE__28548761351.nClass29 : Ljava/lang/Class;
+    INVOKEVIRTUAL java/lang/Class.newInstance ()Ljava/lang/Object;
+    CHECKCAST com/saxonica/ee/bytecode/iter/OneToOneMappingIterator
+    DUP
+   L1
+    LDC "CardinalityCheckerCompiler-Itr"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    LINENUMBER 13 L2
+   L3
+    LDC "SimpleStepExpression-Itr"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC EE__28548761351.nCopyOf30 : Lnet/sf/saxon/expr/instruct/CopyOf;
+    ALOAD 1
+    INVOKEVIRTUAL net/sf/saxon/expr/Expression.evaluateItem (Lnet/sf/saxon/expr/XPathContext;)Lnet/sf/saxon/om/Item;
+    CHECKCAST net/sf/saxon/om/NodeInfo
+   L4
+    LDC "AxisExpressionCompiler - static method: iterate"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    ICONST_3
+    GETSTATIC EE__28548761351.nNameTest31 : Lnet/sf/saxon/pattern/NameTest;
+    LDC "calling iterateAxis"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    INVOKEINTERFACE net/sf/saxon/om/NodeInfo.iterateAxis (BLnet/sf/saxon/pattern/NodeTest;)Lnet/sf/saxon/tree/iter/AxisIterator;
+    LDC "returning axis iterator"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    NEW net/sf/saxon/expr/CardinalityCheckingIterator
+    SWAP
+    DUP2
+    SIPUSH 16384
+    GETSTATIC EE__28548761351.nRoleDiagnostic32 : Lnet/sf/saxon/expr/parser/RoleDiagnostic;
+    GETSTATIC EE__28548761351.nExplicitLocation33 : Lnet/sf/saxon/expr/parser/ExplicitLocation;
+    INVOKESPECIAL net/sf/saxon/expr/CardinalityCheckingIterator.<init> (Lnet/sf/saxon/om/SequenceIterator;ILnet/sf/saxon/expr/parser/RoleDiagnostic;Lnet/sf/saxon/expr/parser/Location;)V
+    POP
+   L5
+    BIPUSH 24
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    CHECKCAST net/sf/saxon/om/SequenceIterator
+    ALOAD 1
+    INVOKEVIRTUAL com/saxonica/ee/bytecode/iter/OneToOneMappingIterator.setSequence (Lnet/sf/saxon/om/SequenceIterator;Lnet/sf/saxon/expr/XPathContext;)V
+    ARETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Ljava/lang/Class; nClass29
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/expr/parser/RoleDiagnostic; nRoleDiagnostic32
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/NameTest; nNameTest31
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/expr/parser/ExplicitLocation; nExplicitLocation33
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/expr/instruct/CopyOf; nCopyOf30
+}

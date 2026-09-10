@@ -1,0 +1,720 @@
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+}
+  // compiled from: file:/Users/mike/bugs/2017/petrk/AbstractType/src/validateDoc.xq
+// class version 49.0 (49)
+// access flags 0x1
+public class gen_CompiledFilterIterator_5 extends com/saxonica/ee/bytecode/iter/CompiledFilterIterator  {
+
+
+  // access flags 0x1
+  public <init>()V
+    ALOAD 0
+    INVOKESPECIAL com/saxonica/ee/bytecode/iter/CompiledFilterIterator.<init> ()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+
+  // access flags 0x1
+  public matches()Z throws net/sf/saxon/trans/XPathException 
+    LINENUMBER 6 L0
+    ALOAD 0
+    GETFIELD com/saxonica/ee/bytecode/iter/CompiledFilterIterator.filterContext : Lnet/sf/saxon/expr/XPathContext;
+    ASTORE 1
+   L1
+    LDC "compileToBoolean(instanceOf())"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    GETSTATIC gen_CompiledFilterIterator_5.nContentTypeTest6 : Lnet/sf/saxon/pattern/ContentTypeTest;
+    ASTORE 2
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getConfiguration ()Lnet/sf/saxon/Configuration;
+    ASTORE 3
+    ALOAD 1
+    INVOKEINTERFACE net/sf/saxon/expr/XPathContext.getContextItem ()Lnet/sf/saxon/om/Item;
+    ALOAD 2
+    SWAP
+    GETSTATIC gen_CompiledFilterIterator_5.nTypeHierarchyEE7 : Lcom/saxonica/ee/config/TypeHierarchyEE;
+    INVOKEINTERFACE net/sf/saxon/type/ItemType.matches (Lnet/sf/saxon/om/Item;Lnet/sf/saxon/type/TypeHierarchy;)Z
+    IFEQ L2
+   L3
+    ICONST_4
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_1
+    GOTO L4
+   L2
+    ICONST_5
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    ICONST_0
+   L4
+    BIPUSH 6
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.trace (I)V
+    LDC "FilterExpression-itr-test1"
+    INVOKESTATIC com/saxonica/ee/bytecode/util/ByteCodeTrace.showMessage (Ljava/lang/String;)V
+    IRETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
+}
+
+  // access flags 0x9
+  public static Lnet/sf/saxon/pattern/ContentTypeTest; nContentTypeTest6
+
+  // access flags 0x9
+  public static Lcom/saxonica/ee/config/TypeHierarchyEE; nTypeHierarchyEE7
+}
