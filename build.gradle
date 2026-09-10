@@ -1105,7 +1105,7 @@ task hejJar(
   }
 }
 
-task testHejJar(type: Jar, dependsOn: ["hejJar"]) {
+task testHejJar(dependsOn: ["hejJar"]) {
   Task jartask = tasks.findByName("hejJar")
   def jarfile = jartask.outputs.getFiles().getSingleFile()
   def jargold = project.file("${projectDir}/tools/java-manifests/saxon-he.list")
@@ -1132,7 +1132,7 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
       signJar("${buildDir}/libs/saxon-he-xqj-${saxonVersion}.jar")
     }
   }
-  task testHejJarXqj(type: Jar, dependsOn: ["hejJarXqj"]) {
+  task testHejJarXqj(dependsOn: ["hejJarXqj"]) {
     Task jartask = tasks.findByName("hejJarXqj")
     def jarfile = jartask.outputs.getFiles().getSingleFile()
     def jargold = project.file("${projectDir}/tools/java-manifests/saxon-he-xqj.list")
@@ -1181,7 +1181,7 @@ task pejJar(
   }
 }
 
-task testPejJar(type: Jar, dependsOn: ["pejJar"]) {
+task testPejJar(dependsOn: ["pejJar"]) {
   Task jartask = tasks.findByName("pejJar")
   def jarfile = jartask.outputs.getFiles().getSingleFile()
   def jargold = project.file("${projectDir}/tools/java-manifests/saxon-pe.list")
@@ -1206,7 +1206,7 @@ task pejJarSql(
   }
 }
 
-task testPejJarSql(type: Jar, dependsOn: ["pejJarSql"]) {
+task testPejJarSql(dependsOn: ["pejJarSql"]) {
   Task jartask = tasks.findByName("pejJarSql")
   def jarfile = jartask.outputs.getFiles().getSingleFile()
   def jargold = project.file("${projectDir}/tools/java-manifests/saxon-pe-sql.list")
@@ -1233,7 +1233,7 @@ task eejJar(
   }
 }
 
-task testEejJar(type: Jar, dependsOn: ["eejJar"]) {
+task testEejJar(dependsOn: ["eejJar"]) {
   Task jartask = tasks.findByName("eejJar")
   def jarfile = jartask.outputs.getFiles().getSingleFile()
   def jargold = project.file("${projectDir}/tools/java-manifests/saxon-ee.list")
@@ -1258,7 +1258,7 @@ task eejJarSql(
   }
 }
 
-task testEejJarSql(type: Jar, dependsOn: ["eejJarSql"]) {
+task testEejJarSql(dependsOn: ["eejJarSql"]) {
   Task jartask = tasks.findByName("eejJarSql")
   def jarfile = jartask.outputs.getFiles().getSingleFile()
   def jargold = project.file("${projectDir}/tools/java-manifests/saxon-ee-sql.list")
