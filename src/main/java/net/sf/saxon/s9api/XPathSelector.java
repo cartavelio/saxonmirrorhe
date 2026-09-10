@@ -197,6 +197,8 @@ public class XPathSelector implements Iterable<XdmItem> {
         Sequence value;
         try {
             value = SequenceTool.toGroundedValue(exp.iterate(dynamicContext));
+        } catch (UncheckedXPathException uxe) {
+            throw new SaxonApiException(uxe);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
