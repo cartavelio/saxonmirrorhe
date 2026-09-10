@@ -78,8 +78,10 @@ public class Validate {
     protected void setPermittedOptions(/*@NotNull*/ CommandLineOptions options) {
         options.addRecognizedOption("config", (CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED),
                 "Use specified configuration file");
+        //#if CSHARP==false
         options.addRecognizedOption("catalog", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                 "Use specified catalog file to resolve URIs");
+        //#endif
         options.addRecognizedOption("dtd", CommandLineOptions.TYPE_ENUMERATION,
                 "Validate using DTD");
         options.setPermittedValues("dtd", new String[]{"on", "off", "recover"}, "on");
