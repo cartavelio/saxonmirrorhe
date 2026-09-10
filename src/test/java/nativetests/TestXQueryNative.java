@@ -276,11 +276,11 @@ public class TestXQueryNative {
         try {
             String query = "$x + $y";
             StaticQueryContext sqc = new Configuration().newStaticQueryContext();
-            sqc.declareGlobalVariable(new StructuredQName("", NamespaceUri.NULL, "x"), SequenceType.SINGLE_INTEGER, Int64Value.MINUS_ONE, false);
-            sqc.declareGlobalVariable(new StructuredQName("", NamespaceUri.NULL, "y"), SequenceType.SINGLE_INTEGER, null, true);
+            sqc.declareGlobalVariable(NamespaceUri.NULL.qName("x"), SequenceType.SINGLE_INTEGER, Int64Value.MINUS_ONE, false);
+            sqc.declareGlobalVariable(NamespaceUri.NULL.qName("y"), SequenceType.SINGLE_INTEGER, null, true);
             XQueryExpression exp = sqc.compileQuery(query);
             DynamicQueryContext dqc = new DynamicQueryContext(sqc.getConfiguration());
-            dqc.setParameter(new StructuredQName("", NamespaceUri.NULL, "y"), Int64Value.PLUS_ONE);
+            dqc.setParameter(NamespaceUri.NULL.qName("y"), Int64Value.PLUS_ONE);
             StringWriter sw = new StringWriter();
             exp.run(dqc, new StreamResult(sw), new Properties());
             assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>0", sw.toString());

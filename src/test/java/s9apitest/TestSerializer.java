@@ -176,8 +176,8 @@ public class TestSerializer {
             CharacterMapIndex mapIndex = new CharacterMapIndex();
             IntHashMap<String> map = new IntHashMap<>();
             map.put('e', "f");
-            CharacterMap namedMap = new CharacterMap(new StructuredQName("", NamespaceUri.NULL, "m"), map);
-            mapIndex.putCharacterMap(new StructuredQName("", NamespaceUri.NULL, "m"), namedMap);
+            CharacterMap namedMap = new CharacterMap(NamespaceUri.NULL.qName("m"), map);
+            mapIndex.putCharacterMap(NamespaceUri.NULL.qName("m"), namedMap);
             serializer.setCharacterMap(mapIndex);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             serializer.setOutputStream(os);
