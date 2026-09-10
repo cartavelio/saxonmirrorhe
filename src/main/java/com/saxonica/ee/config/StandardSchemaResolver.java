@@ -125,22 +125,19 @@ public class StandardSchemaResolver implements SchemaURIResolver {
             locations = new String[]{"https://www.w3.org/1999/xlink.xsd"};
         }
 
+        //#if CSHARP==false
         if (locations.length == 0 && targetNamespace != null) {
             Source source = resolvedNamespaceURI(targetNamespace, baseURI);
             if (source != null) {
                 return new Source[]{source};
             }
         }
+        //#endif
 
         try {
             Source[] sources = new Source[locations.length];
             for (int i = 0; i < locations.length; i++) {
-                sources[i] = config.getCommonResourceResolver().resolve(locations[i], baseURI);
-                // if a user URI resolver returns null, try the standard one
-                // (Note, the standard URI resolver never returns null)
-                if (sources[i] == null) {
-                    sources[i] = config.getSystemURIResolver().resolve(locations[i], baseURI);
-                }
+                sources[i] = resolveLocationHint(baseURI, locations[i]);
             }
             return sources;
         } catch (TransformerException e) {
@@ -148,6 +145,23 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         }
     }
 
+    private Source resolveLocationHint(String baseURI, String location) throws TransformerException {
+        Source s;
+        //#if CSHARP==true
+        s = config.getURIResolver().resolve(location, baseURI);
+        //#endif
+        //#if CSHARP==false
+        s = config.getCommonResourceResolver().resolve(location, baseURI);
+        //#endif
+        // if a user URI resolver returns null, try the standard one
+        // (Note, the standard URI resolver never returns null)
+        if (s == null) {
+            s = config.getSystemURIResolver().resolve(location, baseURI);
+        }
+        return s;
+    }
+
+    //#if CSHARP==false
     private Source resolvedNamespaceURI(String moduleURI, String baseURI) {
         Source source = null;
         try {
@@ -163,6 +177,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         }
         return source;
     }
+    //#endif
 
     public static Source fetchResource(String pathName, Configuration config) {
         InputStream inputStream = Version.platform.locateResource(pathName, new ArrayList<>());
