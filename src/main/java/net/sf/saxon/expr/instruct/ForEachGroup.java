@@ -452,6 +452,18 @@ public class ForEachGroup extends Instruction
                 if (e != null && !(e instanceof Literal)) {
                     dependencies |= e.getDependencies();
                 }
+                e = skd.getOrder();
+                if (e != null && !(e instanceof Literal)) {
+                    dependencies |= e.getDependencies();
+                }
+                e = skd.getCollationNameExpression();
+                if (e != null && !(e instanceof Literal)) {
+                    dependencies |= e.getDependencies();
+                }
+                e = skd.getStable();
+                if (e != null && !(e instanceof Literal)) {
+                    dependencies |= e.getDependencies();
+                }
                 e = skd.getLanguage();
                 if (e != null && !(e instanceof Literal)) {
                     dependencies |= e.getDependencies();
@@ -837,19 +849,25 @@ public class ForEachGroup extends Instruction
             ForEachGroup expr = (ForEachGroup) getExpression();
 
             if (expr.getSortKeyDefinitions() != null) {
-                final AtomicComparer[] comps = expr.sortComparators == null
-                    ? new AtomicComparer[expr.getSortKeyDefinitions().size()]
-                    : expr.sortComparators;
-                PullEvaluator grouper = getGroupIteratorProvider();
-                return context -> {
-                    XPathContext xpc = context.newMinorContext();
-                    if (comps[0] == null) {
+                if (expr.sortComparators == null) {
+                    // Sort criteria vary dynamically: bug 6472
+                    return context -> {
+                        XPathContext xpc = context.newMinorContext();
+                        AtomicComparer[] comps = new AtomicComparer[expr.getSortKeyDefinitions().size()];
                         for (int s = 0; s < expr.getSortKeyDefinitions().size(); s++) {
                             comps[s] = expr.getSortKeyDefinitions().getSortKeyDefinition(s).makeComparator(xpc);
                         }
-                    }
-                    return new SortedGroupIterator(xpc, (GroupIterator) grouper.iterate(xpc), expr, comps);
-                };
+                        PullEvaluator grouper = getGroupIteratorProvider();
+                        return new SortedGroupIterator(xpc, (GroupIterator) grouper.iterate(xpc), expr, comps);
+                    };
+                } else {
+                    final AtomicComparer[] comps = expr.sortComparators;
+                    PullEvaluator grouper = getGroupIteratorProvider();
+                    return context -> {
+                        XPathContext xpc = context.newMinorContext();
+                        return new SortedGroupIterator(xpc, (GroupIterator) grouper.iterate(xpc), expr, comps);
+                    };
+                }
             } else {
                 return getGroupIteratorProvider();
             }
