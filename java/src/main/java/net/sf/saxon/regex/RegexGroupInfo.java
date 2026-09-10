@@ -12,11 +12,12 @@ import net.sf.saxon.str.UnicodeString;
 /**
  * Information about a matching regex group
  * @param index the index number of the group (by counting opening parens)
+ * @param groupName the group name if any, otherwise null
  * @param startPosition the zero-based start position of the match
  * @param content the matching substring
  */
 
-public record RegexGroupInfo(int index, int startPosition, UnicodeString content) {
+public record RegexGroupInfo(int index, UnicodeString groupName, int startPosition, UnicodeString content) {
 
 }
 

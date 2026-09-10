@@ -31,6 +31,7 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.List;
@@ -54,6 +55,7 @@ public class REProgram {
     protected int optimizationFlags;      // Optimization flags (REProgram.OPT_*)
     protected int maxParens;
     protected int backtrackingLimit = -1;
+    protected final IntHashMap<UnicodeString> groupNames;
 
     /**
      * Constructs a program object
@@ -61,10 +63,11 @@ public class REProgram {
      * @param parens       Count of capturing parens in the program.
      * @param flags the regular expression flags
      */
-    public REProgram(Operation operation, int parens, REFlags flags) {
+    public REProgram(Operation operation, int parens, IntHashMap<UnicodeString> groupNames,REFlags flags) {
         this.flags = flags;
         setOperation(operation);
         this.maxParens = parens;
+        this.groupNames = groupNames;
     }
 
     /**

@@ -11,7 +11,8 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.z.IntHashMap;
+
+import java.util.List;
 
 
 /**
@@ -64,7 +65,7 @@ public interface RegexIterator extends SequenceIterator {
      * Get all the groups associated with the current match
      */
 
-    IntHashMap<RegexGroupInfo> getCurrentRegexGroups();
+    List<RegexGroupInfo> getCurrentRegexGroups();
 
     /**
      * Process a matching substring, performing specified actions at the start and end of each matching

@@ -187,6 +187,16 @@ public class REMatcher {
     }
 
     /**
+     * Get the name corresponding to a numbered captured group, if any
+     * @param which the number of the captured group (by counting left parentheses)
+     * @return the associated group name, or null if there is none
+     */
+
+    public UnicodeString getGroupName(int which) {
+        return program.groupNames.get(which);
+    }
+
+    /**
      * Match the current regular expression program against the current
      * input string, starting at index i of the input string.  This method
      * is only meant for internal use.

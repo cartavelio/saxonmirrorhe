@@ -468,7 +468,7 @@ public class RECompiler {
                     } else {
                         syntaxError("Unknown group name in backreference: " + groupName);
                     }
-                } else if (isXPath40) {
+                } else if (!isXPath40) {
                     syntaxError("Named backreference requires XPath 4.0");
                 } else {
                     syntaxError("Expected '<' after \\k");
@@ -1278,7 +1278,7 @@ public class RECompiler {
                     group = capturingOpenParenCount++;
                     Integer prev = namedCapturingGroups.put(groupName, group);
                     if (prev != null) {
-                        syntaxError("Capture group name " + prev + " is a duplicate");
+                        syntaxError("Capture group name " + groupName + " is a duplicate");
                     }
                     capturing = true;
                     idx += 4 + groupName.length32();
@@ -1366,7 +1366,7 @@ public class RECompiler {
 
     private UnicodeString readGroupName(int idx) throws RESyntaxException {
         TwineBuilder builder = TwineBuilder.make(16);
-        int ch = pattern.codePointAt(idx++);
+        int ch = idx < len ? pattern.codePointAt(idx++) : -1;
         if (!isAsciiLetter(ch)) {
             syntaxError("First character of group name must be an ASCII letter");
         }
@@ -1437,7 +1437,11 @@ public class RECompiler {
             Operation ret = new OpAtom(this.pattern);
             Operation endNode = new OpEndProgram();
             Operation seq = makeSequence(ret, endNode);
-            return new REProgram(seq, capturingOpenParenCount, reFlags);
+            IntHashMap<UnicodeString> groupNames = new IntHashMap<>();
+            for (Map.Entry<UnicodeString, Integer> entry : namedCapturingGroups.entrySet()) {
+                groupNames.put(entry.getValue(), entry.getKey());
+            }
+            return new REProgram(seq, capturingOpenParenCount, groupNames, reFlags);
 
         } else {
 
@@ -1518,8 +1522,12 @@ public class RECompiler {
                 }
                 syntaxError("Unexpected input remains");
             }
+            IntHashMap<UnicodeString> groupNames = new IntHashMap<>();
+            for (Map.Entry<UnicodeString, Integer> entry : namedCapturingGroups.entrySet()) {
+                groupNames.put(entry.getValue(), entry.getKey());
+            }
 
-            REProgram program = new REProgram(exp, capturingOpenParenCount, reFlags);
+            REProgram program = new REProgram(exp, capturingOpenParenCount, groupNames, reFlags);
             if (hasBackReferences) {
                 program.optimizationFlags |= REProgram.OPT_HASBACKREFS;
             }
