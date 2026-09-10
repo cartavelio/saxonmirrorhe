@@ -230,7 +230,7 @@ public class ParamKeywords {
         fnParamNames.put("resolve-uri", "href|base");
         fnParamNames.put("reverse", "input");
         fnParamNames.put("root", "node");
-        fnParamNames.put("round", "value|precision|rounding-mode");
+        fnParamNames.put("round", "value|precision|mode");
         fnParamNames.put("round-half-to-even", "value|precision");
         fnParamNames.put("scan-left", "input|zero|action");
         fnParamNames.put("scan-right", "input|zero|action");
