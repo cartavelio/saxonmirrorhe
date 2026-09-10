@@ -64,6 +64,9 @@ public class PatternMaker {
             return getAxisForPathStep(((SlashExpression) step).getFirstStep());
         } else if (step instanceof ContextItemExpression) {
             return AxisInfo.SELF;
+        } else if (Literal.isEmptySequence(step)) {
+            // Can happen after a rewrite of a pattern than never matches anything
+            return AxisInfo.SELF;
         } else {
             throw new XPathException("The path in a pattern must contain simple steps");
         }
