@@ -886,32 +886,43 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
                 int arity = fnc.getArity();
                 PullEvaluator input = fnc.getArg(0).makeElaborator().elaborateForPull();
-                if (arity == 2 && fnc.getArg(1) instanceof Literal optionsArg) {
-                    try {
-                        MapItem options = (MapItem)optionsArg.getGroundedValue();
-                        int version = options.getSpecVersion();
-                        XPathContext context = new EarlyEvaluationContext(getConfiguration());
-                        fnc.getTargetFunction().getDetails().optionDetails.processSuppliedOptions(options, context, version);
-                        String duplicatesErrorCode = "FOJS0003";
-                        OnDuplicatesAction action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
+                if (arity == 2) {
+                    if (fnc.getArg(1) instanceof Literal optionsArg) {
+                        // options are known statically
+                        try {
+                            MapItem options = (MapItem) optionsArg.getGroundedValue();
+                            int version = options.getSpecVersion();
+                            XPathContext context = new EarlyEvaluationContext(getConfiguration());
+                            fnc.getTargetFunction().getDetails().optionDetails.processSuppliedOptions(options, context, version);
+                            String duplicatesErrorCode = "FOJS0003";
+                            OnDuplicatesAction action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
+                            return cxt -> {
+                                SequenceIterator maps = input.iterate(cxt);
+                                return mergeMaps(maps, cxt, action, version);
+                            };
+                        } catch (XPathException e) {
+                            throw new UncheckedXPathException(e);
+                        }
+                    } else {
+                        // options are computed dynamically
+                        ItemEvaluator optionsEval = fnc.getArg(1).makeElaborator().elaborateForItem();
+                        OptionsParameter details = fnc.getTargetFunction().getDetails().optionDetails;
+                        int version = fnc.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                         return cxt -> {
                             SequenceIterator maps = input.iterate(cxt);
+                            MapItem options = (MapItem) optionsEval.eval(cxt);
+                            details.processSuppliedOptions(options, cxt, version);
+                            OnDuplicatesAction action = getDuplicatesCombiner(options, "use-first", "FOJS0003");
                             return mergeMaps(maps, cxt, action, version);
                         };
-                    } catch (XPathException e) {
-                        throw new UncheckedXPathException(e);
                     }
                 } else {
-                    //try {
-                        //String duplicatesErrorCode = "FOJS0003";
-                        OnDuplicatesAction action = (x, y, cxt) -> x;
-                        return cxt -> {
-                            SequenceIterator maps = input.iterate(cxt);
-                            return mergeMaps(maps, cxt, action, 40);
-                        };
-//                    } catch (XPathException e) {
-//                        throw new UncheckedXPathException(e);
-//                    }
+                    // options are defaulted
+                    OnDuplicatesAction action = (x, y, cxt) -> x;
+                    return cxt -> {
+                        SequenceIterator maps = input.iterate(cxt);
+                        return mergeMaps(maps, cxt, action, 40);
+                    };
                 }
             }
         }
