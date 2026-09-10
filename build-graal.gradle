@@ -638,13 +638,59 @@ task graal_eec_jar(
 
 // ============================================================
 
+// This functions returns the closure that's used for filtering
+// input source files
+def textReplacementFilter(String edition, String location='../', String libpath=null) {
+  def gccopts = System.getProperty('os.arch') == 'amd64' ? '-m64' : ''
+
+  def libdir = (systemOs.isMacOsX()
+                ? 'libs/darwin'
+                : (systemOs.isLinux()
+                   ? 'libs/nix'
+                   : 'libs/win'))
+
+  if (libpath == null) {
+    libpath = (systemOs.isLinux()
+               ? '../libs/nix/'
+               : (systemOs.isMacOsX()
+                  ? '../libs/darwin/'
+                  : '..\\\\libs\\\\win\\\\'))
+  }
+
+  def lastLinePatch = (systemOs.isLinux()
+                       ? ('[tool.cibuildwheel]\n'
+                          + 'build = "*"\n'
+                          + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n'
+                          + "archs = [\"${systemOsArch}\"]\n"
+                          + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
+                       : (systemOs.isWindows()
+                          ? ('[tool.cibuildwheel]\n'
+                             + 'build = "*"\n'
+                             + 'archs = ["AMD64"]\n'
+                             + 'skip = ["*-win32", "cp36*", "cp37*", "pp*", "cp*musl*"]\n')
+                          : ('[tool.cibuildwheel]\n'
+                             + 'build = "*"\n'
+                             + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n')))
+  
+  return { line ->
+    line.replace('@@VERSION@@', saxonVersion)
+      .replace('@@VERSION.3@@', saxonVersion3)
+      .replace('@@edition@@', edition)
+      .replace('@@EDITION@@', edition.toUpperCase())
+      .replace('@@gccopts@@', gccopts)
+      .replace('@@libdir@@', libdir)
+      .replace('@@libpath@@', libpath)
+      .replace('@@location@@', location)
+      .replace('[LAST-LINE-BUILD-PATCH]', lastLinePatch)
+  }
+}
+
 task all_saxonc_releases() {
   // Just somewhere to hang dependencies
 }
 
 ["he", "pe", "ee"].each { edition ->
   def EDITION = edition.toUpperCase()
-  //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def graalEdition = "graal_ce_home"
 
   def arch = System.getProperty("os.arch") 
@@ -663,22 +709,11 @@ task all_saxonc_releases() {
                            ? "libs/nix"
                            : "libs/win"))
 
-    def gccopts = arch == "amd64" ? "-m64" : ""
-
-    def location = "../"
-
-    def libpath = ''
-    def saxonc_lib = ''
-    if (systemOs.isLinux()) {
-      libpath = "../libs/nix/"
-      saxonc_lib = "libsaxon-${edition}c-*.so"
-    } else if (systemOs.isMacOsX()) {
-      libpath = "../libs/darwin/"
-      saxonc_lib = "libsaxon-${edition}c-*.dylib"
-    } else {
-      libpath = "..\\\\libs\\\\win\\\\"
-      saxonc_lib = "libsaxon-${edition}c-*.*"
-    }
+    def saxonc_lib = (systemOs.isLinux()
+                      ? "libsaxon-${edition}c-*.so"
+                      : (systemOs.isMacOsX()
+                         ? "libsaxon-${edition}c-*.dylib"
+                         : "libsaxon-${edition}c-*.*"))
 
     doLast {
       copy {
@@ -693,11 +728,7 @@ task all_saxonc_releases() {
         from "${projectDir}/src/main/c"
         into "${saxoncReleaseDir}"
         include "README.md"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-        }
+        filter textReplacementFilter(edition)
       }
     }
 
@@ -714,13 +745,7 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/pypi"
         into "${saxoncReleaseDir}/pypi"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-                  .replace('@@libpath@@', libpath)
-                  .replace('@@location@@', location)
-        }
+        filter textReplacementFilter(edition)
       }
     }
 
@@ -728,24 +753,15 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/pypi/python_saxon"
         into "${saxoncReleaseDir}/pypi/python_saxon"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-                  .replace('@@libpath@@', libpath)
-                  .replace('@@location@@', "../../")
-        }
+        filter textReplacementFilter(edition, '../../')
       }
     }
+
     doLast {
       copy {
         from "${projectDir}/src/main/c/samples"
         into "${saxoncReleaseDir}/samples"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-        }
+        filter textReplacementFilter(edition)
       }
     }
     doLast {
@@ -755,13 +771,7 @@ task all_saxonc_releases() {
         if (edition != "ee") {
           exclude "Validate.c"
         }
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-                  .replace('@@libdir@@', libdir)
-                  .replace('@@gccopts@@', gccopts)
-        }
+        filter textReplacementFilter(edition)
       }
     }
 
@@ -818,11 +828,7 @@ task all_saxonc_releases() {
         include "php8_XQueryProcessor.cpp"
         include "config.m4"
         include "config.w32"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-                  .replace('@@edition@@', edition)
-                  .replace('@@EDITION@@', edition.toUpperCase())
-        }
+        filter textReplacementFilter(edition)
       }
     }
 
@@ -889,25 +895,7 @@ task all_saxonc_releases() {
   def graalEdition = "graal_ce_home"
   def pypiDir = "${buildDir}/${edition}c_pypi"
 
-  def libpath = ''
-  def lastLinePatch = ''
-  if (systemOsName == 'linux') {
-    lastLinePatch = ('[tool.cibuildwheel]\n'
-                     + 'build = "*"\n'
-                     + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n'
-                     + "archs = [\"${systemOsArch}\"]\n"
-                     + 'environment.LD_LIBRARY_PATH = "/project/libs/nix"\n')
-  } else if (systemOsName == 'windows') {
-    lastLinePatch = ('[tool.cibuildwheel]\n'
-                     + 'build = "*"\n'
-                     + 'archs = ["AMD64"]\n'
-                     + 'skip = ["*-win32", "cp36*", "cp37*", "pp*", "cp*musl*"]\n')
-    libpath = "libs\\\\win\\\\"
-  } else {
-    lastLinePatch = ('[tool.cibuildwheel]\n'
-                     + 'build = "*"\n'
-                     + 'skip = ["cp36*", "cp37*", "pp*", "cp*musl*"]\n')
-  }
+  def libpath = systemOs.isWindows() ? 'libs\\\\win\\\\' : ''
 
   task "setup_${edition}c_pypi"(
     dependsOn: [graalEdition, "${edition}c_graalImage"]
@@ -920,14 +908,7 @@ task all_saxonc_releases() {
       copy {
         into pypiDir
         from "${projectDir}/src/main/c/pypi"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-            .replace('@@edition@@', edition)
-            .replace('@@EDITION@@', edition.toUpperCase())
-            .replace('@@location@@', '')
-	    .replace('@@libpath@@', libpath)
-            .replace('[LAST-LINE-BUILD-PATCH]', lastLinePatch)
-        }
+        filter textReplacementFilter(edition, '', libpath)
       }
     }
 
@@ -964,10 +945,7 @@ task all_saxonc_releases() {
         include "saxonc.pyx"
         include "saxoncClasses.pxd"
         include "readme.txt"
-        filter { line ->
-          line.replace('@@edition@@', edition)
-            .replace('@@location@@', "../")
-        }
+        filter textReplacementFilter(edition)
       }
     }
 
@@ -977,9 +955,7 @@ task all_saxonc_releases() {
         into "${buildDir}/${edition}c_pypi"
         include "test_saxonc.py"
         include "test_saxon_schema.py"
-        filter { line ->
-          line.replace('@@edition@@', edition)
-        }
+        filter textReplacementFilter(edition)
       }
     }
 
@@ -990,9 +966,7 @@ task all_saxonc_releases() {
         include "saxon_example.py"
         include "saxon_example2.py"
         include "saxon_example3.py"
-        filter { line ->
-          line.replace('@@edition@@', edition)
-        }
+        filter textReplacementFilter(edition)
       }
     }
 
@@ -1038,11 +1012,7 @@ task all_saxonc_releases() {
         include "XPathProcessor.h"
         include "SchemaValidator.h"
         include "SaxonApiException.h"
-        filter { line ->
-          line.replaceAll('@@VERSION@@', saxonVersion)
-            .replace('@@edition@@', edition)
-            .replace('@@EDITION@@', edition.toUpperCase())
-        }
+        filter textReplacementFilter(edition)
       }
     }
   }
@@ -1353,6 +1323,7 @@ project.task("all_python_test_suites") {
       output.close()
     }
   }
+
   ["xslt30", "qt3"].each { testsuite ->
     Task t = task "${edition}c_${testsuite}_test_suite"(
             dependsOn: ["pyenv_install_saxon_${edition}c"]
