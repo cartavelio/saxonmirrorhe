@@ -46,7 +46,7 @@ task eecs_setupPreprocess(
   include "com/saxonica/**/*.java"
   include "net/sf/saxon/data/**"
   
-  exclude "**/packageInfo.java"
+  exclude "**/package-info.java"
   
   exclude "net/sf/saxon/dotnet/**"
   exclude "net/sf/saxon/event/ContentHandlerProxy.java"
