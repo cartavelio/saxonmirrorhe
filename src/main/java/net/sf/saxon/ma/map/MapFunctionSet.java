@@ -27,6 +27,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -555,12 +556,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
-            ZenoSequence results = new ZenoSequence();
-            for (KeyValuePair pair : map.keyValuePairs()) {
-                ShapedMap kvp = new ShapedMap(Shape.KEY_VALUE_PAIR, pair.key, pair.value);
-                results = results.appendSequence(kvp);
-            }
-            return results;
+            Iterable<KeyValuePair> pairIterable = map.keyValuePairs();
+            SequenceIterator iter = new SequenceIteratorOverJavaIterator<>(pairIterable.iterator(), KeyValuePair::asKeyValueRecord);
+            return new LazySequence(iter);
         }
     }
 

@@ -7,13 +7,13 @@
 
 package net.sf.saxon.ma.map;
 
-import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
@@ -30,6 +30,8 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Stack;
+
 /**
  * Interface supported by different implementations of an XDM map item
  */
@@ -42,6 +44,23 @@ public abstract class MapItem implements FunctionItem {
      */
 
     abstract public GroundedValue get(AtomicValue key);
+
+
+    /**
+     * Get an entry from the Map, supplying an execution plan which the callee can add information to.
+     *
+     * @param key the value of the key
+     * @param plans a list of suggested lookup plans; the callee is free to use these or ignore them
+     *              as it wishes, and can also add new plans for use on future evaluation of the
+     *              same expression. The plan is specific to a particular key value: in practice,
+     *              the method is only used when the lookup key is known statically.
+     * @return the value associated with the given key, or null if the key is not present in the map.
+     */
+
+    public GroundedValue getWithPlan(AtomicValue key, Stack<LookupPlan> plans) {
+        return get(key);
+    }
+
 
     /**
      * Get the size of the map

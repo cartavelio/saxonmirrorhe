@@ -14,6 +14,7 @@ import net.sf.saxon.value.StringValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * A {@code ShapedMap} is an implementation of XDM maps optimised for the case
@@ -21,9 +22,19 @@ import java.util.List;
  *
  * <p>It has the additional property that the keys() method delivers the keys
  * in a consistent order.</p>
+ *
+ * <p>The class implements the method {@link #getWithPlan(AtomicValue, Stack)} so that a
+ * lookup expression such as <code>$record?field</code> using a statically-known lookup
+ * key is able to use the slot number established on a previous call of the same
+ * expression, avoiding the cost of a hash lookup.</p>
  */
 
 public class ShapedMap extends StringMap {
+
+    private static class ShapedMapPlan implements LookupPlan {
+        Shape shape;
+        int slot;
+    }
 
     private final GroundedValue[] values;
     private final Shape shape;
@@ -59,6 +70,39 @@ public class ShapedMap extends StringMap {
             return get(key.getUnicodeStringValue());
         }
         return null;
+    }
+
+    /**
+     * Get an entry from the Map, supplying an execution plan which the callee can add information to.
+     *
+     * @param key   the value of the key
+     * @param plans a list of suggested lookup plans; the callee is free to use these or ignore them
+     *              as it wishes, and can also add new plans for use on future evaluation of the
+     *              same expression. The plan is specific to a particular key value: in practice,
+     *              the method is only used when the lookup key is known statically.
+     * @return the value associated with the given key, or null if the key is not present in the map.
+     */
+    @Override
+    public GroundedValue getWithPlan(AtomicValue key, Stack<LookupPlan> plans) {
+        for (LookupPlan plan : plans) {
+            if (plan instanceof ShapedMapPlan && ((ShapedMapPlan)plan).shape == this.shape) {
+                // Reuse the slot number established on a previous call
+                return values[((ShapedMapPlan) plan).slot];
+            }
+        }
+        if (key instanceof StringValue) {
+            UnicodeString uKey = key.getUnicodeStringValue();
+            int slot = shape.getSlot(uKey);
+            if (slot >= 0) {
+                // Save the slot number for use on subsequent calls
+                ShapedMapPlan newPlan = new ShapedMapPlan();
+                newPlan.shape = this.shape;
+                newPlan.slot = slot;
+                plans.push(newPlan);
+                return values[slot];
+            }
+        }
+        return get(key);
     }
 
     /**
