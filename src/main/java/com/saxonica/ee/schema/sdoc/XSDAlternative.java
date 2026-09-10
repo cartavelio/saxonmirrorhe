@@ -50,13 +50,13 @@ public class XSDAlternative extends AnnotationParent {
 
         String defaultNamespace = atts.getValue(NamespaceUri.NULL, "xpathDefaultNamespace");
         if (defaultNamespace == null) {
-            defaultNamespace = getXSDSchemaElement().getXPathDefaultNamespace();
+            defaultNamespace = getXSDSchema().getXPathDefaultNamespace();
         }
         NamespaceUri defaultNamespaceUri;
         if (defaultNamespace.equals("##defaultNamespace")) {
             defaultNamespaceUri = getURIForPrefix("", true);
         } else if (defaultNamespace.equals("##targetNamespace")) {
-            defaultNamespaceUri = getXSDSchemaElement().getTargetNamespace();
+            defaultNamespaceUri = getXSDSchema().getTargetNamespace();
         } else if (defaultNamespace.equals("##local")) {
             defaultNamespaceUri = NamespaceUri.NULL;
         } else {
@@ -74,10 +74,10 @@ public class XSDAlternative extends AnnotationParent {
             SchemaElement.XPathStaticContext env = new SchemaElement.XPathStaticContext(this);
             env.setDefaultElementNamespace(defaultNamespaceUri);
             env.setBaseURI(getBaseURI());
-            env.setXPathLanguageLevel(getXSDSchemaElement().getAllowedExtensions().contains("any-xpath-version") ? 31 : 20);
+            env.setXPathLanguageLevel(getXSDSchema().getAllowedExtensions().contains("any-xpath-version") ? 31 : 20);
 
             // Declare any variables defined in saxon:param elements
-            for (GlobalParam param : getXSDSchemaElement().getGlobalParams()) {
+            for (GlobalParam param : getXSDSchema().getGlobalParams()) {
                 XPathVariable var = env.declareVariable(param.getVariableQName());
                 GroundedValue defaultVal = ((Literal) param.getBody()).getGroundedValue();
                 var.setDefaultValue(defaultVal);
@@ -103,7 +103,7 @@ public class XSDAlternative extends AnnotationParent {
         alternative = new TypeAlternative(config, condition, xpath);
         alternative.setLocator(this);
         alternative.setNamespaceContext(makeNamespaceContext());
-        alternative.setDefaultElementNamespace(defaultNamespace);
+        alternative.setDefaultElementNamespace(defaultNamespaceUri);
         alternative.setBaseURI(getBaseURI());
         alternative.setParameters(parameters);
 

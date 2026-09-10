@@ -5,6 +5,7 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
@@ -27,7 +28,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
     private final String conditionText;
     private NamespaceResolver namespaceContext;
     private String baseURI;
-    private String defaultNamespace;
+    private NamespaceUri defaultNamespace;
     private Map<StructuredQName, XPathVariable> declaredParams;
     private TypeReference typeReference;
 
@@ -69,12 +70,12 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
     }
 
     /**
-     * Set the default namesapce for elements and types from the static context of the XPath expression
+     * Set the default namespace for elements and types from the static context of the XPath expression
      *
      * @param namespace the default namespace for elements and types. The null namespace is represented as ""
      */
 
-    public void setDefaultElementNamespace(String namespace) {
+    public void setDefaultElementNamespace(NamespaceUri namespace) {
         defaultNamespace = namespace;
     }
 
@@ -84,7 +85,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
      * @return the default namespace for elements and types. The null namespace is represented as ""
      */
 
-    public String getDefaultElementNamespace() {
+    public NamespaceUri getDefaultElementNamespace() {
         return defaultNamespace;
     }
 
@@ -210,7 +211,7 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
         serializer.emitNamespaceContext(getNamespaceContext());
         serializer.emitAttribute("test", conditionText == null ? "true()" : conditionText);
         serializer.emitAttribute("type", serializer.getTypeLink((SchemaType) typeReference.getTarget()));
-        serializer.emitAttribute("defaultNamespace", getDefaultElementNamespace());
+        serializer.emitAttribute("defaultNamespace", getDefaultElementNamespace().toString());
         serializer.emitAttribute("xml:base", getBaseURI());
         serializer.endElement();
     }
