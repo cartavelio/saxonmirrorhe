@@ -504,6 +504,9 @@ val signingMavenJars = tasks.register<Sync>("signingMavenJars") {
     from(javadocMavenJarTask)
     from(testdriverMavenEditionJar)
     from(testdriverMavenEditionSourcesJar)
+    if (extension.edition.get().uppercase() == "HE") {
+      from(editionMavenSourceJarTask)
+    }
 }
 
 val signingResources = tasks.register<AwsSigningResources>("signingResources") {
