@@ -1505,6 +1505,18 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 }
                 return !inverse;
 
+            case "package_version_resolution":
+                if ("highest_version".equals(value)) {
+                    return !inverse;
+                }
+                if ("unspecified".equals(value)) {
+                    return !inverse;
+                }
+                if ("lowest_version".equals(value)) {
+                    return inverse;
+                }
+                return !inverse;
+
             case "on-multiple-match":
                 throw new IllegalStateException("on-multiple-match is no longer recognized");
 //                env.resetActions.add(new Environment.ResetAction() {
