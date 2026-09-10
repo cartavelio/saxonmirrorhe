@@ -92,8 +92,12 @@ public class StandardUnparsedTextResolver
                         String systemId = resolved.getSystemId();
                         if (systemId != null) {
                             try {
-                                URL url = new URL(systemId);
-                                inputStream = url.openStream();
+                                if (systemId.startsWith("classpath:")) {
+                                    inputStream = getClass().getClassLoader().getResourceAsStream(systemId.substring(10));
+                                } else {
+                                    URL url = new URL(systemId);
+                                    inputStream = url.openStream();
+                                }
                             } catch (IOException e) {
                                 throw new XPathException("unparsed-text(): cannot read " + systemId, e);
                             }
@@ -189,10 +193,6 @@ public class StandardUnparsedTextResolver
         } catch (IllegalCharsetNameException | UnsupportedCharsetException icne) {
             throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
         }
-
-
     }
-
-
 }
 
