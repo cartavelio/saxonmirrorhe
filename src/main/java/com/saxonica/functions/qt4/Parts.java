@@ -23,7 +23,6 @@ import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
@@ -114,12 +113,8 @@ public class Parts extends SystemFunction implements Callable {
 
     static SequenceIterator timezone(CalendarValue a) {
         if (a.hasTimezone()) {
-            try {
-                return SingletonIterator.makeIterator(
+            return SingletonIterator.makeIterator(
                         DayTimeDurationValue.fromMilliseconds(60000L * a.getTimezoneInMinutes()));
-            } catch (ValidationException e) {
-                return EmptyIterator.ofAtomic();
-            }
         } else {
             return EmptyIterator.ofAtomic();
         }
