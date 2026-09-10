@@ -1,5 +1,6 @@
 using System.Impl.Helpers;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Xml;
 using java.lang;
 using javax.xml.transform;
@@ -286,7 +287,13 @@ namespace Saxon.Impl.Helpers {
         }
 
         public Stream locateResource(string filename, IList<string> messages) {
-            return null;
+            System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
+            // var resourceNames = ass.GetManifestResourceNames();
+            // foreach (string name in resourceNames) {
+            //     Console.WriteLine("Resource: " + name);
+            // }
+            // TODO: project name hard-coded here, but will change?
+            return ass.GetManifestResourceStream(@"SaxonCS3.resources.net.sf.saxon.data." + filename);
         }
 
         public ActiveSource resolveSource(Source source, Configuration config) {

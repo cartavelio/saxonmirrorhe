@@ -31,9 +31,11 @@ namespace Saxon.Impl.Helpers {
             }
         }
         
-        public static V GetOrDefault<K,V>(SysCollGen.IDictionary<K, V> map, K key, V defaultVal)  {
-            if (map.ContainsKey(key)) {
-                return map[key];
+        public static V GetOrDefault<K,V>(SysCollGen.IDictionary<K, V> map, K key, V defaultVal) {
+            V val;
+            bool found = map.TryGetValue(key, out val);
+            if (found) {
+                return val;
             } else {
                 return defaultVal;
             }

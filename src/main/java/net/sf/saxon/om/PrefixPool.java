@@ -48,8 +48,8 @@ public class PrefixPool {
         }
         // See if the prefix is already known
         if (index != null) {
-            Integer existing = index.get(prefix);
-            if (existing != null) {
+            int existing = index.getOrDefault(prefix, -1);
+            if (existing != -1) {
                 return existing;
             }
         } else {

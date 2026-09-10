@@ -32,7 +32,7 @@ namespace javax.xml.transform
             this._locator = loc;
         }
 
-        public Throwable getException() {
+        public System.Exception getException() {
             return this.getCause();
         }
         

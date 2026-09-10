@@ -410,7 +410,7 @@ public class Block extends Instruction {
         TypeHierarchy th = getConfiguration().getTypeHierarchy();
         for (int i = 0; i < size(); i++) {
             Expression childExpr = child(i);
-            if (!(childExpr instanceof Message)) {
+            if (!(childExpr instanceof MessageInstr)) {
                 ItemType t = childExpr.getItemType();
                 t1 = t1 == null ? t : Type.getCommonSuperType(t1, t, th);
                 if (t1 instanceof AnyItemType) {
