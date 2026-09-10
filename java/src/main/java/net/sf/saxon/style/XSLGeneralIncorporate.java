@@ -138,8 +138,8 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 }
                 ElementImpl outermost = includedDoc.getDocumentElement();
 
-                if (outermost instanceof LiteralResultElement) {
-                    includedDoc = ((LiteralResultElement) outermost).makeStylesheet(false);
+                if (outermost instanceof LiteralResultElement lre) {
+                    includedDoc = LiteralResultElement.makeStylesheet(lre, false);
                     outermost = includedDoc.getDocumentElement();
                 }
 

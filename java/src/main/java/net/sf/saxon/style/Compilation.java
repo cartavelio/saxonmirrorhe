@@ -265,9 +265,12 @@ public class Compilation {
             throw new XPathException("No stylesheet element found at " + source.getSystemId(), "XPST0010");
         }
 
-        if (outermost instanceof LiteralResultElement) {
-            document = ((LiteralResultElement) outermost).makeStylesheet(true);
+        if (outermost instanceof LiteralResultElement lre) {
+            document = LiteralResultElement.makeStylesheet(lre, true);
             outermost = (NodeInfo)document.iterateChildAxis(NodeKindType.ELEMENT).next();
+        } else if (compilerInfo.getXsltVersion() >= 40 && outermost instanceof StyleElement se && se.isInstruction()) {
+            document = LiteralResultElement.makeStylesheet(se, true);
+            outermost = (NodeInfo) document.iterateChildAxis(NodeKindType.ELEMENT).next();
         }
 
         XSLPackage xslpackage;

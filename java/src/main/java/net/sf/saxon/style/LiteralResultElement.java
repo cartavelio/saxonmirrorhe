@@ -400,33 +400,33 @@ public class LiteralResultElement extends StyleElement {
     }
 
     /**
-     * Make a top-level literal result element into a stylesheet. This implements
+     * Make a top-level literal result element (or in 4.0, any XSLT instruction) into a stylesheet. This implements
      * the "Simplified Stylesheet" facility.
      * @param topLevel true if this is the top level module of a stylesheet; false if it is included or imported
      * @return the reconstructed stylesheet with an xsl:stylesheet and xsl:template element added
      * @throws XPathException if anything goes wrong
      */
 
-    public DocumentImpl makeStylesheet(boolean topLevel) throws XPathException {
+    public static DocumentImpl makeStylesheet(StyleElement top, boolean topLevel) throws XPathException {
 
         // the implementation grafts the LRE node onto a containing xsl:template and
         // xsl:stylesheet
 
-        int processorVersion = getCompilation().getCompilerInfo().getXsltVersion();
-        StyleNodeFactory nodeFactory = getCompilation().getStyleNodeFactory(topLevel);
-        if (!isInScopeNamespace(NamespaceUri.XSLT) && processorVersion < 40) {
+        int processorVersion = top.getCompilation().getCompilerInfo().getXsltVersion();
+        StyleNodeFactory nodeFactory = top.getCompilation().getStyleNodeFactory(topLevel);
+        if (!top.isInScopeNamespace(NamespaceUri.XSLT) && processorVersion < 40) {
             String message;
-            if (getLocalPart().equals("stylesheet") || getLocalPart().equals("transform")) {
+            if (top.getLocalPart().equals("stylesheet") || top.getLocalPart().equals("transform")) {
                 message = "Namespace for stylesheet element should be " + NamespaceConstant.XSLT;
             } else {
                 message = "The supplied file does not appear to be a stylesheet";
             }
             XPathException err = new XPathException(message)
-                    .withLocation(allocateLocation())
+                    .withLocation(top.allocateLocation())
                     .withErrorCode("XTSE0150")
                     .asStaticError();
             //noinspection EmptyCatchBlock
-            compileError(err);
+            top.compileError(err);
             throw err;
 
         }
@@ -434,49 +434,50 @@ public class LiteralResultElement extends StyleElement {
         // check there is an xsl:version attribute (it's mandatory until 4.0), and copy
         // it to the new xsl:stylesheet element
 
-        String version = getAttributeValue(NamespaceUri.XSLT, "version");
+        String version = top.getAttributeValue(NamespaceUri.XSLT, "version");
         if (version == null && processorVersion < 40) {
             XPathException err = new XPathException("Simplified stylesheet: xsl:version attribute is missing")
                     .withErrorCode("XTSE0150")
                     .asStaticError()
-                    .withLocation(allocateLocation());
+                    .withLocation(top.allocateLocation());
             //noinspection EmptyCatchBlock
-            compileError(err);
+            top.compileError(err);
             throw err;
         }
 
         try {
-            DocumentImpl oldRoot = (DocumentImpl) getRoot();
+            DocumentImpl oldRoot = (DocumentImpl) top.getRoot();
             LinkedTreeBuilder builder = new LinkedTreeBuilder(
-                    getConfiguration().makePipelineConfiguration(), Durability.LASTING);
+                    top.getConfiguration().makePipelineConfiguration(), Durability.LASTING);
             builder.setNodeFactory(nodeFactory);
-            builder.setSystemId(this.getSystemId());
+            builder.setSystemId(top.getSystemId());
 
             builder.open();
             builder.startDocument(ReceiverOption.NONE);
 
             final Location loc = Loc.NONE;
 
-            NamespaceMap map = getAllNamespaces().put("xsl", NamespaceUri.XSLT);
+            NamespaceMap map = top.getAllNamespaces().put("xsl", NamespaceUri.XSLT);
             AttributeMap atts = EmptyAttributeMap.INSTANCE;
             atts = atts.put(new AttributeInfo(
                     new NoNamespaceName("version"), BuiltInAtomicType.UNTYPED_ATOMIC, version==null ? "4.0" : version, loc, ReceiverOption.NONE));
-            if (processorVersion >= 40 && getAttributeValue(NamespaceUri.XSLT, "expand-text") == null) {
+            if (processorVersion >= 40 && top.getAttributeValue(NamespaceUri.XSLT, "expand-text") == null) {
                 atts = atts.put(new AttributeInfo(
                         new NoNamespaceName("expand-text"), BuiltInAtomicType.UNTYPED_ATOMIC, "yes", loc, ReceiverOption.NONE));
             }
             int st = StandardNames.XSL_STYLESHEET;
-            builder.startElement(new CodedName(st, "xsl", getNamePool()), Untyped.INSTANCE,
+            builder.startElement(new CodedName(st, "xsl", top.getNamePool()), Untyped.INSTANCE,
                                  atts, map, loc, ReceiverOption.NONE);
 
             atts = EmptyAttributeMap.INSTANCE;
-            atts = atts.put(new AttributeInfo(new NoNamespaceName("match"), BuiltInAtomicType.UNTYPED_ATOMIC, "/", loc, ReceiverOption.NONE));
+            String match = processorVersion < 40 ? "/" : ".";
+            atts = atts.put(new AttributeInfo(new NoNamespaceName("match"), BuiltInAtomicType.UNTYPED_ATOMIC, match, loc, ReceiverOption.NONE));
 
             int te = StandardNames.XSL_TEMPLATE;
-            builder.startElement(new CodedName(te, "xsl", getNamePool()), Untyped.INSTANCE,
+            builder.startElement(new CodedName(te, "xsl", top.getNamePool()), Untyped.INSTANCE,
                                  atts, map, loc, ReceiverOption.NONE);
 
-            builder.graftElement(this);
+            builder.graftElement(top);
 
             builder.endElement();
             builder.endElement();
@@ -487,7 +488,7 @@ public class LiteralResultElement extends StyleElement {
             newRoot.graftLocationMap(oldRoot);
             return newRoot;
         } catch (XPathException err) {
-            throw err.withLocation(allocateLocation());
+            throw err.withLocation(top.allocateLocation());
         }
 
     }
