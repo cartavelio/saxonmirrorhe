@@ -50,7 +50,7 @@ public class Steps {
      */
 
     public static Step<XdmNode> root() {
-        return new Step<>() {
+        return new Step<XdmNode>() {
             @Override
             public Stream<XdmNode> apply(XdmItem origin) {
                 return origin instanceof XdmNode
