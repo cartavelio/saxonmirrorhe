@@ -1579,13 +1579,13 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public java.util.function.Function<SequenceIterator, FocusTrackingIterator> getFocusTrackerFactory(
             Executable exec, boolean multithreaded) {
-//        if (multithreaded || (getBooleanProperty(Feature.ALLOW_MULTITHREADING) &&
-//                exec.createsSecondaryResult() &&
-//                isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT))) {
-//            return CSharp.constructorRef(MultithreadedFocusTrackingIterator::new, 1);
-//        } else {
+        if (multithreaded || (getBooleanProperty(Feature.ALLOW_MULTITHREADING) &&
+                exec.createsSecondaryResult() &&
+                isLicensedFeature(LicenseFeature.ENTERPRISE_XSLT))) {
+            return CSharp.constructorRef(com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator::new, 1);
+        } else {
             return CSharp.constructorRef(FocusTrackingIterator::new, 1);
- //       }
+        }
     }
 
     /**
