@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -429,21 +430,26 @@ public class TestDocumentBuilder {
     @Test
     public void testWhitespacePolicySchemaTyped() {
         String s;
-        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.IGNORABLE);
+        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.IGNORABLE, true);
         assertTrue(s.contains("<BOOKS><ITEM"));
-        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.ALL);
+        assertTrue(s.contains("TAX=\"V\""));
+        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.IGNORABLE, false);
+        assertTrue(s.contains("<BOOKS><ITEM"));
+        assertFalse(s.contains("TAX=\"V\""));
+        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.ALL, true);
         assertTrue(s.startsWith("rejected"));
-        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.NONE);
+        s = buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy.NONE, true);
         assertTrue(s.startsWith("rejected"));
     }
 
-    private String buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy policy) {
+    private String buildWithWhitespacePolicyTyped(WhitespaceStrippingPolicy policy, boolean expandDefaults) {
         try {
             Processor proc = new Processor(true);
 
             SchemaManager mgr = proc.getSchemaManager();
             mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             SchemaValidator v = mgr.newSchemaValidator();
+            v.setExpandAttributeDefaults(expandDefaults);
 
             Serializer serializer = proc.newSerializer();
             serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
