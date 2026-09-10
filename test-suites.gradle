@@ -17,13 +17,13 @@ testSuite.configure([
 
   // This maps test suites to the directories that contain the tests.
   "directoryMap": ["qt3": testsuites.w3cQT3TestSuiteDir,
-                   "qt3extra": testsuites.saxonExtraTestSuiteDir + "/suites/qt3",
+                   "qt3extra": "${buildDir}/tests/extra/suites/qt3",
                    "qt4": testsuites.w3cQT4TestSuiteDir,
                    "xslt30": testsuites.w3cXslt30TestSuiteDir,
-                   "xslt30extra": testsuites.saxonExtraTestSuiteDir + "/suites/xslt30",
+                   "xslt30extra": "${buildDir}/tests/extra/suites/xslt30",
                    "xslt40": testsuites.w3cXslt40TestSuiteDir,
                    "xsd": testsuites.w3cXsdTestSuiteDir,
-                   "xsdextra": testsuites.saxonExtraTestSuiteDir + "/suites/xsd",
+                   "xsdextra": "${buildDir}/tests/extra/suites/xsd",
                    "expath": "${buildDir}/tests/expath"
   ]
 ])
