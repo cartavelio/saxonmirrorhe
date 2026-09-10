@@ -443,7 +443,7 @@ namespace Saxon.Api {
         public override bool Matches(XdmItem item) {
             Item theItem = (Item) item.value;
             return theItem is AtomicValue 
-                   && ((AtomicType)underlyingType).matches((AtomicValue)theItem, null);
+                   && ((AtomicType)underlyingType).matches((AtomicValue)theItem);
         }
 
         /// <summary>

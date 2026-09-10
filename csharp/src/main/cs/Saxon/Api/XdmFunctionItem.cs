@@ -78,7 +78,7 @@ namespace Saxon.Api {
                     //args[i] = arguments[i].value;
                     Hej.value.SequenceType required = type.getArgumentTypes()[i];
                     GroundedValue val = arguments[i].value;
-                    if (!required.matches(val, th)) {
+                    if (!required.matches(val)) {
                         int pos = i;
                         Supplier<RoleDiagnostic> role =
                             () => new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", pos);
@@ -97,7 +97,7 @@ namespace Saxon.Api {
                 GroundedValue groundedResult = result.materialize();
                 if (!fi.isTrustedResultType()) {
                     Hej.value.SequenceType required = type.getResultType();
-                    if (!required.matches(groundedResult, th)) {
+                    if (!required.matches(groundedResult)) {
                         Supplier<RoleDiagnostic> role =
                             () => new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
                         groundedResult = coercionRules.coerce(groundedResult, required, 

@@ -138,7 +138,7 @@ namespace Saxon.Api {
         public QName(string lexicalQName, XdmNode element) {
             try {
                 NodeInfo node = (NodeInfo) element.value;
-                sqName = StructuredQName.fromLexicalQName(lexicalQName, true, true,
+                sqName = StructuredQName.fromLexicalQName(lexicalQName, true, StructuredQName.QUPL,
                     node.getAllNamespaces());
             }
             catch (Saxon.Hej.trans.XPathException err) {
