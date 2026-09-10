@@ -68,14 +68,20 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     public static Expression makeCardinalityChecker(Expression sequence, int cardinality, Supplier<RoleDiagnostic> roleSupplier) {
-        Expression result = sequence;
+//        if (Cardinality.subsumes(cardinality, sequence.getCardinality())) {
+//            return sequence;
+//        }
+        // Note that we insert a CardinalityChecker even if it's not needed, because this method is called before we
+        // can safely call getCardinality() on the expression. The CardinalityChcecker will be dropped later if
+        // not needed. The exception is for literals, where we can safely get the actual cardinality now.
         if (sequence instanceof Literal && Cardinality.subsumes(cardinality, SequenceTool.getCardinality(((Literal) sequence).getGroundedValue()))) {
-            return result;
+            return sequence;
         }
+        Expression result;
         if (sequence instanceof Atomizer && !Cardinality.allowsMany(cardinality)) {
             Expression base = ((Atomizer) sequence).getBaseExpression();
             result = new SingletonAtomizer(base, roleSupplier, Cardinality.allowsZero(cardinality));
-        } else if (Cardinality.allowsMany(sequence.getCardinality())) {
+        } else {
             result = new CardinalityChecker(sequence, cardinality, roleSupplier);
         }
         ExpressionTool.copyLocationInfo(sequence, result);
