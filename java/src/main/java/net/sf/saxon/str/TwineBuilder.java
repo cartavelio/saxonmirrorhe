@@ -245,7 +245,7 @@ public abstract class TwineBuilder {
 
         @Override
         public TwineBuilder append(int codepoint) {
-            if (used == buffer.length) {
+            if (used + 3 > buffer.length) {
                 buffer = Arrays.copyOf(buffer, used * 2);
             }
             buffer[used++] = (byte) ((codepoint >> 16) & 0xff);
