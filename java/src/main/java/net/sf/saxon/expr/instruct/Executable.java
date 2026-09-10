@@ -620,6 +620,10 @@ public class Executable {
             }
             for (SequenceType type : globalContextRequirement.getRequiredTypes()) {
                 if (!type.matches(contextValue, th)) {
+                    if (contextValue.getLength() == 0) {
+                        throw new XPathException(
+                                "The global context item must not be an empty sequence", "XPTY0004").asTypeError();
+                    }
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.MISC, "defaulted global context item", 0);
                     String s = role.composeErrorMessage(type.getPrimaryType(), contextValue.head(), th);
                     throw new XPathException(s, "XPTY0004");
