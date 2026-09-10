@@ -76,6 +76,7 @@ public class AtomizingIterator implements SequenceIterator {
                     } else {
                         String message = e.getMessage() + ". Failed while atomizing the " + roleDiagnostic.getMessage();
                         XPathException err = new XPathException(message, e.getErrorCodeLocalPart(), e.getLocator());
+                        err.setErrorCodeQName(e.getErrorCodeQName());
                         throw new UncheckedXPathException(err);
                     }
                 }
