@@ -256,6 +256,9 @@ public:
 private:
 
 
+
+
+
     std::map<XdmAtomicValue *, XdmValue*> data; /*!< Cached XdmMap represented internally as an std::map. This can also be represented as an JNI object */
     int arity; /*!< The arity of this function  */
     int map_size; /*!< Cached size of the map if  represented as a JNI object*/

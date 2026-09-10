@@ -137,6 +137,9 @@ public:
     }
 
 protected:
+
+    XdmValue * getXdmValueSubClass(int64_t value);
+
     char * fname; /*!< The name of the function item */
 
 private:

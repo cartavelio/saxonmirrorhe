@@ -31,58 +31,7 @@ XdmValue* XdmArray::get(int n){
         return nullptr;
     }
     int64_t result = j_xdmArray_get(SaxonProcessor::sxn_environ->thread, (void *)value, n);
-    if(result <= 0){
-    	//if result == -2 - TODO handle exception
-        return nullptr;
-    }  else {
-         XdmValue * value = nullptr;
-         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-
-        XdmItem * xdmItem = nullptr;
-        if(typeRef == -2) {
-            //exception = new SaxonApiException();
-            return nullptr;
-        }
-        if(typeRef == 1) {
-            value = new XdmValue();
-            xdmItem = new XdmAtomicValue(result);
-            value->addXdmItem(xdmItem);
-
-        } else if(typeRef == 2) {
-            value = new XdmValue();
-            xdmItem = new XdmNode(result);
-            value->addXdmItem(xdmItem);
-
-        }  else if (typeRef == 4) {
-            value = new XdmValue();
-            xdmItem =  new XdmMap(result);
-            value->addXdmItem(xdmItem);
-
-        } else if (typeRef == 3) {
-            value = new XdmValue();
-            xdmItem =  new XdmArray(result);
-            value->addXdmItem(xdmItem);
-
-        } else if (typeRef == 5) {
-            value = new XdmValue();
-            xdmItem =  new XdmFunctionItem(result);
-            value->addXdmItem(xdmItem);
-        } else if (typeRef == 6) {
-           //Empty Sequence detected.
-           //TODO Maybe we should create an EmptySequence object
-            j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)result);
-            result = -1;
-           return nullptr;
-
-        }else {
-            value = new XdmValue(result, true);
-
-        }
-
-
-		return value;
-	}
-    return nullptr;
+    return getXdmValueSubClass(result);
 }
 
 
@@ -207,7 +156,6 @@ XdmValue ** XdmArray::values() {
   long long * results = j_convertXdmArrayToArrayObject(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
 
 	if(results == nullptr) {
-       delete exception;
 	   return nullptr;
 	}
 
