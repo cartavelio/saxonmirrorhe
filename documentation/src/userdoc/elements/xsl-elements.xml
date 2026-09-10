@@ -568,17 +568,6 @@
                         >Patterns in XSLT 3.0</a> for more details. All of the extensions to the
                     syntax of match patterns are implemented since Saxon 9.6.</p>
 
-                <p>Earlier drafts of XSLT 3.0 introduced a pattern syntax <code>~typename</code>:
-                    for example <code>~xs:integer</code> would match any integer. With experience
-                    this was found not to be very useful, and it has been dropped. Instead a new
-                    pattern syntax <code>.[expression]</code> was introduced: this matches any item
-                    for which the effective boolean value of the expression (evaluated with that
-                    item as the context item) is true. For example <code>.[. gt 0]</code> will match
-                    any item (necessarily a number) that is greater than zero, while
-                        <code>.[nilled()]</code> matches any element that is nilled
-                        (<code>@xsi:nil='true'</code>). The <code>~typename</code> syntax was
-                    supported in Saxon 9.5, but not since Saxon 9.6.</p>
-
                 <p>For <code>xsl:apply-templates</code> to be streamable, the W3C rules require that
                     the <code>select</code> expression must be "striding", which essentially means
                     that it may use the child axis but not the descendant axis (to ensure that
@@ -828,15 +817,7 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status>
-                <p>Motivated by streaming, the <code>on-empty</code> attribute was introduced in an
-                    early Working Draft for XSLT 3.0, but later removed and replaced by the new <a
-                        class="bodylink code" href="../on-empty">xsl:on-empty</a>, <a
-                        class="bodylink code" href="../on-non-empty">xsl:on-non-empty</a> and <a
-                        class="bodylink code" href="../where-populated">xsl:where-populated</a>
-                    instructions. The <code>on-empty</code> attribute was implemented in Saxon 9.5,
-                    but removed in 9.7.</p>
-            </status>
+            <status-ok/>
             <see-also name="element" type="xsl-elements"/>
             <see-also name="copy" type="xsl-elements"/>
             <see-also name="lre" type="xsl-elements"/>
@@ -1031,12 +1012,6 @@
                     using <code>xsl:call-template</code>) is available from Saxon 13 for XSLT 4.0
                     stylesheets; it is available in Saxon 11 and 12 provided that syntax extensions
                     are enabled.</p>
-                <p>Until 9.6, Saxon supported an alternative instruction
-                        <code>saxon:call-template</code>, but this has now been dropped. This had
-                    the same effect as <code>xsl:call-template</code>, except that it allowed
-                        <code>name</code> attribute may be written as an attribute value template,
-                    allowing the called template to be decided at run-time. In place of this
-                    facility, XSLT 3.0 offers higher-order functions.</p>
             </status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="template" type="xsl-elements"/>
@@ -1378,15 +1353,7 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status>
-                <p>Modivated by streaming, the <code>on-empty</code> attribute was introduced in an
-                    early Working Draft for XSLT 3.0, but later removed and replaced by the new <a
-                        class="bodylink code" href="../on-empty">xsl:on-empty</a>, <a
-                        class="bodylink code" href="../on-non-empty">xsl:on-non-empty</a> and <a
-                        class="bodylink code" href="../where-populated">xsl:where-populated</a>
-                    instructions. The <code>on-empty</code> attribute was implemented in Saxon 9.5,
-                    but removed in 9.7.</p>
-            </status>
+            <status-ok/>
             <see-also name="copy-of" type="xsl-elements"/>
         </xsl-element>
     </section>
@@ -1437,11 +1404,7 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status>
-                <p>Earlier releases of Saxon supported an attribute <code>saxon:read-once</code> to
-                    control streaming behaviour. This is now superseded by the streaming features of
-                    XSLT 3.0; an error is reported if the attribute is used.</p>
-            </status>
+            <status-ok/>
             <see-also name="copy" type="xsl-elements"/>
             <see-also name="copy-of" type="functions"/>
         </xsl-element>
@@ -1542,11 +1505,7 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status>
-                <p>This instruction should not be confused with the instruction of the same name in
-                    the withdrawn XSLT 1.1 draft, (which is supported in Saxon 6.5.x). That
-                    instruction was a precursor to <code>xsl:result-document</code>.</p>
-            </status>
+            <status-ok/>
             <see-also name="result-document" type="xsl-elements"/>
         </xsl-element>
     </section>
@@ -1617,13 +1576,6 @@
                 <p>When the element name is known at compile time, Saxon generates exactly the same
                     code as for a literal result elements. Literal result elements are generally
                     preferred in such cases because they are more readable.</p>
-                <p>Motivated by streaming, the <code>on-empty</code> attribute was introduced in an
-                    early Working Draft for XSLT 3.0, but later removed and replaced by the new <a
-                        class="bodylink code" href="../on-empty">xsl:on-empty</a>, <a
-                        class="bodylink code" href="../on-non-empty">xsl:on-non-empty</a> and <a
-                        class="bodylink code" href="../where-populated">xsl:where-populated</a>
-                    instructions. The <code>on-empty</code> attribute was implemented in Saxon 9.5,
-                    but removed in 9.7.</p>
             </status>
             <see-also name="attribute" type="xsl-elements"/>
             <see-also name="copy" type="xsl-elements"/>
@@ -1894,10 +1846,7 @@
                 <p>For <code>xsl:for-each</code> to be streamable, the W3C rules require that the
                         <code>select</code> expression must be "striding", which essentially means
                     that it may use the child axis but not the descendant axis (to ensure that
-                    selected nodes do not overlap each other). Prior to Saxon 9.5, Saxon attempted
-                    to be more liberal than this, and allow limited streaming also when the
-                    descendant axis was used. Since Saxon 9.6, the implementation has been brought
-                    into line with the W3C specification. In many cases the restriction can be
+                    selected nodes do not overlap each other). In many cases the restriction can be
                     circumvented by using the <code>outermost</code> function, for example the
                     expression <code>outermost(//title)</code> is striding even though it uses the
                     descendant axis.</p>
@@ -2000,16 +1949,13 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL</saxon-edition>
             <status>
-                <p>Earlier drafts of XSLT 3.0 introduced new attributes <code>bind-group</code> and
-                        <code>bind-grouping-key</code>; these are no longer supported since Saxon
-                    9.6.</p>
                 <p>The <code>composite</code> attribute has been implemented since Saxon 9.6.</p>
                 <p>Since 9.6, Saxon supports streamed grouping when the <code>group-adjacent</code>,
                         <code>group-starting-with</code>, or <code>group-ending-with</code>
                     attributes are used. Streaming with a <code>group-by</code> attribute became
                     available in 9.7 maintenance releases and is fully supported in Saxon 9.8 (in
                     this case the <code>xsl:for-each-group</code> instruction must appear within
-                        <code>xsl:fork</code>.)</p>
+                        <code>xsl:fork</code>).</p>
                 <div class="qt4"><p>The XSLT 4.0 <code>split-when</code> attribute is available from Saxon 13.
                     Streaming is not yet implemented for <code>split-when</code>. In Saxon 11 and
                     12, this attribute was available experimentally under the name
@@ -2039,19 +1985,7 @@
                 <p>The instruction is pointless when not streaming, but it is still supported.</p>
                 <p>Fully implemented since Saxon 9.7. Streaming of <code>xsl:for-each-group</code>,
                     as a child of <code>xsl:fork</code>, with a <code>group-by</code> attribute was
-                    introduced in 9.7 maintenance releases and is fully supported in Saxon 9.8.</p>
-                <p>In Saxon 9.6, the instruction was implemented with restrictions: specifically,
-                    the content of <code>xsl:fork</code> must consist of a sequence of
-                        <code>xsl:sequence</code> instructions, and can not include
-                        <code>xsl:for-each-group</code> elements.</p>
-                <p>The Saxon 9.6 implementation of <code>xsl:fork</code> in streaming mode does not
-                    actually use multiple threads: rather, the events notified by the XML parser
-                    (such as startElement and endElement) are notified to each prong of the
-                        <code>xsl:fork</code> in turn. Each prong accumulates its result in a
-                    temporary tree held in memory, and these temporary trees are combined on
-                    completion. The instruction is most effective when each prong consists of a call
-                    to <code>xsl:result-document</code>; in this case the output can immediately be
-                    serialized, leaving no temporary data in memory.</p>
+                    introduced in 9.7 maintenance releases and is fully supported from Saxon 9.8.</p>
             </status>
             <see-also name="fallback" type="xsl-elements"/>
         </xsl-element>
@@ -2195,15 +2129,7 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL_SINCE_9.8 PE/EE 9.7</saxon-edition>
-            <status>
-                <p>Implemented since Saxon 9.7.</p>
-                <p>An earlier draft of the XSLT 3.0 specification defined attributes
-                        <code>streamable</code> and <code>use-accumulators</code> (to define which
-                    accumulators are available with the document containing the global context item)
-                    for <code>xsl:global-context-item</code>. These were briefly implemented in
-                    Saxon but have now been dropped.</p>
-
-            </status>
+            <status-ok/>
         </xsl-element>
     </section>
 
@@ -2533,21 +2459,10 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL_SINCE_9.8 PE/EE_9.6</saxon-edition>
             <status>
-                <p>The ordering of elements within <code>xsl:iterate</code> has changed since the
-                    original W3C working draft (<code>xsl:on-completion</code> now comes immediately
-                    after <code>xsl:param</code>). Since Saxon 9.7, only the new ordering is
-                    allowed. Saxon 9.6 allowed both the new and the old ordering, but gives a
-                    warning if the old ordering is used.</p>
-                <p>Earlier Saxon releases implemented a prototype of <code>xsl:iterate</code> as an
-                    extension in the Saxon namespace (<code>saxon:iterate</code>). This was dropped
-                    in Saxon 9.5.</p>
                 <p>For <code>xsl:iterate</code> to be streamable, the W3C rules require that the
                         <code>select</code> expression must be "striding", which essentially means
                     that it may use the child axis but not the descendant axis (to ensure that
-                    selected nodes do not overlap each other). Prior to Saxon 9.5, Saxon attempted
-                    to be more liberal than this, and allow limited streaming also when the
-                    descendant axis was used. Since Saxon 9.6, Saxon has been brought into line with
-                    the W3C specification. In many cases the restriction can be circumvented by
+                    selected nodes do not overlap each other). In many cases the restriction can be circumvented by
                     using the <code>outermost</code> function, for example the expression
                         <code>outermost(//title)</code> is striding even though it uses the
                     descendant axis.</p>
@@ -2816,9 +2731,6 @@
                     specification in successive working drafts; since Saxon 9.8, the implementation
                     conforms with the final XSLT 3.0 Recommendation.</p>
 
-                <p>Saxon 9.5 implemented the <code>sort-before-merge</code> attribute, which allows
-                    the input to be sorted before merging.</p>
-
                 <p>Saxon 9.6 introduced support for streamed merging. There was one departure from
                     the specification: the nodes selected for merging using the
                         <code>xsl:merge-source/@select</code> are copies of the nodes in the source
@@ -2850,14 +2762,7 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL_SINCE_9.8 PE/EE_9.6</saxon-edition>
-            <status>
-                <p>In Saxon 9.6 the implementation of the <a class="bodylink code"
-                        href="/functions/fn/current-merge-group">current-merge-group()</a> function
-                    did not match the latest W3C specification. Instead of returning a map, it
-                    returned a sequence containing all items in the current merge group, regardless
-                    which merge source they came from.</p>
-                <p>Since Saxon 9.7, the implementation conforms with the final Recommendation.</p>
-            </status>
+            <status-ok/>
             <see-also name="merge" type="xsl-elements"/>
             <see-also name="current-merge-group" type="functions"/>
         </xsl-element>
@@ -3708,17 +3613,7 @@
             <in-spec>xslt30</in-spec>
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL_SINCE_9.8 PE/EE_9.6</saxon-edition>
-            <status>
-                <p>The rule that <code>xsl:on-completion</code> executes with no context item was
-                    first implemented in Saxon 9.8.</p>
-                <p>In earlier working drafts of XSLT 3.0, the <code>xsl:on-completion</code> element
-                    came last in the body of the <code>xsl:iterate</code> instruction. This caused
-                    problems with the scope of local variables, so in the final Recommendation,
-                        <code>xsl:on-completion</code> comes first. The new rule was implemented in
-                    Saxon 9.7. The spec has also changed to clarify that
-                        <code>xsl:on-completion</code> is evaluated if the input sequence to
-                        <code>xsl:iterate</code> is empty.</p>
-            </status>
+            <status-ok/>
             <see-also name="iterate" type="xsl-elements"/>
         </xsl-element>
     </section>
@@ -4265,8 +4160,6 @@
                         href="/extensions/attributes/assignable">saxon:assignable</a> must be set to
                         <code>yes</code> on the relevant <code>xsl:param</code> in order to use this
                     feature.</p>
-
-                <p>The <code>type-information</code> attribute was removed at Saxon 7.5.</p>
             </status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="call-template" type="xsl-elements"/>
