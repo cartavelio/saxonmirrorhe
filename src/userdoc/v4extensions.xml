@@ -3,10 +3,10 @@
    <h1>Experimental 4.0 extensions</h1>
 
    <p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which
-   could eventually become part of a version 4.0 set of specifications. Details are at
+   will hopefully become part of a version 4.0 set of specifications. Details are at
       <a href="https://qt4cg.org/" class="bodylink">https://qt4cg.org</a>. </p>
 
-   <p>Some of the new features in these drafts have been implemented experimentally in Saxon. Generally, the features
+   <p>Many of the new features in these drafts have been implemented experimentally in Saxon. Generally, the features
    are not available unless you explicitly enable them. They should not be considered stable: the
    details are likely to change as the design progresses.</p>
 
@@ -58,41 +58,47 @@
          <ul/>
       </nav>
 
-      <section id="union-types" title="Union types">
-         <h1>Union types</h1>
+      <section id="choice-types" title="Union types">
+         <h1>Choice types</h1>
 
          <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8.</aside>
 
          <p>A construct of the form <code class="bold"
-               >union(type1, type2, type3)</code> can be used to define simple 
-      unions of atomic types. For example, <code>union(xs:base64Binary, xs:hexBinary)</code>
-      defines a union type whose members are <code>xs:base64Binary</code> and <code>xs:hexBinary</code>, while
-      <code>union(xs:date, xs:time, xs:dateTime)</code> defines a union type whose members are <code>xs:date</code>,
+               >(type1 | type2 | type3)</code> can be used to define 
+      unions of arbitrary types. For example, <code>(xs:base64Binary | xs:hexBinary)</code>
+      defines a choice type whose members are <code>xs:base64Binary</code> and <code>xs:hexBinary</code>, while
+      <code>(xs:date | xs:time | xs:dateTime)</code> defines a choice type whose members are <code>xs:date</code>,
       <code>xs:time</code>, and <code>xs:dateTime</code>. These types can conveniently be used in function signatures
       when writing a function that is designed to take arguments of more than one type.</p>
+         
+         <p>The member types do not need to be atomic; for example <code>(map(*) | array(*))</code>
+         is a type that matches maps and arrays, while <code>(document-node() | element())</code> 
+         matches either a document or element node.</p>
+         
+         <aside><p>In earlier drafts of the 4.0 specification, and in earlier Saxon versions, 
+            the facility covered atomic types only, and the syntax
+         used was <code>union(xs:date, xs:time, xs:dateTime)</code>.</p></aside>
 
-         <p>The names between the parentheses are strictly QNames (not general ItemTypes) and must refer to named atomic or 
-      union types. If one of the members is a union type then it must be a "generalized atomic type"
-    in the sense of the XPath 3.1 specification: that is, it must not contain any list types,
-    and must not be derived by restriction from another union type.</p>
+         
 
-         <p>The order of member type names is significant, in that it determines the order used for casting or validating strings.</p>
+         <p>If the member types are atomic, then the choice type follows very similar rules to a schema-defined
+            union type: in particular, the order of member type names is significant, and determines the order 
+            used for casting or validating strings.</p>
 
-         <p>This construct can be used anywhere that a conventional union
-      type name defined in a schema would be recognized, for example in <code>instance of</code> and <code>cast as</code>
+         <p>This construct can be used anywhere that an item type is recognized, for example in <code>instance of</code> 
       expressions, in the <code>as</code> attribute of variable and function declarations, or in <code>typeswitch</code>
-      expressions. The semantics are exactly the same as if the union type were declared in an imported schema and
-    referenced by name. However, it does not require the processor to be schema-aware.</p>
+      expressions. It can be used as the target of a <code>cast as</code> or <code>castable as</code> expression
+         only if all the member types are atomic.</p>
 
-         <p>Union types can also be used in XSLT match patterns, for example a template defined with 
-        <code>match="union(xs:date, xs:time)"</code> will match atomic values of those types.
+         <p>Choice types can also be used in XSLT match patterns, for example a template defined with 
+        <code>match="type(xs:date, xs:time)"</code> will match values of those types.
       Such a pattern is allocated a default priority designed to reflect the type hierarchy,
       so if U is a subtype of V, then the pattern corresponding to U will have a higher priority
       than the pattern corresponding to V. However, the algorithm does not ensure that ambiguous
       union patterns have the same priority, so ambiguities may go undetected.</p>
 
-         <p>The pattern <code>match="atomic(xs:date)"</code> works in the same way; it can be
-      regarded as syntactic sugar for a union with only one member.</p>
+         <p>The pattern <code>match="type(xs:date)"</code> works in the same way; it can be
+      regarded as syntactic sugar for a choice type with only one member.</p>
 
          <p>Two additional Saxon extensions help to improve the usability of union types:</p>
 
