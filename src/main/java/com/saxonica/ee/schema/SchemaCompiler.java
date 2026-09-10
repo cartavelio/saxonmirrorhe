@@ -47,7 +47,7 @@ public class SchemaCompiler {
     // During a schema validation episode, the SchemaCompiler knows which schema it is validating
     private PreparedSchema preparedSchema;
     private int[] occurrenceLimits;
-    private final SchemaURIResolver schemaURIResolver;
+    private SchemaURIResolver schemaURIResolver;
     private ErrorReporter errorReporter;
     private HashMap<IdentityConstraintReference, SchemaType> identityConstraintsAwaitingTypeChecking = null;
     private int errorCount = 0;
@@ -380,6 +380,17 @@ public class SchemaCompiler {
 
     public void setPipelineConfiguration(PipelineConfiguration pipelineConfiguration) {
         this.pipelineConfiguration = pipelineConfiguration;
+    }
+
+    /**
+     * Set the user-defined SchemaURIResolver to be used for resolving URIs used in "import schema"
+     * declarations; defaults to the {@code SchemaURIResolver} found in the {@link Configuration}
+     *
+     * @param resolver the SchemaURIResolver
+     */
+
+    public void setSchemaURIResolver(SchemaURIResolver resolver) {
+        this.schemaURIResolver = resolver;
     }
 
     /**

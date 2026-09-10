@@ -48,7 +48,6 @@ public class SchemaModelLoader extends ProxyReceiver {
     private final List<Fixup> fixups = new ArrayList<>();
     private final Stack<SCMNodeHandler> handlerStack = new Stack<>();
     private NamespaceResolver namespaceResolver;
-    private NodeName elementName;
     private final List<PendingEdge> pendingEdges = new ArrayList<>();
     private String dmk = null;
 
@@ -164,21 +163,20 @@ public class SchemaModelLoader extends ProxyReceiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
 //        System.err.println("start " + config.getNamePool().getDisplayName(nameCode));
-        elementName = elemName;
         SCMNodeHandler handler;
         if (handlerStack.isEmpty()) {
             handler = new SchemaHandler();
         } else {
-            handler = handlerStack.peek().handleChildElement(elementName.getLocalPart());
+            handler = handlerStack.peek().handleChildElement(elemName.getLocalPart());
             if (handler == null) {
-                throw new XPathException("No handler defined for element " + elementName.getLocalPart() +
+                throw new XPathException("No handler defined for element " + elemName.getLocalPart() +
                         " in " + handlerStack.peek().getClass().getName());
             }
         }
         handler.setSchemaModelLoader(this);
         handlerStack.push(handler);
         try {
-            handler.processElementStart(elementName.getLocalPart(), attributes);
+            handler.processElementStart(elemName.getLocalPart(), attributes);
         } catch (SchemaException e) {
             throw new XPathException(e);
         }
@@ -727,7 +725,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 case "modelGroupParticle":
                     return new ParticleHandler(complexType);
                 case "finiteStateMachine":
-                    return new FiniteStateMachineHandler(compiledComplexType);
+                    return new FiniteStateMachineHandler(complexType);
                 case "assertion":
                     return new AssertionHandler(complexType);
                 default:
@@ -768,7 +766,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                     loader.fixups.add(new Fixup(complexType, base, FIXUP_COMPLEX_TYPE_BASE_TYPE));
                 }
             }
-            ComplexVariety varietyCode = ComplexVariety.ELEMENT_ONLY;
+            ComplexVariety varietyCode;
             switch (variety) {
                 case "mixed":
                     varietyCode = ComplexVariety.MIXED;
@@ -776,11 +774,12 @@ public class SchemaModelLoader extends ProxyReceiver {
                 case "empty":
                     varietyCode = ComplexVariety.EMPTY;
                     break;
-                case "element-only":
-                    varietyCode = ComplexVariety.ELEMENT_ONLY;
-                    break;
                 case "simple":
                     varietyCode = ComplexVariety.SIMPLE;
+                    break;
+                case "element-only":
+                default:
+                    varietyCode = ComplexVariety.ELEMENT_ONLY;
                     break;
             }
             complexType.setVariety(varietyCode);
@@ -811,6 +810,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                     Derivation.DERIVATION_EXTENSION |
                                                      Derivation.DERIVATION_RESTRICTION);
             complexType.setFinalProhibitions(finalSet);
+            //compiledComplexType = loader.schema.compileComplexType(loader.compiler,complexType);
         }
 
         @Override
@@ -1141,11 +1141,9 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     private static class PreprocessHandler extends SCMNodeHandler {
 
-        private final UserSimpleType simpleType;
         private final PreprocessFacet facet;
 
         public PreprocessHandler(UserSimpleType simpleType) {
-            this.simpleType = simpleType;
             facet = new PreprocessFacet();
             simpleType.addFacet(facet);
         }
@@ -1226,12 +1224,10 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
             particle.setMinOccurs(minOccurs);
             String maxOccursAtt = attributes.getValue(NamespaceUri.NULL, "maxOccurs");
-            int maxOccurs = -1;
+            int maxOccurs = -1; // meaning "unbounded"
             if (maxOccursAtt != null) {
                 maxOccursAtt = maxOccursAtt.trim();
-                if (maxOccursAtt.equals("unbounded")) {
-                    maxOccurs = -1;
-                } else {
+                if (!maxOccursAtt.equals("unbounded")) {
                     maxOccurs = Integer.parseInt(maxOccursAtt);
                 }
             }
@@ -1659,9 +1655,9 @@ public class SchemaModelLoader extends ProxyReceiver {
 
         private final FiniteStateMachine fsm;
 
-        public FiniteStateMachineHandler(CompiledComplexType complexType) {
-            fsm = new FiniteStateMachine(complexType.getType(), true);
-            complexType.setFiniteStateMachine(fsm);
+        public FiniteStateMachineHandler(UserComplexType complexType) {
+            fsm = new FiniteStateMachine(complexType, true);
+            //complexType.setFiniteStateMachine(fsm);
         }
 
         @Override

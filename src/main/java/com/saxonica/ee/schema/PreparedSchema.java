@@ -321,6 +321,8 @@ public class PreparedSchema implements Schema, NotationSet {
                     boolean b = component.fixup(compiler);
                     if (!b && !compiler.isAllowDanglingReferences()) {
                         errors++;
+                        compiler.getErrorReporter().report(new XmlProcessingException(
+                                new SchemaException("Unresolved reference from " + component)));
                     }
                 } catch (SchemaException err) {
                     errors++;
@@ -1902,14 +1904,15 @@ public class PreparedSchema implements Schema, NotationSet {
         return type;
     }
 
-    public void compileComplexType(SchemaCompiler compiler, UserComplexType type) throws SchemaException {
+    public CompiledComplexType compileComplexType(SchemaCompiler compiler, UserComplexType type) throws SchemaException {
         CompiledComplexType cct = getCompiledComplexType(type);
         if (cct != null) {
-            return;
+            return cct;
         }
         cct = new CompiledComplexType(this, type);
         compiledComplexTypes.put(type, cct);
         cct.buildValidationMachinery(compiler);
+        return cct;
     }
 
 

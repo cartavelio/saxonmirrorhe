@@ -19,7 +19,7 @@ import javax.xml.validation.ValidatorHandler;
  * A reference to a Saxon prepared schema. This is a wrapper around the Saxon PreparedSchema class; the wrapper
  * implements the JAXP Schema interface and thus allows a Saxon schema to be used via the JAXP validation API.
  */
-public class SchemaReference extends Schema {
+public class SaxonJaxpSchema extends Schema {
 
     private final PreparedSchema schema;
 
@@ -29,7 +29,7 @@ public class SchemaReference extends Schema {
      * @param schema the PreparedSchema to be wrapped
      */
 
-    public SchemaReference(PreparedSchema schema) {
+    public SaxonJaxpSchema(PreparedSchema schema) {
         this.schema = schema;
     }
 

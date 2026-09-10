@@ -1941,10 +1941,8 @@ public class UserComplexType extends UserDefinedType
                 return "Derived type has empty content model, but base type does not allow empty content";
             }
         } else {
-            compiler.getPreparedSchema().compileComplexType(compiler, this);
-            CompiledComplexType cct1 = compiler.getPreparedSchema().getCompiledComplexType(this);
-            compiler.getPreparedSchema().compileComplexType(compiler, sub);
-            CompiledComplexType cct2 = compiler.getPreparedSchema().getCompiledComplexType(sub);
+            CompiledComplexType cct1 = compiler.getPreparedSchema().compileComplexType(compiler, this);
+            CompiledComplexType cct2 = compiler.getPreparedSchema().compileComplexType(compiler, sub);
             compiler.scheduleAutomatonCheck(cct1, cct2);
             return null;
             //return FiniteStateMachine.subsumesMachine(machine, sub.machine, compiler);
@@ -2456,7 +2454,9 @@ public class UserComplexType extends UserDefinedType
                 att.elaborate(compiler);
             }
             PreparedSchema schema = compiler.getPreparedSchema();
-            CompiledComplexType compiledType = schema.getCompiledComplexType(this);
+            CompiledComplexType compiledType = compiler.getPreparedSchema().compileComplexType(
+                    compiler, this);
+            //schema.getCompiledComplexType(this);
             compiledType.makeContextDeterminedTypeMapForAttributes(schema);
             compiledType.makeContextDeterminedTypeMapForElements(schema);
             setValidationStatus(VALIDATED);

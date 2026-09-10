@@ -32,7 +32,7 @@ public class ValidatorImpl extends Validator {
 
     private final PipelineConfiguration pipe;
     private LSResourceResolver resourceResolver;
-    private PreparedSchema schema;
+    private final PreparedSchema schema;
 
     /**
      * Create the Validator

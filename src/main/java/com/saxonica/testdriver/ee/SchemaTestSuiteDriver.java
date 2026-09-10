@@ -117,16 +117,16 @@ public class SchemaTestSuiteDriver {
      * Get the document referenced by the xlink:href attribute of a given element node
      *
      * @param element   the element node (a node in the catalog)
-     * @param processor the processor used to build the target document (the processor under test)
+     * @param schema the schema to validate against
      * @throws SaxonApiException  if an error occurs building the document
      */
 
-    private void validateLinkedDocument(XdmNode element, Processor processor)
+    private void validateLinkedDocument(XdmNode element, XsdSchema schema)
             throws SaxonApiException {
         String href = element.getAttributeValue(QN_xlink_href);
         URI target = element.getBaseURI().resolve(href);
         Source ss = new StreamSource(target.toString());
-        SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+        SchemaValidator validator = schema.getValidator();
         StandardErrorReporter reporter = new StandardErrorReporter();
         reporter.setMaximumNumberOfErrors(500);
         validator.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));
@@ -352,6 +352,7 @@ public class SchemaTestSuiteDriver {
                     boolean schemaFailed = false;
                     String bugzillaRef = null;
                     String scm = null;
+                    XsdSchema schema = null;
                     for (XdmItem schemaTestItem : xpath.evaluate("schemaTest", testGroup)) {
                         countTests++;
                         XdmNode schemaTest = (XdmNode) schemaTestItem;
@@ -386,7 +387,10 @@ public class SchemaTestSuiteDriver {
                         println("TEST SCHEMA " + testName + (queried ? " (queried)" : ""));
                         boolean success = true;
                         List<String> scmList = new ArrayList<>(1); // Used as an output parameter
-                        success = loadSchemas(xpath, testProcessor, schemaTest, success, scmList);
+                        schema = loadSchemas(xpath, testProcessor, schemaTest, success, scmList);
+                        if (schema == null) {
+                            success = false;
+                        }
                         if (!scmList.isEmpty()) {
                             scm = scmList.get(0);
                         }
@@ -511,7 +515,7 @@ public class SchemaTestSuiteDriver {
                                 }
                             } else {
                                 try {
-                                    validateLinkedDocument(instanceDocument, testProcessor);
+                                    validateLinkedDocument(instanceDocument, schema);
                                 } catch (SaxonApiException err) {
                                     System.err.println(err.getMessage());
                                     success = false;
@@ -564,7 +568,7 @@ public class SchemaTestSuiteDriver {
         }
     }
 
-    private boolean loadSchemas(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
+    private XsdSchema loadSchemas(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
             throws URISyntaxException, SaxonApiException {
         if (useSCM) {
             return loadSchemasViaSCM(xpath, testProcessor, schemaTest, success, scmList);
@@ -573,7 +577,7 @@ public class SchemaTestSuiteDriver {
         }
     }
 
-    private boolean loadSchemasDirect(XPathCompiler xpath, Processor processor, XdmNode schemaTest, boolean success)
+    private XsdSchema loadSchemasDirect(XPathCompiler xpath, Processor processor, XdmNode schemaTest, boolean success)
             throws SaxonApiException {
         List<Source> sources = new ArrayList<>(4);
         for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
@@ -587,16 +591,16 @@ public class SchemaTestSuiteDriver {
             XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, processor);
             sources.add(schemaDoc.asSource());
         }
+        XsdSchema schema = null;
         try {
-            processor.getSchemaManager().load(sources.toArray(new Source[0])); // TODO: use an ErrorListener
+            schema = processor.newXsdCompiler().compile(sources.toArray(new Source[0])); // TODO: use an ErrorListener
         } catch (SaxonApiException err) {
             println(err.getMessage());
-            success = false;
         }
-        return success;
+        return schema;
     }
 
-    private boolean loadSchemasViaSCM(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
+    private XsdSchema loadSchemasViaSCM(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
             throws SaxonApiException {
         Processor tempProcessor = new Processor(true);
         tempProcessor.setConfigurationProperty(Feature.XSD_VERSION, versionUnderTest);
@@ -614,16 +618,17 @@ public class SchemaTestSuiteDriver {
                     (XdmNode) tempXPath.evaluateSingle("*", schemaDoc);
             String targetNamespace = schemaElement.getAttributeValue(QN_targetNamespace);
             if (targetNamespace != null && tempConfig.isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
-                // do nothing
+                return null; // TODO: get from cache?
             } else {
                 try {
-                    tempProcessor.getSchemaManager().load(schemaDoc.asSource()); // TODO: use an ErrorListener
+                    return tempProcessor.newXsdCompiler().compile(schemaDoc.asSource()); // TODO: use an ErrorListener
                 } catch (SaxonApiException err) {
-                    return false;
+                    return null;
                 }
             }
         }
-        return validateViaScm(testProcessor, success, scmList);
+        return null;
+        //return validateViaScm(testProcessor, success, scmList);
     }
 
     private boolean loadSchemasViaInstanceDocument(XPathCompiler xpath, Processor testProcessor, XdmNode instanceTest, boolean success, List<String> scmList)

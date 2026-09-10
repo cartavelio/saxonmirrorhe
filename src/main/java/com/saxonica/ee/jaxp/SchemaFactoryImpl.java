@@ -292,30 +292,20 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
         } catch (SchemaException e) {
             throw toSAXException(e);
         }
-        return new SchemaReference(ps);
+        return new SaxonJaxpSchema(ps);
     }
 
     /**
-     * Returns the {@link Schema} object containing all the schema components
-     * that have been loaded using the {@link #newSchema} method. If no schema
-     * components have been loaded, the schema can still be used to validate
-     * source documents provided that they specify the location of the required
-     * schema components using the xsi:schemaLocation attribute.
-     * <p>The returned {@link Schema} object assumes that if documents
-     * refer to the same URL in the schema location hints,
-     * they will always resolve to the same schema document. This
-     * assumption allows implementations to reuse parsed results of
-     * schema documents so that multiple validations against the same
-     * schema will run faster.</p>
-     * <p>Note that the use of schema location hints introduces a
-     * vulnerability to denial-of-service attacks.</p>
+     * Returns an empty schema.
      *
      * @return Always return a non-null valid {@link Schema} object.
+     * @since 13.0 - changed to return an empty schema. Previously the method returned the global
+     * schema held by the Saxon {@link Configuration}.
      */
 
     @Override
     public Schema newSchema() {
-        return new SchemaReference(config.getUnnamedSchema());
+        return new SaxonJaxpSchema(new PreparedSchema(config));
     }
 
     /**
@@ -463,15 +453,6 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
             return new SAXParseException(err.getMessage(), (Locator) loc, err);
         }
     }
-
-    private static TransformerException toTransformerException(SAXException err) {
-        if (err.getException() instanceof TransformerException) {
-            return (TransformerException) err.getException();
-        } else {
-            return new TransformerException(err);
-        }
-    }
-
 
     /**
      * A JAXP ErrorReporter that wraps a SAX ErrorHandler

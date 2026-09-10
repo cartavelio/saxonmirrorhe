@@ -1,17 +1,20 @@
 package com.saxonica.ee.s9api;
 
 import com.saxonica.ee.schema.PreparedSchema;
-import net.sf.saxon.s9api.ItemTypeFactory;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.SchemaValidator;
-import net.sf.saxon.s9api.XsdSchema;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Schema;
 
 public class XsdSchemaImpl extends XsdSchema {
 
-    private PreparedSchema schema;
+    private final Processor processor;
+    private final PreparedSchema schema;
 
-    XsdSchemaImpl(PreparedSchema schema) {
+    XsdSchemaImpl(Processor processor, PreparedSchema schema) {
+        this.processor = processor;
         this.schema = schema;
     }
 
@@ -22,8 +25,8 @@ public class XsdSchemaImpl extends XsdSchema {
      * @since 13.0
      */
     @Override
-    public SchemaValidator newSchemaValidator() {
-        return null;
+    public SchemaValidator getValidator() {
+        return new SchemaValidatorImpl(processor, this);
     }
 
     /**
@@ -62,6 +65,28 @@ public class XsdSchemaImpl extends XsdSchema {
 
     public Schema getUnderlyingSchema() {
         return schema;
+    }
+
+    /**
+     * Export a precompiled Schema Component Model containing all the components (except built-in components)
+     * that have been loaded into this Processor.
+     *
+     * @param destination the destination to recieve the precompiled Schema Component Model in the form of an
+     *                    XML document
+     * @throws SaxonApiException if a failure occurs writing the schema components to the supplied destination
+     */
+    @Override
+    public void exportComponents(Destination destination) throws SaxonApiException {
+        try {
+            Configuration config = schema.getConfiguration();
+            if (config.getConfigurationProperty(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS)) {
+                throw new SaxonApiException("Exporting to an SCM file is not possible when unresolved references to schema components have been permitted");
+            }
+            Receiver out = destination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
+            schema.exportComponents(out);
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
     }
 }
 
