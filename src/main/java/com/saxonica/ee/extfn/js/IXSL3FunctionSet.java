@@ -46,13 +46,13 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
         register("apply", 3, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, ArrayItemType.getInstance(), ONE, null)
-                .arg(2, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(2, MapType.ANY_MAP_TYPE, OPT, null));
 
         register("call", 4, e -> e.populate(IXSLFunctionSet.Call::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, ArrayItemType.getInstance(), ONE, null)
-                .arg(3, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(3, MapType.ANY_MAP_TYPE, OPT, null));
 
         register("doc", 1, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
@@ -66,12 +66,12 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
 
         register("eval", 2, e -> e.populate(IXSLFunctionSet.Eval::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
 
         register("get", 3, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
-                .arg(2, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(2, MapType.ANY_MAP_TYPE, OPT, null));
 
         register("http-request", 1, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
@@ -81,14 +81,14 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), OPT, null));
 
         register("json-doc", 1, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+                .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
         register("json-doc", 2, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
 
         register("json-doc", 3, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null)
+                .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .arg(2, AnyItemType.getInstance(), OPT, null));
 
@@ -97,7 +97,7 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
 
         register("json-parse", 2, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
 
         register("new", 2, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
@@ -106,7 +106,7 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
         register("new", 3, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, ArrayItemType.getInstance(), ONE, null)
-                .arg(2, MapType.ANY_MAP_TYPE, ONE, null));
+                .arg(2, MapType.ANY_MAP_TYPE, OPT, null));
 
         register("race", 1, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, ArrayItemType.getInstance(), ONE, null));
