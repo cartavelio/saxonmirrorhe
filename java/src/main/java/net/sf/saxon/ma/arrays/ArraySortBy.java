@@ -42,7 +42,7 @@ public class ArraySortBy extends SystemFunction {
 
     public static final FunctionItemType keyFunctionType =
         new SpecificFunctionType(SequenceType.ANY_SEQUENCE, SequenceType.ATOMIC_SEQUENCE);
-    public static RecordType sortKeyRecord = RecordTest.nonExtensible(
+    public static RecordTest sortKeyRecord = RecordTest.nonExtensible(
             new RecordTest.Field("key", SequenceType.optional(keyFunctionType), true),
             new RecordTest.Field("collation", SequenceType.OPTIONAL_STRING, true),
             new RecordTest.Field("order", SequenceType.optional(EnumerationUnionType.of("ascending", "descending")), true)

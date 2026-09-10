@@ -353,11 +353,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) throws XPathException {
             ItemType it = arguments[0].getItemType();
-            if (it instanceof RecordType && arguments.length == 2) {
+            if (it instanceof RecordTest && arguments.length == 2) {
                 if (arguments[1] instanceof StringLiteral) {
                     String key = ((StringLiteral)arguments[1]).stringify();
-                    if (((RecordType)it).getFieldType(key) == null) {
-                        XPathException xe = new XPathException("Field " + key + " is not defined for tuple type " + it, "SXTT0001");
+                    if (((RecordTest)it).getFieldType(key) == null) {
+                        XPathException xe = new XPathException("Field " + key + " is not defined for record type " + it, "SXTT0001");
                         xe.setIsTypeError(true);
                         throw xe;
                     }

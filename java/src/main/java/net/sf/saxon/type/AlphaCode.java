@@ -358,9 +358,6 @@ public class AlphaCode {
                 case "e": // element type of document type
                     tree.elementType = value;
                     break;
-                case "selfReference":
-                    tree.selfReference = value;
-                    break;
                 default:
                     throw new IllegalArgumentException("Bad alphacode component " + key);
             }
@@ -962,13 +959,7 @@ public class AlphaCode {
                     List<SequenceType> fieldTypes = new ArrayList<>(tree.argTypes.size());
                     RecordTest recordTest = new RecordTest();
                     for (AlphaCodeTree t : tree.argTypes) {
-                        if (t.selfReference != null) {
-                            SelfReferenceRecordTest selfie = new SelfReferenceRecordTest(recordTest);
-                            int xcardinality = Cardinality.fromOccurrenceIndicator(tree.cardinality);
-                            fieldTypes.add(SequenceType.makeSequenceType(selfie, xcardinality));
-                        } else {
-                            fieldTypes.add(sequenceTypeFromTree(t, schema));
-                        }
+                        fieldTypes.add(sequenceTypeFromTree(t, schema));
                     }
                     recordTest.setDetails(tree.fieldNames, fieldTypes, tree.optionalFieldNames, tree.extensibleTupleType);
                     itemType = recordTest;
@@ -1125,17 +1116,7 @@ public class AlphaCode {
                 for (String s : ((RecordTest) primary).getFieldNames()) {
                     result.fieldNames.add(s);
                     SequenceType fieldType = ((RecordTest) primary).getFieldType(s);
-                    if (fieldType.getPrimaryType() instanceof SelfReferenceRecordTest) {
-                        // we have a self-reference ("..")
-                        AlphaCodeTree selfRef = new AlphaCodeTree();
-                        selfRef.selfReference = result;
-                        selfRef.cardinality = fieldType.getCardinality() == StaticProperty.EXACTLY_ONE
-                                ? "1"
-                                : Cardinality.getOccurrenceIndicator(fieldType.getCardinality());
-                        result.argTypes.add(selfRef);
-                    } else {
-                        result.argTypes.add(makeTree(((RecordTest) primary).getFieldType(s)));
-                    }
+                    result.argTypes.add(makeTree(fieldType));
                     if (((RecordTest) primary).isOptionalField(s)) {
                         result.optionalFieldNames.add(s);
                     }
@@ -1180,10 +1161,6 @@ public class AlphaCode {
     private static void alphaCodeFromTree(AlphaCodeTree tree, boolean withCardinality, StringBuilder sb) {
         if (withCardinality) {
             sb.append(tree.cardinality);
-        }
-        if (tree.selfReference != null) {
-            sb.append("..");
-            return;
         }
         sb.append(tree.principal);
         if (tree.name != null) {

@@ -24,7 +24,7 @@ import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.RecordType;
+import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -114,7 +114,7 @@ public class LookupByValuePredicate extends UnaryExpression {
 
         ItemType containerType = getBaseExpression().getItemType();
         boolean isArrayLookup = containerType instanceof ArrayItemType;
-        boolean isMapLookup = containerType instanceof MapType || containerType instanceof RecordType;
+        boolean isMapLookup = containerType instanceof MapType || containerType instanceof RecordTest;
         boolean isJNodeLookup = containerType instanceof JNodeType;
 
 //        if (!isArrayLookup && !isMapLookup) {

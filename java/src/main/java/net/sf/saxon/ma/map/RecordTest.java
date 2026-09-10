@@ -40,7 +40,7 @@ import java.util.function.Supplier;
  * types permit fields other than those listed to appear; non-extensible record types do not.
  * An extensible record type is denoted by record(... ,*).
  */
-public class RecordTest implements RecordType {
+public class RecordTest implements FunctionItemType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final List<String> fieldNamesInOrder = new ArrayList<>();
@@ -218,7 +218,7 @@ public class RecordTest implements RecordType {
      *
      * @return the name of the record type, or null if it has no name
      */
-    @Override
+
     public StructuredQName getName() {
         return name;
     }
@@ -228,7 +228,7 @@ public class RecordTest implements RecordType {
      *
      * @return the names of the fields (in retained order)
      */
-    @Override
+
     public Iterable<String> getFieldNames() {
         return fieldNamesInOrder;
     }
@@ -248,7 +248,6 @@ public class RecordTest implements RecordType {
      * @return the type of the field if it is defined, or null otherwise
      */
 
-    @Override
     public SequenceType getFieldType(String field) {
         return fieldTypes.get(field);
     }
@@ -259,7 +258,6 @@ public class RecordTest implements RecordType {
      * @return true if the field is defined as an optional field
      */
 
-    @Override
     public boolean isOptionalField(String field) {
         return optionalFields.contains(field);
     }
@@ -269,7 +267,6 @@ public class RecordTest implements RecordType {
      *
      * @return true if fields other than the named fields are permitted to appear
      */
-    @Override
     public boolean isExtensible() {
         return _extensible;
     }
@@ -282,30 +279,30 @@ public class RecordTest implements RecordType {
      */
     @Override
     public boolean matches(Item item) {
-        if (!(item instanceof MapItem)) {
+        if (item instanceof MapItem map) {
+            for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
+                GroundedValue val = map.get(new StringValue(field.getKey()));
+                if (val == null) {
+                    if (!isOptionalField(field.getKey())) {
+                        return false;
+                    }
+                } else if (!field.getValue().matches(val)) {
+                    return false;
+                }
+            }
+            if (!_extensible) {
+                AtomicIterator keyIter = map.keys();
+                AtomicValue key;
+                while ((key = keyIter.next()) != null) {
+                    if (!(key instanceof StringValue) || !fieldTypes.containsKey(key.getStringValue())) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        } else {
             return false;
         }
-        MapItem map = (MapItem)item;
-        for (Map.Entry<String, SequenceType> field : fieldTypes.entrySet()) {
-            GroundedValue val = map.get(new StringValue(field.getKey()));
-            if (val == null) {
-                if (!isOptionalField(field.getKey())) {
-                    return false;
-                }
-            } else if (!field.getValue().matches(val)) {
-                return false;
-            }
-        }
-        if (!_extensible) {
-            AtomicIterator keyIter = map.keys();
-            AtomicValue key;
-            while ((key = keyIter.next()) != null) {
-                if (!(key instanceof StringValue) || !fieldTypes.containsKey(key.getStringValue())) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**

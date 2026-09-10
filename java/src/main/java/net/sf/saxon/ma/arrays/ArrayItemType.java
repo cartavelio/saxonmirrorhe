@@ -266,18 +266,20 @@ public class ArrayItemType extends AnyFunctionType {
             return Affinity.SUBSUMED_BY;
         } else if (other.isMapType()){
             return Affinity.DISJOINT;
-        } else if (other instanceof ArrayItemType) {
+        } else if (other instanceof ArrayItemType a2) {
             // See bug 3720. Array types are never disjoint, because the empty array
             // is an instance of every array type
-            ArrayItemType f2 = (ArrayItemType) other;
-            Affinity rel = Subsumption.sequenceTypeRelationship(memberType, f2.memberType);
+            Affinity rel = Subsumption.sequenceTypeRelationship(memberType, a2.memberType);
             return rel== Affinity.DISJOINT ? Affinity.OVERLAPS : rel;
         } else {
             Affinity rel = new SpecificFunctionType(getArgumentTypes(), getResultType()).relationship(other);
-            if (rel == Affinity.SUBSUMES || rel == Affinity.SAME_TYPE) {
-                rel = Affinity.OVERLAPS;
-            }
-            return rel;
+            return switch (rel) {
+                case DISJOINT -> Affinity.DISJOINT;
+                case OVERLAPS -> Affinity.OVERLAPS;
+                case SUBSUMED_BY -> Affinity.SUBSUMED_BY;
+                case SAME_TYPE -> Affinity.SUBSUMED_BY;
+                case SUBSUMES -> Affinity.OVERLAPS;
+            };
         }
     }
 

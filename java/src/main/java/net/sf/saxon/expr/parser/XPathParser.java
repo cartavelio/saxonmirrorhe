@@ -2293,17 +2293,7 @@ public class XPathParser {
                 }
                 SequenceType arg = SequenceType.ANY_SEQUENCE;
                 if (tryKeyword("as")) {
-                    if (t.currentToken == Token.DOT_DOT) {
-                        // self-reference
-                        p.nextToken();
-                        int occ = parseOccurrenceIndicator();
-                        arg = SequenceType.makeSequenceType(new SelfReferenceRecordTest(recordTest), occ);
-                        if (!Cardinality.allowsZero(occ) && !optionalFieldNames.contains(name)) {
-                            throw new XPathException("A self-referencing field in a record type must be emptiable or optional", "XPST0140");
-                        }
-                    } else {
-                        arg = p.parseSequenceType();
-                    }
+                    arg = p.parseSequenceType();
                 }
                 fieldTypes.add(arg);
                 if (t.currentToken == Token.RPAREN) {

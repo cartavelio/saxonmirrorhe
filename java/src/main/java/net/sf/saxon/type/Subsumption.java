@@ -4,21 +4,18 @@ import com.saxonica.ee.config.SubsumptionEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.FunctionAnnotationHandler;
+import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
-import net.sf.saxon.type.gnode.AnyGNodeType;
-import net.sf.saxon.type.gnode.DocumentNodeType;
-import net.sf.saxon.type.gnode.GNodeType;
-import net.sf.saxon.type.gnode.XNodeType;
+import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -61,285 +58,295 @@ public abstract class Subsumption {
 
     public static Affinity computeRelationship(ItemType t1, ItemType t2) {
 
-        //Instrumentation.count("computeRelationship " + t1 + ", " + t2);
+        if (t1 == t2) {
+            return SAME_TYPE;
+        }
 
-        t1 = TypeHierarchy.normalizeItemType(t1);
-        t2 = TypeHierarchy.normalizeItemType(t2);
+        if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
+            t1 = TypeHierarchy.normalizeItemType(t1);
+            t2 = TypeHierarchy.normalizeItemType(t2);
+            ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
+            ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
+            return choiceItemRelationship(c1, c2);
+        }
 
-        try {
-            if (t1 == t2) {
+        if (t2 == ErrorType.getInstance()) {
+            return SUBSUMES;
+        }
+
+        return switch (t1.getGenre()) {
+            case ANY -> relationshipFromAny(t1, t2);
+            case MAP -> relationshipFromMap((FunctionItemType) t1, t2);
+            case ARRAY -> relationshipFromArray((ArrayItemType) t1, t2);
+            case JNODE -> relationshipFromJNode((JNodeType) t1, t2);
+            case XNODE -> relationshipFromXNode((XNodeType) t1, t2);
+            case ATOMIC -> relationshipFromAtomic((AtomicType) t1, t2);
+            case FUNCTION -> relationshipFromFunction((FunctionItemType) t1, t2);
+            case EXTERNAL -> relationshipFromExternal((ExternalObjectType) t1, t2);
+        };
+    }
+
+    private static Affinity relationshipFromAny(ItemType t1, ItemType t2) {
+        if (t1 == AnyItemType.INSTANCE) {
+            return SUBSUMES;
+        }
+        if (t1 instanceof AnyGNodeType) {
+            return t2 instanceof GNodeType ? SUBSUMES : DISJOINT;
+        }
+        if (t1 == ErrorType.getInstance()) {
+            return SUBSUMED_BY;
+        }
+        throw new IllegalArgumentException("Unsupported item type: " + t1);
+    }
+
+    private static Affinity relationshipFromMap(FunctionItemType f1, ItemType t2) {
+        if (t2 == AnyItemType.INSTANCE || t2 == MapType.ANY_MAP_TYPE || t2 == AnyFunctionType.INSTANCE) {
+            return SUBSUMED_BY;
+        }
+        if (t2 == MapType.EMPTY_MAP_TYPE) {
+            return SUBSUMES;
+        }
+        if (f1 instanceof MapType m1) {
+            if (t2 instanceof MapType m2) {
+                PlainType k1 = m1.getKeyType();
+                PlainType k2 = m2.getKeyType();
+                SequenceType v1 = m1.getValueType();
+                SequenceType v2 = m2.getValueType();
+                Affinity keyRel = computeRelationship(k1, k2);
+                Affinity valueRel = sequenceTypeRelationship(v1, v2);
+                Affinity rel = combineRelationships(keyRel, valueRel);
+                if (rel == SAME_TYPE || rel == SUBSUMES || rel == SUBSUMED_BY) {
+                    return rel;
+                }
+                // For other relationships, it's more complex because of the need to compare as function type,
+                // so just fall through
+            }
+        }
+        if (t2 instanceof FunctionItemType f2) {
+            // includes the case where f1 is a record type
+           return f1.relationship(f2);
+        }
+
+        return DISJOINT;
+
+    }
+
+    private static Affinity relationshipFromArray(ArrayItemType a1, ItemType t2) {
+        if (t2 == AnyItemType.INSTANCE || t2 == ArrayItemType.ANY_ARRAY_TYPE || t2 == AnyFunctionType.INSTANCE) {
+            return SUBSUMED_BY;
+        }
+        if (t2 instanceof ArrayItemType a2) {
+            return sequenceTypeRelationship(a1.getMemberType(), a2.getMemberType());
+        }
+        if (t2 instanceof FunctionItemType f2) {
+            return a1.relationship(f2);
+        }
+        return DISJOINT;
+    }
+
+    private static Affinity relationshipFromJNode(JNodeType j1, ItemType t2) {
+        if (t2 == AnyItemType.INSTANCE || t2 == AnyGNodeType.getInstance()) {
+            return SUBSUMED_BY;
+        }
+        if (t2 instanceof JNodeType j2) {
+            return sequenceTypeRelationship(j1.getValueType(), j2.getValueType());
+        }
+        return DISJOINT;
+    }
+
+    private static Affinity relationshipFromAtomic(AtomicType a1, ItemType t2) {
+        // Note, union types are choice types, so we won't see them here.
+        if (t2 == BuiltInAtomicType.ANY_ATOMIC || t2 == AnyItemType.INSTANCE) {
+            return SUBSUMED_BY;
+        }
+        if (a1 == BuiltInAtomicType.ANY_ATOMIC) {
+            return t2 instanceof AtomicType ? SUBSUMES : DISJOINT;
+        }
+        if (t2 instanceof AtomicType a2) {
+
+            if (a1.getFingerprint() == a2.getFingerprint()) {
                 return SAME_TYPE;
             }
-            if (t1 instanceof AnyItemType) {
-                return SUBSUMES;
-            }
-            if (t2 instanceof AnyItemType) {
-                return SUBSUMED_BY;
-            }
-            if (t1 == ErrorType.getInstance()) {
-                return SUBSUMED_BY;
-            }
-            if (t2 == ErrorType.getInstance()) {
-                return SUBSUMES;
-            }
-
-            requireTrueItemType(t1);
-            requireTrueItemType(t2);
-
-            if (t1 instanceof ChoiceItemType || t2 instanceof ChoiceItemType) {
-                ChoiceItemType c1 = t1 instanceof ChoiceItemType ? (ChoiceItemType) t1 : ChoiceItemType.of(t1);
-                ChoiceItemType c2 = t2 instanceof ChoiceItemType ? (ChoiceItemType) t2 : ChoiceItemType.of(t2);
-                return choiceItemRelationship(c1, c2);
-            }
-            if (t1.isPlainType()) {
-                if (t2 instanceof GNodeType || t2 instanceof FunctionItemType || t2 instanceof JavaExternalObjectType) {
-                    return DISJOINT;
-                } else if (t1 == BuiltInAtomicType.ANY_ATOMIC && t2.isPlainType()) {
-                    return SUBSUMES;
-                } else if (t2 == BuiltInAtomicType.ANY_ATOMIC) {
+            // For built-in atomic types, use the alphacode, which is designed to
+            // capture the type hierarchy: for example AD = decimal, ADI = integer, ADIL = long.
+            if (a1 instanceof BuiltInAtomicType && a2 instanceof BuiltInAtomicType) {
+                String alpha1 = a1.getBasicAlphaCode();
+                String alpha2 = a2.getBasicAlphaCode();
+                if (alpha1.startsWith(alpha2)) {
                     return SUBSUMED_BY;
-                } else if (t1 instanceof AtomicType && t2 instanceof AtomicType) {
-                    if (((AtomicType) t1).getFingerprint() == ((AtomicType) t2).getFingerprint()) {
-                        return SAME_TYPE;
-                    }
-                    // For built-in atomic types, use the alphacode, which is designed to
-                    // capture the type hierarchy: for example AD = decimal, ADI = integer, ADIL = long.
-                    if (t1 instanceof BuiltInAtomicType && t2 instanceof BuiltInAtomicType) {
-                        String alpha1 = t1.getBasicAlphaCode();
-                        String alpha2 = t2.getBasicAlphaCode();
-                        if (alpha1.startsWith(alpha2)) {
-                            return SUBSUMED_BY;
-                        }
-                        if (alpha2.startsWith(alpha1)) {
-                            return SUBSUMES;
-                        }
-                        return DISJOINT;
-                    }
-                    if (derivesFrom((AtomicType) t2, (AtomicType) t1)) {
-                        return SUBSUMES;
-                    }
-                    if (derivesFrom((AtomicType) t1, (AtomicType) t2)) {
-                        return SUBSUMED_BY;
-                    }
-                    return DISJOINT;
-
-                } else if (!t1.isAtomicType() && t2.isPlainType()) {
-                    // relationship(union, atomic) or relationship(union, union)
-                    Set<? extends PlainType> s1 = TypeHierarchy.toSet(((PlainType) t1).getPlainMemberTypes());
-                    Set<? extends PlainType> s2 = TypeHierarchy.toSet(((PlainType) t2).getPlainMemberTypes());
-
-                    if (!unionOverlaps(s1, s2)) {
-                        return DISJOINT;
-                    }
-
-                    boolean gt = s1.containsAll(s2);
-                    boolean lt = s2.containsAll(s1);
-                    if (gt && lt) {
-                        return SAME_TYPE;
-                    } else if (gt) {
-                        return SUBSUMES;
-                    } else if (lt) {
-                        return SUBSUMED_BY;
-                    } else if (unionSubsumes(s1, s2)) {
-                        return SUBSUMES;
-                    } else if (unionSubsumes(s2, s1)) {
-                        return SUBSUMED_BY;
-                    } else {
-                        return OVERLAPS;
-                    }
-
-                } else if (t1 instanceof AtomicType) {
-                    // relationship (atomic, union)
-                    Affinity r = computeRelationship(t2, t1);
-                    return inverseRelationship(r);
-
-                } else {
-                    // all options exhausted
-                    throw new IllegalStateException();
                 }
-            } else if (t1 instanceof GNodeType) {
-                if (!(t2 instanceof GNodeType)) {
-                    return DISJOINT;
-                }
-                if (t1 instanceof AnyGNodeType) {
-                    if (t2 instanceof JNodeType || t2 instanceof XNodeType) {
-                        return SUBSUMES;
-                    }
-                    return DISJOINT;
-                } else if (t1 instanceof JNodeType) {
-                    if (t2 instanceof AnyGNodeType) {
-                        return SUBSUMED_BY;
-                    } else if (t2 instanceof JNodeType) {
-                        return sequenceTypeRelationship(((JNodeType) t1).getValueType(), ((JNodeType) t2).getValueType());
-                    } else {
-                        return DISJOINT;
-                    }
-                } else if (t1 instanceof XNodeType) {
-                    if (t2 instanceof AnyGNodeType) {
-                        return SUBSUMED_BY;
-                    }
-                    if (t2 instanceof XNodeType) {
-
-                        // Compare schema-element and schema-attribute tests (Saxon bug 6910)
-
-                        Optional<Affinity> schemaElementAffinity = schemaDeclarationAffinity(t1, t2);
-                        if (schemaElementAffinity.isPresent()) {
-                            return schemaElementAffinity.get();
-                        }
-
-                        // first find the relationship between the node kinds allowed
-                        Affinity nodeKindRelationship;
-                        UType m1 = t1.getUType();
-                        UType m2 = t2.getUType();
-                        if (!m1.overlaps(m2)) {
-                            return DISJOINT;
-                        } else if (m1.equals(m2)) {
-                            nodeKindRelationship = SAME_TYPE;
-                        } else if (m2.subsumes(m1)) {
-                            nodeKindRelationship = SUBSUMED_BY;
-                        } else if (m1.subsumes(m2)) {
-                            nodeKindRelationship = SUBSUMES;
-                        } else {
-                            return OVERLAPS;
-                        }
-
-
-                        // Now find the relationship between the node names allowed.  See bug 3713
-                        Affinity nodeNameRelationship = nameTestRelationship(
-                                ((XNodeType) t1).getAllowedNodeNames(),
-                                ((XNodeType) t2).getAllowedNodeNames());
-
-                        if (nodeNameRelationship == DISJOINT || nodeNameRelationship == OVERLAPS) {
-                            return nodeNameRelationship;
-                        }
-
-                        // now find the relationship between the content types allowed
-
-                        Affinity contentRelationship = computeContentRelationship((XNodeType) t1, (XNodeType) t2);
-
-                        // now analyse the three different relationships
-
-                        if (nodeKindRelationship == SAME_TYPE &&
-                                nodeNameRelationship == SAME_TYPE &&
-                                contentRelationship == SAME_TYPE) {
-                            return SAME_TYPE;
-                        } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMES) &&
-                                (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMES) &&
-                                (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMES)) {
-                            return SUBSUMES;
-                        } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMED_BY) &&
-                                (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMED_BY) &&
-                                (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMED_BY)) {
-                            return SUBSUMED_BY;
-                        } else if (contentRelationship == DISJOINT) {
-                            return DISJOINT;
-                        } else {
-                            return OVERLAPS;
-                        }
-                    }
-                    return DISJOINT;
-                } else {
-                    return DISJOINT;
-                }
-            } else if (t1 instanceof AnyExternalObjectType) {
-                if (!(t2 instanceof AnyExternalObjectType)) {
-                    return DISJOINT;
-                }
-                if (t1 instanceof JavaExternalObjectType) {
-                    if (t2 == AnyExternalObjectType.THE_INSTANCE) {
-                        return SUBSUMED_BY;
-                    } else if (t2 instanceof JavaExternalObjectType) {
-                        return ((JavaExternalObjectType) t1).getRelationship((JavaExternalObjectType) t2);
-                    } else {
-                        return DISJOINT;
-                    }
-                }
-                if (t2 instanceof JavaExternalObjectType) {
+                if (alpha2.startsWith(alpha1)) {
                     return SUBSUMES;
-                } else {
-                    return DISJOINT;
                 }
-            } else {
-                // t1 is a FunctionItemType
-                if (t1 instanceof MapType && t2 instanceof MapType) {
-                    if (t1 == MapType.EMPTY_MAP_TYPE) {
-                        return SUBSUMED_BY;
-                    } else if (t2 == MapType.EMPTY_MAP_TYPE) {
-                        return SUBSUMES;
-                    }
-                    if (t1 == MapType.ANY_MAP_TYPE) {
-                        return SUBSUMES;
-                    } else if (t2 == MapType.ANY_MAP_TYPE) {
-                        return SUBSUMED_BY;
-                    }
-                    PlainType k1 = ((MapType) t1).getKeyType();
-                    PlainType k2 = ((MapType) t2).getKeyType();
-                    SequenceType v1 = ((MapType) t1).getValueType();
-                    SequenceType v2 = ((MapType) t2).getValueType();
-                    Affinity keyRel = computeRelationship(k1, k2);
-                    Affinity valueRel = sequenceTypeRelationship(v1, v2);
-                    Affinity rel = combineRelationships(keyRel, valueRel);
-                    if (rel == SAME_TYPE || rel == SUBSUMES || rel == SUBSUMED_BY) {
-                        return rel;
-                    }
-                    // For other relationships, it's more complex because of the need to compare as function type,
-                    // so just fall through
-                }
-                if (t2 instanceof FunctionItemType) {
-                    Affinity signatureRelationship = ((FunctionItemType) t1).relationship((FunctionItemType) t2);
-                    if (signatureRelationship == DISJOINT) {
-                        return DISJOINT;
-                    } else {
-                        Affinity assertionRelationship = SAME_TYPE;
-                        AnnotationList first = ((FunctionItemType) t1).getAnnotationAssertions();
-                        AnnotationList second = ((FunctionItemType) t2).getAnnotationAssertions();
+                return DISJOINT;
+            }
+            if (derivesFrom(a2, a1)) {
+                return SUBSUMES;
+            }
+            if (derivesFrom(a1, a2)) {
+                return SUBSUMED_BY;
+            }
+            return DISJOINT;
+        }
 
-                        Configuration config = null;
-                        if (!first.isEmpty()) {
-                            config = first.getConfiguration();
-                        } else if (!second.isEmpty()) {
-                            config = second.getConfiguration();
-                        }
-                        if (config != null) {
-                            // implies one of the annotation lists is non-empty
-                            Set<NamespaceUri> namespaces = new HashSet<>();
-                            for (Annotation a : first) {
-                                namespaces.add(a.getAnnotationQName().getNamespaceUri());
-                            }
-                            for (Annotation a : second) {
-                                namespaces.add(a.getAnnotationQName().getNamespaceUri());
-                            }
-                            for (NamespaceUri ns : namespaces) {
-                                FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ns);
-                                if (handler != null) {
-                                    Affinity localRel = SAME_TYPE;
-                                    AnnotationList firstFiltered = first.filterByNamespace(ns);
-                                    AnnotationList secondFiltered = second.filterByNamespace(ns);
-                                    if (firstFiltered.isEmpty()) {
-                                        if (secondFiltered.isEmpty()) {
-                                            // no action
-                                        } else {
-                                            localRel = SUBSUMES;
-                                        }
-                                    } else {
-                                        if (secondFiltered.isEmpty()) {
-                                            localRel = SUBSUMED_BY;
-                                        } else {
-                                            localRel = handler.relationship(firstFiltered, secondFiltered);
-                                        }
-                                    }
-                                    assertionRelationship = combineRelationships(assertionRelationship, localRel);
+        return DISJOINT;
+    }
+
+    private static Affinity relationshipFromXNode(XNodeType n1, ItemType t2) {
+
+        ItemType t1 = TypeHierarchy.normalizeItemType(n1);
+        if (t1 instanceof ChoiceItemType) {
+            return computeRelationship(t1, t2);
+        }
+
+        if (t2 == AnyXNodeType.getInstance() || t2 == AnyGNodeType.getInstance() || t2 == AnyItemType.INSTANCE) {
+            return SUBSUMED_BY;
+        }
+
+        if (t2 instanceof AnyGNodeType) {
+            return SUBSUMED_BY;
+        }
+        if (t2 instanceof XNodeType n2) {
+
+            // Compare schema-element and schema-attribute tests (Saxon bug 6910)
+
+            Optional<Affinity> schemaElementAffinity = schemaDeclarationAffinity(n1, n2);
+            if (schemaElementAffinity.isPresent()) {
+                return schemaElementAffinity.get();
+            }
+
+            // first find the relationship between the node kinds allowed
+            Affinity nodeKindRelationship;
+            UType m1 = n1.getUType();
+            UType m2 = n2.getUType();
+            if (!m1.overlaps(m2)) {
+                return DISJOINT;
+            } else if (m1.equals(m2)) {
+                nodeKindRelationship = SAME_TYPE;
+            } else if (m2.subsumes(m1)) {
+                nodeKindRelationship = SUBSUMED_BY;
+            } else if (m1.subsumes(m2)) {
+                nodeKindRelationship = SUBSUMES;
+            } else {
+                return OVERLAPS;
+            }
+
+
+            // Now find the relationship between the node names allowed.  See bug 3713
+            Affinity nodeNameRelationship = nameTestRelationship(
+                    n1.getAllowedNodeNames(),
+                    n2.getAllowedNodeNames());
+
+            if (nodeNameRelationship == DISJOINT || nodeNameRelationship == OVERLAPS) {
+                return nodeNameRelationship;
+            }
+
+            // now find the relationship between the content types allowed
+
+            Affinity contentRelationship = computeContentRelationship(n1, n2);
+
+            // now analyse the three different relationships
+
+            if (nodeKindRelationship == SAME_TYPE &&
+                    nodeNameRelationship == SAME_TYPE &&
+                    contentRelationship == SAME_TYPE) {
+                return SAME_TYPE;
+            } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMES) &&
+                    (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMES) &&
+                    (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMES)) {
+                return SUBSUMES;
+            } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMED_BY) &&
+                    (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMED_BY) &&
+                    (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMED_BY)) {
+                return SUBSUMED_BY;
+            } else if (contentRelationship == DISJOINT) {
+                return DISJOINT;
+            } else {
+                return OVERLAPS;
+            }
+        }
+        return DISJOINT;
+    }
+
+    private static Affinity relationshipFromFunction(FunctionItemType f1, ItemType t2) {
+        if (t2 == AnyFunctionType.INSTANCE || t2 == AnyItemType.INSTANCE) {
+            return SUBSUMED_BY;
+        }
+        if (t2 instanceof ArrayItemType || t2 instanceof MapType) {
+            return inverseRelationship(computeRelationship(t2, f1));
+        }
+        if (t2 instanceof FunctionItemType f2) {
+            Affinity signatureRelationship = f1.relationship(f2);
+            if (signatureRelationship == DISJOINT) {
+                return DISJOINT;
+            } else {
+                Affinity assertionRelationship = SAME_TYPE;
+                AnnotationList first = f1.getAnnotationAssertions();
+                AnnotationList second = f2.getAnnotationAssertions();
+
+                Configuration config = null;
+                if (!first.isEmpty()) {
+                    config = first.getConfiguration();
+                } else if (!second.isEmpty()) {
+                    config = second.getConfiguration();
+                }
+                if (config != null) {
+                    // implies one of the annotation lists is non-empty
+                    Set<NamespaceUri> namespaces = new HashSet<>();
+                    for (Annotation a : first) {
+                        namespaces.add(a.getAnnotationQName().getNamespaceUri());
+                    }
+                    for (Annotation a : second) {
+                        namespaces.add(a.getAnnotationQName().getNamespaceUri());
+                    }
+                    for (NamespaceUri ns : namespaces) {
+                        FunctionAnnotationHandler handler = config.getFunctionAnnotationHandler(ns);
+                        if (handler != null) {
+                            Affinity localRel = SAME_TYPE;
+                            AnnotationList firstFiltered = first.filterByNamespace(ns);
+                            AnnotationList secondFiltered = second.filterByNamespace(ns);
+                            if (firstFiltered.isEmpty()) {
+                                if (secondFiltered.isEmpty()) {
+                                    // no action
+                                } else {
+                                    localRel = SUBSUMES;
+                                }
+                            } else {
+                                if (secondFiltered.isEmpty()) {
+                                    localRel = SUBSUMED_BY;
+                                } else {
+                                    localRel = handler.relationship(firstFiltered, secondFiltered);
                                 }
                             }
+                            assertionRelationship = combineRelationships(assertionRelationship, localRel);
                         }
-                        return combineRelationships(signatureRelationship, assertionRelationship);
                     }
-                } else {
-                    return DISJOINT;
                 }
+                return combineRelationships(signatureRelationship, assertionRelationship);
             }
-        } catch (MissingComponentException e) {
-            return OVERLAPS;
+        } else {
+            return DISJOINT;
+        }
+    }
+
+    private static Affinity relationshipFromExternal(ExternalObjectType e1, ItemType t2) {
+
+        if (!(t2 instanceof AnyExternalObjectType)) {
+            return DISJOINT;
+        }
+        if (e1 instanceof JavaExternalObjectType j1) {
+            if (t2 == AnyExternalObjectType.THE_INSTANCE) {
+                return SUBSUMED_BY;
+            } else if (t2 instanceof JavaExternalObjectType j2) {
+                return j1.getRelationship(j2);
+            } else {
+                return DISJOINT;
+            }
+        }
+        if (t2 instanceof JavaExternalObjectType) {
+            return SUBSUMES;
+        } else {
+            return DISJOINT;
         }
     }
 
@@ -354,12 +361,12 @@ public abstract class Subsumption {
         return false;
     }
 
-    private static void requireTrueItemType(ItemType t) {
-        Objects.requireNonNull(t);
-        if (t instanceof UnionType && !t.isPlainType()) {
-            throw new AssertionError(t + " is a non-pure union type");
-        }
-    }
+//    private static void requireTrueItemType(ItemType t) {
+//        Objects.requireNonNull(t);
+//        if (t instanceof UnionType && !t.isPlainType()) {
+//            throw new AssertionError(t + " is a non-pure union type");
+//        }
+//    }
 
     private static Affinity nameTestRelationship(QNameTest t1, QNameTest t2) {
         if (t1 == null || t2 == null) {
@@ -384,54 +391,6 @@ public abstract class Subsumption {
         } else {
             return OVERLAPS;
         }
-    }
-
-    /**
-     * Ask whether one union type subsumes another
-     *
-     * @param s1 the member types of the first union type
-     * @param s2 the member types of the second union type
-     * @return true if every type t2 in s2 is subsumed by the first union type; except that
-     * we assume this is the case only if t2 is subsumed by some member type of the first union type.
-     */
-
-    private static boolean unionSubsumes(Set<? extends PlainType> s1, Set<? extends PlainType> s2) {
-        // s1 subsumes s2 if every t2 in s2 is subsumed by some t1 in s1 (we'll discount the possibility
-        // of some t2 in s2 being subsumed by a combination of multiple types in s1)
-        for (PlainType t2 : s2) {
-            boolean t2isSubsumed = false;
-            for (PlainType t1 : s1) {
-                Affinity rel = computeRelationship(t1, t2);
-                if (rel == SUBSUMES || rel == SAME_TYPE) {
-                    t2isSubsumed = true;
-                    break;
-                }
-            }
-            if (!t2isSubsumed) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Ask whether two union types are disjoint
-     *
-     * @param s1 the set of member types of the first union type
-     * @param s2 the set of member types of the second union type
-     * @return true if some S1 in s1 has instances in common with some S2 in s2
-     */
-
-    private static boolean unionOverlaps(Set<? extends PlainType> s1, Set<? extends PlainType> s2) {
-        for (PlainType t2 : s2) {
-            for (PlainType t1 : s1) {
-                Affinity rel = computeRelationship(t1, t2);
-                if (rel != DISJOINT) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -680,7 +639,7 @@ public abstract class Subsumption {
      * @return the relationship between the two, if one is a schema-element test; otherwise
      * Optional.empty().
      */
-    private static Optional<Affinity> schemaDeclarationAffinity(ItemType t1, ItemType t2) {
+    private static Optional<Affinity> schemaDeclarationAffinity(XNodeType t1, XNodeType t2) {
         Optional<Affinity> result = Optional.empty();
         //#if EE=true
         result = SubsumptionEE.schemaDeclarationAffinity(t1, t2);
