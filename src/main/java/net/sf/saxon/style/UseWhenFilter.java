@@ -560,11 +560,13 @@ public class UseWhenFilter extends ProxyReceiver {
                                                e.getErrorCodeQName(), attLoc);
                 }
             }
-            Supplier<RoleDiagnostic> role =
-                    () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0, "XTDE0050");
-            value = coercionRules.coerce(
-                    value, requiredType, SequenceType.ANY_SEQUENCE, getConfiguration(), role, attLoc)
-                    .materialize();
+            if (requiredType != SequenceType.ANY_SEQUENCE) {
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, varName.getDisplayName(), 0, "XTDE0050");
+                value = coercionRules.coerce(
+                                value, requiredType, SequenceType.ANY_SEQUENCE, getConfiguration(), role, attLoc)
+                        .materialize();
+            }
             try {
                 compilation.declareStaticVariable(varName, value, precedence, isParam);
             } catch (XPathException e) {

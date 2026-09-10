@@ -125,7 +125,7 @@ public abstract class ItemType implements Predicate<XdmItem> {
      */
 
     public CoercionPlan getCoercionPlan(int xPathVersion) {
-        return NoCoercionPlan.INSTANCE;
+        return ItemCheckingPlan.INSTANCE;
     }
 
     /**

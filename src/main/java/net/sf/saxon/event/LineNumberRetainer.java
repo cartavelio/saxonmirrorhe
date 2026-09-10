@@ -24,6 +24,9 @@ import java.util.Objects;
  * change to pass an extra argument to {@code endElement}, we instead register the
  * original SAX {@code Location} object in the {@link PipelineConfiguration}, and
  * pick the value up from there.</p>
+ *
+ * <p><b>DROPPED from the Saxon 13 build because in edge cases with multiple-entity files,
+ * it gets the base URI of nodes wrong.</b></p>
  */
 public class LineNumberRetainer extends ProxyReceiver {
 

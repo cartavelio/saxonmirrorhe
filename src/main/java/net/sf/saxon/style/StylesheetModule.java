@@ -215,7 +215,7 @@ public class StylesheetModule {
             final NamePool pool = config.getNamePool();
             commentStripper.setSkippedElementTest(name -> name.obtainFingerprint(pool) == StandardNames.XSL_NOTE);
         }
-        LineNumberRetainer lineNumberer = new LineNumberRetainer(commentStripper);
+        //LineNumberRetainer lineNumberer = new LineNumberRetainer(commentStripper);
 
         // Pipeline for compiled XSLT code
 
@@ -224,7 +224,7 @@ public class StylesheetModule {
         CheckSumFilter checksummer = new CheckSumFilter(packageBuilder);
         checksummer.setCheckExistingChecksum(true);
 
-        Valve valve = new Valve(NamespaceUri.SAXON_XSLT_EXPORT, lineNumberer, checksummer);
+        Valve valve = new Valve(NamespaceUri.SAXON_XSLT_EXPORT, commentStripper, checksummer);
         sourcePipeline = valve;
 
         // build the stylesheet document

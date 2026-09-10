@@ -66,13 +66,24 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     }
 
     /**
-     * Get the genre of this item
+     * Get the genre of this item type
      *
      * @return the genre
      */
     @Override
     public Genre getGenre() {
-        return Genre.ANY;
+        UType uType = getUType();
+        if (UType.ANY_ATOMIC.subsumes(uType)) {
+            return Genre.ATOMIC;
+        } else if (UType.ANY_NODE.subsumes(uType)) {
+            return Genre.NODE;
+        } else if (UType.FUNCTION.subsumes(uType)) {
+            return Genre.FUNCTION;
+        } else if (UType.EXTENSION.subsumes(uType)) {
+            return Genre.EXTERNAL;
+        } else {
+            return Genre.ANY;
+        }
     }
 
     public String getDescription() {

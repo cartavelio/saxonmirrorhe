@@ -278,9 +278,9 @@ public class ReceivingContentHandler
 //    }
 
     private void resetLocation() {
-        if (receiver instanceof LineNumberRetainer) {
-            ((LineNumberRetainer) receiver).resetLocation(localLocator);
-        }
+//        if (receiver instanceof LineNumberRetainer) {
+//            ((LineNumberRetainer) receiver).resetLocation(localLocator);
+//        }
     }
 
     /**

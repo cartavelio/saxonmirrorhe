@@ -12,10 +12,7 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -46,13 +43,30 @@ public final class SequenceCoercer extends UnaryExpression {
      * @param requiredType the function item type to which all items in the sequence should be converted,
      */
 
-    public SequenceCoercer(Expression sequence, SequenceType requiredType,
+    private SequenceCoercer(Expression sequence, SequenceType requiredType,
                            Supplier<RoleDiagnostic> role, boolean allow40) {
         super(sequence);
         this.requiredType = requiredType;
         this.roleSupplier = role;
         this.allow40 = allow40;
         ExpressionTool.copyLocationInfo(sequence, this);
+    }
+
+    public static Expression makeSequenceCoercer(Expression sequence, SequenceType requiredType,
+                                                 Supplier<RoleDiagnostic> role, boolean allow40) {
+        // No real coercion happens for nodes - only checking that supplied value is of the right type.
+        // Also, nodes are handled specially when streaming. So if the required type is a node type,
+        // we use an ItemChecker and/or CardinalityChecker.
+
+        ItemType requiredItemType = requiredType.getPrimaryType();
+        if (requiredItemType.getGenre() == Genre.NODE) {
+            Expression result = new ItemChecker(sequence,requiredItemType, role);
+            if (!Cardinality.subsumes(requiredType.getCardinality(),sequence.getCardinality())) {
+                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+            }
+            return result;
+        }
+        return new SequenceCoercer(sequence, requiredType, role, allow40);
     }
 
     @Override

@@ -107,6 +107,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
             }
             Orphan txt = new Orphan(getConfiguration());
             txt.setNodeKind(Type.TEXT);
+            txt.setStringValue(chars);
             checkItem(txt, locationId);
         }
         getNextOutputter().characters(chars, locationId, properties);
@@ -328,7 +329,7 @@ public class TypeCheckingFilter extends ProxyOutputter {
 
     private void checkItem(Item item, Location locationId) throws XPathException {
         if (!requiredType.matches(item, typeHierarchy)) {
-            throwTypeError(null, item, locationId);
+            throwTypeError(requiredType, item, locationId);
         }
     }
 

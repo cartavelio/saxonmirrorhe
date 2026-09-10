@@ -1636,8 +1636,10 @@ public abstract class StyleElement extends ElementImpl {
             return null;
         }
         try {
+            ExpressionVisitor visitor = makeExpressionVisitor();
             ItemType cit = Type.ITEM_TYPE;
-            pattern = pattern.typeCheck(makeExpressionVisitor(), getConfiguration().makeContextItemStaticInfo(cit, true));
+            ContextItemStaticInfo cisi = getConfiguration().makeContextItemStaticInfo(cit, true);
+            pattern = pattern.typeCheck(visitor, cisi);
             boolean usesCurrent = false;
 
             for (Operand o : pattern.operands()) {
@@ -1650,7 +1652,7 @@ public abstract class StyleElement extends ElementImpl {
             if (usesCurrent) {
                 PatternThatSetsCurrent p2 = new PatternThatSetsCurrent(pattern);
                 pattern.bindCurrent(p2.getCurrentBinding());
-                pattern = p2;
+                return p2.typeCheck(visitor, cisi);
             }
 
             return pattern;

@@ -146,7 +146,7 @@ public class TypeChecker {
 
         // Create a coercer expression wrapping the supplied expression
 
-        Expression result = new SequenceCoercer(supplied, req, roleSupplier, version >= 40);
+        Expression result = SequenceCoercer.makeSequenceCoercer(supplied, req, roleSupplier, version >= 40);
 
         // If the supplied expression was a literal, do the coercion right now
 

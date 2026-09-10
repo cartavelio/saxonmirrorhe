@@ -4278,9 +4278,9 @@ public class Configuration implements SourceResolver, NotationSet {
             builder.setSystemId(source.getSystemId());
 
             Receiver dest = builder;
-            if (lineNumbering) {
-                dest = new LineNumberRetainer(dest);
-            }
+//            if (lineNumbering) {
+//                dest = new LineNumberRetainer(dest);
+//            }
             Sender.send(source, dest, options);
 
             // Get the constructed document

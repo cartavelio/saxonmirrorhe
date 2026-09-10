@@ -15,7 +15,7 @@ import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.NoCoercionPlan;
+import net.sf.saxon.type.coercion.ItemCheckingPlan;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -415,7 +415,7 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return NoCoercionPlan.INSTANCE;
+        return ItemCheckingPlan.INSTANCE;
     }
 
     /**

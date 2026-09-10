@@ -15,7 +15,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.NoCoercionPlan;
+import net.sf.saxon.type.coercion.ItemCheckingPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -127,7 +127,7 @@ public class AnyFunctionType implements FunctionItemType {
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return NoCoercionPlan.INSTANCE;
+        return ItemCheckingPlan.INSTANCE;
     }
 
     /**

@@ -10,7 +10,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.NoCoercionPlan;
+import net.sf.saxon.type.coercion.ItemCheckingPlan;
 
 /**
  * This class represents the type of an external object returned by
@@ -97,6 +97,6 @@ public class AnyExternalObjectType implements ItemType {
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return NoCoercionPlan.INSTANCE;
+        return ItemCheckingPlan.INSTANCE;
     }
 }

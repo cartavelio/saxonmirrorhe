@@ -86,6 +86,9 @@ public abstract class AttributeValueTemplate {
                 exp = exp.simplify();
                 last = parser.getTokenizer().inputOffset + 1;
 
+                if (last > avt.length()) {
+                    throw new XPathException("Missing closing '}' after expression in value template `" + avt + "`", "XTSE0350");
+                }
                 if (env instanceof ExpressionContext && ((ExpressionContext)env).getStyleElement() instanceof XSLAnalyzeString
                         && isIntegerOrIntegerPair(exp)) {
                     env.issueWarning("Found {" + showIntegers(exp) + "} in regex attribute: perhaps {{" +

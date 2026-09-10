@@ -1832,7 +1832,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Supplier<RoleDiagnostic> role = () -> RoleDiagnostic.reconstruct(savedRole);
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
             boolean allow40 = flags != null && flags.contains("4");
-            return new SequenceCoercer(target, type, role, allow40);
+            return SequenceCoercer.makeSequenceCoercer(target, type, role, allow40);
         });
 
         eMap.put("coercedFn", (loader, element) -> {

@@ -7,12 +7,14 @@ import net.sf.saxon.type.ItemType;
 
 /**
  * A coercion plan represents a process for implementing the coercion rules for converting
- * a supplied value to a given required type. The {@code NoCoercionPlan} is used for types
- * such as item(), node(), or map(*) where no item-level coercion take place.
+ * a supplied value to a given required type. The {@code ItemCheckingPlan} is used for types
+ * such as item(), node(), or map(*) where no item-level coercion take place, but where the
+ * only required action is to check that the items have the correct type and raise an
+ * error if not.
  */
-public final class NoCoercionPlan extends CoercionPlan {
+public final class ItemCheckingPlan extends CoercionPlan {
 
-    public final static NoCoercionPlan INSTANCE = new NoCoercionPlan();
+    public final static ItemCheckingPlan INSTANCE = new ItemCheckingPlan();
 
     /**
      * Apply the coercion rules (function conversion rules) to a value, given a required type.

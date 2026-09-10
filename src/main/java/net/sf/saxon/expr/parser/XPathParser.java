@@ -3004,7 +3004,6 @@ public class XPathParser {
                         nextToken();
                         readToken(Token.LPAREN);
                         readToken(Token.RPAREN);
-                        nextToken();
                         AxisExpression nsExp = new AxisExpression(AxisInfo.NAMESPACE, NodeKindTest.NAMESPACE);
                         setLocation(nsExp);
                         return nsExp;

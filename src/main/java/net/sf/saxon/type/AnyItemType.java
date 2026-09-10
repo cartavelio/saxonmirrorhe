@@ -11,7 +11,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.type.coercion.CoercionPlan;
-import net.sf.saxon.type.coercion.NoCoercionPlan;
+import net.sf.saxon.type.coercion.ItemCheckingPlan;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -235,7 +235,7 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
      */
     @Override
     public CoercionPlan getCoercionPlan(int version) {
-        return NoCoercionPlan.INSTANCE;
+        return ItemCheckingPlan.INSTANCE;
     }
 
 }
