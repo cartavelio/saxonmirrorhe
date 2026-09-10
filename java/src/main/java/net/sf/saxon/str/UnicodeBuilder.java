@@ -14,7 +14,8 @@ import net.sf.saxon.z.IntIterator;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Builder class to construct a UnicodeString by appending text incrementally
@@ -25,7 +26,7 @@ import java.util.Arrays;
 public final class UnicodeBuilder extends Writer implements UniStringConsumer, UnicodeWriter {
 
     // The data held by the UnicodeBuilder is in two parts: an archive part
-    // of arbitrary length, held as a ZenoString, and an active part which
+    // of arbitrary length, held as a list of fixed length segments, and an active part which
     // is typically up to 1m characters. For short strings the archive part
     // is always empty. The active part is held as an integer array, 32 bits per
     // character.
@@ -34,13 +35,14 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
     // to track the widest character added so far, which is subsequently used
     // to reduce the memory requirement for storing the string.
 
-    private int[] activePart;
-    private int activePartUsed;
-    private int bitMask;
-    private ZenoString archive = ZenoString.EMPTY;
-
-    private final static int MAX_ACTIVE_SIZE = 1_000_000;
+    private final static int SEGMENT_LENGTH = SegmentedString.SEGMENT_LENGTH;
     // See https://saxonica.plan.io/boards/2/topics/10002
+
+    private int[] activePart = new int[SEGMENT_LENGTH];
+    private int activePartUsed = 0;
+    private List<UnicodeString> archive = new ArrayList<>();
+
+
 
     /**
      * Create a Unicode builder with an initial allocation of 16 codepoints
@@ -70,8 +72,8 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
     }
 
     /**
-     * Append a single unicode character to the content
-     * @param codePoint the unicode codepoint. The caller is responsible for ensuring that this
+     * Append a single Unicode character to the content
+     * @param codePoint the Unicode codepoint. The caller is responsible for ensuring that this
      *                  is not a surrogate. (In fact, some callers, such as the JSON parser, do
      *                  in fact append unpaired surrogates to the builder, and sort it out
      *                  later.)
@@ -79,14 +81,12 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      */
 
     public UnicodeBuilder append(int codePoint) {
-        ensureCapacity(1);
-        activePart[activePartUsed++] = codePoint;
-        bitMask |= codePoint;
+        append(new UnicodeChar(codePoint));
         return this;
     }
 
     /**
-     * Append multiple unicode characters to the content
+     * Append multiple Unicode characters to the content
      *
      * @param codePoints an iterator delivering the codepoints to be added.
      * @return this builder, with the new characters added
@@ -113,7 +113,7 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
 
     /**
      * Append a Java CharSequence to the content. This may contain arbitrary characters including
-     * well formed surrogate pairs
+     * well-formed surrogate pairs
      *
      * @param str the string to be appended
      * @return this builder, with the new string added
@@ -135,17 +135,41 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
         if (len == 0) {
             return this;
         }
-        ensureCapacity(len);
-        str.copy32bit(activePart, activePartUsed);
-        activePartUsed += len;
+        if (activePartUsed + len > SEGMENT_LENGTH) {
 
-        int width = str.getWidth();
-        if (width > 8) {
-            if (width > 16) {
-                bitMask |= 0xffffff;
-            } else {
-                bitMask |= 0xffff;
+            int available = SEGMENT_LENGTH - activePartUsed;
+
+            TwineBuilder tb = TwineBuilder.make(SEGMENT_LENGTH);
+            for (int i = 0; i < activePartUsed; i++) {
+                tb = tb.append(activePart[i]);
             }
+            for (int i = 0; i < available; i++) {
+                tb = tb.append(str.codePointAt(i));
+            }
+            archive.add(tb.toUnicodeString());
+
+            activePartUsed = 0;
+            int offset = available;
+            while (offset + SEGMENT_LENGTH <= len) {
+                archive.add(str.substring(offset, offset + SEGMENT_LENGTH));
+                offset += SEGMENT_LENGTH;
+            }
+
+            int finalSegmentLen = (len - offset);
+            if (finalSegmentLen > activePart.length) {
+                activePart = new int[finalSegmentLen];
+            }
+            str.substring(offset).copy32bit(activePart, 0);
+            activePartUsed = finalSegmentLen;
+            
+        } else {
+            if (activePartUsed + len > activePart.length) {
+                int[] a2 = new int[activePart.length + len];
+                System.arraycopy(activePart, 0, a2, 0, activePart.length);
+                activePart = a2;
+            }
+            str.copy32bit(activePart, activePartUsed);
+            activePartUsed += len;
         }
         return this;
     }
@@ -155,7 +179,7 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      * @return the size in codepoints
      */
     public long length() {
-        return archive.length() + activePartUsed;
+        return archive.size() * (long)SEGMENT_LENGTH + activePartUsed;
     }
 
     /**
@@ -164,26 +188,6 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      */
     public boolean isEmpty() {
         return archive.isEmpty() && activePartUsed == 0;
-    }
-
-    /**
-     * Ensure the buffer has enough capacity for a string of a given length
-     *
-     * @param required the number of codepoints that need to be added to the buffer
-     */
-
-    private void ensureCapacity(int required) {
-        // For very long strings, archive what we've already accumulated as a ZenoString
-        if (activePartUsed > MAX_ACTIVE_SIZE || required > MAX_ACTIVE_SIZE) {
-            archive = archive.concat(getActivePart());
-            activePartUsed = 0;
-            bitMask = 0xff;
-            activePart = new int[required];
-        } else {
-            while (activePartUsed + required > activePart.length) {
-                activePart = Arrays.copyOf(activePart, activePart.length * 2);
-            }
-        }
     }
 
 
@@ -196,7 +200,12 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
         if (archive.isEmpty()) {
             return getActivePart();
         } else {
-            return archive.concat(getActivePart());
+            UnicodeString[] segments = new UnicodeString[archive.size() + 1];
+            for (int i = 0; i < archive.size(); i++) {
+                segments[i] = archive.get(i);
+            }
+            segments[segments.length - 1] = getActivePart();
+            return new SegmentedString(segments);
         }
     }
 
@@ -206,25 +215,26 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      */
 
     private UnicodeString getActivePart() {
-        if (activePartUsed == 0) {
-            return EmptyUnicodeString.getInstance();
-        } else if ((bitMask & 0xff0000) != 0) {
-            // use 24-bit codes
-            return new Twine24(activePart, activePartUsed);
-        } else if ((bitMask & 0xff00) != 0) {
-            // use 16-bit codes
-            char[] chars = new char[activePartUsed];
-            for (int i = 0; i < activePartUsed; i++) {
-                chars[i] = (char) (activePart[i] & 0xffff);
-            }
-            return new Twine16(chars);
-        } else {
-            byte[] bytes = new byte[activePartUsed];
-            for (int i = 0; i < activePartUsed; i++) {
-                bytes[i] = (byte) (activePart[i] & 0xff);
-            }
-            return new Twine8(bytes);
-        }
+        return TwineBuilder.make(activePartUsed).append(activePart, activePartUsed).toUnicodeString();
+//        if (activePartUsed == 0) {
+//            return EmptyUnicodeString.getInstance();
+//        } else if ((bitMask & 0xff0000) != 0) {
+//            // use 24-bit codes
+//            return new Twine24(activePart, activePartUsed);
+//        } else if ((bitMask & 0xff00) != 0) {
+//            // use 16-bit codes
+//            char[] chars = new char[activePartUsed];
+//            for (int i = 0; i < activePartUsed; i++) {
+//                chars[i] = (char) (activePart[i] & 0xffff);
+//            }
+//            return new Twine16(chars);
+//        } else {
+//            byte[] bytes = new byte[activePartUsed];
+//            for (int i = 0; i < activePartUsed; i++) {
+//                bytes[i] = (byte) (activePart[i] & 0xff);
+//            }
+//            return new Twine8(bytes);
+//        }
     }
 
     /**
@@ -255,9 +265,8 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      */
 
     public void clear() {
-        archive = ZenoString.EMPTY;
+        archive = new ArrayList<>();
         activePartUsed = 0;
-        bitMask = 0;
     }
     
     /**

@@ -77,6 +77,24 @@ public abstract class TwineBuilder {
     }
 
     /**
+     * Append an array of codepoints
+     * @param codepoints the array of codepoint to be appended
+     * @param used the number of codepoints in the array that are used
+     * @return a replacement builder. NOTE: although this
+     * will often be the original builder, it will sometimes
+     * be a new one, so it is important to use the returned
+     * builder for future calls.
+     */
+
+    public TwineBuilder append(int[] codepoints, int used) {
+        TwineBuilder tb = this;
+        for (int i = 0; i < used; i++) {
+            tb = tb.append(codepoints[i]);
+        }
+        return tb;
+    }
+
+    /**
      * Get the length, in codepoints
      * @return the length in codepoints
      */
