@@ -80,7 +80,7 @@ std::list<XdmValue *> XdmArray::asList() {
     return arr;
   }
   allocFn fn = operator new;
-  long long * results = j_convertXdmArrayToArrayObject(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
+  long long * results = j_convertXdmArrayToArrayObject(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)fn);
 
 	if(results) {
 
@@ -153,7 +153,7 @@ XdmValue ** XdmArray::values() {
      return arr;
    }
   allocFn fn = operator new;
-  long long * results = j_convertXdmArrayToArrayObject(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
+  long long * results = j_convertXdmArrayToArrayObject(SaxonProcessor::sxn_environ->thread, (void *)value, (void *)fn);
 
 	if(results == nullptr) {
 	   return nullptr;
