@@ -194,9 +194,10 @@ public class JsonParser {
                 String lexical = tokenizer.currentTokenValue.toString();
                 Item d = parseNumericLiteral(lexical, flags, tokenizer.lineNumber, context);
                 if (d == null) {
-                    d = StringValue.EMPTY_STRING;
+                    handler.writeNull();
+                } else {
+                    handler.writeNumeric(lexical, d);
                 }
-                handler.writeNumeric(lexical, d);
                 break;
 
             case TRUE:

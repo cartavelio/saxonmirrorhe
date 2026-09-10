@@ -530,7 +530,7 @@ public class LookupExpression extends BinaryExpression {
                                     MappingFunction arrayAccess = SequenceMapper.of(index -> {
                                         if (index instanceof IntegerValue) {
                                             int i = ((IntegerValue)index).asSubscript();
-                                            if (i > 0 && i < ((ArrayItem) baseItem).arrayLength()) {
+                                            if (i > 0 && i <= ((ArrayItem) baseItem).arrayLength()) {
                                                 GroundedValue member = ((ArrayItem) baseItem).get(i - 1);
                                                 return member.iterate();
                                             }
