@@ -59,7 +59,7 @@ namespace Saxon.Impl.Helpers {
                 return "US";
             }
             else {
-                return new System.Globalization.RegionInfo(culture.LCID).TwoLetterISORegionName;
+                return new System.Globalization.RegionInfo(culture.Name).TwoLetterISORegionName;
             }
         }
 

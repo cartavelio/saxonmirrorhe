@@ -6,7 +6,10 @@ using System.Text.RegularExpressions;
 
 using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
+using Saxon.Ejava.util;
 using Saxon.Ejavax.xml.transform.stream;
 using TestRunner;
 
@@ -119,6 +122,10 @@ namespace TestDriver {
                     language = "XQ";
                 } else if (a.StartsWith("-lang:XP")) {
                     language = "XP";
+                }
+
+                if (a.StartsWith("-locale:")) {
+                    Thread.CurrentThread.CurrentCulture = new CultureInfo(a[7..]);
                 }
             }
 
