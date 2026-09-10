@@ -29,21 +29,13 @@ import java.util.Objects;
 public final class DayTimeDurationValue extends DurationValue
         implements XPathComparable, ContextFreeAtomicValue {
 
-    private final static BigDecimal ONE_THOUSAND = BigDecimal.valueOf(1000);
-    public final static BigDecimal ONE_MILLION = BigDecimal.valueOf(1_000_000);
-    public final static BigDecimal ONE_BILLION = BigDecimal.valueOf(1_000_000_000);
 
-    public final static BigDecimal SIXTY = BigDecimal.valueOf(60);
-
-    public final static BigDecimal HOURS_PER_DAY = BigDecimal.valueOf(24);
-    public final static BigDecimal SECONDS_PER_DAY = BigDecimal.valueOf(24 * 60 * 60);
-    public final static BigDecimal SECONDS_PER_HOUR = BigDecimal.valueOf(60 * 60);
     public DayTimeDurationValue(BigDecimal seconds) {
         this(seconds, BuiltInAtomicType.DAY_TIME_DURATION);
     }
     public DayTimeDurationValue(BigDecimal seconds, AtomicType typeLabel) {
         super(0, seconds, typeLabel);
-        assert (typeLabel.getPrimitiveAtomicType() == BuiltInAtomicType.DAY_TIME_DURATION);
+        //assert (typeLabel.getPrimitiveAtomicType() == BuiltInAtomicType.DAY_TIME_DURATION);
     }
 
     /**
@@ -152,7 +144,7 @@ public final class DayTimeDurationValue extends DurationValue
         if (_seconds.abs().compareTo(BigDecimal.valueOf(Long.MAX_VALUE/1_000_000)) > 0) {
             throw new ArithmeticException("Value is too large to be expressed in microseconds");
         }
-        return _seconds.multiply(ONE_MILLION).longValue();
+        return _seconds.multiply(BigDecimalValue.ONE_MILLION).longValue();
     }
 
 //    /**
@@ -179,7 +171,7 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     public static DayTimeDurationValue fromMilliseconds(long milliseconds) {
-        BigDecimal seconds = new BigDecimal(milliseconds).divide(ONE_THOUSAND, RoundingMode.DOWN);
+        BigDecimal seconds = BigDecimalValue.divideExact(BigDecimal.valueOf(milliseconds), BigDecimalValue.ONE_THOUSAND);
         return new DayTimeDurationValue(seconds);
     }
 
@@ -191,7 +183,7 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     public static DayTimeDurationValue fromNanoseconds(long nanoseconds) {
-        BigDecimal seconds = new BigDecimal(nanoseconds).divide(ONE_BILLION, RoundingMode.DOWN);
+        BigDecimal seconds = BigDecimalValue.divideExact(BigDecimal.valueOf(nanoseconds), BigDecimalValue.ONE_BILLION);
         return new DayTimeDurationValue(seconds);
     }
 
@@ -208,7 +200,7 @@ public final class DayTimeDurationValue extends DurationValue
         int nanoseconds = duration.getNano();
         return new DayTimeDurationValue(BigDecimal.valueOf(seconds)
                                                 .add(BigDecimal.valueOf(nanoseconds)
-                                                             .divide(ONE_BILLION, RoundingMode.DOWN)));
+                                                             .divide(BigDecimalValue.ONE_BILLION, RoundingMode.DOWN)));
     }
 
     /**
@@ -219,7 +211,7 @@ public final class DayTimeDurationValue extends DurationValue
 
     public java.time.Duration toJavaDuration() {
         BigDecimal[] parts = _seconds.divideAndRemainder(BigDecimal.ONE);
-        return java.time.Duration.ofSeconds(parts[0].longValue(), parts[1].multiply(ONE_BILLION).longValue());
+        return java.time.Duration.ofSeconds(parts[0].longValue(), parts[1].multiply(BigDecimalValue.ONE_BILLION).longValue());
     }
     //#endif
 

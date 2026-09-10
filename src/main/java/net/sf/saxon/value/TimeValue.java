@@ -507,7 +507,7 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 return Int64Value.makeIntegerValue(minute);
             case SECONDS:
                 BigDecimal d = BigDecimal.valueOf(nanosecond);
-                d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, RoundingMode.HALF_UP);
+                d = d.divide(BigDecimalValue.ONE_BILLION, 6, RoundingMode.HALF_UP);
                 d = d.add(BigDecimal.valueOf(second));
                 return new BigDecimalValue(d);
             case WHOLE_SECONDS: //(internal use only)

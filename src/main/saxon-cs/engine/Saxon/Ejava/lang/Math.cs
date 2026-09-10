@@ -1,3 +1,4 @@
+using System;
 using SysMath = System.Math;
 namespace Saxon.Ejava.lang {
     public class Math {
@@ -86,6 +87,42 @@ namespace Saxon.Ejava.lang {
         }
         public static double pow(double x, double y) {
             return SysMath.Pow(x, y);
+        }
+
+        public static long addExact(long a, long b) {
+            try {
+                return checked(a + b);
+            }
+            catch (OverflowException err) {
+                throw new ArithmeticException(err.Message);
+            }
+        }
+        
+        public static int addExact(int a, int b) {
+            try {
+                return checked(a + b);
+            }
+            catch (OverflowException err) {
+                throw new ArithmeticException(err.Message);
+            }
+        }
+        
+        public static long multiplyExact(long a, long b) {
+            try {
+                return checked(a * b);
+            }
+            catch (OverflowException err) {
+                throw new ArithmeticException(err.Message);
+            }
+        }
+        
+        public static int multiplyExact(int a, int b) {
+            try {
+                return checked(a * b);
+            }
+            catch (OverflowException err) {
+                throw new ArithmeticException(err.Message);
+            }
         }
 
 

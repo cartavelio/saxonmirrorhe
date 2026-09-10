@@ -344,7 +344,7 @@ public class DateValue extends GDateValue implements XPathComparable {
     public DateValue add(DurationValue duration) throws XPathException {
         if (duration instanceof DayTimeDurationValue) {
             BigDecimal seconds = duration.getTotalSeconds();
-            BigDecimal[] daysAndPartDays = seconds.divideAndRemainder(DayTimeDurationValue.SECONDS_PER_DAY);
+            BigDecimal[] daysAndPartDays = seconds.divideAndRemainder(BigDecimalValue.SECONDS_PER_DAY);
             boolean partDay = daysAndPartDays[1].signum() != 0;
             long days = daysAndPartDays[0].longValue();
             if (Math.abs(days) >= Integer.MAX_VALUE) {

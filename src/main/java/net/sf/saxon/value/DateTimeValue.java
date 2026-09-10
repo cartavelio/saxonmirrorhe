@@ -235,7 +235,7 @@ public final class DateTimeValue extends CalendarValue
     /*@NotNull*/
     public static DateTimeValue fromJavaInstant(long seconds, int nano) throws XPathException {
         BigDecimal totalSeconds = BigDecimal.valueOf(seconds).add(
-                BigDecimal.valueOf(nano).divide(DayTimeDurationValue.ONE_BILLION, RoundingMode.DOWN));
+                BigDecimalValue.divideExact(BigDecimal.valueOf(nano), BigDecimalValue.ONE_BILLION));
         return EPOCH.add(new DayTimeDurationValue(totalSeconds));
     }
 
@@ -911,7 +911,7 @@ public final class DateTimeValue extends CalendarValue
         if (nanosecond == 0) {
             return j;
         } else {
-            return j.add(BigDecimal.valueOf(nanosecond).divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 9, RoundingMode.HALF_EVEN));
+            return j.add(BigDecimal.valueOf(nanosecond).divide(BigDecimalValue.ONE_BILLION, 9, RoundingMode.HALF_EVEN));
         }
     }
 
@@ -926,7 +926,7 @@ public final class DateTimeValue extends CalendarValue
     /*@NotNull*/
     public static DateTimeValue fromJulianInstant(/*@NotNull*/ BigDecimal instant) {
         BigInteger julianSecond = instant.toBigInteger();
-        BigDecimal nanoseconds = instant.subtract(new BigDecimal(julianSecond)).multiply(BigDecimalValue.BIG_DECIMAL_ONE_BILLION);
+        BigDecimal nanoseconds = instant.subtract(new BigDecimal(julianSecond)).multiply(BigDecimalValue.ONE_BILLION);
         long js = julianSecond.longValue();
         long jd = js / (24L * 60L * 60L);
         DateValue date = DateValue.dateFromJulianDayNumber((int) jd);
@@ -1308,7 +1308,7 @@ public final class DateTimeValue extends CalendarValue
                 return Int64Value.makeIntegerValue(minute);
             case SECONDS:
                 BigDecimal d = BigDecimal.valueOf(nanosecond);
-                d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, RoundingMode.HALF_UP);
+                d = d.divide(BigDecimalValue.ONE_BILLION, 6, RoundingMode.HALF_UP);
                 d = d.add(BigDecimal.valueOf(second));
                 return new BigDecimalValue(d);
             case WHOLE_SECONDS: //(internal use only)

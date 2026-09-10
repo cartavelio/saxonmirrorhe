@@ -17,6 +17,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -24,9 +25,6 @@ import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
 import java.util.StringTokenizer;
-
-import static net.sf.saxon.value.DayTimeDurationValue.ONE_BILLION;
-import static net.sf.saxon.value.DayTimeDurationValue.ONE_MILLION;
 
 /**
  * A value of type xs:duration. A duration is represented as an integer number of months (limited to 32 bits)
@@ -45,7 +43,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
 
     public DurationValue(int months, BigDecimal seconds, AtomicType typeLabel) {
         super(typeLabel);
-        assert(typeLabel.getPrimitiveAtomicType() == BuiltInAtomicType.DURATION);
+        //assert(typeLabel.getPrimitiveAtomicType() == BuiltInAtomicType.DURATION);
         if (Integer.signum(months) * seconds.signum() == -1) {
             throw new IllegalArgumentException("The months and seconds components of a duration cannot have different sign");
         }
@@ -71,19 +69,6 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         sb.append('S');
     }
 
-
-//    /**
-//     * Ensure that a zero duration is considered positive
-//     */
-//
-//    protected boolean isNegativeDuration(boolean nonPositive) {
-//        if (_months == 0 && _seconds == 0L && _nanoseconds == 0) {
-//            return false;
-//        } else {
-//            return nonPositive;
-//        }
-//    }
-
     /**
      * Static factory method: create a duration value from a supplied string, in
      * ISO 8601 format [-]PnYnMnDTnHnMnS
@@ -99,6 +84,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     }
 
     /*@NotNull*/
+    @CSharpReplaceException(from="java.lang.NumberFormatException", to="System.FormatException")
     protected static ConversionResult makeDuration(UnicodeString s, boolean allowYM, boolean allowDT) {
         //long years = 0, months = 0, days = 0, hours = 0, minutes = 0;
         BigDecimal seconds = BigDecimal.ZERO;
@@ -182,7 +168,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                         if (!allowDT) {
                             return badDuration("Minute component is not allowed in yearMonthDuration", s);
                         }
-                        seconds = seconds.add(partValue.multiply(DayTimeDurationValue.SIXTY));
+                        seconds = seconds.add(partValue.multiply(BigDecimalValue.SIXTY));
                         state = 6;
                         components++;
                         break;
@@ -193,6 +179,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                         try {
                             months = Math.addExact(months, partValue.intValueExact());
                         } catch (ArithmeticException e) {
+
                             return badDuration("Month component exceeds Saxon limits", s, "FODT0002");
                         }
                         state = 2;
@@ -208,7 +195,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                     if (!allowDT) {
                         return badDuration("Day component is not allowed in yearMonthDuration", s);
                     }
-                    seconds = seconds.add(partValue.multiply(DayTimeDurationValue.SECONDS_PER_DAY));
+                    seconds = seconds.add(partValue.multiply(BigDecimalValue.SECONDS_PER_DAY));
                     state = 3;
                     components++;
                     break;
@@ -219,7 +206,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                     if (!allowDT) {
                         return badDuration("Hour component is not allowed in yearMonthDuration", s);
                     }
-                    seconds = seconds.add(partValue.multiply(DayTimeDurationValue.SECONDS_PER_HOUR));
+                    seconds = seconds.add(partValue.multiply(BigDecimalValue.SECONDS_PER_HOUR));
                     state = 5;
                     components++;
                     break;
@@ -534,12 +521,12 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             }
             case MICROSECONDS: {
                 BigDecimal decimalSeconds = negative ? getSeconds().negate() : getSeconds();
-                long micros = decimalSeconds.divideAndRemainder(ONE_MILLION)[1].longValue();
+                long micros = decimalSeconds.divideAndRemainder(BigDecimalValue.ONE_MILLION)[1].longValue();
                 return new Int64Value(micros);
             }
             case NANOSECONDS: {
                 BigDecimal decimalSeconds = negative ? getSeconds().negate() : getSeconds();
-                long nanos = decimalSeconds.divideAndRemainder(ONE_BILLION)[1].longValue();
+                long nanos = decimalSeconds.divideAndRemainder(BigDecimalValue.ONE_BILLION)[1].longValue();
                 return new Int64Value(nanos);
             }
             default:

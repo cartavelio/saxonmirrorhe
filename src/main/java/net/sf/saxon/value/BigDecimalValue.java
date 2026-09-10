@@ -39,14 +39,21 @@ public final class BigDecimalValue extends DecimalValue {
     // cached property holding the equivalent double. (Note: breaks immutability...)
     private double doubleValue = Double.NaN; // meaning unknown
 
-    public static final BigDecimal BIG_DECIMAL_ONE_MILLION = BigDecimal.valueOf(1_000_000);
-    public static final BigDecimal BIG_DECIMAL_ONE_BILLION = BigDecimal.valueOf(1_000_000_000);
+    public final static BigDecimal ONE_THOUSAND = BigDecimal.valueOf(1000);
+    public static final BigDecimal ONE_MILLION = BigDecimal.valueOf(1_000_000);
+    public static final BigDecimal ONE_BILLION = BigDecimal.valueOf(1_000_000_000);
 
-    public static final BigDecimalValue ZERO = new BigDecimalValue(BigDecimal.valueOf(0));
-    public static final BigDecimalValue ONE = new BigDecimalValue(BigDecimal.valueOf(1));
+    public static final BigDecimalValue ZERO = new BigDecimalValue(BigDecimal.ZERO);
+    public static final BigDecimalValue ONE = new BigDecimalValue(BigDecimal.ONE);
     public static final BigDecimalValue TWO = new BigDecimalValue(BigDecimal.valueOf(2));
-    public static final BigDecimalValue THREE = new BigDecimalValue(BigDecimal.valueOf(3));
     public static final BigDecimal MAX_INT = BigDecimal.valueOf(Integer.MAX_VALUE);
+
+
+    public final static BigDecimal SIXTY = BigDecimal.valueOf(60);
+
+    public final static BigDecimal HOURS_PER_DAY = BigDecimal.valueOf(24);
+    public final static BigDecimal SECONDS_PER_DAY = BigDecimal.valueOf(24 * 60 * 60);
+    public final static BigDecimal SECONDS_PER_HOUR = BigDecimal.valueOf(60 * 60);
 
     /**
      * Constructor supplying a BigDecimal
@@ -236,6 +243,11 @@ public final class BigDecimalValue extends DecimalValue {
     public BigDecimalValue(long in) {
         super(BuiltInAtomicType.DECIMAL);
         value = BigDecimal.valueOf(in);
+    }
+
+    @CSharpReplaceBody(code = "return Singulink.Numerics.BigDecimal.DivideExact(numerator, denominator);")
+    public static BigDecimal divideExact(BigDecimal numerator, BigDecimal denominator) {
+        return numerator.divide(denominator, RoundingMode.DOWN);
     }
 
     /**
@@ -433,6 +445,7 @@ public final class BigDecimalValue extends DecimalValue {
         }
     }
 
+    @CSharpReplaceBody(code = "return fsb.append(value.ToString(\"G\", System.Globalization.CultureInfo.InvariantCulture));")
     public static UnicodeBuilder decimalToUnicodeString(BigDecimal value, UnicodeBuilder fsb) {
         // Can't use BigDecimal#toString() under JDK 1.5 because this produces values like "1E-5".
         // Can't use BigDecimal#toPlainString() because it retains trailing zeroes to represent the scale

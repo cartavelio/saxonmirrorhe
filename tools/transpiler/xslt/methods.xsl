@@ -680,6 +680,8 @@
          'random#0':          '(new System.Random()).NextDouble()',
          'round#1':           '(long)System.Math.Round(%args%, System.MidpointRounding.AwayFromZero)',
          'ceil#1':            'System.Math.Ceiling(%args%)',
+         'addExact#2':        'Saxon.Ejava.lang.Math.addExact(%args%)',
+         'multiplyExact#2':   'Saxon.Ejava.lang.Math.multiplyExact(%args%)',
          '*':                 'System.Math.%Name%(%args%)' 
          })"/>
    </xsl:template>
@@ -735,7 +737,8 @@
          'longValue#0':      '((long)%scope%)',
          'doubleValue#0':    '((double)%scope%)',
          'floatValue#0':     '((float)%scope%)',
-         'longValueExact#0': 'Saxon.Impl.Helpers.BigIntegerUtils.LongValueExact(%scope%)',
+         'intValueExact#0':  'Saxon.Impl.Helpers.BigDecimalUtils.IntValueExact(%scope%)',
+         'longValueExact#0': 'Saxon.Impl.Helpers.BigDecimalUtils.LongValueExact(%scope%)',
          'setScale#1':       '%scope%', (:no-op, values are normalized:)
          'setScale#2':       '%scope%', (:no-op, values are normalized:)
          'stripTrailingZeros#0':       '%scope%', (:no-op, values are normalized:)

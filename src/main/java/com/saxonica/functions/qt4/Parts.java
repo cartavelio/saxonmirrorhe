@@ -140,7 +140,7 @@ public class Parts extends SystemFunction implements Callable {
         register(BuiltInAtomicType.DATE_TIME, "seconds", SequenceType.SINGLE_INTEGER,
                  a -> {
                      BigDecimal d = BigDecimal.valueOf(((DateTimeValue)a).getNanosecond());
-                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, RoundingMode.HALF_UP);
+                     d = d.divide(BigDecimalValue.ONE_BILLION, 6, RoundingMode.HALF_UP);
                      d = d.add(BigDecimal.valueOf(((DateTimeValue) a).getSecond()));
                      return oneDec(d);
                  }
@@ -171,7 +171,7 @@ public class Parts extends SystemFunction implements Callable {
         register(BuiltInAtomicType.TIME, "seconds", SequenceType.SINGLE_INTEGER,
                  a -> {
                      BigDecimal d = BigDecimal.valueOf(((TimeValue) a).getNanosecond());
-                     d = d.divide(BigDecimalValue.BIG_DECIMAL_ONE_BILLION, 6, RoundingMode.HALF_UP);
+                     d = d.divide(BigDecimalValue.ONE_BILLION, 6, RoundingMode.HALF_UP);
                      d = d.add(BigDecimal.valueOf(((TimeValue) a).getSecond()));
                      return oneDec(d);
                  }
