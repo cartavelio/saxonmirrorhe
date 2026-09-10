@@ -8,7 +8,7 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.om.SequenceIterator;
 
 /**
  * A WrappingIterator delivers wrappers for the nodes delivered
@@ -18,9 +18,9 @@ import net.sf.saxon.tree.iter.AxisIterator;
  * rather than switching to the real nodes.
  */
 
-public class WrappingIterator implements AxisIterator {
+public class WrappingIterator implements SequenceIterator {
 
-    AxisIterator base;
+    SequenceIterator base;
     VirtualNode parent;
     /*@Nullable*/ NodeInfo _current;
     boolean atomizing = false;
@@ -35,7 +35,7 @@ public class WrappingIterator implements AxisIterator {
      *                 it can be specified here. Otherwise specify null.
      */
 
-    public WrappingIterator(AxisIterator base, WrappingFunction function, VirtualNode parent) {
+    public WrappingIterator(SequenceIterator base, WrappingFunction function, VirtualNode parent) {
         this.base = base;
         this.wrappingFunction = function;
         this.parent = parent;

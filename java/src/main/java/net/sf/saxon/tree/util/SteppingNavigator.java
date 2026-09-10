@@ -8,8 +8,8 @@
 package net.sf.saxon.tree.util;
 
 import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 
 
@@ -197,7 +197,7 @@ public abstract class SteppingNavigator {
      * An iterator over the descendant or descendant-or-self axis
      */
 
-    public static class DescendantAxisIterator implements AxisIterator {
+    public static class DescendantAxisIterator implements SequenceIterator {
 
         private final SteppingNode start;
         private SteppingNode current;

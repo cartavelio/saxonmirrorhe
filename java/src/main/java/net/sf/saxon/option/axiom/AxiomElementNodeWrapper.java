@@ -7,16 +7,12 @@
 
 package net.sf.saxon.option.axiom;
 
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.util.Navigator;
@@ -200,15 +196,15 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         if (!((OMElement) node).getAllAttributes().hasNext()) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else if (nodeTest instanceof NameTest) {
             String uri = ((NameTest) nodeTest).getNamespaceURI().toString();
             String local = ((NameTest) nodeTest).getLocalPart();
             OMAttribute att = ((OMElement) node).getAttribute(new QName(uri, local));
             if (att == null) {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             } else {
                 return SingleNodeIterator.makeIterator(new AxiomAttributeWrapper(att, this, -1));
             }
@@ -218,7 +214,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
             if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper);
@@ -334,7 +330,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     /**
      * Handles the attribute axis
      */
-    private final class AttributeAxisIterator implements AxisIterator {
+    private static final class AttributeAxisIterator implements SequenceIterator {
 
         private final AxiomElementNodeWrapper element;
         private final Iterator base;

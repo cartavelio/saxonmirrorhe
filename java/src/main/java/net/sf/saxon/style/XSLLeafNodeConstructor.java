@@ -13,7 +13,6 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
@@ -92,7 +91,7 @@ public abstract class XSLLeafNodeConstructor extends StyleElement {
             String errorCode = getErrorCodeForSelectPlusContent();
             compileError("An " + getDisplayName() + " element with a select attribute must be empty", errorCode);
         }
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD);
+        SequenceIterator kids = iterateAxis(AxisInfo.CHILD);
         NodeInfo first = (NodeInfo)kids.next();
         if (select == null) {
             if (first == null) {

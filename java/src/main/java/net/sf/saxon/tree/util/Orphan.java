@@ -15,7 +15,6 @@ import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.*;
@@ -462,7 +461,7 @@ public final class Orphan implements MutableNodeInfo {
 
     /*@NotNull*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR_OR_SELF:
             case AxisInfo.DESCENDANT_OR_SELF:
@@ -484,7 +483,7 @@ public final class Orphan implements MutableNodeInfo {
             case AxisInfo.PRECEDING:
             case AxisInfo.PRECEDING_SIBLING:
             case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);
         }
@@ -501,7 +500,7 @@ public final class Orphan implements MutableNodeInfo {
 
     /*@NotNull*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR_OR_SELF:
             case AxisInfo.DESCENDANT_OR_SELF:
@@ -522,7 +521,7 @@ public final class Orphan implements MutableNodeInfo {
             case AxisInfo.PRECEDING:
             case AxisInfo.PRECEDING_SIBLING:
             case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);
         }

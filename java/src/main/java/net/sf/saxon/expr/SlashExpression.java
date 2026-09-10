@@ -26,7 +26,6 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -1104,7 +1103,7 @@ public class SlashExpression extends BinaryExpression
                 return (out, context) -> {
                     SequenceIterator outer = select.iterate(context);
                     for (Item a; (a = outer.next()) != null; ) {
-                        AxisIterator inner = step.iterate((NodeInfo)a);
+                        SequenceIterator inner = step.iterate((NodeInfo)a);
                         for (NodeInfo b; (b = (NodeInfo)inner.next()) != null;) {
                            out.append(b, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
                         }

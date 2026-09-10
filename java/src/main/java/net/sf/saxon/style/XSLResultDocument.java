@@ -18,7 +18,6 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.Whitespace;
@@ -240,7 +239,7 @@ public class XSLResultDocument extends StyleElement {
         // This is a dynamic error, but worth detecting statically.
         // In fact this is a bit of a fudge. If a function or variable is inlined, we sometimes don't detect
         // XTDE1480 at run-time. Doing this static check improves our chances, though it won't catch all cases.
-        AxisIterator ai = iterateAxis(AxisInfo.ANCESTOR);
+        SequenceIterator ai = iterateAxis(AxisInfo.ANCESTOR);
         NodeInfo node;
         while ((node = (NodeInfo)ai.next()) != null) {
             if (node instanceof XSLGeneralVariable || (node instanceof XSLFunction && !((XSLFunction) node).isUpdating())) {
@@ -270,7 +269,7 @@ public class XSLResultDocument extends StyleElement {
         if (formatExpression == null &&
                 globalProps.getProperty("method") == null &&
                 serializationAttributes.get(METHOD) == null) {
-            AxisIterator kids = iterateAxis(AxisInfo.CHILD);
+            SequenceIterator kids = iterateAxis(AxisInfo.CHILD);
             NodeInfo first = (NodeInfo)kids.next();
             if (first instanceof LiteralResultElement) {
                 if (first.getNamespaceUri().equals(NamespaceUri.XHTML) && first.getLocalPart().equals("html")) {

@@ -19,7 +19,6 @@ import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.QNameValue;
@@ -219,7 +218,7 @@ public class IndependentContext extends AbstractStaticContext
             return;
         }
 
-        AxisIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
+        SequenceIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
         while (true) {
             NodeInfo ns = (NodeInfo)iter.next();
             if (ns == null) {

@@ -8,7 +8,7 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.om.SequenceIterator;
 
 import java.util.function.Function;
 
@@ -166,7 +166,7 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
 
     /*@Nullable*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         return new WrappingIterator(node.iterateAxis(axisNumber), this, null);
     }
 

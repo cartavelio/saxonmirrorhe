@@ -15,10 +15,9 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.NodeListIterator;
-import net.sf.saxon.tree.iter.PrependAxisIterator;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
@@ -382,14 +381,14 @@ public class NamespaceNode implements NodeInfo {
      * @param predicate  A pattern to be matched by the returned nodes; nodes
      *                   that do not match this pattern are not included in the result
      * @return a NodeEnumeration that scans the nodes reached by the axis in
-     *         turn.
+     * turn.
      * @throws UnsupportedOperationException if the namespace axis is
      *                                       requested and this axis is not supported for this implementation.
      * @see net.sf.saxon.om.AxisInfo
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
@@ -397,7 +396,7 @@ public class NamespaceNode implements NodeInfo {
 
             case AxisInfo.ANCESTOR_OR_SELF:
                 if (nodeTest.test(this)) {
-                    return new PrependAxisIterator(this, element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest));
+                    return new PrependSequenceIterator(this, element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest));
                 } else {
                     return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
                 }
@@ -409,7 +408,7 @@ public class NamespaceNode implements NodeInfo {
             case AxisInfo.FOLLOWING_SIBLING:
             case AxisInfo.NAMESPACE:
             case AxisInfo.PRECEDING_SIBLING:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
 
             case AxisInfo.FOLLOWING:
                 return new Navigator.AxisFilter(
@@ -586,7 +585,7 @@ public class NamespaceNode implements NodeInfo {
      */
 
     /*@NotNull*/
-    public static AxisIterator makeIterator(final NodeInfo element, NodePredicate test) {
+    public static SequenceIterator makeIterator(final NodeInfo element, NodePredicate test) {
         List<NodeInfo> nodes = new ArrayList<>();
         int position = 0;
         boolean foundXML = false;
@@ -605,7 +604,7 @@ public class NamespaceNode implements NodeInfo {
                 nodes.add(node);
             }
         }
-        return new NodeListIterator(nodes);
+        return new ListIterator.Of<>(nodes);
     }
 }
 

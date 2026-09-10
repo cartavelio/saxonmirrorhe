@@ -21,7 +21,6 @@ import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -354,7 +353,7 @@ public class SourceBinding {
         checkAgainstRequiredType(declaredType);
 
         if (select == null && !hasProperty(BindingProperty.DISALLOWS_CONTENT) && visibility != Visibility.ABSTRACT) {
-            AxisIterator kids = sourceElement.iterateAxis(AxisInfo.CHILD);
+            SequenceIterator kids = sourceElement.iterateAxis(AxisInfo.CHILD);
             NodeInfo first = (NodeInfo)kids.next();
             if (first == null) {
                 if (declaredType == null) {

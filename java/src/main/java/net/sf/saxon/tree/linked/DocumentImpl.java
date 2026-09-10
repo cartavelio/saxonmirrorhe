@@ -15,8 +15,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.NodeListIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -488,7 +487,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
      */
 
     /*@NotNull*/
-    AxisIterator getAllElements(int fingerprint) {
+    SequenceIterator getAllElements(int fingerprint) {
         if (elementList == null) {
             elementList = new IntHashMap<>(500);
         }
@@ -506,7 +505,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
             }
             eList.put(fingerprint, list);
         }
-        return new NodeListIterator(list);
+        return new ListIterator.Of<>(list);
     }
 
     /**

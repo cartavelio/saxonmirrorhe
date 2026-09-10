@@ -14,8 +14,8 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.GenericTreeInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
@@ -137,7 +137,7 @@ public class AxiomDocument extends GenericTreeInfo implements ActiveSource {
     }
 
 
-    protected static class FollowingSiblingIterator implements AxisIterator {
+    protected static class FollowingSiblingIterator implements SequenceIterator {
 
         private final OMNode start;
         private OMNode currentOMNode;
@@ -166,7 +166,7 @@ public class AxiomDocument extends GenericTreeInfo implements ActiveSource {
 
     }
 
-    protected static class PrecedingSiblingIterator implements AxisIterator {
+    protected static class PrecedingSiblingIterator implements SequenceIterator {
 
         private final OMNode start;
         private OMNode currentOMNode;

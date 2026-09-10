@@ -11,8 +11,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.WithParam;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.EnumSet;
@@ -44,7 +44,7 @@ public class XSLWithParam extends XSLGeneralVariable {
 
         // Check for duplicate parameter names
 
-        AxisIterator iter = iterateAxis(AxisInfo.PRECEDING_SIBLING);
+        SequenceIterator iter = iterateAxis(AxisInfo.PRECEDING_SIBLING);
         Item prev;
         while ((prev = iter.next()) != null) {
             if (prev instanceof XSLWithParam) {

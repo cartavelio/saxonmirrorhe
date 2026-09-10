@@ -7,19 +7,20 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 
 /**
  * An iterator over nodes, that concatenates the nodes returned by two supplied iterators.
  */
 
-public class ConcatenatingAxisIterator implements AxisIterator {
+public class ConcatenatingIterator implements SequenceIterator {
 
-    AxisIterator first;
-    AxisIterator second;
-    AxisIterator active;
+    SequenceIterator first;
+    SequenceIterator second;
+    SequenceIterator active;
 
-    public ConcatenatingAxisIterator(AxisIterator first, AxisIterator second) {
+    public ConcatenatingIterator(SequenceIterator first, SequenceIterator second) {
         this.first = first;
         this.second = second;
         this.active = first;
@@ -33,8 +34,8 @@ public class ConcatenatingAxisIterator implements AxisIterator {
 
     /*@Nullable*/
     @Override
-    public GNode next() {
-        GNode n = active.next();
+    public Item next() {
+        Item n = active.next();
         if (n == null && active == first) {
             active = second;
             n = second.next();

@@ -12,12 +12,12 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
@@ -233,7 +233,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (getNodeKind()) {
             case Type.ATTRIBUTE:
             case Type.NAMESPACE:
@@ -248,7 +248,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                     case AxisInfo.FOLLOWING_SIBLING:
                     case AxisInfo.PRECEDING:
                     case AxisInfo.FOLLOWING:
-                        return EmptyIterator.ofNodes();
+                        return EmptyIterator.getInstance();
                     default:
                         return super.iterateAxis(axisNumber, nodeTest);
                 }
@@ -263,7 +263,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                         case AxisInfo.DESCENDANT:
                         case AxisInfo.DESCENDANT_OR_SELF:
                             // Use the child axis recursively, for efficiency
-                            AxisIterator iter = new Navigator.DescendantIterator(
+                            SequenceIterator iter = new Navigator.DescendantIterator(
                                 this, axisNumber == AxisInfo.DESCENDANT_OR_SELF, true);
                             if (!(nodeTest instanceof AnyXNodeTest)) {
                                 iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -273,7 +273,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                         case AxisInfo.FOLLOWING_SIBLING:
                         case AxisInfo.PRECEDING:
                         case AxisInfo.FOLLOWING:
-                            return EmptyIterator.ofNodes();
+                            return EmptyIterator.getInstance();
                         default:
                             return super.iterateAxis(axisNumber, nodeTest);
                     }

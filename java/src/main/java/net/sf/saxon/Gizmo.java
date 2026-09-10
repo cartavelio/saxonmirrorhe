@@ -32,7 +32,6 @@ import net.sf.saxon.sxpath.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.util.Navigator;
@@ -573,11 +572,11 @@ public class Gizmo {
         typed = false;
         Set<String> names = new HashSet<>();
         NodeInfo element;
-        AxisIterator allElements = currentDoc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+        SequenceIterator allElements = currentDoc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
         while ((element = (NodeInfo)allElements.next()) != null) {
             names.add(element.getLocalPart());
             NodeInfo att;
-            AxisIterator allAtts = element.iterateAxis(AxisInfo.ATTRIBUTE);
+            SequenceIterator allAtts = element.iterateAxis(AxisInfo.ATTRIBUTE);
             while ((att = (NodeInfo)allAtts.next()) != null) {
                 names.add("@" + att.getLocalPart());
             }
@@ -827,7 +826,7 @@ public class Gizmo {
         out.close();
 
         NodeInfo root = builder.getCurrentRoot();
-        AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator top = root.iterateAxis(AxisInfo.CHILD);
         SequenceExtent extent = SequenceExtent.from(top);
         int len = extent.getLength();
         NodeInfo[] array = new NodeInfo[len];

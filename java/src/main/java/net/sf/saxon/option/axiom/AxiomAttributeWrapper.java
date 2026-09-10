@@ -13,9 +13,8 @@ import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.PrependAxisIterator;
+import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualNode;
@@ -389,11 +388,11 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      * @param axisNumber the axis to be used
      * @param nodeTest   A pattern to be matched by the returned nodes
      * @return a SequenceIterator that scans the nodes reached by the axis in
-     *         turn.
+     * turn.
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         // for clarifications, see the W3C specs or:
         // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/xmlsdk/html/xmrefaxes.asp
         switch (axisNumber) {
@@ -402,7 +401,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
 
             case AxisInfo.ANCESTOR_OR_SELF:
                 if (nodeTest.test(this)) {
-                    return new PrependAxisIterator(this, parent.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest));
+                    return new PrependSequenceIterator(this, parent.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest));
                 } else {
                     return parent.iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
                 }
@@ -413,7 +412,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
             case AxisInfo.FOLLOWING_SIBLING:
             case AxisInfo.NAMESPACE:
             case AxisInfo.PRECEDING_SIBLING:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
 
             case AxisInfo.FOLLOWING:
                 return new Navigator.AxisFilter(new Navigator.FollowingIterator(this), nodeTest);

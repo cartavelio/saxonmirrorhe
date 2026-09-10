@@ -12,9 +12,9 @@ import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.expr.VariableReference;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 /**
  * Define the static context for expressions appearing between curly braces in a text value template.
@@ -55,7 +55,7 @@ public class TextValueTemplateContext extends ExpressionContext {
 
         // first search for a local variable declaration
 
-        AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+        SequenceIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
         while ((curr = (NodeInfo)preceding.next()) != null) {
             if (curr instanceof XSLGeneralVariable) {
                 SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);

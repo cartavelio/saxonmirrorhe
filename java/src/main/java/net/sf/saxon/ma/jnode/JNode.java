@@ -9,7 +9,6 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.IncrementalIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
@@ -84,7 +83,7 @@ public abstract class JNode implements GNode {
         return Atomizer.atomize(getValue());
     }
 
-    public AxisIterator iterateAxis(int axis) {
+    public SequenceIterator iterateAxis(int axis) {
         switch (axis) {
             case AxisInfo.SELF:
                 return SingleNodeIterator.makeIterator(this);
@@ -92,13 +91,13 @@ public abstract class JNode implements GNode {
                 return getChildren();
             case AxisInfo.PARENT:
                 if (getParent() == null) {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 } else {
                     return SingleNodeIterator.makeIterator(getParent());
                 }
             case AxisInfo.ANCESTOR:
                 if (getParent() == null) {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 } else {
                     return new IncrementalIterator(getParent(), GNode::getParent);
                 }
@@ -131,7 +130,7 @@ public abstract class JNode implements GNode {
      * possible to supply a {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
      */
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         return iterateAxis(axisNumber); //TEMPORARY
     }
 
@@ -148,7 +147,7 @@ public abstract class JNode implements GNode {
         return "JNode(" + getValue().toShortString() + ")";
     }
 
-    public abstract AxisIterator getChildren();
+    public abstract SequenceIterator getChildren();
 
 
 }

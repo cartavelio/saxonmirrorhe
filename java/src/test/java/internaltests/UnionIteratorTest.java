@@ -9,7 +9,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,9 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -37,10 +38,10 @@ public class UnionIteratorTest {
             for (int i = 0; i < 10; i++) {
                 listOfLists.add(new ArrayList<>());
             }
-            AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
-            AxisIterator children = top.next().iterateAxis(AxisInfo.CHILD);
+            SequenceIterator top = root.iterateAxis(AxisInfo.CHILD);
+            SequenceIterator children = ((NodeInfo)top.next()).iterateAxis(AxisInfo.CHILD);
             NodeInfo node;
-            while ((node = children.next()) != null) {
+            while ((node = (NodeInfo)children.next()) != null) {
                 switch (node.getLocalPart()) {
                     case "a":
                         listOfLists.get(2).add(node);

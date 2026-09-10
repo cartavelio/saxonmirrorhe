@@ -375,12 +375,12 @@ public class KeyIndex {
 
     private SequenceIterator entryIterator(Object value) {
         if (value == null) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else if (value instanceof NodeInfo) {
             return SingleNodeIterator.makeIterator((NodeInfo) value);
         } else {
             List<NodeInfo> nodes = (List<NodeInfo>) value;
-            return new NodeListIterator(nodes);
+            return new ListIterator.Of<>(nodes);
         }
     }
 

@@ -18,7 +18,6 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
@@ -227,7 +226,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                AxisIterator iter = iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.makeNodeKindTest(Type.TEXT));
+                SequenceIterator iter = iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.makeNodeKindTest(Type.TEXT));
                 UnicodeBuilder sb = new UnicodeBuilder();
                 NodeInfo it;
                 while ((it = (NodeInfo)iter.next()) != null) {
@@ -256,7 +255,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     }
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         if (nodeTest instanceof NodeTest &&
                 ((NodeTest)nodeTest).getUType().intersection(UType.TEXT) == UType.VOID ||
                 axisNumber == AxisInfo.ATTRIBUTE || axisNumber == AxisInfo.NAMESPACE) {
@@ -276,7 +275,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
 
     /*@Nullable*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
             case AxisInfo.NAMESPACE:
@@ -287,7 +286,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             case AxisInfo.PRECEDING_SIBLING:
                 SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
                 if (parent == null) {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 } else {
                     return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, parent);
                 }
@@ -340,9 +339,9 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      * skips them.
      */
 
-    private static class StrippingIterator implements AxisIterator {
+    private static class StrippingIterator implements SequenceIterator {
 
-        AxisIterator base;
+        SequenceIterator base;
         SpaceStrippedNode parent;
         NodeInfo currentVirtualNode;
         SpaceStrippedDocument docWrapper;
@@ -356,7 +355,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
          *               it can be specified here. Otherwise specify null.
          */
 
-        public StrippingIterator(AxisIterator base, SpaceStrippedDocument docWrapper, SpaceStrippedNode parent) {
+        public StrippingIterator(SequenceIterator base, SpaceStrippedDocument docWrapper, SpaceStrippedNode parent) {
             this.base = base;
             this.docWrapper = docWrapper;
             this.parent = parent;

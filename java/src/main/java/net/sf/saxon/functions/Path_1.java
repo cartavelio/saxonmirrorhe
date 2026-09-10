@@ -13,7 +13,6 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -121,7 +120,7 @@ public class Path_1 extends SystemFunction {
             return StringValue.makeStringValue("/");
         }
         StringBuilder fsb = new StringBuilder(256);
-        AxisIterator iter = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+        SequenceIterator iter = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
         NodeInfo n;
         boolean first = true;
         while ((n = (NodeInfo)iter.next()) != null) {

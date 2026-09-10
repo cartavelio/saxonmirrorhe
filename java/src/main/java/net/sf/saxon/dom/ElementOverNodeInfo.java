@@ -8,12 +8,8 @@
 package net.sf.saxon.dom;
 
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -104,7 +100,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
             Node node = getAttributes().getNamedItem(name);
             return node == null ? "" : node.getNodeValue();
         }
-        AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
@@ -134,7 +130,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
 
     @Override
     public Attr getAttributeNode(String name) {
-        AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {
@@ -271,7 +267,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
     public Attr getAttributeNodeNS(String namespaceURI, String localName) {
         NamePool pool = node.getConfiguration().getNamePool();
         NameTest test = new NameTest(Type.ATTRIBUTE, NamespaceUri.of(namespaceURI), localName, pool);
-        AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE, test);
+        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE, test);
         return (Attr) wrap((NodeInfo)atts.next());
     }
 
@@ -312,7 +308,7 @@ public class ElementOverNodeInfo extends NodeOverNodeInfo implements Element {
             Node node = getAttributes().getNamedItem(name);
             return node != null;
         }
-        AxisIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = node.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {

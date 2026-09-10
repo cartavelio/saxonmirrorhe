@@ -8,8 +8,8 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.z.IntPredicateProxy;
 
 /**
@@ -18,7 +18,7 @@ import net.sf.saxon.z.IntPredicateProxy;
  * to ensure this, construct the enumeration using NodeInfo#getEnumeration()
  */
 
-final class PrecedingSiblingIterator implements AxisIterator {
+final class PrecedingSiblingIterator implements SequenceIterator {
 
     private final TinyTree document;
     private final TinyNodeImpl startNode;

@@ -8,12 +8,8 @@
 package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.GenericTreeInfo;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.Type;
 import org.apache.axiom.om.OMDocument;
@@ -249,13 +245,13 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
-        return EmptyIterator.ofNodes();
+    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+        return EmptyIterator.getInstance();
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
-        return EmptyIterator.ofNodes();
+    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+        return EmptyIterator.getInstance();
     }
 
     /**
@@ -275,7 +271,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
         return other == this ? 0 : -1;
     }
 
-    protected static class FollowingSiblingIterator implements AxisIterator {
+    protected static class FollowingSiblingIterator implements SequenceIterator {
 
         private final OMNode start;
         private OMNode currentOMNode;
@@ -304,7 +300,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
 
     }
 
-    protected static class PrecedingSiblingIterator implements AxisIterator {
+    protected static class PrecedingSiblingIterator implements SequenceIterator {
 
         private final OMNode start;
         private OMNode currentOMNode;

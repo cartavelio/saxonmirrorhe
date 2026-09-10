@@ -15,7 +15,7 @@ import net.sf.saxon.om.*;
  * SingleNodeIterator: an iterator over a sequence of zero or one nodes
  */
 
-public class SingleNodeIterator implements AxisIterator,
+public class SingleNodeIterator implements SequenceIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator, LookaheadIterator {
 
     private final GNode item;
@@ -40,9 +40,9 @@ public class SingleNodeIterator implements AxisIterator,
      */
 
     /*@NotNull*/
-    public static AxisIterator makeIterator(GNode item) {
+    public static SequenceIterator makeIterator(GNode item) {
         if (item == null) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else {
             return new SingleNodeIterator(item);
         }

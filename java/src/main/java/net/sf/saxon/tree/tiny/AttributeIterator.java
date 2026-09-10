@@ -11,7 +11,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
@@ -19,7 +18,7 @@ import net.sf.saxon.type.Type;
  * AttributeIterator is an iterator over all the attribute nodes of an Element in the TinyTree.
  */
 
-final class AttributeIterator implements AxisIterator, AtomizedValueIterator {
+final class AttributeIterator implements SequenceIterator, AtomizedValueIterator {
 
     private final TinyTree tree;
     private final int element;

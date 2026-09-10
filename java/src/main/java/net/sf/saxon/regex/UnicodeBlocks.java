@@ -15,7 +15,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntBlockSet;
 import net.sf.saxon.z.IntSet;
@@ -99,7 +98,7 @@ public class UnicodeBlocks {
             throw new RESyntaxException("Failed to process unicodeBlocks.xml: " + e.getMessage());
         }
 
-        AxisIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT,
+        SequenceIterator iter = doc.getRootNode().iterateAxis(AxisInfo.DESCENDANT,
                                                           new NameTest(Type.ELEMENT, NamespaceUri.NULL, "block", config.getNamePool()));
         while (true) {
             NodeInfo item = (NodeInfo)iter.next();

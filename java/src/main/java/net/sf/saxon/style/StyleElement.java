@@ -28,8 +28,7 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.AttributeLocation;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.NodeListIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeImpl;
 import net.sf.saxon.tree.linked.TextImpl;
@@ -2081,7 +2080,7 @@ public abstract class StyleElement extends ElementImpl {
             }
             vars.addAll(others);
             vars.addAll(onEmpties);
-            return compileSequenceConstructor(compilation, decl, new NodeListIterator(vars), includeParams);
+            return compileSequenceConstructor(compilation, decl, new ListIterator.Of<>(vars), includeParams);
         } else {
             return compileSequenceConstructor(compilation, decl, iterateAxis(AxisInfo.CHILD), includeParams);
         }
@@ -2117,7 +2116,7 @@ public abstract class StyleElement extends ElementImpl {
                     compileContentValueTemplate((TextImpl) node, contents);
                 } else {
                     // handle literal text nodes by generating an xsl:value-of instruction, unless expand-text is enabled
-                    AxisIterator lookahead = node.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
+                    SequenceIterator lookahead = node.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
                     NodeInfo sibling = (NodeInfo)lookahead.next();
                     if (!(sibling instanceof XSLLocalParam || sibling instanceof XSLSort
                                   || sibling instanceof XSLContextItem || sibling instanceof XSLOnCompletion)) {
@@ -2686,7 +2685,7 @@ public abstract class StyleElement extends ElementImpl {
                 // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
                 curr = curr.getParent();
             }
-            AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+            SequenceIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
             while (true) {
                 curr = (NodeInfo)preceding.next();
                 while (curr == null) {

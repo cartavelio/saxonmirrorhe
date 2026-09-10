@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 
 import java.util.Iterator;
 
@@ -17,7 +18,7 @@ import java.util.Iterator;
  */
 
 public class NodeWrappingAxisIterator<B>
-        implements AxisIterator, LookaheadIterator {
+        implements SequenceIterator, LookaheadIterator {
 
 
     private final Iterator<? extends B> base;

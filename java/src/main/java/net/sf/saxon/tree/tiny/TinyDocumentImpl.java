@@ -10,15 +10,11 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.Logger;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.CopyOptions;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.NodeListIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -205,7 +201,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      * @return an iterator over all elements with this name
      */
 
-    /*@NotNull*/ AxisIterator getAllElements(int fingerprint) {
+    /*@NotNull*/ SequenceIterator getAllElements(int fingerprint) {
         if (elementList == null) {
             elementList = new IntHashMap<List<NodeInfo>>(20);
         }
@@ -214,7 +210,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
             list = makeElementList(fingerprint);
             elementList.put(fingerprint, list);
         }
-        return new NodeListIterator(list);
+        return new ListIterator.Of<>(list);
     }
 
     /**
@@ -267,7 +263,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
     @Override
     public SchemaType getSchemaType() {
-        AxisIterator children = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator children = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo node = (NodeInfo)children.next();
         if (node == null || node.getSchemaType() == Untyped.getInstance()) {
             return Untyped.getInstance();

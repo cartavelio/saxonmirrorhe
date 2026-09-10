@@ -6,9 +6,7 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 
@@ -43,7 +41,7 @@ public class RootJNode extends JNode {
     }
 
     @Override
-    public AxisIterator getChildren() {
+    public SequenceIterator getChildren() {
         if (value instanceof MapItem) {
             return new JNodeMapIterator(this);
         } else {
@@ -51,7 +49,7 @@ public class RootJNode extends JNode {
         }
     }
 
-    private static class JNodeMapIterator implements AxisIterator {
+    private static class JNodeMapIterator implements SequenceIterator {
 
         private final RootJNode origin;
         private final Iterator<KeyValuePair> mapEntryIterator;
@@ -75,7 +73,7 @@ public class RootJNode extends JNode {
         }
     }
 
-    private static class JNodeArrayIterator implements AxisIterator {
+    private static class JNodeArrayIterator implements SequenceIterator {
 
         private final RootJNode origin;
         private final Iterator<GroundedValue> arrayEntryIterator;

@@ -13,7 +13,6 @@ import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
@@ -623,32 +622,32 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         return new Navigator.AxisFilter(
                 new AttributeAxisIterator(this, nodeTest),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
             return new Navigator.AxisFilter(
                     new ChildAxisIterator(this, true, true, nodeTest),
                     nodeTest);
         } else {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         return new Navigator.AxisFilter(
                 new ChildAxisIterator(this, false, forwards, nodeTest),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         if (includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(
                     this, true, nodeTest);
@@ -658,7 +657,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                 return new SteppingNavigator.DescendantAxisIterator(
                         this, false, nodeTest);
             } else {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             }
 
         }
@@ -833,7 +832,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     /**
      * Handles the attribute axis in a rather direct manner.
      */
-    private final class AttributeAxisIterator implements AxisIterator {
+    private final class AttributeAxisIterator implements SequenceIterator {
 
         private final XOMNodeWrapper start;
 
@@ -881,7 +880,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * support the preceding and preceding-or-ancestor axes (the latter being
      * used by xsl:number)
      */
-    private final class ChildAxisIterator implements AxisIterator {
+    private final class ChildAxisIterator implements SequenceIterator {
 
         private final XOMNodeWrapper commonParent;
         private int ix;

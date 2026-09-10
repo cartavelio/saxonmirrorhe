@@ -10,8 +10,8 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AtomizedValueIterator;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 
@@ -20,7 +20,7 @@ import net.sf.saxon.type.Type;
  * an explicit name test for the required element nodes.
  */
 
-final class NamedChildIterator implements AxisIterator, LookaheadIterator, AtomizedValueIterator {
+final class NamedChildIterator implements SequenceIterator, LookaheadIterator, AtomizedValueIterator {
 
     private final TinyTree tree;
     private int nextNodeNr;

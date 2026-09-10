@@ -10,9 +10,9 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AtomizedValueIterator;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
@@ -28,7 +28,7 @@ import net.sf.saxon.z.IntSetPredicate;
  * using NodeInfo#iterateAxis()
  */
 
-final class SiblingIterator implements AxisIterator, LookaheadIterator, AtomizedValueIterator {
+final class SiblingIterator implements SequenceIterator, LookaheadIterator, AtomizedValueIterator {
 
     // NOTE: have experimented with a dedicated iterator for the child axis matching against
     // elements only, by fingerprint - no measurable improvement obtained.

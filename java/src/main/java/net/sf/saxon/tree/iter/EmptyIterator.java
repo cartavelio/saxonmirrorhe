@@ -131,16 +131,6 @@ public class EmptyIterator implements SequenceIterator,
     }
 
     /**
-     * Static method to get an empty AxisIterator
-     *
-     * @return an empty AxisIterator
-     */
-
-    public static AxisIterator ofNodes() {
-        return OfNodes.THE_INSTANCE;
-    }
-
-    /**
      * Static method to get an empty AtomicIterator
      *
      * @return an empty AtomicIterator
@@ -148,25 +138,6 @@ public class EmptyIterator implements SequenceIterator,
 
     public static AtomicIterator ofAtomic() {
         return OfAtomic.THE_INSTANCE;
-    }
-
-    /**
-     * An empty iterator for use where a sequence of nodes is required
-     */
-
-    private static class OfNodes extends EmptyIterator implements AxisIterator {
-
-        public final static OfNodes THE_INSTANCE = new OfNodes();
-        /**
-         * Get the next item.
-         *
-         * @return the next item. For the EmptyIterator this is always null.
-         */
-        @Override
-        public NodeInfo next() {
-            return null;
-        }
-
     }
 
     /**

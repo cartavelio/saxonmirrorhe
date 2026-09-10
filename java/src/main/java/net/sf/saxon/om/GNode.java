@@ -3,7 +3,6 @@ package net.sf.saxon.om;
 import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 public interface GNode extends Item {
     
@@ -22,7 +21,7 @@ public interface GNode extends Item {
      * @since 8.4
      */
 
-    default AxisIterator iterateAxis(int axisNumber) {
+    default SequenceIterator iterateAxis(int axisNumber) {
         return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
     }
 
@@ -43,7 +42,7 @@ public interface GNode extends Item {
      * @since 8.4. Changed in 10.0 to accept any {@code Predicate<NodeInfo>} as the second argument. It is still
      * possible to supply a {@link NodeTest}, because {@code NodeTest} implements {@code Predicate<NodeInfo>}.
      */
-    AxisIterator iterateAxis(int axisNumber, NodePredicate predicate);
+    SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate);
 
     /**
      * Get the parent of this node

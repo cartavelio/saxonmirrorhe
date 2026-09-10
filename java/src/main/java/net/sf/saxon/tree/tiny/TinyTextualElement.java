@@ -117,10 +117,10 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
 
             case AxisInfo.CHILD:
             case AxisInfo.DESCENDANT:
@@ -135,10 +135,10 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
 
             case AxisInfo.CHILD:
             case AxisInfo.DESCENDANT:
@@ -152,7 +152,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 if (nodeTest.test(getTextNode())) {
                     list.add(getTextNode());
                 }
-                return new NodeListIterator(list);
+                return new ListIterator.Of<>(list);
 
             default:
                 return super.iterateAxis(axisNumber, nodeTest);
@@ -550,7 +550,7 @@ public class TinyTextualElement extends TinyElementImpl {
 
         /*@NotNull*/
         @Override
-        public AxisIterator iterateAxis(int axisNumber) {
+        public SequenceIterator iterateAxis(int axisNumber) {
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
                     return element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
@@ -559,7 +559,7 @@ public class TinyTextualElement extends TinyElementImpl {
                     return new Navigator.PrecedingIterator(this, true);
 
                 case AxisInfo.ANCESTOR_OR_SELF:
-                    return new PrependAxisIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF));
+                    return new PrependSequenceIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF));
 
                 case AxisInfo.FOLLOWING:
                     return new Navigator.FollowingIterator(this);
@@ -576,7 +576,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 case AxisInfo.FOLLOWING_SIBLING:
                 case AxisInfo.NAMESPACE:
                 case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
 
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:
@@ -592,13 +592,13 @@ public class TinyTextualElement extends TinyElementImpl {
          * Return an enumeration over the nodes reached by the given axis from this node
          *
          * @param axisNumber the axis to be iterated over
-         * @param predicate   A pattern to be matched by the returned nodes
+         * @param predicate  A pattern to be matched by the returned nodes
          * @return a AxisIterator that scans the nodes reached by the axis in turn.
          */
 
         /*@NotNull*/
         @Override
-        public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
+        public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
             NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
@@ -611,7 +611,7 @@ public class TinyTextualElement extends TinyElementImpl {
 
                 case AxisInfo.ANCESTOR_OR_SELF:
                     return new Navigator.AxisFilter(
-                            new PrependAxisIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF)),
+                            new PrependSequenceIterator(this, getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF)),
                             nodeTest);
 
                 case AxisInfo.FOLLOWING:
@@ -633,7 +633,7 @@ public class TinyTextualElement extends TinyElementImpl {
                 case AxisInfo.FOLLOWING_SIBLING:
                 case AxisInfo.NAMESPACE:
                 case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
 
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:

@@ -25,7 +25,6 @@ import net.sf.saxon.trans.KeyManager;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Schema;
@@ -277,7 +276,7 @@ public class ExpressionContext implements StaticContext {
             }
             // it might be an implicit error variable in try/catch
             if (getXPathVersion() >= 30 && qName.hasURI(NamespaceUri.ERR)) {
-                AxisIterator catchers = element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF,
+                SequenceIterator catchers = element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF,
                                                             new NameTest(Type.ELEMENT, StandardNames.XSL_CATCH, element.getNamePool()));
                 StyleElement catcher = (StyleElement) catchers.next();
                 if (catcher != null) {

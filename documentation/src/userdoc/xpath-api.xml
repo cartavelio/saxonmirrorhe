@@ -1110,8 +1110,8 @@ XPath xpath = xpathFactory.newXPath();
                <p>iterateAxis()</p>
             </td>
             <td>
-               <p>Returns an <a class="javalink" href="net.sf.saxon.tree.iter.AxisIterator"
-                     >AxisIterator</a> object that can be used to iterate over the nodes on any
+               <p>Returns a <a class="javalink" href="net.sf.saxon.tree.iter.SequenceIterator"
+                     >SequenceIterator</a> object that can be used to iterate over the nodes on any
                   of the XPath axes. The first argument is an integer identifying the axis; the
                   second is a <a class="javalink" href="net.sf.saxon.pattern.NodeTest">NodeTest</a>
                   (a simple form of pattern) which can be used to filter the nodes on the axis.

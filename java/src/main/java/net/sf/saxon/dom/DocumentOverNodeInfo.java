@@ -9,9 +9,9 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import org.w3c.dom.*;
 
@@ -197,13 +197,13 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
         if (root == null) {
             return null;
         }
-        AxisIterator children =
+        SequenceIterator children =
                 root.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         return (Element) wrap((NodeInfo)children.next());
     }
 
     protected static NodeList getElementsByTagName(NodeInfo node, String tagname) {
-        AxisIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
+        SequenceIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
         List<Node> nodes = new ArrayList<>(100);
         while (true) {
             NodeInfo next = (NodeInfo)allElements.next();
@@ -293,7 +293,7 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
 
     public static NodeList getElementsByTagNameNS(NodeInfo node, String namespaceURI, String localName) {
         String ns = namespaceURI == null ? "" : namespaceURI;
-        AxisIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
+        SequenceIterator allElements = node.iterateAxis(AxisInfo.DESCENDANT);
         List<Node> nodes = new ArrayList<>(100);
         while (true) {
             NodeInfo next = (NodeInfo)allElements.next();

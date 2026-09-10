@@ -9,12 +9,8 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
@@ -92,7 +88,7 @@ class DOMAttributeMap implements NamedNodeMap {
             }
             return null;
         } else {
-            AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
+            SequenceIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
             NodeInfo att;
             while ((att = (NodeInfo)atts.next()) != null) {
                 if (att.getDisplayName().equals(name)) {
@@ -124,7 +120,7 @@ class DOMAttributeMap implements NamedNodeMap {
         }
         int pos = 0;
         int attNr = index - namespaces.length;
-        AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         NodeInfo att;
         while ((att = (NodeInfo)atts.next()) != null) {
             if (pos == attNr) {
@@ -175,7 +171,7 @@ class DOMAttributeMap implements NamedNodeMap {
     @Override
     public int getLength() {
         int length = 0;
-        AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         while (atts.next() != null) {
             length++;
         }
@@ -197,7 +193,7 @@ class DOMAttributeMap implements NamedNodeMap {
         if (uri.equals("") && localName.equals("xmlns")) {
             return getNamedItem("xmlns");
         }
-        AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
+        SequenceIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         while (true) {
             NodeInfo att = (NodeInfo)atts.next();
             if (att == null) {

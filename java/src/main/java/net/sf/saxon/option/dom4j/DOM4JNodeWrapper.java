@@ -12,7 +12,6 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
@@ -340,7 +339,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         if (index == -1) {
             int ix = 0;
             getParent();
-            AxisIterator iter;
+            SequenceIterator iter;
             switch (nodeKind) {
                 case Type.ELEMENT:
                 case Type.TEXT:
@@ -377,7 +376,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     return index;
             }
             while (true) {
-                GNode n = iter.next();
+                GNode n = (GNode)iter.next();
                 if (n == null) {
                     break;
                 }
@@ -404,7 +403,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //        switch (axisNumber) {
 //            case AxisInfo.ANCESTOR:
 //                if (nodeKind == Type.DOCUMENT) {
-//                    return EmptyIterator.ofNodes();
+//                    return EmptyIterator.getInstance();
 //                }
 //                return new Navigator.AxisFilter(
 //                        new Navigator.AncestorEnumeration(this, false),
@@ -420,7 +419,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //
 //            case AxisInfo.ATTRIBUTE:
 //                if (nodeKind != Type.ELEMENT) {
-//                    return EmptyIterator.ofNodes();
+//                    return EmptyIterator.getInstance();
 //                }
 //                return new Navigator.AxisFilter(
 //                        new AttributeEnumeration(this),
@@ -432,7 +431,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                            new ChildEnumeration(this, true, true),
 //                            nodeTest);
 //                } else {
-//                    return EmptyIterator.ofNodes();
+//                    return EmptyIterator.getInstance();
 //                }
 //
 //            case AxisInfo.DESCENDANT:
@@ -441,7 +440,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                            (new TreeWalker()).newDescendantAxisIterator(this, false, nodeTest),//new Navigator.DescendantEnumeration(this, false, true),
 //                            nodeTest);
 //                } else {
-//                    return EmptyIterator.ofNodes();
+//                    return EmptyIterator.getInstance();
 //                }
 //
 //            case AxisInfo.DESCENDANT_OR_SELF:
@@ -459,7 +458,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                    case Type.DOCUMENT:
 //                    case Type.ATTRIBUTE:
 //                    case Type.NAMESPACE:
-//                        return EmptyIterator.ofNodes();
+//                        return EmptyIterator.getInstance();
 //                    default:
 //                        return new Navigator.AxisFilter(
 //                                new ChildEnumeration(this, false, true),
@@ -468,7 +467,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //
 //            case AxisInfo.NAMESPACE:
 //                if (nodeKind != Type.ELEMENT) {
-//                    return EmptyIterator.ofNodes();
+//                    return EmptyIterator.getInstance();
 //                }
 //                return NamespaceNode.makeIterator(this, nodeTest);
 //
@@ -486,7 +485,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                    case Type.DOCUMENT:
 //                    case Type.ATTRIBUTE:
 //                    case Type.NAMESPACE:
-//                        return EmptyIterator.ofNodes();
+//                        return EmptyIterator.getInstance();
 //                    default:
 //                        return new Navigator.AxisFilter(
 //                                new ChildEnumeration(this, false, false),
@@ -506,32 +505,32 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //        }
 //    }
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         return new Navigator.AxisFilter(
                 new AttributeEnumeration(this),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
             return new Navigator.AxisFilter(
                     new ChildEnumeration(this, true, true),
                     nodeTest);
         } else {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         return new Navigator.AxisFilter(
                 new ChildEnumeration(this, false, forwards),
                 nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         if (includeSelf) {
             return new SteppingNavigator.DescendantAxisIterator(this, true, nodeTest);
 
@@ -539,7 +538,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             if (hasChildNodes()) {
                 return new SteppingNavigator.DescendantAxisIterator(this, false, nodeTest);
             } else {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             }
 
         }
@@ -717,7 +716,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     ///////////////////////////////////////////////////////////////////////////////
 
 
-    private final class AttributeEnumeration implements AxisIterator {
+    private final class AttributeEnumeration implements SequenceIterator {
 
         private final Iterator<Attribute> atts;
         private int ix = 0;
@@ -748,7 +747,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * preceding and preceding-or-ancestor axes (the latter being used by xsl:number)
      */
 
-    private final class ChildEnumeration implements AxisIterator {
+    private final class ChildEnumeration implements SequenceIterator {
 
         private final DOM4JNodeWrapper start;
         private final DOM4JNodeWrapper commonParent;

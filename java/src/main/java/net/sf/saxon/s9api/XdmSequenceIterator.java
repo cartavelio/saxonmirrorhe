@@ -12,7 +12,6 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.streams.XdmStream;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.LookaheadIteratorImpl;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -46,7 +45,7 @@ public class XdmSequenceIterator<T extends XdmItem> implements Iterator<T> {
         }
     }
 
-    public static XdmSequenceIterator<XdmNode> ofNodes(AxisIterator base) {
+    public static XdmSequenceIterator<XdmNode> ofNodes(SequenceIterator base) {
         return new XdmSequenceIterator<>(base);
     }
 

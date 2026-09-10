@@ -10,7 +10,7 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.NodeListIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -50,7 +50,7 @@ public final class DocumentOrderIterator implements SequenceIterator {
         if (sequence.size() > 1) {
             sequence.sort(comparer);
         }
-        iterator = new NodeListIterator(sequence);
+        iterator = new ListIterator.Of<>(sequence);
     }
 
     // Implement the SequenceIterator as a wrapper around the underlying iterator

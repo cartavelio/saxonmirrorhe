@@ -17,7 +17,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.tiny.WhitespaceTextImpl;
 import net.sf.saxon.tree.util.Navigator;
@@ -399,8 +398,8 @@ public class SaxonDeepEqual extends SystemFunction {
                     explain(reporter, reason, flags, n1, n2);
                     return reason;
                 }
-                AxisIterator a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
-                AxisIterator a2 = n2.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator a2 = n2.iterateAxis(AxisInfo.ATTRIBUTE);
                 if (!SequenceTool.sameLength(a1, a2)) {
                     final String reason = "elements have different number of attributes";
                     explain(reporter, reason, flags, n1, n2);
@@ -409,7 +408,7 @@ public class SaxonDeepEqual extends SystemFunction {
                 NodeInfo att1;
                 a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
                 while ((att1 = (NodeInfo)a1.next()) != null) {
-                    AxisIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
+                    SequenceIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
                                                          new SameNameTest(att1));
                     NodeInfo att2 = (NodeInfo)a2iter.next();
 
@@ -499,8 +498,8 @@ public class SaxonDeepEqual extends SystemFunction {
                 CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
-                AxisIterator c1 = n1.iterateAxis(AxisInfo.CHILD);
-                AxisIterator c2 = n2.iterateAxis(AxisInfo.CHILD);
+                SequenceIterator c1 = n1.iterateAxis(AxisInfo.CHILD);
+                SequenceIterator c2 = n2.iterateAxis(AxisInfo.CHILD);
                 while (true) {
                     NodeInfo d1 = (NodeInfo)c1.next();
                     while (d1 != null && isIgnorable(d1, flags)) {

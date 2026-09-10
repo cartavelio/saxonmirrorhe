@@ -19,7 +19,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
 
 import javax.xml.transform.Source;
@@ -173,7 +172,7 @@ public class CatalogCollection extends AbstractResourceCollection {
 
         // Now return an iterator over the documents that it refers to
 
-        AxisIterator iter =
+        SequenceIterator iter =
                 catalog.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo top = (NodeInfo)iter.next();
         if (top == null || !("collection".equals(top.getLocalPart()) && top.getNamespaceUri() == NamespaceUri.NULL)) {
@@ -204,7 +203,7 @@ public class CatalogCollection extends AbstractResourceCollection {
             }
         }
 
-        AxisIterator documents = top.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator documents = top.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         List<String> result = new ArrayList<>();
         NodeInfo item;
         while ((item = (NodeInfo)documents.next()) != null) {

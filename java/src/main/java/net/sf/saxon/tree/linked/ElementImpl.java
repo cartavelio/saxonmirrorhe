@@ -18,7 +18,6 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -274,7 +273,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         return attributeMap;
     }
 
-    AxisIterator iterateAttributes(NodeTest test) {
+    SequenceIterator iterateAttributes(NodeTest test) {
         if (attributeMap instanceof AttributeMapWithIdentity) {
             // this case needs special care because of the possibility of deleted attribute nodes
             return new Navigator.AxisFilter(((AttributeMapWithIdentity) attributeMap).iterateAttributes(this), test);
@@ -431,7 +430,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         DocumentImpl root = getPhysicalRoot();
         super.delete();
         if (root != null) {
-            AxisIterator iter = iterateAxis(AxisInfo.DESCENDANT_OR_SELF, NodeKindTest.ELEMENT);
+            SequenceIterator iter = iterateAxis(AxisInfo.DESCENDANT_OR_SELF, NodeKindTest.ELEMENT);
             while (true) {
                 ElementImpl n = (ElementImpl) iter.next();
                 for (AttributeInfo att : attributeMap) {

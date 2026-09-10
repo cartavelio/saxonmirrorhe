@@ -19,7 +19,6 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntSet;
@@ -767,7 +766,7 @@ public final class AxisExpression extends Expression {
      * @return the iterator over the axis
      */
 
-    public AxisIterator iterate(GNode origin) {
+    public SequenceIterator iterate(GNode origin) {
         if (test == null) {
             return origin.iterateAxis(axis);
         } else {

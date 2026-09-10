@@ -16,7 +16,6 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.linked.DocumentImpl;
@@ -402,7 +401,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
     /*@NotNull*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
             case AxisInfo.ATTRIBUTE:
@@ -413,7 +412,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
             case AxisInfo.PRECEDING:
             case AxisInfo.PRECEDING_SIBLING:
             case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
 
             case AxisInfo.SELF:
             case AxisInfo.ANCESTOR_OR_SELF:
@@ -443,7 +442,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
     /*@NotNull*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
             case AxisInfo.ATTRIBUTE:
@@ -454,7 +453,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
             case AxisInfo.PRECEDING:
             case AxisInfo.PRECEDING_SIBLING:
             case AxisInfo.PRECEDING_OR_ANCESTOR:
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
 
             case AxisInfo.SELF:
             case AxisInfo.ANCESTOR_OR_SELF:
@@ -483,7 +482,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                     if (b2) {
                         return SingleNodeIterator.makeIterator(textNode2);
                     } else {
-                        return EmptyIterator.ofNodes();
+                        return EmptyIterator.getInstance();
                     }
                 }
 
@@ -880,7 +879,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
         /*@NotNull*/
         @Override
-        public AxisIterator iterateAxis(int axisNumber) {
+        public SequenceIterator iterateAxis(int axisNumber) {
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
                 case AxisInfo.PARENT:
@@ -899,7 +898,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                 case AxisInfo.NAMESPACE:
                 case AxisInfo.PRECEDING:
                 case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
 
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:
@@ -921,7 +920,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
         /*@NotNull*/
         @Override
-        public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+        public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
             switch (axisNumber) {
                 case AxisInfo.ANCESTOR:
                 case AxisInfo.PARENT:
@@ -939,7 +938,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                     } else if (matchesText /* && !matchesDoc */) {
                         return SingleNodeIterator.makeIterator(this);
                     } else {
-                        return EmptyIterator.ofNodes();
+                        return EmptyIterator.getInstance();
                     }
 
                 case AxisInfo.ATTRIBUTE:
@@ -950,7 +949,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
                 case AxisInfo.NAMESPACE:
                 case AxisInfo.PRECEDING:
                 case AxisInfo.PRECEDING_SIBLING:
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
 
                 case AxisInfo.SELF:
                 case AxisInfo.DESCENDANT_OR_SELF:

@@ -16,7 +16,6 @@ import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.rules.RuleManager;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 
@@ -232,11 +231,11 @@ public class XSLUsePackage extends StyleElement {
 
     private Set<SymbolicName> getNamedOverrides() {
         Set<SymbolicName> overrides = new HashSet<>();
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo override;
         while ((override = (NodeInfo)kids.next()) != null) {
             if (override instanceof XSLOverride) {
-                AxisIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                SequenceIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo overridingDeclaration;
                 while ((overridingDeclaration = (NodeInfo)overridings.next()) != null) {
                     if (overridingDeclaration instanceof StylesheetComponent) {
@@ -268,14 +267,14 @@ public class XSLUsePackage extends StyleElement {
             throws XPathException {
         StylesheetPackage thisPackage = module.getStylesheetPackage();
         RuleManager ruleManager = module.getRuleManager();
-        AxisIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         Set<SymbolicName> overriddenModes = new HashSet<>();
 
         // Process all template rules within xsl:override elements
         NodeInfo override;
         while ((override = (NodeInfo)kids.next()) != null) {
             if (override instanceof XSLOverride) {
-                AxisIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                SequenceIterator overridings = override.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo overridingDeclaration;
                 while ((overridingDeclaration = (NodeInfo)overridings.next()) != null) {
                     if (overridingDeclaration instanceof XSLTemplate &&

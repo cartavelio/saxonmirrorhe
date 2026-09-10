@@ -18,7 +18,6 @@ import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
 import org.xml.sax.Locator;
@@ -469,7 +468,7 @@ public interface NodeInfo extends GNode, Location
     default AttributeMap attributes() {
         AttributeMap atts = EmptyAttributeMap.getInstance();
         if (getNodeKind() == Type.ELEMENT) {
-            AxisIterator iter = iterateAxis(AxisInfo.ATTRIBUTE);
+            SequenceIterator iter = iterateAxis(AxisInfo.ATTRIBUTE);
             NodeInfo attr;
             while ((attr = ((NodeInfo)iter.next())) != null) {
                 atts = atts.put(new AttributeInfo(NameOfNode.makeName(attr), (SimpleType) attr.getSchemaType(),

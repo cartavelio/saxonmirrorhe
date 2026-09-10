@@ -12,8 +12,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.str.*;
-import net.sf.saxon.tree.iter.AxisIterator;
+import net.sf.saxon.str.EmptyUnicodeString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
@@ -555,7 +557,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                         }
                     case Type.ATTRIBUTE:
                         ix = 0;
-                        AxisIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
+                        SequenceIterator iter = parent.iterateAxis(AxisInfo.ATTRIBUTE);
                         while (true) {
                             NodeInfo n = (NodeInfo)iter.next();
                             if (n == null || Navigator.haveSameName(this, n)) {
@@ -586,8 +588,8 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
-        AxisIterator iter = new AttributeEnumeration(this);
+    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+        SequenceIterator iter = new AttributeEnumeration(this);
         if (nodeTest != AnyXNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
         }
@@ -599,9 +601,9 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
         boolean elementOnly = isElementOnly(nodeTest);
-        AxisIterator iter = new Navigator.EmptyTextFilter(
+        SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
         if (nodeTest != AnyXNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -610,9 +612,9 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         boolean elementOnly = isElementOnly(nodeTest);
-        AxisIterator iter = new Navigator.EmptyTextFilter(
+        SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));
         if (nodeTest != AnyXNodeTest.getInstance()) {
             iter = new Navigator.AxisFilter(iter, nodeTest);
@@ -621,7 +623,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         return new SteppingNavigator.DescendantAxisIterator(this, includeSelf, nodeTest);
     }
 
@@ -638,7 +640,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     @Override
     public String getAttributeValue(/*@NotNull*/ NamespaceUri uri, /*@NotNull*/ String local) {
         NameTest test = new NameTest(Type.ATTRIBUTE, uri, local, getNamePool());
-        AxisIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
+        SequenceIterator iterator = iterateAxis(AxisInfo.ATTRIBUTE, test);
         NodeInfo attribute = (NodeInfo)iterator.next();
         if (attribute == null) {
             return null;
@@ -969,7 +971,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         }
     }
 
-    private final class AttributeEnumeration implements AxisIterator, LookaheadIterator {
+    private final class AttributeEnumeration implements SequenceIterator, LookaheadIterator {
 
         private final ArrayList<Node> attList = new ArrayList<>(10);
         private int ix;
@@ -1023,7 +1025,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      * preceding and preceding-or-ancestor axes (the latter being used by xsl:number)
      */
 
-    private final class ChildEnumeration implements AxisIterator, LookaheadIterator {
+    private final class ChildEnumeration implements SequenceIterator, LookaheadIterator {
 
         private final DOMNodeWrapper start;
         private final DOMNodeWrapper commonParent;

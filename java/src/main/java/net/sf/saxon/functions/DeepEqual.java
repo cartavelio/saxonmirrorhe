@@ -33,7 +33,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.tiny.WhitespaceTextImpl;
@@ -613,8 +612,8 @@ public class DeepEqual extends CollatingFunctionFixed {
                     explain(reporter, reason, options, n1, n2);
                     return reason;
                 }
-                AxisIterator a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
-                AxisIterator a2 = n2.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator a2 = n2.iterateAxis(AxisInfo.ATTRIBUTE);
                 if (!SequenceTool.sameLength(a1, a2)) {
                     final String reason = "elements have different number of attributes";
                     explain(reporter, reason, options, n1, n2);
@@ -623,7 +622,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 NodeInfo att1;
                 a1 = n1.iterateAxis(AxisInfo.ATTRIBUTE);
                 while ((att1 = ((NodeInfo)a1.next())) != null) {
-                    AxisIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
+                    SequenceIterator a2iter = n2.iterateAxis(AxisInfo.ATTRIBUTE,
                                                          new SameNameTest(att1));
                     NodeInfo att2 = (NodeInfo)a2iter.next();
 

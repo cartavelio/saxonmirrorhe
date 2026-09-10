@@ -11,7 +11,6 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.UncheckedXPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
@@ -263,7 +262,7 @@ public class FocusTrackingIterator
             return siblingMemory.mostRecentPosition;
         }
         SiblingMemory s = siblingMemory;
-        AxisIterator prev = node.iterateAxis(AxisInfo.PRECEDING_SIBLING, nodeTest);
+        SequenceIterator prev = node.iterateAxis(AxisInfo.PRECEDING_SIBLING, nodeTest);
         NodeInfo prior;
         int count = 1;
         while ((prior = (NodeInfo)prev.next()) != null) {

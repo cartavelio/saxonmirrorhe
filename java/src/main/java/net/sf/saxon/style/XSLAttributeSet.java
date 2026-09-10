@@ -17,7 +17,6 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -322,7 +321,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
         }
 
         XSLAttribute node;
-        AxisIterator iter = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator iter = iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         while ((node = (XSLAttribute) iter.next()) != null) {
             Expression inst = node.compile(compilation, decl);
             inst.setRetainedStaticContext(makeRetainedStaticContext());

@@ -15,9 +15,8 @@ import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.PrependAxisIterator;
+import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -378,13 +377,13 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         // fast path for child axis
         if (axisNumber == AxisInfo.CHILD) {
             if (hasChildNodes()) {
                 return new SiblingIterator(tree, this, null, true);
             } else {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             }
         } else {
             return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
@@ -395,12 +394,12 @@ public abstract class TinyNodeImpl implements NodeInfo {
      * Return an iterator over the nodes reached by the given axis from this node
      *
      * @param axisNumber Identifies the required axis, for example {@link AxisInfo#CHILD} or {@link AxisInfo#PARENT}
-     * @param predicate   A condition to be matched by the returned nodes.
+     * @param predicate  A condition to be matched by the returned nodes.
      * @return a AxisIteratorImpl that scans the nodes reached by the axis in turn.
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         int type = getNodeKind();
         switch (axisNumber) {
@@ -457,28 +456,28 @@ public abstract class TinyNodeImpl implements NodeInfo {
         }
     }
 
-    private AxisIterator iteratorANCESTOR(NodeTest nodeTest)
+    private SequenceIterator iteratorANCESTOR(NodeTest nodeTest)
     {
-        AxisIterator ancestors = new AncestorIterator(this, nodeTest);
+        SequenceIterator ancestors = new AncestorIterator(this, nodeTest);
         if (nodeTest.test(this)) {
-            return new PrependAxisIterator(this, ancestors);
+            return new PrependSequenceIterator(this, ancestors);
         } else {
             return ancestors;
         }
     }
 
-    private AxisIterator iteratorATTRIBUTE(int type, NodeTest nodeTest)
+    private SequenceIterator iteratorATTRIBUTE(int type, NodeTest nodeTest)
     {
         if (type != Type.ELEMENT) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
         if (tree.alpha[nodeNr] < 0) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
         return new AttributeIterator(tree, nodeNr, nodeTest);
     }
 
-    private AxisIterator iteratorCHILD(NodeTest nodeTest)
+    private SequenceIterator iteratorCHILD(NodeTest nodeTest)
     {
         if (hasChildNodes()) {
             if (nodeTest instanceof NameTest && ((NameTest) nodeTest).getNodeKind() == Type.ELEMENT) {
@@ -488,11 +487,11 @@ public abstract class TinyNodeImpl implements NodeInfo {
                 return new SiblingIterator(tree, this, nodeTest, true);
             }
         } else {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
     }
 
-    private AxisIterator iteratorDESCENDANT(int type, NodeTest nodeTest)
+    private SequenceIterator iteratorDESCENDANT(int type, NodeTest nodeTest)
     {
         if (type == Type.DOCUMENT &&
                 nodeTest instanceof NameTest &&
@@ -505,82 +504,82 @@ public abstract class TinyNodeImpl implements NodeInfo {
                 return new DescendantIteratorSansText(tree, this, nodeTest);
             }
         } else {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
     }
 
-    private AxisIterator iteratorDESCENDANT_OR_SELF(NodeTest nodeTest)
+    private SequenceIterator iteratorDESCENDANT_OR_SELF(NodeTest nodeTest)
     {
-        AxisIterator descendants = iterateAxis(AxisInfo.DESCENDANT, nodeTest);
+        SequenceIterator descendants = iterateAxis(AxisInfo.DESCENDANT, nodeTest);
         if (nodeTest.test(this)) {
-            return new PrependAxisIterator(this, descendants);
+            return new PrependSequenceIterator(this, descendants);
         } else {
             return descendants;
         }
     }
 
-    private AxisIterator iteratorFOLLOWING(int type, NodeTest nodeTest)
+    private SequenceIterator iteratorFOLLOWING(int type, NodeTest nodeTest)
     {
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
             return new FollowingIterator(tree, getParent(), nodeTest, true);
         } else if (tree.depth[nodeNr] == 0) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else {
             return new FollowingIterator(tree, this, nodeTest, false);
         }
     }
 
-    private AxisIterator iteratorFOLLOWING_SIBLING(int type, NodeTest nodeTest)
+    private SequenceIterator iteratorFOLLOWING_SIBLING(int type, NodeTest nodeTest)
     {
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else {
             return new SiblingIterator(tree, this, nodeTest, false);
         }
     }
 
-    private AxisIterator iteratorNAMESPACE(int type, NodeTest nodeTest)
+    private SequenceIterator iteratorNAMESPACE(int type, NodeTest nodeTest)
     {
         if (type != Type.ELEMENT) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
         return NamespaceNode.makeIterator(this, nodeTest);
     }
 
-    private AxisIterator iteratorPARENT(NodeTest nodeTest)
+    private SequenceIterator iteratorPARENT(NodeTest nodeTest)
     {
         NodeInfo parent = getParent();
         return Navigator.filteredSingleton(parent, nodeTest);
     }
 
-    private AxisIterator iteratorPRECEDING(int type, int axisNumber, NodeTest nodeTest)
+    private SequenceIterator iteratorPRECEDING(int type, int axisNumber, NodeTest nodeTest)
     {
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
             return getParent().iterateAxis(axisNumber, nodeTest);
         } else if (tree.depth[nodeNr] == 0) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else {
             return new PrecedingIterator(tree, this, nodeTest, false);
         }
     }
 
-    private AxisIterator iteratorPRECEDING_SIBLING(int type, NodeTest nodeTest)
+    private SequenceIterator iteratorPRECEDING_SIBLING(int type, NodeTest nodeTest)
     {
         if (type == Type.ATTRIBUTE || type == Type.NAMESPACE || tree.depth[nodeNr] == 0) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else {
             return new PrecedingSiblingIterator(tree, this, nodeTest);
         }
     }
 
-    private AxisIterator iteratorPRECEDING_OR_ANCESTOR(int type, NodeTest nodeTest)
+    private SequenceIterator iteratorPRECEDING_OR_ANCESTOR(int type, NodeTest nodeTest)
     {
         if (type == Type.DOCUMENT) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         } else if (type == Type.ATTRIBUTE || type == Type.NAMESPACE) {
             // See test numb32.
             TinyNodeImpl el = getParent();
-            return new PrependAxisIterator(el, new PrecedingIterator(tree, el, nodeTest, true));
+            return new PrependSequenceIterator(el, new PrecedingIterator(tree, el, nodeTest, true));
         } else {
             return new PrecedingIterator(tree, this, nodeTest, true);
         }

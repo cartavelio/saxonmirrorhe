@@ -8,13 +8,9 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 /**
  * An xsl:on-completion element in the stylesheet (XSLT 3.0). <br>
@@ -70,7 +66,7 @@ public class XSLOnCompletion extends StyleElement {
         if (!(parent instanceof XSLIterate)) {
             compileError("xsl:on-completion is not allowed as a child of " + parent.getDisplayName(), "XTSE0010");
         }
-        AxisIterator iter = iterateAxis(AxisInfo.PRECEDING_SIBLING, NodeKindTest.ELEMENT);
+        SequenceIterator iter = iterateAxis(AxisInfo.PRECEDING_SIBLING, NodeKindTest.ELEMENT);
         NodeInfo sib;
         while ((sib = (NodeInfo)iter.next()) != null) {
             if (!(sib instanceof XSLFallback || sib instanceof XSLLocalParam)) {

@@ -8,13 +8,13 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.regex.CaseVariants;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.XPathExecutable;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntArraySet;
 import net.sf.saxon.z.IntHashMap;
@@ -143,9 +143,9 @@ public class Bug6225 {
                     throw new RuntimeException("Failed to build casevariants.xml", e);
                 }
 
-                AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
+                SequenceIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
                 while (true) {
-                    NodeInfo item = iter.next();
+                    NodeInfo item = (NodeInfo)iter.next();
                     if (item == null) {
                         break;
                     }
@@ -256,9 +256,9 @@ public class Bug6225 {
                 throw new RuntimeException("Failed to build casevariants.xml", e);
             }
 
-            AxisIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
+            SequenceIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
             while (true) {
-                NodeInfo item = iter.next();
+                NodeInfo item = (NodeInfo)iter.next();
                 if (item == null) {
                     break;
                 }

@@ -8,13 +8,14 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.SequenceIterator;
 
 /**
  * This class implements an AxisIterator by providing a start item, and a function
  * that selects the next item as a function of the previous item.
  */
 
-public class IncrementalIterator implements AxisIterator {
+public class IncrementalIterator implements SequenceIterator {
 
     // Note: used in SaxonCS
 

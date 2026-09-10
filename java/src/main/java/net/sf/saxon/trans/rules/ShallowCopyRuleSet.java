@@ -14,10 +14,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SimpleType;
@@ -102,8 +101,8 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     pipe.setXPathContext(c2);
 
                     // apply-templates to all attributes
-                    AxisIterator attributes = node.iterateAxis(AxisInfo.ATTRIBUTE);
-                    if (attributes != EmptyIterator.ofNodes()) {
+                    SequenceIterator attributes = node.iterateAxis(AxisInfo.ATTRIBUTE);
+                    if (attributes != EmptyIterator.getInstance()) {
                         c2.setOrigin(this);
                         c2.trackFocus(attributes);
                         TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, out, c2, locationId);

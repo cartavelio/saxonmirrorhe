@@ -8,15 +8,15 @@
 package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 /**
  * This class enumerates the ancestor:: or ancestor-or-self:: axes,
  * starting at a given node. The start node will never be the root.
  */
 
-final public class AncestorIterator implements AxisIterator {
+final public class AncestorIterator implements SequenceIterator {
 
     private final NodeInfo startNode;
     private NodeInfo current;

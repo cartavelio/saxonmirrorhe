@@ -17,7 +17,6 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.util.SteppingNavigator;
@@ -507,13 +506,13 @@ public abstract class NodeImpl
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         // Fast path for child axis
         if (axisNumber == AxisInfo.CHILD) {
             if (this instanceof ParentNodeImpl) {
                 return ((ParentNodeImpl) this).iterateChildren(null);
             } else {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             }
         } else {
             return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
@@ -524,12 +523,12 @@ public abstract class NodeImpl
      * Return an enumeration over the nodes reached by the given axis from this node
      *
      * @param axisNumber The axis to be iterated over
-     * @param predicate   A pattern to be matched by the returned nodes
+     * @param predicate  A pattern to be matched by the returned nodes
      * @return an AxisIterator that scans the nodes reached by the axis in turn.
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         switch (axisNumber) {
             case AxisInfo.ANCESTOR:
@@ -540,7 +539,7 @@ public abstract class NodeImpl
 
             case AxisInfo.ATTRIBUTE:
                 if (getNodeKind() != Type.ELEMENT) {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 } else {
                     return ((ElementImpl)this).iterateAttributes(nodeTest);
                 }
@@ -548,7 +547,7 @@ public abstract class NodeImpl
                 if (this instanceof ParentNodeImpl) {
                     return ((ParentNodeImpl) this).iterateChildren(nodeTest);
                 } else {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 }
 
             case AxisInfo.DESCENDANT:
@@ -559,7 +558,7 @@ public abstract class NodeImpl
                 } else if (hasChildNodes()) {
                     return new SteppingNavigator.DescendantAxisIterator(this, false, nodeTest);
                 } else {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 }
 
             case AxisInfo.DESCENDANT_OR_SELF:
@@ -573,14 +572,14 @@ public abstract class NodeImpl
 
             case AxisInfo.NAMESPACE:
                 if (getNodeKind() != Type.ELEMENT) {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 }
                 return NamespaceNode.makeIterator(this, nodeTest);
 
             case AxisInfo.PARENT:
                 NodeInfo parent = getParent();
                 if (parent == null) {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 }
                 return Navigator.filteredSingleton(parent, nodeTest);
 

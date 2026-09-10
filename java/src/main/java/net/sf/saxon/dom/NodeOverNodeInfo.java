@@ -7,16 +7,16 @@
 
 package net.sf.saxon.dom;
 
-import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
+import net.sf.saxon.functions.SaxonDeepEqual;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.Type;
 import org.w3c.dom.*;
@@ -297,7 +297,7 @@ public abstract class NodeOverNodeInfo implements Node {
 
     @Override
     public Node getLastChild() {
-        AxisIterator children = node.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator children = node.iterateAxis(AxisInfo.CHILD);
         NodeInfo last = null;
         while (true) {
             NodeInfo next = (NodeInfo)children.next();
@@ -645,7 +645,7 @@ public abstract class NodeOverNodeInfo implements Node {
         if (node.getNodeKind() == Type.DOCUMENT) {
             return null;
         } else if (node.getNodeKind() == Type.ELEMENT) {
-            AxisIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
+            SequenceIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
             NodeInfo ns;
             while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getUnicodeStringValue().equals(namespaceURI)) {
@@ -684,7 +684,7 @@ public abstract class NodeOverNodeInfo implements Node {
         if (node.getNodeKind() == Type.DOCUMENT) {
             return null;
         } else if (node.getNodeKind() == Type.ELEMENT) {
-            AxisIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
+            SequenceIterator iter = node.iterateAxis(AxisInfo.NAMESPACE);
             NodeInfo ns;
             while ((ns = (NodeInfo)iter.next()) != null) {
                 if (ns.getLocalPart().equals(prefix)) {

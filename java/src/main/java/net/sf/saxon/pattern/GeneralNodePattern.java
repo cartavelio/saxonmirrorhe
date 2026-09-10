@@ -22,7 +22,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.*;
 
@@ -225,7 +224,7 @@ public final class GeneralNodePattern extends Pattern {
         if (precondition != null && !precondition.matches(item, context)) {
             return false;
         }
-        AxisIterator anc = ((NodeInfo) item).iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+        SequenceIterator anc = ((NodeInfo) item).iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
         NodeInfo top = (NodeInfo)item;
         while (true) {
             NodeInfo a = (NodeInfo)anc.next();
@@ -268,7 +267,7 @@ public final class GeneralNodePattern extends Pattern {
         // equivalent expression
 
         if (anchor == null) {
-            AxisIterator ancestors = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+            SequenceIterator ancestors = node.iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
             while (true) {
                 NodeInfo ancestor = (NodeInfo)ancestors.next();
                 if (ancestor == null) {

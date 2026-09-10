@@ -16,7 +16,6 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 
 import net.sf.saxon.tree.util.Navigator;
@@ -145,7 +144,7 @@ public class VirtualCopy implements NodeInfo {
                 if (!ns.isEmpty()) {
                     nsMap = nsMap.put(getPrefix(), ns);
                 }
-                AxisIterator iter = original.iterateAxis(AxisInfo.ATTRIBUTE);
+                SequenceIterator iter = original.iterateAxis(AxisInfo.ATTRIBUTE);
                 NodeInfo att;
                 while ((att = (NodeInfo)iter.next()) != null) {
                     if (!att.getNamespaceUri().isEmpty()) {
@@ -440,14 +439,14 @@ public class VirtualCopy implements NodeInfo {
      * @param nodeTest   A pattern to be matched by the returned nodes; nodes
      *                   that do not match this pattern are not included in the result
      * @return an AxisIterator that scans the nodes reached by the axis in
-     *         turn.
+     * turn.
      * @throws UnsupportedOperationException if the namespace axis is
      *                                       requested and this axis is not supported for this implementation.
      * @see net.sf.saxon.om.AxisInfo
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
+    public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         VirtualCopy newParent = null;
         switch (axisNumber) {
             case AxisInfo.CHILD:
@@ -469,7 +468,7 @@ public class VirtualCopy implements NodeInfo {
                         new Navigator.AncestorIterator(this, true), nodeTest);
             case AxisInfo.NAMESPACE:
                 if (getNodeKind() != Type.ELEMENT) {
-                    return EmptyIterator.ofNodes();
+                    return EmptyIterator.getInstance();
                 }
                 return NamespaceNode.makeIterator(this, nodeTest);
             case AxisInfo.PARENT:
@@ -723,7 +722,7 @@ public class VirtualCopy implements NodeInfo {
      * @return the iterator that does the copying
      */
 
-    protected VirtualCopier makeCopier(AxisIterator axis, VirtualCopy newParent, boolean testInclusion) {
+    protected VirtualCopier makeCopier(SequenceIterator axis, VirtualCopy newParent, boolean testInclusion) {
         return new VirtualCopier(this, axis, newParent, testInclusion);
     }
 
@@ -735,14 +734,14 @@ public class VirtualCopy implements NodeInfo {
      * the original copied node must be truncated.
      */
 
-    protected static class VirtualCopier implements AxisIterator {
+    protected static class VirtualCopier implements SequenceIterator {
 
         protected VirtualCopy node;
-        protected AxisIterator base;
+        protected SequenceIterator base;
         private final VirtualCopy parent;
         protected boolean testInclusion;
 
-        public VirtualCopier(VirtualCopy node, AxisIterator base, VirtualCopy parent, boolean testInclusion) {
+        public VirtualCopier(VirtualCopy node, SequenceIterator base, VirtualCopy parent, boolean testInclusion) {
             this.node = node;
             this.base = base;
             this.parent = parent;

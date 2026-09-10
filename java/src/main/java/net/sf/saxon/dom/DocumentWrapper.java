@@ -9,12 +9,8 @@ package net.sf.saxon.dom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.GenericTreeInfo;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.tree.iter.AxisIterator;
 import org.w3c.dom.*;
 
 import java.net.URI;
@@ -130,7 +126,7 @@ public class DocumentWrapper extends GenericTreeInfo {
                 return idIndex.get(id);
             } else {
                 idIndex = new HashMap<>();
-                AxisIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+                SequenceIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
                 NodeInfo e;
                 while ((e = (NodeInfo)iter.next()) != null) {
                     String xmlId = e.getAttributeValue(NamespaceUri.XML, "id");

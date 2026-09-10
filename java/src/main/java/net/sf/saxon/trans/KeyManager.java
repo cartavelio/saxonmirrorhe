@@ -285,7 +285,7 @@ public class KeyManager {
             XPathContext context) throws XPathException {
 
         if (soughtValue == null) {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
         if (keySet.isBackwardsCompatible()) {
             // if backwards compatibility is in force, treat all values as strings

@@ -11,13 +11,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.GenericTreeInfo;
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -87,9 +83,9 @@ public class JDOM2DocumentWrapper extends GenericTreeInfo implements ActiveSourc
     public NodeInfo selectID(String id, boolean getParent) {
         if (idIndex == null) {
             idIndex = new HashMap<String, Element>(100);
-            AxisIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+            SequenceIterator iter = getRootNode().iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
             GNode node;
-            while ((node = iter.next()) != null) {
+            while ((node = (GNode)iter.next()) != null) {
                 Element element = (Element) ((JDOM2NodeWrapper) node).node;
                 for (Attribute att : element.getAttributes()) {
                     if (att.getAttributeType() == Attribute.ID_TYPE) {

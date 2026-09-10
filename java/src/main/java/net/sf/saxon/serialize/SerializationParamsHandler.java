@@ -13,7 +13,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
@@ -76,7 +75,7 @@ public class SerializationParamsHandler {
         }
         restrictAttributes(node);
         Set<NodeName> nodeNames = new HashSet<>();
-        AxisIterator kids = node.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = node.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         NodeInfo child;
         while ((child = (NodeInfo)kids.next()) != null) {
             if (!nodeNames.add(NameOfNode.makeName(child))) {
@@ -92,7 +91,7 @@ public class SerializationParamsHandler {
             }
             if (uri.isEmpty() && lname.equals("use-character-maps")) {
                 restrictAttributes(child);
-                AxisIterator gKids = child.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                SequenceIterator gKids = child.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
                 NodeInfo gChild;
                 IntHashMap<String> map = new IntHashMap<>();
                 while ((gChild = (NodeInfo)gKids.next()) != null) {

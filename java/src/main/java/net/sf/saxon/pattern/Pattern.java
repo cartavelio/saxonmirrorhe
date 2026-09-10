@@ -326,16 +326,16 @@ public abstract class Pattern extends PseudoExpression {
             if (matchesItem(doc, context)) {
                 return SingletonIterator.makeIterator(doc);
             } else {
-                return EmptyIterator.ofNodes();
+                return EmptyIterator.getInstance();
             }
         } else if (UType.ATTRIBUTE.subsumes(uType)) {
-            AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+            SequenceIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
             SequenceIterator allAttributes =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
             return ItemMappingIterator.filter(allAttributes, item -> matchesItem(item, context));
         } else if (UType.NAMESPACE.subsumes(uType)) {
-            AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+            SequenceIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
             SequenceIterator allNamespaces =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateAxis(AxisInfo.NAMESPACE));
@@ -348,21 +348,21 @@ public abstract class Pattern extends PseudoExpression {
             } else {
                 nodeTest = new MultipleNodeKindTest(uType);
             }
-            AxisIterator allChildren = doc.iterateAxis(AxisInfo.DESCENDANT, nodeTest);
+            SequenceIterator allChildren = doc.iterateAxis(AxisInfo.DESCENDANT, nodeTest);
             return ItemMappingIterator.filter(allChildren, item -> matchesItem(item, context));
         } else {
             int axis = uType.subsumes(UType.DOCUMENT) ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
-            AxisIterator allChildren = doc.iterateAxis(axis);
+            SequenceIterator allChildren = doc.iterateAxis(axis);
             SequenceIterator attributesOrSelf =
                     MappingIterator.map(allChildren, item -> {
-                        AxisIterator mapper = SingleNodeIterator.makeIterator((NodeInfo) item);
+                        SequenceIterator mapper = SingleNodeIterator.makeIterator((NodeInfo) item);
                         if (uType.subsumes(UType.NAMESPACE)) {
-                            mapper = new ConcatenatingAxisIterator(mapper,
-                                                                   ((NodeInfo) item).iterateAxis(AxisInfo.NAMESPACE));
+                            mapper = new ConcatenatingIterator(mapper,
+                                                               ((NodeInfo) item).iterateAxis(AxisInfo.NAMESPACE));
                         }
                         if (uType.subsumes(UType.ATTRIBUTE)) {
-                            mapper = new ConcatenatingAxisIterator(mapper,
-                                                                   ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
+                            mapper = new ConcatenatingIterator(mapper,
+                                                               ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
                         }
                         return mapper;
                     });

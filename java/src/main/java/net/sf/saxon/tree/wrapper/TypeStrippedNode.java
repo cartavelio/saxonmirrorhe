@@ -11,9 +11,9 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.CopyOptions;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -177,7 +177,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
 
     /*@Nullable*/
     @Override
-    public AxisIterator iterateAxis(int axisNumber) {
+    public SequenceIterator iterateAxis(int axisNumber) {
         return new WrappingIterator(node.iterateAxis(axisNumber), this, null);
     }
 

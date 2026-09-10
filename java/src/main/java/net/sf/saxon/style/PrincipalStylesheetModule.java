@@ -28,7 +28,6 @@ import net.sf.saxon.serialize.CharacterMapIndex;
 import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
@@ -815,7 +814,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
 
     private static void setLocalParamDetails(XSLTemplate source, NamedTemplate nt) {
-        AxisIterator kids = source.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+        SequenceIterator kids = source.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
         List<NamedTemplate.LocalParamInfo> details = new ArrayList<>();
         SequenceTool.supply(kids, (ItemConsumer<? super Item>) child -> {
             if (child instanceof XSLLocalParam) {
@@ -1480,7 +1479,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             }
         }
         NodeInfo child;
-        AxisIterator kids = element.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator kids = element.iterateAxis(AxisInfo.CHILD);
         while ((child = (NodeInfo)kids.next()) != null) {
             if (child instanceof StyleElement) {
                 registerImplicitModes((StyleElement) child, manager);

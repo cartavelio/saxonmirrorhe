@@ -268,7 +268,7 @@ public abstract class ArrayIterator implements SequenceIterator, FocusIterator,
      * contains Nodes; it therefore implements the AxisIterator interface.
      */
 
-    public static class OfNodes <N extends NodeInfo> extends ArrayIterator.Of<N> implements AxisIterator {
+    public static class OfNodes <N extends NodeInfo> extends ArrayIterator.Of<N> implements SequenceIterator {
         public OfNodes(N[] nodes) {
             super(nodes);
         }

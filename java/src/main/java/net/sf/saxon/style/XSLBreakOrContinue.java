@@ -8,7 +8,6 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.tree.iter.AxisIterator;
 
 /**
  * Abstract class containing functionality common to xsl:break and xsl:next-iteration
@@ -51,7 +50,7 @@ public abstract class XSLBreakOrContinue extends StyleElement {
         boolean isLast = true;
         while (true) {
             if (!(inst instanceof XSLWhen)) {
-                AxisIterator sibs = inst.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
+                SequenceIterator sibs = inst.iterateAxis(AxisInfo.FOLLOWING_SIBLING);
                 while (true) {
                     NodeInfo sib = (NodeInfo)sibs.next();
                     if (sib == null) {

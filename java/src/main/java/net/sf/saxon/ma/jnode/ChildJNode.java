@@ -3,16 +3,14 @@ package net.sf.saxon.ma.jnode;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.jiter.MappingJavaIterator;
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class ChildJNode extends JNode {
     private JNode parent;
@@ -49,11 +47,11 @@ public class ChildJNode extends JNode {
     }
 
 
-    public AxisIterator getChildren() {
+    public SequenceIterator getChildren() {
         return new JNodeChildIterator(this);
     }
 
-    private static class JNodeChildIterator implements AxisIterator {
+    private static class JNodeChildIterator implements SequenceIterator {
 
         private final ChildJNode origin;
         private final SequenceIterator valueIterator;

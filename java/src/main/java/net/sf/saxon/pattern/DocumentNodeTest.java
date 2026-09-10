@@ -11,8 +11,10 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.NoQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
 
 import java.util.Optional;
 
@@ -85,7 +87,7 @@ public class DocumentNodeTest extends NodeTest {
         if (!(node instanceof NodeInfo) || ((NodeInfo)node).getNodeKind() != Type.DOCUMENT) {
             return false;
         }
-        AxisIterator iter = node.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator iter = node.iterateAxis(AxisInfo.CHILD);
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;
@@ -176,7 +178,7 @@ public class DocumentNodeTest extends NodeTest {
             return explanation;
         }
         NodeInfo node = (NodeInfo) item;
-        AxisIterator iter = node.iterateAxis(AxisInfo.CHILD);
+        SequenceIterator iter = node.iterateAxis(AxisInfo.CHILD);
         // The match is true if there is exactly one element node child, no text node
         // children, and the element node matches the element test.
         boolean found = false;

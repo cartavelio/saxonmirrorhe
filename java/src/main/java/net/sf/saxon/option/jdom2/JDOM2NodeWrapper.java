@@ -402,7 +402,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             if (parent == null) {
                 return 0;
             }
-            AxisIterator iter;
+            SequenceIterator iter;
             switch (nodeKind) {
                 case Type.ELEMENT:
                 case Type.TEXT:
@@ -421,7 +421,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                     return index;
             }
             while (true) {
-                GNode n = iter.next();
+                GNode n = (GNode)iter.next();
                 if (n == null) {
                     break;
                 }
@@ -441,8 +441,8 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
-        AxisIterator base = new AttributeEnumeration(this);
+    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+        SequenceIterator base = new AttributeEnumeration(this);
         if (nodeTest == AnyXNodeTest.getInstance()) {
             return base;
         } else {
@@ -451,21 +451,21 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
-            AxisIterator base = new ChildEnumeration(this, true, true);
+            SequenceIterator base = new ChildEnumeration(this, true, true);
             if (nodeTest == AnyXNodeTest.getInstance()) {
                 return base;
             } else {
                 return new Navigator.AxisFilter(base, nodeTest);
             }
         } else {
-            return EmptyIterator.ofNodes();
+            return EmptyIterator.getInstance();
         }
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (nodeTest == AnyXNodeTest.getInstance()) {
             return new ChildEnumeration(this, false, forwards);
         } else {
@@ -476,14 +476,14 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         Iterator<? extends Content> descendants;
         final UType uType = nodeTest.getUType();
         if (uType.overlaps(UType.TEXT)) {
             // if selecting text nodes, we have to handle adjacent sibling text nodes. The best way
             // to achieve this is by using the recursive implementation of the descendant axis available
             // in the Navigator class, which works in terms of the child axis only. See bug #5348.
-            AxisIterator allDescendants = new Navigator.DescendantIterator(this, includeSelf, true);
+            SequenceIterator allDescendants = new Navigator.DescendantIterator(this, includeSelf, true);
             if (nodeTest == AnyXNodeTest.getInstance()) {
                 return allDescendants;
             } else {
@@ -502,9 +502,9 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 return makeWrapper(node, getTreeInfo());
             }
         };
-        AxisIterator wrappedDescendants = new DescendantWrappingIterator<Content>(descendants, wrappingFunct);
+        SequenceIterator wrappedDescendants = new DescendantWrappingIterator<Content>(descendants, wrappingFunct);
         if (includeSelf && nodeTest.test(this)) {
-            wrappedDescendants = new PrependAxisIterator(this, wrappedDescendants);
+            wrappedDescendants = new PrependSequenceIterator(this, wrappedDescendants);
         }
 
         if (nodeTest instanceof AnyXNodeTest || (nodeTest instanceof NodeKindTest && ((NodeKindTest) nodeTest).getNodeKind() == Type.ELEMENT)) {
@@ -701,7 +701,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     ///////////////////////////////////////////////////////////////////////////////
 
 
-    private final class AttributeEnumeration implements AxisIterator {
+    private final class AttributeEnumeration implements SequenceIterator {
 
         private final Iterator<Attribute> atts;
         private int ix = 0;
@@ -731,7 +731,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      * preceding and preceding-or-ancestor axes (the latter being used by xsl:number)
      */
 
-    private final class ChildEnumeration implements AxisIterator {
+    private final class ChildEnumeration implements SequenceIterator {
 
         private final JDOM2NodeWrapper commonParent;
         private final ListIterator children;

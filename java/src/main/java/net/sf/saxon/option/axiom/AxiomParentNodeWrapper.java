@@ -9,10 +9,10 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
@@ -99,12 +99,12 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
     }
 
     @Override
-    protected final AxisIterator iterateChildren(NodeTest nodeTest) {
+    protected final SequenceIterator iterateChildren(NodeTest nodeTest) {
         return new ChildWrappingIterator(this, nodeTest);
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         // Note: for unknown reasons, this method is really slow. See XMark test q7.
         return new DescendantWrappingIterator(this, nodeTest, includeSelf);
     }
@@ -126,7 +126,7 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
      * successive node as it is found.
      */
 
-    private abstract class AxiomWrappingIterator implements AxisIterator {
+    private abstract class AxiomWrappingIterator implements SequenceIterator {
         Iterator base;
         NodeTest nodeTest;
 

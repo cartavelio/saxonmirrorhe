@@ -10,12 +10,12 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.NamespaceNode;
-import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
@@ -273,17 +273,17 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     }
 
     @Override
-    protected AxisIterator iterateAttributes(NodeTest nodeTest) {
-        return EmptyIterator.ofNodes();
+    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+        return EmptyIterator.getInstance();
     }
 
     @Override
-    protected AxisIterator iterateChildren(NodeTest nodeTest) {
-        return EmptyIterator.ofNodes();
+    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
+        return EmptyIterator.getInstance();
     }
 
     @Override
-    protected AxisIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
             if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper);
@@ -302,7 +302,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     }
 
     @Override
-    protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
+    protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         throw new UnsupportedOperationException(); // shouldn't be called on this kind of node
     }
 
