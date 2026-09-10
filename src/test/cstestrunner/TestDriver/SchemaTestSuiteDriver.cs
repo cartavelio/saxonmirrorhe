@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Saxon.Api;
+using Saxon.Hej.om;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
 using NullDestination = Saxon.Api.NullDestination;
 using Processor = Saxon.Api.Processor;
@@ -326,7 +327,7 @@ namespace TestDriver {
                                 if (rootElement != null) {
                                     string targetNamespace = rootElement.GetAttributeValue("targetNamespace");
                                     if (targetNamespace != null &&
-                                        testConfig.Implementation.isSchemaAvailable(targetNamespace)) {
+                                        testConfig.Implementation.isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
                                         // the schema has already been read, typically by an import/include/override in a previous schema document.
                                         // Ignore the duplicate.
                                         continue;
