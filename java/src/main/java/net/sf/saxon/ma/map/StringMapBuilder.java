@@ -117,6 +117,7 @@ public class StringMapBuilder {
                     if (!isNew) {
                         throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
                     }
+                    ix++;
                 }
                 return new FixedMapWithStringKeys(keyArray, valueArray, specVersion, index);
             } else {
