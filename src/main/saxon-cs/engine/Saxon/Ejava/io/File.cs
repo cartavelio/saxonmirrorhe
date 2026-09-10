@@ -181,7 +181,12 @@ namespace Saxon.Ejava.io {
         }
 
         public bool mkdirs() {
-            SysIO.Directory.CreateDirectory(fileName);
+            try {
+                SysIODirectory.CreateDirectory(fileName);
+            }
+            catch (Exception) {
+                return false;
+            }
             return true;
         }
 
@@ -265,7 +270,15 @@ namespace Saxon.Ejava.io {
 
         public SysIO.TextReader getInputStreamReader(string encodingName) {
             SysIO.Stream stream = SysIO.File.OpenRead(fileName);
-            Encoding encoding = Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+            Encoding encoding;
+            try {
+                encoding = Encoding.GetEncoding(encodingName, EncoderFallback.ExceptionFallback,
+                    DecoderFallback.ExceptionFallback);
+            }
+            catch (System.ArgumentException) {
+                throw new IOException("Unknown encoding " + encodingName);
+            }
+
             return new SysIO.StreamReader(stream, encoding);
         }
 
