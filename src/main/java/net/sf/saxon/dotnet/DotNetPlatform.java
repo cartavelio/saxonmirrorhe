@@ -27,6 +27,7 @@ import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ExternalObjectType;
 import org.xml.sax.SAXException;
@@ -40,7 +41,6 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.io.Reader;
-import java.nio.charset.spi.CharsetProvider;
 import java.util.List;
 import java.util.Properties;
 
@@ -55,7 +55,7 @@ public class DotNetPlatform implements Platform {
      * loading.
      */
 
-    private static final CharsetProvider provider = new sun.nio.cs.ext.ExtendedCharsets();
+    //private static final CharsetProvider provider = new sun.nio.cs.ext.ExtendedCharsets();
 
     public DotNetPlatform() {
     }
@@ -380,7 +380,7 @@ public class DotNetPlatform implements Platform {
      *          if the regular expression or the flags are invalid
      */
     @Override
-    public RegularExpression compileRegularExpression(Configuration config, CharSequence regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
+    public RegularExpression compileRegularExpression(Configuration config, UnicodeString regex, String flags, String hostLanguage, List<String> warnings) throws XPathException {
         // recognize implementation-defined flags following a semicolon in the flags string
         boolean useJava = false;
         boolean useDotNet = false;
@@ -491,7 +491,7 @@ public class DotNetPlatform implements Platform {
 //#if EE==true
         editionCode = "ee";
 //#endif
-        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon-"+editionCode+"-"+ Version.getProductVersion() +", Version="+ Version.getProductVersion()+", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
+        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl, saxon9"+editionCode+", Version="+ Version.getProductVersion()+", Culture=neutral, PublicKeyToken=e1fdd002d5083fe6");
     }
 
     @Override

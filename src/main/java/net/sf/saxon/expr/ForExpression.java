@@ -521,8 +521,8 @@ public class ForExpression extends Assignation {
             implements MappingFunction, ItemMappingFunction {
 
         protected XPathContext context;
-        private int slotNumber;
-        private Expression action;
+        private final int slotNumber;
+        private final Expression action;
 
         public MappingAction(XPathContext context,
                              int slotNumber,

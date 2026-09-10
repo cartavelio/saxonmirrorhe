@@ -216,7 +216,7 @@ public class TextOverNodeInfo extends NodeOverNodeInfo implements Text, Comment 
         if (node.getNodeKind() != Type.TEXT) {
             throw new UnsupportedOperationException("Method is defined only on text nodes");
         }
-        if (!Whitespace.isWhite(node.getStringValue())) {
+        if (!Whitespace.isAllWhite(node.getUnicodeStringValue())) {
             return false;
         }
         NodeInfo parent = node.getParent();

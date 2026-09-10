@@ -22,7 +22,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 
 public class ReceivingDestination extends AbstractDestination {
 
-    private Receiver outputTarget;
+    private final Receiver outputTarget;
 
     /**
      * Create a {@code ReceivingDestination} that wraps a supplied {@code Receiver}

@@ -47,7 +47,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
      */
 
     public static Expression makeAdjacentTextNodeMerger(Expression base) {
-        if (base instanceof Literal && ((Literal) base).getValue() instanceof AtomicSequence) {
+        if (base instanceof Literal && ((Literal) base).getGroundedValue() instanceof AtomicSequence) {
             return base;
         } else {
             return new AdjacentTextNodeMerger(base);
@@ -62,7 +62,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
     @Override
     public Expression simplify() throws XPathException {
         Expression operand = getBaseExpression();
-        if (operand instanceof Literal && ((Literal) operand).getValue() instanceof AtomicValue) {
+        if (operand instanceof Literal && ((Literal) operand).getGroundedValue() instanceof AtomicValue) {
             return operand;
         } else {
             return super.simplify();
@@ -112,7 +112,7 @@ public class AdjacentTextNodeMerger extends UnaryExpression {
                     Expression content = ((ValueOf) action).getSelect();
                     if (content instanceof StringLiteral) {
                         // if it's empty, we could remove it now, but that's awkward and probably doesn't happen
-                        maybeEmpty |= ((StringLiteral) content).getStringValue().isEmpty();
+                        maybeEmpty |= ((StringLiteral) content).getString().isEmpty();
                     } else {
                         maybeEmpty = true;
                     }

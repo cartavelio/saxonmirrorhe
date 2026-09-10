@@ -24,9 +24,9 @@ import net.sf.saxon.type.UType;
  */
 public class ItemTypeCheckingFunction implements ItemMappingFunction {
 
-    private ItemType requiredItemType;
-    private RoleDiagnostic role;
-    private Location location;
+    private final ItemType requiredItemType;
+    private final RoleDiagnostic role;
+    private final Location location;
     private Expression failingExpression;
     private Configuration config = null;
 

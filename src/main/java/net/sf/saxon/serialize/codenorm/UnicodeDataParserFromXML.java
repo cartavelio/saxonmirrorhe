@@ -98,7 +98,7 @@ class UnicodeDataParserFromXML {
         compose.setDefaultValue(NormalizerData.NOT_COMPOSITE);
 
         readDecompositionTable(decompositionKeys.getStringValue(), decompositionValues.getStringValue(),
-                decompose, compose, isExcluded, isCompatibility);
+                               decompose, compose, isExcluded, isCompatibility);
 
         return new NormalizerData(canonicalClass, decompose, compose,
                 isCompatibility, isExcluded);

@@ -51,6 +51,7 @@ public class ProjectionTests {
 
             final PathMap map = ((XQueryExpressionEE)exp).getPathMap();
             FilterFactory ff = new FilterFactory() {
+                @Override
                 public ProxyReceiver makeFilter(Receiver next) {
                     return new Projector(map.getRootForDocument(fileName), next);
                 }

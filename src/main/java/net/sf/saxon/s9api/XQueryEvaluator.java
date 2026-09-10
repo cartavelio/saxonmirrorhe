@@ -58,9 +58,9 @@ import java.util.Set;
  */
 public class XQueryEvaluator extends AbstractDestination implements Iterable<XdmItem> {
 
-    private Processor processor;
-    private XQueryExpression expression;
-    private DynamicQueryContext context;
+    private final Processor processor;
+    private final XQueryExpression expression;
+    private final DynamicQueryContext context;
     private Controller controller;  // used only when making direct calls to global functions
     private Destination destination;
     private Set<XdmNode> updatedDocuments;
@@ -241,6 +241,7 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
      * @return the ErrorListener in use
      */
 
+    @SuppressWarnings("deprecation")
     public ErrorListener getErrorListener() {
         return context.getErrorListener();
     }

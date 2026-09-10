@@ -22,7 +22,9 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -668,20 +670,43 @@ public class VennExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(final XPathContext c) throws XPathException {
-        SequenceIterator i1 = getLhsExpression().iterate(c);
-        SequenceIterator i2 = getRhsExpression().iterate(c);
         switch (operator) {
-            case Token.UNION:
-                return new UnionEnumeration(i1, i2,
-                        GlobalOrderComparer.getInstance());
-            case Token.INTERSECT:
+            case Token.UNION: {
+                // If either of the operands is a union expression, then we merge its component
+                // iterators into a single multi-way union iterator
+                List<SequenceIterator> operands = new ArrayList<>();
+                gatherUnionLeafIterators(operands, c);
+                return new UnionIterator(operands, GlobalOrderComparer.getInstance());
+            }
+            case Token.INTERSECT: {
+                SequenceIterator i1 = getLhsExpression().iterate(c);
+                SequenceIterator i2 = getRhsExpression().iterate(c);
                 return new IntersectionEnumeration(i1, i2,
-                        GlobalOrderComparer.getInstance());
-            case Token.EXCEPT:
+                                                   GlobalOrderComparer.getInstance());
+            }
+            case Token.EXCEPT: {
+                SequenceIterator i1 = getLhsExpression().iterate(c);
+                SequenceIterator i2 = getRhsExpression().iterate(c);
                 return new DifferenceEnumeration(i1, i2,
-                        GlobalOrderComparer.getInstance());
+                                                 GlobalOrderComparer.getInstance());
+            }
         }
         throw new UnsupportedOperationException("Unknown operator in Venn Expression");
+    }
+
+    private void gatherUnionLeafIterators(List<SequenceIterator> leafIterators, XPathContext context) throws XPathException {
+        Expression e1 = getLhsExpression();
+        if (e1 instanceof VennExpression && ((VennExpression)e1).operator == Token.UNION) {
+            ((VennExpression)e1).gatherUnionLeafIterators(leafIterators, context);
+        } else {
+            leafIterators.add(e1.iterate(context));
+        }
+        Expression e2 = getRhsExpression();
+        if (e2 instanceof VennExpression && ((VennExpression) e2).operator == Token.UNION) {
+            ((VennExpression) e2).gatherUnionLeafIterators(leafIterators, context);
+        } else {
+            leafIterators.add(e2.iterate(context));
+        }
     }
 
     /**

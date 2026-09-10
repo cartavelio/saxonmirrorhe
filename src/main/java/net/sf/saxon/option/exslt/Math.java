@@ -37,7 +37,7 @@ public abstract class Math {
             while (true) {
                 Item it = nsv.next();
                 if (it == null) break;
-                double x = converter.stringToNumber(it.getStringValueCS());
+                double x = converter.stringToNumber(it.getUnicodeStringValue());
                 if (Double.isNaN(x)) return x;
                 if (x > max) max = x;
             }
@@ -59,7 +59,7 @@ public abstract class Math {
             while (true) {
                 Item it = nsv.next();
                 if (it == null) break;
-                double x = converter.stringToNumber(it.getStringValueCS());
+                double x = converter.stringToNumber(it.getUnicodeStringValue());
                 if (Double.isNaN(x)) return x;
                 if (x < min) min = x;
             }
@@ -85,7 +85,7 @@ public abstract class Math {
                 if (it == null) {
                     break;
                 }
-                double x = converter.stringToNumber(it.getStringValueCS());
+                double x = converter.stringToNumber(it.getUnicodeStringValue());
                 if (Double.isNaN(x)) {
                     return EmptySequence.getInstance();
                 }
@@ -119,7 +119,7 @@ public abstract class Math {
                 if (it == null) {
                     break;
                 }
-                double x = converter.stringToNumber(it.getStringValueCS());
+                double x = converter.stringToNumber(it.getUnicodeStringValue());
                 if (Double.isNaN(x)) {
                     return EmptySequence.getInstance();
                 }

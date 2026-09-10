@@ -25,7 +25,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
@@ -47,11 +47,11 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
      */
     @Override
     public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue input = (StringValue) arguments[0].head();
+        StringItem input = (StringItem) arguments[0].head();
         return input == null ? ZeroOrOne.empty() : new ZeroOrOne(evalParseXml(input, context));
     }
 
-    private NodeInfo evalParseXml(StringValue inputArg, XPathContext context) throws XPathException {
+    private NodeInfo evalParseXml(StringItem inputArg, XPathContext context) throws XPathException {
         NodeInfo node = null;
         final String baseURI = getStaticBaseUriString();
         ParseXml.RetentiveErrorHandler errorHandler = new ParseXml.RetentiveErrorHandler();
@@ -169,7 +169,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         }
 
         private int level = 0;
-        private boolean suppressStartContent = false;
+        private final boolean suppressStartContent = false;
 
         /**
          * Notify the start of an element

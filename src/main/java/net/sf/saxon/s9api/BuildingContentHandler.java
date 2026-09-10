@@ -27,7 +27,7 @@ public interface BuildingContentHandler extends ContentHandler {
      * @throws SaxonApiException if any failure occurs
      */
 
-    public XdmNode getDocumentNode() throws SaxonApiException;
+    XdmNode getDocumentNode() throws SaxonApiException;
 
 }
 

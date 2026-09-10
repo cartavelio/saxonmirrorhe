@@ -4,20 +4,17 @@ import jaxptest.ConfigTest;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
@@ -93,8 +90,6 @@ public class TestXQueryStreaming {
      * This test provides the input to a streamed query as an infinite input stream. It therefore relies on the query
      * itself to stop reading the input when it has had enough. It also displays the processing type used for processing
      * N bytes of input.
-     * @param query
-     * @throws Exception
      */
 
     private void streaming(String query) throws Exception {
@@ -105,10 +100,9 @@ public class TestXQueryStreaming {
         XQueryExecutable xqueryExecutable = xQueryCompiler.compile(query);
         XQueryEvaluator xqueryEvaluator = xqueryExecutable.load();
         xqueryEvaluator.setURIResolver(new StandardURIResolver() {
-            private static final long serialVersionUID = 7097605951872171305L;
 
             @Override
-            public Source resolve(String href, String base) throws XPathException {
+            public Source resolve(String href, String base) {
                 return new StreamSource(new InputStream() {
                     private static final String intro =
                             "<song>\n";
@@ -123,7 +117,7 @@ public class TestXQueryStreaming {
                     private int i = -intro.length();
 
                     @Override
-                    public int read() throws IOException {
+                    public int read() {
                         if (i++ < 0) {
                             return intro.charAt(i + intro.length() - 1);
                         } else {
@@ -138,7 +132,7 @@ public class TestXQueryStreaming {
         long start = System.currentTimeMillis();
         long count = 0;
         long nextStop = 1;
-        for (XdmSequenceIterator xdmItemIterator = xqueryEvaluator.iterator(); xdmItemIterator.hasNext(); ) {
+        for (XdmSequenceIterator<?> xdmItemIterator = xqueryEvaluator.iterator(); xdmItemIterator.hasNext(); ) {
             xdmItemIterator.next();
             if (++count == nextStop) {
                 long elapsed = System.currentTimeMillis() - start;
@@ -162,12 +156,8 @@ public class TestXQueryStreaming {
             XQueryEvaluator xqueryEvaluator = xqueryExecutable.load();
             Reader reader = new StringReader("<x><y><z>GOLD</z></y></x>");
             final StreamSource source = new StreamSource(reader);
-            xqueryEvaluator.setURIResolver(new URIResolver() {
-                public Source resolve(String href, String base) throws TransformerException {
-                    return source;
-                }
-            });
-            XdmSequenceIterator iterator = xqueryEvaluator.iterator();
+            xqueryEvaluator.setURIResolver((href, base) -> source);
+            XdmSequenceIterator<?> iterator = xqueryEvaluator.iterator();
             while (iterator.hasNext()) {
                 XdmItem item = iterator.next();
                 System.out.println(item + "|");
@@ -189,7 +179,7 @@ public class TestXQueryStreaming {
             XQueryCompiler xQueryCompiler = proc.newXQueryCompiler();
             XQueryExecutable xqueryExecutable = xQueryCompiler.compile(query);
             XQueryEvaluator xqueryEvaluator = xqueryExecutable.load();
-            XdmSequenceIterator iterator = xqueryEvaluator.iterator();
+            XdmSequenceIterator<?> iterator = xqueryEvaluator.iterator();
             while (iterator.hasNext()) {
                 XdmItem item = iterator.next();
                 System.out.println(item + "|");

@@ -8,9 +8,7 @@
 package net.sf.saxon.expr.number;
 
 import net.sf.saxon.lib.Numberer;
-import net.sf.saxon.regex.EmptyString;
-import net.sf.saxon.regex.UnicodeString;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.*;
 
 import java.util.Locale;
 
@@ -86,7 +84,8 @@ public abstract class AbstractNumberer implements Numberer {
      * Format a number into a string. This method is provided for backwards compatibility. It merely
      * calls the other format method after constructing a RegularGroupFormatter. The method is final;
      * localization subclasses should implement the method
-     * {@link net.sf.saxon.lib.Numberer#format(long, UnicodeString, NumericGroupFormatter, String, String)} rather than this method.
+     * {@link net.sf.saxon.lib.Numberer#format(long, UnicodeString, NumericGroupFormatter, String, String)}
+     * rather than this method.
      *
      * @param number         The number to be formatted
      * @param picture        The format token. This is a single component of the format attribute
@@ -111,7 +110,7 @@ public abstract class AbstractNumberer implements Numberer {
                                String ordinal) {
 
         return format(number, picture,
-                new RegularGroupFormatter(groupSize, groupSeparator, EmptyString.THE_INSTANCE),
+                new RegularGroupFormatter(groupSize, groupSeparator, EmptyUniString.getInstance()),
                 letterValue, ordinal);
     }
 
@@ -132,7 +131,7 @@ public abstract class AbstractNumberer implements Numberer {
      */
     @Override
     public String format(long number,
-                         /*@Nullable*/ UnicodeString picture,
+                         UnicodeString picture,
                          NumericGroupFormatter numGroupFormatter,
                          String letterValue,
                          String ordinal) {
@@ -141,15 +140,15 @@ public abstract class AbstractNumberer implements Numberer {
         if (number < 0) {
             return "" + number;
         }
-        if (picture == null || picture.uLength() == 0) {
+        if (picture == null || picture.length() == 0) {
             return "" + number;
         }
+        int pictureLength = picture.length32();
 
-        int pictureLength = picture.uLength();
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
-        int formchar = picture.uCharAt(0);
+        StringBuilder sb = new StringBuilder(16);
+        int formchar = picture.codePointAt(0);
 
-        FastStringBuffer fsb = new FastStringBuffer(2);
+        StringBuilder fsb = new StringBuilder(2);
 
         switch (formchar) {
 
@@ -176,7 +175,7 @@ public abstract class AbstractNumberer implements Numberer {
             case 'w':
             case 'W':
                 int wordCase;
-                if (picture.uLength() == 1) {
+                if (pictureLength == 1) {
                     if (formchar == 'W') {
                         wordCase = UPPER_CASE;
                     } else /*if (formchar == 'w')*/ {
@@ -308,7 +307,7 @@ public abstract class AbstractNumberer implements Numberer {
                 if (number == 0 || number > 10) {
                     return "" + number;
                 }
-                fsb.appendWideChar(65799 + (int) number - 1);
+                fsb.appendCodePoint(65799 + (int) number - 1);
                 return fsb.toString();
 
             case 69216:
@@ -316,7 +315,7 @@ public abstract class AbstractNumberer implements Numberer {
                 if (number == 0 || number > 10) {
                     return "" + number;
                 }
-                fsb.appendWideChar(69216 + (int) number - 1);
+                fsb.appendCodePoint(69216 + (int) number - 1);
                 return fsb.toString();
 
             case 69714:
@@ -324,7 +323,7 @@ public abstract class AbstractNumberer implements Numberer {
                 if (number == 0 || number > 10) {
                     return "" + number;
                 }
-                fsb.appendWideChar(69714 + (int) number - 1);
+                fsb.appendCodePoint(69714 + (int) number - 1);
                 return fsb.toString();
 
             case 119648:
@@ -332,19 +331,19 @@ public abstract class AbstractNumberer implements Numberer {
                 if (number == 0 || number >= 10) {
                     return "" + number;
                 }
-                fsb.appendWideChar(119648 + (int) number - 1);
+                fsb.appendCodePoint(119648 + (int) number - 1);
                 return fsb.toString();
 
             case 127234:
                 // digit one comma
                 if (number == 0) {
-                    fsb.appendWideChar(127233);
+                    fsb.appendCodePoint(127233);
                     return fsb.toString();
                 }
                 if (number >= 10) {
                     return "" + number;
                 }
-                fsb.appendWideChar(127234 + (int) number - 1);
+                fsb.appendCodePoint(127234 + (int) number - 1);
                 return fsb.toString();
 
             case '\u0391':
@@ -530,9 +529,9 @@ public abstract class AbstractNumberer implements Numberer {
      * @param sb       buffer to hold the result of the formatting
      */
 
-    protected void alphaDefault(long number, char formchar, FastStringBuffer sb) {
-        int min = (int) formchar;
-        int max = (int) formchar;
+    protected void alphaDefault(long number, char formchar, StringBuilder sb) {
+        int min = formchar;
+        int max = formchar;
         // use the contiguous range of letters starting with the specified one
         while (Character.isLetterOrDigit((char) (max + 1))) {
             max++;
@@ -602,10 +601,10 @@ public abstract class AbstractNumberer implements Numberer {
     private String toRadical(long number, int[] digits, int pictureLength,
                              NumericGroupFormatter numGroupFormatter) {
 
-        FastStringBuffer temp = convertDigitSystem(number, digits, pictureLength);
+        String temp = convertDigitSystem(number, digits, pictureLength);
 
         if (numGroupFormatter == null) {
-            return temp.toString();
+            return temp;
         }
 
         return numGroupFormatter.format(temp);
@@ -623,24 +622,24 @@ public abstract class AbstractNumberer implements Numberer {
      * @return the converted number
      */
 
-    public static FastStringBuffer convertDigitSystem(long number, int[] digits, int requiredLength) {
-        FastStringBuffer temp = new FastStringBuffer(FastStringBuffer.C16);
+    public static String convertDigitSystem(long number, int[] digits, int requiredLength) {
+        StringBuilder temp = new StringBuilder(16);
         int base = digits.length;
-        FastStringBuffer s = new FastStringBuffer(FastStringBuffer.C16);
+        StringBuilder s = new StringBuilder(16);
         long n = number;
         int count = 0;
         while (n > 0) {
             int digit = digits[(int) (n % base)];
-            s.prependWideChar(digit);
+            StringTool.prependWideChar(s, digit);
             count++;
             n = n / base;
         }
 
         for (int i = 0; i < (requiredLength - count); i++) {
-            temp.appendWideChar(digits[0]);
+            temp.appendCodePoint(digits[0]);
         }
         temp.append(s);
-        return temp;
+        return temp.toString();
     }
 
     /**
@@ -663,13 +662,13 @@ public abstract class AbstractNumberer implements Numberer {
     // Roman numbers beyond 4000 use overlining and other conventions which we won't
     // attempt to reproduce. We'll go high enough to handle present-day Gregorian years.
 
-    private static String[] romanThousands =
+    private static final String[] romanThousands =
             {"", "m", "mm", "mmm", "mmmm", "mmmmm", "mmmmmm", "mmmmmmm", "mmmmmmmm", "mmmmmmmmm"};
-    private static String[] romanHundreds =
+    private static final String[] romanHundreds =
             {"", "c", "cc", "ccc", "cd", "d", "dc", "dcc", "dccc", "cm"};
-    private static String[] romanTens =
+    private static final String[] romanTens =
             {"", "x", "xx", "xxx", "xl", "l", "lx", "lxx", "lxxx", "xc"};
-    private static String[] romanUnits =
+    private static final String[] romanUnits =
             {"", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix"};
 
 
@@ -681,9 +680,9 @@ public abstract class AbstractNumberer implements Numberer {
      */
 
     public String toJapanese(long number) {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C16);
+        StringBuilder fsb = new StringBuilder(16);
         if (number == 0) {
-            fsb.appendWideChar(0x3007);
+            fsb.appendCodePoint(0x3007);
         } else if (number <= 9999) {
             toJapanese((int) number, fsb, false);
         } else {
@@ -700,26 +699,26 @@ public abstract class AbstractNumberer implements Numberer {
      * @param isInitial true except on a recursive call
      */
 
-    private static void toJapanese(int nr, FastStringBuffer fsb, boolean isInitial) {
+    private static void toJapanese(int nr, StringBuilder fsb, boolean isInitial) {
         if (nr == 0) {
             // no action (not used at top level)
         } else if (nr <= 9) {
             if (!(nr == 1 && isInitial)) {
-                fsb.appendWideChar(kanjiDigits[nr]);
+                fsb.appendCodePoint(kanjiDigits[nr]);
             }
         } else if (nr == 10) {
-            fsb.appendWideChar(0x5341);
+            fsb.appendCodePoint(0x5341);
         } else if (nr <= 99) {
             toJapanese(nr / 10, fsb, true);
-            fsb.appendWideChar(0x5341);
+            fsb.appendCodePoint(0x5341);
             toJapanese(nr % 10, fsb, false);
         } else if (nr <= 999) {
             toJapanese(nr / 100, fsb, true);
-            fsb.appendWideChar(0x767e);
+            fsb.appendCodePoint(0x767e);
             toJapanese(nr % 100, fsb, false);
         } else if (nr <= 9999) {
             toJapanese(nr / 1000, fsb, true);
-            fsb.appendWideChar(0x5343);
+            fsb.appendCodePoint(0x5343);
             toJapanese(nr % 1000, fsb, false);
         }
 

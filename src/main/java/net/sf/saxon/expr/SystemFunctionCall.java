@@ -238,7 +238,20 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
 
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        Optimizer opt = visitor.obtainOptimizer();
+        int properties = getTargetFunction().getDetails().properties;
+        if ((properties & BuiltInFunctionSet.CTRL) != 0) {
+             // Mechanism devised for saxon:unindexed: don't optimize the arguments first
+            Expression sfo = getTargetFunction().makeOptimizedFunctionCall(visitor, contextInfo, getArguments());
+            if (sfo != null) {
+                sfo.setParentExpression(getParentExpression());
+                ExpressionTool.copyLocationInfo(this, sfo);
+                if (sfo instanceof SystemFunctionCall) {
+                    ((SystemFunctionCall) sfo).allocateArgumentEvaluators(((SystemFunctionCall) sfo).getArguments());
+                }
+                return sfo;
+            }
+        }
+
         Expression sf = super.optimize(visitor, contextInfo);
         if (sf == this) {
             // Give the function an opportunity to regenerate the function call, with more information about
@@ -253,6 +266,7 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 return sfo;
             }
         }
+        Optimizer opt = visitor.obtainOptimizer();
         if (sf instanceof SystemFunctionCall && opt.isOptionSet(OptimizerOptions.CONSTANT_FOLDING)) {
             // If any arguments are known to be empty, pre-evaluate the result
             BuiltInFunctionSet.Entry details = ((SystemFunctionCall) sf).getTargetFunction().getDetails();
@@ -480,6 +494,11 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
         } else {
             super.process(output, context);
         }
+    }
+
+    @Override
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        return super.call(context, arguments);
     }
 
     /**

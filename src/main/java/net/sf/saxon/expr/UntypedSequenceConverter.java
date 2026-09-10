@@ -8,13 +8,15 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.UntypedAtomicValue;
 
 /**
  * An UntypedSequenceConverter is an expression that performs a cast on each member of
@@ -100,7 +102,7 @@ public final class UntypedSequenceConverter extends AtomicSequenceConverter {
         /*@NotNull*/
         @Override
         public ConversionResult convert(/*@NotNull*/ AtomicValue input) {
-            if (input instanceof UntypedAtomicValue) {
+            if (input.isUntypedAtomic()) {
                 return untypedConverter.convert(input);
             } else {
                 return input;

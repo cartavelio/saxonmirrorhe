@@ -11,6 +11,8 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.ComparisonException;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
@@ -23,7 +25,7 @@ import net.sf.saxon.type.ValidationFailure;
  */
 
 public final class BooleanValue extends AtomicValue implements Comparable, AtomicMatchKey {
-    private boolean value;
+    private final boolean value;
 
     /**
      * The boolean value TRUE
@@ -93,24 +95,34 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
      * @return the relevant BooleanValue if validation succeeds; or a ValidationFailure if not.
      */
 
-    public static ConversionResult fromString(CharSequence s) {
-        // implementation designed to avoid creating new objects
-        s = Whitespace.trimWhitespace(s);
-        int len = s.length();
-        if (len == 1) {
-            char c = s.charAt(0);
-            if (c == '1') {
-                return TRUE;
-            } else if (c == '0') {
-                return FALSE;
-            }
-        } else if (len == 4) {
-            if (s.charAt(0) == 't' && s.charAt(1) == 'r' && s.charAt(2) == 'u' && s.charAt(3) == 'e') {
-                return TRUE;
-            }
-        } else if (len == 5) {
-            if (s.charAt(0) == 'f' && s.charAt(1) == 'a' && s.charAt(2) == 'l' && s.charAt(3) == 's' && s.charAt(4) == 'e') {
-                return FALSE;
+    public static ConversionResult fromString(UnicodeString s) {
+        // implementation designed to avoid creating new objects or computing hash codes
+        long start = Whitespace.trimmedStart(s);
+        long end = Whitespace.trimmedEnd(s);
+        if (start >= 0) { // start == -1 means empty string or all whitespace
+            long len = end - start;
+            if (len == 1) {
+                int first = s.codePointAt(start);
+                if (first == '0') {
+                    return FALSE;
+                } else if (first == '1') {
+                    return TRUE;
+                }
+            } else if (len == 4) {
+                if (s.codePointAt(start++) == 't'
+                        && s.codePointAt(start++) == 'r'
+                        && s.codePointAt(start++) == 'u'
+                        && s.codePointAt(start) == 'e') {
+                    return TRUE;
+                }
+            } else if (len == 5) {
+                if (s.codePointAt(start++) == 'f'
+                        && s.codePointAt(start++) == 'a'
+                        && s.codePointAt(start++) == 'l'
+                        && s.codePointAt(start++) == 's'
+                        && s.codePointAt(start) == 'e') {
+                    return FALSE;
+                }
             }
         }
         ValidationFailure err = new ValidationFailure(
@@ -118,6 +130,11 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
         err.setErrorCode("FORG0001");
         return err;
     }
+
+    private final static UnicodeString S_0 = BMPString.of("0");
+    private final static UnicodeString S_1 = BMPString.of("1");
+    private final static UnicodeString S_TRUE = BMPString.of("true");
+    private final static UnicodeString S_FALSE = BMPString.of("false");
 
     /**
      * Get the value
@@ -158,8 +175,8 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
      */
 
     @Override
-    public String getPrimitiveStringValue() {
-        return value ? "true" : "false";
+    public UnicodeString getPrimitiveStringValue() {
+        return value ? S_TRUE : S_FALSE;
     }
 
     /**
@@ -272,8 +289,9 @@ public final class BooleanValue extends AtomicValue implements Comparable, Atomi
      *
      * @return a string representation of this value: "true()" or "false()"
      */
-    public String toString() {
-        return getStringValue() + "()";
+    @Override
+    public String show() {
+        return this.getUnicodeStringValue() + "()";
     }
 }
 

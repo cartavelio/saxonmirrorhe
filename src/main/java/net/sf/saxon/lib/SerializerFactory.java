@@ -9,18 +9,18 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.QNameException;
-import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.SequenceWrapper;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.stax.StAXResultHandlerImpl;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BigDecimalValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -445,7 +445,7 @@ public class SerializerFactory {
             if (separator == null || "#absent".equals(separator)) {
                 result = new SequenceNormalizerWithSpaceSeparator(receiver);
             } else {
-                result = new SequenceNormalizerWithItemSeparator(receiver, separator);
+                result = new SequenceNormalizerWithItemSeparator(receiver, StringView.of(separator));
             }
             result.setPipelineConfiguration(pipe);
             return result;
@@ -1194,7 +1194,7 @@ public class SerializerFactory {
     }
 
     private static void checkNormalizationForm(String value) throws XPathException {
-        if (!NameChecker.isValidNmtoken(value)) {
+        if (!NameChecker.isValidNmtoken(StringView.of(value))) {
             throw new XPathException("Invalid value for normalization-form: " +
                                              "must be NFC, NFD, NFKC, NFKD, fully-normalized, or none", "SEPM0016");
         }
@@ -1238,11 +1238,12 @@ public class SerializerFactory {
     }
 
     protected static String checkListOfEQNames(String key, String value) throws XPathException {
-        StringTokenizer tok = new StringTokenizer(value, " \t\n\r", false);
+        Whitespace.Tokenizer tokenizer = new Whitespace.Tokenizer(StringView.of(value).tidy());
         StringBuilder builder = new StringBuilder();
-        while (tok.hasMoreTokens()) {
-            String s = tok.nextToken();
-            if (isValidEQName(s) || NameChecker.isValidNCName(s)) {
+        StringItem tok;
+        while ((tok = tokenizer.next()) != null) {
+            String s = tok.getStringValue();
+            if (isValidEQName(s) || NameChecker.isValidNCName(tok.codePoints())) {
                 builder.append(s);
             } else if (isValidClarkName(s)) {
                 if (s.startsWith("{")) {
@@ -1260,10 +1261,11 @@ public class SerializerFactory {
     }
 
     protected static String checkListOfEQNamesAllowingStar(String key, String value) throws XPathException {
+        Whitespace.Tokenizer tokenizer = new Whitespace.Tokenizer(StringView.of(value).tidy());
         StringBuilder builder = new StringBuilder();
-        StringTokenizer tok = new StringTokenizer(value, " \t\n\r", false);
-        while (tok.hasMoreTokens()) {
-            String s = tok.nextToken();
+        StringItem tok;
+        while ((tok = tokenizer.next()) != null) {
+            String s = tok.getStringValue();
             if ("*".equals(s) || isValidEQName(s) || NameChecker.isValidNCName(s)) {
                 builder.append(s);
             } else if (isValidClarkName(s)) {
@@ -1281,7 +1283,7 @@ public class SerializerFactory {
         return builder.toString().trim();
     }
 
-    private static Pattern publicIdPattern = Pattern.compile("^[\\s\\r\\na-zA-Z0-9\\-'()+,./:=?;!*#@$_%]*$");
+    private static final Pattern publicIdPattern = Pattern.compile("^[\\s\\r\\na-zA-Z0-9\\-'()+,./:=?;!*#@$_%]*$");
 
     private static void checkPublicIdentifier(String value) throws XPathException {
         if (!publicIdPattern.matcher(value).matches()) {
@@ -1293,48 +1295,6 @@ public class SerializerFactory {
         if (value.contains("'") && value.contains("\"")) {
             throw new XPathException("The doctype-system parameter must not contain both an apostrophe and a quotation mark", "SEPM0016");
         }
-    }
-
-    /**
-     * Process a serialization property whose value is a list of element names, for example cdata-section-elements
-     *
-     * @param value        The value of the property as written
-     * @param nsResolver   The namespace resolver to use; may be null if prevalidated is set or if names are supplied
-     *                     in Clark format
-     * @param useDefaultNS True if the namespace resolver should be used for unprefixed names; false if
-     *                     unprefixed names should be considered to be in no namespace
-     * @param prevalidated true if the property has already been validated
-     * @param errorCode    The error code to return in the event of problems
-     * @return The list of element names with lexical QNames replaced by Clark names, starting with a single space
-     * @throws XPathException if any error is found in the list of element names, for example, an undeclared namespace prefix
-     */
-
-    /*@NotNull*/
-    public static String parseListOfNodeNames(
-            String value, NamespaceResolver nsResolver, boolean useDefaultNS, boolean prevalidated, /*@NotNull*/  String errorCode)
-            throws XPathException {
-        StringBuilder s = new StringBuilder();
-        StringTokenizer st = new StringTokenizer(value, " \t\n\r", false);
-        while (st.hasMoreTokens()) {
-            String displayname = st.nextToken();
-            if (prevalidated || (nsResolver == null)) {
-                s.append(' ').append(displayname);
-            } else if (displayname.startsWith("Q{")) {
-                s.append(' ').append(displayname.substring(1));
-            } else {
-                try {
-                    String[] parts = NameChecker.getQNameParts(displayname);
-                    String muri = nsResolver.getURIForPrefix(parts[0], useDefaultNS);
-                    if (muri == null) {
-                        throw new XPathException("Namespace prefix '" + parts[0] + "' has not been declared", errorCode);
-                    }
-                    s.append(" {").append(muri).append('}').append(parts[1]);
-                } catch (QNameException err) {
-                    throw new XPathException("Invalid element name. " + err.getMessage(), errorCode);
-                }
-            }
-        }
-        return s.toString();
     }
 
     protected void checkExtensions(String key /*@Nullable*/) throws XPathException {

@@ -737,9 +737,7 @@ public class ParserExtension {
             // Now do the same for all inner inline functions, but this time binding to the
             // relevant parameter of the next containing function
             innermostBinding = bindParametersInNestedFunctions(qName, inlineFunctionStack, 0);
-            if (innermostBinding != null) {
-                return innermostBinding;
-            }
+            return innermostBinding;
         }
         return null;
     }

@@ -108,7 +108,7 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a DocumentBuilder. A DocumentBuilder is used to load source XML documents.
+     * Create a {@code DocumentBuilder}. A DocumentBuilder is used to load source XML documents.
      *
      * @return a newly created DocumentBuilder
      */
@@ -117,6 +117,19 @@ public class Processor implements Configuration.ApiProvider {
     public DocumentBuilder newDocumentBuilder() {
         return new DocumentBuilder(config);
     }
+
+    /**
+     * Create a {@code JsonBuilder}. A {@code JsonBuilder} is used to load source JSON documents.
+     *
+     * @return a newly created {@code JsonBuilder}
+     * @since 11
+     */
+
+    /*@NotNull*/
+    public JsonBuilder newJsonBuilder() {
+        return new JsonBuilder(this);
+    }
+
 
     /**
      * Create an XPathCompiler. An XPathCompiler is used to compile XPath expressions.
@@ -507,7 +520,7 @@ public class Processor implements Configuration.ApiProvider {
 
     private static class ExtensionFunctionDefinitionWrapper extends ExtensionFunctionDefinition {
 
-        private ExtensionFunction function;
+        private final ExtensionFunction function;
 
         public ExtensionFunctionDefinitionWrapper(ExtensionFunction function) {
             this.function = function;
@@ -646,7 +659,7 @@ public class Processor implements Configuration.ApiProvider {
                         /*@NotNull*/ XPathContext context, Sequence[] arguments) throws XPathException {
                     XdmValue[] args = new XdmValue[arguments.length];
                     for (int i = 0; i < args.length; i++) {
-                        GroundedValue val = (GroundedValue)arguments[i].materialize();
+                        GroundedValue val = arguments[i].materialize();
                         args[i] = XdmValue.wrap(val);
                     }
                     try {

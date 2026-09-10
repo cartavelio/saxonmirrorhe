@@ -58,16 +58,19 @@ public class TransformMessageTest {
         final List<String> warnings = new ArrayList<String>();
 
         transformer.setErrorListener(new ErrorListener() {
+            @Override
             public void error(TransformerException exception) throws TransformerException
             {
                 System.err.println("error: " + exception.getMessage());
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException
             {
                 System.err.println("fatal error: " + exception.getMessage());
             }
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException
             {
                 System.err.println("warning: " + exception.getMessage());
@@ -160,14 +163,17 @@ public class TransformMessageTest {
             Transformer transformer = templates.newTransformer();
             transformer.setErrorListener(new ErrorListener() {
 
+                @Override
                 public void warning(TransformerException exception) throws TransformerException {
                     fail("warning");
                 }
 
+                @Override
                 public void error(TransformerException exception) throws TransformerException {
                     fail("error");
                 }
 
+                @Override
                 public void fatalError(TransformerException exception) throws TransformerException {
                     fail("fatalError");
                 }
@@ -206,15 +212,18 @@ public class TransformMessageTest {
             Transformer transformer = templates.newTransformer();
             transformer.setErrorListener(new ErrorListener() {
 
+                @Override
                 public void warning(TransformerException exception) throws TransformerException {
                     warnings.add(exception);
                 }
 
+                @Override
                 public void error(TransformerException exception) throws TransformerException {
                     System.err.println("Error: " + exception.getMessage());
                     fail("unexpected error");
                 }
 
+                @Override
                 public void fatalError(TransformerException exception) throws TransformerException {
                     fail("fatalError");
                 }
@@ -255,15 +264,18 @@ public class TransformMessageTest {
             Transformer transformer = templates.newTransformer();
             transformer.setErrorListener(new ErrorListener() {
 
+                @Override
                 public void warning(TransformerException exception) throws TransformerException {
                     fail("warning");
                 }
 
+                @Override
                 public void error(TransformerException exception) throws TransformerException {
                     errors.add(exception);
                     throw exception;
                 }
 
+                @Override
                 public void fatalError(TransformerException exception) throws TransformerException {
                     errors.add(exception);
                     throw exception;
@@ -303,15 +315,18 @@ public class TransformMessageTest {
             transformerFactory.setAttribute(net.sf.saxon.lib.FeatureKeys.XSLT_SCHEMA_AWARE, true);
             transformerFactory.setErrorListener(new ErrorListener() {
 
+                @Override
                 public void warning(TransformerException exception) throws TransformerException {
                     assertTrue(exception.getMessage().contains("No schema for this namespace"));
                 }
 
+                @Override
                 public void error(TransformerException exception) throws TransformerException {
                     errors.add(exception);
                     throw exception;
                 }
 
+                @Override
                 public void fatalError(TransformerException exception) throws TransformerException {
                     if (errors.isEmpty()) {
                         assertTrue(exception.getMessage().contains("No schema has been imported"));
@@ -354,15 +369,18 @@ public class TransformMessageTest {
             final StringWriter secondary = new StringWriter();
             ((TransformerImpl)transformer).getUnderlyingController().setOutputURIResolver(
                     new OutputURIResolver() {
+                        @Override
                         public OutputURIResolver newInstance() {
                             return this;
                         }
 
+                        @Override
                         public Result resolve(String href, String base) throws TransformerException {
                             assertEquals("http://some.base.uri/", base);
                             return new StreamResult(secondary);
                         }
 
+                        @Override
                         public void close(Result result) throws TransformerException {
                             assertTrue(secondary.toString().contains("<second/>"));
                         }

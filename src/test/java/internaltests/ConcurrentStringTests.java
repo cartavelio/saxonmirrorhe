@@ -7,7 +7,7 @@
 
 package internaltests;
 
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class ConcurrentStringTests {
         }
 
         private List<Callable<Boolean>> createTasks(final String input) {
-            StringValue stringValue = StringValue.makeStringValue(input);
+            StringItem stringValue = StringItem.makeStringValue(input);
 
             List<Callable<Boolean>> tasks = new ArrayList<Callable<Boolean>>();
             for (int i = 0; i < TASKS_COUNT; i++) {
@@ -72,15 +72,16 @@ public class ConcurrentStringTests {
         }
 
         private static class GetStringLengthCallable implements Callable<Boolean> {
-            private final StringValue stringValue;
+            private final StringItem stringValue;
 
-            public GetStringLengthCallable(StringValue stringValue) {
+            public GetStringLengthCallable(StringItem stringValue) {
                 this.stringValue = stringValue;
             }
 
+            @Override
             public Boolean call() throws Exception {
                 try {
-                    stringValue.getStringLength();
+                    stringValue.getLength();
                 } catch (Exception e) {
                     System.out.println("Error has been reproduced for getStringLength! " + e.getMessage());
                     e.printStackTrace();

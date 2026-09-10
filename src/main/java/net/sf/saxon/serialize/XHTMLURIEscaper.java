@@ -10,12 +10,10 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -35,8 +33,8 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
      * Table of attributes whose value is a URL
      */
 
-    private static HashSet<String> urlTable = new HashSet<String>(70);
-    private static HashSet<String> attTable = new HashSet<String>(20);
+    private static final HashSet<String> urlTable = new HashSet<String>(70);
+    private static final HashSet<String> attTable = new HashSet<String>(20);
 
     private static void setUrlAttribute(String element, String attribute) {
         attTable.add(attribute);
@@ -124,13 +122,13 @@ public class XHTMLURIEscaper extends HTMLURIEscaper {
                         if (isUrlAttribute(nameCode, attName)) {
                             String value = att.getValue();
                             try {
-                                CharSequence normalized = (isAllAscii(value)
+                                String normalized = (isAllAscii(value)
                                                                ? value
                                                                : Normalizer.make(Normalizer.C, getConfiguration()).normalize(value));
                                 return new AttributeInfo(
                                         attName,
                                         att.getType(),
-                                        escapeURL(normalized, true, getConfiguration()).toString(),
+                                        escapeURL(StringView.tidy(normalized), true, getConfiguration()).toString(),
                                         att.getLocation(),
                                         att.getProperties() | ReceiverOption.DISABLE_CHARACTER_MAPS);
                             } catch (XPathException e) {

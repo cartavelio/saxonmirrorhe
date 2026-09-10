@@ -27,8 +27,8 @@ import java.util.List;
 
 public abstract class BinaryExpression extends Expression {
 
-    private Operand lhs;
-    private Operand rhs;
+    private final Operand lhs;
+    private final Operand rhs;
     protected int operator;       // represented by the token number from class Tokenizer
 
     /**

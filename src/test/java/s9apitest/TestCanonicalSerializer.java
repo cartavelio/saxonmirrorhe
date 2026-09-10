@@ -95,5 +95,10 @@ public class TestCanonicalSerializer {
         compareCanonical(new File(ConfigTest.DATA_DIR + "collection/axes268.xml"));
     }
 
+    @Test
+    public void testCanonicalization4() {
+        compareCanonical(new File(ConfigTest.DATA_DIR + "collection/expr80.xml"));
+    }
+
 
 }

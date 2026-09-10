@@ -12,9 +12,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.str.UnicodeBuilder;
+
 import java.util.function.IntPredicate;
 
 /**
@@ -33,18 +34,18 @@ public class CodepointsToString extends SystemFunction implements Callable {
      *          if any of the integers is not the codepoint of a valid XML character
      */
 
-    public static CharSequence unicodeToString(SequenceIterator chars, IntPredicate checker) throws XPathException {
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+    public static StringItem unicodeToString(SequenceIterator chars, IntPredicate checker) throws XPathException {
+        UnicodeBuilder sb = new UnicodeBuilder();
         while (true) {
             NumericValue nextInt = (NumericValue) chars.next();
             if (nextInt == null) {
-                return sb.condense();
+                return new StringItem(sb.toUnicodeString());
             }
             long next = nextInt.longValue();
             if (next < 0 || next > Integer.MAX_VALUE || !checker.test((int) next)) {
                 throw new XPathException("codepoints-to-string(): invalid XML character [x" + Integer.toHexString((int) next) + ']', "FOCH0001");
             }
-            sb.appendWideChar((int) next);
+            sb.append((int) next);
         }
     }
 
@@ -58,9 +59,9 @@ public class CodepointsToString extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         SequenceIterator chars = arguments[0].iterate();
-        return new StringValue(unicodeToString(chars, context.getConfiguration().getValidCharacterChecker()));
+        return unicodeToString(chars, context.getConfiguration().getValidCharacterChecker());
     }
 
     @Override

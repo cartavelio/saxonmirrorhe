@@ -73,7 +73,7 @@ public class NegateExpression extends UnaryExpression {
                 role, visitor);
         setBaseExpression(operand);
         if (operand instanceof Literal) {
-            GroundedValue v = ((Literal) operand).getValue();
+            GroundedValue v = ((Literal) operand).getGroundedValue();
             if (v instanceof NumericValue) {
                 return Literal.makeLiteral(((NumericValue) v).negate(), this);
             }

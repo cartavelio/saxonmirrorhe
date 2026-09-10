@@ -23,8 +23,8 @@ import net.sf.saxon.trans.SymbolicName;
 
 public class ComponentBinding {
 
-    private SymbolicName symbolicName;
-    private Component target;
+    private final SymbolicName symbolicName;
+    private final Component target;
 
     /**
      * Create a ComponentBinding

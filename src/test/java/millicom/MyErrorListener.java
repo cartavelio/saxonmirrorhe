@@ -10,7 +10,7 @@ import javax.xml.transform.TransformerException;
 
 public class MyErrorListener implements ErrorListener, Initializer {
 
-    private XMLStreamWriter writer;
+    private final XMLStreamWriter writer;
     private int warningCount = 0;
     private int errorCount = 0;
 
@@ -27,6 +27,7 @@ public class MyErrorListener implements ErrorListener, Initializer {
         return warningCount;
     }
 
+    @Override
     public void error(TransformerException exception) throws TransformerException {
         errorCount++;
         try {
@@ -41,6 +42,7 @@ public class MyErrorListener implements ErrorListener, Initializer {
 
     }
 
+    @Override
     public void fatalError(TransformerException exception) throws TransformerException {
         try {
             writer.writeStartElement("fatal");
@@ -53,6 +55,7 @@ public class MyErrorListener implements ErrorListener, Initializer {
         }
     }
 
+    @Override
     public void warning(TransformerException exception) throws TransformerException {
         warningCount++;
         try {
@@ -66,6 +69,7 @@ public class MyErrorListener implements ErrorListener, Initializer {
         }
     }
 
+    @Override
     public void initialize(Configuration config) throws TransformerException {
         //config.setErrorListener(this);
     }

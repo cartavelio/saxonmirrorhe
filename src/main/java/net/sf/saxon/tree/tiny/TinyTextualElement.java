@@ -13,9 +13,10 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -102,7 +103,7 @@ public class TinyTextualElement extends TinyElementImpl {
         }
         receiver.startElement(NameOfNode.makeName(this), type, EmptyAttributeMap.getInstance(),
                               namespaces, location, ReceiverOption.NONE);
-        receiver.characters(getStringValueCS(), location, ReceiverOption.NONE);
+        receiver.characters(getUnicodeStringValue(), location, ReceiverOption.NONE);
         receiver.endElement();
     }
 
@@ -112,13 +113,8 @@ public class TinyTextualElement extends TinyElementImpl {
     }
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         return TinyTextImpl.getStringValue(tree, nodeNr);
-    }
-
-    @Override
-    public String getStringValue() {
-        return TinyTextImpl.getStringValue(tree, nodeNr).toString();
     }
 
     @Override
@@ -239,22 +235,14 @@ public class TinyTextualElement extends TinyElementImpl {
         }
 
         /**
-         * Get the String Value
-         */
-
-        @Override
-        public String getStringValue() {
-            return getStringValueCS().toString();
-        }
-
-        /**
          * Get the value of the item as a CharSequence. This is in some cases more efficient than
          * the version of the method that returns a String.
+         * @return
          */
 
         @Override
-        public CharSequence getStringValueCS() {
-            return TinyTextualElement.this.getStringValueCS();
+        public UnicodeString getUnicodeStringValue() {
+            return TinyTextualElement.this.getUnicodeStringValue();
         }
 
         /**
@@ -274,7 +262,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         @Override
-        public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+        public void generateId(/*@NotNull*/ StringBuilder buffer) {
             TinyTextualElement.this.generateId(buffer);
             buffer.append("T");
         }
@@ -422,7 +410,7 @@ public class TinyTextualElement extends TinyElementImpl {
             return getParent().getLineNumber();
         }
 
-        private IntPredicate isNewline = new IntValuePredicate(10);
+        private final IntPredicate isNewline = new IntValuePredicate(10);
 
         /**
          * Return the character position where the current document event ends.
@@ -518,7 +506,7 @@ public class TinyTextualElement extends TinyElementImpl {
         /*@NotNull*/
         @Override
         public AtomicSequence atomize() throws XPathException {
-            return new UntypedAtomicValue(getStringValueCS());
+            return new UntypedAtomicValue(getUnicodeStringValue());
         }
 
         /**
@@ -654,7 +642,7 @@ public class TinyTextualElement extends TinyElementImpl {
         @Override
         public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId)
                 throws XPathException {
-            out.characters(getStringValueCS(), locationId, ReceiverOption.NONE);
+            out.characters(getUnicodeStringValue(), locationId, ReceiverOption.NONE);
         }
 
     }

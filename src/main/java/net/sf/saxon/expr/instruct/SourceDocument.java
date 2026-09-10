@@ -25,7 +25,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.SequenceType;
 
@@ -243,9 +243,9 @@ public class SourceDocument extends Instruction {
         }
         out.emitAttribute("flags", flags);
         if (accumulators != null && !accumulators.isEmpty()) {
-            FastStringBuffer fsb = new FastStringBuffer(256);
+            StringBuilder fsb = new StringBuilder(256);
             for (Accumulator acc : accumulators) {
-                if (!fsb.isEmpty()) {
+                if (fsb.length() != 0) {
                     fsb.append(" ");
                 }
                 fsb.append(acc.getAccumulatorName().getEQName());

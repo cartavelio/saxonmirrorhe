@@ -57,11 +57,11 @@ public class PreparedStylesheet extends Executable {
     // need not be unique, and because they are not available for reference by name.
     private Map<SymbolicName, Component> componentIndex;
 
-    private StructuredQName defaultInitialTemplate;
-    private StructuredQName defaultInitialMode;
-    private String messageReceiverClassName;
-    private OutputURIResolver outputURIResolver;
-    private GlobalParameterSet compileTimeParams;
+    private final StructuredQName defaultInitialTemplate;
+    private final StructuredQName defaultInitialMode;
+    private final String messageReceiverClassName;
+    private final OutputURIResolver outputURIResolver;
+    private final GlobalParameterSet compileTimeParams;
 
 
     /**

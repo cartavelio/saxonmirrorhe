@@ -35,9 +35,9 @@ public enum ValidationMode {
      */
     DEFAULT(Validation.DEFAULT);
 
-    private int number;
+    private final int number;
 
-    private ValidationMode(int number) {
+    ValidationMode(int number) {
         this.number = number;
     }
 

@@ -8,7 +8,7 @@ import net.sf.saxon.lib.StandardErrorListener;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -25,12 +25,14 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  *
  */
-public class TransformTest {
+public class TransformTest  {
 
     @Test
     public void testStreamingViaJaxp() {
@@ -107,7 +109,6 @@ public class TransformTest {
         }
     }
 
-    @Test
     public void testStreamingTransformerHandler() {
         try {
             String xsl =
@@ -255,7 +256,6 @@ public class TransformTest {
     }
 
 
-    @Test
     public void testJsonSerialization2() {
         // See Saxon bug 3225
         try {
@@ -292,7 +292,6 @@ public class TransformTest {
         }
     }
 
-    @Test
     public void testAdaptiveSerialization() {
         // See Saxon bug 3225
         try {
@@ -329,7 +328,6 @@ public class TransformTest {
         }
     }
 
-    @Test
     public void testStaticParameters() {
         // See Saxon bug 3225
         try {
@@ -347,7 +345,7 @@ public class TransformTest {
             TransformerFactoryImpl factory = new TransformerFactoryImpl();
             StreamSource xslS = new StreamSource(new StringReader(xsl));
             CompilerInfo info = new CompilerInfo(factory.getConfiguration());
-            info.setParameter(new StructuredQName("", "", "x"), new StringValue("2+2"));
+            info.setParameter(new StructuredQName("", "", "x"), StringItem.bmp("2+2"));
             Templates templates = factory.newTemplates(xslS, info);
             Transformer transformer = templates.newTransformer();
             transformer.setOutputProperty("method", "text");
@@ -457,6 +455,8 @@ public class TransformTest {
 }
 
 
+// Contributor(s): none.
+//
 
 
 

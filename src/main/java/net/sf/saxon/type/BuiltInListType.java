@@ -14,10 +14,11 @@ import net.sf.saxon.expr.MappingIterator;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
@@ -30,7 +31,7 @@ import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
 
 public class BuiltInListType implements ListType {
 
-    private int fingerprint;
+    private final int fingerprint;
 
     public static BuiltInListType ENTITIES = makeListType(NamespaceConstant.SCHEMA, "ENTITIES");
     public static BuiltInListType IDREFS = makeListType(NamespaceConstant.SCHEMA, "IDREFS");
@@ -378,7 +379,7 @@ public class BuiltInListType implements ListType {
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) throws XPathException {
         try {
-            return getTypedValue(node.getStringValue(),
+            return getTypedValue(node.getUnicodeStringValue(),
                     node.getAllNamespaces(),
                     node.getConfiguration().getConversionRules());
         } catch (ValidationException err) {
@@ -448,17 +449,6 @@ public class BuiltInListType implements ListType {
     }
 
     /**
-     * Apply the whitespace normalization rules for this simple type
-     *
-     * @param value the string before whitespace normalization
-     * @return the string after whitespace normalization
-     */
-
-    public String applyWhitespaceNormalization(String value) {
-        return Whitespace.collapseWhitespace(value).toString();
-    }
-
-    /**
      * Analyze an expression to see whether the expression is capable of delivering a value of this
      * type.
      *
@@ -491,14 +481,14 @@ public class BuiltInListType implements ListType {
     /*@Nullable*/
     @Override
     public ValidationFailure validateContent(
-            /*@NotNull*/ CharSequence value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+            /*@NotNull*/ UnicodeString value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         SimpleType base = getItemType();
         Whitespace.Tokenizer iter = new Whitespace.Tokenizer(value);
         boolean found = false;
-        StringValue val;
+        StringItem val;
         while ((val = iter.next()) != null) {
             found = true;
-            ValidationFailure v = base.validateContent(val.getStringValue(), nsResolver, rules);
+            ValidationFailure v = base.validateContent(val.getUnicodeStringValue(), nsResolver, rules);
             if (v != null) {
                 return v;
             }
@@ -514,7 +504,6 @@ public class BuiltInListType implements ListType {
     /**
      * Get the typed value of a given input string. This method assumes that the input value
      * is valid according to this SimpleType
-     *
      * @param value    the string whose typed value is required
      * @param resolver namespace resolver for namespace-sensitive content
      * @param rules    the type conversion rules to be used
@@ -522,7 +511,7 @@ public class BuiltInListType implements ListType {
 
     /*@NotNull*/
     @Override
-    public AtomicSequence getTypedValue(/*@NotNull*/ CharSequence value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
+    public AtomicSequence getTypedValue(/*@NotNull*/ UnicodeString value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
         Whitespace.Tokenizer iter = new Whitespace.Tokenizer(value);
         ListTypeMappingFunction map = new ListTypeMappingFunction();
         map.resolver = resolver;
@@ -558,7 +547,7 @@ public class BuiltInListType implements ListType {
         @Override
         public AtomicIterator<AtomicValue> map(Item item) throws XPathException {
             try {
-                return atomicType.getTypedValue(item.getStringValueCS(), resolver, rules).iterate();
+                return atomicType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate();
             } catch (ValidationException err) {
                 throw new XPathException(err);
             }
@@ -574,7 +563,7 @@ public class BuiltInListType implements ListType {
      */
 
     @Override
-    public CharSequence preprocess(CharSequence input) {
+    public UnicodeString preprocess(UnicodeString input) {
         return input;
     }
 
@@ -589,7 +578,7 @@ public class BuiltInListType implements ListType {
      */
 
     @Override
-    public CharSequence postprocess(CharSequence input) {
+    public UnicodeString postprocess(UnicodeString input) {
         return input;
     }
 }

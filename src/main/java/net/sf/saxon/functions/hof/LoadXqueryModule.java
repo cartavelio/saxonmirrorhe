@@ -86,9 +86,11 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             MapItem suppliedOptions = (MapItem) args[1].head();
             Map<String, Sequence> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
             xqueryVersionOption = checkedOptions.get("xquery-version");
-            if (xqueryVersionOption != null &&
-                    ((DecimalValue)xqueryVersionOption.head()).getDoubleValue()*10 > 31) {
-                throw new XPathException("No XQuery version " + xqueryVersionOption + " processor is available", "FOQM0006");
+            if (xqueryVersionOption != null) {
+                double vn = ((DecimalValue) xqueryVersionOption.head()).getDoubleValue();
+                if (vn*10 > 31) {
+                    throw new XPathException("No XQuery version " + vn + " processor is available", "FOQM0006");
+                }
             }
             locationHintsOption = checkedOptions.get("location-hints");
             variablesOption = checkedOptions.get("variables");

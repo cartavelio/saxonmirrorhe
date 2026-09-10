@@ -15,14 +15,15 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.function.Predicate;
@@ -103,7 +104,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     public static boolean isPreservedNode(NodeInfo node, SpaceStrippedDocument docWrapper, NodeInfo actualParent) {
 
         // Non-text nodes, non-whitespace nodes, and parentless nodes are preserved
-        if (node.getNodeKind() != Type.TEXT || actualParent == null || !Whitespace.isWhite(node.getStringValueCS())) {
+        if (node.getNodeKind() != Type.TEXT || actualParent == null || !Whitespace.isAllWhite(node.getUnicodeStringValue())) {
             return true;
         }
 
@@ -209,28 +210,25 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
     }
 
     /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
+     * Get the string value of the item.
+     * @return the string value of the node
      */
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         // Might not be the same as the string value of the underlying node because of space stripping
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
                 AxisIterator iter = iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.makeNodeKindTest(Type.TEXT));
-                FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
-                while (true) {
-                    NodeInfo it = iter.next();
-                    if (it == null) {
-                        break;
-                    }
-                    sb.cat(it.getStringValueCS());
+                UnicodeBuilder sb = new UnicodeBuilder();
+                NodeInfo it;
+                while ((it = iter.next()) != null) {
+                    sb.append(it.getUnicodeStringValue());
                 }
-                return sb.condense();
+                return sb.toUnicodeString();
             default:
-                return node.getStringValueCS();
+                return node.getUnicodeStringValue();
         }
     }
 

@@ -17,8 +17,8 @@ package net.sf.saxon.style;
 
 public class ComponentDeclaration {
 
-    private StyleElement sourceElement;
-    private StylesheetModule module;
+    private final StyleElement sourceElement;
+    private final StylesheetModule module;
 
     /**
      * Create a ComponentDeclaration as the combination of a stylesheet module and a declaration

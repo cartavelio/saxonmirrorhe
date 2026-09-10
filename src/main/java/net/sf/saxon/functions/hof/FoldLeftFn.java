@@ -25,14 +25,14 @@ public class FoldLeftFn extends FoldingFunction {
 
     @Override
     public Fold getFold(XPathContext context, Sequence... arguments) throws XPathException {
-        Sequence arg0 = (Sequence)arguments[0];
+        Sequence arg0 = arguments[0];
         return new FoldLeftFold(context, arg0.materialize(), (Function)arguments[1].head());
     }
 
     public class FoldLeftFold implements Fold {
 
-        private XPathContext context;
-        private Function function;
+        private final XPathContext context;
+        private final Function function;
         private Sequence data;
         private int counter;
 

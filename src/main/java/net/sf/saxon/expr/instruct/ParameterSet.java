@@ -45,7 +45,7 @@ public class ParameterSet {
 
     public ParameterSet(int capacity) {
         keys = new StructuredQName[capacity];
-        values = (Sequence[])new Sequence[capacity];
+        values = new Sequence[capacity];
         typeChecked = new boolean[capacity];
     }
 

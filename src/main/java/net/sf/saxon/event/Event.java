@@ -9,6 +9,7 @@ package net.sf.saxon.event;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -114,12 +115,12 @@ public abstract class Event {
 
     public static class Text extends Event {
 
-        String content;
+        CodePoints content;
         Location location;
         int properties;
 
-        public Text(CharSequence content, Location location, int properties) {
-            this.content = content.toString();
+        public Text(CodePoints content, Location location, int properties) {
+            this.content = content;
             this.location = location;
             this.properties = properties;
         }
@@ -136,12 +137,12 @@ public abstract class Event {
 
     public static class Comment extends Event {
 
-        String content;
+        CodePoints content;
         Location location;
         int properties;
 
-        public Comment(CharSequence content, Location location, int properties) {
-            this.content = content.toString();
+        public Comment(CodePoints content, Location location, int properties) {
+            this.content = content;
             this.location = location;
             this.properties = properties;
         }
@@ -158,13 +159,13 @@ public abstract class Event {
 
     public static class ProcessingInstruction extends Event {
         String target;
-        String content;
+        CodePoints content;
         Location location;
         int properties;
 
-        public ProcessingInstruction(String target, CharSequence content, Location location, int properties) {
+        public ProcessingInstruction(String target, CodePoints content, Location location, int properties) {
             this.target = target;
-            this.content = content.toString();
+            this.content = content;
             this.location = location;
             this.properties = properties;
         }

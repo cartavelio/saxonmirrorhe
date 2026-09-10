@@ -8,8 +8,9 @@
 package net.sf.saxon.regex;
 
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -24,7 +25,7 @@ public interface RegexIterator extends SequenceIterator {
      * iterator.
      */
     @Override
-    StringValue next() throws XPathException;
+    StringItem next() throws XPathException;
 
     /**
      * Determine whether the current item in the sequence is a matching item or a non-matching item
@@ -70,7 +71,7 @@ public interface RegexIterator extends SequenceIterator {
          * @param s a matching substring, or part thereof that falls within a specific group
          */
 
-        void characters(CharSequence s) throws XPathException;
+        void characters(CodePoints s) throws XPathException;
 
         /**
          * Method to be called when the start of a captured group is encountered

@@ -9,9 +9,7 @@ package net.sf.saxon.style;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.NextMatch;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
@@ -61,7 +59,7 @@ public class XSLNextMatch extends StyleElement {
                 // OK;
             } else if (child.getNodeKind() == Type.TEXT) {
                 // with xml:space=preserve, white space nodes may still be there
-                if (!Whitespace.isWhite(child.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(child.getUnicodeStringValue())) {
                     compileError("No character data is allowed within xsl:next-match", "XTSE0010");
                 }
             } else {

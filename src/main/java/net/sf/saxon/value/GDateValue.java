@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -100,9 +101,9 @@ public abstract class GDateValue extends CalendarValue {
      */
 
     /*@NotNull*/
-    protected static ConversionResult setLexicalValue(GDateValue d, CharSequence s, boolean allowYearZero) {
+    protected static ConversionResult setLexicalValue(GDateValue d, UnicodeString s, boolean allowYearZero) {
         d.hasNoYearZero = !allowYearZero;
-        StringTokenizer tok = new StringTokenizer(Whitespace.trimWhitespace(s).toString(), "-:+TZ", true);
+        StringTokenizer tok = new StringTokenizer(Whitespace.trim(s).toString(), "-:+TZ", true);
         try {
             if (!tok.hasMoreElements()) {
                 return badDate("Too short", s);
@@ -262,14 +263,14 @@ public abstract class GDateValue extends CalendarValue {
         return d;
     }
 
-    private static ValidationFailure badDate(String msg, CharSequence value) {
+    private static ValidationFailure badDate(String msg, UnicodeString value) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid date " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
         err.setErrorCode("FORG0001");
         return err;
     }
 
-    private static ValidationFailure badDate(String msg, CharSequence value, String errorCode) {
+    private static ValidationFailure badDate(String msg, UnicodeString value, String errorCode) {
         ValidationFailure err = new ValidationFailure(
                 "Invalid date " + Err.wrap(value, Err.VALUE) + " (" + msg + ")");
         err.setErrorCode(errorCode);

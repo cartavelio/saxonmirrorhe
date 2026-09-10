@@ -66,6 +66,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     public static final int CDOC = 1024*16;       // Depends on context document
     public static final int CARD0 = 1024*32;      // Result is empty only if first arg is empty
     public static final int NEW = 1024*64;        // All nodes in the result are newly created
+    public static final int CTRL = 1024*128;      // Controls the optimization of its arguments
 
     public static final int DEPENDS_ON_STATIC_CONTEXT = BASE | NS | DCOLL;
     public static final int FOCUS = CITEM | POSN | LAST | CDOC;
@@ -82,7 +83,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     protected static final int NAV = 1 << 27;   // = usage NAVIGATION (function navigates from this node)
 
 
-    private HashMap<String, Entry> functionTable = new HashMap<>(200);
+    private final HashMap<String, Entry> functionTable = new HashMap<>(200);
     //private List<BuiltInFunctionSet> importedFunctions = new ArrayList<BuiltInFunctionSet>();
 
     /**
@@ -196,7 +197,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             }
         }
 
-        Class functionClass = entry.implementationClass;
+        Class<? extends SystemFunction> functionClass = entry.implementationClass;
         SystemFunction f;
         try {
             f = (SystemFunction) functionClass.newInstance();
@@ -312,7 +313,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             e.usage = new OperandUsage[1];
         } else {
             e.argumentTypes = new SequenceType[arity];
-            e.resultIfEmpty = (Sequence[])new Sequence[arity];
+            e.resultIfEmpty = new Sequence[arity];
             e.usage = new OperandUsage[arity];
         }
         functionTable.put(name + "#" + arity, e);
@@ -335,7 +336,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             e.cardinality = master.cardinality;
             e.properties = master.properties;
             e.argumentTypes = new SequenceType[arity];
-            e.resultIfEmpty = (Sequence[])new Sequence[arity];
+            e.resultIfEmpty = new Sequence[arity];
             e.usage = new OperandUsage[arity];
             for (int i=0; i<arity; i++) {
                 e.argumentTypes[i] = master.argumentTypes[i];
@@ -377,7 +378,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         /**
          * The class containing the implementation of this function (always a subclass of SystemFunction)
          */
-        public Class implementationClass;
+        public Class<? extends SystemFunction> implementationClass;
         /**
          * The arity of the function
          */

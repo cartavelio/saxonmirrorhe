@@ -13,7 +13,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Implement the XPath 3.0 fn:environment-variable() function
@@ -34,10 +34,10 @@ public class EnvironmentVariable extends SystemFunction {
     public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
 
         return new ZeroOrOne(
-                getVariable((StringValue) arguments[0].head(), context));
+                getVariable((StringItem) arguments[0].head(), context));
     }
 
-    private static StringValue getVariable(StringValue environVar, XPathContext context) {
+    private static StringItem getVariable(StringItem environVar, XPathContext context) {
         EnvironmentVariableResolver resolver = context.getConfiguration().getConfigurationProperty(
                 Feature.ENVIRONMENT_VARIABLE_RESOLVER);
         String environVarName = environVar.getStringValue();
@@ -53,7 +53,7 @@ public class EnvironmentVariable extends SystemFunction {
             }
         }
 
-        return new StringValue(environValue);
+        return new StringItem(environValue);
     }
 
 }

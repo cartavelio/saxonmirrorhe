@@ -23,7 +23,7 @@ import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.packages.PackageLibrary;
 import net.sf.saxon.trans.packages.UsePack;
 import net.sf.saxon.trans.packages.VersionedPackageName;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NestedIntegerValue;
@@ -38,21 +38,21 @@ public class Compilation {
 
     // diagnostic switch to control output of timing information
     public static boolean TIMING = false;
-    private Configuration config;
-    private CompilerInfo compilerInfo;
+    private final Configuration config;
+    private final CompilerInfo compilerInfo;
     private PrincipalStylesheetModule principalStylesheetModule;
     private int errorCount = 0;
     private boolean schemaAware;
-    private QNameParser qNameParser;
-    private Map<StructuredQName, ValueAndPrecedence> staticVariables = new HashMap<>();
-    private Map<DocumentKey, TreeInfo> stylesheetModules = new HashMap<>();
-    private Stack<DocumentKey> importStack = new Stack<>(); // handles both include and import
+    private final QNameParser qNameParser;
+    private final Map<StructuredQName, ValueAndPrecedence> staticVariables = new HashMap<>();
+    private final Map<DocumentKey, TreeInfo> stylesheetModules = new HashMap<>();
+    private final Stack<DocumentKey> importStack = new Stack<>(); // handles both include and import
     private PackageData packageData;
     private boolean preScan = true;
     private boolean createsSecondaryResultDocuments = false;
     private boolean libraryPackage = false;
     private VersionedPackageName expectedNameAndVersion = null;
-    private List<UsePack> packageDependencies = new ArrayList<>();
+    private final List<UsePack> packageDependencies = new ArrayList<>();
     private List<VersionedPackageName> usingPackages = new ArrayList<>();
     private GlobalParameterSet suppliedParameters;
     private boolean fallbackToNonStreaming = false;
@@ -187,7 +187,7 @@ public class Compilation {
                         new VersionedPackageName(used.getPackageName(), used.getPackageVersion());
                 if (usingPackages.contains(existing)) {
                     // Report a cycle of package dependencies
-                    FastStringBuffer buffer = new FastStringBuffer(1024);
+                    StringBuilder buffer = new StringBuilder(1024);
                     for (VersionedPackageName n : usingPackages) {
                         buffer.append(n.packageName);
                         buffer.append(", ");

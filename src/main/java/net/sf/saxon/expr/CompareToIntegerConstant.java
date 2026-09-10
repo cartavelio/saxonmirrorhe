@@ -25,7 +25,7 @@ import net.sf.saxon.value.NumericValue;
 
 public class CompareToIntegerConstant extends CompareToConstant {
 
-    private long comparand;
+    private final long comparand;
 
     /**
      * Create the expression

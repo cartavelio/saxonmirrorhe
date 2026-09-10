@@ -15,6 +15,7 @@ import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
@@ -32,7 +33,7 @@ import static net.sf.saxon.type.SchemaComponent.ValidationStatus.VALIDATED;
 
 public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeCache {
 
-    private int fingerprint;
+    private final int fingerprint;
     private int baseFingerprint;
     private int primitiveFingerprint;
     private UType uType;
@@ -44,7 +45,7 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
     private SequenceType _zeroOrOne;
     private SequenceType _zeroOrMore;
 
-    private static Map<String, BuiltInAtomicType> byAlphaCode = new HashMap<>(60);
+    private static final Map<String, BuiltInAtomicType> byAlphaCode = new HashMap<>(60);
 
     public final static BuiltInAtomicType ANY_ATOMIC =
             makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.getInstance(), "A", true);
@@ -921,7 +922,7 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
 
     /*@Nullable*/
     @Override
-    public ValidationFailure validateContent(CharSequence value, /*@Nullable*/ NamespaceResolver nsResolver,
+    public ValidationFailure validateContent(UnicodeString value, /*@Nullable*/ NamespaceResolver nsResolver,
                                              ConversionRules rules) {
         int f = getFingerprint();
         if (f == StandardNames.XS_STRING ||
@@ -1009,12 +1010,12 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
     @Override
     public AtomicSequence atomize(NodeInfo node) throws XPathException {
         // Fast path for common cases
-        CharSequence stringValue = node.getStringValueCS();
-        if (stringValue.length() == 0 && node.isNilled()) {
+        UnicodeString stringValue = node.getUnicodeStringValue();
+        if (stringValue.isEmpty() && node.isNilled()) {
             return AtomicArray.EMPTY_ATOMIC_ARRAY;
         }
         if (fingerprint == StandardNames.XS_STRING) {
-            return StringValue.makeStringValue(stringValue);
+            return new StringItem(stringValue.tidy());
         } else if (fingerprint == StandardNames.XS_UNTYPED_ATOMIC) {
             return new UntypedAtomicValue(stringValue);
         }
@@ -1048,11 +1049,11 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
 
     /*@NotNull*/
     @Override
-    public AtomicSequence getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
+    public AtomicSequence getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         // Fast path for common cases
         if (fingerprint == StandardNames.XS_STRING) {
-            return StringValue.makeStringValue(value);
+            return new StringItem(value.tidy());
         } else if (fingerprint == StandardNames.XS_UNTYPED_ATOMIC) {
             return new UntypedAtomicValue(value);
         }
@@ -1099,7 +1100,7 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
 
     /*@Nullable*/
     @Override
-    public ValidationFailure validate(AtomicValue primValue, CharSequence lexicalValue, ConversionRules rules) {
+    public ValidationFailure validate(AtomicValue primValue, UnicodeString lexicalValue, ConversionRules rules) {
         switch (fingerprint) {
             case StandardNames.XS_NUMERIC:
             case StandardNames.XS_STRING:
@@ -1152,7 +1153,7 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
             case StandardNames.XS_ID:
             case StandardNames.XS_IDREF:
             case StandardNames.XS_ENTITY:
-                return stringConverter.validate(primValue.getStringValueCS());
+                return stringConverter.validate(primValue.getUnicodeStringValue());
             default:
                 throw new IllegalArgumentException();
         }
@@ -1243,7 +1244,7 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
      */
 
     @Override
-    public CharSequence preprocess(CharSequence input) {
+    public UnicodeString preprocess(UnicodeString input) {
         return input;
     }
 
@@ -1258,7 +1259,7 @@ public class BuiltInAtomicType implements AtomicType, ItemType.WithSequenceTypeC
      */
 
     @Override
-    public CharSequence postprocess(CharSequence input) {
+    public UnicodeString postprocess(UnicodeString input) {
         return input;
     }
 

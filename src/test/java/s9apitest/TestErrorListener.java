@@ -39,7 +39,7 @@ public class TestErrorListener {
             } catch (Exception e) {
             }
             System.out.println("=============");
-            System.out.println("");
+            System.out.println();
         } catch (Exception e) {
             System.out.println(String.format("EXCEPTION %s %s", e.getClass().getName(), e.getMessage()));
         }
@@ -48,6 +48,7 @@ public class TestErrorListener {
     private static class MyErrorListener implements ErrorListener {
         int warnings = 0;
         int errors = 0;
+        @Override
         public void error(TransformerException e) throws TransformerException {
             assertEquals(0, errors, "onlyOneError");
             errors++;
@@ -56,10 +57,12 @@ public class TestErrorListener {
             throw new TransformerException("STOP IT");
         }
 
+        @Override
         public void fatalError(TransformerException e) throws TransformerException {
             System.out.println(String.format("fatalError - %s", e.getMessage()));
         }
 
+        @Override
         public void warning(TransformerException e) throws TransformerException {
             System.out.println(String.format("my warning - %s", e.getMessage()));
             warnings++;

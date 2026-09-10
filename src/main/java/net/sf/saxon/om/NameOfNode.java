@@ -15,7 +15,7 @@ import net.sf.saxon.tree.wrapper.AbstractVirtualNode;
  */
 public class NameOfNode implements NodeName {
 
-    private NodeInfo node;
+    private final NodeInfo node;
 
     /**
      * Constructor is private to protect against use with mutable nodes

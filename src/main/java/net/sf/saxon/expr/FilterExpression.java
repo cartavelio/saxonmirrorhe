@@ -41,6 +41,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     private boolean filterIsIndependent;        // true if the filter expression does not
     // depend on the context item or position. (It may depend on last()).
     public boolean doneReorderingPredicates = false;
+    private boolean indexingDisabled;
     public static final int FILTERED = 10000;
 
     public final static OperandRole FILTER_PREDICATE =
@@ -70,6 +71,10 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
     public void setBase(Expression base) {
         setLhsExpression(base);
+    }
+
+    public void disableIndexing() {
+        indexingDisabled = true;
     }
 
     /**
@@ -215,7 +220,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         }
 
         // check whether the filter is a constant true() or false()
-        if (getFilter() instanceof Literal && !(((Literal) getFilter()).getValue() instanceof NumericValue)) {
+        if (getFilter() instanceof Literal && !(((Literal) getFilter()).getGroundedValue() instanceof NumericValue)) {
             try {
                 if (getFilter().effectiveBooleanValue(new EarlyEvaluationContext(getConfiguration()))) {
                     return getBase();
@@ -353,7 +358,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 && ((CompareToStringConstant) getFilter()).getLhsExpression().isCallOn(LocalName_1.class)
                 && ((SystemFunctionCall)((CompareToStringConstant) getFilter()).getLhsExpression()).getArg(0) instanceof ContextItemExpression) {
             AxisExpression ax2 = new AxisExpression(((AxisExpression) getBase()).getAxis(),
-                                       new LocalNameTest(config.getNamePool(), Type.ELEMENT, ((CompareToStringConstant) getFilter()).getComparand()));
+                                       new LocalNameTest(config.getNamePool(), Type.ELEMENT, ((CompareToStringConstant) getFilter()).getComparand().toString()));
             ExpressionTool.copyLocationInfo(this, ax2);
             return ax2;
         }
@@ -369,8 +374,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         }
 
         // the filter expression may have been reduced to a constant boolean by previous optimizations
-        if (getFilter() instanceof Literal && ((Literal) getFilter()).getValue() instanceof BooleanValue) {
-            if (((BooleanValue) ((Literal) getFilter()).getValue()).getBooleanValue()) {
+        if (getFilter() instanceof Literal && ((Literal) getFilter()).getGroundedValue() instanceof BooleanValue) {
+            if (((BooleanValue) ((Literal) getFilter()).getGroundedValue()).getBooleanValue()) {
                 if (tracing) {
                     opt.trace("Redundant filter removed", getBase());
                 }
@@ -392,7 +397,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         getFilter().getItemType().equals(BuiltInAtomicType.BOOLEAN);
 
         // determine whether the filter is indexable
-        if (!filterIsPositional && !visitor.isOptimizeForStreaming()) {
+        if (!filterIsPositional && !visitor.isOptimizeForStreaming() && !indexingDisabled) {
             int isIndexable = opt.isIndexableFilter(getFilter());
 
             // If the filter is indexable consider creating a key, or an indexed filter expression
@@ -446,7 +451,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 ((IsLastExpression) getFilter()).getCondition()) {
 
             if (getBase() instanceof Literal) {
-                setFilter(Literal.makeLiteral(new Int64Value(((Literal) getBase()).getValue().getLength()), this));
+                setFilter(Literal.makeLiteral(new Int64Value(((Literal) getBase()).getGroundedValue().getLength()), this));
             } else {
                 return new LastItemExpression(getBase());
             }
@@ -595,7 +600,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         if (getFilter() instanceof Literal) {
-            GroundedValue val = ((Literal) getFilter()).getValue();
+            GroundedValue val = ((Literal) getFilter()).getGroundedValue();
             if (val instanceof NumericValue) {
                 Expression result;
                 int lvalue = ((NumericValue)val).asSubscript();
@@ -731,7 +736,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 case Token.FEQ: {
                     if (Literal.isConstantOne(comparand)) {
                         return FirstItemExpression.makeFirstItemExpression(start);
-                    } else if (comparand instanceof Literal && ((IntegerValue) ((Literal) comparand).getValue()).asBigInteger().compareTo(BigInteger.ZERO) <= 0) {
+                    } else if (comparand instanceof Literal && ((IntegerValue) ((Literal) comparand).getGroundedValue()).asBigInteger().compareTo(BigInteger.ZERO) <= 0) {
                         return Literal.makeEmptySequence();
                     } else {
                         return new SubscriptExpression(start, comparand);
@@ -743,7 +748,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     args[0] = start;
                     args[1] = Literal.makeLiteral(Int64Value.makeIntegerValue(1), start);
                     if (Literal.isAtomic(comparand)) {
-                        long n = ((NumericValue) ((Literal) comparand).getValue()).longValue();
+                        long n = ((NumericValue) ((Literal) comparand).getGroundedValue()).longValue();
                         args[2] = Literal.makeLiteral(Int64Value.makeIntegerValue(n - 1), start);
                     } else {
                         ArithmeticExpression decrement = new ArithmeticExpression(
@@ -768,7 +773,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                     Expression[] args = new Expression[2];
                     args[0] = start;
                     if (Literal.isAtomic(comparand)) {
-                        long n = ((NumericValue) ((Literal) comparand).getValue()).longValue();
+                        long n = ((NumericValue) ((Literal) comparand).getGroundedValue()).longValue();
                         args[1] = Literal.makeLiteral(Int64Value.makeIntegerValue(n + 1), start);
                     } else {
                         args[1] = new ArithmeticExpression(
@@ -967,8 +972,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
     @Override
     public int computeCardinality() {
-        if (getFilter() instanceof Literal && ((Literal) getFilter()).getValue() instanceof NumericValue) {
-            if (((NumericValue) ((Literal) getFilter()).getValue()).compareTo(1) == 0 &&
+        if (getFilter() instanceof Literal && ((Literal) getFilter()).getGroundedValue() instanceof NumericValue) {
+            if (((NumericValue) ((Literal) getFilter()).getGroundedValue()).compareTo(1) == 0 &&
                     !Cardinality.allowsZero(getBase().getCardinality())) {
                 return StaticProperty.ALLOWS_ONE;
             } else {
@@ -1056,8 +1061,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                 base instanceof AxisExpression &&
                 ((AxisExpression) base).getAxis() == AxisInfo.CHILD &&
                 (filter.getDependencies() & StaticProperty.DEPENDS_ON_LAST) == 0) {
-            if (filter instanceof Literal && ((Literal) filter).getValue() instanceof IntegerValue) {
-                return new SimplePositionalPattern((NodeTest) basePattern.getItemType(), (int) ((IntegerValue) ((Literal) filter).getValue()).longValue());
+            if (filter instanceof Literal && ((Literal) filter).getGroundedValue() instanceof IntegerValue) {
+                return new SimplePositionalPattern((NodeTest) basePattern.getItemType(), (int) ((IntegerValue) ((Literal) filter).getGroundedValue()).longValue());
             } else {
                 return new GeneralPositionalPattern((NodeTest) basePattern.getItemType(), filter);
             }
@@ -1107,7 +1112,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                                     return m == null ? EmptyIterator.emptyIterator() : m.iterate();
                                 }
                             } else if (getBase() instanceof Literal) {
-                                Item i = ((Literal) getBase()).getValue().itemAt(pos - 1);
+                                Item i = ((Literal) getBase()).getGroundedValue().itemAt(pos - 1);
                                 return i == null ? EmptyIterator.emptyIterator() : i.iterate();
                             } else {
                                 SequenceIterator baseIter = getBase().iterate(context);
@@ -1127,8 +1132,8 @@ public final class FilterExpression extends BinaryExpression implements ContextS
                         if (it.next() != null) {
                             ExpressionTool.ebvError("sequence of two or more items starting with a boolean value", getFilter());
                         }
-                    } else if (first instanceof StringValue) {
-                        ebv = !((StringValue) first).isZeroLength();
+                    } else if (first instanceof StringItem) {
+                        ebv = !((StringItem) first).isEmpty();
                         if (it.next() != null) {
                             ExpressionTool.ebvError("sequence of two or more items starting with a boolean value", getFilter());
                         }
@@ -1182,6 +1187,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         fe.filterIsIndependent = filterIsIndependent;
         fe.filterIsPositional = filterIsPositional;
         fe.filterIsSingletonBoolean = filterIsSingletonBoolean;
+        fe.indexingDisabled = indexingDisabled;
         return fe;
     }
 

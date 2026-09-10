@@ -40,8 +40,8 @@ import java.util.List;
 
 public class TryCatch extends Expression {
 
-    private Operand tryOp;
-    private List<CatchClause> catchClauses = new ArrayList<>();
+    private final Operand tryOp;
+    private final List<CatchClause> catchClauses = new ArrayList<>();
     private boolean rollbackOutput;
 
     public TryCatch(Expression tryExpr) {
@@ -433,7 +433,7 @@ public class TryCatch extends Expression {
 
     private class FilteringErrorReporter implements ErrorReporter {
 
-        private ErrorReporter base;
+        private final ErrorReporter base;
 
         FilteringErrorReporter(ErrorReporter base) {
             this.base = base;

@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
@@ -122,7 +123,7 @@ public class Chain implements GroundedValue {
         }
         if (item != null) {
             //noinspection unchecked
-            children.add((GroundedValue)item);
+            children.add(item);
         }
     }
 
@@ -233,22 +234,13 @@ public class Chain implements GroundedValue {
      *          if the sequence contains items that have no string value (for example, function items)
      */
     @Override
-    public String getStringValue() throws XPathException {
+    public UnicodeString getUnicodeStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
-    /**
-     * Get the string value of this sequence. The string value of an item is the result of applying the string()
-     * function. The string value of a sequence is the space-separated result of applying the string-join() function
-     * using a single space as the separator
-     *
-     * @return the string value of the sequence.
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the sequence contains items that have no string value (for example, function items)
-     */
     @Override
-    public CharSequence getStringValueCS() throws XPathException {
-        return SequenceTool.getStringValue(this);
+    public String getStringValue() throws XPathException {
+        return SequenceTool.stringify(this);
     }
 
     /**
@@ -277,11 +269,11 @@ public class Chain implements GroundedValue {
             }
         }
 
-        private Queue<UnfailingIterator> queue = new LinkedList<>();
+        private final Queue<UnfailingIterator> queue = new LinkedList<>();
 
-        private Stack<ChainPosition> stack;
+        private final Stack<ChainPosition> stack;
 
-        private Chain thisChain;
+        private final Chain thisChain;
 
         public ChainIterator(Chain thisChain) {
             this.thisChain = thisChain;
@@ -347,8 +339,8 @@ public class Chain implements GroundedValue {
          * Get properties of this iterator, as a bit-significant integer.
          *
          * @return the properties of this iterator. This will be some combination of
-         *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED}, {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-         *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
+         *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+         *         and {@link Property#LOOKAHEAD}. It is always
          *         acceptable to return the value zero, indicating that there are no known special properties.
          *         It is acceptable for the properties of the iterator to change depending on its state.
          */

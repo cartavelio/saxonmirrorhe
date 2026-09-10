@@ -24,7 +24,7 @@ import javax.xml.transform.TransformerException;
 
 public class TransformerReceiver extends ProxyReceiver {
 
-    private XsltController controller;
+    private final XsltController controller;
     private Builder builder;
     private Receiver destination;
 

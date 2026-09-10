@@ -11,7 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.StreamWriterToReceiver;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -58,14 +58,14 @@ class UnicodeDataGenerator {
     private final static String UNICODE_DATA = "UnicodeData.txt";
     private final static String COMPOSITION_EXCLUSIONS = "CompositionExclusions.txt";
 
-    private static List<Integer> canonicalClassKeys = new ArrayList<>(30000);
-    private static List<Integer> canonicalClassValues = new ArrayList<>(30000);
+    private static final List<Integer> canonicalClassKeys = new ArrayList<>(30000);
+    private static final List<Integer> canonicalClassValues = new ArrayList<>(30000);
 
-    private static List<Integer> decompositionKeys = new ArrayList<>(6000);
-    private static List<String> decompositionValues = new ArrayList<>(6000);
+    private static final List<Integer> decompositionKeys = new ArrayList<>(6000);
+    private static final List<String> decompositionValues = new ArrayList<>(6000);
 
-    private static List<Integer> exclusionList = new ArrayList<>(200);
-    private static List<Integer> compatibilityList = new ArrayList<>(8000);
+    private static final List<Integer> exclusionList = new ArrayList<>(200);
+    private static final List<Integer> compatibilityList = new ArrayList<>(8000);
 
     private UnicodeDataGenerator() {
     }
@@ -277,7 +277,7 @@ class UnicodeDataGenerator {
 
     // Modified by MHK. Original code assumed the characters were each 4 hex digits!
     public static String fromHex(String source) {
-        FastStringBuffer result = new FastStringBuffer(8);
+        StringBuilder result = new StringBuilder(8);
         for (int i = 0; i < source.length(); ++i) {
             char c = source.charAt(i);
             switch (c) {
@@ -310,7 +310,7 @@ class UnicodeDataGenerator {
                         z = source.length();
                     }
                     try {
-                        result.cat((char) Integer.parseInt(source.substring(i, z), 16));
+                        result.append((char) Integer.parseInt(source.substring(i, z), 16));
                     } catch (NumberFormatException e) {
                         throw new IllegalArgumentException("Bad hex value in " + source);
                     }
@@ -341,7 +341,7 @@ class UnicodeDataGenerator {
      * Utility: Supplies a zero-padded hex representation of a Unicode character (without 0x, \\u)
      */
     public static String hex(String s, String sep) {
-        FastStringBuffer result = new FastStringBuffer(20);
+        StringBuilder result = new StringBuilder(20);
         for (int i = 0; i < s.length(); ++i) {
             if (i != 0) {
                 result.append(sep);
@@ -442,18 +442,18 @@ class UnicodeDataGenerator {
 
     private static void printArray(PrintStream o, Iterator<Integer> iter) {
         int count = 0;
-        FastStringBuffer buff = new FastStringBuffer(128);
+        StringBuilder buff = new StringBuilder(128);
         if (!iter.hasNext()) {
             return;
         }
-        buff.cat('"');
+        buff.append('"');
         while (true) {
             if (++count == 20) {
                 count = 0;
                 buff.append("\",");
                 o.println(buff);
                 buff.setLength(0);
-                buff.cat('"');
+                buff.append('"');
             }
             int next = iter.next();
             buff.append(Integer.toString(next, 32));    // values are written in base-32 notation
@@ -470,7 +470,7 @@ class UnicodeDataGenerator {
     private static String base32array(List<Integer> list) {
         int count = 0;
         Iterator<Integer> iter = list.iterator();
-        FastStringBuffer buff = new FastStringBuffer(128);
+        StringBuilder buff = new StringBuilder(128);
         if (!iter.hasNext()) {
             return buff.toString();
         }
@@ -493,7 +493,7 @@ class UnicodeDataGenerator {
     private static String base32arrayRunLength(List<Integer> list) {
         int count = 0;
         Iterator<Integer> iter = list.iterator();
-        FastStringBuffer buff = new FastStringBuffer(128);
+        StringBuilder buff = new StringBuilder(128);
         if (!iter.hasNext()) {
             return buff.toString();
         }
@@ -540,7 +540,7 @@ class UnicodeDataGenerator {
     private static String base32StringArray(List<String> in) {
         Iterator<String> iter = in.iterator();
         int count = 0;
-        FastStringBuffer buff = new FastStringBuffer(128);
+        StringBuilder buff = new StringBuilder(128);
         if (!iter.hasNext()) {
             return "";
         }
@@ -556,10 +556,10 @@ class UnicodeDataGenerator {
                 char b1 = "0123456789abcdef".charAt((c >> 4) & 0xf);
                 char b2 = "0123456789abcdef".charAt((c >> 8) & 0xf);
                 char b3 = "0123456789abcdef".charAt((c >> 12) & 0xf);
-                buff.cat(b3);
-                buff.cat(b2);
-                buff.cat(b1);
-                buff.cat(b0);
+                buff.append(b3);
+                buff.append(b2);
+                buff.append(b1);
+                buff.append(b0);
             }
             if (iter.hasNext()) {
                 buff.append(" ");
@@ -571,7 +571,7 @@ class UnicodeDataGenerator {
 
     private static void printStringArray(PrintStream o, Iterator<String> iter) {
         int count = 0;
-        FastStringBuffer buff = new FastStringBuffer(128);
+        StringBuilder buff = new StringBuilder(128);
         if (!iter.hasNext()) {
             return;
         }
@@ -593,8 +593,8 @@ class UnicodeDataGenerator {
     }
 
 
-    private static void appendJavaString(String value, FastStringBuffer buff) {
-        buff.cat('"');
+    private static void appendJavaString(String value, StringBuilder buff) {
+        buff.append('"');
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
             if (c == '\\') {
@@ -602,20 +602,20 @@ class UnicodeDataGenerator {
             } else if (c == '"') {
                 buff.append("\\\"");
             } else if (c > 32 && c < 127) {
-                buff.cat(c);
+                buff.append(c);
             } else {
                 buff.append("\\u");
                 char b0 = "0123456789abcdef".charAt(c & 0xf);
                 char b1 = "0123456789abcdef".charAt((c >> 4) & 0xf);
                 char b2 = "0123456789abcdef".charAt((c >> 8) & 0xf);
                 char b3 = "0123456789abcdef".charAt((c >> 12) & 0xf);
-                buff.cat(b3);
-                buff.cat(b2);
-                buff.cat(b1);
-                buff.cat(b0);
+                buff.append(b3);
+                buff.append(b2);
+                buff.append(b1);
+                buff.append(b0);
             }
         }
-        buff.cat('"');
+        buff.append('"');
     }
 
     /**

@@ -9,11 +9,12 @@ package net.sf.saxon.tree.linked;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * CommentImpl is an implementation of a Comment node
@@ -24,17 +25,17 @@ import net.sf.saxon.value.StringValue;
 
 public class CommentImpl extends NodeImpl {
 
-    String comment;
+    UnicodeString comment;
     String systemId;
     int lineNumber = -1;
     int columnNumber = -1;
 
-    public CommentImpl(String content) {
+    public CommentImpl(UnicodeString content) {
         this.comment = content;
     }
 
     @Override
-    public final String getStringValue() {
+    public final UnicodeString getUnicodeStringValue() {
         return comment;
     }
 
@@ -46,7 +47,7 @@ public class CommentImpl extends NodeImpl {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() {
-        return new StringValue(getStringValue());
+        return new StringItem(getUnicodeStringValue());
     }
 
     @Override
@@ -71,8 +72,8 @@ public class CommentImpl extends NodeImpl {
      */
 
     @Override
-    public void replaceStringValue(/*@NotNull*/ CharSequence stringValue) {
-        comment = stringValue.toString();
+    public void replaceStringValue(/*@NotNull*/ UnicodeString stringValue) {
+        comment = stringValue;
     }
 
     /**

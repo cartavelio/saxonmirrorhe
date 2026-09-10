@@ -9,9 +9,10 @@ package net.sf.saxon.regex;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.StringValue;
 
 import java.util.List;
 import java.util.function.Function;
@@ -39,7 +40,7 @@ public class ARegularExpression implements RegularExpression {
      * @throws XPathException if the regular expression is invalid
      */
 
-    public ARegularExpression(CharSequence pattern, String flags, String hostLanguage, List<String> warnings, Configuration config) throws XPathException {
+    public ARegularExpression(UnicodeString pattern, String flags, String hostLanguage, List<String> warnings, Configuration config) throws XPathException {
         rawFlags = flags;
         REFlags reFlags;
         try {
@@ -48,7 +49,7 @@ public class ARegularExpression implements RegularExpression {
             throw new XPathException(err.getMessage(), "FORX0001");
         }
         try {
-            rawPattern = UnicodeString.makeUnicodeString(pattern);
+            rawPattern = pattern;
             RECompiler comp2 = new RECompiler();
             comp2.setFlags(reFlags);
             regex = comp2.compile(rawPattern);
@@ -66,18 +67,30 @@ public class ARegularExpression implements RegularExpression {
     }
 
     /**
+     * Static factory method intended for simple static regular expressions known to be correcct
+     */
+
+    public static ARegularExpression compile(String pattern, String flags) {
+        try {
+            return new ARegularExpression(BMPString.of(pattern), flags, "XP31", null, null);
+        } catch (XPathException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
      * Determine whether the regular expression matches a given string in its entirety
      *
      * @param input the string to match
      * @return true if the string matches, false otherwise
      */
     @Override
-    public boolean matches(CharSequence input) {
-        if (StringValue.isEmpty(input) && regex.isNullable()) {
+    public boolean matches(UnicodeString input) {
+        if (input.isEmpty() && regex.isNullable()) {
             return true;
         }
         REMatcher matcher = new REMatcher(regex);
-        return matcher.anchoredMatch(UnicodeString.makeUnicodeString(input));
+        return matcher.anchoredMatch(input.tidy());
     }
 
     /**
@@ -87,9 +100,9 @@ public class ARegularExpression implements RegularExpression {
      * @return true if the string matches, false otherwise
      */
     @Override
-    public boolean containsMatch(CharSequence input) {
+    public boolean containsMatch(UnicodeString input) {
         REMatcher matcher = new REMatcher(regex);
-        return matcher.match(UnicodeString.makeUnicodeString(input), 0);
+        return matcher.match(input.tidy(), 0);
     }
 
     /**
@@ -99,8 +112,8 @@ public class ARegularExpression implements RegularExpression {
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
     @Override
-    public AtomicIterator tokenize(CharSequence input) {
-        return new ATokenIterator(UnicodeString.makeUnicodeString(input), new REMatcher(regex));
+    public AtomicIterator tokenize(UnicodeString input) {
+        return new ATokenIterator(input.tidy(), new REMatcher(regex));
     }
 
     /**
@@ -113,8 +126,8 @@ public class ARegularExpression implements RegularExpression {
      * @return an iterator over matched and unmatched substrings
      */
     @Override
-    public RegexIterator analyze(CharSequence input) {
-        return new ARegexIterator(UnicodeString.makeUnicodeString(input), rawPattern, new REMatcher(regex));
+    public RegexIterator analyze(UnicodeString input) {
+        return new ARegexIterator(input.tidy(), rawPattern, new REMatcher(regex));
     }
 
     /**
@@ -128,12 +141,10 @@ public class ARegularExpression implements RegularExpression {
      *          if the replacement string is invalid
      */
     @Override
-    public CharSequence replace(CharSequence input, CharSequence replacement) throws XPathException {
+    public UnicodeString replace(UnicodeString input, UnicodeString replacement) throws XPathException {
         REMatcher matcher = new REMatcher(regex);
-        UnicodeString in = UnicodeString.makeUnicodeString(input);
-        UnicodeString rep = UnicodeString.makeUnicodeString(replacement);
         try {
-            return matcher.replace(in, rep);
+            return matcher.replace(input.tidy(), replacement);
         } catch (RESyntaxException err) {
             throw new XPathException(err.getMessage(), "FORX0004");
         }
@@ -149,11 +160,10 @@ public class ARegularExpression implements RegularExpression {
      * @throws net.sf.saxon.trans.XPathException if the replacement string is invalid
      */
     @Override
-    public CharSequence replaceWith(CharSequence input, Function<CharSequence, CharSequence> replacer) throws XPathException {
+    public UnicodeString replaceWith(UnicodeString input, Function<UnicodeString, UnicodeString> replacer) throws XPathException {
         REMatcher matcher = new REMatcher(regex);
-        UnicodeString in = UnicodeString.makeUnicodeString(input);
         try {
-            return matcher.replaceWith(in, replacer);
+            return matcher.replaceWith(input.tidy(), replacer);
         } catch (RESyntaxException err) {
             throw new XPathException(err.getMessage(), "FORX0004");
         }

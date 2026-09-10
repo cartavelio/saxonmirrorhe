@@ -14,12 +14,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * fn:string-join(string* $sequence, string $separator)
@@ -95,17 +94,17 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
 
     @Override
     public Fold getFold(XPathContext context, Sequence... additionalArguments) throws XPathException {
-        CharSequence separator = "";
+        CodePoints separator = EmptyUniString.getInstance();
         if (additionalArguments.length > 0) {
-            separator = additionalArguments[0].head().getStringValueCS();
+            separator = ((GroundedValue) additionalArguments[0].head()).getUnicodeStringValue();
         }
         return new StringJoinFold(separator);
     }
 
     @Override
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
-        CharSequence separator = arguments.length > 1 ? arguments[1].head().getStringValueCS() : "";
-        CharSequenceConsumer output = destination.getStringReceiver(false);
+        CodePoints separator = arguments.length > 1 ? ((GroundedValue) arguments[1].head()).getUnicodeStringValue() : EmptyUniString.getInstance();
+        UniStringConsumer output = destination.getStringReceiver(false);
         output.open();
         boolean first = true;
         SequenceIterator iter = arguments[0].iterate();
@@ -114,9 +113,9 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
             if (first) {
                 first = false;
             } else {
-                output.cat(separator);
+                output.append(separator);
             }
-            output.cat(it.getStringValueCS());
+            output.append(it.getUnicodeStringValue());
         }
         output.close();
     }
@@ -124,12 +123,12 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
     private class StringJoinFold implements Fold {
 
         private int position = 0;
-        private CharSequence separator;
-        private FastStringBuffer data;
+        private final CodePoints separator;
+        private final UnicodeBuilder data;
 
-        public StringJoinFold(CharSequence separator) {
+        public StringJoinFold(CodePoints separator) {
             this.separator = separator;
-            this.data = new FastStringBuffer(FastStringBuffer.C64);
+            this.data = new UnicodeBuilder();
         }
 
         /**
@@ -140,10 +139,10 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         @Override
         public void processItem(Item item) {
             if (position == 0) {
-                data.cat(item.getStringValueCS());
+                data.append(item.getUnicodeStringValue());
                 position = 1;
             } else {
-                data.cat(separator).append(item.getStringValueCS());
+                data.append(separator).append(item.getUnicodeStringValue());
             }
         }
 
@@ -162,11 +161,11 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
          * @return the result of the function
          */
         @Override
-        public ZeroOrOne result()  {
+        public ZeroOrOne<StringItem> result()  {
             if (position == 0 && returnEmptyIfEmpty) {
                 return ZeroOrOne.empty();
             } else {
-                return One.string(data.toString());
+                return One.string(data.toUnicodeString());
             }
         }
     }

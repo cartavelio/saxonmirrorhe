@@ -9,6 +9,7 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.expr.sort.LRUCache;
 import net.sf.saxon.functions.IriToUri;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.value.Whitespace;
 
 import java.net.URI;
@@ -20,7 +21,7 @@ import java.net.URISyntaxException;
  */
 public class StandardURIChecker implements URIChecker {
 
-    private static StandardURIChecker THE_INSTANCE = new StandardURIChecker();
+    private static final StandardURIChecker THE_INSTANCE = new StandardURIChecker();
 
     public static StandardURIChecker getInstance() {
         return THE_INSTANCE;
@@ -32,7 +33,7 @@ public class StandardURIChecker implements URIChecker {
      * valid only after escaping, as otherwise an exception occurs during the validation process
      */
 
-    /*@NotNull*/ private static ThreadLocal<LRUCache<CharSequence, Boolean>> caches =
+    /*@NotNull*/ private static final ThreadLocal<LRUCache<CharSequence, Boolean>> caches =
             new ThreadLocal<LRUCache<CharSequence, Boolean>>();
 
     /**
@@ -50,7 +51,7 @@ public class StandardURIChecker implements URIChecker {
      */
 
     @Override
-    public boolean isValidURI(CharSequence value) {
+    public boolean isValidURI(String value) {
         LRUCache<CharSequence, Boolean> cache = caches.get();
         if (cache == null) {
             cache = new LRUCache<CharSequence, Boolean>(50);
@@ -79,7 +80,7 @@ public class StandardURIChecker implements URIChecker {
         }
 
         // Allow a string if it can be escaped into a form that java.net.URI accepts
-        sv = IriToUri.iriToUri(sv).toString();
+        sv = IriToUri.iriToUri(StringView.tidy(sv)).toString();
         try {
             new URI(sv);
             cache.put(value, Boolean.TRUE);

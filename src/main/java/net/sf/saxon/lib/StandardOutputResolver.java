@@ -28,7 +28,7 @@ import java.net.*;
 
 public class StandardOutputResolver implements OutputURIResolver {
 
-    private static StandardOutputResolver theInstance = new StandardOutputResolver();
+    private static final StandardOutputResolver theInstance = new StandardOutputResolver();
 
     /**
      * Get a singular instance

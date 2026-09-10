@@ -34,7 +34,7 @@ public class ConversionRules {
     private TypeHierarchy typeHierarchy; // may be null
 
     // These two tables need to be synchronised to make the caching thread-safe
-    private LRUCache<Integer, Converter> converterCache =
+    private final LRUCache<Integer, Converter> converterCache =
             new LRUCache<>(100, true);
 
     /**
@@ -157,7 +157,7 @@ public class ConversionRules {
      * @return true if the string represents a valid xs:anyURI value
      */
 
-    public boolean isValidURI(CharSequence string) {
+    public boolean isValidURI(String string) {
         return uriChecker == null || uriChecker.isValidURI(string);
     }
 

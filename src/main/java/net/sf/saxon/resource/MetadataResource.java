@@ -17,7 +17,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
 
@@ -26,9 +26,9 @@ import java.util.Map;
  */
 public class MetadataResource implements Resource {
 
-    private Map<String, GroundedValue> properties;
-    private String resourceURI;
-    private Resource content;
+    private final Map<String, GroundedValue> properties;
+    private final String resourceURI;
+    private final Resource content;
 
     public MetadataResource(String resourceURI, Resource content, Map<String, GroundedValue> properties) {
         this.resourceURI = resourceURI;
@@ -58,7 +58,7 @@ public class MetadataResource implements Resource {
         }
 
         // Add the resourceURI of the resource as the "name" property
-        map.initialPut("name", StringValue.makeStringValue(resourceURI));
+        map.initialPut("name", StringItem.makeStringValue(resourceURI));
 
         // Add a fetch() function, which can be used to fetch the resource
         Callable fetcher = (context1, arguments) -> content.getItem(context1);

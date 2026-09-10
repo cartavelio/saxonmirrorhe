@@ -13,6 +13,8 @@ import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pull.NamespaceContextImpl;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -52,7 +54,7 @@ import java.util.function.IntPredicate;
  */
 public class StreamWriterToReceiver implements XMLStreamWriter {
 
-    private static boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     private static class Triple {
         public String prefix;
@@ -79,14 +81,14 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
      * The receiver to which events will be passed
      */
 
-    private Receiver receiver;
-    private Configuration config;
+    private final Receiver receiver;
+    private final Configuration config;
 
     /**
      * The Checker used for testing valid characters
      */
 
-    private IntPredicate charChecker;
+    private final IntPredicate charChecker;
 
     /**
      * Flag to indicate whether names etc are to be checked for well-formedness
@@ -109,7 +111,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
     /**
      * inScopeNamespaces represents namespaces that have been declared in the XML stream
      */
-    private NamespaceReducer inScopeNamespaces;
+    private final NamespaceReducer inScopeNamespaces;
 
     /**
      * setPrefixes represents the namespace bindings that have been set, at each level of the stack,
@@ -117,7 +119,7 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
      * of NamespaceBinding objects, that is, prefix/uri pairs
      */
 
-    private Stack<List<NamespaceBinding>> setPrefixes = new Stack<>();
+    private final Stack<List<NamespaceBinding>> setPrefixes = new Stack<>();
 
     /**
      * rootNamespaceContext is the namespace context supplied at the start, is the final fallback
@@ -603,14 +605,15 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         if (data == null) {
             data = "";
         }
+        CodePoints uData = StringView.of(data);
         try {
-            if (!isValidChars(data)) {
+            if (!isValidChars(uData)) {
                 throw new IllegalArgumentException("Invalid XML character in comment: " + data);
             }
             if (isChecking && data.contains("--")) {
                 throw new IllegalArgumentException("Comment contains '--'");
             }
-            receiver.comment(data, Loc.NONE, ReceiverOption.NONE);
+            receiver.comment(uData, Loc.NONE, ReceiverOption.NONE);
         } catch (XPathException err) {
             throw new XMLStreamException(err);
         }
@@ -626,16 +629,17 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         checkNonNull(target);
         checkNonNull(data);
         flushStartTag();
+        final CodePoints uData = StringView.of(data);
         try {
             if (isChecking) {
                 if (!isValidNCName(target) || "xml".equalsIgnoreCase(target)) {
                     throw new IllegalArgumentException("Invalid PITarget: " + target);
                 }
-                if (!isValidChars(data)) {
+                if (!isValidChars(uData)) {
                     throw new IllegalArgumentException("Invalid character in PI data: " + data);
                 }
             }
-            receiver.processingInstruction(target, data, Loc.NONE, ReceiverOption.NONE);
+            receiver.processingInstruction(target, uData, Loc.NONE, ReceiverOption.NONE);
         } catch (XPathException err) {
             throw new XMLStreamException(err);
         }
@@ -693,11 +697,12 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
         throws XMLStreamException {
         checkNonNull(text);
         flushStartTag();
-        if (!isValidChars(text)) {
+        final CodePoints uData = StringView.of(text);
+        if (!isValidChars(uData)) {
             throw new IllegalArgumentException("illegal XML character: " + text);
         }
         try {
-            receiver.characters(text, Loc.NONE, ReceiverOption.NONE);
+            receiver.characters(uData, Loc.NONE, ReceiverOption.NONE);
         } catch (XPathException err) {
             throw new XMLStreamException(err);
         }
@@ -848,8 +853,8 @@ public class StreamWriterToReceiver implements XMLStreamWriter {
      * @return true if the string is valid or if checking is disabled
      */
 
-    private boolean isValidChars(String text) {
-        return !isChecking || (UTF16CharacterSet.firstInvalidChar(text, charChecker) == -1);
+    private boolean isValidChars(CodePoints text) {
+        return !isChecking || (UTF16CharacterSet.firstInvalidChar(text.codePoints(), charChecker) == -1);
     }
 
     /**

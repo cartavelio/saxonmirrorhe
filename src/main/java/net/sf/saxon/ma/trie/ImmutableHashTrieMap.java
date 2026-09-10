@@ -96,7 +96,7 @@ public abstract class ImmutableHashTrieMap<K, V>
 
         @Override
         public Iterator<Tuple2<K, V>> iterator() {
-            return Collections.<Tuple2<K, V>>emptySet().iterator();
+            return Collections.emptyIterator();
         }
     }
 

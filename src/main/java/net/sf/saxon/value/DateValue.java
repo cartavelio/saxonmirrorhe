@@ -9,8 +9,9 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 
 import java.time.LocalDate;
@@ -120,7 +121,7 @@ public class DateValue extends GDateValue implements Comparable {
      *          conventions for BC years (that is, no year zero), but this may change at some time.
      * @throws ValidationException if the supplied string is not a valid date
      */
-    public DateValue(CharSequence s) throws ValidationException {
+    public DateValue(UnicodeString s) throws ValidationException {
         this(s, ConversionRules.DEFAULT);
     }
 
@@ -132,7 +133,7 @@ public class DateValue extends GDateValue implements Comparable {
      * @param rules the conversion rules (determining whether year zero is allowed)
      * @throws ValidationException if the supplied string is not a valid date
      */
-    public DateValue(CharSequence s, ConversionRules rules) throws ValidationException {
+    public DateValue(UnicodeString s, ConversionRules rules) throws ValidationException {
         setLexicalValue(this, s, rules.isAllowYearZero()).asAtomic();
         typeLabel = BuiltInAtomicType.DATE;
     }
@@ -176,7 +177,7 @@ public class DateValue extends GDateValue implements Comparable {
      * @return either a DateValue or a ValidationFailure
      */
 
-    public static ConversionResult makeDateValue(CharSequence in, ConversionRules rules) {
+    public static ConversionResult makeDateValue(UnicodeString in, ConversionRules rules) {
         DateValue d = new DateValue();
         d.typeLabel = BuiltInAtomicType.DATE;
         return setLexicalValue(d, in, rules.isAllowYearZero());
@@ -194,10 +195,10 @@ public class DateValue extends GDateValue implements Comparable {
      * @since 9.9
      */
 
-    public static DateValue parse(CharSequence s) throws DateTimeParseException {
+    public static DateValue parse(UnicodeString s) throws DateTimeParseException {
         ConversionResult result = makeDateValue(s, ConversionRules.DEFAULT);
         if (result instanceof ValidationFailure) {
-            throw new DateTimeParseException(((ValidationFailure) result).getMessage(), s, 0);
+            throw new DateTimeParseException(((ValidationFailure) result).getMessage(), s.toString(), 0);
         } else {
             return (DateValue) result;
         }
@@ -264,27 +265,27 @@ public class DateValue extends GDateValue implements Comparable {
      */
 
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
 
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C16);
+        UnicodeBuilder sb = new UnicodeBuilder();
         int yr = year;
         if (year <= 0) {
             yr = -yr + (hasNoYearZero ? 1 : 0);           // no year zero in lexical space for XSD 1.0
             if (yr != 0) {
-                sb.cat('-');
+                sb.append('-');
             }
         }
         appendString(sb, yr, yr > 9999 ? (yr + "").length() : 4);
-        sb.cat('-');
+        sb.append('-');
         appendTwoDigits(sb, month);
-        sb.cat('-');
+        sb.append('-');
         appendTwoDigits(sb, day);
 
         if (hasTimezone()) {
             appendTimezone(sb);
         }
 
-        return sb;
+        return sb.toUnicodeString();
 
     }
 
@@ -298,7 +299,7 @@ public class DateValue extends GDateValue implements Comparable {
      */
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
+    public UnicodeString getCanonicalLexicalRepresentation() {
         DateValue target = this;
         if (hasTimezone()) {
             if (getTimezoneInMinutes() > 12 * 60) {
@@ -307,7 +308,7 @@ public class DateValue extends GDateValue implements Comparable {
                 target = adjustTimezone(getTimezoneInMinutes() + 24 * 60);
             }
         }
-        return target.getStringValueCS();
+        return target.getUnicodeStringValue();
     }
 
     /**

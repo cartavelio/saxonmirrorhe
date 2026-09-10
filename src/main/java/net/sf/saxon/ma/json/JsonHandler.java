@@ -9,19 +9,15 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
-
-import java.util.function.IntPredicate;
+import net.sf.saxon.value.StringItem;
 
 import java.util.Map;
+import java.util.function.IntPredicate;
 
 /**
  * Default handler class for accepting the result from parsing JSON strings
@@ -109,29 +105,27 @@ public class JsonHandler {
 
     /**
      * Optionally apply escaping or unescaping to a value.
-     * @param val the string to be escaped or unEscaped
+     * @param val the string to be escaped or unEscaped. This is supplied as a String rather than a UniString
+     *            because there are special rules for handling unpaired surrogates, which cannot be represented
+     *            in a UniString
      * @return the escaped or unescaped string
      * @throws XPathException
      */
 
     public String reEscape(String val) throws XPathException {
-        CharSequence escaped;
+        String escaped;
         if (escape) {
-            escaped = JsonReceiver.escape(val, true, new IntPredicate() {
-                @Override
-                public boolean test(int value) {
-                    return (value >= 0 && value <= 0x1F) ||
-                            (value >= 0x7F && value <= 0x9F) ||
-                            !charChecker.test(value) ||
-                            (value == 0x5C);
-                }
-            });
+            escaped = JsonReceiver.escape(val, true, value ->
+                    (value >= 0 && value <= 0x1F) ||
+                    (value >= 0x7F && value <= 0x9F) ||
+                    !charChecker.test(value) ||
+                    (value == 0x5C));
         } else {
-            FastStringBuffer buffer = new FastStringBuffer(val);
+            StringBuilder buffer = new StringBuilder(val.toString());
             handleInvalidCharacters(buffer);
-            escaped = buffer;
+            escaped = buffer.toString();
         }
-        return escaped.toString();
+        return escaped;
     }
 
     /**
@@ -153,7 +147,7 @@ public class JsonHandler {
      * @param buffer the JSON string
      * @throws XPathException if any error occurs
      */
-    protected void handleInvalidCharacters(FastStringBuffer buffer) throws XPathException {
+    protected void handleInvalidCharacters(StringBuilder buffer) throws XPathException {
         //if (checkSurrogates && !liberal) {
             IntPredicate charChecker = context.getConfiguration().getValidCharacterChecker();
             for (int i = 0; i < buffer.length(); i++) {
@@ -180,7 +174,7 @@ public class JsonHandler {
         //}
     }
 
-    protected void markAsEscaped(CharSequence escaped, boolean isKey) throws XPathException {
+    protected void markAsEscaped(String escaped, boolean isKey) throws XPathException {
         // do nothing in this class
     }
 
@@ -194,8 +188,8 @@ public class JsonHandler {
      * @param context the XPath context
      * @throws XPathException if the callback function throws an exception
      */
-    private void substitute(FastStringBuffer buffer, int offset, int count, XPathContext context) throws XPathException {
-        FastStringBuffer escaped = new FastStringBuffer(count*6);
+    private void substitute(StringBuilder buffer, int offset, int count, XPathContext context) throws XPathException {
+        StringBuilder escaped = new StringBuilder(count*6);
         for (int j=0; j<count; j++) {
             escaped.append("\\u");
             String hex = Integer.toHexString(buffer.charAt(offset + j));
@@ -212,7 +206,7 @@ public class JsonHandler {
             }
         } else {
             for (int j = 0; j < count; j++) {
-                buffer.removeCharAt(offset + j);
+                buffer.deleteCharAt(offset + j);
             }
             for (int j=0; j < replacement.length(); j++) {
                 buffer.insert(offset + j, replacement.charAt(j));
@@ -232,7 +226,7 @@ public class JsonHandler {
     private String replace(String s, XPathContext context) throws XPathException {
         if (fallbackFunction != null) {
             Sequence[] args = new Sequence[1];
-            args[0] = new StringValue(s);
+            args[0] = new StringItem(s);
             Sequence result = SystemFunction.dynamicCall(fallbackFunction, context, args).head();
             Item first = result.head();
             return first == null ? "" : first.getStringValue();

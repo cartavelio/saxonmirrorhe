@@ -20,7 +20,6 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -29,7 +28,7 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.StringConverter;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.UntypedAtomicValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.*;
 
@@ -55,14 +54,14 @@ public class KeyIndex {
     public enum Status {UNDER_CONSTRUCTION, BUILT, FAILED}
 
     // The entry in an index is either a NodeInfo or a List<NodeInfo>
-    private Map <AtomicMatchKey, Object> index;
+    private final Map <AtomicMatchKey, Object> index;
     private UType keyTypesPresent = UType.VOID;
-    private UType keyTypesConvertedFromUntyped = UType.STRING_LIKE;
-    private List <UntypedAtomicValue> untypedKeys;
+    private final UType keyTypesConvertedFromUntyped = UType.STRING_LIKE;
+    private List <StringItem> untypedKeys;
     private ConversionRules rules;
     private int implicitTimezone;
     private StringCollator collation;
-    private long creatingThread;
+    private final long creatingThread;
     private Status status;
 
     public KeyIndex(boolean isRangeKey) {
@@ -222,7 +221,7 @@ public class KeyIndex {
                     if (untypedKeys == null) {
                         untypedKeys = new ArrayList<>(20);
                     }
-                    untypedKeys.add((UntypedAtomicValue)keyVal);
+                    untypedKeys.add((StringItem)keyVal);
                 }
                 addEntry(amk, node, isFirst);
             }
@@ -307,9 +306,9 @@ public class KeyIndex {
             type = BuiltInAtomicType.DOUBLE;
         }
         StringConverter converter = type.getStringConverter(rules);
-        for (UntypedAtomicValue v : untypedKeys) {
+        for (StringItem v : untypedKeys) {
             AtomicMatchKey uk = getCollationKey(v, collation, implicitTimezone);
-            AtomicValue convertedValue = converter.convertString(v.getStringValueCS()).asAtomic();
+            AtomicValue convertedValue = converter.convertString(v.getUnicodeStringValue()).asAtomic();
             AtomicMatchKey amk = getCollationKey(convertedValue, collation, implicitTimezone);
             Object value = index.get(uk);
             if (value instanceof NodeInfo) {
@@ -381,9 +380,9 @@ public class KeyIndex {
             throws XPathException {
         if (UType.STRING_LIKE.subsumes(value.getUType())) {
             if (collation == null) {
-                return UnicodeString.makeUnicodeString(value.getStringValueCS());
+                return value.getUnicodeStringValue().tidy();
             } else {
-                return collation.getCollationKey(value.getStringValue());
+                return collation.getCollationKey(value.getUnicodeStringValue());
             }
         } else {
             return value.getXPathComparable(false, collation, implicitTimezone);
@@ -392,7 +391,7 @@ public class KeyIndex {
 
     private class CompositeAtomicMatchKey implements AtomicMatchKey {
 
-        private List<AtomicMatchKey> keys;
+        private final List<AtomicMatchKey> keys;
 
         public CompositeAtomicMatchKey(List<AtomicMatchKey> keys) {
             this.keys = keys;

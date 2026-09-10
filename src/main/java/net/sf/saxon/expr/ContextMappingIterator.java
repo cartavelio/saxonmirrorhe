@@ -24,9 +24,9 @@ import net.sf.saxon.trans.XPathException;
 
 public final class ContextMappingIterator implements SequenceIterator {
 
-    private FocusIterator base;
-    private ContextMappingFunction action;
-    private XPathContext context;
+    private final FocusIterator base;
+    private final ContextMappingFunction action;
+    private final XPathContext context;
     private SequenceIterator stepIterator = null;
 
     /**

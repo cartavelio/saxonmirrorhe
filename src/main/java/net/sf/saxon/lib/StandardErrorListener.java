@@ -39,7 +39,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
     private int maximumNumberOfWarnings = 25;
     private int maxOrdinaryCharacter = 255;
     private int stackTraceDetail = 2;
-    private Set<String> warningsIssued = new HashSet<>();
+    private final Set<String> warningsIssued = new HashSet<>();
     protected transient Logger logger = new StandardLogger();
 
     /**

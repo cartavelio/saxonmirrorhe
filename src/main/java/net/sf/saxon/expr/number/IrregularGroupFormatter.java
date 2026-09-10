@@ -7,8 +7,9 @@
 
 package net.sf.saxon.expr.number;
 
-import net.sf.saxon.regex.UnicodeString;
-import net.sf.saxon.tree.util.FastStringBuffer;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntSet;
 
 import java.util.List;
@@ -39,24 +40,24 @@ public class IrregularGroupFormatter extends NumericGroupFormatter {
     }
 
     @Override
-    public String format(FastStringBuffer value) {
-        UnicodeString in = UnicodeString.makeUnicodeString(value);
+    public String format(String value) {
+        StringItem in = new StringItem(value);
         int l, m = 0;
-        for (l = 0; l < in.uLength(); l++) {
+        for (l = 0; l < in.length(); l++) {
             if (groupingPositions.contains(l)) {
                 m++;
             }
         }
-        int[] out = new int[in.uLength() + m];
+        int[] out = new int[in.length32() + m];
         int j = 0;
         int k = out.length - 1;
-        for (int i = in.uLength() - 1; i >= 0; i--) {
-            out[k--] = in.uCharAt(i);
-            if ((i > 0) && groupingPositions.contains(in.uLength() - i)) {
+        for (int i = in.length32() - 1; i >= 0; i--) {
+            out[k--] = in.getContent().codePointAt(i);
+            if ((i > 0) && groupingPositions.contains(in.length32() - i)) {
                 out[k--] = separators.get(j++);
             }
         }
-        return UnicodeString.makeUnicodeString(out).toString();
+        return StringTool.fromCodePoints(out, out.length).toString();
     }
 
     /**
@@ -71,8 +72,8 @@ public class IrregularGroupFormatter extends NumericGroupFormatter {
             return null;
         } else {
             int sep = separators.get(separators.size() - 1);
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C16);
-            fsb.appendWideChar(sep);
+            StringBuilder fsb = new StringBuilder(16);
+            fsb.appendCodePoint(sep);
             return fsb.toString();
         }
     }

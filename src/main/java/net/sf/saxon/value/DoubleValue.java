@@ -10,8 +10,8 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationException;
@@ -30,7 +30,7 @@ public final class DoubleValue extends NumericValue {
     public static final DoubleValue ONE = new DoubleValue(1.0);
     public static final DoubleValue NaN = new DoubleValue(Double.NaN);
 
-    private double value;
+    private final double value;
 
     /**
      * Constructor supplying a double
@@ -194,7 +194,7 @@ public final class DoubleValue extends NumericValue {
      * @return the string value
      */
     @Override
-    public CharSequence getPrimitiveStringValue() {
+    public UnicodeString getPrimitiveStringValue() {
         return doubleToString(value);
     }
 
@@ -202,12 +202,12 @@ public final class DoubleValue extends NumericValue {
      * Get the canonical lexical representation as defined in XML Schema. This is not always the same
      * as the result of casting to a string according to the XPath rules. For xs:double, the canonical
      * representation always uses exponential notation.
+     * @return
      */
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C16);
-        return FloatingPointConverter.appendDouble(fsb, value, true);
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        return FloatingPointConverter.convertDouble(value, true);
     }
 
     /**
@@ -217,8 +217,8 @@ public final class DoubleValue extends NumericValue {
      * @return the value converted to a string, according to the XPath casting rules.
      */
 
-    public static CharSequence doubleToString(double value) {
-        return FloatingPointConverter.appendDouble(new FastStringBuffer(FastStringBuffer.C16), value, false);
+    public static UnicodeString doubleToString(double value) {
+        return FloatingPointConverter.convertDouble(value, false);
     }
 
 
@@ -440,7 +440,7 @@ public final class DoubleValue extends NumericValue {
         // Convert negative to positive zero because Double.compareTo() does the wrong thing
         // Note that for NaN, we return NaN, and rely on the user of the Comparable to use it in a way
         // that ensures NaN != NaN.
-        return value == 0.0 ? 0.0 : value;
+        return value;
     }
 
     /**

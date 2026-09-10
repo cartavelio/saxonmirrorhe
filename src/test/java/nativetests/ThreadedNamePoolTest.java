@@ -50,6 +50,7 @@ public class ThreadedNamePoolTest {
             for (int i = 0; i < threads; i++) {
                 executor.execute(new Runnable() {
 
+                    @Override
                     public void run() {
                         try {
                             int runs = 1000000 / threads;

@@ -12,15 +12,13 @@ import net.sf.saxon.event.WherePopulatedOutputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.HexBinaryValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * A compiled xsl:where-populated instruction (formerly xsl:conditional-content).
@@ -138,10 +136,10 @@ public class WherePopulated extends UnaryExpression implements ItemMappingFuncti
                 case Type.ELEMENT:
                     return !((NodeInfo) item).hasChildNodes();
                 default:
-                    return item.getStringValueCS().length() == 0;
+                    return item.getUnicodeStringValue().length() == 0;
             }
-        } else if (item instanceof StringValue || item instanceof HexBinaryValue || item instanceof Base64BinaryValue) {
-            return item.getStringValueCS().length() == 0;
+        } else if (item instanceof StringItem || item instanceof HexBinaryValue || item instanceof Base64BinaryValue) {
+            return item.getUnicodeStringValue().length() == 0;
         } else if (item instanceof MapItem) {
             return ((MapItem)item).isEmpty();
         } else {

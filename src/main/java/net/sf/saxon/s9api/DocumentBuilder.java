@@ -15,6 +15,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.XQueryExpression;
+import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -40,7 +41,7 @@ import java.net.URI;
 
 public class DocumentBuilder {
 
-    private Configuration config;
+    private final Configuration config;
     private SchemaValidator schemaValidator;
     private boolean dtdValidation;
     private boolean lineNumbering;
@@ -307,6 +308,16 @@ public class DocumentBuilder {
         if (source == null) {
             throw new NullPointerException("source");
         }
+        ParseOptions options = getParseOptions(source);
+        try {
+            TreeInfo doc = config.buildDocumentTree(source, options);
+            return new XdmNode(doc.getRootNode());
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+    }
+
+    private ParseOptions getParseOptions(Source source) throws SaxonApiException {
         if (!(whitespacePolicy == WhitespaceStrippingPolicy.UNSPECIFIED
                       || whitespacePolicy == WhitespaceStrippingPolicy.IGNORABLE
                       || whitespacePolicy.ordinal() == Whitespace.XSLT)) {
@@ -353,12 +364,7 @@ public class DocumentBuilder {
                 options.addFilter(ff);
             }
         }
-        try {
-            TreeInfo doc = config.buildDocumentTree(source, options);
-            return new XdmNode(doc.getRootNode());
-        } catch (XPathException e) {
-            throw new SaxonApiException(e);
-        }
+        return options;
     }
 
     /**
@@ -422,7 +428,7 @@ public class DocumentBuilder {
     private static class BuildingContentHandlerImpl extends ReceivingContentHandler
             implements BuildingContentHandler {
 
-        private Builder builder;
+        private final Builder builder;
 
         public BuildingContentHandlerImpl(Receiver r, Builder b) {
             setReceiver(r);
@@ -502,6 +508,36 @@ public class DocumentBuilder {
                 throw new IllegalArgumentException(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Parse a source document, sending it to a supplied {@link Destination}
+     * <p>The process is streamed; no tree is constructed in memory.</p>
+     * @param source The source document to be parsed
+     * @param destination The destination to which the document is to be sent
+     * @throws SaxonApiException if parsing fails, or if the destination reports an error
+     */
+
+    public void parse(Source source, Destination destination) throws SaxonApiException {
+        try {
+            ParseOptions options = getParseOptions(source);
+            PipelineConfiguration pipe = config.makePipelineConfiguration();
+            Sender.send(source, destination.getReceiver(pipe, new SerializationProperties()), options);
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+    }
+
+    /**
+     * Parse a source document from a File, sending it to a supplied {@link Destination}
+     * <p>The process is streamed; no tree is constructed in memory.</p>
+     * @param file      The file containing the XML source document to be parsed
+     * @param destination The destination to which the document is to be sent
+     * @throws SaxonApiException if parsing fails, or if the destination reports an error
+     */
+
+    public void parse(File file, Destination destination) throws SaxonApiException {
+        parse(new StreamSource(file), destination);
     }
 
 

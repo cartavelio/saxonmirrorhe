@@ -14,11 +14,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.*;
 import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.CharSequenceConsumer;
-import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,8 +41,8 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public ZeroOrOne<StringValue> call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue hrefVal = (StringValue) arguments[0].head();
+    public ZeroOrOne<StringItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        StringItem hrefVal = (StringItem) arguments[0].head();
         String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
         try {
             return new ZeroOrOne<>(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
@@ -59,16 +58,16 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
     public void process(Outputter destination, XPathContext context, Sequence[] arguments) throws XPathException {
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         if (stable) {
-            ZeroOrOne<StringValue> result = call(context, arguments);
-            StringValue value = result.head();
+            ZeroOrOne<StringItem> result = call(context, arguments);
+            StringItem value = result.head();
             if (value != null) {
                 destination.append(value, Loc.NONE, ReceiverOption.NONE);
             }
         } else {
-            StringValue href = (StringValue) arguments[0].head();
+            StringItem href = (StringItem) arguments[0].head();
             URI absoluteURI = getAbsoluteURI(href.getStringValue(), getStaticBaseUriString(), context);
             String encoding = getArity() == 2 ? arguments[1].head().getStringValue() : null;
-            CharSequenceConsumer consumer = destination.getStringReceiver(false);
+            UniStringConsumer consumer = destination.getStringReceiver(false);
             consumer.open();
             try {
                 readFile(absoluteURI, encoding, consumer, context);
@@ -82,7 +81,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
         }
     }
 
-    private static final String errorValue = "\u0000";
+    private static final int errorValue = 0;
 
     /**
      * Evaluation of the unparsed-text function
@@ -95,9 +94,9 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
      * @throws XPathException if evaluation fails
      */
 
-    public static StringValue evalUnparsedText(StringValue hrefVal, String base, String encoding, XPathContext context) throws XPathException {
-        CharSequence content;
-        StringValue result;
+    public static StringItem evalUnparsedText(StringItem hrefVal, String base, String encoding, XPathContext context) throws XPathException {
+        UnicodeString content;
+        StringItem result;
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         try {
             if (hrefVal == null) {
@@ -109,40 +108,40 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                 final Controller controller = context.getController();
                 //noinspection SynchronizationOnLocalVariableOrMethodParameter
                 synchronized(controller) {
-                    Map<URI, String> cache = (Map<URI, String>)controller.getUserData("unparsed-text-cache", "");
+                    Map<URI, UnicodeString> cache = (Map<URI, UnicodeString>)controller.getUserData("unparsed-text-cache", "");
                     if (cache != null) {
-                        String existing = cache.get(absoluteURI);
+                        UnicodeString existing = cache.get(absoluteURI);
                         if (existing != null) {
-                            if (existing.startsWith(errorValue)) {
-                                throw new XPathException(existing.substring(1), "FOUT1170");
+                            if (existing.codePointAt(0) == errorValue) {
+                                throw new XPathException(existing.substring(1).toString(), "FOUT1170");
                             }
-                            return new StringValue(existing);
+                            return new StringItem(existing);
                         }
                     }
                     XPathException error = null;
                     try {
-                        StringValue.Builder consumer = new StringValue.Builder();
+                        UnicodeBuilder consumer = new UnicodeBuilder();
                         readFile(absoluteURI, encoding, consumer, context);
-                        content = consumer.getStringValue().getStringValueCS();
+                        content = consumer.toUnicodeString();
                     } catch (XPathException e) {
                         error = e;
-                        content = errorValue + e.getMessage();
+                        content = StringView.tidy(errorValue + e.getMessage());
                     }
                     if (cache == null) {
                         cache = new HashMap<>();
                         controller.setUserData("unparsed-text-cache", "", cache);
-                        cache.put(absoluteURI, content.toString());
+                        cache.put(absoluteURI, content);
                     }
                     if (error != null) {
                         throw error;
                     }
                 }
             } else {
-                StringValue.Builder consumer = new StringValue.Builder();
+                UnicodeBuilder consumer = new UnicodeBuilder();
                 readFile(absoluteURI, encoding, consumer, context);
-                return consumer.getStringValue();
+                return new StringItem(consumer.toUnicodeString());
             }
-            result = new StringValue(content);
+            result = new StringItem(content);
         } catch (XPathException err) {
             err.maybeSetErrorCode("FOUT1170");
             throw err;
@@ -153,8 +152,8 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
     // diagnostic method to output the octets of a file
 
     public static void main(String[] args) throws Exception {
-        FastStringBuffer sb1 = new FastStringBuffer(FastStringBuffer.C256);
-        FastStringBuffer sb2 = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder sb1 = new StringBuilder(256);
+        StringBuilder sb2 = new StringBuilder(256);
         File file = new File(args[0]);
         InputStream is = new FileInputStream(file);
         while (true) {
@@ -169,8 +168,8 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
             if (sb1.length() > 80) {
                 System.out.println(sb1);
                 System.out.println(sb2);
-                sb1 = new FastStringBuffer(FastStringBuffer.C256);
-                sb2 = new FastStringBuffer(FastStringBuffer.C256);
+                sb1 = new StringBuilder(256);
+                sb2 = new StringBuilder(256);
             }
         }
         is.close();

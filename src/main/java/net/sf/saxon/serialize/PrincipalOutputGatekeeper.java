@@ -13,6 +13,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.Destination;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.type.SchemaType;
@@ -36,7 +37,7 @@ import net.sf.saxon.type.SchemaType;
 
 public class PrincipalOutputGatekeeper extends ProxyReceiver {
 
-    private XsltController controller;
+    private final XsltController controller;
     private boolean usedAsPrimaryResult = false;
     private boolean usedAsSecondaryResult = false;
     private boolean open = false;
@@ -79,19 +80,19 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
     }
 
     @Override
-    public synchronized void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public synchronized void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         useAsPrimary();
         nextReceiver.characters(chars, locationId, properties);
     }
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         useAsPrimary();
         nextReceiver.processingInstruction(target, data, locationId, properties);
     }
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         useAsPrimary();
         nextReceiver.comment(chars, locationId, properties);
     }

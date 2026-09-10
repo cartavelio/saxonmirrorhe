@@ -17,9 +17,9 @@ import java.util.Iterator;
  */
 public class ImmList2<E> extends ImmList<E> {
 
-    private ImmList<E> left;
-    private ImmList<E> right;
-    private int size;
+    private final ImmList<E> left;
+    private final ImmList<E> right;
+    private final int size;
 
     protected ImmList2(ImmList<E> left, ImmList<E> right) {
         this.left = left;

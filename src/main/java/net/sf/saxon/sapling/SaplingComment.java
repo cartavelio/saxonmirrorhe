@@ -11,6 +11,7 @@ package net.sf.saxon.sapling;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 
@@ -22,7 +23,7 @@ import java.util.Objects;
 
 public class SaplingComment extends SaplingNode {
 
-    private String value;
+    private final String value;
 
     /**
      * Construct a sapling comment node with a given string value
@@ -52,7 +53,7 @@ public class SaplingComment extends SaplingNode {
 
     @Override
     protected void sendTo(Receiver receiver) throws XPathException {
-        receiver.comment(value, Loc.NONE, ReceiverOption.NONE);
+        receiver.comment(StringView.of(value), Loc.NONE, ReceiverOption.NONE);
     }
 }
 

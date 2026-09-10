@@ -22,8 +22,8 @@ import net.sf.saxon.serialize.SerializationProperties;
 
 public class TeeDestination extends AbstractDestination {
 
-    private Destination dest0;
-    private Destination dest1;
+    private final Destination dest0;
+    private final Destination dest1;
 
     /**
      * Create a TeeDestination: a destination which copies everything that is sent to it to two

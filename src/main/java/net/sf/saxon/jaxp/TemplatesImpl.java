@@ -19,7 +19,7 @@ import java.util.Properties;
  */
 public class TemplatesImpl implements Templates {
 
-    private XsltExecutable executable;
+    private final XsltExecutable executable;
     private boolean forceStreaming;
 
     public TemplatesImpl(XsltExecutable executable) {

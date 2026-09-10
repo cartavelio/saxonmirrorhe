@@ -13,9 +13,11 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.One;
 import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 /**
@@ -31,15 +33,14 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        return normalizeSpace((StringValue) arg);
+        return new StringItem(normalizeSpace(arg.getUnicodeStringValue()));
     }
 
-    public static StringValue normalizeSpace(StringValue sv) {
+    public static UnicodeString normalizeSpace(UnicodeString sv) {
         if (sv == null) {
-            return StringValue.EMPTY_STRING;
+            return EmptyUniString.getInstance();
         }
-        return StringValue.makeStringValue(
-                Whitespace.collapseWhitespace(sv.getStringValueCS()));
+        return Whitespace.collapseWhitespace(sv);
     }
 
     @Override
@@ -51,8 +52,7 @@ public class NormalizeSpace_1 extends ScalarSystemFunction {
                 if (sv == null) {
                     return false;
                 }
-                CharSequence cs = sv.getStringValueCS();
-                return !Whitespace.isWhite(cs);
+                return !Whitespace.isAllWhite(sv.getUnicodeStringValue());
             }
         };
     }

@@ -211,8 +211,8 @@ public class XsltExecutable {
 
     public class ParameterDetails {
 
-        private SequenceType type;
-        private boolean isRequired;
+        private final SequenceType type;
+        private final boolean isRequired;
 
         protected ParameterDetails(SequenceType type, boolean isRequired) {
             this.type = type;

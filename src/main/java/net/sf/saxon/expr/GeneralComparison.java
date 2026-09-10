@@ -22,7 +22,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -478,7 +478,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             // Now a fixed range...
 
             if (getLhsExpression() instanceof Literal) {
-                GroundedValue value0 = ((Literal) getLhsExpression()).getValue();
+                GroundedValue value0 = ((Literal) getLhsExpression()).getGroundedValue();
                 if (value0 instanceof IntegerRange) {
                     long min = ((IntegerRange) value0).getStart();
                     long max = ((IntegerRange) value0).getEnd();
@@ -491,7 +491,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             }
 
             if (getRhsExpression() instanceof Literal) {
-                GroundedValue value1 = ((Literal) getRhsExpression()).getValue();
+                GroundedValue value1 = ((Literal) getRhsExpression()).getGroundedValue();
                 if (value1 instanceof IntegerRange) {
                     long min = ((IntegerRange) value1).getStart();
                     long max = ((IntegerRange) value1).getEnd();
@@ -825,36 +825,36 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
                                   XPathContext context,
                                   NamespaceResolver nsResolver) throws XPathException {
 
-        boolean u0 = a0 instanceof UntypedAtomicValue;
-        boolean u1 = a1 instanceof UntypedAtomicValue;
+        boolean u0 = a0.isUntypedAtomic();
+        boolean u1 = a1.isUntypedAtomic();
         if (u0 != u1) {
             // one value untyped, the other not
             final ConversionRules rules = context.getConfiguration().getConversionRules();
             if (u0) {
                 // a0 is untyped atomic
                 if (a1 instanceof NumericValue) {
-                    return UntypedNumericComparer.quickCompare((UntypedAtomicValue) a0, (NumericValue) a1, operator, rules);
-                } else if (a1 instanceof StringValue) {
+                    return UntypedNumericComparer.quickCompare((StringItem) a0, (NumericValue) a1, operator, rules);
+                } else if (a1 instanceof StringItem) {
                     // no conversion needed
                 } else {
                     StringConverter sc = a1.getItemType().getPrimitiveItemType().getStringConverter(rules);
                     if (a1 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
                     }
-                    a0 = sc.convertString(a0.getStringValueCS()).asAtomic();
+                    a0 = sc.convertString(a0.getUnicodeStringValue()).asAtomic();
                 }
             } else {
                 // a1 is untyped atomic
                 if (a0 instanceof NumericValue) {
-                    return UntypedNumericComparer.quickCompare((UntypedAtomicValue) a1, (NumericValue) a0, Token.inverse(operator), rules);
-                } else if (a0 instanceof StringValue) {
+                    return UntypedNumericComparer.quickCompare((StringItem) a1, (NumericValue) a0, Token.inverse(operator), rules);
+                } else if (a0 instanceof StringItem) {
                     // no conversion needed
                 } else {
                     StringConverter sc = a0.getItemType().getPrimitiveItemType().getStringConverter(rules);
                     if (a0 instanceof QualifiedNameValue) {
                         sc = (StringConverter) sc.setNamespaceResolver(nsResolver);
                     }
-                    a1 = sc.convertString(a1.getStringValueCS()).asAtomic();
+                    a1 = sc.convertString(a1.getUnicodeStringValue()).asAtomic();
                 }
             }
             checkTypes = false; // No further checking needed if conversion succeeded

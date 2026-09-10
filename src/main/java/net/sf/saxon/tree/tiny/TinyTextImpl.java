@@ -11,6 +11,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.UntypedAtomicValue;
@@ -36,29 +37,6 @@ public final class TinyTextImpl extends TinyNodeImpl {
     }
 
     /**
-     * Return the character value of the node.
-     *
-     * @return the string value of the node
-     */
-
-    @Override
-    public String getStringValue() {
-        return getStringValueCS().toString();
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
-        int start = tree.alpha[nodeNr];
-        int len = tree.beta[nodeNr];
-        return tree.charBuffer.subSequence(start, start + len);
-    }
-
-    /**
      * Static method to get the string value of a text node without first constructing the node object
      *
      * @param tree   the tree
@@ -66,10 +44,23 @@ public final class TinyTextImpl extends TinyNodeImpl {
      * @return the string value of the text node
      */
 
-    public static CharSequence getStringValue(TinyTree tree, int nodeNr) {
-        int start = tree.alpha[nodeNr];
-        int len = tree.beta[nodeNr];
-        return tree.charBuffer.subSequence(start, start + len);
+    public static UnicodeString getStringValue(TinyTree tree, int nodeNr) {
+        return tree.textChunks[tree.alpha[nodeNr]];
+//        int start = tree.alpha[nodeNr];
+//        int len = tree.beta[nodeNr];
+//        //System.err.println("TinyTextImpl.getXdmStringValue node=" + nodeNr + " s=" + start + " len=" + len);
+//        return tree.textBuffer.substring(start, start + len);
+    }
+
+    /**
+     * Return the character value of the node.
+     *
+     * @return the string value of the node
+     */
+
+    @Override
+    public UnicodeString getUnicodeStringValue() {
+        return getStringValue(tree, nodeNr);
     }
 
     /**
@@ -89,12 +80,11 @@ public final class TinyTextImpl extends TinyNodeImpl {
 
     @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.characters(getStringValueCS(), locationId, ReceiverOption.NONE);
+        out.characters(getUnicodeStringValue(), locationId, ReceiverOption.NONE);
     }
 
     /**
-     * Get the typed value.  However, this method is often more convenient and may be
-     * more efficient, especially in the common case where the value is expected to be a singleton.
+     * Get the typed value.
      *
      * @return the typed value. It will be a Value representing a sequence whose items are atomic
      *         values.
@@ -103,8 +93,8 @@ public final class TinyTextImpl extends TinyNodeImpl {
 
     /*@NotNull*/
     @Override
-    public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getStringValueCS());
+    public AtomicSequence atomize() {
+        return new UntypedAtomicValue(getUnicodeStringValue());
     }
 }
 

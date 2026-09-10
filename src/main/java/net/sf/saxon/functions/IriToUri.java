@@ -10,10 +10,12 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.ZeroOrOne;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
+import net.sf.saxon.z.IntIterator;
 
 import java.util.Arrays;
 
@@ -41,8 +43,7 @@ public class IriToUri extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
-        final CharSequence s = arg.getStringValueCS();
-        return StringValue.makeStringValue(iriToUri(s));
+        return new StringItem(iriToUri(arg.getUnicodeStringValue()));
     }
 
     @Override
@@ -58,28 +59,29 @@ public class IriToUri extends ScalarSystemFunction {
      * @return the %HH-encoded string
      */
 
-    public static CharSequence iriToUri(CharSequence s) {
+    public static UnicodeString iriToUri(UnicodeString s) {
         // NOTE: implements a late spec change which says that characters that are illegal in an IRI,
         // for example "\", must be %-encoded.
-        if (allAllowedAscii(s)) {
+        if (allAllowedAscii(s.codePoints())) {
             // it's worth doing a prescan to avoid the cost of copying in the common all-ASCII case
             return s;
         }
-        FastStringBuffer sb = new FastStringBuffer(s.length() + 20);
-        for (int i = 0; i < s.length(); i++) {
-            final char c = s.charAt(i);
+        UnicodeBuilder sb = new UnicodeBuilder();
+        IntIterator iter = s.codePoints();
+        while (iter.hasNext()) {
+            final int c = iter.next();
             if (c >= 0x7f || !allowedASCII[(int) c]) {
-                EncodeForUri.escapeChar(c, (i + 1) < s.length() ? s.charAt(i + 1) : ' ', sb);
+                EncodeForUri.escapeChar(c, sb);
             } else {
-                sb.cat(c);
+                sb.append(c);
             }
         }
-        return sb;
+        return sb.toUnicodeString();
     }
 
-    private static boolean allAllowedAscii(CharSequence s) {
-        for (int i = 0; i < s.length(); i++) {
-            final char c = s.charAt(i);
+    private static boolean allAllowedAscii(IntIterator codePoints) {
+        while (codePoints.hasNext()) {
+            int c = codePoints.next();
             if (c >= 0x7f || !allowedASCII[(int) c]) {
                 return false;
             }
@@ -87,8 +89,6 @@ public class IriToUri extends ScalarSystemFunction {
         return true;
     }
 
-
-    private static final String hex = "0123456789ABCDEF";
 
 }
 

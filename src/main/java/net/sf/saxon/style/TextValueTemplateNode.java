@@ -10,6 +10,7 @@ package net.sf.saxon.style;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.linked.TextImpl;
 
@@ -23,7 +24,7 @@ public class TextValueTemplateNode extends TextImpl {
     private Expression contentExp;
     private TextValueTemplateContext staticContext;
 
-    public TextValueTemplateNode(String value) {
+    public TextValueTemplateNode(UnicodeString value) {
         super(value);
     }
 
@@ -44,7 +45,7 @@ public class TextValueTemplateNode extends TextImpl {
         if (parent instanceof XSLText && isYes(parent.getAttributeValue("","disable-output-escaping"))) {
             disable = true;
         }
-        contentExp = AttributeValueTemplate.make(getStringValue(), getStaticContext());
+        contentExp = AttributeValueTemplate.make(getUnicodeStringValue().toString(), getStaticContext());
         contentExp = new ValueOf(contentExp, disable, false);
         contentExp.setRetainedStaticContext(((StyleElement)getParent()).makeRetainedStaticContext());
         contentExp = ((StyleElement)getParent()).typeCheck("tvt", contentExp);

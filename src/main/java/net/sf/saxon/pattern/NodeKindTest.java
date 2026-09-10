@@ -34,8 +34,8 @@ public class NodeKindTest extends NodeTest {
     public static final NodeKindTest NAMESPACE = new NodeKindTest(Type.NAMESPACE);
 
 
-    private int kind;
-    private UType uType;
+    private final int kind;
+    private final UType uType;
 
     private NodeKindTest(int nodeKind) {
         kind = nodeKind;

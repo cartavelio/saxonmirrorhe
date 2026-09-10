@@ -24,7 +24,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Handler for xsl:map instructions in an XSLT 3.0 stylesheet. <br>
@@ -107,9 +107,9 @@ public class XSLMap extends StyleElement {
                     onDuplicates);
         } else {
             HashTrieMap options = new HashTrieMap();
-            options.initialPut(new StringValue("duplicates"), new StringValue("reject"));
+            options.initialPut(StringItem.bmp("duplicates"), StringItem.bmp("reject"));
             options.initialPut(new QNameValue("", NamespaceConstant.SAXON, "duplicates-error-code"),
-                               new StringValue("XTDE3365"));
+                               StringItem.bmp("XTDE3365"));
             optionsExp = Literal.makeLiteral(options, select);
         }
 

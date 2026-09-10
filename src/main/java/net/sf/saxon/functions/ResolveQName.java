@@ -35,7 +35,7 @@ public class ResolveQName extends SystemFunction {
         AtomicValue lex = (AtomicValue) arguments[0].head();
         return new ZeroOrOne(
                 lex == null ? null :
-                        resolveQName(lex.getStringValueCS(), (NodeInfo) arguments[1].head()));
+                        resolveQName(lex.getStringValue(), (NodeInfo) arguments[1].head()));
     }
 
     /**
@@ -49,7 +49,7 @@ public class ResolveQName extends SystemFunction {
      */
 
     /*@Nullable*/
-    public static QNameValue resolveQName(CharSequence lexicalQName, NodeInfo element) throws XPathException {
+    public static QNameValue resolveQName(String lexicalQName, NodeInfo element) throws XPathException {
         NamespaceResolver resolver = element.getAllNamespaces();
         StructuredQName qName = StructuredQName.fromLexicalQName(lexicalQName, true, false, resolver);
         return new QNameValue(qName, BuiltInAtomicType.QNAME);

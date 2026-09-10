@@ -6,6 +6,7 @@ import net.sf.saxon.om.AllElementsSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class MemoryTest {
 
     @Test
+    @Tag("performance")
     public void testTinyTree() {
         try {
             System.gc();
@@ -39,6 +41,7 @@ public class MemoryTest {
     }
 
     @Test
+    @Tag("performance")
     public void testLinkedTree() {
         try {
             System.gc();
@@ -59,6 +62,7 @@ public class MemoryTest {
     }
 
     @Test
+    @Tag("performance")
     public void testBothTrees() {
         testTinyTree();
         testLinkedTree();
@@ -76,13 +80,13 @@ public class MemoryTest {
     private static void gc() {
         try {
             System.gc();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
             System.runFinalization();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
             System.gc();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
             System.runFinalization();
-            Thread.currentThread().sleep(100);
+            Thread.sleep(100);
         } catch (Exception e) {
             e.printStackTrace();
         }

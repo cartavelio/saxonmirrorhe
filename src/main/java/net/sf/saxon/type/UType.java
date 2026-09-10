@@ -11,7 +11,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.tree.iter.UnfailingIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.ObjectValue;
 
@@ -78,7 +78,7 @@ public class UType {
     public static final UType ANY = ANY_NODE.union(ANY_ATOMIC).union(FUNCTION).union(EXTENSION);
 
     
-    private int bits;
+    private final int bits;
     
     public UType(int bits) {
         this.bits = bits;
@@ -263,7 +263,7 @@ public class UType {
         if (components.isEmpty()) {
             return "U{}";
         }
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder sb = new StringBuilder(256);
         Iterator<PrimitiveUType> iter = components.iterator();
         boolean started = false;
         while (iter.hasNext()) {

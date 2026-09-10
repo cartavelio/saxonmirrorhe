@@ -28,7 +28,7 @@ import net.sf.saxon.value.SequenceType;
  */
 public class DocumentSorter extends UnaryExpression {
 
-    private ItemOrderComparer comparer;
+    private final ItemOrderComparer comparer;
 
     public DocumentSorter(Expression base) {
         super(base);

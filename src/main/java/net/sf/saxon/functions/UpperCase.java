@@ -11,7 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.One;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -22,7 +22,7 @@ public class UpperCase extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) {
-        return StringValue.makeStringValue(arg.getStringValue().toUpperCase());
+        return StringItem.makeStringValue(arg.getStringValue().toUpperCase());
     }
 
     @Override

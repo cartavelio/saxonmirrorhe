@@ -13,8 +13,12 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
 import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
+import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
 
@@ -26,7 +30,7 @@ import net.sf.saxon.value.Whitespace;
 
 public class UnicodeNormalizer extends ProxyReceiver {
 
-    private Normalizer normalizer;
+    private final Normalizer normalizer;
 
     public UnicodeNormalizer(String form, Receiver next) throws XPathException {
         super(next);
@@ -77,7 +81,7 @@ public class UnicodeNormalizer extends ProxyReceiver {
     @Override
     public void startElement(NodeName elemName, SchemaType type, AttributeMap attributes, NamespaceMap namespaces, Location location, int properties) throws XPathException {
         AttributeMap am2 = attributes.apply(attInfo -> {
-            String newValue = normalize(attInfo.getValue(),
+            String newValue = normalize(StringView.of(attInfo.getValue()),
                                         ReceiverOption.contains(attInfo.getProperties(), ReceiverOption.USE_NULL_MARKERS)).toString();
 
             return new AttributeInfo(
@@ -95,8 +99,8 @@ public class UnicodeNormalizer extends ProxyReceiver {
      */
 
     @Override
-    public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (Whitespace.isWhite(chars)) {
+    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (Whitespace.isAllWhite(chars)) {
             nextReceiver.characters(chars, locationId, properties);
         } else {
             nextReceiver.characters(normalize(chars, ReceiverOption.contains(properties, ReceiverOption.USE_NULL_MARKERS)),
@@ -104,26 +108,30 @@ public class UnicodeNormalizer extends ProxyReceiver {
         }
     }
 
-    public CharSequence normalize(CharSequence in, boolean containsNullMarkers) {
+    public UnicodeString normalize(CodePoints in, boolean containsNullMarkers) {
+        if (in instanceof CompressedWhitespace) {
+            return in.tidy();
+        }
+        UnicodeString t = in.tidy();
         if (containsNullMarkers) {
-            FastStringBuffer out = new FastStringBuffer(in.length());
+            StringBuilder out = new StringBuilder(t.length32());
             String s = in.toString();
             int start = 0;
             int nextNull = s.indexOf((char)0);
             while (nextNull >= 0) {
-                out.cat(normalizer.normalize(s.substring(start, nextNull)));
-                out.cat((char) 0);
+                out.append(normalizer.normalize(s.substring(start, nextNull)));
+                out.append((char) 0);
                 start = nextNull + 1;
                 nextNull = s.indexOf((char) 0, start);
                 out.append(s.substring(start, nextNull));
-                out.cat((char) 0);
+                out.append((char) 0);
                 start = nextNull + 1;
                 nextNull = s.indexOf((char) 0, start);
             }
-            out.cat(normalizer.normalize(s.substring(start)));
-            return out.condense();
+            out.append(normalizer.normalize(s.substring(start)));
+            return StringView.tidy(out.toString());
         } else {
-            return normalizer.normalize(in);
+            return StringView.tidy(normalizer.normalize(in.toString()));
         }
     }
 

@@ -8,8 +8,10 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.CopyOptions;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -89,7 +91,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
     /*@NotNull*/
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return new UntypedAtomicValue(getStringValueCS());
+        return new UntypedAtomicValue(getUnicodeStringValue());
     }
 
     /**

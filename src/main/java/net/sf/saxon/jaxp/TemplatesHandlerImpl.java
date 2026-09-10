@@ -41,9 +41,9 @@ import javax.xml.transform.sax.TemplatesHandler;
 
 public class TemplatesHandlerImpl extends ReceivingContentHandler implements TemplatesHandler {
 
-    private Processor processor;
-    private LinkedTreeBuilder builder;
-    private StyleNodeFactory nodeFactory;
+    private final Processor processor;
+    private final LinkedTreeBuilder builder;
+    private final StyleNodeFactory nodeFactory;
     private Templates templates;
     private String systemId;
 

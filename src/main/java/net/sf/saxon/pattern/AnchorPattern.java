@@ -32,7 +32,7 @@ import net.sf.saxon.type.UType;
  */
 public class AnchorPattern extends Pattern {
 
-    private static AnchorPattern THE_INSTANCE = new AnchorPattern();
+    private static final AnchorPattern THE_INSTANCE = new AnchorPattern();
 
     public static AnchorPattern getInstance() {
         return THE_INSTANCE;

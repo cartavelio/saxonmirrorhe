@@ -20,9 +20,9 @@ import net.sf.saxon.trans.XPathException;
 
 public class AccumulatorRule implements RuleTarget {
 
-    private Expression newValueExpression;
-    private SlotManager stackFrameMap;
-    private boolean postDescent;
+    private final Expression newValueExpression;
+    private final SlotManager stackFrameMap;
+    private final boolean postDescent;
     private boolean capturing;
 
     /**

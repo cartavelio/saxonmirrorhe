@@ -25,7 +25,7 @@ import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,16 +44,16 @@ public class ForEachGroup extends Instruction
     public static final int GROUP_STARTING = 2;
     public static final int GROUP_ENDING = 3;
 
-    private byte algorithm;
+    private final byte algorithm;
     private int keyItemType;
     private StringCollator collator = null;             // collation used for the grouping comparisons
     private transient AtomicComparer[] sortComparators = null;    // comparators used for sorting the groups
     private boolean composite = false;
     private boolean isInFork = false;
 
-    private Operand selectOp;
-    private Operand actionOp;
-    private Operand keyOp;
+    private final Operand selectOp;
+    private final Operand actionOp;
+    private final Operand keyOp;
     private Operand collationOp;
     private Operand sortKeysOp;
 
@@ -366,7 +366,7 @@ public class ForEachGroup extends Instruction
             collationOp.optimize(visitor, contextItemType);
         }
         if (collator == null && (getCollationNameExpression() instanceof StringLiteral)) {
-            String collation = ((StringLiteral) getCollationNameExpression()).getStringValue();
+            String collation = ((StringLiteral) getCollationNameExpression()).stringify();
             URI collationURI;
             try {
                 collationURI = new URI(collation);
@@ -638,7 +638,7 @@ public class ForEachGroup extends Instruction
 
     private StringCollator getCollator(XPathContext context) throws XPathException {
         if (getCollationNameExpression() != null) {
-            StringValue collationValue = (StringValue) getCollationNameExpression().evaluateItem(context);
+            StringItem collationValue = (StringItem) getCollationNameExpression().evaluateItem(context);
             assert collationValue != null;
             String cname = collationValue.getStringValue();
             try {

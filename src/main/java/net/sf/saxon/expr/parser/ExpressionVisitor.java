@@ -23,7 +23,7 @@ public class ExpressionVisitor  {
     private StaticContext staticContext;
     private boolean optimizeForStreaming = false;
     private boolean optimizeForPatternMatching = false;
-    private Configuration config;
+    private final Configuration config;
     private Optimizer optimizer;
     private int depth = 0;
 

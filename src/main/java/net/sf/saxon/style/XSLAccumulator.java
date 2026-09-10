@@ -35,7 +35,7 @@ import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ import java.util.List;
 
 public class XSLAccumulator extends StyleElement implements StylesheetComponent {
 
-    private Accumulator accumulator = new Accumulator();
+    private final Accumulator accumulator = new Accumulator();
     private SlotManager slotManager;
 
     /**
@@ -156,7 +156,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
 
         if (accumulator.getInitialValueExpression() == null) {
             reportAbsence("initial-value");
-            StringLiteral zls = new StringLiteral(StringValue.EMPTY_STRING);
+            StringLiteral zls = new StringLiteral(StringItem.EMPTY_STRING);
             zls.setRetainedStaticContext(makeRetainedStaticContext());
             accumulator.setInitialValueExpression(zls);
         }
@@ -179,7 +179,7 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             init = config.getTypeChecker(false).staticTypeCheck(init, accumulator.getType(), role, visitor);
             init = init.optimize(visitor, config.getDefaultContextItemStaticInfo());
-            SlotManager stackFrameMap = slotManager;
+            SlotManager stackFrameMap = config.makeSlotManager();
             ExpressionTool.allocateSlots(init, 0, stackFrameMap);
             accumulator.setSlotManagerForInitialValueExpression(stackFrameMap);
             checkInitialStreamability(init);
@@ -198,12 +198,11 @@ public class XSLAccumulator extends StyleElement implements StylesheetComponent 
             RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:accumulator-rule/select", 0);
             newValueExp = config.getTypeChecker(false).staticTypeCheck(newValueExp, accumulator.getType(), role, visitor);
             newValueExp = newValueExp.optimize(visitor, getConfiguration().makeContextItemStaticInfo(pattern.getItemType(), false));
-            SlotManager stackFrameMap = getConfiguration().makeSlotManager();
-            stackFrameMap.allocateSlotNumber(new StructuredQName("", "", "value"));
-            ExpressionTool.allocateSlots(newValueExp, 1, stackFrameMap);
+            slotManager.allocateSlotNumber(new StructuredQName("", "", "value"));
+            ExpressionTool.allocateSlots(newValueExp, 1, slotManager);
             boolean isPreDescent = !rule.isPostDescent();
             SimpleMode mode = isPreDescent ? accumulator.getPreDescentRules() : accumulator.getPostDescentRules();
-            AccumulatorRule action = new AccumulatorRule(newValueExp, stackFrameMap, rule.isPostDescent());
+            AccumulatorRule action = new AccumulatorRule(newValueExp, slotManager, rule.isPostDescent());
             mode.addRule(pattern, action, decl.getModule(), decl.getModule().getPrecedence(), 1, position++, 0);
 
             checkRuleStreamability(rule, pattern, newValueExp);

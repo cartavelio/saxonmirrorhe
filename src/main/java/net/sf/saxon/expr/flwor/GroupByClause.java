@@ -21,7 +21,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -262,7 +262,7 @@ public class GroupByClause extends Clause {
     }
 
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         fsb.append("group by ... ");
         return fsb.toString();
     }
@@ -338,8 +338,8 @@ public class GroupByClause extends Clause {
         // Note: this is over-engineered. Each grouping value is required to be either a single atomic
         // value or an empty sequence.
 
-        private Sequence[] groupingValues;
-        private GenericAtomicComparer[] comparers;
+        private final Sequence[] groupingValues;
+        private final GenericAtomicComparer[] comparers;
 
         public TupleComparisonKey(Sequence[] groupingValues, GenericAtomicComparer[] comparers) {
             this.groupingValues = groupingValues;

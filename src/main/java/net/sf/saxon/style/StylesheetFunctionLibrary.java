@@ -30,8 +30,8 @@ import java.util.List;
 
 public class StylesheetFunctionLibrary implements FunctionLibrary {
 
-    private StylesheetPackage pack;
-    private boolean overrideExtensionFunction;
+    private final StylesheetPackage pack;
+    private final boolean overrideExtensionFunction;
 
     /**
      * Create a FunctionLibrary that provides access to stylesheet functions

@@ -21,13 +21,13 @@ import java.util.ArrayList;
  */
 public class OrderByClausePush extends TuplePush {
 
-    private TuplePush destination;
-    private OrderByClause orderByClause;
-    private TupleExpression tupleExpr;
-    private AtomicComparer[] comparers;
-    private XPathContext context;
+    private final TuplePush destination;
+    private final OrderByClause orderByClause;
+    private final TupleExpression tupleExpr;
+    private final AtomicComparer[] comparers;
+    private final XPathContext context;
     private int position = 0;
-    private ArrayList<ItemToBeSorted> tupleArray = new ArrayList<>(100);
+    private final ArrayList<ItemToBeSorted> tupleArray = new ArrayList<>(100);
 
     public OrderByClausePush(Outputter outputter, TuplePush destination, TupleExpression tupleExpr, OrderByClause orderBy, XPathContext context) {
         super(outputter);

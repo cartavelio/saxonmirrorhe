@@ -17,6 +17,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.XmlProcessingError;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
@@ -27,7 +28,7 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ import static net.sf.saxon.style.SourceBinding.BindingProperty.SELECT;
 
 public class SourceBinding {
 
-    private StyleElement sourceElement;
+    private final StyleElement sourceElement;
     private StructuredQName name;
     private Expression select = null;
     private SequenceType declaredType = null;
@@ -56,12 +57,12 @@ public class SourceBinding {
 
     public enum BindingProperty {
         PRIVATE, GLOBAL, PARAM, TUNNEL, REQUIRED, IMPLICITLY_REQUIRED, ASSIGNABLE,
-        SELECT, AS, DISALLOWS_CONTENT, STATIC, VISIBILITY, IMPLICITLY_DECLARED};
+        SELECT, AS, DISALLOWS_CONTENT, STATIC, VISIBILITY, IMPLICITLY_DECLARED}
 
-    private EnumSet<BindingProperty> properties = EnumSet.noneOf(BindingProperty.class);
+    private final EnumSet<BindingProperty> properties = EnumSet.noneOf(BindingProperty.class);
 
     // List of VariableReference objects that reference this XSLVariableDeclaration
-    private List<BindingReference> references = new ArrayList<>(10);
+    private final List<BindingReference> references = new ArrayList<>(10);
 
     public SourceBinding(StyleElement sourceElement) {
         this.sourceElement = sourceElement;
@@ -357,7 +358,7 @@ public class SourceBinding {
             NodeInfo first = kids.next();
             if (first == null) {
                 if (declaredType == null) {
-                    select = new StringLiteral(StringValue.EMPTY_STRING);
+                    select = new StringLiteral(StringItem.EMPTY_STRING);
                     select.setRetainedStaticContext(sourceElement.makeRetainedStaticContext());
                 } else {
                     if (sourceElement instanceof XSLLocalParam || sourceElement instanceof XSLGlobalParam) {
@@ -507,9 +508,9 @@ public class SourceBinding {
                     b = Literal.makeEmptySequence();
                 }
                 boolean textonly = UType.TEXT.subsumes(b.getItemType().getUType());
-                String constant = null;  // bug 3748
+                UnicodeString constant = null;  // bug 3748
                 if (textonly && b instanceof ValueOf && ((ValueOf) b).getSelect() instanceof StringLiteral) {
-                    constant = ((StringLiteral) ((ValueOf) b).getSelect()).getStringValue();
+                    constant = ((StringLiteral) ((ValueOf) b).getSelect()).getString();
                 }
                 DocumentInstr doc = new DocumentInstr(textonly, constant);
                 doc.setContentExpression(b);
@@ -650,7 +651,7 @@ public class SourceBinding {
                     // now, we do a quick check. See test bug64
                     Affinity relation = th.relationship(select.getItemType(), type.getPrimaryType());
                     if (relation == Affinity.SAME_TYPE || relation == Affinity.SUBSUMED_BY) {
-                        constantValue = ((Literal) select).getValue();
+                        constantValue = ((Literal) select).getGroundedValue();
                     }
                 }
             }

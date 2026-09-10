@@ -10,6 +10,7 @@ package net.sf.saxon.type;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.str.UnicodeString;
 
 /**
  * This interface represents a simple type, which may be a built-in simple type, or
@@ -73,7 +74,7 @@ public interface SimpleType extends SchemaType {
      * @throws ValidationException if the supplied value is not in the lexical space of the data type
      */
 
-    AtomicSequence getTypedValue(CharSequence value, /*@Nullable*/ NamespaceResolver resolver, ConversionRules rules)
+    AtomicSequence getTypedValue(UnicodeString value, /*@Nullable*/ NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException;
 
     /**
@@ -92,7 +93,7 @@ public interface SimpleType extends SchemaType {
 
     /*@Nullable*/
     ValidationFailure validateContent(
-            /*@NotNull*/ CharSequence value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules);
+            /*@NotNull*/ UnicodeString value, /*@Nullable*/ NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules);
 
     /**
      * Test whether this type is namespace sensitive, that is, if a namespace context is needed
@@ -113,7 +114,7 @@ public interface SimpleType extends SchemaType {
      *         {@link net.sf.saxon.value.Whitespace#REPLACE}.
      */
 
-    public int getWhitespaceAction();
+    int getWhitespaceAction();
 
     /**
      * Apply any pre-lexical facets, other than whitespace. At the moment the only such
@@ -124,7 +125,7 @@ public interface SimpleType extends SchemaType {
      * @throws ValidationException if preprocessing detects that the value is invalid
      */
 
-    public CharSequence preprocess(CharSequence input) throws ValidationException;
+    UnicodeString preprocess(UnicodeString input) throws ValidationException;
 
     /**
      * Reverse any pre-lexical facets, other than whitespace. At the moment the only such
@@ -137,7 +138,7 @@ public interface SimpleType extends SchemaType {
      * @throws ValidationException if postprocessing detects that the value is invalid
      */
 
-    public CharSequence postprocess(CharSequence input) throws ValidationException;
+    UnicodeString postprocess(UnicodeString input) throws ValidationException;
 
 }
 

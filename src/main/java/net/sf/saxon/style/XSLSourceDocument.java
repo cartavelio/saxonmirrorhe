@@ -18,6 +18,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
@@ -114,7 +115,7 @@ public class XSLSourceDocument extends StyleElement {
                         // TODO
                         break;
                     case "strip-space":
-                        switch (Whitespace.normalizeWhitespace(value).toString()) {
+                        switch (Whitespace.normalizeWhitespace(StringView.of(value)).toString()) {
                             case "#all":
                                 parseOptions.setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
                                 break;

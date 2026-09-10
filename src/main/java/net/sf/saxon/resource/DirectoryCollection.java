@@ -19,7 +19,7 @@ import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -35,7 +35,7 @@ import java.util.*;
 
 public class DirectoryCollection extends AbstractResourceCollection {
 
-    private File dirFile;
+    private final File dirFile;
     private SpaceStrippingRule whitespaceRules;
 
     /**
@@ -140,17 +140,17 @@ public class DirectoryCollection extends AbstractResourceCollection {
             URI uri = new URI(resource.getResourceURI());
 
             if (details.contentType != null) {
-                properties.put("content-type", StringValue.makeStringValue(details.contentType));
+                properties.put("content-type", StringItem.makeStringValue(details.contentType));
             }
             if (details.encoding != null) {
-                properties.put("encoding", StringValue.makeStringValue(details.encoding));
+                properties.put("encoding", StringItem.makeStringValue(details.encoding));
             }
 
             if ("file".equals(uri.getScheme())) {
                 File file = new File(uri);
-                properties.put("path", StringValue.makeStringValue(file.getPath()));
-                properties.put("absolute-path", StringValue.makeStringValue(file.getAbsolutePath()));
-                properties.put("canonical-path", StringValue.makeStringValue(file.getCanonicalPath()));
+                properties.put("path", StringItem.makeStringValue(file.getPath()));
+                properties.put("absolute-path", StringItem.makeStringValue(file.getAbsolutePath()));
+                properties.put("canonical-path", StringItem.makeStringValue(file.getCanonicalPath()));
                 properties.put("can-read", BooleanValue.get(file.canRead()));
                 properties.put("can-write", BooleanValue.get(file.canWrite()));
                 properties.put("can-execute", BooleanValue.get(file.canExecute()));
@@ -203,9 +203,9 @@ public class DirectoryCollection extends AbstractResourceCollection {
 
     private static class DirectoryIterator implements Iterator<String> {
 
-        private Stack<Iterator<File>> directories;
-        private FilenameFilter filter;
-        private boolean recurse;
+        private final Stack<Iterator<File>> directories;
+        private final FilenameFilter filter;
+        private final boolean recurse;
         private String next = null;
 
         public DirectoryIterator(Stack<Iterator<File>> directories, boolean recurse, FilenameFilter filter) {

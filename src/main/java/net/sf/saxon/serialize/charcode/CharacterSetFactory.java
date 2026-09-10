@@ -32,7 +32,7 @@ import java.util.Properties;
 
 public class CharacterSetFactory {
 
-    private HashMap<String, CharacterSet> characterSets = new HashMap<String, CharacterSet>(10);
+    private final HashMap<String, CharacterSet> characterSets = new HashMap<String, CharacterSet>(10);
 
     /**
      * Class has a single instance per Configuration

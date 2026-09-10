@@ -30,8 +30,8 @@ import net.sf.saxon.value.SequenceType;
 
 public class AtomicConstructorFunction extends AbstractFunction {
 
-    private AtomicType targetType;
-    private NamespaceResolver nsResolver;
+    private final AtomicType targetType;
+    private final NamespaceResolver nsResolver;
 
     /**
      * Create the constructor function.

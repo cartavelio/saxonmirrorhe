@@ -17,6 +17,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardEntityResolver;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import org.xml.sax.InputSource;
@@ -32,11 +33,11 @@ import java.util.Stack;
  */
 public class JsonHandlerXML extends JsonHandler {
 
-    private Outputter out;
-    private Builder builder;
+    private final Outputter out;
+    private final Builder builder;
 
     private Stack<String> keys;
-    private Stack<Boolean> inMap = new Stack<>();
+    private final Stack<Boolean> inMap = new Stack<>();
 
     private boolean allowAnyTopLevel;
     public boolean validate;
@@ -63,7 +64,7 @@ public class JsonHandlerXML extends JsonHandler {
     private static final BuiltInAtomicType STRING_TYPE = BuiltInAtomicType.STRING;
 
     public HashMap<String, SchemaType> types;
-    private Stack<HashSet<String>> mapKeys = new Stack<>();
+    private final Stack<HashSet<String>> mapKeys = new Stack<>();
 
 
     /**
@@ -246,11 +247,11 @@ public class JsonHandlerXML extends JsonHandler {
                          Loc.NONE, ReceiverOption.NONE);
         if (isInMap()) {
             String k = keys.pop();
-            k = reEscape(k);
+            String uk = reEscape(k);
             if (escape) {
-                markAsEscaped(k, true);
+                markAsEscaped(uk, true);
             }
-            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, k,
+            out.attribute(keyQN, validate ? STRING_TYPE : SIMPLE_TYPE, uk.toString(),
                           Loc.NONE, ReceiverOption.NONE);
         }
     }
@@ -266,7 +267,7 @@ public class JsonHandlerXML extends JsonHandler {
      * @throws XPathException if a dynamic error occurs
      */
     private void characters(String s) throws XPathException {
-        out.characters(s, Loc.NONE, ReceiverOption.NONE);
+        out.characters(StringView.of(s), Loc.NONE, ReceiverOption.NONE);
     }
 
     /**
@@ -358,7 +359,7 @@ public class JsonHandlerXML extends JsonHandler {
     @Override
     public void writeString(String val) throws XPathException {
         startElement(stringQN, isInMap() ? "stringWithinMapType" : "stringType");
-        CharSequence escaped = reEscape(val);
+        String escaped = reEscape(val);
         if (escape) {
             markAsEscaped(escaped, false);
         }
@@ -368,7 +369,7 @@ public class JsonHandlerXML extends JsonHandler {
     }
 
  @Override
-    protected void markAsEscaped(CharSequence escaped, boolean isKey) throws XPathException {
+    protected void markAsEscaped(String escaped, boolean isKey) throws XPathException {
         if (containsEscape(escaped.toString()) && escape) {
             NodeName name = isKey ? escapedKeyQN : escapedQN;
             out.attribute(name, validate ? BOOLEAN_TYPE : SIMPLE_TYPE, "true",

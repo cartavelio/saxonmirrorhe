@@ -11,27 +11,33 @@ import org.xml.sax.SAXException;
 
 public class MyContentHandler implements org.xml.sax.ContentHandler {
 
+    @Override
     public void setDocumentLocator(Locator locator) {
         System.out.println("setDocumentLocator");
     }
 
+    @Override
     public void startDocument() throws SAXException {
         System.out.println("startDocument");
     }
 
+    @Override
     public void endDocument() throws SAXException {
         System.out.println("endDocument");
     }
 
+    @Override
     public void startPrefixMapping(String prefix, String uri)
             throws SAXException {
         System.out.println("startPrefixMapping: " + prefix + ", " + uri);
     }
 
+    @Override
     public void endPrefixMapping(String prefix) throws SAXException {
         System.out.println("endPrefixMapping: " + prefix);
     }
 
+    @Override
     public void startElement(
             String namespaceURI, String localName, String qName, Attributes atts)
                 throws SAXException {
@@ -45,9 +51,10 @@ public class MyContentHandler implements org.xml.sax.ContentHandler {
             System.out.print(", " + atts.getQName(i) + "='" + atts.getValue(i) + "'");
         }
 
-        System.out.println("");
+        System.out.println();
     }
 
+    @Override
     public void endElement(
             String namespaceURI, String localName, String qName)
                 throws SAXException {
@@ -55,7 +62,8 @@ public class MyContentHandler implements org.xml.sax.ContentHandler {
                            + localName + ", " + qName);
     }
 
-    public void characters(char ch[], int start, int length)
+    @Override
+    public void characters(char[] ch, int start, int length)
             throws SAXException {
 
         String s = new String(ch, start, (length > 30)
@@ -69,17 +77,20 @@ public class MyContentHandler implements org.xml.sax.ContentHandler {
         }
     }
 
-    public void ignorableWhitespace(char ch[], int start, int length)
+    @Override
+    public void ignorableWhitespace(char[] ch, int start, int length)
             throws SAXException {
         System.out.println("ignorableWhitespace");
     }
 
+    @Override
     public void processingInstruction(String target, String data)
             throws SAXException {
         System.out.println("processingInstruction: " + target + ", "
                            + data);
     }
 
+    @Override
     public void skippedEntity(String name) throws SAXException {
         System.out.println("skippedEntity: " + name);
     }

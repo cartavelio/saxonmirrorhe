@@ -17,6 +17,8 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -32,7 +34,7 @@ public class SequenceWrapper extends SequenceReceiver {
 
     public static final String RESULT_NS = QueryResult.RESULT_NS;
 
-    private ComplexContentOutputter out;
+    private final ComplexContentOutputter out;
     private int depth = 0;
 
     private FingerprintedQName resultDocument;
@@ -170,7 +172,7 @@ public class SequenceWrapper extends SequenceReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (depth == 0) {
             startWrapper(resultText);
             out.characters(chars, locationId, properties);
@@ -185,7 +187,7 @@ public class SequenceWrapper extends SequenceReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (depth == 0) {
             startWrapper(resultComment);
             out.comment(chars, locationId, properties);
@@ -200,7 +202,7 @@ public class SequenceWrapper extends SequenceReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (depth == 0) {
             startWrapper(resultPI);
             out.processingInstruction(target, data, locationId, properties);
@@ -236,13 +238,13 @@ public class SequenceWrapper extends SequenceReceiver {
             out.namespace(prefix, uri, ReceiverOption.NONE);
             out.attribute(xsiType, BuiltInAtomicType.UNTYPED_ATOMIC, displayName, locationId, ReceiverOption.NONE);
             out.startContent();
-            out.characters(item.getStringValue(), locationId, ReceiverOption.NONE);
+            out.characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
             out.endElement();
         } else if (item instanceof NodeInfo) {
             NodeInfo node = (NodeInfo)item;
             int kind = node.getNodeKind();
             if (kind == Type.ATTRIBUTE) {
-                attribute(NameOfNode.makeName(node), (SimpleType)node.getSchemaType(), node.getStringValueCS(), Loc.NONE, 0);
+                attribute(NameOfNode.makeName(node), (SimpleType)node.getSchemaType(), node.getStringValue(), Loc.NONE, 0);
             } else if (kind == Type.NAMESPACE) {
                 namespace(new NamespaceBinding(node.getLocalPart(), node.getStringValue()), 0);
             } else {
@@ -252,17 +254,17 @@ public class SequenceWrapper extends SequenceReceiver {
             if (item instanceof MapItem) {
                 out.startElement(resultMap, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
-                out.characters(item.toShortString(), locationId, ReceiverOption.NONE);
+                out.characters(StringView.of(item.toShortString()), locationId, ReceiverOption.NONE);
                 out.endElement();
             } else if (item instanceof ArrayItem) {
                 out.startElement(resultArray, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
-                out.characters(item.toShortString(), locationId, ReceiverOption.NONE);
+                out.characters(StringView.of(item.toShortString()), locationId, ReceiverOption.NONE);
                 out.endElement();
             } else {
                 out.startElement(resultFunction, Untyped.getInstance(), Loc.NONE, ReceiverOption.NONE);
                 out.startContent();
-                out.characters(((Function)item).getDescription(), locationId, ReceiverOption.NONE);
+                out.characters(StringView.of(((Function)item).getDescription()), locationId, ReceiverOption.NONE);
                 out.endElement();
             }
         } else if (item instanceof ObjectValue) {
@@ -271,7 +273,7 @@ public class SequenceWrapper extends SequenceReceiver {
             out.attribute(new NoNamespaceName("class"), BuiltInAtomicType.UNTYPED_ATOMIC,
                           obj.getClass().getName(), Loc.NONE, ReceiverOption.NONE);
             out.startContent();
-            out.characters(obj.toString(), locationId, ReceiverOption.NONE);
+            out.characters(StringView.of(obj.toString()), locationId, ReceiverOption.NONE);
             out.endElement();
         }
     }

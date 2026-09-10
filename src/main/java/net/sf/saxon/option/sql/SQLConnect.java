@@ -21,7 +21,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -81,7 +81,7 @@ public class SQLConnect extends ExtensionInstruction {
 
         AttributeInfo userAtt = atts.get("", "user");
         if (userAtt == null) {
-            user = new StringLiteral(StringValue.EMPTY_STRING);
+            user = new StringLiteral(StringItem.EMPTY_STRING);
         } else {
             user = makeAttributeValueTemplate(userAtt.getValue(), userAtt);
         }
@@ -90,7 +90,7 @@ public class SQLConnect extends ExtensionInstruction {
 
         AttributeInfo pwdAtt = atts.get("", "password");
         if (pwdAtt == null) {
-            password = new StringLiteral(StringValue.EMPTY_STRING);
+            password = new StringLiteral(StringItem.EMPTY_STRING);
         } else {
             password = makeAttributeValueTemplate(pwdAtt.getValue(), pwdAtt);
         }
@@ -239,6 +239,6 @@ public class SQLConnect extends ExtensionInstruction {
         return "\"" + name.replaceAll("\\\"", "\"\"") + "\"";
     }
 
-    private static Pattern namePattern = Pattern.compile("\"[^\"]+\"|[A-Za-z_][A-Za-z0-9_]*");
+    private static final Pattern namePattern = Pattern.compile("\"[^\"]+\"|[A-Za-z_][A-Za-z0-9_]*");
 }
 

@@ -24,6 +24,7 @@ import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.StringItem;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -34,6 +35,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -250,6 +252,7 @@ public class TestXsltTransformer {
             final XdmNode style1 = builder.build(new StreamSource(sr, "http://imported/"));
 
             xqcomp.setURIResolver(new URIResolver() {
+                @Override
                 public Source resolve(String href, String base) throws TransformerException {
                     if (href.startsWith("http:")) {
                         return style1.asSource();
@@ -288,14 +291,17 @@ public class TestXsltTransformer {
         final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -622,14 +628,17 @@ public class TestXsltTransformer {
         final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -806,7 +815,7 @@ public class TestXsltTransformer {
                 "                <xsl:template match='/'><xsl:element name='root' /></xsl:template>" +
                 "                </xsl:stylesheet>";
 
-        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8"))));
+        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8))));
         Map<QName, XsltExecutable.ParameterDetails> params = xsltExecutable.getGlobalParameters();
 
         System.out.println();
@@ -842,7 +851,7 @@ public class TestXsltTransformer {
                 "                </xsl:stylesheet>";
 
         xsltCompiler.setCompileWithTracing(true);
-        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8"))));
+        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8))));
         Xslt30Transformer t = xsltExecutable.load30();
         t.setTraceListener(new XSLTTraceListener());
         StringWriter sw = new StringWriter();
@@ -854,7 +863,7 @@ public class TestXsltTransformer {
     /**
      * Extension function used by the above test
      */
-    public static net.sf.saxon.value.StringValue debug(XPathContext context) {
+    public static StringItem debug(XPathContext context) {
         Controller controller = context.getController();
         Executable exec = controller.getExecutable();
         for (PackageData pd : exec.getPackages()) {
@@ -866,7 +875,7 @@ public class TestXsltTransformer {
                     " value=" + (used ? bindery.getGlobalVariableValue(var) : "*unused*"));
             }
         }
-        return net.sf.saxon.value.StringValue.makeStringValue("done");
+        return StringItem.makeStringValue("done");
     }
 
     @Test
@@ -973,38 +982,33 @@ public class TestXsltTransformer {
 
     @Test
     public void testCallNamedTemplateRawDestination() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            //configuration.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
-            Processor processor = new Processor(configuration);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        //configuration.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
+        Processor processor = new Processor(configuration);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                    "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                    "                version='3.0'>" +
-                    "                <xsl:template name='t'>" +
-                    "                   <xsl:param name='a' as='xs:double' select='3'/>" +
-                    "                   <xsl:param name='b' as='xs:float' select='4'/>" +
-                    "                   <xsl:sequence select='$a+10, $b+2'/>" +
-                    "                </xsl:template>" +
-                    "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                version='3.0'>" +
+                "                <xsl:template name='t'>" +
+                "                   <xsl:param name='a' as='xs:double' select='3'/>" +
+                "                   <xsl:param name='b' as='xs:float' select='4'/>" +
+                "                   <xsl:sequence select='$a+10, $b+2'/>" +
+                "                </xsl:template>" +
+                "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            XsltTransformer t = xsltExecutable.load();
-            t.setInitialTemplate(new QName("t"));
-            RawDestination out = new RawDestination();
-            t.setDestination(out);
-            t.transform();
-            XdmValue val = out.getXdmValue();
-            assertEquals(2, val.size());
-            assertEquals(13, ((XdmAtomicValue) val.itemAt(0)).getLongValue());
-            assertEquals(6, ((XdmAtomicValue) val.itemAt(1)).getLongValue());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        XsltTransformer t = xsltExecutable.load();
+        t.setInitialTemplate(new QName("t"));
+        RawDestination out = new RawDestination();
+        t.setDestination(out);
+        t.transform();
+        XdmValue val = out.getXdmValue();
+        assertEquals(2, val.size());
+        assertEquals(13, ((XdmAtomicValue) val.itemAt(0)).getLongValue());
+        assertEquals(6, ((XdmAtomicValue) val.itemAt(1)).getLongValue());
     }
 
 

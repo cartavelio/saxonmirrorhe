@@ -64,7 +64,7 @@ public class LoopLifter {
     }
 
     private Expression root;
-    private Configuration config;
+    private final Configuration config;
     private int sequence = 0;
     private boolean changed = false;
     private boolean tracing = false;
@@ -78,7 +78,7 @@ public class LoopLifter {
 
     }
 
-    private Map<Expression, ExpInfo> expInfoMap = new IdentityHashMap<>();
+    private final Map<Expression, ExpInfo> expInfoMap = new IdentityHashMap<>();
 
     public LoopLifter(Expression root, Configuration config, boolean streaming) {
         this.root = root;

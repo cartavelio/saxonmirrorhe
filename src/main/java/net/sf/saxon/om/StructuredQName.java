@@ -7,8 +7,9 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.namespace.QName;
@@ -22,9 +23,9 @@ import javax.xml.namespace.QName;
 
 public class StructuredQName implements IdentityComparable {
 
-    private char[] content;
-    private int localNameStart;
-    private int prefixStart;
+    private final char[] content;
+    private final int localNameStart;
+    private final int prefixStart;
     private int cachedHashCode = -1;
 
     private StructuredQName(char[] content, int localNameStart, int prefixStart) {
@@ -108,24 +109,24 @@ public class StructuredQName implements IdentityComparable {
      *                        changed on return depending on the caller's requirements.
      */
 
-    public static StructuredQName fromLexicalQName(CharSequence lexicalName, boolean useDefault,
+    public static StructuredQName fromLexicalQName(String lexicalName, boolean useDefault,
                                                    boolean allowEQName, NamespaceResolver resolver)
             throws XPathException {
-        lexicalName = Whitespace.trimWhitespace(lexicalName);
-        if (allowEQName && lexicalName.length() >= 4 && lexicalName.charAt(0) == 'Q' && lexicalName.charAt(1) == '{') {
+        lexicalName = Whitespace.trim(lexicalName);
+        if (allowEQName && lexicalName.length() >= 4 && lexicalName.codePointAt(0) == 'Q' && lexicalName.codePointAt(1) == '{') {
             String name = lexicalName.toString();
-            int endBrace = name.indexOf('}');
+            int endBrace = name.indexOf('}', 2);
             if (endBrace < 0) {
                 throw new XPathException("Invalid EQName: closing brace not found", "FOCA0002");
             } else if (endBrace == name.length() - 1) {
                 throw new XPathException("Invalid EQName: local part is missing", "FOCA0002");
             }
             String uri = name.substring(2, endBrace);
-            if (uri.contains("{")) {
+            if (uri.indexOf('{', 0) >= 0) {
                 throw new XPathException("Namespace URI must not contain '{'", "FOCA0002");
             }
-            String local = name.substring(endBrace + 1);
-            if (!NameChecker.isValidNCName(local)) {
+            String local = name.substring(endBrace + 1, name.length());
+            if (!NameChecker.isValidNCName(StringTool.codePoints(local))) {
                 throw new XPathException("Invalid EQName: local part is not a valid NCName", "FOCA0002");
             }
             return new StructuredQName("", uri, local);
@@ -149,7 +150,7 @@ public class StructuredQName implements IdentityComparable {
             throw new XPathException(e.getMessage(), "FOCA0002");
         }
     }
-
+    
     /**
      * Make a structured QName from an EQName in {@code Q{uri}local} format.
      *
@@ -160,18 +161,17 @@ public class StructuredQName implements IdentityComparable {
      * URI and local name parts are not checked)
      */
 
-    public static StructuredQName fromEQName(CharSequence eqName) {
-        eqName = Whitespace.trimWhitespace(eqName);
-        if (eqName.length() >= 4 && eqName.charAt(0) == 'Q' && eqName.charAt(1) == '{') {
-            String name = eqName.toString();
-            int endBrace = name.indexOf('}');
+    public static StructuredQName fromEQName(String eqName) {
+        eqName = Whitespace.trim(eqName);
+        if (eqName.length() >= 4 && eqName.startsWith("Q{")) {
+            int endBrace = eqName.indexOf('}');
             if (endBrace < 0) {
                 throw new IllegalArgumentException("Invalid EQName: closing brace not found");
-            } else if (endBrace == name.length() - 1) {
+            } else if (endBrace == eqName.length() - 1) {
                 throw new IllegalArgumentException("Invalid EQName: local part is missing");
             }
-            String uri = name.substring(2, endBrace);
-            String local = name.substring(endBrace + 1);
+            String uri = eqName.substring(2, endBrace);
+            String local = eqName.substring(endBrace + 1);
             return new StructuredQName("", uri, local);
         } else {
             return new StructuredQName("", "", eqName.toString());
@@ -241,9 +241,9 @@ public class StructuredQName implements IdentityComparable {
         if (prefixStart == content.length) {
             return getLocalPart();
         } else {
-            FastStringBuffer buff = new FastStringBuffer(content.length - localNameStart + 1);
+            StringBuilder buff = new StringBuilder(content.length - localNameStart + 1);
             buff.append(content, prefixStart, content.length - prefixStart);
-            buff.cat(':');
+            buff.append(':');
             buff.append(content, localNameStart, prefixStart - localNameStart);
             return buff.toString();
         }
@@ -266,11 +266,11 @@ public class StructuredQName implements IdentityComparable {
      */
 
     public String getClarkName() {
-        FastStringBuffer buff = new FastStringBuffer(content.length - prefixStart + 2);
+        StringBuilder buff = new StringBuilder(content.length - prefixStart + 2);
         if (localNameStart > 0) {
-            buff.cat('{');
+            buff.append('{');
             buff.append(content, 0, localNameStart);
-            buff.cat('}');
+            buff.append('}');
         }
         buff.append(content, localNameStart, prefixStart - localNameStart);
         return buff.toString();
@@ -284,12 +284,12 @@ public class StructuredQName implements IdentityComparable {
      */
 
     public String getEQName() {
-        FastStringBuffer buff = new FastStringBuffer(content.length - prefixStart + 2);
+        StringBuilder buff = new StringBuilder(content.length - prefixStart + 2);
         buff.append("Q{");
         if (localNameStart > 0) {
             buff.append(content, 0, localNameStart);
         }
-        buff.cat('}');
+        buff.append('}');
         buff.append(content, localNameStart, prefixStart - localNameStart);
         return buff.toString();
     }

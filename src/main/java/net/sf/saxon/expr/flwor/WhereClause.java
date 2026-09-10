@@ -12,7 +12,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import static net.sf.saxon.expr.flwor.Clause.ClauseName.WHERE;
  */
 public class WhereClause extends Clause {
 
-    private Operand predicateOp;
+    private final Operand predicateOp;
 
     public WhereClause(FLWORExpression flwor, Expression predicate) {
         this.predicateOp = new Operand(flwor, predicate, OperandRole.INSPECT);
@@ -91,7 +91,7 @@ public class WhereClause extends Clause {
         final ItemType actualItemType = getPredicate().getItemType();
         for (VariableReference ref : references) {
             ref.refineVariableType(actualItemType, getPredicate().getCardinality(),
-                    getPredicate() instanceof Literal ? ((Literal) getPredicate()).getValue() : null,
+                    getPredicate() instanceof Literal ? ((Literal) getPredicate()).getGroundedValue() : null,
                     getPredicate().getSpecialProperties());
             ExpressionTool.resetStaticProperties(returnExpr);
         }
@@ -142,14 +142,14 @@ public class WhereClause extends Clause {
 
     @Override
     public String toShortString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         fsb.append("where ");
         fsb.append(getPredicate().toShortString());
         return fsb.toString();
     }
 
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         fsb.append("where ");
         fsb.append(getPredicate().toString());
         return fsb.toString();

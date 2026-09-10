@@ -11,11 +11,9 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NoNamespaceName;
-import net.sf.saxon.om.NodeName;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -30,7 +28,7 @@ import net.sf.saxon.value.*;
 
 public class ProcessingInstruction extends SimpleNodeConstructor {
 
-    private Operand nameOp;
+    private final Operand nameOp;
 
     /**
      * Create an xsl:processing-instruction instruction
@@ -111,16 +109,16 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
 
         // Do early checking of name if known statically
 
-        if (nameExp instanceof Literal && ((Literal)nameExp).getValue() instanceof AtomicValue) {
-            AtomicValue val = (AtomicValue) ((Literal) nameExp).getValue();
+        if (nameExp instanceof Literal && ((Literal)nameExp).getGroundedValue() instanceof AtomicValue) {
+            AtomicValue val = (AtomicValue) ((Literal) nameExp).getGroundedValue();
             checkName(val, env.makeEarlyEvaluationContext());
         }
 
         // Do early checking of content if known statically
 
-        if (getSelect() instanceof Literal) {
-            String s = ((Literal) getSelect()).getValue().getStringValue();
-            String s2 = checkContent(s, env.makeEarlyEvaluationContext());
+        if (getSelect() instanceof StringLiteral) {
+            UnicodeString s = ((StringLiteral) getSelect()).getGroundedValue().getUnicodeStringValue();
+            UnicodeString s2 = checkContent(s, env.makeEarlyEvaluationContext());
             if (!s2.equals(s)) {
                 setSelect(new StringLiteral(s2));
             }
@@ -143,10 +141,10 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      */
 
     @Override
-    public void processValue(CharSequence value, Outputter output, XPathContext context) throws XPathException {
+    public void processValue(UnicodeString value, Outputter output, XPathContext context) throws XPathException {
         String expandedName = evaluateName(context);
         if (expandedName != null) {
-            String data = checkContent(value.toString(), context);
+            CodePoints data = checkContent(value, context);
             output.processingInstruction(expandedName, data, getLocation(), ReceiverOption.NONE);
         }
     }
@@ -160,7 +158,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      */
 
     @Override
-    protected String checkContent(String data, XPathContext context) throws XPathException {
+    protected UnicodeString checkContent(UnicodeString data, XPathContext context) throws XPathException {
         if (isXSLT()) {
             return checkContentXSLT(data);
         } else {
@@ -181,13 +179,15 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * @return the original content, unless adjustments are needed
      */
 
-    public static String checkContentXSLT(String data) {
-        int hh;
-        while ((hh = data.indexOf("?>")) >= 0) {
-            data = data.substring(0, hh + 1) + ' ' + data.substring(hh + 1);
+    public static UnicodeString checkContentXSLT(UnicodeString data) {
+        long hh;
+        while ((hh = data.indexOf(DELIM, 0)) >= 0) {
+            data = data.substring(0, hh + 1).concat(UnicodeString.SINGLE_SPACE.concat(data.substring(hh + 1)));
         }
-        return Whitespace.removeLeadingWhitespace(data).toString();
+        return Whitespace.removeLeadingWhitespace(data);
     }
+
+    private final static UnicodeString DELIM = BMPString.of("?>");
 
     /**
      * Check the content of the node, and adjust it if necessary, using the XQuery rules
@@ -197,11 +197,11 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      * @throws XPathException if the content is invalid
      */
 
-    public static String checkContentXQuery(String data) throws XPathException {
-        if (data.contains("?>")) {
+    public static UnicodeString checkContentXQuery(UnicodeString data) throws XPathException {
+        if (data.indexOf(DELIM, 0) >= 0) {
             throw new XPathException("Invalid characters (?>) in processing instruction", "XQDY0026");
         }
-        return Whitespace.removeLeadingWhitespace(data).toString();
+        return Whitespace.removeLeadingWhitespace(data);
     }
 
     @Override
@@ -219,7 +219,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
      */
     private String evaluateName(XPathContext context) throws XPathException {
         AtomicValue av = (AtomicValue) getNameExp().evaluateItem(context);
-        if (av instanceof StringValue && !(av instanceof AnyURIValue)) {
+        if (av instanceof StringItem && !(av instanceof AnyURIValue)) {
             // Always true under XSLT
             return checkName(av, context);
         } else {
@@ -231,7 +231,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
     }
 
     private String checkName(AtomicValue name, XPathContext context) throws XPathException {
-        if (name instanceof StringValue && !(name instanceof AnyURIValue)) {
+        if (name instanceof StringItem && !(name instanceof AnyURIValue)) {
             String expandedName = Whitespace.trim(name.getStringValue());
             if (!NameChecker.isValidNCName(expandedName)) {
                 XPathException e = new XPathException("Processing instruction name " + Err.wrap(expandedName) + " is not a valid NCName");
@@ -247,7 +247,7 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
             }
             return expandedName;
         } else {
-            XPathException e = new XPathException("Processing instruction name " + Err.wrap(name.getStringValue()) +
+            XPathException e = new XPathException("Processing instruction name " + Err.wrap(name.getUnicodeStringValue()) +
                                                           " is not of type xs:string or xs:untypedAtomic");
             e.setXPathContext(context);
             e.setErrorCode("XPTY0004");

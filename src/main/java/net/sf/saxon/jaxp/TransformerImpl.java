@@ -27,7 +27,7 @@ import javax.xml.transform.sax.TransformerHandler;
  */
 public class TransformerImpl extends AbstractTransformerImpl {
 
-    private XsltTransformer xsltTransformer;
+    private final XsltTransformer xsltTransformer;
 
     protected TransformerImpl(XsltExecutable e, XsltTransformer t) {
         super(e);

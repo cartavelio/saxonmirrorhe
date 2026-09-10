@@ -10,7 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
@@ -74,27 +74,27 @@ public class PathMaintainer extends ProxyReceiver {
      */
 
     public String getPath(boolean useURIs) {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         for (AbsolutePath.PathElement pe : path) {
-            fsb.cat('/');
+            fsb.append('/');
             if (useURIs) {
                 String uri = pe.getName().getURI();
                 if (!uri.isEmpty()) {
-                    fsb.cat('"');
+                    fsb.append('"');
                     fsb.append(uri);
-                    fsb.cat('"');
+                    fsb.append('"');
                 }
             } else {
                 String prefix = pe.getName().getPrefix();
                 if (!prefix.isEmpty()) {
                     fsb.append(prefix);
-                    fsb.cat(':');
+                    fsb.append(':');
                 }
             }
             fsb.append(pe.getName().getLocalPart());
-            fsb.cat('[');
+            fsb.append('[');
             fsb.append(pe.getIndex() + "");
-            fsb.cat(']');
+            fsb.append(']');
         }
         return fsb.toString();
     }

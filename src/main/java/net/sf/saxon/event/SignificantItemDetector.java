@@ -10,6 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
@@ -25,7 +26,7 @@ public class SignificantItemDetector extends ProxyOutputter {
 
     private int level = 0;
     private boolean empty = true;
-    private Action trigger;
+    private final Action trigger;
 
     public SignificantItemDetector(Outputter next, Action trigger) {
         super(next);
@@ -79,7 +80,7 @@ public class SignificantItemDetector extends ProxyOutputter {
      * Notify an attribute.
      */
     @Override
-    public void attribute(NodeName attName, SimpleType typeCode, CharSequence value, Location location, int properties) throws XPathException {
+    public void attribute(NodeName attName, SimpleType typeCode, String value, Location location, int properties) throws XPathException {
         getNextOutputter().attribute(attName, typeCode, value, location, properties);
     }
 
@@ -92,21 +93,21 @@ public class SignificantItemDetector extends ProxyOutputter {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (chars.length() > 0) {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (!chars.isEmpty()) {
             start();
         }
         getNextOutputter().characters(chars, locationId, properties);
     }
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         start();
         getNextOutputter().processingInstruction(target, data, locationId, properties);
     }
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         start();
         getNextOutputter().comment(chars, locationId, properties);
     }
@@ -114,10 +115,10 @@ public class SignificantItemDetector extends ProxyOutputter {
     public static boolean isSignificant(Item item) {
         if (item instanceof NodeInfo) {
             NodeInfo node = (NodeInfo) item;
-            return (node.getNodeKind() != Type.TEXT || !node.getStringValue().isEmpty())
+            return (node.getNodeKind() != Type.TEXT || !node.getUnicodeStringValue().isEmpty())
                     && (node.getNodeKind() != Type.DOCUMENT || node.hasChildNodes());
         } else if (item instanceof AtomicValue) {
-            return !item.getStringValue().isEmpty();
+            return !item.getUnicodeStringValue().isEmpty();
         } else if (item instanceof ArrayItem) {
             if (((ArrayItem) item).isEmpty()) {
                 return true;

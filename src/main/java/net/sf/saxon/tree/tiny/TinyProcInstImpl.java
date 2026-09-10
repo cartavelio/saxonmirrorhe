@@ -9,12 +9,15 @@ package net.sf.saxon.tree.tiny;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * TProcInstImpl is an implementation of ProcInstInfo
@@ -32,15 +35,13 @@ final class TinyProcInstImpl extends TinyNodeImpl {
     }
 
     @Override
-    public String getStringValue() {
+    public UnicodeString getUnicodeStringValue() {
         int start = tree.alpha[nodeNr];
         int len = tree.beta[nodeNr];
         if (len == 0) {
-            return "";    // need to special-case this for the Microsoft JVM
+            return EmptyUniString.getInstance();    // need to special-case this for the Microsoft JVM
         }
-        char[] dest = new char[len];
-        tree.commentBuffer.getChars(start, start + len, dest, 0);
-        return new String(dest, 0, len);
+        return tree.commentBuffer.substring(start, start + len);
     }
 
     /**
@@ -50,7 +51,7 @@ final class TinyProcInstImpl extends TinyNodeImpl {
 
     @Override
     public AtomicSequence atomize() {
-        return new StringValue(getStringValue());
+        return new StringItem(getUnicodeStringValue());
     }
 
     @Override
@@ -73,7 +74,7 @@ final class TinyProcInstImpl extends TinyNodeImpl {
 
     @Override
     public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.processingInstruction(getDisplayName(), getStringValue(), locationId, ReceiverOption.NONE);
+        out.processingInstruction(getDisplayName(), getUnicodeStringValue(), locationId, ReceiverOption.NONE);
     }
 
     // DOM methods
@@ -100,8 +101,8 @@ final class TinyProcInstImpl extends TinyNodeImpl {
      */
 
     /*@NotNull*/
-    public String getData() {
-        return getStringValue();
+    public CodePoints getData() {
+        return getUnicodeStringValue();
     }
 
 }

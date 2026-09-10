@@ -19,7 +19,7 @@ import net.sf.saxon.value.AtomicValue;
  */
 public class ComparableAtomicValueComparer implements AtomicComparer {
 
-    private static ComparableAtomicValueComparer THE_INSTANCE = new ComparableAtomicValueComparer();
+    private static final ComparableAtomicValueComparer THE_INSTANCE = new ComparableAtomicValueComparer();
 
     /**
      * Get the singleton instance of this class

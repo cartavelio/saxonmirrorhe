@@ -38,9 +38,9 @@ public interface SequenceIterator extends Closeable {
      * iterator.
      *
      * @return the next item, or null if there are no more items. Once a call
-     *         on next() has returned null, no further calls should be made. The preferred
-     *         action for an iterator if subsequent calls on next() are made is to return
-     *         null again, and all implementations within Saxon follow this rule.
+     * on next() has returned null, no further calls should be made. The preferred
+     * action for an iterator if subsequent calls on next() are made is to return
+     * null again, and all implementations within Saxon follow this rule.
      * @throws XPathException if an error occurs retrieving the next item
      * @since 8.4
      */
@@ -65,18 +65,19 @@ public interface SequenceIterator extends Closeable {
      */
 
     @Override
-    default void close() {}
+    default void close() {
+    }
 
     /**
      * Get properties of this iterator.
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
-     *         and {@link Property#LOOKAHEAD}. It is always
-     *         acceptable to return the default value {@code EnumSet.noneOf(Property.class)},
-     *         indicating that there are no known special properties.
-     *         It is acceptable (though unusual) for the properties of the iterator to change depending
-     *         on its state.
+     * properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+     * and {@link Property#LOOKAHEAD}. It is always
+     * acceptable to return the default value {@code EnumSet.noneOf(Property.class)},
+     * indicating that there are no known special properties.
+     * It is acceptable (though unusual) for the properties of the iterator to change depending
+     * on its state.
      * @since 8.6. Default implementation added in 9.9.
      */
 
@@ -155,7 +156,6 @@ public interface SequenceIterator extends Closeable {
     default GroundedValue materialize() throws XPathException {
         return new SequenceExtent(this).reduce();
     }
-
 
 
 }

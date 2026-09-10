@@ -15,7 +15,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AnyURIValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * Implements the unparsed-entity-uri() function defined in XSLT 1.0
@@ -40,7 +40,7 @@ public abstract class UnparsedEntity extends SystemFunction implements Callable 
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         int operation = getOp();
         String arg0 = arguments[0].head().getStringValue();
         NodeInfo doc = null;
@@ -67,7 +67,10 @@ public abstract class UnparsedEntity extends SystemFunction implements Callable 
         }
         String[] ids = doc.getTreeInfo().getUnparsedEntity(arg0);
         String result = ids == null ? "" : ids[operation];
-        return operation == URI ? new AnyURIValue(result) : new StringValue(result);
+        if (result == null) {
+            result = "";
+        }
+        return operation == URI ? new AnyURIValue(result) : new StringItem(result);
     }
 
     public static class UnparsedEntityUri extends UnparsedEntity {

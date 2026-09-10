@@ -39,7 +39,7 @@ import java.util.Stack;
 public class NamespaceDifferencer extends ProxyReceiver {
 
     private boolean undeclareNamespaces = false;
-    private Stack<NamespaceMap> namespaceStack = new Stack<>();
+    private final Stack<NamespaceMap> namespaceStack = new Stack<>();
     private NodeName currentElement;
 
     /**
@@ -96,7 +96,8 @@ public class NamespaceDifferencer extends ProxyReceiver {
                     }
                 }
             } else {
-                // undeclare the default namespace if the child element is in the default namespace
+                // undeclare the default namespace if the parent element has a default namespace and the child does not
+                // See also bug 4696, test
                 if (!parentMap.getDefaultNamespace().isEmpty() &&
                         thisMap.getDefaultNamespace().isEmpty()) {
                     delta = delta.put("", "");

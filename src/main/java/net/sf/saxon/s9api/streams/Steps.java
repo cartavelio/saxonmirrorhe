@@ -22,7 +22,7 @@ import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -989,7 +989,7 @@ public class Steps {
         return new Step<XdmAtomicValue>() {
             @Override
             public Stream<XdmAtomicValue> apply(XdmItem item) {
-                AtomicIterator<StringValue> iter = new Whitespace.Tokenizer(item.getStringValue());
+                AtomicIterator<StringItem> iter = new Whitespace.Tokenizer(item.getUnderlyingValue().getUnicodeStringValue());
                 return XdmSequenceIterator.ofAtomicValues(iter).stream();
             }
         };

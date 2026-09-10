@@ -33,7 +33,7 @@ public class DynamicQueryContext {
 
     /*@Nullable*/ private Item contextItem;
     /*@Nullable*/ private GlobalParameterSet parameters = new GlobalParameterSet();
-    private Configuration config;
+    private final Configuration config;
     private URIResolver uriResolver;
     private ErrorReporter errorReporter;
     /*@Nullable*/ private TraceListener traceListener;

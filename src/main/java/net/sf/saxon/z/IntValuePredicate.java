@@ -15,7 +15,7 @@ import java.util.function.IntPredicate;
 
 public class IntValuePredicate implements IntPredicate {
 
-    private int target;
+    private final int target;
 
     public IntValuePredicate(int target) {
         this.target = target;

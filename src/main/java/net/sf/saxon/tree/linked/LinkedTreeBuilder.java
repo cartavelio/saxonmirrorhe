@@ -12,6 +12,9 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringTool;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -39,7 +42,7 @@ public class LinkedTreeBuilder extends Builder
     /*@NotNull*/ private int[] size = new int[100];          // stack of number of children for each open node
     private int depth = 0;
     private ArrayList<NodeImpl[]> arrays = new ArrayList<>(20);       // reusable arrays for creating nodes
-    private Stack<NamespaceMap> namespaceStack = new Stack<>();
+    private final Stack<NamespaceMap> namespaceStack = new Stack<>();
     private boolean allocateSequenceNumbers = true;
     private int nextNodeNumber = 1;
     private boolean mutable;
@@ -217,7 +220,7 @@ public class LinkedTreeBuilder extends Builder
                 ((ReceivingContentHandler.LocalLocator) location).levelInEntity == 0;
 
         AttributeInfo xmlId = suppliedAttributes.get(NamespaceConstant.XML, "id");
-        if (xmlId != null && Whitespace.containsWhitespace(xmlId.getValue())) {
+        if (xmlId != null && Whitespace.containsWhitespace(StringTool.codePoints(xmlId.getValue()))) {
             suppliedAttributes = suppliedAttributes.put(new AttributeInfo(
                     xmlId.getNodeName(), xmlId.getType(), Whitespace.trim(xmlId.getValue()), xmlId.getLocation(), xmlId.getProperties()));
         }
@@ -272,14 +275,15 @@ public class LinkedTreeBuilder extends Builder
      */
 
     @Override
-    public void characters(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
         // System.err.println("Characters: " + chars.toString() + " depth=" + depth);
-        if (chars.length() > 0) {
+        if (!chars.isEmpty()) {
+            UnicodeString t = chars.tidy();
             NodeInfo prev = currentNode.getNthChild(size[depth] - 1);
             if (prev instanceof TextImpl) {
-                ((TextImpl) prev).appendStringValue(chars.toString());
+                ((TextImpl) prev).appendStringValue(t);
             } else {
-                TextImpl n = nodeFactory.makeTextNode(currentNode, chars);
+                TextImpl n = nodeFactory.makeTextNode(currentNode, t);
                 //TextImpl n = new TextImpl(chars.toString());
                 currentNode.addChild(n, size[depth]++);
             }
@@ -291,8 +295,8 @@ public class LinkedTreeBuilder extends Builder
      */
 
     @Override
-    public void processingInstruction(String name, /*@NotNull*/ CharSequence remainder, Location locationId, int properties) {
-        ProcInstImpl pi = new ProcInstImpl(name, remainder.toString());
+    public void processingInstruction(String name, /*@NotNull*/ CodePoints remainder, Location locationId, int properties) {
+        ProcInstImpl pi = new ProcInstImpl(name, remainder.tidy());
         currentNode.addChild(pi, size[depth]++);
         pi.setLocation(locationId.getSystemId(), locationId.getLineNumber(), locationId.getColumnNumber());
     }
@@ -302,8 +306,8 @@ public class LinkedTreeBuilder extends Builder
      */
 
     @Override
-    public void comment(/*@NotNull*/ CharSequence chars, Location locationId, int properties) throws XPathException {
-        CommentImpl comment = new CommentImpl(chars.toString());
+    public void comment(/*@NotNull*/ CodePoints chars, Location locationId, int properties) throws XPathException {
+        CommentImpl comment = new CommentImpl(chars.tidy());
         currentNode.addChild(comment, size[depth]++);
         comment.setLocation(locationId.getSystemId(), locationId.getLineNumber(), locationId.getColumnNumber());
     }
@@ -419,8 +423,8 @@ public class LinkedTreeBuilder extends Builder
          * @return the constructed text node
          */
         @Override
-        public TextImpl makeTextNode(NodeInfo parent, CharSequence content) {
-            return new TextImpl(content.toString());
+        public TextImpl makeTextNode(NodeInfo parent, UnicodeString content) {
+            return new TextImpl(content);
         }
     }
 

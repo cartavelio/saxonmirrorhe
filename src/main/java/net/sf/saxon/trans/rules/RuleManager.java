@@ -30,10 +30,10 @@ import java.util.HashMap;
 
 public final class RuleManager {
 
-    private StylesheetPackage stylesheetPackage;
-    private Configuration config;
-    private SimpleMode unnamedMode;           // template rules with default mode
-    private HashMap<StructuredQName, Mode> modes;
+    private final StylesheetPackage stylesheetPackage;
+    private final Configuration config;
+    private final SimpleMode unnamedMode;           // template rules with default mode
+    private final HashMap<StructuredQName, Mode> modes;
     // tables of rules for non-default modes
     private SimpleMode omniMode = null;       //template rules that specify mode="all"
     private boolean unnamedModeExplicit;

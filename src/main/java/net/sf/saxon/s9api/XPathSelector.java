@@ -28,9 +28,9 @@ import java.util.Map;
 @SuppressWarnings({"ForeachStatement"})
 public class XPathSelector implements Iterable<XdmItem> {
 
-    private XPathExpression exp;
-    private XPathDynamicContext dynamicContext;
-    private Map<StructuredQName, XPathVariable> declaredVariables;
+    private final XPathExpression exp;
+    private final XPathDynamicContext dynamicContext;
+    private final Map<StructuredQName, XPathVariable> declaredVariables;
 
     // protected constructor
 

@@ -169,7 +169,7 @@ public class XSLNumber extends StyleElement {
         if (formatAtt != null) {
             if (format instanceof StringLiteral) {
                 formatter = new NumberFormatter();
-                formatter.prepare(((StringLiteral) format).getStringValue());
+                formatter.prepare(((StringLiteral) format).stringify());
             }
             // else we'll need to allocate the formatter at run-time
         } else {

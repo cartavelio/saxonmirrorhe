@@ -12,9 +12,9 @@ import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -157,9 +157,9 @@ public abstract class AbstractArrayItem implements ArrayItem {
      * Invoke the array in its role as a function
      *
      * @param context the XPath dynamic evaluation context
-     * @param args    the actual arguments to be supplied (a single integer, one-based)
+     * @param args    the actual arguments to be supplied (a single integer)
      * @return the result of invoking the function
-     * @throws XPathException if the index is out of bounds
+     * @throws XPathException if a dynamic error occurs within the function
      */
 
     @Override
@@ -221,29 +221,11 @@ public abstract class AbstractArrayItem implements ArrayItem {
      * @throws UnsupportedOperationException if the item is an array (an unchecked exception
      *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
      *                                       needed)
-     * @see #getStringValueCS
      * @since 8.4
      */
 
     @Override
-    public String getStringValue() {
-        throw new UnsupportedOperationException("An array does not have a string value");
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. For arrays, there is no string value,
-     * so an exception is thrown.
-     *
-     * @return the string value of the item
-     * @throws UnsupportedOperationException if the item is an array (an unchecked exception
-     *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
-     *                                       needed)
-     * @see #getStringValueCS
-     * @since 8.4
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         throw new UnsupportedOperationException("An array does not have a string value");
     }
 
@@ -271,7 +253,7 @@ public abstract class AbstractArrayItem implements ArrayItem {
      */
 
     public String toString() {
-        FastStringBuffer buffer = new FastStringBuffer(256);
+        StringBuilder buffer = new StringBuilder(256);
         buffer.append("[");
         for (GroundedValue seq : members()) {
             if (buffer.length() > 1) {

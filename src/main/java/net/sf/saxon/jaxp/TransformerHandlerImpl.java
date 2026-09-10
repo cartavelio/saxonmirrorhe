@@ -42,8 +42,8 @@ import javax.xml.transform.sax.TransformerHandler;
 
 public class TransformerHandlerImpl extends ReceivingContentHandler implements TransformerHandler {
 
-    private TransformerImpl transformer;
-    private Builder builder;
+    private final TransformerImpl transformer;
+    private final Builder builder;
     private Receiver receiver;
     private Result result;
     private String systemId;

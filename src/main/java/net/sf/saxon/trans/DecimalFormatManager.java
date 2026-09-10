@@ -25,10 +25,10 @@ import java.util.Map;
 
 public class DecimalFormatManager {
 
-    private DecimalSymbols defaultDFS;
-    private HashMap<StructuredQName, DecimalSymbols> formatTable;   // table for named decimal formats
-    private HostLanguage language;
-    private int languageLevel;
+    private final DecimalSymbols defaultDFS;
+    private final HashMap<StructuredQName, DecimalSymbols> formatTable;   // table for named decimal formats
+    private final HostLanguage language;
+    private final int languageLevel;
 
     /**
      * create a DecimalFormatManager and initialise variables

@@ -18,7 +18,7 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.Type;
 import net.sf.saxon.z.IntBlockSet;
 import net.sf.saxon.z.IntSet;
@@ -51,7 +51,7 @@ public class UnicodeBlocks {
     }
 
     private static String normalizeBlockName(String name) {
-        FastStringBuffer fsb = new FastStringBuffer(name.length());
+        StringBuilder fsb = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
             switch (c) {
@@ -63,7 +63,7 @@ public class UnicodeBlocks {
                     // no action
                     break;
                 default:
-                    fsb.cat(c);
+                    fsb.append(c);
             }
         }
         return fsb.toString();

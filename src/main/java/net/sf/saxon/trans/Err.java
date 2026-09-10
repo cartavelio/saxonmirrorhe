@@ -11,9 +11,14 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.z.IntIterator;
 
 /**
  * Class containing utility methods for handling error messages
@@ -36,8 +41,28 @@ public class Err {
      * @param cs the variable information to be delimited
      * @return the delimited variable information
      */
-    public static String wrap(CharSequence cs) {
+    public static String wrap(CodePoints cs) {
         return wrap(cs, GENERAL);
+    }
+
+    /**
+     * Add delimiters to represent variable information within an error message
+     *
+     * @param cs the variable information to be delimited
+     * @return the delimited variable information
+     */
+    public static String wrap(String cs) {
+        return wrap(cs, GENERAL);
+    }
+
+    /**
+     * Add delimiters to represent variable information within an error message
+     *
+     * @param cs the variable information to be delimited
+     * @return the delimited variable information
+     */
+    public static String wrap(String cs, int valueType) {
+        return wrap(StringView.of(cs), GENERAL);
     }
 
     /**
@@ -47,14 +72,16 @@ public class Err {
      * @param valueType the type of value, e.g. element name or attribute name
      * @return the delimited variable information
      */
-    public static String wrap(/*@Nullable*/ CharSequence cs, int valueType) {
+    public static String wrap(CodePoints cs, int valueType) {
         if (cs == null) {
             return "(NULL)";
         }
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
-        int len = cs.length();
-        for (int i = 0; i < len; i++) {
-            char c = cs.charAt(i);
+        StringBuilder sb = new StringBuilder(64);
+        IntIterator iter = cs.codePoints();
+        int len = 0;
+        while (iter.hasNext()) {
+            int c = iter.next();
+            len++;
             switch (c) {
                 case '\n':
                     sb.append("\\n");
@@ -65,15 +92,12 @@ public class Err {
                 case '\r':
                     sb.append("\\r");
                     break;
-//                case '\\':
-//                    sb.append("\\\\");
-//                    break;
                 default:
                     if (c < 32) {
                         sb.append("\\x");
                         sb.append(Integer.toHexString(c));
                     } else {
-                        sb.cat(c);
+                        sb.appendCodePoint(c);
                     }
             }
         }
@@ -121,7 +145,7 @@ public class Err {
      * Create a string representation of an item for use in an error message
      */
 
-    public static CharSequence depict(Item item) {
+    public static String depict(Item item) {
         if (item instanceof NodeInfo) {
             NodeInfo node = (NodeInfo)item;
             switch (node.getNodeKind()) {
@@ -130,9 +154,9 @@ public class Err {
                 case Type.ELEMENT:
                     return '<' + node.getDisplayName() + '>';
                 case Type.ATTRIBUTE:
-                    return '@' + node.getDisplayName() + "=\"" + node.getStringValueCS() + '"';
+                    return '@' + node.getDisplayName() + "=\"" + node.getUnicodeStringValue() + '"';
                 case Type.TEXT:
-                    return "text{" + truncate30(node.getStringValueCS()) + "}";
+                    return "text{" + truncate30(node.getUnicodeStringValue()) + "}";
                 case Type.COMMENT:
                     return "<!--...-->";
                 case Type.PROCESSING_INSTRUCTION:
@@ -167,7 +191,7 @@ public class Err {
 
     public static String depictSequenceStart(SequenceIterator seq, int max, int actual) {
         try {
-            FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder sb = new StringBuilder(64);
             int count = 0;
             sb.append(" (");
             Item next;
@@ -180,7 +204,7 @@ public class Err {
                     return sb.toString();
                 }
 
-                sb.cat(Err.depict(next));
+                sb.append(Err.depict(next));
             }
             sb.append(") ");
             return sb.toString();
@@ -189,11 +213,11 @@ public class Err {
         }
     }
 
-    public static CharSequence truncate30(CharSequence cs) {
+    public static UnicodeString truncate30(UnicodeString cs) {
         if (cs.length() <= 30) {
             return Whitespace.collapseWhitespace(cs);
         } else {
-            return Whitespace.collapseWhitespace(cs.subSequence(0, 30)) + "...";
+            return Whitespace.collapseWhitespace(cs.substring(0, 30)).concat(BMPString.of("..."));
         }
     }
 

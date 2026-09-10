@@ -260,10 +260,10 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
 
     protected static class FollowingSiblingIterator implements AxisIterator {
 
-        private OMNode start;
+        private final OMNode start;
         private OMNode currentOMNode;
-        private AxiomParentNodeWrapper commonParent;
-        private AxiomDocument docWrapper;
+        private final AxiomParentNodeWrapper commonParent;
+        private final AxiomDocument docWrapper;
 
         public FollowingSiblingIterator(OMNode start, AxiomParentNodeWrapper commonParent, AxiomDocument docWrapper) {
             this.start = start;
@@ -289,10 +289,10 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper  {
 
     protected static class PrecedingSiblingIterator implements AxisIterator {
 
-        private OMNode start;
+        private final OMNode start;
         private OMNode currentOMNode;
-        private AxiomParentNodeWrapper commonParent;
-        private AxiomDocument docWrapper;
+        private final AxiomParentNodeWrapper commonParent;
+        private final AxiomDocument docWrapper;
 
         public PrecedingSiblingIterator(OMNode start, AxiomParentNodeWrapper commonParent, AxiomDocument docWrapper) {
             this.start = start;

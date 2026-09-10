@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
@@ -25,7 +26,7 @@ public class UntypedNumericComparer implements AtomicComparer {
 
     private ConversionRules rules = ConversionRules.DEFAULT;
 
-    private static double[][] bounds = {
+    private static final double[][] bounds = {
             {1, 0e0, 0e1, 0e2, 0e3, 0e4, 0e5, 0e6, 0e7, 0e8, 0e9, 0e10},
             {1, 1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10},
             {1, 2e0, 2e1, 2e2, 2e3, 2e4, 2e5, 2e6, 2e7, 2e8, 2e9, 2e10},
@@ -52,7 +53,7 @@ public class UntypedNumericComparer implements AtomicComparer {
      */
 
     public static boolean quickCompare(
-            UntypedAtomicValue a0, NumericValue a1, int operator, ConversionRules rules)
+            StringItem a0, NumericValue a1, int operator, ConversionRules rules)
             throws XPathException {
         int comp = quickComparison(a0, a1, rules);
         switch (operator) {
@@ -85,19 +86,19 @@ public class UntypedNumericComparer implements AtomicComparer {
      */
 
     private static int quickComparison(
-            UntypedAtomicValue a0, NumericValue a1, ConversionRules rules)
+            StringItem a0, NumericValue a1, ConversionRules rules)
             throws XPathException {
         double d1 = a1.getDoubleValue();
 
-        CharSequence cs = Whitespace.trimWhitespace(a0.getStringValueCS());
+        UnicodeString cs = Whitespace.trim(a0.getUnicodeStringValue());
 
         boolean simple = true;
         int wholePartLength = 0;
         int firstDigit = -1;
         int decimalPoints = 0;
-        char sign = '?';
+        int sign = '?';
         for (int i = 0; i < cs.length(); i++) {
-            char c = cs.charAt(i);
+            int c = cs.codePointAt(i);
             if (c >= '0' && c <= '9') {
                 if (firstDigit < 0) {
                     firstDigit = c - '0';
@@ -149,7 +150,7 @@ public class UntypedNumericComparer implements AtomicComparer {
         } else {
             ConversionResult result;
             synchronized(a0) {
-                result = BuiltInAtomicType.DOUBLE.getStringConverter(rules).convertString(a0.getPrimitiveStringValue());
+                result = BuiltInAtomicType.DOUBLE.getStringConverter(rules).convertString(a0.getUnicodeStringValue());
             }
             AtomicValue av = result.asAtomic();
             return Double.compare(((DoubleValue)av).getDoubleValue(), d1);
@@ -175,7 +176,7 @@ public class UntypedNumericComparer implements AtomicComparer {
     @Override
     public int compareAtomicValues(AtomicValue a, AtomicValue b) {
         try {
-            return quickComparison((UntypedAtomicValue)a, (NumericValue)b, rules);
+            return quickComparison((StringItem)a, (NumericValue)b, rules);
         } catch (XPathException e) {
             throw new ComparisonException(e);
         }

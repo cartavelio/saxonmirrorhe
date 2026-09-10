@@ -89,7 +89,7 @@ public class RandomNumberGenerator extends SystemFunction implements Callable {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            Sequence input = (Sequence)arguments[0];
+            Sequence input = arguments[0];
             SequenceIterator iterator = input.iterate();
             Item item;
             final List<Item> output = new LinkedList<>();

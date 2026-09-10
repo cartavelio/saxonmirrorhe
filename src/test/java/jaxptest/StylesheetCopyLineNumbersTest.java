@@ -47,6 +47,7 @@ public class StylesheetCopyLineNumbersTest {
 
         // Run the stylesheets with an empty document to show the difference in error line number
         ErrorListener el = new StandardErrorListener() {
+            @Override
             public void fatalError(TransformerException exception) {
                 //System.err.println("error here: " + exception.getLocator().getLineNumber());
                 assertEquals(14, exception.getLocator().getLineNumber(), "line number is ");
@@ -93,6 +94,7 @@ public class StylesheetCopyLineNumbersTest {
 
         // Run the stylesheets with an empty document to show the difference in error line number
         ErrorListener el = new StandardErrorListener() {
+            @Override
             public void fatalError(TransformerException exception) {
                 //System.err.println("error here: " + exception.getLocator().getLineNumber());
                 assertEquals(14, exception.getLocator().getLineNumber(), "line number is ");

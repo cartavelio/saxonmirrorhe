@@ -13,8 +13,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.type.ValidationException;
 import org.xml.sax.SAXParseException;
@@ -43,7 +43,7 @@ public class StandardErrorReporter
     private int maximumNumberOfErrors = 1000;
     private int maxOrdinaryCharacter = 255;
     private int stackTraceDetail = 2;
-    private Set<String> warningsIssued = new HashSet<>();
+    private final Set<String> warningsIssued = new HashSet<>();
     protected transient Logger logger = new StandardLogger();
     private XmlProcessingError latestError;
     private boolean outputErrorCodes = true;

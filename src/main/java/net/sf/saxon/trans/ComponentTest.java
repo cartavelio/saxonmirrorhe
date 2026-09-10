@@ -17,9 +17,9 @@ import net.sf.saxon.pattern.QNameTest;
 
 public class ComponentTest {
 
-    private int componentKind;
-    private QNameTest nameTest;
-    private int arity;
+    private final int componentKind;
+    private final QNameTest nameTest;
+    private final int arity;
 
     public ComponentTest(int componentKind, QNameTest nameTest, int arity) {
         this.componentKind = componentKind;

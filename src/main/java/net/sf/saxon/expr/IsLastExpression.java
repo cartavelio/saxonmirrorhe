@@ -24,7 +24,7 @@ import net.sf.saxon.value.BooleanValue;
 
 public final class IsLastExpression extends Expression {
 
-    private boolean condition;
+    private final boolean condition;
 
     /**
      * Construct a condition that tests position() eq last() (if condition

@@ -46,7 +46,7 @@ public class UnresolvedXQueryFunctionItem extends AbstractFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-        return ((Function) ref.evaluateItem(context)).call(context, args);
+        return ref.evaluateItem(context).call(context, args);
     }
 
     @Override

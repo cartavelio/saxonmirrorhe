@@ -7,6 +7,7 @@
 
 package net.sf.saxon.type;
 
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.Whitespace;
@@ -16,7 +17,7 @@ import net.sf.saxon.value.Whitespace;
  */
 public class StringToDouble extends StringConverter {
 
-    private static StringToDouble THE_INSTANCE = new StringToDouble();
+    private static final StringToDouble THE_INSTANCE = new StringToDouble();
 
     /**
      * Get the singleton instance
@@ -39,9 +40,9 @@ public class StringToDouble extends StringConverter {
      * @throws NumberFormatException if the value cannot be converted
      */
 
-    public double stringToNumber(CharSequence s) throws NumberFormatException {
+    public double stringToNumber(UnicodeString s) throws NumberFormatException {
         // first try to parse simple numbers by hand (it's cheaper)
-        int len = s.length();
+        int len = s.length32();
         boolean containsDisallowedChars = false;
         boolean containsWhitespace = false;
         if (len < 9) {
@@ -52,7 +53,7 @@ public class StringToDouble extends StringConverter {
             boolean onlySpaceAllowed = false;
             loop:
             for (int i = 0; i < len; i++) {
-                char c = s.charAt(i);
+                int c = s.codePointAt(i);
                 switch (c) {
                     case ' ':
                     case '\n':
@@ -119,7 +120,7 @@ public class StringToDouble extends StringConverter {
         } else {
             loop2:
             for (int i = 0; i < len; i++) {
-                char c = s.charAt(i);
+                int c = s.codePointAt(i);
                 switch (c) {
                     case ' ':
                     case '\n':
@@ -149,7 +150,7 @@ public class StringToDouble extends StringConverter {
                 }
             }
         }
-        String n = containsWhitespace ? Whitespace.trimWhitespace(s).toString() : s.toString();
+        String n = containsWhitespace ? Whitespace.trim(s).toString() : s.toString();
         if ("INF".equals(n)) {
             return Double.POSITIVE_INFINITY;
         } else if ("+INF".equals(n)) {
@@ -173,7 +174,7 @@ public class StringToDouble extends StringConverter {
         throw new NumberFormatException("the float/double value '+INF' is not allowed under XSD 1.0");
     }
 
-    /*@NotNull*/ private static double[] powers = new double[]{1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
+    /*@NotNull*/ private static final double[] powers = new double[]{1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
 
     /**
      * Convert a string to the target type of this converter.
@@ -183,7 +184,7 @@ public class StringToDouble extends StringConverter {
      *         succeeded), or a {@link net.sf.saxon.type.ValidationFailure} if conversion failed.
      */
     @Override
-    public ConversionResult convertString(CharSequence input) {
+    public ConversionResult convertString(UnicodeString input) {
         try {
             double d = stringToNumber(input);
             return new DoubleValue(d);

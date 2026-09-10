@@ -73,6 +73,7 @@ public class TransformChainTest {
             private boolean startDocumentCalled = false;
             private boolean endDocumentCalled = false;
 
+            @Override
             public void startDocument() throws SAXException {
                 if (!this.startDocumentCalled) {
                     this.startDocumentCalled = true;
@@ -82,6 +83,7 @@ public class TransformChainTest {
                 }
             }
 
+            @Override
             public void endDocument() throws SAXException {
                 if (!this.endDocumentCalled) {
                     this.endDocumentCalled = true;

@@ -29,8 +29,8 @@ import net.sf.saxon.value.SequenceType;
  */
 public class IntegratedFunctionCall extends FunctionCall implements Callable {
 
-    private StructuredQName name;
-    private ExtensionFunctionCall function;
+    private final StructuredQName name;
+    private final ExtensionFunctionCall function;
     private SequenceType resultType = SequenceType.ANY_SEQUENCE;
     private int state = 0;
 
@@ -361,7 +361,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
 
     public static class ConfigurationCheckingFunction implements ItemMappingFunction {
 
-        private Configuration config;
+        private final Configuration config;
 
         public ConfigurationCheckingFunction(Configuration config) {
             this.config = config;

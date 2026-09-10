@@ -1,7 +1,6 @@
 package regextests;
 
 import jaxptest.ConfigTest;
-import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntRangeSet;
 import org.junit.jupiter.api.Test;
@@ -94,7 +93,5 @@ public class testRegex {
         }
     }
 
-    public static String diagnosticDisplay(String s) {
-        return StringValue.diagnosticDisplay(s);
-    }
+
 }

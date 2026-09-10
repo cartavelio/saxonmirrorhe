@@ -22,7 +22,7 @@ import net.sf.saxon.tree.util.Navigator;
  */
 public class FailRuleSet implements BuiltInRuleSet {
 
-    private static FailRuleSet THE_INSTANCE = new FailRuleSet();
+    private static final FailRuleSet THE_INSTANCE = new FailRuleSet();
 
     /**
      * Get the singleton instance of this class
@@ -53,7 +53,7 @@ public class FailRuleSet implements BuiltInRuleSet {
                         Location locationId) throws XPathException {
         String id = (item instanceof NodeInfo ?
                 "the node " + Navigator.getPath((NodeInfo) item) :
-                "the atomic value " + item.getStringValue());
+                "the atomic value " + item.getUnicodeStringValue());
         XPathException err = new XPathException("No user-defined template rule matches " + id, "XTDE0555");
         err.setLocator(locationId.saveLocation());
         throw err;

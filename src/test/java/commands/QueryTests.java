@@ -15,13 +15,7 @@ import net.sf.saxon.lib.ModuleURIResolver;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringReader;
+import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -49,6 +43,21 @@ public class QueryTests {
         String[] args = {
                 "-qs:count(//*)",
                 "-s:" + ConfigTest.DATA_DIR + "books.xml",
+                "-t",
+                "!omit-xml-declaration=yes"};
+        try {
+            Query.main(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testQueryDirectWithJsonSource() {
+        String[] args = {
+                "-qs:?name",
+                "-json:" + ConfigTest.DATA_DIR + "sample.json",
                 "-t",
                 "!omit-xml-declaration=yes"};
         try {
@@ -100,7 +109,7 @@ public class QueryTests {
                     "-update:on"};
 
             Query.main(args);
-            // FIXME: If this is an update test, shouldn't we check if it updated?
+            // TODO: If this is an update test, shouldn't we check if it updated?
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -139,6 +148,7 @@ public class QueryTests {
     public static class MyInitializer
             implements Initializer {
 
+        @Override
         public void initialize(Configuration config) {
             System.err.println("Initialize...");
             config.setModuleURIResolver(new Resolver());
@@ -147,6 +157,7 @@ public class QueryTests {
         private static final class Resolver
                 implements ModuleURIResolver {
 
+            @Override
             public StreamSource[] resolve(String ns, String base, String[] locs) {
                 System.err.println("Resolve: " + ns + ", " + base);
                 String mod = "module namespace h = \"http://example.org/ns/hello\"; " +

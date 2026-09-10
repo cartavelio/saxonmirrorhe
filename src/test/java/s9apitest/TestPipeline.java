@@ -17,9 +17,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestPipeline {
 	private XsltExecutable xslt_executable1 = null;
 	private XsltExecutable xslt_executable2 = null;
-	private File xslt1 = new File(ConfigTest.DATA_DIR + "echo_given_sourcefile.xsl");
-	private File xslt2 = new File(ConfigTest.DATA_DIR + "print_elements.xsl");
-
+	private final File xslt1 = new File(ConfigTest.DATA_DIR + "echo_given_sourcefile.xsl");
+	private final File xslt2 = new File(ConfigTest.DATA_DIR + "print_elements.xsl");
 
     @Test
 	public void testPipeline() {

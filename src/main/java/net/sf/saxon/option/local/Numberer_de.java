@@ -72,12 +72,12 @@ public class Numberer_de extends AbstractNumberer {
         }
     }
 
-    private static String[] germanUnits = {
+    private static final String[] germanUnits = {
             "", "Ein", "Zwei", "Drei", "Vier", "F\u00fcnf", "Sechs", "Sieben", "Acht", "Neun",
             "Zehn", "Elf", "Zw\u00f6lf", "Dreizehn", "Vierzehn", "F\u00fcnfzehn", "Sechszehn",
             "Siebzehn", "Achtzehn", "Neunzehn"};
 
-    private static String[] germanTens = {
+    private static final String[] germanTens = {
             "", "Zehn", "Zwanzig", "Drei\u00dfig", "Vierzig", "F\u00fcnfzig",
             "Sechzig", "Siebzig", "Achtzig", "Neunzig"};
 
@@ -120,7 +120,7 @@ public class Numberer_de extends AbstractNumberer {
         }
     }
 
-    private static String[] germanOrdinalUnits = {
+    private static final String[] germanOrdinalUnits = {
             "", "Erst", "Zweit", "Dritt", "Viert", "F\u00fcnft", "Sechst", "Siebt", "Acht", "Neunt",
             "Zehnt", "Elft", "Zw\u00f6lft", "Dreizehnt", "Vierzehnt", "F\u00fcnfzehnt", "Sechszehnt",
             "Siebzehnt", "Achtzehnt", "Neunzehnt"};
@@ -148,7 +148,7 @@ public class Numberer_de extends AbstractNumberer {
         return name;
     }
 
-    private static String[] germanMonths = {
+    private static final String[] germanMonths = {
             "Januar", "Februar", "M\u00e4rz", "April", "Mai", "Juni",
             "Juli", "August", "September", "Oktober", "November", "Dezember"
     };
@@ -173,7 +173,7 @@ public class Numberer_de extends AbstractNumberer {
         return name;
     }
 
-    private static String[] germanDays = {
+    private static final String[] germanDays = {
             "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"
     };
 

@@ -8,12 +8,12 @@
 package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.SaxonOutputKeys;
-import net.sf.saxon.om.NamespaceMap;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -90,7 +90,7 @@ public class TEXTEmitter extends XMLEmitter {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (!started) {
             openDocument();
         }
@@ -102,7 +102,7 @@ public class TEXTEmitter extends XMLEmitter {
             }
         }
         if (newlineMatcher != null) {
-            chars = newlineMatcher.matcher(chars).replaceAll(newlineRepresentation);
+            chars = StringView.of(newlineMatcher.matcher(chars.toString()).replaceAll(newlineRepresentation));
         }
         try {
             writer.write(chars.toString());
@@ -139,7 +139,7 @@ public class TEXTEmitter extends XMLEmitter {
      */
 
     @Override
-    public void processingInstruction(String name, /*@NotNull*/ CharSequence value, Location locationId, int properties)
+    public void processingInstruction(String name, /*@NotNull*/ CodePoints value, Location locationId, int properties)
             throws XPathException {
     }
 
@@ -149,7 +149,7 @@ public class TEXTEmitter extends XMLEmitter {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
     }
 
 }

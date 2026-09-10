@@ -8,9 +8,10 @@
 package net.sf.saxon.value;
 
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.BMPString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
@@ -29,7 +30,7 @@ public final class BigDecimalValue extends DecimalValue {
 
     public static final int DIVIDE_PRECISION = 18;
 
-    private BigDecimal value;
+    private final BigDecimal value;
     private Double doubleValue;
 
     public static final BigDecimal BIG_DECIMAL_ONE_MILLION = BigDecimal.valueOf(1_000_000);
@@ -63,13 +64,13 @@ public final class BigDecimalValue extends DecimalValue {
      *         message if not.
      */
 
-    public static ConversionResult makeDecimalValue(CharSequence in, boolean validate) {
+    public static ConversionResult makeDecimalValue(String in, boolean validate) {
 
         try {
             return parse(in);
         } catch (NumberFormatException err) {
             ValidationFailure e = new ValidationFailure(
-                    "Cannot convert string " + Err.wrap(Whitespace.trim(in), Err.VALUE) +
+                    "Cannot convert string " + Err.wrap(in, Err.VALUE) +
                             " to xs:decimal: " + err.getMessage());
             e.setErrorCode("FORG0001");
             return e;
@@ -86,7 +87,7 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
     public static BigDecimalValue parse(CharSequence in) throws NumberFormatException {
-        FastStringBuffer digits = new FastStringBuffer(in.length());
+        StringBuilder digits = new StringBuilder(in.length());
         int scale = 0;
         int state = 0;
         // 0 - in initial whitespace; 1 - after sign
@@ -115,7 +116,7 @@ public final class BigDecimalValue extends DecimalValue {
                         throw new NumberFormatException("unexpected sign");
                     }
                     state = 1;
-                    digits.cat(c);
+                    digits.append(c);
                     break;
                 case '0':
                 case '1':
@@ -135,7 +136,7 @@ public final class BigDecimalValue extends DecimalValue {
                     if (state == 5) {
                         throw new NumberFormatException("contains embedded whitespace");
                     }
-                    digits.cat(c);
+                    digits.append(c);
                     foundDigit = true;
                     break;
                 case '.':
@@ -166,7 +167,7 @@ public final class BigDecimalValue extends DecimalValue {
                 break;
             }
         }
-        if (digits.isEmpty() || (digits.length() == 1 && digits.charAt(0) == '-')) {
+        if (digits.length() == 0 || (digits.length() == 1 && digits.charAt(0) == '-')) {
             return BigDecimalValue.ZERO;
         }
         BigInteger bigInt = new BigInteger(digits.toString());
@@ -181,8 +182,8 @@ public final class BigDecimalValue extends DecimalValue {
      * @return true if the string has the correct format for a decimal
      */
 
-    public static boolean castableAsDecimal(CharSequence in) {
-        CharSequence trimmed = Whitespace.trimWhitespace(in);
+    public static boolean castableAsDecimal(String in) {
+        String trimmed = Whitespace.trim(in).toString();
         return decimalPattern.matcher(trimmed).matches();
     }
 
@@ -320,20 +321,21 @@ public final class BigDecimalValue extends DecimalValue {
      */
 
 //    public CharSequence getStringValueCS() {
-//        return decimalToString(value, new FastStringBuffer(20));
+//        return decimalToString(value, new StringBuilder(20));
 //    }
 
     /**
      * Get the canonical lexical representation as defined in XML Schema. This is not always the same
      * as the result of casting to a string according to the XPath rules. For xs:decimal, the canonical
      * representation always contains a decimal point.
+     * @return the canonical lexical representation
      */
 
     @Override
-    public CharSequence getCanonicalLexicalRepresentation() {
-        String s = getStringValue();
+    public UnicodeString getCanonicalLexicalRepresentation() {
+        UnicodeString s = this.getUnicodeStringValue().tidy();
         if (s.indexOf('.') < 0) {
-            s += ".0";
+            s = s.concat(BMPString.of(".0"));
         }
         return s;
     }
@@ -346,19 +348,19 @@ public final class BigDecimalValue extends DecimalValue {
 
     /*@NotNull*/
     @Override
-    public CharSequence getPrimitiveStringValue() {
-        return decimalToString(value, new FastStringBuffer(FastStringBuffer.C16));
+    public UnicodeString getPrimitiveStringValue() {
+        return BMPString.of(decimalToString(value, new StringBuilder(16)).toString());
     }
 
     /**
      * Convert a decimal value to a string, using the XPath rules for formatting
      *
      * @param value the decimal value to be converted
-     * @param fsb   the FastStringBuffer to which the value is to be appended
-     * @return the supplied FastStringBuffer, suitably populated
+     * @param fsb   the StringBuilder to which the value is to be appended
+     * @return the supplied StringBuilder, suitably populated
      */
 
-    public static FastStringBuffer decimalToString(BigDecimal value, FastStringBuffer fsb) {
+    public static StringBuilder decimalToString(BigDecimal value, StringBuilder fsb) {
         // Can't use BigDecimal#toString() under JDK 1.5 because this produces values like "1E-5".
         // Can't use BigDecimal#toPlainString() because it retains trailing zeroes to represent the scale
         int scale = value.scale();
@@ -368,38 +370,38 @@ public final class BigDecimalValue extends DecimalValue {
         } else if (scale < 0) {
             String s = value.abs().unscaledValue().toString();
             if (s.equals("0")) {
-                fsb.cat('0');
+                fsb.append('0');
                 return fsb;
             }
-            //FastStringBuffer sb = new FastStringBuffer(s.length() + (-scale) + 2);
+            //StringBuilder sb = new StringBuilder(s.length() + (-scale) + 2);
             if (value.signum() < 0) {
-                fsb.cat('-');
+                fsb.append('-');
             }
             fsb.append(s);
             for (int i = 0; i < -scale; i++) {
-                fsb.cat('0');
+                fsb.append('0');
             }
             return fsb;
         } else {
             String s = value.abs().unscaledValue().toString();
             if (s.equals("0")) {
-                fsb.cat('0');
+                fsb.append('0');
                 return fsb;
             }
             int len = s.length();
-            //FastStringBuffer sb = new FastStringBuffer(len+1);
+            //StringBuilder sb = new StringBuilder(len+1);
             if (value.signum() < 0) {
-                fsb.cat('-');
+                fsb.append('-');
             }
             if (scale >= len) {
                 fsb.append("0.");
                 for (int i = len; i < scale; i++) {
-                    fsb.cat('0');
+                    fsb.append('0');
                 }
                 fsb.append(s);
             } else {
                 fsb.append(s.substring(0, len - scale));
-                fsb.cat('.');
+                fsb.append('.');
                 fsb.append(s.substring(len - scale));
             }
             return fsb;

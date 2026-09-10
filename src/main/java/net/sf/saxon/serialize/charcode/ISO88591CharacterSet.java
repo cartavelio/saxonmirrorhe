@@ -13,7 +13,7 @@ package net.sf.saxon.serialize.charcode;
 
 public class ISO88591CharacterSet implements CharacterSet {
 
-    private static ISO88591CharacterSet theInstance = new ISO88591CharacterSet();
+    private static final ISO88591CharacterSet theInstance = new ISO88591CharacterSet();
 
     private ISO88591CharacterSet() {
     }

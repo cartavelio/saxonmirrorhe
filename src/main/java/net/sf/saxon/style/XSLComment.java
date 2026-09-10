@@ -13,7 +13,7 @@ import net.sf.saxon.expr.instruct.Comment;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * An xsl:comment elements in the stylesheet. <br>
@@ -61,7 +61,7 @@ public final class XSLComment extends XSLLeafNodeConstructor {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Comment inst = new Comment();
-        compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));
+        compileContent(exec, decl, inst, new StringLiteral(StringItem.SINGLE_SPACE));
         return inst;
     }
 

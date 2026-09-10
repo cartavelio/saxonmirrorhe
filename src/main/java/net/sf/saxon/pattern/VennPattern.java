@@ -234,7 +234,7 @@ public abstract class VennPattern extends Pattern {
     protected abstract String getOperatorName();
 
     /**
-     * Get the pattern text for diagnostics
+     * Get the original pattern text
      */
     @Override
     public String reconstruct() {

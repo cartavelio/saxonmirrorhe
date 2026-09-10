@@ -13,9 +13,9 @@ import net.sf.saxon.regex.charclass.CharacterClass;
 import net.sf.saxon.regex.charclass.EmptyCharacterClass;
 import net.sf.saxon.regex.charclass.IntSetCharacterClass;
 import net.sf.saxon.regex.charclass.SingletonCharacterClass;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.z.*;
 
 import java.util.Iterator;
@@ -215,7 +215,7 @@ public abstract class Operation {
         @Override
         public IntIterator iterateMatches(final REMatcher matcher, final int position) {
             return new IntIterator() {
-                Iterator<Operation> branchIter = branches.iterator();
+                final Iterator<Operation> branchIter = branches.iterator();
                 IntIterator currentIter = null;
                 Operation currentOp = null;
 
@@ -256,14 +256,14 @@ public abstract class Operation {
          */
         @Override
         public String display() {
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder fsb = new StringBuilder(64);
             fsb.append("(?:");
             boolean first = true;
             for (Operation branch : branches) {
                 if (first) {
                     first = false;
                 } else {
-                    fsb.cat('|');
+                    fsb.append('|');
                 }
                 fsb.append(branch.display());
             }
@@ -277,7 +277,7 @@ public abstract class Operation {
      */
 
     public static class OpSequence extends Operation {
-        private List<Operation> operations;
+        private final List<Operation> operations;
 
         OpSequence(List<Operation> operations) {
             this.operations = operations;
@@ -390,7 +390,7 @@ public abstract class Operation {
          */
         @Override
         public String display() {
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder fsb = new StringBuilder(64);
             for (Operation op : operations) {
                 fsb.append(op.display());
             }
@@ -505,7 +505,7 @@ public abstract class Operation {
      */
 
     public static class OpCharClass extends Operation {
-        private IntPredicate predicate;
+        private final IntPredicate predicate;
 
         OpCharClass(IntPredicate predicate) {
             this.predicate = predicate;
@@ -536,9 +536,8 @@ public abstract class Operation {
 
         @Override
         public IntIterator iterateMatches(REMatcher matcher, int position) {
-            //System.err.println("CharClass " + predicate + " matching at position " + position);
             UnicodeString in = matcher.search;
-            if (position < in.uLength() && predicate.test(in.uCharAt(position))) {
+            if (position < in.length() && predicate.test(in.codePointAt(position))) {
                 return new IntSingletonIterator(position + 1);
             } else {
                 return EmptyIntIterator.getInstance();
@@ -558,13 +557,13 @@ public abstract class Operation {
                 if (s instanceof IntSingletonSet) {
                     return "" + (char)((IntSingletonSet)s).getMember();
                 } else if (s instanceof IntRangeSet) {
-                    FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+                    StringBuilder fsb = new StringBuilder(64);
                     IntRangeSet irs = (IntRangeSet)s;
                     fsb.append("[");
                     for (int i=0; i<irs.getNumberOfRanges(); i++) {
-                        fsb.cat((char)irs.getStartPoints()[1]);
+                        fsb.append((char)irs.getStartPoints()[1]);
                         fsb.append("-");
-                        fsb.cat((char)irs.getEndPoints()[1]);
+                        fsb.append((char)irs.getEndPoints()[1]);
                     }
                     fsb.append("[");
                     return fsb.toString();
@@ -582,12 +581,12 @@ public abstract class Operation {
      */
 
     public static class OpAtom extends Operation {
-        private UnicodeString atom;
-        private int len;
+        private final UnicodeString atom;
+        private final int len;
 
         OpAtom(UnicodeString atom) {
             this.atom = atom;
-            this.len = atom.uLength();
+            this.len = atom.length32();
         }
 
         UnicodeString getAtom() {
@@ -610,7 +609,7 @@ public abstract class Operation {
                 return EmptyCharacterClass.getInstance();
             } else if (caseBlind) {
                 IntSet set;
-                int ch = atom.uCharAt(0);
+                int ch = atom.codePointAt(0);
                 int[] variants = CaseVariants.getCaseVariants(ch);
                 if (variants.length > 0) {
                     set = new IntHashSet(variants.length);
@@ -621,24 +620,24 @@ public abstract class Operation {
                     return new IntSetCharacterClass(set);
                 }
             }
-            return new SingletonCharacterClass(atom.uCharAt(0));
+            return new SingletonCharacterClass(atom.codePointAt(0));
         }
 
         @Override
         public IntIterator iterateMatches(REMatcher matcher, int position) {
             UnicodeString in = matcher.search;
-            if (position + len > in.uLength()) {
+            if (position + len > in.length()) {
                 return EmptyIntIterator.getInstance();
             }
             if (matcher.program.flags.isCaseIndependent()) {
                 for (int i = 0; i < len; i++) {
-                    if (!matcher.equalCaseBlind(in.uCharAt(position + i), atom.uCharAt(i))) {
+                    if (!matcher.equalCaseBlind(in.codePointAt(position + i), atom.codePointAt(i))) {
                         return EmptyIntIterator.getInstance();
                     }
                 }
             } else {
                 for (int i = 0; i < len; i++) {
-                    if (in.uCharAt(position + i) != atom.uCharAt(i)) {
+                    if (in.codePointAt(position + i) != atom.codePointAt(i)) {
                         return EmptyIntIterator.getInstance();
                     }
                 }
@@ -658,7 +657,7 @@ public abstract class Operation {
      */
 
     public static class OpGreedyFixed extends OpRepeat {
-        private int len;
+        private final int len;
 
         OpGreedyFixed(Operation op, int min, int max, int len) {
             super(op, min, max, true);
@@ -692,7 +691,7 @@ public abstract class Operation {
 
         @Override
         public IntIterator iterateMatches(REMatcher matcher, int position) {
-            int guard = matcher.search.uLength();
+            int guard = matcher.search.length32();
             if (max < Integer.MAX_VALUE) {
                 guard = java.lang.Math.min(guard, position + len * max);
             }
@@ -771,7 +770,7 @@ public abstract class Operation {
 
         @Override
         public IntIterator iterateMatches(REMatcher matcher, int position) {
-            int guard = matcher.search.uLength();
+            int guard = matcher.search.length32();
 
             int p = position;
             int matches = 0;
@@ -862,7 +861,7 @@ public abstract class Operation {
         public IntIterator iterateMatches(final REMatcher matcher, int position) {
             final Stack<IntIterator> iterators = new Stack<>();
             final Stack<Integer> positions = new Stack<>();
-            final int bound = Math.min(max, matcher.search.uLength() - position + 1);
+            final int bound = Math.min(max, matcher.search.length32() - position + 1);
             int p = position;
             if (greedy) {
                 // Prime the arrays first with iterators up to the maximum length, stopping if there is no match
@@ -1003,7 +1002,7 @@ public abstract class Operation {
      */
 
     public static class OpReluctantFixed extends OpRepeat {
-        private int len;
+        private final int len;
 
         OpReluctantFixed(Operation op, int min, int max, int len) {
             super(op, min, max, false);
@@ -1093,7 +1092,7 @@ public abstract class Operation {
             // An anchored match is successful only if we are at the end of the string.
             // Otherwise, match has succeeded unconditionally
             if (matcher.anchoredMatch) {
-                if (matcher.search.isEnd(position)) {
+                if (position >= matcher.search.length()) {
                     return new IntSingletonIterator(position);
                 } else {
                     return EmptyIntIterator.getInstance();
@@ -1139,7 +1138,7 @@ public abstract class Operation {
                 // If we're multiline matching, we could still be at the start of a line
                 if (matcher.program.flags.isMultiLine()) {
                     // Continue if at the start of a line
-                    if (matcher.isNewline(position - 1) && !matcher.search.isEnd(position)) {
+                    if (matcher.isNewline(position - 1) && !(position >= matcher.search.length())) {
                         return new IntSingletonIterator(position);
                     }
                 }
@@ -1182,14 +1181,14 @@ public abstract class Operation {
 
             UnicodeString search = matcher.search;
             if (matcher.program.flags.isMultiLine()) {
-                if (search.isEnd(0) || search.isEnd(position) || matcher.isNewline(position)) {
+                if (0 >= search.length() || position >= search.length() || matcher.isNewline(position)) {
                     return new IntSingletonIterator(position); //match successful
                 } else {
                     return EmptyIntIterator.getInstance();
                 }
             } else {
                 // In spec bug 16809 we decided that '$' does not match a trailing newline when not in multiline mode
-                if (search.isEnd(0) || search.isEnd(position)) {
+                if (0 >= search.length() || position >= search.length()) {
                     return new IntSingletonIterator(position);
                 } else {
                     return EmptyIntIterator.getInstance();
@@ -1338,7 +1337,7 @@ public abstract class Operation {
 
             // If there's not enough input left, give up.
             UnicodeString search = matcher.search;
-            if (search.isEnd(position + l - 1)) {
+            if (position + l - 1 >= search.length()) {
                 return EmptyIntIterator.getInstance();
             }
 
@@ -1346,14 +1345,14 @@ public abstract class Operation {
             if (matcher.program.flags.isCaseIndependent()) {
                 // Compare backref to input
                 for (int i = 0; i < l; i++) {
-                    if (!matcher.equalCaseBlind(search.uCharAt(position + i), search.uCharAt(s + i))) {
+                    if (!matcher.equalCaseBlind(search.codePointAt(position + i), search.codePointAt(s + i))) {
                         return EmptyIntIterator.getInstance();
                     }
                 }
             } else {
                 // Compare backref to input
                 for (int i = 0; i < l; i++) {
-                    if (search.uCharAt(position + i) != search.uCharAt(s + i)) {
+                    if (search.codePointAt(position + i) != search.codePointAt(s + i)) {
                         return EmptyIntIterator.getInstance();
                     }
                 }
@@ -1484,7 +1483,7 @@ public abstract class Operation {
      */
 
     private static class ForceProgressIterator implements IntIterator {
-        private IntIterator base;
+        private final IntIterator base;
         int countZeroLength = 0;
         int currentPos = -1;
 

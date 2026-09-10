@@ -2,6 +2,7 @@ package xqjtests;
 
 import com.saxonica.xqj.SaxonXQDataSource;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.DurationValue;
 import net.sf.saxon.value.SaxonDuration;
@@ -81,9 +82,9 @@ public class TestSaxonDuration {
         try {
             Duration dayTimeDuration = getDayTimeDuration();
             Duration yearMonthDuration = getYearMonthDuration();
-            assertEquals(new SaxonDuration((DurationValue)DurationValue.makeDuration("P2DT4H6M9S").asAtomic()),
+            assertEquals(new SaxonDuration((DurationValue)DurationValue.makeDuration(StringView.wrap("P2DT4H6M9S")).asAtomic()),
                          dayTimeDuration.add(dayTimeDuration));
-            assertEquals(new SaxonDuration((DurationValue) DurationValue.makeDuration("P17Y6M").asAtomic()),
+            assertEquals(new SaxonDuration((DurationValue) DurationValue.makeDuration(StringView.wrap("P17Y6M")).asAtomic()),
                          yearMonthDuration.add(yearMonthDuration));
         } catch (ValidationException e) {
             e.printStackTrace();

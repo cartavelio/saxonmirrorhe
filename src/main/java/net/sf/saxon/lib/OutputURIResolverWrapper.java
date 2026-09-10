@@ -30,7 +30,7 @@ import java.util.List;
 
 public class OutputURIResolverWrapper implements ResultDocumentResolver {
 
-    private OutputURIResolver outputURIResolver;
+    private final OutputURIResolver outputURIResolver;
 
     public OutputURIResolverWrapper(OutputURIResolver resolver) {
         this.outputURIResolver = resolver;

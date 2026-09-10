@@ -28,10 +28,10 @@ import java.util.function.IntPredicate;
 
 public class NameTest extends NodeTest implements QNameTest {
 
-    private int nodeKind;
-    private int fingerprint;
-    private UType uType;
-    private NamePool namePool;
+    private final int nodeKind;
+    private final int fingerprint;
+    private final UType uType;
+    private final NamePool namePool;
     /*@Nullable*/ private String uri = null;  // the URI corresponding to the fingerprint - computed lazily
     /*@Nullable*/ private String localName = null; //the local name corresponding to the fingerprint - computed lazily
 

@@ -19,9 +19,9 @@ import java.util.function.Predicate;
 
 final public class AncestorIterator implements AxisIterator {
 
-    private NodeInfo startNode;
+    private final NodeInfo startNode;
     private NodeInfo current;
-    private Predicate<? super NodeInfo> test;
+    private final Predicate<? super NodeInfo> test;
 
     public AncestorIterator(NodeInfo node, Predicate<? super NodeInfo> nodeTest) {
         test = nodeTest;

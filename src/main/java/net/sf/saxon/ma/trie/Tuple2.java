@@ -25,10 +25,7 @@ public final class Tuple2<T1, T2> {
 
         if (_1 != null ? !_1.equals(tuple._1) : tuple._1 != null)
             return false;
-        if (_2 != null ? !_2.equals(tuple._2) : tuple._2 != null)
-            return false;
-
-        return true;
+        return _2 != null ? _2.equals(tuple._2) : tuple._2 == null;
     }
 
     @Override

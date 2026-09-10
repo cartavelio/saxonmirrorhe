@@ -35,7 +35,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
 
     private List<UserFunctionResolvable> unboundFunctionReferences = new ArrayList<>(20);
     private List<StaticContext> correspondingStaticContext = new ArrayList<>(20);
-    private List<List<String>> correspondingReasons = new ArrayList<>();
+    private final List<List<String>> correspondingReasons = new ArrayList<>();
     private boolean resolving = false;
 
     /**
@@ -151,18 +151,7 @@ public class UnboundFunctionLibrary implements FunctionLibrary {
                 if (fd != null) {
                     fd.registerReference(ufc);
                     ufc.setStaticType(fd.getResultType());
-                }
-
-//                if (fd == null && importingModule.importsNamespace(q.getURI())) {
-//                    XQueryFunctionBinder global = importingModule.getExecutable().getFunctionLibrary();
-//                    fd = global.getDeclaration(q, arity);
-//                    if (fd != null) {
-//                        fd.registerReference(ufc);
-//                        ufc.setStaticType(fd.getResultType());
-//                    }
-//                }
-
-                if (fd == null) {
+                } else {
                     StringBuilder sb = new StringBuilder("Cannot find a " + arity +
                             "-argument function named " + q.getEQName() + "()");
                     List<String> reasons = correspondingReasons.get(i);

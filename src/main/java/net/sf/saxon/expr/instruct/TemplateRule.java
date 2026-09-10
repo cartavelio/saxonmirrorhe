@@ -61,7 +61,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     private int lineNumber;
 
 
-    private List<Rule> rules = new ArrayList<>();
+    private final List<Rule> rules = new ArrayList<>();
     protected List<TemplateRule> slaveCopies = new ArrayList<>();
 
     /**

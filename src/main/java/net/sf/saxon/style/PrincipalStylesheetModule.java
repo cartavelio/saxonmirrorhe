@@ -50,8 +50,8 @@ import java.util.*;
  */
 public class PrincipalStylesheetModule extends StylesheetModule implements GlobalVariableManager {
 
-    private StylesheetPackage stylesheetPackage;
-    private boolean declaredModes;
+    private final StylesheetPackage stylesheetPackage;
+    private final boolean declaredModes;
 
 
     // table of functions imported from XQuery library modules
@@ -62,24 +62,24 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
     // index of global variables and parameters, by StructuredQName
     // (overridden variables are excluded).
-    private HashMap<StructuredQName, ComponentDeclaration> globalVariableIndex =
+    private final HashMap<StructuredQName, ComponentDeclaration> globalVariableIndex =
             new HashMap<>(20);
 
 
     // index of templates - only includes those actually declared within this package
-    private HashMap<StructuredQName, ComponentDeclaration> templateIndex = new HashMap<>(20);
+    private final HashMap<StructuredQName, ComponentDeclaration> templateIndex = new HashMap<>(20);
 
     // Table of named stylesheet functions.
-    private HashMap<SymbolicName, ComponentDeclaration> functionIndex = new HashMap<>(8);
+    private final HashMap<SymbolicName, ComponentDeclaration> functionIndex = new HashMap<>(8);
 
     // key manager for all the xsl:key definitions in this package
-    private KeyManager keyManager;
+    private final KeyManager keyManager;
 
     // decimal format manager for all the xsl:decimal-format definitions in this package
-    private DecimalFormatManager decimalFormatManager;
+    private final DecimalFormatManager decimalFormatManager;
 
     // rule manager for template rules
-    private RuleManager ruleManager;
+    private final RuleManager ruleManager;
 
     // manager class for accumulator rules (XSLT 3.0 only)
     private AccumulatorRegistry accumulatorManager = null;
@@ -92,18 +92,18 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
     // attribute sets. A package can contain several declarations attribute sets with the same name.
     // They are indexed in the order they will be applied, that is, highest precedence first
-    private Map<StructuredQName, List<ComponentDeclaration>> attributeSetDeclarations = new HashMap<>();
+    private final Map<StructuredQName, List<ComponentDeclaration>> attributeSetDeclarations = new HashMap<>();
 
     // cache of stylesheet documents. Note that multiple imports of the same URI
     // lead to the stylesheet tree being reused
-    private HashMap<DocumentKey, XSLModuleRoot> moduleCache = new HashMap<>(4);
+    private final HashMap<DocumentKey, XSLModuleRoot> moduleCache = new HashMap<>(4);
 
-    private TypeAliasManager typeAliasManager;
+    private final TypeAliasManager typeAliasManager;
 
 
-    private CharacterMapIndex characterMapIndex;
+    private final CharacterMapIndex characterMapIndex;
 
-    private List<Action> fixupActions = new ArrayList<>();
+    private final List<Action> fixupActions = new ArrayList<>();
     private boolean needsDynamicOutputProperties = false;
 
 

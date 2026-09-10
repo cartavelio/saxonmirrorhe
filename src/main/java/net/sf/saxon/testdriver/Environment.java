@@ -10,9 +10,8 @@ package net.sf.saxon.testdriver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DocumentWrapper;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.expr.sort.SimpleCollation;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
@@ -22,7 +21,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.DecimalSymbols;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -72,8 +71,8 @@ public class Environment implements URIResolver {
     public HashMap<QName, XdmValue> params = new HashMap<>();
     public boolean usable = true;
     public boolean failedToBuild = false;
-    public FastStringBuffer paramDeclarations = new FastStringBuffer(256);
-    public FastStringBuffer paramDecimalDeclarations = new FastStringBuffer(256);
+    public StringBuilder paramDeclarations = new StringBuilder(256);
+    public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
     public UnparsedTextURIResolver unparsedTextResolver;
     public List<ResetAction> resetActions = new ArrayList<>();
     public boolean schemaAvailable = false;
@@ -447,7 +446,7 @@ public class Environment implements URIResolver {
                         e.printStackTrace();
                     }
                 } else {
-                    File file = new File(((XdmNode) env).getBaseURI().resolve(href));
+                    File file = new File(env.getBaseURI().resolve(href));
                     try {
                         manager.load(new StreamSource(file));
                     } catch (SaxonApiException err) {
@@ -521,8 +520,8 @@ public class Environment implements URIResolver {
                     formatQName = new StructuredQName("", "", formatName);
                 } else {
                     try {
-                        formatQName = StructuredQName.fromLexicalQName(formatName, false, true,
-                                decimalFormat.getUnderlyingNode().getAllNamespaces());
+                        formatQName = StructuredQName.fromLexicalQName((formatName), false, true,
+                                                                       decimalFormat.getUnderlyingNode().getAllNamespaces());
                     } catch (XPathException e) {
                         driver.println("**** Invalid QName as decimal-format name");
                         formatQName = new StructuredQName("", "", "error-name");
@@ -930,7 +929,7 @@ public class Environment implements URIResolver {
                     }
                     environment.streamedInputValidation = validation;
                 } else {
-                    File file = new File(((XdmNode) env).getBaseURI().resolve(href));
+                    File file = new File(env.getBaseURI().resolve(href));
                     environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
                     res.file = file;
                 }
@@ -943,12 +942,12 @@ public class Environment implements URIResolver {
                     if (href == null) {
                         environment.streamedContent = xpc.evaluate("string(content)", source).toString();
                     } else {
-                        environment.streamedFile = new File(((XdmNode) env).getBaseURI().resolve(href));
+                        environment.streamedFile = new File(env.getBaseURI().resolve(href));
                         res.file = environment.streamedFile;
                     }
                     environment.streamedInputValidation = validation;
                 } else {
-                    File file = new File(((XdmNode) env).getBaseURI().resolve(href));
+                    File file = new File(env.getBaseURI().resolve(href));
                     environment.streamedSecondaryDocs.put(file.toURI().toString(), validation);
                     res.file = file;
                 }
@@ -1059,7 +1058,7 @@ public class Environment implements URIResolver {
                     }
                 }
             }
-            String definesStylesheet = ((XdmNode) source).attribute("defines-stylesheet");
+            String definesStylesheet = source.attribute("defines-stylesheet");
             if (definesStylesheet != null) {
                 definesStylesheet = definesStylesheet.trim();
             }

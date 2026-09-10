@@ -22,7 +22,7 @@ public enum Genre {
     ARRAY("an array"),
     EXTERNAL("an external object");
 
-    private String description;
+    private final String description;
 
     Genre(String desc) {
         this.description = desc;

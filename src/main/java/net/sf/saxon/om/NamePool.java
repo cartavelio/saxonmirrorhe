@@ -71,11 +71,11 @@ public final class NamePool {
     // Next fingerprint available to be allocated. Starts at 1024 as low-end fingerprints are statically allocated to system-defined
     // names
 
-    private AtomicInteger unique = new AtomicInteger(1024);
+    private final AtomicInteger unique = new AtomicInteger(1024);
 
     // A map containing suggested prefixes for particular URIs
 
-    private ConcurrentHashMap<String, String> suggestedPrefixes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> suggestedPrefixes = new ConcurrentHashMap<>();
 
 
 

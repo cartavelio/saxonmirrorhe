@@ -34,10 +34,10 @@ import java.util.List;
 
 public class XPathExpression {
 
-    private StaticContext env;
-    private Expression expression;
+    private final StaticContext env;
+    private final Expression expression;
     private SlotManager stackFrameMap;
-    private Executable executable;
+    private final Executable executable;
     private int numberOfExternalVariables;
 
     /**

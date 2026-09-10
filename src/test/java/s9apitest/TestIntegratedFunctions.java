@@ -81,7 +81,7 @@ public class TestIntegratedFunctions {
         testOverrideFunctionXslt(xslWithOverridingFunction2, false);
     }
 
-    private static String xslWithOverridingFunction1 =
+    private static final String xslWithOverridingFunction1 =
             "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:f='http://math.com/'>" +
                     "<xsl:template name='go'><a sqrt2='{f:sqrt(2)}' />" +
                     "</xsl:template>" +
@@ -92,7 +92,7 @@ public class TestIntegratedFunctions {
                     "</xsl:function>" +
                     "</xsl:stylesheet>";
 
-    private static String xslWithOverridingFunction2 =
+    private static final String xslWithOverridingFunction2 =
             "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:f='http://math.com/'>" +
                     "<xsl:template name='go'><a sqrt2='{f:sqrt(2)}' />" +
                     "</xsl:template>" +
@@ -269,6 +269,7 @@ public class TestIntegratedFunctions {
          * @return the QName of the function
          */
 
+        @Override
         public StructuredQName getFunctionQName() {
             return qName;
         }
@@ -278,6 +279,7 @@ public class TestIntegratedFunctions {
          * @return the minimum number of arguments that must be supplied in a call to this function
          */
 
+        @Override
         public int getMinimumNumberOfArguments() {
             return 1;
         }
@@ -287,6 +289,7 @@ public class TestIntegratedFunctions {
          * @return the maximum number of arguments that may be supplied in a call to this function
          */
 
+        @Override
         public int getMaximumNumberOfArguments() {
             return 1;
         }
@@ -299,6 +302,7 @@ public class TestIntegratedFunctions {
          *         entry in the array providing the required type for all the remaining arguments.
          */
 
+        @Override
         public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
             return new net.sf.saxon.value.SequenceType[]{net.sf.saxon.value.SequenceType.OPTIONAL_DOUBLE};
         }
@@ -331,6 +335,7 @@ public class TestIntegratedFunctions {
          *         consequences are unpredictable.
          */
 
+        @Override
         public boolean trustResultType() {
             return true;
         }
@@ -340,6 +345,7 @@ public class TestIntegratedFunctions {
          * a function call that calls this function.
          */
 
+        @Override
         public ExtensionFunctionCall makeCallExpression() {
             return new SqrtFunctionCall();
         }
@@ -367,9 +373,10 @@ public class TestIntegratedFunctions {
          *          consistent with each other).
          */
 
+        @Override
         public Expression rewrite(StaticContext context, Expression[] arguments) throws XPathException {
             if (arguments[0] instanceof Literal) {
-                DoubleValue val = (DoubleValue)((Literal)arguments[0]).getValue();
+                DoubleValue val = (DoubleValue)((Literal)arguments[0]).getGroundedValue();
                 if (val == null) {
                     return Literal.makeEmptySequence();
                 }
@@ -396,6 +403,7 @@ public class TestIntegratedFunctions {
          *          if a dynamic error occurs during evaluation of the function.
          */
 
+        @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             DoubleValue val = (DoubleValue)arguments[0].head();
             if (val == null) {
@@ -422,6 +430,7 @@ public class TestIntegratedFunctions {
          * @return the QName of the function
          */
 
+        @Override
         public StructuredQName getFunctionQName() {
             return qName;
         }
@@ -431,6 +440,7 @@ public class TestIntegratedFunctions {
          * @return the minimum number of arguments that must be supplied in a call to this function
          */
 
+        @Override
         public int getMinimumNumberOfArguments() {
             return 0;
         }
@@ -440,6 +450,7 @@ public class TestIntegratedFunctions {
          * @return the maximum number of arguments that may be supplied in a call to this function
          */
 
+        @Override
         public int getMaximumNumberOfArguments() {
             return 0;
         }
@@ -452,6 +463,7 @@ public class TestIntegratedFunctions {
          *         entry in the array providing the required type for all the remaining arguments.
          */
 
+        @Override
         public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
             return new net.sf.saxon.value.SequenceType[0];
         }
@@ -465,6 +477,7 @@ public class TestIntegratedFunctions {
          * @return the return type of the function, as defined by its function signature
          */
 
+        @Override
         public net.sf.saxon.value.SequenceType getResultType(net.sf.saxon.value.SequenceType[] suppliedArgumentTypes) {
             return net.sf.saxon.value.SequenceType.OPTIONAL_DOUBLE;
         }
@@ -479,6 +492,7 @@ public class TestIntegratedFunctions {
          *         consequences are unpredictable.
          */
 
+        @Override
         public boolean trustResultType() {
             return true;
         }
@@ -488,6 +502,7 @@ public class TestIntegratedFunctions {
          * a function call that calls this function.
          */
 
+        @Override
         public ExtensionFunctionCall makeCallExpression() {
             return new ZeroArgFunctionCall();
         }
@@ -511,6 +526,7 @@ public class TestIntegratedFunctions {
          *          if a dynamic error occurs during evaluation of the function.
          */
 
+        @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             return new DoubleValue(123.4e0);
         }
@@ -533,6 +549,7 @@ public class TestIntegratedFunctions {
          * @return the QName of the function
          */
 
+        @Override
         public StructuredQName getFunctionQName() {
             return qName;
         }
@@ -542,6 +559,7 @@ public class TestIntegratedFunctions {
          * @return the minimum number of arguments that must be supplied in a call to this function
          */
 
+        @Override
         public int getMinimumNumberOfArguments() {
             return 1;
         }
@@ -551,6 +569,7 @@ public class TestIntegratedFunctions {
          * @return the maximum number of arguments that may be supplied in a call to this function
          */
 
+        @Override
         public int getMaximumNumberOfArguments() {
             return 1;
         }
@@ -563,6 +582,7 @@ public class TestIntegratedFunctions {
          * entry in the array providing the required type for all the remaining arguments.
          */
 
+        @Override
         public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
             return new net.sf.saxon.value.SequenceType[]{net.sf.saxon.value.SequenceType.SINGLE_STRING};
         }
@@ -576,6 +596,7 @@ public class TestIntegratedFunctions {
          * @return the return type of the function, as defined by its function signature
          */
 
+        @Override
         public net.sf.saxon.value.SequenceType getResultType(net.sf.saxon.value.SequenceType[] suppliedArgumentTypes) {
             return net.sf.saxon.value.SequenceType.OPTIONAL_STRING;
         }
@@ -590,6 +611,7 @@ public class TestIntegratedFunctions {
          *         consequences are unpredictable.
          */
 
+        @Override
         public boolean trustResultType() {
             return true;
         }
@@ -599,6 +621,7 @@ public class TestIntegratedFunctions {
          * a function call that calls this function.
          */
 
+        @Override
         public ExtensionFunctionCall makeCallExpression() {
             return new InscopePrefixFunctionCall();
         }
@@ -627,6 +650,7 @@ public class TestIntegratedFunctions {
           *          consistent with each other).
           */
 
+         @Override
          public void supplyStaticContext(StaticContext context, int locationId, Expression[] arguments) throws XPathException {
              nsContext = context.getNamespaceResolver();
          }
@@ -641,6 +665,7 @@ public class TestIntegratedFunctions {
          *                    be an instance of the same function class as the source function.
          */
 
+        @Override
         public void copyLocalData(ExtensionFunctionCall destination) {
             ((InscopePrefixFunctionCall)destination).nsContext = nsContext;
         }
@@ -661,8 +686,9 @@ public class TestIntegratedFunctions {
          *          if a dynamic error occurs during evaluation of the function.
          */
 
+        @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            StringValue val = (StringValue)arguments[0].head();
+            StringItem val = (StringItem)arguments[0].head();
             if (val == null) {
                 return EmptySequence.getInstance();
             }
@@ -670,7 +696,7 @@ public class TestIntegratedFunctions {
             if (ns == null) {
                 return EmptySequence.getInstance();
             }
-            return new StringValue(ns);
+            return new StringItem(ns);
         }
     }
 
@@ -679,22 +705,26 @@ public class TestIntegratedFunctions {
         try {
             Processor proc = new Processor(false);
             ExtensionFunction sqrt = new ExtensionFunction() {
+                @Override
                 public QName getName() {
                     return new QName("http://math.com/", "sqrt");
                 }
 
+                @Override
                 public net.sf.saxon.s9api.SequenceType getResultType() {
                     return net.sf.saxon.s9api.SequenceType.makeSequenceType(
                         ItemType.DOUBLE, OccurrenceIndicator.ONE
                     );
                 }
 
+                @Override
                 public net.sf.saxon.s9api.SequenceType[] getArgumentTypes() {
                     return new net.sf.saxon.s9api.SequenceType[]{
                         net.sf.saxon.s9api.SequenceType.makeSequenceType(
                             ItemType.DOUBLE, OccurrenceIndicator.ONE)};
                 }
 
+                @Override
                 public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
                     double arg = ((XdmAtomicValue)arguments[0].itemAt(0)).getDoubleValue();
                     double result = Math.sqrt(arg);

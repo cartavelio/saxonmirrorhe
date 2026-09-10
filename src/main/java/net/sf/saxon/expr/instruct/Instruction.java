@@ -13,10 +13,10 @@ import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -394,12 +394,12 @@ public abstract class Instruction extends Expression implements TailCallReturner
      */
 
     @Override
-    public final CharSequence evaluateAsString(XPathContext context) throws XPathException {
+    public final UnicodeString evaluateAsString(XPathContext context) throws XPathException {
         Item item = evaluateItem(context);
         if (item == null) {
-            return "";
+            return EmptyUniString.getInstance();
         } else {
-            return item.getStringValue();
+            return item.getUnicodeStringValue();
         }
     }
 

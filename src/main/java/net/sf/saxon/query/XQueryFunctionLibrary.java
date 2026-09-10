@@ -193,7 +193,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             }
             Sequence[] args = new Sequence[arguments.length];
             for (int i = 0; i < arguments.length; i++) {
-                args[i] = ((SequenceIterator) arguments[i].iterate()).materialize();
+                args[i] = arguments[i].iterate().materialize();
             }
             return function.call(context.newCleanContext(), args);
         }

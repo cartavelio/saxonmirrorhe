@@ -38,6 +38,7 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -339,6 +340,7 @@ public class TestXslt30TransformerDebug {
             final XdmNode style1 = builder.build(new StreamSource(sr, "http://imported/"));
 
             xqcomp.setURIResolver(new URIResolver() {
+                @Override
                 public Source resolve(String href, String base) throws TransformerException {
                     if (href.startsWith("http:")) {
                         return style1.asSource();
@@ -375,14 +377,17 @@ public class TestXslt30TransformerDebug {
         final List<TransformerException> fatals = new ArrayList<TransformerException>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception) throws TransformerException {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception) throws TransformerException {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception) throws TransformerException {
                 fatals.add(exception);
             }
@@ -720,14 +725,17 @@ public class TestXslt30TransformerDebug {
         final List<TransformerException> fatals = new ArrayList<>(4);
         ErrorListener listener = new ErrorListener() {
 
+            @Override
             public void warning(TransformerException exception)  {
                 warnings.add(exception);
             }
 
+            @Override
             public void error(TransformerException exception)  {
                 errors.add(exception);
             }
 
+            @Override
             public void fatalError(TransformerException exception)  {
                 fatals.add(exception);
             }
@@ -911,7 +919,7 @@ public class TestXslt30TransformerDebug {
                 "                <xsl:template match='/'><xsl:element name='root' /></xsl:template>" +
                 "                </xsl:stylesheet>";
 
-        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8"))));
+        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8))));
         Map<QName, XsltExecutable.ParameterDetails> params = xsltExecutable.getGlobalParameters();
 
         System.out.println();
@@ -949,7 +957,7 @@ public class TestXslt30TransformerDebug {
                 "                <xsl:template match='/'><xsl:element name='root' /></xsl:template>" +
                 "                </xsl:stylesheet>";
 
-        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8"))));
+        XsltExecutable xsltExecutable = xsltCompiler.compile(new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8))));
         Map<QName, XsltExecutable.ParameterDetails> params = xsltExecutable.getGlobalParameters();
         ItemType t1 = params.get(new QName("surname")).getDeclaredItemType();
         assertTrue(t1.toString().equals("Q{" + NamespaceConstant.SCHEMA + "}string"), "t1");
@@ -978,32 +986,27 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testCallFunction() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            Processor processor = new Processor(configuration);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        Processor processor = new Processor(configuration);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                    "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                    "                xmlns:f='http://localhost/'" +
-                    "                version='2.0'>" +
-                    "                <xsl:function name='f:add' visibility='public'><xsl:param name='a'/><xsl:param name='b'/>" +
-                    "                  <xsl:sequence select='$a + $b'/></xsl:function>" +
-                    "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                xmlns:f='http://localhost/'" +
+                "                version='2.0'>" +
+                "                <xsl:function name='f:add' visibility='public'><xsl:param name='a'/><xsl:param name='b'/>" +
+                "                  <xsl:sequence select='$a + $b'/></xsl:function>" +
+                "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
 
-            XdmValue v = t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)});
-            assertEquals(5, ((XdmAtomicValue) v).getLongValue());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        XdmValue v = t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)});
+        assertEquals(((XdmAtomicValue) v).getLongValue(), 5);
     }
 
     /**
@@ -1015,36 +1018,31 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testCallFunctionArgConversion() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            Processor processor = new Processor(configuration);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        Processor processor = new Processor(configuration);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                    "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                    "                xmlns:f='http://localhost/'" +
-                    "                version='2.0'>" +
-                    "                <xsl:function name='f:add' visibility='public'>" +
-                    "                   <xsl:param name='a' as='xs:double'/>" +
-                    "                   <xsl:param name='b' as='xs:double'/>" +
-                    "                   <xsl:sequence select='$a + $b'/>" +
-                    "                </xsl:function>" +
-                    "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                xmlns:f='http://localhost/'" +
+                "                version='2.0'>" +
+                "                <xsl:function name='f:add' visibility='public'>" +
+                "                   <xsl:param name='a' as='xs:double'/>" +
+                "                   <xsl:param name='b' as='xs:double'/>" +
+                "                   <xsl:sequence select='$a + $b'/>" +
+                "                </xsl:function>" +
+                "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
 
-            XdmValue v = t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)});
-            assertEquals(((XdmAtomicValue) v).getDoubleValue(), 5.0e0);
-            assertEquals("double", (((XdmAtomicValue) v)).getPrimitiveTypeName().getLocalName());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        XdmValue v = t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)});
+        assertEquals(((XdmAtomicValue) v).getDoubleValue(), 5.0e0);
+        assertEquals((((XdmAtomicValue) v)).getPrimitiveTypeName().getLocalName(), "double");
     }
 
     /**
@@ -1057,44 +1055,39 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testCallFunctionWrapResults() throws SaxonApiException {
-        try {
-            Processor processor = new Processor(true);
-            processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Processor processor = new Processor(true);
+        processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                    "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                    "                xmlns:f='http://localhost/'" +
-                    "                version='2.0'>" +
-                    "                <xsl:param name='x' as='xs:integer'/>" +
-                    "                <xsl:param name='y' select='.+2'/>" +
-                    "                <xsl:function name='f:add' visibility='final'>" +
-                    "                   <xsl:param name='a' as='xs:double'/>" +
-                    "                   <xsl:param name='b' as='xs:double'/>" +
-                    "                   <xsl:sequence select='$a + $b + $x + $y'/>" +
-                    "                </xsl:function>" +
-                    "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                xmlns:f='http://localhost/'" +
+                "                version='2.0'>" +
+                "                <xsl:param name='x' as='xs:integer'/>" +
+                "                <xsl:param name='y' select='.+2'/>" +
+                "                <xsl:function name='f:add' visibility='final'>" +
+                "                   <xsl:param name='a' as='xs:double'/>" +
+                "                   <xsl:param name='b' as='xs:double'/>" +
+                "                   <xsl:sequence select='$a + $b + $x + $y'/>" +
+                "                </xsl:function>" +
+                "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
-            t.setGlobalContextItem(new XdmAtomicValue(20));
-            Map<QName, XdmValue> globals = new HashMap<QName, XdmValue>();
-            globals.put(new QName("x"), new XdmAtomicValue(30));
-            t.setStylesheetParameters(globals);
-            StringWriter sw = new StringWriter();
-            Serializer s = processor.newSerializer();
-            s.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            s.setOutputWriter(sw);
-            t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)}, s);
-            assertEquals("57", sw.toString());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
+        t.setGlobalContextItem(new XdmAtomicValue(20));
+        Map<QName, XdmValue> globals = new HashMap<QName, XdmValue>();
+        globals.put(new QName("x"), new XdmAtomicValue(30));
+        t.setStylesheetParameters(globals);
+        StringWriter sw = new StringWriter();
+        Serializer s = processor.newSerializer();
+        s.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+        s.setOutputWriter(sw);
+        t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue(3)}, s);
+        assertEquals(sw.toString(), "57");
     }
 
 
@@ -1125,15 +1118,12 @@ public class TestXslt30TransformerDebug {
                     "                </xsl:function>" +
                     "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
+            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
             XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
             Xslt30Transformer t = xsltExecutable.load30();
             t.setTraceListener(new MyTraceListener());
             XdmValue v = t.callFunction(new QName("http://localhost/", "f:add"), new XdmValue[]{new XdmAtomicValue(2), new XdmAtomicValue("3")});
             fail("Failed to throw error");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
         } catch (SaxonApiException e) {
             System.err.println(e.getMessage());
             // OK
@@ -1149,41 +1139,36 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testCallNamedTemplateWithParams() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-            Processor processor = new Processor(configuration);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+        Processor processor = new Processor(configuration);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                    "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                    "                version='3.0'>" +
-                    "                <xsl:template name='t'>" +
-                    "                   <xsl:param name='a' as='xs:double'/>" +
-                    "                   <xsl:param name='b' as='xs:float'/>" +
-                    "                   <xsl:sequence select='$a + $b'/>" +
-                    "                </xsl:template>" +
-                    "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                version='3.0'>" +
+                "                <xsl:template name='t'>" +
+                "                   <xsl:param name='a' as='xs:double'/>" +
+                "                   <xsl:param name='b' as='xs:float'/>" +
+                "                   <xsl:sequence select='$a + $b'/>" +
+                "                </xsl:template>" +
+                "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
-            Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
-            params.put(new QName("a"), new XdmAtomicValue(12));
-            params.put(new QName("b"), new XdmAtomicValue(5));
-            t.setInitialTemplateParameters(params, false);
-            StringWriter sw = new StringWriter();
-            Serializer se = processor.newSerializer(sw);
-            se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            t.callTemplate(new QName("t"), se);
-            assertEquals("17", sw.toString());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
+        Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
+        params.put(new QName("a"), new XdmAtomicValue(12));
+        params.put(new QName("b"), new XdmAtomicValue(5));
+        t.setInitialTemplateParameters(params, false);
+        StringWriter sw = new StringWriter();
+        Serializer se = processor.newSerializer(sw);
+        se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+        t.callTemplate(new QName("t"), se);
+        assertEquals(sw.toString(), "17");
     }
 
     /**
@@ -1213,7 +1198,7 @@ public class TestXslt30TransformerDebug {
                     "                </xsl:template>" +
                     "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
+            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
             XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
             Xslt30Transformer t = xsltExecutable.load30();
             t.setTraceListener(new MyTraceListener());
@@ -1227,9 +1212,6 @@ public class TestXslt30TransformerDebug {
             fail("failed to detect error");
         } catch (SaxonApiException e) {
             assertTrue(e.getMessage().contains("required parameter $b"), "message");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
         }
     }
 
@@ -1242,44 +1224,39 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testCallNamedTemplateWithTunnelParams() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-            Processor processor = new Processor(configuration);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+        Processor processor = new Processor(configuration);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                    "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                    "                version='3.0'>" +
-                    "                <xsl:template name='t'>" +
-                    "                   <xsl:call-template name='u'/>" +
-                    "                </xsl:template>" +
-                    "                <xsl:template name='u'>" +
-                    "                   <xsl:param name='a' as='xs:double' tunnel='yes'/>" +
-                    "                   <xsl:param name='b' as='xs:float' tunnel='yes'/>" +
-                    "                   <xsl:sequence select='$a + $b'/>" +
-                    "                </xsl:template>" +
-                    "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                version='3.0'>" +
+                "                <xsl:template name='t'>" +
+                "                   <xsl:call-template name='u'/>" +
+                "                </xsl:template>" +
+                "                <xsl:template name='u'>" +
+                "                   <xsl:param name='a' as='xs:double' tunnel='yes'/>" +
+                "                   <xsl:param name='b' as='xs:float' tunnel='yes'/>" +
+                "                   <xsl:sequence select='$a + $b'/>" +
+                "                </xsl:template>" +
+                "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
-            Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
-            params.put(new QName("a"), new XdmAtomicValue(12));
-            params.put(new QName("b"), new XdmAtomicValue(5));
-            t.setInitialTemplateParameters(params, true);
-            StringWriter sw = new StringWriter();
-            Serializer se = processor.newSerializer(sw);
-            se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            t.callTemplate(new QName("t"), se);
-            assertEquals("17", sw.toString());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
+        Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
+        params.put(new QName("a"), new XdmAtomicValue(12));
+        params.put(new QName("b"), new XdmAtomicValue(5));
+        t.setInitialTemplateParameters(params, true);
+        StringWriter sw = new StringWriter();
+        Serializer se = processor.newSerializer(sw);
+        se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+        t.callTemplate(new QName("t"), se);
+        assertEquals(sw.toString(), "17");
     }
 
     /**
@@ -1291,41 +1268,36 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testCallTemplateRuleWithParams() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-            Processor processor = new Processor(configuration);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+        Processor processor = new Processor(configuration);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                    "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                    "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                    "                version='3.0'>" +
-                    "                <xsl:template match='*'>" +
-                    "                   <xsl:param name='a' as='xs:double'/>" +
-                    "                   <xsl:param name='b' as='xs:float'/>" +
-                    "                   <xsl:sequence select='name(.), $a + $b'/>" +
-                    "                </xsl:template>" +
-                    "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+                "                version='3.0'>" +
+                "                <xsl:template match='*'>" +
+                "                   <xsl:param name='a' as='xs:double'/>" +
+                "                   <xsl:param name='b' as='xs:float'/>" +
+                "                   <xsl:sequence select='name(.), $a + $b'/>" +
+                "                </xsl:template>" +
+                "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
-            Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
-            params.put(new QName("a"), new XdmAtomicValue(12));
-            params.put(new QName("b"), new XdmAtomicValue(5));
-            t.setInitialTemplateParameters(params, false);
-            StringWriter sw = new StringWriter();
-            Serializer se = processor.newSerializer(sw);
-            se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            t.applyTemplates(new StreamSource(new StringReader("<e/>")), se);
-            assertEquals("e 17", sw.toString());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
+        Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
+        params.put(new QName("a"), new XdmAtomicValue(12));
+        params.put(new QName("b"), new XdmAtomicValue(5));
+        t.setInitialTemplateParameters(params, false);
+        StringWriter sw = new StringWriter();
+        Serializer se = processor.newSerializer(sw);
+        se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+        t.applyTemplates(new StreamSource(new StringReader("<e/>")), se);
+        assertEquals(sw.toString(), "e 17");
     }
 
     /**
@@ -1336,40 +1308,35 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testCallNamedTemplateWithParamsRaw() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-            Processor processor = new Processor(configuration);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        //configuration.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
+        Processor processor = new Processor(configuration);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                "                version='3.0'>" +
-                "                <xsl:template name='t'>" +
-                "                   <xsl:param name='a' as='xs:double'/>" +
-                "                   <xsl:param name='b' as='xs:float'/>" +
-                "                   <xsl:sequence select='$a+1, $b+1'/>" +
-                "                </xsl:template>" +
-                "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+            "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+            "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+            "                version='3.0'>" +
+            "                <xsl:template name='t'>" +
+            "                   <xsl:param name='a' as='xs:double'/>" +
+            "                   <xsl:param name='b' as='xs:float'/>" +
+            "                   <xsl:sequence select='$a+1, $b+1'/>" +
+            "                </xsl:template>" +
+            "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
-            Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
-            params.put(new QName("a"), new XdmAtomicValue(12));
-            params.put(new QName("b"), new XdmAtomicValue(5));
-            t.setInitialTemplateParameters(params, false);
-            XdmValue val = t.callTemplate(new QName("t"));
-            assertEquals(2, val.size());
-            assertEquals(13, ((XdmAtomicValue) val.itemAt(0)).getLongValue());
-            assertEquals(6, ((XdmAtomicValue) val.itemAt(1)).getLongValue());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
+        Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
+        params.put(new QName("a"), new XdmAtomicValue(12));
+        params.put(new QName("b"), new XdmAtomicValue(5));
+        t.setInitialTemplateParameters(params, false);
+        XdmValue val = t.callTemplate(new QName("t"));
+        assertEquals(2, val.size());
+        assertEquals(13, ((XdmAtomicValue) val.itemAt(0)).getLongValue());
+        assertEquals(6, ((XdmAtomicValue) val.itemAt(1)).getLongValue());
     }
 
 
@@ -1381,46 +1348,41 @@ public class TestXslt30TransformerDebug {
 
     @Test
     public void testApplyTemplatesRaw() throws SaxonApiException {
-        try {
-            Configuration configuration = Configuration.newConfiguration();
-            Processor processor = new Processor(configuration);
-            processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
-            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+        Configuration configuration = Configuration.newConfiguration();
+        Processor processor = new Processor(configuration);
+        processor.setConfigurationProperty(Feature.COMPILE_WITH_TRACING, true);
+        XsltCompiler xsltCompiler = processor.newXsltCompiler();
 
-            String source = "<?xml version='1.0'?>" +
-                "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
-                "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
-                "                version='3.0'>" +
-                "                <xsl:template match='*'>" +
-                "                   <xsl:param name='a' as='xs:double'/>" +
-                "                   <xsl:param name='b' as='xs:float'/>" +
-                "                   <xsl:sequence select='., $a + $b'/>" +
-                "                </xsl:template>" +
-                "                </xsl:stylesheet>";
+        String source = "<?xml version='1.0'?>" +
+            "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" +
+            "                xmlns:xs='http://www.w3.org/2001/XMLSchema'" +
+            "                version='3.0'>" +
+            "                <xsl:template match='*'>" +
+            "                   <xsl:param name='a' as='xs:double'/>" +
+            "                   <xsl:param name='b' as='xs:float'/>" +
+            "                   <xsl:sequence select='., $a + $b'/>" +
+            "                </xsl:template>" +
+            "                </xsl:stylesheet>";
 
-            StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes("UTF-8")), "file:///dummy/");
-            XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
-            Xslt30Transformer t = xsltExecutable.load30();
-            t.setTraceListener(new MyTraceListener());
-            Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
-            params.put(new QName("a"), new XdmAtomicValue(12));
-            params.put(new QName("b"), new XdmAtomicValue(5));
-            t.setInitialTemplateParameters(params, false);
-            StringWriter sw = new StringWriter();
-            Serializer se = processor.newSerializer(sw);
-            se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            XdmValue result = t.applyTemplates(new StreamSource(new StringReader("<e/>")));
-            assertEquals(2, result.size(), "size");
-            XdmItem first = result.itemAt(0);
-            assertTrue(first instanceof XdmNode, "t1");
-            assertEquals("e", ((XdmNode) first).getNodeName().getLocalName(), "v1");
-            XdmItem second = result.itemAt(1);
-            assertTrue(second instanceof XdmAtomicValue, "t2");
-            assertEquals(17e0, ((XdmAtomicValue) second).getDoubleValue(),  "v2");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            fail();
-        }
+        StreamSource ss = new StreamSource(new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
+        XsltExecutable xsltExecutable = xsltCompiler.compile(ss);
+        Xslt30Transformer t = xsltExecutable.load30();
+        t.setTraceListener(new MyTraceListener());
+        Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
+        params.put(new QName("a"), new XdmAtomicValue(12));
+        params.put(new QName("b"), new XdmAtomicValue(5));
+        t.setInitialTemplateParameters(params, false);
+        StringWriter sw = new StringWriter();
+        Serializer se = processor.newSerializer(sw);
+        se.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+        XdmValue result = t.applyTemplates(new StreamSource(new StringReader("<e/>")));
+        assertEquals(2, result.size(), "size");
+        XdmItem first = result.itemAt(0);
+        assertTrue(first instanceof XdmNode, "t1");
+        assertEquals("e", ((XdmNode) first).getNodeName().getLocalName(), "v1");
+        XdmItem second = result.itemAt(1);
+        assertTrue(second instanceof XdmAtomicValue, "t2");
+        assertEquals(17e0, ((XdmAtomicValue) second).getDoubleValue(), "v2");
     }
 
 
@@ -1467,7 +1429,7 @@ public class TestXslt30TransformerDebug {
             validator.setLax(false);
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(validator);
-            StreamSource sDoc = new StreamSource(new ByteArrayInputStream(in.getBytes("UTF-8")), "file:///dummy/");
+            StreamSource sDoc = new StreamSource(new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
             XdmNode doc = builder.build(sDoc);
 
             StringWriter writer = new StringWriter();

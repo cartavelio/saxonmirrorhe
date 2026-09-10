@@ -21,8 +21,8 @@ import net.sf.saxon.type.FunctionItemType;
  */
 public class OriginalFunction extends AbstractFunction implements Function, ContextOriginator {
 
-    private UserFunction userFunction;
-    private Component component;
+    private final UserFunction userFunction;
+    private final Component component;
 
     public OriginalFunction(Component component) {
         this.component = component;

@@ -14,7 +14,7 @@ import net.sf.saxon.type.StringToDouble;
  */
 public class StringToDouble11 extends StringToDouble {
 
-    private static StringToDouble11 THE_INSTANCE = new StringToDouble11();
+    private static final StringToDouble11 THE_INSTANCE = new StringToDouble11();
 
     /**
      * Get the singleton instance

@@ -8,16 +8,17 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyBuilder;
@@ -29,7 +30,7 @@ import net.sf.saxon.type.Type;
 
 public class Doctype extends Instruction {
 
-    private Operand contentOp;
+    private final Operand contentOp;
 
     public Doctype(Expression content) {
         contentOp = new Operand(this, content, OperandRole.SINGLE_ATOMIC);
@@ -277,7 +278,7 @@ public class Doctype extends Instruction {
     }
 
     private void write(Outputter out, String s) throws XPathException {
-        out.characters(s, getLocation(), ReceiverOption.DISABLE_ESCAPING);
+        out.characters(StringView.of(s), getLocation(), ReceiverOption.DISABLE_ESCAPING);
     }
 
 

@@ -15,12 +15,12 @@ import cli.System.Text.RegularExpressions.Regex;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.regex.ARegexIterator;
 import net.sf.saxon.regex.RegexIterator;
-import net.sf.saxon.regex.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
-import net.sf.saxon.value.StringValue;
+
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntToIntHashMap;
 
@@ -76,7 +76,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-    public StringValue next() {
+    public StringItem next() {
         if (next == null && prevEnd >= 0) {
             // we've returned a match (or we're at the start), so find the next match
             if (matcher.MoveNext()) {
@@ -117,7 +117,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
                 return null;
             }
         }
-        return StringValue.makeStringValue(current);
+        return StringItem.makeStringValue(current);
     }
 
     /**
@@ -127,7 +127,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     public Item current() {
-        return StringValue.makeStringValue(current);
+        return StringItem.makeStringValue(current);
     }
 
     /**
@@ -194,13 +194,13 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
         GroupCollection groups = match.get_Groups();
         int c = groups.get_Count();
         if (c == 0) {
-            action.characters(current);
+            action.characters(StringView.of(current));
         } else {
             // Create a map from positions in the string to lists of actions.
             // The "actions" in each list are: +N: start group N; -N: end group N.
             IntHashMap<List<Integer>> actions = new IntHashMap<List<Integer>>(c);
 
-            StringValue[] groupArray = new StringValue[c - 1];
+            StringItem[] groupArray = new StringItem[c - 1];
             IEnumerator en = groups.GetEnumerator();
             int i = 0;
             // we're not interested in group 0
@@ -232,7 +232,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
                     // and match("a", "(a)(b?)") will both give the same result for group 2 (start=1, end=1).
                     // So we need to go back to the original regex to determine the group nesting
                     if (nestingTable == null) {
-                        nestingTable = ARegexIterator.computeNestingTable(UnicodeString.makeUnicodeString(pattern.toString()));
+                        nestingTable = ARegexIterator.computeNestingTable(StringView.tidy(pattern.toString()));
                     }
                     int parentGroup = nestingTable.get(i);
                     // insert the start and end events immediately before the end event for the parent group,
@@ -259,12 +259,12 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
 
 
             }
-            FastStringBuffer buff = new FastStringBuffer(current.length());
+            StringBuilder buff = new StringBuilder(current.length());
             for (int k = 0; k < current.length() + 1; k++) {
                 List<Integer> events = actions.get(k);
                 if (events != null) {
                     if (buff.length() > 0) {
-                        action.characters(buff);
+                        action.characters(StringView.of(buff.toString()));
                         buff.setLength(0);
                     }
                     for (Integer group : events) {
@@ -276,11 +276,11 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
                     }
                 }
                 if (k < current.length()) {
-                    buff.cat(current.charAt(k));
+                    buff.append(current.charAt(k));
                 }
             }
             if (buff.length() > 0) {
-                action.characters(buff);
+                action.characters(StringView.of(buff.toString()));
             }
         }
 

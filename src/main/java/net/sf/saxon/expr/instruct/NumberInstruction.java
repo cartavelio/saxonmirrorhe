@@ -45,9 +45,9 @@ public class NumberInstruction extends Expression {
     public static final int SIMPLE = 3;
     public static final String[] LEVEL_NAMES = new String[]{"single", "multi", "any", "simple"};
 
-    private Operand selectOp;
+    private final Operand selectOp;
 
-    private int level;
+    private final int level;
     private Operand countOp;
     private Operand fromOp;
     private boolean hasVariablesInPatterns = false;

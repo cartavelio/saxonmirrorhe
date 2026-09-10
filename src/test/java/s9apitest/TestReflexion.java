@@ -90,7 +90,7 @@ public class TestReflexion {
         }
     }
 
-    private String xslVoidThis = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    private final String xslVoidThis = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             + "<xsl:stylesheet exclude-result-prefixes=\"#all\" version=\"2.0\" \n"
             + "    xmlns:date=\"java:java.util.Date?void=this\" xmlns:jt=\"http://saxon.sf.net/java-type\" \n"
             + "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
@@ -216,18 +216,6 @@ public class TestReflexion {
             fail(e.getMessage());
         }
     }
-
-//    public void testSupplyMap() {
-//        try {
-//            XQueryCompiler c = makeCompiler();
-//            XQueryExecutable exec = c.compile(
-//                    "this:mapSize(map{'a':1, 'b':2})");
-//            XdmValue val = exec.load().evaluate();
-//            assertEquals("val", "true", val.itemAt(0).getStringValue());
-//        } catch (SaxonApiException e) {
-//            fail(e.getMessage());
-//        }
-//    }
 
     @Test
     public void testSupplyDate() {
@@ -679,7 +667,7 @@ public class TestReflexion {
 
     public static Object fetchRecordXml() {
         String xml = "<Root><Record><PERS_NBR>123</PERS_NBR><Name>SAN</Name></Record></Root>";
-        InputSource ins = new InputSource(new StringReader(xml.toString()));
+        InputSource ins = new InputSource(new StringReader(xml));
         SAXSource sax = new SAXSource(ins);
         Object obj = null;
         Processor processor = new Processor(true);
@@ -747,7 +735,7 @@ public class TestReflexion {
         testOverrideFunctionXslt(xslWithOverridingFunction2, false);
     }
 
-    private static String xslWithOverridingFunction1 =
+    private static final String xslWithOverridingFunction1 =
             "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:f='java:java.lang.Math'>" +
                     "<xsl:template name='go'><a sqrt2='{Q{java:java.lang.Math}sqrt(2)}' />" +
                     "</xsl:template>" +
@@ -758,7 +746,7 @@ public class TestReflexion {
                     "</xsl:function>" +
                     "</xsl:stylesheet>";
 
-    private static String xslWithOverridingFunction2 =
+    private static final String xslWithOverridingFunction2 =
             "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:f='java:java.lang.Math'>" +
                     "<xsl:template name='go'><a sqrt2='{Q{java:java.lang.Math}sqrt(2)}' />" +
                     "</xsl:template>" +
@@ -803,21 +791,6 @@ public class TestReflexion {
 
     @Test
     public void testLookupNotationWithContext() {    // bug 4056
-        try {
-            Processor proc = new Processor(true);
-            XPathCompiler compiler = proc.newXPathCompiler();
-            XPathExecutable exp = compiler.compile(
-                    "let $e := Q{java:net.sf.saxon.expr.Literal}makeEmptySequence() return $e?effectiveBooleanValue()");
-            XdmValue result = exp.load().evaluateSingle();
-            assertFalse(((XdmAtomicValue) result).getBooleanValue());
-        } catch (SaxonApiException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
-    @Test
-    public void testReturnJDOM2Document() {    // bug 4567
         try {
             Processor proc = new Processor(true);
             XPathCompiler compiler = proc.newXPathCompiler();

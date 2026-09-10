@@ -41,9 +41,9 @@ import java.util.Set;
 
 public class UseWhenStaticContext extends AbstractStaticContext implements StaticContext {
 
-    private NamespaceResolver namespaceContext;
-    private FunctionLibrary functionLibrary;
-    private Compilation compilation;
+    private final NamespaceResolver namespaceContext;
+    private final FunctionLibrary functionLibrary;
+    private final Compilation compilation;
 
     /**
      * Create a static context for evaluating use-when expressions

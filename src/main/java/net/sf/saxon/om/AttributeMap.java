@@ -118,7 +118,7 @@ public interface AttributeMap extends Iterable<AttributeInfo> {
         return AttributeMap.fromList(list);
     }
 
-    default void verify() {};
+    default void verify() {}
 
     default AttributeMap apply(java.util.function.Function<AttributeInfo, AttributeInfo> mapper) {
         List<AttributeInfo> list = new ArrayList<>(size());

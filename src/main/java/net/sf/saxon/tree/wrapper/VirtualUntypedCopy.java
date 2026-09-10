@@ -9,10 +9,8 @@ package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.CopyOptions;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SchemaType;
@@ -96,7 +94,7 @@ public class VirtualUntypedCopy extends VirtualCopy {
         switch (getNodeKind()) {
             case Type.ELEMENT:
             case Type.ATTRIBUTE:
-                return new UntypedAtomicValue(getStringValueCS());
+                return new UntypedAtomicValue(getUnicodeStringValue());
             default:
                 return super.atomize();
         }

@@ -15,7 +15,7 @@ import java.util.function.IntPredicate;
  */
 public class IntSetPredicate implements IntPredicate {
 
-    private IntSet set;
+    private final IntSet set;
 
     public IntSetPredicate(IntSet set) {
         if (set == null) {

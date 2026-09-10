@@ -42,8 +42,8 @@ import java.util.*;
 
 public class PathMap {
 
-    /*@NotNull*/ private List<PathMapRoot> pathMapRoots = new ArrayList<PathMapRoot>();
-    /*@NotNull*/ private HashMap<Binding, PathMapNodeSet> pathsForVariables =
+    /*@NotNull*/ private final List<PathMapRoot> pathMapRoots = new ArrayList<PathMapRoot>();
+    /*@NotNull*/ private final HashMap<Binding, PathMapNodeSet> pathsForVariables =
             new HashMap<Binding, PathMapNodeSet>();  // a map from a variable Binding to a PathMapNodeSet
 
     /**
@@ -247,7 +247,7 @@ public class PathMap {
 
     public static class PathMapRoot extends PathMapNode {
 
-        private Expression rootExpression;
+        private final Expression rootExpression;
         private boolean isDownwardsOnly;
 
         /**
@@ -276,9 +276,9 @@ public class PathMap {
      */
 
     public static class PathMapArc {
-        private PathMapNode target;
-        private int axis;
-        private NodeTest test;
+        private final PathMapNode target;
+        private final int axis;
+        private final NodeTest test;
 
         /**
          * Create a PathMapArc
@@ -596,7 +596,7 @@ public class PathMap {
             String suppliedUri = null;
             if (arg instanceof Literal) {
                 try {
-                    String argValue = ((Literal) arg).getValue().getStringValue();
+                    String argValue = ((Literal) arg).getGroundedValue().getUnicodeStringValue().toString();
                     if (baseUri == null) {
                         if (new URI(argValue).isAbsolute()) {
                             suppliedUri = argValue;

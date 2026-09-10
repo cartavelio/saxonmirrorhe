@@ -13,7 +13,7 @@ import net.sf.saxon.expr.instruct.NamespaceConstructor;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * An xsl:namespace element in the stylesheet. (XSLT 2.0)
@@ -53,13 +53,13 @@ public class XSLNamespace extends XSLLeafNodeConstructor {
         if (select == null) {
             if (countChildren == 0) {
                 // there are no child nodes and no select attribute
-                select = new StringLiteral(StringValue.EMPTY_STRING);
+                select = new StringLiteral(StringItem.EMPTY_STRING);
                 select.setRetainedStaticContext(makeRetainedStaticContext());
             } else if (countChildren == 1) {
                 // there is exactly one child node
                 if (firstChild.getNodeKind() == Type.TEXT) {
                     // it is a text node: optimize for this case
-                    select = new StringLiteral(firstChild.getStringValueCS());
+                    select = new StringLiteral(firstChild.getUnicodeStringValue());
                     select.setRetainedStaticContext(makeRetainedStaticContext());
                 }
             }
@@ -80,7 +80,7 @@ public class XSLNamespace extends XSLLeafNodeConstructor {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         NamespaceConstructor inst = new NamespaceConstructor(name);
-        compileContent(exec, decl, inst, new StringLiteral(StringValue.SINGLE_SPACE));
+        compileContent(exec, decl, inst, new StringLiteral(StringItem.SINGLE_SPACE));
         return inst;
     }
 

@@ -8,6 +8,7 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
@@ -76,8 +77,8 @@ public class IgnorableWhitespaceStripper extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (chars.length() > 0 && (!stripStack[top] || !Whitespace.isWhite(chars))) {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (!chars.isEmpty() && (!stripStack[top] || !Whitespace.isAllWhite(chars))) {
             nextReceiver.characters(chars, locationId, properties);
         }
     }

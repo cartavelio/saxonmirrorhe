@@ -177,10 +177,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     public static int checkSubscript(IntegerValue subscript, int limit) throws XPathException {
         int index = subscript.asSubscript();
         if (index <= 0) {
-            throw new XPathException("Array subscript " + subscript.getStringValue() + " is out of range", "FOAY0001");
+            throw new XPathException("Array subscript " + subscript.getUnicodeStringValue() + " is out of range", "FOAY0001");
         }
         if (index > limit) {
-            throw new XPathException("Array subscript " + subscript.getStringValue() +
+            throw new XPathException("Array subscript " + subscript.getUnicodeStringValue() +
                                              " exceeds limit (" + limit + ")", "FOAY0001");
         }
         return index;
@@ -479,6 +479,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
      * Implementation of the function array:subarray(array, xs:integer, xs:integer) =&gt; array
      */
     public static class ArraySubarray extends SystemFunction {
+
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {

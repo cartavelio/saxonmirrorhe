@@ -10,9 +10,11 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.tiny.CharSlice;
 import net.sf.saxon.value.Base64BinaryValue;
 import net.sf.saxon.value.HexBinaryValue;
 
@@ -59,7 +61,7 @@ public class BinaryTextDecoder extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String name, /*@NotNull*/ CharSequence value, Location locationId, int properties)
+    public void processingInstruction(String name, /*@NotNull*/ CodePoints value, Location locationId, int properties)
             throws XPathException {
         String encoding;
         byte[] bytes = null;
@@ -70,10 +72,11 @@ public class BinaryTextDecoder extends ProxyReceiver {
         } else {
             encoding = outputEncoding;
         }
+        UnicodeString tValue = value.tidy();
         if (name.equals("hex")) {
-            bytes = new HexBinaryValue(value).getBinaryValue();
+            bytes = new HexBinaryValue(tValue).getBinaryValue();
         } else if (name.equals("b64")) {
-            bytes = new Base64BinaryValue(value).getBinaryValue();
+            bytes = new Base64BinaryValue(tValue).getBinaryValue();
         }
         if (bytes != null) {
             try {
@@ -81,7 +84,7 @@ public class BinaryTextDecoder extends ProxyReceiver {
                 InputStreamReader reader = new InputStreamReader(stream, encoding);
                 char[] array = new char[bytes.length];
                 int used = reader.read(array, 0, array.length);
-                nextReceiver.characters(new CharSlice(array, 0, used), locationId, properties);
+                nextReceiver.characters(StringView.of(new String(array, 0, used)), locationId, properties);
             } catch (IOException e) {
                 throw new XPathException(
                         "Text output method: failed to decode binary data " + Err.wrap(value.toString(), Err.VALUE));

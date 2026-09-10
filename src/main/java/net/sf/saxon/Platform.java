@@ -15,6 +15,7 @@ import net.sf.saxon.expr.sort.SimpleCollation;
 import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ExternalObjectType;
 import org.xml.sax.XMLReader;
@@ -187,7 +188,7 @@ public interface Platform {
      * @throws XPathException if the regular expression or the flags are invalid
      */
 
-    RegularExpression compileRegularExpression(Configuration config, CharSequence regex, String flags, String hostLanguage, List<String> warnings)
+    RegularExpression compileRegularExpression(Configuration config, UnicodeString regex, String flags, String hostLanguage, List<String> warnings)
             throws XPathException;
 
     /**
@@ -257,7 +258,7 @@ public interface Platform {
     ModuleURIResolver makeStandardModuleURIResolver(Configuration config);
 
 
-//#if BYTECODE==true
+//#if EE==true
     /**
      * Return the class loader required to load the bytecode generated classes
      *

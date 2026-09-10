@@ -19,7 +19,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public class DescendingComparer implements AtomicComparer {
 
-    private AtomicComparer baseComparer;
+    private final AtomicComparer baseComparer;
 
     public DescendingComparer(AtomicComparer base) {
         baseComparer = base;

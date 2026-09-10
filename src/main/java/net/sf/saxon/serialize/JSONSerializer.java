@@ -14,17 +14,15 @@ import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.codenorm.Normalizer;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.stream.StreamResult;
@@ -45,7 +43,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
     private int topLevelCount = 0;
     private int maxLineLength = 80;
 
-    private JSONEmitter emitter;
+    private final JSONEmitter emitter;
     private Properties outputProperties;
     private CharacterSet characterSet;
     private boolean isIndenting;
@@ -175,10 +173,10 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             emitter.endArray();
         } else if (item instanceof NodeInfo) {
             String s = serializeNode((NodeInfo) item);
-            emitter.writeAtomicValue(new StringValue(s));
+            emitter.writeAtomicValue(new StringItem(s));
         } else if (unfailing) {
-            String s = item.getStringValue();
-            emitter.writeAtomicValue(new StringValue(s));
+            CodePoints s = item.getUnicodeStringValue();
+            emitter.writeAtomicValue(new StringItem(s.tidy()));
         } else {
             throw new XPathException("JSON output method cannot handle an item of type " + item.getClass(), "SERE0021");
         }
@@ -194,7 +192,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             if (!(member instanceof AtomicValue)) {
                 return false;
             }
-            totalSize += ((AtomicValue) member).getStringValueCS().length() + 1;
+            totalSize += ((AtomicValue) member).getUnicodeStringValue().estimatedLength() + 1;
             if (totalSize > maxLineLength) {
                 return false;
             }
@@ -211,7 +209,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             if (!(entry.value instanceof AtomicValue)) {
                 return false;
             }
-            totalSize += entry.key.getStringValueCS().length() + ((AtomicValue) entry.value).getStringValueCS().length() + 4;
+            totalSize += entry.key.getUnicodeStringValue().estimatedLength() + ((AtomicValue) entry.value).getUnicodeStringValue().estimatedLength() + 4;
             if (totalSize > maxLineLength) {
                 return false;
             }

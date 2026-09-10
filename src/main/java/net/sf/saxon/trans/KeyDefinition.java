@@ -29,11 +29,11 @@ import java.util.Map;
 
 public class KeyDefinition extends Actor implements ContextOriginator {
 
-    private SymbolicName symbolicName;
-    private Pattern match;          // the match pattern
+    private final SymbolicName symbolicName;
+    private final Pattern match;          // the match pattern
     private BuiltInAtomicType useType;    // the type of the values returned by the atomized use expression
-    private StringCollator collation;     // the collating sequence, when type=string
-    private String collationName;         // the collation URI
+    private final StringCollator collation;     // the collating sequence, when type=string
+    private final String collationName;         // the collation URI
     private boolean backwardsCompatible = false;
     private boolean strictComparison = false;
     private boolean convertUntypedToOther = false;

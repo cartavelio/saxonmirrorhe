@@ -24,7 +24,7 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.*;
 
@@ -35,10 +35,10 @@ import java.util.*;
  */
 public class OptionsParameter {
 
-    private Map<String, SequenceType> allowedOptions = new HashMap<>(8);
-    private Map<String, Sequence> defaultValues = new HashMap<>(8);
-    private Set<String> requiredOptions = new HashSet<>(4);
-    private Map<String, Set<String>> allowedValues = new HashMap<>(8);
+    private final Map<String, SequenceType> allowedOptions = new HashMap<>(8);
+    private final Map<String, Sequence> defaultValues = new HashMap<>(8);
+    private final Set<String> requiredOptions = new HashSet<>(4);
+    private final Map<String, Set<String>> allowedValues = new HashMap<>(8);
     private String errorCodeForDisallowedValue;
     private String errorCodeForAbsentValue = "SXJE9999";
     private boolean allowCastFromString = false;
@@ -110,7 +110,7 @@ public class OptionsParameter {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
         for (String req : requiredOptions) {
-            if (supplied.get(new StringValue(req)) == null) {
+            if (supplied.get(new StringItem(req)) == null) {
                 throw new XPathException("No value supplied for required option: " + req, errorCodeForAbsentValue);
             }
         }
@@ -119,19 +119,19 @@ public class OptionsParameter {
             String nominalKey = allowed.getKey();
             AtomicValue actualKey;
             if (nominalKey.startsWith("Q{")) {
-                actualKey = new QNameValue(StructuredQName.fromEQName(nominalKey), BuiltInAtomicType.QNAME);
+                actualKey = new QNameValue(StructuredQName.fromEQName((nominalKey)), BuiltInAtomicType.QNAME);
             } else {
-                actualKey = new StringValue(nominalKey);
+                actualKey = new StringItem(nominalKey);
             }
             SequenceType required = allowed.getValue();
             Sequence actual = supplied.get(actualKey);
             if (actual != null) {
                 if (!required.matches(actual, th)) {
                     boolean ok = false;
-                    if (actual instanceof StringValue && allowCastFromString
+                    if (actual instanceof StringItem && allowCastFromString
                             && required.getPrimaryType() instanceof AtomicType) {
                         try {ConversionRules rules = context.getConfiguration().getConversionRules();
-                            actual = Converter.convert((StringValue)actual, (AtomicType)required.getPrimaryType(), rules);
+                            actual = Converter.convert((StringItem)actual, (AtomicType)required.getPrimaryType(), rules);
                             ok = true;
                         } catch (XPathException err) {
                             ok = false;

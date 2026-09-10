@@ -17,8 +17,8 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.trace.XSLTTraceListener;
-import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
@@ -121,14 +121,11 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
         if (type.equals("feature") && value.equals("streaming")) {
             return true;
         }
-        if (type.equals("year_component_values") &&
+        return type.equals("year_component_values") &&
                 (value.equals("support year above 9999") ||
                          value.equals("support negative year") ||
                          value.equals("support year zero")
-                )) {
-            return true;
-        }
-        return false;
+                );
     }
 
     @Override
@@ -1436,10 +1433,11 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
             } else if (val.startsWith("{")) {
                 return new QName(StructuredQName.fromClarkName(val));
             } else if (val.startsWith("Q{")) {
-                return new QName(StructuredQName.fromEQName(val));
+                return new QName(StructuredQName.fromEQName((val)));
             } else if (val.contains(":")){
                 try {
-                    QNameValue qn = ResolveQName.resolveQName(val, att.get().getUnderlyingNode().getParent());
+                    QNameValue qn = ResolveQName.resolveQName(
+                            val, att.get().getUnderlyingNode().getParent());
                     return new QName(qn.getStructuredQName());
                 } catch (XPathException e) {
                     e.printStackTrace();
@@ -1455,9 +1453,9 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
     protected static class ResultDocHandler implements java.util.function.Function<URI, Destination> {
 
-        private Processor proc;
-        private TestOutcome outcome;
-        private URI baseOutputURI;
+        private final Processor proc;
+        private final TestOutcome outcome;
+        private final URI baseOutputURI;
         boolean serialized;
 
         public ResultDocHandler(Processor proc, TestOutcome outcome, String baseOutputURI, boolean serialized) {
@@ -1499,8 +1497,8 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
 
     protected static class OutputResolver implements OutputURIResolver {
 
-        private Processor proc;
-        private TestOutcome outcome;
+        private final Processor proc;
+        private final TestOutcome outcome;
         private Destination destination;
         private StringWriter stringWriter;
         boolean serialized;

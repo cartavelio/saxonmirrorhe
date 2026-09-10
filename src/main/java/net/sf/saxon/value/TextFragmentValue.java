@@ -12,13 +12,13 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.tree.linked.DocumentImpl;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -35,10 +35,10 @@ import java.util.function.Predicate;
 
 public final class TextFragmentValue implements NodeInfo, SourceLocator {
 
-    private CharSequence text;
-    private String baseURI;
+    private final UnicodeString text;
+    private final String baseURI;
     private String documentURI;
-    private GenericTreeInfo treeInfo;
+    private final GenericTreeInfo treeInfo;
     private TextFragmentTextNode textNode = null;   // created on demand
 
 
@@ -49,7 +49,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      * @param baseURI the base URI of the document node
      */
 
-    public TextFragmentValue(Configuration config, CharSequence value, String baseURI) {
+    public TextFragmentValue(Configuration config, UnicodeString value, String baseURI) {
         this.text = value;
         this.baseURI = baseURI;
         this.treeInfo = new GenericTreeInfo(config);
@@ -64,7 +64,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      * @param baseURI the base URI of the document node
      */
 
-    public static NodeInfo makeTextFragment(Configuration config, CharSequence value, String baseURI) {
+    public static NodeInfo makeTextFragment(Configuration config, UnicodeString value, String baseURI) {
         if (value.length() == 0) {
             // Create a childless document node: bug 4246
             DocumentImpl doc = new DocumentImpl();
@@ -120,21 +120,12 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
     }
 
     /**
-     * Get the String Value
+     * Get the String Value of the document node, which is the same as the string value of the text node
+     * @return the string value
      */
 
     @Override
-    public String getStringValue() {
-        return text.toString();
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         return text;
     }
 
@@ -172,7 +163,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
         buffer.append("tt");
         buffer.append(Long.toString(treeInfo.getDocumentNumber()));
     }
@@ -624,21 +615,12 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
         }
 
         /**
-         * Get the String Value
+         * Get the String Value of the text node
+         * @return the string value
          */
 
         @Override
-        public String getStringValue() {
-            return text.toString();
-        }
-
-        /**
-         * Get the value of the item as a CharSequence. This is in some cases more efficient than
-         * the version of the method that returns a String.
-         */
-
-        @Override
-        public CharSequence getStringValueCS() {
+        public UnicodeString getUnicodeStringValue() {
             return text;
         }
 
@@ -658,7 +640,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
 
         @Override
-        public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
+        public void generateId(/*@NotNull*/ StringBuilder buffer) {
             buffer.append("tt");
             buffer.append(Long.toString(treeInfo.getDocumentNumber()));
             buffer.append("t1");

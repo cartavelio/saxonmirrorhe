@@ -117,7 +117,7 @@ public final class XSLAssert extends StyleElement {
             }
             if (errorCode instanceof StringLiteral) {
                 // resolve any QName prefix now
-                String code = ((StringLiteral) errorCode).getStringValue();
+                String code = ((StringLiteral) errorCode).stringify();
                 if (code.contains(":") && !code.startsWith("Q{")) {
                     StructuredQName name = makeQName(code, null, "error-code");
                     errorCode = new StringLiteral(name.getEQName());

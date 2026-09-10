@@ -9,12 +9,11 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
@@ -56,8 +55,8 @@ public class CollatingFunctionFree extends SystemFunction {
     @Override
     public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
         Expression c = arguments[arguments.length - 1];
-        if (c instanceof Literal) {
-            String coll = ((Literal) c).getValue().getStringValue();
+        if (c instanceof StringLiteral) {
+            String coll = ((StringLiteral) c).stringify();
             try {
                 URI collUri = new URI(coll);
                 if (!collUri.isAbsolute()) {

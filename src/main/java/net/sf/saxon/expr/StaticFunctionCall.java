@@ -27,7 +27,7 @@ import net.sf.saxon.type.*;
  */
 public class StaticFunctionCall extends FunctionCall implements Callable {
 
-    private Function target;
+    private final Function target;
 
     public StaticFunctionCall(Function target, Expression[] arguments) {
         if (target.getArity() != arguments.length) {

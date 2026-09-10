@@ -9,6 +9,7 @@ package net.sf.saxon.om;
 
 import net.sf.saxon.expr.SingletonIntersectExpression;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.UnfailingIterator;
@@ -20,7 +21,7 @@ import java.util.List;
 
 /**
  * A value that exists in memory and that can be directly addressed
- * @since 9.5.  Generified in 9.9.
+ * @since 9.5.  Generified in 9.9.  Generification reverted in 10.0.
  */
 public interface GroundedValue extends Sequence {
 
@@ -89,26 +90,41 @@ public interface GroundedValue extends Sequence {
     }
 
     /**
-     * Get the string value of this sequence. The string value of an item is the result of applying the string()
+     * Get the string value of this sequence, as an instance of {@link UnicodeString}.
+     * The string value of an item is the result of applying the XPath string()
      * function. The string value of a sequence is the space-separated result of applying the string-join() function
      * using a single space as the separator
+     *
+     * <p>The result of this method is always equivalent to the result of the {@link #getStringValue()} method.
+     * Use this method in preference either (a) if you need to use the value in a context where a {@link UnicodeString}
+     * is required, or (b) if the underlying value is held as a {@code UniString}, or in a form that is readily
+     * converted to a {@code UniString}. This is typically the case (i) when the value is a text or element node
+     * in a TinyTree, and (ii) when the value is a {@code StringItem}: that is, an atomic value of type
+     * {@code xs:string}.</p>
+     *
+     * @return the string value of the sequence.
+     * @throws XPathException if the sequence contains items that have no string value (for example, function items)
+     */
+
+    UnicodeString getUnicodeStringValue() throws XPathException;
+
+    /**
+     * Get the string value of this sequence, as an instance of {@link String}.
+     * The string value of an item is the result of applying the XPath string()
+     * function. The string value of a sequence is the space-separated result of applying the string-join() function
+     * using a single space as the separator.
+     *
+     * <p>The result of this method is always equivalent to the result of the {@link #getUnicodeStringValue()} method.
+     *    Use this method in preference either (a) if you need to use the value in a context where a {@link String}
+     *    is required, or (b) if the underlying value is held as a {@code String}, or in a form that is readily
+     *    converted to a {@code String}. This is typically the case (i) when the value is an attribute node
+     *    in a TinyTree, or (ii) any kind of node in a third-party tree model such as DOM.</p>
      *
      * @return the string value of the sequence.
      * @throws XPathException if the sequence contains items that have no string value (for example, function items)
      */
 
     String getStringValue() throws XPathException;
-
-    /**
-     * Get the string value of this sequence. The string value of an item is the result of applying the string()
-     * function. The string value of a sequence is the space-separated result of applying the string-join() function
-     * using a single space as the separator
-     *
-     * @return the string value of the sequence.
-     * @throws XPathException if the sequence contains items that have no string value (for example, function items)
-     */
-
-    CharSequence getStringValueCS() throws XPathException;
 
     /**
      * Reduce the sequence to its simplest form. If the value is an empty sequence, the result will be

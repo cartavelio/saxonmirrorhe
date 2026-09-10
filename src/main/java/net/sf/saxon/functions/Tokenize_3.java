@@ -11,6 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
@@ -44,8 +45,8 @@ public class Tokenize_3 extends RegexFunction {
         if (sv == null) {
             return EmptySequence.getInstance();
         }
-        CharSequence input = sv.getStringValueCS();
-        if (input.length() == 0) {
+        UnicodeString input = sv.getUnicodeStringValue();
+        if (input.isEmpty()) {
             return EmptySequence.getInstance();
         }
         RegularExpression re = getRegularExpression(arguments);

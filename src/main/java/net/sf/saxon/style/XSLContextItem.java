@@ -8,10 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -110,7 +107,7 @@ public class XSLContextItem extends StyleElement {
         }
         ((XSLTemplate)getParent()).setContextItemRequirements(requiredType, mayBeOmitted, absentFocus);
         iterateAxis(AxisInfo.PRECEDING_SIBLING).forEachOrFail(prec -> {
-            if (((NodeInfo)prec).getNodeKind() != Type.TEXT || !Whitespace.isWhite(prec.getStringValueCS())) {
+            if (((NodeInfo)prec).getNodeKind() != Type.TEXT || !Whitespace.isAllWhite(prec.getUnicodeStringValue())) {
                 compileError("xsl:context-item must be the first child of xsl:template");
             }
         });

@@ -11,10 +11,12 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -52,7 +54,7 @@ public class Matches extends RegexFunction {
                 lang += "/XSD11";
             }
             re = context.getConfiguration().compileRegularExpression(
-                    regex.getStringValueCS(), flags.toString(), lang, null);
+                    regex.getUnicodeStringValue(), flags.toString(), lang, null);
 
         } catch (XPathException err) {
             XPathException de = new XPathException(err);
@@ -60,7 +62,7 @@ public class Matches extends RegexFunction {
             de.setXPathContext(context);
             throw de;
         }
-        return re.containsMatch(input.getStringValueCS());
+        return re.containsMatch(input.getUnicodeStringValue());
     }
 
     /**
@@ -75,8 +77,8 @@ public class Matches extends RegexFunction {
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         RegularExpression re = getRegularExpression(arguments);
-        StringValue arg = (StringValue)arguments[0].head();
-        CharSequence in = arg==null ? "" : arg.getStringValueCS();
+        StringItem arg = (StringItem)arguments[0].head();
+        UnicodeString in = arg==null ? EmptyUniString.getInstance() : arg.getUnicodeStringValue();
         boolean result = re.containsMatch(in);
         return BooleanValue.get(result);
     }

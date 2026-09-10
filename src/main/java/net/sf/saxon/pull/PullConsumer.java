@@ -18,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
 
 public class PullConsumer {
 
-    private PullProvider in;
+    private final PullProvider in;
 
     /**
      * Create a PullConsumer that swallows the events read from a given pull provider

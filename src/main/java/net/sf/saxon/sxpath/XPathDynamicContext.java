@@ -32,9 +32,9 @@ import javax.xml.transform.URIResolver;
  */
 public class XPathDynamicContext {
 
-    private ItemType contextItemType;
-    private XPathContextMajor contextObject;
-    private SlotManager stackFrameMap;
+    private final ItemType contextItemType;
+    private final XPathContextMajor contextObject;
+    private final SlotManager stackFrameMap;
 
     protected XPathDynamicContext(ItemType contextItemType, XPathContextMajor contextObject, SlotManager stackFrameMap) {
         this.contextItemType = contextItemType;

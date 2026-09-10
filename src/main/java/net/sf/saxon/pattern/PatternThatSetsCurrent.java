@@ -28,7 +28,7 @@ import net.sf.saxon.value.SequenceType;
  */
 public class PatternThatSetsCurrent extends Pattern {
 
-    private LocalVariableBinding binding;
+    private final LocalVariableBinding binding;
     private Pattern wrappedPattern;
 
     public PatternThatSetsCurrent(Pattern wrappedPattern) {

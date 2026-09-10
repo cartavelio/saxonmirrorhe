@@ -23,7 +23,7 @@ import net.sf.saxon.value.SequenceType;
 public abstract class CastingExpression extends UnaryExpression {
 
     private AtomicType targetType;
-    private AtomicType targetPrimitiveType;
+    private final AtomicType targetPrimitiveType;
     private boolean allowEmpty = false;
     protected Converter converter;
     private boolean operandIsStringLiteral = false;

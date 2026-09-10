@@ -39,8 +39,8 @@ import java.util.List;
 
 public class XQueryCompiler {
 
-    private Processor processor;
-    private StaticQueryContext staticQueryContext;
+    private final Processor processor;
+    private final StaticQueryContext staticQueryContext;
     private ItemType requiredContextItemType;
     private String encoding;
 

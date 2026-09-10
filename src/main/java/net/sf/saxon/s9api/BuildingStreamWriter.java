@@ -38,7 +38,7 @@ public interface BuildingStreamWriter extends XMLStreamWriter {
      * @throws SaxonApiException if any failure occurs
      */
 
-    public XdmNode getDocumentNode() throws SaxonApiException;
+    XdmNode getDocumentNode() throws SaxonApiException;
 
     /**
      * Say whether names and values are to be checked for conformance with XML rules
@@ -46,7 +46,7 @@ public interface BuildingStreamWriter extends XMLStreamWriter {
      * @param check true if names and values are to be checked. Default is true.
      */
 
-    public void setCheckValues(boolean check);
+    void setCheckValues(boolean check);
 
     /**
      * Ask whether names and values are to be checked for conformance with XML rules
@@ -54,7 +54,7 @@ public interface BuildingStreamWriter extends XMLStreamWriter {
      * @return true if names and values are to be checked. Default is true.
      */
 
-    public boolean isCheckValues();
+    boolean isCheckValues();
 
 
 }

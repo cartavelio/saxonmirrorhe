@@ -28,8 +28,8 @@ import java.net.URLConnection;
 
 public class UnknownResource implements Resource {
 
-    private Configuration config;
-    private AbstractResourceCollection.InputDetails details;
+    private final Configuration config;
+    private final AbstractResourceCollection.InputDetails details;
 
     public static final ResourceFactory FACTORY = UnknownResource::new;
 

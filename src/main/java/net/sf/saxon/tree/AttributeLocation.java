@@ -19,11 +19,11 @@ import net.sf.saxon.tree.util.Navigator;
 
 public class AttributeLocation implements Location {
 
-    private String systemId;
-    private int lineNumber;
-    private int columnNumber;
-    private StructuredQName elementName;
-    private StructuredQName attributeName;
+    private final String systemId;
+    private final int lineNumber;
+    private final int columnNumber;
+    private final StructuredQName elementName;
+    private final StructuredQName attributeName;
     private NodeInfo elementNode;
 
     public AttributeLocation(NodeInfo element, StructuredQName attributeName) {

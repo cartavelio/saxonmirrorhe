@@ -12,7 +12,7 @@ package net.sf.saxon.z;
  */
 public class IntSingletonSet implements IntSet {
 
-    private int value;
+    private final int value;
 
     public IntSingletonSet(int value) {
         this.value = value;

@@ -31,7 +31,7 @@ import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -56,7 +56,7 @@ public class MergeInstr extends Instruction {
 
     public static class MergeSource {
 
-        private MergeInstr instruction;
+        private final MergeInstr instruction;
         public Location location;
         private Operand forEachItemOp = null;
         private Operand forEachStreamOp = null;
@@ -796,9 +796,9 @@ public class MergeInstr extends Instruction {
                 }
             }
             if (mergeSource.accumulators != null && !mergeSource.accumulators.isEmpty()) {
-                FastStringBuffer fsb = new FastStringBuffer(256);
+                StringBuilder fsb = new StringBuilder(256);
                 for (Accumulator acc : mergeSource.accumulators) {
-                    if (!fsb.isEmpty()) {
+                    if (fsb.length() != 0) {
                         fsb.append(" ");
                     }
                     fsb.append(acc.getAccumulatorName().getEQName());
@@ -859,10 +859,10 @@ public class MergeInstr extends Instruction {
      */
 
     public static class MergeKeyMappingFunction implements ContextMappingFunction {
-        private MergeSource ms;
-        private XPathContext baseContext;
-        private XPathContext keyContext;
-        private ManualIterator manualIterator;
+        private final MergeSource ms;
+        private final XPathContext baseContext;
+        private final XPathContext keyContext;
+        private final ManualIterator manualIterator;
 
         public MergeKeyMappingFunction(XPathContext baseContext, MergeSource ms) {
             this.baseContext = baseContext;
@@ -881,7 +881,7 @@ public class MergeInstr extends Instruction {
             ItemWithMergeKeys newItem = new ItemWithMergeKeys(currentItem, ms.mergeKeyDefinitions, ms.sourceName, keyContext);
             return SingletonIterator.makeIterator(new ObjectValue<>(newItem));
 
-        };
+        }
     }
 }
 

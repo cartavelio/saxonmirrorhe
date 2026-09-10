@@ -186,21 +186,21 @@ public class Numberer_en extends AbstractNumberer {
         }
     }
 
-    private static String[] englishUnits = {
+    private static final String[] englishUnits = {
             "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
             "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
             "Seventeen", "Eighteen", "Nineteen"};
 
-    private static String[] englishTens = {
+    private static final String[] englishTens = {
             "", "Ten", "Twenty", "Thirty", "Forty", "Fifty",
             "Sixty", "Seventy", "Eighty", "Ninety"};
 
-    private static String[] englishOrdinalUnits = {
+    private static final String[] englishOrdinalUnits = {
             "Zeroth", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth",
             "Tenth", "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth",
             "Seventeenth", "Eighteenth", "Nineteenth"};
 
-    private static String[] englishOrdinalTens = {
+    private static final String[] englishOrdinalTens = {
             "", "Tenth", "Twentieth", "Thirtieth", "Fortieth", "Fiftieth",
             "Sixtieth", "Seventieth", "Eightieth", "Ninetieth"};
 
@@ -230,7 +230,7 @@ public class Numberer_en extends AbstractNumberer {
         return name;
     }
 
-    private static String[] englishMonths = {
+    private static final String[] englishMonths = {
             "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
     };
@@ -267,15 +267,15 @@ public class Numberer_en extends AbstractNumberer {
         return name;
     }
 
-    private static String[] englishDays = {
+    private static final String[] englishDays = {
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     };
 
-    private static String[] englishDayAbbreviations = {
+    private static final String[] englishDayAbbreviations = {
             "Mon", "Tues", "Weds", "Thurs", "Fri", "Sat", "Sun"
     };
 
-    /*@NotNull*/ private static int[] minUniqueDayLength = {
+    /*@NotNull*/ private static final int[] minUniqueDayLength = {
             1, 2, 1, 2, 1, 2, 2
     };
 

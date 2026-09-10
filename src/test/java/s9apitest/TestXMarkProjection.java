@@ -3,6 +3,7 @@ package s9apitest;
 import jaxptest.ConfigTest;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -54,101 +55,121 @@ public class TestXMarkProjection {
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ1() {
         doTest("q1");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ2() {
         doTest("q2");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ3() {
         doTest("q3");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ4() {
         doTest("q4");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ5() {
         doTest("q5");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ6() {
         doTest("q6");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ7() {
         doTest("q7");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ8() {
         doTest("q8");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ9() {
         doTest("q9");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ10() {
         doTest("q10");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ11() {
         doTest("q11");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ12() {
         doTest("q12");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ13() {
         doTest("q13");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ14() {
         doTest("q14");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ15() {
         doTest("q15");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ16() {
         doTest("q16");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ17() {
         doTest("q17");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ18() {
         doTest("q18");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ19() {
         doTest("q19");
     }
 
     @Test
+    @Tag("bytecode")
     public void testQ20() {
         doTest("q20");
     }

@@ -26,7 +26,7 @@ import java.util.function.IntPredicate;
 
 public final class AnyNodeTest extends NodeTest implements QNameTest {
 
-    private static AnyNodeTest THE_INSTANCE = new AnyNodeTest();
+    private static final AnyNodeTest THE_INSTANCE = new AnyNodeTest();
 
     /**
      * Get an instance of AnyNodeTest

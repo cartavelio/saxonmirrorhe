@@ -27,7 +27,7 @@ public enum Axis {
     SELF(AxisInfo.SELF),
     NAMESPACE(AxisInfo.NAMESPACE);
 
-    private int number;
+    private final int number;
 
     /**
      * Create an Axis
@@ -35,7 +35,7 @@ public enum Axis {
      * @param number the internal axis number as defined in class {@link net.sf.saxon.om.AxisInfo}
      */
 
-    private Axis(int number) {
+    Axis(int number) {
         this.number = number;
     }
 

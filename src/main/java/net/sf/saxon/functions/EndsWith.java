@@ -15,9 +15,10 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.StringValue;
 
 /**
  * Implements the fn:ends-with() function, with the collation already fixed
@@ -58,18 +59,14 @@ public class EndsWith extends CollatingFunctionFixed {
     }
 
 
-    public static boolean endsWith(StringValue arg0, StringValue arg1, SubstringMatcher collator) {
-        if (arg1 == null || arg1.isZeroLength() || collator.comparesEqual(arg1.getPrimitiveStringValue(), "")) {
+    public static boolean endsWith(UnicodeString arg0, UnicodeString arg1, SubstringMatcher collator) {
+        if (arg1 == null || arg1.isEmpty() || collator.comparesEqual(arg1, EmptyUniString.getInstance())) {
             return true;
         }
-        if (arg0 == null || arg0.isZeroLength()) {
+        if (arg0 == null || arg0.isEmpty()) {
             return false;
         }
-
-        String s0 = arg0.getStringValue();
-        String s1 = arg1.getStringValue();
-
-        return collator.endsWith(s0, s1);
+        return collator.endsWith(arg0, arg1);
     }
 
     /**
@@ -83,8 +80,8 @@ public class EndsWith extends CollatingFunctionFixed {
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue s0 = (StringValue) arguments[0].head();
-        StringValue s1 = (StringValue) arguments[1].head();
+        UnicodeString s0 = getUniStringArg(arguments[0]);
+        UnicodeString s1 = getUniStringArg(arguments[1]);
         return BooleanValue.get(endsWith(s0, s1, (SubstringMatcher)getStringCollator()));
     }
 

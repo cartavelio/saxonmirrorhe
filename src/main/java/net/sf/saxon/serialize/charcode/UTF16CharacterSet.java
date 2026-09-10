@@ -7,6 +7,8 @@
 
 package net.sf.saxon.serialize.charcode;
 
+import net.sf.saxon.z.IntIterator;
+
 import java.util.function.IntPredicate;
 
 /**
@@ -15,7 +17,7 @@ import java.util.function.IntPredicate;
 
 public class UTF16CharacterSet implements CharacterSet {
 
-    private static UTF16CharacterSet theInstance = new UTF16CharacterSet();
+    private static final UTF16CharacterSet theInstance = new UTF16CharacterSet();
 
     /**
      * Private constructor to force the singular instance to be used
@@ -137,19 +139,15 @@ public class UTF16CharacterSet implements CharacterSet {
     /**
      * Test whether all the characters in a CharSequence are valid XML characters
      *
-     * @param chars the character sequence to be tested
+     * @param iter iterator over the character sequence to be tested
      * @param predicate the predicate that all characters must satisfy
      * @return the codepoint of the first invalid character in the character sequence (according to the supplied predicate);
      *         or -1 if all characters in the character sequence are valid
      */
 
-    public static int firstInvalidChar(CharSequence chars, IntPredicate predicate) {
-        for (int c = 0; c < chars.length(); c++) {
-            int ch32 = chars.charAt(c);
-            if (UTF16CharacterSet.isHighSurrogate(ch32)) {
-                char low = chars.charAt(c++);
-                ch32 = UTF16CharacterSet.combinePair((char) ch32, low);
-            }
+    public static int firstInvalidChar(IntIterator iter, IntPredicate predicate) {
+        while (iter.hasNext()) {
+            int ch32 = iter.next();
             if (!predicate.test(ch32)) {
                 return ch32;
             }
@@ -157,9 +155,5 @@ public class UTF16CharacterSet implements CharacterSet {
         return -1;
     }
 
-    public static void main(String[] args) {
-        System.err.println(Integer.toHexString(highSurrogate(0xeffff)));
-        System.err.println(Integer.toHexString(lowSurrogate(0xeffff)));
-    }
 }
 

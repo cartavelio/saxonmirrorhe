@@ -10,6 +10,7 @@ package net.sf.saxon.resource;
 import net.sf.saxon.functions.URIQueryParameters;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Resource;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Base64BinaryValue;
 
@@ -45,7 +46,7 @@ public class DataURIScheme {
         String contentType = header.substring(0, isBase64 ? comma - 7 : comma);
         if (isBase64) {
             try {
-                byte[] octets = Base64BinaryValue.decode(content);
+                byte[] octets = Base64BinaryValue.decode(StringView.tidy(content));
                 BinaryResource resource =
                         new BinaryResource(uri.toString(), contentType, octets);
                 resource.setData(octets);

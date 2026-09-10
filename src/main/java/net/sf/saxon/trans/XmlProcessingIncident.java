@@ -9,13 +9,12 @@ package net.sf.saxon.trans;
 
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.XmlProcessingError;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.tree.util.Navigator;
 
 import javax.xml.transform.TransformerException;
@@ -28,7 +27,7 @@ import java.util.Objects;
  */
 public class XmlProcessingIncident implements XmlProcessingError {
 
-    private String message;
+    private final String message;
     private String errorCode;
     private Throwable cause;
     private Location locator = null;
@@ -182,13 +181,13 @@ public class XmlProcessingIncident implements XmlProcessingError {
         if (errorCode == null) {
             return null;
         }
-        return new QName(StructuredQName.fromEQName(errorCode));
+        return new QName(StructuredQName.fromEQName((errorCode)));
     }
 
     public void setErrorCodeAsEQName(String code) {
         if (code.startsWith("Q{")) {
             this.errorCode = code;
-        } else if (NameChecker.isValidNCName(code)) {
+        } else if (NameChecker.isValidNCName(StringTool.codePoints(code))) {
             this.errorCode = "Q{" + NamespaceConstant.ERR + "}" + code;
         } else {
             this.errorCode = "Q{" + NamespaceConstant.SAXON + "}invalid-error-code";

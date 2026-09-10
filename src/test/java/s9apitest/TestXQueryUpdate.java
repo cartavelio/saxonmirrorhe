@@ -5,7 +5,6 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -24,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for XQuery Update using the s9api XQueryCompiler
  */
 public class TestXQueryUpdate {
-    @BeforeAll
-    static void setUp() throws IOException {
+    public void setUp() throws IOException {
         // Copy books.xml to the temp directory so that the updates don't matter
         String tempfn = ConfigTest.TEMP_DIR + "books.xml";
         String origfn = ConfigTest.DATA_DIR + "books.xml";

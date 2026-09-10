@@ -14,6 +14,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -179,7 +180,7 @@ public class DotNetDomBuilder implements Receiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         try {
             XmlText text = document.CreateTextNode(chars.toString());
             currentNode.AppendChild(text);
@@ -194,7 +195,7 @@ public class DotNetDomBuilder implements Receiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         try {
             XmlProcessingInstruction pi =
@@ -210,7 +211,7 @@ public class DotNetDomBuilder implements Receiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         try {
             XmlComment comment = document.CreateComment(chars.toString());
             currentNode.AppendChild(comment);

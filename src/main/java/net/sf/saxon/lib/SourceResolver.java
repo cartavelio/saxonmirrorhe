@@ -45,7 +45,7 @@ public interface SourceResolver {
      */
 
     /*@Nullable*/
-    public Source resolveSource(Source source, Configuration config) throws XPathException;
+    Source resolveSource(Source source, Configuration config) throws XPathException;
 
 }
 

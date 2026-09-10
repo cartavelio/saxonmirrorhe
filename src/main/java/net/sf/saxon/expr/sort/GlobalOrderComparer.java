@@ -18,7 +18,7 @@ import net.sf.saxon.om.NodeInfo;
 
 public final class GlobalOrderComparer implements ItemOrderComparer {
 
-    private static GlobalOrderComparer instance = new GlobalOrderComparer();
+    private static final GlobalOrderComparer instance = new GlobalOrderComparer();
 
     /**
      * Get an instance of a GlobalOrderComparer. The class maintains no state

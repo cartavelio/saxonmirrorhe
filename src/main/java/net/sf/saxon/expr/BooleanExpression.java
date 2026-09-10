@@ -70,11 +70,11 @@ public abstract class BooleanExpression extends BinaryExpression implements Nega
             throw err1;
         }
         // Precompute the EBV of any constant operand
-        if (getLhsExpression() instanceof Literal && !(((Literal) getLhsExpression()).getValue() instanceof BooleanValue)) {
+        if (getLhsExpression() instanceof Literal && !(((Literal) getLhsExpression()).getGroundedValue() instanceof BooleanValue)) {
             setLhsExpression(Literal.makeLiteral(
                     BooleanValue.get(getLhsExpression().effectiveBooleanValue(visitor.makeDynamicContext())), this));
         }
-        if (getRhsExpression() instanceof Literal && !(((Literal) getRhsExpression()).getValue() instanceof BooleanValue)) {
+        if (getRhsExpression() instanceof Literal && !(((Literal) getRhsExpression()).getGroundedValue() instanceof BooleanValue)) {
             setRhsExpression(Literal.makeLiteral(
                     BooleanValue.get(getRhsExpression().effectiveBooleanValue(visitor.makeDynamicContext())), this));
         }

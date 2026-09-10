@@ -40,6 +40,7 @@ public class SlashExpression extends BinaryExpression
         implements ContextSwitchingExpression {
 
     boolean contextFree;
+    boolean indexingDisabled;
 
     /**
      * Constructor
@@ -119,6 +120,10 @@ public class SlashExpression extends BinaryExpression
     @Override
     public Expression getActionExpression() {
         return getStep();
+    }
+
+    public void disableIndexing() {
+        indexingDisabled = true;
     }
 
     /**
@@ -322,6 +327,7 @@ public class SlashExpression extends BinaryExpression
                 return null;
             }
             ExpressionTool.copyLocationInfo(this, newPath);
+            ((SlashExpression) newPath).indexingDisabled = indexingDisabled;
             return (SlashExpression) newPath;
         }
 
@@ -378,23 +384,25 @@ public class SlashExpression extends BinaryExpression
 
         // Rewrite a/b[filter] as (a/b)[filter] to improve the chance of indexing
 
-        Expression firstStep = getFirstStep();
-        if (!(firstStep.isCallOn(Doc.class) || firstStep.isCallOn(DocumentFn.class))) {
-            // Avoid the rewrite if the path starts with doc() for streaming reasons
-            Expression lastStep = getLastStep();
-            if (lastStep instanceof FilterExpression && !((FilterExpression) lastStep).isPositional(th)) {
-                Expression leading = getLeadingSteps();
-                Expression p2 = ExpressionTool.makePathExpression(leading, ((FilterExpression) lastStep).getSelectExpression());
-                Expression f2 = new FilterExpression(p2, ((FilterExpression) lastStep).getFilter());
-                ExpressionTool.copyLocationInfo(this, f2);
-                return f2.optimize(visitor, contextItemType);
+        if (!indexingDisabled) {
+            Expression firstStep = getFirstStep();
+            if (!(firstStep.isCallOn(Doc.class) || firstStep.isCallOn(DocumentFn.class))) {
+                // Avoid the rewrite if the path starts with doc() for streaming reasons
+                Expression lastStep = getLastStep();
+                if (lastStep instanceof FilterExpression && !((FilterExpression) lastStep).isPositional(th)) {
+                    Expression leading = getLeadingSteps();
+                    Expression p2 = ExpressionTool.makePathExpression(leading, ((FilterExpression) lastStep).getSelectExpression());
+                    Expression f2 = new FilterExpression(p2, ((FilterExpression) lastStep).getFilter());
+                    ExpressionTool.copyLocationInfo(this, f2);
+                    return f2.optimize(visitor, contextItemType);
+                }
             }
-        }
 
-        if (!visitor.isOptimizeForStreaming()) {
-            Expression k = opt.convertPathExpressionToKey(this, visitor);
-            if (k != null) {
-                return k.typeCheck(visitor, contextItemType).optimize(visitor, contextItemType);
+            if (!visitor.isOptimizeForStreaming()) {
+                Expression k = opt.convertPathExpressionToKey(this, visitor);
+                if (k != null) {
+                    return k.typeCheck(visitor, contextItemType).optimize(visitor, contextItemType);
+                }
             }
         }
 
@@ -429,11 +437,6 @@ public class SlashExpression extends BinaryExpression
                 ExpressionTool.resetStaticProperties(keyCall);
                 return keyCall;
             }
-        }
-
-        Expression k = promoteFocusIndependentSubexpressions(visitor, contextItemType);
-        if (k != this) {
-            return k;
         }
 
         if (visitor.isOptimizeForStreaming()) {
@@ -554,38 +557,6 @@ public class SlashExpression extends BinaryExpression
 
 
     /**
-     * If any subexpressions within the step are not dependent on the focus,
-     * and if they are not "creative" expressions (expressions that can create new nodes), then
-     * promote them: this causes them to be evaluated once, outside the path expression
-     *
-     * @param visitor         the expression visitor
-     * @param contextItemType the type of the context item for evaluating the start expression
-     * @return the rewritten expression, or the original expression if no rewrite was possible
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a static error is detected
-     */
-
-    protected Expression promoteFocusIndependentSubexpressions(
-            ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-
-//        Optimizer opt = getConfiguration().obtainOptimizer();
-//
-//        PromotionOffer offer = new PromotionOffer(opt);
-//        offer.action = PromotionOffer.FOCUS_INDEPENDENT;
-//        offer.promoteDocumentDependent = (getStart().getSpecialProperties() & StaticProperty.CONTEXT_DOCUMENT_NODESET) != 0;
-//        offer.containingExpression = this;
-//
-//        setStep(doPromotion(getStep(), offer));
-//        ExpressionTool.resetStaticProperties(this);
-//        if (offer.containingExpression != this) {
-//            offer.containingExpression =
-//                    offer.containingExpression.typeCheck(visitor, contextItemType).optimize(visitor, contextItemType);
-//            return offer.containingExpression;
-//        }
-        return this;
-    }
-
-    /**
      * Replace this expression by a simpler expression that delivers the results without regard
      * to order.
      *
@@ -658,6 +629,9 @@ public class SlashExpression extends BinaryExpression
     public Expression copy(RebindingMap rebindings) {
         Expression exp = ExpressionTool.makePathExpression(getStart().copy(rebindings), getStep().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, exp);
+        if (exp instanceof SlashExpression) {
+            ((SlashExpression)exp).indexingDisabled = indexingDisabled;
+        }
         return exp;
     }
 
@@ -870,12 +844,13 @@ public class SlashExpression extends BinaryExpression
         }
         if (headPattern == null) {
             if (tail instanceof VennExpression) {
+                // Bug 4645. Rewrite a/(b|c) as (a/b union a/c)
                 Expression lhExpansion = new SlashExpression(
-                        head.copy(new RebindingMap()), ((VennExpression)tail).getLhsExpression());
+                        head.copy(new RebindingMap()), ((VennExpression) tail).getLhsExpression());
                 Expression rhExpansion = new SlashExpression(
                         head.copy(new RebindingMap()), ((VennExpression) tail).getRhsExpression());
                 VennExpression topExpansion = new VennExpression(
-                        lhExpansion, ((VennExpression)tail).operator, rhExpansion);
+                        lhExpansion, ((VennExpression) tail).operator, rhExpansion);
                 return topExpansion.toPattern(config);
             } else {
                 axis = PatternMaker.getAxisForPathStep(tail);
@@ -944,7 +919,7 @@ public class SlashExpression extends BinaryExpression
 
         Expression step = getStep();
         if (contextFree && step instanceof AxisExpression) {
-            // see bug 4730, the step might have been rewritten since the flag was set
+            // See bug 4730: the step might have been changed to something else
             return new MappingIterator(
                     getStart().iterate(context),
                     item -> ((AxisExpression) step).iterate((NodeInfo)item));
@@ -952,7 +927,7 @@ public class SlashExpression extends BinaryExpression
 
         XPathContext context2 = context.newMinorContext();
         context2.trackFocus(getStart().iterate(context));
-        return new ContextMappingIterator(step::iterate, context2);
+        return new ContextMappingIterator(c1 -> getStep().iterate(c1), context2);
     }
 
 //    /**

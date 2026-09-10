@@ -25,27 +25,27 @@ public class Numberer_frBE extends AbstractNumberer {
      */
     private static final long serialVersionUID = -222104830008011842L;
 
-    private static String[] frenchUnits = {
+    private static final String[] frenchUnits = {
             "", "Un", "Deux", "Trois", "Quatre", "Cinq", "Six", "Sept", "Huit", "Neuf", "Dix",
             "Onze", "Douze", "Treize", "Quatorze", "Quinze", "Seize", "Dix-sept", "Dix-huit", "Dix-neuf"};
 
-    private static String[] frenchTens = {
+    private static final String[] frenchTens = {
             "", "Dix", "Vingt", "Trente", "Quarante", "Cinquante", "Soixante", "Soixante", "Quatre-vingt", "Quatre-vingt"};
 
-    private static String[] frenchOrdinalUnits = {
+    private static final String[] frenchOrdinalUnits = {
             "", "Premier", "Deuxi\u00e8me", "Troisi\u00e8me", "Quatri\u00e8me", "Cinqui\u00e8me",
             "Sixi\u00e8me", "Septi\u00e8me", "Huiti\u00e8me", "Neuvi\u00e8me", "Dixi\u00e8me", "Onzi\u00e8me",
             "Douzi\u00e8me", "Treizi\u00e8me", "Quatorzi\u00e8me", "Quinzi\u00e8me", "Seizi\u00e8me", "Dix-septi\u00e8me",
             "Dix-huiti\u00e8me", "Dix-neuvi\u00e8me"};
 
-    private static String[] frenchOrdinalTens = {
+    private static final String[] frenchOrdinalTens = {
             "", "Dixi\u00e8me", "Vingti\u00e8me", "Trenti\u00e8me", "Quaranti\u00e8me", "Cinquanti\u00e8me",
             "Soixanti\u00e8me", "Soixante", "Quatre-vingti\u00e8me", "Quatre-vingt"};
 
-    private static String[] frenchDays = {
+    private static final String[] frenchDays = {
             "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"};
 
-    private static String[] frenchMonths = {
+    private static final String[] frenchMonths = {
             "Janvier", "F\u00e9vrier", "Mars", "Avril", "Mai", "Juin", "Juillet", "Ao\u00fbt", "Septembre", "Octobre", "Novembre", "D\u00e9cembre"};
 
     /*

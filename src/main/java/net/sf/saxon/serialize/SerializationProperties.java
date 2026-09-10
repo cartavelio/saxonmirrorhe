@@ -10,6 +10,7 @@ package net.sf.saxon.serialize;
 
 import net.sf.saxon.event.*;
 import net.sf.saxon.lib.SaxonOutputKeys;
+import net.sf.saxon.str.StringView;
 
 import javax.xml.transform.OutputKeys;
 import java.util.Properties;
@@ -138,7 +139,7 @@ public class SerializationProperties {
         String itemSeparator = properties.getProperty(SaxonOutputKeys.ITEM_SEPARATOR);
         return itemSeparator == null || "#absent".equals(itemSeparator)
                 ? new SequenceNormalizerWithSpaceSeparator(next)
-                : new SequenceNormalizerWithItemSeparator(next, itemSeparator);
+                : new SequenceNormalizerWithItemSeparator(next, StringView.of(itemSeparator));
     }
 
     /**

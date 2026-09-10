@@ -342,7 +342,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
             // The value of the variable is a sequence of nodes and/or atomic values
         } else if (select instanceof Literal) {
             // fast path for common case
-            return ((Literal)select).getValue();
+            return ((Literal)select).getGroundedValue();
         } else {
             // There is a select attribute: do a lazy evaluation of the expression,
             // which will already contain any code to force conversion to the required type.

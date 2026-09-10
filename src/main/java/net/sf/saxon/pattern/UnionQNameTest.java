@@ -8,7 +8,7 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class UnionQNameTest implements QNameTest {
 
     public String toString() {
         boolean started = false;
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         for (QNameTest qt : tests) {
             if (started) {
                 fsb.append("|");
@@ -84,7 +84,7 @@ public class UnionQNameTest implements QNameTest {
      */
     @Override
     public String generateJavaScriptNameTest(int targetVersion) {
-        FastStringBuffer fsb = new FastStringBuffer(256);
+        StringBuilder fsb = new StringBuilder(256);
         boolean started = false;
         for (QNameTest qt : tests) {
             if (started) {

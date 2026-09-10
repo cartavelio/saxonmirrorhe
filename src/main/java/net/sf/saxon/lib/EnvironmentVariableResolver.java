@@ -25,7 +25,7 @@ public interface EnvironmentVariableResolver {
      *         method {@link #getEnvironmentVariable(String)}
      */
 
-    public Set<String> getAvailableEnvironmentVariables();
+    Set<String> getAvailableEnvironmentVariables();
 
     /**
      * Get the value of a specific environment variable
@@ -36,6 +36,6 @@ public interface EnvironmentVariableResolver {
      *         returned by the method {@link #getAvailableEnvironmentVariables()}
      */
 
-    public String getEnvironmentVariable(String name);
+    String getEnvironmentVariable(String name);
 }
 

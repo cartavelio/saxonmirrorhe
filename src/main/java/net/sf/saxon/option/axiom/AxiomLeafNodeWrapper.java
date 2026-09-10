@@ -9,11 +9,13 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
@@ -155,17 +157,18 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     /**
      * Get the value of the item as a CharSequence. This is in some cases more efficient than
      * the version of the method that returns a String.
+     * @return the string value of the node
      */
 
     @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         switch (nodeKind) {
             case Type.TEXT:
-                return ((OMText) node).getText();
+                return StringView.tidy(((OMText) node).getText());
             case Type.COMMENT:
-                return ((OMComment) node).getValue();
+                return StringView.tidy(((OMComment) node).getValue());
             case Type.PROCESSING_INSTRUCTION:
-                return ((OMProcessingInstruction) node).getValue();
+                return StringView.tidy(((OMProcessingInstruction) node).getValue());
             default:
                 throw new AssertionError();
         }
@@ -334,7 +337,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      */
 
     @Override
-    public void generateId(FastStringBuffer buffer) {
+    public void generateId(StringBuilder buffer) {
         Navigator.appendSequentialKey(this, buffer, true);
         //buffer.append(Navigator.getSequentialKey(this));
     }

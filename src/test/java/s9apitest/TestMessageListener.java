@@ -1,15 +1,16 @@
 package s9apitest;
 
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.SystemLogger;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
+import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Attempts to reproduce a bug from Stephen P Cuzner where the MessageListener gets an AIOOB exception
@@ -42,6 +43,7 @@ public class TestMessageListener {
             t.setInitialTemplate(new QName("main"));
             final StringBuilder sb = new StringBuilder();
             t.setMessageListener(new MessageListener() {
+                @Override
                 public void message(XdmNode content, boolean terminate, SourceLocator locator) {
                     sb.append(content.getStringValue());
                 }
@@ -75,6 +77,7 @@ public class TestMessageListener {
             t.setInitialTemplate(new QName("main"));
             final StringBuilder sb = new StringBuilder();
             t.setMessageListener(new MessageListener() {
+                @Override
                 public void message(XdmNode content, boolean terminate, SourceLocator locator) {
                     System.err.println(content.getStringValue() + terminate);
                     sb.append(content.getStringValue());
@@ -88,4 +91,31 @@ public class TestMessageListener {
             assertTrue(e1.getMessage().contains("Processing terminated by xsl:message"), "exception");
         }
     }
+
+    @Test
+    public void testMessageToLogger() {
+        try {
+            String xsl =
+                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                            "<xsl:template name='main'>" +
+                            "<xsl:for-each select='1 to 5'>" +
+                            "<xsl:message><a nr='{.}'/></xsl:message>" +
+                            "</xsl:for-each>" +
+                            "</xsl:template>" +
+                            "</xsl:transform>";
+            Processor p = new Processor(false);
+            p.getUnderlyingConfiguration().setLogger(new SystemLogger(Logger.getAnonymousLogger()));
+            p.setConfigurationProperty(Feature.TIMING, true);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer t = e.load();
+            t.setInitialTemplate(new QName("main"));
+            t.setDestination(p.newSerializer(System.out));
+            t.transform();
+        } catch (SaxonApiException e1) {
+            e1.printStackTrace();
+            fail();
+        }
+    }
+
 }

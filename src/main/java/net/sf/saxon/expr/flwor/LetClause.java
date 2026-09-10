@@ -12,7 +12,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 
 import java.util.List;
@@ -143,7 +143,7 @@ public class LetClause extends Clause {
         final ItemType actualItemType = seq.getItemType();
         for (VariableReference ref : references) {
             ref.refineVariableType(actualItemType, getSequence().getCardinality(),
-                    seq instanceof Literal ? ((Literal) seq).getValue() : null,
+                    seq instanceof Literal ? ((Literal) seq).getGroundedValue() : null,
                     seq.getSpecialProperties());
             ExpressionTool.resetStaticProperties(returnExpr);
         }
@@ -207,7 +207,7 @@ public class LetClause extends Clause {
 
     @Override
     public String toShortString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         fsb.append("let $");
         fsb.append(rangeVariable.getVariableQName().getDisplayName());
         fsb.append(" := ");
@@ -216,7 +216,7 @@ public class LetClause extends Clause {
     }
 
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         fsb.append("let $");
         fsb.append(rangeVariable.getVariableQName().getDisplayName());
         fsb.append(" := ");

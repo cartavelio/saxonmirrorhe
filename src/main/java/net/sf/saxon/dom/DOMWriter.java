@@ -13,6 +13,7 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -217,8 +218,8 @@ public class DOMWriter extends Builder {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
-        if (level == 0 && nextSibling == null && Whitespace.isWhite(chars)) {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
+        if (level == 0 && nextSibling == null && Whitespace.isAllWhite(chars)) {
             return; // no action for top-level whitespace
         }
         try {
@@ -239,7 +240,7 @@ public class DOMWriter extends Builder {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         try {
             ProcessingInstruction pi =
@@ -259,7 +260,7 @@ public class DOMWriter extends Builder {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         try {
             Comment comment = document.createComment(chars.toString());
             if (nextSibling != null && level == 0) {

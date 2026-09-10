@@ -9,7 +9,6 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -89,8 +88,8 @@ public class RangeExpression extends BinaryExpression {
 
     private Expression makeConstantRange() throws XPathException {
         if (getLhsExpression() instanceof Literal && getRhsExpression() instanceof Literal) {
-            GroundedValue v0 = ((Literal) getLhsExpression()).getValue();
-            GroundedValue v1 = ((Literal) getRhsExpression()).getValue();
+            GroundedValue v0 = ((Literal) getLhsExpression()).getGroundedValue();
+            GroundedValue v1 = ((Literal) getRhsExpression()).getGroundedValue();
             if (v0 instanceof Int64Value && v1 instanceof Int64Value) {
                 long i0 = ((Int64Value) v0).longValue();
                 long i1 = ((Int64Value) v1).longValue();

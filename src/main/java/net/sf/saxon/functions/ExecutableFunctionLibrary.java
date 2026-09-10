@@ -30,7 +30,7 @@ import java.util.List;
 
 public class ExecutableFunctionLibrary implements FunctionLibrary {
 
-    private transient Configuration config;
+    private final transient Configuration config;
     private HashMap<SymbolicName, UserFunction> functions = new HashMap<>(20);
     // The key of the hash table is a String that combines the QName of the function with the arity.
 

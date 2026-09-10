@@ -26,14 +26,14 @@ import java.util.function.IntPredicate;
 
 final class PrecedingIterator implements AxisIterator {
 
-    private TinyTree tree;
+    private final TinyTree tree;
     private NodeInfo current;
     private int nextAncestorDepth;
-    private boolean includeAncestors;
+    private final boolean includeAncestors;
     private final IntPredicate matcher;
     private NodeInfo pending = null;
-    private NodeTest nodeTest;
-    private boolean matchesTextNodes;
+    private final NodeTest nodeTest;
+    private final boolean matchesTextNodes;
 
     public PrecedingIterator(/*@NotNull*/ TinyTree doc, /*@NotNull*/ TinyNodeImpl node,
                              NodeTest nodeTest, boolean includeAncestors) {

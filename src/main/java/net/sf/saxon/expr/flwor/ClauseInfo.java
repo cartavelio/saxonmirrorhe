@@ -17,7 +17,7 @@ import net.sf.saxon.trace.Traceable;
  */
 public class ClauseInfo implements Traceable {
 
-    private Clause clause;
+    private final Clause clause;
     private NamespaceResolver nsResolver;
 
     public ClauseInfo(Clause clause) {

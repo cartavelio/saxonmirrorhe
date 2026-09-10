@@ -14,7 +14,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
@@ -871,7 +871,7 @@ public class FLWORExpression extends Expression {
      */
     @Override
     public String toShortString() {
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder sb = new StringBuilder(64);
         sb.append(clauses.get(0).toShortString());
         sb.append(" ... return ");
         sb.append(getReturnClause().toShortString());
@@ -883,10 +883,10 @@ public class FLWORExpression extends Expression {
      */
 
     public String toString() {
-        FastStringBuffer sb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder sb = new StringBuilder(64);
         for (Clause c : clauses) {
             sb.append(c.toString());
-            sb.cat(' ');
+            sb.append(' ');
         }
         sb.append(" return ");
         sb.append(getReturnClause().toString());

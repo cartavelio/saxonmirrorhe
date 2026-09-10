@@ -31,7 +31,7 @@ import java.util.Properties;
 
 public class IdentityTransformer extends Transformer {
 
-    private Configuration configuration;
+    private final Configuration configuration;
     private Properties localOutputProperties;
     private URIResolver uriResolver;
     private ErrorListener errorListener;

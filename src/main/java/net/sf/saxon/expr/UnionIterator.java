@@ -34,6 +34,7 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
     private static class Intake {
         public SequenceIterator iter;
         public NodeInfo nextNode;
+
         public Intake(SequenceIterator iter, NodeInfo nextNode) {
             this.iter = iter;
             this.nextNode = nextNode;
@@ -43,10 +44,10 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
     private TreeSet<Intake> intakes;
 
     /**
-     * Create the iterator. The two input iterators must return nodes in document
+     * Create the iterator. The several input iterators must return nodes in document
      * order for this to work.
      *
-     * @param inputs      iterators over the first operand sequence (in document order)
+     * @param inputs   iterators over the first operand sequence (in document order)
      * @param comparer used to test whether nodes are in document order. Different versions
      *                 are used for intra-document and cross-document operations
      * @throws XPathException if an error occurs reading the first item of either operand
@@ -65,7 +66,7 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
 
         intakes = new TreeSet<>(comp);
         for (SequenceIterator seq : inputs) {
-            NodeInfo next = (NodeInfo)seq.next();
+            NodeInfo next = (NodeInfo) seq.next();
             while (next != null) {
                 boolean added = intakes.add(new Intake(seq, next));
                 if (added) {
@@ -98,7 +99,7 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
             // or (b) any other entry in the TreeMap
 
             SequenceIterator iter = nextIntake.iter;
-            NodeInfo nextNode = (NodeInfo)iter.next();
+            NodeInfo nextNode = (NodeInfo) iter.next();
             while (nextNode != null) {
                 boolean added = false;
                 if (!nextNode.isSameNodeInfo(nextIntake.nextNode)) {
@@ -108,7 +109,7 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
                 if (added) {
                     break;
                 } else {
-                    nextNode = (NodeInfo)iter.next();
+                    nextNode = (NodeInfo) iter.next();
                 }
             }
             return nextIntake.nextNode;
@@ -128,11 +129,10 @@ public class UnionIterator implements SequenceIterator, LookaheadIterator {
      * Get properties of this iterator
      *
      * @return the properties of this iterator. This will be some combination of
-     *         properties such as {@link net.sf.saxon.om.SequenceIterator.Property#GROUNDED},
-     *         {@link net.sf.saxon.om.SequenceIterator.Property#LAST_POSITION_FINDER},
-     *         and {@link net.sf.saxon.om.SequenceIterator.Property#LOOKAHEAD}. It is always
-     *         acceptable to return the value zero, indicating that there are no known special properties.
-     *         It is acceptable for the properties of the iterator to change depending on its state.
+     * properties such as {@link Property#GROUNDED}, {@link Property#LAST_POSITION_FINDER},
+     * and {@link Property#LOOKAHEAD}. It is always
+     * acceptable to return the value zero, indicating that there are no known special properties.
+     * It is acceptable for the properties of the iterator to change depending on its state.
      */
 
     @Override

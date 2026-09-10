@@ -34,7 +34,7 @@ public class SimonSoftTest {
 
     private static long numTransformed = 0;
 
-    private String xsl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+    private final String xsl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
             "<!--\n" +
             "\n" +
             "    Copyright (C) 2009-2013 Simonsoft Nordic AB\n" +

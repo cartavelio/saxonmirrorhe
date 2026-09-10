@@ -18,8 +18,8 @@ import java.util.Iterator;
 
 public class MappingJavaIterator<S, T> implements Iterator<T> {
 
-    private Iterator<S> input;
-    private java.util.function.Function<S, T> mapper;
+    private final Iterator<S> input;
+    private final java.util.function.Function<S, T> mapper;
 
     /**
      * Create a mapping iterator

@@ -15,8 +15,8 @@ package net.sf.saxon.z;
  */
 public class IntBlockSet implements IntSet {
 
-    private int startPoint;
-    private int endPoint;
+    private final int startPoint;
+    private final int endPoint;
 
     // Hashcode, evaluated lazily
     private int hashCode = -1;

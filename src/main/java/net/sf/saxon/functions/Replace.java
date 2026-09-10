@@ -12,8 +12,10 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 
 /**
@@ -40,10 +42,10 @@ public class Replace extends RegexFunction  {
      */
     @Override
     public Expression makeFunctionCall(Expression... arguments) {
-        boolean maybeQ = arguments.length == 4 && (!(arguments[3] instanceof StringLiteral) || ((StringLiteral) arguments[3]).getStringValue().contains("q"));
+        boolean maybeQ = arguments.length == 4 && (!(arguments[3] instanceof StringLiteral) || ((StringLiteral) arguments[3]).stringify().contains("q"));
         if (arguments[2] instanceof StringLiteral && !maybeQ) {
             // Do early checking of the replacement expression if known statically
-            String rep = ((StringLiteral) arguments[2]).getStringValue();
+            UnicodeString rep = ((StringLiteral) arguments[2]).getString();
             if (checkReplacement(rep) == null) {
                 replacementChecked = true;
             }
@@ -61,13 +63,12 @@ public class Replace extends RegexFunction  {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public StringItem call(XPathContext context, Sequence[] arguments) throws XPathException {
 
-        StringValue arg0 = (StringValue)arguments[0].head();
-        CharSequence input = arg0 == null ? "" : arg0.getStringValueCS();
+        StringItem arg0 = (StringItem)arguments[0].head();
+        UnicodeString input = arg0 == null ? EmptyUniString.getInstance() : arg0.getUnicodeStringValue();
 
-        StringValue arg2 = (StringValue) arguments[2].head();
-        CharSequence replacement = arg2.getStringValueCS();
+        UnicodeString replacement = arguments[2].head().getUnicodeStringValue();
 
         RegularExpression re = getRegularExpression(arguments);
         if (!re.getFlags().contains("q")) {
@@ -79,8 +80,7 @@ public class Replace extends RegexFunction  {
                 }
             }
         }
-        CharSequence res = re.replace(input, replacement);
-        return StringValue.makeStringValue(res);
+        return new StringItem(re.replace(input, replacement));
     }
 
     /**
@@ -90,12 +90,13 @@ public class Replace extends RegexFunction  {
      * @return null if the string is OK, or an error message if not
      */
 
-    public static String checkReplacement(CharSequence rep) {
+    public static String checkReplacement(UnicodeString rep) {
         for (int i = 0; i < rep.length(); i++) {
-            char c = rep.charAt(i);
+            int c = rep.codePointAt(i);
             if (c == '$') {
                 if (i + 1 < rep.length()) {
-                    char next = rep.charAt(++i);
+                    int index = ++i;
+                    int next = rep.codePointAt(index);
                     if (next < '0' || next > '9') {
                         return "Invalid replacement string in replace(): $ sign must be followed by digit 0-9";
                     }
@@ -104,7 +105,8 @@ public class Replace extends RegexFunction  {
                 }
             } else if (c == '\\') {
                 if (i + 1 < rep.length()) {
-                    char next = rep.charAt(++i);
+                    int index = ++i;
+                    int next = rep.codePointAt(index);
                     if (next != '\\' && next != '$') {
                         return "Invalid replacement string in replace(): \\ character must be followed by \\ or $";
                     }

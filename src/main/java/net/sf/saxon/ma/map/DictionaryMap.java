@@ -15,7 +15,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.*;
 
@@ -27,7 +27,7 @@ import java.util.*;
 
 public class DictionaryMap implements MapItem {
 
-    private HashMap<String, GroundedValue> hashMap;
+    private final HashMap<String, GroundedValue> hashMap;
 
     /**
      * Create an empty dictionary, to which entries can be added using {@link #initialPut(String, GroundedValue)},
@@ -67,7 +67,7 @@ public class DictionaryMap implements MapItem {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        if (key instanceof StringValue) {
+        if (key instanceof StringItem) {
             return hashMap.get(key.getStringValue());
         } else {
             return null;
@@ -100,9 +100,9 @@ public class DictionaryMap implements MapItem {
      * @return a set containing all the key values present in the map, in unpredictable order
      */
     @Override
-    public AtomicIterator<StringValue> keys() {
+    public AtomicIterator<StringItem> keys() {
         Iterator<String> base = hashMap.keySet().iterator();
-        return () -> base.hasNext() ? new StringValue(base.next()) : null;
+        return () -> base.hasNext() ? new StringItem(base.next()) : null;
     }
 
     /**
@@ -113,7 +113,7 @@ public class DictionaryMap implements MapItem {
     @Override
     public Iterable<KeyValuePair> keyValuePairs() {
         List<KeyValuePair> pairs = new ArrayList<>();
-        hashMap.forEach((k, v) -> pairs.add(new KeyValuePair(new StringValue(k), v)));
+        hashMap.forEach((k, v) -> pairs.add(new KeyValuePair(new StringItem(k), v)));
         return pairs;
     }
 
@@ -224,7 +224,7 @@ public class DictionaryMap implements MapItem {
     private HashTrieMap toHashTrieMap() {
         //System.err.println("Dictionary rewrite!!!!");
         HashTrieMap target = new HashTrieMap();
-        hashMap.forEach((k, v) -> target.initialPut(new StringValue(k), v));
+        hashMap.forEach((k, v) -> target.initialPut(new StringItem(k), v));
         return target;
     }
 }

@@ -10,6 +10,7 @@ package net.sf.saxon.tree.tiny;
 import net.sf.saxon.event.BuilderMonitor;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -21,11 +22,11 @@ import net.sf.saxon.type.Type;
  */
 public class TinyBuilderMonitor extends BuilderMonitor {
 
-    private TinyBuilder builder;
+    private final TinyBuilder builder;
     private int mark = -1;
     private int markedNodeNr = -1;
-    private int markedAttribute = -1;
-    private int markedNamespace = -1;
+    private final int markedAttribute = -1;
+    private final int markedNamespace = -1;
 
     public TinyBuilderMonitor(/*@NotNull*/ TinyBuilder builder) {
         super(builder);
@@ -58,7 +59,7 @@ public class TinyBuilderMonitor extends BuilderMonitor {
     }
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (mark == Type.TEXT) {
             markedNodeNr = builder.getTree().getNumberOfNodes();
         }
@@ -67,7 +68,7 @@ public class TinyBuilderMonitor extends BuilderMonitor {
     }
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (mark == Type.COMMENT) {
             markedNodeNr = builder.getTree().getNumberOfNodes();
         }
@@ -76,7 +77,7 @@ public class TinyBuilderMonitor extends BuilderMonitor {
     }
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (mark == Type.PROCESSING_INSTRUCTION) {
             markedNodeNr = builder.getTree().getNumberOfNodes();
         }

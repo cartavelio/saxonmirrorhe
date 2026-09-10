@@ -12,10 +12,7 @@ import net.sf.saxon.expr.SuppliedParameterReference;
 import net.sf.saxon.expr.instruct.LocalParam;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
-import net.sf.saxon.om.AxisInfo;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.Whitespace;
@@ -30,7 +27,7 @@ import java.util.EnumSet;
 
 public class XSLLocalParam extends XSLGeneralVariable {
 
-    private EnumSet<SourceBinding.BindingProperty> permittedAttributes = EnumSet.of(
+    private final EnumSet<SourceBinding.BindingProperty> permittedAttributes = EnumSet.of(
             SourceBinding.BindingProperty.TUNNEL,
             SourceBinding.BindingProperty.REQUIRED,
             SourceBinding.BindingProperty.SELECT,
@@ -122,7 +119,7 @@ public class XSLLocalParam extends XSLGeneralVariable {
                 compileError("xsl:param must not be preceded by other instructions", "XTSE0010");
             } else {
                 // it must be a text node; allow it if all whitespace
-                if (!Whitespace.isWhite(node.getStringValueCS())) {
+                if (!Whitespace.isAllWhite(node.getUnicodeStringValue())) {
                     compileError("xsl:param must not be preceded by text", "XTSE0010");
                 }
             }

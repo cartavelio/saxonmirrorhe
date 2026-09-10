@@ -14,7 +14,6 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.*;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
@@ -520,7 +519,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         function.callUpdating(actualArgs, c2, pul);
     }
 
-    private static int depth = 0;
+    private static final int depth = 0;
 
     /**
      * This is the method that actually does the function call (in pull mode)
@@ -556,7 +555,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
 
         try {
-            //Instrumentation.count(function.getFunctionName().getLocalPart());
             return targetFunction.call(c2, actualArgs);
         } catch (UncheckedXPathException e) {
             XPathException xe = e.getXPathException();
@@ -683,11 +681,11 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         }
         out.emitAttribute("bSlot", "" + getBindingSlot());
         if (argumentEvaluators != null && getArity() > 0) {
-            FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+            StringBuilder fsb = new StringBuilder(64);
             for (Evaluator e : argumentEvaluators) {
                 fsb.append(e.getEvaluationMode().getCode() + " ");
             }
-            out.emitAttribute("eval", Whitespace.trim(fsb));
+            out.emitAttribute("eval", Whitespace.trim(fsb.toString()));
         }
         for (Operand o : operands()) {
             o.getChildExpression().export(out);

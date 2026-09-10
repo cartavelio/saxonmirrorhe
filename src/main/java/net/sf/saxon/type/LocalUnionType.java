@@ -11,8 +11,8 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.tree.util.FastStringBuffer;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -25,7 +25,7 @@ import java.util.List;
 
 public class LocalUnionType implements PlainType, UnionType {
 
-    private List<AtomicType> memberTypes;
+    private final List<AtomicType> memberTypes;
 
     /**
      * Get the genre of this item
@@ -211,7 +211,7 @@ public class LocalUnionType implements PlainType, UnionType {
      */
 
     /*@Nullable*/
-    public ValidationFailure validateContent(/*@NotNull*/ CharSequence value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
+    public ValidationFailure validateContent(UnicodeString value, NamespaceResolver nsResolver, /*@NotNull*/ ConversionRules rules) {
         for (AtomicType at : memberTypes) {
             ValidationFailure err = at.validateContent(value, nsResolver, rules);
             if (err == null) {
@@ -240,7 +240,7 @@ public class LocalUnionType implements PlainType, UnionType {
     }
 
     @Override
-    public AtomicValue getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules)
+    public AtomicValue getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules)
             throws ValidationException {
         for (AtomicType type : memberTypes) {
             StringConverter converter = rules.makeStringConverter(type);
@@ -342,7 +342,7 @@ public class LocalUnionType implements PlainType, UnionType {
      */
 
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         fsb.append("union(");
         for (AtomicType at : memberTypes) {
             String member = at.getDisplayName();
@@ -356,7 +356,7 @@ public class LocalUnionType implements PlainType, UnionType {
 
     @Override
     public String toExportString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C256);
+        StringBuilder fsb = new StringBuilder(256);
         fsb.append("union(");
         for (AtomicType at : memberTypes) {
             fsb.append(at.toExportString());

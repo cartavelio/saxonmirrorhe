@@ -14,7 +14,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.ZeroOrOne;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * This class implements the XPath 2.0 fn:compare() function
@@ -22,7 +22,7 @@ import net.sf.saxon.value.StringValue;
 
 public class Compare extends CollatingFunctionFixed {
 
-    private static Int64Value compare(StringValue s1, StringValue s2, AtomicComparer comparer) throws XPathException {
+    private static Int64Value compare(StringItem s1, StringItem s2, AtomicComparer comparer) throws XPathException {
         if (s1 == null || s2 == null) {
             return null;
         }
@@ -38,8 +38,8 @@ public class Compare extends CollatingFunctionFixed {
 
     @Override
     public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
-        StringValue arg0 = (StringValue) arguments[0].head();
-        StringValue arg1 = (StringValue) arguments[1].head();
+        StringItem arg0 = (StringItem) arguments[0].head();
+        StringItem arg1 = (StringItem) arguments[1].head();
         GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
         Int64Value result = compare(arg0, arg1, comparer);
         return new ZeroOrOne(result);

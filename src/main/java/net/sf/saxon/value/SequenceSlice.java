@@ -11,9 +11,10 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 
 import java.util.Iterator;
 import java.util.List;
@@ -25,9 +26,9 @@ import java.util.List;
  */
 
 public class SequenceSlice implements GroundedValue {
-    private List<? extends Item> value;
-    private int offset;
-    private int length;
+    private final List<? extends Item> value;
+    private final int offset;
+    private final int length;
 
     /**
      * Construct an sequence from a slice of a list of items. Note, the list of items is used as is,
@@ -54,13 +55,13 @@ public class SequenceSlice implements GroundedValue {
     }
 
     @Override
-    public String getStringValue() throws XPathException {
+    public UnicodeString getUnicodeStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
     @Override
-    public CharSequence getStringValueCS() throws XPathException {
-        return SequenceTool.getStringValue(this);
+    public String getStringValue() throws XPathException {
+        return SequenceTool.stringify(this);
     }
 
     /**
@@ -176,12 +177,12 @@ public class SequenceSlice implements GroundedValue {
 
     /*@NotNull*/
     public String toString() {
-        FastStringBuffer fsb = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder fsb = new StringBuilder(64);
         for (int i = 0; i < getLength(); i++) {
             fsb.append(i == 0 ? "(" : ", ");
             fsb.append(itemAt(i).toString());
         }
-        fsb.cat(')');
+        fsb.append(')');
         return fsb.toString();
     }
 

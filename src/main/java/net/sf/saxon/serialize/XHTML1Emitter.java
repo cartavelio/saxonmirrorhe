@@ -30,7 +30,7 @@ public class XHTML1Emitter extends XMLEmitter {
 
     static Set<String> emptyTags1 = new HashSet<String>(31);
 
-    private static String[] emptyTagNames1 = {
+    private static final String[] emptyTagNames1 = {
             "area", "base", "basefont", "br", "col", "embed", "frame", "hr", "img", "input", "isindex", "link", "meta", "param"
             // added "embed" in 9.5
     };

@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -75,21 +76,11 @@ public abstract class AbstractFunction implements Function {
      * Get the string value of the function
      *
      * @throws UnsupportedOperationException (the string value of a function is not defined)
+     * @return
      */
 
     @Override
-    public String getStringValue() {
-        throw new UnsupportedOperationException("The string value of a function is not defined");
-    }
-
-    /**
-     * Get the string value of the function
-     *
-     * @throws UnsupportedOperationException (the string value of a function is not defined)
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         throw new UnsupportedOperationException("The string value of a function is not defined");
     }
 

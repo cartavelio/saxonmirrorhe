@@ -40,7 +40,7 @@ import java.util.Map;
 
 public class StandardCollectionFinder implements CollectionFinder {
 
-    private Map<String, ResourceCollection> registeredCollections = new HashMap<>(2);
+    private final Map<String, ResourceCollection> registeredCollections = new HashMap<>(2);
 
     /**
      * Register a specific URI and bind it to a specific ResourceCollection

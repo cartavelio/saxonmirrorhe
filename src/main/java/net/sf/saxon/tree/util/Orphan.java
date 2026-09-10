@@ -12,12 +12,13 @@ import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingleNodeIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 import net.sf.saxon.value.UntypedAtomicValue;
 
 import java.util.function.Predicate;
@@ -37,10 +38,10 @@ public final class Orphan implements MutableNodeInfo {
 
     private short kind;
     /*@Nullable*/ private NodeName nodeName = null;
-    private CharSequence stringValue;
+    private UnicodeString stringValue;
     private SchemaType typeAnnotation = null;
     private int options = ReceiverOption.NONE;
-    private GenericTreeInfo treeInfo;
+    private final GenericTreeInfo treeInfo;
 
     /**
      * Create an Orphan node
@@ -145,7 +146,7 @@ public final class Orphan implements MutableNodeInfo {
      * @param stringValue the string value of the node
      */
 
-    public void setStringValue(CharSequence stringValue) {
+    public void setStringValue(UnicodeString stringValue) {
         this.stringValue = stringValue;
     }
 
@@ -258,15 +259,15 @@ public final class Orphan implements MutableNodeInfo {
         switch (getNodeKind()) {
             case Type.COMMENT:
             case Type.PROCESSING_INSTRUCTION:
-                return new StringValue(stringValue);
+                return new StringItem(stringValue);
             case Type.TEXT:
             case Type.DOCUMENT:
             case Type.NAMESPACE:
-                return new UntypedAtomicValue(stringValue);
+                return new UntypedAtomicValue(getUnicodeStringValue());
             default:
                 if (typeAnnotation == null || typeAnnotation == Untyped.getInstance() ||
                         typeAnnotation == BuiltInAtomicType.UNTYPED_ATOMIC) {
-                    return new UntypedAtomicValue(stringValue);
+                    return new UntypedAtomicValue(getUnicodeStringValue());
                 } else {
                     return typeAnnotation.atomize(this);
                 }
@@ -374,17 +375,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     @Override
-    public String getStringValue() {
-        return stringValue.toString();
-    }
-
-    /**
-     * Get the value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String.
-     */
-
-    @Override
-    public CharSequence getStringValueCS() {
+    public UnicodeString getUnicodeStringValue() {
         return stringValue;
     }
 
@@ -579,8 +570,8 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     @Override
-    public void generateId(/*@NotNull*/ FastStringBuffer buffer) {
-        buffer.cat('Q');
+    public void generateId(/*@NotNull*/ StringBuilder buffer) {
+        buffer.append('Q');
         buffer.append(Integer.toString(hashCode()));
     }
 
@@ -727,7 +718,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     @Override
-    public void addAttribute(NodeName nameCode, SimpleType attType, CharSequence value, int properties) {
+    public void addAttribute(NodeName nameCode, SimpleType attType, String value, int properties) {
         // no action: node is not an element
     }
 
@@ -785,7 +776,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     @Override
-    public void replaceStringValue(CharSequence stringValue) {
+    public void replaceStringValue(UnicodeString stringValue) {
         this.stringValue = stringValue;
     }
 

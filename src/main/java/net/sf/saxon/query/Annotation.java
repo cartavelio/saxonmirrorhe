@@ -11,7 +11,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,8 +95,8 @@ public class Annotation {
     }
 
     private static boolean annotationParamEqual(AtomicValue a, AtomicValue b) {
-        if (a instanceof StringValue && b instanceof StringValue) {
-            return a.getStringValue().equals(b.getStringValue());
+        if (a instanceof StringItem && b instanceof StringItem) {
+            return a.getUnicodeStringValue().equals(b.getUnicodeStringValue());
         } else if (a instanceof NumericValue && b instanceof NumericValue) {
             return ((NumericValue) a).getDoubleValue() == ((NumericValue) b).getDoubleValue();
         } else {

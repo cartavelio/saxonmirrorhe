@@ -26,8 +26,8 @@ import java.util.Stack;
  */
 public class PathMappedAccumulatorData implements IAccumulatorData {
 
-    private IAccumulatorData originalData;
-    private NodeInfo origin;
+    private final IAccumulatorData originalData;
+    private final NodeInfo origin;
 
     PathMappedAccumulatorData(IAccumulatorData original, NodeInfo origin) {
         this.originalData = original;

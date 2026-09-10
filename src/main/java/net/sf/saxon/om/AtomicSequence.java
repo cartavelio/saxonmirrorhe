@@ -7,6 +7,7 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.AtomicValue;
 
@@ -61,7 +62,7 @@ public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
      *         of casting to string according to the XPath 2.0 rules
      */
 
-    CharSequence getCanonicalLexicalRepresentation();
+    UnicodeString getCanonicalLexicalRepresentation();
 
     /**
      * Get a Comparable value that implements the XML Schema ordering comparison semantics for this value.
@@ -79,23 +80,13 @@ public interface AtomicSequence extends GroundedValue, Iterable<AtomicValue> {
     /**
      * Get a string representation of the sequence. The is the space-separated concatenation of the result of
      * casting each of the items in the sequence to xs:string
-     * @return a whitespace-separated concatenation of the string values of the items making up the sequence,
-     * as a CharSequence.
-     */
-
-    @Override
-    CharSequence getStringValueCS();
-
-    /**
-     * Get a string representation of the sequence. The is the space-separated concatenation of the result of
-     * casting each of the items in the sequence to xs:string
      *
      * @return a whitespace-separated concatenation of the string values of the items making up the sequence,
      * as a String.
      */
 
     @Override
-    String getStringValue();
+    UnicodeString getUnicodeStringValue();
 
 }
 

@@ -21,6 +21,7 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -39,7 +40,7 @@ import java.util.function.BiConsumer;
 
 public final class FixedAttribute extends AttributeCreator {
 
-    private NodeName nodeName;
+    private final NodeName nodeName;
 
     /**
      * Construct an Attribute instruction
@@ -138,7 +139,7 @@ public final class FixedAttribute extends AttributeCreator {
 
         // Attempt early validation if possible
         if (Literal.isAtomic(getSelect()) && schemaType != null && !schemaType.isNamespaceSensitive()) {
-            CharSequence value = ((Literal) getSelect()).getValue().getStringValueCS();
+            UnicodeString value = ((Literal) getSelect()).getGroundedValue().getUnicodeStringValue();
             ValidationFailure err = schemaType.validateContent(
                     value, DummyNamespaceResolver.getInstance(), rules);
             if (err != null) {
@@ -155,7 +156,7 @@ public final class FixedAttribute extends AttributeCreator {
         // escaped when the time comes for serialization
         if (getSelect() instanceof StringLiteral) {
             boolean special = false;
-            CharSequence val = ((StringLiteral) getSelect()).getStringValue();
+            String val = ((StringLiteral) getSelect()).stringify();
             for (int k = 0; k < val.length(); k++) {
                 char c = val.charAt(k);
                 if ((int) c < 33 || (int) c > 126 ||

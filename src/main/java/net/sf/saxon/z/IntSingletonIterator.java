@@ -13,7 +13,7 @@ package net.sf.saxon.z;
 
 public class IntSingletonIterator implements IntIterator {
 
-    private int value;
+    private final int value;
     boolean gone = false;
 
     public IntSingletonIterator(int value) {

@@ -24,7 +24,7 @@ public interface WrappingFunction {
      */
 
     /*@NotNull*/
-    public VirtualNode makeWrapper(NodeInfo node, VirtualNode parent);
+    VirtualNode makeWrapper(NodeInfo node, VirtualNode parent);
 
 
 }

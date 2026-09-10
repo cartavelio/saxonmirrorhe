@@ -27,7 +27,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.DoubleValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -431,8 +431,8 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
 
         if (t0.equals(BuiltInAtomicType.STRING) || t1.equals(BuiltInAtomicType.STRING) ||
                 (t0.equals(BuiltInAtomicType.UNTYPED_ATOMIC) && t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC))) {
-            StringValue s0 = StringValue.makeStringValue(a0.getStringValueCS());
-            StringValue s1 = StringValue.makeStringValue(a1.getStringValueCS());
+            StringItem s0 = new StringItem(a0.getUnicodeStringValue());
+            StringItem s1 = new StringItem(a1.getUnicodeStringValue());
             return ValueComparison.compare(s0, operator, s1, comparer, false);
         }
 
@@ -440,11 +440,11 @@ public class GeneralComparison10 extends BinaryExpression implements Callable {
         // convert it to the type of the other operand, and compare
 
         if (t0.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-            a0 = t1.getStringConverter(rules).convert((StringValue)a0).asAtomic();
+            a0 = t1.getStringConverter(rules).convert(a0).asAtomic();
         }
 
         if (t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
-            a1 = t0.getStringConverter(rules).convert((StringValue)a1).asAtomic();
+            a1 = t0.getStringConverter(rules).convert(a1).asAtomic();
         }
 
         return ValueComparison.compare(a0, operator, a1, comparer, false);

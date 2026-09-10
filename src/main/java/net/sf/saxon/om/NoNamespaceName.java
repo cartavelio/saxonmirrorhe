@@ -12,7 +12,7 @@ package net.sf.saxon.om;
  */
 public final class NoNamespaceName implements NodeName {
 
-    private String localName;
+    private final String localName;
     private int nameCode = -1;
 
     public NoNamespaceName(String localName) {

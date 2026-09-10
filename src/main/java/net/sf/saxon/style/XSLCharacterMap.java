@@ -124,7 +124,7 @@ public class XSLCharacterMap extends StyleElement {
             if (!(child instanceof XSLOutputCharacter)) {
                 compileError("Only xsl:output-character is allowed within xsl:character-map", "XTSE0010");
             }
-        };
+        }
 
         // check that there isn't another character-map with the same name and import
         // precedence

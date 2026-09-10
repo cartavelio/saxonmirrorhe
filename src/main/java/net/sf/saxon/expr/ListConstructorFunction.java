@@ -10,12 +10,13 @@ package net.sf.saxon.expr;
 import net.sf.saxon.functions.AbstractFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * A function item representing a constructor function for a list type
@@ -144,14 +145,14 @@ public class ListConstructorFunction extends AbstractFunction {
                 throw e;
             }
         }
-        if (!(val instanceof StringValue) || val instanceof AnyURIValue) {
+        if (!(val instanceof StringItem) || val instanceof AnyURIValue) {
             XPathException e = new XPathException("Only xs:string and xs:untypedAtomic can be cast to a list type", "XPTY0004");
             e.setIsTypeError(true);
             throw e;
         }
 
         ConversionRules rules = context.getConfiguration().getConversionRules();
-        CharSequence cs = val.getStringValueCS();
+        UnicodeString cs = val.getUnicodeStringValue();
         ValidationFailure failure = targetType.validateContent(cs, nsResolver, rules);
         if (failure != null) {
             throw failure.makeException();

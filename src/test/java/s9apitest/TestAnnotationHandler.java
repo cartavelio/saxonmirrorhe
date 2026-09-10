@@ -20,6 +20,7 @@ public class TestAnnotationHandler {
 
     private static class ColourHandler implements FunctionAnnotationHandler {
 
+        @Override
         public String getAssertionNamespace () {
             return "http://s.com";
         }
@@ -34,10 +35,12 @@ public class TestAnnotationHandler {
          * @throws XPathException if the annotation is invalid, or if it is inconsistent with the annotations
          *                        in the existing list.
          */
+        @Override
         public void check(AnnotationList annotations, String construct) throws XPathException {
             //
         }
 
+        @Override
         public boolean satisfiesAssertion(Annotation assertion, AnnotationList annotationList) {
             if (assertion.getAnnotationQName().getLocalPart().equals("coloured")) {
                 return annotationList.includes("colour");
@@ -46,6 +49,7 @@ public class TestAnnotationHandler {
             }
         }
 
+        @Override
         public Affinity relationship(AnnotationList firstList, AnnotationList secondList) {
             return Affinity.OVERLAPS;
         }

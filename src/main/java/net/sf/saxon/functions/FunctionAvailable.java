@@ -11,10 +11,8 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.QNameParser;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -54,7 +52,7 @@ public class FunctionAvailable extends SystemFunction {
         // for calls with fixed arguments is done during the optimization phase, which makes the full static context available.
 
         if (arguments[0] instanceof Literal && (arguments.length == 1 || arguments[1] instanceof Literal)) {
-            String lexicalQName = ((Literal) arguments[0]).getValue().getStringValue();
+            String lexicalQName = ((StringLiteral) arguments[0]).stringify();
             StaticContext env = visitor.getStaticContext();
             boolean b = false;
 
@@ -97,7 +95,7 @@ public class FunctionAvailable extends SystemFunction {
         }
         StructuredQName qName;
         try {
-            if (NameChecker.isValidNCName(lexicalName)) {
+            if (NameChecker.isValidNCName(StringTool.codePoints(lexicalName))) {
                 // we're in XSLT, where the default namespace for functions can't be changed
                 String uri = NamespaceConstant.FN;
                 qName = new StructuredQName("", uri, lexicalName);

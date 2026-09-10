@@ -14,7 +14,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.SequenceType;
 
@@ -433,7 +433,7 @@ public abstract class FunctionCall extends Expression {
      */
 
     public String toString() {
-        FastStringBuffer buff = new FastStringBuffer(FastStringBuffer.C64);
+        StringBuilder buff = new StringBuilder(64);
         StructuredQName fName = getFunctionName();
         String f;
         if (fName == null) {

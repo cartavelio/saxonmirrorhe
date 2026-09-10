@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.value.AtomicValue;
@@ -26,7 +27,7 @@ import java.util.List;
 
 public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
 
-    private List<T> content;
+    private final List<T> content;
 
     /**
      * Create a sequence containing zero or one items
@@ -132,7 +133,7 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
      *          if the sequence contains items that have no string value (for example, function items)
      */
     @Override
-    public String getStringValue() throws XPathException {
+    public UnicodeString getUnicodeStringValue() throws XPathException {
         return SequenceTool.getStringValue(this);
     }
 
@@ -142,12 +143,11 @@ public class ZeroOrMore<T extends Item> implements GroundedValue, Iterable<T> {
      * using a single space as the separator
      *
      * @return the string value of the sequence.
-     * @throws net.sf.saxon.trans.XPathException
-     *          if the sequence contains items that have no string value (for example, function items)
+     * @throws net.sf.saxon.trans.XPathException if the sequence contains items that have no string value (for example, function items)
      */
     @Override
-    public CharSequence getStringValueCS() throws XPathException {
-        return SequenceTool.getStringValue(this);
+    public String getStringValue() throws XPathException {
+        return SequenceTool.stringify(this);
     }
 
     /**

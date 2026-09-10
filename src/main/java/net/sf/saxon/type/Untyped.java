@@ -462,7 +462,7 @@ public enum Untyped implements ComplexType {
     /*@NotNull*/
     @Override
     public AtomicSequence atomize(/*@NotNull*/ NodeInfo node) {
-        return new UntypedAtomicValue(node.getStringValueCS());
+        return new UntypedAtomicValue(node.getUnicodeStringValue());
     }
 
     /**

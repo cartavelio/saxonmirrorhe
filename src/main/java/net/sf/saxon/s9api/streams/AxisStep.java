@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  */
 class AxisStep extends Step<XdmNode> {
 
-    private Axis axis;
+    private final Axis axis;
 
     public AxisStep(Axis axis) {
         this.axis = axis;

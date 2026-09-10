@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.Sequence;
@@ -82,9 +83,9 @@ public class TypeAvailable extends SystemFunction {
     @Override
     public Expression makeFunctionCall(Expression[] arguments) {
         try {
-            if (arguments[0] instanceof Literal) {
+            if (arguments[0] instanceof StringLiteral) {
                 boolean b = typeAvailable(
-                    ((Literal)arguments[0]).getValue().getStringValue(),
+                    ((StringLiteral)arguments[0]).stringify(),
                     getRetainedStaticContext().getConfiguration());
                 return Literal.makeLiteral(BooleanValue.get(b));
             }

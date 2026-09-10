@@ -21,11 +21,11 @@ import java.util.function.IntPredicate;
 
 final class FollowingIterator implements AxisIterator {
 
-    private TinyTree tree;
-    private TinyNodeImpl startNode;
+    private final TinyTree tree;
+    private final TinyNodeImpl startNode;
     private NodeInfo current;
-    private NodeTest test;
-    private boolean includeDescendants;
+    private final NodeTest test;
+    private final boolean includeDescendants;
     int position = 0;
     private final IntPredicate matcher;
     private NodeInfo pending;

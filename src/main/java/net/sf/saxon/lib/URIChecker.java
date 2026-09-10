@@ -27,5 +27,5 @@ public interface URIChecker {
      * @return true if the string is considered to represent a valid URI
      */
 
-    boolean isValidURI(CharSequence value);
+    boolean isValidURI(String value);
 }

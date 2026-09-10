@@ -17,11 +17,12 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.util.FastStringBuffer;
+
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
@@ -373,40 +374,15 @@ public interface MapItem extends Function {
      * node as defined in the XPath 2.0 data model, except that all nodes are treated as being
      * untyped: it is not an error to get the string value of a node with a complex type.
      * For atomic values, the method returns the result of casting the atomic value to a string.
-     * <p>If the calling code can handle any CharSequence, the method {@link #getStringValueCS} should
-     * be used. If the caller requires a string, this method is preferred.</p>
      *
      * @return the string value of the item
      * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
      *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
      *                                       needed)
-     * @see #getStringValueCS
      * @since 8.4
      */
     @Override
-    default String getStringValue() {
-        throw new UnsupportedOperationException("A map has no string value");
-    }
-
-    /**
-     * Get the string value of the item as a CharSequence. This is in some cases more efficient than
-     * the version of the method that returns a String. The method satisfies the rule that
-     * <code>X.getStringValueCS().toString()</code> returns a string that is equal to
-     * <code>X.getStringValue()</code>.
-     * <p>Note that two CharSequence values of different types should not be compared using equals(), and
-     * for the same reason they should not be used as a key in a hash table.</p>
-     * <p>If the calling code can handle any CharSequence, this method should
-     * be used. If the caller requires a string, the {@link #getStringValue} method is preferred.</p>
-     *
-     * @return the string value of the item
-     * @throws UnsupportedOperationException if the item is a function item (an unchecked exception
-     *                                       is used here to avoid introducing exception handling to a large number of paths where it is not
-     *                                       needed)
-     * @see #getStringValue
-     * @since 8.4
-     */
-    @Override
-    default CharSequence getStringValueCS() {
+    default UnicodeString getUnicodeStringValue() {
         throw new UnsupportedOperationException("A map has no string value");
     }
 
@@ -441,10 +417,11 @@ public interface MapItem extends Function {
     default boolean deepEquals(Function other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
-            AtomicIterator keys = keys();
+            AtomicIterator<?> keys = keys();
             AtomicValue key;
             while ((key = keys.next()) != null) {
                 Sequence thisValue = get(key);
+                assert thisValue != null;
                 Sequence otherValue = ((MapItem) other).get(key);
                 if (otherValue == null) {
                     return false;
@@ -477,7 +454,7 @@ public interface MapItem extends Function {
      */
 
     static String mapToString(MapItem map) {
-        FastStringBuffer buffer = new FastStringBuffer(256);
+        StringBuilder buffer = new StringBuilder(256);
         buffer.append("map{");
         for (KeyValuePair pair : map.keyValuePairs()) {
             if (buffer.length() > 4) {

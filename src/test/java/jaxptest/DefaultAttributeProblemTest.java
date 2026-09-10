@@ -10,24 +10,27 @@ import javax.xml.transform.TransformerException;
 
 public class DefaultAttributeProblemTest {
 
-    private static ErrorListener errorListener = new ErrorListener() {
+    private static final ErrorListener errorListener = new ErrorListener() {
+        @Override
         public void warning(TransformerException ex) {
             System.out.println("Warning: " + ex + "\nLocation: " + ex.getLocator());
         }
 
+        @Override
         public void fatalError(TransformerException ex) {
             System.out.println("Error: " + ex.getMessage());
         }
 
+        @Override
         public void error(TransformerException ex) {
             System.out.println("Error: " + ex + "\nLocation: " + ex.getLocator());
         }
     };
 
-    private static String dir = ConfigTest.DATA_DIR + "defaultAttTest/";
-    private static String xslPath = dir + "samples/dita_xsd_based/copy_stylesheet.xsl";
-    private static String xmlPath = dir + "samples/dita_xsd_based/defAttr.xml";
-    private static String outPath = dir + "samples/dita_xsd_based/out.xml";
+    private static final String dir = ConfigTest.DATA_DIR + "defaultAttTest/";
+    private static final String xslPath = dir + "samples/dita_xsd_based/copy_stylesheet.xsl";
+    private static final String xmlPath = dir + "samples/dita_xsd_based/defAttr.xml";
+    private static final String outPath = dir + "samples/dita_xsd_based/out.xml";
 
     @Test
     public void testDummyTest() {

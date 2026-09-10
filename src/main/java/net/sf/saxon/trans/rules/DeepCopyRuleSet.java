@@ -11,11 +11,8 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ParameterSet;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.om.CopyOptions;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameOfNode;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SimpleType;
@@ -26,7 +23,7 @@ import net.sf.saxon.type.Type;
  */
 public class DeepCopyRuleSet implements BuiltInRuleSet {
 
-    private static DeepCopyRuleSet THE_INSTANCE = new DeepCopyRuleSet();
+    private static final DeepCopyRuleSet THE_INSTANCE = new DeepCopyRuleSet();
 
     /**
      * Get the singleton instance of this class
@@ -68,15 +65,15 @@ public class DeepCopyRuleSet implements BuiltInRuleSet {
                     return;
                 }
                 case Type.TEXT:
-                    out.characters(item.getStringValueCS(), locationId, ReceiverOption.NONE);
+                    out.characters(item.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                     return;
 
                 case Type.COMMENT:
-                    out.comment(node.getStringValueCS(), locationId, ReceiverOption.NONE);
+                    out.comment(node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                     return;
 
                 case Type.PROCESSING_INSTRUCTION:
-                    out.processingInstruction(node.getLocalPart(), node.getStringValue(), locationId, ReceiverOption.NONE);
+                    out.processingInstruction(node.getLocalPart(), node.getUnicodeStringValue(), locationId, ReceiverOption.NONE);
                     return;
 
                 case Type.ATTRIBUTE:

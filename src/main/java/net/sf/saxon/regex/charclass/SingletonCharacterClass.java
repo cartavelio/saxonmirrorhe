@@ -18,7 +18,7 @@ import net.sf.saxon.z.IntSingletonSet;
 
 public class SingletonCharacterClass implements CharacterClass {
 
-    private int codepoint;
+    private final int codepoint;
 
     public SingletonCharacterClass(int codepoint) {
         this.codepoint = codepoint;

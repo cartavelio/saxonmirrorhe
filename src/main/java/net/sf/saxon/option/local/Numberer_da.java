@@ -21,21 +21,21 @@ public class Numberer_da extends AbstractNumberer {
 
     private static final long serialVersionUID = 1L;
 
-    private static String[] danishOrdinalUnits = {
+    private static final String[] danishOrdinalUnits = {
             "", "f\u00f8rste", "anden", "tredje", "fjerde", "femte", "sjette", "syvende", "ottende", "niende",
             "tiende", "ellevte", "tolvte", "trettende", "fjortende", "femtende", "sekstende",
             "syttende", "attende", "nittende"};
 
-    private static String[] danishOrdinalTens = {
+    private static final String[] danishOrdinalTens = {
             "", "tiende", "tyvende", "tredivte", "fyrretyvende", "halvtredsindstyvende",
             "tresindstyvende", "halvfjerdsindstyvende", "firsindstyvende", "halvfemstyvende"};
 
-    private static String[] danishUnits = {
+    private static final String[] danishUnits = {
             "", "et", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni",
             "ti", "elleve" /*or elvte*/, "tolv", "tretten", "fjorten", "femten", "seksten",
             "sytten", "atten", "nitten"};
 
-    private static String[] danishTens = {
+    private static final String[] danishTens = {
             "", "ti", "tyve", "tredive", "fyrre", "halvtreds",
             "tres", "halvfjerds", "firs", "halvfems"};
 
@@ -134,7 +134,7 @@ public class Numberer_da extends AbstractNumberer {
     }
 
 
-    private static String[] swedishMonths = {
+    private static final String[] swedishMonths = {
             "januar", "februar", "marts", "april", "maj", "juni",
             "juli", "august", "september", "oktober", "november", "december"
     };
@@ -193,15 +193,15 @@ public class Numberer_da extends AbstractNumberer {
         return name;
     }
 
-    private static String[] danishDays = {
+    private static final String[] danishDays = {
             "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "l\u00f8rdag", "s\u00f8ndag"
     };
 
-    private static String[] danishDayAbbreviations = {
+    private static final String[] danishDayAbbreviations = {
             "ma", "ti", "on", "to", "fr", "l\u00f8", "s\u00f8"
     };
 
-    /*@NotNull*/ private static int[] minUniqueDayLength = {
+    /*@NotNull*/ private static final int[] minUniqueDayLength = {
             1, 2, 1, 2, 1, 2, 2
     };
 

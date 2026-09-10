@@ -9,13 +9,14 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
+import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.regex.RegularExpression;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,18 +36,18 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
     private void tryToBindRegularExpression(Expression[] arguments) {
         // For all these functions, the regular expression is the second argument, and the flags
         // argument is the last argument.
-        if (arguments[1] instanceof Literal && arguments[arguments.length - 1] instanceof Literal) {
+        if (arguments[1] instanceof StringLiteral && arguments[arguments.length - 1] instanceof StringLiteral) {
             try {
                 Configuration config = getRetainedStaticContext().getConfiguration();
-                String re = ((Literal) arguments[1]).getValue().getStringValue();
-                String flags = ((Literal) arguments[arguments.length - 1]).getValue().getStringValue();
+                UnicodeString re = ((StringLiteral) arguments[1]).getGroundedValue().getUnicodeStringValue();
+                String flags = ((StringLiteral) arguments[arguments.length - 1]).stringify();
                 String hostLang = "XP30";
                 if (config.getXsdVersion() == Configuration.XSD11) {
                     hostLang += "/XSD11";
                 }
                 List<String> warnings = new ArrayList<>(1);
                 staticRegex = config.compileRegularExpression(re, flags, hostLang, warnings);
-                if (!allowRegexMatchingEmptyString() && staticRegex.matches("")) {
+                if (!allowRegexMatchingEmptyString() && staticRegex.matches(EmptyUniString.getInstance())) {
                     staticRegex = null;
                     // will cause a dynamic error
                 }
@@ -119,17 +120,16 @@ public abstract class RegexFunction extends SystemFunction implements StatefulSy
             return staticRegex;
         }
         Configuration config = getRetainedStaticContext().getConfiguration();
-        StringValue regexArg = (StringValue)args[1].head();
-        String re = regexArg.getStringValue();
+        UnicodeString regexArg = args[1].head().getUnicodeStringValue();
         String flags = args[args.length - 1].head().getStringValue();
         String hostLang = "XP30";
         if (config.getXsdVersion() == Configuration.XSD11) {
             hostLang += "/XSD11";
         }
         List<String> warnings = new ArrayList<>(1);
-        RegularExpression regex = config.compileRegularExpression(re, flags, hostLang, warnings);
+        RegularExpression regex = config.compileRegularExpression(regexArg, flags, hostLang, warnings);
 
-        if (!allowRegexMatchingEmptyString() && regex.matches("")) {
+        if (!allowRegexMatchingEmptyString() && regex.matches(EmptyUniString.getInstance())) {
             throw new XPathException("The regular expression must not be one that matches a zero-length string", "FORX0003");
         }
         return regex;

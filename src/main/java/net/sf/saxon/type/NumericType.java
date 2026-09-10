@@ -12,6 +12,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
@@ -290,7 +291,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      *          if the supplied value is not in the lexical space of the data type
      */
     @Override
-    public DoubleValue getTypedValue(CharSequence value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
+    public DoubleValue getTypedValue(UnicodeString value, NamespaceResolver resolver, ConversionRules rules) throws ValidationException {
         try {
             double d = StringToDouble.getInstance().stringToNumber(value);
             return new DoubleValue(d);
@@ -314,7 +315,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      *                                       resolver is supplied
      */
     @Override
-    public ValidationFailure validateContent(CharSequence value, NamespaceResolver nsResolver, ConversionRules rules) {
+    public ValidationFailure validateContent(UnicodeString value, NamespaceResolver nsResolver, ConversionRules rules) {
         try {
             StringToDouble.getInstance().stringToNumber(value);
             return null;
@@ -369,7 +370,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @return the value after preprocessing
      */
     @Override
-    public CharSequence preprocess(CharSequence input) {
+    public UnicodeString preprocess(UnicodeString input) {
         return input;
     }
 
@@ -383,7 +384,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @return the value after postprocessing
      */
     @Override
-    public CharSequence postprocess(CharSequence input) {
+    public UnicodeString postprocess(UnicodeString input) {
         return input;
     }
 

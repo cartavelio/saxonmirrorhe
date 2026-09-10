@@ -29,10 +29,10 @@ import net.sf.saxon.value.SequenceType;
 
 public final class IterateInstr extends Instruction implements ContextSwitchingExpression {
 
-    private Operand selectOp;
-    private Operand actionOp;
-    private Operand initiallyOp;
-    private Operand onCompletionOp;
+    private final Operand selectOp;
+    private final Operand actionOp;
+    private final Operand initiallyOp;
+    private final Operand onCompletionOp;
 
     /**
      * Create an xsl:iterate instruction

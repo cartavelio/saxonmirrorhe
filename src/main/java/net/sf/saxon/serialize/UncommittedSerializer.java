@@ -13,6 +13,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -33,8 +34,8 @@ public class UncommittedSerializer extends ProxyReceiver {
 
     private boolean committed = false;
     private EventBuffer pending = null;
-    private Result finalResult;
-    private SerializationProperties properties;
+    private final Result finalResult;
+    private final SerializationProperties properties;
 
     /**
      * Create an uncommitted Serializer
@@ -73,7 +74,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().characters(chars, locationId, properties);
         } else {
@@ -81,7 +82,7 @@ public class UncommittedSerializer extends ProxyReceiver {
                 pending = new EventBuffer(getPipelineConfiguration());
             }
             pending.characters(chars, locationId, properties);
-            if (!Whitespace.isWhite(chars)) {
+            if (!Whitespace.isAllWhite(chars)) {
                 switchToMethod("xml");
             }
         }
@@ -92,7 +93,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties) throws XPathException {
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().processingInstruction(target, data, locationId, properties);
         } else {
@@ -108,7 +109,7 @@ public class UncommittedSerializer extends ProxyReceiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void comment(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (committed) {
             getNextReceiver().comment(chars, locationId, properties);
         } else {

@@ -15,6 +15,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.CodePoints;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.AttributeCollectionImpl;
@@ -428,7 +429,7 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     @Override
-    public void characters(CharSequence chars, Location locationId, int properties) throws XPathException {
+    public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         currentLocation = locationId;
         boolean disable = ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING);
         if (disable) {
@@ -436,13 +437,14 @@ public class ContentHandlerProxy implements Receiver {
         }
         try {
             if (depth <= 0 && requireWellFormed) {
-                if (Whitespace.isWhite(chars)) {
+                if (Whitespace.isAllWhite(chars)) {
                     // ignore top-level white space
                 } else {
                     notifyNotWellFormed();
                 }
             } else {
-                handler.characters(chars.toString().toCharArray(), 0, chars.length());
+                String content = chars.toString();
+                handler.characters(content.toCharArray(), 0, content.length());
             }
         } catch (SAXException err) {
             handleSAXException(err);
@@ -469,7 +471,7 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     @Override
-    public void processingInstruction(String target, CharSequence data, Location locationId, int properties)
+    public void processingInstruction(String target, CodePoints data, Location locationId, int properties)
             throws XPathException {
         currentLocation = locationId;
         try {
@@ -485,12 +487,13 @@ public class ContentHandlerProxy implements Receiver {
      */
 
     @Override
-    public void comment(CharSequence chars, Location locationId, int properties)
+    public void comment(CodePoints chars, Location locationId, int properties)
             throws XPathException {
         currentLocation = locationId;
         try {
             if (lexicalHandler != null) {
-                lexicalHandler.comment(chars.toString().toCharArray(), 0, chars.length());
+                final String str = chars.toString();
+                lexicalHandler.comment(str.toCharArray(), 0, str.length());
             }
         } catch (SAXException err) {
             handleSAXException(err);

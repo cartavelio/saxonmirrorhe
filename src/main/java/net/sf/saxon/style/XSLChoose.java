@@ -115,8 +115,8 @@ public class XSLChoose extends StyleElement {
                 }
 
                 // Optimize for constant conditions (true or false)
-                if (conditions[w] instanceof Literal && ((Literal) conditions[w]).getValue() instanceof BooleanValue) {
-                    if (((BooleanValue) ((Literal) conditions[w]).getValue()).getBooleanValue()) {
+                if (conditions[w] instanceof Literal && ((Literal) conditions[w]).getGroundedValue() instanceof BooleanValue) {
+                    if (((BooleanValue) ((Literal) conditions[w]).getGroundedValue()).getBooleanValue()) {
                         // constant true: truncate the tests here
                         entries = w + 1;
                         break;
@@ -157,8 +157,8 @@ public class XSLChoose extends StyleElement {
                 return null; // return a no-op
             }
             if (entries == 1 && (conditions[0] instanceof Literal) &&
-                    ((Literal) conditions[0]).getValue() instanceof BooleanValue) {
-                if (((BooleanValue) ((Literal) conditions[0]).getValue()).getBooleanValue()) {
+                    ((Literal) conditions[0]).getGroundedValue() instanceof BooleanValue) {
+                if (((BooleanValue) ((Literal) conditions[0]).getGroundedValue()).getBooleanValue()) {
                     // only one condition left, and it's known to be true: return the corresponding action
                     return actions[0];
                 } else {

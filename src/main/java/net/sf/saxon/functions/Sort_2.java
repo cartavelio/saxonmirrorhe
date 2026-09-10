@@ -11,7 +11,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class Sort_2 extends Sort_1 {
     }
 
     protected StringCollator getCollation(XPathContext context, Sequence collationArg) throws XPathException {
-        StringValue secondArg = (StringValue)collationArg.head();
+        StringItem secondArg = (StringItem)collationArg.head();
         if (secondArg == null) {
             return  context.getConfiguration().getCollation(getRetainedStaticContext().getDefaultCollationName());
         } else {

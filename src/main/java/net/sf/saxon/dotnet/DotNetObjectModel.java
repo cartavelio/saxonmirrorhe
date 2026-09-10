@@ -91,7 +91,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
         if (isRecognizedNodeClass(sourceClass)) {
             return new JPConverter() {
                 @Override
-                public Sequence convert(Object object, XPathContext context) throws XPathException {
+                public GroundedValue convert(Object object, XPathContext context) throws XPathException {
                     return unwrapXdmValue(object);
                 }
 
@@ -157,7 +157,7 @@ public abstract class DotNetObjectModel implements ExternalObjectModel {
      * @return the underlying Value
      */
 
-    public abstract Sequence unwrapXdmValue(Object object);
+    public abstract GroundedValue unwrapXdmValue(Object object);
 
     /**
      * Wrap a Value as an XdmValue

@@ -14,7 +14,7 @@ import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.StringValue;
+import net.sf.saxon.value.StringItem;
 
 /**
  * A StaticContextAccessor is a function that takes no arguments, but operates implicitly on the
@@ -58,7 +58,7 @@ public abstract class StaticContextAccessor extends SystemFunction {
     public static class DefaultCollation extends StaticContextAccessor {
         @Override
         public AtomicValue evaluate(RetainedStaticContext rsc) {
-            return new StringValue(rsc.getDefaultCollationName());
+            return new StringItem(rsc.getDefaultCollationName());
         }
     }
 

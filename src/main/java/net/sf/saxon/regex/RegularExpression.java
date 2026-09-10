@@ -7,6 +7,7 @@
 
 package net.sf.saxon.regex;
 
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
@@ -25,7 +26,7 @@ public interface RegularExpression {
      * @return true if the string matches, false otherwise
      */
 
-    boolean matches(CharSequence input);
+    boolean matches(UnicodeString input);
 
     /**
      * Determine whether the regular expression contains a match of a given string
@@ -34,7 +35,7 @@ public interface RegularExpression {
      * @return true if the string matches, false otherwise
      */
 
-    boolean containsMatch(CharSequence input);
+    boolean containsMatch(UnicodeString input);
 
     /**
      * Use this regular expression to tokenize an input string.
@@ -43,7 +44,7 @@ public interface RegularExpression {
      * @return a SequenceIterator containing the resulting tokens, as objects of type StringValue
      */
 
-    AtomicIterator tokenize(CharSequence input);
+    AtomicIterator tokenize(UnicodeString input);
 
     /**
      * Use this regular expression to analyze an input string, in support of the XSLT
@@ -56,7 +57,7 @@ public interface RegularExpression {
      */
 
     /*@NotNull*/
-    RegexIterator analyze(CharSequence input);
+    RegexIterator analyze(UnicodeString input);
 
     /**
      * Replace all substrings of a supplied input string that match the regular expression
@@ -68,7 +69,7 @@ public interface RegularExpression {
      * @throws XPathException if the replacement string is invalid
      */
 
-    CharSequence replace(CharSequence input, CharSequence replacement) throws XPathException;
+    UnicodeString replace(UnicodeString input, UnicodeString replacement) throws XPathException;
 
     /**
      * Replace all substrings of a supplied input string that match the regular expression
@@ -81,7 +82,7 @@ public interface RegularExpression {
      * @throws XPathException if the replacement string is invalid
      */
 
-    CharSequence replaceWith(CharSequence input, Function<CharSequence, CharSequence> replacement) throws XPathException;
+    UnicodeString replaceWith(UnicodeString input, Function<UnicodeString, UnicodeString> replacement) throws XPathException;
 
     /**
      * Get the flags used at the time the regular expression was compiled.
