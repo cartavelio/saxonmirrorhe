@@ -4842,6 +4842,7 @@ public class Configuration implements SourceResolver {
         booleanFeatures.add(FeatureCode.ALLOW_MULTITHREADING);
         booleanFeatures.add(FeatureCode.ALLOW_SYNTAX_EXTENSIONS);
         booleanFeatures.add(FeatureCode.ASSERTIONS_CAN_SEE_COMMENTS);
+        booleanFeatures.add(FeatureCode.ASSERTIONS_CAN_SEE_RESOURCES);
         booleanFeatures.add(FeatureCode.COMPILE_WITH_TRACING);
         booleanFeatures.add(FeatureCode.DEBUG_BYTE_CODE);
         booleanFeatures.add(FeatureCode.DISABLE_XSL_EVALUATE);

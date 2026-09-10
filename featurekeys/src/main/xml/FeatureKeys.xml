@@ -3029,5 +3029,35 @@
                that this is what the developer intended.</p>
         </desc>
     </feature>
+    
+    <feature>
+        <featureCode>131</featureCode>
+        <name>ASSERTIONS_CAN_SEE_RESOURCES</name>
+        <type>boolean</type>
+        <uri>http://saxon.sf.net/feature/assertionsCanSeeResources</uri>
+        <editions>EE</editions>
+        <platforms>J CS</platforms>
+        <configfile>xsd/@assertionsCanSeeResources</configfile>
+        <configfiledesc>
+            <p>Determines whether assertions in an XSD 1.1 schema have access to external resources
+            using functions such as <code>doc()</code> and <code>unparsed-text()</code></p>
+        </configfiledesc>
+        <desc>
+            <p>ASSERTIONS_CAN_SEE_RESOURCES determines whether functions such as <code>doc()</code> 
+                and <code>unparsed-text()</code> can be used within XSD assertions to access external
+                resources. The default is false. If the option is set, access is still subject
+                to other configurations such as ALLOWED_PROTOCOLS.</p>
+            <p>The XSD 1.1 specification says that in the dynamic context for evaluating assertions,
+            the available documents and available collections are empty sets, meaning that external
+            resources cannot be accessed. However, this way of prohibiting access is inadequate for
+            XPath versions later than 2.0, which define many additional ways of accessing external
+            resources.</p>
+            <p>In an environment where the schema is trusted, accessing external documents within
+                an assertion can be useful for example to perform code lookup; it can also be used
+                to trigger validation of secondary documents referenced from a primary document.</p>
+            <p>This option is introduced in Saxon 13.1. Earlier versions restricted use of some
+            functions (such as <code>doc()</code>) while allowing others (such as <code>unparsed-text()</code>).</p>
+        </desc>
+    </feature>
 
 </features>

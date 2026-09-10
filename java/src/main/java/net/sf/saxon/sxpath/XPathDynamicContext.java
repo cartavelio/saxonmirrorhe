@@ -135,7 +135,7 @@ public class XPathDynamicContext {
      * document(), etc.  The URIResolver is set locally to this XPathContext
      * object.
      *
-     * @param resolver An object that implements the URIResolver interface, or
+     * @param resolver An object that implements the ResourceResolver interface, or
      *                 null.
      * @since 9.2. Changed in 9.6 to set the URIResolver locally. Changed in 11.1 to use a ResourceResolver
      * rather than a URIResolver.

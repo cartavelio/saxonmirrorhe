@@ -771,6 +771,7 @@ public class ConfigurationReader implements Receiver {
         props.setProperty("#element", "xsd");
         applyProperty(props, "allowUnresolvedSchemaComponents", FeatureCode.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS, "JN");
         applyProperty(props, "assertionsCanSeeComments", FeatureCode.ASSERTIONS_CAN_SEE_COMMENTS, "JN");
+        applyProperty(props, "assertionsCanSeeResources", FeatureCode.ASSERTIONS_CAN_SEE_RESOURCES, "JN");
         applyProperty(props, "implicitSchemaImports", FeatureCode.IMPLICIT_SCHEMA_IMPORTS, "JN");
         applyProperty(props, "multipleSchemaImports", FeatureCode.MULTIPLE_SCHEMA_IMPORTS, "JN");
         applyProperty(props, "occurrenceLimits", FeatureCode.OCCURRENCE_LIMITS, "JN");
