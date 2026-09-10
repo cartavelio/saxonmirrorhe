@@ -42,6 +42,7 @@
                compatibility, but the use of the corresponding methods on the <code>XsltExecutable</code>
                class is recommended.</li>
             <li>It is possible to clone the <code>XsltExecutable</code> object to run different executables.</li>
+            <li>The <code>XsltProcessor</code> has now been dropped from the product given that the <code>Xslt30Processor</code> and <code>XsltExecutable</code> covers the same features.</li>
          </ul>
       </li>
       <li><code>XdmArray</code> and <code>XdmMap</code> have been implemented as new XDM data types, making it
