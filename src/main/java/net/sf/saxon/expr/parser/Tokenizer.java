@@ -257,6 +257,7 @@ public final class Tokenizer {
         }
 
         if (currentToken == Token.TAG || currentToken == Token.RCURLY) {
+
             // No lookahead after encountering "<" at the start of an XML-like tag.
             // After an RCURLY, the parser must do an explicit lookahead() to continue
             // tokenizing; otherwise it can continue with direct character reading
@@ -267,145 +268,220 @@ public final class Tokenizer {
         lookAhead();
 
         if (currentToken == Token.NAME) {
+
             if (state == BARE_NAME_STATE) {
                 return;
             }
             if (oldPrecedingToken == Token.DOLLAR) {
                 return;
             }
-            switch (nextToken) {
-                case Token.LPAR:
-                    int op = getBinaryOp(currentTokenValue);
-                    // the test on followsOperator() is to cater for an operator being used as a function name,
-                    // e.g. is(): see XQTS test K-FunctionProlog-66
-                    if (op == Token.UNKNOWN || followsOperator(oldPrecedingToken)) {
-                        currentToken = getFunctionType(currentTokenValue);
-                        lookAhead();    // swallow the "("
-                    } else {
-                        currentToken = op;
-                    }
-                    break;
 
-                case Token.LCURLY:
-                    if (!(state == SEQUENCE_TYPE_STATE)) {
-                        currentToken = Token.KEYWORD_CURLY;
-                        lookAhead();        // swallow the "{"
-                    }
-                    break;
-
-                case Token.COLONCOLON:
-                    lookAhead();
-                    currentToken = Token.AXIS;
-                    break;
-
-                case Token.HASH:
-                    lookAhead();
-                    currentToken = Token.NAMED_FUNCTION_REF;
-                    break;
-
-                case Token.COLONSTAR:
-                    lookAhead();
-                    currentToken = Token.PREFIX;
-                    break;
-
-                case Token.DOLLAR:
-                    switch (currentTokenValue) {
-                        case "for":
-                            currentToken = Token.FOR;
-                            break;
-                        case "some":
-                            currentToken = Token.SOME;
-                            break;
-                        case "every":
-                            currentToken = Token.EVERY;
-                            break;
-                        case "let":
-                            currentToken = Token.LET;
-                            break;
-                        case "count":
-                            currentToken = Token.COUNT;
-                            break;
-                        case "copy":
-                            currentToken = Token.COPY;
-                            break;
-                    }
-                    break;
-
-                case Token.PERCENT:
-                    if (currentTokenValue.equals("declare")) {
-                        currentToken = Token.DECLARE_ANNOTATED;
-                    }
-                    break;
-
-                case Token.NAME:
-                    int candidate = -1;
-                    switch (currentTokenValue) {
-                        case "element":
-                            candidate = Token.ELEMENT_QNAME;
-                            break;
-                        case "attribute":
-                            candidate = Token.ATTRIBUTE_QNAME;
-                            break;
-                        case "processing-instruction":
-                            candidate = Token.PI_QNAME;
-                            break;
-                        case "namespace":
-                            candidate = Token.NAMESPACE_QNAME;
-                            break;
-                    }
-                    if (candidate != -1) {
-                        // <'element' QName '{'> constructor
-                        // <'attribute' QName '{'> constructor
-                        // <'processing-instruction' QName '{'> constructor
-                        // <'namespace' QName '{'> constructor
-
-                        String qname = nextTokenValue;
-                        String saveTokenValue = currentTokenValue;
-                        int savePosition = inputOffset;
-                        lookAhead();
-                        if (nextToken == Token.LCURLY) {
-                            currentToken = candidate;
-                            currentTokenValue = qname;
-                            lookAhead();
-                            return;
-                        } else {
-                            // backtrack (we don't have 2-token lookahead; this is the
-                            // only case where it's needed. So we backtrack instead.)
-                            currentToken = Token.NAME;
-                            currentTokenValue = saveTokenValue;
-                            inputOffset = savePosition;
-                            nextToken = Token.NAME;
-                            nextTokenValue = qname;
-                        }
-
-                    }
-                    String composite = currentTokenValue + ' ' + nextTokenValue;
-                    int possibleToken = Token.doubleKeywords.getOrDefault(composite, Token.UNKNOWN);
-                    if (possibleToken == Token.UNKNOWN) {
-                        break;
-                    } else {
-                        currentToken = possibleToken;
-                        currentTokenValue = composite;
-                        // some tokens are actually triples
-                        if (currentToken == Token.REPLACE_VALUE) {
-                            // this one's a quadruplet - "replace value of node"
-                            lookAhead();
-                            if (nextToken != Token.NAME || !nextTokenValue.equals("of")) {
-                                throw new XPathException("After '" + composite + "', expected 'of'");
-                            }
-                            lookAhead();
-                            if (nextToken != Token.NAME || !nextTokenValue.equals("node")) {
-                                throw new XPathException("After 'replace value of', expected 'node'");
-                            }
-                            nextToken = currentToken;   // to reestablish after-operator state
-                        }
-                        lookAhead();
-                        return;
-                    }
-                default:
-                    // no action needed
-            }
+            handleNextToken(oldPrecedingToken);
         }
+    }
+
+    private void handleNextToken(int oldPrecedingToken) throws XPathException {
+
+        switch (nextToken)
+        {
+        case Token.LPAR:
+            handleLPAR(oldPrecedingToken);
+            break;
+
+        case Token.LCURLY:
+            handleLCURLY();
+            break;
+
+        case Token.COLONCOLON:
+            handleCOLONCOLON();
+            break;
+
+        case Token.HASH:
+            handleHASH();
+            break;
+
+        case Token.COLONSTAR:
+            handleCOLONSTAR();
+            break;
+
+        case Token.DOLLAR:
+            handleDOLLAR();
+            break;
+
+        case Token.PERCENT:
+            handlePERCENT();
+            break;
+
+        case Token.NAME:
+            int candidate = getCandidate();
+
+            if (candidate != -1)
+            {
+                // <'element' QName '{'> constructor
+                // <'attribute' QName '{'> constructor
+                // <'processing-instruction' QName '{'> constructor
+                // <'namespace' QName '{'> constructor
+
+                String qname = nextTokenValue;
+                String saveTokenValue = currentTokenValue;
+                int savePosition = inputOffset;
+                lookAhead();
+                if (nextToken == Token.LCURLY)
+                {
+                    currentToken = candidate;
+                    currentTokenValue = qname;
+                    lookAhead();
+                    return;
+                }
+                else
+                {
+                    // backtrack (we don't have 2-token lookahead; this is the
+                    // only case where it's needed. So we backtrack instead.)
+                    currentToken = Token.NAME;
+                    currentTokenValue = saveTokenValue;
+                    inputOffset = savePosition;
+                    nextToken = Token.NAME;
+                    nextTokenValue = qname;
+                }
+
+            }
+
+            String composite = currentTokenValue + ' ' + nextTokenValue;
+            int possibleToken = Token.doubleKeywords.getOrDefault(composite, Token.UNKNOWN);
+
+            if (possibleToken == Token.UNKNOWN)
+            {
+                break;
+            }
+            else
+            {
+                handleNotUnknown(composite, possibleToken);
+                return;
+            }
+        default:
+            // no action needed
+        }
+    }
+
+    private void handleLPAR(int oldPrecedingToken) throws XPathException
+    {
+        int op = getBinaryOp(currentTokenValue);
+        // the test on followsOperator() is to cater for an operator being used as a function name,
+        // e.g. is(): see XQTS test K-FunctionProlog-66
+        if (op == Token.UNKNOWN || followsOperator(oldPrecedingToken))
+        {
+            currentToken = getFunctionType(currentTokenValue);
+            lookAhead();    // swallow the "("
+        }
+        else
+        {
+            currentToken = op;
+        }
+    }
+
+    private void handleLCURLY() throws XPathException
+    {
+        if (!(state == SEQUENCE_TYPE_STATE))
+        {
+            currentToken = Token.KEYWORD_CURLY;
+            lookAhead();        // swallow the "{"
+        }
+    }
+
+    private void handleCOLONCOLON() throws XPathException
+    {
+        lookAhead();
+        currentToken = Token.AXIS;
+    }
+
+    private void handleHASH() throws XPathException
+    {
+        lookAhead();
+        currentToken = Token.NAMED_FUNCTION_REF;
+    }
+
+    private void handleCOLONSTAR() throws XPathException
+    {
+        lookAhead();
+        currentToken = Token.PREFIX;
+    }
+
+    private void handleDOLLAR() throws XPathException
+    {
+        switch (currentTokenValue)
+        {
+        case "for":
+            currentToken = Token.FOR;
+            break;
+        case "some":
+            currentToken = Token.SOME;
+            break;
+        case "every":
+            currentToken = Token.EVERY;
+            break;
+        case "let":
+            currentToken = Token.LET;
+            break;
+        case "count":
+            currentToken = Token.COUNT;
+            break;
+        case "copy":
+            currentToken = Token.COPY;
+            break;
+        }
+    }
+
+    private void handlePERCENT() throws XPathException
+    {
+        if (currentTokenValue.equals("declare"))
+        {
+            currentToken = Token.DECLARE_ANNOTATED;
+        }
+    }
+
+    private int getCandidate()
+    {
+        int candidate = -1;
+        switch (currentTokenValue)
+        {
+        case "element":
+            candidate = Token.ELEMENT_QNAME;
+            break;
+        case "attribute":
+            candidate = Token.ATTRIBUTE_QNAME;
+            break;
+        case "processing-instruction":
+            candidate = Token.PI_QNAME;
+            break;
+        case "namespace":
+            candidate = Token.NAMESPACE_QNAME;
+            break;
+        }
+
+        return candidate;
+    }
+
+    private void handleNotUnknown(String composite, int possibleToken) throws XPathException
+    {
+        currentToken = possibleToken;
+        currentTokenValue = composite;
+        // some tokens are actually triples
+        if (currentToken == Token.REPLACE_VALUE)
+        {
+            // this one's a quadruplet - "replace value of node"
+            lookAhead();
+            if (nextToken != Token.NAME || !nextTokenValue.equals("of"))
+            {
+                throw new XPathException("After '" + composite + "', expected 'of'");
+            }
+            lookAhead();
+            if (nextToken != Token.NAME || !nextTokenValue.equals("node"))
+            {
+                throw new XPathException("After 'replace value of', expected 'node'");
+            }
+            nextToken = currentToken;   // to reestablish after-operator state
+        }
+        lookAhead();
     }
 
     /**
