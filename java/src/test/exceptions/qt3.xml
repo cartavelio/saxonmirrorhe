@@ -14,6 +14,13 @@
     <reason>Known bug in ICU</reason>
   </exception>
   
+  <exception test-set="fn-distinct-values" 
+             test-case="fn-distinct-values-1 fn-distinct-values-mixed-args-012" 
+             run="false" report="n/a">
+    <created by="Michael Kay" on="2026-04-10"/>
+    <reason>Saxon 13 implements transitive equality even in 3.1 mode</reason>
+  </exception>
+  
   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
@@ -54,6 +61,22 @@
     <created by="Michael Kay" on="2025-09-21"/>
     <reason>Saxon is using transitive comparison for XQuery group-by even in 3.1 mode</reason>
   </exception>
+  
+  <exception test-set="op-to" test-case="RangeExpr-408f
+      RangeExpr-408g
+      RangeExpr-408h
+      RangeExpr-408i
+      RangeExpr-408j
+      RangeExpr-408k
+      RangeExpr-410f
+      RangeExpr-410g
+      RangeExpr-410h
+      RangeExpr-410i
+      RangeExpr-410j
+      RangeExpr-410k" run="false" report="tooBig">
+      <created by="Michael Kay" on="2022-11-23"/>
+      <reason>Exceeds Saxon limit on max length of a sequence</reason>
+   </exception>
   
   <exception test-set="method-xhtml" test-case="Serialization-xhtml-36
                                                 Serialization-xhtml-36a

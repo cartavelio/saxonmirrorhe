@@ -723,6 +723,16 @@
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
+   
+   <exception test-set="prod-MapConstructor" test-case="MapConstructor-500
+                                                         MapConstructor-501
+                                                         MapConstructor-502
+                                                         MapConstructor-504" 
+                                              run="false" report="notRun">
+      <created by="Michael Kay" on="2026-04-07"/>
+      <reason>PR2541 not yet implemented</reason>
+   </exception>
+   
   <!-- 
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-parse-csv-001
