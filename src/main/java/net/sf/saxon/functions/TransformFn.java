@@ -529,15 +529,10 @@ public class TransformFn extends SystemFunction implements Callable {
     private XsltExecutable reportCompileError(SaxonApiException e, List<XmlProcessingError> compileErrors) throws XPathException {
         for (XmlProcessingError te : compileErrors) {
             // This is primarily so that the right error code is reported as required by the fn:transform spec
-//            if (te instanceof XPathException) {
-//                if (((XPathException) te).getErrorCodeLocalPart() == null) {
-//                    ((XPathException) te).setErrorCode("FOXT0002");
-//                }
-//                throw (XPathException)te;
-//            }
-            XPathException xe = XPathException.fromXmlProcessingError(te);
-            xe.maybeSetErrorCode("FOXT0002");
-            throw xe;
+            throw XPathException.fromXmlProcessingError(te)
+                    .maybeWithErrorCode("FOXT0002")
+                    .replacingErrorCode("SXXP0003", "FOXT0002");
+
         }
         if (e.getCause() instanceof XPathException) {
             throw (XPathException) e.getCause();
