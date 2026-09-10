@@ -303,6 +303,7 @@ public class QT3TestDriverHE extends TestDriver {
             } else if ("moduleImport".equals(value)) {
                 return !inverse;
             } else if ("schema-location-hint".equals(value)) {
+                env.schemaAware = !inverse;
                 return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
             } else if ("infoset-dtd".equals(value)) {
                 if (treeModel == TreeModel.TINY_TREE || treeModel == TreeModel.LINKED_TREE ||
