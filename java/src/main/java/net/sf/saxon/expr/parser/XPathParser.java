@@ -367,7 +367,7 @@ public class XPathParser {
      */
 
     public void grumble(String message, String errorCode) throws XPathException {
-        grumble(message, new StructuredQName("", NamespaceUri.ERR, errorCode), -1);
+        grumble(message, new StructuredQName("", NamespaceUri.ERR, errorCode), t.inputOffset);
     }
 
     /**
@@ -3132,7 +3132,7 @@ public class XPathParser {
             return parseDirectElementConstructor(false);
 
         } else {
-            grumble("Unexpected token " + currentTokenDisplay() + " at start of sub-expression");
+            grumble("Unexpected token " + currentTokenDisplay() + " after " + t.recentText(t.inputOffset));
             return null;
         }
 
@@ -4012,6 +4012,9 @@ public class XPathParser {
                     break;
                 } else {
                     readToken(Token.COMMA);
+                    if (t.currentToken == Token.RCURLY) {
+                        grumble("Comma is not allowed after final entry in map constructor");
+                    }
                 }
             }
         }
@@ -4121,6 +4124,9 @@ public class XPathParser {
             members.add(member);
             if (t.currentToken == Token.COMMA) {
                 nextToken();
+                if (t.currentToken == Token.RSQB) {
+                    grumble("Comma is not allowed after final member in array constructor");
+                }
                 continue;
             } else if (t.currentToken == Token.RSQB) {
                 nextToken();
