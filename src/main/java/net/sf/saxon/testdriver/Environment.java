@@ -309,17 +309,6 @@ public class Environment implements ResourceResolver {
                     if (driver.runWithJS) {
                         String sourceFile = env.getBaseURI().resolve(fileName).toString();
                         environment.exportedStylesheet = driver.exportStylesheet(environment.xsltCompiler, sourceFile);
-                    } else if (driver.xxCompilerLocation != null && !environment.xsltCompiler.isSchemaAware()) {
-                        if (driver.xxCompiler == null) {
-                            XsltCompiler c = driver.driverProc.newXsltCompiler();
-                            driver.xxCompiler = c.compile(new StreamSource(new File(driver.xxCompilerLocation)));
-                        }
-                        File exportFile = new File(driver.resultsDir + "/export/" + name + ".sef");
-                        Xslt30Transformer transformer = driver.xxCompiler.load30();
-                        transformer.setInitialMode(new QName("compile-complete"));
-                        Serializer serializer = driver.driverProc.newSerializer(exportFile);
-                        transformer.applyTemplates(styleSource, serializer);
-                        environment.xsltExecutable = environment.xsltCompiler.loadExecutablePackage(exportFile.toURI());
                     } else {
                         File exportFile = new File(driver.resultsDir + "/export/" + name + ".sef");
                         System.err.println("Exporting package to " + exportFile.getAbsolutePath());
