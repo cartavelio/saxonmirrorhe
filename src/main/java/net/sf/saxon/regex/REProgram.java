@@ -47,7 +47,7 @@ public class REProgram {
     protected REFlags flags;
     protected UnicodeString prefix;              // Prefix string optimization
     protected IntPredicateProxy initialCharClass;
-    protected List<RegexPrecondition> preconditions = new java.util.ArrayList<RegexPrecondition>();
+    protected List<RegexPrecondition> preconditions = new java.util.ArrayList<>();
     protected int minimumLength = 0;
     protected int fixedLength = -1;
     protected int optimizationFlags;      // Optimization flags (REProgram.OPT_*)

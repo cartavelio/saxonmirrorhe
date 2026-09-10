@@ -94,6 +94,7 @@ public class RECompiler {
     int len;                                            // Length of the pattern string
     int idx;                                            // Current input index into ac
     int capturingOpenParenCount;                                         // Total number of paren pairs
+    int lookaheadDepth = 0;
 
     // Node flags
     static final int NODE_NORMAL = 0;                   // No flags (nothing special)
@@ -1224,6 +1225,7 @@ public class RECompiler {
                     if (!isXPath40) {
                         syntaxError("Lookahead assertions allowed only in XPath4.0");
                     }
+                    lookaheadDepth++;
                 } else if (marker == '<') {
                     if (!isXPath40) {
                         syntaxError("Lookbehind assertions allowed only in XPath4.0");
@@ -1249,10 +1251,12 @@ public class RECompiler {
                     idx += "(*positive_lookahead:".length();
                     paren = 2;
                     marker = '=';
+                    lookaheadDepth++;
                 } else if (thereFollows("(*negative_lookahead:")) {
                     idx += "(*negative_lookahead:".length();
                     paren = 2;
                     marker = '!';
+                    lookaheadDepth++;
                 } else if (thereFollows("(*positive_lookbehind:")) {
                     idx += "(*positive_lookbehind:".length();
                     paren = 2;
@@ -1298,13 +1302,14 @@ public class RECompiler {
                 syntaxError("Missing close parenthesis");
             }
             if (capturing) {
-                op = new OpCapture(op, group);
+                op = new OpCapture(op, group, lookaheadDepth > 0);
                 captures.add(closeParens);
             } else if (marker == '=' || marker == '!') {
                 if (lookbehind) {
                     op = new OpLookbehind(op, marker=='=');
                 } else {
                     op = new OpLookahead(op, marker == '=');
+                    lookaheadDepth--;
                 }
             }
         } else {

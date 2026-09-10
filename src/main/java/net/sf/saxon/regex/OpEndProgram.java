@@ -38,7 +38,7 @@ public class OpEndProgram extends Operation {
                 return EmptyIntIterator.getInstance();
             }
         } else {
-            matcher.setParenEnd(0, position);
+            //matcher.setParenEnd(0, position);
             return new IntSingletonIterator(position);
         }
     }

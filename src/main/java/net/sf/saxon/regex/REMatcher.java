@@ -35,10 +35,7 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntPredicateProxy;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
 
 
@@ -155,17 +152,14 @@ import java.util.function.BiFunction;
  */
 public class REMatcher {
 
-    // Limits
-    static final int MAX_PAREN = 16;              // Number of paren pairs
-
     // State of current program
     REProgram program;                            // Compiled regular expression 'program'
     UnicodeString search;                           // The string being matched against
     History history = new History();
-    int maxParen = MAX_PAREN;
+    int maxParen;
 
     // Parenthesized subexpressions
-    State _captureState = new State();
+    State _captureState;
 
     // Backreferences
     int[] startBackref;                 // Lazily-allocated array of backref starts
@@ -183,31 +177,16 @@ public class REMatcher {
      * @see RECompiler
      */
     public REMatcher(REProgram program) {
-        setProgram(program);
-    }
-
-    /**
-     * Sets the current regular expression program used by this matcher object.
-     *
-     * @param program Regular expression program compiled by RECompiler.
-     * @see RECompiler
-     * @see REProgram
-     */
-    public void setProgram(REProgram program) {
+        Objects.requireNonNull(program);
         this.program = program;
-        if (program != null && program.maxParens != -1) {
-            this.operation = program.operation;
-            this.maxParen = program.maxParens;
-        } else {
-            this.maxParen = MAX_PAREN;
-        }
+        this.operation = program.operation;
+        this.maxParen = program.maxParens;
+        this._captureState = new State(maxParen);
     }
 
     /**
      * Returns the current regular expression program in use by this matcher object.
-     *
      * @return Regular expression program
-     * @see #setProgram
      */
     public REProgram getProgram() {
         return program;
@@ -263,35 +242,20 @@ public class REMatcher {
     }
 
     /**
-     * Sets the start of a paren level
+     * Sets a captured group
      *
      * @param which Which paren level
-     * @param i     Index in input array
+     * @param start     start index in input string
+     * @param end       end index in input string
+     * @param inLookahead true if the match is within a lookahead assertion
      */
-    protected final void setParenStart(int which, int i) {
-        while (which > _captureState.startn.length - 1) {
-            int[] s2 = new int[_captureState.startn.length * 2];
-            System.arraycopy(_captureState.startn, 0, s2, 0, _captureState.startn.length);
-            Arrays.fill(s2, _captureState.startn.length, s2.length, -1);
-            _captureState.startn = s2;
-        }
-        _captureState.startn[which] = i;
-    }
 
-    /**
-     * Sets the end of a paren level
-     *
-     * @param which Which paren level
-     * @param i     Index in input array
-     */
-    protected final void setParenEnd(int which, int i) {
-        while (which > _captureState.endn.length - 1) {
-            int[] e2 = new int[_captureState.endn.length * 2];
-            System.arraycopy(_captureState.endn, 0, e2, 0, _captureState.endn.length);
-            Arrays.fill(e2, _captureState.endn.length, e2.length, -1);
-            _captureState.endn = e2;
+    protected final void capture(int which, int start, int end, boolean inLookahead) {
+        _captureState.startn[which] = start;
+        _captureState.endn[which] = end;
+        if (inLookahead) {
+            _captureState.inLookahead.set(which);
         }
-        _captureState.endn[which] = i;
     }
 
     /**
@@ -301,13 +265,13 @@ public class REMatcher {
 
     protected void clearCapturedGroupsBeyond(int pos) {
         for (int i = 0; i < _captureState.startn.length; i++) {
-            if (_captureState.startn[i] >= pos) {
+            if (_captureState.startn[i] >= pos && !_captureState.inLookahead.get(i)) {
                 _captureState.endn[i] = _captureState.startn[i];
             }
         }
         if (startBackref != null) {
             for (int i = 0; i < startBackref.length; i++) {
-                if (startBackref[i] >= pos) {
+                if (startBackref[i] >= pos && !_captureState.inLookahead.get(i)) {
                     endBackref[i] = startBackref[i];
                 }
             }
@@ -327,7 +291,6 @@ public class REMatcher {
         // Initialize start pointer, paren cache and paren count
         _captureState.parenCount = 1;
         anchoredMatch = anchored;
-        setParenStart(0, i);
 
         // Allocate backref arrays (unless optimizations indicate otherwise)
         if ((program.optimizationFlags & REProgram.OPT_HASBACKREFS) != 0) {
@@ -340,7 +303,7 @@ public class REMatcher {
         IntIterator iter = operation.iterateMatches(this, i);
         if (iter.hasNext()) {
             idx = iter.next();
-            setParenEnd(0, idx);
+            capture(0, i, idx, false);
             return true;
         }
 
@@ -377,7 +340,7 @@ public class REMatcher {
         this.search = search.tidy();
 
         // Clear the captured group state
-        _captureState = new State();
+        _captureState = new State(maxParen);
 
         // Can we optimize the search by looking for new lines?
         if ((program.optimizationFlags & REProgram.OPT_HASBOL) == REProgram.OPT_HASBOL) {
@@ -526,7 +489,7 @@ public class REMatcher {
      * matched by the pattern.</p>
      *
      * @param s String to split on this regular exression
-     * @return Array of strings
+     * @return A list of strings
      */
     public List<UnicodeString> split(UnicodeString s) {
         // Create new vector
@@ -807,21 +770,24 @@ public class REMatcher {
 
     public static class State {
         int parenCount;                     // Number of subexpressions matched (num open parens + 1)
-        int[] startn;                       // Lazily-allocated array of sub-expression starts
-        int[] endn;                         // Lazily-allocated array of sub-expression ends
+        int[] startn;                       // array of sub-expression starts
+        int[] endn;                         // array of sub-expression ends
+        BitSet inLookahead;
 
-        public State() {
-            parenCount = 0;
-            startn = new int[3];
-            startn[0] = startn[1] = startn[2] = -1;
-            endn = new int[3];
-            endn[0] = endn[1] = endn[2] = -1;
+        public State(int maxParens) {
+            parenCount = maxParens;
+            startn = new int[maxParens];
+            Arrays.fill(startn, -1);
+            endn = new int[maxParens];
+            Arrays.fill(endn, -1);
+            inLookahead = new BitSet(maxParens);
         }
 
         public State(State s) {
             parenCount = s.parenCount;
             startn = Arrays.copyOf(s.startn, s.startn.length);
             endn = Arrays.copyOf(s.endn, s.endn.length);
+            inLookahead = (BitSet)s.inLookahead.clone();
         }
     }
 }
