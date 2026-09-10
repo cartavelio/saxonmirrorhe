@@ -208,7 +208,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("get", 3, e -> e.populate(ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
-                    .arg(2, fallbackType, OPT | INS, null));     // TODO: check status of issue 1330
+                    .arg(2, AnyItemType.getInstance(), STAR | INS, null));
 
             register("empty", 1, e -> e.populate(ArrayEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
@@ -612,8 +612,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             } else {
                 int i = index.asSubscript();
                 if (i <= 0 || i > array.arrayLength()) {
-                    FunctionItem fn = (FunctionItem) arguments[2].head();
-                    return dynamicCall(fn, context, index);
+                    return arguments[2];
                 } else {
                     return array.get(i - 1);
                 }

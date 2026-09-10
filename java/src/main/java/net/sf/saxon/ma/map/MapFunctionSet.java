@@ -192,7 +192,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             register("get", 3, e -> e.populate(MapGet::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                    .arg(2, fallbackType, ONE | INS, null));
+                    .arg(2, AnyItemType.getInstance(), STAR | INS, null));
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
                     SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
@@ -397,7 +397,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 } else {
                     return valueType.getCardinality();
                 }
-            } else if (mapType instanceof MapType) {
+            } else if (mapType instanceof MapType && args.length == 2) {
                 return Cardinality.union(
                         ((MapType) mapType).getValueType().getCardinality(),
                         StaticProperty.ALLOWS_ZERO);
@@ -440,8 +440,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             Sequence value = map.get(key);
             if (value == null) {
                 if (arguments.length > 2) {
-                    FunctionItem fn = (FunctionItem)arguments[2].head();
-                    return dynamicCall(fn, context, key);
+                    return arguments[2];
                 } else {
                     return EmptySequence.getInstance();
                 }
