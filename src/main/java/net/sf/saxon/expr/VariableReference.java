@@ -578,13 +578,13 @@ public abstract class VariableReference extends Expression implements BindingRef
             err.maybeSetLocation(getLocation());
             throw err;
         } catch (NullPointerException err) {
-            err.printStackTrace();
+            //err.printStackTrace();
             String msg = "Internal error: no value for variable $" + getDisplayName() +
                     " at line " + getLocation().getLineNumber() + (getLocation().getSystemId() == null ? "" : " of " + getLocation().getSystemId());
             new StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
             throw new AssertionError(msg);
         } catch (AssertionError err) {
-            err.printStackTrace();
+            //err.printStackTrace();
             String msg = err.getMessage() + ". Variable reference $" + getDisplayName() +
                     " at line " + getLocation().getLineNumber() + (getLocation().getSystemId() == null ? "" : " of " + getLocation().getSystemId());
             new StandardDiagnostics().logStackTrace(c, c.getConfiguration().getLogger(), 2);
