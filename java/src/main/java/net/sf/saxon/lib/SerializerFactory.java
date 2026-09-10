@@ -10,7 +10,6 @@ package net.sf.saxon.lib;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.functions.ResolveURI;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.SequenceWrapper;
@@ -321,8 +320,7 @@ public class SerializerFactory {
                     JSONSerializer js = new JSONSerializer(pipe, je, props);
                     String canonical = props.getProperty(SaxonOutputKeys.CANONICAL);
                     if ("yes".equals(canonical)) {
-                        js.setPropertySorter(
-                                Comparator.comparing(Item::getStringValue));
+                        js.setCanonicalPropertySorter();
                     } else {
                         String sortOrder = props.getProperty(SaxonOutputKeys.PROPERTY_ORDER);
                         if (sortOrder != null) {

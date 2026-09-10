@@ -23,6 +23,7 @@ import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -96,6 +97,16 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
 
     public void setPropertySorter(Comparator<AtomicValue> sorter) {
         this.propertySorter = sorter;
+    }
+
+    /**
+     * Set property sorting as required by canonical JSON: this sorts by UTF-16 code units,
+     * which happens to be the same as Java's so-called "natural" order for strings
+     */
+
+    @CSharpReplaceBody(code="setPropertySorter(new Saxon.Impl.Helpers.CanonicalJsonKeyComparer());")
+    public void setCanonicalPropertySorter() {
+        setPropertySorter(Comparator.comparing(Item::getStringValue));
     }
 
     /**

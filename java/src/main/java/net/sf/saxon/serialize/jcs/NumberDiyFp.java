@@ -37,21 +37,21 @@ package net.sf.saxon.serialize.jcs;
 // DiyFp are not designed to contain special doubles (NaN and Infinity).
 class NumberDiyFp {
 
-    private long f;
-    private int e;
+    private long _f;
+    private int _e;
 
-    static final int kSignificandSize = 64;
-    static final long kUint64MSB = 0x8000000000000000L;
+    public static final int kSignificandSize = 64;
+    public static final long kUint64MSB = 0x8000000000000000L;
 
 
     NumberDiyFp() {
-        this.f = 0;
-        this.e = 0;
+        this._f = 0;
+        this._e = 0;
     }
 
     NumberDiyFp(long f, int e) {
-        this.f = f;
-        this.e = e;
+        this._f = f;
+        this._e = e;
     }
 
     private static boolean uint64_gte(long a, long b) {
@@ -64,16 +64,16 @@ class NumberDiyFp {
     // must be bigger than the significand of other.
     // The result will not be normalized.
     void subtract(NumberDiyFp other) {
-        assert (e == other.e);
-        assert uint64_gte(f, other.f);
-        f -= other.f;
+        assert (_e == other._e);
+        assert uint64_gte(_f, other._f);
+        _f -= other._f;
     }
 
     // Returns a - b.
     // The exponents of both numbers must be the same and this must be bigger
     // than other. The result will not be normalized.
-    static NumberDiyFp minus(NumberDiyFp a, NumberDiyFp b) {
-        NumberDiyFp result = new NumberDiyFp(a.f, a.e);
+    public static NumberDiyFp minus(NumberDiyFp a, NumberDiyFp b) {
+        NumberDiyFp result = new NumberDiyFp(a._f, a._e);
         result.subtract(b);
         return result;
     }
@@ -86,10 +86,10 @@ class NumberDiyFp {
         // significant 64 bits are only used for rounding the most significant 64
         // bits.
         final long kM32 = 0xFFFFFFFFL;
-        long a = f >>> 32;
-        long b = f & kM32;
-        long c = other.f >>> 32;
-        long d = other.f & kM32;
+        long a = _f >>> 32;
+        long b = _f & kM32;
+        long c = other._f >>> 32;
+        long d = other._f & kM32;
         long ac = a * c;
         long bc = b * c;
         long ad = a * d;
@@ -99,21 +99,21 @@ class NumberDiyFp {
         // Halfway cases will be round up.
         tmp += 1L << 31;
         long result_f = ac + (ad >>> 32) + (bc >>> 32) + (tmp >>> 32);
-        e += other.e + 64;
-        f = result_f;
+        _e += other._e + 64;
+        _f = result_f;
     }
 
     // returns a * b;
-    static NumberDiyFp times(NumberDiyFp a, NumberDiyFp b) {
-        NumberDiyFp result = new NumberDiyFp(a.f, a.e);
+    public static NumberDiyFp times(NumberDiyFp a, NumberDiyFp b) {
+        NumberDiyFp result = new NumberDiyFp(a._f, a._e);
         result.multiply(b);
         return result;
     }
 
     void normalize() {
-        assert (f != 0);
-        long f = this.f;
-        int e = this.e;
+        assert (_f != 0);
+        long f = this._f;
+        int e = this._e;
 
         // This method is mainly called for normalizing boundaries. In general
         // boundaries need to be shifted by 10 bits. We thus optimize for this case.
@@ -126,35 +126,35 @@ class NumberDiyFp {
             f <<= 1;
             e--;
         }
-        this.f = f;
-        this.e = e;
+        this._f = f;
+        this._e = e;
     }
 
     static NumberDiyFp normalize(NumberDiyFp a) {
-        NumberDiyFp result = new NumberDiyFp(a.f, a.e);
+        NumberDiyFp result = new NumberDiyFp(a._f, a._e);
         result.normalize();
         return result;
     }
 
     long f() {
-        return f;
+        return _f;
     }
 
     int e() {
-        return e;
+        return _e;
     }
 
     void setF(long new_value) {
-        f = new_value;
+        _f = new_value;
     }
 
     void setE(int new_value) {
-        e = new_value;
+        _e = new_value;
     }
 
     @Override
     public String toString() {
-        return "[DiyFp f:" + f + ", e:" + e + "]";
+        return "[DiyFp f:" + _f + ", e:" + _e + "]";
     }
 
 }

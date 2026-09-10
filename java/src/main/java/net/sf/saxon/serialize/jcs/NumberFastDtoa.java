@@ -30,10 +30,12 @@
 
 package net.sf.saxon.serialize.jcs;
 
+import net.sf.saxon.transpile.CSharp;
+
 class NumberFastDtoa {
 
     // FastDtoa will produce at most kFastDtoaMaximalLength digits.
-    static final int kFastDtoaMaximalLength = 17;
+    public static final int kFastDtoaMaximalLength = 17;
 
 
     // The minimal and maximal target exponent define the range of w's binary
@@ -189,6 +191,7 @@ class NumberFastDtoa {
                     exponent = 9;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 29;");
             case 29:
             case 28:
             case 27:
@@ -197,6 +200,7 @@ class NumberFastDtoa {
                     exponent = 8;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 26;");
             case 26:
             case 25:
             case 24:
@@ -205,6 +209,7 @@ class NumberFastDtoa {
                     exponent = 7;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 23;");
             case 23:
             case 22:
             case 21:
@@ -214,6 +219,7 @@ class NumberFastDtoa {
                     exponent = 6;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 19;");
             case 19:
             case 18:
             case 17:
@@ -222,6 +228,7 @@ class NumberFastDtoa {
                     exponent = 5;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 16;");
             case 16:
             case 15:
             case 14:
@@ -230,6 +237,7 @@ class NumberFastDtoa {
                     exponent = 4;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 13;");
             case 13:
             case 12:
             case 11:
@@ -239,6 +247,7 @@ class NumberFastDtoa {
                     exponent = 3;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 9;");
             case 9:
             case 8:
             case 7:
@@ -247,6 +256,7 @@ class NumberFastDtoa {
                     exponent = 2;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 6;");
             case 6:
             case 5:
             case 4:
@@ -255,6 +265,7 @@ class NumberFastDtoa {
                     exponent = 1;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 3;");
             case 3:
             case 2:
             case 1:
@@ -263,6 +274,7 @@ class NumberFastDtoa {
                     exponent = 0;
                     break;
                 }  // else fallthrough
+                CSharp.emitCode("goto case 0;");
             case 0:
                 power = 0;
                 exponent = -1;
@@ -271,6 +283,7 @@ class NumberFastDtoa {
                 // Following assignments are here to silence compiler warnings.
                 power = 0;
                 exponent = 0;
+                break;
                 // UNREACHABLE();
         }
         return ((long) power << 32) | (0xffffffffL & exponent);

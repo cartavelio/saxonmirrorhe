@@ -21,17 +21,17 @@
 
 package net.sf.saxon.serialize.jcs;
 
+import net.sf.saxon.transpile.CSharp;
+
 import java.math.BigInteger;
 
 class NumberDToA {
 
-
-    static final int
-            DTOSTR_STANDARD = 0,              /* Either fixed or exponential format; round-trip */
-            DTOSTR_STANDARD_EXPONENTIAL = 1,  /* Always exponential format; round-trip */
-            DTOSTR_FIXED = 2,                 /* Round to <precision> digits after the decimal point; exponential if number is large */
-            DTOSTR_EXPONENTIAL = 3,           /* Always exponential format; <precision> significant digits */
-            DTOSTR_PRECISION = 4;             /* Either fixed or exponential format; <precision> significant digits */
+    public static final int DTOSTR_STANDARD = 0;              /* Either fixed or exponential format; round-trip */
+    public static final int DTOSTR_STANDARD_EXPONENTIAL = 1;  /* Always exponential format; round-trip */
+    public static final int DTOSTR_FIXED = 2;                 /* Round to <precision> digits after the decimal point; exponential if number is large */
+    public static final int DTOSTR_EXPONENTIAL = 3;           /* Always exponential format; <precision> significant digits */
+    public static final int DTOSTR_PRECISION = 4;             /* Either fixed or exponential format; <precision> significant digits */
 
 
     private static final int Frac_mask = 0xfffff;
@@ -418,6 +418,7 @@ class NumberDToA {
                 break;
             case 2:
                 leftright = false;
+                CSharp.emitCode("goto case 4;");
                 /* no break */
             case 4:
                 if (ndigits <= 0)
@@ -426,6 +427,7 @@ class NumberDToA {
                 break;
             case 3:
                 leftright = false;
+                CSharp.emitCode("goto case 5;");
                 /* no break */
             case 5:
                 i = ndigits + k + 1;
@@ -433,6 +435,7 @@ class NumberDToA {
                 ilim1 = i - 1;
                 if (i <= 0)
                     i = 1;
+                break;
         }
         /* ilim is the maximum number of significant digits we want, based on k and ndigits. */
         /* ilim1 is the maximum number of significant digits we want, based on k and ndigits,
@@ -479,7 +482,7 @@ class NumberDToA {
                 else {
                     ilim = ilim1;
                     k--;
-                    d *= 10.;
+                    d *= 10.0;
                     ieps++;
                 }
             }
@@ -489,7 +492,7 @@ class NumberDToA {
             eps = ieps * d + 7.0;
             eps = setWord0(eps, word0(eps) - (P - 1) * Exp_msk1);
             if (ilim == 0) {
-                S = mhi = null;
+                //S = mhi = null;
                 d -= 5.0;
                 if (d > eps) {
                     buf.append('1');
@@ -586,7 +589,7 @@ class NumberDToA {
             /* Yes. */
             ds = tens[k];
             if (ndigits < 0 && ilim <= 0) {
-                S = mhi = null;
+                //S = mhi = null;
                 if (ilim < 0 || d < 5 * ds || (!biasUp && d == 5 * ds)) {
                     buf.setLength(0);
                     buf.append('0');        /* copy "0" to buffer */
@@ -635,7 +638,7 @@ class NumberDToA {
 
         m2 = b2;
         m5 = b5;
-        mhi = mlo = null;
+        mhi = mlo = BigInteger.ZERO; // MHK: was "= null". Changed for transpilation to C#.
         if (leftright) {
             if (mode < 2) {
                 i = (denorm) ? be[0] + (Bias + (P - 1) - 1 + 1) : 1 + P - bbits[0];
@@ -935,7 +938,7 @@ class NumberDToA {
             2};  /* DTOSTR_PRECISION */
 
     @SuppressWarnings("fallthrough")
-    static void JS_dtostr(StringBuilder buffer, int mode, int precision, double d) {
+    public static void JS_dtostr(StringBuilder buffer, int mode, int precision, double d) {
         int decPt;                                    /* Position of decimal point relative to first digit returned by JS_dtoa */
         boolean[] sign = new boolean[1];            /* true if the sign bit was set in d */
         int nDigits;                                /* Number of significand digits returned by JS_dtoa */
@@ -974,6 +977,7 @@ class NumberDToA {
 //                    JS_ASSERT(precision > 0);
                     minNDigits = precision;
                     /* Fall through */
+                    CSharp.emitCode("goto case DTOSTR_STANDARD_EXPONENTIAL;");
                 case DTOSTR_STANDARD_EXPONENTIAL:
                     exponentialNotation = true;
                     break;

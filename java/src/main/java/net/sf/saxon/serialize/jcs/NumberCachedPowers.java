@@ -48,7 +48,7 @@ class NumberCachedPowers {
     }
 
 
-    static int getCachedPower(int e, int alpha, int gamma, NumberDiyFp c_mk) {
+    public static int getCachedPower(int e, int alpha, int gamma, NumberDiyFp c_mk) {
         int kQ = NumberDiyFp.kSignificandSize;
         double k = Math.ceil((alpha - e + kQ - 1) * kD_1_LOG2_10);
         int index = (GRISU_CACHE_OFFSET + (int) k - 1) / CACHED_POWERS_SPACING + 1;

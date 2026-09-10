@@ -38,13 +38,13 @@ class NumberDoubleHelper {
     static final long kSignificandMask = 0x000FFFFFFFFFFFFFL;
     static final long kHiddenBit = 0x0010000000000000L;
 
-    static NumberDiyFp asDiyFp(long d64) {
+    public static NumberDiyFp asDiyFp(long d64) {
         assert (!isSpecial(d64));
         return new NumberDiyFp(significand(d64), exponent(d64));
     }
 
     // this->Significand() must not be 0.
-    static NumberDiyFp asNormalizedDiyFp(long d64) {
+    public static NumberDiyFp asNormalizedDiyFp(long d64) {
         long f = significand(d64);
         int e = exponent(d64);
 
@@ -108,7 +108,7 @@ class NumberDoubleHelper {
     // Returns the two boundaries of first argument.
     // The bigger boundary (m_plus) is normalized. The lower boundary has the same
     // exponent as m_plus.
-    static void normalizedBoundaries(long d64, NumberDiyFp m_minus, NumberDiyFp m_plus) {
+    public static void normalizedBoundaries(long d64, NumberDiyFp m_minus, NumberDiyFp m_plus) {
         NumberDiyFp v = asDiyFp(d64);
         boolean significand_is_zero = (v.f() == kHiddenBit);
         m_plus.setF((v.f() << 1) + 1);
