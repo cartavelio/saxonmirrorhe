@@ -7,8 +7,8 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
@@ -50,6 +50,37 @@ import java.util.function.Function;
 
 public class DeepEqual40 extends CollatingFunctionFixed {
 
+    public static OptionsParameter OPTION_DETAILS;
+
+    static {
+        OptionsParameter o = new OptionsParameter();
+        o.addAllowedOption("base-uri", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("comments", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("debug", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("false-on-error", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("id-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("idrefs-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("in-scope-namespaces", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("namespace-prefixes", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("nilled-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("processing-instructions", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("text-boundaries", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        o.addAllowedOption("timezones", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("type-annotations", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("type-variety", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        o.addAllowedOption("typed-values", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        o.addAllowedOption("whitespace-text", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+
+        o.addAllowedOption("normalization-form", SequenceType.OPTIONAL_STRING, EmptySequence.getInstance());
+        o.setAllowedValues("normalization-form", "XPTY0004", "NFC", "NFD", "NFKC", "NFKD");
+
+        o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.getInstance());
+
+        OPTION_DETAILS = o;
+    }
+
+
     // TODO: confine options param to 4.0.
 
     public static class DeepEqualOptions {
@@ -78,15 +109,16 @@ public class DeepEqual40 extends CollatingFunctionFixed {
 
 
         private static String[] booleanOptions = new String[]{
-                "base-uri", "comments", "debug", "false-on-error", "id-property", "idref-property",
+                "base-uri", "comments", "debug", "false-on-error", "id-property", "idrefs-property",
                 "in-scope-namespaces", "namespace-prefixes", "nilled-property", "normalize-space",
-                "processing-instructions", "retain-text-boundaries", "timezones", "type-annotations",
+                "processing-instructions", "text-boundaries", "timezones", "type-annotations",
                 "type-variety", "typed-values", "whitespace-text"};
 
 
         public DeepEqualOptions(MapItem map, String collationName, XPathContext context) throws XPathException {
+            Map<String, Sequence> values = OPTION_DETAILS.processSuppliedOptions(map, context);
             for (String option : DeepEqualOptions.booleanOptions) {
-                setBooleanOption(map, option);
+                setBooleanOption(values, option);
             }
             GroundedValue normForm = map.get(new StringValue("normalization-form"));
             if (normForm != null) {
@@ -112,25 +144,10 @@ public class DeepEqual40 extends CollatingFunctionFixed {
             }
         }
 
-        private void setBooleanOption(MapItem map, String optionName) throws XPathException {
-            GroundedValue value = map.get(new StringValue(optionName));
+        private void setBooleanOption(Map<String, Sequence> map, String optionName) throws XPathException {
+            Sequence value = map.get(optionName);
             if (value != null) {
-                boolean booleanValue = false;
-                // TODO: do coercion rules properly
-                if (value instanceof BooleanValue) {
-                    booleanValue = ((BooleanValue) value).getBooleanValue();
-                } else {
-                    value = Atomizer.atomize(value);
-                    if (value instanceof StringValue) {
-                        ConversionResult r = new StringConverter.StringToBoolean().convertString(
-                                ((StringValue) value).getUnicodeStringValue());
-                        if (r instanceof ValidationFailure) {
-                            throw new XPathException("Invalid value for fn:deep-equal option " + optionName, "FOJS0005");
-                        }
-                        booleanValue = r.asAtomic().effectiveBooleanValue();
-                    }
-                }
-
+                boolean booleanValue = ExpressionTool.effectiveBooleanValue(value.iterate());
                 switch (optionName) {
                     case "base-uri":
                         baseUriSignificant = booleanValue;
@@ -147,7 +164,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     case "id-property":
                         idSignificant = booleanValue;
                         return;
-                    case "idref-property":
+                    case "idrefs-property":
                         idrefSignificant = booleanValue;
                         return;
                     case "in-scope-namespaces":
@@ -165,7 +182,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     case "processing-instructions":
                         processingInstructionsSignificant = booleanValue;
                         return;
-                    case "retain-text-boundaries":
+                    case "text-boundaries":
                         textBoundariesSignificant = booleanValue;
                         return;
                     case "timezones":
@@ -431,12 +448,12 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     final SchemaType type2 = n2.getSchemaType();
                     final boolean isSimple1 = type1.isSimpleType() || ((ComplexType) type1).isSimpleContent();
                     final boolean isSimple2 = type2.isSimpleType() || ((ComplexType) type2).isSimpleContent();
-                    if (isSimple1 != isSimple2) {
+                    if (options.typeVarietySignificant && isSimple1 != isSimple2) {
                         final String reason = "one element has a simple type, the other does not";
                         explain(reporter, reason, options, n1, n2);
                         return reason;
                     }
-                    if (isSimple1) {
+                    if (isSimple1 && isSimple2) {
                         final AtomicIterator v1 = n1.atomize().iterate();
                         final AtomicIterator v2 = n2.atomize().iterate();
                         boolean typedValueComparison = deepEqual(v1, v2, context, options);
@@ -444,17 +461,15 @@ public class DeepEqual40 extends CollatingFunctionFixed {
                     }
                 }
 
-                if (options.idSignificant) {
-                    if (n1.isId() != n2.isId()) {
-                        final String reason = "one element is an ID, the other is not";
-                        explain(reporter, reason, options, n1, n2);
-                        return reason;
-                    }
-                    if (n1.isIdref() != n2.isIdref()) {
-                        final String reason = "one element is an IDREF, the other is not";
-                        explain(reporter, reason, options, n1, n2);
-                        return reason;
-                    }
+                if (options.idSignificant && n1.isId() != n2.isId()) {
+                    final String reason = "one element is an ID, the other is not";
+                    explain(reporter, reason, options, n1, n2);
+                    return reason;
+                }
+                if (options.idrefSignificant && n1.isIdref() != n2.isIdref()) {
+                    final String reason = "one element is an IDREF, the other is not";
+                    explain(reporter, reason, options, n1, n2);
+                    return reason;
                 }
 
                 if (options.unorderedElements.contains(NameOfNode.makeName(n1).getStructuredQName())) {
