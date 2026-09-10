@@ -193,10 +193,6 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
             }
             SimpleType type = Type.getBuiltInSimpleType(uri, localName);
             if (type != null) {
-                if (type == AnySimpleType.INSTANCE) {
-                    reasons.add("Abstract type used in constructor function: {" + uri + '}' + localName);
-                    return null;
-                }
                 if (type.isAtomicType()) {
                     if (((AtomicType) type).isAbstract()) {
                         reasons.add("Abstract type used in constructor function: {" + uri + '}' + localName);
@@ -212,6 +208,9 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
                     NamespaceResolver resolver = env.getNamespaceResolver();
                     UnionConstructorFunction ucf = new UnionConstructorFunction((UnionType) type, resolver, true);
                     return new StaticFunctionCall(ucf, arguments);
+                } else if (type == AnySimpleType.INSTANCE) {
+                    reasons.add("Abstract type used in constructor function: {" + uri + '}' + localName);
+                    return null;
                 } else {
                     NamespaceResolver resolver = env.getNamespaceResolver();
                     try {
