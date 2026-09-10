@@ -16,13 +16,27 @@ namespace Saxon.Impl.Overrides {
 
         private readonly SysCollGen.IEnumerator<S> baseEnumerator;
         private readonly Func<S, T> mapper;
+        private T nextItem = default(T);
 
         public MappingEnumerator(SysCollGen.IEnumerator<S> baseEnumerator, Func<S, T> mapper) {
             this.baseEnumerator = baseEnumerator;
             this.mapper = mapper;
+            this.nextItem = default(T);
         }
         public bool MoveNext() {
-            return baseEnumerator.MoveNext();
+            T next;
+            do {
+                bool baseHasNext = baseEnumerator.MoveNext();
+                if (baseHasNext) {
+                    next = mapper(baseEnumerator.Current);
+                }
+                else {
+                    this.nextItem = default(T);
+                    return false;
+                } 
+            } while (next == null);
+            nextItem = next;
+            return true;
         }
 
         public void Reset() {
@@ -35,9 +49,8 @@ namespace Saxon.Impl.Overrides {
             this.baseEnumerator.Dispose();
         }
 
-        public T Current => mapper(baseEnumerator.Current);
-
-    }
+        public T Current => this.nextItem;
+    } 
 }
 
-// Copyright (c) 2021 - 2023 Saxonica Limited
+// Copyright (c) 2021 - 2025 Saxonica Limited

@@ -8,7 +8,11 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.List;
+
 
 /**
  * Builder class for constructing ordered maps, where the keys are all known in advance to have
@@ -105,10 +109,8 @@ public class StringMapBuilder {
                 GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
                 for (int i = 0; i < keys.size(); i++) {
                     UnicodeString key = keyArray[i];
-                    Integer existing = index.get(key);
-                    if (existing == null) {
-                        index.put(key, i);
-                    } else {
+                    boolean isNew = AbstractFixedMap.putOffsetIfAbsent(index, key, i);
+                    if (!isNew) {
                         throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
                     }
                 }
@@ -119,12 +121,12 @@ public class StringMapBuilder {
                 int offset = 0;
                 for (int i = 0; i < keys.size(); i++) {
                     UnicodeString key = keys.get(i);
-                    Integer existing = index.get(key);
-                    if (existing == null) {
+                    boolean isNew = AbstractFixedMap.putOffsetIfAbsent(index, key, offset++);
+                    if (isNew) {
                         keys2.add(key);
                         values2.add(values.get(i));
-                        index.put(key, offset++);
                     } else {
+                        int existing = AbstractFixedMap.getOffset(index, key);
                         GroundedValue newVal = combiner.combine(
                                 values2.get(existing), values.get(i), context);
                         values2.set(existing, newVal);

@@ -6,6 +6,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.*;
@@ -34,6 +35,41 @@ import java.util.*;
 
 public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyValuePair> {
 
+//    /**
+//     * Class representing the index of offsets. Implemented this way because maps with
+//     * int values behave rather differently in C#.
+//     */
+//    public static class OffsetIndex extends HashMap<AtomicMatchKey, Integer> {
+//
+//        public OffsetIndex(int size) {
+//            super(size);
+//        }
+//
+//        /**
+//         * Get the value associated with the given key if present, or -1 if absent
+//         * @param key the given key
+//         * @return the associated value, or -1
+//         */
+//        public int getOffset(AtomicMatchKey key) {
+//            Integer i = get(key);
+//            return (i==null ? -1 : i);
+//        }
+//
+//        /**
+//         * Put an entry in the map if the key is currently absent
+//         * @param key the new key
+//         * @param value the new value
+//         * @return true if an entry was added, false if the key was already present
+//         */
+//        public boolean putIfAbsent(AtomicMatchKey key, int value) {
+//            if (!containsKey(key)) {
+//                put(key, value);
+//                return true;
+//            }
+//            return false;
+//        }
+//    }
+
     protected GroundedValue[] values;
     protected HashMap<AtomicMatchKey, Integer> index;
 
@@ -53,8 +89,8 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
             GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
             HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keyArray.length);
             for (int i = 0; i < keyArray.length; i++) {
-                Integer prev = index.put(keyArray[i].asMapKey(), i);
-                if (prev != null) {
+                boolean isNew = putOffsetIfAbsent(index, keyArray[i].asMapKey(), i);
+                if (!isNew) {
                     throw new XPathException("Duplicate key " + Err.depict(keyArray[i]) + " in map", "FOJS0003");
                 }
             }
@@ -89,8 +125,8 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
                 int serial = 0;
                 for (int i = 0; i < keys.size(); i++) {
                     AtomicMatchKey key = keys.get(i).asMapKey();
-                    Integer existing = index.get(key);
-                    if (existing == null) {
+                    boolean isNew = putOffsetIfAbsent(index, key, i);
+                    if (isNew) {
                         index.put(key, serial++);
                         keyList.add(keys.get(i));
                         valueList.add(values.get(i));
@@ -98,18 +134,20 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
                         throw new XPathException("Duplicate key " + Err.depict(keys.get(i)) + " in map");
                     } else {
                         GroundedValue newVal;
+                        int offset = -1;
                         try {
-                            newVal = combiner.combine(valueList.get(existing), values.get(i), context);
+                            offset = getOffset(index, key);
+                            newVal = combiner.combine(valueList.get(offset), values.get(i), context);
                         } catch (UncheckedXPathException e) {
                             throw new XPathException("Duplicate key " + Err.depict(keys.get(i))
                                                              + " in map. First value: "
-                                                             + Err.depictSequence(valueList.get(existing)) + "; second value: "
+                                                             + Err.depictSequence(valueList.get(offset)) + "; second value: "
                                                              + Err.depictSequence(values.get(i)), e).withErrorCode(e.getXPathException().getErrorCodeQName());
                         }
                         // In 4.0 we have the option of using the old or the new key. But 3.1 requires the new
                         // key, so we use that.
-                        keyList.set(existing, keys.get(i));
-                        valueList.set(existing, newVal);
+                        keyList.set(offset, keys.get(i));
+                        valueList.set(offset, newVal);
                     }
                 }
 
@@ -161,20 +199,42 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
     @Override
     public GroundedValue get(AtomicValue key) {
         ensureIndexed();
-        Integer offset = index.get(key.asMapKey());
-        if (offset == null) {
-            return null;
+        int offset = getOffset(index, key.asMapKey());
+        return offset < 0 ? null : values[offset];
+    }
+
+    /**
+     * Get the offset in the index of a given key, or -1 if the key is not present.
+     * Done this way for C# transpilation (maps with primitive int values work differently...)
+     * @param index the index of offsets
+     * @param key the wanted key
+     * @return the offset in the index, or -1 if absent
+     */
+
+    @CSharpReplaceBody(code="return index.TryGetValue(key, out var result) ? result : -1;")
+    public static int getOffset(HashMap<AtomicMatchKey, Integer> index, AtomicMatchKey key) {
+        Integer offset = index.get(key);
+        return offset == null ? -1 : offset;
+    }
+
+    /**
+     * Put an entry in the index if the key is currently absent
+     * @param index the index of offsets
+     * @param key the new key
+     * @param value the new value
+     * @return true if an entry was added, false if the key was already present
+     */
+    public static boolean putOffsetIfAbsent(HashMap<AtomicMatchKey, Integer> index, AtomicMatchKey key, int value) {
+        if (!index.containsKey(key)) {
+            index.put(key, value);
+            return true;
         }
-        return values[offset];
+        return false;
     }
 
     public int getIndex(AtomicValue key) {
         ensureIndexed();
-        Integer offset = index.get(key.asMapKey());
-        if (offset == null) {
-            return -1;
-        }
-        return offset;
+        return getOffset(index, key.asMapKey());
     }
 
     /**
