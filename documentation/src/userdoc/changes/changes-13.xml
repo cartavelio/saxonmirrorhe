@@ -127,6 +127,43 @@ TODO: rethink redefines and override
     
     <category name="s9api" class="javaonly">
         
+        <p>TODO: most of these changes apply equally to the <code>Saxon.Api</code> interface in SaxonCS.</p>
+        
+        <p>Significant (and incompatible) changes have been made to the schema processing API. These arise from the
+        fact that a <code>Processor</code> (and its underlying <code>Configuration</code>) can now hold multiple
+        independent schemas. A schema (meaning a compiled and consistent collection of schema components) is
+        now represented by an <code>net.sf.saxon.s9api.XsdSchema</code> object. This is created using a
+        <code>net.sf.saxon.s9api.XsdCompiler</code>, which in turn is created using the factory method
+        <code>Processor.newXsdCompiler()</code>.</p>
+        
+        <ul>
+            <li><p>The <code>SchemaManager</code> class remains available but is deprecated. It does not
+            retain all the functionality of previous releases. In particular, any schema created using the
+            <code>SchemaManager</code> is not implicitly available to any <code>XsltCompiler</code>,
+            <code>XQueryCompiler</code>, or <code>DocumentBuilder</code> created by the same <code>Processor</code>:
+            the schema needs to be explicitly imported.</p></li>
+            <li><p>An <code>XsdSchema</code> object, whether created using the old <code>SchemaManager</code>
+            or the new <code>XsdCompiler</code>, needs to be explicitly made available to any <code>XsltCompiler</code>
+            or <code>XQueryCompiler</code> that uses it, using the new <code>useSchema()</code> method.</p></li>
+            <li><p>Although Saxon now allows multiple schemas to be held in a <code>Processor</code> (and indeed,
+            XSLT 4.0 allows multiple schemas to be used within a single transformation &mdash; for example one schema for
+            the source document and another for the result document), the schemas must be consistent with each other.
+            This primarily means that two schemas within a <code>Processor</code> must not hold conflicting definitions
+            of the same component (for example, different definitions of the same complex type).</p></li>
+        </ul>
+        
+        <p>If a schema-aware stylesheet is exported to a SEF file, the SCM representation of any schema imported by
+        the stylesheet is included in the SEF file and is automatically incorparated in any compiled stylesheet
+        reconstituted from the SEF file.</p>
+        
+        <p>The handling of a schema referenced from a source document using <code>xsi:schemaLocation</code>
+            or <code>xsi:noNamespaceSchemaLocation</code>
+        has changed. Generally, such a schema is read only if the use of such schemas is explicitly enabled.
+        Earlier Saxon releases read the schema at the specified location and added the relevant schema components
+        to the schema held globally by the <code>Configuration</code>, changing the results of subsequent
+        validation episodes under that <code>Configuration</code>. In Saxon 13, the schema constructed by
+        reading these components is transient, and does not affect the result of any subsequent validation task.</p>
+        
     <p>Some new convenience methods have been introduced for the <code>XdmValue</code> and <code>XdmStream</code>
     classes. In both cases, you can now write <code>select("name")</code> or <code>select("uri", "local")</code>
     as a shorthand for <code>select(Steps.child("name"))</code> or <code>select(Steps.child("uri", "local")</code>
@@ -134,7 +171,7 @@ TODO: rethink redefines and override
         <code>doc.select(Steps.child("test-set").then(Steps.child("dependencies"))).first()</code> reduces to
         <code>doc.select("test-set").select("dependencies").first()</code>.</p>
         
-    <p>A couple of methods have been added to <code>net.sf.saxon.soapi.ItemType</code>. The static method
+    <p>A couple of methods have been added to <code>net.sf.saxon.s9api.ItemType</code>. The static method
     <code>ItemType.builtInAtomicType(localName)</code> provides a quick way of getting an <code>ItemType</code>
        such as <code>ItemType.DATE_TIME</code> if the local name is not known statically. The method
        <code>ItemType.validateAtomic(String)</code> tests whether a given string is in the lexical space
@@ -151,10 +188,9 @@ TODO: rethink redefines and override
         output, they are used to ensure that the trace output remains well-formed when errors are
         caught and recovered.</p>
         
-        <p>Add information regarding schema processing....</p>
         
-        <p>The handling of a schema referenced from a source document using <code>xsi:schemaLocation</code>
-        has changed. </p>
+        
+        
         
         <p>The callback for <code>xsl:message</code> processing can now request (by calling a method on the supplied
         <code>Message</code> object) that the message is to be treated as a dynamic error.</p>
@@ -275,7 +311,12 @@ TODO: rethink redefines and override
         
         <p>The XDM 4.0 specification changes the rules for maps so that 
         <code>xs:base64Binary</code> and <code>xs:hexBinary</code> become mutually comparable.
-        Because Saxon supports both 3.1 and 4.0 in the same product, the version number is held
+        This has the consequence that <code>xs:base64Binary</code> and <code>xs:hexBinary</code> representations
+            of the same value (for example <code>xs:base64Binary("")</code> and <code>xs:hexBinary("")</code>
+            can no longer coexist in the same map in 4.0, whereas they could coexist in 3.1. This
+            creates a problem because Saxon 13 supports both 3.1 and 4.0 in the same product, 
+            and allows maps to be passed from 3.1 to 4.0 applications and vice versa. 
+            To solve this problem, the version number is held
         in the map itself, and determines how values are compared when using that map. Generally,
         the version number in the map is 40 if XPath 4.0 was enabled in the application that 
         constructed the map, or 31 otherwise. However, maps constructed and returned by Saxon
@@ -285,6 +326,25 @@ TODO: rethink redefines and override
         
         
         <h2>New features from the 4.0 specifications</h2>
+        
+        <p>Many new features from the draft 4.0 specifications are implemented in Saxon 13, and they
+        are not all listed individually here. In general, to check whether a new feature is implemented:</p>
+        
+        <ol>
+            <li><p>Check the blue change entries in the draft specifications listed at 
+            <a href="https://qt4cg.org/">qt4cg.org</a>. In most cases these link to the GitHub
+            issues and pull requests (PRs) that record the progress of each change. For example,
+            section 5.5 of the XSLT 4.0 specification starts with the change entry:</p>
+                <quote>The strings used in the formatted number to represent a decimal separator, grouping separator, 
+                    exponent separator, percent sign, per mille sign, or minus sign, are no longer 
+                    constrained to be single characters.   [Issue 1048 PR 1250 3 June 2024]</quote>
+            </li>
+            <li><p>Click on the PR number in the spec to find the relevant PR on GitHub.
+            For this example (at the time of writing) the PR carries the labels "Completed", "Tests Added",
+            and "In Saxon13", confirming that the feature is fully implemented and tested in Saxon 13.
+            Be aware, however, that the 4.0 specifications are work in progress, and that the specification
+            and implementation are both subject to change.</p></li>
+        </ol>
         
         <p><emph>References of the form </emph>PR nnnn <emph>refer to pull requests against the
         specifications in <a href="https://github.com/qt4cg/qtspecs/pulls">GitHub</a>.</emph></p>
