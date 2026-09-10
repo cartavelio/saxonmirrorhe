@@ -144,7 +144,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
 
     private static XPathContextMajor getMajorCaller(XPathContext context) {
         XPathContext caller = context.getCaller();
-        return caller.getMajorContext();
+        return caller == null ? null : caller.getMajorContext();
     }
 
     /**
