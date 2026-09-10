@@ -214,6 +214,11 @@ public class XSLMode extends StyleElement {
                         asAtt = value;
                     }
                     break;
+                case "copy-namespaces":
+                    if (requireXslt40Attribute("copy-namespaces")) {
+                        processBooleanAttribute("copy-namespaces", value);
+                    }
+                    break;
                 default:
                     if (attName.hasURI(NamespaceUri.SAXON)) {
                         isExtensionAttributeAllowed(attName.getDisplayName());
@@ -272,7 +277,7 @@ public class XSLMode extends StyleElement {
             String attValue = att.getValue();
             if (f.equals("streamable") || f.equals("on-multiple-match") || f.equals("on-no-match") ||
                     f.equals("warning-on-multiple-match") || f.equals("warning-on-no-match") ||
-                    f.equals("typed") || f.equals("visibility")) {
+                    f.equals("typed") || f.equals("copy-namespaces") || f.equals("visibility")) {
                 String trimmed = Whitespace.trim(attValue);
                 String normalizedAtt;
                 if ("true".equals(trimmed) || "1".equals(trimmed)) {

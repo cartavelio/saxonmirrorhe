@@ -29,7 +29,8 @@ import net.sf.saxon.type.Untyped;
  */
 public class ShallowCopyRuleSet implements BuiltInRuleSet {
 
-    private static final ShallowCopyRuleSet THE_INSTANCE = new ShallowCopyRuleSet();
+    private static final ShallowCopyRuleSet INSTANCE_WITH_COPY_NS = new ShallowCopyRuleSet(true);
+    private static final ShallowCopyRuleSet INSTANCE_WITH_NO_COPY_NS = new ShallowCopyRuleSet(false);
 
     /**
      * Get the singleton instance of this class
@@ -37,11 +38,14 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
      * @return the singleton instance
      */
 
-    public static ShallowCopyRuleSet getInstance() {
-        return THE_INSTANCE;
+    public static ShallowCopyRuleSet getInstance(boolean copyNamespaces) {
+        return copyNamespaces ? INSTANCE_WITH_COPY_NS : INSTANCE_WITH_NO_COPY_NS;
     }
 
-    protected ShallowCopyRuleSet() {
+    private boolean copyNamespaces;
+
+    protected ShallowCopyRuleSet(boolean copyNamespaces) {
+        this.copyNamespaces = copyNamespaces;
     }
 
     /**
@@ -88,8 +92,10 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                     }
                     NodeName fqn = NameOfNode.makeName(node);
                     out.startElement(fqn, schemaAware ? AnyType.getInstance() : Untyped.getInstance(), locationId, ReceiverOption.NONE);
-                    for (NamespaceBinding ns : node.getAllNamespaces()) {
-                        out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
+                    if (copyNamespaces) {
+                        for (NamespaceBinding ns : node.getAllNamespaces()) {
+                            out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);
+                        }
                     }
                     XPathContextMajor c2 = context.newContext();
                     c2.setCurrentComponent(c2.getCurrentMode());  // Bug 3508

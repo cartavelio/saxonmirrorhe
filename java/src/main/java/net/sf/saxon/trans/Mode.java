@@ -650,14 +650,14 @@ public abstract class Mode extends Actor {
      * @param code the code used in export
      * @return a suitable ruleset
      */
-    public BuiltInRuleSet getBuiltInRuleSetForCode(String code, SequenceType requiredType) {
+    public BuiltInRuleSet getBuiltInRuleSetForCode(String code, SequenceType requiredType, boolean copyNamespaces) {
         BuiltInRuleSet base;
         if (code.startsWith("SC")) {
-            base = ShallowCopyRuleSet.getInstance();
+            base = ShallowCopyRuleSet.getInstance(copyNamespaces);
         } else if (code.startsWith("SS")) {
             base = ShallowSkipRuleSet.getInstance();
         } else if (code.startsWith("DC")) {
-            base = DeepCopyRuleSet.getInstance();
+            base = DeepCopyRuleSet.getInstance(copyNamespaces);
         } else if (code.startsWith("DS")) {
             base = DeepSkipRuleSet.getInstance();
         } else if (code.startsWith("FF")) {
@@ -665,7 +665,7 @@ public abstract class Mode extends Actor {
         } else if (code.startsWith("TC")) {
             base = TextOnlyCopyRuleSet.getInstance();
         } else if (code.startsWith("CA")) {
-            base = ShallowCopyAllRuleSet.getInstance();
+            base = ShallowCopyAllRuleSet.getInstance(copyNamespaces);
         } else {
             throw new IllegalArgumentException(code);
         }
@@ -708,6 +708,9 @@ public abstract class Mode extends Actor {
         }
         if (!hasRules) {
             flags += "e";
+        }
+        if ("no".equals(getProperty("copy-namespaces"))) {
+            flags += "n";
         }
         if (!flags.isEmpty()) {
             presenter.emitAttribute("flags", flags);

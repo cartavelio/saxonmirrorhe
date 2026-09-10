@@ -32,7 +32,8 @@ import java.util.List;
  */
 public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
 
-    private static final ShallowCopyAllRuleSet THE_INSTANCE = new ShallowCopyAllRuleSet();
+    private static final ShallowCopyAllRuleSet INSTANCE_WITH_COPY_NS = new ShallowCopyAllRuleSet(true);
+    private static final ShallowCopyAllRuleSet INSTANCE_WITH_NO_COPY_NS = new ShallowCopyAllRuleSet(false);
 
     /**
      * Get the singleton instance of this class
@@ -40,11 +41,12 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
      * @return the singleton instance
      */
 
-    public static ShallowCopyAllRuleSet getInstance() {
-        return THE_INSTANCE;
+    public static ShallowCopyRuleSet getInstance(boolean copyNamespaces) {
+        return copyNamespaces ? INSTANCE_WITH_COPY_NS : INSTANCE_WITH_NO_COPY_NS;
     }
 
-    private ShallowCopyAllRuleSet() {
+    private ShallowCopyAllRuleSet(boolean copyNamespaces) {
+        super(copyNamespaces);
     }
 
     /**

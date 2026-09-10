@@ -127,6 +127,7 @@ public class SimpleMode extends Mode {
     public void resolveProperties(RuleManager manager) throws XPathException {
         boolean failOnMultipleMatch = false;
         boolean warningOnMultipleMatch = true;
+        boolean copyNamespaces = !"no".equals(getActivePart().getPropertyValue("copy-namespaces"));
         for (Map.Entry<String, Object> entry : getActivePart().explicitPropertyValues.entrySet()) {
             String prop = entry.getKey();
             Object value = entry.getValue();
@@ -159,10 +160,10 @@ public class SimpleMode extends Mode {
                             base = TextOnlyCopyRuleSet.getInstance();
                             break;
                         case "shallow-copy":
-                            base = ShallowCopyRuleSet.getInstance();
+                            base = ShallowCopyRuleSet.getInstance(copyNamespaces);
                             break;
                         case "deep-copy":
-                            base = DeepCopyRuleSet.getInstance();
+                            base = DeepCopyRuleSet.getInstance(copyNamespaces);
                             break;
                         case "shallow-skip":
                             base = ShallowSkipRuleSet.getInstance();
@@ -174,7 +175,7 @@ public class SimpleMode extends Mode {
                             base = FailRuleSet.getInstance();
                             break;
                         case "shallow-copy-all":
-                            base = ShallowCopyAllRuleSet.getInstance();
+                            base = ShallowCopyAllRuleSet.getInstance(copyNamespaces);
                             break;
                         default:
                             // already validated

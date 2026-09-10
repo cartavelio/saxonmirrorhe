@@ -774,34 +774,40 @@ public class PackageLoaderHE implements IPackageLoader {
         int patternSlots = getIntegerAttribute(modeElement, "patternSlots");
         mode.allocatePatternSlots(patternSlots);
 
+        String flags = modeElement.getAttributeValue(NamespaceUri.NULL, "flags");
+        if (flags == null) {
+            flags = "";
+        }
+
         String onNoMatch = modeElement.getAttributeValue(NamespaceUri.NULL, "onNo");
         BuiltInRuleSet base;
         if (onNoMatch != null) {
             String asAtt = modeElement.getAttributeValue(NamespaceUri.NULL, "as");
             SequenceType requiredType = asAtt == null ? SequenceType.ANY_SEQUENCE : AlphaCode.toSequenceType(asAtt, pack.getImportedSchema(""));
-            base = mode.getBuiltInRuleSetForCode(onNoMatch, requiredType);
+            boolean copyNamespaces = !flags.contains("n");
+            base = mode.getBuiltInRuleSetForCode(onNoMatch, requiredType, copyNamespaces);
             mode.setBuiltInRuleSet(base);
         }
 
-        String flags = modeElement.getAttributeValue(NamespaceUri.NULL,"flags");
-        if (flags != null) {
-            mode.setStreamable(flags.contains("s"));
-            if (flags.contains("t")) {
-                mode.setExplicitProperty("typed", "yes", 1);
-            }
-            if (flags.contains("u")) {
-                mode.setExplicitProperty("typed", "no", 1);
-            }
-            if (flags.contains("F")) {
-                mode.setRecoveryPolicy(RecoveryPolicy.DO_NOT_RECOVER);
-            }
-            if (flags.contains("W")) {
-                mode.setRecoveryPolicy(RecoveryPolicy.RECOVER_WITH_WARNINGS);
-            }
-            if (flags.contains("e")) {
-                mode.setHasRules(false);
-            }
+
+
+        mode.setStreamable(flags.contains("s"));
+        if (flags.contains("t")) {
+            mode.setExplicitProperty("typed", "yes", 1);
         }
+        if (flags.contains("u")) {
+            mode.setExplicitProperty("typed", "no", 1);
+        }
+        if (flags.contains("F")) {
+            mode.setRecoveryPolicy(RecoveryPolicy.DO_NOT_RECOVER);
+        }
+        if (flags.contains("W")) {
+            mode.setRecoveryPolicy(RecoveryPolicy.RECOVER_WITH_WARNINGS);
+        }
+        if (flags.contains("e")) {
+            mode.setHasRules(false);
+        }
+
 
         final List<StructuredQName> accNames = getListOfQNameAttribute(modeElement, "useAcc");
         addCompletionAction(() -> {
