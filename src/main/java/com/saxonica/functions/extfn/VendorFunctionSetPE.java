@@ -21,10 +21,10 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.SimpleMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -236,9 +236,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 //                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
 //                .arg(1, orderKey, ONE, null));
 
-        register("index", 2, e -> e.populate( Index::new, MapType.getInstance(), ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
-                .arg(1, AnyItemType.getInstance(), ONE, EMPTY));
+//        register("index", 2, e -> e.populate( Index::new, MapType.getInstance(), ONE, 0)
+//                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
+//                .arg(1, AnyItemType.getInstance(), ONE, EMPTY));
 
 //        register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
 //                .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
@@ -981,7 +981,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
             ParameterSet params = context.getTunnelParameters();
             params.materializeValues();
             StructuredQName[] names = params.getParameterNames();
-            MapBuilder map = HashTrieMap.getBuilder();
+            MapBuilder map = SimpleMap.getBuilder();
             for (int i = 0; i < params.size(); i++) {
                 map.put(new QNameValue(names[i], BuiltInAtomicType.QNAME), params.getValue(i).materialize());
             }

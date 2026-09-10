@@ -684,7 +684,7 @@ public class ElementsToMaps extends SystemFunction {
     private MapItem makeRecordElementContent(NodeInfo element, ConversionContext cc) throws XPathException {
         cc.elementNameStack.push(element.getQName());
         StringMapBuilder innerMap = new StringMapBuilder();
-        innerMap.setCombiner((a, b) -> {
+        innerMap.setCombiner((a, b, cxt) -> {
             if (a instanceof ArrayItem) {
                 return ((ArrayItem) a).append(b);
             } else {

@@ -265,7 +265,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
 
     private static class NewMapSimpleFeed extends ItemFeed {
 
-        MapBuilder resultMap;
+        MapItem resultMap;
 
         NewMapSimpleFeed(Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
@@ -281,7 +281,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
-            resultMap = HashTrieMap.getBuilder();
+            resultMap = new OrderedMap();
         }
 
         /**
@@ -297,7 +297,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
                         XPathException err = new XPathException("Duplicate key value in map: " + Err.depict(pair.key), "XTDE3365");
                         dynamicError(err);
                     }
-                    resultMap.put(pair.key, pair.value);
+                    resultMap = resultMap.put(pair.key, pair.value);
                 }
             } else {
                 // Should be caught by type-checking?
@@ -318,7 +318,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
             //System.err.println("NMA close() " + toString());
             if (!hasFailed()) {
                 Outputter out = getNextOutputter();
-                out.append(resultMap.getCompletedMap());
+                out.append(resultMap);
                 out.close();
             }
             resultMap = null;

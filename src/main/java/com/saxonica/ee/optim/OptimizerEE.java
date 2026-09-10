@@ -885,7 +885,7 @@ public class OptimizerEE extends Optimizer {
                 }
                 map = new DictionaryMap(dict);
             } else {
-                MapBuilder trie = HashTrieMap.getBuilder();
+                MapBuilder builder = SimpleMap.getBuilder();
                 for (Item item : literal.getGroundedValue().asIterable()) {
                     if (item instanceof AtomicValue) {
                         // if the values have complex comparison semantics, give up
@@ -901,12 +901,12 @@ public class OptimizerEE extends Optimizer {
                         if (item instanceof QualifiedNameValue) {
                             return null;
                         }
-                        trie.put((AtomicValue) item, BooleanValue.TRUE);
+                        builder.put((AtomicValue) item, BooleanValue.TRUE);
                     } else {
                         return null;
                     }
                 }
-                map = trie.getCompletedMap();
+                map = builder.getCompletedMap();
             }
             Expression e2;
             TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();

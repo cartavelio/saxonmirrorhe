@@ -7,7 +7,7 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
@@ -77,7 +77,7 @@ public class MapEntryStreamer extends StreamingAdjunct implements FeedMaker {
         public void close() throws XPathException {
             AtomicValue key = (AtomicValue) ((SystemFunctionCall) getExpression()).getArg(0).evaluateItem(getContext());
             GroundedValue seq = SequenceExtent.makeSequenceExtent(value);
-            HashTrieMap map = HashTrieMap.singleton(key, seq);
+            SingleEntryMap map = new SingleEntryMap(key, seq);
             getNextOutputter().append(map);
             getNextOutputter().close();
         }

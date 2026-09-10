@@ -231,7 +231,7 @@ public class ParseURI extends URIFunctions {
 
         if (query != null) {
             StringMapBuilder querySegments = new StringMapBuilder();
-            querySegments.setCombiner(GroundedValue::concatenate);
+            querySegments.setCombiner((a, b, cxt) -> a.concatenate(b));
             for (String str : query.split("&")) {
                 pos = str.indexOf("=");
                 final UnicodeString key;
