@@ -204,8 +204,6 @@ dependencies {
     files(saxonLicenseDir),
     files("lib/Tidy.jar"),
     //fileTree(dir: 'extra/lib/', include: ['*.jar'])
-    fileTree(dir: '/usr/lib/jvm/graalvm/lib/graalvm', include: ['*.jar']),
-    fileTree(dir: '/usr/lib/jvm/graalvm/lib/*', include: ['*.jar'])
   )
   testImplementation (
     [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.2'],
