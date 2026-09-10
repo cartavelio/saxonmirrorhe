@@ -19,6 +19,11 @@
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
   </exception>
   
+  <exception test-set="fn-unparsed-text" test-case="fn-unparsed-text-054a" run="false" report="notRun">
+    <created by="Michael Kay" on="2025-12-18"/>
+    <reason>Getting access problems with https://timeanddate.com</reason>
+  </exception>
+  
   <exception test-set="prod-CastExpr" test-case="K-SeqExprCast-71a" run="false" report="n/a">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 rules for casting to QName no longer supported</reason>
