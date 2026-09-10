@@ -286,6 +286,11 @@ EndGlobal
                 <Compile Include="..\..\..\..\src\main\cs\**"/>
                 <Compile Include="..\..\..\..\..\featurekeys\build\cs\**"/>
                 <Compile Remove="..\..\..\..\**\.DS_Store"/>
+                <xsl:if test="$edition != 'ee'">
+                  <Compile Remove="..\..\..\..\src\main\cs\Saxon\Api\Support\Xsd*"/>
+                  <Compile Remove="..\..\..\..\src\main\cs\Saxon\Impl\Overrides\Verifier.cs"/>
+                  <Compile Remove="..\..\..\..\src\main\cs\Saxon\Impl\Parallel\**"/>
+                </xsl:if>
               </ItemGroup>
             </xsl:when>
             <xsl:otherwise>
@@ -294,6 +299,11 @@ EndGlobal
                 <Compile Include="..\src\main\cs\**"/>
                 <Compile Include="..\..\featurekeys\build\cs\**"/>
                 <Compile Remove="..\**\.DS_Store"/>
+                <xsl:if test="$edition != 'ee'">
+                  <Compile Remove="..\src\main\cs\Saxon\Api\Support\Xsd*"/>
+                  <Compile Remove="..\src\main\cs\Saxon\Impl\Overrides\Verifier.cs"/>
+                  <Compile Remove="..\src\main\cs\Saxon\Impl\Parallel\**"/>
+                </xsl:if>
               </ItemGroup>
             </xsl:otherwise>
           </xsl:choose>

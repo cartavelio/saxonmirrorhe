@@ -102,7 +102,6 @@ val preprocessJava = tasks.register<JavaExec>("preprocessJava") {
                .asFileTree
                .matching {
                  include("net/sf/saxon/**/*.java")
-                 exclude("com/saxonica/**/*.java")
                  include("net/sf/saxon/data/**")
                  exclude("**/package-info.java")
                  exclude("net/sf/saxon/dotnet/**")
@@ -365,8 +364,13 @@ val preprocessCS = tasks.register<Copy>("preprocessCS") {
 val copyResources = tasks.register("copyResources") {
   doLast {
     copy {
+      // These are copied into build/{arch} so that ../ will be correct
+      // relative to either the build directory build/{arch}/SaxonCS or
+      // the csharp/{ee,pe,he} directories because (at least some?) relative
+      // paths in a csproj file are relative to the build location, not
+      // the csproj file. ¯\_(ツ)_/¯
       from(layout.projectDirectory.dir(".."))
-      into(layout.buildDirectory)
+      into(layout.buildDirectory.dir(architectures.first()))
       include("LICENSE.txt")
       include("README.md")
     }
