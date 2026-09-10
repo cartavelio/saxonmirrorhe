@@ -14,6 +14,8 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.json.ParseJsonFn;
+import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
@@ -324,6 +326,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
+        register("normalize-unicode", 2, e -> e.populate(NormalizeUnicode::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, StringValue.EMPTY_STRING)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
         SpecificFunctionType operatorType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
                 SequenceType.ANY_SEQUENCE);
@@ -356,7 +362,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("parse-integer", 2, e -> e.populate(ParseInteger::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
+                .arg(1, BuiltInAtomicType.INTEGER, OPT, null));
+
+        register("parse-json", 2, e -> e.populate(ParseJsonFn::new, AnyItemType.getInstance(), OPT, 0)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(ParseJsonFn.OPTION_DETAILS));
 
         //#if EE==true || PE==true
         register("parse-uri", 1, 2, e -> e.populate(ParseURI::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -398,6 +409,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("resolve-uri", 2, e -> e.populate(ResolveURI::new, BuiltInAtomicType.ANY_URI, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
+        register("round", 2, e -> e.populate(Round::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+                .arg(0, NumericType.getInstance(), OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.INTEGER, OPT, null));
+
+        register("round-half-to-even", 2, e -> e.populate(RoundHalfToEven::new, NumericType.getInstance(), OPT, AS_PRIM_ARG0)
+                .arg(0, NumericType.getInstance(), OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.INTEGER, OPT, null));
 
         register("seconds", 1, e -> e.populate(SecondsFn::new, BuiltInAtomicType.DAY_TIME_DURATION, OPT, 0)
                 .arg(0, BuiltInAtomicType.DECIMAL, OPT, null));
@@ -505,6 +524,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(XdmToJsonFn.OPTION_DETAILS));
+
+        register("xml-to-json", 2, e -> e.populate(XMLToJsonFn::new, BuiltInAtomicType.STRING,
+                                                   OPT, LATE)
+                .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT | ABS, null)
+                .setOptionDetails(XMLToJsonFn.makeOptionsParameter()));
 
 
     }

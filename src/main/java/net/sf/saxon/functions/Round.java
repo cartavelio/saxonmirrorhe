@@ -53,7 +53,9 @@ public final class Round extends SystemFunction {
         int scaleRnd = 0;
         if (arguments.length == 2) {
             NumericValue scaleVal = (NumericValue) arguments[1].head();
-            scaleRnd = (int) scaleVal.longValue();
+            if (scaleVal != null) {
+                scaleRnd = (int) scaleVal.longValue();
+            }
         }
         return val0.round(scaleRnd);
 
@@ -97,7 +99,8 @@ public final class Round extends SystemFunction {
                     if (result == null) {
                         return null;
                     }
-                    int scale = (int) ((NumericValue) scaleArg.eval(context)).longValue();
+                    NumericValue scaleVal = (NumericValue) scaleArg.eval(context);
+                    int scale = scaleVal == null ? 0 : (int) scaleVal.longValue();
                     return result.round(scale);
                 };
             }

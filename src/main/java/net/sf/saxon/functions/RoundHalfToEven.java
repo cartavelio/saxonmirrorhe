@@ -54,12 +54,14 @@ public final class RoundHalfToEven extends SystemFunction {
         int scale = 0;
         if (arguments.length == 2) {
             NumericValue scaleVal = (NumericValue) arguments[1].head();
-            if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
-                return val0;
-            } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
-                scale = Integer.MIN_VALUE;
-            } else {
-                scale = (int) scaleVal.longValue();
+            if (scaleVal != null) {
+                if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
+                    return val0;
+                } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
+                    scale = Integer.MIN_VALUE;
+                } else {
+                    scale = (int) scaleVal.longValue();
+                }
             }
         }
         return val0.roundHalfToEven(scale);
@@ -117,7 +119,7 @@ public final class RoundHalfToEven extends SystemFunction {
                     }
 
                 }
-        } else {
+            } else {
                 final ItemEvaluator scaleArg = fnc.getArg(1).makeElaborator().elaborateForItem();
                 return context -> {
                     NumericValue result = (NumericValue) arg0eval.eval(context);
@@ -125,13 +127,15 @@ public final class RoundHalfToEven extends SystemFunction {
                         return null;
                     }
                     NumericValue scaleVal = (NumericValue) scaleArg.eval(context);
-                    int scale;
-                    if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
-                        return result;
-                    } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
-                        scale = Integer.MIN_VALUE;
-                    } else {
-                        scale = (int) scaleVal.longValue();
+                    int scale = 0;
+                    if (scaleVal != null) {
+                        if (scaleVal.compareTo(Integer.MAX_VALUE) > 0) {
+                            return result;
+                        } else if (scaleVal.compareTo(Integer.MIN_VALUE) < 0) {
+                            scale = Integer.MIN_VALUE;
+                        } else {
+                            scale = (int) scaleVal.longValue();
+                        }
                     }
                     return result.roundHalfToEven(scale);
                 };
