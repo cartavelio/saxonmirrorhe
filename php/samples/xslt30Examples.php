@@ -6,66 +6,6 @@
 <body>
 <?php
 
-function userFunction1()
-{
-
-    echo("userspace function called with no paramXXX\n");
-
-}
-
-// define a user space function
-function userFunction($param, $param2)
-{
-
-    echo("userspace function called with two paramXXX\n");
-    if (is_numeric($param2)) {
-        echo("userspace function called cp1\n");
-        echo("Param3 = " . $param2);
-    }
-
-    if (is_a($param2, "Saxon\\XdmNode")) {
-        echo("userspace function called cp2\n");
-        /*$proc = new Saxon\SaxonProcessor(true);
-        $xpath = $proc->newXPathProcessor();
-        $xpath->setContextItem($param3);
-                $value = $xpath->evaluate("(//*)");*/
-        $value = $param2->getStringValue();
-        if ($value != null) {
-            echo("XdmNode value= " . $value);
-            return $param2;
-        } else {
-            echo("XdmNode value is null!!!");
-        }
-    }
-    echo("userspace function called cp3\n");
-    $resulti = "Result of userFunction+" . $param;
-
-    return $resulti;
-}
-
-function userFunctionExample($saxon, $proc, $xmlfile, $xslFile)
-{
-    echo '<b>userFunctionExample:</b><br/>';
-    global $resultg;
-
-    $proc->setProperty("extc", "/path-to-module/saxon");
-    $saxon->registerPHPFunction("/path-to-module/saxon");
-
-    $executable = $proc->compileFromFile($xslFile);
-    $executable->setInitialMatchSelectionAsFile($xmlfile);
-
-    $result = $executable->transformToString();
-    if ($result != null) {
-        echo 'Output=======:' . $result;
-    } else {
-        echo "Result is null";
-    }
-
-    $executable->clearParameters();
-    $executable->clearProperties();
-
-}
-
 /* simple example to show transforming to string */
 function exampleSimple1($saxonproc, $proc, $xmlfile, $xslFile)
 {

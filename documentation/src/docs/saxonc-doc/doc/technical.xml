@@ -164,6 +164,44 @@ except  PySaxonApiError as err:
        <p>If a program crashes, it is sometimes useful to run the program on the command line under the
            debugger tool <code>gdb</code> for Linux and MacOS, and this may give insight to where the fault
            occurred.</p>
+
+       <p>PHP Example: handling exceptions</p>
+       <pre><code class="language-php"><![CDATA[try {
+        $executable = $proc->compileFromFile($xslFile);
+        if ($executable == null) {
+            echo "executable is null";
+            return;
+        }
+        $executable->setInitialMatchSelectionAsFile($xmlFile);
+        $xdmvalue = $saxonProc->createAtomicValue(strval("Hello to you"));
+        if ($xdmvalue != null) {
+            echo "Name of Class ", get_class($xdmvalue), "\n";
+            $str = $xdmvalue->getStringValue();
+            if ($str != null) {
+                echo "XdmValue:" . $str;
+            }
+            $executable->setParameter('a-param', $xdmvalue);
+        } else {
+            echo "Xdmvalue is null";
+        }
+        $result = $executable->applyTemplatesReturningString();
+        if ($result != null) {
+            echo 'Output:' . $result . "<br/>";
+        } else {
+            echo "Result is NULL<br/>";
+        }
+
+        $executable->clearParameters();
+        $executable->clearProperties();
+    } catch (Exception $e) {
+        echo "Exception".$e->getMessage();
+    }]]></code></pre>
+
+       <h2 class="subtitle">Debugging tools</h2>
+
+       <p>If a program crashes, it is sometimes useful to run the program on the command line under the
+           debugger tool <code>gdb</code> for Linux and MacOS, and this may give insight to where the fault
+           occurred.</p>
        
    </section>
 

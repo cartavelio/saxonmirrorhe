@@ -266,7 +266,7 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
    <section id="samples_php" title="PHP samples">
       <h1>PHP samples</h1>
      
-     <p>The <code>samples/php</code> directory in the SaxonC download contains PHP code samples
+     <p>The <code>php/samples</code> directory in the SaxonC download contains PHP code samples
        for running XSLT, XQuery, XPath and Schema Validation, providing various examples of the use of the
        SaxonC PHP API.</p>
      
@@ -290,21 +290,21 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
      
      <h3 class="subtitle">Running the samples</h3>
 
-      <p>The <code>samples/php</code> directory in the SaxonC download contains various samples for
+      <p>The <code>php/samples</code> directory in the SaxonC download contains various samples for
          XSLT, XQuery, XPath and Schema Validation (namely: <code>xsltExamples.php</code>,
             <code>xslt30Examples.php</code>, <code>xqueryExamples.php</code>,
             <code>xpathExamples.php</code>, and <code>validatorExamples.php</code>) and associated
-         files, as well as PHP unit tests for XSLT (<code>xslt30_PHPUnit.php</code>). These files
+         files, as well as PHP unit tests for XSLT, XQuery, XPath and XQuery (<code>SaxonCPHPTests.php</code>). These files
          contain many useful examples which will help get you started. The unit tests run under
-         PHPUnit for PHP 7.2 which can be downloaded and installed separately in the same directory
+         PHPUnit for PHP 8.X which can be downloaded and installed separately in the same directory
          as the unit tests.</p>
 
       <p>To run the PHP unit tests for XSLT, use a command such as:</p>
-      <kbd>cd samples/php</kbd>
-      <kbd>./phpunit xslt30_PHPUnit.php</kbd>
+      <kbd>cd php/samples</kbd>
+      <kbd>./phpunit SaxonCPHPTests.php</kbd>
 
       <p>And to run a single unit test:</p>
-      <kbd>./phpunit --filter testPipeline xslt30_PHPUnit.php</kbd>
+      <kbd>./phpunit --filter testPipeline SaxonCPHPTests.php</kbd>
      
      
 
@@ -324,7 +324,7 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
 
   
 
-      <p>The following example shows how to debug if something unexpected is happening. It is also
+      <p>Exceptions that are thrown from the SaxonC PHP  API can be handled using the PHP try-catch block. It is also
          very useful to examine the apache <code>error.log</code> file:</p>
 
       <pre><code class="language-php"><![CDATA[<?php
@@ -333,17 +333,14 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
   $proc = new Saxon\SaxonProcessor();
   $xsltProc = $proc->newXslt30Processor();
   $executable = $xsltProc->compileFromFile($xslFile);
-  
-  $result = $executable->transformFileToString($xmlFile);
-  if($result == NULL) {
-    if($executable->exceptionOccurred()){
-        $errCode = $executable->getErrorCode();
-        $errMessage = $executable->getErrorMessage();
-        echo 'Expected error: Code='.$errCode.' Message='.$errMessage;
-      $xsltProc->exceptionClear();
-    }
+  try{
+    $result = $executable->transformFileToString($xmlFile);
+    echo $result;
+  } catch(Exception $e) {
+        echo "Exception".$e->getMessage();
   }
-  echo $result;
+  }
+
   $xsltProc->clearParameters();
   $xsltProc->clearProperties();
 ?>]]></code></pre>
