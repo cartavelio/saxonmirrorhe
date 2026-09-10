@@ -80,6 +80,7 @@ public class IXSLSetAttribute extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
+        checkEmpty();
         name = typeCheck("name", name);
         select = typeCheck("select", select);
         object = typeCheck("object", object);

@@ -81,6 +81,7 @@ public class IXSLRemoveProperty extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
+        checkEmpty();
         name = typeCheck("name", name);
         object = typeCheck("object", object);
     }

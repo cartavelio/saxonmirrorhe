@@ -76,6 +76,7 @@ public class IXSLPromise extends StyleElement {
 
     @Override
     public void validate(ComponentDeclaration decl) throws XPathException {
+        checkEmpty();
         select = typeCheck("select", select);
         onCompletion = typeCheck("on-completion", onCompletion);
         onFailure = typeCheck("on-failure", onFailure);
