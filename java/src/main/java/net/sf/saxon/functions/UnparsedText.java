@@ -128,6 +128,16 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                             Item fn = fallbackOption.head();
                             fallback = fn.effectiveBooleanValue();
                         }
+                        GroundedValue normalizeNewlinesOption = options.get("normalize-newlines");
+                        if (normalizeNewlinesOption != null) {
+                            // Revert to pull mode execution for now
+                            Sequence result = call(context, arguments);
+                            StringValue value = (StringValue) result.head();
+                            if (value != null) {
+                                destination.append(value, Loc.NONE, ReceiverOption.NONE);
+                            }
+                            return;
+                        }
                     }
                 }
 
