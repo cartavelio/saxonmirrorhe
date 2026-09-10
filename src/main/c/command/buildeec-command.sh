@@ -4,8 +4,6 @@
 parent_path=$( cd "$(dirname "$0")" ; pwd -P )
 
 cd "$parent_path"
-SCRIPT_PATH=$0;
-echo $parent_path
 gcc -m64 -fPIC -I../Saxon.C.API/graalvm  -c ../Saxon.C.API/SaxonCGlue.c -o SaxonCGlue.o $1 $2
 
 gcc -m64 -fPIC -I../Saxon.C.API/graalvm  Transform.c  -o transform -ldl -lc -DEEC SaxonCGlue.o -lsaxon-eec-12.1 $1 $2
