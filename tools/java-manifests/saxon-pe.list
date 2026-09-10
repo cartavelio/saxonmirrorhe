@@ -351,7 +351,6 @@ net/sf/saxon/expr/FilterExpression.class
 net/sf/saxon/expr/FilterIterator.class
 net/sf/saxon/expr/FirstItemExpression.class
 net/sf/saxon/expr/ForExpression.class
-net/sf/saxon/expr/ForMemberExpression.class
 net/sf/saxon/expr/FunctionCall.class
 net/sf/saxon/expr/GeneralComparison.class
 net/sf/saxon/expr/GeneralComparison20.class
@@ -459,9 +458,6 @@ net/sf/saxon/expr/flwor/ForClauseOuterPull.class
 net/sf/saxon/expr/flwor/ForClauseOuterPush.class
 net/sf/saxon/expr/flwor/ForClausePull.class
 net/sf/saxon/expr/flwor/ForClausePush.class
-net/sf/saxon/expr/flwor/ForMemberClause.class
-net/sf/saxon/expr/flwor/ForMemberClausePull.class
-net/sf/saxon/expr/flwor/ForMemberClausePush.class
 net/sf/saxon/expr/flwor/GroupByClause.class
 net/sf/saxon/expr/flwor/GroupByClausePull.class
 net/sf/saxon/expr/flwor/GroupByClausePush.class

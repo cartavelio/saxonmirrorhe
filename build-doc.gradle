@@ -1007,7 +1007,7 @@ task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
   }
 }
 
-task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi']) {
+task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi', 'saxonc_doxygen']) {
   inputs.files fileTree(dir: "${buildDir}/doc_pypi", exclude: "*.html")
   outputs.file "${buildDir}/doc_pypi/saxoncee.html"
 
