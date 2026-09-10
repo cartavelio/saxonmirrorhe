@@ -7,8 +7,6 @@
 
 package net.sf.saxon.style;
 
-import com.saxonica.trans.XSLArray;
-import com.saxonica.trans.XSLArrayMember;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -107,6 +105,7 @@ public class StyleNodeFactory implements NodeFactory {
         String baseURI = location.getSystemId();
         int lineNumber = location.getLineNumber();
         int columnNumber = location.getColumnNumber();
+        int processorVersion = compilation.getCompilerInfo().getXsltVersion();
 
         if (parent instanceof DataElement) {
             DataElement d = new DataElement();
@@ -180,7 +179,6 @@ public class StyleNodeFactory implements NodeFactory {
             // Detect a mis-spelt XSLT element, or a 3.0 element used in a 2.0 stylesheet
 
             if (uri.equals(NamespaceUri.XSLT)) {
-                int processorVersion = compilation.getCompilerInfo().getXsltVersion();
                 if (parent instanceof XSLStylesheet) {
                     if (((XSLStylesheet) parent).getEffectiveVersion() <= processorVersion) {
                         temp = new AbsentExtensionElement();
@@ -195,9 +193,6 @@ public class StyleNodeFactory implements NodeFactory {
                     temp.setLocation(baseURI, lineNumber, columnNumber);
                     temp.setCompilation(compilation);
                     temp.processStandardAttributes(NamespaceUri.NULL);
-                    int effectiveVersion = temp.getEffectiveVersion();
-                    XmlProcessingIncident incident = new XmlProcessingIncident(
-                            "Unknown XSLT instruction xsl:" + localname, "XTSE0010", location);
                     temp.setValidationError(
                             new XmlProcessingIncident("Unknown XSLT instruction " + elemName.getDisplayName(), "XTSE0010", location),
                             temp.getEffectiveVersion() > processorVersion
@@ -305,12 +300,6 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLApplyImports();
             case StandardNames.XSL_APPLY_TEMPLATES:
                 return new XSLApplyTemplates();
-            //#if EE==true || PE==true
-            case StandardNames.XSL_ARRAY:
-                return new XSLArray();
-            case StandardNames.XSL_ARRAY_MEMBER:
-                return new XSLArrayMember();
-            //#endif
             case StandardNames.XSL_ASSERT:
                 return new XSLAssert();
             case StandardNames.XSL_ATTRIBUTE:
@@ -351,8 +340,6 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLForEach();
             case StandardNames.XSL_FOR_EACH_GROUP:
                 return new XSLForEachGroup();
-//            case StandardNames.XSL_FOR_EACH_MEMBER:
-//                return new XSLForEachMember();
             case StandardNames.XSL_FORK:
                 return new XSLFork();
             case StandardNames.XSL_FUNCTION:
@@ -443,10 +430,6 @@ public class StyleNodeFactory implements NodeFactory {
             case StandardNames.XSL_TRANSFORM:
                 //noinspection RedundantCast
                 return topLevelModule ? (StyleElement)new XSLPackage() : (StyleElement)new XSLStylesheet();
-            //#if EE==true || PE==true
-            case StandardNames.XSL_SWITCH:
-                return new XSLSwitch();
-            //#endif
             case StandardNames.XSL_TEMPLATE:
                 return new XSLTemplate();
             case StandardNames.XSL_TEXT:
