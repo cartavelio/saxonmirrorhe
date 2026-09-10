@@ -57,7 +57,9 @@
 
   
   <div class="javaonly">
-  <h2 class="subtitle">SaxonJ-HE</h2>
+    <h2 class="subtitle">Saxon on Java</h2>
+    
+  <h3>SaxonJ-HE</h3>
   
   <p>The open-source SaxonJ-HE product is made available under the <dfn>Mozilla Public License</dfn>
     (the "License"). Prior to Saxon 9.5 MPL Version 1.0 was used; from 9.5 onwards, MPL Version 2.0
@@ -112,10 +114,9 @@
   <aside><p>Although Saxonica complies with all the terms of the XQJ license, Saxonica takes
     the view that implementing the published XQJ API does not actually require a license (a view
     reinforced by the decision on Google LLC v. Oracle America, Inc.)</p></aside>
-  </div>
-
-  <div class="javaonly">
-  <h2 class="subtitle">SaxonJ-EE and SaxonJ-PE</h2>
+  
+  
+  <h3>SaxonJ-EE and SaxonJ-PE</h3>
       <p>The Enterprise and Professional editions of Saxon are commercial products released under the
         terms and conditions published on the Saxonica website. To find the relevant terms and
         conditions agreement for your license, see the <a href="https://www.saxonica.com/license/terms.xml"
@@ -142,6 +143,8 @@
   </div>
   <div class="csonly">
     
+    <h2 class="subtitle">Saxon on .NET</h2>
+    
     <p>SaxonCS is built from SaxonJ by converting the Java source code of SaxonJ to C#, using a transpiler
     developed and owned by Saxonica. The transpiler is written largely in XSLT 3.0, but also makes use of the open-source 
         <a href="http://javaparser.org" class="bodylink">javaparser</a> library.</p>
@@ -151,7 +154,7 @@
     <p>From Saxon 13, two SaxonCS products are shipped: SaxonCS-HE and SaxonCS-EE. These are described in the 
     following sections. There is no product corresponding to SaxonJ-PE.</p>
     
-    <h2 class="subtitle">SaxonCS-HE</h2>
+    <h3>SaxonCS-HE</h3> 
 
     <p>SaxonCS-HE is released for the first time at version 13.0, with functionality corresponding
       very closely to the functionality of the SaxonJ-HE product, but converted to C#.</p>
@@ -180,7 +183,7 @@
     </aside>
     
     
-    <h2 class="subtitle">SaxonCS-EE</h2>
+    <h3>SaxonCS-EE</h3>
 
     <p>SaxonCS-EE is a commercial Saxonica product built from the following components:</p>
     
@@ -245,7 +248,6 @@
 
   <h2 class="subtitle">Redistribution</h2>
 
-  <div class="javaonly">
       <p>Redistribution of SaxonJ-HE and SaxonCS-HE is freely permitted under the terms of the Mozilla Public
       License 2.0. Note that this requires inclusion of all the necessary notices. If any source code
       changes are made, the license requires that they be published (or at any rate, made available to
@@ -257,7 +259,6 @@
       page, which is at <a href="https://www.saxonica.com/" class="bodylink"
         >https://www.saxonica.com/</a>. As a courtesy, please take reasonable steps to ensure that your
       users know that they are running Saxon.</p>
-  </div>
 
   <p>Redistribution of commercial Saxonica products (Saxon-PE and Saxon-EE) as a component of a commercial application is possible
     under commercial terms; prices are published in the Saxonica online store, and a specimen
@@ -785,7 +786,7 @@
           <p>Saxon packages / modules</p>
         </td>
         <td>
-          <p>Package net.sf.saxon.serialize.jcs 
+          <p>Package <code>net.sf.saxon.serialize.jcs</code>. 
             Included in both the Java and C# products; however, the C# version is inactive.</p>
         </td>
       </tr>
@@ -795,7 +796,7 @@
         </td>
         <td>
           <p>Very minor modifications to enable transpilation of the source code to C#. Changes listed
-          in the package-info.java file.</p>
+            in the <code java="net.sf.saxon.serialize.jcs">net.sf.saxon.serialize.jcs</code> package-info.java file.</p>
         </td>
       </tr>
       <tr>
