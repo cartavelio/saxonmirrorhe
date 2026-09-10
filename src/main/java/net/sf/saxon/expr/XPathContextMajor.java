@@ -36,24 +36,20 @@ public class XPathContextMajor extends XPathContextMinor {
     private ParameterSet localParameters;
     private ParameterSet tunnelParameters;
     /*@Nullable*/ private TailCallLoop.TailCallInfo tailCallInfo;
-    //private Component.M currentMode;
-    ///*@Nullable*/ private Rule currentTemplate;
-    //private GroupIterator currentGroupIterator;
-    //private GroupIterator currentMergeGroupIterator;
-    //private RegexIterator currentRegexIterator;
+    private Component.M currentMode;
+    private Rule currentTemplate;
+    private GroupIterator currentGroupIterator;
+    private GroupIterator currentMergeGroupIterator;
+    private RegexIterator currentRegexIterator;
 
-    // From 12.0, to avoid the space-allocation costs of storing rarely-used properties
-    // as individual fields which are often null, we store them in the form of a one-way
-    // linked chain of property objects, acting as an immutable stack.
-    private ContextProperty firstProperty;
 
     private ContextOriginator origin;
     private ThreadManager threadManager = null;
 
-    //private ResourceResolver resourceResolver;
-    //private ErrorReporter errorReporter;
+    private ResourceResolver resourceResolver;
+    private ErrorReporter errorReporter;
     private Component currentComponent;
-    //XPathException currentException;
+    XPathException currentException;
 
 
     /**
@@ -114,20 +110,19 @@ public class XPathContextMajor extends XPathContextMinor {
         c.tunnelParameters = tunnelParameters;
         c.last = last;
         c.currentDestination = currentDestination;
-        c.firstProperty = firstProperty;
-//        c.currentMode = currentMode;
-//        c.currentTemplate = currentTemplate;
-//        c.currentRegexIterator = currentRegexIterator;
-//        c.currentGroupIterator = currentGroupIterator;
-//        c.currentMergeGroupIterator = currentMergeGroupIterator;
-//        c.currentException = currentException;
+        c.currentMode = currentMode;
+        c.currentTemplate = currentTemplate;
+        c.currentRegexIterator = currentRegexIterator;
+        c.currentGroupIterator = currentGroupIterator;
+        c.currentMergeGroupIterator = currentMergeGroupIterator;
+        c.currentException = currentException;
         c.caller = this;
         c.tailCallInfo = null;
         c.temporaryOutputState = temporaryOutputState;
         c.threadManager = threadManager;
         c.currentComponent = currentComponent;
-//        c.errorReporter = errorReporter;
-//        c.resourceResolver = resourceResolver;
+        c.errorReporter = errorReporter;
+        c.resourceResolver = resourceResolver;
         return c;
     }
 
@@ -148,18 +143,18 @@ public class XPathContextMajor extends XPathContextMinor {
         c.tunnelParameters = p.getTunnelParameters();
         c.last = prev.last;
         c.currentDestination = prev.currentDestination;
-        c.firstProperty = p.firstProperty;
-//        c.currentMode = p.getCurrentMode();
-//        c.currentTemplate = p.getCurrentTemplateRule();
-//        c.currentRegexIterator = p.getCurrentRegexIterator();
-//        c.currentGroupIterator = p.getCurrentGroupIterator();
-//        c.currentMergeGroupIterator = p.getCurrentMergeGroupIterator();
+        c.currentMode = p.getCurrentMode();
+        c.currentTemplate = p.getCurrentTemplateRule();
+        c.currentRegexIterator = p.getCurrentRegexIterator();
+        c.currentGroupIterator = p.getCurrentGroupIterator();
+        c.currentMergeGroupIterator = p.getCurrentMergeGroupIterator();
         c.caller = prev;
         c.tailCallInfo = null;
         c.threadManager = p.threadManager;
         c.currentComponent = p.currentComponent;
-//        c.errorReporter = p.errorReporter;
-//        c.resourceResolver = p.resourceResolver;
+        c.errorReporter = p.errorReporter;
+        c.currentException = p.currentException;
+        c.resourceResolver = p.resourceResolver;
         c.temporaryOutputState = prev.temporaryOutputState;
         return c;
     }
@@ -435,9 +430,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentMode(Component.M mode) {
-        if (mode != getCurrentMode()) {
-            firstProperty = new CurrentMode(mode, firstProperty);
-        }
+        currentMode = mode;
     }
 
     /**
@@ -448,21 +441,17 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public Component.M getCurrentMode() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentMode) {
-                return ((CurrentMode)p).mode;
+        Component.M m = currentMode;
+        if (m == null) {
+            RuleManager rm = getController().getRuleManager();
+            if (rm != null) {
+                return rm.getUnnamedMode().getDeclaringComponent();
+            } else {
+                return null;
             }
-            p = p.next;
-        }
-
-        RuleManager rm = getController().getRuleManager();
-        if (rm != null) {
-            return rm.getUnnamedMode().getDeclaringComponent();
         } else {
-            return null;
+            return m;
         }
-
     }
 
     /**
@@ -474,9 +463,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentTemplateRule(/*@Nullable*/ Rule rule) {
-        if (rule != getCurrentTemplateRule()) {
-            firstProperty = new CurrentTemplateRule(rule, firstProperty);
-        }
+        currentTemplate = rule;
     }
 
     /**
@@ -487,14 +474,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public Rule getCurrentTemplateRule() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentTemplateRule) {
-                return ((CurrentTemplateRule) p).currentRule;
-            }
-            p = p.next;
-        }
-        return null;
+        return currentTemplate;
     }
 
     /**
@@ -505,9 +485,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentGroupIterator(GroupIterator iterator) {
-        if (iterator != getCurrentGroupIterator()) {
-            firstProperty = new CurrentGroupIterator(iterator, firstProperty);
-        }
+        currentGroupIterator = iterator;
     }
 
     /**
@@ -519,14 +497,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public GroupIterator getCurrentGroupIterator() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentGroupIterator) {
-                return ((CurrentGroupIterator) p).iterator;
-            }
-            p = p.next;
-        }
-        return null;
+        return currentGroupIterator;
     }
 
     /**
@@ -537,9 +508,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentMergeGroupIterator(GroupIterator iterator) {
-        if (iterator != getCurrentMergeGroupIterator()) {
-            firstProperty = new CurrentMergeGroupIterator(iterator, firstProperty);
-        }
+        currentMergeGroupIterator = iterator;
     }
 
     /**
@@ -551,27 +520,18 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public GroupIterator getCurrentMergeGroupIterator() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentMergeGroupIterator) {
-                return ((CurrentMergeGroupIterator) p).iterator;
-            }
-            p = p.next;
-        }
-        return null;
+        return currentMergeGroupIterator;
     }
 
     /**
      * Set the current regex iterator. This supports the functionality of the regex-group()
      * function in XSLT 2.0.
      *
-     * @param currentRegexIterator the current regex iterator
+     * @param iterator the current regex iterator
      */
 
-    public void setCurrentRegexIterator(RegexIterator currentRegexIterator) {
-        if (currentRegexIterator != getCurrentRegexIterator()) {
-            firstProperty = new CurrentRegexIterator(currentRegexIterator, firstProperty);
-        }
+    public void setCurrentRegexIterator(RegexIterator iterator) {
+        currentRegexIterator = iterator;
     }
 
     /**
@@ -583,14 +543,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public RegexIterator getCurrentRegexIterator() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentRegexIterator) {
-                return ((CurrentRegexIterator) p).iterator;
-            }
-            p = p.next;
-        }
-        return null;
+        return currentRegexIterator;
     }
 
     /**
@@ -623,9 +576,7 @@ public class XPathContextMajor extends XPathContextMinor {
     }
     
     public void setResourceResolver(ResourceResolver resolver) {
-        if (resolver != getResourceResolver()) {
-            firstProperty = new CurrentResourceResolver(resolver, firstProperty);
-        }
+        resourceResolver = resolver;
     }
 
     /**
@@ -639,14 +590,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public ResourceResolver getResourceResolver() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentResourceResolver) {
-                return ((CurrentResourceResolver) p).resolver;
-            }
-            p = p.next;
-        }
-        return controller.getResourceResolver();
+        return resourceResolver == null ? controller.getResourceResolver() : resourceResolver;
     }
 
     /**
@@ -658,9 +602,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setErrorReporter(ErrorReporter reporter) {
-        if (reporter != getErrorReporter()) {
-            firstProperty = new CurrentErrorReporter(reporter, firstProperty);
-        }
+        errorReporter = reporter;
     }
 
     /**
@@ -674,14 +616,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public ErrorReporter getErrorReporter() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentErrorReporter) {
-                return ((CurrentErrorReporter) p).errorReporter;
-            }
-            p = p.next;
-        }
-        return controller.getErrorReporter();
+        return errorReporter == null ? controller.getErrorReporter() : errorReporter;
     }
 
     /**
@@ -691,9 +626,7 @@ public class XPathContextMajor extends XPathContextMinor {
      */
 
     public void setCurrentException(XPathException exception) {
-        if (exception != getCurrentException()) {
-            this.firstProperty = new CurrentException(exception, firstProperty);
-        }
+        currentException = exception;
     }
 
     /**
@@ -704,14 +637,7 @@ public class XPathContextMajor extends XPathContextMinor {
 
     @Override
     public XPathException getCurrentException() {
-        ContextProperty p = firstProperty;
-        while (p != null) {
-            if (p instanceof CurrentException) {
-                return ((CurrentException) p).exception;
-            }
-            p = p.next;
-        }
-        return null;
+        return currentException;
     }
 
     /**
@@ -768,82 +694,7 @@ public class XPathContextMajor extends XPathContextMinor {
         }
     }
 
-    private abstract static class ContextProperty {
-        public ContextProperty next;
-//        public ContextProperty() {
-//            Instrumentation.count(this.getClass().getName());
-//        }
-    }
 
-    private static class CurrentRegexIterator extends ContextProperty {
-        public RegexIterator iterator;
-        public CurrentRegexIterator(RegexIterator iterator, ContextProperty next) {
-            this.iterator = iterator;
-            this.next = next;
-        }
-    }
 
-    private static class CurrentGroupIterator extends ContextProperty {
-        public GroupIterator iterator;
-
-        public CurrentGroupIterator(GroupIterator iterator, ContextProperty next) {
-            this.iterator = iterator;
-            this.next = next;
-        }
-    }
-
-    private static class CurrentMergeGroupIterator extends ContextProperty {
-        public GroupIterator iterator;
-
-        public CurrentMergeGroupIterator(GroupIterator iterator, ContextProperty next) {
-            this.iterator = iterator;
-            this.next = next;
-        }
-    }
-
-    private static class CurrentTemplateRule extends ContextProperty {
-        public Rule currentRule;
-
-        public CurrentTemplateRule(Rule currentRule, ContextProperty next) {
-            this.currentRule = currentRule;
-            this.next = next;
-        }
-    }
-
-    private static class CurrentMode extends ContextProperty {
-        public Component.M mode;
-
-        public CurrentMode(Component.M mode, ContextProperty next) {
-            this.mode = mode;
-            this.next = next;
-        }
-    }
-
-    private static class CurrentException extends ContextProperty {
-        public XPathException exception;
-
-        public CurrentException(XPathException exception, ContextProperty next) {
-            this.exception = exception;
-            this.next = next;
-        }
-    }
-
-    private static class CurrentErrorReporter extends ContextProperty {
-        public ErrorReporter errorReporter;
-
-        public CurrentErrorReporter(ErrorReporter errorReporter, ContextProperty next) {
-            this.errorReporter = errorReporter;
-            this.next = next;
-        }
-    }
-
-    private static class CurrentResourceResolver extends ContextProperty {
-        public ResourceResolver resolver;
-
-        public CurrentResourceResolver(ResourceResolver resolver, ContextProperty next) {
-            this.resolver = resolver;
-            this.next = next;
-        }
-    }
 }
 
