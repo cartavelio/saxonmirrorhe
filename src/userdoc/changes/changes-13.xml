@@ -241,8 +241,8 @@
         
         <p>The new function <code>fn:function-annotations</code> is implemented.</p>
         
-        <p>The function <code>fn:codepoints-to-string</code> is now variadic: you can write
-        <code>codepoints-to-string(13, 10)</code> instead of <code>codepoints-to-string((13, 10))</code>.</p>
+        <!--<p>The function <code>fn:codepoints-to-string</code> is now variadic: you can write
+        <code>codepoints-to-string(13, 10)</code> instead of <code>codepoints-to-string((13, 10))</code>.</p>-->
         
         <p>The functions <code>fn:parse-xml</code> and <code>fn:parse-xml-fragment</code> now accept
         an <code>options</code> parameter.</p>
@@ -262,6 +262,12 @@
         
         <p>The rules for the <code>number-parser</code> callback in <code>fn:parse-json</code> and 
             <code>fn:json-doc</code> have been changed to reflect changes in the specification.</p>
+        
+        <p>The <code>xml-to-json</code> function is changed so that numbers in the input are output with
+        their lexical representation unchanged, other than changes (such as removing leading zeroes or
+        plus signs) needed to make the output valid JSON. In particular, large integers are no longer
+        output using exponential notation. The <code>number-formatter</code> option, which was a previous
+        attempt to solve this problem, has been dropped.</p>
         
         <p>In decimal format properties, it is now possible to set composite values for some properties,
         for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
@@ -291,6 +297,8 @@
         
         <p>The adaptive serialization method has changed to output maps as <code>{...}</code>
         rather than <code>map{...}</code>.</p>
+        
+        <p>In XSLT, the <code>xsl:sequence</code> instruction now allows an <code>@as</code> attribute.</p>
         
         <h2>Dropped experimental features</h2>
         
@@ -326,6 +334,9 @@
             <li><p><code>saxon:is-NaN</code> is superseded by <code>fn:is-NaN</code>.</p></li>
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>.</p></li>
         </ul>
+        
+        <p>The <code>saxon:array</code> and <code>saxon:array-member</code> instructions are dropped
+        in favour of their XSLT 4.0 counterparts, <code>xsl:array</code> and <code>xsl:array-member</code>.</p>
         
         <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
         the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the
