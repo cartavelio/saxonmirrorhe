@@ -433,6 +433,8 @@ TODO: rethink redefines and override
     
     <category name="xquery40">
         
+        <p>See also the changes for XPath 4.0, which apply equally to XQuery.</p>
+        
         <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
             <code>declare item-type</code>.</p>
         
@@ -447,8 +449,8 @@ TODO: rethink redefines and override
         <ul>
             <li><p>Item type declarations in XQuery have restrictions:</p>
                 <ul>
-                    <li><p>In XQuery, forwards references to named item type declarations are not allowed.</p></li>
-                    <li><p>In XQuery, self-references within named item type declarations are not allowed.</p></li>
+                    <li><p>Forwards references to named item type declarations are not allowed.</p></li>
+                    <li><p>Self-references within named item type declarations are not allowed.</p></li>
                     <li><p>In consequence, the declared result type of the function <code>fn:random-number-generator</code>
                         is an approximation to the type defined in the specification.</p></li>
                 </ul>
@@ -462,10 +464,15 @@ TODO: rethink redefines and override
     
     <category name="xpath40">
         
+        <h3>Data model changes</h3>
+        
+        <p>Maps are now ordered: for example, if maps are produced by parsing JSON, the order of entries
+           will be preserved when the map is serialized.</p>
+        
         <p>The XDM 4.0 specification changes the rules for maps so that 
             <code>xs:base64Binary</code> and <code>xs:hexBinary</code> become mutually comparable.
             This has the consequence that <code>xs:base64Binary</code> and <code>xs:hexBinary</code> representations
-            of the same value (for example <code>xs:base64Binary("")</code> and <code>xs:hexBinary("")</code>
+            of the same value (for example <code>xs:base64Binary("")</code> and <code>xs:hexBinary("")</code>)
             can no longer coexist in the same map in 4.0, whereas they could coexist in 3.1. This
             creates a problem because Saxon 13 supports both 3.1 and 4.0 in the same product, 
             and allows maps to be passed from 3.1 to 4.0 applications and vice versa. 
@@ -490,8 +497,25 @@ TODO: rethink redefines and override
         <p>Function items now have an identity property, enabling them to be compared with
             <code>fn:deep-equal()</code>.</p>
         
-        <p>A <code>URIQualifiedName</code> may now supply a prefix as well as a URI and local name,
-            in the format <code>Q{uri}prefix:local</code>.</p>
+        <p>The handling of year zero in dates (specifically, types <code>xs:dateTime</code>,
+        <code>xs:date</code>, <code>xs:gYear</code>, and <code>xs:gYearMonth</code>) has changed.
+        Year zero is now allowed in all cases except when validating a source document against
+        an XSD schema when XSD 1.0 processing has been requested (the default is XSD 1.1). In this
+        situation (XSD 1.0 validation), year zero is rejected, but negative years have the XSD 1.1
+        (and ISO 8601) semantics: that is, year -0001 ends one year before the start of year +0001. 
+        This only affects applications doing arithmetic on dates. This change is consistent with
+        changes in the draft 4.0 specifications, but it has been made regardless whether 4.0 processing
+        is enabled in Saxon. The change is also conformant with XPath 3.1, which states
+        that the results of operations on dates that cross the year 0000 are implementation-defined.</p>
+        
+        <p>The rules for casting from <code>xs:string</code> when 4.0 is enabled always follow the XSD 1.1 rules.
+        This means that when casting to <code>xs:date</code> or <code>xs:dateTime</code>,
+        year zero is accepted regardless of whether the selected XSD version in the <code>Configuration</code> 
+        is 1.0 or 1.1. Similarly, the lexical form <code>+INF</code> (for positive infinity) is always
+        accepted when casting to <code>xs:double</code> or <code>xs:float</code>. The XSD 1.0 rules continue
+        to be used for casting if (a) 4.0 is not enabled, and (b) XSD 1.0 processing is selected.</p>
+        
+       
         
         <p>XPath expressions can be preceded by namespace declarations, allowing namespace
             prefixes to be bound within the XPath expression, rather than relying entirely on the host
@@ -537,14 +561,16 @@ TODO: rethink redefines and override
             <code>type(alias)</code>.</p>
         
         <p>Choice item types are implemented, for example the required type of a parameter in a function
-            signature can be <code>(map(*) | array(*))</code>. The local union type syntax 
+            signature can be <code>(map(*) | array(*))</code>, indicating that the parameter accepts 
+            either a map or an array. The parentheses are mandatory.
+            The local union type syntax 
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
             is dropped.</p>
         
-        <p>The ItemType syntax <code>union(a, b)</code> has been dropped from the 4.0 specification,
-            but remains supported in Saxon for the time being. The replacement syntax is <code>(a|b)</code>
-            (the parentheses are mandatory). This allows, for example, <code>as="(map(*)|array(*))"</code>
-            for a function or variable that accepts either a map or an array.</p>
+        
+        
+        <p>A <code>URIQualifiedName</code> may now supply a prefix as well as a URI and local name,
+            in the format <code>Q{uri}prefix:local</code>.</p>
         
         <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (PR 1501)</p>
         
@@ -560,10 +586,7 @@ TODO: rethink redefines and override
             <li><p>TODO: is that still the case?</p></li>
         </ul>
         
-        <p>Saxon's implementation of the coercion rules (formerly known as the "function conversion rules") differs from
-            the current 4.0 specification in the case where the required type is a GNode or JNode. In this situation Saxon will automatically
-            wrap a supplied map or array in a root JNode. The specification requires this implicit conversion only for the
-            left-hand operand of the "/" operator.</p>
+        
         
     </category>
     
