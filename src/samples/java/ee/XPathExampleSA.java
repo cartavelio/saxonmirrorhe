@@ -110,18 +110,15 @@ public class XPathExampleSA implements XPathVariableResolver, XPathFunctionResol
         }
 
         // Find the titles matching the specified criteria
-        List matchedLines = (List)findBooks.evaluate(doc, XPathConstants.NODESET);
+        List<NodeInfo> matchedLines = (List<NodeInfo>)findBooks.evaluate(doc, XPathConstants.NODESET);
 
         // Process these lines
         boolean found = false;
         if (matchedLines != null) {
-            for (Iterator iter = matchedLines.iterator(); iter.hasNext();) {
+            for (NodeInfo book : matchedLines) {
 
                 // Note that we have found at least one line
                 found = true;
-
-                // Get the next matching title
-                NodeInfo book = (NodeInfo)iter.next();
 
                 // Display the title
                 System.out.println(book.getStringValue());
