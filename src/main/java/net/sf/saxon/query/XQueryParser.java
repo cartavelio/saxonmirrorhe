@@ -7,6 +7,7 @@
 
 package net.sf.saxon.query;
 
+import com.saxonica.xsltextn.instruct.DeepUpdate;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
@@ -3488,6 +3489,35 @@ public class XQueryParser extends XPathParser {
         t.lookAhead();      // always done manually after an RCURLY
         nextToken();
         return makeTracer(exp, null);
+    }
+
+    /**
+     * Parse an update map|array Expression.
+     *
+     * @return the parsed expression; except that this version of the method always
+     * throws an exception
+     * @throws XPathException if a static error is found
+     */
+
+    /*@NotNull*/
+    protected Expression parseDeepUpdateExpression() throws XPathException {
+        if (!allowXPath40Syntax) {
+            grumble("update map/array syntax requires 4.0 to be enabled");
+        }
+        boolean isMap = t.currentToken == Token.UPDATE_MAP;
+        nextToken();
+        Expression rootExpr = parseExprSingle();
+        if (!isKeyword("replace")) {
+            grumble("expected keyword 'replace'");
+        }
+        nextToken();
+        Expression selectExpr = parseExprSingle();
+        if (t.currentToken != Token.WITH && !isKeyword("with")) {
+            grumble("expected keyword 'with");
+        }
+        nextToken();
+        Expression actionExpr = parseExprSingle();
+        return new DeepUpdate(rootExpr, selectExpr, actionExpr);
     }
 
     /**

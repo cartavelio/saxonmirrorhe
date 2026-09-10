@@ -540,6 +540,9 @@ public abstract class Token {
     public static final int DECLARE_ITEM_TYPE = 144;
     public static final int SWITCH_CASE = 145;
 
+    public static final int UPDATE_MAP = 146;
+    public static final int UPDATE_ARRAY = 147;
+
     /**
      * semicolon separator
      */
@@ -827,6 +830,8 @@ public abstract class Token {
         mapDouble("first into", FIRST_INTO);
         mapDouble("last into", LAST_INTO);
         mapDouble("switch case", SWITCH_CASE);
+        mapDouble("update map", UPDATE_MAP);
+        mapDouble("update array", UPDATE_ARRAY);
     }
 
     private static void mapDouble(String doubleKeyword, int token) {

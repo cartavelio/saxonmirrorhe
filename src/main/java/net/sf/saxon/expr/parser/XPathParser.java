@@ -47,7 +47,8 @@ import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
-import net.sf.saxon.z.*;
+import net.sf.saxon.z.IntPredicateProxy;
+import net.sf.saxon.z.IntToIntHashMap;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -848,6 +849,9 @@ public class XPathParser {
             case Token.VALIDATE_LAX:
             case Token.VALIDATE_TYPE:
                 return parseValidateExpression();
+            case Token.UPDATE_MAP:
+            case Token.UPDATE_ARRAY:
+                return parseDeepUpdateExpression();
             case Token.PRAGMA:
                 return parseExtensionExpression();  // XQuery only
             case Token.KEYWORD_CURLY:
@@ -1243,6 +1247,22 @@ public class XPathParser {
     /*@NotNull*/
     protected Expression parseValidateExpression() throws XPathException {
         grumble("validate{} expressions are not allowed in XPath");
+        return new ErrorExpression();
+    }
+
+    /**
+     * Parse an update map|array Expression.
+     * This construct is XQuery-only, so the XPath version of this
+     * method throws an error unconditionally
+     *
+     * @return the parsed expression; except that this version of the method always
+     * throws an exception
+     * @throws XPathException if a static error is found
+     */
+
+    /*@NotNull*/
+    protected Expression parseDeepUpdateExpression() throws XPathException {
+        grumble("update map/array expressions are not allowed in XPath");
         return new ErrorExpression();
     }
 
