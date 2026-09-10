@@ -125,8 +125,8 @@ public class XSIAttributeHandler extends ValidatingFilter {
             if (xsiTypeValue != null) {
                 xsiType = processXsiType(xsiTypeValue, namespaces);
             }
-            if (!fullSchemaLocation.isEmpty()) {
-                processXsiSchemaLocation(fullSchemaLocation, location);
+            if (fullSchemaLocation.length() > 0) {
+                processXsiSchemaLocation(fullSchemaLocation.toString(), location);
             }
             for (AttributeInfo att : attributes) {
                 NodeName attName = att.getNodeName();

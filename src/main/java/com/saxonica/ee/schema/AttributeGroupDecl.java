@@ -730,8 +730,8 @@ public final class AttributeGroupDecl extends SchemaStructure
         for (AttributeUse att : getAttributeUses()) {
             att.serialize(serializer);
         }
-        if (getAttributeWildcard(null) != null) {
-            getAttributeWildcard(null).serialize(serializer);
+        if (getAttributeWildcard() != null) {
+            getAttributeWildcard().serialize(serializer);
         }
     }
 

@@ -2756,7 +2756,7 @@ public class UserComplexType extends UserDefinedType
                 IntIterator iter = children.iterator();
                 iter.hasNext();
                 int fp = iter.next();
-                int card = getElementParticleCardinality(fp, null, true);
+                int card = getElementParticleCardinality(fp, schema, true);
                 if (Cardinality.allowsMany(card)) {
                     return (allowsAttributes(schema) ? "list-plus" : "list") + "/" + fp;
                 } else {

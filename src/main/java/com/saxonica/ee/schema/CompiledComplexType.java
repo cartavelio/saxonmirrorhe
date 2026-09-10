@@ -472,7 +472,7 @@ public class CompiledComplexType {
         if (card != 0) {
             return card;
         }
-        AttributeWildcard awild = ag.getAttributeWildcard(null);
+        AttributeWildcard awild = ag.getAttributeWildcard();
         if (awild == null) {
             return StaticProperty.EMPTY;
         }
@@ -497,7 +497,7 @@ public class CompiledComplexType {
         if (!ag.getAttributeUses().isEmpty()) {
             return true;
         }
-        if (ag.getAttributeWildcard(null) != null) {
+        if (ag.getAttributeWildcard() != null) {
             return true;
         }
         for (SchemaType ext : schema.getExtensionsOfType(type)) {
