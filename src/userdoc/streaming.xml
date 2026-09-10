@@ -485,10 +485,10 @@ satisfies number($t/@value) lt 0
       <samp><![CDATA[<xsl:variable name="contains-debit" as="xs:boolean">
   <xsl:source-document streamable="yes" href="big-transaction-file.xml">
     <xsl:iterate select=".//transaction">
+      <xsl:on-completion select="false()"/>
       <xsl:if test="@value lt 0">
         <xsl:break select="true()"/>
-      </xsl:if>
-      <xsl:on-completion select="false()"/>
+      </xsl:if>     
     </xsl:iterate>
   </xsl:source-document>
 </xsl:variable>
