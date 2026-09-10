@@ -36,6 +36,7 @@ public abstract class SequenceExtent implements GroundedValue {
      * @param iter The supplied sequence of items. The returned sequence will contain all
      *             items delivered by repeated calls on next() on this iterator, and the
      *             iterator will be consumed by calling the method.
+     * @return a sequence of the remaining items
      * @throws UncheckedXPathException if reading the items using the
      *                                           SequenceIterator raises an error
      */

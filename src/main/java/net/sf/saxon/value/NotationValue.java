@@ -30,7 +30,8 @@ public final class NotationValue extends QualifiedNameValue {
      *                  default prefix.
      * @param uri       The namespace part of the QName. Use null or "" to represent the null namespace.
      * @param localName The local part of the QName
-     * @param check   Used for request checking names against XML 1.0 or XML 1.1 syntax rules
+     * @param check     Used for request checking names against XML 1.0 or XML 1.1 syntax rules
+     * @throws XPathException if an error is detected
      */
 
     public NotationValue(String prefix, String uri, String localName, boolean check) throws XPathException {

@@ -39,6 +39,9 @@ public abstract class AbstractBlockIterator implements SequenceIterator {
 
     /**
      * Initializer for use from bytecode
+     *
+     * @param size    the size
+     * @param context the XPath context
      */
 
     public void init(int size, XPathContext context) {

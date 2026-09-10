@@ -108,6 +108,7 @@ public class ObjectValue<T> implements AnyExternalObject {
     /**
      * Display the type name for use in error messages
      *
+     * @param value a Java object
      * @return the type name. This will be in the form "java-type:" followed by the full class name of the
      * wrapped Java object.
      */

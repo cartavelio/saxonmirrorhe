@@ -214,6 +214,7 @@ public interface XPathContext {
      * @param slotNumber  Slot number of the parameter within the stack frame of the called template
      * @param isTunnel    True if a tunnel parameter is required, else false
      * @return ParameterSet.NOT_SUPPLIED, ParameterSet.SUPPLIED, or ParameterSet.SUPPLIED_AND_CHECKED
+     * @throws XPathException if an error is detected
      */
 
     int useLocalParameter(

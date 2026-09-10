@@ -62,6 +62,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      * @param config the Saxon Configuration
      * @param value   a String containing the value
      * @param baseURI the base URI of the document node
+     * @return the result tree fragment, or an empty document node
      */
 
     public static NodeInfo makeTextFragment(Configuration config, UnicodeString value, String baseURI) {

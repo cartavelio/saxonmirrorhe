@@ -55,6 +55,7 @@ public class StringValue extends AtomicValue {
     /**
      * Construct an instance that wraps a supplied {@code UnicodeString}, with the default
      * type xs:string
+     * @param content the {@code UnicodeString} to wrap
      */
 
     public StringValue(UnicodeString content) {
@@ -63,6 +64,8 @@ public class StringValue extends AtomicValue {
 
     /**
      * Construct an instance that wraps a supplied {@code UnicodeString}, with a supplied atomic type
+     * @param content the {@code UnicodeString} to wrap
+     * @param type    the requested atomic type
      */
 
     public StringValue(UnicodeString content, AtomicType type) {
@@ -398,6 +401,7 @@ public class StringValue extends AtomicValue {
 
         /**
          * Create an iterator over a string
+         * @param value the string
          */
 
         public CharacterIterator(CharSequence value) {
