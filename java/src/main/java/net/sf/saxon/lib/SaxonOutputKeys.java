@@ -404,6 +404,9 @@ public class SaxonOutputKeys {
      */
     public static boolean isXhtmlHtmlVersion5(Properties properties) {
         String htmlVersion = properties.getProperty(SaxonOutputKeys.HTML_VERSION);
+        if (htmlVersion == null) {
+            return true; // Default to 5
+        }
         try {
             return htmlVersion != null &&
                     ((DecimalValue)BigDecimalValue.makeDecimalValue(htmlVersion, false).asAtomic())
