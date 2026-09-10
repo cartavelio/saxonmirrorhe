@@ -13,8 +13,12 @@ void raise_py_error()
   } 
   catch (SaxonApiException& e) {
       const char * errorMessage = e.getMessageWithErrorCode();
+      if(errorMessage == nullptr) {
+        PyErr_SetString(pysaxonapierror, "Unknown exception found");
+      } else {
+        PyErr_SetString(pysaxonapierror, errorMessage);
+      }
 
-      PyErr_SetString(pysaxonapierror, errorMessage);
 
    // PyErr_SetString(PyExc_RuntimeError, msg);
   }  catch (const std::exception& e) {

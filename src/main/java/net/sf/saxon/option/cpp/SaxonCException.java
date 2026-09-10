@@ -132,14 +132,22 @@ public class SaxonCException  {
 
 
         for(Object item : errorList) {
-            //System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message: "+((XmlProcessingError)item).getMessage());
-            message+=(((XmlProcessingError)item).getMessage() + "\n");
-            //System.err.println("Java DEBUG j_getCombinedStaticErrorMessages message-1: "+message);
+            XmlProcessingError error = (XmlProcessingError)item;
+            if(error.getErrorCode() == null) {
+                message+=(((XmlProcessingError)item).getMessage() + "\n");
+            } else {
+                message+=(error.getErrorCode().getLocalName() + ": " +((XmlProcessingError)item).getMessage() + "\n");
+            }
+
         }
 
+        if(message.isEmpty()) {
+            return j_getErrorMessageWithErrorCode(thread, alloc);
+        } else {
+            CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
+            return a;
+        }
 
-        CCharPointer a = SaxonCAPI.stringToNative2(alloc, message);
-        return a;
     }
 
 

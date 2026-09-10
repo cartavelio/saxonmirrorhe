@@ -2508,7 +2508,25 @@ void testSaxSourceDTDValidation(SaxonProcessor * proc, sResultCount *sresult) {
 
 
 
+}
+
+void testTestAssociatedError(SaxonProcessor *proc, Xslt30Processor *trans, sResultCount *sresult){
+    try {
+        XsltExecutable * executable = trans->compileFromAssociatedFile("../data/trax/xml/foo.xml");
+        sresult->failure++;
+        sresult->failureList.push_back("testTestAssociatedError");
+    }catch(SaxonApiException &e) {
+        const char * emessage = e.getMessage();
+        if(emessage != nullptr) {
+            cerr << "exception=" << emessage << endl;
+        } else {
+            cerr<< "exception is nullptr"<<endl;
+        }
+        sresult->success++;
     }
+
+
+}
 
 
 static int NUM_THREADS = 10;
@@ -2638,6 +2656,10 @@ int main(int argc, char* argv[]) {
     cout<<endl<<"============================================================="<<endl<<endl;
 
     exampleSimple1Err(trans, sresult);
+
+    cout<<endl<<"============================================================="<<endl<<endl;
+
+    testTestAssociatedError(processor, trans, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
 
