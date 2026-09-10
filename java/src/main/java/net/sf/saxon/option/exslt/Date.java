@@ -14,10 +14,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
@@ -874,12 +871,29 @@ public final class Date {
      */
 
     /*@Nullable*/
+
+    /**
+     * Add two duration values, according to the rules for the add-duration() and sum() functions
+     *
+     * @param dv0 the first duration
+     * @param dv1 the second duration
+     * @return the sum of the two durations, or null if they are not summable (e.g. P1Y + -P1D)
+     */
+
+    /*@Nullable*/
     private static DurationValue addDurationValues(DurationValue dv0, DurationValue dv1) {
-        try {
-            return dv0.add(dv1);
-        } catch (XPathException e) {
+        int months = dv0.getTotalMonths() + dv1.getTotalMonths();
+        BigDecimal seconds = dv0.getTotalSeconds().add(dv1.getTotalSeconds());
+        if (months == 0) {
+            return new DayTimeDurationValue(seconds);
+        }
+        if (seconds.equals(BigDecimal.ZERO)) {
+            return new YearMonthDurationValue(months, BuiltInAtomicType.YEAR_MONTH_DURATION);
+        }
+        if (Integer.signum(months) != seconds.signum()) {
             return null;
         }
+        return new DurationValue(months, seconds,BuiltInAtomicType.DURATION);
     }
 
     /**
@@ -996,9 +1010,13 @@ public final class Date {
      * @return the duration as a string in ISO format
      */
 
-    public static String duration(double seconds) {
-        DayTimeDurationValue v = new DayTimeDurationValue(new BigDecimal(seconds), BuiltInAtomicType.DAY_TIME_DURATION);
-        return v.getStringValue();
+    public static String duration(NumericValue seconds) {
+        try {
+            DayTimeDurationValue v = new DayTimeDurationValue(seconds.getDecimalValue(), BuiltInAtomicType.DAY_TIME_DURATION);
+            return v.getStringValue();
+        } catch (ValidationException e) {
+            return "";
+        }
     }
 
     /**
