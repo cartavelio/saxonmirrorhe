@@ -160,6 +160,7 @@ void XsltExecutable::setInitialTemplateParameters(
     std::map<std::string, XdmValue *> _itparameters, bool _tunnel) {
   for (std::map<std::string, XdmValue *>::iterator itr = _itparameters.begin();
        itr != _itparameters.end(); itr++) {
+       
     parameters["itparam:" + std::string(itr->first)] = itr->second;
     itr->second->incrementRefCount();
   }
