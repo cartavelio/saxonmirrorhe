@@ -224,8 +224,9 @@ public class DocumentInstr extends ParentNodeConstructor {
     public Expression copy(RebindingMap rebindings) {
         DocumentInstr doc = new DocumentInstr(textOnly, constantText);
         ExpressionTool.copyLocationInfo(this, doc);
+        Schema schema = getValidationOptions().getSchema();
         doc.setContentExpression(getContentExpression().copy(rebindings));
-        doc.setValidationAction(getValidationAction(), getSchemaType());
+        doc.setValidationAction(schema, getValidationAction(), getSchemaType());
         return doc;
     }
 

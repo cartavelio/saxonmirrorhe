@@ -32,7 +32,7 @@ public abstract class ParentNodeConstructor extends Instruction
             new OperandRole(0, OperandUsage.ABSORPTION, SequenceType.ANY_SEQUENCE);
 
     protected Operand contentOp;
-    private ParseOptions validationOptions = null;
+    private ParseOptions validationOptions = new ParseOptions();
 
     /**
      * Flag set to true if validation=preserve and no schema type supplied for validation; also true
@@ -78,13 +78,14 @@ public abstract class ParentNodeConstructor extends Instruction
     /**
      * Set the validation mode for the new document or element node
      *
+     * @param schema     the schema to be used for validation (can be null if not validating)
      * @param mode       the validation mode, for example {@link Validation#STRICT}
      * @param schemaType the required type (for validation by type). Null if not
      *                   validating by type
      */
 
 
-    public void setValidationAction(int mode, /*@Nullable*/ SchemaType schemaType) {
+    public void setValidationAction(Schema schema, int mode, /*@Nullable*/ SchemaType schemaType) {
         preservingTypes = mode == Validation.PRESERVE && schemaType == null;
         if (!preservingTypes) {
             if (validationOptions == null) {
@@ -96,6 +97,7 @@ public abstract class ParentNodeConstructor extends Instruction
                 validationOptions = validationOptions.withSchemaValidationMode(mode)
                         .withTopLevelType(schemaType);
             }
+            validationOptions = validationOptions.withSchema(schema);
         }
     }
 
@@ -214,7 +216,7 @@ public abstract class ParentNodeConstructor extends Instruction
                 }
             }
         } else {
-            setValidationAction(Validation.STRIP, null);
+            setValidationAction(null, Validation.STRIP, null);
             setNoNeedToStrip();
         }
         return this;

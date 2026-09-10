@@ -53,17 +53,18 @@ public class Copy extends ElementCreator {
      *
      * @param copyNamespaces    true if namespace nodes are to be copied when copying an element
      * @param inheritNamespaces true if child elements are to inherit the namespace nodes of their parent
+     * @param schema
      * @param schemaType        the Schema type against which the content is to be validated
      * @param validation        the schema validation mode
      */
 
     public Copy(boolean copyNamespaces,
                 boolean inheritNamespaces,
-                SchemaType schemaType,
+                Schema schema, SchemaType schemaType,
                 int validation) {
         this.copyNamespaces = copyNamespaces;
         this.bequeathNamespacesToChildren = inheritNamespaces;
-        setValidationAction(validation, schemaType);
+        setValidationAction(schema, validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
     }
 
@@ -156,8 +157,9 @@ public class Copy extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
+        Schema schema = getValidationOptions().getSchema();
         Copy copy = new Copy(
-                copyNamespaces, bequeathNamespacesToChildren, getSchemaType(), getValidationAction());
+                copyNamespaces, bequeathNamespacesToChildren, schema, getSchemaType(), getValidationAction());
         ExpressionTool.copyLocationInfo(this, copy);
         copy.setContentExpression(getContentExpression().copy(rebindings));
         copy.resultItemType = resultItemType;

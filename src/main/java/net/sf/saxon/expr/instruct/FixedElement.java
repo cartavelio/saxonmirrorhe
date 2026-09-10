@@ -54,6 +54,7 @@ public class FixedElement extends ElementCreator {
      *                                    Supply an empty array if none are required.
      * @param inheritNamespacesToChildren true if the children of this element inherit its namespaces
      * @param inheritNamespacesFromParent true if this element inherits namespaces from its parent
+     * @param schema
      * @param schemaType                  Type annotation for the new element node
      * @param validation                  Validation mode to be applied, for example STRICT, LAX, SKIP
      */
@@ -61,13 +62,13 @@ public class FixedElement extends ElementCreator {
                         NamespaceMap namespaceBindings,
                         boolean inheritNamespacesToChildren,
                         boolean inheritNamespacesFromParent,
-                        SchemaType schemaType,
+                        Schema schema, SchemaType schemaType,
                         int validation) {
         this.elementName = elementName;
         this.namespaceBindings = namespaceBindings;
         this.bequeathNamespacesToChildren = inheritNamespacesToChildren;
         this.inheritNamespacesFromParent = inheritNamespacesFromParent;
-        setValidationAction(validation, schemaType);
+        setValidationAction(schema, validation, schemaType);
         preservingTypes = schemaType == null && validation == Validation.PRESERVE;
     }
 
@@ -163,8 +164,9 @@ public class FixedElement extends ElementCreator {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
+        Schema schema = getValidationOptions().getSchema();
         FixedElement fe = new FixedElement(elementName, namespaceBindings, bequeathNamespacesToChildren,
-                                           inheritNamespacesFromParent, getSchemaType(), getValidationAction());
+                                           inheritNamespacesFromParent, schema, getSchemaType(), getValidationAction());
         fe.setContentExpression(getContentExpression().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, fe);
         return fe;
