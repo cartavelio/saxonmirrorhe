@@ -344,5 +344,66 @@ namespace SaxonCS_NUnit
             }
         }
 
+        [Test]
+        public void testExternalObjectParam() {
+
+            string xslt =
+           @"<xsl:transform version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
+           @" xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns:ext='http://www.ctk.cz/mrs/extensions/'>" +
+           @"<xsl:output method='text'/>" +
+           @"<xsl:param name='pgconn' required='yes'/>" +
+           @"<xsl:template name = 'xsl:initial-template'>" +
+           @"<xsl:sequence select='ext:testFunc($pgconn)'/>" +
+           @"</xsl:template>" +
+           @"</xsl:transform>";
+
+            Processor processor = new Processor(true);
+            processor.RegisterExtensionFunction(new TestFunc());
+            XsltCompiler comp = processor.NewXsltCompiler();
+            Xslt30Transformer transformer = comp.Compile(new StringReader(xslt)).Load30();
+            var p = new Dictionary<QName, XdmValue>();
+            NpgsqlConnection pgconn = new NpgsqlConnection();
+            p.Add(new QName("pgconn"), new XdmExternalObject<NpgsqlConnection>(pgconn));
+            transformer.SetStylesheetParameters(p);
+            Serializer serializer = processor.NewSerializer();
+            serializer.OutputWriter = Console.Out;
+            serializer.SetOutputProperty(Serializer.INDENT, "yes");
+            transformer.CallTemplate(null, serializer);
+
+        }
     }
+
+    class TestFunc : ExtensionFunctionDefinition
+    {
+
+        public override QName FunctionName => new QName("http://www.ctk.cz/mrs/extensions/", "testFunc");
+        public override int MinimumNumberOfArguments => 1;
+        public override int MaximumNumberOfArguments => 1;
+        public override XdmSequenceType[] ArgumentTypes =>
+                new XdmSequenceType[] { new XdmSequenceType(XdmAnyItemType.Instance, ' ') };
+
+        public override XdmSequenceType ResultType(XdmSequenceType[] ArgumentTypes) =>
+            new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_STRING), ' ');
+        public override bool TrustResultType => true;
+
+        public override ExtensionFunctionCall MakeFunctionCall()
+        {
+            return new TestFuncCall();
+        }
+
+    }
+
+    class TestFuncCall : ExtensionFunctionCall
+    {
+        public override XdmValue Call(XdmValue[] arguments, DynamicContext context)
+        {
+            var arg = (XdmExternalObject<NpgsqlConnection>)arguments[0][0];
+            NpgsqlConnection pgconn = arg.GetObject();
+            return new XdmAtomicValue("OK");
+        }
+    }
+    
+    public class NpgsqlConnection {}
+
+
 }

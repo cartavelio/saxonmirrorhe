@@ -195,7 +195,7 @@ namespace SaxonCS_NUnit {
         [Test]
         public static void testWriteXdmValue() {
             try {
-                Processor proc = new Processor(false);
+                Processor proc = new Processor();
                 StringReader sr = new StringReader("<doc><e>text</e></doc>");
                 DocumentBuilder builder = proc.NewDocumentBuilder();
                 XdmNode node = builder.Build(sr);
