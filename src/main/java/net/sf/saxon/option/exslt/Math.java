@@ -28,6 +28,8 @@ public abstract class Math {
 
     /**
      * Get the maximum numeric value of the string-value of each of a set of nodes
+     * @param context the XPath dynamic context
+     * @param nsv the values whose maximum is required
      */
 
     public static double max(XPathContext context, SequenceIterator nsv) throws XPathException {
@@ -50,6 +52,8 @@ public abstract class Math {
 
     /**
      * Get the minimum numeric value of the string-value of each of a set of nodes
+     * @param context the XPath dynamic context
+     * @param nsv the values whose minimum is required
      */
 
     public static double min(XPathContext context, SequenceIterator nsv) throws XPathException {
@@ -73,6 +77,8 @@ public abstract class Math {
     /**
      * Get the items with maximum numeric value of the string-value of each of a sequence of items.
      * The items are returned in the order of the original sequence.
+     * @param context the XPath dynamic context
+     * @param nsv the input sequence
      */
 
     public static Sequence highest(XPathContext context, SequenceIterator nsv) throws XPathException {
@@ -107,6 +113,8 @@ public abstract class Math {
     /**
      * Get the items with minimum numeric value of the string-value of each of a sequence of items
      * The items are returned in the order of the original sequence.
+     * @param context the XPath dynamic context
+     * @param nsv the input sequence
      */
 
     public static Sequence lowest(XPathContext context, SequenceIterator nsv) throws XPathException {
@@ -139,6 +147,8 @@ public abstract class Math {
 
     /**
      * Get the absolute value of a numeric value (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double abs(double x) {
@@ -147,6 +157,8 @@ public abstract class Math {
 
     /**
      * Get the square root of a numeric value (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double sqrt(double x) {
@@ -201,6 +213,9 @@ public abstract class Math {
 
     /**
      * Get a named constant to a given precision  (SStL)
+     * @param context the XPath dynamic context
+     * @param name the name of the constant
+     * @param precision the required precision
      */
 
     public static double constant(XPathContext context, /*@NotNull*/ String name, double precision) throws XPathException {
@@ -233,6 +248,8 @@ public abstract class Math {
 
     /**
      * Get the logarithm of a numeric value (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double log(double x) {
@@ -241,6 +258,7 @@ public abstract class Math {
 
     /**
      * Get a random numeric value (SStL)
+     * @return the result
      */
 
     public static double random() {
@@ -249,6 +267,8 @@ public abstract class Math {
 
     /**
      * Get the sine of a numeric value (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double sin(double x) {
@@ -257,6 +277,8 @@ public abstract class Math {
 
     /**
      * Get the cosine of a numeric value (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double cos(double x) {
@@ -265,6 +287,8 @@ public abstract class Math {
 
     /**
      * Get the tangent of a numeric value  (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double tan(double x) {
@@ -273,6 +297,8 @@ public abstract class Math {
 
     /**
      * Get the arcsine of a numeric value  (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double asin(double x) {
@@ -281,6 +307,8 @@ public abstract class Math {
 
     /**
      * Get the arccosine of a numeric value  (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double acos(double x) {
@@ -289,6 +317,8 @@ public abstract class Math {
 
     /**
      * Get the arctangent of a numeric value  (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double atan(double x) {
@@ -297,6 +327,9 @@ public abstract class Math {
 
     /**
      * Converts rectangular coordinates to polar  (SStL)
+     * @param x the first input value
+     * @param y the second input value
+     * @return the result
      */
 
     public static double atan2(double x, double y) {
@@ -305,6 +338,8 @@ public abstract class Math {
 
     /**
      * Get the exponential of a numeric value  (SStL)
+     * @param x the input value
+     * @return the result
      */
 
     public static double exp(double x) {

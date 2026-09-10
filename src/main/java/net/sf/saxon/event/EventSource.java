@@ -52,7 +52,7 @@ public abstract class EventSource implements ActiveSource {
      * @param out the Receiver to which events will be sent. It is the caller's responsibility
      *            to initialize the receiver with a PipelineConfiguration, and to call the open() and close()
      *            methods on the receiver before and after calling this send() method.
-     * @param options
+     * @param options options for parsing XML input
      * @throws net.sf.saxon.trans.XPathException
      *          if any error occurs
      */

@@ -25,7 +25,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.SequenceType;
-import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import java.io.File;
@@ -423,6 +422,7 @@ public class Processor implements Configuration.ApiProvider {
      *              as constants in class {@link net.sf.saxon.lib.Feature}.
      * @param value the value of the option to be set (which must be of the appropriate type for the
      *              particular feature.
+     * @param <T> the type of the value required by the feature (often boolean or string)
      * @throws IllegalArgumentException if the supplied value is not a valid value for the selected feature.
      * @since 9.9 introduced to give a faster and type-safe alternative to
      * {@link #setConfigurationProperty(String, Object)}
@@ -447,6 +447,7 @@ public class Processor implements Configuration.ApiProvider {
      *
      * @param feature the option required. The names of the properties available are listed
      *             as constants in class {@link net.sf.saxon.lib.Feature}.
+     * @param <T> the type of the feature (often boolean or string)
      * @return the value of the property, if one is set; or null if the property is unset and there is
      * no default.
      * @since 9.9 introduced to give a faster and type-safe alternative to

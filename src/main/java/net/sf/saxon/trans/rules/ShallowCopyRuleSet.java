@@ -46,10 +46,10 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
 
     /**
      * Perform the built-in template action for a given node.
-     * @param item
+     * @param item the item to be processed by this built-in rule
      * @param parameters   the parameters supplied to apply-templates
      * @param tunnelParams the tunnel parameters to be passed through
-     * @param out
+     * @param out  the destination for output
      * @param context      the dynamic evaluation context
      * @param locationId   location of the instruction (apply-templates, apply-imports etc) that caused
      */

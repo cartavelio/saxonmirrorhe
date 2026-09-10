@@ -143,7 +143,7 @@ public class CurriedFunction extends AbstractFunction {
      * @param context the XPath dynamic evaluation context
      * @param args    the actual arguments to be supplied
      * @return the result of invoking the function
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws net.sf.saxon.trans.XPathException if the function reports a dynamic error
      *
      */
 

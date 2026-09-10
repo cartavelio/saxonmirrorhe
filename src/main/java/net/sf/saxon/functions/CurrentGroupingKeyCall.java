@@ -98,7 +98,7 @@ public class CurrentGroupingKeyCall extends Expression implements Callable {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables to be renamed
      */
     @Override
     public Expression copy(RebindingMap rebindings) {

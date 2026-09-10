@@ -36,8 +36,8 @@ public class JSONResource implements Resource {
     /**
      * Create the resource
      *
-     * @param context
-     * @param details the inputstream holding the JSON content plus details of encoding etc
+     * @param context XPath dynamic context
+     * @param details the input stream holding the JSON content plus details of encoding etc
      */
 
     public JSONResource(XPathContext context, AbstractResourceCollection.InputDetails details) {

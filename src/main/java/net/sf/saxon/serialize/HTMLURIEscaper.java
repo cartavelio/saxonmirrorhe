@@ -171,7 +171,7 @@ public class HTMLURIEscaper extends ProxyReceiver {
      * its UTF-8 representation
      *
      * @param url       the URI to be escaped
-     * @param normalize
+     * @param normalize true if Unicode normalization (to NFC) is required
      * @param config    the configuration
      * @return the URI after escaping non-ASCII characters
      * @throws XPathException if any error occurs

@@ -68,8 +68,8 @@ public class Numberer_he extends Numberer_en {
      * Convert a number to traditional Hebrew representation.
      * All parameters are the same as for format()
      *
-     * @param number
-     * @param groupSeparator
+     * @param number the number to be formatted
+     * @param groupSeparator the grouping separator, if required (may be null)
      * @return The number in traditional Hebrew.  The result for numbers above 9999
      *         is not really well-defined.  Neither is 0.
      */

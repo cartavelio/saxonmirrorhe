@@ -277,6 +277,7 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
     /**
      * Write a sequence of ASCII characters. The caller is responsible for ensuring
      * that each byte represents a character in the range 1-127
+     * @param content the content to be written
      */
     @Override
     public void writeAscii(byte[] content) throws IOException {
@@ -286,6 +287,9 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
     /**
      * Write a sequence of ASCII characters. The caller is responsible for ensuring
      * that each byte represents a character in the range 1-127
+     * @param chars the characters to be written
+     * @param off the offset of the first character to be included
+     * @param len the number of characters to be written
      */
     public void writeAscii(byte[] chars, int off, int len) throws IOException {
 

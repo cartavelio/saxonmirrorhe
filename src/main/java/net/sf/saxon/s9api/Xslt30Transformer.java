@@ -188,6 +188,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      *                   and whose corresponding values are the values to be assigned to those parameters.
      *                   The contents of the supplied map are copied by this method,
      *                   so subsequent changes to the map have no effect.
+     * @param <T> the type of values for the parameters
      * @throws IllegalStateException if the transformation has already been evaluated by calling one of the methods
      *                               <code>applyTemplates</code>, <code>callTemplate</code>, or <code>callFunction</code>
      * @throws SaxonApiException     currently occurs only if the supplied value of a parameter cannot be evaluated
@@ -253,6 +254,7 @@ public class Xslt30Transformer extends AbstractXsltTransformer {
      * @param parameters the parameters to be used for the initial template
      * @param tunnel     true if these values are to be used for setting tunnel parameters;
      *                   false if they are to be used for non-tunnel parameters
+     * @param <T> the type of values for the parameters
      * @throws SaxonApiException not currently used, but retained in the method signature for compatibility reasons
      */
 

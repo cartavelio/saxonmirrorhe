@@ -186,7 +186,7 @@ public class PatternParser extends XPathParser {
         }
     }
 
-    private boolean isSelectionPattern(String pattern) throws XPathException {
+    private boolean isSelectionPattern(String pattern)  {
         return pattern.startsWith(".");
     }
 
@@ -226,7 +226,7 @@ public class PatternParser extends XPathParser {
      * Override the parsing of top-level expressions
      *
      * @return the parsed expression
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws net.sf.saxon.trans.XPathException if the pattern is invalid
      *
      */
 
@@ -354,7 +354,7 @@ public class PatternParser extends XPathParser {
      * the normal rules that apply within an XSLT pattern
      *
      * @return the parsed expression that appears within the predicate
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws net.sf.saxon.trans.XPathException if the predicate is invalid
      *
      */
 
@@ -375,9 +375,10 @@ public class PatternParser extends XPathParser {
      * imposes the constraints on which function calls are allowed to appear in a pattern
      *
      * @return the expression that results from the parsing (usually a FunctionCall)
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws net.sf.saxon.trans.XPathException if the function call is invalid
      *
-     * @param prefixArgument
+     * @param prefixArgument left hand operand of arrow operator,
+     *                    or null in the case of a conventional function call
      */
 
     /*@NotNull*/
@@ -386,7 +387,7 @@ public class PatternParser extends XPathParser {
         Expression fn = super.parseFunctionCall(prefixArgument);
         if (inPredicate <= 0 && !fn.isCallOn(SuperId.class) && !fn.isCallOn(KeyFn.class) &&
                 !fn.isCallOn(Doc.class) && !fn.isCallOn(Root_1.class)) {
-            grumble("The " + fn.toString() + " function is not allowed at the head of a pattern");
+            grumble("The " + fn + " function is not allowed at the head of a pattern");
         }
         return fn;
     }

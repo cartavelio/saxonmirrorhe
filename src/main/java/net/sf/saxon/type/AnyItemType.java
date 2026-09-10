@@ -100,7 +100,7 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
      *
      *
      * @param item    The item to be tested
-     * @param th
+     * @param th  The type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override
@@ -112,7 +112,7 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
      * Get the primitive item type corresponding to this item type. For item(),
      * this is Type.ITEM. For node(), it is Type.NODE. For specific node kinds,
      * it is the value representing the node kind, for example Type.ELEMENT.
-     * For anyAtomicValue it is Type.ATOMIC_VALUE. For numeric it is Type.NUMBER.
+     * For anyAtomicValue it is Type.ATOMIC_VALUE. For xs:numeric it is Type.NUMBER.
      * For other atomic types it is the primitive type as defined in XML Schema,
      * except that INTEGER is considered to be a primitive type.
      */

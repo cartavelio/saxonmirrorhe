@@ -126,6 +126,11 @@ public class NumberFormatter {
      *
      * @param numbers the numbers to be formatted (a sequence of integer values; it may also contain
      *                preformatted strings as part of the error recovery fallback)
+     * @param groupSize the grouping-size, as in xsl:number
+     * @param groupSeparator the grouping-separator, as in xsl:number
+     * @param letterValue the letter-value, as in xsl:number
+     * @param ordinal the ordinal attribute as in xsl:number
+     * @param numberer the Numberer to be used for localization
      * @return the formatted output string.
      */
 

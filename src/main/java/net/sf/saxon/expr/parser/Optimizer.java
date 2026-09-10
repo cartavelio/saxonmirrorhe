@@ -167,7 +167,7 @@ public class Optimizer {
      * Attempt to optimize a call on saxon:stream(). Return null if no optimization is possible.
      *
      * @param visitor the expression visitor
-     * @param cisi
+     * @param cisi Static information about the context item
      * @param select  the expression that selects the items to be copied
      * @return null if no optimization is possible, or an expression that does an optimized
      * copy of these items otherwise
@@ -190,11 +190,9 @@ public class Optimizer {
      * @param pathExp The path expression to be converted.
      * @param visitor The expression visitor
      * @return the optimized expression, or null if no optimization is possible
-     * @throws XPathException if any error occurs
      */
 
-    public Expression convertPathExpressionToKey(SlashExpression pathExp, ExpressionVisitor visitor)
-            throws XPathException {
+    public Expression convertPathExpressionToKey(SlashExpression pathExp, ExpressionVisitor visitor) {
         return null;
     }
 
@@ -237,12 +235,10 @@ public class Optimizer {
      *
      * @param pathExp the path expression to be converted
      * @param th      the type hierarchy cache
-     * @return the resulting filterexpression if conversion is possible, or null if not
-     * @throws XPathException if any error occurs
+     * @return the resulting filter expression if conversion is possible, or null if not
      */
 
-    public FilterExpression convertToFilterExpression(SlashExpression pathExp, TypeHierarchy th)
-            throws XPathException {
+    public FilterExpression convertToFilterExpression(SlashExpression pathExp, TypeHierarchy th) {
         return null;
     }
 
@@ -421,20 +417,6 @@ public class Optimizer {
     }
 
     /**
-     * Extract subexpressions from the body of a function that can be evaluated
-     * as global variables
-     *
-     * @param body  the body of the function
-     * @param offer The PromotionOffer. Will be marked to indicate whether any action was taken
-     * @return a reference to the new global variable if a variable has been created, or null if not
-     */
-
-//    public Expression extractGlobalVariables(Expression body, ExpressionVisitor visitor, PromotionOffer offer)
-//            throws XPathException {
-//        return null;
-//    }
-
-    /**
      * Generate the inversion of the expression comprising the body of a template rules.
      * Supported in Saxon-EE only
      *
@@ -454,10 +436,9 @@ public class Optimizer {
      *
      * @param parent the parent expression
      * @param child  the operand
-     * @throws XPathException if any error occurs
      */
 
-    public void makeCopyOperationsExplicit(Expression parent, Operand child) throws XPathException {
+    public void makeCopyOperationsExplicit(Expression parent, Operand child) {
         // no action unless streaming
     }
 
@@ -573,7 +554,7 @@ public class Optimizer {
             Logger err = getConfiguration().getLogger();
             err.info("OPT : At line " + exp.getLocation().getLineNumber() + " of " + exp.getLocation().getSystemId());
             err.info("OPT : " + message);
-            err.info("OPT : Expression after rewrite: " + exp.toString());
+            err.info("OPT : Expression after rewrite: " + exp);
             exp.verifyParentPointers();
         }
     }
@@ -583,7 +564,7 @@ public class Optimizer {
             Logger err = config.getLogger();
             err.info("OPT : At line " + exp.getLocation().getLineNumber() + " of " + exp.getLocation().getSystemId());
             err.info("OPT : " + message);
-            err.info("OPT : Expression after rewrite: " + exp.toString());
+            err.info("OPT : Expression after rewrite: " + exp);
             exp.verifyParentPointers();
         }
     }

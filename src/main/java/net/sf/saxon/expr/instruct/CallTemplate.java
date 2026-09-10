@@ -31,11 +31,11 @@ import java.util.Arrays;
 
 public class CallTemplate extends Instruction implements ITemplateCall, ComponentInvocation {
 
-    private NamedTemplate template = null; // Null only for saxon:call-template
+    private NamedTemplate template; // Null only for saxon:call-template
     private final StructuredQName calledTemplateName;   // the name of the called template
     private WithParam[] actualParams = WithParam.EMPTY_ARRAY;
     private WithParam[] tunnelParams = WithParam.EMPTY_ARRAY;
-    private boolean useTailRecursion = false;
+    private boolean useTailRecursion;
     private int bindingSlot = -1;
     private final boolean isWithinDeclaredStreamableConstruct;
 
@@ -49,7 +49,8 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
      *                           where this is established dynamically
      * @param useTailRecursion true if the call is potentially tail recursive
      *                         where the name of the called template is to be calculated dynamically
-     * @param inStreamable
+     * @param inStreamable true if the call-template instruction appears within a construct that is
+     *                     declared streamable, for example a streamable template rule
      */
 
     public CallTemplate(NamedTemplate template, StructuredQName calledTemplateName, boolean useTailRecursion, boolean inStreamable) {
@@ -586,10 +587,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
     @Override
     public String toShortString() {
         // fallback implementation
-        StringBuilder buff = new StringBuilder(64);
-        buff.append("CallTemplate#");
-        buff.append(template.getObjectName().getDisplayName());
-        return buff.toString();
+        return "CallTemplate#" + template.getObjectName().getDisplayName();
     }
 
     @Override

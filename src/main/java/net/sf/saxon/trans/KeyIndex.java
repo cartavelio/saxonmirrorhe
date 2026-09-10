@@ -104,7 +104,7 @@ public class KeyIndex {
 
     /**
      * Say whether the index is under construction
-     * @param status
+     * @param status the status of the index, for example {@link Status#UNDER_CONSTRUCTION}
      */
 
     public void setStatus(Status status) {

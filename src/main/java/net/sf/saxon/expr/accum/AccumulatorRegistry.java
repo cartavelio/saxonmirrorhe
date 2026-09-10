@@ -33,7 +33,7 @@ public class AccumulatorRegistry {
     /**
      * Process the use-accumulators attribute of instructions such as xsl:stream, xsl:mode, etc
      * @param useAccumulatorsAtt the value of the use-accumulators attribute
-     * @param styleElement
+     * @param styleElement the element on which the use-accumulators attribute appears
      * @return the list of accumulators referenced
      */
 

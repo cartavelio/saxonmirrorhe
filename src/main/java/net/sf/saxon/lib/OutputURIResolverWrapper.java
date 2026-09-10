@@ -43,7 +43,7 @@ public class OutputURIResolverWrapper implements ResultDocumentResolver {
      * @param href the effective value of the href attribute
      * @param baseUri the base output URI of the transformation (typically, the
      *                destination of the principal output
-     * @param properties
+     * @param properties the serialization properties to be applied
      * @return a new instance of the {@code ResultDocumentInstance} class;
      * which Saxon will then call for further information.
      */

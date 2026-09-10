@@ -32,6 +32,7 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
 
     /**
      * Return the instance of ZeroOrOne that represents the empty sequence
+     * @param <T> the static type of the empty sequence
      * @return a representation of the empty sequence that satisfies the type ZeroOrOne
      */
 

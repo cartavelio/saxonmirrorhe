@@ -43,6 +43,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
      * Create a use-attribute-set expression
      *
      * @param name the name of the target attribute set
+     * @param streamable true if the attribute set is streamable
      */
 
     public UseAttributeSet(StructuredQName name, boolean streamable) {
@@ -71,7 +72,7 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
     }
 
     /**
-     * Make an list of expressions whose combined effect is to expand the attribute sets named in an
+     * Make a list of expressions whose combined effect is to expand the attribute sets named in an
      * [xsl]use-attribute-sets attribute, for example on a literal result element
      *
      * @param targets     the QNames contained in the use-attribute-sets attribute
