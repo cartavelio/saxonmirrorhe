@@ -67,6 +67,7 @@ public class TemplateRuleEE extends TemplateRule {
      *
      * @param compilation the XSLT compilation
      * @param decl        the component declaration of this template rule
+     * @param modeName    the mode name
      */
 
     @Override
@@ -79,6 +80,8 @@ public class TemplateRuleEE extends TemplateRule {
     /**
      * Ensure that any first-time initialization has been done. Used in Saxon-EE
      * to do JIT compilation
+     *
+     * @throws XPathException if any error occurs
      */
     @Override
     public synchronized void initialize() throws XPathException {
@@ -95,6 +98,8 @@ public class TemplateRuleEE extends TemplateRule {
      * we create the copy as soon as we know it is needed. The problem is that at this stage many of the properties
      * of the template rule are still uninitialised. So we mark the new copy as a slave of the original, and at
      * the end of the compilation process we update all the slave copies to match the properties of the original.
+     *
+     * @return a copy of the template rule
      */
 
     @Override
