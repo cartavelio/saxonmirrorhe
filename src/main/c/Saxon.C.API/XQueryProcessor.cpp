@@ -31,10 +31,10 @@
         SaxonProcessor::attachCurrentThread();
     proc = p;
         exception = nullptr;
-        cppXQ = createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread, p->procRef);
+        cppXQ = createXQueryEngineWithProcessor(SaxonProcessor::sxn_environ->thread, (void *)p->procRef);
 
 
-        if(cppXP == -1) {
+        if(cppXQ == -1) {
 
             std::cerr<<"Error: Failed to create the XPathProcessor internal object"<<std::endl;
 
@@ -257,7 +257,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
             setProperty("qs", query);
         }
         int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-        j_executeQueryToFile(SaxonProcessor::sxn_environ->thread, cppXQ, cwdXQ.c_str(), ofilename, processorDataRef);
+        j_executeQueryToFile(SaxonProcessor::sxn_environ->thread, (void *)cppXQ, (char *)cwdXQ.c_str(), (char *)ofilename, (void *)processorDataRef);
 
 
 	  if(proc->exceptionOccurred()) {
@@ -282,7 +282,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
             setProperty("qs", query);
         }
         int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-        int64_t result = j_executeQueryToValue(SaxonProcessor::sxn_environ->thread, cppXQ, cwdXQ.c_str(), ofilename, processorDataRef);
+        int64_t result = j_executeQueryToValue(SaxonProcessor::sxn_environ->thread, (void *)cppXQ, (char *)cwdXQ.c_str(),(void *)processorDataRef);
 
 
         if(proc->exceptionOccurred()) {
@@ -355,7 +355,7 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
             setProperty("qs", query);
         }
         int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-        char result = j_executeQueryToString(SaxonProcessor::sxn_environ->thread, cppXQ, cwdXQ.c_str(), ofilename, processorDataRef);
+        char *result = j_executeQueryToString(SaxonProcessor::sxn_environ->thread, (void *)cppXQ, (char *)cwdXQ.c_str(), (void *)processorDataRef);
 
 
         return (const char *)result;
@@ -439,7 +439,7 @@ void XQueryProcessor::createException(const char * message) {
         exception = nullptr;
     }
     if(message == nullptr) {
-        exception = proc->checkAndCreateException(cppClass);
+        //exception = proc->checkAndCreateException(cppClass);
     } else {
         exception = new SaxonApiException(message);
     }

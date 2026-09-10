@@ -43,10 +43,10 @@ XsltExecutable::~XsltExecutable() {
     clearParameters();
 
     SaxonProcessor::sxn_environ->env->DeleteGlobalRef(executableRef);
-    if(saxonMessageListenerRef != nullptr){
+    if(saxonMessageListenerRef != -1){
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(saxonMessageListenerRef);
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(saxonResultDocRef);
     }
     SaxonProcessor::sxn_environ->env->ExceptionClear(); // This is as a precaution to avoid crashing out if JNI gets into an unclean state.
@@ -194,7 +194,7 @@ void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
     SaxonProcessor::attachCurrentThread();
     if(flag) {
         resultDocumentMap.clear();
-        if(saxonResultDocRef != nullptr) {
+        if(saxonResultDocRef != -1) {
             saxonResultDocRef = -1;
         }
 
@@ -452,27 +452,30 @@ void XsltExecutable::applyTemplatesReturningFile(const char *output_filename) {
 
 
     	setProperty("resources", resources_dir.c_str());
-        JParameters comboArrays;
+
         int additions = 0;
         int iadd = 0;
-        if(saxonMessageListenerRef != nullptr ) {
+        /*if(saxonMessageListenerRef != -1 ) {
             additions++;
         }
-        if(saxonResultDocRef != nullptr) {
+        if(saxonResultDocRef != -1) {
             additions++;
-        }
+        }*/
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
-        //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-        if(saxonMessageListenerRef != nullptr) {
-            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    std::string optionStr;
+    //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
-        }
-        if(saxonResultDocRef != nullptr) {
-            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
-        }
+    }
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
+    }
 
-        j_applyTemplatesReturningFile(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, selectionRef, output_filename, processorDataRef);
+        j_applyTemplatesReturningFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (char *)output_filename, (void *)processorDataRef);
 
 
     return;
@@ -491,27 +494,30 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 
 
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+    std::string optionStr;
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
-    char * result = j_applyTemplatesReturningString(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, selectionRef, processorDataRef);
+    char * result = j_applyTemplatesReturningString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (void *)processorDataRef);
 
     return result;
 
@@ -520,30 +526,33 @@ const char *XsltExecutable::applyTemplatesReturningString() {
 XdmValue *XsltExecutable::applyTemplatesReturningValue() {
     SaxonProcessor::attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    std::string optionStr;
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
-    int64_t result = j_applyTemplatesReturningValue(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, selectionRef, processorDataRef);
+    int64_t result = j_applyTemplatesReturningValue(SaxonProcessor::sxn_environ->thread, cwdXE.c_str(), (void *)executableRef, (void *)selectionRef, (void *)processorDataRef);
 
     if (result > -1) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,result);
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
 
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
@@ -578,7 +587,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
         return value;
     }else {
 
-        createException();
+       // createException();
 
 
     }
@@ -594,33 +603,36 @@ void XsltExecutable::callFunctionReturningFile(const char *functionName, XdmValu
 
 
     	setProperty("resources", resources_dir.c_str());
-        JParameters comboArrays;
+
         int additions = 0;
         int iadd = 0;
-        if(saxonMessageListenerRef != nullptr ) {
+        /*if(saxonMessageListenerRef != -1 ) {
             additions++;
         }
-        if(saxonResultDocRef != nullptr) {
+        if(saxonResultDocRef != -1) {
             additions++;
-        }
+        }*/
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+        std::string optionStr;
         //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-        if(saxonMessageListenerRef != nullptr) {
-            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+        if(saxonMessageListenerRef != -1) {
+            optionStr = "m";
+            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
         }
-        if(saxonResultDocRef != nullptr) {
-            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+        if(saxonResultDocRef != -1) {
+            optionStr = "rd";
+            addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
         }
 
         int64_t argumentValuesRef = createProcessorData(SaxonProcessor::sxn_environ->thread, argument_length);
 
         for(int i= 0; i<argument_length; i++) {
-            addProcessorValue(SaxonProcessor::sxn_environ->thread, argumentValuesRef,  arguments[i]->getUnderlyingValue());
+            addProcessorValue(SaxonProcessor::sxn_environ->thread, (void *)argumentValuesRef,  (void *)arguments[i]->getUnderlyingValue());
         }
 
-        j_callFunctionReturningFile(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, functionName, output_filename, argumentValuesRef, processorDataRef);
+        j_callFunctionReturningFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (char *)output_filename, (void *)argumentValuesRef, (void *)processorDataRef);
 
         return;
 
@@ -632,33 +644,36 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     SaxonProcessor::attachCurrentThread();
 
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+    std::string optionStr;
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
     int64_t argumentValuesRef = createProcessorData(SaxonProcessor::sxn_environ->thread, argument_length);
 
     for(int i= 0; i<argument_length; i++) {
-        addProcessorValue(SaxonProcessor::sxn_environ->thread, argumentValuesRef,  arguments[i]->getUnderlyingValue());
+        addProcessorValue(SaxonProcessor::sxn_environ->thread, (Void *)argumentValuesRef,  (void *)arguments[i]->getUnderlyingValue());
     }
 
-    char * result = j_callFunctionReturningString(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, functionName, output_filename, argumentValuesRef, processorDataRef);
+    char * result = j_callFunctionReturningString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (char *)output_filename, (void *)argumentValuesRef, (void *)processorDataRef);
 
     return result;
 
@@ -671,36 +686,39 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
 
     SaxonProcessor::attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+    std::string optionStr;
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
     int64_t argumentValuesRef = createProcessorData(SaxonProcessor::sxn_environ->thread, argument_length);
 
     for(int i= 0; i<argument_length; i++) {
-        addProcessorValue(SaxonProcessor::sxn_environ->thread, argumentValuesRef,  arguments[i]->getUnderlyingValue());
+        addProcessorValue(SaxonProcessor::sxn_environ->thread, (void *)argumentValuesRef,  (void *)arguments[i]->getUnderlyingValue());
     }
 
-    int64_t  result = j_callFunctionReturningValue(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, functionName, output_filename, argumentValuesRef,  processorDataRef);
+    int64_t  result = j_callFunctionReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)functionName, (char *)output_filename, (void *)argumentValuesRef,  (void *)processorDataRef);
 
     if (result > -1) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,result);
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
 
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
@@ -735,7 +753,7 @@ XsltExecutable::callFunctionReturningValue(const char *functionName, XdmValue **
         return value;
     }else {
 
-        createException();
+        //createException();
 
 
     }
@@ -747,27 +765,30 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
 
     SaxonProcessor::attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
     }
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    std::string optionStr;
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
-    j_callTemplateReturningFile(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, templateName, outfile, processorDataRef);
+    j_callTemplateReturningFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (char *)outfile, (void *)processorDataRef);
 
 }
 
@@ -775,27 +796,30 @@ void XsltExecutable::callTemplateReturningFile(const char *templateName, const c
 const char * XsltExecutable::callTemplateReturningString(const char *templateName) {
     SaxonProcessor::attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    } */
+    std::string optionStr;
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd"
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, (char *)optionStr.c_str(), saxonResultDocRef);
     }
 
-    char * result = j_callTemplateReturningString(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, templateName, processorDataRef);
+    char * result = j_callTemplateReturningString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (void *)processorDataRef);
 
     return result;
 
@@ -804,30 +828,33 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
     SaxonProcessor::attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+    std::string optionStr;
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
-    int64_t result = j_callTemplateReturningValue(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, templateName, processorDataRef);
+    int64_t result = j_callTemplateReturningValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)templateName, (void *)processorDataRef);
 
     if (result > -1) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,result);
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
 
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
@@ -862,7 +889,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
         return value;
     }else {
 
-        createException();
+        //createException();
 
 
     }
@@ -880,29 +907,32 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
 
 
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+    std::string optionStr;
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
-    int64_t result = j_transformToValue(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, sourcefile, processorDataRef);
+    int64_t result = j_transformToValue(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (char *)sourcefile, (void *)processorDataRef);
     if (result > -1) {
-        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,result);
+        int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread,(void *)result);
 
         XdmValue * value = new XdmValue();
         XdmItem * xdmItem = nullptr;
@@ -937,7 +967,7 @@ XdmValue *XsltExecutable::transformFileToValue(const char *sourcefile) {
         return value;
     }else {
 
-        createException();
+        //createException();
 
 
     }
@@ -953,27 +983,30 @@ void XsltExecutable::transformFileToFile(const char *source, const char *outputf
 
     SaxonProcessor::attachCurrentThread();
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
     int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
+    std::string optionStr;
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
 
-    j_transformToFile(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, source, outputfile, processorDataRef);
+    j_transformToFile(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)executableRef, (void *)-1, (char *)source, (char *)outputfile, (void *)processorDataRef);
 
 }
 
@@ -983,11 +1016,12 @@ void XsltExecutable::setSaveXslMessage(bool create, const char * filename) {
     if (create) {
 
         if (filename == nullptr) {
-            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, , cwdXE, "-:on");
+            std::string optionStr = "-:on";
+            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)optionStr.c_str());
 
             //setProperty("m", "on");
         } else {
-            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, , cwdXE, filename);
+            saxonMessageListenerRef = createSaxonCMessageListener(SaxonProcessor::sxn_environ->thread, (void *)procRef, (char *)cwdXE.c_str(), (char *)filename);
 
         }
 
@@ -1040,27 +1074,30 @@ const char *XsltExecutable::transformFileToString(const char *source) {
     SaxonProcessor::attachCurrentThread();
 
     setProperty("resources", resources_dir.c_str());
-    JParameters comboArrays;
+
     int additions = 0;
-    int iadd = 0;
-    if(saxonMessageListenerRef != nullptr ) {
+
+    /*if(saxonMessageListenerRef != -1 ) {
         additions++;
     }
-    if(saxonResultDocRef != nullptr) {
+    if(saxonResultDocRef != -1) {
         additions++;
-    }
+    }*/
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties, additions);
 
     //TODO change map to set values as int64_t then we can add saxonMessageListenerRef directly
-    if(saxonMessageListenerRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "m", saxonMessageListenerRef);
+    std::string optionStr;
+    if(saxonMessageListenerRef != -1) {
+        optionStr = "m";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (void *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonMessageListenerRef);
 
     }
-    if(saxonResultDocRef != nullptr) {
-        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, processorDataRef, "rd", saxonResultDocRef);
+    if(saxonResultDocRef != -1) {
+        optionStr = "rd";
+        addProcessorDataPair(SaxonProcessor::sxn_environ->thread, (char *)processorDataRef, (char *)optionStr.c_str(), (void *)saxonResultDocRef);
     }
-
-    char *  result = j_transformToString(SaxonProcessor::sxn_environ->thread, cwdXE, executableRef, source, processorDataRef);
+    char * cstylesheet = nullptr;
+    char *  result = j_transformToString(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(), (void *)-1, (void *)executableRef, (char *)source, cstylesheet, (void *)processorDataRef);
 
     return result;
 }

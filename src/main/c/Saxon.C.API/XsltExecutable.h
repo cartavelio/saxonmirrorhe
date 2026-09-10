@@ -451,6 +451,11 @@ public:
      */
     void transformToFile(XdmNode * source=nullptr);
 
+
+    XdmValue * getXslMessages();
+
+
+
     /**
      * Checks for pending exceptions without creating a local reference to the exception object
      * @return bool - true when there is a pending exception; otherwise return false
@@ -502,7 +507,7 @@ private:
 
     //jclass  cppClass;
     //jclass messageListenerClass, resultDocumentClass;
-	int64_t executableRef, selectionRef, saxonMessageListenerRef, saxonResultDocRef;
+	int64_t procRef, executableRef, selectionRef, saxonMessageListenerRef, saxonResultDocRef;
 	XdmValue * selectionV;
     std::string cwdXE; /*!< current working directory */
     std::string resources_dir; /*!< current Saxon resources directory */

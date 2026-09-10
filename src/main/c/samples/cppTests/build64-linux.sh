@@ -46,11 +46,11 @@ g++  -std=c++14 -m64 -fPIC -I.  -c ../../Saxon.C.API/DocumentBuilder.cpp -o bin/
 
 g++  -std=c++14 -m64 -fPIC -I.  -c ../../Saxon.C.API/SaxonProcessor.cpp -o bin/SaxonProcessor.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
-g++ -std=c++14 -m64 -fPIC  -c ../../Saxon.C.API/SaxonApiException.cpp -o bin/SaxonApiException.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+g++ -std=c++14 -m64 -fPIC  -I. -c ../../Saxon.C.API/SaxonApiException.cpp -o bin/SaxonApiException.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 g++  -std=c++14 -m64 -fPIC -I.  -c ../../Saxon.C.API/Xslt30Processor.cpp -o bin/Xslt30Processor.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
-g++ -std=c++14 -m64  -fPIC -c ../../Saxon.C.API/XsltExecutable.cpp -o bin/XsltExecutable.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+g++ -std=c++14 -m64  -fPIC -I. -c ../../Saxon.C.API/XsltExecutable.cpp -o bin/XsltExecutable.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 g++  -std=c++14 -m64 -fPIC -I.  -c ../../Saxon.C.API/XQueryProcessor.cpp -o bin/XQueryProcessor.o -ldl -lc -llibgraalvm-ee-12.1  $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 

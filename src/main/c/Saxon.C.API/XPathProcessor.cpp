@@ -34,7 +34,7 @@ XPathProcessor::XPathProcessor(SaxonProcessor* p, std::string curr) {
 			"(Lnet/sf/saxon/s9api/Processor;)V", proc->proc);*/
 
 
-    cppXP = createXPathProcessorWithProcessor(SaxonProcessor::sxn_environ->thread, p->procRef);
+    cppXP = createXPathProcessorWithProcessor(SaxonProcessor::sxn_environ->thread, (void *)p->procRef);
 
 
     if(cppXP == -1) {
@@ -108,8 +108,9 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 
 
 	setProperty("resources", proc->getResourcesDirectory());
+    allocFn fn = operator new;
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    long ** results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP, xpathStr, (void *)processorDataRef);
+    long long * results = j_evaluate(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (void *)fn, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
 
 	if(!results) {
 
@@ -177,7 +178,7 @@ XdmItem * XPathProcessor::evaluateSingle(const char * xpathStr) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    int64_t results = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)xpathStr, (void *)processorDataRef);
+    int64_t results = j_evaluateSingle(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
 
 /*
 	if (result) {
@@ -300,7 +301,7 @@ bool XPathProcessor::effectiveBooleanValue(const char * xpathStr) {
 
     setProperty("resources", proc->getResourcesDirectory());
     int64_t  processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
-    bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, xpathStr, (void *)processorDataRef);
+    bool resultsi = (bool)j_effectiveBooleanValue(SaxonProcessor::sxn_environ->thread, (void *)cppXP, (char *)cwdXP.c_str(), (char *)xpathStr, (void *)processorDataRef);
     return resultsi;
 }
 
