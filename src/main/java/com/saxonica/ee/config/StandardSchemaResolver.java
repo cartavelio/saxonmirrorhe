@@ -13,12 +13,16 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 /**
  * The default schema resolver used when no other is requested
  */
 public class StandardSchemaResolver implements SchemaURIResolver {
+    public static final String SCHEMA_NATURE = "http://www.w3.org/2001/XMLSchema ";
+    public static final String VALIDATION_PURPOSE = "http://www.rddl.org/purposes#validation";
 
     private EnterpriseConfiguration config;
     private static final StreamSource[] EMPTY_SOURCE_ARRAY = new StreamSource[0];
@@ -106,36 +110,58 @@ public class StandardSchemaResolver implements SchemaURIResolver {
                 !config.getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
             return EMPTY_SOURCE_ARRAY;
         }
-        if (NamespaceConstant.XLINK.equals(targetNamespace)) {
-            // Use a local copy of the XLink schema rather than fetching it from the W3C site
-            return new Source[]{fetchResource("w3c/xlink/xlink.xsd", config)};
-        } else if (NamespaceConstant.FN.equals(targetNamespace)) {
+        if (NamespaceConstant.FN.equals(targetNamespace)) {
             // Use a local copy of the schema rather than fetching it from the W3C site
             return new Source[]{fetchResource("xpath-functions.scm", config)};
-        } else {
-            try {
-                Source[] sources = new Source[locations.length];
-                for (int i = 0; i < locations.length; i++) {
+        }
 
-                    // Now try a JAXP URIResolver if available
-                    if (uriResolver == null) {
-                        uriResolver = config.getURIResolver();
-                    }
-                    if (uriResolver != null) {
-                        sources[i] = uriResolver.resolve(locations[i], baseURI);
-                    }
+        // The previous version of this method explicitly mapped the XLINK namespace to
+        // a local resource. We can rely on the catalog resolver to do the mapping,
+        // so all we have to do is make sure the right public URI is in place. We could
+        // easily do this mapping for several common APIs, but perhaps that should
+        // be in the entity resolver. For now, just continue to map this one for
+        // backwards compatibility.
+        if (NamespaceConstant.XLINK.equals(targetNamespace)) {
+            locations = new String[]{"https://www.w3.org/1999/xlink.xsd"};
+        }
 
-                    // if a user URI resolver returns null, try the standard one
-                    // (Note, the standard URI resolver never returns null)
-                    if (sources[i] == null) {
-                        sources[i] = config.getSystemURIResolver().resolve(locations[i], baseURI);
-                    }
-                }
-                return sources;
-            } catch (TransformerException e) {
-                throw XPathException.makeXPathException(e);
+        if (locations.length == 0 && targetNamespace != null) {
+            Source source = resolvedNamespaceURI(targetNamespace, baseURI);
+            if (source != null) {
+                return new Source[]{source};
             }
         }
+
+        try {
+            Source[] sources = new Source[locations.length];
+            for (int i = 0; i < locations.length; i++) {
+                sources[i] = config.getCommonResourceResolver().resolve(locations[i], baseURI);
+                // if a user URI resolver returns null, try the standard one
+                // (Note, the standard URI resolver never returns null)
+                if (sources[i] == null) {
+                    sources[i] = config.getSystemURIResolver().resolve(locations[i], baseURI);
+                }
+            }
+            return sources;
+        } catch (TransformerException e) {
+            throw XPathException.makeXPathException(e);
+        }
+    }
+
+    private Source resolvedNamespaceURI(String moduleURI, String baseURI) {
+        Source source = null;
+        try {
+            if (config != null) {
+                source = config.getCommonResourceResolver().resolveNamespace(moduleURI, SCHEMA_NATURE, VALIDATION_PURPOSE);
+                if (source == null && baseURI != null) {
+                    String resuri = new URI(baseURI).resolve(moduleURI).toString();
+                    source = config.getCommonResourceResolver().resolveNamespace(resuri, SCHEMA_NATURE, VALIDATION_PURPOSE);
+                }
+            }
+        } catch (TransformerException | URISyntaxException ex) {
+            // nevermind
+        }
+        return source;
     }
 
     public static Source fetchResource(String pathName, Configuration config) {
@@ -150,6 +176,5 @@ public class StandardSchemaResolver implements SchemaURIResolver {
     }
 
 }
-
 
 // Copyright (c) 2006-2020 Saxonica Limited
