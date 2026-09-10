@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * A GroupBreakingIterator iterates over a sequence of groups defined by
- * xsl:for-each-group break-when="x". The groups are returned in
+ * xsl:for-each-group split-when="x". The groups are returned in
  * order of first appearance.
  */
 

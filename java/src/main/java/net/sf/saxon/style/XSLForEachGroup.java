@@ -161,7 +161,7 @@ public final class XSLForEachGroup extends StyleElement {
                 (splitWhenAtt == null ? 0 : 1);
         if (c != 1) {
             compileError("Exactly one of the attributes group-by, group-adjacent, group-starting-with, " +
-                    "and group-ending-with must be specified", "XTSE1080"); //TODO: add break-when when it becomes mainstream
+                    "group-ending-with, and split-when must be specified", "XTSE1080");
         }
 
         if (startingAtt != null) {
@@ -233,14 +233,14 @@ public final class XSLForEachGroup extends StyleElement {
                 compileError(err);
             }
         } else if (splitWhen != null) {
-            splitWhen = typeCheck("break-when", splitWhen);
+            splitWhen = typeCheck("split-when", splitWhen);
             try {
-                SpecificFunctionType breakWhenType = new SpecificFunctionType(
+                SpecificFunctionType splitWhenType = new SpecificFunctionType(
                         SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_BOOLEAN);
                 Supplier<RoleDiagnostic> role = () ->
-                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0, "XTTE1100");
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/split-when", 0, "XTTE1100");
                 splitWhen = tc.staticTypeCheck(splitWhen,
-                                               SequenceType.one(breakWhenType),
+                                               SequenceType.one(splitWhenType),
                                                role, visitor);
             } catch (XPathException err) {
                 compileError(err);
