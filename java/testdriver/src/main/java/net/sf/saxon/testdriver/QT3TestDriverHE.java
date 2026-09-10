@@ -271,7 +271,9 @@ public class QT3TestDriverHE extends TestDriver {
             if ("namespace-axis".equals(value)) {
                 return !inverse;
             } else if ("binary".equals(value)) {
-                return !inverse;
+                return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
+            } else if ("expath-file".equals(value)) {
+                return (edition.equals("PE") || edition.equals("EE")) ^ inverse;
             } else if ("arbitraryPrecisionDecimal".equals(value)) {
                 return !inverse;
             } else if ("collection-stability".equals(value)) {
