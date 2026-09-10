@@ -756,7 +756,7 @@ public class JsonParser {
                     if (t.endsWith(".") || t.contains(".e") || t.contains(".E")) {
                         invalidJSON("Empty fractional part not allowed", ERR_GRAMMAR, lineNumber);
                     }
-                    if (t.startsWith(".")) {
+                    if (t.isEmpty() || t.startsWith(".")) {
                         invalidJSON("Empty integer part not allowed", ERR_GRAMMAR, lineNumber);
                     }
                 }
@@ -771,6 +771,9 @@ public class JsonParser {
                 return new StringValue(token);
             } else {
                 NumericValue numericValue = NumericValue.parseNumber(token);
+                if (numericValue.isNaN()) {
+                    invalidJSON("Invalid JSON number " + token, ERR_GRAMMAR, lineNumber);
+                }
                 if (numberFormat == null || "double".equals(numberFormat)) {
                     if (numericValue instanceof DoubleValue) {
                         return numericValue;
