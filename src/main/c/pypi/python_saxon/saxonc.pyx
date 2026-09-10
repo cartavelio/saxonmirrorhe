@@ -837,7 +837,10 @@ cdef class PyDocumentBuilder:
        Args:
            val (PySchemaValidator): the schema validator to be used
         """
-       self.thisdbptr.setSchemaValidator(val.thissvptr)
+       if val is None:
+           self.thisdbptr.setSchemaValidator(NULL)
+       else:
+           self.thisdbptr.setSchemaValidator(val.thissvptr)
 
 
     def get_schema_validator(self):
