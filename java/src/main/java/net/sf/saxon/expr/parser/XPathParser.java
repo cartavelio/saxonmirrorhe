@@ -25,6 +25,7 @@ import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
@@ -59,6 +60,7 @@ import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.util.IndexedStack;
+import net.sf.saxon.tree.util.NamespaceResolverWithDefault;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.*;
 import net.sf.saxon.value.*;
@@ -120,6 +122,16 @@ public class XPathParser {
 
     protected int languageVersion = 20; // XPath language level. Note XQuery 1.0 == XPath 2.0.
     protected int catchDepth = 0;
+
+    protected final static Set<String> reservedNames = new HashSet<>(200);
+
+    static {       // Revised by PR2481
+        String[] kw = ("and case div else eq except follows follows-or-is "
+                               + "for ge gt idiv intersect is is-not le let lt mod ne or otherwise "
+                               + "precedes precedes-or-is return satisfies to union where while").split("\\s");
+
+        reservedNames.addAll(Arrays.asList(kw));
+    }
 
 
     public record InlineFunctionDetails(
@@ -3597,20 +3609,624 @@ public class XPathParser {
         return token;
     }
 
-
     /**
-     * Parse a computed node constructor. This is allowed only in XQuery, so the method throws
-     * an error for XPath.
+     * Parse a node constructor. This is allowed only in XQuery, or in XPath from 4.0. This method handles
+     * the XQuery-based "computed" constructors, not the XML-style "direct" constructors.
+     * On entry the current token is the node-kind keyword such as "element" or "attribute".
      *
-     * @return the expression that results from the parsing
-     * @throws net.sf.saxon.trans.XPathException if a static error occurs
+     * @return an Expression for evaluating the parsed constructor
+     * @throws XPathException in the event of a syntax error.
      */
 
     /*@NotNull*/
     protected Expression parseComputedNodeConstructor() throws XPathException {
-        grumble("Node constructor expressions are allowed only in XQuery, not in XPath");
-        return new ErrorExpression();
+        if (language == ParsedLanguage.XPATH && languageVersion < 40) {
+            grumble("Node constructor expressions are allowed only in XQuery, or in XPath 4.0+");
+            return new ErrorExpression();
+        }
+        int offset = t.currentTokenStartOffset;
+        String nodeKind = readName();
+        if (t.currentToken == Token.LCURLY) {
+            return switch (nodeKind) {
+                case "document" -> parseDocumentConstructor(offset);
+                case "element" -> parseComputedElementConstructor(offset);
+                case "attribute" -> parseComputedAttributeConstructor(offset);
+                case "text" -> parseTextNodeConstructor(offset);
+                case "comment" -> parseCommentConstructor(offset);
+                case "processing-instruction" -> parseProcessingInstructionConstructor(offset);
+                case "namespace" -> parseNamespaceConstructor(offset);
+                default -> failure("Unrecognized keyword '" + nodeKind + "' before {...} ");
+            };
+        } else {
+            String name = null;
+            StructuredQName qName = null;
+            switch (nodeKind) {
+                case "element":
+                case "attribute":
+                    if (t.currentToken == Token.HASH && languageVersion >= 40) {
+                        qName = parseEQName();
+                    } else {
+                        name = expectName();
+                        if (languageVersion >= 40) {
+                            checkUnreserved(name);
+                        }
+                    }
+                    break;
+                case "namespace":
+                case "processing-instruction":
+                    if (t.currentToken == Token.HASH && languageVersion >= 40) {
+                        nextToken();
+                        name = expectName();
+                    } else {
+                        name = expectName();
+                        if (languageVersion >= 40) {
+                            checkUnreserved(name);
+                        }
+                    }
+                    break;
+                default:
+                    grumble("Unknown constructor for named node: " + nodeKind);
+                    return null;
+            }
+
+            return switch (nodeKind) {
+                case "element" -> parseNamedElementConstructor(name, qName, offset);
+                case "attribute" -> parseNamedAttributeConstructor(name, qName, offset);
+                case "namespace" -> parseNamedNamespaceConstructor(name, offset);
+                case "processing-instruction" -> parseNamedProcessingInstructionConstructor(name, offset);
+                default -> failure("Unknown constructor for named node: " + nodeKind);
+            };
+        }
     }
+
+    private Expression failure(String message) throws XPathException {
+        grumble(message);
+        return null;
+    }
+
+    /**
+     * Parse document constructor: document {...}
+     *
+     * @param offset the location in the source query
+     * @return the document constructor instruction
+     * @throws XPathException if parsing fails
+     */
+
+    /*@NotNull*/
+    private Expression parseDocumentConstructor(int offset) throws XPathException {
+        nextToken();
+        Expression content;
+        if (t.currentToken == Token.RCURLY && languageVersion >= 31) {
+            content = Literal.makeEmptySequence();
+        } else {
+            content = parseExpression();
+        }
+        readToken(Token.RCURLY);
+        DocumentInstr doc = new DocumentInstr(false, null);
+        int constructionMode = Validation.PRESERVE;
+        if (env instanceof QueryModule qm) {
+            if (!qm.isPreserveNamespaces()) {
+                content = new CopyOf(content, false, Validation.PRESERVE, null, true);
+            }
+            constructionMode = qm.getConstructionMode();
+        }
+        doc.setValidationAction(env.getImportedSchema(), constructionMode, null);
+        doc.setContentExpression(content);
+        setLocation(doc, offset);
+        return doc;
+    }
+
+    /**
+     * Parse an element constructor of the form
+     * element {expr} {expr}
+     *
+     * @param offset location of the expression in the source query
+     * @return the compiled instruction
+     * @throws XPathException if a static error is found
+     */
+
+    /*@NotNull*/
+    private Expression parseComputedElementConstructor(int offset) throws XPathException {
+        nextToken();
+        // get the expression that yields the element name
+        Expression name = parseExpression();
+        readToken(Token.RCURLY);
+        readToken(Token.LCURLY);
+        Expression content = null;
+        if (t.currentToken != Token.RCURLY) {
+            // get the expression that yields the element content
+            content = parseExpression();
+            // if the child expression creates another element,
+            // suppress validation, as the parent already takes care of it
+            if (content instanceof ElementCreator && ((ElementCreator) content).getSchemaType() == null) {
+                ((ElementCreator) content).setValidationAction(
+                        env.getImportedSchema(),
+                        Validation.PRESERVE, null);
+            }
+            expect(Token.RCURLY);
+        }
+        nextToken();
+
+        Instruction inst;
+        if (name instanceof Literal) {
+            GroundedValue vName = ((Literal) name).getGroundedValue();
+            // if element name is supplied as a literal, treat it like a direct element constructor
+            NodeName elemName;
+            if (vName instanceof StringValue && !(vName instanceof AnyURIValue)) {
+                String lex = ((StringValue) vName).getStringValue();
+                try {
+                    QNameParser oldQP = getQNameParser();
+                    setQNameParser(oldQP.withUnescaper(null));
+                    elemName = makeNodeName(lex, true);
+                    setQNameParser(oldQP);
+                    elemName.obtainFingerprint(env.getConfiguration().getNamePool());
+                } catch (XPathException staticError) {
+                    if (staticError.hasErrorCode("XPST0008", "XPST0081")) {
+                        staticError.setErrorCode("XQDY0074");
+                    } else if (staticError.hasErrorCode("XPST0003")) {
+                        //staticError.setErrorCode("XQDY0074");
+                        grumble("Invalid QName in element constructor: " + lex, "XQDY0074", offset);
+                        return new ErrorExpression();
+                    }
+                    staticError.setLocator(makeLocation());
+                    staticError.setIsStaticError(false);
+                    return new ErrorExpression(new XmlProcessingException(staticError));
+                }
+            } else if (vName instanceof QualifiedNameValue) {
+                NamespaceUri uri = ((QualifiedNameValue) vName).getNamespaceURI();
+                elemName = new FingerprintedQName("", uri, ((QualifiedNameValue) vName).getLocalName());
+                elemName.obtainFingerprint(env.getConfiguration().getNamePool());
+            } else {
+                grumble("Element name must be either a string or a QName", "XPTY0004", offset);
+                return new ErrorExpression();
+            }
+            Schema schema = env.getImportedSchema();
+            inst = newFixedNameElement(elemName, schema);
+            if (content == null) {
+                content = Literal.makeEmptySequence();
+            }
+            if (env instanceof QueryModule qm && !qm.isPreserveNamespaces()) {
+                content = new CopyOf(content, false, Validation.PRESERVE, null, true);
+            }
+            ((FixedElement) inst).setContentExpression(content);
+            setLocation(inst, offset);
+            //makeContentConstructor(content, (InstructionWithChildren) inst, offset);
+            return makeTracer(inst, elemName.getStructuredQName());
+        } else {
+            // it really is a computed element constructor: save the namespace context
+            NamespaceResolver ns = new NamespaceResolverWithDefault(
+                    env.getNamespaceResolver(),
+                    env.getDefaultElementNamespace());
+            Schema schema = env.getImportedSchema();
+            inst = newComputedNameElement(name, schema);
+            setLocation(inst);
+            if (content == null) {
+                content = Literal.makeEmptySequence();
+            }
+            if (env instanceof QueryModule qm && !qm.isPreserveNamespaces()) {
+                content = new CopyOf(content, false, Validation.PRESERVE, null, true);
+            }
+            ((ComputedElement) inst).setContentExpression(content);
+            setLocation(inst, offset);
+            //makeContentConstructor(content, (InstructionWithChildren) inst, offset);
+            return makeTracer(inst, null);
+        }
+    }
+
+    private ComputedElement newComputedNameElement(Expression name, Schema schema) {
+        if (env instanceof QueryModule qm) {
+            return new ComputedElement(name, null, schema, null,
+                                       qm.getConstructionMode(),
+                                       qm.isInheritNamespaces(),
+                                       true);
+        } else {
+            return new ComputedElement(name, null, schema, null,
+                                       Validation.PRESERVE,
+                                       true,
+                                       true);
+        }
+    }
+
+    private FixedElement newFixedNameElement(NodeName elemName, Schema schema) {
+        if (env instanceof QueryModule qm) {
+            return new FixedElement(elemName,
+                                    qm.getActiveNamespaceBindings(),
+                                    qm.isInheritNamespaces(),
+                                    true, schema, null,
+                                    qm.getConstructionMode());
+        } else {
+            return new FixedElement(elemName, NamespaceMap.emptyMap(),
+                                    true, true, schema,
+                                    null, Validation.PRESERVE);
+        }
+    }
+
+    /**
+     * Parse an element constructor of the form
+     * <code>element name { expr }</code> or <code>element #qName { expr }</code>.
+     * Either {@code name} or {@code qName}
+     * must be supplied.
+     *
+     * @param name   the lexical QName of the element
+     * @param qName  the structured QName of the element
+     * @param offset the position in the source query
+     * @return the compiled instruction
+     * @throws XPathException if parsing fails
+     */
+
+    private Expression parseNamedElementConstructor(
+            String name, StructuredQName qName, int offset) throws XPathException {
+        NodeName nodeName;
+        if (qName == null) {
+            nodeName = makeNodeName(name, true);
+            nextToken();
+        } else {
+            nodeName = new FingerprintedQName(qName, env.getConfiguration().getNamePool());
+        }
+        Expression content = null;
+        readToken(Token.LCURLY);
+        if (t.currentToken != Token.RCURLY) {
+            content = parseExpression();
+            expect(Token.RCURLY);
+        }
+        nextToken();
+        Schema schema = env.getImportedSchema();
+        FixedElement el2 = newFixedNameElement(nodeName, schema);
+        setLocation(el2, offset);
+        if (content == null) {
+            content = Literal.makeEmptySequence();
+        }
+        if (env instanceof QueryModule qm && !qm.isPreserveNamespaces()) {
+            content = new CopyOf(content, false, Validation.PRESERVE, null, true);
+        }
+        el2.setContentExpression(content);
+        return makeTracer(el2, nodeName.getStructuredQName());
+    }
+
+    /**
+     * Parse an attribute constructor of the form
+     * attribute {expr} {expr}
+     *
+     * @param offset position of the expression in the input
+     * @return the compiled instruction
+     * @throws XPathException if a static error is encountered
+     */
+
+    /*@NotNull*/
+    private Expression parseComputedAttributeConstructor(int offset) throws XPathException {
+        nextToken();
+        Expression name = parseExpression();
+        readToken(Token.RCURLY);
+        readToken(Token.LCURLY);
+        Expression content = null;
+        if (t.currentToken != Token.RCURLY) {
+            content = parseExpression();
+            expect(Token.RCURLY);
+        }
+        nextToken();
+        if (name instanceof Literal) {
+            GroundedValue vName = ((Literal) name).getGroundedValue();
+            if (vName instanceof StringValue && !(vName instanceof AnyURIValue)) {
+                String lex = ((StringValue) vName).getStringValue();
+                if (lex.equals("xmlns") || lex.startsWith("xmlns:")) {
+                    grumble("Cannot create a namespace using an attribute constructor", "XQDY0044", offset);
+                }
+                NodeName attributeName;
+                try {
+                    QNameParser oldQP = getQNameParser();
+                    setQNameParser(oldQP.withUnescaper(null));
+                    attributeName = makeNodeName(lex, false);
+                    setQNameParser(oldQP);
+                } catch (XPathException staticError) {
+                    staticError.setLocator(makeLocation());
+                    if (staticError.hasErrorCode("XPST0008", "XPST0081")) {
+                        staticError.setErrorCode("XQDY0074");
+                    } else if (staticError.hasErrorCode("XPST0003")) {
+                        grumble("Invalid QName in attribute constructor: " + lex, "XQDY0074", offset);
+                        return new ErrorExpression();
+                    }
+                    throw staticError;
+                }
+                if (attributeName.getPrefix().isEmpty() && !attributeName.hasURI(NamespaceUri.NULL)) {
+                    attributeName = new FingerprintedQName("_", attributeName.getNamespaceUri(),
+                                                           attributeName.getLocalPart(),
+                                                           attributeName.getFingerprint());
+                }
+                FixedAttribute fatt = new FixedAttribute(attributeName,
+                                                         Validation.STRIP,
+                                                         null);
+                fatt.setRejectDuplicates();
+                makeSimpleContent(content, fatt, offset);
+                return makeTracer(fatt, null);
+            } else if (vName instanceof QNameValue qnv) {
+                NodeName attributeName = new FingerprintedQName(
+                        qnv.getPrefix(), qnv.getNamespaceURI(), qnv.getLocalName());
+                attributeName.obtainFingerprint(env.getConfiguration().getNamePool());
+                FixedAttribute fatt = new FixedAttribute(attributeName,
+                                                         Validation.STRIP,
+                                                         null);
+                fatt.setRejectDuplicates();
+                makeSimpleContent(content, fatt, offset);
+                return makeTracer(fatt, null);
+            }
+        }
+        ComputedAttribute att = new ComputedAttribute(name,
+                                                      null,
+                                                      Validation.STRIP,
+                                                      null,
+                                                      true);
+        att.setRejectDuplicates();
+        makeSimpleContent(content, att, offset);
+        return makeTracer(att, null);
+    }
+
+    /**
+     * Parse an attribute constructor of the form
+     * <code>attribute name { expr }</code> or <code>attribute #qName { expr }</code>.
+     * Either {@code name} or {@code qName}
+     * must be supplied.
+     *
+     * @param attName the lexical QName of the attribute
+     * @param qName   the structured QName of the attribute
+     * @param offset  position of the expression in the source
+     * @return the parsed expression
+     * @throws XPathException if a static error is found
+     */
+
+    private Expression parseNamedAttributeConstructor(
+            String attName, StructuredQName qName, int offset) throws XPathException {
+        String warningMessage = null;
+        NodeName attributeName;
+        if (qName == null) {
+            if (attName.equals("xmlns") || attName.startsWith("xmlns:")) {
+                warningMessage = "Cannot create a namespace declaration using an attribute constructor";
+            }
+            attributeName = makeNodeName(attName, false);
+            nextToken();
+        } else {
+            attributeName = new FingerprintedQName(qName, env.getConfiguration().getNamePool());
+        }
+
+        if (!attributeName.hasURI(NamespaceUri.NULL) && attributeName.getPrefix().isEmpty()) {
+            // This must be because the name was given as Q{uri}local. Invent a prefix.
+            attributeName = new FingerprintedQName(
+                    attributeName.hasURI(NamespaceUri.XML) ? "xml" : "_",
+                    attributeName.getNamespaceUri(),
+                    attributeName.getLocalPart());
+        }
+        Expression attContent = null;
+        readToken(Token.LCURLY);
+        if (t.currentToken != Token.RCURLY) {
+            attContent = parseExpression();
+            expect(Token.RCURLY);
+        }
+        nextToken();
+        if (warningMessage == null) {
+            FixedAttribute att2 = new FixedAttribute(attributeName,
+                                                     Validation.STRIP,
+                                                     null);
+            att2.setRejectDuplicates();
+            att2.setRetainedStaticContext(env.makeRetainedStaticContext());
+            makeSimpleContent(attContent, att2, offset);
+            return makeTracer(att2, attributeName.getStructuredQName());
+        } else {
+            warning(warningMessage, "XQDY0044");
+            return new ErrorExpression(warningMessage, "XQDY0044", false);
+        }
+    }
+
+    private Expression parseTextNodeConstructor(int offset) throws XPathException {
+        nextToken();
+        Expression value;
+        if (t.currentToken == Token.RCURLY && languageVersion >= 31) {
+            value = Literal.makeEmptySequence();
+        } else {
+            value = parseExpression();
+        }
+        readToken(Token.RCURLY);
+        Expression select = stringify(value, true, env);
+        ValueOf vof = new ValueOf(select, false, true);
+        setLocation(vof, offset);
+        return makeTracer(vof, null);
+    }
+
+    private Expression parseCommentConstructor(int offset) throws XPathException {
+        nextToken();
+        Expression value;
+        if (t.currentToken == Token.RCURLY && languageVersion >= 31) {
+            value = Literal.makeEmptySequence();
+        } else {
+            value = parseExpression();
+        }
+        readToken(Token.RCURLY);
+        Comment com = new Comment();
+        makeSimpleContent(value, com, offset);
+        return makeTracer(com, null);
+    }
+
+    /**
+     * Parse a processing instruction constructor of the form
+     * processing-instruction {expr} {expr}
+     *
+     * @param offset the position of the expression in the source query
+     * @return the compiled instruction
+     * @throws XPathException if parsing fails
+     */
+
+    private Expression parseProcessingInstructionConstructor(int offset) throws XPathException {
+        nextToken();
+        Expression name = parseExpression();
+        readToken(Token.RCURLY);
+        readToken(Token.LCURLY);
+        Expression content = null;
+        if (t.currentToken != Token.RCURLY) {
+            content = parseExpression();
+            expect(Token.RCURLY);
+        }
+        nextToken();
+        ProcessingInstruction pi = new ProcessingInstruction(name);
+        makeSimpleContent(content, pi, offset);
+        return makeTracer(pi, null);
+    }
+
+    /**
+     * Parse a processing instruction constructor of the form
+     * processing-instruction name { expr }
+     *
+     * @param offset position of the expression in the source
+     * @return the parsed expression
+     * @throws XPathException if a static error is found
+     */
+
+    private Expression parseNamedProcessingInstructionConstructor(String target, int offset) throws XPathException {
+        String warningMessage = null;
+        if (target.equalsIgnoreCase("xml")) {
+            warningMessage = "A processing instruction must not be named 'xml' in any combination of upper and lower case";
+        }
+        if (!NameChecker.isValidNCName(target)) {
+            grumble("Invalid processing instruction name " + Err.wrap(target));
+        }
+        Expression piName = new StringLiteral(target);
+        Expression piContent = null;
+        nextToken();
+        readToken(Token.LCURLY);
+        if (t.currentToken != Token.RCURLY) {
+            piContent = parseExpression();
+            expect(Token.RCURLY);
+        }
+        nextToken();
+        if (warningMessage == null) {
+            ProcessingInstruction pi2 = new ProcessingInstruction(piName);
+            makeSimpleContent(piContent, pi2, offset);
+            return makeTracer(pi2, null);
+        } else {
+            warning(warningMessage, "XQDY0064");
+            return new ErrorExpression(warningMessage, "XQDY0064", false);
+        }
+    }
+
+    /**
+     * Parse a computed namespace constructor of the form
+     * namespace {expr}{expr}
+     *
+     * @param offset the location of the expression in the query source
+     * @return the compiled Namespace instruction
+     * @throws XPathException in the event of a syntax error
+     */
+
+    /*@NotNull*/
+    private Expression parseNamespaceConstructor(int offset) throws XPathException {
+        if (languageVersion < 30) {
+            grumble("Namespace node constructors require XQuery 3.0");
+        }
+        nextToken();
+        Expression nameExpr = parseExpression();
+        readToken(Token.RCURLY);
+        readToken(Token.LCURLY);
+        Expression content = null;
+        if (t.currentToken != Token.RCURLY) {
+            content = parseExpression();
+            expect(Token.RCURLY);
+        }
+        nextToken();
+
+        NamespaceConstructor instr = new NamespaceConstructor(nameExpr);
+        setLocation(instr);
+        makeSimpleContent(content, instr, offset);
+        return makeTracer(instr, null);
+    }
+
+    /**
+     * Parse a namespace node constructor of the form
+     * namespace name { expr }
+     *
+     * @param offset the location of the expression in the query source
+     * @return the compiled instruction
+     * @throws XPathException in the event of a syntax error
+     */
+
+    /*@NotNull*/
+    private Expression parseNamedNamespaceConstructor(String prefix, int offset) throws XPathException {
+        if (languageVersion < 30) {
+            grumble("Namespace node constructors require XQuery 3.0");
+        }
+        if (!NameChecker.isValidNCName(prefix)) {
+            grumble("Invalid namespace prefix " + Err.wrap(prefix));
+        }
+        Expression nsName = new StringLiteral(prefix);
+        Expression nsContent = null;
+        nextToken();
+        readToken(Token.LCURLY);
+        if (t.currentToken != Token.RCURLY) {
+            nsContent = parseExpression();
+            expect(Token.RCURLY);
+        }
+        nextToken();
+        NamespaceConstructor instr = new NamespaceConstructor(nsName);
+        makeSimpleContent(nsContent, instr, offset);
+        return makeTracer(instr, null);
+    }
+
+
+    /**
+     * Make the instructions for the children of a node with simple content (attribute, text, PI, etc)
+     *
+     * @param content the expression making up the simple content
+     * @param inst    the skeletal instruction for creating the node
+     * @param offset  the character position of this construct within the source query
+     */
+
+    protected void makeSimpleContent(Expression content, SimpleNodeConstructor inst, int offset) {
+        if (content == null) {
+            inst.setSelect(new StringLiteral(StringValue.EMPTY_STRING));
+        } else {
+            inst.setSelect(stringify(content, false, env));
+        }
+        setLocation(inst, offset);
+    }
+
+    /**
+     * Convert an expression so it generates a space-separated sequence of strings
+     *
+     * @param exp           the expression that calculates the content
+     * @param noNodeIfEmpty if true, no node is produced when the value of the content
+     *                      expression is an empty sequence. If false, the effect of supplying an empty sequence
+     *                      is that a node is created whose string-value is a zero-length string. Set to true for
+     *                      text node constructors, false for other kinds of node.
+     * @param env           the static context
+     * @return an expression that computes the content and converts the result to a character string
+     */
+
+    public static Expression stringify(Expression exp, boolean noNodeIfEmpty, StaticContext env) {
+        // Compare with XSLLeafNodeConstructor.makeSimpleContentConstructor
+        // Fast path if given a string literal
+        if (exp instanceof StringLiteral) {
+            return exp;
+        }
+        if (exp.getLocalRetainedStaticContext() == null) {
+            exp.setRetainedStaticContext(env.makeRetainedStaticContext());
+        }
+        // Atomize the result
+        exp = Atomizer.makeAtomizer(exp, null);
+        // Convert each atomic value to a string
+        exp = new AtomicSequenceConverter(exp, BuiltInAtomicType.STRING);
+        //((AtomicSequenceConverter) exp).allocateConverter(config, false);
+        // Join the resulting strings with a separator
+        exp = SystemFunction.makeCall("string-join", exp.getRetainedStaticContext(), exp, new StringLiteral(StringValue.SINGLE_SPACE));
+        if (noNodeIfEmpty) {
+            ((StringJoin) ((SystemFunctionCall) exp).getTargetFunction()).setReturnEmptyIfEmpty(true);
+        }
+        // All that's left for the instruction to do is to construct the right kind of node
+        return exp;
+    }
+
+
+    private void checkUnreserved(String name) throws XPathException {
+        if (reservedNames.contains(name)) {
+            grumble("Keyword `" + name + "` is reserved in XQuery 4.0 - it needs to be written in quotes");
+        }
+    }
+
 
     protected Expression parseDirectPIConstructor() throws XPathException {
         grumble("Node constructor expressions are allowed only in XQuery, not in XPath");

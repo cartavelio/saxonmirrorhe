@@ -1509,7 +1509,7 @@ public class QueryModule implements StaticContext {
      */
 
     /*@NotNull*/
-    NamespaceMap getActiveNamespaceBindings() {
+    public NamespaceMap getActiveNamespaceBindings() {
         if (constructedNamespaces.isEmpty()) {
             return NamespaceMap.emptyMap();
         }
