@@ -500,7 +500,7 @@ public class FleetingNode implements NodeInfo {
                     return EmptyIterator.ofNodes();
                 }
                 return new Navigator.AxisFilter(
-                        new Navigator.AncestorEnumeration(this, false),
+                        new Navigator.AncestorIterator(this, false),
                         nodeTest);
 
             case AxisInfo.ANCESTOR_OR_SELF:
@@ -508,7 +508,7 @@ public class FleetingNode implements NodeInfo {
                     return Navigator.filteredSingleton(this, nodeTest);
                 }
                 return new Navigator.AxisFilter(
-                        new Navigator.AncestorEnumeration(this, true),
+                        new Navigator.AncestorIterator(this, true),
                         nodeTest);
 
             case AxisInfo.PARENT:

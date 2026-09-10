@@ -342,7 +342,7 @@ public class DominoAttr implements NodeInfo {
 
             case AxisInfo.FOLLOWING:
                 return new Navigator.AxisFilter(
-                        new Navigator.FollowingEnumeration(this),
+                        new Navigator.FollowingIterator(this),
                         nodeTest);
 
             case AxisInfo.PARENT:
@@ -350,7 +350,7 @@ public class DominoAttr implements NodeInfo {
 
             case AxisInfo.PRECEDING:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, false),
+                        new Navigator.PrecedingIterator(this, false),
                         nodeTest);
 
             case AxisInfo.SELF:
@@ -358,7 +358,7 @@ public class DominoAttr implements NodeInfo {
 
             case AxisInfo.PRECEDING_OR_ANCESTOR:
                 return new Navigator.AxisFilter(
-                        new Navigator.PrecedingEnumeration(this, true),
+                        new Navigator.PrecedingIterator(this, true),
                         nodeTest);
             default:
                 throw new IllegalArgumentException("Unknown axis number " + axisNumber);
