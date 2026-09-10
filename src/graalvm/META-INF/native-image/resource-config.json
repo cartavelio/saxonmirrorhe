@@ -41,6 +41,9 @@
       "pattern":"\\Qnet/sf/saxon/data/categories.xml\\E"
     },
     {
+      "pattern":"\\Qnet/sf/saxon/data/unicodeBlocks.xml\\E"
+    },
+    {
       "pattern":"\\Qnet/sf/saxon/data/casevariants.xml\\E"
     },
     {
