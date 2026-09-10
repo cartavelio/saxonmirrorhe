@@ -36,10 +36,15 @@ import java.util.Objects;
  * XPath 2.0 data model. Atomic values belong to one of the 19 primitive types
  * defined in XML Schema; or they are of type xs:untypedAtomic; or they are
  * "external objects", representing a Saxon extension to the XPath 2.0 type system.
+ *
  * <p>The AtomicValue class contains some methods that are suitable for applications
  * to use, and many others that are designed for internal use by Saxon itself.
  * These have not been fully classified. At present, therefore, none of the methods on this
  * class should be considered to be part of the public Saxon API.</p>
+ *
+ * <p>The AtomicValue class and its subclasses are essentially immutable (since 12.x).
+ * There is an exception, in that {@link DecimalValue} caches the result of converting
+ * its value to a double internally.</p>
  */
 
 public abstract class AtomicValue

@@ -14,7 +14,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.str.*;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -425,7 +424,6 @@ public class XMLEmitter extends Emitter {
     public void startElement(NodeName elemName, SchemaType type,
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
-        Instrumentation.count("ELEMENTS OUT: ");
         previousAtomic = false;
         if (!started) {
             openDocument();

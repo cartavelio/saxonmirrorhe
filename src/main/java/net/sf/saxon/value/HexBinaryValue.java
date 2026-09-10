@@ -159,6 +159,12 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
         return binaryValue.length;
     }
 
+    /*@Nullable*/
+    @Override
+    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
+        return this;
+    }
+
     /**
      * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
      * If the ordered parameter is set to true, the result will be a Comparable and will support a compareTo()
@@ -173,12 +179,6 @@ public class HexBinaryValue extends AtomicValue implements AtomicMatchKey, XPath
      * @param implicitTimezone to be used for comparing dates/times with no timezone
      * @return a key used for performing the comparison
      */
-
-    /*@Nullable*/
-    @Override
-    public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
-        return this;
-    }
 
     @Override
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) {

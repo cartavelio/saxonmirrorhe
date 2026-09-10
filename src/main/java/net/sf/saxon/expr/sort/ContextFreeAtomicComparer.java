@@ -10,7 +10,6 @@ package net.sf.saxon.expr.sort;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.ContextFreeAtomicValue;
 
 
 /**
@@ -69,13 +68,14 @@ public class ContextFreeAtomicComparer implements AtomicComparer {
 
     @Override
     public int compareAtomicValues(AtomicValue a, AtomicValue b) {
-        if (a == null) {
-            return (b == null ? 0 : -1);
-        } else if (b == null) {
-            return +1;
-        }
-        return ((ContextFreeAtomicValue) a).getXPathComparable()
-                .compareTo(((ContextFreeAtomicValue) b).getXPathComparable());
+//        if (a == null) {
+//            return (b == null ? 0 : -1);
+//        } else if (b == null) {
+//            return +1;
+//        }
+//        return ((ContextFreeAtomicValue) a).getXPathComparable()
+//                .compareTo(((ContextFreeAtomicValue) b).getXPathComparable());
+        return ((XPathComparable)a).compareTo((XPathComparable)b);
     }
 
     /**
