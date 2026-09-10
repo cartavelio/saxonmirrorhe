@@ -476,6 +476,17 @@ History
         <field>
             <xsl:apply-templates select="@*"/>
             <xsl:call-template name="type-attributes"/>
+            <xsl:if test="d:purpose|d:description|d:since|d:see|d:deprecated">
+                <comment>
+                    <xsl:apply-templates select="d:purpose"/>
+                    <xsl:if test="d:description">
+                        <body>
+                            <xsl:call-template name="full-comment"/>
+                        </body>
+                    </xsl:if>
+                    <xsl:apply-templates select="d:since|d:see|d:deprecated"/>
+                </comment>
+            </xsl:if>
         </field>
     </xsl:template>
     
