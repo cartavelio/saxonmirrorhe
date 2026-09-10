@@ -3113,7 +3113,7 @@ public class XPathParser {
                 return parseInlineFunction(annotations);
             }
 
-        } else if (token == Token.HASH && isAllowXPath40Syntax()) {
+        } else if (token == Token.HASH_BEFORE_NAME && isAllowXPath40Syntax()) {
             StructuredQName qn = parseVariableName();  // it does the job...
             return Literal.makeLiteral(new QNameValue(qn,BuiltInAtomicType.QNAME));
 

@@ -379,7 +379,10 @@ public final class Tokenizer {
                     nextToken = Token.PERCENT;
                     return;
                 case '(':
-                    if (isFollowedBy('#')) {
+                    if (isFollowedBy('#') &&
+                            (languageLevel < 40 ||
+                                     isFollowedBy("# ") || isFollowedBy("#\t") ||
+                                     isFollowedBy("#\n") || isFollowedBy("#\r"))) {
                         int pragmaStart = inputOffset-1;
                         inputOffset++;
                         int nestingDepth = 1;
@@ -591,7 +594,17 @@ public final class Tokenizer {
                     nextToken = Token.VBAR;
                     return;
                 case '#':
-                    nextToken = Token.HASH;
+                    if (inputOffset < inputLength
+                            && languageLevel >= 40
+                            && NameChecker.isNCNameStartChar(input.charAt(inputOffset))) {
+                        nextToken = Token.HASH_BEFORE_NAME;
+                        // indicates that the "#" is the start of a QName literal. We only
+                        // return this if the "#" is followed by a name start character, but
+                        // we leave the parser to read the immediately-following EQName as
+                        // if it were a separate token.
+                    } else {
+                        nextToken = Token.HASH;
+                    }
                     return;
                 case '.':
                     if (isFollowedBy('.')) {
