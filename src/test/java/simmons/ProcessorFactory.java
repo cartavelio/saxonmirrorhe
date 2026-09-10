@@ -20,7 +20,7 @@ import java.net.URI;
  */
 public class ProcessorFactory {
 
-  static Processor createProcessor() {
+  static Processor createProcessor(String DIR) {
     Processor processor = new Processor(true);
     processor.setConfigurationProperty("http://saxon.sf.net/feature/schema-validation-mode", "lax");
     SchemaManager schemaManager = processor.getSchemaManager();
@@ -56,7 +56,7 @@ public class ProcessorFactory {
         }
         String prefix = "http://";
         if (location.startsWith(prefix)) {
-          File localFile = new File("schemas", location.substring(prefix.length()));
+          File localFile = new File(DIR + "schemas", location.substring(prefix.length()));
           if (localFile.canRead()) {
             try {
               return new StreamSource[] {new StreamSource(new FileInputStream(localFile), location)};
