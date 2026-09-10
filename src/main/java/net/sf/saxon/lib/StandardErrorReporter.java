@@ -399,10 +399,10 @@ public class StandardErrorReporter
             XPathParser.NestedLocation nestedLoc = (XPathParser.NestedLocation)locator;
             Location outerLoc = nestedLoc.getContainingLocation();
 
-            int line = nestedLoc.getLocalLineNumber();
-            int column = nestedLoc.getColumnNumber();
-            String lineInfo = line <= 0 ? "" : "on line " + line + ' ';
-            String columnInfo = column <= 0 ? "" : "at " + (line <= 0 ? "char " : "column ") + column + ' ';
+            int line = nestedLoc.getLocalLineNumber() + 1;
+            int column = nestedLoc.getColumnNumber() + 1;
+            String lineInfo = line <= 1 ? "" : "on line " + line + ' ';
+            String columnInfo = column <= 1 ? "" : "at " + (line <= 1 ? "char " : "column ") + column + ' ';
             String nearBy = nestedLoc.getNearbyText();
 
             Expression failingExpression = null;
@@ -514,11 +514,7 @@ public class StandardErrorReporter
      */
 
     public String getExpandedMessage(XmlProcessingError err) {
-        String preamble = formatErrorCode(err);
-        if (!preamble.isEmpty()) {
-            preamble += " ";
-        }
-        String message = preamble + err.getMessage();
+        String message = formatErrorCode(err) + " " + err.getMessage();
         message = formatNestedMessages(err, message);
         return message;
     }
