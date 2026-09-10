@@ -21,7 +21,6 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -541,7 +540,7 @@ public class SpecificFunctionType extends AnyFunctionType {
     }
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
         SequenceType[] a2 = new SequenceType[argTypes.length];
         for (int i = 0; i < a2.length; i++) {
             a2[i] = argTypes[i].resolveAliases(env, path);

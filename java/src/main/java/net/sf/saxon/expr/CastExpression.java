@@ -21,8 +21,11 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
 
+import java.util.Stack;
 import java.util.function.Supplier;
 
 
@@ -57,6 +60,18 @@ public class CastExpression extends CastingExpression implements Callable {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+
+        if (getTargetType() instanceof DraftItemType draft) {
+            ItemType resolved = getTargetType().resolveAliases(visitor.getStaticContext(), new Stack<>());
+            if (resolved instanceof AtomicType) {
+                setTargetType((AtomicType) resolved);
+            } else if (resolved instanceof CastingTarget target) {
+                return XPathParser.makeCastingExpression(getBaseExpression(), OperatorSymbol.CAST_AS, target, visitor.getStaticContext(), allowsEmpty());
+            } else {
+                throw new XPathException("The type with alias " + draft.getEQName() + " is not a suitable type for casting");
+            }
+        }
+
         getOperand().typeCheck(visitor, contextInfo);
         SequenceType atomicType = SequenceType.makeSequenceType(BuiltInAtomicType.ANY_ATOMIC, getCardinality());
 

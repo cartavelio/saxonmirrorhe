@@ -44,7 +44,7 @@ import java.util.function.Supplier;
 
 public final class ItemChecker extends UnaryExpression {
 
-    private final ItemType requiredItemType;
+    private ItemType requiredItemType;
     private final Supplier<RoleDiagnostic> roleSupplier;
 
     /**
@@ -109,17 +109,13 @@ public final class ItemChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        ItemType req2 = requiredItemType.resolveAliases(visitor.getStaticContext(), new Stack<>());
-        if (req2 != requiredItemType) {
-            return new ItemChecker(getBaseExpression(), req2, roleSupplier).typeCheck(visitor, contextInfo);
-        }
+        requiredItemType = requiredItemType.resolveAliases(visitor.getStaticContext(), new Stack<>());
         getOperand().typeCheck(visitor, contextInfo);
         Expression operand = getBaseExpression();
 
-        if (operand instanceof Block) {
+        if (operand instanceof Block block) {
             // Do the item-checking on each operand of the block separately (it might not be needed on all items)
             // This is particularly needed for streamability analysis of xsl:map
-            Block block = (Block)operand;
             List<Expression> checkedOperands = new ArrayList<>();
             for (Operand o : block.operands()) {
                 ItemChecker checkedOp = new ItemChecker(o.getChildExpression(), requiredItemType, roleSupplier);

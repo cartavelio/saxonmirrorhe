@@ -1,6 +1,7 @@
 package net.sf.saxon.type;
 
 import net.sf.saxon.expr.StaticContext;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 
@@ -28,8 +29,23 @@ public class DraftItemType extends ErrorType {
         return name;
     }
 
+    @Override
+    public String getName() {
+        return name.getLocalPart();
+    }
+
+    @Override
+    public NamespaceUri getTargetNamespace() {
+        return name.getNamespaceUri();
+    }
+
     public String toString() {
         return "named item type " + name.getEQName();
+    }
+
+    @Override
+    public String getEQName() {
+        return name.getEQName();
     }
 
     /**
@@ -42,7 +58,7 @@ public class DraftItemType extends ErrorType {
      */
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
         ItemType target = env.resolveTypeAlias(getTargetName());
         if (target == null) {
             throw new XPathException("Item type " + name.getEQName() + " is not defined in the static context " + getTargetName(), "XPST0051");

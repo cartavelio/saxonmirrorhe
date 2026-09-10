@@ -2,7 +2,6 @@ package net.sf.saxon.ma.jnode;
 
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.PlainType;
@@ -120,7 +119,7 @@ public class SpecificJNodeType extends JNodeType {
     }
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
         SequenceType v2 = valueType.resolveAliases(env, path);
         if (v2 != valueType) {
             return new SpecificJNodeType(selector, v2);

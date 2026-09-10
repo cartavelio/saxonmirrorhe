@@ -13,7 +13,6 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -376,7 +375,7 @@ public class MapType extends AnyFunctionType {
 
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
         ItemType k2 = keyType.resolveAliases(env, path);
         if (!k2.isPlainType()) {
             throw new XPathException("Key type " + keyType + " must be an atomic or pure union type: found " + keyType, "XPST0152");

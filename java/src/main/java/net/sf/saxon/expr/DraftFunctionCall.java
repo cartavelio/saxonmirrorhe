@@ -10,7 +10,9 @@ package net.sf.saxon.expr;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.DynamicPartialApply;
 import net.sf.saxon.functions.hof.FunctionLiteral;
@@ -21,6 +23,8 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpUsing;
+import net.sf.saxon.type.CastingTarget;
+import net.sf.saxon.type.ItemType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -234,6 +238,14 @@ public class DraftFunctionCall extends DraftExpression {
         if (queryModule.getConfiguration().isDisabledFunction(qName)) {
             throw new XPathException("Function " + qName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017")
                     .withLocation(getLocation());
+        }
+
+        if (arity == 1) {
+            ItemType targetType = queryModule.resolveTypeAlias(qName);
+            if (targetType instanceof CastingTarget target) {
+                return XPathParser.makeCastingExpression(
+                        getArguments()[0], OperatorSymbol.CAST_AS, target, queryModule, true);
+            }
         }
 
         SymbolicName.F functionName = new SymbolicName.F(qName, arity);

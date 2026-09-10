@@ -11,7 +11,6 @@ import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.MultipleNodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
@@ -471,7 +470,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     }
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
         List<ItemType> members = new ArrayList<>(memberTypes);
         boolean changed = false;
         for (ItemType member : memberTypes) {

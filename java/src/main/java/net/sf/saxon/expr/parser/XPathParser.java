@@ -1078,7 +1078,7 @@ public class XPathParser {
                     if (allowEmpty) {
                         nextToken();
                     }
-                    lhs = makeSingleTypeExpression(lhs, operator, at, allowEmpty);
+                    lhs = makeCastingExpression(lhs, operator, at, env, allowEmpty);
                     setLocation(lhs, offset);
                     if (getCurrentOperatorPrecedence() >= prec) {
                         grumble("Left operand of '" + t.currentToken + "' needs parentheses");
@@ -1301,7 +1301,7 @@ public class XPathParser {
 
     }
 
-    private Expression makeSingleTypeExpression(Expression lhs, OperatorSymbol operator, CastingTarget type, boolean allowEmpty)
+    public static Expression makeCastingExpression(Expression lhs, OperatorSymbol operator, CastingTarget type, StaticContext env, boolean allowEmpty)
             throws XPathException {
         if (type instanceof AtomicType && !(type == ErrorType.getInstance())) {
             switch (operator) {
@@ -1322,7 +1322,7 @@ public class XPathParser {
                 default:
                     throw new IllegalArgumentException();
             }
-        } else if (languageVersion >= 30) {
+        } else if (env.getXPathVersion() >= 30) {
             switch (operator) {
                 case CASTABLE_AS:
                     if (type instanceof UnionType) {
@@ -2121,6 +2121,9 @@ public class XPathParser {
 
             SchemaType st = env.getImportedSchema().getSchemaType(new StructuredQName("", uri, local));
             if (st == null) {
+                if (languageVersion >= 40 && language == ParsedLanguage.XQUERY) {
+                    return new DraftItemType(sq);
+                }
                 if (languageVersion >= 30) {
                     grumble("Unknown simple type " + qname, "XQST0052");
                 } else {

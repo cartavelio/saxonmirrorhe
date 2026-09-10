@@ -10,7 +10,6 @@ package net.sf.saxon.type;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.coercion.CoercionPlan;
@@ -233,7 +232,7 @@ public interface ItemType {
      * @return the item type after resolving any item type name references
      */
 
-    default ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+    default ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
         return this;
     }
 

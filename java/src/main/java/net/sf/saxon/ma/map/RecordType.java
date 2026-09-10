@@ -807,9 +807,14 @@ public class RecordType implements FunctionItemType {
     }
 
     @Override
-    public ItemType resolveAliases(StaticContext env, Stack<StructuredQName> path) throws XPathException {
+    public ItemType resolveAliases(StaticContext env, Stack<Object> path) throws XPathException {
         List<SequenceType> fieldTypes2 = new ArrayList<>(fieldTypes.size());
         boolean changed = false;
+        if (path.contains(this)) {
+            // Record types can be recursive, need to ensure we terminate
+            return this;
+        }
+        path.push(this);
         for (String s : fieldNamesInOrder) {
             SequenceType oldType = fieldTypes.get(s);
             SequenceType newType = oldType.resolveAliases(env, path);
@@ -818,6 +823,7 @@ public class RecordType implements FunctionItemType {
             }
             fieldTypes2.add(newType);
         }
+        path.pop();
         if (changed) {
             return new RecordType(fieldNamesInOrder, fieldTypes2, optionalFields, _extensible, name);
         }

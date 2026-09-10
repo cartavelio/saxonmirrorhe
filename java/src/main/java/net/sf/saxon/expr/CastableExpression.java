@@ -19,6 +19,7 @@ import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Stack;
 import java.util.function.Supplier;
 
 /**
@@ -48,6 +49,18 @@ public final class CastableExpression extends CastingExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+
+        if (getTargetType() instanceof DraftItemType draft) {
+            ItemType resolved = getTargetType().resolveAliases(visitor.getStaticContext(), new Stack<>());
+            if (resolved instanceof AtomicType) {
+                setTargetType((AtomicType) resolved);
+            } else if (resolved instanceof CastingTarget target) {
+                return XPathParser.makeCastingExpression(getBaseExpression(), OperatorSymbol.CASTABLE_AS, target, visitor.getStaticContext(), allowsEmpty());
+            } else {
+                throw new XPathException("The type with alias " + draft.getEQName() + " is not a suitable type for casting");
+            }
+        }
+
         getOperand().typeCheck(visitor, contextInfo);
         SequenceType atomicType = SequenceType.ATOMIC_SEQUENCE;
 

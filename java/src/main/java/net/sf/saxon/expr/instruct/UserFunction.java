@@ -11,13 +11,17 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.sort.AtomicMatcher;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.query.AnnotationList;
+import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -28,10 +32,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -643,6 +644,18 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     }
 
     public void typeCheck(ExpressionVisitor visitor) throws XPathException {
+
+        // In XQuery, it may be necessary to resolve references to declared item types
+
+        if (visitor.getStaticContext() instanceof QueryModule qm) {
+            for (UserFunctionParameter param : parameterDefinitions) {
+                SequenceType type = param.getRequiredType();
+                SequenceType resolved = type.resolveAliases(qm, new Stack<>());
+                param.setRequiredType(resolved);
+            }
+            declaredResultType = declaredResultType.resolveAliases(qm, new Stack<>());
+        }
+
         Expression exp = getBody();
         if (exp instanceof ValueOf
                 && ((ValueOf) exp).getSelect().getItemType().isAtomicType()

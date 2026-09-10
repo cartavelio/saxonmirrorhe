@@ -212,11 +212,13 @@ public class XQueryParser extends XPathParser {
             for (GlobalVariable var : env.getPackageData().getGlobalVariableList()) {
                 if (languageVersion >= 40 && var.getRequiredType() != SequenceType.ANY_SEQUENCE) {
                     var.setRequiredType(var.getRequiredType().resolveAliases(env, new Stack<>()));
-                    TypeChecker checker = env.getConfiguration().getTypeChecker(false);
-                    ExpressionVisitor visitor = ExpressionVisitor.make(env);
-                    Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, var.getVariableQName().getDisplayName(), 0);
-                    Expression body = checker.staticTypeCheck(var.getBody(), var.getRequiredType(), role, visitor);
-                    var.setBody(body);
+                    if (var.getBody() != null) {
+                        TypeChecker checker = env.getConfiguration().getTypeChecker(false);
+                        ExpressionVisitor visitor = ExpressionVisitor.make(env);
+                        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, var.getVariableQName().getDisplayName(), 0);
+                        Expression body = checker.staticTypeCheck(var.getBody(), var.getRequiredType(), role, visitor);
+                        var.setBody(body);
+                    }
                 }
             }
 
