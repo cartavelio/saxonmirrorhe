@@ -748,9 +748,9 @@ def testCaseVariantFileLoads(saxonproc):
     assert executable is not None
 
 
-def testNamedTemplateToFileDefault(saxonproc):
+def testNamedTemplateToFileDefault(tmp_path, saxonproc):
     trans = saxonproc.new_xslt30_processor()
-    trans.set_cwd(os.getcwd() + '/')
+    trans.set_cwd(str(tmp_path))
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     executable = trans.compile_stylesheet(stylesheet_text='''
      <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -783,9 +783,10 @@ def testNamedTemplateToFileDefault(saxonproc):
              ''')
     assert executable is not None
 
-    executable.call_template_returning_file(output_file="result_For_call_template.xml")
-    assert isfile("result_For_call_template.xml") == True
+    result_file_name = "result_For_call_template.xml"
 
+    executable.call_template_returning_file(output_file=result_file_name)
+    assert isfile(tmp_path / result_file_name) == True
 
 def testUseAssociated(saxonproc, data_dir):
     try:
@@ -1135,17 +1136,17 @@ def testResultDocumentWitJson(saxonproc):
     assert isinstance(rdocs_map[keysList[0]].head, PyXdmMap)
 
 
-def testApplyTemplatesToFile(saxonproc):
+def testApplyTemplatesToFile(tmp_path, saxonproc):
     xsl = "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>  <xsl:template match='a'> <c>d</c>  </xsl:template></xsl:stylesheet>"
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text=xsl)
     inputDoc = saxonproc.parse_xml(xml_text="<a>b</a>")
     inputDoc is not None
-    executable.set_cwd('.')
+    executable.set_cwd(str(tmp_path))
     executable.set_output_file("output123.xml")
     executable.set_initial_match_selection(xdm_value=inputDoc)
     executable.apply_templates_returning_file(output_file="output123.xml")
-    assert isfile("output123.xml") == True
+    assert isfile(tmp_path / "output123.xml") == True
 
 
 '''@pytest.mark.skip('Error: Test can only run with a license file present')'''
@@ -1342,9 +1343,9 @@ def test_return_document_node(saxonproc):
         assert result.node_kind == DOCUMENT
 
 
-def testxQuery1(saxonproc, data_dir):
+def testxQuery1(tmp_path, saxonproc, data_dir):
     query_proc = saxonproc.new_xquery_processor()
-    query_proc.set_cwd(os.getcwd())
+    query_proc.set_cwd(str(tmp_path))
     query_proc.clear_properties()
     query_proc.clear_parameters()
     xmlFile = os.path.join(data_dir, "cat.xml")
@@ -1354,22 +1355,20 @@ def testxQuery1(saxonproc, data_dir):
     assert result is not None
     print(result)
 
-    print(os.getcwd())
-    query_proc.run_query_to_file(output_file_name="catOutput.xml")
-    assert os.path.exists("catOutput.xml")
-    node = saxonproc.parse_xml(xml_file_name='catOutput.xml')
+    cat_output_filename = "catOutput.xml"
+    cat_output_path = tmp_path / cat_output_filename
+    query_proc.run_query_to_file(output_file_name = cat_output_filename)
+    assert cat_output_path.is_file()
+    node = saxonproc.parse_xml(xml_file_name = str(cat_output_path))
     assert node is not None
     xp = saxonproc.new_xpath_processor()
     xp.set_context(xdm_item=node)
     assert xp.effective_boolean_value("/out/text()=3")
-    if os.path.exists('catOutput.xml'):
-        os.remove("catOutput.xml")
 
-
-def testxQuery2(saxonproc, data_dir):
+def testxQuery2(tmp_path, saxonproc, data_dir):
     query_proc = saxonproc.new_xquery_processor()
-    query_proc.set_cwd(os.getcwd() + '/')
-    saxonproc.set_cwd(os.getcwd() + '/')
+    query_proc.set_cwd(str(tmp_path))
+    saxonproc.set_cwd(str(tmp_path))
     query_proc.clear_properties()
     query_proc.clear_parameters()
     xmlFile = os.path.join(data_dir, "cat.xml")
@@ -1379,18 +1378,17 @@ def testxQuery2(saxonproc, data_dir):
     assert result is not None
     print(result)
 
-    print(os.getcwd())
-    query_proc.run_query_to_file(output_file_name="catOutput2.xml")
-    assert os.path.exists("catOutput2.xml")
+    cat_output_filename = "catOutput2.xml"
+    cat_output_path = tmp_path / cat_output_filename
+    query_proc.run_query_to_file(output_file_name = cat_output_filename)
+    assert cat_output_path.is_file()
     builder = saxonproc.new_document_builder()
 
-    node = builder.parse_xml(xml_file_name='catOutput2.xml')
+    node = builder.parse_xml(xml_file_name = str(cat_output_path))
     assert node is not None
     xp = saxonproc.new_xpath_processor()
     xp.set_context(xdm_item=node)
     assert xp.effective_boolean_value("/out/text()=3")
-    if os.path.exists('catOutput2.xml'):
-        os.remove("catOutput2.xml")
 
 
 def testxQuery_encoding1(saxonproc, data_dir):
@@ -1770,7 +1768,7 @@ def test_declare_variable_value2(saxonproc):
         assert 'No value has been supplied for variable $s1' in str(err)
 
 
-def test_packages(data_dir):
+def test_packages(tmp_path, data_dir):
     sp = PySaxonProcessor(license=True)
     xsl = """\
     <xsl:package name = \"package-002.xsl\" package-version = \"2.1.0.5\"
@@ -1785,11 +1783,12 @@ def test_packages(data_dir):
     </xsl:template>
     </xsl:package>
     """
+    package_file = tmp_path / 'package02.xsltpack'
     xsltproc = sp.new_xslt30_processor()
-    xsltproc.compile_stylesheet(stylesheet_text=xsl, save=True, output_file='package02.xsltpack')
+    xsltproc.compile_stylesheet(stylesheet_text=xsl, save=True, output_file=str(package_file))
     xsltproc = None
     xsltproc2 = sp.new_xslt30_processor()
-    xsltproc2.transform_to_string(source_file=os.path.join(data_dir, "books.xml"), stylesheet_file="package02.xsltpack")
+    xsltproc2.transform_to_string(source_file=os.path.join(data_dir, "books.xml"), stylesheet_file=str(package_file))
 
 
 @pytest.mark.skip('Error: SaxonDll.processor is nullptr in constructor(configFile)')
