@@ -545,9 +545,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             MapItem map = (MapItem) arguments[0].head();
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
-                DictionaryMap kvp = new DictionaryMap(2);
-                kvp.initialPut("key", pair.key);
-                kvp.initialPut("value", pair.value);
+                ShapedMap kvp = new ShapedMap(Shape.KEY_VALUE_PAIR, pair.key, pair.value);
                 results = results.appendSequence(kvp);
             }
             return results;

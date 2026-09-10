@@ -20,6 +20,7 @@ import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.*;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -247,11 +248,10 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         }
 
-        DictionaryMap map = new DictionaryMap();
-        map.initialPut("variables", variablesMap);
-        map.initialPut("functions", functionsMap);
-        return map;
+        return new ShapedMap(RESULT_SHAPE, variablesMap, functionsMap);
     }
+
+    private static final Shape RESULT_SHAPE = new Shape(new Twine8("variables"), new Twine8("functions"));
 
 }
 
