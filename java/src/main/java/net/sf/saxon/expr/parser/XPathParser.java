@@ -1483,7 +1483,7 @@ public class XPathParser {
             if (iterand == ForQualifier.FOR_MEMBER) {
                 collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
             } else {
-                collection = MapFunctionSet.getInstance(40).makeFunction("pairs", 1).makeFunctionCall(collection);
+                collection = MapFunctionSet.getInstance(40).makeFunction("entries", 1).makeFunctionCall(collection);
             }
             result.setRequiredType(SequenceType.SINGLE_ITEM);
             result.setVariableQName(
@@ -1495,7 +1495,7 @@ public class XPathParser {
                 declareRangeVariable(positionBinding);
                 numberOfVariables++;
             }
-            if (iterand == ForQualifier.FOR_MEMBER || iterand == ForQualifier.FOR_VALUE) {
+            if (iterand == ForQualifier.FOR_MEMBER) {
                 LetExpression temp = new LetExpression();
                 setLocation(temp, offset);
                 temp.setRequiredType(requiredType);
@@ -1508,15 +1508,26 @@ public class XPathParser {
                 numberOfVariables++;
                 result.setAction(temp);
                 target = temp;
+            } else if (iterand == ForQualifier.FOR_VALUE) {
+                LetExpression temp = new LetExpression();
+                setLocation(temp, offset);
+                temp.setRequiredType(requiredType);
+                temp.setVariableQName(varQName);
+                LocalVariableReference tempRef = new LocalVariableReference(result);
+                Expression valueGetter = MapFunctionSet.getInstance(40).makeFunction("items", 1).makeFunctionCall(tempRef);
+                temp.setSequence(valueGetter);
+                declareRangeVariable(temp);
+                numberOfVariables++;
+                result.setAction(temp);
+                target = temp;
             } else { //if (iterand == ForExpression.Qualifier.FOR_KEY) {
                 LetExpression temp = new LetExpression();
                 setLocation(temp, offset);
                 temp.setRequiredType(requiredType);
                 temp.setVariableQName(varQName);
                 LocalVariableReference tempRef = new LocalVariableReference(result);
-                LookupExpression lookup = new LookupExpression(tempRef,
-                                                               new StringLiteral("key"));
-                temp.setSequence(lookup);
+                Expression keyGetter = MapFunctionSet.getInstance(40).makeFunction("keys", 1).makeFunctionCall(tempRef);
+                temp.setSequence(keyGetter);
                 declareRangeVariable(temp);
                 numberOfVariables++;
                 result.setAction(temp);
@@ -1527,9 +1538,8 @@ public class XPathParser {
                     temp2.setRequiredType(requiredType2 == null ? SequenceType.ANY_SEQUENCE : requiredType2);
                     temp2.setVariableQName(varQName2);
                     LocalVariableReference tempRef2 = new LocalVariableReference(result);
-                    LookupExpression lookup2 = new LookupExpression(tempRef2,
-                                                                   new StringLiteral("value"));
-                    temp2.setSequence(lookup2);
+                    Expression valueGetter = MapFunctionSet.getInstance(40).makeFunction("items", 1).makeFunctionCall(tempRef2);
+                    temp2.setSequence(valueGetter);
                     declareRangeVariable(temp2);
                     numberOfVariables++;
                     target.setAction(temp2);

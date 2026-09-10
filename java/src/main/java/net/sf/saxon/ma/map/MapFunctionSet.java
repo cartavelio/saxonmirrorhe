@@ -578,6 +578,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
+            if (map instanceof SingleEntryMap) {
+                // Special-case optimization
+                return ((SingleEntryMap)map).getValue();
+            }
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 results = results.appendSequence(pair.value);
@@ -665,6 +669,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             assert map != null;
+            if (map instanceof SingleEntryMap) {
+                // special-case optimization
+                return ((SingleEntryMap)map).getKey();
+            }
             return SequenceTool.toLazySequence(map.keys());
         }
     }

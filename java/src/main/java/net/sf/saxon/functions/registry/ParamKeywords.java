@@ -314,9 +314,9 @@ public class ParamKeywords {
         mapParamNames.put("keys", "map");
         mapParamNames.put("keys-where", "map|predicate");
         mapParamNames.put("merge", "maps|options");
-        mapParamNames.put("of-pairs", "input|options");
-        mapParamNames.put("pair", "key|value");
-        mapParamNames.put("pairs", "map");
+        //mapParamNames.put("of-pairs", "input|options");
+        //mapParamNames.put("pair", "key|value");
+        //mapParamNames.put("pairs", "map");
         mapParamNames.put("put", "map|key|value");
         mapParamNames.put("remove", "map|keys");
         mapParamNames.put("replace", "map|key|action");

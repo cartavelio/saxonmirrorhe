@@ -98,7 +98,7 @@ public class XQueryParser extends XPathParser {
                 "inherit", "instance", "intersect", "is", "is-not", "item", "items", "key", "keys", "lax", "le", "let", "lt",
                 "map", "member", "minus-sign", "mod", "module", "namespace", "namespace-node", "NaN", "ne",
                 "next", "no-inherit", "no-preserve", "node", "of", "only", "option", "or", "order", "ordered",
-                "ordering", "otherwise", "pairs", "parent", "pattern-separator", "per-mille", "percent",
+                "ordering", "otherwise", "parent", "pattern-separator", "per-mille", "percent",
                 "precedes", "preceding", "preceding-sibling", "preserve", "previous", "processing-instruction",
                 "record", "return", "satisfies", "schema", "schema-attribute", "schema-element",
                 "self", "sliding", "some", "stable", "start", "strict", "strip", "switch", "text", "then",
@@ -2399,7 +2399,7 @@ public class XQueryParser extends XPathParser {
             if (iterand == ForQualifier.FOR_MEMBER) {
                 memberType = SequenceType.ANY_SEQUENCE;
             } else if (iterand == ForQualifier.FOR_KEY || iterand == ForQualifier.FOR_VALUE) {
-                memberType = SequenceType.one(MapFunctionSet.KVP_TYPE_INEXTENSIBLE);
+                memberType = SequenceType.SINGLE_MAP;
             }
             LocalVariableBinding binding =
                     new LocalVariableBinding(iterationQName, memberType);
@@ -2437,7 +2437,7 @@ public class XQueryParser extends XPathParser {
             if (iterand == ForQualifier.FOR_MEMBER) {
                 collection = ArrayFunctionSet.getInstance(40).makeFunction("members", 1).makeFunctionCall(collection);
             } else if (iterand == ForQualifier.FOR_KEY || iterand == ForQualifier.FOR_VALUE) {
-                collection = MapFunctionSet.getInstance(40).makeFunction("pairs", 1).makeFunctionCall(collection);
+                collection = MapFunctionSet.getInstance(40).makeFunction("entries", 1).makeFunctionCall(collection);
             }
             clause.initSequence(flwor, collection);
             declareRangeVariable(binding);
@@ -2448,23 +2448,23 @@ public class XQueryParser extends XPathParser {
                 checkForClauseAllowingEmpty(flwor, clause);
             }
             if (iterand == ForQualifier.FOR_MEMBER || iterand == ForQualifier.FOR_VALUE) {
-                // Generate "let $x as T := $temp?value"
+                // Generate "let $x as T := map:items($temp"
                 LetClause letClause = new LetClause();
                 final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
                 letClause.setRangeVariable(letBinding);
                 LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
-                LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("value"));
-                letClause.initSequence(flwor, lookup);
+                Expression valueGetter = MapFunctionSet.getInstance(40).makeFunction("items", 1).makeFunctionCall(tempRef);
+                letClause.initSequence(flwor, valueGetter);
                 declareRangeVariable(letBinding);
                 clauseList.add(letClause);
             } else if (iterand == ForQualifier.FOR_KEY) {
-                // Generate "let $x as T := $temp?key"
+                // Generate "let $x as T := map:keys($temp)"
                 LetClause letClause = new LetClause();
                 final LocalVariableBinding letBinding = new LocalVariableBinding(explicitQName, iterandType);
                 letClause.setRangeVariable(letBinding);
                 LocalVariableReference tempRef = new LocalVariableReference(clause.getRangeVariable());
-                LookupExpression lookup = new LookupExpression(tempRef, new StringLiteral("key"));
-                letClause.initSequence(flwor, lookup);
+                Expression keyGetter = MapFunctionSet.getInstance(40).makeFunction("keys", 1).makeFunctionCall(tempRef);
+                letClause.initSequence(flwor, keyGetter);
                 declareRangeVariable(letBinding);
                 clauseList.add(letClause);
                 if (explicitQName2 != null) {
@@ -2473,8 +2473,8 @@ public class XQueryParser extends XPathParser {
                             new LocalVariableBinding(explicitQName2, explicitType2 == null ? SequenceType.ANY_SEQUENCE : explicitType2);
                     letClause2.setRangeVariable(letBinding2);
                     LocalVariableReference tempRef2 = new LocalVariableReference(clause.getRangeVariable());
-                    LookupExpression lookup2 = new LookupExpression(tempRef2, new StringLiteral("value"));
-                    letClause2.initSequence(flwor, lookup2);
+                    Expression valueGetter = MapFunctionSet.getInstance(40).makeFunction("items", 1).makeFunctionCall(tempRef2);
+                    letClause2.initSequence(flwor, valueGetter);
                     declareRangeVariable(letBinding2);
                     clauseList.add(letClause2);
                 }
