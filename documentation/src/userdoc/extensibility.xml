@@ -61,7 +61,9 @@
     <p class="csonly">To write extension functions in C#, see <a class="bodylink"
       href="../extension-functions-CS">Extension functions (C#)</a>.</p>
     
-  
+    <p>Saxon allows the use of any function (including core functions, Saxon-supplied extension functions,
+    user-supplied extension functions, and others) to be disabled using the method
+    <code>Configuration.disableFunction()</code>.</p>
  
     
   </section>

@@ -197,6 +197,12 @@ TODO: rethink redefines and override
         <code>makeMessageReceiver()</code>, <code>setMessageEmitter()</code>,
         <code>getMessageEmitter()</code>. </p>
         
+        <p>The <code>Configuration</code> class now provides a method <code>disableFunction()</code>
+        that allows use of any function name to be disabled. This can be a core function, a Saxon-supplied
+        extension function, a user-registered extension function, a constructor function: anything. The
+        method disables static function calls (such as <code>fn:contains()</code>), named function
+        references (<code>fn:contains#2</code>) and dynamic access using <code>function-lookup</code>.</p>
+        
         
    
     </category>
