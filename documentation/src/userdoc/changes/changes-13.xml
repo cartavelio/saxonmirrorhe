@@ -677,7 +677,8 @@ TODO: rethink redefines and override
             <li><code>array:members</code></li> 
             <li><code>array:of-members</code></li> 
             <li><code>array:slice</code></li> 
-            <li><code>array:sort-with</code></li> 
+        	<li><code>array:sort-by</code></li> 
+        	<li><code>array:sort-with</code></li> 
             <li><code>array:split</code></li> 
             <li><code>array:trunk</code></li> 
             <li><code>fn:atomic-type-annotation</code></li> 
@@ -691,12 +692,13 @@ TODO: rethink redefines and override
             <li><code>fn:contains-subsequence</code></li> 
             <li><code>fn:csv-doc</code></li> 
             <li><code>fn:csv-to-arrays</code></li> 
-            <li><code>fn:csv-to-xml</code></li> 
+            <li><code>fn:csv-to-xml</code></li>
             <li><code>fn:decode-from-uri</code></li> 
             <li><code>fn:distinct-ordered-nodes</code></li> 
             <li><code>fn:do-until</code></li> 
             <li><code>fn:duplicate-values</code></li> 
-            <li><code>fn:element-to-map-plan</code></li> 
+        	<li><code>fn:element-to-map</code></li> 
+        	<li><code>fn:element-to-map-plan</code></li> 
             <li><code>fn:ends-with-subsequence</code></li> 
             <li><code>fn:every</code></li> 
             <li><code>fn:expanded-QName</code></li> 
@@ -807,8 +809,11 @@ TODO: rethink redefines and override
             <li><code>fn:in-scope-prefixes</code></li> 
             <li><code>fn:index-of</code></li> 
             <li><code>fn:index-where</code></li> 
-            <li><code>fn:innermost</code></li> 
-            <li><code>fn:json-doc</code></li> 
+            <li><code>fn:innermost</code></li>
+        	<li><code>fn:invisible-xml</code></li> 
+            <li><code>fn:json-doc</code></li>
+        	<li><code>fn:jtree</code></li>
+        	<li><code>fn:label</code></li> 
             <li><code>fn:load-xquery-module</code></li> 
             <li><code>fn:max</code></li> 
             <li><code>fn:min</code></li> 
@@ -847,7 +852,8 @@ TODO: rethink redefines and override
             <li><code>map:filter</code></li> 
             <li><code>map:find</code></li> 
             <li><code>map:for-each</code></li> 
-            <li><code>map:get</code></li>  
+            <li><code>map:get</code></li>
+        	<li><code>map:items</code></li>  
             <li><code>map:merge</code></li> 
             <li><code>map:put</code></li> 
             <li><code>map:remove</code></li> 
@@ -1026,11 +1032,11 @@ TODO: rethink redefines and override
 
     </category>
     
-    <!--<category name="sql" class="javaonly">
+    <category name="sql" class="javaonly">
         
-       
+       <p>The function <code>sql:query-as-xml</code> has been added.</p>
   
-    </category>-->
+    </category>
     
     
     
