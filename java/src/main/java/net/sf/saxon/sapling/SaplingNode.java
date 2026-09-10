@@ -15,6 +15,7 @@ import net.sf.saxon.s9api.SchemaValidator;
 import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Type;
 
@@ -76,6 +77,7 @@ public abstract class SaplingNode {
      * @return the kind of node, for example {@link Type#ELEMENT} for an element node.
      */
 
+    @CSharpModifiers(code = {"internal abstract"})
     public abstract int getNodeKind();
 
     /**

@@ -11,6 +11,7 @@ import net.sf.saxon.s9api.QName;
 //#if CSHARP == false
 import net.sf.saxon.sapling.dsl.DocumentBuilder;
 import net.sf.saxon.sapling.dsl.ElementBuilder;
+import net.sf.saxon.transpile.CSharpModifiers;
 //#endif
 
 /**
@@ -29,6 +30,7 @@ public class Saplings {
      * @return the new node
      */
 
+    @CSharpModifiers(code = {"internal static"})
     public static SaplingDocument doc() {
         return new SaplingDocument();
     }
@@ -54,6 +56,7 @@ public class Saplings {
      * @return the new node
      */
 
+    @CSharpModifiers(code = {"internal static"})
     public static SaplingDocument doc(String baseUri) {
         return new SaplingDocument(baseUri);
     }
@@ -81,6 +84,7 @@ public class Saplings {
      * @return the new node
      */
 
+    @CSharpModifiers(code = {"internal static"})
     public static SaplingElement elem(String name) {
         return new SaplingElement(name);
     }
@@ -93,6 +97,7 @@ public class Saplings {
      * @return the new node
      */
 
+    @CSharpModifiers(code = {"internal static"})
     public static SaplingElement elem(QName qName) {
         return new SaplingElement(qName);
     }
@@ -136,6 +141,7 @@ public class Saplings {
      * @return the new node
      */
 
+    @CSharpModifiers(code = {"internal static"})
     public static SaplingText text(String value) {
         return new SaplingText(value);
     }
@@ -148,6 +154,7 @@ public class Saplings {
      * @return the new node
      */
 
+    @CSharpModifiers(code = {"internal static"})
     public static SaplingComment comment(String value) {
         return new SaplingComment(value);
     }
@@ -161,6 +168,7 @@ public class Saplings {
      * @return the new node
      */
 
+    @CSharpModifiers(code = {"internal static"})
     public static SaplingProcessingInstruction pi(String target, String data) {
         return new SaplingProcessingInstruction(target, data);
     }

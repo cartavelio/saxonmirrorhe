@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Type;
 
 import java.util.Objects;
@@ -36,6 +37,7 @@ public class SaplingProcessingInstruction extends SaplingNode {
      * @throws NullPointerException if either name or value is null
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingProcessingInstruction(String name, String value) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(value);
@@ -48,6 +50,7 @@ public class SaplingProcessingInstruction extends SaplingNode {
      * @return the name of the node (the processing-instruction target)
      */
 
+    @CSharpModifiers(code = {"internal"})
     public String getName() {
         return name;
     }
@@ -57,11 +60,13 @@ public class SaplingProcessingInstruction extends SaplingNode {
      * @return the string value of the node (the processing-instruction data)
      */
 
+    @CSharpModifiers(code = {"internal"})
     public String getStringValue() {
         return value;
     }
 
     @Override
+    @CSharpModifiers(code = {"internal override"})
     public int getNodeKind() {
         return Type.PROCESSING_INSTRUCTION;
     }

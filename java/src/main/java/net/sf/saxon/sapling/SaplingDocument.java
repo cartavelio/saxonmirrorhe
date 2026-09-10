@@ -18,6 +18,7 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Type;
 
 import javax.xml.transform.Source;
@@ -38,18 +39,18 @@ import javax.xml.transform.Source;
  */
 
 @CSharpInjectMembers(code={
-          "public Saxon.Api.XdmNode toXdmNode(Saxon.Api.Processor processor) {"
+          "internal Saxon.Api.XdmNode toXdmNode(Saxon.Api.Processor processor) {"
         + "            try {"
         + "                return (Saxon.Api.XdmNode)(Saxon.Api.XdmValue.Wrap(toNodeInfo(processor.Implementation)));"
         + "            } catch (Saxon.Hej.trans.XPathException e) {"
         + "                throw new Saxon.Api.SaxonApiException(e);"
         + "            }"
         + "        }",
-          "        public void Serialize(Saxon.Api.Serializer serializer) {"
+          "        internal void Serialize(Saxon.Api.Serializer serializer) {"
         + "            Saxon.Api.Processor proc = serializer.Processor;"
         + "            Send(proc, serializer);"
         + "        }\n",
-          "        public void Send(Saxon.Api.Processor processor, Saxon.Api.IDestination destination) {"
+          "        internal void Send(Saxon.Api.Processor processor, Saxon.Api.IDestination destination) {"
         + "            try {"
         + "                Saxon.Hej.@event.PipelineConfiguration pipe = processor.Implementation.makePipelineConfiguration();"
         + "                deliver(destination.UnderlyingDestination.getReceiver(pipe, new Saxon.Hej.serialize.SerializationProperties()), null);"
@@ -65,6 +66,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
      * Create a sapling document node with no children and no base URI
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingDocument() {
         this.reversedChildren = emptyNodeList();
     }
@@ -74,6 +76,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
      * @param baseUri the base URI of the document node
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingDocument(String baseUri) {
         this.reversedChildren = emptyNodeList();
         this.baseUri = baseUri;
@@ -104,6 +107,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
     }
 
     @Override
+    @CSharpModifiers(code = {"internal override"})
     public int getNodeKind() {
         return Type.DOCUMENT;
     }
@@ -125,6 +129,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
      *                                  a document node.
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingDocument withChild(SaplingNode... children) {
         SaplingDocument e2 = copy();
         for (SaplingNode node : children) {
@@ -200,6 +205,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
      * @throws SaxonApiException if anything goes wrong
      */
 
+    @CSharpModifiers(code = {"internal"})
     public void serialize(Serializer serializer) throws SaxonApiException {
         Processor proc = serializer.getProcessor();
         send(proc, serializer);
@@ -212,6 +218,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
      * @throws SaxonApiException if anything goes wrong
      */
 
+    @CSharpModifiers(code = {"internal"})
     public void send(Processor processor, Destination destination) throws SaxonApiException {
         try {
             PipelineConfiguration pipe = processor.getUnderlyingConfiguration().makePipelineConfiguration();

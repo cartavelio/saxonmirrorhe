@@ -14,6 +14,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Type;
 
 import java.util.Objects;
@@ -33,12 +34,14 @@ public class SaplingComment extends SaplingNode {
      * @throws NullPointerException if the supplied value is null.
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingComment(String value) {
         Objects.requireNonNull(value);
         this.value = value;
     }
 
     @Override
+    @CSharpModifiers(code = {"internal override"})
     public int getNodeKind() {
         return Type.COMMENT;
     }

@@ -21,6 +21,7 @@ import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
@@ -71,6 +72,7 @@ public class SaplingElement extends SaplingNode {
      *             current implementation does not check this.
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingElement(String name) {
         Objects.requireNonNull(name);
         reversedChildren = emptyNodeList();
@@ -85,6 +87,7 @@ public class SaplingElement extends SaplingNode {
      * @throws IllegalArgumentException if the name contains a prefix but no URI
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingElement(QName name) {
         Objects.requireNonNull(name);
         reversedChildren = emptyNodeList();
@@ -98,12 +101,14 @@ public class SaplingElement extends SaplingNode {
         }
     }
 
+    @CSharpModifiers(code = {"internal"})
     private SaplingElement(StructuredQName name) {
         this.nodeName = name;
         reversedChildren = emptyNodeList();
     }
 
     @Override
+    @CSharpModifiers(code = {"internal override"})
     public int getNodeKind() {
         return Type.ELEMENT;
     }
@@ -129,6 +134,7 @@ public class SaplingElement extends SaplingNode {
      * @throws IllegalArgumentException if any of the nodes supplied as an argument is
      *                                  a document node.
      */
+    @CSharpModifiers(code = {"internal"})
     public SaplingElement withChild(SaplingNode... children) {
         SaplingElement e2 = copy();
         for (SaplingNode child : children) {
@@ -155,7 +161,7 @@ public class SaplingElement extends SaplingNode {
      * @return a new element node, identical to this element but with the new text node as
      * an additional child
      */
-
+    @CSharpModifiers(code = {"internal"})
     public SaplingElement withText(String value) {
         return withChild(new SaplingText(value));
     }
@@ -176,6 +182,7 @@ public class SaplingElement extends SaplingNode {
      * @return a new sapling element node, identical to the target node except for the added or replaced attribute
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingElement withAttr(String name, String value) {
         return withAttribute(new StructuredQName("", NamespaceUri.NULL, name), value);
     }
@@ -193,6 +200,7 @@ public class SaplingElement extends SaplingNode {
      * bindings on the element
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingElement withAttr(QName name, String value) {
         StructuredQName attName = name.getStructuredQName();
         if (attName.getPrefix().isEmpty() && !attName.hasURI(NamespaceUri.NULL)) {
@@ -218,6 +226,7 @@ public class SaplingElement extends SaplingNode {
      * a different URI.
      */
 
+    @CSharpModifiers(code = {"internal"})
     public SaplingElement withNamespace(String prefix, String uri) {
         if (uri.isEmpty()) {
             if (prefix.isEmpty()) {
@@ -318,6 +327,7 @@ public class SaplingElement extends SaplingNode {
      * @throws SaxonApiException if construction fails; this could happen if constraints have been violated
      */
 
+    @CSharpModifiers(code = {"internal"})
     public XdmNode toXdmNode(Configuration configuration) throws SaxonApiException {
         try {
             Processor processor = new Processor(configuration);
