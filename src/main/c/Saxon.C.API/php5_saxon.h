@@ -60,11 +60,6 @@ struct saxonProcessor_object {
     SaxonProcessor * saxonProcessor;
 };
 
-struct xsltProcessor_object {
-    zend_object std;
-    XsltProcessor *xsltProcessor;
-};
-
 struct xslt30Processor_object {
     zend_object std;
     Xslt30Processor *xslt30Processor;
@@ -143,36 +138,6 @@ jobject JNICALL phpNativeCall
     PHP_METHOD(SaxonProcessor,  version);
     PHP_METHOD(SaxonProcessor,  isSchemaAware);
 
-
-
-
-    //PHP_METHOD(XsltProcessor,  __construct);
-    PHP_METHOD(XsltProcessor,  __destruct);
-    PHP_METHOD(XsltProcessor,  transformFileToFile);
-    PHP_METHOD(XsltProcessor,  transformFileToString);
-    PHP_METHOD(XsltProcessor,  transformFileToValue);
-    PHP_METHOD(XsltProcessor,  transformToString);
-    PHP_METHOD(XsltProcessor,  transformToValue);
-    PHP_METHOD(XsltProcessor,  transformToFile);
-    PHP_METHOD(XsltProcessor, compileFromFile);
-    PHP_METHOD(XsltProcessor, compileFromValue);
-    PHP_METHOD(XsltProcessor, compileFromString);
-    PHP_METHOD(XsltProcessor, compileFromFileAndSave);
-    PHP_METHOD(XsltProcessor, compileFromStringAndSave);
-    PHP_METHOD(XsltProcessor,  setOutputFile);
-    PHP_METHOD(XsltProcessor,  setSourceFromFile);
-    PHP_METHOD(XsltProcessor,  setSourceFromXdmValue);
-    PHP_METHOD(XsltProcessor,  setJustInTimeCompilation);
-    PHP_METHOD(XsltProcessor,  setParameter);
-    PHP_METHOD(XsltProcessor,  setProperty);
-    PHP_METHOD(XsltProcessor,  clearParameters);
-    PHP_METHOD(XsltProcessor,  clearProperties);
-    PHP_METHOD(XsltProcessor,  exceptionClear);
-    PHP_METHOD(XsltProcessor,  exceptionOccurred);
-    PHP_METHOD(XsltProcessor,  getErrorCode);
-    PHP_METHOD(XsltProcessor,  getErrorMessage);
-    PHP_METHOD(XsltProcessor,  getExceptionCount);
-    PHP_METHOD(XsltProcessor,  getXslMessages);
 
     //PHP_METHOD(Xslt30Processor,  __construct);
     PHP_METHOD(Xslt30Processor, callFunctionReturningValue);

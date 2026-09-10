@@ -658,10 +658,6 @@ DocumentBuilder * SaxonProcessor::newDocumentBuilder(){
 }
 
 
-XsltProcessor *SaxonProcessor::newXsltProcessor() {
-    return (new XsltProcessor(this, cwd));
-}
-
 Xslt30Processor *SaxonProcessor::newXslt30Processor() {
     return (new Xslt30Processor(this, cwd));
 }

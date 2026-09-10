@@ -38,7 +38,6 @@
 
 #include "SaxonCGlue.h"
 #include "SaxonCXPath.h"
-#include "XsltProcessor.h"
 #include "Xslt30Processor.h"
 #include "XsltExecutable.h"
 #include "DocumentBuilder.h"
@@ -70,8 +69,6 @@ void operator delete(void*, std::size_t) noexcept;
 
 #endif
 
-
-class XsltProcessor;
 
 class Xslt30Processor;
 
@@ -121,8 +118,6 @@ typedef struct {
 class SaxonProcessor {
 
     friend class DocumentBuilder;
-
-    friend class XsltProcessor;
 
     friend class Xslt30Processor;
 
@@ -195,12 +190,6 @@ public:
      */
     DocumentBuilder * newDocumentBuilder();
 
-    /*!
-
-       * Create an XsltProcessor. An XsltProcessor is used to compile XSLT stylesheets.
-       * @return a newly created XsltProcessor
-     */
-    XsltProcessor *newXsltProcessor();
 
     /*!
 

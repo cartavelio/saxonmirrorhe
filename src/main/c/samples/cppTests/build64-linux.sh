@@ -45,8 +45,6 @@ g++  -std=c++14 -m64 -fPIC -c ../../Saxon.C.API/SaxonProcessor.cpp -o bin/SaxonP
 
 g++ -std=c++14 -m64 -fPIC  -c ../../Saxon.C.API/SaxonApiException.cpp -o bin/SaxonApiException.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
-g++  -std=c++14 -m64 -fPIC -c ../../Saxon.C.API/XsltProcessor.cpp -o bin/XsltProcessor.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
-
 g++  -std=c++14 -m64 -fPIC -c ../../Saxon.C.API/Xslt30Processor.cpp -o bin/Xslt30Processor.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 g++ -std=c++14 -m64  -fPIC -c ../../Saxon.C.API/XsltExecutable.cpp -o bin/XsltExecutable.o -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
@@ -64,8 +62,8 @@ g++  -std=c++14 -m64 -fPIC -pthread bin/SaxonCGlue.o bin/SaxonCXPath.o bin/Saxon
 g++  -std=c++14 -m64 -fPIC bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/Xslt30Processor.o bin/XsltExecutable.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testXQuery.cpp -o testXQuery -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 
-g++  -std=c++14 -m64 -fPIC bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/Xslt30Processor.o bin/XsltExecutable.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testXPath.cpp -o testXPath -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+g++  -std=c++14 -m64 -fPIC bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o  bin/Xslt30Processor.o bin/XsltExecutable.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testXPath.cpp -o testXPath -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
-g++  -std=c++14 -m64 -fPIC bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/XsltProcessor.o bin/Xslt30Processor.o bin/XsltExecutable.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testValidator.cpp -o testValidator -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
+g++  -std=c++14 -m64 -fPIC bin/SaxonCGlue.o bin/SaxonCXPath.o bin/SaxonProcessor.o bin/XQueryProcessor.o bin/Xslt30Processor.o bin/XsltExecutable.o bin/XPathProcessor.o bin/DocumentBuilder.o bin/XdmValue.o bin/XdmItem.o bin/XdmNode.o bin/XdmAtomicValue.o bin/XdmArray.o bin/XdmFunctionItem.o bin/XdmMap.o bin/SchemaValidator.o bin/SaxonApiException.o testValidator.cpp -o testValidator -ldl -lc $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
 
 g++  -std=c++14 -fPIC -m64 -shared -Wl,-soname,cppExtensionFunction.so -o  cppExtensionFunction.so bin/cppExtensionFunction.o $TURN_ERRORS_TO_WARNINGS $SAXON_ERRORS $1 $2
