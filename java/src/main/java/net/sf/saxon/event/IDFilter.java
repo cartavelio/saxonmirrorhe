@@ -26,6 +26,7 @@ public class IDFilter extends ProxyReceiver {
 
     private final String requiredId;
     private int activeDepth = 0;
+    private boolean foundInDocument = false;
 
     public IDFilter(Receiver next, String id) {
         // System.err.println("IDFilter, looking for " + id);
@@ -49,6 +50,7 @@ public class IDFilter extends ProxyReceiver {
                         ReceiverOption.contains(att.getProperties(), ReceiverOption.IS_ID)) {
                     if (att.getValue().equals(requiredId)) {
                         matched = true;
+                        foundInDocument = true;
                     }
                 }
             }
@@ -72,6 +74,14 @@ public class IDFilter extends ProxyReceiver {
             nextReceiver.endElement();
             activeDepth--;
         }
+    }
+
+    @Override
+    public void endDocument() throws XPathException {
+        if (!foundInDocument) {
+            throw new XPathException("ID not found: " + requiredId, "SXXP0003");
+        }
+        nextReceiver.endDocument();
     }
 
     /**
