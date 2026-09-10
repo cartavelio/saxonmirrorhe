@@ -34,6 +34,7 @@ import net.sf.saxon.tree.linked.DocumentImpl;
 import net.sf.saxon.tree.linked.LinkedTreeBuilder;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.Source;

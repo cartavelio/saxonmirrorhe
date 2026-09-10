@@ -12,10 +12,8 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
 
 import java.util.function.Supplier;
 
@@ -60,8 +58,8 @@ public class ItemTypeCheckingFunction implements ItemMappingFunction {
         final TypeHierarchy th = config.getTypeHierarchy();
         if (requiredItemType.matches(item, th)) {
             // OK, no action
-        } else if (requiredItemType.getUType().subsumes(UType.STRING) && BuiltInAtomicType.ANY_URI.matches(item, th)) {
-            // OK, no action
+//        } else if (requiredItemType.getUType().subsumes(UType.STRING) && BuiltInAtomicType.ANY_URI.matches(item, th)) {
+//            // OK, no action
         } else {
             RoleDiagnostic role = roleSupplier.get();
             String message = role.composeErrorMessage(requiredItemType, item, th);

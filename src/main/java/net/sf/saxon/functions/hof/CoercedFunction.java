@@ -23,6 +23,7 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;

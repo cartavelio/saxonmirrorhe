@@ -19,6 +19,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.RecordCoercionPlan;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -586,6 +588,16 @@ public class RecordTest extends AnyFunctionType implements RecordType {
         return new SpecificFunctionType(getArgumentTypes(), getResultType()).makeFunctionSequenceCoercer(exp, role, false);
     }
 
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath language version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return RecordCoercionPlan.INSTANCE;
+    }
 }
 
 // Copyright (c) 2011-2023 Saxonica Limited

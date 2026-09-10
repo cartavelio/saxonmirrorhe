@@ -13,6 +13,8 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.NoCoercionPlan;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -394,6 +396,17 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
         } else {
             return Optional.of("The supplied value is " + Err.describeGenre(item.getGenre()));
         }
+    }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath language version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return NoCoercionPlan.INSTANCE;
     }
 
     public String toShortString() {

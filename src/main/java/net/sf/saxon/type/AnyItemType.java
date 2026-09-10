@@ -10,6 +10,8 @@ package net.sf.saxon.type;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.NoCoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -223,6 +225,17 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
             _zeroOrMore = new SequenceType(this, StaticProperty.ALLOWS_ZERO_OR_MORE);
         }
         return _zeroOrMore;
+    }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath language version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return NoCoercionPlan.INSTANCE;
     }
 
 }

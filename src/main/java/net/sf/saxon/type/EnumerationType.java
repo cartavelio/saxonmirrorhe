@@ -13,6 +13,8 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.EnumerationCoercionPlan;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.value.Whitespace;
@@ -681,6 +683,17 @@ public class EnumerationType implements AtomicType {
     @Override
     public SchemaValidationStatus getValidationStatus() {
         return SchemaValidationStatus.VALIDATED;
+    }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath language version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return EnumerationCoercionPlan.INSTANCE;
     }
 
     /**

@@ -16,7 +16,7 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.CoercionRules;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Collection;

@@ -14,6 +14,8 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.NoCoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -115,6 +117,17 @@ public class AnyFunctionType implements FunctionItemType {
     @Override
     public String getBasicAlphaCode() {
         return "F";
+    }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath langauge version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return NoCoercionPlan.INSTANCE;
     }
 
     /**

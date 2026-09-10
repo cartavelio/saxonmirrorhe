@@ -9,6 +9,8 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.NoCoercionPlan;
 
 /**
  * This class represents the type of an external object returned by
@@ -85,5 +87,16 @@ public class AnyExternalObjectType implements ItemType {
     @Override
     public double getDefaultPriority() {
         return -1;
+    }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath language version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return NoCoercionPlan.INSTANCE;
     }
 }

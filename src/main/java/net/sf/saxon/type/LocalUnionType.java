@@ -13,6 +13,8 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.type.coercion.CoercionPlan;
+import net.sf.saxon.type.coercion.UnionCoercionPlan;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -390,6 +392,17 @@ public class LocalUnionType implements PlainType, UnionType {
         fsb.setLength(fsb.length() - 2);
         fsb.append(")");
         return fsb.toString();
+    }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath language version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return UnionCoercionPlan.INSTANCE;
     }
 
 }

@@ -16,6 +16,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.coercion.*;
 import net.sf.saxon.value.*;
 
 import java.util.Collections;
@@ -43,149 +44,198 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     private SequenceType _oneOrMore;
     private SequenceType _zeroOrOne;
     private SequenceType _zeroOrMore;
+    private CoercionPlan coercionPlan31;
+    private CoercionPlan coercionPlan40;
 
     private static final Map<String, BuiltInAtomicType> byAlphaCode = new HashMap<>(60);
 
     public final static BuiltInAtomicType ANY_ATOMIC =
-            makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.getInstance(), "A", true);
+            makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.getInstance(),
+                           "A", true);
 
     public final static BuiltInAtomicType STRING =
-            makeAtomicType(StandardNames.XS_STRING, ANY_ATOMIC, "AS", true);
+            makeAtomicType(StandardNames.XS_STRING, ANY_ATOMIC,
+                           "AS", true);
 
     public final static BuiltInAtomicType BOOLEAN =
-            makeAtomicType(StandardNames.XS_BOOLEAN, ANY_ATOMIC, "AB", true);
+            makeAtomicType(StandardNames.XS_BOOLEAN, ANY_ATOMIC,
+                           "AB", true);
 
     public final static BuiltInAtomicType DURATION =
-            makeAtomicType(StandardNames.XS_DURATION, ANY_ATOMIC, "AR", false);
+            makeAtomicType(StandardNames.XS_DURATION, ANY_ATOMIC,
+                           "AR", false);
 
     public final static BuiltInAtomicType DATE_TIME =
-            makeAtomicType(StandardNames.XS_DATE_TIME, ANY_ATOMIC, "AM", true);
+            makeAtomicType(StandardNames.XS_DATE_TIME, ANY_ATOMIC,
+                           "AM", true);
 
     public final static BuiltInAtomicType DATE =
-            makeAtomicType(StandardNames.XS_DATE, ANY_ATOMIC, "AA", true);
+            makeAtomicType(StandardNames.XS_DATE, ANY_ATOMIC,
+                           "AA", true);
 
     public final static BuiltInAtomicType TIME =
-            makeAtomicType(StandardNames.XS_TIME, ANY_ATOMIC, "AT", true);
+            makeAtomicType(StandardNames.XS_TIME, ANY_ATOMIC,
+                           "AT", true);
 
     public final static BuiltInAtomicType G_YEAR_MONTH =
-            makeAtomicType(StandardNames.XS_G_YEAR_MONTH, ANY_ATOMIC, "AH", false);
+            makeAtomicType(StandardNames.XS_G_YEAR_MONTH, ANY_ATOMIC,
+                           "AH", false);
 
     public final static BuiltInAtomicType G_MONTH =
-            makeAtomicType(StandardNames.XS_G_MONTH, ANY_ATOMIC, "AI", false);
+            makeAtomicType(StandardNames.XS_G_MONTH, ANY_ATOMIC,
+                           "AI", false);
 
     public final static BuiltInAtomicType G_MONTH_DAY =
-            makeAtomicType(StandardNames.XS_G_MONTH_DAY, ANY_ATOMIC, "AJ", false);
+            makeAtomicType(StandardNames.XS_G_MONTH_DAY, ANY_ATOMIC,
+                           "AJ", false);
 
     public final static BuiltInAtomicType G_YEAR =
-            makeAtomicType(StandardNames.XS_G_YEAR, ANY_ATOMIC, "AG", false);
+            makeAtomicType(StandardNames.XS_G_YEAR, ANY_ATOMIC,
+                           "AG", false);
 
     public final static BuiltInAtomicType G_DAY =
-            makeAtomicType(StandardNames.XS_G_DAY, ANY_ATOMIC, "AK", false);
+            makeAtomicType(StandardNames.XS_G_DAY, ANY_ATOMIC,
+                           "AK", false);
 
     public final static BuiltInAtomicType HEX_BINARY =
-            makeAtomicType(StandardNames.XS_HEX_BINARY, ANY_ATOMIC, "AX", true);
+            makeAtomicType(StandardNames.XS_HEX_BINARY, ANY_ATOMIC,
+                           "AX", true);
 
     public final static BuiltInAtomicType BASE64_BINARY =
-            makeAtomicType(StandardNames.XS_BASE64_BINARY, ANY_ATOMIC, "A2", true);
+            makeAtomicType(StandardNames.XS_BASE64_BINARY, ANY_ATOMIC,
+                           "A2", true);
 
     public final static BuiltInAtomicType ANY_URI =
-            makeAtomicType(StandardNames.XS_ANY_URI, ANY_ATOMIC, "AU", true);
+            makeAtomicType(StandardNames.XS_ANY_URI, ANY_ATOMIC,
+                           "AU", true);
 
     public final static BuiltInAtomicType QNAME =
-            makeAtomicType(StandardNames.XS_QNAME, ANY_ATOMIC, "AQ", false);
+            makeAtomicType(StandardNames.XS_QNAME, ANY_ATOMIC,
+                           "AQ", false);
 
     public final static BuiltInAtomicType NOTATION =
-            makeAtomicType(StandardNames.XS_NOTATION, ANY_ATOMIC, "AN", false);
+            makeAtomicType(StandardNames.XS_NOTATION, ANY_ATOMIC,
+                           "AN", false);
 
     public final static BuiltInAtomicType UNTYPED_ATOMIC =
-            makeAtomicType(StandardNames.XS_UNTYPED_ATOMIC, ANY_ATOMIC, "AZ", true);
+            makeAtomicType(StandardNames.XS_UNTYPED_ATOMIC, ANY_ATOMIC,
+                           "AZ", true);
 
     public final static BuiltInAtomicType DECIMAL =
-            makeAtomicType(StandardNames.XS_DECIMAL, ANY_ATOMIC, "AD", true);
+            makeAtomicType(StandardNames.XS_DECIMAL, ANY_ATOMIC,
+                           "AD", true);
 
     public final static BuiltInAtomicType FLOAT =
-            makeAtomicType(StandardNames.XS_FLOAT, ANY_ATOMIC, "AF", true);
+            makeAtomicType(StandardNames.XS_FLOAT, ANY_ATOMIC,
+                           "AF", true);
 
     public final static BuiltInAtomicType DOUBLE =
-            makeAtomicType(StandardNames.XS_DOUBLE, ANY_ATOMIC, "AO", true);
+            makeAtomicType(StandardNames.XS_DOUBLE, ANY_ATOMIC,
+                           "AO", true);
 
     public final static BuiltInAtomicType INTEGER =
-            makeAtomicType(StandardNames.XS_INTEGER, DECIMAL, "ADI", true);
+            makeAtomicType(StandardNames.XS_INTEGER, DECIMAL,
+                           "ADI", true);
 
     public final static BuiltInAtomicType NON_POSITIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_NON_POSITIVE_INTEGER, INTEGER, "ADIN", true);
+            makeAtomicType(StandardNames.XS_NON_POSITIVE_INTEGER, INTEGER,
+                           "ADIN", true);
 
     public final static BuiltInAtomicType NEGATIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_NEGATIVE_INTEGER, NON_POSITIVE_INTEGER, "ADINN", true);
+            makeAtomicType(StandardNames.XS_NEGATIVE_INTEGER, NON_POSITIVE_INTEGER,
+                           "ADINN", true);
 
     public final static BuiltInAtomicType LONG =
-            makeAtomicType(StandardNames.XS_LONG, INTEGER, "ADIL", true);
+            makeAtomicType(StandardNames.XS_LONG, INTEGER,
+                           "ADIL", true);
 
     public final static BuiltInAtomicType INT =
-            makeAtomicType(StandardNames.XS_INT, LONG, "ADILI", true);
+            makeAtomicType(StandardNames.XS_INT, LONG,
+                           "ADILI", true);
 
     public final static BuiltInAtomicType SHORT =
-            makeAtomicType(StandardNames.XS_SHORT, INT, "ADILIS", true);
+            makeAtomicType(StandardNames.XS_SHORT, INT,
+                           "ADILIS", true);
 
     public final static BuiltInAtomicType BYTE =
-            makeAtomicType(StandardNames.XS_BYTE, SHORT, "ADILISB", true);
+            makeAtomicType(StandardNames.XS_BYTE, SHORT,
+                           "ADILISB", true);
 
     public final static BuiltInAtomicType NON_NEGATIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_NON_NEGATIVE_INTEGER, INTEGER, "ADIP", true);
+            makeAtomicType(StandardNames.XS_NON_NEGATIVE_INTEGER, INTEGER,
+                           "ADIP", true);
 
     public final static BuiltInAtomicType POSITIVE_INTEGER =
-            makeAtomicType(StandardNames.XS_POSITIVE_INTEGER, NON_NEGATIVE_INTEGER, "ADIPP", true);
+            makeAtomicType(StandardNames.XS_POSITIVE_INTEGER, NON_NEGATIVE_INTEGER,
+                           "ADIPP", true);
 
     public final static BuiltInAtomicType UNSIGNED_LONG =
-            makeAtomicType(StandardNames.XS_UNSIGNED_LONG, NON_NEGATIVE_INTEGER, "ADIPL", true);
+            makeAtomicType(StandardNames.XS_UNSIGNED_LONG, NON_NEGATIVE_INTEGER,
+                           "ADIPL", true);
 
     public final static BuiltInAtomicType UNSIGNED_INT =
-            makeAtomicType(StandardNames.XS_UNSIGNED_INT, UNSIGNED_LONG, "ADIPLI", true);
+            makeAtomicType(StandardNames.XS_UNSIGNED_INT, UNSIGNED_LONG,
+                           "ADIPLI", true);
 
     public final static BuiltInAtomicType UNSIGNED_SHORT =
-            makeAtomicType(StandardNames.XS_UNSIGNED_SHORT, UNSIGNED_INT, "ADIPLIS", true);
+            makeAtomicType(StandardNames.XS_UNSIGNED_SHORT, UNSIGNED_INT,
+                           "ADIPLIS", true);
 
     public final static BuiltInAtomicType UNSIGNED_BYTE =
-            makeAtomicType(StandardNames.XS_UNSIGNED_BYTE, UNSIGNED_SHORT, "ADIPLISB", true);
+            makeAtomicType(StandardNames.XS_UNSIGNED_BYTE, UNSIGNED_SHORT,
+                           "ADIPLISB", true);
 
     public final static BuiltInAtomicType YEAR_MONTH_DURATION =
-            makeAtomicType(StandardNames.XS_YEAR_MONTH_DURATION, DURATION, "ARY", true);
+            makeAtomicType(StandardNames.XS_YEAR_MONTH_DURATION, DURATION,
+                           "ARY", true);
 
     public final static BuiltInAtomicType DAY_TIME_DURATION =
-            makeAtomicType(StandardNames.XS_DAY_TIME_DURATION, DURATION, "ARD", true);
+            makeAtomicType(StandardNames.XS_DAY_TIME_DURATION, DURATION,
+                           "ARD", true);
 
     public final static BuiltInAtomicType NORMALIZED_STRING =
-            makeAtomicType(StandardNames.XS_NORMALIZED_STRING, STRING, "ASN", true);
+            makeAtomicType(StandardNames.XS_NORMALIZED_STRING, STRING,
+                           "ASN", true);
 
     public final static BuiltInAtomicType TOKEN =
-            makeAtomicType(StandardNames.XS_TOKEN, NORMALIZED_STRING, "ASNT", true);
+            makeAtomicType(StandardNames.XS_TOKEN, NORMALIZED_STRING,
+                           "ASNT", true);
 
     public final static BuiltInAtomicType LANGUAGE =
-            makeAtomicType(StandardNames.XS_LANGUAGE, TOKEN, "ASNTL", true);
+            makeAtomicType(StandardNames.XS_LANGUAGE, TOKEN,
+                           "ASNTL", true);
 
     public final static BuiltInAtomicType NAME =
-            makeAtomicType(StandardNames.XS_NAME, TOKEN, "ASNTN", true);
+            makeAtomicType(StandardNames.XS_NAME, TOKEN,
+                           "ASNTN", true);
 
     public final static BuiltInAtomicType NMTOKEN =
-            makeAtomicType(StandardNames.XS_NMTOKEN, TOKEN, "ASNTK", true);
+            makeAtomicType(StandardNames.XS_NMTOKEN, TOKEN,
+                           "ASNTK", true);
 
     public final static BuiltInAtomicType NCNAME =
-            makeAtomicType(StandardNames.XS_NCNAME, NAME, "ASNTNC", true);
+            makeAtomicType(StandardNames.XS_NCNAME, NAME,
+                           "ASNTNC", true);
 
     public final static BuiltInAtomicType ID =
-            makeAtomicType(StandardNames.XS_ID, NCNAME, "ASNTNCI", true);
+            makeAtomicType(StandardNames.XS_ID, NCNAME,
+                           "ASNTNCI", true);
 
     public final static BuiltInAtomicType IDREF =
-            makeAtomicType(StandardNames.XS_IDREF, NCNAME, "ASNTNCR", true);
+            makeAtomicType(StandardNames.XS_IDREF, NCNAME,
+                           "ASNTNCR", true);
 
     public final static BuiltInAtomicType ENTITY =
-            makeAtomicType(StandardNames.XS_ENTITY, NCNAME, "ASNTNCE", true);
+            makeAtomicType(StandardNames.XS_ENTITY, NCNAME,
+                           "ASNTNCE", true);
 
     public final static BuiltInAtomicType DATE_TIME_STAMP =
-            makeAtomicType(StandardNames.XS_DATE_TIME_STAMP, DATE_TIME, "AMP", true);
+            makeAtomicType(StandardNames.XS_DATE_TIME_STAMP, DATE_TIME,
+                           "AMP", true);
 
     static {
         // See bug 2524
+        // TODO: why are some types for example float and double missing from this list?
         ANY_ATOMIC          .stringConverter = StringConverter.StringToString.INSTANCE;
         STRING              .stringConverter = StringConverter.StringToString.INSTANCE;
         LANGUAGE            .stringConverter = StringConverter.StringToLanguage.INSTANCE;
@@ -230,6 +280,103 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
         //NumericType.init();
     }
+
+    static {
+
+        ANY_ATOMIC.coercionPlan40 = AtomicCoercionPlan.INSTANCE;
+        STRING.coercionPlan40 = StringCoercionPlan.INSTANCE;
+        ANY_URI.coercionPlan40 = AnyURICoercionPlan.INSTANCE;
+        LANGUAGE.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        NORMALIZED_STRING.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        TOKEN.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        NCNAME.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        NAME.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        NMTOKEN.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        ID.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        IDREF.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        ENTITY.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        DECIMAL.coercionPlan40 = DecimalCoercionPlan.INSTANCE;
+        INTEGER.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        DURATION.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        G_MONTH.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        G_MONTH_DAY.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        G_DAY.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        DAY_TIME_DURATION.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        YEAR_MONTH_DURATION.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        TIME.coercionPlan40 = AtomicCoercionPlan.INSTANCE;
+        DATE.coercionPlan40 = AtomicCoercionPlan.INSTANCE;
+        DATE_TIME.coercionPlan40 = AtomicCoercionPlan.INSTANCE;
+        DATE_TIME_STAMP.coercionPlan40 = AtomicCoercionPlan.INSTANCE;
+        BOOLEAN.coercionPlan40 = AtomicCoercionPlan.INSTANCE;
+        DOUBLE.coercionPlan40 = DoubleCoercionPlan.INSTANCE;
+        FLOAT.coercionPlan40 = FloatCoercionPlan.INSTANCE;
+        HEX_BINARY.coercionPlan40 = HexBinaryCoercionPlan.INSTANCE;
+        BASE64_BINARY.coercionPlan40 = Base64BinaryCoercionPlan.INSTANCE;
+        QNAME.coercionPlan40 = QNameCoercionPlan.INSTANCE;
+        NOTATION.coercionPlan40 = QNameCoercionPlan.INSTANCE;
+        UNTYPED_ATOMIC.coercionPlan40 = AtomicCoercionPlan.INSTANCE;
+
+        NON_POSITIVE_INTEGER.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        NEGATIVE_INTEGER.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        LONG.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        INT.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        SHORT.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        BYTE.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        NON_NEGATIVE_INTEGER.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        POSITIVE_INTEGER.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        UNSIGNED_LONG.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        UNSIGNED_INT.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        UNSIGNED_SHORT.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+        UNSIGNED_BYTE.coercionPlan40 = DerivedAtomicCoercionPlan.INSTANCE;
+
+
+        ANY_ATOMIC.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        STRING.coercionPlan31 = StringCoercionPlan.INSTANCE;
+        LANGUAGE.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        NORMALIZED_STRING.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        TOKEN.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        NCNAME.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        NAME.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        NMTOKEN.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        ID.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        IDREF.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        ENTITY.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        DECIMAL.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        INTEGER.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        DURATION.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        G_MONTH.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        G_MONTH_DAY.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        G_DAY.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        DAY_TIME_DURATION.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        YEAR_MONTH_DURATION.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        TIME.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        DATE.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        DATE_TIME.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        DATE_TIME_STAMP.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        BOOLEAN.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        DOUBLE.coercionPlan31 = DoubleCoercionPlan.INSTANCE;
+        FLOAT.coercionPlan31 = FloatCoercionPlan.INSTANCE;
+        HEX_BINARY.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        BASE64_BINARY.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        QNAME.coercionPlan31 = QNameCoercionPlan.INSTANCE;
+        NOTATION.coercionPlan31 = QNameCoercionPlan.INSTANCE;
+        UNTYPED_ATOMIC.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+
+        NON_POSITIVE_INTEGER.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        NEGATIVE_INTEGER.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        LONG.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        INT.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        SHORT.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        BYTE.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        NON_NEGATIVE_INTEGER.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        POSITIVE_INTEGER.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        UNSIGNED_LONG.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        UNSIGNED_INT.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        UNSIGNED_SHORT.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+        UNSIGNED_BYTE.coercionPlan31 = AtomicCoercionPlan.INSTANCE;
+
+    }
+
 
     public static BuiltInAtomicType fromAlphaCode(String code) {
         return byAlphaCode.get(code);
@@ -1188,12 +1335,12 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      * @param expression the expression that delivers the content
      * @param kind       the node kind whose content is being delivered: {@link Type#ELEMENT},
      *                   {@link Type#ATTRIBUTE}, or {@link Type#DOCUMENT}
-     * @param schema
-     * @throws net.sf.saxon.trans.XPathException if the expression will never deliver a value of the correct type
+     * @throws net.sf.saxon.trans.XPathException
+     *          if the expression will never deliver a value of the correct type
      */
 
     @Override
-    public void analyzeContentExpression(Expression expression, int kind, Schema schema) throws XPathException {
+    public void analyzeContentExpression(Expression expression, int kind) throws XPathException {
         analyzeContentExpression(this, expression, kind);
     }
 
@@ -1237,11 +1384,12 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
      * @param fingerprint The name of the type
      * @param baseType    The base type from which this type is derived
      * @param code        Alphabetic code chosen to enable ordering of types according to the type hierarchy
-     * @param ordered true if the type is ordered
+     * @param ordered     true if the type is ordered
      * @return the newly constructed built in atomic type
      */
     /*@NotNull*/
-    private static BuiltInAtomicType makeAtomicType(int fingerprint, SimpleType baseType, String code, boolean ordered) {
+    private static BuiltInAtomicType makeAtomicType(
+            int fingerprint, SimpleType baseType, String code, boolean ordered) {
         BuiltInAtomicType t = new BuiltInAtomicType(fingerprint);
         t.setBaseTypeFingerprint(baseType.getFingerprint());
         if (t.isPrimitiveType()) {
@@ -1255,6 +1403,17 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         BuiltInType.register(fingerprint, t);
         byAlphaCode.put(code, t);
         return t;
+    }
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     *
+     * @param version the XPath langauge version (40 or 31)
+     */
+    @Override
+    public CoercionPlan getCoercionPlan(int version) {
+        return version >= 40 ? coercionPlan40 : coercionPlan31;
     }
 
     /**

@@ -26,7 +26,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.type.CoercionRules;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.SequenceType;
 
 import javax.xml.transform.Source;

@@ -26,6 +26,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 

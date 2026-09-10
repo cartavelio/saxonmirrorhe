@@ -22,6 +22,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -362,16 +363,19 @@ public class DynamicFunctionCall extends Expression {
                     }
                 }
                 Sequence rawResult = fn.call(c2, argValues);
-                if (fn.isTrustedResultType()) {
-                    // trust system functions to return a result of the correct type
-                    return rawResult.iterate();
-                } else {
-                    // Check the result of the function
-                    Supplier<RoleDiagnostic> resultRole =
-                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
-                    return coercionRules.coerce(
-                            rawResult, fit.getResultType(), SequenceType.ANY_SEQUENCE, config, resultRole, Loc.NONE).iterate();
-                }
+                // The function is responsible for coercing its result to the required type;
+                // this is not the caller's job
+                return rawResult.iterate();
+//                if (fn.isTrustedResultType()) {
+//                    // trust system functions to return a result of the correct type
+//                    return rawResult.iterate();
+//                } else {
+//                    // Check the result of the function
+//                    Supplier<RoleDiagnostic> resultRole =
+//                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "fn:apply", -1);
+//                    return coercionRules.coerce(
+//                            rawResult, fit.getResultType(), SequenceType.ANY_SEQUENCE, config, resultRole, Loc.NONE).iterate();
+//                }
             };
         }
         

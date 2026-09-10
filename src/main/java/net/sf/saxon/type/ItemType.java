@@ -9,6 +9,7 @@ package net.sf.saxon.type;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.type.coercion.CoercionPlan;
 
 import java.util.Optional;
 
@@ -139,6 +140,14 @@ public interface ItemType {
      */
 
     boolean isAtomizable(TypeHierarchy th);
+
+    /**
+     * Get the coercion plan for use when this type is the required type for (say) coercion
+     * of arguments in a function call
+     * @param version the XPath language version (40 or 31)
+     */
+
+    CoercionPlan getCoercionPlan(int version);
 
     /**
      * Get an alphabetic code representing the type, or at any rate, the nearest built-in type

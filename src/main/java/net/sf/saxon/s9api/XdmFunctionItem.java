@@ -19,7 +19,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.type.CoercionRules;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;

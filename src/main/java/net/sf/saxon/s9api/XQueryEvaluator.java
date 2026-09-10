@@ -25,7 +25,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyBuilder;
-import net.sf.saxon.type.CoercionRules;
+import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
