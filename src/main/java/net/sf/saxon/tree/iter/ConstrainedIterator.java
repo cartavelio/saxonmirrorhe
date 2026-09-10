@@ -14,7 +14,7 @@ import net.sf.saxon.om.SequenceIterator;
 
 
 /**
- * SingletonIterator: an iterator over a sequence of zero or one values
+ * ConstrainedIterator: an iterator over a sequence of zero or one values
  */
 
 public interface ConstrainedIterator<T extends Item> extends SequenceIterator, UnfailingIterator,

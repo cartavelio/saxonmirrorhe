@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
+import com.saxonica.expr.ForMemberExpression;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
@@ -736,14 +737,15 @@ public class XPathParser {
                 grumble("Expected an expression, but reached the end of the input");
             case Token.FOR:
             case Token.LET:
+            case Token.FOR_MEMBER:
             case Token.FOR_SLIDING:
             case Token.FOR_TUMBLING:
                 return parseFLWORExpression();
             case Token.SOME:
             case Token.EVERY:
                 return parseQuantifiedExpression();
-            case Token.FOR_MEMBER:
-                return parserExtension.parseForMemberExpression(this);
+//            case Token.FOR_MEMBER:
+//                return parseForMemberExpression(this);
             case Token.IF:
                 return parseIfExpression();
             case Token.SWITCH:
@@ -1152,6 +1154,66 @@ public class XPathParser {
         }
 
     }
+//
+//    /**
+//     * Parse a for-member expression (Saxon extension):
+//     * for member $x in expr return expr
+//     *
+//     * @return the resulting subexpression
+//     * @throws XPathException if any error is encountered
+//     */
+//
+//    protected Expression parseForMemberExpression(XPathParser p) throws XPathException {
+//        Tokenizer t = p.getTokenizer();
+//        p.checkLanguageVersion40();
+//        int clauses = 0;
+//        int operator = t.currentToken;
+//        ForMemberExpression first = null;
+//        ForMemberExpression previous = null;
+//        do {
+//            int offset = t.currentTokenStartOffset;
+//            p.nextToken();
+//            p.expect(Token.DOLLAR);
+//            p.nextToken();
+//            p.expect(Token.NAME);
+//            String var = t.currentTokenValue;
+//            clauses++;
+//
+//            // declare the range variable
+//            ForMemberExpression v = new ForMemberExpression();
+//            p.setLocation(v, offset);
+//
+//            v.setVariableQName(p.makeStructuredQName(var, ""));
+//            p.nextToken();
+//
+//            // process the "in" clause
+//            p.expect(Token.IN);
+//            p.nextToken();
+//            v.setSequence(p.parseExprSingle());
+//            p.declareRangeVariable(v);
+//            if (previous != null) {
+//                previous.setAction(v);
+//            } else {
+//                first = v;
+//            }
+//            previous = v;
+//
+//        } while (t.currentToken == Token.COMMA);
+//
+//        // process the "return" expression (called the "action")
+//        p.expect(Token.RETURN);
+//        p.nextToken();
+//        previous.setAction(p.parseExprSingle());
+//
+//
+//        // undeclare all the range variables
+//
+//        for (int i = 0; i < clauses; i++) {
+//            p.undeclareRangeVariable();
+//        }
+//        return p.makeTracer(first, first.getVariableQName());
+//
+//    }
 
     /**
      * Parse a Typeswitch Expression.
@@ -1236,7 +1298,7 @@ public class XPathParser {
 
     /**
      * Parse a FOR or LET expression:
-     * for $x in expr (',' $y in expr)* 'return' expr
+     * for 'member'? $x in expr (',' 'member'? $y in expr)* 'return' expr
      * let $x := expr (', $y := expr)* 'return' expr
      * This version of the method handles the subset of the FLWOR syntax allowed in XPath
      *
@@ -1250,6 +1312,9 @@ public class XPathParser {
         }
         if (t.currentToken == Token.FOR_SLIDING || t.currentToken == Token.FOR_TUMBLING) {
             grumble("sliding/tumbling windows can only be used in XQuery");
+        }
+        if (t.currentToken == Token.FOR_MEMBER && !allowXPath40Syntax) {
+            grumble("'for member' requires XPath 4.0 to be enabled");
         }
         int clauses = 0;
         int offset;
@@ -1269,6 +1334,9 @@ public class XPathParser {
             if (operator == Token.FOR) {
                 v = new ForExpression();
                 v.setRequiredType(SequenceType.SINGLE_ITEM);
+            } else if (operator == Token.FOR_MEMBER) {
+                v = new ForMemberExpression();
+                v.setRequiredType(SequenceType.ANY_SEQUENCE);
             } else /*if (operator == Token.LET)*/ {
                 v = new LetExpression();
                 v.setRequiredType(SequenceType.ANY_SEQUENCE);
@@ -1290,7 +1358,6 @@ public class XPathParser {
                 previous.setAction(v);
             }
             previous = v;
-
         } while (t.currentToken == Token.COMMA);
 
         // process the "return" expression (called the "action")

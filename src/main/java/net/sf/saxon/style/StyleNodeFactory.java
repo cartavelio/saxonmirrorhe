@@ -358,6 +358,8 @@ public class StyleNodeFactory implements NodeFactory {
                 return new XSLForEach();
             case StandardNames.XSL_FOR_EACH_GROUP:
                 return new XSLForEachGroup();
+            case StandardNames.XSL_FOR_EACH_MEMBER:
+                return new XSLForEachMember();
             case StandardNames.XSL_FORK:
                 return new XSLFork();
             case StandardNames.XSL_FUNCTION:

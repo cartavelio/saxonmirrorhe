@@ -1,4 +1,4 @@
-package com.saxonica.xsltextn.style;
+package net.sf.saxon.style;
 
 import com.saxonica.expr.ForMemberExpression;
 import net.sf.saxon.Configuration;
@@ -11,20 +11,19 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.style.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
 
 /**
- * Handler for saxon:for-each-member elements in stylesheet.
- * The saxon:for-each-member element has mandatory attributes select and bind-to.
+ * Handler for xsl:for-each-member elements in stylesheet (4.0 extension).
+ * The xsl:for-each-member element has mandatory attributes select and bind-to.
  * The select expression must return an array. For each member of this array
  * it binds the variable named in the bind-to attribute, and executes the body
  * of the instruction with this additional variable binding.
  */
 
-public class SaxonForEachMember extends StyleElement implements ScopedBindingElement {
+public class XSLForEachMember extends StyleElement implements ScopedBindingElement {
 
     private Expression select;
     private StructuredQName bindTo;

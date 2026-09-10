@@ -2239,7 +2239,7 @@ public class XQueryParser extends XPathParser {
         List<Clause> clauseList = new ArrayList<>(4);
         while (true) {
             int offset = t.currentTokenStartOffset;
-            if (t.currentToken == Token.FOR) {
+            if (t.currentToken == Token.FOR || t.currentToken == Token.FOR_MEMBER) {
                 parseForClause(flwor, clauseList);
             } else if (t.currentToken == Token.LET) {
                 parseLetClause(flwor, clauseList);
@@ -2379,7 +2379,7 @@ public class XQueryParser extends XPathParser {
      * Parse a ForClause.
      * <p>
      * [42] ForClause ::=  "for" ForBinding ("," ForBinding)* <br>
-     * [42a] ForBinding ::= "$" VarName TypeDeclaration? ("allowing" "empty")? PositionalVar? "in" ExprSingle
+     * [42a] ForBinding ::= "member"? "$" VarName TypeDeclaration? ("allowing" "empty")? PositionalVar? "in" ExprSingle
      * </p>
      *
      * @param clauseList - the components of the parsed ForClause are appended to the
@@ -2388,25 +2388,27 @@ public class XQueryParser extends XPathParser {
      */
     private void parseForClause(FLWORExpression flwor, List<Clause> clauseList) throws XPathException {
         boolean first = true;
+        boolean forMember = t.currentToken == Token.FOR_MEMBER;
+        if (forMember && !allowXPath40Syntax) {
+            grumble("The 'for member' syntax requires XQuery 4.0 to be enabled");
+        }
         do {
-            ForClause clause = new ForClause();
-            clause.setRepeated(!first || containsLoopingClause(clauseList));
-            setLocation(clause, t.currentTokenStartOffset);
-            if (first) {
-                //clause.offset = t.currentTokenStartOffset;
-            }
-            clauseList.add(clause);
             nextToken();
+            
+            int offset = t.currentTokenStartOffset;
+            ForClause clause = forMember ? new ForMemberClause() : new ForClause();
+            clause.setRepeated(!first || containsLoopingClause(clauseList));
             if (first) {
                 first = false;
-            } else {
-                //clause.offset = t.currentTokenStartOffset;
             }
+            setLocation(clause, offset);
+            clauseList.add(clause);
+
             expect(Token.DOLLAR);
             nextToken();
             expect(Token.NAME);
             StructuredQName varQName = makeStructuredQName(t.currentTokenValue, "");
-            SequenceType type = SequenceType.SINGLE_ITEM;
+            SequenceType type = forMember ? SequenceType.ANY_SEQUENCE : SequenceType.SINGLE_ITEM;
             nextToken();
 
             boolean explicitType = false;
@@ -2418,10 +2420,13 @@ public class XQueryParser extends XPathParser {
 
             boolean allowingEmpty = false;
             if (isKeyword("allowing")) {
+                if (forMember) {
+                    grumble("'allowing empty' cannot appear in a 'for member' clause");
+                }
                 allowingEmpty = true;
                 clause.setAllowingEmpty(true);
                 if (!explicitType) {
-                    type = SequenceType.OPTIONAL_ITEM;
+                    type = forMember ? SequenceType.ANY_SEQUENCE : SequenceType.OPTIONAL_ITEM;
                 }
                 nextToken();
                 if (!isKeyword("empty")) {
@@ -2430,7 +2435,7 @@ public class XQueryParser extends XPathParser {
                 nextToken();
             }
 
-            if (explicitType && !allowingEmpty && type.getCardinality() != StaticProperty.EXACTLY_ONE) {
+            if (explicitType && !allowingEmpty && !forMember && type.getCardinality() != StaticProperty.EXACTLY_ONE) {
                 warning("Occurrence indicator on singleton range variable has no effect");
                 type = SequenceType.makeSequenceType(type.getPrimaryType(), StaticProperty.EXACTLY_ONE);
             }

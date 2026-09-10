@@ -18,7 +18,7 @@ import net.sf.saxon.value.SequenceType;
  * to be used in an itemType with the syntax <code>type(N)</code>.
  */
 
-public class XSLItemType extends StyleElement {
+public class XSLItemType extends StyleElement {      // renamed to solve a transient build problem
 
     private StructuredQName itemTypeName;
     private boolean resolved = false;

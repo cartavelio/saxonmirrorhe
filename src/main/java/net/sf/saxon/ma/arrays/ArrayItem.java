@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.arrays;
 
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
@@ -19,9 +18,6 @@ import net.sf.saxon.z.IntSet;
  * Interface supported by different implementations of an XDM array item
  */
 public interface ArrayItem extends Function {
-
-    SequenceType SINGLE_ARRAY_TYPE =
-            SequenceType.makeSequenceType(ArrayItemType.ANY_ARRAY_TYPE, StaticProperty.EXACTLY_ONE);
 
     /**
      * Get a member of the array
