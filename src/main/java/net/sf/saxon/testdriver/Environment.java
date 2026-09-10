@@ -728,37 +728,6 @@ public class Environment implements ResourceResolver {
             }
 
             collectioni = new ExplicitCollection(config, collectionURI, resourcesi);
-//            {
-//
-//
-//                public void addResource(Resource r) {
-//                    resourcesi.add(r);
-//                }
-//
-//                @Override
-//                public String getCollectionURI() {
-//                    return cURI;
-//                }
-//
-//                @Override
-//                public Iterator<String> getResourceURIs(XPathContext context) {
-//                    List<String> resourceUris = new ArrayList<>();
-//                    for (Resource resource : resourcesi) {
-//                        resourceUris.add(resource.getResourceURI());
-//                    }
-//                    return resourceUris.iterator();
-//                }
-//
-//                @Override
-//                public Iterator<? extends Resource> getResources(XPathContext context) {
-//                    return resourcesi.iterator();
-//                }
-//
-//                @Override
-//                public boolean isStable(XPathContext context) {
-//                    return true;
-//                }
-//            };
 
             for (XdmNode source : coll.children("source")) {
                 String href = source.attribute("file");
