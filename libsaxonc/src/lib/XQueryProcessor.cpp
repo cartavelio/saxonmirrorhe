@@ -169,6 +169,14 @@ bool XQueryProcessor::removeParameter(const char *name) {
   return (bool)(parameters.erase("param:" + std::string(name)));
 }
 
+const char * XQueryProcessor::getProperty(const char *name) {
+  std::map<std::string, std::string>::iterator it;
+  it = properties.find(std::string(name));
+  if (it != properties.end())
+    return it->second.c_str();
+  return nullptr;
+}
+
 // Set a property.
 void XQueryProcessor::setProperty(const char *name, const char *value) {
 #ifdef DEBUG
@@ -219,6 +227,10 @@ const char * XQueryProcessor::getcwd() {
 
 void XQueryProcessor::setQueryBaseURI(const char *baseURI) {
   setProperty("base", baseURI);
+}
+
+const char * XQueryProcessor::getQueryBaseURI() {
+  return getProperty("base");
 }
 
 void XQueryProcessor::setUpdating(bool updating) {

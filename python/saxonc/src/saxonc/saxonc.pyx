@@ -3253,6 +3253,17 @@ cdef class PyXQueryProcessor:
         py_base_string = base_uri.encode('UTF-8') if base_uri is not None else None
         c_baseuri = py_base_string if base_uri is not None else ""
         self.thisxqptr.setQueryBaseURI(c_baseuri)
+     @property
+     def base_uri(self):
+        """
+        base_uri()
+        Property to get the static base URI of the query
+        Returns:
+            the static base URI
+        """
+        cdef const char* c_string = self.thisxqptr.getQueryBaseURI()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
 
      @property
      def cwd(self):

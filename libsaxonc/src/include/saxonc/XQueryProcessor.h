@@ -129,6 +129,13 @@ public:
    */
   void setProperty(const char *name, const char *value);
 
+   /**
+  * Get the value of a configuration property specified on the XQuery processor in use.
+  * @param name - the name of the property
+  * @return Value of the property or nullptr if the property is not found. Memory deallocation is handled internally.
+  */
+  const char * getProperty(const char *name);
+
   /**
    * Clear parameter values set.
    * Default behaviour (false) is to leave XdmValues in memory.
@@ -281,6 +288,12 @@ public:
    * is available
    */
   void setQueryBaseURI(const char *baseURI);
+
+    /**
+   * Get the static base URI for the query
+   * @return  the static base URI
+   */
+  const char * getQueryBaseURI();
 
   /**
    * Set the current working directory
