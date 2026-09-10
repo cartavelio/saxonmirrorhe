@@ -175,7 +175,7 @@ public class DictionaryMap extends StringMapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return toGeneralMap().put(key, value);
+        return OrderedMap.copy(this).put(key, value);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class DictionaryMap extends StringMapItem {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return toGeneralMap().remove(key);
+        return OrderedMap.copy(this).remove(key);
     }
 
     @Override
@@ -240,15 +240,6 @@ public class DictionaryMap extends StringMapItem {
     @Override
     public UType getKeyUType() {
         return map.isEmpty() ? UType.VOID : UType.STRING;
-    }
-
-    /**
-     * Convert to a HashTrieMap
-     */
-
-    private MapItem toGeneralMap() {
-        //System.err.println("Dictionary rewrite!!!!");
-        return OrderedMap.copy(this);
     }
 
     protected static class KeyIteratorImpl implements AtomicIterator {

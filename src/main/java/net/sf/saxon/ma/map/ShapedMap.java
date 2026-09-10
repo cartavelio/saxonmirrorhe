@@ -208,10 +208,7 @@ public class ShapedMap extends StringMapItem {
                 return new ShapedMap(shape, v2);
             }
         }
-        GeneralMapBuilder target = new GeneralMapBuilder();
-        target.copy(this);
-        MapItem map = target.getCompletedMapConfidently();
-        return map.put(key, value);
+        return OrderedMap.copy(this).put(key, value);
     }
 
     @Override
