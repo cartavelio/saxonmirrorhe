@@ -1934,6 +1934,10 @@
       <xsl:text>{@value}</xsl:text>
    </xsl:template>
    
+   <xsl:template match="*[@nodeType='DoubleLiteralExpr'][ends-with(@value, '.')]" priority="20">
+      <xsl:text>{@value}0</xsl:text>
+   </xsl:template>
+   
    <xsl:template match="*[@nodeType='LongLiteralExpr'][matches(@value, '^0x[89a-fA-F]')]" priority="20">
       <xsl:text>unchecked((long){@value})</xsl:text>
    </xsl:template>
@@ -2129,6 +2133,16 @@
          <xsl:otherwise> = </xsl:otherwise>
       </xsl:choose>
       <xsl:apply-templates select="value"/>
+   </xsl:template>
+   
+   <xsl:template match="*[@nodeType='AssignExpr'][@operator='UNSIGNED_RIGHT_SHIFT']" priority="20">
+      <!-- C# has no ">>>" operator, so generate a function call -->
+      <xsl:apply-templates select="target"/>
+      <xsl:text> = Saxon.Impl.Helpers.Utils.unsignedRightShift(</xsl:text>
+      <xsl:apply-templates select="target"/>
+      <xsl:text>, </xsl:text>
+      <xsl:apply-templates select="value"/>
+      <xsl:text>)</xsl:text>
    </xsl:template>
    
    <xsl:template match="*[@nodeType='ArrayAccessExpr']">

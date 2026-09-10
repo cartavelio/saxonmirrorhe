@@ -287,6 +287,7 @@
          'valueOf#1':             '(%args%)',
          'doubleToLongBits#1':    'System.BitConverter.DoubleToInt64Bits(%args%)',
          'doubleToRawLongBits#1': 'System.BitConverter.DoubleToInt64Bits(%args%)',
+         'longBitsToDouble#1':    'System.BitConverter.Int64BitsToDouble(%args%)',
          'toString#1':            '(%args%).ToString(System.Globalization.CultureInfo.InvariantCulture)',
          '*':                     '%scope%.%Name%(%args%)' 
          })"/>
