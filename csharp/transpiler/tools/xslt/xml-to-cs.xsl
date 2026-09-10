@@ -1962,7 +1962,8 @@
    <!-- Handle a method call to a field in a record. `record.field()` in Java becomes `record.field` in C# -->
    <xsl:template match="*[@nodeType='MethodCallExpr']
                          [key('digestClassKey', @RESOLVED_TYPE, $digest)[self::record]]
-                         [not(name/@identifier = ('hashCode', 'equals', 'toString'))]" priority="18">
+                         [not(name/@identifier = ('hashCode', 'equals', 'toString'))]
+                         [not(arguments/argument)]" priority="18">
       <xsl:apply-templates select="scope"/>
       <xsl:text>.{f:renameMethod(name/@identifier, .)}</xsl:text>
    </xsl:template>
