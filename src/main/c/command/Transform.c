@@ -35,7 +35,13 @@ int transform(sxnc_environment * environi, int argc, const char* argv[]) {
         printf("\nError: Not enough arguments in Transform");
         return 0;
     }
-     j_run_transform(environi->thread, argc, (char *)argv);
+
+    int64_t processorDataRef = createProcessorDataWithCapacity(environi->thread, argc);
+    for (int i =1; i < argc; i++) {
+        addProcessorProperty(environi->thread, (void *)processorDataRef, (char *)argv[i]);
+    }
+
+     j_run_transform(environi->thread, 0, (void *)processorDataRef);
 	return 0;
 }
 
@@ -47,6 +53,9 @@ int main( int argc, const char* argv[] )
     sxnc_environment * environi;
     environi  =  (sxnc_environment *)malloc(sizeof(sxnc_environment));
     create_graalvm_isolate(environi);
+#ifdef DEBUG
+    setDebugMode(environi->thread, 1);
+#endif
     transform(environi, argc, argv);
 
   

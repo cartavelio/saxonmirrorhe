@@ -95,6 +95,17 @@ public class ProcessorDataAccumulator {
     }
 
 
+    @CEntryPoint(name = "addProcessorProperty")
+    public static void addProcessorProperty(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName){
+
+        ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
+        String paramNamei = CTypeConversion.toJavaString(cparamName);
+
+        processorData.paramNames.add(paramNamei);
+
+    }
+
+
     @CEntryPoint(name = "clearProcessorData")
     public static void clearProcessorDataAccumulator(IsolateThread thread, ObjectHandle processorDataRef){
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);

@@ -30,11 +30,13 @@ typedef void (*addProcessorPropertyPair_fn_t)(graal_isolatethread_t*, void *, ch
 
 typedef void (*addProcessorValue_fn_t)(graal_isolatethread_t*, void *, void *);
 
+typedef void (*addProcessorProperty_fn_t)(graal_isolatethread_t*, void *, char*);
+
 typedef void (*clearProcessorData_fn_t)(graal_isolatethread_t*, void *);
 
 typedef long long int (*createSaxonProcessor_fn_t)(graal_isolatethread_t*, int);
 
-typedef long long int (*j_run_transform_fn_t)(graal_isolatethread_t*, int, char*);
+typedef long long int (*j_run_transform_fn_t)(graal_isolatethread_t*, int, void *);
 
 typedef void (*j_handles_destroy_fn_t)(graal_isolatethread_t*, void *);
 

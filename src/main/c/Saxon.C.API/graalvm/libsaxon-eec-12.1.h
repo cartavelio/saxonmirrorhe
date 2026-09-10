@@ -30,11 +30,13 @@ void addProcessorPropertyPair(graal_isolatethread_t*, void *, char*, char*);
 
 void addProcessorValue(graal_isolatethread_t*, void *, void *);
 
+void addProcessorProperty(graal_isolatethread_t*, void *, char*);
+
 void clearProcessorData(graal_isolatethread_t*, void *);
 
 long long int createSaxonProcessor(graal_isolatethread_t*, int);
 
-long long int j_run_transform(graal_isolatethread_t*, int, char*);
+long long int j_run_transform(graal_isolatethread_t*, int, void *);
 
 void j_handles_destroy(graal_isolatethread_t*, void *);
 
