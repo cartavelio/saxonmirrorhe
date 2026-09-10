@@ -129,6 +129,13 @@ public final class SequenceType {
     public static final SequenceType OPTIONAL_INTEGER =
             BuiltInAtomicType.INTEGER.zeroOrOne();
 
+    /**
+     * A type that allows a sequence of integers
+     */
+
+    public static final SequenceType INTEGER_SEQUENCE =
+            BuiltInAtomicType.INTEGER.zeroOrMore();
+
 
     /**
      * A type that allows a single short

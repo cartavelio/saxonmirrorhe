@@ -7,19 +7,19 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.LastItemExpression;
+import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.om.LazySequence;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.LookaheadIterator;
+import net.sf.saxon.tree.iter.LookaheadIteratorImpl;
 
 /**
- * This class implements the function fn:foot(), which is proposed as a standard function in XPath 4.0
+ * This class implements the function fn:truncate(), which is proposed as a standard function in XPath 4.0
  */
 
-public class FootFn extends SystemFunction {
+public class Truncate extends SystemFunction {
 
     /**
      * Evaluate the expression
@@ -32,11 +32,11 @@ public class FootFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        try {
-            Item foot = LastItemExpression.getLast(arguments[0].iterate());
-            return SequenceTool.itemOrEmpty(foot);
-        } catch (UncheckedXPathException e) {
-            throw e.getXPathException();
-        }
+        LookaheadIterator spy =
+                LookaheadIteratorImpl.makeLookaheadIterator(arguments[0].iterate());
+        ItemMappingIterator mapper =
+                new ItemMappingIterator(spy, item -> spy.hasNext() ? item : null);
+        return new LazySequence(mapper);
     }
+    
 }

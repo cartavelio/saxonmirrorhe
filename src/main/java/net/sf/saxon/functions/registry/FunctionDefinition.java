@@ -19,6 +19,13 @@ public interface FunctionDefinition {
     int getNumberOfParameters();
 
     /**
+     * Get the number of mandatory arguments (the lower bound of the arity range)
+     * @return the number of mandatory arguments
+     */
+
+    int getMinimumArity();
+
+    /**
      * Get the name (keyword) of the Nth parameter
      *
      * @return the expression for computing the value of the Nth parameter

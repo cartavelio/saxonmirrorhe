@@ -2520,6 +2520,9 @@ public class XPathParser {
     protected Expression parsePredicate(Expression step) throws XPathException {
         nextToken();
         Expression predicate = parsePredicate();
+        if (Literal.isConstantZero(predicate)) {
+            warning("Positions are numbered from one; the predicate [0] selects nothing", SaxonErrorCode.SXWN9046);
+        }
         expect(Token.RSQB);
         nextToken();
         step = new FilterExpression(step, predicate);
