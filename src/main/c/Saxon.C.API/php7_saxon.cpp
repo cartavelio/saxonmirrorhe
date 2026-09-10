@@ -1423,7 +1423,8 @@ PHP_METHOD(XdmValue, addXdmItem){
         RETURN_NULL();
     }
 
-    xdmValue_object *obj = (xdmValue_object *)Z_OBJ_P(getThis() TSRMLS_CC);
+    zend_object *oobj = Z_OBJ_P(getThis());
+    xdmValue_object* obj = (xdmValue_object *)((char *)oobj - XtOffsetOf(xdmValue_object, std));
     xdmValue = obj->xdmValue;
     if (xdmValue != nullptr) {
      const char * objName =ZSTR_VAL(Z_OBJCE_P(oth)->name);

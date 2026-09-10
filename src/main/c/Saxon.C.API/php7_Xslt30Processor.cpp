@@ -93,6 +93,7 @@ PHP_METHOD(Xslt30Processor, transformFileToFile)
           SaxonApiException * exception = xsltProcessor->getException();
           if(exception != nullptr) {
             zend_throw_exception(zend_exception_get_default(TSRMLS_C), exception->getMessage(), 0 TSRMLS_CC);
+            delete exception;
             }
 
         }
