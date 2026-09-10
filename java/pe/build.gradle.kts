@@ -127,6 +127,7 @@ sourceSets.named("editionTest") {
     exclude("net/sf/saxon/option/cpp/**")
     exclude("performance/ArrayPerformance.java")
     exclude("performance/Fernandes.java")
+    exclude("performance/MapPerformance.java")
     exclude("performance/PerformanceTestCase.java")
     exclude("performance/Playground.java")
     exclude("performance/QueryGroupingPerformance.java")
