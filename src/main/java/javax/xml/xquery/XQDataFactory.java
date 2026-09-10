@@ -14,13 +14,11 @@ import java.net.URI;
 /**
  * This interface represents a factory to obtain sequences,
  * item objects and types.
- * <p/>
- * <p/>
- * The items, sequences and types obtained through this interface are
- * independent of any connection.   <p>
- * The items and sequences created are immutable. The <code>close</code> method can
+ * <p>The items, sequences and types obtained through this interface are
+ * independent of any connection.   </p>
+ * <p>The items and sequences created are immutable. The <code>close</code> method can
  * be called to close the item or sequence and release all resources associated
- * with this item or sequence.<p>
+ * with this item or sequence.</p>
  */
 public interface XQDataFactory {
 
@@ -51,11 +49,11 @@ public interface XQDataFactory {
      * <code>xs:string</code> or a type derived by restriction from
      * <code>xs:string</code>. If the specified type is <code>null</code>, it
      * defaults to <code>xs:string</code>.<br>
-     * <p/>
-     * Subsequently the value is converted into an instance of the specified
+     *
+     * <p>Subsequently the value is converted into an instance of the specified
      * type according to the rule defined in <i>14.2 Mapping a Java Data Type to
      * an XQuery Data Type, XQuery API for Java (XQJ) 1.0</i>. If the
-     * conversion fails, an <code>XQException</code> will be thrown.
+     * conversion fails, an <code>XQException</code> will be thrown.</p>
      *
      * @param value the value to be converted, cannot be
      *              <code>null</code>
@@ -76,29 +74,18 @@ public interface XQDataFactory {
 
     /**
      * Creates an item from the given value.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will be parsed
+
+     * <p>If the value represents a well-formed XML document, it will be parsed
      * and results in a document node.
      * The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value is not well formed, or if a kind of the input type other
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the value is not well formed, or if a kind of the input type other
      * than the values list above is specified, behavior is implementation
-     * defined and may raise an exception.
+     * defined and may raise an exception.</p>
      *
      * @param value   the value to be converted, cannot be
      *                <code>null</code>
@@ -124,29 +111,17 @@ public interface XQDataFactory {
 
     /**
      * Creates an item from the given value.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will be parsed
+     * <p>If the value represents a well-formed XML document, it will be parsed
      * and results in a document node.
      * The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value is not well formed, or if a kind of the input type other
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the value is not well formed, or if a kind of the input type other
      * than the values list above is specified, behavior is implementation
-     * defined and may raise an exception.
+     * defined and may raise an exception.</p>
      *
      * @param value   the value to be converted, cannot be
      *                <code>null</code>
@@ -172,26 +147,14 @@ public interface XQDataFactory {
 
     /**
      * Creates an item from the given value.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will be parsed
+     * <p>If the value represents a well-formed XML document, it will be parsed
      * and results in a document node.
      * The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
      * If the value is not well formed, or if a kind of the input type other
      * than the values list above is specified, behavior is implementation
      * defined and may raise an exception.
@@ -220,27 +183,15 @@ public interface XQDataFactory {
 
     /**
      * Creates an item from the given value.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it results in a
+     * <p>If the value represents a well-formed XML document, it results in a
      * document node.  The kind of the input type must be <code>null</code>,
-     * <code>XQITEMKIND_DOCUMENT_ELEMENT</code> or <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_ELEMENT</code> or <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value is not well formed, or if a kind of the input type other
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the value is not well formed, or if a kind of the input type other
      * than the values list above is specified, behavior is implementation
-     * defined and may raise an exception.
+     * defined and may raise an exception.</p>
      *
      * @param value the value to be converted, cannot be <code>null</code>
      * @param type  the type of the value for the created
@@ -269,28 +220,16 @@ public interface XQDataFactory {
      * <li><code>javax.xml.transform.sax.SAXSource</code></li>
      * <li><code>javax.xml.transform.stream.StreamSource</code></li>
      * </ul>
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will result in a
+     * <p>If the value represents a well-formed XML document, it will result in a
      * document node. The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value is not well formed, or if a kind of the input type other
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the value is not well formed, or if a kind of the input type other
      * than the values list above is specified, behavior is implementation
-     * defined and may raise an exception.
+     * defined and may raise an exception.</p>
      *
      * @param value the value to be converted, cannot be <code>null</code>
      * @param type  the type of the value for the created
@@ -527,13 +466,13 @@ public interface XQDataFactory {
      * Creates an <code>XQSequence</code>, containing all the items from the
      * iterator. The newly created <code>XQSequence</code> is scrollable and
      * independent of any underlying <code>XQConnection</code>.
-     * <p/>
-     * If the iterator returns an <code>XQItem</code>, it is added to the
+     *
+     * <p>If the iterator returns an <code>XQItem</code>, it is added to the
      * sequence. If the iterator returns any other object, an item is added to the
      * sequence following the rules from <i>14.2 Mapping a Java Data Type
-     * to an XQuery Data Type, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * If the iterator does not return any items, then an empty sequence is created.
+     * to an XQuery Data Type, XQuery API for Java (XQJ) 1.0</i>.</p>
+     *
+     * <p>If the iterator does not return any items, then an empty sequence is created.</p>
      *
      * @param i input iterator
      * @return <code>XQSequence</code> representing the sequence

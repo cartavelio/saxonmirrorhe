@@ -35,7 +35,7 @@ public class XQStackTraceElement implements Serializable {
      * @param column    the column number in the query string where the error occured.
      *                  Column numbering starts at <code>1</code>. <code>-1</code> if unknown
      * @param position  the position in the query string where the error occured. This
-     *                  is a <code>0</code> based position. <code>-1<code> if unknown
+     *                  is a <code>0</code> based position. <code>-1</code> if unknown
      * @param function  the <code>QName</code> of the function in which the exception occurred,
      *                  or <code>null</code> if it occurred outside an enclosing function
      * @param variables the variables in scope at this execution point,
@@ -67,8 +67,8 @@ public class XQStackTraceElement implements Serializable {
     /**
      * Gets the character position in the query string containing the execution
      * point represented by this stack trace element.
-     * <p/>
-     * This is a <code>0</code> based position. <code>-1</code> if unknown.</li>
+     *
+     * <p>This is a <code>0</code> based position. <code>-1</code> if unknown.</p>
      *
      * @return the character position in the query string containing the
      *         execution point represented by the stack trace element
@@ -80,10 +80,10 @@ public class XQStackTraceElement implements Serializable {
     /**
      * Gets the line number in the query string containing the execution
      * point represented by this stack trace element.
-     * <p/>
+     * <p>
      * Line numbering starts at <code>1</code>. <code>-1</code> is returned
      * if the line number is unknown. If the implementation does not support this method,
-     * it must return <code>-1</code>
+     * it must return <code>-1</code></p>
      *
      * @return the line number in the query string containing the
      *         execution point represented by the stack trace element
@@ -95,10 +95,10 @@ public class XQStackTraceElement implements Serializable {
     /**
      * Gets the column number in the query string containing the execution
      * point represented by this stack trace element.
-     * <p/>
-     * Column numbering starts at <code>1</code>. <code>-1</code> is returned
+     *
+     * <p>Column numbering starts at <code>1</code>. <code>-1</code> is returned
      * if the column number is unknown. If the implementation does not support this method,
-     * it must return <code>-1</code>
+     * it must return <code>-1</code></p>
      *
      * @return the column number in the query string containing the
      *         execution point represented by the stack trace element

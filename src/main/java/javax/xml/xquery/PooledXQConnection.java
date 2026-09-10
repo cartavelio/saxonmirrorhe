@@ -11,16 +11,16 @@ package javax.xml.xquery;
  * can be recycled rather than being closed when an application is
  * finished with it, thus reducing the number of connections that
  * need to be made.
- * <p/>
+ * <p>
  * An application programmer does not use the <code>PooledXQConnection</code>
  * interface directly; rather, it is used by a middle tier infrastructure
  * that manages the pooling of connections.
- * <p/>
+ * </p><p>
  * When an application calls the method <code>XQDataSource.getConnection</code>,
  * it gets back an <code>XQConnection</code> object.  If connection pooling is
  * being done, that <code>XQConnection</code> object is actually a handle to
  * a <code>PooledXQConnection</code> object, which is a physical connection.
- * <p/>
+ * </p><p>
  * The connection pool manager, typically the application server, maintains
  * a pool of <code>PooledXQConnection</code> objects.  If there is a
  * <code>PooledXQConnection</code> object available in the pool, the
@@ -30,7 +30,7 @@ package javax.xml.xquery;
  * connection pool manager calls the <code>ConnectionPoolXQDataSource</code>
  * method <code>getPooledConnection</code> to create a new physical connection and
  * returns a handle to it.
- * <p/>
+ * </p><p>
  * When an application closes a connection, it calls the <code>XQConnection</code>
  * method <code>close</code>. When connection pooling is being done,
  * the connection pool manager is notified because it has registered itself as
@@ -41,11 +41,11 @@ package javax.xml.xquery;
  * <code>PooledXQConnection</code> object to the pool of connections so that
  * it can be used again.  Thus, when an application closes its connection,
  * the underlying physical connection is recycled rather than being closed.
- * <p/>
+ * </p><p>
  * The physical connection is not closed until the connection pool manager
  * calls the <code>PooledXQConnection</code> method <code>close</code>.
  * This method is generally called to have an orderly shutdown of the server or
- * if a fatal error has made the physical connection unusable.
+ * if a fatal error has made the physical connection unusable.</p>
  */
 
 public interface PooledXQConnection {

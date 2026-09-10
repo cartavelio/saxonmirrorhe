@@ -43,7 +43,7 @@ package javax.xml.xquery;
  *
  *  }
  * </pre>
- * <p/>
+ * <p>
  * See also:
  * <ul>
  * <li> <i>Table 6 - XQuery Atomic Types and Corresponding Java Object Types,
@@ -60,8 +60,6 @@ package javax.xml.xquery;
  * <code>org.w3.dom.Element</code>.
  * </li>
  * </ul>
- * <p/>
- * <p/>
  */
 public interface XQItemAccessor {
 
@@ -148,11 +146,11 @@ public interface XQItemAccessor {
     /**
      * Gets the type of the item.
      * <br>
-     * <p/>
+     * <p>
      * On a forward only sequence this method can be called independent of any
      * other get or write method. It will not raise an error if such method has
      * been called already, nor will it affect subsequent invocations of any
-     * other get or write method.
+     * other get or write method.</p>
      *
      * @return the type of the item
      * @throws XQException if (1) there are errors accessing the type of the item,
@@ -203,11 +201,11 @@ public interface XQItemAccessor {
      * The type of the returned DOM node is governed by <i>Table 7 -
      * XQuery Node Types and Corresponding Java Object Types  XQuery
      * API for Java (XQJ) 1.0</i>
-     * <p/>
+     * <p>
      * The instance of the returned node is implementation dependent. The node
      * may be a reference or a copy of the internal state of the item. It is
      * advisable to make a copy of the node if the application plans to modify
-     * it.
+     * it. </p>
      *
      * @return a DOM node representing the current item
      * @throws XQException if (1) if there are errors accessing the current item,
@@ -226,12 +224,12 @@ public interface XQItemAccessor {
      * empty string is returned. If the document URI is available, the returned
      * value is the same as if <code>fn:document-uri</code> were evaluated on this document
      * node. If the item is of a node kind other than document node, then the
-     * returned URI is implementation-defined.<br>
-     * <p/>
+     * returned URI is implementation-defined.
+     * <p>
      * On a forward only sequence this method can be called independent of any
      * other get or write method. It will not raise an error if such method has
      * been called already, nor will it affect subsequent invocations of any
-     * other get or write method on the current item.
+     * other get or write method on the current item.</p>
      *
      * @return the document URI for this document node or the empty string if
      *         not available. For other node kinds, the result is
@@ -244,11 +242,11 @@ public interface XQItemAccessor {
 
     /**
      * Gets the current item as an <code>Object</code>.
-     * <p/>
+     * <p>
      * The data type of the returned object will be the Java <code>Object</code>
      * type as specified in <i>14.4 Mapping an XQuery Atomic Value to a
      * Java Object Type and 14.5 Mapping an XQuery Node to a Java Object Type,
-     * XQuery API for Java (XQJ) 1.0</i>.
+     * XQuery API for Java (XQJ) 1.0</i>.</p>
      *
      * @return an object representing the current item
      * @throws XQException if (1) if there are errors accessing the current item,
@@ -263,15 +261,15 @@ public interface XQItemAccessor {
      * Read the current item as an <code>XMLStreamReader</code> object, as described
      * in <i>Section 12.1 Serializing an XDM instance into a StAX event stream
      * (XMLStreamReader), XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
+     * <p>
      * Note that the serialization process might fail, in which case a
      * <code>XQException</code> is thrown.
-     * <p/>
+     * </p><p>
      * While the stream is being read, the application MUST NOT do any other
      * concurrent operations on the underlying item or sequence.
      * The operation on the stream is undefined if the underlying sequence
      * is repositioned or the state of the underlying item or sequence
-     * is changed by concurrent operations.
+     * is changed by concurrent operations.</p>
      *
      * @return an XML reader object as <code>XMLStreamReader</code>
      * @throws XQException if (1) there are errors accessing the current item
@@ -290,13 +288,13 @@ public interface XQItemAccessor {
      * Serializes the current item  according to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>.
-     * <p/>
+     * <p>
      * Serialization parameters, which influence how serialization is
      * performed, can be specified. Refer to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>
      * and <i>Section 12 Serialization, XQuery
-     * API for Java (XQJ) 1.0</i> for more information.
+     * API for Java (XQJ) 1.0</i> for more information.</p>
      *
      * @param props specifies the serialization parameters,
      *              <code>null</code> is considered equivalent to an empty
@@ -333,9 +331,9 @@ public interface XQItemAccessor {
      * Checks if the item "matches" an item type, as defined in
      * <a href="http://www.w3.org/TR/xquery/#id-matching-item"><i>2.5.4.2
      * Matching an Item Type and an Item, XQuery 1.0: An XML Query Language</i></a>.
-     * <p/>
+     * <p>
      * You can use this method to first check the type of the result before
-     * calling the specific get methods.
+     * calling the specific get methods. </p>
      * <br>
      * <br>
      * Example -
@@ -397,13 +395,13 @@ public interface XQItemAccessor {
      * Serializes the current item to a <code>Writer</code> according to
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>.
-     * <p/>
+     * <p>
      * Serialization parameters, which influence how serialization is
      * performed, can be specified. Refer to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>
      * and <i>Section 12 Serialization, XQuery
-     * API for Java (XQJ) 1.0</i> for more information.
+     * API for Java (XQJ) 1.0</i> for more information.</p>
      *
      * @param os    the output stream into which the current item is
      *              to be serialized
@@ -425,17 +423,16 @@ public interface XQItemAccessor {
      * Serializes the current item to a <code>Writer</code> according to
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>.
-     * <p/>
+     * <p>
      * Serialization parameters, which influence how serialization is
      * performed, can be specified. Refer to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>
      * and <i>Section 12 Serialization, XQuery
-     * API for Java (XQJ) 1.0</i> for more information.
-     * <br>
-     * <br>
-     * Warning: When outputting to a <code>Writer</code>, make sure the writer's encoding
-     * matches the encoding parameter if specified as a property or the default
+     * API for Java (XQJ) 1.0</i> for more information.</p>
+     *
+     * <p>Warning: When outputting to a <code>Writer</code>, make sure the writer's encoding
+     * matches the encoding parameter if specified as a property or the default</p>
      * encoding.
      *
      * @param ow    the writer object into which the current item is to be
@@ -458,15 +455,15 @@ public interface XQItemAccessor {
      * Writes the current item to a SAX handler, as described in
      * in <i>Section 12.2 Serializing an XDM instance into a SAX event stream,
      * XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
+     * <p>
      * Note that the serialization process might fail, in
      * which case a <code>XQException</code> is thrown.
-     * <p/>
+     * </p><p>
      * The specified <code>org.xml.sax.ContentHandler</code> can optionally implement the
      * <code>org.xml.sax.LexicalHandler</code> interface. An implementation must check if the
      * specified <code>ContentHandler</code> implements <code>LexicalHandler</code>.
      * If the handler is a <code>LexicalHandler</code> comment nodes are reported, otherwise
-     * they will be silently ignored.
+     * they will be silently ignored. </p>
      *
      * @param saxhdlr the SAX content handler, optionally a lexical handler
      * @throws XQException if (1) there are errors accessing the current
@@ -486,10 +483,10 @@ public interface XQItemAccessor {
      * normalized as described in <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>. Subsequently it is
      * serialized to the <code>Result</code> object.<br>
-     * <p/>
+     * <p>
      * Note that the normalization process can fail, in which case an
      * <code>XQException</code> is thrown.
-     * <p/>
+     * </p><p>
      * An XQJ implementation must at least support the following implementations:
      * <ul>
      * <li><code>javax.xml.transform.dom.DOMResult</code></li>

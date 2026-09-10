@@ -10,7 +10,7 @@ package javax.xml.xquery;
  * <i>XQuery Static Context Components</i></a>. Further it includes the
  * static XQJ properties for an <code>XQExpression</code> or
  * <code>XQPreparedExpression</code> object.
- * <p/>
+ * <p>
  * The following XQuery Static Context Components are supported through the
  * <code>XQStaticContext</code> interface:
  * <ul>
@@ -28,9 +28,9 @@ package javax.xml.xquery;
  * </ul>
  * As described in the XQuery specification, each of these default values can
  * be overridden or augmented in the query prolog.<br>
- * <p/>
+ * <p>
  * In addition <code>XQStaticContext</code> includes the static XQJ properties
- * for an <code>XQExpression</code> or <code>XQPreparedExpression</code> object:
+ * for an <code>XQExpression</code> or <code>XQPreparedExpression</code> object:</p>
  * <ul>
  * <li>Binding mode
  * <li>Holdability of the result sequences
@@ -38,7 +38,7 @@ package javax.xml.xquery;
  * <li>Query language
  * <li>Query timeout
  * </ul>
- * <p/>
+ * <p>
  * Note that <code>XQStaticContext</code> is a value object, changing attributes in
  * such object doesn't affect any existing <code>XQExpression</code> or
  * <code>XQPreparedExpression</code> object.<br>

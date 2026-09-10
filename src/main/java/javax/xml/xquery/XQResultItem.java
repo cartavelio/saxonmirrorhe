@@ -7,13 +7,12 @@ package javax.xml.xquery;
 /**
  * This interface represents an immutable item object obtained from an
  * <code>XQResultSequence</code> using the <code>getItem</code> method.
- * <p/>
- * <p/>
+ * <p>
  * A forward only result sequence does not support calling the getter methods
  * multiple times on the same item. To work around this case,
  * the <code>getItem</code> method can be used to obtain a result item and then
  * getter methods may be called multiple times on this item. <p>
- * <p/>
+ * </p><p>
  * The <code>XQResultItem</code> object is dependent on
  * the connection, expression and the sequence from which it
  * was created and is only valid for the duration of those objects.
@@ -21,7 +20,7 @@ package javax.xml.xquery;
  * will be implicitly closed, and it can no longer be used.
  * Similarly  re-executing the expression also implicitly closes the
  * associated result sequences, which in turn implicitly closes this result item. <p>
- * <p/>
+ * </p><p>
  * An XQJ driver is not required to provide finalizer methods for
  * the connection and other objects. Hence it is strongly recommended that
  * users call close method explicitly to free any resources. It is also
@@ -29,7 +28,7 @@ package javax.xml.xquery;
  * is closed even when there are exceptions.
  * Not closing this object implicitly or explicitly might result in serious memory
  * leaks.<p>
- * <p/>
+ * </p><p>
  * Example -
  * <pre>
  *

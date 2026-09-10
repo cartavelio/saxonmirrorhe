@@ -233,17 +233,17 @@ public interface XQMetaData {
      * Returns a set of <code>java.lang.String</code>, each of which
      * specifies a character encoding method the XQJ implmentation supports to
      * parse the XQuery query text. <br>
-     * <p/>
+     * <p>
      * For an example, for an XQJ impmentation which is able to parse the
      * XQuery encoded in "UTF-8" or "UTF-16", it returns a
      * <code>java.util.Set</code> of  "UTF-8" and "UTF-16".
-     * <p/>
+     * </p><p>
      * If the implemetation is not able to generate a list of encodings supported,
      * an empty set is returned. If a non-empty set is returned, the encodings
      * returned in this set are guaranteed to be supported. Note that encodings not in the
      * returned set might also be supported. For example, if the set has two
      * encoding methods: 'UTF-8' and 'UTF-16', they are supported by the implementation.
-     * However, this does not mean 'Shift-Js' is not supported. It might be supported.
+     * However, this does not mean 'Shift-Js' is not supported. It might be supported. </p>
      *
      * @return a <code>java.util.Set</code> of
      *         <code>java.lang.String</code>, each of which

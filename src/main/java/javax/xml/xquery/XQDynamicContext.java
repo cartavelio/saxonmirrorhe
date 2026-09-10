@@ -15,23 +15,21 @@ import java.io.Reader;
  * <a href="http://www.w3.org/TR/xquery/#eval_context"><i>2.1.2
  * Dynamic Context, XQuery 1.0: An XML Query Language</i></a>.
  * The following components can be accessed:
- * <p/>
  * <ul>
  * <li>The context item can be set</li>
  * <li>The variable values can be bound</li>
  * <li>The implicit time zone can be retrieved or specified</li>
  * </ul>
- * <p/>
+ * <p>
  * Where the prolog of the expression specifies the static type of external
  * variables, this interface allows the dynamic type and value of the
  * variable to be specified.
- * <p/>
+ * </p><p>
  * Note that in case of an <code>XQPreparedExpression</code>, values may only be bound
  * to those variables that are defined in the prolog of the expression.
- * <p/>
- * <p/>
+ * </p><p>
  * Example -
- * <p/>
+ * </p>
  * <pre>
  *
  *  XQConnection conn = XQDataSource.getConnection();
@@ -74,11 +72,11 @@ import java.io.Reader;
  * <br>
  * <br>
  * <b>Binding mode</b>
- * <p/>
+ * <p>
  * The default binding mode is immediate. In other words, the external
  * variable value specified by the application is consumed during the
  * <code>bindXXX()</code> method.
- * <p/>
+ * </p><p>
  * An application has the ability to set the binding mode to deferred. In deferred
  * mode an application cannot assume that the bound value will be
  * consumed during the invocation of the <code>bindXXX</code> method. In
@@ -88,18 +86,18 @@ import java.io.Reader;
  * external variable. The XQJ implementation is also free to read the bound
  * value either at bind time or during the subsequent evaluation and
  * processing of the query results.
- * <p/>
+ * </p><p>
  * Also note that in deferred binding mode, bindings are only active for a
  * single execution cycle. The application is required to explicitly
  * re-bind values to every external variable before each execution. Failing
  * to do so will result in an <code>XQException</code>, as the
  * implementation will assume during the next execution that none of the
  * external variables are bound.
- * <p/>
+ * </p><p>
  * Finally, note that in deferred binding mode, any error condition
  * specified to throw an exception during the <code>bindXXX()</code> methods,
  * may as well be thrown later during the query's evaluation.
- * <p/>
+ * </p><p>
  * Example - in case of an immediate binding mode, bindings stay active
  * over executions
  * <pre>
@@ -192,13 +190,13 @@ public interface XQDynamicContext {
      * represent an <code>xs:string</code> or a type derived by restriction
      * from <code>xs:string</code>. If the specified type is <code>null</code>,
      * it defaults to <code>xs:string</code>.<br>
-     * <p/>
-     * Subsequently the value is converted into an instance of the specified
+     *
+     * <p>Subsequently the value is converted into an instance of the specified
      * type according to the rule defined in <i>14.2 Mapping a Java Data Type to
      * an XQuery Data Type, XQuery API for Java (XQJ) 1.0,</i>. If the
      * conversion fails, or if there is a mismatch between the static and
      * dynamic types, an <code>XQException</code> is raised either by this
-     * method, or during query evaluation.
+     * method, or during query evaluation.</p>
      *
      * @param varName the name of the external variable to bind to,
      *                cannot be <code>null</code>
@@ -224,31 +222,19 @@ public interface XQDynamicContext {
 
     /**
      * Binds a value to the given external variable or the context item.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will be parsed
+     * <p>If the value represents a well-formed XML document, it will be parsed
      * and results in a document node.
      * The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the conversion fails, or if there is a mismatch between the static
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the conversion fails, or if there is a mismatch between the static
      * and dynamic types, an <code>XQException</code> is raised either by this
      * method, or during query evaluation. If the value is not well formed,
      * or if a kind of the input type other than the values list above is
-     * specified, behavior is implementation defined and may raise an exception.
+     * specified, behavior is implementation defined and may raise an exception.</p>
      *
      * @param varName the name of the external variable to bind to,
      *                cannot be <code>null</code>
@@ -280,31 +266,19 @@ public interface XQDynamicContext {
 
     /**
      * Binds a value to the given external variable or the context item.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will be parsed
+     * <p>If the value represents a well-formed XML document, it will be parsed
      * and results in a document node.
      * The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the conversion fails, or if there is a mismatch between the static
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the conversion fails, or if there is a mismatch between the static
      * and dynamic types, an <code>XQException</code> is raised either by this
      * method, or during query evaluation. If the value is not well formed,
      * or if a kind of the input type other than the values list above is
-     * specified, behavior is implementation defined and may raise an exception.
+     * specified, behavior is implementation defined and may raise an exception.</p>
      *
      * @param varName the name of the external variable to bind to,
      *                cannot be <code>null</code>
@@ -335,31 +309,19 @@ public interface XQDynamicContext {
 
     /**
      * Binds a value to the given external variable or the context item.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will be parsed
+     * <p>If the value represents a well-formed XML document, it will be parsed
      * and results in a document node.
      * The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the conversion fails, or if there is a mismatch between the static
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the conversion fails, or if there is a mismatch between the static
      * and dynamic types, an <code>XQException</code> is raised either by this
      * method, or during query evaluation. If the value is not well formed,
      * or if a kind of the input type other than the values list above is
-     * specified, behavior is implementation defined and may raise an exception.
+     * specified, behavior is implementation defined and may raise an exception.</p>
      *
      * @param varName the name of the external variable to bind to,
      *                cannot be <code>null</code>
@@ -390,30 +352,18 @@ public interface XQDynamicContext {
 
     /**
      * Binds a value to the given external variable or the context item.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it results in a
+     * <p>If the value represents a well-formed XML document, it results in a
      * document node.  The kind of the input type must be <code>null</code>,
-     * <code>XQITEMKIND_DOCUMENT_ELEMENT</code> or <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_ELEMENT</code> or <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value is not well formed, or if a kind of the input type other
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the value is not well formed, or if a kind of the input type other
      * than the values list above is specified, behavior is implementation
      * defined and may raise an exception. If the conversion
      * fails, or if there is a mismatch between the static and dynamic types,
      * an <code>XQException</code> is raised either by this method, or during
-     * query evaluation.
+     * query evaluation.</p>
      *
      * @param varName the name of the external variable to bind to, cannot
      *                be <code>null</code>
@@ -448,30 +398,18 @@ public interface XQDynamicContext {
      * <li><code>javax.xml.transform.sax.SAXSource</code></li>
      * <li><code>javax.xml.transform.stream.StreamSource</code></li>
      * </ul>
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value represents a well-formed XML document, it will result in a
+     * <p>If the value represents a well-formed XML document, it will result in a
      * document node. The kind of the input type must be <code>null</code>,
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, or
-     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * The value is converted into an instance of the specified type according
+     * <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>.</p>
+     * <p>The value is converted into an instance of the specified type according
      * to  the rules defined in <i>14.3 Mapping a Java XML document to an
-     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * If the value is not well formed, or if a kind of the input type other
+     * XQuery document node, XQuery API for Java (XQJ) 1.0</i>.</p>
+     * <p>If the value is not well formed, or if a kind of the input type other
      * than the values list above is specified, behavior is implementation
      * defined and may raise an exception. If the conversion fails, or if there
      * is a mismatch between the static and dynamic types, an <code>XQException</code>
-     * is raised either by this method, or during query evaluation.
+     * is raised either by this method, or during query evaluation.</p>
      *
      * @param varName the name of the external variable to bind to, cannot
      *                be <code>null</code>

@@ -10,13 +10,13 @@ import java.util.Properties;
 /**
  * An <code>XQDataSource</code> is a factory for <code>XQConnection</code>
  * objects. The datasource may be obtained from a JNDI source or through other means.
- * <br/>
- * The XQuery connection (<code>XQConnection</code>) objects may be created using
+ *
+ * <p>The XQuery connection (<code>XQConnection</code>) objects may be created using
  * an existing JDBC connection. This is an optional feature that may not be
  * supported by all implementations. If the implementation supports this
  * mechanism, then the XQuery connection may inherit some of the JDBC
- * connection's properties, such as login timeout, log writer etc.
- * <br/>
+ * connection's properties, such as login timeout, log writer etc.</p>
+ *
  */
 public interface XQDataSource {
     /**
@@ -92,18 +92,14 @@ public interface XQDataSource {
     /**
      * Returns an array containing the property names supported by this
      * <code>XQDataSource</code>.
-     * Implementations that support user name and password must recognize
-     * the user name and password properties listed below.
-     * <br>
-     * <br>
-     * <table>
-     * <tr><td><code>user</code></td>
-     * <td>the user name to use for creating a connection</td></tr>
-     * <tr><td><code>password</code></td>
-     * <td>the password to use for creating a connection</td></tr>
-     * </table>
-     * <br>
-     * Any additional properties are implementation-defined.
+     * <p>Implementations that support user name and password must recognize
+     * the user name and password properties listed below.</p>
+     * <ul>
+     * <li><code>user</code>: the user name to use for creating a connection</li>
+     * <li><code>password</code>: the password to use for creating a connection</li>
+     * </ul>
+     *
+     * <p>Any additional properties are implementation-defined.</p>
      *
      * @return <code>String[]</code> an array of property names
      *         supported by this implementation

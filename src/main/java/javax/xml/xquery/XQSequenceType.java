@@ -7,9 +7,9 @@ package javax.xml.xquery;
 /**
  * The <code>XQSequenceType</code> interface represents a sequence type as
  * <a href="http://www.w3.org/TR/xquery"><i>XQuery 1.0: An XML Query language</i></a>.
- * <p/>
+ * <p>
  * The <code>XQSequenceType</code> is the base interface for the
- * <code>XQItemType</code> interface and contains an occurence indicator.
+ * <code>XQItemType</code> interface and contains an occurence indicator.</p>
  */
 public interface XQSequenceType {
     int OCC_ZERO_OR_ONE = 1;  // same as ?
@@ -30,9 +30,8 @@ public interface XQSequenceType {
     /**
      * Returns the occurrence indicator for the sequence type.
      * One of:
-     * <p/>
-     * <p/>
      * <table>
+     *     <caption>Occurrence indicators</caption>
      * <tr><th>Description</th>
      * <th>Value</th></tr>
      * <tr><td>Zero or one</td>
@@ -65,15 +64,11 @@ public interface XQSequenceType {
      * Compares the specified object with this sequence type for equality. The result
      * is <code>true</code> only if the argument is a sequence type object which
      * represents the same XQuery sequence type.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
-     * In order to comply with the general contract of <code>equals</code> and
+     * <p>In order to comply with the general contract of <code>equals</code> and
      * <code>hashCode</code> across different implementations the following
      * algorithm must be used.  Return <code>true</code> if and only if both
      * objects are <code>XQsequenceType</code> and:
-     * <p/>
+     * </p>
      * <ul>
      * <li><code>getItemOccurrence()</code> is equal</li>
      * <li>if not <code>OCC_EMPTY</code>, <code>getItemType()</code>
@@ -89,13 +84,10 @@ public interface XQSequenceType {
 
     /**
      * Returns a hash code consistent with the definition of the equals method.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
+     * <p>
      * In order to comply with the general contract of <code>equals</code> and
      * <code>hashCode</code> across different implementations the following
-     * algorithm must be used:
+     * algorithm must be used: </p>
      * <pre>
      *  int hashCode;
      *  if (getItemOccurrence() == XQSequenceType.OCC_EMPTY)

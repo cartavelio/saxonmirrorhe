@@ -12,30 +12,30 @@ import javax.xml.namespace.QName;
  * connection. <p>
  * The preparation of the expression does the static analysis of the expression
  * using the static context information. <p>
- * <p/>
+ * </p><p>
  * The dynamic context information, such as values for bind variables, can then
  * be set using the setter methods. When setting values for bind variables,
  * these  variables should be present as external
  * variables in the prolog of the prepared expression.<p>
- * <p/>
+ * </p><p>
  * The static type information of the query can also be retrieved if the XQuery
  * implementation provides it using the <code>getStaticResultType</code>
  * method.<p>
- * <p/>
+ * </p><p>
  * When the expression is executed using the <code>executeQuery</code>
  * method, if the execution is successful, then
  * an <code>XQResultSequence</code> object is returned.
  * The <code>XQResultSequence</code> object is tied to
  * the <code>XQPreparedExpression</code> from which it was prepared and is
  * closed implicitly if that  expression is either closed or if re-executed.  <p>
- * <p/>
+ * </p><p>
  * The <code>XQPreparedExpression</code> object is dependent on
  * the <code>XQConnection</code> object from which it was created and is only
  * valid for the duration of that object.
  * Thus, if the <code>XQConnection</code> object is closed then
  * this <code>XQPreparedExpression</code> object  will be implicitly closed
  * and it can no longer be used.<p>
- * <p/>
+ * </p><p>
  * An XQJ driver is not required to provide finalizer methods for
  * the connection and other objects. Hence it is strongly recommended that
  * users call close method explicitly to free any resources. It is also
@@ -43,11 +43,11 @@ import javax.xml.namespace.QName;
  * is closed even when there are exceptions.
  * Not closing this object implicitly or explicitly might result in serious memory
  * leaks.<p>
- * <p/>
+ * </p><p>
  * When the <code>XQPreparedExpression</code> is closed any
  * <code>XQResultSequence</code> object obtained from it
  * is also implicitly closed. <p>
- * <p/>
+ * </p><p>
  * Example -
  * <pre>
  *  XQConnection conn = XQDataSource.getconnection();
@@ -108,11 +108,11 @@ public interface XQPreparedExpression extends XQDynamicContext {
      * Closes the expression object  and release all resources associated with
      * this prepared expression. This also closes any result sequences obtained
      * from this expression.
-     * <p/>
-     * Once the expression is closed, all methods on this object other than the
+     *
+     * <p>Once the expression is closed, all methods on this object other than the
      * <code>close</code> or <code>isClosed</code> will raise exceptions.
      * Calling close on an <code>XQExpression</code> object that is already closed has no
-     * effect.
+     * effect.</p>
      *
      * @throws XQException if there are errors when closing the expression
      */

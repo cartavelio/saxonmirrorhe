@@ -10,13 +10,11 @@ import java.net.URI;
 /**
  * The <code>XQItemType</code> interface represents an item type as defined in
  * <a href="http://www.w3.org/TR/xquery"><i>XQuery 1.0: An XML Query language</i></a>.
- * <p/>
- * <br>
- * <p/>
+ * <p>
  * The <code>XQItemType</code> extends the <code>XQSequenceType</code> but
  * restricts the occurrance indicator to be exactly one. This derivation allows passing
  * an item type wherever a sequence type is expected, but not the other way.
- * <p/>
+ * </p><p>
  * The <code>XQItemType</code> interface contains methods to represent
  * information about the following aspects of an item type:
  * <ul>
@@ -30,10 +28,10 @@ import java.net.URI;
  * <li>XML Schema URI associated with the type, if any</li>
  * <li>The nillability characteristics, if any</li>
  * </ul>
- * <p/>
+ * <p>
  * An instance of the <code>XQItemType</code> is a standalone
  * object that is independant of the <code>XQConnection</code> and
- * any XQuery static or dynamic context.
+ * any XQuery static or dynamic context. </p>
  */
 public interface XQItemType extends XQSequenceType {
     /**
@@ -365,12 +363,11 @@ public interface XQItemType extends XQSequenceType {
     /**
      * Returns the base type of the item. One of the <code>XQBASETYPE_*</code>
      * constants.
-     * <br/>
-     * <br/>
-     * XQJ defines a constant for each of the built-in schema
+     * 
+     * <p>XQJ defines a constant for each of the built-in schema
      * types defined in XML Schema. For atomic types this is the closest
      * matching built-in XML Schema type, for element and attributes the
-     * closest matching built-in XML Schema type this node is based on.
+     * closest matching built-in XML Schema type this node is based on.</p>
      *
      * @return int      one of the <code>XQBASETYPE_*</code> constants
      *         indicating the basic type of the item
@@ -416,10 +413,10 @@ public interface XQItemType extends XQSequenceType {
      * <code>XQITEMKIND_DOCUMENT_ELEMENT</code>, <code>XQITEMKIND_DOCUMENT_SCHEMA_ELEMENT</code>,
      * <code>XQITEMKIND_ELEMENT</code>, <code>XQITEMKIND_SCHEMA_ELEMENT</code>,
      * <code>XQITEMKIND_ATTRIBUTE</code>, or <code>XQITEMKIND_SCHEMA_ATTRIBUTE</code>.
-     * <p/>
+     * <p>
      * For example, in the case of  a type for <code>element "foo"</code>
      * this will return the <code>QName foo</code>. For wildcard entries a
-     * <code>null</code> value will be returned.
+     * <code>null</code> value will be returned. </p>
      *
      * @return <code>QName</code> for the name of the element,
      *         attribute, or document element node. <code>null</code>
@@ -439,13 +436,13 @@ public interface XQItemType extends XQSequenceType {
      * element or type definition. This method is implementation-definied
      * and an implementation will return a <code>null</code> value if it does
      * not support retrieving the schema location URI.
-     * <p/>
+     * <p>
      * If the item corresponds to a validated global element in a schema,
      * the result will be the schema location URI to the XMLSchema containing
      * the element definition. Otherwise if the item is a schema validated
      * node, the result will be the schema location URI of the XMLSchema
      * containing the type definition of that node. If the item is not schema
-     * validated, the result is <code>null</code>
+     * validated, the result is <code>null</code></p>
      *
      * @return <code>URI</code> representing the schema
      *         location URI of the XMLSchema containing the
@@ -511,15 +508,12 @@ public interface XQItemType extends XQSequenceType {
      * Compares the specified object with this item type for equality. The result
      * is <code>true</code> only if the argument is an item type object which
      * represents the same XQuery item type.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
+     * <p>
      * In order to comply with the general contract of <code>equals</code> and
      * <code>hashCode</code> across different implementations the following
      * algorithm must be used. Return <code>true</code> if and only if both
      * objects are <code>XQItemType</code> and:
-     * <p/>
+     * </p>
      * <ul>
      * <li><code>getItemKind()</code> is equal</li>
      * <li>if <code>getBaseType()</code> is supported for
@@ -544,13 +538,10 @@ public interface XQItemType extends XQSequenceType {
 
     /**
      * Returns a hash code consistent with the definition of the equals method.
-     * <p/>
-     * <br>
-     * <br>
-     * <p/>
+     * <p>
      * In order to comply with the general contract of <code>equals</code> and
      * <code>hashCode</code> across different implementations the following
-     * algorithm must be used:
+     * algorithm must be used: </p>
      * <pre>
      *  hashCode = this.getItemKind();
      *  if this.getSchemaURI != null

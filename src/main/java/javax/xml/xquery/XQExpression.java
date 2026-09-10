@@ -9,7 +9,7 @@ package javax.xml.xquery;
  * expressions. This object can be created from the <code>XQConnection</code>
  * and the execution can be done using the <code>executeQuery()</code> or
  * <code>executeCommand()</code> method, passing in the XQuery expression. <p>
- * <p/>
+ * <p>
  * All external variables defined in the prolog of the expression to be executed must
  * be set in the dynamic context of this expression using the bind methods.
  * Also, variables bound in this expression but not defined as external in
@@ -18,33 +18,33 @@ package javax.xml.xquery;
  * but the query only defines <code>$var1</code> as external, no error
  * will be reported for the binding of <code>$var2</code>. It will simply
  * be ignored.
- * <p/>
+ * </p><p>
  * When the expression is executed using the <code>executeQuery</code>
  * method, if the execution is successful, then
  * an <code>XQResultSequence</code> object is returned.
  * The <code>XQResultSequence</code> object is tied to
  * the <code>XQExpression</code> from which it was prepared and is
  * closed implicitly if that <code>XQExpression</code> is either closed or re-executed.  <p>
- * <p/>
+ * </p><p>
  * The <code>XQExpression</code> object is dependent on
  * the <code>XQConnection</code> object from which it was created and is only
  * valid for the duration of that object.
  * Thus, if the <code>XQConnection</code> object is closed then
  * this <code>XQExpression</code> object  will be implicitly closed
  * and it can no longer be used. <p>
- * <p/>
+ * </p><p>
  * An XQJ driver is not required to provide finalizer methods for
  * the connection and other objects. Hence it is strongly recommended that
  * users call close method explicitly to free any resources. It is also
  * recommended that they do so under a final block to ensure that the object
  * is closed even when there are exceptions. Not closing this object implicitly
  * or explicitly might result in serious memory leaks. <p>
- * <p/>
+ * </p><p>
  * When the <code>XQExpression</code> is closed any <code>XQResultSequence</code>
  * object obtained from it is also implicitly closed. <p>
- * <p/>
+ * </p><p>
  * Example -
- * <p/>
+ * </p><p>
  * <pre>
  *  XQConnection conn = XQDatasource.getConnection();
  *  XQExpression expr = conn.createExpression();
@@ -96,12 +96,12 @@ public interface XQExpression extends XQDynamicContext {
 
     /**
      * Closes the expression object and release associated resources.
-     * <p/>
-     * Once the expression is closed, all methods on this object other than the
+     *
+     * <p>Once the expression is closed, all methods on this object other than the
      * <code>close</code> or <code>isClosed</code> will raise exceptions.
      * This also closes any result sequences  obtained from this expression.
      * Calling <code>close</code> on an <code>XQExpression</code> object
-     * that is already closed has no effect.
+     * that is already closed has no effect.</p>
      *
      * @throws XQException if there are errors when closing the expression
      */
@@ -163,11 +163,11 @@ public interface XQExpression extends XQDynamicContext {
     /**
      * Executes a query expression. This implicitly closes any previous
      * result sequences obtained from this expression.
-     * <p/>
-     * If the query specifies a version declaration including an encoding, the
+     *
+     * <p>If the query specifies a version declaration including an encoding, the
      * XQJ implementation may try use this information to parse the query. In
      * absence of the version declaration, the assumed encoding is
-     * implementation dependent.
+     * implementation dependent.</p>
      *
      * @param query the input query expression as a input stream object.
      *              Cannot be <code>null</code>

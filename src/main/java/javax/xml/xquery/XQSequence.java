@@ -7,17 +7,17 @@ package javax.xml.xquery;
 /**
  * This interface represents a sequence of items as defined in the
  * XDM. The sequence may be materialized or non-materialized. <p>
- * <p/>
+ * </p><p>
  * The <code>next</code> method is useful to position the
  * <code>XQSequence</code> over the next item in the sequence.
  * If the scrollability is <code>XQConstants.SCROLLTYPE_SCROLLABLE</code>,
  * then the <code>previous</code> method can be called to move backwards.
- * <p/>
+ * </p><p>
  * In the case of a forward only sequence, the get methods may be only called
  * once per item. To perform multiple gets on an item, extract the item first
  * from the sequence using the <code>getItem</code> method and
  * then operate on the <code>XQItem</code> object.
- * <p/>
+ * </p><p>
  * <pre>
  *
  *  XQPreparedExpression expr = conn.prepareExpression("for $i ..");
@@ -42,7 +42,7 @@ package javax.xml.xquery;
  *  }
  *
  * </pre>
- * <p/>
+ * <p>
  * In a sequence, the cursor may be positioned on an item, after the last item
  * or before the first item. The <code>getPosition</code> method
  * returns the current position number. A value of 0 indicates
@@ -51,12 +51,12 @@ package javax.xml.xquery;
  * indicates that it is positioned on the item at that position.  <p>
  * For example, a position value of 1 indicates that it is positioned on
  * the item at position 1. <p>
- * <p/>
+ * </p><p>
  * The <code>isOnItem</code> method may be used to find out if the cursor
  * is positioned on the item. When the cursor is positioned on an item,
  * the <code>next</code> method call will move the cursor to be on the next item.
- * <p/>
- * <p/>
+ * </p><p>
+ * </p><p>
  * See also: <i>Section 12 Serialization, XQuery API for Java
  * (XQJ) 1.0</i>,  which describes some general information applicable
  * to various XQJ serialization methods.
@@ -76,19 +76,19 @@ public interface XQSequence extends XQItemAccessor {
      * If the given item number is negative, the <code>XQSequence</code>
      * positions itself on an absolute item position with respect to the
      * end of the sequence.
-     * <p/>
-     * For example, calling the method <code>absolute(-1)</code>
+     * 
+     * <p>For example, calling the method <code>absolute(-1)</code>
      * positions the <code>XQSequence</code> on the last item;
      * calling the method <code>absolute(-2)</code> moves the
      * <code>XQSequence</code> to the next-to-last item, and so on.
-     * <code>absolute(0)</code> will position the sequence before the first item.
-     * <p/>
-     * An attempt to position the sequence beyond the first/last item
+     * <code>absolute(0)</code> will position the sequence before the first item.</p>
+     * 
+     * <p>An attempt to position the sequence beyond the first/last item
      * set leaves the current position to be before the first item or
-     * after the last item. <p>
-     * <p/>
-     * Calling this method on an empty sequence
-     * will return <code>false</code>.
+     * after the last item. </p>
+     * 
+     * <p>Calling this method on an empty sequence
+     * will return <code>false</code>.</p>
      *
      * @param itempos the item position to jump to
      * @return <code>true</code> if the current position is
@@ -117,15 +117,15 @@ public interface XQSequence extends XQItemAccessor {
     /**
      * Closes the sequence and frees all resources associated with this
      * sequence.
-     * <p/>
-     * Closing an <code>XQSequence</code> object also implicitly closes all
-     * <code>XQItem</code> objects obtained from it.
-     * <p/>
-     * All methods other than the <code>isClosed</code>
+     * 
+     * <p>Closing an <code>XQSequence</code> object also implicitly closes all
+     * <code>XQItem</code> objects obtained from it.</p>
+     * 
+     * <p>All methods other than the <code>isClosed</code>
      * or <code>close</code> method will raise exceptions when invoked
      * after closing the sequence.
      * Calling <code>close</code> on an <code>XQSequence</code> object
-     * that is already closed has no effect.
+     * that is already closed has no effect.</p>
      *
      * @throws XQException if there are errors during closing of
      *                     the sequence
@@ -155,10 +155,10 @@ public interface XQSequence extends XQItemAccessor {
      * and <code>count() + 1</code> indicates position after the last item.
      * A specific position indicates that the cursor is positioned on
      * the item at that position. Use the <code>isOnItem</code>
-     * method to verify if the cursor is positioned on the item.<p>
-     * <p/>
+     * method to verify if the cursor is positioned on the item.
+     * <p>
      * Calling this method on an empty sequence
-     * will return <code>0</code>.
+     * will return <code>0</code>.</p>
      *
      * @throws XQException if (1) the sequence is forward-only, or (2)
      *                     the sequence is closed
@@ -205,12 +205,12 @@ public interface XQSequence extends XQItemAccessor {
      * In case of an <code>XQResultSequence</code>, the item is an
      * <code>XQResultItem</code>.
      * In the case of forward only sequences, this method or any other
-     * get or write method may only be called once on the curent item. <p>
-     * <p/>
-     * The <code>XQItem</code> object is dependent on the sequence from which
+     * get or write method may only be called once on the curent item.
+     * 
+     * <p>The <code>XQItem</code> object is dependent on the sequence from which
      * it was created and is only valid for the duration of <code>XQSequence</code>
      * lifetime. Thus, the <code>XQSequence</code> is closed, this <code>XQItem</code>
-     * object will be implicitly closed and it can no longer be used.
+     * object will be implicitly closed and it can no longer be used.</p>
      *
      * @return an <code>XQItem</code> object
      * @throws XQException if (1) there are errors retrieving the item,
@@ -225,21 +225,21 @@ public interface XQSequence extends XQItemAccessor {
      * <code>XMLStreamReader</code> object, as described in
      * <i>Section 12.1 Serializing an XDM instance into a StAX event stream
      * (XMLStreamReader), XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
-     * Note that the serialization process might fail, in which case a
-     * <code>XQException</code> is thrown.
-     * <p/>
-     * While the stream is being read, the application MUST NOT do any other
+     * 
+     * <p>Note that the serialization process might fail, in which case a
+     * <code>XQException</code> is thrown.</p>
+     *
+     * <p>While the stream is being read, the application MUST NOT do any other
      * concurrent operations on the sequence. The operation on the stream is
      * undefined if the underlying sequence position or state is changed by
-     * concurrent operations.
-     * <p/>
-     * After all items are written to the stream, the current position of the
-     * cursor is set to point after the last item.
-     * <p/>
-     * Also, in the case of forward only sequences, this method may only be
+     * concurrent operations.</p>
+     * 
+     * <p>After all items are written to the stream, the current position of the
+     * cursor is set to point after the last item.</p>
+     * 
+     * <p>Also, in the case of forward only sequences, this method may only be
      * called if the current item has not yet been read through any of the get
-     * or write methods.
+     * or write methods.</p>
      *
      * @return an XML reader object as <code>XMLStreamReader</code>
      * @throws XQException if (1) there are errors accessing any of the items
@@ -258,20 +258,20 @@ public interface XQSequence extends XQItemAccessor {
      * Serializes the sequence starting from the current position to a String
      * according to the <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>.
-     * <p/>
+     * <p>
      * Serialization parameters, which influence how serialization is
      * performed, can be specified. Refer to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>
      * and <i>Section 12 Serialization, XQuery
      * API for Java (XQJ) 1.0</i> for more information.
-     * <p/>
+     * </p><p>
      * Reading the sequence during the serialization process performs implicit
      * next operations to read the items.
-     * <p/>
+     * </p><p>
      * After all items are written to the stream, the current position of the
      * cursor is set to point after the last item.
-     * <p/>
+     * </p><p>
      * Also, in the case of forward only sequences, this method may only be
      * called if the current item has not yet been read through any of the get
      * or write methods.
@@ -377,11 +377,11 @@ public interface XQSequence extends XQItemAccessor {
      * Attempting to move beyond the first/last item in the sequence positions
      * the sequence before/after the the first/last item.
      * Calling <code>relative(0)</code> is valid, but does not change the cursor position.
-     * <p/>
-     * Note: Calling the method <code>relative(1)</code> is identical to calling the method
+     * 
+     * <p>Note: Calling the method <code>relative(1)</code> is identical to calling the method
      * <code>next</code> and calling the method <code>relative(-1)</code> is identical
      * to calling the method <code>previous()</code>.
-     * Calling this method on an empty sequence will return <code>false</code>.
+     * Calling this method on an empty sequence will return <code>false</code>.</p>
      *
      * @param itempos the item position to jump to
      * @return <code>true</code> if the new current position is within
@@ -397,20 +397,20 @@ public interface XQSequence extends XQItemAccessor {
      * <code>OutputStream</code> according to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>.
-     * <p/>
-     * Serialization parameters, which influence how serialization is
+     * 
+     * <p>Serialization parameters, which influence how serialization is
      * performed, can be specified. Refer to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>
      * and <i>Section 12 Serialization, XQuery
      * API for Java (XQJ) 1.0</i> for more information.
-     * <p/>
+     * </p><p>
      * Reading the sequence during the serialization process performs implicit
      * next operations to read the items.
-     * <p/>
+     * </p><p>
      * After all items are written to the stream, the current position of the
      * cursor is set to point after the last item.
-     * <p/>
+     * </p><p>
      * Also, in the case of forward only sequences, this method may only be
      * called if the current item has not yet been read through any of the
      * get or write methods.
@@ -433,7 +433,7 @@ public interface XQSequence extends XQItemAccessor {
      * Serializes the sequence starting from the current position to a Writer
      * according to the  <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>.
-     * <p/>
+     * <p>
      * Serialization parameters, which influence how serialization is
      * performed, can be specified. Refer to the
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
@@ -447,13 +447,13 @@ public interface XQSequence extends XQItemAccessor {
      * encoding.
      * <br>
      * <br>
-     * <p/>
+     * </p><p>
      * Reading the sequence during the serialization process performs implicit
      * next operations to read the items.
-     * <p/>
+     * </p><p>
      * After all items are written to the stream, the current position of the
      * cursor is set to point after the last item.
-     * <p/>
+     * </p><p>
      * Also, in the case of forward only sequences, this method may only be
      * called if the current item has not yet been read through any of the get
      * or write methods.
@@ -476,17 +476,17 @@ public interface XQSequence extends XQItemAccessor {
      * Writes the entire sequence starting from the current position to a SAX
      * handler, as described in <i>Section 12.2 Serializing an XDM instance
      * into a SAX event stream, XQuery API for Java (XQJ) 1.0</i>.
-     * <p/>
+     * <p>
      * Note that the serialization process might fail, in which case a
      * <code>XQException</code> is thrown.
-     * <p/>
+     * </p><p>
      * After all items are written to the stream, the current position of the
      * cursor is set to point after the last item.
-     * <p/>
+     * </p><p>
      * Also, in the case of forward only sequences, this method may only be called
      * if the current item has not yet been read through any of the get or write
      * methods.
-     * <p/>
+     * </p><p>
      * The specified <code>org.xml.sax.ContentHandler</code> can optionally implement the
      * <code>org.xml.sax.LexicalHandler</code> interface. An implementation must check if the
      * specified <code>ContentHandler</code> implements <code>LexicalHandler</code>.
@@ -511,10 +511,10 @@ public interface XQSequence extends XQItemAccessor {
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">
      * <i>XSLT 2.0 and XQuery 1.0 serialization</i></a>.  Subsequently it is serialized
      * to the <code>Result</code> object.<br>
-     * <p/>
+     * <p>
      * Note that the normalization process can fail, in which case an
      * <code>XQException</code> is thrown.
-     * <p/>
+     * </p><p>
      * An XQJ implementation must at least support the following
      * implementations:
      * <br>
