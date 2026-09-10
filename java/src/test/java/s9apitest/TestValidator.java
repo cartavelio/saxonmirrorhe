@@ -1398,6 +1398,7 @@ public class TestValidator {
 
             XsltCompiler xsltCompiler = proc.newXsltCompiler();
             xsltCompiler.setSchemaAware(true);
+            xsltCompiler.useSchema("", schema);
             Xslt30Transformer exec = xsltCompiler.compile(new StreamSource(new StringReader(xsl))).load30();
 
             exec.setErrorListener(new ErrorListener() {
@@ -1442,9 +1443,9 @@ public class TestValidator {
 
 
         final List<TransformerException> errorList = new ArrayList<>();
-        FileOutputStream out = null;
+        ByteArrayOutputStream out = null;
         try {
-            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
+            out = new ByteArrayOutputStream();
             Processor proc = new Processor(true);
             XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(Testdata.file("../bugs/4744/UniqueKeyBug.xsd"));
@@ -1513,6 +1514,32 @@ public class TestValidator {
             }
         } catch (Exception ex) {
             if (useHints) {
+                ex.printStackTrace();
+                fail("Validation should not have failed");
+            }
+        }
+    }
+
+    private void testSchemaLocationHints40(boolean useHints, boolean withNS) {
+        try {
+            Processor processor = new Processor(true);
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+
+            XsdCompiler compiler = processor.newXsdCompiler();
+            XsdSchema schema = compiler.minimalSchema();
+            SchemaValidator validator = schema.newValidator();
+
+            validator.setUseXsiSchemaLocation(useHints);
+
+            validator.validate(source.asSource());
+
+            if (!useHints) {
+                fail("Document should not have validated");
+            }
+        } catch (Exception ex) {
+            if (useHints) {
+                ex.printStackTrace();
                 fail("Validation should not have failed");
             }
         }
@@ -1526,6 +1553,14 @@ public class TestValidator {
         testSchemaLocationHints(true, true);
     }
 
+    @Test
+    public void testIgnoreSchemaLocationHints40() {
+        testSchemaLocationHints40(false, false);
+        testSchemaLocationHints40(false, true);
+        testSchemaLocationHints40(true, false);
+        testSchemaLocationHints40(true, true);
+    }
+
     private void testSchemaLocationHintsWithDestination(boolean useHints, boolean withNS) {
         try {
             Processor processor = new Processor(true);
@@ -1537,6 +1572,35 @@ public class TestValidator {
             validator.setUseXsiSchemaLocation(useHints);
 
             XQueryCompiler comp = processor.newXQueryCompiler();
+            comp.useSchema(manager.getXsdSchema());
+            XQueryEvaluator eval = comp.compile(".").load();
+            eval.setContextItem(source);
+            eval.run(validator);
+
+            if (!useHints) {
+                fail("Document should not have validated");
+            }
+        } catch (Exception ex) {
+            if (useHints) {
+                ex.printStackTrace();
+                fail("Validation should not have failed");
+            }
+        }
+    }
+
+    private void testSchemaLocationHintsWithDestination40(boolean useHints, boolean withNS) {
+        try {
+            Processor processor = new Processor(true);
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+
+            XsdCompiler compiler = processor.newXsdCompiler();
+            XsdSchema schema = compiler.minimalSchema();
+            SchemaValidator validator = schema.newValidator();
+            validator.setUseXsiSchemaLocation(useHints);
+
+            XQueryCompiler comp = processor.newXQueryCompiler();
+            comp.useSchema(schema);
             XQueryEvaluator eval = comp.compile(".").load();
             eval.setContextItem(source);
             eval.run(validator);
@@ -1559,6 +1623,14 @@ public class TestValidator {
         testSchemaLocationHintsWithDestination(true, true);
     }
 
+    @Test
+    public void testIgnoreSchemaLocationHintsWithValidatorDestination40() {
+        testSchemaLocationHintsWithDestination40(false, false);
+        testSchemaLocationHintsWithDestination40(false, true);
+        testSchemaLocationHintsWithDestination40(true, false);
+        testSchemaLocationHintsWithDestination40(true, true);
+    }
+
 
     @Test
     public void testErrorListenerBug4744b() {
@@ -1567,9 +1639,9 @@ public class TestValidator {
 
 
         final List<SAXParseException> errorList = new ArrayList<>();
-        FileOutputStream out = null;
+        ByteArrayOutputStream out = null;
         try {
-            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
+            out = new ByteArrayOutputStream();
             Processor proc = new Processor(true);
             XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(Testdata.file("../bugs/4744/UniqueKeyBug.xsd"));

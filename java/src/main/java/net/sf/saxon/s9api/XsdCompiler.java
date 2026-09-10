@@ -47,6 +47,14 @@ import java.io.File;
 public abstract class XsdCompiler {
 
     /**
+     * Get the associated s9api {@link Processor}
+     *
+     * @return the {@link Processor}
+     */
+
+    public abstract Processor getProcessor();
+
+    /**
      * Set the version of XSD in use for this schema. The value must be "1.0" or "1.1". The default is taken
      * from the configuration property {@link Feature#XSD_VERSION} at the time the
      * {@code XsdSchemaCompiler} is instantiated. By default this is "1.1".
@@ -145,6 +153,16 @@ public abstract class XsdCompiler {
 
     @CSharpModifiers(code = {"internal", "abstract"})
     public abstract XsdSchema compile(File... file) throws SaxonApiException;
+
+    /**
+     * Get a minimal schema, one that contains only the built-in schema components
+     * defined in the XSD specification. This can be used, for example, to
+     * validate elements that have an xsi:type attribute naming a built-in atomic
+     * type such as xs:ID
+     * @return a minimal XSD schema
+     */
+
+    public abstract XsdSchema minimalSchema();
 
     /**
      * Combine a set of schemas into one
