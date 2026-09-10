@@ -210,7 +210,7 @@ EndGlobal
           </ItemGroup>
           <ItemGroup>
             <Reference Include="SaxonCS">
-              <HintPath>..\..\..\{$edition}\build\{$arch}\SaxonCS\bin\{$release}\{$framework}\{$platform}-{$arch}\SaxonCS.dll</HintPath>
+              <HintPath>..\..\..\{$edition}\build\{$arch}\SaxonCS\bin\{$release}\{$framework}\{$platform}-{$arch}\SaxonCS-{$EDITION}.dll</HintPath>
             </Reference>
           </ItemGroup>
           <ItemGroup>
@@ -399,7 +399,7 @@ EndGlobal
     </ItemGroup>
     <ItemGroup>
       <Reference Include="SaxonCS">
-        <HintPath>{translate($relative-hint-path, '/', '\')}artifacts\bin\SaxonCS\release_{$platform}-{$arch}\SaxonCS.dll</HintPath>
+        <HintPath>{translate($relative-hint-path, '/', '\')}artifacts\bin\SaxonCS\release_{$platform}-{$arch}\SaxonCS-{$EDITION}.dll</HintPath>
       </Reference>
     </ItemGroup>
   </Project>
