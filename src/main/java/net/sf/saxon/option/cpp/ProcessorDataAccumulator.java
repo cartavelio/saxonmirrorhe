@@ -26,7 +26,7 @@ public class ProcessorDataAccumulator {
     }
 
 
-    @CEntryPoint(name = "addProcessorData")
+    @CEntryPoint(name = "addProcessorDataPair")
     public static void addProcessorData(IsolateThread thread, ObjectHandle processorDataRef, CCharPointer cparamName, ObjectHandle objectRef){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
@@ -39,7 +39,7 @@ public class ProcessorDataAccumulator {
     }
 
 
-    @CEntryPoint(name = "addProcessorData")
+    @CEntryPoint(name = "addProcessorValue")
     public static void addProcessorValue(IsolateThread thread, ObjectHandle processorDataRef, ObjectHandle objectRef){
 
         ProcessorDataAccumulator processorData = SaxonCAPI.objectHandles.get(processorDataRef);
