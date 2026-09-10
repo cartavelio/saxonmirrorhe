@@ -261,6 +261,42 @@
           information specific to Saxon, but take care that it is relevant to the current release.
           Significant changes have been made in Saxon 11.1.</p>
         
+   <section id="note-on-resolution" title="A note about resolving URIs">
+   <h2>A note about resolving URIs</h2>
+
+<p>Historically, the entity resolver contract on Java was that the resolver
+should return null if it failed to resolve the request. In terms of the catalog
+resolver, if you requested a resource and the resource wasn’t in the catalog,
+the resolver would return null and the parser (or other processor) would perhaps
+try to resolve the request some other way.</p>
+
+<p>As web servers began to transition from “http” URIs to “https” URIs, a new
+problem arose. To ease the transition to https, most web servers will return a
+“redirect” response if you attempt to use the now deprecated “http” URI.
+But some parsers don’t understand how to follow redirects.</p>
+
+<p>If you request “http://example.com/doctype.dtd” and that isn’t in the catalog, the
+catalog resolver returns null, the parser attempts to retrieve the resource at that URI,
+the web server returns a redirect response, and the parser falls over.</p>
+
+<p>To mitigate this problem, there’s an XML Resolver feature,
+<a href="https://www.xmlresolver.org/ResolverFeature/ALWAYS_RESOLVE.html">ALWAYS_RESOLVE</a>,
+that’s enabled by default. When this feature is enabled, rather than returning null if the
+resource isn’t in the catalog, the resolver will make the request to the server, follow redirects
+if they’re encountered, and return the resource.</p>
+
+<p>This, unfortunately, is not without its drawbacks. If you attempt to request
+a resource, for example a namespace name in a module URI, and that resource
+exists, it will be returned by the resolver. Consequently, you must either
+assure that such resources do not exist, or that they’re the correct kind of
+document for the request, or disable the ALWAYS_RESOLVE feature.</p>
+
+<p>There’s no answer that’s best under all circumstances.</p>
+
+<p>This problem doesn’t arise in SaxonCS because the entity resolver contract in
+.NET is different. The resolver is always expected to return the resource.</p>
+
+   </section>
       
     </section>
     
