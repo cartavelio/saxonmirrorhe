@@ -324,12 +324,14 @@ public class XdmUtils {
         XdmFunctionItem functionItem = SaxonCAPI.objectHandles.get(xdmFuncValueRef);
 
         ProcessorDataAccumulator processorDataAccumulator = null;
-        XdmValue arguments [] = null;
+        XdmValue arguments [];
         if(procDataRef != WordFactory.nullPointer()){
             processorDataAccumulator = SaxonCAPI.objectHandles.get(procDataRef);
 
             arguments = Xslt30Processor.getArguments(processorDataAccumulator.getValues());
 
+        } else {
+            arguments = new XdmValue[0];
         }
         XdmValue value = functionItem.call(proc, arguments);
         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
