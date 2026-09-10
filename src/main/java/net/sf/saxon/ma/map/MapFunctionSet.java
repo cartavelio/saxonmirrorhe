@@ -94,7 +94,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         register("merge", 2, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                .arg(1, MapType.ANY_MAP_TYPE, version>=40 ? OPT : ONE, null)
                 .setOptionDetails(mergeOptionDetails));
 
         register("put", 3, e -> e.populate(MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
@@ -726,24 +726,26 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
             if (arguments.length == 2 && arguments[1] instanceof Literal) {
                 MapItem options = (MapItem) ((Literal)arguments[1]).getGroundedValue().head();
-                Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(
-                        options, visitor.getStaticContext().makeEarlyEvaluationContext());
-                String duplicates = ((StringValue) values.get("duplicates")).getStringValue();
-                String duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
-                FunctionItem onDuplicates = (FunctionItem)values.get(onDuplicatesKey);
-                if (onDuplicates != null) {
-                    duplicates = "use-callback";
-                }
+                if (options != null) {
+                    Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(
+                            options, visitor.getStaticContext().makeEarlyEvaluationContext());
+                    String duplicates = ((StringValue) values.get("duplicates")).getStringValue();
+                    String duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
+                    FunctionItem onDuplicates = (FunctionItem) values.get(onDuplicatesKey);
+                    if (onDuplicates != null) {
+                        duplicates = "use-callback";
+                    }
 
-                boolean isFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
-                String keyType = ((StringValue) values.get(keyTypeKey)).getStringValue();
-                MapMerge mm2 = (MapMerge)instance31.makeFunction("merge", 1);
-                mm2.duplicates = duplicates;
-                mm2.duplicatesErrorCode = duplicatesErrorCode;
-                mm2.onDuplicates = onDuplicates;
-                mm2.allStringKeys = keyType.equals("string");
-                mm2.treatAsFinal = isFinal;
-                return mm2.makeFunctionCall(arguments[0]);
+                    boolean isFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
+                    String keyType = ((StringValue) values.get(keyTypeKey)).getStringValue();
+                    MapMerge mm2 = (MapMerge) instance31.makeFunction("merge", 1);
+                    mm2.duplicates = duplicates;
+                    mm2.duplicatesErrorCode = duplicatesErrorCode;
+                    mm2.onDuplicates = onDuplicates;
+                    mm2.allStringKeys = keyType.equals("string");
+                    mm2.treatAsFinal = isFinal;
+                    return mm2.makeFunctionCall(arguments[0]);
+                }
             }
             return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
         }
@@ -797,14 +799,16 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 FunctionItem onDuplicates = this.onDuplicates;
                 if (arguments.length > 1) {
                     MapItem options = (MapItem) arguments[1].head();
-                    Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context);
-                    duplicates = ((StringValue) values.get("duplicates")).getStringValue();
-                    duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
-                    treatAsFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
-                    allStringKeys = "string".equals(((StringValue)values.get(keyTypeKey)).getStringValue());
-                    onDuplicates = (FunctionItem) values.get(onDuplicatesKey);
-                    if (onDuplicates != null) {
-                        duplicates = "use-callback";
+                    if (options != null) {
+                        Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context);
+                        duplicates = ((StringValue) values.get("duplicates")).getStringValue();
+                        duplicatesErrorCode = ((StringValue) values.get(errorCodeKey)).getStringValue();
+                        treatAsFinal = ((BooleanValue) values.get(finalKey)).getBooleanValue();
+                        allStringKeys = "string".equals(((StringValue) values.get(keyTypeKey)).getStringValue());
+                        onDuplicates = (FunctionItem) values.get(onDuplicatesKey);
+                        if (onDuplicates != null) {
+                            duplicates = "use-callback";
+                        }
                     }
                 }
 
