@@ -523,14 +523,14 @@
                   inhibits coverage analysis.</p>
             </td>
          </tr>
-         <tr class="javaonly">
+         <tr>
             <td>
                <p>-TJ</p>
             </td>
             <td>
-               <p>Switches on tracing of the binding of calls to external Java methods. This is
-                  useful when analyzing why Saxon fails to find a Java method to match an extension
-                  function call in the query, or why it chooses one method over another when
+               <p>Switches on tracing of the binding of function calls, including external functions. This is
+                  useful when analyzing why Saxon fails to find a function, such as an external
+                  function call in the query, or why it chooses one function over another when
                   several are available.</p>
             </td>
          </tr>
@@ -570,7 +570,7 @@
                      href="../performanceanalysis">Performance analysis</a>.</p>
             </td>
          </tr>
-         <tr>
+         <tr class="javaonly">
             <td>
                <p>-TPxsl:filename</p>
             </td>
