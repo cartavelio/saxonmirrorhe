@@ -14,10 +14,15 @@ clone_expath_cg.onlyIf {
 // ============================================================
 
 task documentation(
-  dependsOn: ["update_documentation", "gen_contents_ref", "gen_feature_matrix",
-              //"copy_prod_desc_pdf" // TODO not building product descriptions yet
-  ],
+  dependsOn: ["update_documentation", "gen_contents_ref", "gen_feature_matrix"],
   description: "Build the documentation and pages for website"
+) {
+  // Just a place to hang dependencies
+}
+
+task website(
+        dependsOn: ["documentation", "copy_prod_desc_pdf", "saxonc_documentation"],
+        description: "Build the documentation, product descriptions and pages for website"
 ) {
   // Just a place to hang dependencies
 }
@@ -224,8 +229,6 @@ task product_jeljavadoc(
                "-doclet", "com.jeldoclet.JELDoclet",
                "-docletpath", cp,
                "-source", "1.8"] + packages.keySet()
-
-    //command = ["echo", "FIXME: the .NET javadoc is not being built"]
   }
     
   doLast {
@@ -233,20 +236,6 @@ task product_jeljavadoc(
       commandLine command
     }
   }
-
-  //doLast {
-  //  // FIXME: the .NET javadoc is not being built
-  //  def output = new FileWriter(new File("${buildDir}/jeljavadoc/jeldoclet-out.xml"))
-  //  output.write("<jel></jel>\n")
-  //  output.close()
-  //}
-
-  //doLast {
-  //  // FIXME: the .NET javadoc is not being built
-  //  def output = new FileWriter(new File("${buildDir}/jeljavadoc/p-jeldoclet-out.xml"))
-  //  output.write("<package-comments></package-comments>\n")
-  //  output.close()
-  //}
 }
 
 task product_xsljavadoc(
@@ -298,25 +287,6 @@ task dotnet_doc_parsecs(
     "-o:${buildDir}/dotnetdoc/names.xml",
     "inputdir=file://${projectDir}/src/main/saxon-cs/engine/Saxon/Api"
 }
-
-//doFirst {
-//    mkdir "${buildDir}/dotnetdoc"
-//  }
-
-//task dotnet_doc_parsecs(
-//  description: "Parse dotnet cs files for docs"
-//) {
-//  doFirst {
-//    mkdir "${buildDir}/dotnetdoc"
-//  }
-//
-//  doLast {
-//    // FIXME: the .NET javadoc is not being built
-//    def output = new FileWriter(new File("${buildDir}/dotnetdoc/names.xml"))
-//    output.write("<package></package>\n")
-//    output.close()
-//  }
-//}
 
 task dotnet_doc_merge(
   type: JavaExec,
