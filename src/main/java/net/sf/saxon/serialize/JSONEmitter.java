@@ -360,11 +360,15 @@ public class JSONEmitter {
         if (first) {
             emit("null");
         }
-        if (writer != null && mustClose) {
+        if (writer != null) {
             try {
-                writer.close();
+                if (mustClose) {
+                    writer.close();
+                } else {
+                    writer.flush();
+                }
             } catch (IOException e) {
-                // no action
+                throw new XPathException(e);
             }
         }
     }
