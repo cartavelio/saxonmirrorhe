@@ -135,15 +135,6 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("days-from-duration", 1, e -> e.populate(AccessorFn.DaysFromDuration::new, BuiltInAtomicType.INTEGER, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DURATION, OPT, EMPTY));
 
-//        register("deep-equal", 2, e -> e.populate(DeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
-//                .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
-//                .arg(1, Type.ITEM_TYPE, STAR | ABS, null));
-//
-//        register("deep-equal", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
-//                .arg(0, Type.ITEM_TYPE, STAR, null)
-//                .arg(1, Type.ITEM_TYPE, STAR, null)
-//                .arg(2, BuiltInAtomicType.STRING, ONE, null));
-
         register("deep-equal", 2, 4, e -> e.populate(DeepEqual20::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
                 .arg(1, Type.ITEM_TYPE, STAR | ABS, null)

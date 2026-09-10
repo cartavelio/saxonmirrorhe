@@ -357,47 +357,12 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
      *
      * @param name                the function name
      * @param arity               the function arity (-1 is treated specially)
+     * @param populator           a function to perform initialization of the entry, called
+     *                            the first time an entry for the function is actually needed
 
      * @return the entry describing the function. The entry is incomplete, it does not yet contain information
      * about the function arguments.
      */
-
-//    /*@NotNull*/
-//    protected Entry register(String name,
-//                             int arity,
-//                             Supplier<SystemFunction> functionFactory,
-//                             ItemType itemType,
-//                             int cardinality,
-//                             int properties) {
-//        Instrumentation.count("Register function");
-//        Instrumentation.count(getNamespace().toString());
-//        Entry e = new Entry();
-//        e.name = new StructuredQName(getConventionalPrefix(), getNamespace(), name);
-//        e.arity = arity;
-//        e.implementationFactory = functionFactory;
-//        e.functionSet = this;
-//        e.itemType = itemType;
-//        e.cardinality = cardinality;
-//        e.properties = properties;
-//        if (e.arity == -1) {
-//            // special case for concat()
-//            e.argumentTypes = new SequenceType[1];
-//            e.resultIfEmpty = new AtomicValue[1];
-//            e.usage = new OperandUsage[1];
-//        } else {
-//            e.argumentTypes = new SequenceType[arity];
-//            e.resultIfEmpty = new Sequence[arity];
-//            e.usage = new OperandUsage[arity];
-//        }
-//        if (functionTable.containsKey(name + "#" + arity)) {
-//            Instrumentation.count("Duplicate function " + name + "#" + arity);
-//        }
-//        functionTable.put(name + "#" + arity, e);
-//        if ((properties & SEQV) != 0) {
-//            sequenceVariadicFunctions.put(name, arity - 1);
-//        }
-//        return e;
-//    }
 
     protected Entry register(String name,
                              int arity,

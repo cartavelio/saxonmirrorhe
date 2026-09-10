@@ -56,9 +56,6 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
                 throw new XPathException("Context item for " +
                                                  getFunctionName().getDisplayName() + " is absent", "XPDY0002");
             }
-            //});
-            //FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
-            //return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
         }
         if (ci instanceof Parcel) {
             throw new XPathException("Context value for " +
@@ -111,7 +108,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
     @Override
     @CSharpModifiers(code={"public", "override"})
     public Expression makeFunctionCall(Expression[] arguments) {
-        Expression arg = new ContextItemExpression();
+        Expression arg = new ContextValueExpression();
         if (getFunctionName().hasURI(NamespaceUri.SAXON)) {
             BuiltInFunctionSet.Entry entry = getDetails();
             try {
@@ -205,10 +202,6 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
         Item item = context.getContextItem();
         GroundedValue gv = fi.call(context, new Sequence[]{item}).materialize();
         return new ConstantFunction(fi.getFunctionName(), gv, fi.getFunctionItemType().getResultType());
-//        return new CallableFunction(
-//                new SymbolicName.F(fi.getFunctionName(), 0),
-//                new CallableDelegate((cxt, args) -> gv),
-//                new SpecificFunctionType(new SequenceType[0], fi.getFunctionItemType().getResultType()));
     }
 
 
