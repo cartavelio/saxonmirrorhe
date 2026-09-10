@@ -677,7 +677,7 @@
   
   <feature class="Localization">
     <shortName>Localization for sorting</shortName>
-    <details link="extensibility/config-extend/collation/UCA" name="Unicode collation"
+    <details link="localization/unicode-collation-algorithm" name="Unicode Collation Algorithm"
       subpages="has-subpages"/>
     <products>
       <product level="Basic" J="HE" C="HE">
@@ -702,7 +702,7 @@
   
   <feature class="Localization">
     <shortName>Localization for formatting numbers</shortName>
-    <details link="extensibility/config-extend/localizing" name="Localizing numbers and dates"
+    <details link="localization/localizing-numbers-and-dates" name="Localizing numbers and dates"
       subpages="has-subpages"/>
     <products>
       <product level="Basic" J="HE" C="HE">
@@ -720,7 +720,7 @@
   
   <feature class="Localization">
     <shortName>Localization for formatting dates</shortName>
-    <details link="extensibility/config-extend/localizing" name="Localizing numbers and dates"
+    <details link="localization/localizing-numbers-and-dates" name="Localizing numbers and dates"
       subpages="has-subpages"/>
     <products>
       <product level="Basic" J="HE" C="HE">
