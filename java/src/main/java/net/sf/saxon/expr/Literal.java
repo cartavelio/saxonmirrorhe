@@ -791,8 +791,8 @@ public class Literal extends Expression {
 
     public static Literal makeLiteral(GroundedValue value) {
         value = value.reduce();
-        if (value instanceof StringValue) {
-            return new StringLiteral((StringValue) value);
+        if (value instanceof StringValue sv) {
+            return new StringLiteral(sv);
         } else if (value instanceof FunctionItem && !(value instanceof MapItem || value instanceof ArrayItem)) {
             return new FunctionLiteral((FunctionItem) value);
         } else {
