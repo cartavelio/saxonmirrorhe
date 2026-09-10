@@ -2307,5 +2307,30 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(e.Message);
             }
         }
+
+        [Test]
+        public void TestBug5341() {
+            string xslt = @"
+                <xsl:stylesheet 
+	                xmlns:xsl='http://www.w3.org/1999/XSL/Transform' 
+                    version='3.0'>
+
+	                <xsl:template match = '/'>
+                        <xsl:sequence select = ""substring-after(/eventItem/contentMeta/scheduled/start, 'T')""/>
+	                </xsl:template>
+                </xsl:stylesheet>";
+
+            Processor processor = new Processor(true);
+            XsltCompiler xsltCompiler = processor.NewXsltCompiler();
+            xsltCompiler.XsltLanguageVersion = "3.0";
+            var rdr = new StringReader(xslt);
+            XsltExecutable exec = xsltCompiler.Compile(rdr);
+            Xslt30Transformer transf = exec.Load30();
+            XdmDestination dest = new XdmDestination();
+            var stream = File.OpenRead(ConfigTest.DATA_DIR + "cirkev.xml");
+
+            transf.ApplyTemplates(stream, dest);
+        }
+        
     }
 }
