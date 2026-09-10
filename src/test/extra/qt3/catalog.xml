@@ -60,6 +60,7 @@
 
   <test-set name="andAlso" file="misc/andAlso.xml"/>
   <test-set name="arrayFilter" file="misc/arrayFilter.xml"/>
+  <test-set name="flwor-trace" file="misc/flwor-trace.xml"/>
   <test-set name="lambda" file="misc/lambda.xml"/>
   <test-set name="reflex" file="misc/reflex.xml"/>
   <test-set name="or" file="misc/orExpr.xml"/>

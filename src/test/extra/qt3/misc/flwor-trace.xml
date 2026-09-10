@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<test-set xmlns="http://www.w3.org/2010/09/qt-fots-catalog" name="flwor-trace">
+   <description>Tests for trace clause in FLWOR expressions (Saxon extension)</description>
+   <link type="spec" document="http://www.w3.org/TR/xpath-functions-11/"
+         idref="func-abs"/>
+         
+   <dependency type="spec" value="XQ31+"/>
+   <dependency type="xsd-version" value="1.1"/>
+   
+   <environment name="flwor-trace">
+      <saxon:property name="http://saxon.sf.net/feature/allowSyntaxExtensions" value="true" xmlns:saxon="http://saxon.sf.net/"/>
+   </environment>
+      
+   <test-case name="flwor-trace-001">
+      <description>simple let</description>
+      <created by="Michael Kay" on="2022-02-05"/>
+      <environment ref="flwor-trace"/>
+      <test><![CDATA[
+         let $x := 1 to 5
+         trace $x
+         return exists($x)
+      ]]></test>
+      <result>
+         <assert-true/>
+      </result>
+   </test-case>
+   
+   <test-case name="flwor-trace-002">
+      <description>simple for</description>
+      <created by="Michael Kay" on="2022-02-05"/>
+      <environment ref="flwor-trace"/>
+      <test><![CDATA[
+         for $x in 1 to 5
+         trace $x
+         return $x
+      ]]></test>
+      <result>
+         <assert-deep-eq>1 to 5</assert-deep-eq>
+      </result>
+   </test-case>
+   
+   <test-case name="flwor-trace-003">
+      <description>simple for, computed result</description>
+      <created by="Michael Kay" on="2022-02-05"/>
+      <environment ref="flwor-trace"/>
+      <test><![CDATA[
+         for $x in 1 to 5
+         trace "plus 2: " || ($x + 2)
+         return $x + 2
+      ]]></test>
+      <result>
+         <assert-deep-eq>3 to 7</assert-deep-eq>
+      </result>
+   </test-case>
+   
+   <test-case name="flwor-trace-004">
+      <description>for + where</description>
+      <created by="Michael Kay" on="2022-02-05"/>
+      <environment ref="flwor-trace"/>
+      <test><![CDATA[
+         for $x in 1 to 5
+         trace "$x = " || $x
+         where $x mod 2 eq 0
+         trace "even: " || $x
+         return $x
+      ]]></test>
+      <result>
+         <assert-deep-eq>2, 4</assert-deep-eq>
+      </result>
+   </test-case>
+   
+   <test-case name="flwor-trace-005">
+      <description>push mode trace</description>
+      <created by="Michael Kay" on="2022-02-05"/>
+      <environment ref="flwor-trace"/>
+      <test><![CDATA[<x>{
+            for $x in 1 to 5
+            trace "$x = " || $x
+            where $x mod 2 eq 0
+            trace "even: " || $x
+            return <y>{$x}</y>
+         }</x>
+      ]]></test>
+      <result>
+         <assert-xml><![CDATA[<x><y>2</y><y>4</y></x>]]></assert-xml>
+      </result>
+   </test-case>
+   
+ 
+ 
+
+</test-set>
