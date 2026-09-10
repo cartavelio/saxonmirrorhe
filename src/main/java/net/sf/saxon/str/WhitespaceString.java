@@ -7,6 +7,8 @@
 
 package net.sf.saxon.str;
 
+import java.util.function.IntPredicate;
+
 /**
  * This abstract class represents a couple of different implementations of strings
  * containing whitespace only.
@@ -52,6 +54,11 @@ public abstract class WhitespaceString extends UnicodeString {
     public long indexOf(int codePoint, long from) {
         // Faster implementations are possible, but not needed
         return uncompress().indexOf(codePoint, from);
+    }
+
+    @Override
+    public long indexWhere(IntPredicate predicate, long from) {
+        return uncompress().indexWhere(predicate, from);
     }
 
     /**

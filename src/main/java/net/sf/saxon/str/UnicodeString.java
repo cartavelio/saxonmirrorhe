@@ -120,23 +120,9 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      *                  treated as zero. A position beyond the end of the string results in a return
      *                  value of -1 (meaning not found).
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
-     * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
-     *                                       for codePoint access
      */
 
-    public long indexWhere(IntPredicate predicate, long from) {
-        IntIterator iter = codePoints();
-        from = Math.max(from, 0);
-        long i = 0;
-        while (iter.hasNext()) {
-            int ch = iter.next();
-            if (i >= from && predicate.test(ch)) {
-                return i;
-            }
-            i++;
-        }
-        return -1;
-    }
+    public abstract long indexWhere(IntPredicate predicate, long from);
 
     /**
      * Get the first position, at or beyond <code>from</code>, where another string appears as a substring
