@@ -60,6 +60,26 @@ class XdmNodeKind(IntEnum):
     PRECEDING_SIBLING = 11
     SELF = 12
 
+class ProcRefCounter:
+    _proc_counter = 0
+
+    def __cinit__(self):
+        self._proc_counter = 0
+
+
+    @property
+    def proc_counter(self):
+        return self._proc_counter
+
+
+    def increment_proc_counter(self):
+        self._proc_counter += 1
+
+    def decrement_proc_counter(self):
+        self._proc_counter -= 1
+
+
+
 
 
 def create_xdm_dict(proc, mmap):
@@ -176,7 +196,7 @@ cdef str make_py_str(const char * c_value, encoding='utf-8'):
     except UnicodeError as ex:
         raise PySaxonApiError(ex)
 
-_proc_count = 0
+
 
 
 cdef class PySaxonProcessor:
@@ -191,6 +211,7 @@ cdef class PySaxonProcessor:
             xslt30proc = proc.new_xslt30_processor()
     """
     cdef saxoncClasses.SaxonProcessor *thisptr      # hold a C++ instance which we're wrapping
+    _proc_counter = ProcRefCounter()
     # cdef bool _release    flag to indicate if this PySaxonProcessor should call release
     ##
     # The Constructor
@@ -208,8 +229,7 @@ cdef class PySaxonProcessor:
         """
         cdef const char * c_str = NULL
         cdef bool l = license
-        global _proc_count
-        _proc_count += 1
+        self._proc_counter.increment_proc_counter()
 
         if config_file is not None:
             '''make_c_str(config_file)'''
@@ -228,14 +248,13 @@ cdef class PySaxonProcessor:
 
     def __dealloc__(self):
         """The destructor."""
-        global _proc_count
         if self.thisptr is not NULL:
             del self.thisptr
             self.thisptr = NULL
-            if _proc_count == 1:
+            if self._proc_counter.proc_counter == 1:
                 self.thisptr.release()
             else:
-                _proc_count = _proc_count - 1
+                self._proc_counter.decrement_proc_counter()
 
 
     def __enter__(self):

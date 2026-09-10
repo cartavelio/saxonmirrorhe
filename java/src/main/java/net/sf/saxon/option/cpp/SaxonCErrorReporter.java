@@ -20,7 +20,6 @@ public class SaxonCErrorReporter  extends StandardErrorReporter {
         super.report(error);
         if(SaxonCAPI.debug) {
             System.err.println("SaxonCErrorReporter.report current error=" + error.getMessage());
-            System.err.println("SaxonCErrorReporter.report current error=" + errors.toString());
 
             System.err.println("All error SaxonCErrorReporter.report=" + errors.toString());
             System.err.println("logger: " + errors.getClass().hashCode());

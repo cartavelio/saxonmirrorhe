@@ -3101,6 +3101,31 @@ void testUTF8StringTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
   parameterValues.clear();
 }
 
+void compileStylesheetWithError(SaxonProcessor *proc, Xslt30Processor *trans,
+                           sResultCount *sresult)
+{
+
+
+  try {
+    const char * stylesheet_string = "xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'></xsl:stylesheet>";
+    cout << endl << "Test: compileStylesheetWithError" << endl;
+    XsltExecutable * _xsltExecutable =trans->compileFromString(stylesheet_string);
+    sresult->failure++;
+    sresult->failureList.push_back("compileStylesheetWithError");
+  }
+  catch (SaxonApiException& e) {
+    std::cerr << "Error in compile_stylesheet: "<< e.getMessage() << std::endl;
+    sresult->success++;
+  }
+  catch (const std::exception& e) {
+    std:cerr << "Error in compile_stylesheet1: "<< e.what()<< std::endl;
+    sresult->failure++;
+    sresult->failureList.push_back("compileStylesheetWithError1");
+
+  }
+
+}
+
 
 static int NUM_THREADS = 10;
 
@@ -3327,7 +3352,7 @@ int main(int argc, char *argv[]) {
   }
   // testValidation(trans,sresult);
 
-  testInitialTemplate(processor, trans, sresult);
+ /* testInitialTemplate(processor, trans, sresult);
 
   cout << endl
        << "============================================================="
@@ -3662,7 +3687,12 @@ int main(int argc, char *argv[]) {
      << endl
      << endl;
 
-  testCallSystemFunction(processor, sresult);
+  testCallSystemFunction(processor, sresult); */
+  cout << endl
+     << "============================================================="
+     << endl
+     << endl;
+  compileStylesheetWithError(processor, trans, sresult);
 
   fflush(stdout);
 

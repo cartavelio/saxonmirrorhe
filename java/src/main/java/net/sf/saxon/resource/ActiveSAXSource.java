@@ -261,9 +261,11 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
                     StandardErrorReporter ser = (StandardErrorReporter) er;
                     XmlProcessingError latestError = ser.getLatestError();
                     if (latestError != null) {
-                        throw new XPathException(ser.getExpandedMessage(latestError))
+                        XPathException exception = new XPathException(ser.getExpandedMessage(latestError))
                                 .withErrorCode(SaxonErrorCode.SXXP0003)
-                                .withLocation(latestError.getLocation());   // bug 6858
+                                .withLocation(latestError.getLocation()); // bug 6858
+                        exception.setHasBeenReported(latestError.isAlreadyReported());
+                        throw exception;
                     }
                 }
             }
