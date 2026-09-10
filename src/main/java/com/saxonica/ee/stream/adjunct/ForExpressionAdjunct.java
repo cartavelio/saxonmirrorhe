@@ -40,7 +40,7 @@ public class ForExpressionAdjunct extends StreamingAdjunct implements FeedMaker 
             return super.computeStreamability(contextInfo, reasons);
         } else {
             if (reasons != null) {
-                String desc = exp.getVariableQName().getURI().equals(NamespaceConstant.SAXON_GENERATED_VARIABLE)
+                String desc = exp.getVariableQName().hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)
                         ? exp.getSequence().toShortString()
                         : "bound to the variable $" + exp.getVariableName();
                 reasons.add("The expression " + desc +
