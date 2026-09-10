@@ -375,7 +375,7 @@
     dtdValidation="false"
     dtdValidationRecoverable="true"
     eagerEvaluation="true"
-    entityResolver="net.sf.saxon.lib.StandardEntityResolver"
+    entityResolver=""
     environmentVariableResolver=""
     errorListener="net.sf.saxon.lib.StandardErrorListener"
     expandAttributeDefaults="true"
