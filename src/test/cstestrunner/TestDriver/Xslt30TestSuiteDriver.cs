@@ -434,8 +434,8 @@ namespace TestDriver {
 
                 SysCollGen.IEnumerable<XdmNode> paramsi = testInput.Select(Child("param").Where(IsTrue("static")));
                 foreach (XdmNode param in paramsi) {
-                    String name = param.GetAttributeValue("name");
-                    String select = param.GetAttributeValue("select");
+                    string name = param.GetAttributeValue("name");
+                    string select = param.GetAttributeValue("select");
                     XdmValue value;
                     try {
                         value = xpath.Evaluate(select, null);
@@ -450,7 +450,7 @@ namespace TestDriver {
                 }
 
                 foreach (XdmNode pack in usedPackages) {
-                    String fileName2 = pack.GetAttributeValue("file");
+                    string fileName2 = pack.GetAttributeValue("file");
                     Uri fileUri = res.ResolveUri(pack.BaseUri, fileName2);
                     Stream styleSource2 = new FileStream(fileUri.AbsolutePath, FileMode.Open, FileAccess.Read);
                     XsltPackage xpack = compiler.CompilePackage(styleSource2, fileUri);
