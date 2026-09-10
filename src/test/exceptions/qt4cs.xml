@@ -140,6 +140,11 @@
       <created by="Michael Kay" on="2021-10-04"/>
       <reason>Fails with a stack overflow (we've set a limit but it's too low)</reason>
    </exception>
+   
+   <exception test-set="prod-ForClause.map"  run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-18"/>
+      <reason>Not yet implemented</reason>
+   </exception>
 
    
    <exception test-set="op-to" test-case="RangeExpr-408f

@@ -85,10 +85,6 @@
    </exception>
 
 
-Keywords-fn-all-1
-
-
-Keywords-fn-some-1
 
 
    
@@ -142,6 +138,11 @@ Keywords-fn-some-1
    <exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
       <created by="Michael Kay" on="2023-03-14"/>
       <reason>Placeholders currently not allowed as keyword arguments</reason>
+   </exception>
+   
+   <exception test-set="prod-ForClause.map"  run="false" report="n/a">
+      <created by="Michael Kay" on="2023-11-18"/>
+      <reason>Not yet implemented</reason>
    </exception>
    
    <exception test-set="prod-FunctionDecl" test-case="
@@ -206,19 +207,7 @@ Keywords-fn-some-1
       <reason>Try/Catch binding a map of error information - not yet implemented</reason>
    </exception>
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case="
-      fo-test-fn-replace-009
-      fo-test-fn-replace-010
-      fo-test-fn-replace-011
-      fo-test-fn-replace-012
-      fo-test-fn-replace-013
-      " 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
+ 
    <exception test-set="app-spec-examples" 
       test-case="
       fo-test-map-values-001
@@ -245,18 +234,7 @@ Keywords-fn-some-1
       <reason>Implementation is ahead of the spec</reason>
    </exception>
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-array-partition-001
-      fo-test-array-partition-002
-      fo-test-array-partition-003
-      fo-test-array-partition-004
-      fo-test-array-partition-005
-      " 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Function has been dropped from spec</reason>
-
-   -->
+ 
    <exception test-set="app-spec-examples" 
       test-case=" fo-test-array-values-001
                   fo-test-array-values-002
@@ -266,30 +244,7 @@ Keywords-fn-some-1
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-map-substitute-001
-                 fo-test-map-substitute-002" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
-   <!--<exception test-set="app-spec-examples" 
-      test-case=" fo-test-map-replace-001
-                  fo-test-map-replace-002
-                  fo-test-map-replace-003" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
-   
-   <!--<exception test-set="app-spec-examples" 
-      test-case="fo-test-map-of-002" 
-      run="false" report="n/a">
-      <created by="Michael Kay" on="2023-06-28"/>
-      <reason>Problem with test: variable $week is referenced in expected result, but not declared there.</reason>
-   </exception>-->
-   
+ 
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-chain-001
       fo-test-fn-chain-002
