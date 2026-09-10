@@ -640,4 +640,4 @@ public abstract class AutomatonState implements State {
 
 }
 
-// Copyright (c) 2004-2020 Saxonica Limited See Terms and Conditions.
+// Copyright (c) 2004-2022 Saxonica Limited See Terms and Conditions.

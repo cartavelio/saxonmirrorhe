@@ -31,6 +31,6 @@ public class SinkFeed extends ItemFeed {
     }
 }
 
-// Copyright (c) 2009-2020 Saxonica Limited
+// Copyright (c) 2009-2022 Saxonica Limited
 
 

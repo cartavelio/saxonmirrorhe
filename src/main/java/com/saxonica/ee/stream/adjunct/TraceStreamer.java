@@ -158,4 +158,4 @@ public class TraceStreamer extends TransmissionAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2010-2020 Saxonica Limited - 2013.
+// Copyright (c) 2010-2022 Saxonica Limited - 2013.

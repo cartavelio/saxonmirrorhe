@@ -408,4 +408,4 @@ public class PullNamespaceReducer extends PullFilter implements NamespaceResolve
 
 }
 
-// Copyright (c) 2009-2020 Saxonica Limited
+// Copyright (c) 2009-2022 Saxonica Limited

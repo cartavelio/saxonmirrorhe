@@ -262,4 +262,4 @@ public class InsertBeforeStreamer extends TransmissionAdjunct implements FeedMak
 
 }
 
-// Copyright (c) 2010-2020 Saxonica Limited - 2015.
+// Copyright (c) 2010-2022 Saxonica Limited - 2015.

@@ -341,4 +341,4 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
 }
 
-// Copyright (c) 2008-2020 Saxonica Limited
+// Copyright (c) 2008-2022 Saxonica Limited

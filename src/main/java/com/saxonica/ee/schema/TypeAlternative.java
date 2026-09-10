@@ -237,4 +237,4 @@ public class TypeAlternative extends SchemaStructure implements SchemaComponent 
     }
 }
 
-// Copyright (c) 2007-2020 Saxonica Limited
+// Copyright (c) 2007-2022 Saxonica Limited

@@ -170,4 +170,4 @@ public class IdentityConstraintReference extends SchemaStructure implements Comp
 
 }
 
-// Copyright (c) 2010-2020 Saxonica Limited
+// Copyright (c) 2010-2022 Saxonica Limited

@@ -71,4 +71,4 @@ public class SubsequenceStreamer extends FilteringAdjunct implements FeedMaker {
 
 }
 
-// Copyright (c) 2013-2020 Saxonica Limited
+// Copyright (c) 2013-2022 Saxonica Limited

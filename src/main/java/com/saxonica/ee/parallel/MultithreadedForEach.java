@@ -155,5 +155,5 @@ public class MultithreadedForEach extends ForEach {
     }
 }
 
-// Copyright (c) 2010-2020 Saxonica Limited
+// Copyright (c) 2010-2022 Saxonica Limited
 

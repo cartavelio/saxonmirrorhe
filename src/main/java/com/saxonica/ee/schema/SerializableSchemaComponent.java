@@ -23,4 +23,4 @@ public interface SerializableSchemaComponent {
 
 }
 
-// Copyright (c) 2006-2020 Saxonica Limited No warranty.
+// Copyright (c) 2006-2022 Saxonica Limited No warranty.

@@ -368,4 +368,4 @@ public class XSIAttributeHandler extends ValidatingFilter {
 
 }
 
-// Copyright (c) 2004-2020 Saxonica Limited
+// Copyright (c) 2004-2022 Saxonica Limited

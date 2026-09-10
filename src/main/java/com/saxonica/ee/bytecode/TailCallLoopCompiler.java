@@ -42,4 +42,4 @@ public class TailCallLoopCompiler extends ToIteratorCompiler {
     // TODO: we're not currently optimizing stack usage for non-recursive tail calls
 }
 
-// Copyright (c) 2011-2020 Saxonica Limited
+// Copyright (c) 2011-2022 Saxonica Limited

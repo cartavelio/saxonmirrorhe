@@ -45,6 +45,6 @@ public class CardinalityCheckerAdjunct extends TransmissionAdjunct implements Fe
 
 }
 
-// Copyright (c) 2006-2020 Saxonica Limited
+// Copyright (c) 2006-2022 Saxonica Limited
 
 

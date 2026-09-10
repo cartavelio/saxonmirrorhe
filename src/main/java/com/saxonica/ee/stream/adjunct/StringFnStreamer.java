@@ -24,4 +24,4 @@ public class StringFnStreamer extends ComposingAdjunct {
 
 }
 
-// Copyright (c) 2010-2020 Saxonica Limited
+// Copyright (c) 2010-2022 Saxonica Limited

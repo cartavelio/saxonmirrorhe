@@ -90,5 +90,5 @@ public class RenameAction extends PendingUpdateAction {
     private final static int PHASE = 0;
 }
 
-// Copyright (c) 2008-2020 Saxonica Limited
+// Copyright (c) 2008-2022 Saxonica Limited
 

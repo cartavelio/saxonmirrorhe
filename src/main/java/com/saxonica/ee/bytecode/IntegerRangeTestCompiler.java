@@ -210,4 +210,4 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
 }
 
 //
-// Copyright (c) 2001-2020 Saxonica Limited
+// Copyright (c) 2001-2022 Saxonica Limited

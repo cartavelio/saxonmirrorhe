@@ -61,4 +61,4 @@ public interface UserSchemaComponent extends SchemaComponent {
 
 }
 
-// Copyright (c) 2004-2020 Saxonica Limited No warranty.
+// Copyright (c) 2004-2022 Saxonica Limited No warranty.

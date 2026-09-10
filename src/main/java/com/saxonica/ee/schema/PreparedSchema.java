@@ -1232,4 +1232,4 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
 
 }
 
-// Copyright (c) 2005-2020 Saxonica Limited
+// Copyright (c) 2005-2022 Saxonica Limited

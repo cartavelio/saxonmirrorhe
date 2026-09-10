@@ -39,4 +39,4 @@ public class FirstItemExpressionCompiler extends ToItemCompiler {
 
 }
 
-// Copyright (c) 2011-2020 Saxonica Limited
+// Copyright (c) 2011-2022 Saxonica Limited

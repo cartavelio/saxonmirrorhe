@@ -63,4 +63,4 @@ final class DescendantIterator implements AxisIterator {
 
 }
 
-// Copyright (c) 2017-2020 Saxonica Limited
+// Copyright (c) 2017-2022 Saxonica Limited

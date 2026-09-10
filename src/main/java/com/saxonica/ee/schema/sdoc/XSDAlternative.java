@@ -221,4 +221,4 @@ public class XSDAlternative extends AnnotationParent {
 
 }
 
-// Copyright (c) 2007-2020 Saxonica Limited
+// Copyright (c) 2007-2022 Saxonica Limited
