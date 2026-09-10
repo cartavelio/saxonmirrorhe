@@ -7,7 +7,6 @@
 
 package net.sf.saxon.s9api;
 
-import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.ErrorReporter;
@@ -121,7 +120,7 @@ public class XQueryCompiler {
 
     public void useSchema(XsdSchema schema) {
         staticQueryContext.setSchemaAware(true);
-        staticQueryContext.preLoadSchema((PreparedSchema)schema.getUnderlyingSchema());
+        staticQueryContext.preLoadSchema(schema.getUnderlyingSchema());
     }
 
     //#if CSHARP==false

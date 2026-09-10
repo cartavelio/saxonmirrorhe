@@ -7,9 +7,7 @@
 
 package net.sf.saxon.query;
 
-import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.*;
 import net.sf.saxon.expr.instruct.*;
@@ -1281,26 +1279,8 @@ public class XQueryParser extends XPathParser {
                 ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
                 return;
             }
-            if (!config.isSchemaAvailable(sImport.namespaceURI)) {
-                if (!sImport.locationURIs.isEmpty()) {
-                    try {
-                        PipelineConfiguration pipe = config.makePipelineConfiguration();
-                        config.readMultipleSchemas(pipe, env.getStaticBaseURI(), sImport.locationURIs, sImport.namespaceURI);
-                        namespacesToBeSealed.add(sImport.namespaceURI);
-                    } catch (SchemaException err) {
-                        grumble("Error in schema " + sImport.namespaceURI + ": " + err.getMessage(), "XQST0059", sImport.offset);
-                    }
-                } else if (sImport.namespaceURI.equals(NamespaceUri.XML) ||
-                        sImport.namespaceURI.equals(NamespaceUri.FN) ||
-                        sImport.namespaceURI.equals(NamespaceUri.SCHEMA_INSTANCE)) {
-                    Schema schema = config.getSchemaForBuiltInNamespace(sImport.namespaceURI);
-                    if (schema != null) {
-                        ((PreparedSchema)schema).copyTo(pack.getImportedSchema(),);
-                    }
-                } else {
-                    grumble("Unable to locate requested schema " + sImport.namespaceURI, "XQST0059", sImport.offset);
-                }
-            }
+            parserExtension.processSchemaImports(sImport.namespaceURI, sImport.locationURIs, env.getStaticBaseURI(), (QueryModule)env);
+
             ((QueryModule) env).addImportedSchema(sImport.namespaceURI, env.getStaticBaseURI(), sImport.locationURIs);
         }
     }

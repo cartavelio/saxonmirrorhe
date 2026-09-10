@@ -84,7 +84,7 @@ public class Doc_2 extends SystemFunction implements Callable {
             Configuration configuration = context.getConfiguration();
             StructuredQName name = qval.getStructuredQName();
             result = result
-                    .withTopLevelType(configuration.getSchema().getSchemaType(name))
+                    .withTopLevelType(rsc.getPackageData().getImportedSchema().getSchemaType(name))
                     .withSchemaValidationMode(Validation.BY_TYPE);
         }
         value = checkedOptions.get("strip-space");
