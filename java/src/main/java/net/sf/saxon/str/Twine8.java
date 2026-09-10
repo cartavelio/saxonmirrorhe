@@ -22,7 +22,7 @@ import java.util.function.IntPredicate;
 
 
 /**
- * {@code Twine8} is Unicode string whose codepoints are all in the range 0-255 (that is, Latin-1).
+ * A {@code Twine8} is a Unicode string whose codepoints are all in the range 0-255 (that is, Latin-1).
  * These are held in an array of bytes, one byte per character. The length of the string is limited
  * to 2^31-1 codepoints.
  */

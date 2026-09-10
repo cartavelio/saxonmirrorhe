@@ -7,12 +7,9 @@
 
 package net.sf.saxon.str;
 
-import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.z.IntIterator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.function.IntPredicate;
@@ -117,18 +114,6 @@ public class Slice8 extends UnicodeString {
             return EmptyUnicodeString.getInstance();
         } else {
             return new Slice8(bytes, requireInt(start) + this.start, requireInt(end) + this.start);
-        }
-    }
-
-    public Twine8 toTwine8() {
-        return new Twine8(bytes, start, end);
-    }
-
-    private void write(Writer writer, long start, long len) throws IOException {
-        if (writer instanceof UTF8Writer) {
-            ((UTF8Writer) writer).writeLatin1(bytes, this.start + requireInt(start), requireInt(len));
-        } else {
-            writer.write(substring(requireInt(start), requireInt(start + len)).toString());
         }
     }
 
