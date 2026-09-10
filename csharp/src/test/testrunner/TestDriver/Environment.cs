@@ -414,15 +414,6 @@ namespace TestDriver {
                         Uri uri = res.ResolveUri(((XdmNode) env).BaseUri, href);
                         Console.Error.WriteLine("Load schema document " + uri + " ~ " + href);
                         sources.Add(new XsdCompiler.SchemaSource(uri));
-                        // FileInfo file = new FileInfo()
-                        // FileStream file = new FileStream(uri.AbsolutePath, FileMode.Open, FileAccess.Read);
-                        // try {
-                        //     manager.Compile(file, uri);
-                        // }
-                        // catch (Exception err) {
-                        //     System.Console.WriteLine("*** Failed to load schema: " + err.Message + ", Trace:" +
-                        //                              err.StackTrace);
-                        // }
                     }
 
                     if ("source-reference".Equals(role)) {
