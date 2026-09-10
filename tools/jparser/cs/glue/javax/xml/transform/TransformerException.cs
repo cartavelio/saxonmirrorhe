@@ -1,4 +1,5 @@
 using System.Management.Instrumentation;
+using java.lang;
 
 namespace javax.xml.transform
 {
@@ -11,10 +12,10 @@ namespace javax.xml.transform
         public TransformerException(string message, SourceLocator locator) : base(message) {
             this._locator = locator;
         }
-        public TransformerException(string message, SourceLocator locator, java.lang.Throwable cause) : base(message, cause) {
+        public TransformerException(string message, SourceLocator locator, System.Exception cause) : base(message, cause) {
             this._locator = locator;
         }
-        public TransformerException(string message, java.lang.Throwable cause) : base(message, cause) {
+        public TransformerException(string message, System.Exception cause) : base(message, cause) {
             
         }
         public TransformerException(java.lang.Throwable cause) : base("", cause) {
@@ -27,6 +28,10 @@ namespace javax.xml.transform
 
         public void setLocator(SourceLocator loc) {
             this._locator = loc;
+        }
+
+        public Throwable getException() {
+            return this.getCause();
         }
         
     }
