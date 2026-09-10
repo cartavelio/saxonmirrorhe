@@ -433,7 +433,7 @@ public abstract class Operation {
         @Override
         @CSharpInnerClass(outer = true, extra = {
                 "net.sf.saxon.regex.REMatcher matcher",
-                "java.util.Stack<net.sf.saxon.z.IntIterator> iterators",
+                "System.Collections.Generic.Stack<net.sf.saxon.z.IntIterator> iterators",
                 "int backtrackingLimit",
                 "net.sf.saxon.regex.REMatcher.State savedState",
                 "int position"})
@@ -869,8 +869,8 @@ public abstract class Operation {
         @Override
         @CSharpInnerClass(outer = true, extra = {
                 "net.sf.saxon.regex.REMatcher matcher",
-                "java.util.Stack<net.sf.saxon.z.IntIterator> iterators",
-                "java.util.Stack<System.Int32> positions",
+                "System.Collections.Generic.Stack<net.sf.saxon.z.IntIterator> iterators",
+                "System.Collections.Generic.Stack<System.Int32> positions",
                 "int bound",
                 "int position"})
         public IntIterator iterateMatches(final REMatcher matcher, int position) {

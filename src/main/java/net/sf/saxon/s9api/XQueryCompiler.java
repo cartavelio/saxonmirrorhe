@@ -12,7 +12,6 @@ import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StringCollator;
-import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -43,6 +42,7 @@ import java.util.List;
                 + "        setErrorReporter(new Saxon.Impl.Helpers.ErrorReportingAction(reporter));"
                 + "    }"
 })
+
 public class XQueryCompiler {
 
     private final Processor processor;
@@ -336,7 +336,7 @@ public class XQueryCompiler {
             throw new UnsupportedOperationException("Streaming requires a Saxon-EE license");
         }
         if (option) {
-            setRequiredContextItemType(new ConstructedItemType(NodeKindTest.DOCUMENT, getProcessor()));
+            setRequiredContextItemType(ItemType.DOCUMENT_NODE);
         }
     }
 

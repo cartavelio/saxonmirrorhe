@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.parser;
 
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
@@ -18,6 +17,8 @@ import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharp;
+import net.sf.saxon.tree.util.IndexedStack;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -677,7 +678,7 @@ public class PathMap {
         }
         // Now process the tree of paths recursively, rewriting all axes in terms of downwards
         // selections, if necessary as downward selections from the root
-        Stack<PathMapNode> nodeStack = new Stack<PathMapNode>();
+        IndexedStack<PathMapNode> nodeStack = new IndexedStack<>();
         nodeStack.push(newRoot);
         reduceToDownwardsAxes(newRoot, nodeStack);
         newRoot.isDownwardsOnly = true;
@@ -692,7 +693,7 @@ public class PathMap {
      *                  The node at the bottom of the stack is the root.
      */
 
-    private void reduceToDownwardsAxes(/*@NotNull*/ PathMapRoot root, /*@NotNull*/ Stack<PathMapNode> nodeStack) {
+    private void reduceToDownwardsAxes(/*@NotNull*/ PathMapRoot root, /*@NotNull*/ IndexedStack<PathMapNode> nodeStack) {
         //PathMapArc lastArc = (PathMapArc)arcStack.peek();
         //byte lastAxis = lastArc.getStep().getAxis();
         PathMapNode node = nodeStack.peek();

@@ -736,7 +736,7 @@ public class RECompiler {
         IntSet is1 = p1.getIntSet();
         IntSet is2 = p2.getIntSet();
         if (is1 == null || is2 == null) {
-            return new PredicateCharacterClass(IntExceptPredicate.makeDifference(p1, p2));
+            return new PredicateCharacterClass(ch -> IntExceptPredicate.makeDifference(p1, p2).test(ch));
         } else {
             return new IntSetCharacterClass(is1.except(is2));
         }

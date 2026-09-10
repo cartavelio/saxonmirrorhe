@@ -77,7 +77,7 @@ public class Serializer extends AbstractDestination {
 
     static {
         for (Property p : Property.values()) {
-            standardProperties.put(p.name, p);
+            standardProperties.put(p.toString(), p);
         }
     }
 
@@ -248,6 +248,7 @@ public class Serializer extends AbstractDestination {
          */
         SAXON_SUPPLY_SOURCE_LOCATOR(SaxonOutputKeys.SUPPLY_SOURCE_LOCATOR);
 
+        
         private final String name;
 
         Property(String propertyName) {

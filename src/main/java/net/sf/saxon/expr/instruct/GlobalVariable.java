@@ -13,7 +13,10 @@ import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.HostLanguage;
@@ -24,6 +27,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
@@ -31,7 +35,9 @@ import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.SequenceType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
@@ -506,7 +512,7 @@ public class GlobalVariable extends Actor
      *          if cycles are found
      */
 
-    public void lookForCycles(Stack<Object> referees, XQueryFunctionLibrary globalFunctionLibrary) throws XPathException {
+    public void lookForCycles(IndexedStack<Object> referees, XQueryFunctionLibrary globalFunctionLibrary) throws XPathException {
         if (referees.contains(this)) {
             int s = referees.indexOf(this);
             referees.push(this);
@@ -574,7 +580,7 @@ public class GlobalVariable extends Actor
      */
 
     private static void lookForFunctionCycles(
-            XQueryFunction f, Stack<Object> referees, XQueryFunctionLibrary globalFunctionLibrary) throws XPathException {
+            XQueryFunction f, IndexedStack<Object> referees, XQueryFunctionLibrary globalFunctionLibrary) throws XPathException {
         Expression body = f.getBody();
         referees.push(f);
         List<Binding> list = new ArrayList<>(10);
@@ -595,6 +601,7 @@ public class GlobalVariable extends Actor
         }
         referees.pop();
     }
+    
 
     /**
      * Evaluate the variable. That is,

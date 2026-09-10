@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * entries will simply be recomputed. Equally, the incrementing of counters isn't
  * synchronized because they don't need to be exact.
  */
-@CSharpTypeBounds(bounds={"K:class", "V:class"})
+@CSharpTypeBounds(bounds={"V:class"})
 public class LFUCache<K, V> {
 
     private final boolean concurrent;
@@ -94,6 +94,23 @@ public class LFUCache<K, V> {
         } else {
             entry.counter++;
             return entry.value;
+        }
+    }
+
+    /**
+     * Ask whether a given key is present in the cache.<br>
+     * The usage count of the entry is incremented if the entry exists.
+     * @param key the key to be tested
+     * @return true if the key is present
+     */
+
+    public boolean containsKey(K key) {
+        EntryWithCounter<V> entry = map.get(key);
+        if (entry == null) {
+            return false;
+        } else {
+            entry.counter++;
+            return true;
         }
     }
 

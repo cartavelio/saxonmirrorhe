@@ -11,7 +11,6 @@ import cli.Microsoft.Win32.Registry;
 import cli.Microsoft.Win32.RegistryKey;
 import cli.System.Environment;
 import cli.System.Xml.*;
-import com.saxonica.ee.bytecode.util.GeneratedClassLoader;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Platform;
 import net.sf.saxon.Version;
@@ -28,9 +27,8 @@ import net.sf.saxon.pull.PullSource;
 import net.sf.saxon.regex.ARegularExpression;
 import net.sf.saxon.regex.JavaRegularExpression;
 import net.sf.saxon.regex.RegularExpression;
-import net.sf.saxon.resource.ActiveSource;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.resource.StandardCollectionFinder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ExternalObjectType;
 import org.xml.sax.SAXException;
@@ -107,6 +105,16 @@ public class DotNetPlatform implements Platform {
     @Override
     public String getPlatformSuffix() {
         return "N";
+    }
+
+    /**
+     * Get the default DynamicLoader for the platform
+     *
+     * @return the default DynamicLoader
+     */
+    @Override
+    public IDynamicLoader getDefaultDynamicLoader() {
+        return null;
     }
 
     /**
@@ -553,17 +561,8 @@ public class DotNetPlatform implements Platform {
      * @since 9.6.0.3
      */
     @Override
-    public ClassLoader makeGeneratedClassLoader(Configuration config, Class thisClass){
-        ClassLoader parentClassLoader = config.getDynamicLoader().getClassLoader();
-        if (parentClassLoader == null) {
-            parentClassLoader = thisClass.getClassLoader();
-        }
-
-        if (parentClassLoader == null) {
-            parentClassLoader = Thread.currentThread().getContextClassLoader();
-        }
-         return new GeneratedClassLoader(parentClassLoader);
-
+    public ClassLoader makeGeneratedClassLoader(Configuration config, Class<?> thisClass){
+        return null;
     }
 
 

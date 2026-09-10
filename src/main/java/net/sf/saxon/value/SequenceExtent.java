@@ -168,7 +168,6 @@ public abstract class SequenceExtent implements GroundedValue {
          */
 
         @Override
-        @CSharpModifiers(code = {"public", "override"})
         public boolean effectiveBooleanValue() throws XPathException {
             int len = getLength();
             if (len == 0) {
@@ -288,7 +287,7 @@ public abstract class SequenceExtent implements GroundedValue {
         }
 
         /*@NotNull*/
-        @CSharpModifiers(code = {"public", "override"})
+        @CSharpModifiers(code = {"public"})
         public String toString() {
             StringBuilder fsb = new StringBuilder(64);
             for (int i = 0; i < getLength(); i++) {
@@ -308,7 +307,7 @@ public abstract class SequenceExtent implements GroundedValue {
          * @return the simplified sequence
          */
         @Override
-        @CSharpModifiers(code = {"public", "override"})
+        @CSharpModifiers(code = {"public"})
         public GroundedValue reduce() {
             int len = getLength();
             if (len == 0) {
@@ -328,7 +327,7 @@ public abstract class SequenceExtent implements GroundedValue {
          */
 
         //@Override
-        @CSharpModifiers(code = {"public", "override"})
+        @CSharpModifiers(code = {"public"})
         public Iterator<T> iterator() {
             return items.iterator();
         }

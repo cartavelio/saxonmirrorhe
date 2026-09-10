@@ -8,7 +8,7 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.resource.ActiveSource;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.trans.XPathException;
 
 /**

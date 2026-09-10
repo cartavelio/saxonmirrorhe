@@ -8,10 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.Receiver;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.resource.ActiveSource;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.lib.ActiveSource;
 
 import java.util.Iterator;
 

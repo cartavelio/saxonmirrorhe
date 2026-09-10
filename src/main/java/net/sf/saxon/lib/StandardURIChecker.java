@@ -21,6 +21,8 @@ import java.net.URISyntaxException;
  */
 public class StandardURIChecker implements URIChecker {
 
+    // TODO: we are holding the corresponding URI objects in the cache, but we aren't currently taking advantage of this
+
     private static final StandardURIChecker THE_INSTANCE = new StandardURIChecker();
 
     public static StandardURIChecker getInstance() {
@@ -33,8 +35,8 @@ public class StandardURIChecker implements URIChecker {
      * valid only after escaping, as otherwise an exception occurs during the validation process
      */
 
-    /*@NotNull*/ private static final ThreadLocal<LFUCache<CharSequence, Boolean>> caches =
-            new ThreadLocal<LFUCache<CharSequence, Boolean>>();
+    private static final ThreadLocal<LFUCache<String, URI>> caches =
+            new ThreadLocal<>();
 
     /**
      * Protected constructor to allow subclassing
@@ -52,13 +54,13 @@ public class StandardURIChecker implements URIChecker {
 
     @Override
     public boolean isValidURI(String value) {
-        LFUCache<CharSequence, Boolean> cache = caches.get();
+        LFUCache<String, URI> cache = caches.get();
         if (cache == null) {
-            cache = new LFUCache<CharSequence, Boolean>(50);
+            cache = new LFUCache<String, URI>(50);
             caches.set(cache);
         }
 
-        if (cache.get(value) != null) {
+        if (cache.containsKey(value)) {
             return true;
         }
 
@@ -71,8 +73,8 @@ public class StandardURIChecker implements URIChecker {
 
         // Allow a string if the java.net.URI class accepts it
         try {
-            new URI(sv);
-            cache.put(value, Boolean.TRUE);
+            URI uri = new URI(sv);
+            cache.put(value, uri);
             return true;
         } catch (URISyntaxException e) {
             // keep trying
@@ -82,8 +84,8 @@ public class StandardURIChecker implements URIChecker {
         // Allow a string if it can be escaped into a form that java.net.URI accepts
         sv = IriToUri.iriToUri(StringView.tidy(sv)).toString();
         try {
-            new URI(sv);
-            cache.put(value, Boolean.TRUE);
+            URI uri = new URI(sv);
+            cache.put(value, uri);
             return true;
         } catch (URISyntaxException e) {
             return false;

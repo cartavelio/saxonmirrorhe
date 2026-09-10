@@ -18,6 +18,7 @@ import org.xml.sax.XMLReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class is an extension of the JAXP Source interface. The class can be used
@@ -360,11 +361,12 @@ public class AugmentedSource implements Source {
      * a Saxon-defined interface.</p>
      *
      * @param wrap if true, the node in the supplied Source is wrapped, to create a view. If false, the node
-     *             and its contained subtree is copied. If null, the system default is chosen.
+     *             and its contained subtree is copied. If absent, the system default is chosen.
      * @since 8.8
      */
 
-    public void setWrapDocument(Boolean wrap) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    public void setWrapDocument(Optional<Boolean> wrap) {
         options.setWrapDocument(wrap);
     }
 
@@ -377,11 +379,11 @@ public class AugmentedSource implements Source {
      * a Saxon-defined interface.</p>
      *
      * @return if true, the node in the supplied Source is wrapped, to create a view. If false, the node
-     *         and its contained subtree is copied. If null, the system default is chosen.
+     *         and its contained subtree is copied. If absent, the system default is chosen.
      * @since 8.8
      */
 
-    public Boolean getWrapDocument() {
+    public Optional<Boolean> getWrapDocument() {
         return options.getWrapDocument();
     }
 

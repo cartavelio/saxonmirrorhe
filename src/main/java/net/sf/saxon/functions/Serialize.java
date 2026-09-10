@@ -187,7 +187,7 @@ public class Serialize extends SystemFunction implements Callable {
      */
 
     private MapItem checkOptions(MapItem map, XPathContext context) throws XPathException {
-        HashTrieMap result = new HashTrieMap();
+        MapItem result = new HashTrieMap();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
         AtomicIterator keysIterator = map.keys();

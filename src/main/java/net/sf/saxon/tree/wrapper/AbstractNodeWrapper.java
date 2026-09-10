@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.wrapper;
 
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
@@ -14,6 +15,7 @@ import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -217,6 +219,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
+    @CSharpModifiers(code={"public", "virtual"})
     public String getDisplayName() {
         String prefix = getPrefix();
         String local = getLocalPart();
@@ -239,6 +242,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * @since 9.4
      */
     @Override
+    @CSharpModifiers(code = {"public", "virtual"})
     public String getAttributeValue(String uri, String local) {
         return null;
     }
@@ -252,6 +256,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
+    @CSharpModifiers(code={"public", "virtual"})
     public AxisIterator iterateAxis(int axisNumber) {
         return iterateAxis(axisNumber, AnyNodeTest.getInstance());
     }
@@ -270,6 +275,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
+    @CSharpModifiers(code = {"public", "virtual"})
     public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         NodeTest nodeTest = Navigator.nodeTestFromPredicate(predicate);
         int nodeKind = getNodeKind();
@@ -410,6 +416,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * @return an iterator over the sibling nodes, in axis order.
      */
 
+    @CSharpModifiers(code={"protected", "virtual"})
     protected AxisIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         AxisIterator iter = new Navigator.DescendantEnumeration(this, includeSelf, true);
         if (!(nodeTest instanceof AnyNodeTest)) {
@@ -439,6 +446,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      *      <p>For a node other than an element, the method returns null.</p>
      */
     @Override
+    @CSharpModifiers(code = {"public", "virtual"})
     public NamespaceBinding[] getDeclaredNamespaces(NamespaceBinding[] buffer) {
         return new NamespaceBinding[0];
     }
@@ -479,6 +487,14 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
         }
     }
 
+    //#if CSHARP==true
+    @Override
+    @CSharpModifiers(code = {"public", "virtual"})
+    public void copy(Receiver out, int copyOptions, Location locationId) throws XPathException {
+        // Copy of default method included so it can be marked as virtual
+        Navigator.copy(this, out, copyOptions, locationId);
+    }
+    //#endif
 
     /**
      * Determine whether the node has any children.
@@ -487,6 +503,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      */
 
     @Override
+    @CSharpModifiers(code = {"public", "virtual"})
     public boolean hasChildNodes() {
         switch (getNodeKind()) {
             case Type.DOCUMENT:
@@ -505,6 +522,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      *                                       hasFingerprint() returns false;
      */
     @Override
+    @CSharpModifiers(code = {"public", "virtual"})
     public int getFingerprint() {
         throw new UnsupportedOperationException();
     }
@@ -513,6 +531,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
      * Test whether a fingerprint is available for the node name
      */
     @Override
+    @CSharpModifiers(code = {"public", "virtual"})
     public boolean hasFingerprint() {
         return false;
     }

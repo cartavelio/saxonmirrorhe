@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
+import net.sf.saxon.pattern.NodeSelector;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.packages.PackageDetails;
 import net.sf.saxon.trans.rules.RuleManager;
@@ -209,8 +210,7 @@ public class XSLUsePackage extends StyleElement {
             return; // error already reported
         }
         for (NodeInfo override : children(XSLOverride.class::isInstance)) {
-            //noinspection RedundantCast
-            for (NodeInfo overridingDeclaration : ((XSLOverride)override).children(StylesheetComponent.class::isInstance)) {
+            for (NodeInfo overridingDeclaration : override.children(NodeSelector.of(StylesheetComponent.class::isInstance))) {
                 ComponentDeclaration decl = new ComponentDeclaration(module, (StyleElement) overridingDeclaration);
                 topLevel.add(decl);
                 SymbolicName name = ((StylesheetComponent) overridingDeclaration).getSymbolicName();

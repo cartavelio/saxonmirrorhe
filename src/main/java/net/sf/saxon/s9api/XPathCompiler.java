@@ -443,7 +443,6 @@ public class XPathCompiler {
         env.setDefaultCollationName(uri);
     }
 
-
     /**
      * Say whether the compiler should maintain a cache of compiled expressions.
      *

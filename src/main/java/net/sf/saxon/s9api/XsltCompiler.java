@@ -209,7 +209,8 @@ public class XsltCompiler {
      */
 
     public void setErrorList(List<? super StaticError> errorList) {
-        compilerInfo.setErrorReporter(errorList::add);
+        //noinspection Convert2MethodRef
+        compilerInfo.setErrorReporter(err -> errorList.add(err));
     }
 
     /**
@@ -558,7 +559,7 @@ public class XsltCompiler {
      * @since 9.6
      */
 
-    @CSharpReplaceBody(code="throw new NotImplementedException()")
+    @CSharpReplaceBody(code="throw new NotImplementedException();")
     public Source getAssociatedStylesheet(Source source, String media, String title, String charset)
             throws SaxonApiException {
         try {

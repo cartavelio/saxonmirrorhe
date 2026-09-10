@@ -14,6 +14,7 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.value.AnyURIValue;
 
@@ -30,7 +31,7 @@ import java.util.Iterator;
  */
 
 public class UriCollection extends SystemFunction {
-
+//#if CSHARP==false
     @CSharpInnerClass(outer=false, extra={"java.util.Iterator<string> sources"})
     private SequenceIterator getUris(final String href, final XPathContext context) throws XPathException {
         ResourceCollection rCollection = context.getConfiguration().getCollectionFinder().findCollection(context, href);
@@ -71,6 +72,16 @@ public class UriCollection extends SystemFunction {
         };
     }
 
+    private Sequence getDefaultUriCollection(XPathContext context) throws XPathException {
+        String href = context.getConfiguration().getDefaultCollection();
+        if (href == null) {
+            throw new XPathException("No default collection has been defined", "FODC0002");
+        } else {
+            return new LazySequence(getUris(href, context));
+        }
+    }
+
+//#endif
     /**
      * Evaluate the expression
      *
@@ -81,6 +92,7 @@ public class UriCollection extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
+    @CSharpReplaceBody(code="throw new NotImplementedException();")
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         if (arguments.length == 0) {
             return getDefaultUriCollection(context);
@@ -108,14 +120,6 @@ public class UriCollection extends SystemFunction {
 
     }
 
-    private Sequence getDefaultUriCollection(XPathContext context) throws XPathException {
-        String href = context.getConfiguration().getDefaultCollection();
-        if (href == null) {
-            throw new XPathException("No default collection has been defined", "FODC0002");
-        } else {
-            return new LazySequence(getUris(href, context));
-        }
-    }
 
 }
 

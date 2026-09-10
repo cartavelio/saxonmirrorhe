@@ -2,6 +2,7 @@ package net.sf.saxon.resource;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Receiver;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.trans.XPathException;
 import org.xml.sax.InputSource;

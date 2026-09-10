@@ -386,6 +386,7 @@ public class CommandLineOptions {
             config.setConfigurationProperty(Feature.OPTIMIZATION_LEVEL, optionValue);
         }
 
+        //#if CSHARP==false
         optionValue = getOptionValue("or");
         if (optionValue != null) {
             Object resolver = config.getInstance(optionValue);
@@ -395,6 +396,7 @@ public class CommandLineOptions {
                 throw new XPathException("Class " + optionValue + " is not an OutputURIResolver");
             }
         }
+        //#endif
 
         optionValue = getOptionValue("outval");
         if (optionValue != null) {
@@ -715,7 +717,7 @@ public class CommandLineOptions {
             throws SaxonApiException {
 
         Source sourceInput;
-        XMLReader parser;
+
         Configuration config = processor.getUnderlyingConfiguration();
         if (useURLs || isImplicitURI(sourceFileName)) {
             try {
@@ -730,12 +732,16 @@ public class CommandLineOptions {
             return false;
         } else if (sourceFileName.equals("-")) {
             // take input from stdin
+            //#if CSHARP == false
             if (useSAXSource) {
-                parser = config.getSourceParser();
+                XMLReader parser = config.getSourceParser();
                 sourceInput = new SAXSource(parser, new InputSource(System.in));
             } else {
+                //#endif
                 sourceInput = new StreamSource(System.in);
+                //#if CSHARP == false
             }
+            //#endif
             sources.add(sourceInput);
             return false;
         } else {
@@ -744,32 +750,42 @@ public class CommandLineOptions {
                 throw new SaxonApiException("Source file " + sourceFile + " does not exist");
             }
             if (sourceFile.isDirectory()) {
-                parser = config.getSourceParser();
+                //#if CSHARP == false
+                XMLReader parser = config.getSourceParser();
+                //#endif
                 String[] files = sourceFile.list();
                 if (files != null) {
                     for (String file1 : files) {
                         File file = new File(sourceFile, file1);
                         if (!file.isDirectory() && !file.isHidden()) {
+                            //#if CSHARP == false
                             if (useSAXSource) {
                                 InputSource eis = new InputSource(file.toURI().toString());
                                 sourceInput = new SAXSource(parser, eis);
                                 // it's safe to use the same parser for each document, as they
                                 // will be processed one at a time.
                             } else {
+                                //#endif
                                 sourceInput = new StreamSource(file.toURI().toString());
+                                //#if CSHARP == false
                             }
+                            //#endif
                             sources.add(sourceInput);
                         }
                     }
                 }
                 return true;
             } else {
+                //#if CSHARP == false
                 if (useSAXSource) {
                     InputSource eis = new InputSource(sourceFile.toURI().toString());
                     sourceInput = new SAXSource(config.getSourceParser(), eis);
                 } else {
+                    //#endif
                     sourceInput = new StreamSource(sourceFile.toURI().toString());
+                    //#if CSHARP == false
                 }
+                //#endif
                 sources.add(sourceInput);
                 return false;
             }
@@ -814,7 +830,8 @@ public class CommandLineOptions {
         } else {
             try {
                 double millisecs = nanosecs/1e6;
-                DayTimeDurationValue d = milliSecond.multiply(millisecs);
+                @SuppressWarnings("RedundantCast") 
+                DayTimeDurationValue d = (DayTimeDurationValue) milliSecond.multiply(millisecs);
                 long days = ((NumericValue) d.getComponent(AccessorFn.Component.DAY)).longValue();
                 long hours = ((NumericValue) d.getComponent(AccessorFn.Component.HOURS)).longValue();
                 long minutes = ((NumericValue) d.getComponent(AccessorFn.Component.MINUTES)).longValue();

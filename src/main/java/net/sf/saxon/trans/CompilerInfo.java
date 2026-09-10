@@ -38,7 +38,6 @@ public class CompilerInfo {
 
     private Configuration config;
     private URIResolver uriResolver;
-    private OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
     private ErrorReporter errorReporter = new StandardErrorReporter();
     private CodeInjector codeInjector;
     private int recoveryPolicy = Mode.RECOVER_WITH_WARNINGS;
@@ -58,6 +57,10 @@ public class CompilerInfo {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private int languageVersion = 30;
+
+    //#if CSHARP==false
+    private OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
+    //#endif
 
     /**
      * Create an empty CompilerInfo object with default settings. (Note, this does not
@@ -91,7 +94,6 @@ public class CompilerInfo {
     public void copyFrom(CompilerInfo info) {
         config = info.config;
         uriResolver = info.uriResolver;
-        outputURIResolver = info.outputURIResolver;
         errorReporter = info.errorReporter;
         codeInjector = info.codeInjector;
         recoveryPolicy = info.recoveryPolicy;
@@ -110,6 +112,10 @@ public class CompilerInfo {
         defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
         unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
         languageVersion = info.languageVersion;
+
+        //#if CSHARP==false
+        outputURIResolver = info.outputURIResolver;
+        //#endif
     }
 
     public Configuration getConfiguration() {
@@ -366,6 +372,7 @@ public class CompilerInfo {
         return uriResolver;
     }
 
+    //#if CSHARP==false
     /**
      * Get the OutputURIResolver that will be used to resolve URIs used in the
      * href attribute of the xsl:result-document instruction.
@@ -390,6 +397,7 @@ public class CompilerInfo {
     public void setOutputURIResolver(OutputURIResolver outputURIResolver) {
         this.outputURIResolver = outputURIResolver;
     }
+    //#endif
 
     //#if CSHARP==false
     /**
