@@ -192,7 +192,7 @@ public class ExpressionTool {
      */
 
     public static GroundedValue eagerEvaluate(Expression exp, XPathContext context) throws XPathException {
-        return (GroundedValue)exp.makeElaborator().eagerly().evaluate(context);
+        return exp.makeElaborator().eagerly().evaluate(context).materialize();
     }
 
     /**

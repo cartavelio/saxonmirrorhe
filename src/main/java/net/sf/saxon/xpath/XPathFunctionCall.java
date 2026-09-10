@@ -240,7 +240,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
             XPathFunctionCall expr = (XPathFunctionCall)getExpression();
             SequenceEvaluator[] argEvals = new SequenceEvaluator[expr.getArity()];
             for (int i = 0; i < argEvals.length; i++) {
-                argEvals[i] = expr.getArg(i).makeElaborator().lazily(true);
+                argEvals[i] = expr.getArg(i).makeElaborator().lazily(true, false);
             }
             return context -> {
                 Sequence[] argValues = new Sequence[expr.getArity()];

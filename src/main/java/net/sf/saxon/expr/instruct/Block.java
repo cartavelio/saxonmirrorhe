@@ -799,12 +799,12 @@ public class Block extends Instruction {
     public static class BlockElaborator extends PullElaborator {
 
         @Override
-        public SequenceEvaluator lazily(boolean repeatable) {
+        public SequenceEvaluator lazily(boolean repeatable, boolean lazyEvaluationRequired) {
             final Block expr = (Block) getExpression();
             if (expr.isCandidateForSharedAppend()) {
                 return new SharedAppendEvaluator(expr);
             } else {
-                return super.lazily(repeatable);
+                return super.lazily(repeatable, lazyEvaluationRequired);
             }
         }
 

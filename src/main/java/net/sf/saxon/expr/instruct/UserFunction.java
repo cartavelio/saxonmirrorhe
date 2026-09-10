@@ -302,7 +302,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
             // return a Closure, the tail call escapes into the wild and can reappear anywhere...
             bodyEvaluator = getBody().makeElaborator().eagerly();
         } else {
-            bodyEvaluator = getBody().makeElaborator().lazily(true);
+            bodyEvaluator = getBody().makeElaborator().lazily(true, false);
         }
     }
 

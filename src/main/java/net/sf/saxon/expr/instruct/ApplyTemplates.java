@@ -583,7 +583,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
             UnicodeStringEvaluator sep = expr.separatorOp == null ? null
                     : expr.getSeparatorExpression().makeElaborator().elaborateForUnicodeString(true);
             if (expr.useTailRecursion()) {
-                SequenceEvaluator select = expr.getSelect().makeElaborator().lazily(false);
+                SequenceEvaluator select = expr.getSelect().makeElaborator().lazily(false, false);
                 return (output, context) -> {
                     Component.M targetMode = expr.getTargetMode(context);
 

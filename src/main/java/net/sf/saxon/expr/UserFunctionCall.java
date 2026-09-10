@@ -261,7 +261,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 argumentEvaluators[i] = new SharedAppendEvaluator((Block) arg);
             } else {
                 argumentEvaluators[i] = new LearningEvaluator(
-                        arg, arg.makeElaborator().lazily(true));
+                        arg, arg.makeElaborator().lazily(true, false));
             }
             i++;
         }

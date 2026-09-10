@@ -641,7 +641,7 @@ public abstract class FunctionCall extends Expression {
             int arity = expr.getArity();
             argumentEvaluators = new SequenceEvaluator[arity];
             for (int i = 0; i < arity; i++) {
-                argumentEvaluators[i] = expr.getArg(i).makeElaborator().lazily(allowRepeatedUse);
+                argumentEvaluators[i] = expr.getArg(i).makeElaborator().lazily(allowRepeatedUse, false);
             }
         }
 

@@ -96,14 +96,19 @@ public abstract class Elaborator {
 
     /**
      * Get a function that evaluates the underlying expression lazily
-     * @param repeatable true if the resulting {@link Sequence} must be usable repeatedly; false
-     *                   if it only needs to be used once
+     *
+     * @param repeatable             true if the resulting {@link Sequence} must be usable repeatedly; false
+     *                               if it only needs to be used once
+     * @param lazyEvaluationRequired true if the expression MUST be evaluated lazily, for example to prevent
+     *                               spurious errors or side-effects if it has been lifted out of a loop
      * @return an evaluator for the expression that returns a {@link Sequence} (which may be a lazy sequence)
      */
 
-    public SequenceEvaluator lazily(boolean repeatable) {
+    public SequenceEvaluator lazily(boolean repeatable, boolean lazyEvaluationRequired) {
         Expression expr = getExpression();
-        if (!expr.supportsLazyEvaluation()) {
+        if (lazyEvaluationRequired) {
+            return new MemoClosureEvaluator(expr, elaborateForPull());
+        } else if (!expr.supportsLazyEvaluation()) {
             return eagerly();
         } else if (repeatable) {
             return new LearningEvaluator(
