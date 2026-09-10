@@ -486,7 +486,7 @@
          'isOpaque#0':                'Saxon.Impl.Helpers.UriUtils.IsOpaque(%scope%)',
          'normalize#0':               'Saxon.Impl.Helpers.UriUtils.Normalize(%scope%)',
          'resolve#1':                 'new System.Uri(%scope%, %args%)',
-         'toASCIIString#0':           '%scope%.OriginalString',
+         'toASCIIString#0':           'Saxon.Impl.Helpers.UriUtils.toAsciiString(%scope%)',
          'toURL#0':                   'Saxon.Impl.Helpers.UriUtils.ToURL(%scope%)',
          '*':                         '%scope%.%Name%(%args%)' 
          })"/>

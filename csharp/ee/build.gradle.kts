@@ -335,6 +335,7 @@ val jarFinder = JarFinder(configurations.named("transpiler").get())
 val transpileToXml = tasks.register<JavaExec>("transpileToXml") {
   group = LifecycleBasePlugin.BUILD_GROUP
   inputs.files(preprocessJava)
+  inputs.dir(layout.projectDirectory.dir("../transpiler/tools/xslt"))
   outputs.dir(layout.buildDirectory.dir("tmp/xml"))
   doFirst {
     mkdir("${layout.buildDirectory.dir("tmp/xml").get()}")

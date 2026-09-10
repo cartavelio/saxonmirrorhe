@@ -52,9 +52,16 @@ namespace Saxon.Ejava.io {
         }
 
         public SysUri toURI() {
-            // This is horrible, but the simple "new Uri(fullPath)" generates a Uri whose OriginalString property
-            // is say "/folder/file.xml" rather than "file:///folder/file.xml". Really, we shouldn't be generating
-            // calls on OriginalString in the transpiler, but changing that just before release is a bit scary.
+            // This is horrible, but the simple "new Uri(fullPath)" generates a
+            // Uri whose OriginalString property is say "/folder/file.xml"
+            // rather than "file:///folder/file.xml". Really, we shouldn't be
+            // generating calls on OriginalString in the transpiler, but
+            // changing that just before release is a bit scary.
+            //
+            // 2025-09-29, ndw: I think calling OriginalString is usually
+            // wrong; I've removed most uses of it. But I'm not changing this
+            // method at this time; I don't think it's wrong, just a bit 
+            // redundant.
             return new Uri(new Uri(fullPath).AbsoluteUri);
             //return new Uri(fullPath); 
         }
