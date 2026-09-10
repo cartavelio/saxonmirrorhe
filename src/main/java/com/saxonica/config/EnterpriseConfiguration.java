@@ -618,7 +618,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
      */
 
-    public void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorReporter errorReporter, SchemaCompiler compiler) throws SchemaException {
+    public synchronized void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorReporter errorReporter, SchemaCompiler compiler) throws SchemaException {
         try {
             //#if CSHARP==false
             if (schemaSource instanceof SAXSource && getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
