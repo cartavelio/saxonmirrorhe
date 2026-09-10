@@ -166,7 +166,7 @@ public class SaxonCAPI {
     }
 
     @CEntryPoint(name = "j_registerFunctionDefinition", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, CCharPointer c_funcName, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc, int c_useNativeTypes) throws SaxonApiException {
+    public static long j_registerFunctionDefinition(IsolateThread thread, ObjectHandle procRef, CCharPointer c_namespace, CCharPointer c_funcName, ObjectHandle signatureRef, CFunctionPointer pythonProc, CFunctionPointer func, AllocatorFn alloc,  int c_useNativeTypes) throws SaxonApiException {
         if (SaxonCAPI.debug) {
             System.err.println("Java DEBUG en entered setLibrary!!");
         }

@@ -925,7 +925,7 @@ function userFunction($param , $param2)
          }
          $saxonProc1 = new Saxon\SaxonProcessor(True);
 
-         $saxonProc1->registerUserFunction("http://www.example.com", "UserFunction", "{ \"myFunc\": {".
+         $saxonProc1->registerUserFunction("http://www.example.com", "userFunction", "{ \"myFunc\": {".
                                                         "      \"as\": \"xs:integer?\"," .
                                                         "      \"param\": [" .
                                                         "        \"xs:integer\"" .

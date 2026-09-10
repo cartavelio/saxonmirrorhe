@@ -1338,9 +1338,6 @@ PHP_METHOD(SaxonProcessor, registerUserFunction)
     bool useNativeTypes = true;
     size_t len1, len2, len3;
  std::cerr<<"checkpoint in registerPHPFunction start"<<std::endl;
-    if (ZEND_NUM_ARGS()!= 1) {
-        WRONG_PARAM_COUNT;
-    }
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "sssb", &namespacei, &len1, &functionName, &len2, &signature, &len3, &useNativeTypes) ==
 FAILURE) { RETURN_NULL();
@@ -1352,7 +1349,7 @@ XtOffsetOf(saxonProcessor_object, std));
 
     saxonProcessor = obj->saxonProcessor;
 
-saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, functionName, nullptr, signature, useNativeTypes);
+saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, functionName, (void *)nullptr, signature, useNativeTypes);
 //"com/saxonica/functions/extfn/cpp/PHPFunctionSet$PHPFunction", phpMethods,
 //sizeof(phpMethods) / sizeof(phpMethods[0]));
 
