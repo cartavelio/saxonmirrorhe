@@ -13,7 +13,7 @@
    <exception test-set="fn-random-number-generator" 
       test-case="fn-random-number-generator-35a
                      fn-random-number-generator-36a
-                     fn-random-number-generator-37a" run="false" report="n/a">
+                     fn-random-number-generator-37a" run="false" report="n/a" when="export">
       <created by="Michael Kay" on="2026-04-22"/>
       <reason>Implemented signature of fn:random-number-generator differs from the spec, because
         of limited support for recursive record types.</reason>

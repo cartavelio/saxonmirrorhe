@@ -140,6 +140,7 @@ public abstract class TestDriver {
             }
             if (args[i].startsWith("-export") && !argValue.equals("off")) {
                 export = true;
+                exceptionPredicates.add("export");
             }
             if (args[i].startsWith("-jit") && !argValue.equals("off")) {
                 jitFlag = true;
@@ -150,6 +151,7 @@ public abstract class TestDriver {
                 treeModel = DOMObjectModel.getInstance();
                 jsPlatforms = new String[]{"browser", "nodejs"};
                 exceptionPredicates.add("js");
+                exceptionPredicates.add("export");
                 exceptionPredicates.add("dom");
             }
             if (args[i].equals("-pullparser")) {
