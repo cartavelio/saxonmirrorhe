@@ -686,10 +686,8 @@ public final class EvaluateInstr extends Expression {
                 try {
                     return expr.iterate(c2);
                 } catch (XPathException err) {
-                    XPathException e2 = new XPathException("Dynamic error in expression {" + exprText + "} called using xsl:evaluate", err);
-                    e2.setLocation(instr.getLocation());
-                    e2.setErrorCodeQName(err.getErrorCodeQName());
-                    throw e2;
+                    throw err.withMessage("Dynamic error in expression {" + exprText + "} called using xsl:evaluate")
+                            .withLocation(instr.getLocation());
                 }
             };
         }

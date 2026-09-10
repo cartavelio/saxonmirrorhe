@@ -308,9 +308,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
                 result = new ItemMappingIterator(result, ItemMapper.of(item -> {
                      if (!type.matches(item, th)) {
                          String msg = role.get().composeErrorMessage(type, item, th);
-                         XPathException err = new XPathException(msg, "XPTY0004");
-                         err.setLocation(getLocation());
-                         throw err;
+                         throw new XPathException(msg, "XPTY0004").withLocation(getLocation());
                      }
                      return item;
                  }), true);

@@ -300,10 +300,7 @@ public final class ComputedAttribute extends AttributeCreator {
             } else {
                 msg += "the containing element is of simple type " + parentType.getDescription();
             }
-            XPathException err = new XPathException(msg);
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException(msg).asTypeError().withLocation(getLocation());
         }
     }
 

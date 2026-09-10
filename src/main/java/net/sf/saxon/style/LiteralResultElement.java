@@ -455,9 +455,7 @@ public class LiteralResultElement extends StyleElement {
             newRoot.graftLocationMap(oldRoot);
             return newRoot;
         } catch (XPathException err) {
-            //TransformerConfigurationException e = new TransformerConfigurationException(err);
-            err.setLocation(allocateLocation());
-            throw err;
+            throw err.withLocation(allocateLocation());
         }
 
     }

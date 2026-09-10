@@ -1315,10 +1315,9 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
             }
             sub.checkForUpdatingSubexpressions();
             if (sub.isUpdatingExpression()) {
-                XPathException err = new XPathException(
-                        "Updating expression appears in a context where it is not permitted", "XUST0001");
-                err.setLocation(sub.getLocation());
-                throw err;
+                throw new XPathException(
+                        "Updating expression appears in a context where it is not permitted", "XUST0001")
+                        .withLocation(sub.getLocation());
             }
         }
     }

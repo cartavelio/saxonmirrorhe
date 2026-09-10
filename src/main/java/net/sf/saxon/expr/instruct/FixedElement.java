@@ -193,22 +193,18 @@ public class FixedElement extends ElementCreator {
             if (validation == Validation.STRICT) {
                 SchemaDeclaration decl = config.getElementDeclaration(fp);
                 if (decl == null) {
-                    XPathException err = new XPathException("There is no global element declaration for " +
-                            elementName.getStructuredQName().getEQName() +
-                            ", so strict validation will fail");
-                    err.setErrorCode(instr.isXSLT() ? "XTTE1512" : "XQDY0084");
-                    err.setIsTypeError(true); // technically this is a type error in XSLT but not in XQuery
-                    err.setLocation(instr.getLocation());
-                    throw err;
+                    throw new XPathException("There is no global element declaration for " +
+                            elementName.getStructuredQName().getEQName() + ", so strict validation will fail")
+                            .withErrorCode(instr.isXSLT() ? "XTTE1512" : "XQDY0084")
+                            .asTypeError() // technically this is a type error in XSLT but not in XQuery
+                            .withLocation(instr.getLocation());
                 }
                 if (decl.isAbstract()) {
-                    XPathException err = new XPathException("The element declaration for " +
-                            elementName.getStructuredQName().getEQName() +
-                            " is abstract, so strict validation will fail");
-                    err.setErrorCode(instr.isXSLT() ? "XTTE1512" : "XQDY0027");
-                    err.setIsTypeError(true); // technically this is a type error in XSLT but not in XQuery
-                    err.setLocation(instr.getLocation());
-                    throw err;
+                    throw new XPathException("The element declaration for " +
+                            elementName.getStructuredQName().getEQName() + " is abstract, so strict validation will fail")
+                            .withErrorCode(instr.isXSLT() ? "XTTE1512" : "XQDY0084")
+                            .asTypeError() // technically this is a type error in XSLT but not in XQuery
+                            .withLocation(instr.getLocation());
                 }
                 SchemaType declaredType = decl.getType();
                 SchemaType xsiType = instr.getXSIType(env);
@@ -227,9 +223,8 @@ public class FixedElement extends ElementCreator {
                     try {
                         schemaType.analyzeContentExpression(content, Type.ELEMENT);
                     } catch (XPathException e) {
-                        e.setErrorCode(instr.isXSLT() ? "XTTE1510" : "XQDY0027");
-                        e.setLocation(instr.getLocation());
-                        throw e;
+                        throw e.withErrorCode(instr.isXSLT() ? "XTTE1510" : "XQDY0027")
+                                .withLocation(instr.getLocation());
                     }
                     if (xsiType != null) {
                         try {
@@ -260,9 +255,8 @@ public class FixedElement extends ElementCreator {
                     try {
                         schemaType.analyzeContentExpression(content, Type.ELEMENT);
                     } catch (XPathException e) {
-                        e.setErrorCode(instr.isXSLT() ? "XTTE1515" : "XQDY0027");
-                        e.setLocation(instr.getLocation());
-                        throw e;
+                        throw e.withErrorCode(instr.isXSLT() ? "XTTE1515" : "XQDY0027")
+                                .withLocation(instr.getLocation());
                     }
                 }
             } else if (validation == Validation.PRESERVE) {
@@ -287,9 +281,7 @@ public class FixedElement extends ElementCreator {
             try {
                 schemaType.analyzeContentExpression(content, Type.ELEMENT);
             } catch (XPathException e) {
-                e.setErrorCode(instr.isXSLT() ? "XTTE1540" : "XQDY0027");
-                e.setLocation(instr.getLocation());
-                throw e;
+                throw e.withErrorCode(instr.isXSLT() ? "XTTE1540" : "XQDY0027").withLocation(instr.getLocation());
             }
         }
         return itemType;
@@ -425,17 +417,13 @@ public class FixedElement extends ElementCreator {
     @Override
     public void checkPermittedContents(SchemaType parentType, boolean whole) throws XPathException {
         if (parentType instanceof SimpleType) {
-            XPathException err = new XPathException("Element " + elementName.getDisplayName() +
-                    " is not permitted here: the containing element is of simple type " + parentType.getDescription());
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("Element " + elementName.getDisplayName() +
+                    " is not permitted here: the containing element is of simple type " + parentType.getDescription())
+                    .asTypeError().withLocation(getLocation());
         } else if (((ComplexType) parentType).isSimpleContent()) {
-            XPathException err = new XPathException("Element " + elementName.getDisplayName() +
-                    " is not permitted here: the containing element has a complex type with simple content");
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("Element " + elementName.getDisplayName() +
+                    " is not permitted here: the containing element has a complex type with simple content")
+                    .asTypeError().withLocation(getLocation());
         }
 
         // Check that a sequence consisting of this element alone is valid against the content model

@@ -260,10 +260,7 @@ public class ComputedElement extends ElementCreator {
             } else {
                 msg += "has a complex type with simple content";
             }
-            XPathException err = new XPathException(msg);
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException(msg).asTypeError().withLocation(getLocation());
         }
         // NOTE: we could in principle check that if all the elements permitted in the content of the parentType
         // themselves have a simple type (not uncommon, perhaps) then this element must not have element content.

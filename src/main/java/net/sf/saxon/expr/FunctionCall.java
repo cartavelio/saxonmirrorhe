@@ -391,10 +391,8 @@ public abstract class FunctionCall extends Expression {
             msg = "Function " + getDisplayName() + " must have no more than " + pluralArguments(max);
         }
         if (msg != null) {
-            XPathException err = new XPathException(msg, "XPST0017");
-            err.setIsStaticError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException(msg, "XPST0017")
+                    .asStaticError().withLocation(getLocation());
         }
         return numArgs;
     }

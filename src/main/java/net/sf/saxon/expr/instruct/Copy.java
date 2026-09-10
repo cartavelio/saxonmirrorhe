@@ -111,10 +111,8 @@ public class Copy extends ElementCreator {
         selectItemType = contextInfo.getItemType();
 
         if (selectItemType == ErrorType.getInstance()) {
-            XPathException err = new XPathException("No context item supplied for xsl:copy", "XTTE0945");
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw new XPathException("No context item supplied for xsl:copy", "XTTE0945")
+                    .asTypeError().withLocation(getLocation());
         }
 
         if (selectItemType instanceof NodeTest) {

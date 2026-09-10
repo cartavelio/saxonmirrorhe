@@ -257,12 +257,10 @@ public final class ValueOf extends SimpleNodeConstructor {
                     !((ComplexType) parentType).isSimpleContent() &&
                     !((ComplexType) parentType).isMixedContent() &&
                     !Whitespace.isAllWhite(selectValue.getUnicodeStringValue())) {
-                XPathException err = new XPathException("The containing element must be of type " + parentType.getDescription() +
+                throw new XPathException("The containing element must be of type " + parentType.getDescription() +
                         ", which does not allow text content " +
-                        Err.wrap(selectValue.getUnicodeStringValue()));
-                err.setLocation(getLocation());
-                err.setIsTypeError(true);
-                throw err;
+                        Err.wrap(selectValue.getUnicodeStringValue()))
+                        .withLocation(getLocation()).asTypeError();
             }
         } else {
             // check that the type allows text nodes. If not, this is a warning condition, since the text

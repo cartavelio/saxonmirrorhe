@@ -381,10 +381,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
             RoleDiagnostic role = new RoleDiagnostic(
                     RoleDiagnostic.MISC, "context item for the template rule", 0);
             String message = role.composeErrorMessage(requiredContextItemType, context.getContextItem(), th);
-            XPathException err = new XPathException(message, "XTTE0590");
-            err.setLocation(this);
-            err.setIsTypeError(true);
-            throw err;
+            throw new XPathException(message, "XTTE0590").withLocation(this).asTypeError();
         }
         if (absentFocus) {
             context = context.newMinorContext();

@@ -257,9 +257,9 @@ public class UseWhenFilter extends ProxyReceiver {
                                             new DirectResourceResolver(config));
 
             if (source == null) {
-                XPathException e = new XPathException("Unable to resolve " + elemName.getDisplayName() + " stylesheet URI " + href, "XTSE0165");
-                e.setLocation(location);
-                throw e;
+                throw new XPathException("Unable to resolve " + elemName.getDisplayName()
+                                                 + " stylesheet URI " + href, "XTSE0165")
+                        .withLocation(location);
             }
             if (source instanceof EmptySource) {
                 source = new StreamSource(

@@ -367,11 +367,10 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
         if (bindingSlot >= 0) {
             target = context.getTargetComponent(bindingSlot);
             if (target.isHiddenAbstractComponent()) {
-                XPathException err = new XPathException("Cannot call an abstract template (" +
+                throw new XPathException("Cannot call an abstract template (" +
                                                                 calledTemplateName.getDisplayName() +
-                                                                ") with no implementation", "XTDE3052");
-                err.setLocation(getLocation());
-                throw err;
+                                                                ") with no implementation", "XTDE3052")
+                        .withLocation(getLocation());
             }
         }
         t = (NamedTemplate) target.getActor();
@@ -612,11 +611,10 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
                     if (bindingSlot >= 0) {
                         target = context.getTargetComponent(bindingSlot);
                         if (target.isHiddenAbstractComponent()) {
-                            XPathException err = new XPathException("Cannot call an abstract template (" +
+                            throw new XPathException("Cannot call an abstract template (" +
                                                                             expr.calledTemplateName.getDisplayName() +
-                                                                            ") with no implementation", "XTDE3052");
-                            err.setLocation(expr.getLocation());
-                            throw err;
+                                                                            ") with no implementation", "XTDE3052")
+                                    .withLocation(expr.getLocation());
                         }
                     }
                     t = (NamedTemplate) target.getActor();

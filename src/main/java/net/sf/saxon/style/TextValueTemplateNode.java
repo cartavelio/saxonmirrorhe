@@ -54,9 +54,8 @@ public class TextValueTemplateNode extends TextImpl {
         try {
             contentExp = AttributeValueTemplate.make(getUnicodeStringValue().toString(), getStaticContext());
         } catch (XPathException e) {
-            e.setLocation(this);
             assert getParent() instanceof StyleElement;
-            ((StyleElement) getParent()).compileError(e);
+            ((StyleElement) getParent()).compileError(e.withLocation(this));
             contentExp = new StringLiteral(getStringValue());
         }
         contentExp = new ValueOf(contentExp, disable, false);

@@ -576,8 +576,7 @@ public class ForEachGroup extends Instruction
             try {
                 return context.getConfiguration().getCollation(cname, getStaticBaseURIString(), "FOCH0002");
             } catch (XPathException e) {
-                e.setLocation(getLocation());
-                throw e;
+                throw e.withLocation(getLocation());
             }
 
         } else {

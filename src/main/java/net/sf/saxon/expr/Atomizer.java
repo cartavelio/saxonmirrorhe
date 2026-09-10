@@ -133,17 +133,15 @@ public final class Atomizer extends UnaryExpression {
                     if (((FunctionItem)i).isArray()) {
                         return this;
                     } else if (((FunctionItem)i).isMap()) {
-                        XPathException err = new XPathException(
-                                expandMessage("Cannot atomize a map (" + i.toShortString() + ")"), "FOTY0013");
-                        err.setIsTypeError(true);
-                        err.setLocation(getLocation());
-                        throw err;
+                        throw new XPathException(expandMessage("Cannot atomize a map (" + i.toShortString() + ")"))
+                                .withErrorCode("FOTY0013")
+                                .asTypeError()
+                                .withLocation(getLocation());
                     } else {
-                        XPathException err = new XPathException(
-                                expandMessage("Cannot atomize a function item"), "FOTY0013");
-                        err.setIsTypeError(true);
-                        err.setLocation(getLocation());
-                        throw err;
+                        throw new XPathException(expandMessage("Cannot atomize a function item"))
+                                .withErrorCode("FOTY0013")
+                                .asTypeError()
+                                .withLocation(getLocation());
                     }
                 }
             }
@@ -181,15 +179,14 @@ public final class Atomizer extends UnaryExpression {
             XPathException err;
             if (operandType instanceof FunctionItemType) {
                 String thing = operandType instanceof MapType ? "map" : "function item";
-                err = new XPathException(
-                        expandMessage("Cannot atomize a " + thing), "FOTY0013");
+                err = new XPathException(expandMessage("Cannot atomize a " + thing))
+                        .withErrorCode("FOTY0013");
             } else {
                 err = new XPathException(
-                        expandMessage("Cannot atomize an element that is defined in the schema to have element-only content"), "FOTY0012");
+                        expandMessage("Cannot atomize an element that is defined in the schema to have element-only content"))
+                        .withErrorCode("FOTY0012");
             }
-            err.setIsTypeError(true);
-            err.setLocation(getLocation());
-            throw err;
+            throw err.asTypeError().withLocation(getLocation());
         }
         getBaseExpression().setFlattened(true);
         return this;

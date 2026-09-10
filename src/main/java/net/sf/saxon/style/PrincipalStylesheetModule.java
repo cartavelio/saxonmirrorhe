@@ -1604,10 +1604,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             for (ComponentTest test : exposure.getWildcardComponentTests()) {
                 if (test.matches(component.getActor())) {
                     if (exposure.getVisibility() == Visibility.ABSTRACT && component.getVisibility() != Visibility.ABSTRACT) {
-                        XPathException err = new XPathException(
-                                "The non-abstract component " + component.getActor().getSymbolicName() + " cannot be made abstract by means of xsl:expose", "XTSE3025");
-                        err.setLocation(exposure);
-                        throw err;
+                        throw new XPathException(
+                                "The non-abstract component " + component.getActor().getSymbolicName()
+                                        + " cannot be made abstract by means of xsl:expose", "XTSE3025")
+                                .withLocation(exposure);
                     }
                     component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
                     return;
@@ -1623,10 +1623,10 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             for (ComponentTest test : exposure.getWildcardComponentTests()) {
                 if (test.isPartialWildcard() && test.matches(component.getActor())) {
                     if (exposure.getVisibility() == Visibility.ABSTRACT && component.getVisibility() != Visibility.ABSTRACT) {
-                        XPathException err = new XPathException(
-                                "The non-abstract component " + component.getActor().getSymbolicName() + " cannot be made abstract by means of xsl:expose", "XTSE3025");
-                        err.setLocation(exposure);
-                        throw err;
+                        throw new XPathException(
+                                "The non-abstract component " + component.getActor().getSymbolicName()
+                                        + " cannot be made abstract by means of xsl:expose", "XTSE3025")
+                                .withLocation(exposure);
                     }
                     component.setVisibility(exposure.getVisibility(), VisibilityProvenance.EXPOSED);
                     return true;

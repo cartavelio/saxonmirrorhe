@@ -171,9 +171,8 @@ public class CurrentGroupingKeyCall extends Expression implements Callable {
                 GroupIterator gi = context.getCurrentGroupIterator();
                 AtomicSequence result = gi == null ? null : gi.getCurrentGroupingKey();
                 if (result == null) {
-                    XPathException err = new XPathException("There is no current grouping key", "XTDE1071");
-                    err.setLocation(expr.getLocation());
-                    throw err;
+                    throw new XPathException("There is no current grouping key", "XTDE1071")
+                            .withLocation(expr.getLocation());
                 }
                 return result.iterate();
             };

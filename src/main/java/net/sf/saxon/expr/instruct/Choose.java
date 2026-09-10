@@ -557,8 +557,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 try {
                     b = ((Literal) getCondition(i)).getGroundedValue().effectiveBooleanValue();
                 } catch (XPathException err) {
-                    err.setLocation(getLocation());
-                    throw err;
+                    throw err.withLocation(getLocation());
                 }
                 setCondition(i, Literal.makeLiteral(BooleanValue.get(b), this));
             }

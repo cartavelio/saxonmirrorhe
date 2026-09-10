@@ -1207,9 +1207,9 @@ public abstract class StyleElement extends ElementImpl {
             // It will be null on the xsl:package element itself
             psm.addFixupAction(() -> {
                 if (psm.getRuleManager().obtainMode(checkedName, false) == null) {
-                    XPathException err = new XPathException("Mode " + checkedName.getDisplayName() + " is not declared in an xsl:mode declaration", "XTSE3085");
-                    err.setLocation(this);
-                    throw err;
+                    throw new XPathException("Mode " + checkedName.getDisplayName()
+                                                     + " is not declared in an xsl:mode declaration", "XTSE3085")
+                            .withLocation(this);
                 }
             });
         }
@@ -1572,8 +1572,7 @@ public abstract class StyleElement extends ElementImpl {
             // is actually executed.
             //err.printStackTrace();
             if (err.isReportableStatically()) {
-                err.setLocation(new AttributeLocation(this, StructuredQName.fromClarkName(name)));
-                compileError(err);
+                compileError(err.withLocation(new AttributeLocation(this, StructuredQName.fromClarkName(name))));
                 return exp;
             } else {
                 ErrorExpression erexp = new ErrorExpression(new XmlProcessingException(err));
