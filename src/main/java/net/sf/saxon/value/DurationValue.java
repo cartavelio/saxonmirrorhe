@@ -532,7 +532,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
             DurationValue d2 = (DurationValue) other;
 
             return d1._months == d2._months &&
-                    d1._seconds.equals(d2._seconds);
+                    d1._seconds.compareTo(d2._seconds) == 0;
         } else {
             return false;
         }
