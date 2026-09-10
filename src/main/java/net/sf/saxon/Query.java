@@ -782,7 +782,7 @@ public class Query {
         if (useURLs || CommandLineOptions.isImplicitURI(sourceFileName)) {
             ResourceRequest request = new ResourceRequest();
             request.relativeUri = sourceFileName;
-            URI cwd = new File(System.getProperty("user.dir")).toURI();
+            URI cwd = CommandLineOptions.getCurrentWorkingDirectory();
             request.baseUri = cwd.toString();
             request.uri = cwd.resolve(sourceFileName).toString();
             request.nature = ResourceRequest.XML_NATURE;
@@ -831,12 +831,12 @@ public class Query {
         XQueryExecutable exp;
         if (queryFileName.equals("-")) {
             Reader queryReader = standardInputReader();
-            compiler.setBaseURI(new File(System.getProperty("user.dir")).toURI());
+            compiler.setBaseURI(CommandLineOptions.getCurrentWorkingDirectory());
             exp = compiler.compile(queryReader);
         } else if (queryFileName.startsWith("{") && queryFileName.endsWith("}")) {
             // query is inline on the command line
             String q = queryFileName.substring(1, queryFileName.length() - 1);
-            compiler.setBaseURI(new File(System.getProperty("user.dir")).toURI());
+            compiler.setBaseURI(CommandLineOptions.getCurrentWorkingDirectory());
             exp = compiler.compile(q);
         } else if (useURLs || CommandLineOptions.isImplicitURI(queryFileName)) {
             ModuleURIResolver resolver = compiler.getModuleURIResolver();

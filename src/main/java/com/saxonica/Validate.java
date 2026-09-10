@@ -310,7 +310,7 @@ public class Validate {
                 if (useURLs || CommandLineOptions.isImplicitURI(schemaFileName)) {
                     ResourceRequest request = new ResourceRequest();
                     request.relativeUri = schemaFileName;
-                    URI cwd = new File(System.getProperty("user.dir")).toURI();
+                    URI cwd = CommandLineOptions.getCurrentWorkingDirectory();
                     request.baseUri = cwd.toString();
                     request.uri = cwd.resolve(schemaFileName).toString();
                     request.nature = ResourceRequest.XSD_NATURE;
@@ -321,7 +321,7 @@ public class Validate {
                     //#if CSHARP==false
                     if (Version.platform.isJava()) {
                         final InputSource inputSource = new InputSource(System.in);
-                        inputSource.setSystemId(new File(System.getProperty("user.dir")).toURI().toASCIIString());
+                        inputSource.setSystemId(CommandLineOptions.getCurrentWorkingDirectory().toASCIIString());
                         schemaSource = new SAXSource(config.getStyleParser(), inputSource);
                     } else {
                         //#endif
@@ -598,7 +598,7 @@ public class Validate {
         if (useURLs || CommandLineOptions.isImplicitURI(sourceFileName)) {
             ResourceRequest request = new ResourceRequest();
             request.relativeUri = sourceFileName;
-            URI cwd = new File(System.getProperty("user.dir")).toURI();
+            URI cwd = CommandLineOptions.getCurrentWorkingDirectory();
             request.baseUri = cwd.toString();
             request.uri = cwd.resolve(sourceFileName).toString();
             request.nature = ResourceRequest.XML_NATURE;
@@ -608,7 +608,7 @@ public class Validate {
             //#if CSHARP==false
             // take input from stdin
             if (Version.platform.isJava()) {
-                String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();
+                String sysId = CommandLineOptions.getCurrentWorkingDirectory().toASCIIString();
                 final InputSource inputSource = new InputSource(System.in);
                 inputSource.setSystemId(sysId);
                 sourceInput = new SAXSource(inputSource);

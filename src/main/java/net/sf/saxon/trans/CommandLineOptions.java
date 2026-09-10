@@ -24,6 +24,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.net.URI;
 import java.text.Collator;
 import java.util.*;
 
@@ -59,6 +60,11 @@ public class CommandLineOptions {
     private final Properties paramExpressions = new Properties();
     private final Properties paramFiles = new Properties();
     private final Properties serializationParams = new Properties();
+
+    @CSharpReplaceBody(code="return Saxon.Ejava.io.File.CurrentDirectoryUri();")
+    public static URI getCurrentWorkingDirectory() {
+        return new File(System.getProperty("user.dir")).toURI();
+    }
 
     /**
      * Set the permitted options.
