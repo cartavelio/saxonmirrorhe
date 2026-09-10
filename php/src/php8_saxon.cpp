@@ -2767,7 +2767,6 @@ PHP_METHOD(XdmNode, __destruct) {
     if (xdmNode != nullptr) {
       xdmNode->decrementRefCount();
       if (xdmNode->getRefCount() < 1) {
-          xdmNode->resetRelinquishedChildren();
           delete xdmNode;
           xdmNode = nullptr;
       }
