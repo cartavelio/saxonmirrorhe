@@ -482,6 +482,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                                                            BuiltInAtomicType.INTEGER, OPT, CARD0)
                 .arg(0, chronoType, OPT, EMPTY));
 
+        register("partial-apply", 2, e -> e.populate(PartialApplyFn::new, AnyFunctionType.getInstance(),
+                                             ONE, LATE)
+                .arg(0, AnyFunctionType.getInstance(), ONE, null)
+                .arg(1, new MapType(BuiltInAtomicType.POSITIVE_INTEGER, SequenceType.ANY_SEQUENCE), ONE, null));
+
         register("type-of", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
         register("type-of", 1, e -> e.populate(TypeOf_1::new, BuiltInAtomicType.STRING, ONE, 0)
