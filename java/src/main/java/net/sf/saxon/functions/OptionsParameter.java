@@ -22,7 +22,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.coercion.CoercionRules;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
@@ -117,7 +116,6 @@ public class OptionsParameter {
     public Map<String, GroundedValue> processSuppliedOptions(MapItem supplied, XPathContext context, int version) throws XPathException {
         Map<String, GroundedValue> result = new HashMap<>();
         Configuration config = context.getConfiguration();
-        TypeHierarchy th = config.getTypeHierarchy();
         CoercionRules coercionRules = CoercionRules.forVersion(config, languageVersion);
 
         for (String req : requiredOptions) {
