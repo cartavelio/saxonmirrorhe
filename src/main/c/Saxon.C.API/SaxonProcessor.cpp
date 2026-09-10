@@ -546,6 +546,10 @@ int64_t SaxonProcessor::createParameterJArray(
                   }}
       #endif  */
 
+      if((iter->second) == nullptr) {
+        continue;
+      }
+
       addProcessorDataPair(SaxonProcessor::sxn_environ->thread,
                            (void *)processorDataRef,
                            (char *)(iter->first).c_str(),
@@ -872,6 +876,7 @@ void SaxonProcessor::release() {
       fprintf(stderr, "graal_detach_thread error\n");
       return;
     }
+
 
   } else {
 #ifdef DEBUG

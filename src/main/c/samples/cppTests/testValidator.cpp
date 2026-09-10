@@ -42,6 +42,8 @@ void testValidator1(SaxonProcessor *processor, SchemaValidator *val,
     delete input;
     input = nullptr;
   }
+  val->clearParameters();
+  val->clearProperties();
 
 }
 
@@ -176,11 +178,12 @@ void testValidator3(SaxonProcessor *processor, SchemaValidator *val,
   }
 }
 
-void testValidator4(sResultCount *sresult) {
+void testValidator4(const char* cwd, sResultCount *sresult) {
 
   SaxonProcessor *processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("xsdversion", "1.1");
   SchemaValidator *val = processor->newSchemaValidator();
+  val->setcwd(cwd);
   val->clearParameters(true);
   val->clearProperties();
   cout << endl
@@ -225,9 +228,9 @@ void testValidator4a(sResultCount *sresult) {
        << endl;
 
   try {
-    val->registerSchemaFromFile("data/family-ext.xsd");
-    val->registerSchemaFromFile("data/family.xsd");
-    XdmNode *node = val->validateToNode("data/family.xml");
+    val->registerSchemaFromFile("../data/family-ext.xsd");
+    val->registerSchemaFromFile("../data/family.xsd");
+    XdmNode *node = val->validateToNode("../data/family.xml");
 
     const char *valueStr = node->toString();
     if (valueStr != nullptr) {
@@ -411,7 +414,7 @@ int main(int argc, char *argv[]) {
   processor->setConfigurationProperty(
       "http://saxon.sf.net/feature/multipleSchemaImports", "on");
   SchemaValidator *validator2 = processor->newSchemaValidator();
-  testValidator4(sresult);
+  testValidator4(cwd, sresult);
   testValidator4a(sresult);
   processor->setConfigurationProperty("xsdversion", "1.1");
   SchemaValidator *validator3 = processor->newSchemaValidator();

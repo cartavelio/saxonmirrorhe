@@ -330,8 +330,9 @@ void SchemaValidator::clearParameters(bool delVal) {
         delete value;
       }
     }
+    }
     parameters.clear();
-  }
+
 }
 
 void SchemaValidator::clearProperties() { properties.clear(); }
