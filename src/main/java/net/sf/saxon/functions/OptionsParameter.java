@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 public class OptionsParameter {
 
     private final Map<String, SequenceType> allowedOptions = new HashMap<>(8);
-    private final Map<String, Sequence> defaultValues = new HashMap<>(8);
+    private final Map<String, GroundedValue> defaultValues = new HashMap<>(8);
     private final Set<String> requiredOptions = new HashSet<>(4);
     private final Map<String, Set<String>> allowedValues = new HashMap<>(8);
     private String errorCodeForDisallowedValue;
@@ -77,7 +77,7 @@ public class OptionsParameter {
      * @param defaultValue the default value if the option is not specified; or null
      *                                 if no default is defined
      */
-    public void addAllowedOption(String name, SequenceType type, Sequence defaultValue) {
+    public void addAllowedOption(String name, SequenceType type, GroundedValue defaultValue) {
         allowedOptions.put(name, type);
         if (defaultValue != null) {
             defaultValues.put(name, defaultValue);
@@ -177,11 +177,7 @@ public class OptionsParameter {
      */
 
     public Map<String, Sequence> getDefaultOptions()  {
-        Map<String, Sequence> result = new HashMap<>();
-        for (Map.Entry<String, Sequence> entry : defaultValues.entrySet()) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-        return result;
+        return new HashMap<>(defaultValues);
     }
 
     /**
