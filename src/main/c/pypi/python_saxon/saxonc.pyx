@@ -10,6 +10,7 @@ PySchemaValidator, PyXdmValue, PyXdmItem, PyXdmAtomicValue, PyXdmNode, PyXdmFunc
 # cython: language_level = 3
 
 __version__ = '@@VERSION@@'
+__author__ = 'Saxonica'
 
 cimport saxoncClasses
 from libcpp cimport bool
