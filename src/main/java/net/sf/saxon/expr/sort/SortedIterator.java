@@ -13,6 +13,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
@@ -143,12 +144,16 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
 
     /*@Nullable*/
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         if (position < 0) {
             return null;
         }
         if (count < 0) {
-            doSort();
+            try {
+                doSort();
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
+            }
         }
         if (position < count) {
             return (Item) values[position++].value;
@@ -159,9 +164,13 @@ public class SortedIterator implements SequenceIterator, LastPositionFinder, Loo
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         if (count < 0) {
-            doSort();
+            try {
+                doSort();
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
+            }
         }
         return count;
     }

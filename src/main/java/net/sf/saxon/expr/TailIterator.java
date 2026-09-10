@@ -67,7 +67,7 @@ public class TailIterator
         } else if (base instanceof ArrayIterator) {
             return ((ArrayIterator) base).makeSliceIterator(start, Integer.MAX_VALUE);
         } else if (base.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
-            GroundedValue value = base.materialize();
+            GroundedValue value = SequenceTool.toGroundedValue(base);
             if (start > value.getLength()) {
                 return EmptyIterator.emptyIterator();
             } else {
@@ -87,7 +87,7 @@ public class TailIterator
 
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         return base.next();
     }
 
@@ -97,7 +97,7 @@ public class TailIterator
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         int bl = ((LastPositionFinder) base).getLength() - start + 1;
         return bl > 0 ? bl : 0;
     }

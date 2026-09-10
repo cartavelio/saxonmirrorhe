@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -32,14 +33,14 @@ public class ErrorIterator implements SequenceIterator {
      *         on next() has returned null, no further calls should be made. The preferred
      *         action for an iterator if subsequent calls on next() are made is to return
      *         null again, and all implementations within Saxon follow this rule.
-     * @throws net.sf.saxon.trans.XPathException
-     *          if an error occurs retrieving the next item
+     * @throws net.sf.saxon.trans.UncheckedXPathException
+     *          if an error occurs retrieving the next item (which is always the case)
      * @since 8.4
      */
 
     @Override
-    public Item next() throws XPathException {
-        throw exception;
+    public Item next() {
+        throw new UncheckedXPathException(exception);
     }
 
     @Override

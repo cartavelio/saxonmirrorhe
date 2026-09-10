@@ -31,7 +31,8 @@ public class ValidationParams extends HashMap<StructuredQName, Sequence> {
     public static void setValidationParams(Map<StructuredQName, XPathVariable> declaredParams, ValidationParams actualParams, XPathDynamicContext context) throws XPathException {
         for (StructuredQName p : declaredParams.keySet()) {
             XPathVariable var = declaredParams.get(p);
-            Sequence paramValue = actualParams.get(p);
+            @SuppressWarnings("RedundantCast")
+            Sequence paramValue = ((HashMap<StructuredQName, Sequence>)actualParams).get(p);
             if (paramValue != null) {
                 context.setVariable(var, paramValue);
             } else {

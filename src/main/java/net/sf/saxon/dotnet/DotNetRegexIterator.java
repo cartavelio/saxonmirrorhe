@@ -65,7 +65,7 @@ public class DotNetRegexIterator implements RegexIterator, LastPositionFinder {
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         DotNetRegexIterator another = new DotNetRegexIterator(theString, pattern);
         return Count.steppingCount(another);
     }

@@ -165,7 +165,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
     @Override
     public void generateId(/*@NotNull*/ StringBuilder buffer) {
         buffer.append("tt");
-        buffer.append(Long.toString(treeInfo.getDocumentNumber()));
+        buffer.append(treeInfo.getDocumentNumber());
     }
 
     /**

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.om;
 
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -43,12 +44,12 @@ public class LazySequence implements Sequence {
      * Iterate over all the items in the sequence. The first time this is called it returns the original
      * iterator backing the sequence. On subsequent calls it clones the original iterator.
      * @return  an iterator over the items in the sequence
-     * @throws XPathException if evaluation of the iterator fails.
+     * @throws UncheckedXPathException if evaluation of the iterator fails.
      * @throws IllegalStateException if iterate() has already been called
      */
 
     @Override
-    public synchronized SequenceIterator iterate() throws XPathException {
+    public synchronized SequenceIterator iterate()  {
         if (used) {
             throw new IllegalStateException("A LazySequence can only be read once");
         } else {

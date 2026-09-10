@@ -18,6 +18,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ReversibleIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
@@ -121,11 +122,17 @@ public class Reverse extends SystemFunction {
 
     }
 
+    @CSharpReplaceBody(code="return new Saxon.Impl.Helpers.ReverseListIterator(list);")
+    public static <T extends Item> UnfailingIterator reverseIterator(List<T> list) {
+        return new ReverseListIterator(list);
+    }
+
     @Override
     public String getStreamerName() {
         return "Reverse";
     }
 
+    //#if CSHARP==false
     public static class ReverseListIterator implements UnfailingIterator, LastPositionFinder, ReversibleIterator {
 
         private final java.util.ListIterator<? extends Item> listIter;
@@ -148,7 +155,7 @@ public class Reverse extends SystemFunction {
          *                        the number of items
          */
         @Override
-        public int getLength() throws XPathException {
+        public int getLength() {
             return list.size();
         }
 
@@ -174,5 +181,6 @@ public class Reverse extends SystemFunction {
             return new ListIterator.Of<>(list);
         }
     }
+    //#endif
 }
 

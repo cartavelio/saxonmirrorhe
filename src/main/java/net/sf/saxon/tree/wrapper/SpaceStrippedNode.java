@@ -255,7 +255,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             // iteration does not include text nodes, so no stripping needed
             return new WrappingIterator(node.iterateAxis(axisNumber, nodeTest), this, getParentForAxis(axisNumber));
         } else {
-            return new StrippingIterator(node.iterateAxis(axisNumber, nodeTest), getParentForAxis(axisNumber));
+            return new StrippingIterator(node.iterateAxis(axisNumber, nodeTest), (SpaceStrippedDocument) docWrapper, getParentForAxis(axisNumber));
         }
     }
 
@@ -274,17 +274,17 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             case AxisInfo.NAMESPACE:
                 return new WrappingIterator(node.iterateAxis(axisNumber), this, this);
             case AxisInfo.CHILD:
-                return new StrippingIterator(node.iterateAxis(axisNumber), this);
+                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, this);
             case AxisInfo.FOLLOWING_SIBLING:
             case AxisInfo.PRECEDING_SIBLING:
                 SpaceStrippedNode parent = (SpaceStrippedNode) getParent();
                 if (parent == null) {
                     return EmptyIterator.ofNodes();
                 } else {
-                    return new StrippingIterator(node.iterateAxis(axisNumber), parent);
+                    return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, parent);
                 }
             default:
-                return new StrippingIterator(node.iterateAxis(axisNumber), null);
+                return new StrippingIterator(node.iterateAxis(axisNumber), (SpaceStrippedDocument) docWrapper, null);
         }
     }
 
@@ -337,6 +337,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         AxisIterator base;
         SpaceStrippedNode parent;
         NodeInfo currentVirtualNode;
+        SpaceStrippedDocument docWrapper;
         int position;
 
         /**
@@ -347,8 +348,9 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
          *               it can be specified here. Otherwise specify null.
          */
 
-        public StrippingIterator(AxisIterator base, SpaceStrippedNode parent) {
+        public StrippingIterator(AxisIterator base, SpaceStrippedDocument docWrapper, SpaceStrippedNode parent) {
             this.base = base;
+            this.docWrapper = docWrapper;
             this.parent = parent;
             position = 0;
         }
@@ -366,7 +368,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
                 // otherwise skip this whitespace text node
             } while (!isPreserved(nextRealNode));
 
-            currentVirtualNode = makeWrapper(nextRealNode, (SpaceStrippedDocument) parent.docWrapper, parent);
+            currentVirtualNode = makeWrapper(nextRealNode, docWrapper, parent);
             position++;
             return currentVirtualNode;
         }
@@ -377,7 +379,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
             }
             NodeInfo actualParent =
                     parent == null ? nextRealNode.getParent() : parent.node;
-            return isPreservedNode(nextRealNode, (SpaceStrippedDocument)parent.docWrapper, actualParent);
+            return isPreservedNode(nextRealNode, docWrapper, actualParent);
         }
 
         @Override

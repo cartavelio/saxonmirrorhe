@@ -8,9 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -54,7 +52,7 @@ public class SimpleArrayItem extends AbstractArrayItem {
 
     public static SimpleArrayItem makeSimpleArrayItem(SequenceIterator input) throws XPathException {
         List<GroundedValue> members = new ArrayList<>();
-        input.forEachOrFail(item -> {
+        SequenceTool.supply(input, (ItemConsumer<? super Item>) item -> {
             if (item.getClass().getName().equals("com.saxonica.functions.extfn.ArrayMemberValue")) {
                 members.add((GroundedValue) ((ExternalObject<GroundedValue>) item).getObject());
             } else {

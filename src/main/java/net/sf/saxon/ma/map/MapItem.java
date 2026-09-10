@@ -20,9 +20,9 @@ import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
@@ -215,7 +215,7 @@ public abstract class MapItem implements Function {
      * be efficiently determined
      */
 
-    static boolean isKnownToConform(Sequence value, ItemType itemType) {
+    public static boolean isKnownToConform(Sequence value, ItemType itemType) {
         // Problem is we don't have access to a TypeHierarchy object...
         if (itemType == AnyItemType.getInstance()) {
             return true;
@@ -246,7 +246,7 @@ public abstract class MapItem implements Function {
                 }
             }
             return true;
-        } catch (XPathException e) {
+        } catch (UncheckedXPathException e) {
             return false;
         }
     }
@@ -259,7 +259,7 @@ public abstract class MapItem implements Function {
      * values in the sequence are known to conform to this type; otherwise item().
      */
 
-    static ItemType getItemTypeOfSequence(Sequence val) {
+    public static ItemType getItemTypeOfSequence(Sequence val) {
         try {
             Item first = val.head();
             if (first == null) {

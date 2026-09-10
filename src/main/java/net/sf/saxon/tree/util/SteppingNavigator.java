@@ -7,13 +7,9 @@
 
 package net.sf.saxon.tree.util;
 
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.transpile.CSharpParameterType;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.Type;
-
-import java.util.function.Predicate;
 
 
 /**

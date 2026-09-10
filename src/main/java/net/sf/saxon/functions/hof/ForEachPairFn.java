@@ -76,7 +76,7 @@ public class ForEachPairFn extends SystemFunction {
         }
 
         @Override
-        public ObjectValue<Sequence[]> next() throws XPathException {
+        public ObjectValue<Sequence[]> next() {
             Item i0 = seq0.next();
             if (i0 == null) {
                 close();

@@ -8,6 +8,7 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.value.Int64Value;
@@ -35,12 +36,12 @@ public abstract class RangeIterator implements GroundedIterator {
      * consume the iterator).
      *
      * @return the corresponding Value
-     * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
      */
 
     @Override
-    public abstract GroundedValue getResidue() throws XPathException;
+    public abstract GroundedValue getResidue();
 
     public abstract IntegerValue getFirst();
 

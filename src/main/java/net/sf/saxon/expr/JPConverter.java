@@ -282,7 +282,7 @@ public abstract class JPConverter {
 
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
-            return ((SequenceIterator)object).materialize();
+            return SequenceTool.toGroundedValue(((SequenceIterator)object));
         }
 
         @Override

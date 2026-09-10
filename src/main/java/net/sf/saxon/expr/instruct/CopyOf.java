@@ -535,7 +535,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 // Test case accumulators-070
                 // We have to create a physical copy because of the validation requirement, but this makes
                 // it difficult to copy the accumulator values.
-                getSelect().iterate(context).forEachOrFail(item -> {
+                SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
                     if (item instanceof NodeInfo) {
                         TinyBuilder builder = new TinyBuilder(out.getPipelineConfiguration());
                         ComplexContentOutputter cco = new ComplexContentOutputter(builder);
@@ -551,7 +551,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                 });
             } else {
                 // Use the iterate() method to create a virtual copy.
-                iterate(context).forEachOrFail(out::append);
+                SequenceTool.supply(iterate(context), (ItemConsumer<? super Item>) out::append);
             }
         } else {
 
@@ -560,7 +560,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     | (copyNamespaces ? CopyOptions.ALL_NAMESPACES : 0)
                     | (copyForUpdate ? CopyOptions.FOR_UPDATE : 0);
 
-            getSelect().iterate(context).forEachOrFail(item -> {
+            SequenceTool.supply(getSelect().iterate(context), (ItemConsumer<? super Item>) item -> {
                 if (item instanceof NodeInfo) {
                     copyOneNode(context, out, (NodeInfo) item, copyOptions);
                 } else {

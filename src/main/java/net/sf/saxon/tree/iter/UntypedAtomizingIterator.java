@@ -10,6 +10,7 @@ package net.sf.saxon.tree.iter;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
@@ -41,12 +42,16 @@ public class UntypedAtomizingIterator implements SequenceIterator,
 
     /*@Nullable*/
     @Override
-    public AtomicValue next() throws XPathException {
-        Item nextSource = base.next();
-        if (nextSource == null) {
-            return null;
-        } else {
-            return (AtomicValue) nextSource.atomize();
+    public AtomicValue next() {
+        try {
+            Item nextSource = base.next();
+            if (nextSource == null) {
+                return null;
+            } else {
+                return (AtomicValue) nextSource.atomize();
+            }
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
     }
 
@@ -73,7 +78,7 @@ public class UntypedAtomizingIterator implements SequenceIterator,
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         return ((LastPositionFinder) base).getLength();
     }
 

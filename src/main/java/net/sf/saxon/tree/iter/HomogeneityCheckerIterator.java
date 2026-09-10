@@ -7,12 +7,13 @@
 
 package net.sf.saxon.tree.iter;
 
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.ArrayList;
@@ -44,17 +45,17 @@ public class HomogeneityCheckerIterator implements SequenceIterator {
     }
 
     /*@NotNull*/
-    private XPathException reportMixedItems() {
+    private UncheckedXPathException reportMixedItems() {
         XPathException err = new XPathException("Cannot mix nodes and atomic values in the result of a path expression");
         err.setErrorCode("XPTY0018");
         err.setLocator(loc);
-        return err;
+        return new UncheckedXPathException(err);
     }
 
 
     /*@Nullable*/
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         Item item = base.next();
         if (item == null) {
             return null;

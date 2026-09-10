@@ -184,7 +184,7 @@ public class JarCollection extends AbstractResourceCollection {
      */
 
     @Override
-    public Iterator<Resource> getResources(XPathContext context) throws XPathException {
+    public Iterator<? extends Resource> getResources(XPathContext context) throws XPathException {
         FilenameFilter filter = null;
         boolean recurse = false;
         if (params != null) {

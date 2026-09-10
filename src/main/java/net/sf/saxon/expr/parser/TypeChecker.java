@@ -180,7 +180,7 @@ public class TypeChecker {
                     try {
                         if (exp instanceof Literal) {
                             exp = Literal.makeLiteral(
-                                    cexp.iterate(visitor.makeDynamicContext()).materialize(), exp);
+                                    SequenceTool.toGroundedValue(cexp.iterate(visitor.makeDynamicContext())), exp);
                             ExpressionTool.copyLocationInfo(cexp, exp);
                         } else {
                             exp = cexp;
@@ -215,7 +215,7 @@ public class TypeChecker {
                     try {
                         if (exp instanceof Literal) {
                             exp = Literal.makeLiteral(
-                                    conversion.iterate(visitor.makeDynamicContext()).materialize(), exp);
+                                    SequenceTool.toGroundedValue(conversion.iterate(visitor.makeDynamicContext())), exp);
                             ExpressionTool.copyLocationInfo(supplied, exp);
                         } else {
                             exp = conversion;

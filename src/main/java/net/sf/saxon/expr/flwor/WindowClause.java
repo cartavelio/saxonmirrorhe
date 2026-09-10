@@ -28,7 +28,6 @@ import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntHashMap;
 
-import java.util.Iterator;
 import java.util.List;
 
 import static net.sf.saxon.expr.flwor.Clause.ClauseName.WINDOW;
@@ -123,10 +122,10 @@ public class WindowClause extends Clause {
 
     @CSharpSuppressWarnings("UnsafeIteratorConversion")
     public void setVariableBinding(int role, LocalVariableBinding binding) throws XPathException {
-        for (Iterator<LocalVariableBinding> iter = windowVars.valueIterator(); iter.hasNext(); ) {
-            if (iter.next().getVariableQName().equals(binding.getVariableQName())) {
+        for (LocalVariableBinding b : windowVars.valueSet()) {
+            if (b.getVariableQName().equals(binding.getVariableQName())) {
                 throw new XPathException("Two variables in a window clause cannot have the same name (" +
-                        binding.getVariableQName().getDisplayName() + ")", "XQST0103");
+                                                 binding.getVariableQName().getDisplayName() + ")", "XQST0103");
             }
         }
         windowVars.put(role, binding);
@@ -264,9 +263,8 @@ public class WindowClause extends Clause {
     public LocalVariableBinding[] getRangeVariables() {
         LocalVariableBinding[] vars = new LocalVariableBinding[windowVars.size()];
         int i = 0;
-        Iterator<LocalVariableBinding> iter = windowVars.valueIterator();
-        while (iter.hasNext()) {
-            vars[i++] = iter.next();
+        for (LocalVariableBinding binding : windowVars.valueSet()) {
+            vars[i++] = binding;
         }
         return vars;
     }

@@ -524,7 +524,7 @@ public class ForEach extends Instruction implements ContextSwitchingExpression {
                     }
                 }
             } else {
-                iter.forEachOrFail(item -> action.process(output, c2));
+                SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> action.process(output, c2));
             }
             pipe.setXPathContext(context);
         }

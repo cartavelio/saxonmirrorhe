@@ -121,7 +121,7 @@ public class Outermost extends SystemFunction {
         }
 
         @Override
-        public NodeInfo next() throws XPathException {
+        public NodeInfo next() {
             while (true) {
                 NodeInfo next = (NodeInfo)in.next();
                 if (next == null) {

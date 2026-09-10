@@ -249,27 +249,23 @@ public final class CardinalityChecker extends UnaryExpression {
      */
 
     public static String depictSequenceStart(SequenceIterator seq, int max) {
-        try {
-            StringBuilder sb = new StringBuilder(64);
-            int count = 0;
-            sb.append(" (");
-            Item next;
-            while ((next = seq.next()) != null) {
-                if (count++ > 0) {
-                    sb.append(", ");
-                }
-                if (count > max) {
-                    sb.append("...) ");
-                    return sb.toString();
-                }
-
-                sb.append(Err.depict(next));
+        StringBuilder sb = new StringBuilder(64);
+        int count = 0;
+        sb.append(" (");
+        Item next;
+        while ((next = seq.next()) != null) {
+            if (count++ > 0) {
+                sb.append(", ");
             }
-            sb.append(") ");
-            return sb.toString();
-        } catch (XPathException e) {
-            return "";
+            if (count > max) {
+                sb.append("...) ");
+                return sb.toString();
+            }
+
+            sb.append(Err.depict(next));
         }
+        sb.append(") ");
+        return sb.toString();
     }
 
     /**

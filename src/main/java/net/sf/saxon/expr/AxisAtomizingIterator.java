@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.AtomizedValueIterator;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
@@ -35,7 +36,7 @@ public final class AxisAtomizingIterator implements SequenceIterator {
     }
 
     @Override
-    public AtomicValue next() throws XPathException {
+    public AtomicValue next() {
         while (true) {
             if (results != null) {
                 if (atomicPosition < results.getLength()) {
@@ -46,19 +47,23 @@ public final class AxisAtomizingIterator implements SequenceIterator {
                 }
             }
 
-            AtomicSequence atomized = base.nextAtomizedValue();
-            if (atomized == null) {
-                results = null;
-                return null;
-            }
-            if (atomized instanceof AtomicValue) {
-                // common case (the atomized value of the node is a single atomic value)
-                results = null;
-                return (AtomicValue) atomized;
-            } else {
-                results = atomized;
-                atomicPosition = 0;
-                // continue
+            try {
+                AtomicSequence atomized = base.nextAtomizedValue();
+                if (atomized == null) {
+                    results = null;
+                    return null;
+                }
+                if (atomized instanceof AtomicValue) {
+                    // common case (the atomized value of the node is a single atomic value)
+                    results = null;
+                    return (AtomicValue) atomized;
+                } else {
+                    results = atomized;
+                    atomicPosition = 0;
+                    // continue
+                }
+            } catch (XPathException e) {
+                throw new UncheckedXPathException(e);
             }
         }
     }

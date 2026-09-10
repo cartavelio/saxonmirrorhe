@@ -111,12 +111,13 @@ public class XSLLocalParam extends XSLGeneralVariable {
             compileError("Function parameters cannot have a default value", "XTSE0760");
         }
 
-        iterateAxis(AxisInfo.PRECEDING_SIBLING).forEachOrFail(node -> {
+        // it must be a text node; allow it if all whitespace
+        SequenceTool.supply(iterateAxis(AxisInfo.PRECEDING_SIBLING), (ItemConsumer<? super Item>) node -> {
             if (node instanceof XSLLocalParam) {
                 if (name.equals(((XSLLocalParam) node).sourceBinding.getVariableQName())) {
                     compileError("The name of the parameter is not unique", "XTSE0580");
                 }
-            } else if (node instanceof StyleElement && ((StyleElement)node).getFingerprint() != StandardNames.XSL_CONTEXT_ITEM) {
+            } else if (node instanceof StyleElement && ((StyleElement) node).getFingerprint() != StandardNames.XSL_CONTEXT_ITEM) {
                 compileError("xsl:param must not be preceded by other instructions", "XTSE0010");
             } else {
                 // it must be a text node; allow it if all whitespace

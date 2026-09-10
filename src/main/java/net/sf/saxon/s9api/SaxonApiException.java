@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -23,6 +24,16 @@ public class SaxonApiException extends Exception {
 
     public SaxonApiException(Throwable cause) {
         super(cause);
+    }
+
+    /**
+     * Create a SaxonApiException
+     *
+     * @param cause the underlying cause of the exception
+     */
+
+    public SaxonApiException(UncheckedXPathException cause) {
+        super(cause.getXPathException());
     }
 
     /**

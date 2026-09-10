@@ -9,7 +9,6 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
@@ -140,10 +139,6 @@ public class EmptyIterator implements SequenceIterator,
         return false;
     }
 
-    @Override
-    public void forEachOrFail(ItemConsumer<? super Item> consumer) throws XPathException {
-        // No action
-    }
 
     @Override
     public void forEach(Consumer<? super Item> consumer) {

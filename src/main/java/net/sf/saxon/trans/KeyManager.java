@@ -285,7 +285,6 @@ public class KeyManager {
         if (soughtValue == null) {
             return EmptyIterator.ofNodes();
         }
-
         if (keySet.isBackwardsCompatible()) {
             // if backwards compatibility is in force, treat all values as strings
             final ConversionRules rules = context.getConfiguration().getConversionRules();

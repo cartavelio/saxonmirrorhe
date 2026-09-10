@@ -17,8 +17,10 @@ import net.sf.saxon.functions.Count;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
+import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.iter.UnfailingIterator;
 import net.sf.saxon.tree.wrapper.VirtualNode;
@@ -45,11 +47,15 @@ public class SequenceTool {
      * @param iterator the supplied sequence. The iterator may or may not be consumed as a result of
      *                 passing it to this method.
      * @return a GroundedValue containing the same items
-     * @throws XPathException if a failure occurs reading the input iterator
+     * @throws UncheckedXPathException if a failure occurs reading the input iterator
      */
 
-    public static GroundedValue toGroundedValue(SequenceIterator iterator) throws XPathException {
-        return iterator.materialize();
+    public static GroundedValue toGroundedValue(SequenceIterator iterator) {
+        if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
+            return ((GroundedIterator) iterator).materialize();
+        } else {
+            return SequenceExtent.from(iterator).reduce();
+        }
     }
 
     /**
@@ -67,7 +73,7 @@ public class SequenceTool {
         if (iterator instanceof EmptyIterator) {
             return EmptySequence.getInstance();
         } else if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED)) {
-            return iterator.materialize();
+            return toGroundedValue(iterator);
         } else {
             return new MemoSequence(iterator);
         }
@@ -89,7 +95,7 @@ public class SequenceTool {
         if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED) &&
                 !(iterator instanceof AscendingRangeIterator) &&
                 !(iterator instanceof DescendingRangeIterator)) {
-            return iterator.materialize();
+            return toGroundedValue(iterator);
         } else {
             return new LazySequence(iterator);
         }
@@ -99,9 +105,29 @@ public class SequenceTool {
         if (iterator.getProperties().contains(SequenceIteratorProperty.GROUNDED) &&
                 !(iterator instanceof AscendingRangeIterator) &&
                 !(iterator instanceof DescendingRangeIterator)) {
-            return iterator.materialize();
+            return toGroundedValue(iterator);
         } else {
             return new LazySequence(iterator);
+        }
+    }
+
+    /**
+     * Supply the (remaining) items in a sequence to a consumer of items
+     * @param iter a sequence iterator, which will be consumed by calling this method
+     * @param consumer the consumer which will be called to process the remaining items
+     *                 in the sequence, in turn
+     * @throws UncheckedXPathException if the computation of the input sequence reports an XPathException,
+     * or if the consymer throws an XPathException
+     */
+
+    public static void supply(SequenceIterator iter, ItemConsumer<? super Item> consumer) {
+        Item item;
+        try {
+            while ((item = iter.next()) != null) {
+                consumer.accept(item);
+            }
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
     }
 
@@ -187,11 +213,11 @@ public class SequenceTool {
      * @param sequence the input sequence
      * @param index    the 0-based subscript
      * @return the n'th item if it exists, or null otherwise
-     * @throws XPathException for example if the value is a closure that needs to be
+     * @throws UncheckedXPathException for example if the value is a closure that needs to be
      *                        evaluated, and evaluation fails
      */
 
-    public static Item itemAt(Sequence sequence, int index) throws XPathException {
+    public static Item itemAt(Sequence sequence, int index)  {
         if (sequence instanceof Item && index == 0) {
             return (Item)sequence;
         }
@@ -302,7 +328,7 @@ public class SequenceTool {
 
     public static UnicodeString getStringValue(Sequence sequence) throws XPathException {
         UnicodeBuilder ub = new UnicodeBuilder();
-        sequence.iterate().forEachOrFail(item -> {
+        supply(sequence.iterate(), (ItemConsumer<? super Item>) item -> {
             if (!ub.isEmpty()) {
                 ub.append(' ');
             }
@@ -325,7 +351,7 @@ public class SequenceTool {
 
     public static String stringify(Sequence sequence) throws XPathException {
         StringBuilder sb = new StringBuilder(64);
-        sequence.iterate().forEachOrFail(item -> {
+        supply(sequence.iterate(), (ItemConsumer<? super Item>) item -> {
             if (sb.length() != 0) {
                 sb.append(' ');
             }
@@ -363,7 +389,7 @@ public class SequenceTool {
                     }
                 }
                 return type == null ? ErrorType.getInstance() : type;
-            } catch (XPathException err) {
+            } catch (UncheckedXPathException err) {
                 return AnyItemType.getInstance();
             }
         } else {
@@ -432,7 +458,7 @@ public class SequenceTool {
             }
             item = iter.next();
             return item == null ? StaticProperty.EXACTLY_ONE : StaticProperty.ALLOWS_ONE_OR_MORE;
-        } catch (XPathException err) {
+        } catch (UncheckedXPathException err) {
             return StaticProperty.ALLOWS_ONE_OR_MORE;
         }
     }
@@ -450,7 +476,7 @@ public class SequenceTool {
      */
 
     public static void process(Sequence value, Outputter output, Location locationId) throws XPathException {
-        value.iterate().forEachOrFail(it -> output.append(it, locationId, ReceiverOption.ALL_NAMESPACES));
+        supply(value.iterate(), (ItemConsumer<? super Item>) it -> output.append(it, locationId, ReceiverOption.ALL_NAMESPACES));
     }
 
     /**

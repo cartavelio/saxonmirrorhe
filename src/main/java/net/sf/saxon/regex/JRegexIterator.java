@@ -60,7 +60,7 @@ public class JRegexIterator implements RegexIterator, LastPositionFinder {
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         JRegexIterator another = new JRegexIterator(theString, pattern);
         return Count.steppingCount(another);
     }

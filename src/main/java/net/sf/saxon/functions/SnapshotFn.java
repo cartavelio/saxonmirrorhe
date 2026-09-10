@@ -10,11 +10,14 @@ package net.sf.saxon.functions;
 import net.sf.saxon.event.BuilderMonitor;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.ItemMappingIterator;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
+import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.tiny.TinyBuilder;
 import net.sf.saxon.tree.wrapper.SnapshotNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
@@ -81,8 +84,10 @@ public class SnapshotFn extends SystemFunction {
 
     public static List<NodeInfo> makeAncestorList(NodeInfo origin) {
         List<NodeInfo> ancestors = new ArrayList<>(20);
-        for (Item item : origin.iterateAxis(AxisInfo.ANCESTOR)) {
-            ancestors.add((NodeInfo)item);
+        AxisIterator iter = origin.iterateAxis(AxisInfo.ANCESTOR);
+        NodeInfo item;
+        while ((item = iter.next()) != null) {
+            ancestors.add(item);
         }
         return ancestors;
     }

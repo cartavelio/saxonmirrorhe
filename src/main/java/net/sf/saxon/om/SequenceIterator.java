@@ -7,9 +7,8 @@
 
 package net.sf.saxon.om;
 
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.tree.iter.SequenceIteratorProperty;
-import net.sf.saxon.value.SequenceExtent;
 
 import java.io.Closeable;
 import java.util.EnumSet;
@@ -41,12 +40,12 @@ public interface SequenceIterator extends Closeable {
      * on next() has returned null, no further calls should be made. The preferred
      * action for an iterator if subsequent calls on next() are made is to return
      * null again, and all implementations within Saxon follow this rule.
-     * @throws XPathException if an error occurs retrieving the next item
+     * @throws UncheckedXPathException if an error occurs retrieving the next item
      * @since 8.4
      */
 
     /*@Nullable*/
-    Item next() throws XPathException;
+    Item next();
 
     /**
      * Close the iterator. This indicates to the supplier of the data that the client
@@ -83,40 +82,6 @@ public interface SequenceIterator extends Closeable {
 
     default EnumSet<SequenceIteratorProperty> getProperties() {
         return EnumSet.noneOf(SequenceIteratorProperty.class);
-    }
-
-    /**
-     * Process all the remaining items delivered by the SequenceIterator using a supplied consumer function.
-     *
-     * @param consumer the supplied consumer function
-     * @throws XPathException if either (a) an error occurs obtaining an item from the input sequence,
-     *                        or (b) the consumer throws an exception.
-     */
-
-    default void forEachOrFail(ItemConsumer<? super Item> consumer) throws XPathException {
-        Item item;
-        while ((item = next()) != null) {
-            consumer.accept(item);
-        }
-    }
-
-    /**
-     * Create a GroundedValue (a sequence materialized in memory) containing all the values delivered
-     * by this SequenceIterator. The method must only be used when the SequenceIterator is positioned
-     * at the start. If it is not positioned at the start, then it is implementation-dependant whether
-     * the returned sequence contains all the nodes delivered by the SequenceIterator from the beginning,
-     * or only those delivered starting at the current position.
-     * <p>It is implementation-dependant whether this method consumes the SequenceIterator. (More specifically,
-     * in the current implementation: if the iterator is backed by a {@link GroundedValue}, then that
-     * value is returned and the iterator is not consumed; otherwise, the iterator is consumed and the
-     * method returns the remaining items after the current position only).</p>
-     *
-     * @return a sequence containing all the items delivered by this SequenceIterator.
-     * @throws XPathException if reading the SequenceIterator throws an error
-     */
-
-    default GroundedValue materialize() throws XPathException {
-        return SequenceExtent.from(this).reduce();
     }
 
 

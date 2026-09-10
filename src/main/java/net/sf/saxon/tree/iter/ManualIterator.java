@@ -11,7 +11,7 @@ import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.UncheckedXPathException;
 
 import java.util.EnumSet;
 import java.util.function.Supplier;
@@ -90,11 +90,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
 
     @Override
     public boolean hasNext() {
-        try {
-            return position() != getLength();
-        } catch (XPathException e) {
-            return false; // should not happen
-        }
+        return position() != getLength();
     }
 
     @Override
@@ -119,9 +115,9 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
     }
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         if (lengthFinder == null) {
-            throw new XPathException("Saxon streaming restriction: last() cannot be used when consuming a sequence of streamed nodes, even if the items being processed are grounded");
+            throw new UncheckedXPathException("Saxon streaming restriction: last() cannot be used when consuming a sequence of streamed nodes, even if the items being processed are grounded");
         } else {
             return lengthFinder.get();
         }
@@ -148,7 +144,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
 
     @Override
     public GroundedValue getResidue() {
-        return materialize();
+        return item;
     }
 
     /**

@@ -225,7 +225,7 @@ public abstract class ArrayIterator implements UnfailingIterator,
 
         @Override
         public SequenceIterator getReverseIterator() {
-            return new Reverse.ReverseListIterator(Arrays.asList(items));
+            return Reverse.reverseIterator(Arrays.asList(items));
         }
 
         /**

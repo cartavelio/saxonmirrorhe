@@ -297,7 +297,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             throw new XPathException("Cannot call evaluate() on an updating query");
         }
         ArrayList<Object> list = new ArrayList<>(100);
-        iterator(env).forEachOrFail(item -> list.add(SequenceTool.convertToJava(item)));
+        SequenceTool.supply(iterator(env), (ItemConsumer<? super Item>) item -> list.add(SequenceTool.convertToJava(item)));
         return list;
     }
 
@@ -773,16 +773,8 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
 
         /*@Nullable*/
         @Override
-        public Item next() throws XPathException {
-            try {
-                return base.next();
-            } catch (XPathException e1) {
-                e1.maybeSetLocation(location);
-                XmlProcessingException err = new XmlProcessingException(e1);
-                reporter.report(err);
-                e1.setHasBeenReported(true);
-                throw e1;
-            }
+        public Item next() {
+            return base.next();
         }
 
         @Override

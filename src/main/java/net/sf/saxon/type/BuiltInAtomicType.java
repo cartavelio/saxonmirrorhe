@@ -1281,7 +1281,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     /*@NotNull*/
     @Override
     public List<? extends PlainType> getPlainMemberTypes() {
-        return Collections.singletonList(this);
+        return Collections.singletonList((PlainType)this);
     }
 
     /**

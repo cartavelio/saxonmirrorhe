@@ -241,7 +241,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
     /*@Nullable*/
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         if (position >= 0 && position < groups.size()) {
             position++;
             return current();
@@ -279,7 +279,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
      */
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         return groups.size();
     }
 
@@ -312,7 +312,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
 
         @Override
-        public int getLength() throws XPathException {
+        public int getLength() {
             return groups.size();
         }
 

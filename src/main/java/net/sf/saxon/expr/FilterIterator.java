@@ -10,6 +10,7 @@ package net.sf.saxon.expr;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.*;
 
@@ -57,8 +58,12 @@ public class FilterIterator implements SequenceIterator {
      */
 
     @Override
-    public Item next() throws XPathException {
-        return getNextMatchingItem();
+    public Item next() {
+        try {
+            return getNextMatchingItem();
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     /**

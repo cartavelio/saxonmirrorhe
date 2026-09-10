@@ -25,6 +25,14 @@ public class UncheckedXPathException extends RuntimeException {
         super(cause);
     }
 
+    public UncheckedXPathException(String message) {
+        super(new XPathException(message));
+    }
+
+    public UncheckedXPathException(Throwable cause) {
+        super(new XPathException(cause));
+    }
+
     public XPathException getXPathException() {
         return (XPathException)getCause();
     }

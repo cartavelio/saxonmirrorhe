@@ -8,6 +8,7 @@
 package net.sf.saxon.om;
 
 import net.sf.saxon.expr.LastPositionFinder;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.*;
@@ -59,7 +60,7 @@ public class MemoSequence implements Sequence {
 
 
     @Override
-    public synchronized SequenceIterator iterate() throws XPathException {
+    public synchronized SequenceIterator iterate() {
 
         switch (state) {
             case UNREAD:
@@ -94,7 +95,7 @@ public class MemoSequence implements Sequence {
                 XPathException de = new XPathException("Attempt to access a variable while it is being evaluated");
                 de.setErrorCode("XTDE0640");
                 //de.setXPathContext(context);
-                throw de;
+                throw new UncheckedXPathException(de);
 
             case EMPTY:
                 return EmptyIterator.emptyIterator();
@@ -211,7 +212,7 @@ public class MemoSequence implements Sequence {
 
         /*@Nullable*/
         @Override
-        public Item next() throws XPathException {
+        public Item next() {
             synchronized (container) {
                 // synchronized for the case where a multi-threaded xsl:for-each is reading the variable
                 if (position == -2) {   // means we've already returned null once, keep doing so if called again.
@@ -250,7 +251,7 @@ public class MemoSequence implements Sequence {
          */
 
         @Override
-        public int getLength() throws XPathException {
+        public int getLength() {
             if (container.state == State.ALL_READ) {
                 return container.used;
             } else if (container.state == State.EMPTY) {
@@ -276,7 +277,7 @@ public class MemoSequence implements Sequence {
 
         /*@Nullable*/
         @Override
-        public GroundedValue materialize() throws XPathException {
+        public GroundedValue materialize() {
             if (container.state == State.ALL_READ) {
                 return makeExtent();
             } else if (container.state == State.EMPTY) {
@@ -310,7 +311,7 @@ public class MemoSequence implements Sequence {
         }
 
         @Override
-        public GroundedValue getResidue() throws XPathException {
+        public GroundedValue getResidue() {
             if (container.state == State.EMPTY || position >= container.used || position == -2) {
                 return EmptySequence.getInstance();
             } else if (container.state == State.ALL_READ) {

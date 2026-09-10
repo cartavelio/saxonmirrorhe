@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -41,24 +42,28 @@ public class BlockIterator implements SequenceIterator {
      */
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         if (position < 0) {
             return null;
         }
-        while (true) {
-            if (currentIter == null) {
-                currentIter = operanda[currentChildExpr++].getChildExpression().iterate(context);
+        try {
+            while (true) {
+                if (currentIter == null) {
+                    currentIter = operanda[currentChildExpr++].getChildExpression().iterate(context);
+                }
+                Item current = currentIter.next();
+                if (current != null) {
+                    position++;
+                    return current;
+                }
+                currentIter = null;
+                if (currentChildExpr >= operanda.length) {
+                    position = -1;
+                    return null;
+                }
             }
-            Item current = currentIter.next();
-            if (current != null) {
-                position++;
-                return current;
-            }
-            currentIter = null;
-            if (currentChildExpr >= operanda.length) {
-                position = -1;
-                return null;
-            }
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
         }
     }
 

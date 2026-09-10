@@ -13,16 +13,14 @@ import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TraceableComponent;
 import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -644,10 +642,16 @@ public class GlobalVariable extends Actor
                 if (_indexed) {
                     result = c2.getConfiguration().makeSequenceExtent(select, FilterExpression.FILTERED, c2);
                 } else {
-                    result = select.iterate(c2).materialize();
+                    result = SequenceTool.toGroundedValue(select.iterate(c2));
                 }
                 c2.setTemporaryOutputState(savedOutputState);
                 return result;
+            } catch (UncheckedXPathException unxe) {
+                XPathException xe = unxe.getXPathException();
+                if (!getVariableQName().hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
+                    xe.setIsGlobalError(true);
+                }
+                throw xe;
             } catch (XPathException e) {
                 if (!getVariableQName().hasURI(NamespaceConstant.SAXON_GENERATED_VARIABLE)) {
                     e.setIsGlobalError(true);

@@ -166,7 +166,7 @@ public class XPathFunctionCall extends FunctionCall implements Callable {
         Configuration config = context.getConfiguration();
         for (Sequence argValue : argValues) {
             List<Object> target = new ArrayList<>();
-            argValue.iterate().forEachOrFail(item -> {
+            SequenceTool.supply(argValue.iterate(), (ItemConsumer<? super Item>) item -> {
                 PJConverter converter = PJConverter.allocate(
                         config, Type.getItemType(item, config.getTypeHierarchy()), StaticProperty.ALLOWS_ONE, Object.class);
                 target.add(converter.convert(item, Object.class, context));

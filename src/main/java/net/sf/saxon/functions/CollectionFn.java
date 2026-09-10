@@ -73,7 +73,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         }
 
         @Override
-        public Iterator<Resource> getResources(XPathContext context) {
+        public Iterator<? extends Resource> getResources(XPathContext context) {
             return Collections.emptyIterator();
         }
 
@@ -147,15 +147,11 @@ public class CollectionFn extends SystemFunction implements Callable {
 
             @Override
             @CSharpModifiers(code = {"public", "override"})
-            public Item next() throws XPathException {
-                try {
-                    if (sources.hasNext()) {
-                        return new ObjectValue<Resource>(sources.next());
-                    } else {
-                        return null;
-                    }
-                } catch (Exception e) {
-                    throw XPathException.makeXPathException(e);
+            public Item next() {
+                if (sources.hasNext()) {
+                    return new ObjectValue<Resource>(sources.next());
+                } else {
+                    return null;
                 }
             }
 
@@ -270,7 +266,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         if (collection.isStable(context) || context.getConfiguration().getBooleanProperty(Feature.STABLE_COLLECTION_URI)) {
             Controller controller = context.getController();
             DocumentPool docPool = controller.getDocumentPool();
-            cachedCollection = result.materialize();
+            cachedCollection = SequenceTool.toGroundedValue(result);
             SequenceIterator iter = cachedCollection.iterate();
             Item item;
             while ((item = iter.next()) != null) {

@@ -14,6 +14,7 @@ import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceMethod;
 import net.sf.saxon.value.*;
 
@@ -100,6 +101,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      * @return the atomic types and plain union types in the transitive membership of the union type.
      */
     @Override
+    @CSharpReplaceBody(code = "return new System.Collections.Generic.List<net.sf.saxon.type.PlainType>(getMemberTypes());")
     public List<? extends PlainType> getPlainMemberTypes() {
         return getMemberTypes();
     }

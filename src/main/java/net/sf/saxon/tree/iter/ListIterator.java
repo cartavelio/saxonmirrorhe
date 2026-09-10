@@ -104,7 +104,7 @@ public abstract class ListIterator implements UnfailingIterator, LastPositionFin
 
         @Override
         public SequenceIterator getReverseIterator() {
-            return new Reverse.ReverseListIterator(list);
+            return Reverse.reverseIterator(list);
         }
     }
 

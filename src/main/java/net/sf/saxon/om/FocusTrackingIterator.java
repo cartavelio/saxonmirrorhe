@@ -10,6 +10,7 @@ package net.sf.saxon.om;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
@@ -73,7 +74,7 @@ public class FocusTrackingIterator
      * @since 8.4
      */
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         curr = base.next();
         if (curr == null) {
             pos = -1;
@@ -127,11 +128,11 @@ public class FocusTrackingIterator
      * it creates a new base iterator which means that the result of calling getUnderlyingIterator()
      * may change.
      * @return the position of the last item
-     * @throws XPathException if a failure occurs reading the sequence
+     * @throws UncheckedXPathException if a failure occurs reading the sequence
      */
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         if (last == -1) {
             if (base.getProperties().contains(SequenceIteratorProperty.LAST_POSITION_FINDER)) {
                 last = ((LastPositionFinder)base).getLength();
@@ -167,13 +168,13 @@ public class FocusTrackingIterator
      * SequenceIterator. This should be an "in-memory" value, not a Closure.
      *
      * @return the corresponding Value
-     * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
      * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
-    public GroundedValue materialize() throws XPathException {
-        return base.materialize();
+    public GroundedValue materialize() {
+        return SequenceTool.toGroundedValue(base);
     }
 
     /**
@@ -181,12 +182,12 @@ public class FocusTrackingIterator
      * SequenceIterator, starting at the current position. This should be an "in-memory" value, not a Closure.
      *
      * @return the corresponding Value
-     * @throws XPathException in the cases of subclasses (such as the iterator over a MemoClosure)
+     * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
      * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
-    public GroundedValue getResidue() throws XPathException {
+    public GroundedValue getResidue()  {
         return SequenceExtent.from(this);
     }
 

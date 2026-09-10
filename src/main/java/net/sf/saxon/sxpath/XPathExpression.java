@@ -14,7 +14,9 @@ import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -188,7 +190,7 @@ public class XPathExpression {
         List<Item> list = new ArrayList<>(20);
         // Don't replace with list::add - C# doesn't like it because list.add() returns boolean
         //noinspection Convert2MethodRef 
-        expression.iterate(context.getXPathContextObject()).forEachOrFail(item -> list.add(item));
+        SequenceTool.supply(expression.iterate(context.getXPathContextObject()), (ItemConsumer<? super Item>) item -> list.add(item));
         return list;
     }
 

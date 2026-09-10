@@ -11,6 +11,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.*;
@@ -65,7 +66,7 @@ public class Parts extends SystemFunction implements Callable {
             details = new HashMap<>();
         }
         for (Map.Entry<String, ComponentDetails> component : details.entrySet()) {
-            result.initialPut(component.getKey(), component.getValue().supplier.apply(subject).materialize());
+            result.initialPut(component.getKey(), SequenceTool.toGroundedValue(component.getValue().supplier.apply(subject)));
         }
         result.initialPut("value", subject);
         return result;

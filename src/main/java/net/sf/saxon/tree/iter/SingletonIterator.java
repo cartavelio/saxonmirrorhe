@@ -126,7 +126,7 @@ public class SingletonIterator implements SequenceIterator, UnfailingIterator,
 
     @Override
     public GroundedValue getResidue() {
-        return gone ? EmptySequence.getInstance() : materialize();
+        return gone ? EmptySequence.getInstance() : item;
     }
 
     /**

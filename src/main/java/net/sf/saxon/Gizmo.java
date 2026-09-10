@@ -436,7 +436,7 @@ public class Gizmo {
     private void delete(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         saveCurrentDoc();
-        GroundedValue all = getSelectedItems(buffer, Token.EOF).materialize();
+        GroundedValue all = SequenceTool.toGroundedValue(getSelectedItems(buffer, Token.EOF));
         for (Item item : all.asIterable()) {
             if (item instanceof MutableNodeInfo) {
                 ((MutableNodeInfo) item).delete();
@@ -548,7 +548,7 @@ public class Gizmo {
         while ((item = iter.next()) != null) {
             if (item instanceof MutableNodeInfo) {
                 MutableNodeInfo target = (MutableNodeInfo) item;
-                GroundedValue newValue = evaluateQuery(replacement, item).materialize();
+                GroundedValue newValue = SequenceTool.toGroundedValue(evaluateQuery(replacement, item));
                 if (newValue instanceof AtomicValue) {
                     Orphan orphan = new Orphan(config);
                     orphan.setNodeKind(Type.TEXT);
@@ -635,7 +635,7 @@ public class Gizmo {
         while ((item = iter.next()) != null) {
             if (item instanceof MutableNodeInfo) {
                 MutableNodeInfo target = (MutableNodeInfo) item;
-                GroundedValue newValue = evaluateQuery(newContent, item).materialize();
+                GroundedValue newValue = SequenceTool.toGroundedValue(evaluateQuery(newContent, item));
                 if (newValue instanceof AtomicValue && where.equals("content")) {
                     target.replaceStringValue(((AtomicValue) newValue).getUnicodeStringValue());
                 } else {
@@ -767,7 +767,7 @@ public class Gizmo {
         }
         DocumentImpl saved = currentDoc;
 
-        GroundedValue value = getSelectedItems(new StringBuilder(buffer.substring(ws + 1)), Token.EOF).materialize();
+        GroundedValue value = SequenceTool.toGroundedValue(getSelectedItems(new StringBuilder(buffer.substring(ws + 1)), Token.EOF));
         if (varName.equals(".")) {
             saveCurrentDoc();
             if (value.getLength() == 1 && value.itemAt(0) instanceof DocumentImpl) {
@@ -818,7 +818,7 @@ public class Gizmo {
     private void list(StringBuilder buffer) throws XPathException {
         needCurrentDoc();
         SequenceIterator iter = getSelectedItems(buffer, Token.EOF);
-        GroundedValue value = iter.materialize();
+        GroundedValue value = SequenceTool.toGroundedValue(iter);
         int size = value.getLength();
         if (size != 1) {
             System.out.println("Found " + size + " items");
@@ -841,7 +841,7 @@ public class Gizmo {
             buffer = new StringBuilder(".");
         }
         SequenceIterator iter = getSelectedItems(buffer, Token.EOF);
-        GroundedValue value = iter.materialize();
+        GroundedValue value = SequenceTool.toGroundedValue(iter);
         int size = value.getLength();
         if (size != 1) {
             System.out.println("Found " + size + " items");

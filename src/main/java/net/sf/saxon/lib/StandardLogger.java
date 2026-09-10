@@ -131,6 +131,7 @@ public class StandardLogger extends Logger {
     public void println(String message, int severity) {
         if (severity >= threshold) {
             writer.write(message + "\n");
+            writer.flush();
         }
     }
 

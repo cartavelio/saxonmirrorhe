@@ -148,8 +148,8 @@ public class EnumerationType implements AtomicType {
      * in its transitive membership
      */
     @Override
-    public List<? extends PlainType> getPlainMemberTypes() throws MissingComponentException {
-        return Collections.singletonList(this);
+    public List<? extends PlainType> getPlainMemberTypes() {
+        return Collections.singletonList((PlainType)this);
     }
 
     /**

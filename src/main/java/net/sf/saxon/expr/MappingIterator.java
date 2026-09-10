@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
 
@@ -62,42 +63,46 @@ public class MappingIterator implements SequenceIterator {
     }
 
     @Override
-    public Item next() throws XPathException {
-        Item nextItem;
-        while (true) {
-            if (results != null) {
-                nextItem = results.next();
-                if (nextItem != null) {
-                    break;
-                } else {
-                    results = null;
-                }
-            }
-            Item nextSource = base.next();
-            if (nextSource != null) {
-                // Call the supplied mapping function
-                SequenceIterator obj = action.map(nextSource);
-
-                // The result may be null (representing an empty sequence),
-                //  or a SequenceIterator (any sequence)
-
-                if (obj != null) {
-                    results = obj;
+    public Item next() {
+        try {
+            Item nextItem;
+            while (true) {
+                if (results != null) {
                     nextItem = results.next();
-                    if (nextItem == null) {
-                        results = null;
-                    } else {
+                    if (nextItem != null) {
                         break;
+                    } else {
+                        results = null;
                     }
                 }
-                // now go round the loop to get the next item from the base sequence
-            } else {
-                results = null;
-                return null;
-            }
-        }
+                Item nextSource = base.next();
+                if (nextSource != null) {
+                    // Call the supplied mapping function
+                    SequenceIterator obj = action.map(nextSource);
 
-        return nextItem;
+                    // The result may be null (representing an empty sequence),
+                    //  or a SequenceIterator (any sequence)
+
+                    if (obj != null) {
+                        results = obj;
+                        nextItem = results.next();
+                        if (nextItem == null) {
+                            results = null;
+                        } else {
+                            break;
+                        }
+                    }
+                    // now go round the loop to get the next item from the base sequence
+                } else {
+                    results = null;
+                    return null;
+                }
+            }
+
+            return nextItem;
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
     }
 
     @Override

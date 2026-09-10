@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
@@ -70,7 +71,7 @@ public abstract class UnaryExpression extends Expression {
         try {
             if (getBaseExpression() instanceof Literal) {
                 Expression e2 = Literal.makeLiteral(
-                        iterate(visitor.getStaticContext().makeEarlyEvaluationContext()).materialize(), this);
+                        SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
                 ExpressionTool.copyLocationInfo(this, e2);
                 return e2;
             }
@@ -106,7 +107,7 @@ public abstract class UnaryExpression extends Expression {
         try {
             if (base instanceof Literal) {
                 return Literal.makeLiteral(
-                        iterate(visitor.getStaticContext().makeEarlyEvaluationContext()).materialize(), this);
+                        SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
             }
         } catch (XPathException err) {
             // if early evaluation fails, suppress the error: the value might

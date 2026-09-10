@@ -607,7 +607,7 @@ public abstract class VariableReference extends Expression implements BindingRef
         try {
             SequenceIterator iter = evaluateVariable(c).iterate();
             Location loc = getLocation();
-            iter.forEachOrFail(item -> output.append(item, loc, ReceiverOption.ALL_NAMESPACES));
+            SequenceTool.supply(iter, (ItemConsumer<? super Item>) item -> output.append(item, loc, ReceiverOption.ALL_NAMESPACES));
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());
             throw err;

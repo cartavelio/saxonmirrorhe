@@ -77,7 +77,7 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
         } else if (max == Integer.MAX_VALUE) {
             return TailIterator.make(base, min);
         } else if (base.getProperties().contains(SequenceIteratorProperty.GROUNDED) && min > 4) {
-            GroundedValue value = base.materialize();
+            GroundedValue value = SequenceTool.toGroundedValue(base);
             value = value.subsequence(min - 1, max - min + 1);
             return value.iterate();
         } else {
@@ -99,7 +99,7 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
      */
 
     @Override
-    public Item next() throws XPathException {
+    public Item next() {
         if (nextItem == null) {
             return null;
         }
@@ -144,7 +144,7 @@ public class SubsequenceIterator implements SequenceIterator, LastPositionFinder
      */
 
     @Override
-    public int getLength() throws XPathException {
+    public int getLength() {
         int lastBase = ((LastPositionFinder) base).getLength();
         int z = Math.min(lastBase, max);
         return Math.max(z - min + 1, 0);
