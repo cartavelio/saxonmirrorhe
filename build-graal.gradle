@@ -648,7 +648,6 @@ task all_saxonc_releases() {
     if (systemOs.isLinux()) {
       libpath = "../libs/nix"
       saxonc_lib = "libsaxon-${edition}c-*.so"
-      saxonc_lib = ''
     } else if (systemOs.isMacOsX()) {
       libpath = "../libs/darwin"
       saxonc_lib = "libsaxon-${edition}c-*.dylib"
