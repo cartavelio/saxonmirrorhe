@@ -2314,9 +2314,9 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             <code>compileFromFileAndSave</code> and <code>compileFromXdmNodeAndSave</code> in C++).</p>
       
       <p>The simplest way to generate an export file is from the command line, for example with
-         Saxon-EE 12.0:</p>
+         Saxon-EE 13.0:</p>
       
-      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-12.0.jar -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
+      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-13.0.jar -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       <kbd class="csonly">dotnet SaxonCS transform -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       <kbd class="conly">./transform -xsl:stylesheet.xsl -export:stylesheet.sef -nogo</kbd>
       
@@ -2336,7 +2336,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
       <p>A stylesheet export file for a complete stylesheet (as distinct from a library package) is accepted
       by any Saxon interface that accepts a source stylesheet. For example, from the command line:</p>
       
-      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-12.0.jar -xsl:stylesheet.sef -s:source.xml</kbd>
+      <kbd class="javaonly">java -jar <i>dir</i>/saxon-ee-13.0.jar -xsl:stylesheet.sef -s:source.xml</kbd>
       <kbd class="csonly">dotnet SaxonCS transform -xsl:stylesheet.sef -s:source.xml</kbd>
       <kbd class="conly">./transform -xsl:stylesheet.sef -s:source.xml</kbd>
       

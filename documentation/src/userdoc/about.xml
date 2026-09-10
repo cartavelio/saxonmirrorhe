@@ -60,8 +60,8 @@
       <li>Saxon-EE includes features needed for advanced applications and high
          performance.</li>
    </ul>
-   <p class="csonly">From Saxon 13, the three editions are now available for SaxonCS. (In
-      previous versions only the Enterprise Edition SaxonCS-EE was available.)</p>
+   <p class="csonly">From Saxon 13.0, two editions are now available for SaxonCS: SaxonCS-HE and
+      SaxonCS-EE. (In previous versions only the Enterprise Edition SaxonCS-EE was available.)</p>
    <p>See also <a class="bodylink" href="packages">Choosing a software package</a>.</p>
    
    <h2 class="subtitle">Other documentation</h2>
@@ -237,7 +237,7 @@
       <section id="gettingstarteddotnet" title="Getting started with SaxonCS" class="csonly">
          <h1>Getting started with SaxonCS</h1>
          
-         <p>SaxonCS is a new product for .NET Core, replacing the older Saxon/.NET product. The older
+         <p>SaxonCS is the current product for .NET Core, replacing the older Saxon/.NET product. The older
          product was built by compiling the Java source code to bytecode, and then converting this to run
          on .NET using the IKVM converter. IKVM has never supported .NET Core (which is the strategic version
          of .NET for the future), and development has been discontinued, so SaxonCS uses a different approach:
@@ -282,8 +282,8 @@
                </ul>
             </li>
             <li>
-               <p>If you are using features specific to SaxonCS-PE or SaxonCS-EE (the commercial
-                  editions of SaxonCS), you will need to obtain a file containing a licence key. The license key is
+               <p>If you are using features specific to SaxonCS-EE (the commercial
+                  edition of SaxonCS), you will need to obtain a file containing a licence key. The license key is
                   interchangeable between the Java, .NET, and C/C++ platforms. You can apply for a free
                   30-day evaluation license key by going to <a href="https://www.saxonica.com/"
                      class="bodylink">www.saxonica.com</a> and clicking on "Try Saxon for 30 days".
@@ -417,7 +417,7 @@
             <strong>archive</strong>. Many of these extensions were pioneered in Saxon and have
          since become available in other products.</p>
 
-      <p class="javaonly">These extension libraries in most cases require Saxon-PE or higher, and in some cases require
+      <p>These extension libraries in most cases require Saxon-PE or higher, and in some cases require
          Saxon-EE.</p>
      
        <aside>Some Saxon extensions are described in the documentation as <b>experimental</b>. This
@@ -434,10 +434,10 @@
          to all users. SaxonJ-PE and SaxonJ-EE are commercial products and require activation by a
          license key.</p>
       
-      <p class="javaonly">SaxonCS (on the .NET platform) is distributed in three editions: SaxonCS-HE,
-         SaxonCS-PE, and SaxonCS-EE. SaxonCS-HE is available under an open-source
+      <p class="csonly">SaxonCS (on the .NET platform) is distributed in two editions: SaxonCS-HE
+         and SaxonCS-EE. SaxonCS-HE is available under an open-source
          license (specifically, the Mozilla Public License 2.0), and all its features are available
-         to all users. SaxonJ-PE and SaxonJ-EE are commercial products and require activation by a
+         to all users. SaxonCS-EE is a commercial product and requires activation by a
          license key.</p>
       
       <p class="conly">SaxonC (on the Native platform) is distributed in three editions: SaxonC-HE,
@@ -1140,7 +1140,7 @@ any version number.</p>
          <h1>Setting up a license key</h1>
 
          <p>The open-source Saxon-HE product does not require any license key. For Saxon-PE and
-            Saxon-EE (Java and C/C++), and also for SaxonCS, you need to obtain a license key from Saxonica. You can order a free
+            Saxon-EE, you need to obtain a license key from Saxonica. You can order a free
             license key for a 30-day evaluation, or purchase an unrestricted license key, from the
                <a href="https://www.saxonica.com/" class="bodylink">Saxonica</a> website.</p>
          
@@ -1242,7 +1242,7 @@ any version number.</p>
          
          <h1>Checking a license is found</h1>
          
-         <p>To check that a valid license for SaxonJ-PE or SaxonJ-EE has been found and Saxon is
+         <p>To check that a valid license for Saxon-PE or Saxon-EE has been found and Saxon is
             running with full functionality, try running one of the following simple commands.</p>
          <div class="javaonly"><p>On Java (for example, for SaxonJ-EE 13.0):</p>
          <kbd>java -cp saxon-ee-13.0.jar net.sf.saxon.Query -qs:"saxon:string-to-hexBinary('saxon', 'utf-8')"</kbd>
@@ -1254,7 +1254,7 @@ any version number.</p>
             The above query uses a Saxon extension function which requires Saxon-PE or -EE, so
             it will produce the correct answer ("7361786F6E") if the license is found, but return an
             error message if the license is not found.</p>
-         <p class="csonly">SaxonCS will fail and exit if no license file is found.</p>
+         <p class="csonly">SaxonCS-EE will fail and exit if no license file is found.</p>
          <p>See <a class="bodylink" href="../licensefaq">Troubleshooting license key problems</a>
             for advice if the license is not found.</p>
       </section>
@@ -1301,9 +1301,9 @@ any version number.</p>
             <li>
                <p>
                   <strong>If Saxon says that a particular operation requires Saxon-PE or
-                     Saxon-EE</strong>, this may mean that you are running SaxonJ-HE software, or
-                  that you have invoked Saxon using a SaxonJ-HE entry point, or that Saxon has
-                  reverted to SaxonJ-HE functionality because it could not find a valid license file
+                     Saxon-EE</strong>, this may mean that you are running Saxon-HE software, or
+                  that you have invoked Saxon using a Saxon-HE entry point, or that Saxon has
+                  reverted to Saxon-HE functionality because it could not find a valid license file
                   (in the latter case it will usually have produced a message to this effect: but
                   depending on your application, you might not see the message).</p>
                
@@ -1453,8 +1453,9 @@ any version number.</p>
 
 
       <p>Saxon has been under development since 1998. Throughout that time the development
-      has been led by Michael Kay; by 2023 the team had grown to five developers (Michael Kay plus
-      O'Neil Delpratt, Debbie Lockett, Norm Walsh, and Matt Patterson, in order of first appearance).</p>
+      has been led by Michael Kay; by 2026 the team had grown to six developers (Michael Kay plus
+      O'Neil Delpratt, Debbie Lockett, Norm Walsh, Matt Patterson, and Sheila Thomson in order
+      of first appearance).</p>
 
       <p>Saxon was originally written to support an internal project in ICL (now part of <a
             href="http://www.fujitsu.com" class="bodylink">Fujitsu</a>), and ICL continued to
@@ -1468,7 +1469,7 @@ any version number.</p>
             >Saxonica Limited</a> to provide ongoing development and support of Saxon as a
          commercial venture. Saxonica continues to develop the open source version of
          Saxon (Saxon-HE), while at the same time delivering 
-         additional software (Saxon-PE and Saxon-EE, and more recently SaxonCS) as commercial offerings. The commercial
+         additional software (Saxon-PE and Saxon-EE) as commercial offerings. The commercial
          product incorporates the code of the open-source product in its entirety, with many additions
          such as schema processing, streaming, advanced optimization, and multi-threading, and 
          it is produced in accordance with the provisions defined

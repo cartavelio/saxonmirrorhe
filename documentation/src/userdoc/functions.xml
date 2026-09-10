@@ -7046,7 +7046,7 @@
             <code>jt:net.sf.saxon.query.XQueryExpression</code> is not available; the type of the
           result should be declared as <code>item()</code>.</p>
       </status>
-      <saxon-edition platform="J C">PE/EE</saxon-edition>
+      <saxon-edition>PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function takes as input a string containing an XQuery query, and produces as
@@ -9455,7 +9455,7 @@ StreamSource:new() =&gt; saxon:object-map() =&gt; map:keys() =&gt; sort()</code>
             <code>jt:net.sf.saxon.query.XQueryExpression</code> is not available; the type of the
           result should be declared as <code>item()</code>.</p>
       </status>
-      <saxon-edition platform="J C">PE/EE</saxon-edition>
+      <saxon-edition>PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function takes as input a compiled XQuery query, and runs the query, returning the

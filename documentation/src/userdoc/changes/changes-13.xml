@@ -56,7 +56,7 @@ TODO: rethink redefines and override
                 class="bodylink" href="/xsl-elements">XSLT elements</a>, <a class="bodylink"
                     href="/expressions">XPath syntax</a> and <a class="bodylink"
                         href="/functions">Function library</a> has been updated to align with the
-            4.0 specifications (dated 2026-XX-XX). In particular, note that the signatures for
+            draft 4.0 specifications (dated 28 January 2026). In particular, note that the signatures for
             functions in the Function library have been updated to align with the 4.0 specification,
             and use the same updated notation (e.g. giving default values for parameters that can be
             omitted), and these may have changed since XPath 3.1. The XPath syntax section has been
@@ -72,14 +72,14 @@ TODO: rethink redefines and override
     
     <category name="installation">
         
-        <div class="javaonly">
-            <p>SaxonJ 13 is built and tested using Java 21, but is supported with Java 17 or
-                later.</p>
-        </div>
+        <p class="javaonly">SaxonJ 13 is built and tested using Java 21, but is supported with Java 17 or
+            later.</p>
         
-        <div class="csonly">
-            <p>SaxonCS 13 is targeted at .NET 10.</p>
-        </div>
+        <p class="csonly">SaxonCS 13 is targeted at .NET 10.</p>
+        
+        <p class="csonly">From 13.0, the Home Edition of SaxonCS becomes available, so SaxonCS is
+            now distributed in two editions: SaxonCS-HE and SaxonCS-EE.</p>
+        
         
        <p>The XPath parser and tokenizer have changed beyond all recognition in the 25 years since they were
        first forked from James Clark's xt implementation. The open-source license terms relating to these

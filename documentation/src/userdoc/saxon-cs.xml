@@ -45,13 +45,20 @@ as their Java counterparts, with some exceptions. They are described in the foll
       </li>
          <li>
          <p>
-            <a class="bodylink" href="/schema-processing/commandline">Validation from the command line</a>
+            <a class="bodylink" href="/schema-processing/commandline">Validation from the
+               command line</a> (requires Saxon-EE)
          </p>
       </li>
       </ul>
 
       <p>An introduction to the API for Saxon on .NET is provided at <a class="bodylink" href="dotnetapi">Saxon API for .NET</a>;
 full specifications are available in the <a href="/dotnetdoc" class="bodylink">.NET API</a>.</p>
+   
+   <p>This section also covers the following topics:</p>
+   
+   <nav except="dotnetapi">
+      <ul/>
+   </nav>
          
    <section id="dotnetapi" title="Saxon API for .NET" class="csonly">
       <h1>Saxon API for .NET</h1>
@@ -348,11 +355,12 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <p>Nearly all the <a class="bodylink" href="/extensions/functions">extension functions</a> provided in the Java product in the <code>saxon</code> namespace are available.
          The exceptions are:</p>
       <ul>
+         <li><code>saxon:is-defaulted</code></li>
          <li><code>saxon:key-map</code></li>
          <li><code>saxon:last-modified</code></li>
+         <li><code>saxon:object-map</code></li>
          <li><code>saxon:parse-dateTime</code></li>
          <li><code>saxon:send-mail</code></li>
-         <li><code>saxon:object-map</code></li>
       </ul>
       
       <p>It is possible to wrap an external C# object in an <a class="cslink"
