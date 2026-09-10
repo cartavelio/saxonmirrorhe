@@ -13,6 +13,8 @@ using Saxon.Hej.resource;
 using Saxon.Hej.trans;
 using ResourceRequest = XmlResolver.ResourceRequest;
 
+#nullable enable 
+
 namespace Saxon.Callbacks {
 
     /// <summary>
