@@ -25,6 +25,8 @@ def get_debug_postfix(is_debug_build):
     if is_debug_build:
         if system() == 'Darwin':
             return '_debug'
+        elif system() == 'Windows'
+            return ''
         return 'd'
     return ''
 
