@@ -878,7 +878,7 @@ task saxonc_documentation(
 ) {
     into "${buildDir}/website/saxon-c"
     from ("${buildDir}/saxonc-doc") {
-        exclude "documentation11/*.css"
+        exclude "documentation${saxonMajorVersion}/*.css"
     }
 }
 
@@ -886,7 +886,7 @@ task copy_saxonc_doc(
   type: Copy,
   description: "Copy the SaxonC documentation source"
 ) {
-  into "${buildDir}/saxonc-doc/documentation11"
+  into "${buildDir}/saxonc-doc/documentation${saxonMajorVersion}"
   from ("${projectDir}/src/docs/saxonc-doc") {
     exclude "xsl/*.xsl"
   }
@@ -896,7 +896,7 @@ task copy_saxonc_css(
   type: Copy,
   description: "Copy SaxonC documentation CSS"
 ) {
-  into "${buildDir}/website/saxon-c/documentation11"
+  into "${buildDir}/website/saxon-c/documentation${saxonMajorVersion}"
   from "${projectDir}/src/docs/saxonc-doc/jstree.css"
   filter { line ->
     line.contains("url('saxon-base.css')")
@@ -910,11 +910,11 @@ task saxonc_doc_sef(
   description: "Compile the viewer_app stylesheet for the SaxonC documentation"
 ) {
   inputs.files fileTree(dir: "${projectDir}/src/docs/saxonc-doc/xsl")
-  outputs.file "${buildDir}/saxonc-doc/documentation11/xsl/jstree.sef.json"
+  outputs.file "${buildDir}/saxonc-doc/documentation${saxonMajorVersion}/xsl/jstree.sef.json"
   classpath = configurations.documentation
   mainClass = "com.saxonica.Transform"
   args "-xsl:${projectDir}/src/docs/saxonc-doc/xsl/jstree.xsl",
-          "-export:${buildDir}/saxonc-doc/documentation11/xsl/jstree.sef.json",
+          "-export:${buildDir}/saxonc-doc/documentation${saxonMajorVersion}/xsl/jstree.sef.json",
           "-target:JS", "-nogo", "-relocate:on", "-ns:##html5",
           "--generateByteCode:off"
 }
@@ -931,7 +931,7 @@ task copy_saxonc_api_doc(
   dependsOn: ["saxonc_doxygen"],
   description: "Copy generated SaxonC API documentation"
 ) {
-  into "${buildDir}/saxonc-doc/doc11"
+  into "${buildDir}/saxonc-doc/doc${saxonMajorVersion}"
   from "${buildDir}/docbuild/documentation"
 }
 
@@ -940,7 +940,7 @@ task copy_saxonc_python_api_doc(
   dependsOn: ["saxonc_pydoc3"],
   description: "Copy generated SaxonC python API documentation"
 ) {
-  into "${buildDir}/saxonc-doc/doc11/html"
+  into "${buildDir}/saxonc-doc/doc${saxonMajorVersion}/html"
   from "${buildDir}/docbuild/Saxon.C.API/python-saxon/saxonc.html"
 }
 
@@ -1024,40 +1024,51 @@ task saxonc_doc_setup(dependsOn: ["saxonc_docbuild_container"]) {
   }
 }
 
-task saxonc_doxygen(type: Exec, dependsOn: ['saxonc_doc_setup']) {
-  inputs.files fileTree(dir: "${buildDir}/docbuild/Saxon.C.API")
-  outputs.files fileTree(dir: "${buildDir}/docbuild/documentation")
-  commandLine 'docker', 'run', '-i', '--rm',
-    '-v', "${projectDir}/src/main/c/Saxon.C.API:/src",
-    '-v', "${projectDir}/src/docs/doc/img:/img",
-    '-v', "${buildDir}:/build",
-    "${docbuildImage}:${docbuildImageTag}",
-    'doxygen', 'docbuild/Saxon.C.API/Doxyfile'
+task saxonc_doxygen(dependsOn: ['saxon_eec_pypi']) {
+  doLast {
+    copy {
+      into "${buildDir}/eec_pypi/Saxon.C.API"
+      from "${projectDir}/src/main/c/Saxon.C.API"
+      include "Doxyfile"
+      filter { line ->
+        line.replaceAll('@@VERSION@@', saxonVersion)
+          .replace('@@LOGO@@', '/img/saxonica_logo.gif')
+          .replace('@@SOURCES@@', 'src')
+          .replace('@@OUTPUT@@', 'documentation')
+      }
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir "${buildDir}/eec_pypi"
+      commandLine 'doxygen', 'Saxon.C.API/Doxyfile'
+    }
+  }
 }
 
-task saxonc_pydoc3_setup(type: Exec, dependsOn: ['saxonc_doc_setup']) {
-  inputs.files fileTree(dir: "${buildDir}/docbuild/Saxon.C.API",
-                        exclude: ["python-saxon/build/**",
-                                  "python-saxon/__pycache__/**",
-                                  "python-saxon/*.so",
-                                  "python-saxon/saxonc.html"])
-  outputs.files fileTree("${buildDir}/docbuild/Saxon.C.API/python-saxon/build")
-  commandLine 'docker', 'run', '-i', '--rm',
-    '-v', "${buildDir}/docbuild/Saxon.C.API:/build",
-    '--workdir', '/build/python-saxon',
-    "${docbuildImage}:${docbuildImageTag}",
-    'python3', 'saxon-setup.py', 'build_ext', '-if'
-}
+// gradle saxon_eec_pypi
+// cd build/eec_pypi
+// python setup.py build_ext -if
+// pydoc3 -w saxonc
 
-task saxonc_pydoc3(type: Exec, dependsOn: ['saxonc_pydoc3_setup']) {
-  inputs.files fileTree(dir: "${buildDir}/docbuild/Saxon.C.API",
-                        exclude: ["python-saxon/build/**",
-                                  "python-saxon/__pycache__/**",
-                                  "python-saxon/*.so"])
-  outputs.file "${buildDir}/docbuild/Saxon.C.API/python-saxon/saxonc.html"
-  commandLine 'docker', 'run', '-i', '--rm',
-    '-v', "${buildDir}/docbuild/Saxon.C.API:/build",
-    '--workdir', '/build/python-saxon',
-    "${docbuildImage}:${docbuildImageTag}",
-    'pydoc3', '-w', 'saxonc'
+// Remove saxonc_doc_setup ?
+
+task saxonc_pydoc3(dependsOn: ['saxon_eec_pypi']) {
+  inputs.files fileTree(dir: "${buildDir}/eec_pypi", exclude: "*.html")
+  outputs.file "${buildDir}/eec_pypi/saxonc.html"
+
+  doLast {
+    exec {
+      workingDir "${buildDir}/eec_pypi"
+      commandLine 'python3', 'setup.py', 'build_ext', '-if'
+    }
+  }
+
+  doLast {
+    exec {
+      workingDir "${buildDir}/eec_pypi"
+      commandLine 'pydoc3', '-w', 'saxonc'
+    }
+  }
 }
