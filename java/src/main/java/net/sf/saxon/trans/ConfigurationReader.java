@@ -644,7 +644,12 @@ public class ConfigurationReader implements Receiver {
             details.baseName = atts.getValue("base");
             details.shortName = atts.getValue("shortName");
 
-            packageLibrary.addPackage(details);
+            try {
+                packageLibrary.addPackage(details);
+            } catch (XPathException e) {
+                // This should not happen, because the package being added has not yet been compiled
+                throw new UncheckedXPathException(e);
+            }
         }
     }
 

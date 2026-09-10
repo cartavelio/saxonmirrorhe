@@ -116,8 +116,13 @@ public class PackageLibrary {
      * any existing package with the same name and version.
      *
      * @param packageIn The stylesheet package to be added
+     * @throws XPathException if the supplied package was compiled under a different
+     * Configuration from the one used for the library
      */
-    public synchronized void addPackage(StylesheetPackage packageIn) {
+    public synchronized void addPackage(StylesheetPackage packageIn) throws XPathException {
+        if (!packageIn.getConfiguration().isCompatible(config)) {
+            throw new XPathException("Cannot add a package to a library built with an incompatible configuration");
+        }
         String name = packageIn.getPackageName();
         PackageVersion version = packageIn.getPackageVersion();
         VersionedPackageName vp = new VersionedPackageName(name, version);
@@ -137,9 +142,14 @@ public class PackageLibrary {
      *                referenced in these details may exist in either
      *                source or compiled form. No static processing
      *                or validation takes place at this stage.
+     *  @throws XPathException if the supplied package has been compiled under a different
+     *  Configuration from the one used for the library
      */
 
-    public synchronized void addPackage(PackageDetails details) {
+    public synchronized void addPackage(PackageDetails details) throws XPathException {
+        if (details.loadedPackage != null && !details.loadedPackage.getConfiguration().isCompatible(config)) {
+            throw new XPathException("Cannot add a package to a library built with an incompatible configuration");
+        }
         VersionedPackageName vp = details.nameAndVersion;
         String name = vp.packageName;
         PackageVersion version = vp.packageVersion;
