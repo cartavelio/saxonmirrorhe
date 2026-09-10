@@ -51,10 +51,14 @@ import java.util.Properties;
  * <p>A <code>Serializer</code> may also be created from an {@link Xslt30Transformer} using the method
  * {@link Xslt30Transformer#newSerializer()} or one of its variants. In this case the serializer
  * is initialized with properties taken from the default output declaration in the stylesheet.</p>
- * <p>Serialization parameters defined via this interface take precedence over any serialization parameters
- * supplied when {@link #getReceiver} is called. The {@link #getReceiver} method is supplied with
- * parameters derived from the query or stylesheet, which are merged with the parameters set on this
- * {@code Serializer}.</p>
+ * <p>Serialization parameters set explicitly on the {@code Serializer} take precedence over any
+ * serialization parameters supplied when {@link #getReceiver} is called. The {@link #getReceiver} method
+ * is supplied with parameters derived from the query or stylesheet, which are merged with the parameters
+ * set on this {@code Serializer}.</p>
+ * <p>Any serialization parameters that are not given an explicit value using one of these mechanisms
+ * are defaulted using the rules for the XSLT 3.0 <code>&lt;xsl:output</code> declaration. In particular,
+ * this means that the default serialization method (when serializing an XDM document) depends on the
+ * name of the first element encountered in the document.</p>
  * <p><i>Changed in 9.9 so the {@code Serializer} now only holds one set of output properties. Additional
  * serialization properties can be supplied
  * when {@link #getReceiver(PipelineConfiguration, SerializationProperties)}
@@ -372,7 +376,7 @@ public class Serializer extends AbstractDestination {
     /**
      * Say if the output stream should be closed on completion
      * By default the close method closes the output stream only when the serializer created the output stream itself
-     * that is when the destination has been suppplied as a file rather than a stream.
+     * that is when the destination has been supplied as a file rather than a stream.
      * @param value - if true the output file will be closed when the close method is called
      *              if false the close method has no effect.
      */
@@ -602,10 +606,12 @@ public class Serializer extends AbstractDestination {
     }
 
     /**
-     * Serialize an arbitrary XdmValue to the selected output destination using this serializer. The supplied
-     * sequence is first wrapped in a document node according to the rules given in section 2 (Sequence Normalization) of the
-     * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">XSLT/XQuery serialization specification</a>; the resulting
-     * document nodes is then serialized using the serialization parameters defined in this serializer.
+     * Serialize an arbitrary XdmValue to the selected output destination using this serializer.
+     *
+     * <p>If the supplied <code>XdmValue</code> is an <code>XdmNode</code>, then it is serialized
+     * using the {@link #serializeNode(XdmNode)} method. In other cases, it behaves in a way
+     * equivalent to XSLT serialization with <code>build-tree="no"</code>; this is the recommended
+     * way to output non-node values using the JSON or Adaptive serialization methods.</p>
      *
      * @param value The value to be serialized
      * @throws IllegalStateException if no outputStream, Writer, or File has been supplied as the
@@ -638,6 +644,11 @@ public class Serializer extends AbstractDestination {
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">XSLT/XQuery serialization specification</a>; the resulting
      * document nodes is then serialized using the serialization parameters defined in this serializer.
      *
+     * <p>The default serialization properties used by this method correspond to the properties used
+     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
+     * encountered.</p>
+     *
      * @param source The value to be serialized
      * @throws IllegalStateException if no outputStream, Writer, or File has been supplied as the
      *                               destination for the serialized output
@@ -662,6 +673,11 @@ public class Serializer extends AbstractDestination {
      * <a href="http://www.w3.org/TR/xslt-xquery-serialization/">XSLT/XQuery serialization specification</a>; the resulting
      * document nodes is then serialized using the serialization parameters defined in this serializer.
      *
+     * <p>The default serialization properties used by this method correspond to the properties used
+     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
+     * encountered.</p>
+     *
      * @param source The value to be serialized
      * @return the serialized result, as a string
      * @throws SaxonApiException     if a serialization error or I/O error occurs
@@ -684,6 +700,11 @@ public class Serializer extends AbstractDestination {
 
     /**
      * Serialize an XdmNode to a string using this serializer
+     *
+     * <p>The default serialization properties used by this method correspond to the properties used
+     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
+     * encountered.</p>
      *
      * @param node The node to be serialized
      * @return the serialized representation of the node as lexical XML
@@ -711,6 +732,11 @@ public class Serializer extends AbstractDestination {
      * Get an XMLStreamWriter that can be used for writing application-generated XML
      * to be output via this serializer.
      *
+     * <p>The default serialization properties used by this method correspond to the properties used
+     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
+     * encountered.</p>
+     *
      * @return a newly constructed XMLStreamWriter that pipes events into this Serializer
      * @throws SaxonApiException     if any other failure occurs
      * @since 9.3
@@ -728,6 +754,11 @@ public class Serializer extends AbstractDestination {
     /**
      * Get a ContentHandler that can be used to direct the output of a SAX parser (or other
      * source of SAX events) to this serializer.
+     *
+     * <p>The default serialization properties used by this method correspond to the properties used
+     * by an XSLT 3.0 stylesheet with no &lt;xsl:output&gt; declaration. In particular, the default output
+     * method (always one of XML, XHTML, or HTML) depends on the name of the first element node
+     * encountered.</p>
      *
      * @return a newly constructed ContentHandler that pipes events into this Serializer
      * @throws SaxonApiException     if any other failure occurs
@@ -783,7 +814,9 @@ public class Serializer extends AbstractDestination {
      * @param params Serialization parameters originating from the query or stylesheet
      *               (for example, xsl:output declarations or xsl:result-document attributes).
      *               These parameters are combined with those held by this {@code Serializer} itself,
-     *               with properties set of the {@code Serializer} taking precedence.
+     *               with properties set on the {@code Serializer} taking precedence. If a particular
+     *               property has not been set either on the {@code Serializer} object itself
+     *               or in the supplied {@code params}, the defaults follow the XSLT 3.0 rules.
      * @return a receiver to which XML events will be sent
      */
 
@@ -817,7 +850,7 @@ public class Serializer extends AbstractDestination {
      * @param defaultOutputProperties the default properties
      * @return a newly-constructed Properties object holding the declared serialization properties. Specifically,
      * it holds the properties defined explicitly on this Serializer object, backed by the properties defined
-     * in unnamed xsl:output declarations in the stylesheet, or output declarations in XQuery.
+     * in {@code defaultOutputProperties}.
      */
 
     public Properties getCombinedOutputProperties(Properties defaultOutputProperties) {
@@ -832,7 +865,7 @@ public class Serializer extends AbstractDestination {
 
     /**
      * Create a Properties object holding the serialization properties explicitly declared
-     * within this Serializer object, and not including any defaults taken from the stylesheet or query.
+     * within this {@code Serializer} object, and not including any defaults taken from the stylesheet or query.
      * @return a newly-constructed Properties object holding the declared serialization properties. Specifically,
      * it holds the properties defined explicitly on this Serializer object, and excludes any properties defined
      * in named or unnamed xsl:output declarations in the stylesheet, or the equivalent in XQuery.
