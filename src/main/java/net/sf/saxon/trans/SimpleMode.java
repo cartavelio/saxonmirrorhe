@@ -19,8 +19,10 @@ import net.sf.saxon.pattern.*;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetModule;
 import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trace.ExitCounter;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.rules.*;
+import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
@@ -31,6 +33,7 @@ import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntIterator;
 
+import javax.swing.*;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -568,7 +571,20 @@ public class SimpleMode extends Mode {
         RuleChain unnamedNodeChain;
         Rule bestRule = null;
 
-        switch (node.getNodeKind()) {
+        //ExitCounter.count(node.getClass().getSimpleName());
+
+        int nodeKind;
+
+        if(node instanceof TinyElementImpl)
+        {
+            nodeKind = Type.ELEMENT;
+        }
+        else
+        {
+            nodeKind = node.getNodeKind();
+        }
+
+        switch (nodeKind) {
         case Type.DOCUMENT:
             unnamedNodeChain = documentRuleChain;
             break;
