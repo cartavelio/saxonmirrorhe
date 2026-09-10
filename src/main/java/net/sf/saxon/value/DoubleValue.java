@@ -14,6 +14,7 @@ import net.sf.saxon.functions.Round;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationException;
@@ -126,6 +127,7 @@ public final class DoubleValue extends NumericValue {
      *          if the value cannot be converted, for example if it is NaN or infinite
      */
     @Override
+    @CSharpReplaceException(from = "java.lang.NumberFormatException", to = "System.ArgumentOutOfRangeException")
     public BigDecimal getDecimalValue() throws ValidationException {
         try {
             return BigDecimal.valueOf(value);
@@ -142,6 +144,7 @@ public final class DoubleValue extends NumericValue {
      * @throws ValidationException if the value cannot be converted, for example if it is NaN or infinite
      */
     @Override
+    @CSharpReplaceException(from="java.lang.NumberFormatException", to="System.ArgumentOutOfRangeException")
     public BigDecimal getExactDecimalValue() throws ValidationException {
         try {
             return new BigDecimal(value);
