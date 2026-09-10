@@ -39,7 +39,6 @@ public class LookupExpression extends BinaryExpression {
     private boolean isClassified = false;
     protected boolean isArrayLookup = false;
     protected boolean isMapLookup = false;
-    protected boolean isAtomicLookup = false;
     protected boolean isSingleContainer = false;
     protected boolean isSingleEntry = false;
 
@@ -96,16 +95,6 @@ public class LookupExpression extends BinaryExpression {
                 } else if (mapType instanceof MapType) {
                     return ((MapType) mapType).getValueType().getPrimaryType();
                 }
-            } else if (isAtomicLookup) {
-                ItemType itemType = getLhsExpression().getItemType();
-                if (itemType instanceof AtomicType && getRhsExpression() instanceof StringLiteral) {
-                    String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-                    SequenceType componentType = AtomicComponent.getComponentType(
-                            (BuiltInAtomicType)((AtomicType)itemType).getPrimitiveItemType(), fieldName);
-                    if (componentType != null) {
-                        return componentType.getPrimaryType();
-                    }
-                }
             }
         }
         return AnyItemType.getInstance();
@@ -153,10 +142,9 @@ public class LookupExpression extends BinaryExpression {
             return config.makeObjectLookupExpression(getLhsExpression(), getRhsExpression())
                     .typeCheck(visitor, contextInfo);
         }
-        isAtomicLookup = containerType instanceof AtomicType;
         isSingleContainer = getLhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
-        if (!isArrayLookup && !isMapLookup && !isAtomicLookup) {
+        if (!isArrayLookup && !isMapLookup) {
             // TODO: improve error handling here
             if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT &&
                     th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT &&
@@ -187,22 +175,6 @@ public class LookupExpression extends BinaryExpression {
                 String fieldName = ((StringLiteral) getRhsExpression()).stringify();
                 if (tt.getFieldType(fieldName) == null) {
                     XPathException err = new XPathException("Field " + fieldName + " is not defined in the tuple type", "XPTY0004");
-                    err.setIsTypeError(true);
-                    err.setLocation(getLocation());
-                    throw err;
-                }
-            }
-        }
-
-        if (isAtomicLookup && getRhsExpression() instanceof StringLiteral) {
-            if (containerType != BuiltInAtomicType.ANY_ATOMIC) {
-                assert containerType instanceof AtomicType;
-                String fieldName = ((StringLiteral) getRhsExpression()).stringify();
-                SequenceType componentType = AtomicComponent.getComponentType(
-                        (BuiltInAtomicType) ((AtomicType) containerType).getPrimitiveItemType(), fieldName);
-                if (componentType == null) {
-                    XPathException err = new XPathException(
-                                    "Atomic type " + ((AtomicType)containerType).getDisplayName() + " does not have a component named " + fieldName, "XPTY0004");
                     err.setIsTypeError(true);
                     err.setLocation(getLocation());
                     throw err;
@@ -388,19 +360,6 @@ public class LookupExpression extends BinaryExpression {
                         }));
             }
 
-        } else if (isAtomicLookup) {
-            // TODO: map over sequences?
-            AtomicValue val = ((AtomicValue)getLhsExpression().evaluateItem(context));
-            Item rhs = getRhsExpression().evaluateItem(context);
-            if (rhs instanceof StringItem) {
-                StringItem field = ((StringItem) getRhsExpression().evaluateItem(context));
-                return AtomicComponent.getComponentValue(val, field.getStringValue());
-            } else {
-                throw new XPathException(
-                        "An item on the LHS of the '?' operator is an atomic value, but a value on the RHS of the operator (" +
-                                rhs.toShortString() + ") is not a string", "XPTY0004");
-
-            }
         } else {
             SequenceIterator baseIterator = getLhsExpression().iterate(context);
             GroundedValue rhs = getRhsExpression().iterate(context).materialize();

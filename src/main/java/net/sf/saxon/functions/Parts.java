@@ -1,16 +1,25 @@
-package net.sf.saxon.type;
+package net.sf.saxon.functions;
 
 
+import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.iter.UnfailingIterator;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
@@ -19,16 +28,57 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
 
-public class AtomicComponent {
+public class Parts extends SystemFunction implements Callable {
 
+    /**
+     * Get the return type, given knowledge of the actual arguments
+     *
+     * @param args the actual arguments supplied
+     * @return the best available item type that the function will return
+     */
 
+    public ItemType getResultItemType(Expression[] args) {
+        AtomicType argType = args[0].getStaticType().getPrimaryType().getAtomizedItemType().getPrimitiveItemType();
+        if (argType == BuiltInAtomicType.ANY_ATOMIC) {
+            return super.getResultItemType(args);
+        }
+        while (argType.getBaseType() != BuiltInAtomicType.ANY_ATOMIC) {
+            // Handle xs:integer, xs:dayTimeDuration, xs:yearMonthDuration
+            argType = (AtomicType)argType.getBaseType();
+        }
+        RecordTest resultType = resultTypeMap.get(argType);
+        if (resultType == null) {
+            return super.getResultItemType(args);
+        } else {
+            return resultType;
+        }
+    }
+
+    @Override
+    public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
+        DictionaryMap result = new DictionaryMap();
+        AtomicValue subject = (AtomicValue)args[0].head();
+        AtomicType type = subject.getPrimitiveType();
+        if (type.getBaseType() == BuiltInAtomicType.DURATION) {
+            type = BuiltInAtomicType.DURATION;
+        }
+        Map<String, ComponentDetails> details = componentMap.get(type);
+        if (details == null) {
+            details = new HashMap<>();
+        }
+        for (Map.Entry<String, ComponentDetails> component : details.entrySet()) {
+            result.initialPut(component.getKey(), component.getValue().supplier.apply(subject).materialize());
+        }
+        result.initialPut("value", subject);
+        return result;
+    }
 
     private static class ComponentDetails {
         SequenceType componentType;
         Function<AtomicValue, UnfailingIterator> supplier;
     }
 
-    private static Map<AtomicType, Map<String, ComponentDetails>> componentMap = new HashMap<>();
+    private final static Map<AtomicType, Map<String, ComponentDetails>> componentMap = new HashMap<>();
 
     private static void register(BuiltInAtomicType type, String fieldName, SequenceType componentType,
                                  Function<AtomicValue, UnfailingIterator> supplier) {
@@ -162,19 +212,19 @@ public class AtomicComponent {
         );
 
         register(BuiltInAtomicType.DURATION, "years", SequenceType.SINGLE_INTEGER,
-                 a -> oneInt(((DurationValue) a).getYears() * ((DurationValue) a).signum())
+                 a -> oneInt((long) ((DurationValue) a).getYears() * ((DurationValue) a).signum())
         );
         register(BuiltInAtomicType.DURATION, "months", SequenceType.SINGLE_INTEGER,
-                 a -> oneInt(((DurationValue) a).getMonths() * ((DurationValue) a).signum())
+                 a -> oneInt((long) ((DurationValue) a).getMonths() * ((DurationValue) a).signum())
         );
         register(BuiltInAtomicType.DURATION, "days", SequenceType.SINGLE_INTEGER,
-                 a -> oneInt(((DurationValue) a).getDays() * ((DurationValue) a).signum())
+                 a -> oneInt((long) ((DurationValue) a).getDays() * ((DurationValue) a).signum())
         );
         register(BuiltInAtomicType.DURATION, "hours", SequenceType.SINGLE_INTEGER,
-                 a -> oneInt(((DurationValue) a).getHours() * ((DurationValue) a).signum())
+                 a -> oneInt((long) ((DurationValue) a).getHours() * ((DurationValue) a).signum())
         );
         register(BuiltInAtomicType.DURATION, "minutes", SequenceType.SINGLE_INTEGER,
-                 a -> oneInt(((DurationValue) a).getMinutes() * ((DurationValue) a).signum())
+                 a -> oneInt((long) ((DurationValue) a).getMinutes() * ((DurationValue) a).signum())
         );
         register(BuiltInAtomicType.DURATION, "seconds", SequenceType.SINGLE_INTEGER,
                  a -> SingletonIterator.makeIterator(((DurationValue) a).getComponent(AccessorFn.Component.SECONDS))
@@ -259,6 +309,30 @@ public class AtomicComponent {
                  }
         );
 
+        buildRecordTypes();
+
+    }
+
+    private static Map<AtomicType, RecordTest> resultTypeMap;
+
+    private static void buildRecordTypes() {
+        resultTypeMap = new HashMap<>();
+        for (Map.Entry<AtomicType, Map<String, ComponentDetails>> entry : componentMap.entrySet()) {
+             //RecordTest(List<String> names, List<SequenceType> types, List<String> optionalFieldNames, boolean extensible)
+            List<String> names = new ArrayList<>();
+            List<SequenceType> types = new ArrayList<>();
+            List<String> optionalFields = new ArrayList<>();
+            for (Map.Entry<String, ComponentDetails> details : entry.getValue().entrySet()) {
+                names.add(details.getKey());
+                types.add(details.getValue().componentType);
+                if (Cardinality.allowsZero(details.getValue().componentType.getCardinality())) {
+                    optionalFields.add(details.getKey());
+                }
+            }
+            names.add("value");
+            types.add(SequenceType.makeSequenceType(entry.getKey(), StaticProperty.EXACTLY_ONE));
+            resultTypeMap.put(entry.getKey(), new RecordTest(names, types, optionalFields, false));
+        }
     }
 
     public static SequenceType getComponentType(BuiltInAtomicType type, String componentName) {
