@@ -86,8 +86,8 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         needsEE.add("languages_for_numbering");
         alwaysOff.add("feature/streaming");
         alwaysOff.add("feature/schema_aware");
-        needsEE.add("feature/Saxon-PE");
-        needsEE.add("feature/Saxon-EE");
+        //needsEE.add("feature/Saxon-PE");
+        //needsEE.add("feature/Saxon-EE");
         //needsEE.add("feature/XSD_1.1");
         alwaysOn.add("feature/XPath_3.1");
         alwaysOn.add("feature/dynamic_evaluation");
