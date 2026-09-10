@@ -497,6 +497,13 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
         if (type == null) {
             type = anonymousTypesByName.get(name);
         }
+//        if (type instanceof SimpleTypeDefinition) {
+//            SimpleType workingType = ((SimpleTypeDefinition) type).getWorkingType();
+//            if (workingType != null) {
+//                type = workingType;
+//                typesByName.put(name, type);
+//            }
+//        }
         return type;
     }
 
@@ -1012,6 +1019,10 @@ public class PreparedSchema /*extends SchemaStructure*/ implements NotationSet {
                 if (result && (s instanceof SimpleTypeDefinition)) {
                     UserSimpleType st = ((SimpleTypeDefinition) s).getWorkingType();
                     typesByName.put(st.getTypeName(), st);
+                    PreparedSchema superSchema = compiler.getConfiguration().getSuperSchema();
+                    if (superSchema.getSchemaType(st.getTypeName()) == s) {
+                        superSchema.typesByName.put(st.getTypeName(), st);
+                    }
                 }
             }
         }
