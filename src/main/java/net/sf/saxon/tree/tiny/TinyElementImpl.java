@@ -24,7 +24,9 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.z.IntHashMap;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -354,10 +356,13 @@ public class TinyElementImpl extends TinyParentNodeImpl {
 
 
                         // output attributes
+                        //AttributeMap attributes = tree.alpha[nodeNr] < 0 ? EmptyAttributeMap.getInstance() : new LocalAttributeMap(copyTypes);
 
-                        AttributeMap attributes = EmptyAttributeMap.getInstance();
+                        AttributeMap attributes;
+
                         int att = tree.alpha[next];
                         if (att >= 0) {
+                            List<AttributeInfo> attributeInfoList = new ArrayList<>(8);
                             while (att < tree.numberOfAttributes && tree.attParent[att] == next) {
                                 int attCode = tree.attCode[att];
                                 int attfp = attCode & NamePool.FP_MASK;
@@ -380,14 +385,17 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                                 if (tree.isIdrefAttribute(att)) {
                                     attProps |= ReceiverOption.IS_IDREF;
                                 }
-                                attributes = attributes.put(new AttributeInfo(new CodedName(attfp, attPrefix, pool),
-                                                        attributeType, tree.attValue[att].toString(),
+                                attributeInfoList.add(new AttributeInfo(new CodedName(attfp, attPrefix, pool),
+                                                        attributeType, tree.attValue[att],
                                                         location, attProps));
                                 if (addAttributeNamespaces && !attPrefix.isEmpty()) {
                                     namespaces = namespaces.put(attPrefix,pool.getURI(attCode));
                                 }
                                 att++;
                             }
+                            attributes = SequenceTool.attributeMapFromList(attributeInfoList);
+                        } else {
+                            attributes = EmptyAttributeMap.getInstance();
                         }
 
                         // see bug 2209
@@ -468,6 +476,10 @@ public class TinyElementImpl extends TinyParentNodeImpl {
             receiver.endElement();
         }
     }
+
+    // Alternative algorithm for the copy() method, using recursion. Included so that we
+    // can study the performance. It's currently not handling all edge cases, for example
+    // detection of the disallowNamespaceSensitiveContent condition.
 
     public void copy_12(Receiver receiver, int copyOptions, Location location) throws XPathException {
 

@@ -16,8 +16,9 @@ public class Evaluators {
     // These numeric constants must be stable as they are held in the SEF file
 
     public static final int UNDECIDED = -1;
-    public static final int EVALUATE_LITERAL=0;
-    public static final int EVALUATE_VARIABLE=1;
+    public static final int EVALUATE_LITERAL = 0;
+    public static final int EVALUATE_VARIABLE = 1;
+    public static final int EAGER_SEQUENCE = 2;
     public static final int MAKE_CLOSURE = 3;
     public static final int MAKE_MEMO_CLOSURE=4;
     public static final int RETURN_EMPTY_SEQUENCE = 5;

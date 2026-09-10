@@ -58,7 +58,6 @@ public class CompilerInfo {
     private int languageVersion = 30;
 
     //#if CSHARP==false
-    private String messageReceiverClassName = "net.sf.saxon.serialize.MessageEmitter";
     private OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
     //#endif
 
@@ -115,7 +114,6 @@ public class CompilerInfo {
 
         //#if CSHARP==false
         outputURIResolver = info.outputURIResolver;
-        messageReceiverClassName = info.messageReceiverClassName;
         //#endif
     }
 
@@ -477,33 +475,6 @@ public class CompilerInfo {
     public ErrorReporter getErrorReporter() {
         return this.errorReporter;
     }
-
-    //#if CSHARP==false
-    /**
-     * Get the name of the class that will be instantiated to create a MessageEmitter,
-     * to process the output of xsl:message instructions in XSLT.
-     *
-     * @return the full class name of the message emitter class.
-     * @since 9.2
-     */
-
-    public String getMessageReceiverClassName() {
-        return messageReceiverClassName;
-    }
-
-    /**
-     * Set the name of the class that will be instantiated to create a MessageEmitter,
-     * to process the output of xsl:message instructions in XSLT.
-     *
-     * @param messageReceiverClassName the message emitter class. This
-     *                                 must implement net.sf.saxon.event.Emitter.
-     * @since 9.2
-     */
-
-    public void setMessageReceiverClassName(String messageReceiverClassName) {
-        this.messageReceiverClassName = messageReceiverClassName;
-    }
-    //#endif
 
     /**
      * Set the name of the default collation
