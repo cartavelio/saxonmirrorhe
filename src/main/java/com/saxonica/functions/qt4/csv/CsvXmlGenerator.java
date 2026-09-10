@@ -51,7 +51,7 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
     public Item fromRowSequence(Sequence rows) throws XPathException {
         generator = new Generator(context, staticBaseUri);
         generator.startDocument();
-        if (shouldExtractColumns) {
+        if (_shouldExtractColumns) {
             SequenceIterator iter = rows.iterate();
             List<GroundedValue> columnNames = generateColumns(iter);
             generateRows(iter, columnNames);

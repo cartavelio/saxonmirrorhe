@@ -1,12 +1,7 @@
 package com.saxonica.functions.qt4.csv;
 
-import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
@@ -15,17 +10,17 @@ import java.util.*;
 
 public abstract class CsvRepresentationGenerator {
     protected final Map<String, GroundedValue> options;
-    protected final boolean shouldExtractColumns;
-    protected final boolean shouldFilterColumns;
-    protected final NumberOfColumns numberOfColumnsMode;
+    protected final boolean _shouldExtractColumns;
+    protected final boolean _shouldFilterColumns;
+    protected final NumberOfColumns _numberOfColumnsMode;
     protected List<Integer> columnIndexes;
     protected int numberOfColumns = -1;
 
     public CsvRepresentationGenerator(Map<String, GroundedValue> options) throws XPathException {
         this.options = options;
-        shouldFilterColumns = (options.getOrDefault("filter-columns", EmptySequence.getInstance())).getLength() > 0;
-        numberOfColumnsMode = numberOfColumnsMode();
-        shouldExtractColumns = shouldExtractColumns();
+        _shouldFilterColumns = (options.getOrDefault("filter-columns", EmptySequence.getInstance())).getLength() > 0;
+        _numberOfColumnsMode = numberOfColumnsMode();
+        _shouldExtractColumns = shouldExtractColumns();
     }
 
     private boolean shouldExtractColumns() throws XPathException {
@@ -81,11 +76,11 @@ public abstract class CsvRepresentationGenerator {
 
     protected List<Integer> getColumnIndexes(ArrayItem rowArray) throws XPathException {
         if (columnIndexes != null) return columnIndexes;
-        if (shouldFilterColumns) {
+        if (_shouldFilterColumns) {
             columnIndexes = getColumnFilter();
         } else {
             int numberOfColumns;
-            switch (numberOfColumnsMode) {
+            switch (_numberOfColumnsMode) {
                 case SPECIFIED:
                     numberOfColumns = specifiedNumberOfColumns();
                     break;
@@ -112,14 +107,14 @@ public abstract class CsvRepresentationGenerator {
 
     protected Iterable<GroundedValue> filteredRow(ArrayItem row) throws XPathException {
         Iterable<GroundedValue> filteredRow;
-        if (shouldFilterColumns) {
+        if (_shouldFilterColumns) {
             List<GroundedValue> filteredRowList = new ArrayList<>();
             IterationUtils.forEach(getColumnIndexes(row), oneBasedIndex -> {
                 filteredRowList.add(row.get(oneBasedIndex - 1));
             });
             filteredRow = filteredRowList;
         } else {
-            switch (numberOfColumnsMode) {
+            switch (_numberOfColumnsMode) {
                 case SPECIFIED:
                     filteredRow = new BoundedRow(row, specifiedNumberOfColumns());
                     break;
@@ -145,7 +140,7 @@ public abstract class CsvRepresentationGenerator {
     /**
      * Represents how the number of columns will be calculated.
      */
-    enum NumberOfColumns {
+    public enum NumberOfColumns {
         /**
          * All columns should be included. (The number of columns may vary by row.)
          */

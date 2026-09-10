@@ -62,7 +62,7 @@ public class CsvXdmGenerator extends CsvRepresentationGenerator {
      */
     @Override
     public MapItem fromRowSequence(Sequence rows) throws XPathException {
-        if (shouldExtractColumns) {
+        if (_shouldExtractColumns) {
             SequenceIterator iter = rows.iterate();
             MapItem columnsRecord = generateColumnsRecord(iter);
             return generateCsvRecord(columnsRecord, iter);
