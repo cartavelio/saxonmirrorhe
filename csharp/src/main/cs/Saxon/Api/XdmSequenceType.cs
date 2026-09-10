@@ -137,12 +137,24 @@ namespace Saxon.Api {
         /// <returns>true if the supplied value conforms to this SequenceType</returns>
 
         public bool Matches(XdmValue value) {
-            if (!Cardinality.allows((int)occurrences, value.Count)) {
+            if (!Cardinality.allows(CardinalityProperty(), value.Count)) {
                 return false;
             }
 
             return value.AllMatch<XdmItem>(item => itemType.Matches(item));
         }
+
+        private int CardinalityProperty() {
+            return (occurrences) switch {
+                Saxon.Hej.s9api.OccurrenceIndicator.ONE => StaticProperty.ALLOWS_ONE,
+                Saxon.Hej.s9api.OccurrenceIndicator.ONE_OR_MORE => StaticProperty.ALLOWS_ONE_OR_MORE,
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO => StaticProperty.ALLOWS_ZERO,
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_MORE => StaticProperty.ALLOWS_ZERO_OR_MORE,
+                Saxon.Hej.s9api.OccurrenceIndicator.ZERO_OR_ONE => StaticProperty.ALLOWS_ZERO_OR_ONE,
+                _ => throw new IllegalArgumentException()
+            };
+        }
+        
 
         /// <summary>
         /// Get a string representation of the sequence type

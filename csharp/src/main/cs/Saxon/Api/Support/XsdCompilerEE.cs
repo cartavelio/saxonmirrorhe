@@ -80,11 +80,12 @@ namespace Saxon.Api.Support {
         public override XsdSchema Compile(params XsdCompiler.SchemaSource[] sources) {
             Source[] ss = new Source[sources.Length];
             for (int i = 0; i < sources.Length; i++) {
-                ss[i] = new StreamSource(sources[i].Stream, sources[i].Uri.AbsoluteUri);
+                ss[i] = sources[i].getSource();
             }
 
             return new XsdSchemaEE(processor, xsdCompilerJ.compile(ss));
         }
+
 
         /**
          * Combine a set of schemas into one
@@ -123,8 +124,7 @@ namespace Saxon.Api.Support {
          * @return the schema produced by processing the supplied schema component model export file
          */
         public override XsdSchema ImportComponents(SchemaSource source) {
-            Saxon.Hej.s9api.XsdSchema s = xsdCompilerJ.importComponents(
-                new StreamSource(source.Stream, source.Uri.ToString()));
+            Saxon.Hej.s9api.XsdSchema s = xsdCompilerJ.importComponents(source.getSource());
             return new XsdSchemaEE(processor, s);
         }
     }

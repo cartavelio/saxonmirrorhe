@@ -1,5 +1,11 @@
+using System;
 using System.IO;
+using System.Xml;
+using Saxon.Ejava.lang;
 using Saxon.Ejava.net;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Ejavax.xml.transform.stream;
+using File = Saxon.Ejava.io.File;
 
 namespace Saxon.Api {
     /// <summary>
@@ -44,36 +50,152 @@ namespace Saxon.Api {
         /// by the method as an <c>XsdSchema</c> object.
         ///</summary>
         public abstract XsdSchema Compile(params SchemaSource[] sources);
+        
+        /// <summary>
+        /// Compile a schema supplied as a <c>Stream</c>. The resulting schema components are added
+        /// to the cache. The base URI of the schema document is taken as the current working directory.
+        /// </summary>
+        /// <param name="input">A stream containing the source text of the schema. This method
+        /// will consume the supplied stream. It is the caller's responsibility to close the stream
+        /// after use.</param>
+        /// <returns>The schema constructed from this input document.</returns>
 
-        ///<summary>
+        public XsdSchema Compile(Stream input) {
+            return Compile (input, new Uri(Environment.CurrentDirectory));
+        }
+
+        /// <summary>
+        /// Compile a schema supplied as a <c>Stream</c>. The resulting schema components are added
+        /// to the cache.
+        /// </summary>
+        /// <param name="input">A stream containing the source text of the schema. This method
+        /// will consume the supplied stream. It is the caller's responsibility to close the stream
+        /// after use.</param>
+        /// <param name="baseUri">The base URI of the schema document, for resolving any references to other
+        /// schema documents</param>
+        /// <returns>The schema constructed from this input document.</returns> 
+        public XsdSchema Compile(System.IO.Stream input, System.Uri baseUri) {
+            return Compile(new SchemaSource(input, baseUri));
+        }
+        
+        /// <summary>
+        /// Compile a schema supplied as a <c>TextReader</c>. The resulting schema components are added
+        /// to the cache.
+        /// </summary>
+        /// <param name="input">A <c>TextReader</c> that supplies the source text of the schema. This method
+        /// will consume the supplied stream. It is the caller's responsibility to close the reader
+        /// after use.</param>
+        /// <param name="baseUri">The base URI of the schema document, for resolving any references to other
+        /// schema documents</param>
+        /// <returns>The schema constructed from this input document.</returns>
+        public XsdSchema Compile(System.IO.TextReader input, System.Uri baseUri) {
+            return Compile(new SchemaSource(input, baseUri));
+        }
+        
+        /// <summary>
+        /// Compile a schema supplied as a <c>TextReader</c>. The base URI of the schema document is
+        /// taken as the current working directory.
+        /// </summary>
+        /// <param name="reader">A <c>TextReader</c> that supplies the source text of the schema. This method
+        /// will consume the supplied stream. It is the caller's responsibility to close the reader
+        /// after use.</param>
+        /// <returns>The schema constructed from this input document.</returns>
+        public XsdSchema Compile(System.IO.TextReader reader) {
+            return Compile(new SchemaSource(reader, new Uri(Environment.CurrentDirectory)));
+        }
+        
+        /// <summary>
+        /// Compile a schema, retrieving the source using a URI. 
+        /// </summary>
+        /// <remarks>
+        /// The document located via the URI is parsed using the <c>System.Xml</c> parser.
+        /// </remarks>
+        /// <param name="uri">The URI identifying the location where the schema document can be
+        /// found</param>
+        /// <returns>The schema constructed from this input document.</returns>
+        /// 
+        public XsdSchema Compile(System.Uri uri) {
+            return Compile(new SchemaSource(uri));
+        }
+        
+        /// <summary>
+        /// Compile a schema, retrieving the source from a given file. 
+        /// </summary>
+        /// <remarks>
+        /// The content of the file is parsed using the <c>System.Xml</c> parser.
+        /// </remarks>
+        /// <param name="file">The file where the schema document can be
+        /// found</param>
+        /// <returns>The schema constructed from this input document.</returns>
+        /// 
+        public XsdSchema Compile(System.IO.FileInfo file) {
+            return Compile(new SchemaSource(file));
+        }
+        
+        
+        
+        /// <summary>
+        /// Compile a schema, retrieving the source from a supplied XML reader
+        /// (that is, an XML parser). The base URI of the document is taken
+        /// from the <c>BaseUri</c> property of the <c>XmlReader</c>.
+        /// </summary>
+        /// <param name="reader">The XML reader supplying
+        /// the schema document</param>
+        /// <returns>The schema constructed from this input document.</returns>
+        /// 
+        public XsdSchema Compile(XmlReader reader) {
+            return Compile(new SchemaSource(reader));
+        }
+        
+        /// <summary>
+        /// Compile a schema, retrieving the source from a supplied XDM node.
+        /// This may be a document node whose
+        /// child is an <c>xs:schema</c> element, or it may be
+        /// the <c>xs:schema</c> element itself. 
+        /// The base URI of the document is taken
+        /// from the <c>BaseUri</c> property of the <c>XdmNode</c>.
+        /// </summary>
+        /// <param name="node">The XML reader supplying
+        /// the schema document</param>
+        /// <returns>The schema constructed from this input document.</returns>
+        /// 
+        public XsdSchema Compile(XdmNode node) {
+            return Compile(new SchemaSource(node));
+        }
+
+        /// <summary>
         /// Combine a set of schemas into one
         /// </summary>
         /// <param name="schemas">The schemas to be combined</param>
         /// <returns>The combined schema</returns>
-        public abstract XsdSchema Combine ( params XsdSchema[] schemas);
+        public abstract XsdSchema Combine (params XsdSchema[] schemas); 
+            
+        /// <summary>
+        /// Return an empty schema. This may be useful for validating instance documents when all
+        /// the actual schema definitions are linked from the instance document using {@code xsi:schemaLocation}
+        /// and {@code xsi:noNamespaceSchemaLocation} attributes
+        /// </summary>
+        /// <returns>An empty schema</returns>
 
-        /**
-         * Return an empty schema. This may be useful for validating instance documents when all
-         * the actual schema definitions are linked from the instance document using {@code xsi:schemaLocation}
-         * and {@code xsi:noNamespaceSchemaLocation} attributes
-         * @return an empty schema
-         */
         public abstract XsdSchema EmptySchema();
 
-        /**
-         * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
-         * document are added to the cache of schema components maintained by this SchemaManager
-         *
-         * @param source the XML file containing the schema component model, as generated by a previous call on
-         *               {@link XsdSchema#exportComponents}
-         * @return the schema produced by processing the supplied schema component model export file
-         */
+        /// <summary>
+        /// Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
+        /// document are added to the cache of schema components maintained by this XsdCompiler
+        /// </summary>
+        /// <param name="source">The XML file containing the schema component model, as generated by a previous call on
+        ///  <c>XsdSchema#exportComponents</c>
+        /// </param>
+        /// <returns>The schema produced by processing the supplied schema component model export file</returns>
+
         public abstract XsdSchema ImportComponents(SchemaSource source);
         
         /// <summary>
-        /// Internal class defining the source for a particular schema document.
+        /// Embedded class defining the source for a particular schema document.
         /// </summary>
         public class SchemaSource {
+            
+            readonly Source jSource;
 
             /// <summary>
             /// A schema document supplied in the form of a stream, together with a Uri that defines
@@ -82,8 +204,17 @@ namespace Saxon.Api {
             /// <param name="stream">The input stream</param>
             /// <param name="uri">The base URI</param>
             public SchemaSource(System.IO.Stream stream, System.Uri uri) {
-                this.Stream = stream;
-                this.Uri = uri;
+                jSource = new StreamSource(stream, uri.AbsoluteUri);
+            }
+            
+            /// <summary>
+            /// A schema document supplied in the form of a text reader, together with a Uri that defines
+            /// the base URI for resolving any <c>xs:include</c> or <c>xs:import</c> declarations.
+            /// </summary>
+            /// <param name="reader">The text reader</param>
+            /// <param name="uri">The base URI</param>
+            public SchemaSource(System.IO.TextReader reader, System.Uri uri) {
+                jSource = new StreamSource(reader, uri.AbsoluteUri);
             }
 
             /// <summary>
@@ -92,8 +223,7 @@ namespace Saxon.Api {
             /// </summary>
             /// <param name="uri">The base URI</param>
             public SchemaSource(System.Uri uri) {
-                this.Stream = new URL(uri).openStream();
-                this.Uri = uri;
+                jSource = new StreamSource(uri.AbsoluteUri);
             }
 
             /// <summary>
@@ -101,12 +231,29 @@ namespace Saxon.Api {
             /// </summary>
 
             public SchemaSource(System.IO.FileInfo file) {
-                this.Stream = file.OpenRead();
-                this.Uri = new System.Uri(file.FullName);
+                jSource = new StreamSource(file.OpenRead(), new System.Uri(file.FullName).AbsoluteUri);
             }
             
-            public System.IO.Stream Stream { get; }
-            public System.Uri Uri { get; }
+            /// <summary>
+            /// A schema document supplied in the form of an <c>XdmNode</c>
+            /// </summary>
+
+            public SchemaSource(XdmNode node) {
+                jSource = node.Implementation.asActiveSource();
+            }
+            
+            /// <summary>
+            /// A schema document supplied in the form of an <c>XmlReader</c>
+            /// </summary>
+
+            public SchemaSource(XmlReader parser) {
+                throw new UnsupportedOperationException(); // TODO
+                //jSource = node.Implementation.asActiveSource();
+            }
+
+            internal Source getSource() {
+                return jSource;
+            }
         }
     }
 }

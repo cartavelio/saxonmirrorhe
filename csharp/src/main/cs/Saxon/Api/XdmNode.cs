@@ -8,7 +8,6 @@ using Saxon.Hej;
 using Saxon.Hej.@event;
 using Saxon.Hej.expr.parser;
 using Saxon.Hej.om;
-using Saxon.Hej.pattern;
 using Saxon.Hej.tree.wrapper;
 using Saxon.Api.Support;
 using Saxon.Hej.pattern.nodetest;
