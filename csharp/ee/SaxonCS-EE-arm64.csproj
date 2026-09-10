@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
   <Import Project="build\arm64\SaxonCS\core.csproj"/>
    <ItemGroup>
       <None Include="build\LICENSE.txt" Pack="true" PackagePath=""/>
