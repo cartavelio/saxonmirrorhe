@@ -119,7 +119,8 @@ task buildCWrappers (
 }
 
 ["he", "pe", "ee"].each { edition ->
-  def graalEdition = edition == "he" ? "ce" : "ee"
+  //def graalEdition = edition == "he" ? "ce" : "ee"
+  def graalEdition = "ce"
   
   task "setup_${edition}c_graalJar"(
     dependsOn: ["graal_${edition}c_jar"],
@@ -620,7 +621,8 @@ task all_saxonc_releases() {
 
 ["he", "pe", "ee"].each { edition ->
   def EDITION = edition.toUpperCase()
-  def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
+  //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
+  def graalEdition = "graal_ce_home"
 
   def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-v${saxonVersion}"
   if (systemOs.isMacOsX()) {
@@ -855,7 +857,8 @@ task all_saxonc_releases() {
 }
 
 ["he", "pe", "ee"].each { edition ->
-  def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
+  //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
+  def graalEdition = "graal_ce_home"
   def pypiDir = "${buildDir}/${edition}c_pypi"
 
   def libpath = ''
