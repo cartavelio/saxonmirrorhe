@@ -3,16 +3,14 @@ package com.saxonica.functions.qt4;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.value.BigDecimalValue;
-import net.sf.saxon.value.DecimalValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.IntegerValue;
+import net.sf.saxon.value.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,6 +20,11 @@ import java.math.RoundingMode;
  */
 
 public class DivideDecimals extends SystemFunction {
+
+    public static RecordTest QUOTIENT_AND_REMAINDER_RECORD = RecordTest.nonExtensible(
+            new RecordTest.Field("quotient", SequenceType.SINGLE_DECIMAL, false),
+            new RecordTest.Field("scheme", SequenceType.SINGLE_DECIMAL, false)
+    );
 
     /**
      * Evaluate this function call at run-time
