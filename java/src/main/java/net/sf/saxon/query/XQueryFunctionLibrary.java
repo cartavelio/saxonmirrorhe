@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
@@ -441,7 +442,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                     if (expandedArgs[a] == null) {
                         Supplier<Expression> defaultExp = fd.getParameterDefinitions()[a].getDefaultValueExpression();
                         if (defaultExp != null) {
-                            expandedArgs[a] = defaultExp.get();
+                            expandedArgs[a] = defaultExp.get().copy(new RebindingMap());
                         }
                     }
                 }
