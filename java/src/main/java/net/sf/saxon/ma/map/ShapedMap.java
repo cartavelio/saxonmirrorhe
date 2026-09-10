@@ -31,13 +31,13 @@ import java.util.Stack;
 
 public class ShapedMap extends StringMapItem {
 
-    private static class ShapedMapPlan implements LookupPlan {
+    protected static class ShapedMapPlan implements LookupPlan {
         Shape shape;
         int slot;
     }
 
-    private final GroundedValue[] values;
-    private final Shape shape;
+    protected final GroundedValue[] values;
+    protected final Shape shape;
 
     /**
      * Create an instance of a {@code ShapedMap} whose structure is defined
