@@ -34,8 +34,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *  JUnit tests for integrated extension functions in XSLT, XQuery, and XPath
  */
 public class TestIntegratedFunctions {
-    private final ConfigTest configTest = new ConfigTest();
-    
+
     /**
      * Test integrated extension function in XSLT
      */
@@ -540,7 +539,9 @@ public class TestIntegratedFunctions {
 
     /**
      * An integrated extension function whose task is to find the namespace URI corresponding to a given
-     * prefix in the static namespace context
+     * prefix in the static namespace context. In fact it defines two functions: insn#0 returns the
+     * default namespace for elements and types in the static context, while insn#1 returns the namespace
+     * corresponding to a given prefix.
      */
 
     public static class InscopePrefixFunction extends ExtensionFunctionDefinition {
@@ -566,7 +567,7 @@ public class TestIntegratedFunctions {
 
         @Override
         public int getMinimumNumberOfArguments() {
-            return 1;
+            return 0;
         }
 
         /**
@@ -635,6 +636,7 @@ public class TestIntegratedFunctions {
     private static class InscopePrefixFunctionCall extends ExtensionFunctionCall {
 
         private NamespaceResolver nsContext;
+        private NamespaceUri defaultElementNamespace;
 
         /**
           * Supply static context information.
@@ -658,6 +660,7 @@ public class TestIntegratedFunctions {
          @Override
          public void supplyStaticContext(StaticContext context, int locationId, Expression[] arguments) throws XPathException {
              nsContext = context.getNamespaceResolver();
+             defaultElementNamespace = context.getDefaultElementNamespace();
          }
 
 
@@ -678,30 +681,166 @@ public class TestIntegratedFunctions {
         /**
          * Evaluate this function call at run-time
          *
- *
- * @param context   The XPath dynamic evaluation context
- * @param arguments The values of the arguments to the function call. Each argument value (which is in general
- *                  a sequence) is supplied in the form of an iterator over the items in the sequence. If required, the
- *                  supplied sequence can be materialized by calling, for example, <code>new SequenceExtent(arguments[i])</code>.
- *                  If the argument is always a singleton, then the single item may be obtained by calling
- *                  <code>arguments[i].next()</code>.
- * @return an iterator over the results of the function. If the result is a single item, it can be
-         *         returned in the form of a {@link net.sf.saxon.tree.iter.SingletonIterator}.
-         * @throws net.sf.saxon.trans.XPathException
-         *          if a dynamic error occurs during evaluation of the function.
+         * @param context   The XPath dynamic evaluation context
+         * @param arguments The values of the arguments to the function call. Each argument value (which is in general
+         *                  a sequence) is supplied in the form of an iterator over the items in the sequence. If required, the
+         *                  supplied sequence can be materialized by calling, for example, <code>new SequenceExtent(arguments[i])</code>.
+         *                  If the argument is always a singleton, then the single item may be obtained by calling
+         *                  <code>arguments[i].next()</code>.
+         * @return an iterator over the results of the function. If the result is a single item, it can be
+         * returned in the form of a {@link net.sf.saxon.tree.iter.SingletonIterator}.
+         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during evaluation of the function.
          */
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            StringValue val = (StringValue)arguments[0].head();
-            if (val == null) {
-                return EmptySequence.getInstance();
+            NamespaceUri ns;
+            if (arguments.length == 0) {
+                ns = defaultElementNamespace;
+            } else {
+                StringValue val = (StringValue) arguments[0].head();
+                if (val == null) {
+                    return EmptySequence.getInstance();
+                }
+                ns = nsContext.getURIForPrefix(val.getStringValue(), false);
             }
-            NamespaceUri ns = nsContext.getURIForPrefix(val.getStringValue(), false);
             if (ns == null) {
                 return EmptySequence.getInstance();
             }
             return new StringValue(ns.toUnicodeString());
+        }
+    }
+
+    /**
+     * An integrated extension function whose task is to find the namespace URI corresponding to a given
+     * prefix in the static namespace context. In fact it defines two functions: insn#0 returns the
+     * default namespace for elements and types in the static context, while insn#1 returns the namespace
+     * corresponding to a given prefix.
+     */
+
+    public static class MultiArityFunction extends ExtensionFunctionDefinition {
+
+
+        private static final StructuredQName qName =
+                new StructuredQName("", "http://math.com/", "join");
+
+        /**
+         * Get the function name, as a QName
+         *
+         * @return the QName of the function
+         */
+
+        @Override
+        public StructuredQName getFunctionQName() {
+            return qName;
+        }
+
+        /**
+         * Return the minimum number of arguments required by the function
+         *
+         * @return the minimum number of arguments that must be supplied in a call to this function
+         */
+
+        @Override
+        public int getMinimumNumberOfArguments() {
+            return 0;
+        }
+
+        /**
+         * Return the maximum number of arguments allowed by the function
+         *
+         * @return the maximum number of arguments that may be supplied in a call to this function
+         */
+
+        @Override
+        public int getMaximumNumberOfArguments() {
+            return 1;
+        }
+
+        /**
+         * Get the required types for the arguments of this function, counting from zero
+         *
+         * @return the required types of the argument, as defined by the function signature. Normally
+         * this should be an array of size {@link #getMaximumNumberOfArguments()}; however for functions
+         * that allow a variable number of arguments, the array can be smaller than this, with the last
+         * entry in the array providing the required type for all the remaining arguments.
+         */
+
+        @Override
+        public net.sf.saxon.value.SequenceType[] getArgumentTypes() {
+            return new net.sf.saxon.value.SequenceType[]{net.sf.saxon.value.SequenceType.SINGLE_STRING};
+        }
+
+        /**
+         * Get the type of the result of the function
+         *
+         * @param suppliedArgumentTypes the static types of the arguments to the function.
+         *                              This is provided so that a more precise result type can be returned in the common
+         *                              case where the type of the result depends on the type of the first argument. The value
+         *                              will be null if the function call has no arguments.
+         * @return the return type of the function, as defined by its function signature
+         */
+
+        @Override
+        public net.sf.saxon.value.SequenceType getResultType(net.sf.saxon.value.SequenceType[] suppliedArgumentTypes) {
+            return net.sf.saxon.value.SequenceType.OPTIONAL_STRING;
+        }
+
+        /**
+         * Ask whether the result actually returned by the function should be checked against
+         * the declared type.
+         *
+         * @return true if the function implementation warrants that the value it returns will
+         * be an instance of the declared result type. The default value is false, in which case
+         * the result will be checked at run-time to ensure that it conforms to the declared type.
+         * If the value true is returned, but the function returns a value of the wrong type, the
+         * consequences are unpredictable.
+         */
+
+        @Override
+        public boolean trustResultType() {
+            return true;
+        }
+
+        /**
+         * Create a call on this function. This method is called by the compiler when it identifies
+         * a function call that calls this function.
+         */
+
+        @Override
+        public ExtensionFunctionCall makeCallExpression() {
+            return new MultiArityFunctionCall();
+        }
+    }
+
+    private static class MultiArityFunctionCall extends ExtensionFunctionCall {
+
+        /**
+         * Evaluate this function call at run-time
+         *
+         * @param context   The XPath dynamic evaluation context
+         * @param arguments The values of the arguments to the function call. Each argument value (which is in general
+         *                  a sequence) is supplied in the form of an iterator over the items in the sequence. If required, the
+         *                  supplied sequence can be materialized by calling, for example, <code>new SequenceExtent(arguments[i])</code>.
+         *                  If the argument is always a singleton, then the single item may be obtained by calling
+         *                  <code>arguments[i].next()</code>.
+         * @return an iterator over the results of the function. If the result is a single item, it can be
+         * returned in the form of a {@link net.sf.saxon.tree.iter.SingletonIterator}.
+         * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during evaluation of the function.
+         */
+
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            NamespaceUri ns;
+            if (arguments.length == 0) {
+                return new StringValue("/");
+            } else {
+                StringValue val = (StringValue) arguments[0].head();
+                if (val == null) {
+                    return EmptySequence.getInstance();
+                }
+                return new StringValue(val.getStringValue() + "/" + val.getStringValue());
+            }
         }
     }
 
@@ -747,6 +886,73 @@ public class TestIntegratedFunctions {
             XdmValue val = ev.evaluate();
             String result = val.toString();
             assertTrue(result.contains("1.414213"), "sqrt ");
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testVariableArityFunctionXPath() {
+        try {
+            Processor proc = new Processor(false);
+            proc.registerExtensionFunction(new InscopePrefixFunction());
+            XPathCompiler comp = proc.newXPathCompiler();
+            comp.declareNamespace("if", "http://math.com/");
+            comp.declareNamespace("", "http://example.com/ns");
+            comp.declareVariable(new QName("arg"));
+            XPathExecutable exp = comp.compile("if:insn() || '~' || if:insn($arg)");
+            XPathSelector ev = exp.load();
+            ev.setVariable(new QName("arg"), new XdmAtomicValue("if"));
+            XdmValue val = ev.evaluate();
+            String result = val.toString();
+            assertTrue(result.contains("http://example.com/ns~http://math.com/"), "result ");
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testVariableArityFunctionXPathDynamic() {
+        try {
+            Processor proc = new Processor(false);
+            proc.registerExtensionFunction(new MultiArityFunction());
+            XPathCompiler comp = proc.newXPathCompiler();
+            comp.declareNamespace("if", "http://math.com/");
+            comp.declareNamespace("", "http://example.com/ns");
+            comp.declareVariable(new QName("arg"));
+            XPathExecutable exp = comp.compile("if:join#0() || '~' || if:join#1($arg)");
+            XPathSelector ev = exp.load();
+            ev.setVariable(new QName("arg"), new XdmAtomicValue("if"));
+            XdmValue val = ev.evaluate();
+            String result = val.toString();
+            assertEquals("/~if/if", result, "result ");
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testVariableArityFunctionXQueryLookup() {
+        try {
+            Processor proc = new Processor(false);
+            proc.registerExtensionFunction(new MultiArityFunction());
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.declareNamespace("if", "http://math.com/");
+            comp.declareNamespace("", "http://example.com/ns");
+            XQueryExecutable exp = comp.compile(
+                    "declare variable $arg external;" +
+                    "let $ns := 'http://math.com/', "
+                            + "$f0 := function-lookup(QName($ns, 'join'), 0),"
+                            + "$f1 := function-lookup(QName($ns, 'join'), 1)"
+                            + "return $f0() || '~' || $f1($arg)");
+            XQueryEvaluator ev = exp.load();
+            ev.setExternalVariable(new QName("arg"), new XdmAtomicValue("if"));
+            XdmValue val = ev.evaluate();
+            String result = val.toString();
+            assertEquals("/~if/if", result, "result ");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
