@@ -1,5 +1,6 @@
 package jaxptest;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.lib.EmptySource;
 import net.sf.saxon.lib.FeatureKeys;
@@ -9,6 +10,10 @@ import net.sf.saxon.s9api.Xslt30Transformer;
 import net.sf.saxon.s9api.XsltCompiler;
 import net.sf.saxon.s9api.XsltExecutable;
 import net.sf.saxon.trans.XPathException;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.transform.JDOMSource;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -16,9 +21,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayInputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -257,6 +260,70 @@ public class URIResolverTest {
         } catch (Exception ex) {
             ex.printStackTrace();
             fail();
+        }
+    }
+
+
+    @Test
+    public void testBug5800() {
+        // URIResolver for stylesheet modules returns a JDOMSource
+        try {
+            net.sf.saxon.TransformerFactoryImpl tfactory = new net.sf.saxon.TransformerFactoryImpl();
+            Resolver2 phoo = new Resolver2(tfactory.getConfiguration());
+            tfactory.setURIResolver(phoo);
+            assertSame(tfactory.getURIResolver(), phoo);
+
+            Templates foo1Templates = tfactory.newTemplates(new StreamSource(foo_xsl));
+            assertTrue(phoo.history.contains("inc1/inc1.xsl"));
+            assertTrue(phoo.history.contains("inc2/inc2.xsl"));
+
+            Transformer foo1Transformer = foo1Templates.newTransformer();
+            assertSame(foo1Transformer.getURIResolver(), phoo);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
+    }
+
+    private static class Resolver2 extends StandardURIResolver {
+
+        public Configuration config;
+        public Set<String> history = new HashSet<String>();
+        public Map<String, String> mappings = new HashMap<String, String>();
+
+        public Resolver2(Configuration config) {
+            this.config = config;
+        }
+
+        public void map(String from, String to) {
+            mappings.put(from, to);
+        }
+
+        @Override
+        public Source resolve(String href, String base) throws XPathException {
+            try {
+                history.add(href);
+                base = base.replace("/dummy/", "");
+                for (Map.Entry<String, String> entry : mappings.entrySet()) {
+                    href = href.replace(entry.getKey(), entry.getValue());
+                }
+                SAXBuilder builder = new SAXBuilder();
+                File file;
+                if (href.endsWith("inc1/inc1.xsl")) {
+                    file = new File("/Users/mike/GitHub/saxon2020/src/test/testdata/trax/xsl/inc1/inc1.xsl");
+                } else if (href.endsWith("inc2/inc2.xsl")) {
+                    file = new File("/Users/mike/GitHub/saxon2020/src/test/testdata/trax/xsl/inc1/inc2/inc2.xsl");
+                } else {
+                    throw new XPathException("Unknown file " + href);
+                }
+                Document doc = builder.build(file);
+                JDOMSource js = new JDOMSource(doc);
+                js.setSystemId(base + "/dummy/" + href);
+                return js;
+            } catch (JDOMException | IOException e) {
+                throw new XPathException(e);
+            }
         }
     }
 
