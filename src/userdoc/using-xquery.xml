@@ -172,8 +172,10 @@
                   a representation of the final expression tree after optimization.
                   If no file name is specified the output is sent to the standard error stream. The
                   output is in XML format.</p>
+
                <p>Equivalent to setting the configuration option <a class="feature" href="TRACE_OPTIMIZER_DECISIONS"/>
                and then calling the <code>explain()</code> method of the <code>XQueryExecutable</code>.</p>
+
             </td>
          </tr>
          <tr class="javaonly">

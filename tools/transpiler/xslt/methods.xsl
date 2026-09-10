@@ -1231,6 +1231,17 @@
          })"/>
    </xsl:template>-->
    
+
+   <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.Message']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getContent#0'    : '%scope%.Content',
+         'getErrorCode#0'  : '%scope%.ErrorCode',
+         'isTerminate#0'   : '%scope%.Terminate',
+         '*'               : '%scope%.%Name%(%args%)'
+         })"/>
+   </xsl:template>
+   
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.MessageListener2']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
