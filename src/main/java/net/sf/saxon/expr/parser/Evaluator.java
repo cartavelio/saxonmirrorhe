@@ -178,7 +178,11 @@ public abstract class Evaluator {
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             Item item = expr.evaluateItem(context);
-            return item==null ? EmptySequence.getInstance() : item;
+            if (item == null) {
+                return EmptySequence.getInstance();
+            } else {
+                return item;
+            }
         }
 
         /**

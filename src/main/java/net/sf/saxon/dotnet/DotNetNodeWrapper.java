@@ -8,6 +8,7 @@
 package net.sf.saxon.dotnet;
 
 import cli.System.Xml.*;
+import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -796,6 +797,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                }
                                 break;
                             }
+                            CSharp.emitCode("goto default");
                             // otherwise fall through to default case
                         default:
                             previousText = thisText;
@@ -842,6 +844,7 @@ public class DotNetNodeWrapper extends AbstractNodeWrapper implements SteppingNo
 //                                }
                                 break;
                             }
+                            CSharp.emitCode("goto default");
                             // otherwise fall through to default case
                         default:
                             previousText = thisText;

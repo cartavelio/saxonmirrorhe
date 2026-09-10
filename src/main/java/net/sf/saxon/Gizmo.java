@@ -64,7 +64,7 @@ public class Gizmo {
     private final IndependentContext env;
     private DocumentImpl currentDoc;
     private boolean unsaved = false;
-    private final Map<StructuredQName, Sequence> variables = new HashMap<>();
+    private final Map<StructuredQName, GroundedValue> variables = new HashMap<>();
     private final Map<String, SubCommand> subCommands = new HashMap<>();
     private final Talker talker;
     private boolean typed = false;
@@ -381,7 +381,7 @@ public class Gizmo {
 
     private SequenceIterator evaluateExpression(XPathExpression expr, Item contextItem) throws XPathException {
         XPathDynamicContext context = expr.createDynamicContext(contextItem);
-        for (Map.Entry<StructuredQName, Sequence> var : variables.entrySet()) {
+        for (Map.Entry<StructuredQName, GroundedValue> var : variables.entrySet()) {
             XPathVariable v = env.getExternalVariable(var.getKey());
             context.setVariable(v, var.getValue());
         }

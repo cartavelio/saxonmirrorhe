@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
@@ -124,7 +125,7 @@ public class OptionsParameter {
                 actualKey = new StringItem(nominalKey);
             }
             SequenceType required = allowed.getValue();
-            Sequence actual = supplied.get(actualKey);
+            GroundedValue actual = supplied.get(actualKey);
             if (actual != null) {
                 if (!required.matches(actual, th)) {
                     boolean ok = false;

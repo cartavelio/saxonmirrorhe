@@ -932,22 +932,13 @@ public class SlashExpression extends BinaryExpression
             // See bug 4730: the step might have been changed to something else
             return new MappingIterator(
                     getStart().iterate(context),
-                    item -> ((AxisExpression) step).iterate((NodeInfo)item));
+                    SequenceMapper.of(item -> ((AxisExpression) step).iterate((NodeInfo)item)));
         }
 
         XPathContext context2 = context.newMinorContext();
         context2.trackFocus(getStart().iterate(context));
         return new ContextMappingIterator(c1 -> getStep().iterate(c1), context2);
     }
-
-//    /**
-//     * Mapping function, from a node returned by the start iteration, to a sequence
-//     * returned by the child.
-//     */
-//
-//    public SequenceIterator map(XPathContext context) throws XPathException {
-//        return getStep().iterate(context);
-//    }
 
     /**
      * Diagnostic print of expression structure. The abstract expression tree

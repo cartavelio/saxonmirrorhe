@@ -267,6 +267,7 @@ public class ArithmeticExpression extends BinaryExpression {
                             return null;
                         }
                     }
+                    return null; 
                 case Token.DIV:
                 case Token.IDIV:
                     if (getRhsExpression() instanceof Literal) {

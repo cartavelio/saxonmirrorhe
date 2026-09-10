@@ -42,7 +42,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
     private static final int IMPLICITLY_REQUIRED = 16;  // a parameter that is required because the fallback
     // value is not a valid instance of the type.
 
-    private byte properties = 0;
+    private int properties = 0;
     private Operand selectOp = null;
     protected StructuredQName variableQName;
     private SequenceType requiredType;
@@ -513,6 +513,7 @@ public final class LocalParam extends Instruction implements LocalBinding {
                     throw e;
                 }
                 context.setLocalVariable(slotNumber, getSelectValue(context));
+                break;
         }
         return null;
     }

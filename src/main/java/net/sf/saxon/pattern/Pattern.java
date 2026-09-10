@@ -306,15 +306,15 @@ public abstract class Pattern extends PseudoExpression {
             }
         } else if (UType.ATTRIBUTE.subsumes(uType)) {
             AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            MappingFunction atts = item -> ((NodeInfo)item).iterateAxis(AxisInfo.ATTRIBUTE);
+            MappingFunction atts = SequenceMapper.of(item -> ((NodeInfo)item).iterateAxis(AxisInfo.ATTRIBUTE));
             SequenceIterator allAttributes = new MappingIterator(allElements, atts);
-            ItemMappingFunction selection = item -> matches(item, context) ? (NodeInfo)item : null;
+            ItemMappingFunction selection = ItemFilter.of(item -> matches(item, context));
             return new ItemMappingIterator(allAttributes, selection);
         } else if (UType.NAMESPACE.subsumes(uType)) {
             AxisIterator allElements = doc.iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
-            MappingFunction atts = item -> ((NodeInfo)item).iterateAxis(AxisInfo.NAMESPACE);
+            MappingFunction atts = SequenceMapper.of(item -> ((NodeInfo)item).iterateAxis(AxisInfo.NAMESPACE));
             SequenceIterator allNamespaces = new MappingIterator(allElements, atts);
-            ItemMappingFunction selection = item -> matches(item, context) ? (NodeInfo) item : null;
+            ItemMappingFunction selection = ItemFilter.of(item -> matches(item, context));
             return new ItemMappingIterator(allNamespaces, selection);
 
         } else if (UType.CHILD_NODE_KINDS.subsumes(uType)) {
@@ -330,7 +330,7 @@ public abstract class Pattern extends PseudoExpression {
         } else {
             int axis = uType.subsumes(UType.DOCUMENT) ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
             AxisIterator allChildren = doc.iterateAxis(axis);
-            MappingFunction processElement = item -> {
+            MappingFunction processElement = SequenceMapper.of(item -> {
                 AxisIterator mapper = SingleNodeIterator.makeIterator((NodeInfo)item);
                 if (uType.subsumes(UType.NAMESPACE)) {
                     mapper = new ConcatenatingAxisIterator(mapper, ((NodeInfo)item).iterateAxis(AxisInfo.NAMESPACE));
@@ -339,15 +339,9 @@ public abstract class Pattern extends PseudoExpression {
                     mapper = new ConcatenatingAxisIterator(mapper, ((NodeInfo) item).iterateAxis(AxisInfo.ATTRIBUTE));
                 }
                 return mapper;
-            };
+            });
             SequenceIterator attributesOrSelf = new MappingIterator(allChildren, processElement);
-            ItemMappingFunction test = item -> {
-                if (matches(item, context)) {
-                    return (NodeInfo)item;
-                } else {
-                    return null;
-                }
-            };
+            ItemMappingFunction test = ItemFilter.of(item -> matches(item, context));
             return new ItemMappingIterator(attributesOrSelf, test);
 
         }

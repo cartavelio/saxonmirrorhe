@@ -19,7 +19,6 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -317,11 +316,7 @@ public class SpecificFunctionType extends AnyFunctionType {
                     argTypes[0].getPrimaryType().isPlainType() &&
                     Cardinality.allowsZero(resultType.getCardinality())) {
                 for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                    try {
-                        if (!resultType.matches(pair.value, th)) {
-                            return false;
-                        }
-                    } catch (XPathException e) {
+                    if (!resultType.matches(pair.value, th)) {
                         return false;
                     }
                 }
@@ -341,12 +336,8 @@ public class SpecificFunctionType extends AnyFunctionType {
                 if (!(rel == Affinity.SAME_TYPE || rel == Affinity.SUBSUMED_BY)) {
                     return false;
                 }
-                for (Sequence member : ((ArrayItem) item).members()) {
-                    try {
-                        if (!resultType.matches(member, th)) {
-                            return false;
-                        }
-                    } catch (XPathException e) {
+                for (GroundedValue member : ((ArrayItem) item).members()) {
+                    if (!resultType.matches(member, th)) {
                         return false;
                     }
                 }
@@ -380,20 +371,16 @@ public class SpecificFunctionType extends AnyFunctionType {
                 if (argTypes[0].getCardinality() == StaticProperty.EXACTLY_ONE &&
                     argTypes[0].getPrimaryType().isPlainType()) {
                     for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                        try {
-                            if (!resultType.matches(pair.value, th)) {
-                                String s = "The supplied map contains an entry with key (" + pair.key +
-                                        ") whose corresponding value (" + Err.depictSequence(pair.value) +
-                                        ") is not an instance of the return type in the function signature (" +
-                                        resultType + ")";
-                                Optional<String> more = resultType.explainMismatch(pair.value, th);
-                                if (more.isPresent()) {
-                                    s = s + ". " + more.get();
-                                }
-                                return Optional.of(s);
+                        if (!resultType.matches(pair.value, th)) {
+                            String s = "The supplied map contains an entry with key (" + pair.key +
+                                    ") whose corresponding value (" + Err.depictSequence(pair.value) +
+                                    ") is not an instance of the return type in the function signature (" +
+                                    resultType + ")";
+                            Optional<String> more = resultType.explainMismatch(pair.value, th);
+                            if (more.isPresent()) {
+                                s = s + ". " + more.get();
                             }
-                        } catch (XPathException e) {
-                            return Optional.empty();
+                            return Optional.of(s);
                         }
                     }
                 } else {
@@ -420,19 +407,15 @@ public class SpecificFunctionType extends AnyFunctionType {
                         return Optional.of(s);
                     } else {
                         for (GroundedValue member : ((ArrayItem) item).members()) {
-                            try {
-                                if (!resultType.matches(member, th)) {
-                                    String s = "The supplied array contains an entry (" + Err.depictSequence(member) +
-                                            ") is not an instance of the return type in the function signature (" +
-                                            resultType + ")";
-                                    Optional<String> more = resultType.explainMismatch(member, th);
-                                    if (more.isPresent()) {
-                                        s = s + ". " + more.get();
-                                    }
-                                    return Optional.of(s);
+                            if (!resultType.matches(member, th)) {
+                                String s = "The supplied array contains an entry (" + Err.depictSequence(member) +
+                                        ") is not an instance of the return type in the function signature (" +
+                                        resultType + ")";
+                                Optional<String> more = resultType.explainMismatch(member, th);
+                                if (more.isPresent()) {
+                                    s = s + ". " + more.get();
                                 }
-                            } catch (XPathException e) {
-                                return Optional.empty();
+                                return Optional.of(s);
                             }
                         }
                     }

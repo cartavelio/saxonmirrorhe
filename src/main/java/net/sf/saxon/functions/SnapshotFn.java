@@ -10,10 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.event.BuilderMonitor;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.ItemMappingFunction;
-import net.sf.saxon.expr.ItemMappingIterator;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -65,7 +62,7 @@ public class SnapshotFn extends SystemFunction {
      */
 
     public static ItemMappingFunction getMappingFunction() {
-        return SnapshotFn::snapshotSingle;
+        return ItemMapper.of(SnapshotFn::snapshotSingle);
     }
 
     /**

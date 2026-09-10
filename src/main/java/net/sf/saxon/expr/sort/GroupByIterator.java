@@ -297,7 +297,7 @@ public class GroupByIterator implements GroupIterator, LastPositionFinder, Looka
 
         public ManualGroupByIterator() {
             super(groups.get(position - 1).get(0), position);
-            setLastPositionFinder(() -> groups.size());
+            setLengthFinder(() -> groups.size());
         }
 
         @Override

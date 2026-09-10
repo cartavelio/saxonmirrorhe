@@ -15,6 +15,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.value.DateTimeValue;
@@ -154,10 +155,11 @@ public interface XPathContext {
      * Get the context size (the position of the last item in the current node list)
      *
      * @return the context size
-     * @throws XPathException if the context position is undefined
+     * @throws UncheckedXPathException if the context position is undefined. This is an unchecked
+     * exception to allow use of functional interfaces for lazy evaluation.
      */
 
-    int getLast() throws XPathException;
+    int getLast() throws UncheckedXPathException;
 
     /**
      * Determine whether the context position is the same as the context size

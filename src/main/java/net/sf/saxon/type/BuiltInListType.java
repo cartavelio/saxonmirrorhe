@@ -9,8 +9,8 @@ package net.sf.saxon.type;
 
 import com.saxonica.ee.schema.UserSimpleType;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.MappingFunction;
 import net.sf.saxon.expr.MappingIterator;
+import net.sf.saxon.expr.SequenceMapper;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
@@ -291,7 +291,7 @@ public class BuiltInListType implements ListType {
 
     /**
      * Returns the value of the 'block' attribute for this type, as a bit-signnificant
-     * integer with fields such as {@link Derivatiion#DERIVATION_LIST} and {@link Derivatiion#DERIVATION_EXTENSION}
+     * integer with fields such as {@link Derivation#DERIVATION_LIST} and {@link Derivation#DERIVATION_EXTENSION}
      *
      * @return the value of the 'block' attribute for this type
      */
@@ -331,7 +331,7 @@ public class BuiltInListType implements ListType {
      * Determines whether derivation (of a particular kind)
      * from this type is allowed, based on the "final" property
      *
-     * @param derivation the kind of derivation, for example {@link Derivatiion#DERIVATION_LIST}
+     * @param derivation the kind of derivation, for example {@link Derivation#DERIVATION_LIST}
      * @return true if this kind of derivation is allowed
      */
 
@@ -344,7 +344,7 @@ public class BuiltInListType implements ListType {
      * Get the types of derivation that are not permitted, by virtue of the "final" property.
      *
      * @return the types of derivation that are not permitted, as a bit-significant integer
-     *         containing bits such as {@link net.sf.saxon.type.Derivatiion#DERIVATION_EXTENSION}
+     *         containing bits such as {@link net.sf.saxon.type.Derivation#DERIVATION_EXTENSION}
      */
     @Override
     public int getFinalProhibitions() {
@@ -518,7 +518,7 @@ public class BuiltInListType implements ListType {
         map.atomicType = (AtomicType) getItemType();
         map.rules = rules;
         try {
-            return new AtomicArray(new MappingIterator(iter, map));
+            return new AtomicArray(new MappingIterator(iter, SequenceMapper.of(map::map)));
         } catch (XPathException err) {
             throw new ValidationException(err); // should not happen
         }
@@ -531,7 +531,7 @@ public class BuiltInListType implements ListType {
         return t;
     }
 
-    private static class ListTypeMappingFunction implements MappingFunction {
+    private static class ListTypeMappingFunction {
 
         public NamespaceResolver resolver;
         /*@Nullable*/ public AtomicType atomicType;
@@ -544,7 +544,6 @@ public class BuiltInListType implements ListType {
          * For details see {@link net.sf.saxon.expr.MappingFunction}
          */
 
-        @Override
         public AtomicIterator<AtomicValue> map(Item item) throws XPathException {
             try {
                 return atomicType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate();

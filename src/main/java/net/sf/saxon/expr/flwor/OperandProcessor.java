@@ -14,6 +14,7 @@ import net.sf.saxon.trans.XPathException;
  * Interface representing a visitor of the clauses of a FLWOR expession that can process and
  * modify the operands of each clause
  */
+@FunctionalInterface
 public interface OperandProcessor {
 
     void processOperand(Operand expr) throws XPathException;

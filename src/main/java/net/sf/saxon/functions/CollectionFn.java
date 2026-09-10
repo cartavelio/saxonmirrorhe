@@ -247,12 +247,12 @@ public class CollectionFn extends SystemFunction implements Callable {
         // Get an iterator over the items representing the resources
         SequenceIterator result = context.getConfiguration()
                 .getMultithreadedItemMappingIterator(sourceSeq,
-                                                     item1 -> ((ExternalObject<Resource>)item1).getObject().getItem(context));
+                                                     ItemMapper.of(item1 -> ((ExternalObject<Resource>)item1).getObject().getItem(context)));
 
         // In XSLT, apply space-stripping to document nodes in the collection
         if (whitespaceRule != null) {
             final SpaceStrippingRule rule = whitespaceRule;
-            ItemMappingFunction stripper = item -> {
+            ItemMappingFunction stripper = ItemMapper.of(item -> {
                 if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
                     TreeInfo treeInfo = ((NodeInfo) item).getTreeInfo();
                     if (treeInfo.getSpaceStrippingRule() != rule) {
@@ -260,7 +260,7 @@ public class CollectionFn extends SystemFunction implements Callable {
                     }
                 }
                 return item;
-            };
+            });
             result = new ItemMappingIterator(result, stripper);
         }
 

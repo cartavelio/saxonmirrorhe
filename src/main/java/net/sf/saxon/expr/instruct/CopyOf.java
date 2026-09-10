@@ -840,7 +840,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
         if (schemaType == null /*&& copyNamespaces*/ && !copyForUpdate) {
             if (validation == Validation.PRESERVE) {
                 // create a virtual copy of the underlying nodes
-                ItemMappingFunction copier = item -> {
+                ItemMappingFunction copier = ItemMapper.of(item -> {
                     if (item instanceof NodeInfo) {
                         if (((NodeInfo) item).getTreeInfo().isTyped()) {
                             if (!copyNamespaces && ((NodeInfo) item).getNodeKind() == Type.ELEMENT) {
@@ -863,11 +863,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     } else {
                         return item;
                     }
-                };
+                });
                 return new ItemMappingIterator(getSelect().iterate(context), copier, true);
             } else if (validation == Validation.STRIP) {
                 // create a virtual copy of the underlying nodes
-                ItemMappingFunction copier = item -> {
+                ItemMappingFunction copier = ItemMapper.of(item -> {
                     if (!(item instanceof NodeInfo)) {
                         return item;
                     }
@@ -878,7 +878,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         vc.setSystemId(computeNewBaseUri((NodeInfo) item, getStaticBaseURIString()));
                     }
                     return vc;
-                };
+                });
                 return new ItemMappingIterator(getSelect().iterate(context), copier, true);
             }
         }

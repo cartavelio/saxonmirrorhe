@@ -4926,7 +4926,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * false: no error is thrown.
      */
 
-    public boolean getBooleanProperty(Feature<?> feature) {
+    public boolean getBooleanProperty(Feature<Boolean> feature) {
         return enabledProperties.contains(feature.code);
     }
 
@@ -5065,7 +5065,7 @@ public class Configuration implements SourceResolver, NotationSet {
     @SuppressWarnings("unchecked")
     public <T> T getConfigurationProperty(Feature<T> feature) {
         if (booleanFeatures.contains(feature)) {
-            return (T) Boolean.valueOf(getBooleanProperty(feature));
+            return (T) Boolean.valueOf(getBooleanProperty((Feature<Boolean>)feature));
         }
         if (stringFeatures.contains(feature)) {
             String value = stringProperties.get(feature.code);

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.parser;
 
+import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
@@ -731,6 +732,7 @@ public class PathMap {
                         }
                         break;
                     } else {
+                        CSharp.emitCode("goto case AxisInfo.ANCESTOR");
                         // fall through
                     }
 

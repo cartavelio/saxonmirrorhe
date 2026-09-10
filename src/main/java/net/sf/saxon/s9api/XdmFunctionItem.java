@@ -153,7 +153,7 @@ public class XdmFunctionItem extends XdmItem {
             TypeHierarchy th = processor.getUnderlyingConfiguration().getTypeHierarchy();
             for (int i = 0; i < arguments.length; i++) {
                 net.sf.saxon.value.SequenceType required = type.getArgumentTypes()[i];
-                Sequence val = arguments[i].getUnderlyingValue();
+                GroundedValue val = arguments[i].getUnderlyingValue();
                 if (!required.matches(val, th)) {
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "", i);
                     val = th.applyFunctionConversionRules(val, required, role, Loc.NONE);
@@ -166,16 +166,15 @@ public class XdmFunctionItem extends XdmItem {
             context = fi.makeNewContext(context, controller);
 
             Sequence result = fi.call(context, argVals);
+            GroundedValue groundedResult = result.materialize();
             if (!fi.isTrustedResultType()) {
-                result = result.materialize();
                 net.sf.saxon.value.SequenceType required = type.getResultType();
-                if (!required.matches(result, th)) {
+                if (!required.matches(groundedResult, th)) {
                     RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION_RESULT, "", 0);
-                    result = th.applyFunctionConversionRules(result.materialize(), required, role, Loc.NONE);
+                    groundedResult = th.applyFunctionConversionRules(groundedResult, required, role, Loc.NONE);
                 }
             }
-            Sequence se = result.iterate().materialize();
-            return XdmValue.wrap(se);
+            return XdmValue.wrap(groundedResult);
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }

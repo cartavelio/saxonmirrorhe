@@ -9,7 +9,6 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
@@ -173,12 +172,8 @@ public class DictionaryMap extends MapItem {
             return true;
         }
         for (GroundedValue val : hashMap.values()) {
-            try {
-                if (!valueType.matches(val, th)) {
-                    return false;
-                }
-            } catch (XPathException e) {
-                throw new AssertionError(e); // cannot happen when value is grounded
+            if (!valueType.matches(val, th)) {
+                return false;
             }
         }
         return true;

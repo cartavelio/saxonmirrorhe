@@ -15,6 +15,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trans.NoDynamicContextException;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.value.CalendarValue;
@@ -209,15 +210,15 @@ public class EarlyEvaluationContext implements XPathContext {
      * Get the context size (the position of the last item in the current node list)
      *
      * @return the context size
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws net.sf.saxon.trans.UncheckedXPathException
      *          if the context position is undefined
      */
 
     @Override
-    public int getLast() throws XPathException {
+    public int getLast() throws UncheckedXPathException {
         XPathException err = new XPathException("The context item is absent");
         err.setErrorCode("XPDY0002");
-        throw err;
+        throw new UncheckedXPathException(err);
     }
 
     /**

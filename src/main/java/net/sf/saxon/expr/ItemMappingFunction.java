@@ -14,6 +14,10 @@ import net.sf.saxon.trans.XPathException;
  * ItemMappingFunction is an interface that must be satisfied by an object passed to a
  * ItemMappingIterator. It represents an object which, given an Item, can return either
  * another Item, or null.
+ *
+ * <p>NOTE: Java allows a lambda expression to be used where an ItemMappingFunction
+ * is needed, but C# does not (it's not possible in C# to have a class implementing
+ * a delegate). So if a delegate is wanted, use {@link ItemMapper}</p>
  */
 
 public interface ItemMappingFunction {

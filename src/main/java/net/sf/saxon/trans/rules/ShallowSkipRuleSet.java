@@ -7,6 +7,7 @@
 
 package net.sf.saxon.trans.rules;
 
+import net.sf.saxon.annotate.CSharp;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
@@ -69,6 +70,7 @@ public class ShallowSkipRuleSet implements BuiltInRuleSet {
                     while (tc != null) {
                         tc = tc.processLeavingTail();
                     }
+                    CSharp.emitCode("goto case Type.DOCUMENT");
                 }   // fall through!
                 case Type.DOCUMENT: {
                     XPathContextMajor c2 = context.newContext();

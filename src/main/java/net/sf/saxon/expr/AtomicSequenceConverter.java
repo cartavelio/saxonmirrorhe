@@ -339,7 +339,6 @@ public class AtomicSequenceConverter extends UnaryExpression {
             this.errorCode = code;
         }
 
-        @Override
         public AtomicValue mapItem(Item item) throws XPathException {
             ConversionResult result = converter.convert((AtomicValue)item);
             if (errorCode != null && result instanceof ValidationFailure) {

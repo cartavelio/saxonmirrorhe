@@ -15,6 +15,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.trace.ContextStackIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.iter.LookaheadIterator;
@@ -236,17 +237,21 @@ public class XPathContextMinor implements XPathContext {
      */
 
     @Override
-    public final int getLast() throws XPathException {
+    public final int getLast() throws UncheckedXPathException {
         if (currentIterator == null) {
             XPathException e = new XPathException("The context item is absent, so last() is undefined");
             e.setXPathContext(this);
             e.setErrorCode("XPDY0002");
-            throw e;
+            throw new UncheckedXPathException(e);
         }
         if (last.value >= 0) {
             return last.value;
         }
-        return currentIterator.getLength();
+        try {
+            return currentIterator.getLength();
+        } catch (XPathException err) {
+            throw new UncheckedXPathException(err);
+        }
     }
 
     /**
@@ -259,7 +264,11 @@ public class XPathContextMinor implements XPathContext {
         if (currentIterator.getProperties().contains(SequenceIteratorProperty.LOOKAHEAD)) {
             return !((LookaheadIterator) currentIterator).hasNext();
         }
-        return currentIterator.position() == getLast();
+        try {
+            return currentIterator.position() == getLast();
+        } catch (UncheckedXPathException e) {
+            throw XPathException.makeXPathException(e);
+        }
     }
 
     /**

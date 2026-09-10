@@ -15,9 +15,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.EmptySequence;
@@ -174,10 +175,10 @@ abstract class AbstractTransformerImpl extends IdentityTransformer {
         }
         Configuration config = getConfiguration();
         net.sf.saxon.value.SequenceType required = details.getUnderlyingDeclaredType();
-        Sequence converted;
+        GroundedValue converted;
         try {
             if (value instanceof Sequence) {
-                converted = (Sequence)value;
+                converted = ((Sequence)value).materialize();
             } else if (value instanceof String) {
                 converted = new UntypedAtomicValue(StringView.tidy((String) value));
             } else if (required.getPrimaryType() instanceof JavaExternalObjectType) {

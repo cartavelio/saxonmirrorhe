@@ -8,10 +8,13 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FocusIterator;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
 
 import java.util.EnumSet;
+import java.util.function.Supplier;
 
 
 /**
@@ -24,7 +27,7 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
 
     private Item item;
     private int _position;
-    private LastPositionFinder lastPositionFinder;
+    private Supplier<Integer> lengthFinder;
 
     /**
      * Create an uninitialized ManualIterator: this is only usable after the context item, position, and size (if required)
@@ -57,15 +60,15 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
     public ManualIterator(Item value) {
         this.item = value;
         this._position = 1;
-        this.lastPositionFinder = () -> 1;
+        this.lengthFinder = () -> 1;
     }
 
     public void setContextItem(Item value) {
         this.item = value;
     }
 
-    public void setLastPositionFinder(LastPositionFinder finder) {
-        this.lastPositionFinder = finder;
+    public void setLengthFinder(Supplier<Integer> finder) {
+        this.lengthFinder = finder;
     }
 
     public void incrementPosition() {
@@ -117,10 +120,10 @@ public class ManualIterator implements FocusIterator, UnfailingIterator,
 
     @Override
     public int getLength() throws XPathException {
-        if (lastPositionFinder == null) {
+        if (lengthFinder == null) {
             throw new XPathException("Saxon streaming restriction: last() cannot be used when consuming a sequence of streamed nodes, even if the items being processed are grounded");
         } else {
-            return lastPositionFinder.getLength();
+            return lengthFinder.get();
         }
     }
 
