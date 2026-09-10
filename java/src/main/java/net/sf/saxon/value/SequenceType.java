@@ -658,7 +658,7 @@ public final class SequenceType {
     /**
      * Indicates whether some other object is "equal to" this one. Note that equality for sequence types
      * and item types is stricter than the relation established using
-     * {@link #isSameType)}: for example the two
+     * {@link #isSameType}: for example the two
      * types map(*) and record(*) are considered distinct types by equals(), but the same type
      * by {@code Affinity.SAME_TYPE}.
      */
