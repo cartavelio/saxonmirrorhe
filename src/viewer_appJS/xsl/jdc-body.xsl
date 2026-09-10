@@ -808,6 +808,21 @@
                 </li>
             </ul>
         </xsl:if>
+            
+            <xsl:if test="exists(paramtags)">
+                <dl>
+                    <dt>Type Parameters</dt>
+                    <xsl:for-each select="paramtags/tag">
+                        <dd>
+                            <code><xsl:value-of select="."/></code>
+                            <xsl:if test="@comment">
+                                <xsl:text> - </xsl:text>
+                                <xsl:value-of select="@comment"/>
+                            </xsl:if>
+                        </dd>
+                    </xsl:for-each>
+                </dl>
+            </xsl:if>
 
         <xsl:if test="exists(implements | extends/inherits/interface)">
             <!--<xsl:if test="implements/interface/@fulltype =
