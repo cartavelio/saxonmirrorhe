@@ -140,7 +140,7 @@ typedef long long int (*j_executeQueryToValue_fn_t)(graal_isolatethread_t*, void
 
 typedef long long int (*j_executeQueryToFile_fn_t)(graal_isolatethread_t*, void *, char*, char*, void *);
 
-typedef char* (*getBaseURIForXdmNode_fn_t)(graal_isolatethread_t*, void *);
+typedef char* (*getBaseURIForXdmNode_fn_t)(graal_isolatethread_t*, void *, void *);
 
 typedef long long int (*getParentForXdmNode_fn_t)(graal_isolatethread_t*, void *);
 
@@ -170,9 +170,9 @@ typedef long long int (*j_makeXdmArrayFromBool_fn_t)(graal_isolatethread_t*, int
 
 typedef int (*j_getNodeKind_fn_t)(graal_isolatethread_t*, void *);
 
-typedef char* (*j_getLocalName_fn_t)(graal_isolatethread_t*, void *);
+typedef char* (*j_getLocalName_fn_t)(graal_isolatethread_t*, void *, void *);
 
-typedef char* (*j_getNodeName_fn_t)(graal_isolatethread_t*, void *);
+typedef char* (*j_getNodeName_fn_t)(graal_isolatethread_t*, void *, void *);
 
 typedef char* (*xdmValueArrayToString_fn_t)(graal_isolatethread_t*, void *, void *);
 

@@ -140,7 +140,7 @@ long long int j_executeQueryToValue(graal_isolatethread_t*, void *, char*, void 
 
 long long int j_executeQueryToFile(graal_isolatethread_t*, void *, char*, char*, void *);
 
-char* getBaseURIForXdmNode(graal_isolatethread_t*, void *);
+char* getBaseURIForXdmNode(graal_isolatethread_t*, void *, void *);
 
 long long int getParentForXdmNode(graal_isolatethread_t*, void *);
 
@@ -170,9 +170,9 @@ long long int j_makeXdmArrayFromBool(graal_isolatethread_t*, int*, int);
 
 int j_getNodeKind(graal_isolatethread_t*, void *);
 
-char* j_getLocalName(graal_isolatethread_t*, void *);
+char* j_getLocalName(graal_isolatethread_t*, void *, void *);
 
-char* j_getNodeName(graal_isolatethread_t*, void *);
+char* j_getNodeName(graal_isolatethread_t*, void *, void *);
 
 char* xdmValueArrayToString(graal_isolatethread_t*, void *, void *);
 
