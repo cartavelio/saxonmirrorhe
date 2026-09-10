@@ -14,6 +14,7 @@ import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.functions.Root_1;
 import net.sf.saxon.functions.SuperId;
+import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceUri;
@@ -342,6 +343,22 @@ public class PatternParser extends XPathParser {
                 return super.parseBasicStep(firstInPattern);
             }
 
+        }
+    }
+
+    @Override
+    protected boolean isAllowArgumentKeywords() {
+        return super.isAllowArgumentKeywords() && inPredicate > 0;
+    }
+
+    protected void checkAllowedFunctionArgument(Expression arg) throws XPathException {
+        if (inPredicate > 0) {
+            return;
+        }
+        if (!(arg instanceof VariableReference || arg instanceof Literal)
+                || arg instanceof FunctionLiteral
+                || Literal.isEmptySequence(arg)) {
+            grumble("Expression " + arg + " is not allowed as function argument in XSLT pattern");
         }
     }
 

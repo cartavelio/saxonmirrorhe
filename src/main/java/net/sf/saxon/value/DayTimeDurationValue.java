@@ -16,13 +16,13 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
  * A value of type xs:dayTimeDuration (or a subtype thereof).
- * <p>Internally this is held as an integer number of seconds held in a positive long, a positive integer
- * number of microseconds in the range 0 to 999,999,999, and a boolean sign. Some of the constructor
+ * <p>Internally this is held as an BigDecimal number of seconds. Some of the constructor
  * and accessor methods cannot handle the full range of values.</p>
  */
 
@@ -171,7 +171,7 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     public static DayTimeDurationValue fromMilliseconds(long milliseconds) {
-        BigDecimal seconds = BigDecimalValue.divideExact(BigDecimal.valueOf(milliseconds), BigDecimalValue.ONE_THOUSAND);
+        BigDecimal seconds = new BigDecimal(BigInteger.valueOf(milliseconds), 3);
         return new DayTimeDurationValue(seconds);
     }
 
@@ -183,7 +183,7 @@ public final class DayTimeDurationValue extends DurationValue
      */
 
     public static DayTimeDurationValue fromNanoseconds(long nanoseconds) {
-        BigDecimal seconds = BigDecimalValue.divideExact(BigDecimal.valueOf(nanoseconds), BigDecimalValue.ONE_BILLION);
+        BigDecimal seconds = new BigDecimal(BigInteger.valueOf(nanoseconds), 9);
         return new DayTimeDurationValue(seconds);
     }
 

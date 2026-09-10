@@ -328,6 +328,7 @@ public class XdmValue implements Iterable<XdmItem> {
      * <code>xs:date("2023-01-31")</code>.</p>
      * <p>A sequence of items is formatted by serializing the individual items, separated
      * by newlines.</p>
+     * <p>The output format is not guaranteed to remain identical between software releases.</p>
      * @return a string representation of the value
      */
 

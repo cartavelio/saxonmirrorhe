@@ -231,8 +231,10 @@ public final class DateTimeValue extends CalendarValue
 
     /*@NotNull*/
     public static DateTimeValue fromJavaInstant(long seconds, int nano) throws XPathException {
-        BigDecimal totalSeconds = BigDecimal.valueOf(seconds).add(
-                BigDecimalValue.divideExact(BigDecimal.valueOf(nano), BigDecimalValue.ONE_BILLION));
+        BigInteger totalNanoseconds = BigInteger.valueOf(seconds)
+                .multiply(BigInteger.valueOf(1_000_000_000L))
+                .add(BigInteger.valueOf(nano));
+        BigDecimal totalSeconds = new BigDecimal(totalNanoseconds, 9);
         return EPOCH.add(new DayTimeDurationValue(totalSeconds));
     }
 

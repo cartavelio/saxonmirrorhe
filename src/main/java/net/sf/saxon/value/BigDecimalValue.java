@@ -248,11 +248,6 @@ public final class BigDecimalValue extends DecimalValue {
         value = BigDecimal.valueOf(in);
     }
 
-    @CSharpReplaceBody(code = "return Singulink.Numerics.BigDecimal.DivideExact(numerator, denominator);")
-    public static BigDecimal divideExact(BigDecimal numerator, BigDecimal denominator) {
-        return numerator.divide(denominator, RoundingMode.DOWN);
-    }
-
     /**
      * Create a copy of this atomic value, with a different type label
      *

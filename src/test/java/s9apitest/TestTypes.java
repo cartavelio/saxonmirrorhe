@@ -285,7 +285,7 @@ public class TestTypes {
             Processor p = new Processor(true);
             p.setConfigurationProperty(Feature.XQUERY_VERSION, "4.0");
             ItemTypeFactory itf = new ItemTypeFactory(p);
-            ItemType it1 = itf.parseItemType("union(xs:double, xs:string)");
+            ItemType it1 = itf.parseItemType("(xs:double | xs:string)");
             assertTrue(it1.matches(new XdmAtomicValue(1.23)));
             assertTrue(it1.matches(new XdmAtomicValue("banana")));
             assertFalse(it1.matches(new XdmAtomicValue(true)));

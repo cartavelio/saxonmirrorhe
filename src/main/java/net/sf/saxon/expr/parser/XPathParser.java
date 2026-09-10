@@ -4248,7 +4248,9 @@ public class XPathParser {
             while (true) {
                 Token peek = t.peekAhead();
                 Expression arg;
-                if (t.currentToken instanceof Token.NameToken && peek == Token.COLON_EQUALS && allowXPath40Syntax) {
+                if (t.currentToken instanceof Token.NameToken
+                        && peek == Token.COLON_EQUALS
+                        && isAllowArgumentKeywords()) {
                     // keyword argument
                     StructuredQName paramName = qNameParser.parse(t.currentName(), NamespaceUri.NULL);
                     nextToken(); // read the operator
@@ -4287,6 +4289,7 @@ public class XPathParser {
                     } else {
                         arg = parseStandaloneExpr();
                     }
+                    checkAllowedFunctionArgument(arg);
                     args.add(arg);
                 }
                 if (t.currentToken == Token.COMMA) {
@@ -4364,6 +4367,12 @@ public class XPathParser {
         return makeTracer(fcall, functionName);
 
     }
+
+    protected boolean isAllowArgumentKeywords() {
+        return allowXPath40Syntax;
+    }
+
+    protected void checkAllowedFunctionArgument(Expression arg) throws XPathException {}
 
     /**
      * Process a function call in which one or more of the argument positions are
