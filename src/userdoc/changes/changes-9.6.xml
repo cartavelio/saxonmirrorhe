@@ -284,7 +284,7 @@
         <code>validation="preserve"</code> and <code>validation="lax"</code> are now treated as
         <code>validation="strip"</code>, rather than being rejected as in 2.0.</p>
     <p>Full support for the use of the <a class="bodylink"
-        href="/extensibility/collation/UCA">Unicode Collation Algorithm</a> is
+        href="/localization/unicode-collation-algorithm">Unicode Collation Algorithm</a> is
       provided in Saxon-PE/EE, with fallback behaviour in Saxon-HE.</p>
     <p>Conversion between JSON and XML using the <a class="bodylink code"
         href="/functions/fn/json-to-xml">json-to-xml()</a> function is supported as per the
@@ -483,9 +483,9 @@
 
   <category name="localization">
     <p>Full support for the use of the <a class="bodylink"
-        href="/extensibility/collation/UCA">Unicode Collation Algorithm</a> is
+        href="/localization/unicode-collation-algorithm">Unicode Collation Algorithm</a> is
       provided in Saxon-PE/EE, with fallback behaviour in Saxon-HE.</p>
-    <p><a class="bodylink" href="/extensibility/localizing">Localization of numbering
+    <p><a class="bodylink" href="/localization/localizing-numbers-and-dates">Localization of numbering
         and dates</a> using features from the ICU (International Components for Unicode) library is
       now supported in Saxon-PE/EE.</p>
     <p>Predefined versions of the numberer for Danish, Dutch, Flemish, French (and Belgian French),
