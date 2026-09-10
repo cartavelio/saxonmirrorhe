@@ -6,13 +6,11 @@ import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyDocumentImpl;
@@ -160,11 +158,40 @@ public class TestValidator {
         }
     }
 
+    @Test
+    public void testTypeAnnotations() {
+        try {
+            Processor proc = new Processor(true);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode doc = builder.build(new File(configTest.getDataDir() + "books.xml"));
+            assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), doc.getTypeAnnotationName());
+
+            SchemaManager mgr = proc.getSchemaManager();
+            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            SchemaValidator v = mgr.newSchemaValidator();
+            XdmDestination dest = new XdmDestination();
+            v.setDestination(dest);
+            v.setDestinationBaseURI(doc.getBaseURI());
+            v.validate(doc.asSource());
+
+            XdmNode validDoc = dest.getXdmNode();
+            assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "anyType"), validDoc.getTypeAnnotationName());
+            XdmNode books = validDoc.select(Steps.descendant("BOOKS")).firstItem();
+            assertEquals(NamespaceConstant.ANONYMOUS, books.getTypeAnnotationName().getNamespaceURI());
+            XdmNode price = books.select(Steps.path("ITEM", "PRICE")).firstItem();
+            assertEquals(new QName("moneyType"), price.getTypeAnnotationName());
+            assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "decimal"), ((XdmAtomicValue)price.getTypedValue()).getPrimitiveTypeName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
     private Set<String> getAllBaseUris(XdmNode root) {
         Set<String> baseUris = new HashSet<>();
-        XdmSequenceIterator iter = root.axisIterator(Axis.DESCENDANT);
+        XdmSequenceIterator<XdmNode> iter = root.axisIterator(Axis.DESCENDANT);
         while (iter.hasNext()) {
-            XdmNode node = (XdmNode) iter.next();
+            XdmNode node = iter.next();
             if (node.getNodeKind() == XdmNodeKind.ELEMENT) {
                 baseUris.add(node.getBaseURI().toASCIIString());
             }
@@ -504,7 +531,6 @@ public class TestValidator {
             SchemaManager sm = proc.getSchemaManager();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
-            SchemaValidator sv = sm.newSchemaValidator();
             try {
                 sm.load(source_xsd);
                 if (!allow) {
