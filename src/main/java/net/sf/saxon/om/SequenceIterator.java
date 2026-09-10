@@ -77,7 +77,7 @@ public interface SequenceIterator extends Closeable {
      * the iterator to calculate the rest of the sequence eagerly. The method is called by a client
      * if it anticipates that it might not read the iterator to completion, but it cannot
      * guarantee that {@link #close()} will be called when no more items are needed.
-     * @since 10.7
+     * @since 11.1
      */
 
     default void discharge() {
