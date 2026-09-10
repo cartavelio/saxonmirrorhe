@@ -87,7 +87,11 @@ public class SequenceCoercer extends UnaryExpression {
             return result;
         }
         if (requiredItemType == AnyGNodeType.getInstance()) {
-            return new GNodeSequenceConverter(sequence, role);
+            Expression result = sequence;
+            if (requiredType.getCardinality() != StaticProperty.ALLOWS_ZERO_OR_MORE) {
+                result = CardinalityChecker.makeCardinalityChecker(result, requiredType.getCardinality(), role);
+            }
+            return new GNodeSequenceConverter(result, role);
         }
         return new SequenceCoercer(sequence, requiredType, role, allow40);
     }
