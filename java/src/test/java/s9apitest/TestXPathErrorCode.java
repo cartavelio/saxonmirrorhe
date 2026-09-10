@@ -199,13 +199,13 @@ public class TestXPathErrorCode {
             StandardErrorReporter reporter = new StandardErrorReporter();
             comp.setWarningHandler(reporter);
             comp.compile("parse-xml('<abc/>')//*/@*/text()");
-            assertEquals(reporter.getNumberOfWarnings(), 1);
+            assertEquals(1, reporter.getNumberOfWarnings());
             reporter.suppressWarning("SXWN9037");
             comp.compile("parse-xml('<abc/>')//namespace::*/text()");
-            assertEquals(reporter.getNumberOfWarnings(), 1);
+            assertEquals(1, reporter.getNumberOfWarnings());
 
         } catch (Exception e) {
-            System.out.println(String.format("EXCEPTION %s %s", e.getClass().getName(), e.getMessage()));
+            System.out.printf("EXCEPTION %s %s%n", e.getClass().getName(), e.getMessage());
         }
     }
 
