@@ -7,7 +7,7 @@
 
 Processor.getSchemaManager() has an optional name parameter. The default name is "#global" which registers a global schema with the configuration. The special name "#local" creates a schema which is standalone, and is not registered with the configuration. Other schema names should be unique within a Processor/Configuration. It is possible for SchemaManager.load() to accept more than one Source, but once a schema has been loaded, it is not possible to add to it. The schema must be loaded before a SchemaValidator is created,
 
--- No, now moved to using XsdCompiler
+- No, now moved to using XsdCompiler
 
 When multiple calls on SchemaManager.load() are made, each schema must be valid in its own right, as well as the union of the schemas being valid. This means that one call must not load a schema that has "dangling references" to components in another.
 If such dependencies exist, the two schema documents must be loaded in a single call of the load() method.
@@ -36,7 +36,7 @@ JAXP SchemaFactory - the newSchema() method with no arguments now returns an emp
 
 Test attribute-1501 assumes that attribute definitions from the XML namespace are present in every schema. This ain't so! Changed the test to import the xml namespace.
 
-TODO: we can get rid of namespace sealing -- certainly at configuration level (DONE). Similarly much of the handling of namespace status.
+TODO: we can get rid of namespace sealing - certainly at configuration level (DONE). Similarly much of the handling of namespace status.
 
 TODO: package export and import
 
