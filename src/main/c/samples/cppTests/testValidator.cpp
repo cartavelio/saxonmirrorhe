@@ -65,7 +65,7 @@ void testValidatorInParseXml(SaxonProcessor *processor, SchemaValidator *val,
   try {
     val->registerSchemaFromString(sch1);
 
-    input = processor->parseXmlFromString(invalid_xml.c_str(), val, nullptr);
+    input = processor->parseXmlFromString(invalid_xml.c_str(), nullptr, val);
     // val->setSourceNode(input);
     // val->validate();
     sresult->failure++;
