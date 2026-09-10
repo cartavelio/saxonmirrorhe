@@ -17,6 +17,10 @@ saxonj {
   )
   manifestMainClass = "net.sf.saxon.Transform"
   sourceRoot = layout.projectDirectory.dir("src")
+
+  editionSourceRoots(layout.projectDirectory.dir("pe/src"),
+    layout.projectDirectory.dir("ee/src"))
+
   testDataDir = layout.projectDirectory.dir("../src/test/testdata")
   jarManifestClasspath = jarClasspath("lib/icu4j-${findProperty("icu4jVersion")}.jar", "lib/icu4j.jar")
   editionJarExclusions = listOf("**/sql", "com/saxonica/StatsTransform*.class")
