@@ -171,7 +171,8 @@ History
         <j id="{@name}" in="{$initial}" qy="{lower-case(@name)}"/>
     </xsl:template>
     
-    <xsl:template match="d:method[exists(preceding-sibling::d:method[@name eq current()/@name])]" mode="deeptree">
+    <xsl:template match="d:method[exists(preceding-sibling::d:method[(@name eq current()/@name) and
+        (@access ne 'private')])]" mode="deeptree">
         <!--<xsl:message>Duplicate method name <xsl:value-of select="@name"/></xsl:message>-->
     </xsl:template>
     
@@ -209,7 +210,7 @@ History
               <p>
                  <xsl:call-template name="comment-first-para"/>
               </p>
-              <xsl:apply-templates select="d:description/h:body/h:p | d:description/h:body/h:ul"
+              <xsl:apply-templates select="d:description/h:body/(h:p|h:ul|h:ol)"
                  mode="comment"/>
            </xsl:if>
         </div>
@@ -223,7 +224,7 @@ History
             normalize-space(string-join(d:description/h:body/text()/string(),
             '')) ne ''">
             <xsl:value-of select="' '"/> 
-            <xsl:apply-templates select="d:description/h:body/node()" mode="purpose"/>
+            <xsl:apply-templates select="d:description/h:body/node()[empty(preceding-sibling::h:p)]" mode="purpose"/>
         </xsl:if>
     </xsl:template>
     
@@ -478,7 +479,13 @@ History
                     </xsl:apply-templates>
                 </inherits>
             </xsl:if>
+            <!--<xsl:variable name="superclass-fullname" select="d:type/@fullname" as="xs:string"/>
+            <xsl:variable name="superclass-element" select="//d:class[@fullname eq $superclass-fullname]"/>
+            <xsl:if test="$superclass-element[@access eq 'private']">
+                <xsl:message>Private superclass: <xsl:value-of select="$superclass-fullname"/></xsl:message>
+            </xsl:if>-->
             <interface fulltype="{d:type/@fullname}" type="{d:type/@name}">
+                <xsl:apply-templates select="d:type/d:param"/>
                 <xsl:if test="d:inherited/d:method">
                     <methods>
                         <xsl:apply-templates select="d:inherited/d:method">
