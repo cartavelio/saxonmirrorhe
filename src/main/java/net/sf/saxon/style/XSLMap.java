@@ -68,8 +68,8 @@ public class XSLMap extends StyleElement {
                 if (requireXslt40Attribute("select")) {
                     select = makeExpression(value, att);
                 }
-            } else if (f.equals("on-duplicates")) {
-                if (requireXslt40Attribute("on-duplicates")) {
+            } else if (f.equals("duplicates") || f.equals("on-duplicates")) { // TODO: drop old name
+                if (requireXslt40Attribute("duplicates")) {
                     onDuplicates = makeExpression(value, att);
                 }
             } else {
