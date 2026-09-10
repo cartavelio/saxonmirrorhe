@@ -5954,7 +5954,10 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.0. Not available in SaxonCS.</p>
+        <p>Available since Saxon 9.0. The function is obsolescent, replaced by
+          the newer function <code>saxon:xquery</code>. The function is implemented in SaxonCS
+          but with the restriction that the type name <code>jt:net.sf.saxon.query.XQueryExpression</code>
+         is not available; the type of the result should be declared as <code>item()</code>.</p>
       </status>
       <saxon-edition platform="J C">PE/EE</saxon-edition>
       <details>
@@ -8533,9 +8536,10 @@ return ....
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.1. The function is available both in XQuery and in XSLT.
-        Not available in SaxonCS. The function is obsolescent, replaced by the new function
-        <code>saxon:xquery()</code>.</p>
+        <p>Available since Saxon 9.0. The function is obsolescent, replaced by
+          the newer function <code>saxon:xquery</code>. The function is implemented in SaxonCS
+          but with the restriction that the type name <code>jt:net.sf.saxon.query.XQueryExpression</code>
+          is not available; the type of the result should be declared as <code>item()</code>.</p>
       </status>
       <saxon-edition platform="J C">PE/EE</saxon-edition>
       <details>
