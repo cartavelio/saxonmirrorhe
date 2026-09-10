@@ -49,7 +49,7 @@ public class CoverageTraceListener implements TraceListener {
 
     private int openCount = 0;
 
-    private Logger out = new StandardLogger();
+    private Logger out = StandardLogger.makeLogger();
 
     public CoverageTraceListener() {}
 

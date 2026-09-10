@@ -21,7 +21,6 @@ import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.SaxonApiException;
 import net.sf.saxon.s9api.push.Document;
@@ -69,7 +68,7 @@ public class TimingTraceListener implements TraceListener {
     }
 
 
-    private Logger out = new StandardLogger();
+    private Logger out = StandardLogger.makeLogger();
 
     /**
      * Set the PrintStream to which the output will be written.

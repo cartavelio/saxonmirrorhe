@@ -45,7 +45,7 @@ import java.util.Stack;
 public abstract class AbstractTraceListener extends StandardDiagnostics implements TraceListener {
     protected int indent = 0;
     protected int detail = TraceLevel.NORMAL;
-    protected Logger out = new StandardLogger();
+    protected Logger out = StandardLogger.makeLogger();
     private Stack<Object> stack = new Stack<>();
     /*@NotNull*/ private static final StringBuilder spaceBuffer = new StringBuilder("                ");
 
