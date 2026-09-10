@@ -1529,8 +1529,8 @@ namespace SaxonCS_NUnit {
         
 
         /**
-     * Test that namespaces are copied OK by an identity transform
-     */
+        * Test that namespaces are copied OK by an identity transform
+        */
 
         [Test]
         public void testNamespaceSerialization4858() {
@@ -1603,6 +1603,25 @@ namespace SaxonCS_NUnit {
             catch (Exception err) {
                 Assert.Fail(err.Message);
             }
+        }
+        
+        [Test]
+        public void WrapDOMDocumentWithXmlDeclaration() {
+            Processor proc = new();
+            DocumentBuilder docBuilder = proc.NewDocumentBuilder();
+            XPathCompiler xpathCompiler = proc.NewXPathCompiler();
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(@"<?xml version='1.0'?><root>
+  <item>a</item>
+  <item>b</item>
+</root>");
+
+            XdmNode xdmDoc = docBuilder.Wrap(xmlDoc);
+
+            var xdmValue = xpathCompiler.Evaluate("//root | //item", xdmDoc);
+
+            Assert.That(xdmValue.Count, Is.EqualTo(3));
+
         }
 
 
