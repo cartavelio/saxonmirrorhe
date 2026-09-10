@@ -1398,7 +1398,7 @@ public class TestValidator {
 
             XsltCompiler xsltCompiler = proc.newXsltCompiler();
             xsltCompiler.setSchemaAware(true);
-            xsltCompiler.useSchema("", schema);
+            xsltCompiler.useSchema(schema);
             Xslt30Transformer exec = xsltCompiler.compile(new StreamSource(new StringReader(xsl))).load30();
 
             exec.setErrorListener(new ErrorListener() {

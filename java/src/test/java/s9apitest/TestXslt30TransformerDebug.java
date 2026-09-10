@@ -654,7 +654,7 @@ public class TestXslt30TransformerDebug {
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(true);
-            compiler.useSchema("", schema);
+            compiler.useSchema(schema);
 
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "\n" +

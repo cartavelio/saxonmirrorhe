@@ -124,7 +124,7 @@ public class LicenseTests {
         compiler = proc.newXsltCompiler();
         compiler.setJustInTimeCompilation(false);
         compiler.setSchemaAware(true);
-        compiler.useSchema("", schema);
+        compiler.useSchema(schema);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             XsltExecutable exec = compiler.compile(new StreamSource(new StringReader(xsl)));

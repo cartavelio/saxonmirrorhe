@@ -253,7 +253,7 @@ public class TestXslt30TransformerEE {
                     + "        </xsl:template>"
                     + "        </xsl:transform>";
             XsltCompiler comp = processor.newXsltCompiler();
-            comp.useSchema("", schema);
+            comp.useSchema(schema);
             Xslt30Transformer transformer = comp.compile(new StreamSource(new StringReader(s))).load30();
             XdmDestination dest = new XdmDestination();
             transformer.callTemplate(null, dest);
@@ -284,7 +284,7 @@ public class TestXslt30TransformerEE {
                     + "        </xsl:template>"
                     + "        </xsl:transform>";
             XsltCompiler comp = processor.newXsltCompiler();
-            comp.useSchema("", schema);
+            comp.useSchema(schema);
             comp.setURIResolver(new URIResolver() {
                 @Override
                 public Source resolve(String href, String base) throws TransformerException {

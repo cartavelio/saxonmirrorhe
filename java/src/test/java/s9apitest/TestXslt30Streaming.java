@@ -207,7 +207,7 @@ public class TestXslt30Streaming {
             XsdSchema schema = sm.compile(new StreamSource(Testdata.file("books.xsd")));
 
             XsltCompiler comp = proc.newXsltCompiler();
-            comp.useSchema("", schema);
+            comp.useSchema(schema);
             StringReader sr = new StringReader(
                     "<xsl:stylesheet version='3.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
                             "<xsl:mode streamable='yes' on-no-match='shallow-copy'/>" +
@@ -628,7 +628,7 @@ public class TestXslt30Streaming {
 
             XsdCompiler manager = proc.newXsdCompiler();
             XsdSchema schema = manager.compile(new StreamSource(Testdata.file("varietyOfTypes.xsd")));
-            comp.useSchema("", schema);
+            comp.useSchema(schema);
 
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer xsl = exec.load30();

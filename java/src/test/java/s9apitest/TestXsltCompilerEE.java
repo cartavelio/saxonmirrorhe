@@ -11,31 +11,15 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
-import net.sf.saxon.lib.ChainedResourceResolver;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLFilter;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLFilterImpl;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -153,6 +137,7 @@ public class TestXsltCompilerEE {
             Serializer scmOut = proc.newSerializer(scm);
             sm.exportComponents(scmOut);
 
+            comp.useSchema(sm.getXsdSchema());
             XsltPackage pack = comp.compilePackage(new StreamSource(new StringReader(xsl1)));
             File sefFile = Testdata.tempFile("6969test.sef");
             pack.save(sefFile);
@@ -176,6 +161,7 @@ public class TestXsltCompilerEE {
     @Test
     public void testReloadFromSource() {
         // Variant of testBug4969 that reloads the SEF file from a string
+        // Changes in Saxon 13 because schemas are now included in compiled SEF files
         try {
             Processor proc = new Processor(true);
             XsltCompiler comp = proc.newXsltCompiler();
@@ -201,19 +187,20 @@ public class TestXsltCompilerEE {
                     + "    <xs:complexType />\n"
                     + "  </xs:element>\n"
                     + "</xs:schema>";
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new StringReader(xsd)));
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
             StringWriter scm = new StringWriter();
             Serializer scmOut = proc.newSerializer(scm);
-            sm.exportComponents(scmOut);
+            schema.exportComponents(scmOut);
 
+            comp.useSchema(schema);
             XsltExecutable pack = comp.compile(new StreamSource(new StringReader(xsl1)));
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             pack.export(baos);
 
             Processor proc2 = new Processor(true);
-            SchemaManager sm2 = proc2.getSchemaManager();
-            sm2.importComponents(new StreamSource(new StringReader(scm.toString())));
+//            SchemaManager sm2 = proc2.getSchemaManager();
+//            sm2.importComponents(new StreamSource(new StringReader(scm.toString())));
             XsltCompiler comp2 = proc2.newXsltCompiler();
             comp2.setSchemaAware(true);
             XsltExecutable exec = comp2.loadExecutablePackage(

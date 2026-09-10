@@ -636,7 +636,7 @@ public class TestXsltTransformer {
             serializer.setOutputFile(Testdata.tempFile("validationWarnings.xml"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
-            compiler.useSchema("", schema);
+            compiler.useSchema(schema);
 
             String xsl = "<xsl:stylesheet version=\"2.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n" +
                     "\n" +
