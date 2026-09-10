@@ -231,12 +231,12 @@
         <p>To make it easier to iterate over the children of a node, the <code>NodeInfo</code> interface now has a method
         <code>children()</code> returning <code>Iterable&lt;NodeInfo&gt;</code>. The method has a default implementation.
         This makes it possible to use a Java "for each":</p>
-        <samp>for (NodeInfo child : children()) { ... }</samp>
+        <pre><code class="language-java">for (NodeInfo child : children()) { ... }</code></pre>
         
         <p>There is also a variant of <code>children()</code> that takes a Java <code>Predicate</code> as its second argument. 
             The <code>NodeTest</code> class now implements <code>Predicate&lt;NodeInfo&gt;</code>, so you can write for example:</p>
         
-        <samp>for (NodeInfo childElement : children(NodeKindTest.ELEMENT)) { ... }</samp>
+        <pre><code class="language-java">for (NodeInfo childElement : children(NodeKindTest.ELEMENT)) { ... }</code></pre>
         
         <p>which processes the children of a node that are themselves element nodes.</p>
         
@@ -666,9 +666,9 @@
         
         <p>For example:</p>
         
-        <samp><![CDATA[<saxon:for-each-member select="[(1,2), (3,4)]" bind-to="m">
+        <pre><code class="language-xml"><![CDATA[<saxon:for-each-member select="[(1,2), (3,4)]" bind-to="m">
   <subtotal>{sum($m)}</subtotal>
-</saxon:for-each-member>]]></samp>
+</saxon:for-each-member>]]></code></pre>
         
         <p>outputs <code><![CDATA[<subtotal>3</subtotal><subtotal>7</subtotal>]]></code></p>
         
@@ -770,7 +770,7 @@
             <li><p>The <code>xsl:if</code> elements can have a <code>then</code> attribute in place of a contained
                 sequence constructor, and it can also have an <code>else</code> attribute.</p>
             <p>For example, this function found in a W3C specification:</p>
-            <samp><![CDATA[<xsl:function name="f:product">
+            <pre><code class="language-xml"><![CDATA[<xsl:function name="f:product">
   <xsl:param name="seq"/>
   <xsl:choose>
     <xsl:when test="empty($seq)">
@@ -780,12 +780,12 @@
       <xsl:sequence select="head($seq) * f:product(tail($seq))"/>
     </xsl:otherwise>
   </xsl:choose>
-</xsl:function>]]></samp>
+</xsl:function>]]></code></pre>
                 <p>Can now be written:</p>
-                <samp><![CDATA[<xsl:function name="f:product">
+                <pre><code class="language-xml"><![CDATA[<xsl:function name="f:product">
   <xsl:param name="seq"/>
   <xsl:if test="empty($seq)" then="1" else="head($seq) * f:product(tail($seq))"/>
-</xsl:function>]]></samp>
+</xsl:function>]]></code></pre>
             </li>
         </ul>
       

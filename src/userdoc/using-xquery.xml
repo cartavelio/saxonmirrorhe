@@ -1012,7 +1012,7 @@
             <p>Because the <code>XQueryEvaluator</code> is an <code>IEnumerable</code>, it is
                possible to iterate over the results directly using the C# "foreach"
                construct:</p>
-            <samp>foreach(XdmItem item in compiler.Compile("1 to 10").Load()) {...}</samp>
+            <pre><code class="language-cs">foreach(XdmItem item in compiler.Compile("1 to 10").Load()) {...}</code></pre>
          </li>
          <li><p>The result of the <code>XQueryEvaluator.Evaluate()</code> method is an
             <code>XdmValue</code>. Saxon provides powerful facilities (modeled on LINQ) to process
@@ -1020,7 +1020,7 @@
             a single node <code>section</code>, (<code>XdmNode</code> is a subclass of <code>XdmValue</code>), then
             you could test whether it has any descendant <code>para</code> elements with <code>@class="normal"</code>
             by writing</p>
-            <samp>if (section.Select(Descendant("para").Where(Eq(Attribute("class"), "normal")).Exists()) {...}</samp>
+            <pre><code class="language-cs">if (section.Select(Descendant("para").Where(Eq(Attribute("class"), "normal")).Exists()) {...}</code></pre>
             
             <aside>This example assumes the presence of appropriate <code>using static</code> directives for the
                types <a class="cslink" href="Saxon.Api.Steps">Saxon.Api.Steps</a> and <a class="cslink"
@@ -1105,7 +1105,7 @@
                
                <p>For example:</p>
                
-               <samp><![CDATA[   int cap = 10;
+               <pre><code class="language-c"><![CDATA[   int cap = 10;
    sxnc_parameter *parameters;
    int parLen = 0, parCap;
    parCap = cap;
@@ -1115,21 +1115,21 @@
    sxnc_environment *environ;
    sxnc_processor *processor;
 
-   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></samp>
+   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></code></pre>
             </li>
             <li>
                <p>Next set up the GraalVM environment to create and initialize a new independent VM instance,
                   using the <code>create_graalvm_isolate()</code> function. This is required by the SaxonC
                   processors.</p>
-               <samp><![CDATA[   sxnc_environment *environ;
-   create_graalvm_isolate(environi);]]></samp>
+               <pre><code class="language-c"><![CDATA[   sxnc_environment *environ;
+   create_graalvm_isolate(environi);]]></code></pre>
             </li>
             <li>
                <p>Use the <code>c_createSaxonProcessor()</code> function to create a SaxonC processor, which
                   is used for XSLT and XQuery processing. The last argument is used to specify whether the
                   processor is to be run with license enabled (i.e. for Saxon-EE and Saxon-PE) or off - set
                   using values '1' and '0' respectively.</p>
-               <samp><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
+               <pre><code class="language-c"><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></code></pre>
             </li>
             <li>
                <p>Supply properties for the query using the <code>setProperty()</code> function. The query
@@ -1137,25 +1137,25 @@
                   or as a string using the property 'qs'.</p>
                <p>For example, set the source document, the current working directory, and the query string,
                   as follows:</p>
-               <samp><![CDATA[   setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
+               <pre><code class="language-c"><![CDATA[   setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
 
    setProperty(&properties, &propLen, &propCap, "cwd", cwd);
 
    setProperty(&properties, &propLen, &propCap, "qs",
-      "<out>{count(/out/person)}</out>");]]></samp>
+      "<out>{count(/out/person)}</out>");]]></code></pre>
             </li>
             <li>
                <p>You can now execute the XQuery, using the <code>executeQueryToFile()</code> or
                   <code>executeQueryToString()</code> functions. For example, you could execute a query
                   and return the results as a string representation, using:</p>
-               <samp><![CDATA[   const char *result =
-      executeQueryToString(environi, processor, cwd, 0, properties, 0, propLen);]]]></samp>
+               <pre><code class="language-c"><![CDATA[   const char *result =
+      executeQueryToString(environi, processor, cwd, 0, properties, 0, propLen);]]]></code></pre>
             </li>
             <li>
                <p>At the end of the program it is necessary to deallocate the memory created for the Saxon
                   processor, parameters and properties; and cleanly release resources created by GraalVM.</p>
-               <samp><![CDATA[   graal_tear_down(environi->thread);
-   freeSaxonc(&environi, &processor, &parameters, &properties);]]></samp>
+               <pre><code class="language-c"><![CDATA[   graal_tear_down(environi->thread);
+   freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             </li>
          </ol>
          
@@ -1397,7 +1397,7 @@
          required type: for example, if the function expects a string, then you can supply an attribute node, and it will be atomized.</p>
 
       <p>Here is an example:</p>
-         <samp><![CDATA[Processor processor = new Processor(true);
+         <pre><code class="language-java"><![CDATA[Processor processor = new Processor(true);
 XQueryCompiler qc = processor.newXQueryCompiler();
 XQueryExecutable exp1 = qc.compile(
         "declare function local:t1($v1 as xs:integer, $v2 as xs:double*) { " +
@@ -1407,7 +1407,8 @@ XQueryExecutable exp1 = qc.compile(
 final XQueryEvaluator ev = exp1.load();
 XdmValue v1 = new XdmAtomicValue(14);
 XdmValue v2 = new XdmAtomicValue(5).append(new XdmAtomicValue(2));
-XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local-functions", "t1"), new XdmValue[]{v1, v2});]]></samp>
+XdmValue result = ev.callFunction(
+   new QName("http://www.w3.org/2005/xquery-local-functions", "t1"), new XdmValue[]{v1, v2});]]></code></pre>
       
       <p>The value of <code>result</code> will be the atomic value 2, of type <code>xs:double</code>. The function conversion rules take care of
       the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
@@ -1443,7 +1444,7 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
          required type: for example, if the function expects a string, then you can supply an attribute node, and it will be atomized.</p>
       
       <p>Here is an example:</p>
-      <samp><![CDATA[Processor processor = new Processor();
+      <pre><code class="language-cs"><![CDATA[Processor processor = new Processor();
 XQueryCompiler qc = processor.NewXQueryCompiler();
 XQueryExecutable exp1 = qc.Compile(
         "declare function local:t1($v1 as xs:integer, $v2 as xs:double*) { " +
@@ -1453,7 +1454,8 @@ XQueryExecutable exp1 = qc.Compile(
 XQueryEvaluator ev = exp1.Load();
 XdmValue v1 = new XdmAtomicValue(14);
 XdmValue v2 = new XdmAtomicValue(5).append(new XdmAtomicValue(2));
-XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local-functions", "t1"), v1, v2);]]></samp>
+XdmValue result = ev.CallFunction(
+   new QName("http://www.w3.org/2005/xquery-local-functions", "t1"), v1, v2);]]></code></pre>
       
       <p>The value of <code>result</code> will be the atomic value 2, of type <code>xs:double</code>. The function conversion rules take care of
          the fact that a supplied sequence of integers is accepted where the required type is a sequence of <code>xs:double</code> values.</p>
@@ -1515,7 +1517,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          inspect the format supplied as input), supply an identity stylesheet. The data consists primarily of elements
          such as:</p>
       
-      <samp><![CDATA[
+      <pre><code class="language-xml"><![CDATA[
    <fn name="fp:localization" construct="xsl:function" file="****.xq" line="61" 
        count="18" t-sum-net="2.7411305" t-avg-net="0.15228502777777778" 
        t-sum="20.292764" t-avg="1.1273757777777778"/>
@@ -1523,7 +1525,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
    <fn match="phase-1-result" construct="xsl:variable" file="****.xq" 
        count="49" t-sum-net="89.4315515" t-avg-net="1.8066980101010102" line="41" 
        t-sum="90.9251545" t-avg="1.836871808080808"/>      
-   ]]></samp>
+   ]]></code></pre>
       
       <p>Here:</p>
       

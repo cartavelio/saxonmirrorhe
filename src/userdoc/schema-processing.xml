@@ -624,7 +624,7 @@
             transformation, having first set the option to perform schema validation. The following
             code (from the sample application <code>QuickValidator.java</code>) illustrates
             this:</p>
-         <samp><![CDATA[try {
+         <pre><code class="language-java"><![CDATA[try {
     System.setProperty(
             "javax.xml.transform.TransformerFactory",
             "com.saxonica.config.EnterpriseTransformerFactory");
@@ -643,7 +643,7 @@
 } catch (TransformerException err) {
     System.err.println("Validation failed");
 }
-]]></samp>
+]]></code></pre>
 
          <p>If you set an <code>ErrorListener</code> on the <code>TransformerFactory</code>, then
             you can control the way that error messages are output.</p>
@@ -652,7 +652,7 @@
             the source document, you can do this by pre-loading the schema into the
                <code>TransformerFactory</code>. This extended example (again from the sample
             application <code>QuickValidator.java</code>) illustrates this:</p>
-         <samp><![CDATA[try {
+         <pre><code class="language-java"><![CDATA[try {
     System.setProperty(
             "javax.xml.transform.TransformerFactory",
             "com.saxonica.config.EnterpriseTransformerFactory");
@@ -676,7 +676,7 @@
 } catch (TransformerException err) {
     System.err.println("Validation failed");
 }
-]]></samp>
+]]></code></pre>
 
          <p>You can preload as many schemas as you like using the <code>addSchema()</code> method.
             Such schemas are parsed, validated, and compiled once, and can be used as often as you
@@ -1352,8 +1352,8 @@
 
          <p>Assertions enable cross-validation of different elements or attributes within a complex
             type. For example, specifying:</p>
-         <samp><![CDATA[<xs:assert test="xs:date(@date-of-birth) lt xs:date(@date-of-death)"/>
-]]></samp>
+         <pre><code class="language-xml"><![CDATA[<xs:assert test="xs:date(@date-of-birth) lt xs:date(@date-of-death)"/>
+]]></pre>
 
          <p>will cause a run-time validation error if an instance document is validated in which the
             relevant condition does not hold.</p>
@@ -1447,25 +1447,25 @@
             disable use of extension functions if validating against a schema that is untrusted.</p>
 
          <p>The following example validates that a date is in the past:</p>
-         <samp><![CDATA[  <xs:element name="date">
+         <pre><code class="language-xml"><![CDATA[  <xs:element name="date">
     <xs:simpleType>
        <xs:restriction base="xs:date">
          <xs:assertion test="$value lt current-date()"/>
        </xs:restriction>   
     </xs:simpleType>
   </xs:element>
-]]></samp>
+]]></code></pre>
 
          <p>The following example validates that a string is a legal XPath expression. This relies
             on the fact that a failure evaluating the assertion is treated as "false":</p>
-         <samp><![CDATA[  <xs:element name="xpath">
+         <pre><code class="language-xml"><![CDATA[  <xs:element name="xpath">
     <xs:simpleType>
        <xs:restriction base="xs:string">
          <xs:assertion test="exists(saxon:expression($value))" xmlns:saxon="http://saxon.sf.net/"/>
        </xs:restriction>   
     </xs:simpleType>
   </xs:element>
-]]></samp>
+]]></code></pre>
 
          <p>Note how the in-scope namespaces for the XPath expression are taken from the in-scope
             namespaces of the containing <code>xs:assert</code> element.</p>
@@ -1703,7 +1703,7 @@
             facet is not satisfied.</p>
 
          <p>For example:</p>
-         <samp><![CDATA[  <xs:element name="date">
+         <pre><code class="language-xml"><![CDATA[  <xs:element name="date">
     <xs:simpleType>
        <xs:restriction base="xs:date" xmlns:saxon="http://saxon.sf.net/">
          <xs:assertion test=". lt current-date()"
@@ -1713,7 +1713,7 @@
        </xs:restriction>   
     </xs:simpleType>
   </xs:element>
-]]></samp>
+]]></code></pre>
       </section>
      
      <section id="saxon.streamable" title="saxon:streamable - streamable assertions">
@@ -1787,13 +1787,13 @@
          <p>For example, the following (rather contrived) example indicates that employees in a data file are to be sorted
             by ascending last name, then descending first name:</p>
          
-         <samp><![CDATA[<xs:element name="employees">
+         <pre><code class="language-xml"><![CDATA[<xs:element name="employees">
   <xs:unique>
     <xs:selector xpath="employee"/>
     <xs:field xpath="last" saxon:order="ascending"/>
     <xs:field xpath="first" saxon:order="descending"/>
   </xs:unique>
-</xs:element>]]></samp>
+</xs:element>]]></code></pre>
          
       </section>
       
@@ -1832,9 +1832,9 @@
         
          
          <p>For example:</p>
-         <samp><![CDATA[  <xs:simpleType name="list-of-doubles" xmlns:saxon="http://saxon.sf.net/">
+         <pre><code class="language-xml"><![CDATA[  <xs:simpleType name="list-of-doubles" xmlns:saxon="http://saxon.sf.net/">
     <xs:list item-type="xs:double" saxon:separator=",">
-  </xs:simpleType>]]></samp>
+  </xs:simpleType>]]></code></pre>
       </section>
       
       <section id="saxon.flags" title="saxon:flags - regular expression flags on xs:pattern">
@@ -1848,14 +1848,14 @@
  
          
          <p>For example:</p>
-         <samp><![CDATA[  <xs:element name="code">
+         <pre><code class="language-xml"><![CDATA[  <xs:element name="code">
     <xs:simpleType>
        <xs:restriction base="xs:string" xmlns:saxon="http://saxon.sf.net/">
          <xs:pattern value="[A-M][1-9]" saxon:flags="i"/>
        </xs:restriction>   
     </xs:simpleType>
   </xs:element>
-]]></samp>
+]]></code></pre>
          
          <p>Valid values for the <code>code</code> element include "A3", "J2", and "m5".</p>
       </section>
@@ -1876,7 +1876,7 @@
          
          <p>For example, a list of days-of-the-week, not permitting duplicates, might be written:</p>
       
-         <samp><![CDATA[<xs:simpleType name="days">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="days">
   <xs:restriction>
     <xs:list>
       <xs:simpleType>
@@ -1893,7 +1893,7 @@
     </xs:list>
     <saxon:distinct xmlns:saxon="http://saxon.sf.net/"/>
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
          
       </section>
       
@@ -1917,7 +1917,7 @@
          
          <p>For example, a list of dates, in ascending order, with no timezone, might be written:</p>
          
-         <samp><![CDATA[<xs:simpleType name="dates">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="dates">
   <xs:restriction>
     <xs:list>
       <xs:simpleType>
@@ -1928,7 +1928,7 @@
     </xs:list>
     <saxon:order value="ascending" xmlns:saxon="http://saxon.sf.net/"/>
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
          
       </section>
       
@@ -2021,14 +2021,14 @@
 
          <p>The following example converts a string to upper-case before testing it against the
             enumeration facet.</p>
-         <samp><![CDATA[<xs:simpleType name="currency">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="currency">
   <xs:restriction base="xs:string">
     <saxon:preprocess action="upper-case($value)" xmlns:saxon="http://saxon.sf.net/"/>
     <xs:enumeration value="USD"/>
     <xs:enumeration value="EUR"/>
     <xs:enumeration value="GBP"/>
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
 
          <p>Of course, it is not only the constraining facets that will see the preprocessed value
             (in this case, the upper-case value), any XPath operation that makes use of the typed
@@ -2040,33 +2040,33 @@
             output, the process is reversed, so that full stops are replaced by commas. (Note that
             in this example, the user-defined type also accepts numbers written in the "standard"
             style <code>3.15</code>.)</p>
-         <samp><![CDATA[<xs:simpleType name="euroDecimal">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="euroDecimal">
   <xs:restriction base="xs:decimal">
     <saxon:preprocess action="translate($value, ',', '.')" 
                       reverse="translate($value, '.', ',')"
                       xmlns:saxon="http://saxon.sf.net/"/>
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
 
          <p>The following example allows an <code>xs:time</code> value to be written with the
             seconds part omitted. Again, it also accepts the standard <code>hh:mm:ss</code>
             notation:</p>
-         <samp><![CDATA[<xs:simpleType name="hoursAndMinutes">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="hoursAndMinutes">
   <xs:restriction base="xs:time">
     <saxon:preprocess action="concat($value, ':00'[string-length($value) = 5])" 
                       xmlns:saxon="http://saxon.sf.net/"/>
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
 
          <p>The following example uses extension function calls within the XPath expression to
             support integers written in hexadecimal notation:</p>
-         <samp><![CDATA[<xs:simpleType name="hexInteger">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="hexInteger">
   <xs:restriction base="xs:long">
     <saxon:preprocess action="Long:parseLong($value, 16)" reverse="Long:toHexString(xs:long($value))"
       xmlns:Long="java:java.lang.Long"
       xmlns:saxon="http://saxon.sf.net/"/>
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
 
          <p>Given the input <code>&lt;val&gt;0040&lt;/val&gt;</code>, validated against this schema,
             the query <code>(val*3) cast as hexInteger</code> will produce the output
@@ -2079,7 +2079,7 @@
             preprocessing. So a facet that defines US date formats earlier than a certain date might
             look like this:</p>
 
-         <samp><![CDATA[<xs:simpleType name="us-date-before-2012">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="us-date-before-2012">
   <xs:restriction base="xs:date">
     <saxon:preprocess action="concat(substring($value, 7, 4), '-', 
                                      substring($value, 1, 2), '-', 
@@ -2087,13 +2087,13 @@
                       xmlns:saxon="http://saxon.sf.net/"/>
     <xs:maxInclusive value="2011-12-31"/>                  
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
 
          <p>However, if the type is further restricted, then facets for derived types will be
             validated after preprocessing. So an alternative formulation of the above type would
             be:</p>
 
-         <samp><![CDATA[<xs:simpleType name="us-date">
+         <pre><code class="language-xml"><![CDATA[<xs:simpleType name="us-date">
   <xs:restriction base="xs:date">
     <saxon:preprocess action="concat(substring($value, 7, 4), '-', 
                                      substring($value, 1, 2), '-', 
@@ -2105,7 +2105,7 @@
   <xs:restriction base="us-date">
     <xs:maxInclusive value="12-31-2011"/>                  
   </xs:restriction>
-</xs:simpleType>]]></samp>
+</xs:simpleType>]]></code></pre>
 
          <p>
             <i>The preprocess facet is not currently implemented for list or union types.</i>
@@ -2138,12 +2138,12 @@
          <p>For example, the following is permitted, indicating that US-based employees must have a
             unique social security number, but not imposing any such constraint on other
             employees:</p>
-         <samp><![CDATA[<xs:element name="company">
+         <pre><code class="language-xml"><![CDATA[<xs:element name="company">
   <xs:unique>
     <xs:selector xpath="employee[@location='us']"/>
     <xs:field xpath="@ssid"/>
   </xs:unique>
-</xs:element>]]></samp>
+</xs:element>]]></code></pre>
       </section>
       
       
@@ -2170,20 +2170,20 @@
          <p>Saxon provides an extension to the standard XSD syntax that allows a schema to be
             parameterized. This is only useful if XSD 1.1 is enabled. The facility allows a parameter
             to be declared in a top-level annotation in the schema document, for example:</p>
-         <samp><![CDATA[<xs:annotation>
+         <pre><code class="language-xml"><![CDATA[<xs:annotation>
   <xs:appinfo>
     <saxon:param name="accepted-currencies" 
                  as="xs:string" 
                  select="'USD', 'GBP, 'EUR'"
                  xmlns:saxon="http://saxon.sf.net/"/>
   </xs:appinfo>
-</xs:annotation>]]></samp>
+</xs:annotation>]]></code></pre>
          
          <p>This declaration allows the variable <code>$accepted-currencies</code> to appear in any XPath
             expression appearing in the remainder of the same schema document. Typically it will be
             used in an assertion or in an expression controlling conditional type assignment, for
             example:</p>
-         <samp><![CDATA[<xs:assert test="@currency = $accepted-currencies"/>]]></samp>
+         <pre><code class="language-xml"><![CDATA[<xs:assert test="@currency = $accepted-currencies"/>]]></code></pre>
          
          <p>As with stylesheet parameters in XSLT, the <code>as</code> attribute defines the required
             type of the value (defaulting to <code>item()*</code>), and the <code>select</code>

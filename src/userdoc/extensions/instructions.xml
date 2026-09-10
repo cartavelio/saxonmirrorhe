@@ -69,14 +69,14 @@
           <p>The following example groups transaction elements by date, returning the result as a nested array
             structure: specifically, an outer array, itself containing arrays of transaction elements, where all
             the transactions for a particular day are grouped as members of an inner array.</p>
-          <samp><![CDATA[<xsl:variable name="groups" as="array(array(element(*))">
+          <pre><code class="language-xml"><![CDATA[<xsl:variable name="groups" as="array(array(element(*))">
   <saxon:array>
     <xsl:for-each-group select="transaction" group-by="@date">
       <saxon:array select="current-group()"/>
     </xsl:for-each-group>
   </saxon:array>
 </xsl:variable>
-]]></samp>
+]]></code></pre>
           <p>Rather than binding the resulting array to a variable, another useful technique is to serialize
           it as JSON using <code>&lt;xsl:output method="json" build-tree="no"/&gt;</code>.</p>
         </example>
@@ -184,7 +184,7 @@
         <p>The <code>saxon:assign</code> element itself does not allow an <code>as</code> attribute.
           Instead, it calculates the value of the variable as if <code>as="item()*"</code> were
           specified. This means that the result of the construct:</p>
-        <samp><![CDATA[<saxon:assign name="a">London</saxon:assign>]]></samp>
+        <pre><code class="language-xml"><![CDATA[<saxon:assign name="a">London</saxon:assign>]]></code></pre>
 
         <p>is a single text node, not a document node containing a text node. If you want to create
           a document node, use <a class="bodylink code" href="/xsl-elements/document"
@@ -209,14 +209,14 @@
       </details>
       <examples>
         <example>
-          <samp><![CDATA[<xsl:variable name="i" select="0" saxon:assignable="yes"/>
+          <pre><code class="language-xml"><![CDATA[<xsl:variable name="i" select="0" saxon:assignable="yes"/>
 <xsl:template name="loop">
   <saxon:while test="$i &lt; 10">
     The value of i is <xsl:value-of select="$i"/>
     <saxon:assign name="i" select="$i+1"/>
   </saxon:while>
 </xsl:template>
-]]></samp>
+]]></code></pre>
         </example>
       </examples>
       <see-also name="assignable" type="extensions" subtype="attributes" namespace="saxon"/>
@@ -302,7 +302,7 @@
       <examples>
         <example>
           <p>Consider a JSON text holding details of customers, orders, and order-lines like this:</p>
-          <samp><![CDATA[
+          <pre><code class="language-json"><![CDATA[
 [
   { "customer": "Jones the Baker",
     "orders" : [{ 
@@ -334,9 +334,9 @@
     ....    
   }
 ]            
-            ]]></samp>
+            ]]></code></pre>
           <p>And suppose we want to double the quantity of flour ordered by Jones. This can be done as follows:</p>
-          <samp><![CDATA[<xsl:variable name="in" select="json-doc('customers.json')"/>
+          <pre><code class="language-xml"><![CDATA[<xsl:variable name="in" select="json-doc('customers.json')"/>
 <xsl:variable name="updated" as="array(*)">
   <saxon:deep-update
      root = "$in"
@@ -345,7 +345,7 @@
      action = "map:put(., 'quantity', ?quantity * 2)"/>
 </xsl:variable>
 <xsl:value-of select="serialize($updated, map{'method':'json', 'indent':true()})"/>
-]]></samp>
+]]></code></pre>
         </example>
       </examples>
       <saxon-edition>PE/EE 9.9</saxon-edition>
@@ -613,7 +613,7 @@
       </details>
       <examples>
         <example>
-          <samp><![CDATA[<xsl:template match="/">
+          <pre><code class="language-xml"><![CDATA[<xsl:template match="/">
   <saxon:doctype xsl:extension-element-prefixes="saxon">
   <dtd:doctype name="booklist"
         xmlns:dtd="http://saxon.sf.net/dtd" xsl:exclude-result-prefixes="dtd">
@@ -634,7 +634,7 @@
   </dtd:doctype>
   </saxon:doctype>
   <xsl:apply-templates/>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
 
           <p>Although not shown in this example, there is nothing to stop the DTD being generated as
             the output of a transformation, using instructions such as <code>xsl:value-of</code> and
@@ -814,10 +814,10 @@
       </details>
       <examples>
         <example>
-          <samp><![CDATA[<saxon:item-type name="square" as="xs:integer"/>
+          <pre><code class="language-xml"><![CDATA[<saxon:item-type name="square" as="xs:integer"/>
 <saxon:item-type name="piece" as="xs:string"/>
 <saxon:item-type name="board" as="array(array(type(square)))"/>
-<saxon:item-type name="move" type="map(type(piece), type(square))"/>]]></samp></example></examples>
+<saxon:item-type name="move" type="map(type(piece), type(square))"/>]]></code></pre></example></examples>
       <saxon-edition>PE/EE 9.8</saxon-edition>
       <see-also name="item-type" type="xsl-elements"/>
     </saxon-element>
@@ -1124,7 +1124,7 @@
       <details>
         <p>The effect of the instruction is easiest to illustrate by example. Consider the structure that results
         from parsing the JSON input:</p>
-          <samp><![CDATA[
+          <pre><code class="language-json"><![CDATA[
 [{ "country": "UK",
    "cities: [
       { "name": "London",
@@ -1150,22 +1150,22 @@
       }
     ]}
  ]
- ]]></samp>
+ ]]></code></pre>
         
         <p>This can be processed using the instruction:</p>
         
-        <samp><![CDATA[<saxon:tabulate-maps root="parse-json($input)" select="?*?cities?*"/>]]></samp>
+        <pre><code class="language-xml"><![CDATA[<saxon:tabulate-maps root="parse-json($input)" select="?*?cities?*"/>]]></code></pre>
         
         <p>which delivers the result (serialized as JSON, with whitespace added for clarity):</p>
         
-        <samp><![CDATA[
+        <pre><code class="language-json"><![CDATA[
 [{"name":"London",     "population":7.2E6,       "_keys":[1,"cities",1], "country":"UK"},
  {"name":"Birmingham", "population":992000,      "_keys":[1,"cities",2], "country":"UK"},
  {"name":"Leeds",      "population":720000,      "_keys":[1,"cities",3], "country":"UK"},
  {"name":"Paris",      "population":1.2341418E7, "_keys":[2,"cities",1], "country":"France"},
  {"name":"Lyon",       "population":2.214068E6,  "_keys":[2,"cities",2], "country":"France"},
  {"name":"Marseille",  "population":1.72707E6,   "_keys":[2,"cities",3], "country":"France"}]         
-          ]]></samp>
+          ]]></code></pre>
         
         <p>The result is thus an array of maps, corresponding one-to-one with the maps selected in the <code>select</code>
         expression, with each map in the output containing:</p>
@@ -1223,9 +1223,9 @@
       <details>
         <p>For example, you can delete selected attributes using the construct:</p>
         
-        <samp><![CDATA[<saxon:update select="//chapter[1]">
+        <pre><code class="language-xml"><![CDATA[<saxon:update select="//chapter[1]">
     <saxon:delete select=".//para[@deleted='yes']"/>
-</saxon:update>]]></samp>
+</saxon:update>]]></code></pre>
         
         <p>The outermost instruction is <code>saxon:update</code>. This has a <code>select</code> attribute to
           select the nodes whose subtrees will be updated. The default is <code>select="."</code>. The result of the
@@ -1290,13 +1290,13 @@
       </details>
       <examples>
         <example>
-          <samp><![CDATA[<xsl:template match="book">
+          <pre><code class="language-xml"><![CDATA[<xsl:template match="book">
   <saxon:update>
     <saxon:delete select=".//price"/>
     <saxon:rename select="author" to="'editor'"/>
   </saxon:update>
 </xsl:template>
-]]></samp>
+]]></code></pre>
         </example>
       </examples>
       <saxon-edition>EE 9.9</saxon-edition>
@@ -1332,14 +1332,14 @@
       </details>
       <examples>
         <example>
-          <samp><![CDATA[<xsl:variable name="i" select="0" saxon:assignable="yes"/>
+          <pre><code class="language-xml"><![CDATA[<xsl:variable name="i" select="0" saxon:assignable="yes"/>
 <xsl:template name="loop">
   <saxon:while test="$i &lt; 10">
     The value of i is <xsl:value-of select="$i"/>
     <saxon:assign name="i" select="$i+1"/>
   </saxon:while>
 </xsl:template>
-]]></samp>
+]]></code></pre>
         </example>
       </examples>
     </saxon-element>

@@ -1012,12 +1012,12 @@
             pseudo-attribute <code>href</code> that identifies the relative or absolute URL of the
             stylsheet document, and a pseudo-attribute type whose value is <code>text/xml</code>,
                <code>application/xml</code>, or <code>text/xsl</code>. For example:</p>
-         <samp>&lt;?xml-stylesheet type="text/xsl" href="../style3.xsl" ?&gt;</samp>
+         <pre><code class="language-xml"><![CDATA[<?xml-stylesheet type="text/xsl" href="../style3.xsl" ?>]]></code></pre>
 
          <p>It is also possible to refer to a stylesheet embedded within the source document,
             provided it has an <code>id</code> attribute and the <code>id</code> attribute is
             declared in the DTD as being of type <code>ID</code>. For example:</p>
-         <samp><![CDATA[<?xml-stylesheet type="text/xsl" href="#style1" ?>
+         <pre><code class="language-xml"><![CDATA[<?xml-stylesheet type="text/xsl" href="#style1" ?>
 <!DOCTYPE BOOKLIST SYSTEM "books.dtd"
   <!ATTLIST xsl:transform id ID #IMPLIED>
 >
@@ -1026,7 +1026,7 @@
   <xsl:transform id="style1" version="1.0" xmlns:xsl="...">
   ...
   </xsl:transform>
-</BOOKLIST>]]></samp>
+</BOOKLIST>]]></code></pre>
          
       </section>
    </section>
@@ -1225,14 +1225,14 @@
          
          <p>For instance, "TransformA" in S9APIExamples tests the following (to run the <a class="bodylink"
             href="/samples/books">Book list example</a>):</p>
-         <samp><![CDATA[   Processor processor = new Processor(false);
-   XsltCompiler compiler = processor.newXsltCompiler();
-   XsltExecutable stylesheet = compiler.compile(new StreamSource(new File("styles/books.xsl")));
-   Serializer out = processor.newSerializer(new File("books.html"));
-   out.setOutputProperty(Serializer.Property.METHOD, "html");
-   out.setOutputProperty(Serializer.Property.INDENT, "yes");
-   Xslt30Transformer transformer = stylesheet.load30();
-   transformer.transform(new StreamSource(new File("data/books.xml")), out);]]></samp>
+         <pre><code class="language-java"><![CDATA[Processor processor = new Processor(false);
+XsltCompiler compiler = processor.newXsltCompiler();
+XsltExecutable stylesheet = compiler.compile(new StreamSource(new File("styles/books.xsl")));
+Serializer out = processor.newSerializer(new File("books.html"));
+out.setOutputProperty(Serializer.Property.METHOD, "html");
+out.setOutputProperty(Serializer.Property.INDENT, "yes");
+Xslt30Transformer transformer = stylesheet.load30();
+transformer.transform(new StreamSource(new File("data/books.xml")), out);]]></code></pre>
            
       </section>
 
@@ -1412,14 +1412,14 @@
                set any global configuration options on the <code>Processor</code>.
               It is recommended to create a single <code>Processor</code> for the entire
             application.</p>
-            <samp>var processor = new Processor();</samp>
+            <pre><code class="language-cs">var processor = new Processor();</code></pre>
          </li>
          <li>
             <p>Call <code>NewXsltCompiler()</code> to create an <a class="cslink"
                href="Saxon.Api.XsltCompiler">XsltCompiler</a> object, and set any options
                that are local to a specific compilation (for example, the destination of error
                messages).</p>
-            <samp>var compiler = processor.NewXsltCompiler();</samp>
+            <pre><code class="language-cs">var compiler = processor.NewXsltCompiler();</code></pre>
          </li>
          <li>
             <p>Decide how you want to handle compile-time errors. Some options are:</p>
@@ -1436,9 +1436,9 @@
                them to a log file, or you could display them on screen. Either way, you will want to
                register an <code cs="Saxon.Api.ErrorReporter">ErrorReporter</code> that deals with the messages. For example,
                you could capture the messages in a list (for later analysis) like this:</p>
-                  <samp>compiler.ErrorReporter = err => errorList.Add(err)</samp>
+                  <pre><code class="language-cs">compiler.ErrorReporter = err => errorList.Add(err)</code></pre>
                <p>Or you could send them to a log file like this:</p>
-                  <samp>compiler.ErrorReporter = err => Console.Error.WriteLine(err.Message)</samp>
+                  <pre><code class="language-cs">compiler.ErrorReporter = err => Console.Error.WriteLine(err.Message)</code></pre>
                <p>The error object that is passed to the <code>ErrorReporter</code> delegate
                   is not an exception (it cannot be thrown). It is an object of class 
                   <code cs="Saxon.Api.Error">Error</code>, and its main properties
@@ -1456,7 +1456,7 @@
             <p>Call the <code>Compile()</code> method to compile a stylesheet. The result is an
                <code cs="Saxon.Api.XsltExecutable">XsltExecutable</code>, which can be used as often as you like, in the same thread or
                in different threads.</p>
-            <samp>var executable = compiler.Compile(...)</samp>
+            <pre><code class="language-cs">var executable = compiler.Compile(...)</code></pre>
             <p>This method has a number of overloads, allowing the stylesheet to be supplied in different ways. It can be
             supplied as a URI, as a <code>Stream</code>, as a <code>TextReader</code>, or as an <code>XmlReader</code>.</p>
             <p>Except for trivial stylesheets containing a single module, it's important that the stylesheet should have
@@ -1476,8 +1476,8 @@
                the <code>Load()</code> or
                <code>Load30()</code> method on the <code>XsltExecutable</code>.</p>
             
-            <samp>var transformer = executable.Load();</samp>
-            <samp>var transformer = executable.Load30();</samp>
+            <pre><code class="language-cs">var transformer = executable.Load();</code></pre>
+            <pre><code class="language-cs">var transformer = executable.Load30();</code></pre>
             
                <p>Either of these can be used to run the
                transformation (regardless of which XSLT version you are using), but they have
@@ -1521,14 +1521,14 @@
                      global stylesheet parameters, but not for parameters declared at the level
                      of a particular <code>xsl:template</code> element.</p>
                   <p>Typical usage:</p>
-                  <samp><![CDATA[ var transformer = executable.Load();
- transformer.SetInputStream(...);
- transformer.SetParameter(new QName("debug"), new XdmAtomicValue(true));
- var writer = new StringWriter();
- var serializer = processor.NewSerializer(writer);
- serializer.SetOutputProperty(Serializer.INDENT, "yes");
- transformer.Run(serializer);
- Console.WriteLine(writer.ToString());]]></samp>
+                  <pre><code class="language-cs"><![CDATA[var transformer = executable.Load();
+transformer.SetInputStream(...);
+transformer.SetParameter(new QName("debug"), new XdmAtomicValue(true));
+var writer = new StringWriter();
+var serializer = processor.NewSerializer(writer);
+serializer.SetOutputProperty(Serializer.INDENT, "yes");
+transformer.Run(serializer);
+Console.WriteLine(writer.ToString());]]></code></pre>
                   
                </li>
                <li>
@@ -1579,24 +1579,25 @@
       <p>For instance, <code>XsltSimple2</code> in <code>Examples.cs</code> runs as follows:</p>
 
       
-         <samp><![CDATA[   // Create a Processor instance.
-   Processor processor = new();
+         <pre><code class="language-cs"><![CDATA[// Create a Processor instance.
+Processor processor = new();
 
-   // Load the source document
-   XdmNode input = processor.NewDocumentBuilder().Build(new Uri(samplesDir, "data/books.xml"));
+// Load the source document
+XdmNode input = processor.NewDocumentBuilder().Build(new Uri(samplesDir, "data/books.xml"));
 
-   // Create a transformer for the stylesheet
-   Xslt30Transformer transformer = processor.NewXsltCompiler().Compile(new Uri(samplesDir, "styles/identity.xsl")).Load30();
+// Create a transformer for the stylesheet
+Xslt30Transformer transformer = processor.NewXsltCompiler().Compile(new Uri(samplesDir, 
+   "styles/identity.xsl")).Load30();
 
-   // Create a serializer
-   const string outfile = "OutputFromXsltSimple2.xml";
-   Serializer serializer = processor.NewSerializer();
-   serializer.OutputStream = new FileStream(outfile, FileMode.Create, FileAccess.Write);
+// Create a serializer
+const string outfile = "OutputFromXsltSimple2.xml";
+Serializer serializer = processor.NewSerializer();
+serializer.OutputStream = new FileStream(outfile, FileMode.Create, FileAccess.Write);
 
-   // Transform the source XML and serialize the result to the output file.
-   transformer.ApplyTemplates(input, serializer);
+// Transform the source XML and serialize the result to the output file.
+transformer.ApplyTemplates(input, serializer);
 
-   Console.WriteLine("\nOutput written to " + outfile + "\n");]]></samp>
+Console.WriteLine("\nOutput written to " + outfile + "\n");]]></code></pre>
          
    </section>
    
@@ -1651,46 +1652,46 @@
                
                <p>For example:</p>
                
-               <samp><![CDATA[   int cap = 10;
-   sxnc_parameter *parameters;
-   int parLen = 0, parCap;
-   parCap = cap;
-   sxnc_property *properties;
-   int propLen = 0;
-   parCap = cap;
-   sxnc_environment *environ;
-   sxnc_processor *processor;
+               <pre><code class="language-c"><![CDATA[int cap = 10;
+sxnc_parameter *parameters;
+int parLen = 0, parCap;
+parCap = cap;
+sxnc_property *properties;
+int propLen = 0;
+parCap = cap;
+sxnc_environment *environ;
+sxnc_processor *processor;
 
-   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></samp>
+initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></code></pre>
             </li>
             <li>
                <p>Next set up the GraalVM environment to create and initialize a new independent VM instance,
                   using the <code>create_graalvm_isolate()</code> function. This is required by the SaxonC
                   processors.</p>
-               <samp><![CDATA[   sxnc_environment *environ;
-   create_graalvm_isolate(environi);]]></samp>
+               <pre><code class="language-c"><![CDATA[sxnc_environment *environ;
+create_graalvm_isolate(environi);]]></code></pre>
             </li>
             <li>
                <p>Use the <code>c_createSaxonProcessor()</code> function to create a SaxonC processor, which
                   is used for XSLT and XQuery processing. The last argument is used to specify whether the
                   processor is to be run with license enabled (i.e. for Saxon-EE and Saxon-PE) or off - set
                   using values '1' and '0' respectively.</p>
-               <samp><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
+               <pre><code class="language-c"><![CDATA[int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></code></pre>
             </li>
             <li>
                <p>You can now execute XSLT stylesheets, using the <code>xsltSaveResultToFile()</code> or
                   <code>xsltApplyStylesheet()</code> functions. For example, you could execute a stylesheet
                   and return the results as a string representation, using:</p>
-               <samp><![CDATA[   const char *result =
-      xsltApplyStylesheet(environ, processor, cwd, "../data/sample.xml",
-         "../data/test.xsl", 0, 0, 0, 0);]]]></samp>
+               <pre><code class="language-c"><![CDATA[const char *result =
+   xsltApplyStylesheet(environ, processor, cwd, "../data/sample.xml",
+      "../data/test.xsl", 0, 0, 0, 0);]]]></code></pre>
                <p>Notice here we have not supplied any parameters or properties.</p>
             </li>
             <li>
                <p>At the end of the program it is necessary to deallocate the memory created for the Saxon
                   processor, parameters and properties; and cleanly release resources created by GraalVM.</p>
-               <samp><![CDATA[   graal_tear_down(environi->thread);
-   freeSaxonc(&environi, &processor, &parameters, &properties);]]></samp>
+               <pre><code class="language-c"><![CDATA[graal_tear_down(environi->thread);
+freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             </li>
          </ol>
          
@@ -2016,11 +2017,10 @@
       <p>Saxon-specific configuration options can be specified using the <code>attribute</code>
          child of the <code>factory</code> element. For example, the following switches on Saxon
          tracing (the equivalent of the <code>-T</code> option on the command line):</p>
-      <samp><![CDATA[  <factory name="net.sf.saxon.TransformerFactoryImpl">
-     <attribute name="http://saxon.sf.net/feature/traceListenerClass"
-                value="net.sf.saxon.trace.XSLTTraceListener"/>
-  </factory>
-]]></samp>
+      <pre><code class="language-xml"><![CDATA[<factory name="net.sf.saxon.TransformerFactoryImpl">
+   <attribute name="http://saxon.sf.net/feature/traceListenerClass"
+              value="net.sf.saxon.trace.XSLTTraceListener"/>
+</factory>]]></code></pre>
 
       <p>For a full list of feature names, see <a class="bodylink"
          href="/configuration/config-features">Configuration features</a> or the Javadoc
@@ -2040,10 +2040,10 @@
 
       <p>It is possible to get detailed control of the configuration by specifying the name of a
          Saxon configuration file using this mechanism, for example:</p>
-      <samp><![CDATA[  <factory name="com.saxonica.config.EnterpriseTransformerFactory">
-    <attribute name="http://saxon.sf.net/feature/configuration-file"
-               value="config-de.xml"/>
-  </factory>]]></samp>
+      <pre><code class="language-xml"><![CDATA[<factory name="com.saxonica.config.EnterpriseTransformerFactory">
+   <attribute name="http://saxon.sf.net/feature/configuration-file"
+              value="config-de.xml"/>
+</factory>]]></code></pre>
 
       <p>In this case this must be the first attribute.</p>
 
@@ -2377,15 +2377,15 @@
       
       <p>For example, given a stylesheet whose initial template is:</p>
       
-      <samp><![CDATA[<xsl:template match="/">
+      <pre><code class="language-xml"><![CDATA[<xsl:template match="/">
    <xsl:sequence select="1 to 5"/>
-</xsl:template>]]></samp>
+</xsl:template>]]></code></pre>
       
       <p>the raw output is a sequence of five integers; the tree output is an in-memory 
          XML document fragment holding
       a single text node whose string value is <code>"1 2 3 4 5"</code>, and the serialized output
       (assuming the XML output method) might be:</p>
-      <samp><![CDATA[<?xml version="1.0" encoding="utf-8">1 2 3 4 5]]></samp>
+      <pre><code class="language-xml"><![CDATA[<?xml version="1.0" encoding="utf-8">1 2 3 4 5]]></code></pre>
       
  
       <p>The following sections describe the mechanisms for controlling where stylesheet output is
@@ -2519,7 +2519,7 @@
                   that is, a function that accepts an absolute URI and returns a <code java="net.sf.saxon.s9api.Destination">Destination</code> for the output. For example, you
                   might write:</p>
                
-               <samp>transformer.setResultDocumentHandler(uri -> processor.newSerializer(....));</samp>
+               <pre><code class="language-java">transformer.setResultDocumentHandler(uri -> processor.newSerializer(....));</code></pre>
                
                <p>When writing to the secondary result document is complete, Saxon will call the method <code>Destination.close()</code>,
                   whose effect depends on the kind of destination. For example, in the case of a <code
@@ -2544,7 +2544,7 @@
                   and base URI, and returns an <code cs="Saxon.Api.IDestination">IDestination</code> for the output. For example, you
                   might write:</p>
                
-               <samp>transformer.ResultDocumentHandler = (href, base) => processor.NewSerializer(....);</samp>
+               <pre><code class="language-cs">transformer.ResultDocumentHandler = (href, base) => processor.NewSerializer(....);</code></pre>
                              
                <p>You can set the property <code>Destination.OnClose</code> to supply an application-specific action
                   to be performed when the destination is closed. For example, if the URI is a <code>mailto:</code> URI, you might
@@ -2565,9 +2565,9 @@
                <p>In Python the <code>get_result_documents()</code> method returns a Python <code>dict</code>
                   (i.e. <code>dict [str, PyXdmValue]</code>).</p>
                <p>For example in Python you could do the following:</p>
-               <samp><![CDATA[  xslt_excutable.set_capture_result_documents(True)
-  result = xslt_executable.call_template_returning_value(template_name='main', base_output_uri=base_output_uri)
-  result_documents = xslt_executable.get_result_documents()]]></samp>
+               <pre><code class="language-python"><![CDATA[xslt_excutable.set_capture_result_documents(True)
+result = xslt_executable.call_template_returning_value(template_name='main', base_output_uri=base_output_uri)
+result_documents = xslt_executable.get_result_documents()]]></code></pre>
                
             </li>
          </ul>
@@ -2605,7 +2605,8 @@
             method is of type <code>Consumer&lt;Message&gt;</code>
          and it will typically be supplied as a lambda expression, for example:</p>
          
-            <samp>transformer.setMessageHandler(msg -> System.err.println(">>" + msg.getContent().getStringValue()));</samp>
+            <pre><code class="language-java"><![CDATA[transformer.setMessageHandler(msg -> System.err.println(">>" +
+   msg.getContent().getStringValue()));]]></code></pre>
             
          </div>
          <div class="csonly">
@@ -2614,7 +2615,8 @@
                or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code>. The value of the property should be of type <code>Action&lt;Message&gt;</code>
                and it will typically be supplied as a lambda expression, for example:</p>
             
-            <samp>transformer.MessageListener = msg => Console.Error.WriteLine(">>" + msg.Content.StringValue);</samp>
+            <pre><code class="language-cs"><![CDATA[transformer.MessageListener = msg => Console.Error.WriteLine(">>" +
+   msg.Content.StringValue);]]></code></pre>
             
          </div>
          <div class="conly">
@@ -2629,9 +2631,9 @@
                <code>getXslMessages()</code> method (<code>get_xsl_messages()</code> in Python), which returns
                the sequence of messages as an <code>XdmValue</code>, for example in C++:</p>
             
-            <samp><![CDATA[  executable->setSaveXslMessage(true);
-  result = executable->transformToString();
-  XdmValue * messages = executable->getXslMessages();]]></samp>
+            <pre><code class="language-cpp"><![CDATA[executable->setSaveXslMessage(true);
+result = executable->transformToString();
+XdmValue * messages = executable->getXslMessages();]]></code></pre>
             
          </div>
          
@@ -2686,14 +2688,12 @@
          inspect the format supplied as input), supply an identity stylesheet. The data consists primarily of elements
          such as:</p>
       
-      <samp><![CDATA[
-   <fn name="fp:localization" construct="xsl:function" file="****.xsl" line="61" 
-       count="18" t-sum-net="2.7411305" t-avg-net="0.15228502777777778" 
-       t-sum="20.292764" t-avg="1.1273757777777778"/>
-   <fn match="*" construct="xsl:template" file="****.xsl" line="41" 
-       count="49" t-sum-net="89.4315515" t-avg-net="1.8066980101010102" 
-       t-sum="90.9251545" t-avg="1.836871808080808"/>
-   ]]></samp>
+      <pre><code class="language-xml"><![CDATA[<fn name="fp:localization" construct="xsl:function" file="****.xsl" line="61" 
+    count="18" t-sum-net="2.7411305" t-avg-net="0.15228502777777778" 
+    t-sum="20.292764" t-avg="1.1273757777777778"/>
+<fn match="*" construct="xsl:template" file="****.xsl" line="41" 
+    count="49" t-sum-net="89.4315515" t-avg-net="1.8066980101010102" 
+    t-sum="90.9251545" t-avg="1.836871808080808"/>]]></code></pre>
       
       <p>Here:</p>
       

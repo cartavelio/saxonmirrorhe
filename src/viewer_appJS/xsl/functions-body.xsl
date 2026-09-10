@@ -163,6 +163,7 @@
 
     <xsl:template match="code|fc:code" mode="f">
         <code>
+            <xsl:copy-of select="@*"/>
             <xsl:apply-templates/>
         </code>
     </xsl:template>

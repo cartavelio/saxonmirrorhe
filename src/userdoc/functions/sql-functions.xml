@@ -79,13 +79,13 @@
          </table>
          <p>For example:</p>
          
-         <samp><![CDATA[<xsl:variable name="connection" select="sql:connect(map{
+         <pre><code class="language-xml"><![CDATA[<xsl:variable name="connection" select="sql:connect(map{
         'database':'jdbc:mysql://localhost/saxontest',
         'driver':'com.mysql.jdbc.Driver',
         'user':'dbadmin',
         'password':$password,
         'autoCommit':true()})"/>
-]]></samp>
+]]></code></pre>
          <p>It will often be appropriate to bind the result of the call to a global variable.</p>
          <p>A dynamic error is thrown in the event of any connection failure. Improved diagnostics on the reason
             for failure are output if the configuration option <a class="feature" href="TIMING"/> is set (<code>-t</code>
@@ -97,7 +97,7 @@
             href="/extensions/instructions/do">saxon:do</a> extension instruction: for example to close the connection use the
             instruction:</p>
          
-         <samp><![CDATA[<saxon:do action="$connection?close()"/>]]></samp>        
+         <pre><code class="language-xml"><![CDATA[<saxon:do action="$connection?close()"/>]]></code></pre>        
          
          <p>JDBC connections are not thread-safe. It is therefore advisable when using JDBC connections to
             suppress Saxon multi-threading by setting the configuration option <a class="feature" href="ALLOW_MULTI_THREADING"/>
@@ -143,7 +143,7 @@
             the <a class="bodylink code" href="/extensions/instructions/do">saxon:do</a> extension instruction.</p>
          
          <p>Example:</p>
-         <samp><![CDATA[<saxon:do action="sql:delete($connection, 'book', 'price > 20.00')"/>]]></samp>
+         <pre><code class="language-xml"><![CDATA[<saxon:do action="sql:delete($connection, 'book', 'price > 20.00')"/>]]></code></pre>
       </details>
    </function>
    
@@ -182,7 +182,7 @@
             the <a class="bodylink code" href="/extensions/instructions/do">saxon:do</a> extension instruction.</p>
          
          <p>Example:</p>
-         <samp><![CDATA[<saxon:do action="sql:execute($connection, 'DROP TABLE book')"/>]]></samp>
+         <pre><code class="language-xml"><![CDATA[<saxon:do action="sql:execute($connection, 'DROP TABLE book')"/>]]></code></pre>
       </details>
    </function>
    
@@ -226,13 +226,13 @@
             the <a class="bodylink code" href="/extensions/instructions/do">saxon:do</a> extension instruction.</p>
          
          <p>Example:</p>
-         <samp><![CDATA[<saxon:do action="sql:insert($connection, 'book', 
+         <pre><code class="language-xml"><![CDATA[<saxon:do action="sql:insert($connection, 'book', 
    map{'title': TITLE,
        'author': AUTHOR,
        'category': $category,
        'price': PRICE,
        'date': current-date()})"/>
-]]></samp>
+]]></code></pre>
       </details>
    </function>
    
@@ -270,13 +270,13 @@
                href="/extensions/instructions/do">saxon:do</a> instruction.</p>
          
          <p>Example:</p>
-         <samp><![CDATA[<xsl:variable name="add-book" as="function(*)" 
+         <pre><code class="language-xml"><![CDATA[<xsl:variable name="add-book" as="function(*)" 
    select="sql:prepared-statement($connection, 
    'INSERT INTO book (isbn, title, author, category) VALUES (?, ?, ?, ?)')"/>        
 <xsl:for-each select="//book">
    <saxon:do action="$add-book(@isbn, @title, @author, @category)"/>
 </xsl:for-each>
-]]></samp>
+]]></code></pre>
       </details>
    </function>
    
@@ -313,7 +313,7 @@
          <p>Note that the result is a sequence rather than an array. It can be converted to an array (for example,
             for serializing in JSON) using the expression <code>array{$result}</code>.</p>
          <p>Example:</p>
-         <samp><![CDATA[<xsl:variable name="query" as="function(*)" 
+         <pre><code class="language-xml"><![CDATA[<xsl:variable name="query" as="function(*)" 
    select="sql:prepared-query($connection, 'SELECT date, title FROM book WHERE author = ?')"/>
         
 <out>
@@ -326,7 +326,7 @@
       </author>
    </xsl:for-each>
 </out>
-]]></samp>
+]]></code></pre>
       </details>
    </function>
    
@@ -376,21 +376,21 @@
          <p>Note that the result is a sequence rather than an array. It can be converted to an array (for example,
             for serializing in JSON) using the expression <code>array{$result}</code>.</p>
          <p>Example:</p>
-         <samp><![CDATA[<out>
+         <pre><code class="language-xml"><![CDATA[<out>
    <xsl:for-each select="sql:query($connection, 'book', ('date', 'title'), 
       'author = ''J. K. Rowling''')">
       <book date="{?date}" title="{?title}"/>
    </xsl:for-each>
 </out>
-]]></samp>
+]]></code></pre>
         <p>To avoid problems with nested quotation marks, you could also write:</p>
-        <samp><![CDATA[<out>
+        <pre><code class="language-xml"><![CDATA[<out>
    <xsl:variable name="condition" as="xs:string">author = 'J. K. Rowling'</xsl:variable>       
    <xsl:for-each select="sql:query($connection, 'book', ('date', 'title'), $condition)">
       <book date="{?date}" title="{?title}"/>
    </xsl:for-each>
 </out>
-]]></samp>
+]]></code></pre>
       </details>
    </function>
    
@@ -436,7 +436,7 @@
             the <a class="bodylink code" href="/extensions/instructions/do">saxon:do</a> extension instruction.</p>
          
          <p>Example:</p>
-         <samp><![CDATA[<saxon:do action="sql:update($connection, 'book', 'stock = 0', map{'out-of-print': true()}"/>]]></samp>
+         <pre><code class="language-xml"><![CDATA[<saxon:do action="sql:update($connection, 'book', 'stock = 0', map{'out-of-print': true()}"/>]]></code></pre>
       </details>
    </function>
    

@@ -104,19 +104,19 @@
      <h3 class="subtitle">Example</h3>
      
      <p>Given a source document:</p>
-     <samp><![CDATA[<cities>
+     <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
      
      <p>The command:</p>
      <kbd>delete //city[@name='Rome']</kbd>
      <p>produces the document:</p>
-     <samp><![CDATA[<cities>
+     <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Paris" country="FR"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
      
    </section>
   
@@ -142,21 +142,21 @@
       after every <code>img</code> element in the document.</p>
     
     <p>Given a source document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     <kbd>follow //city[@name='Paris'] with &lt;city name="Lyon" country="{@country}"/></kbd>
     <p>produces the document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Lyon" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
   </section>
   
@@ -188,11 +188,11 @@
     <h3 class="subtitle">Example</h3>
     
     <p>Given a source document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     <kbd>list //city[@name='Paris']</kbd>
@@ -295,18 +295,18 @@
       before every <code>img</code> element in the document.</p>
     
     <p>Given a source document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Munich" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Lyon" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     <kbd>precede //city[not(@country=preceding-sibling::*[1]/@country)] with &lt;country name="{@country}"/></kbd>
     <p>produces the document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <country name="DE"/>
   <city name="Berlin" country="DE"/>
   <city name="Munich" country="DE"/>
@@ -315,7 +315,7 @@
   <city name="Lyon" country="FR"/>
   <country name="IT"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
   </section>
   
@@ -345,18 +345,18 @@
       as the first child of the <code>section</code>.</p>
     
     <p>Given a source document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Munich" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Lyon" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     <kbd>prefix //city with &lt;country name="{@country}"/></kbd>
     <p>produces the document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE">
     <country name="DE"/>
   </city>  
@@ -372,7 +372,7 @@
   <city name="Rome" country="IT">
     <country name="FR"/>
   </city>  
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>With the same document, the command:</p>
     
@@ -380,13 +380,13 @@
     
     <p>produces:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE" id="1"/>
   <city name="Munich" country="DE" id="2"/>
   <city name="Paris" country="FR" id="3"/>
   <city name="Lyon" country="FR" id="4"/>
   <city name="Rome" country="IT" id="5"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
   </section>
   
@@ -450,58 +450,58 @@
     <h3 class="subtitle">Examples</h3>
     
     <p>Given a source document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Munich" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Lyon" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     <kbd>replace //city[@country="DE"] with &lt;stadt @Name="{@name}"/></kbd>
     <p>produces the document:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <stadt Name="Berlin"/>
   <stadt Name="Munich"/>
   <city name="Paris" country="FR"/>
   <city name="Lyon" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>Given a source document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city><name>Berlin</name><country>DE</country></city>
   <city><name>Munich</name><country>DE</country></city>
   <city><name>Paris</name><country>FR</country></city>
   <city><name>Lyon</name><country>FR</country></city>
   <city><name>Rome</name><country>IT</country></city>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     <kbd>replace //city/name[.="Munich"]/text() with "München"</kbd>
     <p>produces the document:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city><name>Berlin</name><country>DE</country></city>
   <city><name>München</name><country>DE</country></city>
   <city><name>Paris</name><country>FR</country></city>
   <city><name>Lyon</name><country>FR</country></city>
   <city><name>Rome</name><country>IT</country></city>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>With the same source document, the command:</p>
     <kbd>replace //name with <cityName>{.}</cityName></kbd>
     <p>produces the document:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city><cityName><name>Berlin</name></cityName><country>DE</country></city>
   <city><cityName><name>Munich</name></cityName><country>DE</country></city>
   <city><cityName><name>Paris</name></cityName><country>FR</country></city>
   <city><cityName><name>Lyon</name></cityName><country>FR</country></city>
   <city><cityName><name>Rome</name></cityName><country>IT</country></city>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>Note that in this expression, <code>{.}</code> follows the XQuery rules rather than
     the XSLT rules: it copies the whole element, rather than extract its string value.</p>
@@ -714,13 +714,13 @@
     
     <p>Given the source document:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Munich" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Lyon" country="FR"/>
   <city name="Rome" country="IT"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     
@@ -728,34 +728,34 @@
     
     <p>produces:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city name="Berlin" country="DE"/>
   <city name="Munich" country="DE"/>
   <city name="Paris" country="FR"/>
   <city name="Lyon" country="FR"/>
   <city name="Rome" country="ITALIA"/>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>Given a source document:</p>
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city><name>Berlin</name><country>DE</country></city>
   <city><name>Munich</name><country>DE</country></city>
   <city><name>Paris</name><country>FR</country></city>
   <city><name>Lyon</name><country>FR</country></city>
   <city><name>Rome</name><country>IT</country></city>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>The command:</p>
     <kbd>update //city/name[.="Munich"] with "München"</kbd>
     <p>produces the document:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city><name>Berlin</name><country>DE</country></city>
   <city><name>München</name><country>DE</country></city>
   <city><name>Paris</name><country>FR</country></city>
   <city><name>Lyon</name><country>FR</country></city>
   <city><name>Rome</name><country>IT</country></city>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
     <p>With the same source document, the command:</p>
     
@@ -763,13 +763,13 @@
     
     <p>produces:</p>
     
-    <samp><![CDATA[<cities>
+    <pre><code class="language-xml"><![CDATA[<cities>
   <city><name>Berlin</name><country>de</country></city>
   <city><name>Munich</name><country>de</country></city>
   <city><name>Paris</name><country>fr</country></city>
   <city><name>Lyon</name><country>fr</country></city>
   <city><name>Rome</name><country>it</country></city>
-</cities>]]></samp>
+</cities>]]></code></pre>
     
   </section>
   

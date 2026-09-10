@@ -100,7 +100,13 @@
     
     <ul>
       <li><p>The supplied URI reference is first made absolute by resolving against a 
-        suitable base URI.</p></li>
+        suitable base URI.</p>
+        <p class="conly">SaxonC provides a number of methods for setting the base URI:
+          <code>SaxonProcessor.setcwd()</code>; <code>Xslt30Processor.setcwd()</code> or
+          <code>XsltExecutable.setBaseOutputURI()</code> for XSLT;
+          <code>XQueryProcessor.setQueryBaseURI()</code> for XQuery; or
+          <code>DocumentBuilder.setBaseUri()</code> for building documents.</p>
+      </li>
       <li><p>The resulting absolute URI is dereferenced by a 3-step process:</p>
         <ol>
           <li><p>It is first passed to a local user-supplied <code>ResourceResolver</code>, 
@@ -114,10 +120,7 @@
           there are also specialized methods for particular kinds of resources: for example
           <code>setURIResolver()</code>, <code>setSchemaURIResolver()</code>, 
           <code>setUnparsedTextResolver()</code>, <code>setModuleURIResolver()</code>.</p>
-          <p class="conly"><p>For SaoxnC we have a different setup. Firstly, the user can use the<code>SaxonProcessor.setcwd()</code> which acts as the base URI.
-            Alternatively the user can set on the <code>Xslt30Processor.setcwd()</code>, <code>XsltExecutable.setBaseOutputURI()</code> for XSLT or the
-                    <code>XQueryProcessor.setQueryBaseURI()</code> for XQuery or for building documents <code>DocumentBuilder.setBaseUri()</code>.</p></p>
-
+            <p class="conly">Note that for SaxonC there is no way to supply such a resolver.</p>
           </li>
           <li><p>If the local resolver fails to resolve the URI, it is passed to a resolver registered centrally
           with the Saxon <code java="net.sf.saxon.Configuration">Configuration</code>. The default resolver at this level is designed
@@ -126,15 +129,14 @@
           containing local copies of popular W3C-defined resources such as the DTDs for XHTML and
           SVG. Additional catalog files can be registered using an API (<code
             java="net.sf.saxon.s9api.Processor#setCatalogFiles">Processor.setCatalogFiles()</code>
-            in Java, <code cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> in C#, for SaxonC see below),
+            in Java, <code cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> in C#,
+            <code>SaxonProcessor.setCatalog()</code> in C++ and PHP,
+            <code>PySaxonProcessor.set_catalog()</code> in Python),
             or from the command line, or from the Saxon configuration file. </p>
-          <p class="javaonly">The catalog resolver for SaxonJ and SaxonC also has built-in support for
+          <p>The catalog resolver for SaxonJ and SaxonC also has built-in support for
           URIs using the <code>classpath</code> and <code>data</code> schemes.</p>
           <p class="csonly">The catalog resolver for SaxonCS also has built-in support for
               URIs using the <code>data</code> scheme.</p>
-          <p class="conly">In SaxonC, additional catalog files can be registered using an API (<code>SaxonProcessor.setCatalog()</code>
-                      in C++ and PHP, <code>PySaxonProcessor.set_catalog()</code> in Python),
-                      or from the command line, or from the Saxon configuration file.</p>
           </li>
           <li>If the URI has still not been resolved, it is then dereferenced using standard
           mechanisms provided by the platform: for example, <code>http</code> URIs are dereferenced
@@ -172,8 +174,7 @@
         resource using a conventional system identifier (URI) or public identifier, and a local
         catalog is used to map the system and public identifiers to an actual location.</p>
       
-        <p>When
-using Saxon from the command line, it is possible to specify a catalog to be used using
+        <p>When using Saxon from the command line, it is possible to specify a catalog to be used using
           the option <code>-&#xfeff;catalog:<i>files</i></code>. Here <code><i>files</i></code> is the catalog
           file to be searched, or a list of filenames separated by semicolons. This catalog will be used
           to locate DTDs and external entities required by the XML parser, XSLT stylesheet modules
@@ -181,7 +182,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
           using the <code>document()</code> and <code>doc()</code> functions, and also schema documents,
           however they are referenced.</p>
       
-        <p>Similarly, when using the Java or C# API, catalog files can be nominated:</p>
+        <p>Similarly, when using the API, catalog files can be nominated:</p>
       
         <ul>
           <li class="javaonly">From Java, use the method <code
@@ -190,7 +191,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
           <li class="csonly">From C#, use the method <code
             cs="Saxon.Api.Processor#SetCatalogFiles">Processor.SetCatalogFiles()</code> with a list of filenames.</li>
           <li class="conly">From C++ and PHP, use the method <code>SaxonProcessor.setCatalog()</code> with the
-                      filename. From Python , use the method <code>PySaxonProcessor.set_catalog()</code> with the filename.</li>
+            filename. From Python, use the method <code>PySaxonProcessor.set_catalog()</code> with the filename.</li>
         </ul>
         
         <p>
@@ -207,7 +208,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
         <p>Catalog-based resolution is performed using a third-party library:</p>
       
         <ul>
-          <li class="javaonly">For SaxonJ, project <code>xmlresolver/xmlresolver</code> on GitHub.</li>
+          <li>For SaxonJ and SaxonC, project <code>xmlresolver/xmlresolver</code> on GitHub.</li>
           <li class="csonly">For SaxonCS, project <code>xmlresolver/xmlresolvercs</code> on GitHub.</li>
         </ul>
       
@@ -243,7 +244,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
         
         
         
-        <samp><![CDATA[<?xml version="1.0"?>
+        <pre><code class="language-xml"><![CDATA[<?xml version="1.0"?>
 <catalog  xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">  
    <group  prefer="public"  xml:base="file:///usr/share/xml/" >  
 
@@ -256,7 +257,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
          uri="docbook45/docbookx.dtd"/>
 
    </group>
-</catalog>]]></samp>
+</catalog>]]></code></pre>
         
         <p>There are many tutorials for XML catalogs available on the web, including some that have
           information specific to Saxon, but take care that it is relevant to the current release.
@@ -1275,48 +1276,70 @@ using Saxon from the command line, it is possible to specify a catalog to be use
     by a software component called an <i>XML Parser</i>. Saxon does not include its own XML parser,
     rather it provides interfaces that invoke XML parsers supplied by third parties. Platforms
     such as Java and .NET typically include a built-in XML parser that Saxon uses by default.</p>
+    <!-- TODO SaxonC includes the third party Xerces XML parser built-in??? -->
 
-    <p>A source document can be built using the <a class="javalink"
-        href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</a> class, which is created using
-      the factory method <code>newDocumentBuilder</code> (<code>NewDocumentBuilder()</code> in C#) on the <a class="javalink"
-        href="net.sf.saxon.s9api.Processor">Processor</a> object. Various options for document
-      building are available as methods on the <code>DocumentBuilder</code>, for example options to
-      perform schema or DTD validation, to strip whitespace, to expand XInclude directives, and also
-      to choose the tree implementation model to be used.</p>
+    <p>A source document can be built using the <code>DocumentBuilder</code> class
+      (<code>PyDocumentBuilder</code> in Python), which is created using the factory method
+      <code>newDocumentBuilder</code> (<code>NewDocumentBuilder()</code> in C#, and
+      <code>new_document_builder()</code> in Python) on the <code>Processor</code> object
+      (<code>SaxonProcessor</code> in C++ and PHP, <code>PySaxonProcessor</code> in Python). Various options
+      for document building are available as methods on the <code>DocumentBuilder</code>, for example options
+      to perform schema or DTD validation, to strip whitespace, to expand XInclude directives, and also to
+      choose the tree implementation model to be used.</p>
     
-    <p class="javaonly">On Java, the different ways of supplying input to the <code>DocumentBuilder</code>
-      are represented using the JAXP <code>Source</code> object. This is a JAXP interface designed
-    as an abstraction of various kinds of XML source, including:</p>
-      
     <div class="javaonly">
-    <ul>
-      <li><code>StreamSource</code>, which represents lexical XML
-        held in a file or input stream.</li>
-      <li><code>SAXSource</code>, which represents a source of SAX events.</li>
-      <li><code>DOMSource</code>, representing an already-parsed XML document held in a DOM tree.</li>
-      <li><code>StAXSource</code>, which represents a
-        class that responds to requests for STAX (pull-parser) events.</li>
-      <li><code java="net.sf.saxon.lib.ActiveSource">ActiveSource</code>, a Saxon extension of the JAXP <code>Source</code> interface,
-      allowing you to define your own kind of input source: all you need to do is implement the method
-      <code>deliver()</code>, which delivers the contents of the resource to a Saxon <code>Receiver</code>.</li>
-      <li><code java="net.sf.saxon.om.NodeInfo">NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code>.</li>
-    </ul>
-    </div>
-     <p>In addition, the s9api <a class="javalink"
-        href="net.sf.saxon.s9api.XdmNode">XdmNode</a> class has an <code>asSource()</code> method,
+      <p>On Java, the different ways of supplying input to the <a class="javalink"
+        href="net.sf.saxon.s9api.DocumentBuilder">DocumentBuilder</a>
+        are represented using the JAXP <code>Source</code> object. This is a JAXP interface designed
+        as an abstraction of various kinds of XML source, including:</p>
+      <ul>
+        <li><code>StreamSource</code>, which represents lexical XML
+          held in a file or input stream.</li>
+        <li><code>SAXSource</code>, which represents a source of SAX events.</li>
+        <li><code>DOMSource</code>, representing an already-parsed XML document held in a DOM tree.</li>
+        <li><code>StAXSource</code>, which represents a
+          class that responds to requests for STAX (pull-parser) events.</li>
+        <li><code java="net.sf.saxon.lib.ActiveSource">ActiveSource</code>, a Saxon extension of the JAXP <code>Source</code> interface,
+          allowing you to define your own kind of input source: all you need to do is implement the method
+          <code>deliver()</code>, which delivers the contents of the resource to a Saxon <code>Receiver</code>.</li>
+        <li><code java="net.sf.saxon.om.NodeInfo">NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code>.</li>
+      </ul>
+      <p>In addition, the s9api <a class="javalink"
+      href="net.sf.saxon.s9api.XdmNode">XdmNode</a> class has an <code>asSource()</code> method,
       so it is always possible to supply an existing Saxon tree as the source for any of these interfaces.</p>
-
-    <p class="csonly">On .NET, the <code cs="Saxon.Api.DocumentBuilder">DocumentBuilder</code> has an overloaded <code>Build</code> method
-    allowing input to be supplied from sources of the following kinds:</p>
+    </div>
     
     <div class="csonly">
-    <ul>
-      <li><code>Stream</code>, containing lexical XML as a stream of bytes.</li>
-      <li><code>TextReader</code>, containing lexical XML as a stream of characters.</li>
-      <li><code>Uri</code>, which can be dereferenced to fetch a stream of bytes.</li>
-      <li><code>XmlNode</code>, Microsoft's DOM implementation.</li>
-      <li><code>XmlReader</code>, an XML parser, primed with a source of input.</li>
-    </ul>
+      <p>On .NET, the <code cs="Saxon.Api.DocumentBuilder">DocumentBuilder</code> has an overloaded <code>Build</code> method
+        allowing input to be supplied from sources of the following kinds:</p>
+      <ul>
+        <li><code>Stream</code>, containing lexical XML as a stream of bytes.</li>
+        <li><code>TextReader</code>, containing lexical XML as a stream of characters.</li>
+        <li><code>Uri</code>, which can be dereferenced to fetch a stream of bytes.</li>
+        <li><code>XmlNode</code>, Microsoft's DOM implementation.</li>
+        <li><code>XmlReader</code>, an XML parser, primed with a source of input.</li>
+      </ul>
+    </div>
+    
+    <div class="conly">
+      <p>On C++, Python and PHP, source XML documents can be parsed from file or lexical string using methods on the
+        <code>DocumentBuilder</code>:</p>
+      <ul>
+        <li>In C++, <a href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html"
+          class="bodylink code">DocumentBuilder</a> provides the methods: <code>parseXmlFromFile()</code>,
+          <code>parseXmlFromUri()</code>, and <code>parseXmlFromString()</code>.</li>
+        <li>In Python, <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder"
+          class="bodylink code">PyDocumentBuilder</a> provides the method <code>parse_xml()</code> with
+          which different keywords are used to supply the input from file, URI or lexical string.</li>
+        <li>In PHP, <a href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_documentBuilder"
+          class="bodylink code">Saxon\DocumentBuilder</a> provides the methods: <code>parseXmlFromFile()</code>,
+          <code>parseXmlFromUri()</code>, and <code>parseXmlFromString()</code>.</li>
+      </ul>
+      
+      <p>It is also possible to parse XML documents directly from the <code>SaxonProcessor</code> without
+        creating a <code>DocumentBuilder</code>, using the methods of the same names as above. However this only
+        allows simple parsing, not any of the additional parsing options available with
+        <code>DocumentBuilder</code>.</p>
     </div>
     
 
@@ -1326,6 +1349,9 @@ using Saxon from the command line, it is possible to specify a catalog to be use
         <a class="javalink" href="net.sf.saxon.om.TreeInfo">TreeInfo</a> at the root of the
       existing document as the <code>Source</code> supplied to the <code>buildDocumentTree()</code>
       method of the new <code>Configuration</code>. </p>
+    
+    <p class="conly">With SaxonC, it is only possible to copy a document from one <code>Configuration</code>
+      into another by serializing the object and parsing it again.</p>
   </section>
   
   
@@ -1791,9 +1817,9 @@ using Saxon from the command line, it is possible to specify a catalog to be use
       events that need to be changed. The filter can be injected into the pipeline by supplying 
       the document in the form of an <code java="net.sf.saxon.lib.AugmentedSource">AugmentedSource</code>: a typical example would be:</p>
       
-      <samp><![CDATA[AugmentedSource as = AugmentedSource.makeAugmentedSource(new StreamSource(...));
+      <pre><code class="language-java"><![CDATA[AugmentedSource as = AugmentedSource.makeAugmentedSource(new StreamSource(...));
 as.addFilter(receiver -> new MyFilter(receiver));
-documentBuilder.build(as);]]></samp>
+documentBuilder.build(as);]]></code></pre>
       
       <p>Here <code>MyFilter</code> is typically a class that extends <code>ProxyReceiver</code>
       by overriding some of its methods: for example, you might override the <code>comment()</code>
@@ -1846,9 +1872,9 @@ documentBuilder.build(as);]]></samp>
         
         <p>It is also possible to switch on XInclude processing (for all documents) by setting the
           system property:</p>
-        <samp><![CDATA[-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=
+        <pre><code class="language-java"><![CDATA[-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=
     org.apache.xerces.parsers.XIncludeParserConfiguration
-]]></samp>
+]]></code></pre>
         
         <p>An alternative approach is to incorporate an XInclude processor as a SAX filter in the input
           pipeline. You can find a suitable SAX filter at <a href="http://xincluder.sourceforge.net/"
@@ -1909,12 +1935,14 @@ documentBuilder.build(as);]]></samp>
         interface on .NET, validation may be controlled by setting the appropriate options on the
         <code>DocumentBuilder</code>.</p>
 
-      <p class="conly"> On SaxonC, ehen documents are built using the <a
-              href="https://www.saxonica.com/saxon-c/doc/html/classDocumentBuilder.html">DocumentBuilder</a> in the C++ interface, or the
-              <a href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a> in the PHP
-              interface, or the <a href="https://www.saxonica.com/saxon-c/doc/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a> in the Python interface,
-              validation may be controlled by setting the appropriate options on the
-              <code>DocumentBuilder</code>.</p>
+      <p class="conly">Similarly on SaxonC, validation may be controlled by setting the appropriate options on
+        the <a class="bodylink code"
+          href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html">DocumentBuilder</a> in
+        the C++ interface, the <a class="bodylink code"
+          href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a>
+        in the PHP interface, or the <a class="bodylink code"
+          href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a>
+        in the Python interface.</p>
       
       <p class="javaonly">On Java interfaces that expect a JAXP <code>Source</code> object it is possible to request
         validation by supplying an <a class="javalink" href="net.sf.saxon.lib.AugmentedSource"
@@ -2273,11 +2301,11 @@ documentBuilder.build(as);]]></samp>
           <h2 class="subtitle">The Sapling tree API</h2>
           <p>A new API offered from Saxon 10 is the Sapling tree API. This provides a collection of methods to create
             nodes; for example, to create a document containing a <code>body</code> element with two paragraphs, the expression</p>
-          <samp><![CDATA[doc(
+          <pre><code class="language-java"><![CDATA[doc(
   elem("body")
     .child(elem("p").text("Hello"), 
            elem("p").text("World"))
-      )]]></samp>
+      )]]></code></pre>
           <p>might be used. These methods are found in package <code>net.sf.saxon.sapling</code>, specifically in the
             class <code java="net.sf.saxon.sapling.Saplings">net.sf.saxon.sapling.Saplings</code>.</p>
           <p>The "Sapling" nodes created by these methods are transient nodes used only during tree construction; when the Sapling
@@ -2316,16 +2344,16 @@ documentBuilder.build(as);]]></samp>
             Furthermore, these methods return the element to which they are applied, allowing method chaining.
             So a typical sequence of calls might be:</p>
           
-          <samp><![CDATA[   out.element("employee")
+          <pre><code class="language-java"><![CDATA[   out.element("employee")
       .attribute("ssn", "123456")
       .attribute("location", "Berlin")
       .text("Helmut Schmidt")
       .close();
-]]></samp>
+]]></code></pre>
           
           <p>This example constructs a slightly more complex tree:</p>
           
-          <samp><![CDATA[   Processor processor = new Processor(false);
+          <pre><code class="language-java"><![CDATA[   Processor processor = new Processor(false);
    Serializer destination = processor.newSerializer(new File("out.xml"));
    destination.setOutputProperty(Serializer.Property.INDENT, "no");
    Push.Document doc = processor.newPush(destination).document(true);
@@ -2338,7 +2366,7 @@ documentBuilder.build(as);]]></samp>
          .text(emp.name);
    }
    doc.close(); 
-]]></samp>
+]]></code></pre>
           
           <p>Note that there are no explicit <code>endElement</code> events here; an end tag is written automatically when
             the next sibling is written to the parent element, or when the parent element is closed. The <code>close()</code>
@@ -2491,14 +2519,14 @@ documentBuilder.build(as);]]></samp>
     <p>If the collection URI identifies a file, Saxon treats this as a collection catalog. This is a file
       in XML format that lists the documents comprising the collection. Here is an example of such a
       catalog file:</p>
-    <samp><![CDATA[<collection stable="true">
+    <pre><code class="language-xml"><![CDATA[<collection stable="true">
   <doc href="dir/contents.json"/>
   <doc href="dir/chap1.xml"/>
   <doc href="dir/chap2.xml"/>
   <doc href="dir/chap3.xml"/>
   <doc href="dir/chap4.xml"/>
   <doc href="dir/index.json"/>
-</collection>]]></samp>
+</collection>]]></code></pre>
 
     <p>The <code>stable</code> attribute indicates whether the collection is stable or not. The
       default value is <code>true</code>. If a collection is stable, then the URIs listed in the
@@ -2826,11 +2854,11 @@ documentBuilder.build(as);]]></samp>
             parallel evaluation of multiple threads (Saxon-EE only).</p>
           <p>For example, a <code>CollectionFinder</code> written to handle collection URIs using the
             scheme name "sql" might be supplied as:</p>
-          <samp><![CDATA[config.setCollectionFinder((context, uri) -> 
+          <pre><code class="language-java"><![CDATA[config.setCollectionFinder((context, uri) -> 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
-      : config.getStandardCollectionFinder().findCollection(context, uri)
-)]]></samp>
+      : new StandardCollectionFinder().findCollection(context, uri)
+)]]></code></pre>
           <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
             of <code>ResourceCollection</code>, perhaps one that retrieves XML documents from
             a relational database.</p>
@@ -2847,11 +2875,11 @@ documentBuilder.build(as);]]></samp>
               parallel evaluation of multiple threads.</p>
             <p>For example, a <code>CollectionFinder</code> written to handle collection URIs using the
               scheme name "sql" might be supplied as:</p>
-            <samp><![CDATA[processor.CollectionFinder = uri => 
+            <pre><code class="language-cs"><![CDATA[processor.CollectionFinder = uri => 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
-      : config.getStandardCollectionFinder().findCollection(context, uri)
-)]]></samp>
+      : new StandardCollectionFinder().findCollection(context, uri)
+)]]></code></pre>
             <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
               of <code>IEnumerable&lt;IResource&gt;</code>, perhaps one that retrieves XML documents from
               a relational database.</p>

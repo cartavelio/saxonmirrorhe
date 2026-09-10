@@ -626,8 +626,8 @@
      methods of the implementation classes for XDM values. For example, the following
      gets the current Julian instant:</p>
      
-     <samp><![CDATA[<xsl:value-of select="d:toJulianInstant(current-dateTime())"
-         xmlns:d="java:net.sf.saxon.value.DateTimeValue"/>]]></samp>
+     <pre><code class="language-xml"><![CDATA[<xsl:value-of select="d:toJulianInstant(current-dateTime())"
+         xmlns:d="java:net.sf.saxon.value.DateTimeValue"/>]]></code></pre>
          
      <p xmlns="">When an instance of <code>java.util.Map</code> is passed as a parameter to a stylesheet
      or query, then by default it is accessible within the stylesheet or query as an XPath 3.0 map
@@ -3594,10 +3594,10 @@ as <code>sort($v)/a/b/c/d</code>, because this can result in duplicates if $v is
 contains one node that is an ancestor of another.)</p>
 
          <p xmlns="">This optimization (which is available only in Saxon-SA) benefits many queries of the form:</p>
-         <samp><![CDATA[
+         <pre><code class="language-xquery"><![CDATA[
 let $x := doc('abc.xml')//item[@code='12345']
 return $x/price, $x/value, $x/size
-]]></samp>
+]]></code></pre>
 
          <p xmlns="">Where the expression <code>EXP1</code> in <code>for $i in EXP1 return EXP2</code> is known to be a singleton,
 the expression is rewritten <code>let $i := EXP1 return EXP2</code>. This creates the opportunity for further simplifications.</p>
@@ -6073,7 +6073,7 @@ by means of the extension attribute <code>saxon:read-once="yes"</code>. It is in
 a stereotypical coding pattern that the optimizer recognizes and treats specially.</p>
 
          <p xmlns="">The typical code is as follows:</p>
-         <samp><![CDATA[
+         <pre><code class="language-xml"><![CDATA[
 <xsl:function name="f:customers">
  <xsl:copy-of select="doc('customers.xml')/*/customer"
        saxon:read-once="yes" xmlns:saxon="http://saxon.sf.net/"/>
@@ -6082,7 +6082,7 @@ a stereotypical coding pattern that the optimizer recognizes and treats speciall
 <xsl:template name="main">
   <xsl:apply-templates select="f:customers()"/>
 </xsl:template>
-]]></samp>
+]]></code></pre>
 
          <p xmlns="">It's not necessary for such a stylesheet to have a principal source document, the transformation
 can be invoked instead using the <code>-it main</code> option from the command line, or its equivalent
@@ -7814,10 +7814,10 @@ are ignored and must-understand extensions are rejected.</p>
 
          <p xmlns="">A Saxon-specific pragma has been implemented allowing a default value to be specified
  for a query parameter (external variable). The syntax is illustrated below:</p>
-         <samp><![CDATA[
+         <pre><code class="language-xquery"><![CDATA[
 declare namespace saxon="http://saxon.sf.net/";
 declare variable $x external (:: pragma saxon:default "20" ::);
-]]></samp>
+]]></code></pre>
 
          <p xmlns="">The default value must be either a numeric literal or a string literal.</p>
 
@@ -8736,12 +8736,12 @@ a form such as <code>http://saxon.sf.net/collation?lang=de;strength=primary</cod
 the URI of the collection as a reference to an XML document that acts as a catalogue listing the
 documents in the collection. An example of a catalogue document is:</p>
 
-<samp>&lt;collection>
+<pre><code class="language-xml">&lt;collection>
   &lt;doc href="doc1.xml"/>
   &lt;doc href="doc2.xml"/>
   &lt;doc href="doc3.xml"/>
 &lt;/collection>
-</samp>
+</code></pre>
 
 <p xmlns="">In effect, <code>collection("a.xml")</code> is merely a shorthand for
 <code>document(document("a.xml")/collection/doc/@href)</code>. My thinking is to extend the

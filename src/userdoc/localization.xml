@@ -298,7 +298,7 @@
     <p>The first is to supply a <code>LocalizerFactory</code> that responds to the request for a particular
       language, for example:</p>
 
-    <samp><![CDATA[Configuration config = new Configuration();
+    <pre><code class="language-java"><![CDATA[Configuration config = new Configuration();
 config.setLocalizerFactory(new LocalizerFactory() {
   public Numberer getNumberer(String language, String country) {
     if (language.equals("jp")) {
@@ -307,7 +307,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
       return null;
     }
   }
-}]]></samp>
+}]]></code></pre>
 
     <p>The alternative is to register the localization module in the <a class="bodylink"
         href="/configuration/configuration-file">configuration file</a>.</p>
