@@ -126,7 +126,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         }
 
         //#if CSHARP==false
-        if (locations.length == 0 && targetNamespace != null) {
+        if ((locations == null || locations.length == 0) && targetNamespace != null) {
             Source source = resolvedNamespaceURI(targetNamespace, baseURI);
             if (source != null) {
                 return new Source[]{source};
@@ -147,6 +147,16 @@ public class StandardSchemaResolver implements SchemaURIResolver {
 
     private Source resolveLocationHint(String baseURI, String location) throws TransformerException {
         Source s;
+
+        if (config.getURIResolver() != null) {
+            // If the user has installed an explicit URI resolver, try using it first
+            URIResolver uresolver = config.getURIResolver();
+            s = uresolver.resolve(location, baseURI);
+            if (s != null) {
+                return s;
+            }
+        }
+
         //#if CSHARP==true
         s = config.getURIResolver().resolve(location, baseURI);
         //#endif
