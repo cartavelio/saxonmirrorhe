@@ -231,6 +231,11 @@ TODO: rethink redefines and override
         <p>The adaptive output method now does (fairly crude) indentation of maps and arrays
         if the <code>indent</code> serialization option is set. Previously maps and arrays
         were output without indentation.</p>
+        
+        <p>A new Saxon serialization property is introduced: <code>saxon:conditional-cdata</code>.
+        If set to true, text is output within a CDATA section only when (a) the containing element
+        is named in the <code>cdata-section-elements</code> property, and (b) the text contains
+        at least one special character, specifically a less-than or ampersand character.</p>
   
     </category>
     

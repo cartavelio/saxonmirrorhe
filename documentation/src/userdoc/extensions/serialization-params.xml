@@ -96,6 +96,19 @@
             <constant value="decimal"/>
             <constant value="hex"/>
         </attribute>
+        
+        <attribute name="saxon:conditional-cdata" required="no">
+            <desc>
+                <p>When the output method is XML and an element name is listed in the value
+                    of the <code>cdata-section-elements</code> attribute, the
+                        <code>saxon:conditional-cdata</code> attribute may be used to indicate
+                    that the element content should be output as a CDATA section only if it contains
+                    special characters (specifically, an ampersand or less-than character).
+                    The value is a boolean (written in XSLT as <code>"yes"</code> or <code>"no"</code>),
+                    and the default is <code>"no"</code>.</p>
+            </desc>
+            <data-type name="boolean"/>
+        </attribute>
 
         <attribute name="saxon:double-space" required="no">
             <desc>
