@@ -145,10 +145,7 @@
             the <code cs="Saxon.Api.ResultDocumentHandler">ResultDocumentHandler</code>,
             the <code cs="Saxon.Api.CollectionFinder">CollectionFinder</code>, the <code
                 cs="Saxon.Api.ErrorReporter">ErrorReporter</code>, and the <code
-                    cs="Saxon.Api.XQueryResolver">XQueryResolver</code> (module resolver). 
-            The class <code cs="Saxon.Api.SimpleUriResolver">SimpleUriResolver</code> is an implementation of the .NET-defined
-            interface <code>XmlResolver</code> that allows the actual resolution logic to be written as a lambda expression,
-            for example <code>XmlResolver resolver = new SimpleUriResolver(uri => new WebClient().OpenRead(uri))</code>.</p>
+                    cs="Saxon.Api.XQueryResolver">XQueryResolver</code> (module resolver).</p>
         
         <p>The classes <code cs="Saxon.Api.SchemaValidator">SchemaValidator</code>, <code
             cs="Saxon.Api.XQueryCompiler">XQueryCompiler</code>, and <code cs="Saxon.Api.XsltCompiler">XsltCompiler</code> no

@@ -26,7 +26,7 @@
   <ul>
     <li class="javaonly"><p><a class="bodylink" href="instructions">Writing XSLT Extension Instructions</a></p></li>
     <li class="javaonly"><p><a class="bodylink" href="output-filters">Customizing Serialization</a></p></li>
-    <li><p><a class="bodylink" href="uri-resolution">Resolving URIs</a></p></li>
+    <li><p><a class="bodylink" href="/sourcedocs/resources-and-uris">Resources and URIs</a></p></li>
   </ul>
   
  
@@ -2328,14 +2328,14 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
   </section>
 
 
-    <section id="uri-resolution" title="Customizing URI Resolution">
+  <!--  <section id="uri-resolution" title="Customizing URI Resolution">
       <h1>Customizing URI Resolution</h1>
       <p>The resolution of URIs can be extended in several ways:</p>
       <nav>
         <ul/>
       </nav>
 
-      <section id="uri-resolver" title="Writing a URI Resolver for Input Files">
+      <!-\-<section id="uri-resolver" title="Writing a URI Resolver for Input Files">
         <h1>Writing a URI Resolver for Input Files</h1>
 
 
@@ -2373,7 +2373,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
         in the configuration file.</aside>
         
       </section>
-
+-\->
 
 
 
@@ -2413,8 +2413,8 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
 
         
       </section>
-
-      <section id="collection-uri-resolver" title="Writing a URI Resolver for Collections">
+-->
+      <!--<section id="collection-uri-resolver" title="Writing a URI Resolver for Collections">
         <h1>Writing a URI Resolver for Collections</h1>
         
         <p>Saxon 9.7 introduced a new <code>CollectionFinder</code> interface, superseding
@@ -2433,8 +2433,8 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
             href="/sourcedocs/collections">Collections</a>.</p>
 
 
-      </section>
-    </section>
+      </section>-->
+  <!--  </section>-->
 
     <section id="output-filters" title="Customizing Serialization">
       <h1>Customizing Serialization</h1>

@@ -2880,37 +2880,23 @@
             </attributes>
             <details>
                 <p>By default the message is displayed on the standard error output stream. You can
-                    supply your own message receiver if you want it handled differently. This must
-                    be a class that implements the <a class="javalink"
-                        href="net.sf.saxon.event.Receiver">Receiver</a> interface. The content of
-                    the message is in general an XML fragment. You can supply the
-                        <code>Receiver</code> using the <code>-m</code> option on the command line,
-                    or the <code>setMessageEmitter()</code> method of the <a class="javalink"
-                        href="net.sf.saxon.Controller">Controller</a> class.</p>
-
-                <p>The sequence of calls to this <code>Receiver</code> is as follows: there is a
-                    single <code>open()</code> call at the start of the transformation, and a single
-                        <code>close()</code> call at the end; and each evaluation of an
-                        <code>xsl:message</code> instruction starts with a
-                        <code>startDocument()</code> call and ends with <code>endDocument()</code>.
-                    The <code>startDocument()</code> event has a <code>properties</code> argument
-                    indicating whether <code>terminate="yes"</code> was specified, and the
-                        <code>locationId</code> on calls such as <code>startElement()</code> and
-                        <code>characters()</code> can be used to identify the location in the
-                    stylesheet where the message data originated (this is achieved by passing the
-                    supplied <code>locationId</code> in a call to
-                        <code>getPipelineConfiguration().getLocator().getSystemId(locationId)</code>,
-                    or to <code>getLineNumber()</code> on the same object).</p>
+                    supply your own message handler if you want it handled differently: for
+                    details see <a class="bodylink" href="/using-xsl/stylesheet-output/message-output">Message Output</a>.</p>
                 
-                <p>From Saxon 9.8, if the <code>xsl:message</code> instruction defines an error code,
-                this code will be notified to the <code>Receiver</code> by means of a processing instruction
-                event. The name of the processing-instruction is <code>error-code</code>; the string value
-                is the error code as an <code>EQName</code>. The <code>processingInstruction()</code> event occurs
-                immediately after the <code>startDocument()</code> event.</p>
+                <p>A user-written message handler is called with a <code>Message</code> object containing
+                the details of the message. This allows the application to extract:</p>
+                
+                <ul>
+                    <li>The content of the message, as an <code>XdmNode</code>;</li>
+                    <li>The location of the <code>xsl:message</code> instruction in the stylesheet;</li>
+                    <li>Any error code that was requested on the <code>xsl:message</code> instruction;</li>
+                    <li>A boolean value indicating whether <code>terminate="yes"</code> was requested.</li>
+                </ul>
 
-                <p>Select the class <a class="javalink" href="net.sf.saxon.serialize.MessageWarner"
-                        >MessageWarner</a> to have <code>xsl:message</code> output notified to the
-                    JAXP <code>ErrorListener</code>, as described in the JAXP documentation.</p>
+              
+                <p>Saxon no longer provides an option to have <code>xsl:message</code> output notified to the
+                    JAXP <code>ErrorListener</code>, as described in the JAXP documentation; but this
+                can be achieved by writing an appropriate message handler.</p>
             </details>
             <in-spec>xslt10</in-spec>
             <in-spec>xslt20</in-spec>
@@ -4256,14 +4242,14 @@
             <details>
                 <p>The <code>xsl:result-document</code> element was introduced in XSLT 2.0,
                     obsoleting the previous extension element <a class="bodylink code"
-                        href="/extensions/instructions/output">saxon6:output</a> (which is
+                        href="/extensions/instructions/output">saxon6:output</a> (which was
                     reinstated in Saxon 9.9 as a synonym for
                     <code>xsl:result-document</code> since legacy stylesheets still use it). </p>
 
                 <p>The destination of the result document can be altered programmatically as
                     described in <a class="bodylink"
-                        href="/extensibility/uri-resolution/output-uri-resolver">Resolving
-                        the URIs of Output Files</a>. In other cases the document is serialized and written to
+                        href="/using-xsl/stylesheet-output/secondary-output">Secondary Output</a>. 
+                    In other cases the document is serialized and written to
                     the file identified by the URI in the <code>href</code> attribute, resolved if
                     it is relative against the base output URI for the transformation (which
                     defaults to the destination of the principal output document). The destination
@@ -4352,7 +4338,7 @@
                 <p>The new XSLT 3.0 attribute <code>parameter-document</code> is first implemented in
                     Saxon 9.8.</p>
                 
-                <p>There is a change in Saxon 9.9 regarding the way in which an <code>xsl:result-document</code> instruction
+                <p>There was a change in Saxon 9.9 regarding the way in which an <code>xsl:result-document</code> instruction
                     with no <code>href</code> attribute is handled. In previous releases Saxon attempted to reuse the output stream
                     established for the primary output of the transformation. The new XSLT 3.0 options (such as raw output) make
                     this difficult, and possibly non-conformant. The new model is therefore that the <code>href</code> attribute simply
@@ -4361,8 +4347,7 @@
                     failure. It also means that when a user written result document resolver is in
                     use, it will be called to handle this case with the base output URI supplied as
                     the URI argument. For more information, see <a class="bodylink"
-                        href="/extensibility/uri-resolution/output-uri-resolver">Resolving the URIs of
-                        Output Files</a>.</p>
+                        href="/using-xsl/stylesheet-output/secondary-output">Secondary Output</a>.</p>
             </status>
             <see-also name="output" type="xsl-elements"/>
         </xsl-element>
