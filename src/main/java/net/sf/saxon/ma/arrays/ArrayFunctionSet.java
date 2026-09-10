@@ -229,6 +229,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE | INS, null));
 
+            register("items", 1, e -> e.populate(ArrayItems::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
+
             register("join", 1, 2, e -> e.populate(ArrayJoin::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR | INS, null)
                     .arg(1, ArrayItemType.ANY_ARRAY_TYPE, OPT | INS, null));
@@ -256,7 +259,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             register("members", 1, e -> e.populate(ArrayMembers::new, Parcel.TYPE, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
-            register("values", 1, e -> e.populate(ArrayValues::new, AnyItemType.getInstance(), STAR, 0)
+            // TODO: drop this, renamed array:items
+            register("values", 1, e -> e.populate(ArrayItems::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
 
@@ -866,9 +870,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the proposed XP40 function array:values(array(*)) =&gt; item()*
+     * Implementation of the proposed XP40 function array:items(array(*)) =&gt; item()*
      */
-    public static class ArrayValues extends SystemFunction {
+    public static class ArrayItems extends SystemFunction {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {

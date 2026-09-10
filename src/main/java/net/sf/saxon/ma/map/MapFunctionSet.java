@@ -177,6 +177,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
                     SequenceType.OPTIONAL_BOOLEAN);
 
+            register("items", 1, e -> e.populate(MapItems::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
             register("keys-where", 2, e -> e.populate(MapKeysWhere::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, filterFunctionType, ONE, null));
@@ -205,7 +208,8 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
                     .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
-            register("values", 1, e -> e.populate(MapValues::new, AnyItemType.getInstance(), STAR, 0)
+            // TODO: drop this, renamed map:items
+            register("values", 1, e -> e.populate(MapItems::new, AnyItemType.getInstance(), STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
@@ -553,9 +557,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the proposed 4.0 function map:values(Map) =&gt; item()*
+     * Implementation of the proposed 4.0 function map:items(Map) =&gt; item()*
      */
-    public static class MapValues extends SystemFunction {
+    public static class MapItems extends SystemFunction {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
