@@ -4,7 +4,6 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.expr.XQueryParserExtensionPE;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
@@ -150,9 +149,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         if (!config.isSchemaAvailable(targetNamespace)) {
             if (!locationHints.isEmpty()) {
                 try {
-                    PipelineConfiguration pipe = config.makePipelineConfiguration();
                     PreparedSchema combined = schemaCompiler.readMultipleSchemas(targetNamespace, locationHints, baseUri);
-                    //namespacesToBeSealed.add(targetNamespace);
                     module.getPackageData().setImportedSchema(combined);
                 } catch (SchemaException err) {
                     throw new XPathException("Error in schema " + targetNamespace + ": " + err.getMessage(), "XQST0059");

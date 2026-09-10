@@ -345,7 +345,7 @@ public class CompiledComplexType {
         IntIterator kids = children.iterator();
         while (kids.hasNext()) {
             int child = kids.next();
-            int childCard = getElementParticleCardinality(child, null, true);
+            int childCard = getElementParticleCardinality(child, schema, true);
             if (child == elementFingerprint) {
                 cardinality = Cardinality.sum(cardinality, childCard);
                 if (Cardinality.allowsMany(cardinality)) {
@@ -353,7 +353,7 @@ public class CompiledComplexType {
                     return cardinality;
                 }
             }
-            SchemaType childType = getElementParticleType(child, null, true);
+            SchemaType childType = getElementParticleType(child, schema, true);
             if (childType != null && childType.isComplexType()) {
                 IntHashSet childDescendants = new IntHashSet();
                 ((ComplexType) childType).gatherAllPermittedDescendants(schema, childDescendants);
