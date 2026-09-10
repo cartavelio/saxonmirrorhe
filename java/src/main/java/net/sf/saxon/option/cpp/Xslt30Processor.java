@@ -55,7 +55,7 @@ public class Xslt30Processor extends SaxonCAPI {
     /**
      * Constructor to initialise XsltProcessor with processor and license flag
      *
-     * @param proc - s9api processor
+     * @param proc - The processor
      */
     public Xslt30Processor(Processor proc) {
         super(proc);
