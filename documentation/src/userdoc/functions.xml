@@ -419,16 +419,15 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">char</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="value" type="(xs:string | xs:positiveInteger)" desc="FIXME:"/>
+          <arg name="value" type="(xs:string | xs:positiveInteger)" desc="A value identifying a
+            particular character: either a Unicode codepoint, an HTML5 character reference name, or
+            one of the backslash-escape sequences \n, \r or \t"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns a string containing a particular character or glyph.</p>
       </description>
     </function>
@@ -468,17 +467,14 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">civil-timezone</name>
       <signatures>
         <proto return-type="xs:dayTimeDuration">
-          <arg name="value" type="xs:dateTime" desc="FIXME:"/>
-          <arg name="place" type="xs:string" default="()" desc="FIXME:"/>
+          <arg name="value" type="xs:dateTime" desc="The input date/time"/>
+          <arg name="place" type="xs:string" default="()" desc="An IANA timezone name"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns the timezone offset from UTC that is in conventional use at a given place and
           time.</p>
       </description>
@@ -528,16 +524,13 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">collation</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="options" type="map(*)" desc="FIXME:"/>
+          <arg name="options" type="map(*)" desc="A map defining the properties required of the collation"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Constructs a collation URI with requested properties.</p>
       </description>
     </function>
@@ -546,16 +539,16 @@
       <signatures>
         <proto return-type="xs:boolean">
           <arg name="collation" type="xs:string" desc="A collation URI"/>
-          <arg name="usage" type="enum('compare', 'key', 'substring')*" default="()" desc="FIXME:"/>
+          <arg name="usage" type="enum('compare', 'key', 'substring')*" default="()" desc="A
+            sequence indicating the intended usage of the collation URI"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>TODO check implementation conforms to latest spec.</p>
       </status>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Asks whether a collation URI is recognized by the implementation, and whether it has
           required properties.</p>
       </description>
@@ -765,17 +758,14 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">csv-doc</name>
       <signatures>
         <proto return-type="fn:parsed-csv-structure-record?">
-          <arg name="source" type="xs:string?" desc="FIXME:"/>
-          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
+          <arg name="source" type="xs:string?" desc="The URI of the CSV file to be read"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Reads an external resource containing CSV, and returns the results as a record containing
           information about the names in the header, as well as the data itself.</p>
       </description>
@@ -784,17 +774,14 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">csv-to-arrays</name>
       <signatures>
         <proto return-type="array(xs:string)*">
-          <arg name="value" type="xs:string?" desc="FIXME:"/>
-          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
+          <arg name="value" type="xs:string?" desc="The input CSV data"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Parses CSV data supplied as a string, returning the results in the form of a sequence of
           arrays of strings.</p>
       </description>
@@ -803,19 +790,15 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">csv-to-xml</name>
       <signatures>
         <proto return-type="document-node(fn:csv)?">
-          <arg name="value" type="xs:string?" desc="FIXME:"/>
-          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
+          <arg name="value" type="xs:string?" desc="The input CSV data"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
-        <p>Parses CSV data supplied as a string, returning the results as an XML document, as
-          described by SPECREF:csv-represent-as-xml:.</p>
+        <p>Parses CSV data supplied as a string, returning the results as an XML document.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -954,17 +937,14 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">current-merge-key-array</name>
       <signatures>
         <proto return-type="array(xs:anyAtomicType*)">
-          <in-spec>xpath40</in-spec>
+          <in-spec>xslt40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
-        <p>Returns the merge key of the merge group currently being processed using the <code
-            xmlns="">xsl:merge</code> instruction.</p>
+        <p>Returns the merge key of the merge group currently being processed using the
+          <code>xsl:merge</code> instruction.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1098,16 +1078,13 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">decode-from-uri</name>
       <signatures>
         <proto return-type="xs:string">
-          <arg name="value" type="xs:string?" desc="FIXME:"/>
+          <arg name="value" type="xs:string?" desc="The input URI string"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Decodes URI-escaped characters in a string.</p>
       </description>
     </function>
@@ -1180,16 +1157,13 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">distinct-ordered-nodes</name>
       <signatures>
         <proto return-type="gnode()*">
-          <arg name="nodes" type="gnode()*" desc="FIXME:"/>
+          <arg name="nodes" type="gnode()*" desc="The input sequence of GNodes"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Removes duplicate GNodes and sorts the input into document order.</p>
       </description>
     </function>
@@ -3602,17 +3576,14 @@
       <name namespace="http://www.w3.org/2005/xpath-functions">parse-csv</name>
       <signatures>
         <proto>
-          <arg name="value" type="xs:string?" desc="FIXME:"/>
-          <arg name="options" type="map(*)?" default="{}" desc="FIXME:"/>
+          <arg name="value" type="xs:string?" desc="The input CSV data"/>
+          <arg name="options" type="map(*)?" default="{}" desc="Parsing options"/>
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status>
-        <p>FIXME:</p>
-      </status>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Parses CSV data, returning the results in the form of a record containing information
           about the names in the header, as well as the data itself.</p>
       </description>
@@ -3628,8 +3599,8 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 13 in XPath 4.0. An earlier version of the function was available
-          since Saxon 12.0 provided that syntax extensions are enabled.</p>
+        <p>Available since Saxon 13 in XPath 4.0. An earlier one-argument version of the function
+          was available since Saxon 12.0 provided that syntax extensions are enabled.</p>
         <p>In SaxonJ this is implemented using <code>validator.nu</code>; in SaxonCS the
           implementation uses <code>AngleSharp</code>.</p>
       </status>
@@ -6184,7 +6155,7 @@
           <in-spec>xpath40</in-spec>
         </proto>
       </signatures>
-      <status/>
+      <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>Returns a sequence containing selected keys present in a map.</p>
