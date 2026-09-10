@@ -258,7 +258,7 @@ public class Environment implements ResourceResolver {
         if (needsLicense && "EE".equals(driver.driverProc.getSaxonEdition()) /*xpc.isSchemaAware()*/) {
             XsdCompiler xsdCompiler = environment.processor.newXsdCompiler();
             environment.xsdSchema = loadSchemaDocuments(driver, xpc, env, environment, xsdCompiler);
-            if (environment.xsdSchema != null) {
+            if (environment.xsdSchema != null && environment.xsltCompiler != null) {
                 environment.xsltCompiler.setSchemaAware(true);
             }
         }
