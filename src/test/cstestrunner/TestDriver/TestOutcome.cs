@@ -6,9 +6,12 @@ using System.IO;
 using Saxon.Api;
 using System.Collections;
 using System.Xml;
+using Saxon.Hej.@event;
 using Saxon.Hej.om;
 using Saxon.Hej.regex;
+using Saxon.Hej.serialize;
 using Saxon.Hej.str;
+using Saxon.Hej.trans;
 using JWhitespace = Saxon.Hej.value.Whitespace;
 using JFeatureKeys = Saxon.Hej.lib.FeatureKeys;
 using JDeepEqual = Saxon.Hej.functions.SaxonDeepEqual;
@@ -1024,7 +1027,6 @@ namespace TestDriver {
         }
 
         private bool assertPermutation(XdmNode assertion, SingleResultDoc result, XPathCompiler assertXpc) {
-            // TODO: extend this to handle nodes (if required)
             if (IsException()) {
                 return false;
             }
@@ -1047,6 +1049,9 @@ namespace TestDriver {
                     // Approximation: compare the string values of the items in the result
 
                     foreach (XdmItem i in expectedResult) {
+                        if (!(i is XdmAtomicValue)) {
+                            return assertNonAtomicPermutation(s, result, assertXpc);
+                        }
                         expected.Add(i.StringValue);
                     }
 
@@ -1060,6 +1065,42 @@ namespace TestDriver {
                 catch (SaxonApiException) {
                     return false;
                 }
+            }
+        }
+
+
+        private bool assertNonAtomicPermutation(XPathSelector expected, SingleResultDoc result,
+            XPathCompiler assertXpc) {
+            // For assert-permutation involving non-atomic values, we compare the adaptive-serialization representation of the items
+            // TODO: this isn't good enough for comparing maps, where the serialization outputs entries in random order
+            try {
+                int expectedItems = 0;
+                PipelineConfiguration pipe = assertXpc.Processor.Implementation.makePipelineConfiguration();
+                HashSet<UnicodeString> expectedValues = new HashSet<UnicodeString>();
+                foreach (XdmItem item in expected) {
+                    expectedItems++;
+                    UnicodeBuilder writer = new();
+                    AdaptiveEmitter emitter = new(pipe, writer);
+                    emitter.write((Item)item.Unwrap());
+                    expectedValues.Add(writer.toUnicodeString());
+                }
+
+                int actualItems = 0;
+                foreach (XdmItem item in principalResult.value) {
+                    actualItems++;
+                    UnicodeBuilder writer = new UnicodeBuilder();
+                    AdaptiveEmitter emitter = new AdaptiveEmitter(pipe, writer);
+                    emitter.write((Item)item.Unwrap());
+                    if (!expectedValues.Contains(writer.toUnicodeString())) {
+                        return false;
+                    }
+                }
+
+                return actualItems == expectedItems;
+            }
+            catch (XPathException e) {
+                //e.printStackTrace();
+                return false;
             }
         }
 
