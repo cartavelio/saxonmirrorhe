@@ -55,7 +55,12 @@ public class DocumentKey {
     }
 
     public String getAbsoluteURI() {
-        return displayValue;
+        String s = displayValue;
+        int query = s.indexOf('?');
+        if (query >= 0) {
+            s = s.substring(0, query);
+        }
+        return s;
     }
 
 
