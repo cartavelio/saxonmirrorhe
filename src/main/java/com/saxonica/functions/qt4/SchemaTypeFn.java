@@ -1,15 +1,21 @@
 package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SimpleLazyFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class supports the proposed QT4 function fn:schema-type.
@@ -17,7 +23,7 @@ import net.sf.saxon.value.*;
 
 public class SchemaTypeFn extends SystemFunction {
 
-    public final static RecordTest schemaTypeRecord = new RecordTest();
+    public final static RecordTest schemaTypeRecord = new RecordTest(new StructuredQName("fn", NamespaceUri.FN, "schema-type-record"));
 
     private final static SequenceType[] NO_ARGS = new SequenceType[]{};
 
@@ -81,7 +87,9 @@ public class SchemaTypeFn extends SystemFunction {
         }
         SchemaType base = st.getBaseType();
         if (base != null) {
-            result.initialPut("base-type", makeSchemaRecord(base));
+            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(base),
+                                                           SequenceType.one(schemaTypeRecord));
+            result.initialPut("base-type", fn);
         }
         String variety = "*unknown*";
         if (st.isSimpleType()) {
@@ -106,10 +114,43 @@ public class SchemaTypeFn extends SystemFunction {
         result.initialPut("variety", new StringValue(variety));  // TODO: should be an enum type
 
         if (st.isAtomicType() && !st.isSameType(BuiltInAtomicType.ANY_ATOMIC)) {
-            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(((AtomicType) st).getPrimitiveAtomicType()),
+            AtomicType prim = ((AtomicType) st).getPrimitiveAtomicType();
+            // This might not be truly primitive, for example it might be xs:integer
+            while (prim.getBaseType() != BuiltInAtomicType.ANY_ATOMIC) {
+                prim = (AtomicType)prim.getBaseType();
+            }
+            final AtomicType finalResult = prim;
+            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(finalResult),
                                                            SequenceType.one(schemaTypeRecord));
             result.initialPut("primitive-type", fn);
 
+        }
+
+        if (st.isSimpleType() && ((SimpleType)st).isListType()) {
+            final SimpleType itemType = ((ListType)st).getItemType();
+            SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(itemType),
+                                                           SequenceType.one(schemaTypeRecord));
+            result.initialPut("members", fn);
+        }
+        if (st.isSimpleType() && ((SimpleType) st).isUnionType()) {
+            final List<? extends PlainType> memberTypes = ((UnionType) st).getPlainMemberTypes();
+            // TODO: handle general XSD union types that are not "plain unions"
+            SimpleLazyFunction fn = new SimpleLazyFunction(() -> {
+                List<MapItem> memberTypeRecords = new ArrayList<>();
+                for (PlainType m : memberTypes) {
+                    memberTypeRecords.add(makeSchemaRecord((SimpleType)m));
+                }
+                return SequenceExtent.makeSequenceExtent(memberTypeRecords);
+            }, SequenceType.zeroOrMore(schemaTypeRecord));
+            result.initialPut("members", fn);
+        }
+
+        if (st.isAtomicType()) {
+            CallableFunction matches = new CallableFunction((context, args) -> {
+                TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+                return BooleanValue.get(((AtomicType) st).matches(args[0].head(), th));
+            }, new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.SINGLE_BOOLEAN));
+            result.initialPut("matches", matches);
         }
         return result;
     }
