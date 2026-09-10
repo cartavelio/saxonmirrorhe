@@ -87,9 +87,9 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
         arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
         //new XdmValue((int64_t)arguments[i]);
     }
-    if(func == nullptr) {
+    /*if(func == nullptr) {
         return nullptr;
-    }
+    } */
 
 #if defined PYTHON_SAXONC_API
     fprintf(stdout, "We are in a c function preprocessor directive for Python\n");
@@ -459,30 +459,30 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
 
         if(signatureMap == nullptr) {
               std::cerr<<"We are in a C++ registerUserFunction K"<<std::endl;
-              throw SaxonApiException();
+              throw SaxonApiException("Signature Map is NULL");
         }
 
         //TODO this might not be needed
-        int64_t paramValues = j_getArgumentTypesFromSignature(SaxonProcessor::sxn_environ->thread,
+        /*int64_t paramValues = j_getArgumentTypesFromSignature(SaxonProcessor::sxn_environ->thread,
                                                               (void *) signatureMap->getUnderlyingValue());
 
-        argValue = new XdmArray(paramValues);
+        argValue = new XdmArray(paramValues);   */
       //  userFunctionDescriptor1->argumentTypes = argValue;
 
 
-        int64_t returnIntValue = j_getReturnTypeFromSignature(SaxonProcessor::sxn_environ->thread,
-                                                              (void *) signatureMap->getUnderlyingValue());
+        /*int64_t returnIntValue = j_getReturnTypeFromSignature(SaxonProcessor::sxn_environ->thread,
+                                                              (void *) signatureMap->getUnderlyingValue()); */
 
     std::cerr<<"We are in a C++ registerUserFunction cp3"<<std::endl;
 
-        if (returnIntValue == SXN_EXCEPTION) {
+        /*if (returnIntValue == SXN_EXCEPTION) {
 
             throw SaxonApiException();
         } else {
             returnValue = new XdmValue(returnIntValue, false);
            // userFunctionDescriptor1->returnType = returnValue;
 
-        }
+        }  */
 
     }
 

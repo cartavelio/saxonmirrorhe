@@ -925,7 +925,7 @@ function userFunction($param , $param2)
          }
          $saxonProc1 = new Saxon\SaxonProcessor(True);
 
-         $saxonProc1->registerUserFunction("http://www.example.com", "userFunction", "{ \"myFunc\": {".
+         $saxonProc1->registerUserFunction("http://www.example.com", "userFunction", "{ \"userFunction\": {".
                                                         "      \"as\": \"xs:integer?\"," .
                                                         "      \"param\": [" .
                                                         "        \"xs:integer\"" .
@@ -935,10 +935,10 @@ function userFunction($param , $param2)
                                                         "}", False);
 
          $xpathProc = $saxonProc1->newXPathProcessor();
-         xpathProc->declareNamespace("dy", "http://www.example.com");
+         $xpathProc->declareNamespace("dy", "http://www.example.com");
 
          try {
-             $result = $xpathProc->evaluateSingle("dy:myFunc(3)");
+             $result = $xpathProc->evaluateSingle("dy:userFunction(3)");
              $this->assertNotNull($result);
              $this->assertInstanceOf(Saxon\XdmItem::class, $result);
              $this->assertTrue($result->isAtomic());

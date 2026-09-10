@@ -1347,11 +1347,20 @@ FAILURE) { RETURN_NULL();
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj -
 XtOffsetOf(saxonProcessor_object, std));
 
-    saxonProcessor = obj->saxonProcessor;
+  if(signature == nullptr) {
+       zend_throw_exception(zend_ce_exception, "Method signature is null", 0);
+   } else {
+        std::cerr<<"Signature ="<<signature<<std::endl;
+   }
 
-saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, functionName, (void *)nullptr, signature, useNativeTypes);
-//"com/saxonica/functions/extfn/cpp/PHPFunctionSet$PHPFunction", phpMethods,
-//sizeof(phpMethods) / sizeof(phpMethods[0]));
+    saxonProcessor = obj->saxonProcessor;
+                 try {
+
+
+                    saxonProcessor->registerUserFunctionWithProcessor((void *)saxonProcessor, namespacei, functionName, (void *)nullptr, (const char *)signature, useNativeTypes);
+                } catch (SaxonApiException &e) {
+                    zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+                 }
 
 }
 

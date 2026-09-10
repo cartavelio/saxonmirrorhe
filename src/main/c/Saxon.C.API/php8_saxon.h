@@ -26,7 +26,7 @@ extern "C" { // remove comment
 #include "zend_interfaces.h"
 #include "zend_types.h"
 
-//#define PHP_SAXONC_API
+#define PHP_SAXONC_API
 #ifdef PHP_WIN32
 #define _ALLOW_KEYWORD_MACROS
 #endif
