@@ -81,7 +81,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
         fprintf(stdout, "We are in a c function\n");
     }
 
-    //void ** arguments1 = (void **)malloc(sizeof(void *) * 1);
+    void * userFuncResult = nullptr;
     XdmValue ** arguments1 = new XdmValue*[numOfArguments];
     for(int i =0; i< numOfArguments; i++) {
         arguments1[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)arguments[i]);
@@ -93,7 +93,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
     fprintf(stdout, "We are in a c function preprocessor directive for Python\n");
     fflush(stdout);
   }
-  return python_nativeFunctionCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
+  userFuncResult = python_nativeFunctionCall(functionName, proc, func, useNativeTypes, numOfArguments, arguments1);
 
 #elif defined PHP_SAXONC_API
 
@@ -102,7 +102,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
     fflush(stdout);
   }
 
-  return phpNativeCall(functionName, proc, useNativeTypes, numOfArguments, arguments1);
+  userFuncResult = phpNativeCall(functionName, proc, useNativeTypes, numOfArguments, arguments1);
 
 
 #else
@@ -117,9 +117,15 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, in
   sxnExtensionFunction func1 = sxnExtensionFunction(func);
 
     XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
-    return (void *)result->getUnderlyingValue();
-#endif
 
+    userFuncResult = (void *)result->getUnderlyingValue();
+#endif
+  //destroy arguments
+  //delete [] arguments;
+  //delete [] arguments1;
+
+
+  return userFuncResult;
 }
 
 

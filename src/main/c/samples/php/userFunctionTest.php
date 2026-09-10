@@ -303,8 +303,8 @@ function testTwoSequence($saxonProc) {
              }
              $result3 = $xpath->evaluate("ms:twoSequenceParam3(['a','b','c'], [1,2,3])");
              if($result3 != null) {
-                $size = $result2->size();
-                $value = $result2->itemAt(0)->getStringValue();
+                $size = $result3->size();
+                $value = $result3->itemAt(0)->getStringValue();
                 echo 'Output size='.$size." Result for 1st item = ".$value;
                 echo "\n";
              }
