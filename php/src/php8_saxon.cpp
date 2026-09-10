@@ -1411,6 +1411,15 @@ XtOffsetOf(saxonProcessor_object, std));
 
 }
 
+typedef enum saxonTypeEnum {
+  enumNode,
+  enumString,
+  enumInteger,
+  enumDouble,
+  enumFloat,
+  enumBool,
+  enumArrXdmValue
+} PRIMITIVE_TYPE;
 
 zval makePHPValue(XdmValue * value){
 
@@ -1919,7 +1928,8 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
       }
 
       resultVoidValue = (void *)resultValue->getUnderlyingValue();
-      resultValue->resetValue(SXN_UNSET);
+      //TODO check for memory leak - if we need to delete the resultValue.
+      //resultValue->resetValue(SXN_UNSET);
 
 
       return resultVoidValue;
