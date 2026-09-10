@@ -99,7 +99,7 @@ val editionJava = configurations.resolvable("editionJava") {
 // we can't get rid of and which clashes when the assemble task is run, so let's point it somewhere
 // harmless
 val processResources by tasks.named<ProcessResources>("processResources") {
-  into(layout.buildDirectory.dir("ignore/resources"))
+  destinationDir = layout.buildDirectory.dir("ignore/resources").get().asFile
 }
 
 // from() is set in the edition build.gradle.kts
