@@ -14,7 +14,6 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import net.sf.saxon.tree.iter.LookaheadIterator;
-import net.sf.saxon.tree.iter.SequenceIteratorProperty;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -166,8 +165,7 @@ public class FocusTrackingIterator
      * is stateless and it is not necessary (or usual) to call it before calling
      * next(). It is used only when there is an explicit need to tell if we
      * are at the last element.
-     * <p>This method must not be called unless the result of getProperties() on the iterator
-     * includes the bit setting {@link SequenceIteratorProperty#LOOKAHEAD}</p>
+     * <p>This method must not be called unless the method {@link #supportsHasNext()} returns true.</p>
      *
      * @return true if there are more items in the sequence
      * @throws ClassCastException if the base iterator does not support lookahead processing
@@ -185,7 +183,6 @@ public class FocusTrackingIterator
      * @return the corresponding Value
      * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
     public GroundedValue materialize() {
@@ -199,7 +196,6 @@ public class FocusTrackingIterator
      * @return the corresponding Value
      * @throws UncheckedXPathException in the cases of subclasses (such as the iterator over a MemoClosure)
      *                        which cause evaluation of expressions while materializing the value.
-     * @throws ClassCastException if the iterator does not have the {@link SequenceIteratorProperty#GROUNDED} property.
      */
     @Override
     public GroundedValue getResidue()  {
