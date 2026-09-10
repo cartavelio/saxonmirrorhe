@@ -183,13 +183,13 @@
       priority="30" mode="methods">
       
       <xsl:sequence select="f:applyFormat(., map{
-         'toLowerCase#0':     '%scope%.ToLower()',
-         'toUpperCase#0':     '%scope%.ToUpper()',
-         'hashCode#0':        '%scope%.GetHashCode()',
+         (: TODO: equals() and hashCode() should use StringComparison.Ordinal :)
+         'compareTo#1':       'System.String.Compare(%scope%, %arg1%, System.StringComparison.Ordinal)', 
          'charAt#1':          '%scope%[%args%]',
          'equalsIgnoreCase#1':'Saxon.Impl.Helpers.StringUtils.stringEqualsIgnoreCase(%scope%, %args%)',
          'getChars#4':        'Saxon.Impl.Helpers.StringUtils.stringToCharArray(%scope%, %args%)',
          'getBytes#1':        'System.Text.Encoding.GetEncoding(%args%).GetBytes(%scope%)',
+         'hashCode#0':        '%scope%.GetHashCode()',
          'intern#0':          'System.String.Intern(%scope%)',
          'isEmpty#0':         '%scope%.Length==0',
          'length#0':          '%scope%.Length',
@@ -201,6 +201,8 @@
          'substring#2':       '%scope%.Substring(%arg1%, %arg2% - %arg1%)',
          'subSequence#1':     '%scope%.Substring(%args%)',
          'subSequence#2':     '%scope%.Substring(%arg1%, %arg2% - %arg1%)',
+         'toLowerCase#0':     '%scope%.ToLower()',
+         'toUpperCase#0':     '%scope%.ToUpper()',
          '*':                 '%scope%.%Name%(%args%)' 
          })"/>
       
@@ -520,7 +522,7 @@
          'getHost#0':                 '%scope%.Host',
          'getPath#0':                 '%scope%.LocalPath',
          'getPort#0':                 '%scope%.Port',
-         'getQuery#0':                '%scope%.Query',
+         'getQuery#0':                'Saxon.Impl.Helpers.UriUtils.GetQuery(%scope%)',
          'getRawAuthority#0':         '%scope%.Authority',
          'getRawFragment#0':          '%scope%.Fragment',
          'getRawPath#0':              '%scope%.LocalPath',
@@ -534,7 +536,7 @@
          'isOpaque#0':                'Saxon.Impl.Helpers.UriUtils.IsOpaque(%scope%)',
          'normalize#0':               'Saxon.Impl.Helpers.UriUtils.Normalize(%scope%)',
          'resolve#1':                 'new System.Uri(%scope%, %args%)',
-         'toASCIIString#0':           '%scope%.ToString()',
+         'toASCIIString#0':           '%scope%.OriginalString',
          'toURL#0':                   'Saxon.Impl.Helpers.UriUtils.ToURL(%scope%)',
          '*':                         '%scope%.%Name%(%args%)' 
          })"/>
@@ -702,6 +704,7 @@
    <xsl:template match="*[@RESOLVED_TYPE = 'java.math.BigDecimal']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
+         'abs#0':           'Singulink.Numerics.BigDecimal.Abs(%scope%)',
          'add#1':           '(%scope%+%args%)',
          'subtract#1':      '(%scope%-%args%)',
          'multiply#1':      '(%scope%*%args%)',
@@ -1046,6 +1049,87 @@
          })"/>
    </xsl:template>-->
    
+   <!-- com.ibm.icu.lang.UScript: ICU4N.Globalization.UScript -->
+   
+   <xsl:template match="*[f:targetType(.) = 'com.ibm.icu.lang.UScript']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getCode#1':         'ICU4N.Globalization.UScript.GetCode(%args%)',
+         '*':                 '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
+   <!-- com.ibm.icu.text.Collator (=ICU4N.Text.Collator) -->
+   
+   <xsl:template match="*[f:targetType(.) = 'com.ibm.icu.text.Collator']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getInstance#0':     'ICU4N.Text.Collator.GetInstance()',
+         'getInstance#1':     'ICU4N.Text.Collator.GetInstance(%args%)',
+         '*':                 '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
+   <!-- com.ibm.icu.text.CollationElementIterator (=ICU4N.Text.CollationElementIterator) -->
+   
+   <xsl:template match="*[f:targetType(.) = 'com.ibm.icu.text.CollationElementIterator']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'primaryOrder#1':    'ICU4N.Text.CollationElementIterator.PrimaryOrder(%args%)',
+         'secondaryOrder#1':  'ICU4N.Text.CollationElementIterator.SecondaryOrder(%args%)',
+         'tertiaryOrder#1':   'ICU4N.Text.CollationElementIterator.TertiaryOrder(%args%)',
+         '*':                 '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
+   <!-- com.ibm.icu.text.CollationKey (=ICU4N.Text.CollationKey) -->
+   
+   <xsl:template match="*[f:targetType(.) = 'com.ibm.icu.text.CollationKey']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         '*':                 '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
+   <!-- com.ibm.icu.text.RuleBasedCollator (=ICU4N.Text.RuleBasedCollator) -->
+   
+   <xsl:template match="*[f:targetType(.) = 'com.ibm.icu.text.RuleBasedCollator']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getAvailableLocales#0':         'ICU4N.Text.RuleBasedCollator.',
+         'getStrength#0':                 '(int)%scope%.Strength',
+         'getVariableTop#0':              '%scope%.VariableTop',
+         'isFrenchCollation#0':           '%scope%.IsFrenchCollation',
+         'isLowerCaseFirst#0':            '%scope%.IsLowerCaseFirst',
+         'isUpperCaseFirst#0':            '%scope%.IsUpperCaseFirst',
+         'setAlternateHandlingShifted#1': '%scope%.IsAlternateHandlingShifted = (%args%)',
+         'setCaseLevel#1':                '%scope%.IsCaseLevel = (%args%)',
+         'setDecomposition#1':            '%scope%.Decomposition = (%args%)',
+         'setFrenchCollation#1':          '%scope%.IsFrenchCollation = (%args%)',
+         'setLowerCaseFirst#1':           '%scope%.IsLowerCaseFirst = (%args%)',
+         'setMaxVariable#1':              '%scope%.MaxVariable = (%args%)',
+         'setNumericCollation#1':         '%scope%.IsNumericCollation = (%args%)',
+         'setStrength#1':                 '%scope%.Strength = (ICU4N.Text.CollationStrength)(%args%)',
+         'setUpperCaseFirst#1':           '%scope%.IsUpperCaseFirst = (%args%)',
+         '*':                             '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
+   <!-- com.ibm.icu.util.VersionInfo (=ICU4N.Util.VersionInfo) -->
+   
+   <xsl:template match="*[f:targetType(.) = 'com.ibm.icu.util.VersionInfo']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getInstance#0':              'ICU4N.Util.VersionInfo.GetInstance()',
+         'getInstance#1':              'ICU4N.Util.VersionInfo.GetInstance(%args%)',
+         'getMajor#0':                 '%scope%.Major',
+         'getMinor#0':                 '%scope%.Minor',
+         'getMilli#0':                 '%scope%.Milli',
+         'getMicro#0':                 '%scope%.Micro',
+         '*':                          '%scope%.%Name%(%args%)' 
+         })"/>     
+   </xsl:template>
+   
    <xsl:template match="*[f:targetType(.) = 'net.sf.saxon.s9api.QName']" 
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
@@ -1255,6 +1339,19 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
+   
+   <!-- 'java.util.Locale': 'System.Globalization.CultureInfo' -->
+   
+   <xsl:template match="*[@RESOLVED_TYPE = 'java.util.Locale']" priority="20">
+      <xsl:sequence select="f:applyFormat(., map{
+         'getCountry#0':     '(%scope%.IsNeutralCulture ? null : new System.Globalization.RegionInfo(%scope%.LCID).TwoLetterISORegionName)',
+         'getDefault#0':     'System.Globalization.CultureInfo.CurrentCulture',
+         'getDisplayName#0': '%scope%.Name',
+         'getLanguage#0':    '%scope%.Name',
+         '*':                '%scope%.%Name%(%args%)'
+         })"/>
+   </xsl:template>
+   
    
    <!-- Translate methods used on IO classes -->
    <xsl:template match="*[starts-with(@RESOLVED_TYPE, 'java.io.') and not(@RESOLVED_TYPE = 'java.io.File')]" 

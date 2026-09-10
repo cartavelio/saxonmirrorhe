@@ -246,6 +246,48 @@
       </xsl:choose>
    </xsl:template>
    
+   <!-- Fields on com.ibm.icu.text.Collator -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'com.ibm.icu.text.Collator']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='PRIMARY'">(int)ICU4N.Text.CollationStrength.Primary</xsl:when>
+         <xsl:when test="name/@identifier='SECONDARY'">(int)ICU4N.Text.CollationStrength.Secondary</xsl:when>
+         <xsl:when test="name/@identifier='TERTIARY'">(int)ICU4N.Text.CollationStrength.Tertiary</xsl:when>
+         <xsl:when test="name/@identifier='QUATERNARY'">(int)ICU4N.Text.CollationStrength.Quaternary</xsl:when>
+         <xsl:when test="name/@identifier='IDENTICAL'">(int)ICU4N.Text.CollationStrength.Identical</xsl:when>
+         <xsl:when test="name/@identifier='NO_DECOMPOSITION'">ICU4N.Text.NormalizationMode.NoDecomposition</xsl:when>
+         <xsl:when test="name/@identifier='CANONICAL_DECOMPOSITION'">ICU4N.Text.NormalizationMode.CanonicalDecomposition</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Fields on com.ibm.icu.text.CollationElementIterator -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'com.ibm.icu.text.CollationElementIterator']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='NULLORDER'">ICU4N.Text.CollationElementIterator.NullOrder</xsl:when>
+         <xsl:when test="name/@identifier='IGNORABLE'">ICU4N.Text.CollationElementIterator.Ingorable</xsl:when>
+         <!-- sic - it's misspelled in ICU4N. Raised as issue #35 -->
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
+   <!-- Fields on com.ibm.icu.text.Collator.ReorderCodes -->
+   <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'com.ibm.icu.text.Collator.ReorderCodes']" priority="20">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='SPACE'">ICU4N.Text.ReorderCodes.Space</xsl:when>
+         <xsl:when test="name/@identifier='PUNCTUATION'">ICU4N.Text.ReorderCodes.Punctuation</xsl:when>
+         <xsl:when test="name/@identifier='SYMBOL'">ICU4N.Text.ReorderCodes.Symbol</xsl:when>
+         <xsl:when test="name/@identifier='CURRENCY'">ICU4N.Text.ReorderCodes.Currency</xsl:when>
+         <xsl:when test="name/@identifier='DIGIT'">ICU4N.Text.ReorderCodes.Digit</xsl:when>
+         <xsl:otherwise>
+            <xsl:next-match/>
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>
+   
 
    
  <!--  <xsl:template match="*[$refactoredProperties(name/@identifier)]" priority="20">
