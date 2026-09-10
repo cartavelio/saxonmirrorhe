@@ -118,20 +118,17 @@ public abstract class ExtensionFunctionCall implements Callable {
     }
 
     /**
-     * Copy local data from one copy of the function to another. This method must be implemented
-     * in any implementation that maintains local data retained from the static context; the job of the
-     * method is to copy this local data to the supplied destination function.
-     * <p>This method is called if a call to the extension function needs to be copied during
-     * the process of optimization. For example, this occurs if the function containing the call
-     * to the extension function is inlined.</p>
-     * <p>If any objects held as local data for the function call are mutable then deep copies must
-     * be made.</p>
+     * Copy local data from one copy of the function to another.
+     * <p>This method is no longer used: functions do not need to provide an implementation, and if they
+     * do so, the implementation will never be called. It is retained for the time being for backwards
+     * compatibility</p>
      *
-     * @param destination the function to which the local data must be copied. This will always
-     *                    be an instance of the same function class as the source function.
+     * @param destination the function to which the local data must be copied.
+     * @deprecated since 12.0
      */
 
     @CSharpModifiers(code = {"public", "virtual"})
+    @Deprecated
     public void copyLocalData(ExtensionFunctionCall destination) {
         // default implementation does nothing
     }
