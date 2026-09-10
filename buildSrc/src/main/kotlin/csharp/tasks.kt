@@ -244,7 +244,7 @@ abstract class DotNetBuild : DotNetImplementation() {
   abstract val inputSources: ConfigurableFileCollection
 
   @get:OutputFile
-  val apiDocumentationFile: Provider<RegularFile> = buildBinArtifactsDir.map { it.file("${target.get()}.xml") }
+  val apiDocumentationFile: Provider<RegularFile> = buildBinArtifactsDir.map { it.file("${target.get()}-${edition.get().uppercase()}.xml") }
 
   @get:OutputDirectory
   val outputDir = buildPublishArtifactsDir
