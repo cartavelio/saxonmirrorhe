@@ -4,7 +4,10 @@ SaxonC-@EDITION@ is a compiled variant of Saxon from the Java
 platform to the C/C++ platform using GraalVM native-image.
 
 SaxonC-@EDITION@ provides processing in XSLT 3.0, XQuery 3.1 and
-XPath 3.1, and Schema validation 1.0/1.1.
+XPath 3.1; and Schema validation 1.0/1.1 with SaxonC-EE.
+SaxonC-EE and SaxonC-PE also include support for many features in
+the XPath, XQuery, and XSLT 4.0 specifications currently in
+development in the QT4 Community Group.
 
 This is a library with APIs for C, C++, PHP, and Python. The main
 classes in the SaxonC C++ API are as follows: SaxonProcessor, Xslt30Processor,

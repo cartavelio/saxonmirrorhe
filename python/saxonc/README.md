@@ -24,9 +24,10 @@ For full documentation for the latest SaxonC release, see the
 
 The main reason for using SaxonC in preference to other XML
 tools available for Python is that it supports all the latest W3C
-standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1. It even
-includes experimental support for the draft 4.0 specifications
-currently under development.
+standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1. 
+SaxonC-EE and SaxonC-PE also include support for many features in
+the XPath, XQuery, and XSLT 4.0 specifications currently in
+development in the [QT4 Community Group](http://qt4cg.org/).
 
 ## About SaxonC
 

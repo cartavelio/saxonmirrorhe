@@ -1,12 +1,16 @@
 \mainpage
-This documentation details the C++ API and C API for SaxonC.
+This documentation details the C++ API and C API for all editions 
+(HE, PE and EE) of SaxonC 13.
 
 SaxonC is a compiled variant of Saxon from the Java
 platform to the C/C++ platform using GraalVM Native Image,
 with APIs for C/C++, PHP, and Python.
 
 SaxonC provides processing in XSLT 3.0, XQuery 3.1 and
-XPath 3.1, and Schema validation 1.0/1.1.
+XPath 3.1; and Schema validation 1.0/1.1 with SaxonC-EE.
+SaxonC-EE and SaxonC-PE also include support for many features in 
+the XPath, XQuery, and XSLT 4.0 specifications currently in 
+development in the QT4 Community Group.
 
 ## C++ API
 
