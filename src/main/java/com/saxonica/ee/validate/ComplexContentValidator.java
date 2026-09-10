@@ -595,4 +595,4 @@ public class ComplexContentValidator extends AttributeValidator {
     }
 }
 
-// Copyright � 2004-2020 Saxonica Limited No warranty.
+// Copyright (c) 2004-2022 Saxonica Limited
