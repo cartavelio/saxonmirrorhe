@@ -7,8 +7,6 @@
 
 package net.sf.saxon;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.config.ProfessionalConfiguration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -282,17 +280,17 @@ public class Configuration implements SourceResolver, NotationSet {
 
     public static Configuration newLicensedConfiguration() {
         //#if EE==true
-        EnterpriseConfiguration eeConfig = new EnterpriseConfiguration();
+        com.saxonica.config.EnterpriseConfiguration eeConfig = new com.saxonica.config.EnterpriseConfiguration();
         if (eeConfig.isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
             return eeConfig;
         } else if (eeConfig.isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            ProfessionalConfiguration peConfig = new ProfessionalConfiguration();
+            com.saxonica.config.ProfessionalConfiguration peConfig = new com.saxonica.config.ProfessionalConfiguration();
             peConfig.importLicenseDetails(eeConfig);
             return peConfig;
         }
         //#endif
         //#if PE==true
-        ProfessionalConfiguration peConfig2 = new ProfessionalConfiguration();
+        com.saxonica.config.ProfessionalConfiguration peConfig2 = new com.saxonica.config.ProfessionalConfiguration();
         if (peConfig2.isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
             return peConfig2;
         }
