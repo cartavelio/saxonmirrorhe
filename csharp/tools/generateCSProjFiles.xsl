@@ -463,13 +463,13 @@ EndGlobal
         <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.8" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration'">
-        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.10" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration.Json'">
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.10" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.Extensions.Configuration.Xml'">
-        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.10" />
       </xsl:when>
       <xsl:when test=". = 'Microsoft.NET.Test.Sdk'">
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
@@ -505,10 +505,10 @@ EndGlobal
         <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.7" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolver'">
-        <PackageReference Include="XmlResolver" Version="6.0.23" />
+        <PackageReference Include="XmlResolver" Version="6.0.24" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolverData'">
-        <PackageReference Include="XmlResolverData" Version="6.0.23" />
+        <PackageReference Include="XmlResolverData" Version="6.0.24" />
       </xsl:when>
       <xsl:when test=". = 'coverlet.collector'">
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
