@@ -60,9 +60,10 @@ public interface RelativeURIResolver extends URIResolver {
 
     /**
      * Extended method that accepts flags
-     * @param uri the URI to be dereferecned
+     * @param uri the URI to be dereferenced
      * @param flags recognized flags are S=streamable, M=stylesheet module, D=document, K=schema
-     * @return
+     * @return A Source object, or null if the href cannot be dereferenced,
+     *         and the processor should try to resolve the URI itself.
      * @throws TransformerException
      */
     default Source dereference(String uri, String flags) throws TransformerException {
