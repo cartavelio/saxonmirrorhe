@@ -92,7 +92,7 @@ public class UntypedNumericComparer implements AtomicComparer {
             long upperBound = bounds[firstDigit + 1][wholePartLength];
             long simpleNumber = (decimalPoints == 0) ? 1L : 0L;
             if (sign == '-') {
-                return new long[]{-lowerBound, -upperBound, simpleNumber};
+                return new long[]{-upperBound, -lowerBound, simpleNumber};
             } else {
                 return new long[]{lowerBound, upperBound, simpleNumber};
             }
@@ -122,21 +122,14 @@ public class UntypedNumericComparer implements AtomicComparer {
         int comp = specVersion >= 40
                 ? quickComparison40(a0, a1, rules)
                 : quickComparison31(a0, a1, rules);
-        switch (operator) {
-            case FEQ:
-                return comp == 0;
-            case FLE:
-                return comp <= 0;
-            case FLT:
-                return comp < 0;
-            case FGE:
-                return comp >= 0;
-            case FGT:
-                return comp > 0;
-            case FNE:
-            default:
-                return comp != 0;
-        }
+        return switch (operator) {
+            case FEQ -> comp == 0;
+            case FLE -> comp <= 0;
+            case FLT -> comp < 0;
+            case FGE -> comp >= 0;
+            case FGT -> comp > 0;
+            default -> comp != 0;
+        };
     }
 
     /**
