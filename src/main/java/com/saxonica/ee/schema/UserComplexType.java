@@ -426,11 +426,9 @@ public class UserComplexType extends UserDefinedType
      * (after simplification to remove pointless particles)
      *
      * @return true if the content model of the complex type is "all"
-     * @throws net.sf.saxon.type.SchemaException
-     *          if an error is found in the schema
      */
 
-    public boolean computeIsAllContent() throws SchemaException {
+    public boolean computeIsAllContent()  {
         if (isSimpleContent()) {
             return false;
         }

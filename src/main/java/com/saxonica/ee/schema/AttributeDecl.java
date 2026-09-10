@@ -535,6 +535,11 @@ public final class AttributeDecl extends SchemaStructure
         });
     }
 
+
+    public String toString() {
+        return "AttributeDeclaration " + getName();
+    }
+
 }
 
 // Copyright (c) 2004-2023 Saxonica Limited

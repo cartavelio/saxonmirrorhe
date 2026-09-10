@@ -1283,8 +1283,33 @@ public class PreparedSchema implements Schema, NotationSet {
 
         //System.err.println("Validating top-level components");
 
-        //-- validate top-level components
         if (components != null) {
+
+            // Bug 6671. Sort types by their depth in the hierarchy. This is to ensure
+            // that we never process a derived type when its base type is half validated
+
+            components.sort((a, b) -> {
+                // Types come before anything else; deeper types come before shallower types.
+                // This is a little counter-intuitive, but it is designed to ensure that we
+                // never validate a derived type while its base type is half-validated, because
+                // validating a derived type needs information about the base type. The problem
+                // we are solving here arises when the content model of the base type includes
+                // elements whose type is the derived type.
+                if (a instanceof UserDefinedType) {
+                    if (b instanceof UserDefinedType) {
+                        return -Integer.compare(((UserDefinedType) a).getDepth(), ((UserDefinedType) b).getDepth());
+                    } else {
+                        return -1;
+                    }
+                } else if (b instanceof UserDefinedType) {
+                    return +1;
+                } else return 0;
+            });
+
+            //System.err.println("Validating top-level components");
+
+            //-- validate top-level components
+
             for (UserSchemaComponent s : components) {
                 //System.err.println("Validating " + s.toString());
                 result &= s.validate(compiler);

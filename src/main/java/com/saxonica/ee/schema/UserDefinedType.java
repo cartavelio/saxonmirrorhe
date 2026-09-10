@@ -55,6 +55,12 @@ public abstract class UserDefinedType extends SchemaStructure
 
     private StructuredQName qName = null;
 
+    /**
+     * Depth of the type in the type hierarchy
+     */
+
+    private int depth = -1;
+
 
     /**
      * Default constructor. For internal use only.
@@ -456,6 +462,27 @@ public abstract class UserDefinedType extends SchemaStructure
         s1 = DocumentKey.normalizeURI(s1);
         s2 = DocumentKey.normalizeURI(s2);
         return s1.equals(s2);
+    }
+
+
+    /**
+     * Get (and if necessary compute) the depth of the type in the type hierarchy
+     */
+
+    public int getDepth() {
+        if (depth >= 0) {
+            return depth;
+        } else if (!(getBaseType() instanceof UserDefinedType)) {
+            return depth = 0;
+        } else {
+            // Prevent infinite recursion if the relation is cyclic (suntest xsd007.e)
+            int d = -1;
+            SchemaType type = this;
+            while (type instanceof UserDefinedType && d++ < 100) {
+                type = type.getBaseType();
+            }
+            return depth = d;
+        }
     }
 
 
