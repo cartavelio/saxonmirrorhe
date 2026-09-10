@@ -103,19 +103,9 @@ Xslt30Processor::Xslt30Processor(const Xslt30Processor &other) {
 
 void Xslt30Processor::setProperty(const char *name, const char *value) {
     if (name != nullptr) {
-        int s = properties.size();
-
+        properties.erase(name);
         std::string skey = std::string(name);
-        properties.insert(std::pair<std::string, std::string>(skey, std::string((value == nullptr ? "" : value))));
-
-        if (s == properties.size()) {
-            std::map<std::string, std::string>::iterator it;
-            it = properties.find(skey);
-            if (it != properties.end()) {
-                properties.erase(skey);
-                properties[skey] = std::string((value == nullptr ? "" : value));
-            }
-        }
+        properties[skey] = std::string((value == nullptr ? "" : value));
     }
 }
 
@@ -143,29 +133,18 @@ void Xslt30Processor::setBaseOutputURI(const char *baseURI) {
 
 
 void Xslt30Processor::setParameter(const char* name, XdmValue * value) {
-	if(value != nullptr && name != nullptr){
-		//value->incrementRefCount();
-		int s = parameters.size();
-		std::string skey = ("sparam:"+std::string(name));
-		parameters[skey] = value;
-		if(s == parameters.size()) {
-            std::map<std::string, XdmValue*>::iterator it;
-            it = parameters.find(skey);
-            if (it != parameters.end()) {
-                XdmValue * valuei = it->second;
-                if(valuei != nullptr) {
-                    valuei->decrementRefCount();
-                    /*if (valuei->getRefCount() < 1) {
-                        delete value;
-                        value = nullptr;
-                    }   */
-                    parameters.erase(skey);
-                    parameters[skey] = value;
-                    //value->incrementRefCount();
-                }
+    if(value != nullptr && name != nullptr) {
+        std::string skey = ("sparam:" + std::string(name));
+        std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
+        if (it != parameters.end()) {
+            XdmValue *valuei = it->second;
+            if (valuei != nullptr) {
+                valuei->decrementRefCount();
+                parameters.erase(skey);
             }
-		}
-	 }
+        }
+        parameters[skey] = value;
+    }
 }
 
 XdmValue* Xslt30Processor::getParameter(const char* name) {
@@ -693,7 +672,6 @@ void Xslt30Processor::transformFileToFile(const char* source,
 
 const char * Xslt30Processor::transformFileToString(const char* source,
 		const char* stylesheet) {
-           std::cerr<<"source in transformFiletoString="<<source<<" stylsheet="<<stylesheet<<std::endl;
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.

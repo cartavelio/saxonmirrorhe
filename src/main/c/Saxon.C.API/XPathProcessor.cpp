@@ -466,28 +466,18 @@ return false;
 
 
 void XPathProcessor::setParameter(const char * name, XdmValue*value, bool withParam) {
-	if(value != nullptr){
-		//value->incrementRefCount();
-		int s = parameters.size();
-		std::string skey = (withParam ? "param:" : "")+std::string(name);
-		parameters[skey] = value;
-		if(s == parameters.size()) {
-            std::map<std::string, XdmValue*>::iterator it;
-            it = parameters.find(skey);
-            if (it != parameters.end()) {
-                XdmValue * valuei = it->second;
-                if(valuei != nullptr) {
-                    valuei->decrementRefCount();
-                    /*std::cerr<<"setParameter found key="<<skey<<", deleted first"<<std::endl;
-                    if (valuei->getRefCount() < 1) {
-                        delete value;
-                    } */
-                    parameters.erase(skey);
-                    parameters[skey] = value;
-                }
+    if(value != nullptr && name != nullptr) {
+        std::string skey = (withParam ? "param:" : "")+std::string(name);
+        std::map<std::string, XdmValue *>::iterator it = parameters.find(skey);
+        if (it != parameters.end()) {
+            XdmValue *valuei = it->second;
+            if (valuei != nullptr) {
+                valuei->decrementRefCount();
+                parameters.erase(skey);
             }
-		}
-	}
+        }
+        parameters[skey] = value;
+    }
 
 }
 
