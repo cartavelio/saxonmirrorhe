@@ -223,7 +223,15 @@
             <xsl:sequence select="f:formatCall(., 'System.Text.RegularExpressions.Regex.Split(%scope%, %args%)')"/>
          </xsl:when>
          <xsl:when test="name/@identifier = ('substring', 'subSequence')">
-            <xsl:sequence select="f:formatCall(., '%scope%.Substring(%args%)')"/>
+            <xsl:choose>
+               <xsl:when test="count(arguments/argument)=1">
+                  <xsl:sequence select="f:formatCall(., '%scope%.Substring(%args%)')"/>
+               </xsl:when>
+               <xsl:otherwise>
+                  <!-- Java has substring(start, end), C# has Substring(start, length) -->
+                  <xsl:sequence select="f:formatCall(., '%scope%.Substring(%arg1%, %arg2%-%arg1%)')"/>
+               </xsl:otherwise>
+            </xsl:choose>
          </xsl:when> 
          <xsl:when test="map:contains($renamedMethods, name/@identifier)">
             <xsl:apply-templates select="scope" mode="xml-to-cs"/>

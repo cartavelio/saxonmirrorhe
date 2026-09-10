@@ -68,7 +68,7 @@ namespace Saxon.Api {
         /// as a prefix to the error message if desired.</returns>
         public String GetContextPath()
         {
-            return failure.getContextPath().toString();
+            return failure.getContextPath().ToString();
         }
 
 
@@ -109,7 +109,7 @@ namespace Saxon.Api {
         /// <returns>A path to the location in the document.</returns>
         public String GetPath()
         {
-            return failure.getPath().toString();
+            return failure.getPath().ToString();
         }
 
 
