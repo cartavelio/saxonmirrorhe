@@ -49,6 +49,7 @@ public class XSLResultDocument extends StyleElement {
         fans.add("build-tree");
         fans.add("byte-order-mark");
         fans.add("cdata-section-elements");
+        fans.add("canonical");
         fans.add("doctype-public");
         fans.add("doctype-system");
         fans.add("encoding");
@@ -156,6 +157,10 @@ public class XSLResultDocument extends StyleElement {
                 }
                 if (f.equals(SaxonOutputKeys.ESCAPE_SOLIDUS)) {
                     requireXslt40Attribute(f);
+                }
+                if (f.equals("{http://saxon.sf.net/}canonical")) {
+                    // Allowed for backwards compatibility
+                    name = new StructuredQName("", "", "canonical");
                 }
                 Expression exp = makeAttributeValueTemplate(val, att);
                 serializationAttributes.put(name, exp);

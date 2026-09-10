@@ -1128,6 +1128,11 @@ public class SerializerFactory {
                         value = checkYesOrNo(key, value);
                     }
                     break;
+                case SaxonOutputKeys.CANONICAL:
+                    if (value != null) {
+                        value = checkYesOrNo(key, value);
+                    }
+                    break;
                 case OutputKeys.CDATA_SECTION_ELEMENTS:
                 case SaxonOutputKeys.SUPPRESS_INDENTATION:
                 case SaxonOutputKeys.USE_CHARACTER_MAPS:

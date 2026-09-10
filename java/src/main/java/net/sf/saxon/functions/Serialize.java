@@ -48,6 +48,7 @@ public class Serialize extends SystemFunction implements Callable {
         op.addAllowedOption("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         op.addAllowedOption("cdata-section-elements", listOfQNames, EmptySequence.INSTANCE);
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
+        op.addAllowedOption("canonical", SequenceType.SINGLE_BOOLEAN);
         op.addAllowedOption("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
         op.addAllowedOption("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
         op.addAllowedOption("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
@@ -98,7 +99,7 @@ public class Serialize extends SystemFunction implements Callable {
     }
 
     private final String[] paramNames = new String[]{
-        "allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "doctype-public", "doctype-system",
+        "allow-duplicate-names", "byte-order-mark", "cdata-section-elements", "canonical", "doctype-public", "doctype-system",
         "encoding", "escape-solidus", "escape-uri-attributes", "html-version", "include-content-type", "indent", "item-separator",
         "json-lines", "json-node-output-method", "media-type", "method", "normalization-form", "omit-xml-declaration", "standalone",
         "suppress-indentation", "undeclare-prefixes", "use-character-maps", "version"
@@ -135,6 +136,7 @@ public class Serialize extends SystemFunction implements Callable {
         requiredTypes.put("byte-order-mark", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         requiredTypes.put("cdata-section-elements", BuiltInAtomicType.QNAME.zeroOrMore());
         //QNames-param-type - sequence or an array of xs:QName values. Note that an array will be converted to a sequence, as required
+        requiredTypes.put("canonical", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
         requiredTypes.put("doctype-public", SequenceType.SINGLE_STRING); //doctype-public-param-type pubid-char-string-type
         requiredTypes.put("doctype-system", SequenceType.SINGLE_STRING); //doctype-system-param-type system-id-string-type
         requiredTypes.put("encoding", SequenceType.SINGLE_STRING); //encoding-param-type encoding-string-type
@@ -295,8 +297,7 @@ public class Serialize extends SystemFunction implements Callable {
 
     private String toMethodTypeString(Sequence seqVal) throws XPathException {
         String stringVal;
-        if (seqVal.head() instanceof QNameValue) {
-            QNameValue qNameValue = (QNameValue) seqVal.head();
+        if (seqVal.head() instanceof QNameValue qNameValue) {
             stringVal = '{' + qNameValue.getComponent(AccessorFn.Component.NAMESPACE).toString() + '}' + qNameValue.getComponent(AccessorFn.Component.LOCALNAME);
         } else {
             stringVal = seqVal.head().getStringValue();
@@ -370,6 +371,9 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get("cdata-section-elements")) != null) {
             props.setProperty("cdata-section-elements", toQNamesTypeString(seqVal, false));
+        }
+        if ((seqVal = map.get("canonical")) != null) {
+            props.setProperty("canonical", toYesNoTypeString(seqVal));
         }
         if ((seqVal = map.get("doctype-public")) != null) {
             props.setProperty("doctype-public", seqVal.head().getStringValue());
@@ -494,8 +498,7 @@ public class Serialize extends SystemFunction implements Callable {
         // element is used (or when the argument is omitted), but are fixed by this specification in the
         // case where a map (including an empty map) is supplied for the argument.
         if (param != null) {
-            if (param instanceof NodeInfo) {
-                NodeInfo paramNode = (NodeInfo) param;
+            if (param instanceof NodeInfo paramNode) {
                 if (paramNode.getNodeKind() != Type.ELEMENT ||
                     !NamespaceUri.OUTPUT.equals(paramNode.getNamespaceUri()) ||
                     !"serialization-parameters".equals(paramNode.getLocalPart())) {
@@ -506,9 +509,8 @@ public class Serialize extends SystemFunction implements Callable {
                 sph.setSerializationParams(paramNode);
                 params = sph.getSerializationProperties();
 
-            } else if (param instanceof MapItem) {
+            } else if (param instanceof MapItem paramMap) {
                 // If any parameters are supplied as QNames in the Saxon namespace, convert them to EQName strings
-                MapItem paramMap = (MapItem)param;
                 for (KeyValuePair kvp : paramMap.keyValuePairs()) {
                     AtomicValue k = kvp.key;
                     if (k instanceof QNameValue && ((QNameValue)k).getStructuredQName().hasURI(NamespaceUri.SAXON)) {

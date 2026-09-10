@@ -169,7 +169,7 @@ public class SaxonOutputKeys {
     /*@NotNull*/ public static final String ATTRIBUTE_ORDER = "{http://saxon.sf.net/}attribute-order";
 
     /**
-     * saxon:canonical = yes/no
+     * saxon:canonical = yes/no or canonical = yes/no
      * <p>When used in conjunction with the XML output method, delivers the output in C14N canonical form.
      * Any serialization properties inconsistent with C14N (for example, encoding, indent, or character maps) are
      * ignored if saxon:canonical=yes is specified. Provisions of the W3C serialization specification
@@ -177,7 +177,7 @@ public class SaxonOutputKeys {
      * @since 9.9
      */
 
-    /*@NotNull*/ public static final String CANONICAL = "{http://saxon.sf.net/}canonical";
+    /*@NotNull*/ public static final String CANONICAL = "canonical";
 
     /**
      * saxon:property-order = list of strings

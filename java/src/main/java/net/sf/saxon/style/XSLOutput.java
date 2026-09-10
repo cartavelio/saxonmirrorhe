@@ -76,6 +76,13 @@ public class XSLOutput extends StyleElement {
                 if (f.equals(SaxonOutputKeys.ESCAPE_SOLIDUS)) {
                      requireXslt40Attribute(f);
                 }
+                if (f.equals(SaxonOutputKeys.CANONICAL)) {
+                    requireXslt40Attribute(f);
+                }
+                if (f.equals("{http://saxon.sf.net/}canonical")) {
+                    // Allow saxon:canonical for backwards compatibility
+                    f = SaxonOutputKeys.CANONICAL;
+                }
                 if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR) && !f.equals(SaxonOutputKeys.NEWLINE)) {
                     val = Whitespace.trim(val);
                 }

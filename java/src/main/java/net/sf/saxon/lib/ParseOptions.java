@@ -79,6 +79,7 @@ public class ParseOptions {
         TOP_LEVEL_ELEMENT,
         TOP_LEVEL_TYPE,
         TREE_MODEL,
+        TRUSTED,
         USE_XSI_SCHEMA_LOCATION,
         VALIDATION_ERROR_LIMIT,
         VALIDATION_PARAMS,

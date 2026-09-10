@@ -246,7 +246,7 @@ public class Serializer extends AbstractDestination {
         SAXON_ATTRIBUTE_ORDER(SaxonOutputKeys.ATTRIBUTE_ORDER),
 
         /**
-         * Saxon extension: request canonical XML output. Value is "yes" or "no"
+         * Saxon extension (now in 4.0): request canonical XML output. Value is "yes" or "no"
          */
         SAXON_CANONICAL(SaxonOutputKeys.CANONICAL),
 

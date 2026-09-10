@@ -48,6 +48,7 @@ public class Doc extends SystemFunction implements Callable {
         //docOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
         docOptions.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -238,20 +239,16 @@ public class Doc extends SystemFunction implements Callable {
             parseOptions = parseOptions.withStable(false);
         }
 
-//        val = checkedOptions.get("allow-external-entities");
-//        if (val != null && !val.effectiveBooleanValue()) {
-//            //#if CSHARP==false
-//            parser.setEntityResolver(new EntityResolver() {
-//
-//                @Override
-//                public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-//                    throw new SAXException(
-//                            new XPathException("The parse-xml input references '" + systemId +
-//                                                       "' but external entity expansion is disallowed", "FODC0006"));
-//                }
-//            });
-//            //#endif
-//        }
+        val = checkedOptions.get("trusted");
+        if (!val.effectiveBooleanValue()) {
+            //#if CSHARP==false
+            parser.setEntityResolver((publicId, systemId) -> {
+                throw new SAXException(
+                        new XPathException("The parse-xml input references '" + systemId +
+                                                   "' but external entity expansion is disallowed", "FODC0006"));
+            });
+            //#endif
+        }
 
 //        val = checkedOptions.get("entity-expansion-limit").head();
 //        if (val != null) {
