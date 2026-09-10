@@ -7,6 +7,7 @@ import net.sf.saxon.expr.ValueComparison;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.ContextFreeAtomicComparer;
+import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
@@ -67,17 +68,17 @@ public class ValueComparisonElaborator extends ItemElaborator {
             if (comparer == ContextFreeAtomicComparer.getInstance()) {
                 switch (operator) {
                     case Token.FEQ:
-                        return comparer.comparesEqual(v0, v1);
+                        return v0.equals(v1);
                     case Token.FNE:
-                        return !comparer.comparesEqual(v0, v1);
+                        return !v0.equals(v1);
                     case Token.FGT:
-                        return comparer.compareAtomicValues(v0, v1) > 0;
+                        return ((XPathComparable) v0).compareTo((XPathComparable) v1) > 0;
                     case Token.FLT:
-                        return comparer.compareAtomicValues(v0, v1) < 0;
+                        return ((XPathComparable) v0).compareTo((XPathComparable) v1) < 0;
                     case Token.FGE:
-                        return comparer.compareAtomicValues(v0, v1) >= 0;
+                        return ((XPathComparable) v0).compareTo((XPathComparable) v1) >= 0;
                     case Token.FLE:
-                        return comparer.compareAtomicValues(v0, v1) <= 0;
+                        return ((XPathComparable) v0).compareTo((XPathComparable) v1) <= 0;
                     default:
                         throw new UnsupportedOperationException("Unknown operator " + operator);
                 }
