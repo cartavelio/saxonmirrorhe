@@ -122,7 +122,8 @@ extension.supportedPythonVersions.get().forEach { pythonVersion ->
     val venvTask = tasks.register<PythonVenv>("release_venv_${v}") {
         pythonEnv = extension
         branch = manageBranches.currentBranch
-        suffix = "${v}-release"
+        versionSuffix = v
+        suffix = "release"
         pythonVersionExe = supportedPythonExes.get(v)!!
         buildSystemBootstrap = pyprojectToml
     }
@@ -203,6 +204,7 @@ val devPythonExe = supportedPythonExes.get(extension.version.get())!! // configu
 val venv = tasks.register<PythonVenv>("venv") {
     pythonVersionExe = devPythonExe
     pythonEnv = extension
+    versionSuffix = extension.version
     branch = manageBranches.currentBranch
     buildSystemBootstrap = pyprojectToml
 }
@@ -210,6 +212,7 @@ val venv = tasks.register<PythonVenv>("venv") {
 val debugVenv = tasks.register<PythonVenv>("debug_venv") {
     pythonVersionExe = devDebugPythonExe.elements.map { project.file(it.single().asFile.readText()) }
     pythonEnv = extension
+    versionSuffix = extension.version
     branch = manageBranches.currentBranch
     buildSystemBootstrap = pyprojectToml
     suffix = "debug"

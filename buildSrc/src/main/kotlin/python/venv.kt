@@ -83,6 +83,9 @@ abstract class PythonVenv @Inject constructor(ex: ExecOperations) : ErrorLogging
     @get:InputFile
     abstract val pythonVersionExe: RegularFileProperty
 
+    @get:Input
+    abstract val versionSuffix: Property<String>
+
     @get:Optional
     @get:Input
     abstract val suffix: Property<String>
@@ -96,7 +99,7 @@ abstract class PythonVenv @Inject constructor(ex: ExecOperations) : ErrorLogging
     @Internal
     val venvName: Provider<String> = branch.map {
         val finalSuffix = if (suffix.isPresent()) "-${suffix.get()}" else ""
-        "${it}${finalSuffix}"
+        "${it}-${versionSuffix.get()}${finalSuffix}"
     }
 
     @Internal
