@@ -161,9 +161,8 @@ namespace System.Impl.Helpers {
                 }
                 catch (XmlException e) {
                     Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(
-                        ("Error reported by XML parser"
-                         + (baseURI == null ? ": " : " processing " + baseURI + ": ")
-                         + e.Message), e);
+                        "Error reported by XML parser"
+                         + (baseURI == null ? ": " : " processing " + baseURI), e);
                     Saxon.Hej.expr.parser.Loc loc =
                         new Saxon.Hej.expr.parser.Loc(getSystemId(), e.LineNumber, e.LinePosition);
                     de.setLocator(loc);
@@ -180,9 +179,8 @@ namespace System.Impl.Helpers {
                 }
                 catch (System.Exception e) {
                     Saxon.Hej.trans.XPathException de = new Saxon.Hej.trans.XPathException(
-                        ("Error reported by XML parser"
-                         + (baseURI == null ? ": " : " processing " + baseURI + ": ")
-                         + e.Message), e);
+                        "Error reported by XML parser"
+                         + (baseURI == null ? ": " : " processing " + baseURI), e);
                     Saxon.Hej.expr.parser.Loc loc = new Saxon.Hej.expr.parser.Loc(getSystemId(), -1, -1);
                     de.setLocator(loc);
                     throw de;
