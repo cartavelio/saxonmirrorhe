@@ -27,22 +27,22 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
 
     // The data held by the UnicodeBuilder is in two parts: an archive part
     // of arbitrary length, held as a list of fixed length segments, and an active part which
-    // is typically up to 1m characters. For short strings the archive part
-    // is always empty. The active part is held as an integer array, 32 bits per
-    // character.
+    // is typically up to 65536 characters. For short strings the archive part
+    // is always empty. The active part is held as a TwineBuilder, which morphs itself
+    // from a Twine8 builder to a Twine16 builder or Twine24 builder as and when
+    // higher codepoint values are encountered. Each segment ends up using 8, 16, or 24
+    // bits per character depending on the highest codepoint in that segment.
 
-    // As characters are added to the active part, the variable "bits" is used
-    // to track the widest character added so far, which is subsequently used
-    // to reduce the memory requirement for storing the string.
+    // On completion, the toUnicodeString() method copies the structure to a
+    // SegmentedString, which has a very similar structure, but is immutable.
+
+
 
     private final static int SEGMENT_LENGTH = SegmentedString.SEGMENT_LENGTH;
     // See https://saxonica.plan.io/boards/2/topics/10002
 
-    private int[] activePart = new int[SEGMENT_LENGTH];
-    private int activePartUsed = 0;
+    private TwineBuilder activePart;
     private List<UnicodeString> archive = new ArrayList<>();
-
-
 
     /**
      * Create a Unicode builder with an initial allocation of 16 codepoints
@@ -57,7 +57,7 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      * @param allocate the initial space allocation, in codepoints (32-bit integers) 
      */
     public UnicodeBuilder(int allocate) {  
-        activePart = new int[allocate];
+        activePart = TwineBuilder.make(allocate);
     }
 
     /**
@@ -100,18 +100,6 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
     }
 
     /**
-     * Append a Java string to the content. The caller is responsible for ensuring that this
-     * consists entirely of characters in the Latin-1 character set
-     *
-     * @param str the string to be appended
-     * @return this builder, with the new string added
-     */
-
-    public UnicodeBuilder appendLatin(String str) {
-        return append(new BMPString(str));
-    }
-
-    /**
      * Append a Java CharSequence to the content. This may contain arbitrary characters including
      * well-formed surrogate pairs
      *
@@ -135,20 +123,14 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
         if (len == 0) {
             return this;
         }
-        if (activePartUsed + len > SEGMENT_LENGTH) {
+        if (activePart.length() + len > SEGMENT_LENGTH) {
 
-            int available = SEGMENT_LENGTH - activePartUsed;
+            int available = SEGMENT_LENGTH - activePart.length();
 
-            TwineBuilder tb = TwineBuilder.make(SEGMENT_LENGTH);
-            for (int i = 0; i < activePartUsed; i++) {
-                tb = tb.append(activePart[i]);
-            }
-            for (int i = 0; i < available; i++) {
-                tb = tb.append(str.codePointAt(i));
-            }
-            archive.add(tb.toUnicodeString());
+            activePart = activePart.append(str.substring(0, available));
+            archive.add(activePart.toUnicodeString());
 
-            activePartUsed = 0;
+            activePart = TwineBuilder.make(SEGMENT_LENGTH);
             int offset = available;
             while (offset + SEGMENT_LENGTH <= len) {
                 archive.add(str.substring(offset, offset + SEGMENT_LENGTH));
@@ -156,20 +138,13 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
             }
 
             int finalSegmentLen = (len - offset);
-            if (finalSegmentLen > activePart.length) {
-                activePart = new int[finalSegmentLen];
+            if (finalSegmentLen > activePart.length()) {
+                activePart = TwineBuilder.make(finalSegmentLen);
             }
-            str.substring(offset).copy32bit(activePart, 0);
-            activePartUsed = finalSegmentLen;
-            
+            activePart = activePart.append(str.substring(offset));
+
         } else {
-            if (activePartUsed + len > activePart.length) {
-                int[] a2 = new int[activePart.length + len];
-                System.arraycopy(activePart, 0, a2, 0, activePart.length);
-                activePart = a2;
-            }
-            str.copy32bit(activePart, activePartUsed);
-            activePartUsed += len;
+            activePart = activePart.append(str);
         }
         return this;
     }
@@ -179,7 +154,7 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      * @return the size in codepoints
      */
     public long length() {
-        return archive.size() * (long)SEGMENT_LENGTH + activePartUsed;
+        return archive.size() * (long)SEGMENT_LENGTH + activePart.length();
     }
 
     /**
@@ -187,7 +162,7 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      * @return true if the size is zero
      */
     public boolean isEmpty() {
-        return archive.isEmpty() && activePartUsed == 0;
+        return archive.isEmpty() && activePart.isEmpty();
     }
 
 
@@ -215,26 +190,7 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
      */
 
     private UnicodeString getActivePart() {
-        return TwineBuilder.make(activePartUsed).append(activePart, activePartUsed).toUnicodeString();
-//        if (activePartUsed == 0) {
-//            return EmptyUnicodeString.getInstance();
-//        } else if ((bitMask & 0xff0000) != 0) {
-//            // use 24-bit codes
-//            return new Twine24(activePart, activePartUsed);
-//        } else if ((bitMask & 0xff00) != 0) {
-//            // use 16-bit codes
-//            char[] chars = new char[activePartUsed];
-//            for (int i = 0; i < activePartUsed; i++) {
-//                chars[i] = (char) (activePart[i] & 0xffff);
-//            }
-//            return new Twine16(chars);
-//        } else {
-//            byte[] bytes = new byte[activePartUsed];
-//            for (int i = 0; i < activePartUsed; i++) {
-//                bytes[i] = (byte) (activePart[i] & 0xff);
-//            }
-//            return new Twine8(bytes);
-//        }
+        return activePart.toUnicodeString();
     }
 
     /**
@@ -266,7 +222,7 @@ public final class UnicodeBuilder extends Writer implements UniStringConsumer, U
 
     public void clear() {
         archive = new ArrayList<>();
-        activePartUsed = 0;
+        activePart = TwineBuilder.make(16);
     }
     
     /**
