@@ -43,9 +43,6 @@ SchemaValidator::SchemaValidator(const SchemaValidator &other) {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   cppV = j_copy_handles(thread, (void *)other.cppV);
   procRef = j_copy_handles(thread, (void *)other.procRef);
-  if(cppV == SXN_EXCEPTION) {
-    throw SaxonApiException();
-  }
 
   outputFile = other.outputFile;
 
@@ -108,14 +105,15 @@ void SchemaValidator::setLax(bool l) { lax = l; }
 
 XdmNode *SchemaValidator::getValidationReport() {
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   int64_t result =
-      j_getValidationReport(thread, (void *)cppV);
+      j_getValidationReport(thread, (void *)cppV, &r);
 
-  if (result > 0) {
+  if (result > SXN_UNSET) {
     XdmNode *node = new XdmNode(result);
     return node;
-  } else if (result == SXN_EXCEPTION) {
-    throw SaxonApiException();
+  } else if (r.status == SXN_EXCEPTION) {
+    throw SaxonApiException(r.status, r.message, r.error_code, r.system_id, r.line_number,r.num_of_errors);
   }
   return nullptr;
 }

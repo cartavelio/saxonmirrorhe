@@ -232,17 +232,19 @@ void XPathProcessor::declareNamespace(const char *prefix, const char *uri) {
         throw SaxonApiException(
                 "Null namespace URI supplied to declareNamespace()");
     }
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
     j_xp_declareNamespace(thread, (void *) cppXP,
-                          (char *) prefix, (char *) uri);
+                          (char *) prefix, (char *) uri, &r);
 }
 
 void XPathProcessor::declareVariable(const char *name) {
     if (name == nullptr) {
         return;
     }
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-    j_xp_declareVariable(thread, (void *) cppXP, (char *) name);
+    j_xp_declareVariable(thread, (void *) cppXP, (char *) name, &r);
 }
 
 #if CVERSION_API_NO >= 121

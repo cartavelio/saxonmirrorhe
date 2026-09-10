@@ -135,7 +135,8 @@ std::list<XdmValue *> XdmArray::asList() {
   }
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   allocFn fn = operator new;
-  long long *results = j_convertXdmArrayToArrayObject(thread, (void *)value, (void *)fn);
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
+  long long *results = j_convertXdmArrayToArrayObject(thread, (void *)value, (void *)fn, &r);
 
   if (results) {
 
@@ -160,9 +161,10 @@ XdmValue **XdmArray::values() {
   if (sizex == 0 || value == SXN_UNSET) {
     return arr;
   }
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   allocFn fn = operator new;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  long long *results = j_convertXdmArrayToArrayObject(thread, (void *)value, (void *)fn);
+  long long *results = j_convertXdmArrayToArrayObject(thread, (void *)value, (void *)fn, &r);
 
   if (results == nullptr) {
     return nullptr;

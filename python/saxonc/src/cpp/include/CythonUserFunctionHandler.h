@@ -427,9 +427,13 @@ PyObject *makePythonValue(void * proc, void * value){
 
         //graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
         long long *rawKeys = j_xdmMap_keys(thread,(void *)fn, (void *)value);
+        saxon_error_t r = SAXON_ERROR_DEFAULT;
+        long long * rawMapValues = j_xdmMap_values(thread,(void *)fn, (void *)value, &r);
 
-        long long * rawMapValues = j_xdmMap_values(thread,(void *)fn, (void *)value);
 
+        if(r.status != SAXON_OK) {
+            return nullptr;
+        }
         //char * ss = nullptr;
 
           if (getenv("SAXONC_DEBUG_FLAG")) {

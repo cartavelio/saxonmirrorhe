@@ -230,8 +230,9 @@ std::list<XdmValue *> XdmMap::valuesAsList() {
   long long *results = nullptr;
 
   if(sizex > 0 || value != SXN_UNSET) {
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
     graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
-  	results = j_xdmMap_values(thread,(void *)fn, (void *)value);
+  	results = j_xdmMap_values(thread,(void *)fn, (void *)value, &r);
   }
 
   if (results != nullptr) {
@@ -254,9 +255,10 @@ XdmValue **XdmMap::values() {
 
   allocFn fn = operator new;
   int size = mapSize();
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
   graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   long long *results = j_xdmMap_values(thread,
-                                       (void *)fn, (void *)value);
+                                       (void *)fn, (void *)value, &r);
 
   XdmValue **valuesi = nullptr;
 

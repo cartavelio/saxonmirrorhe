@@ -22,15 +22,17 @@ import java.net.URI;
 
 public class DocumentBuilderForCpp extends SaxonCAPI {
 
-    @CEntryPoint(name = "createDocumentBuilder", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) throws SaxonApiException {
+    @CEntryPoint(name = "createDocumentBuilder")
+    public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef)  {
         if(processorRef != WordFactory.nullPointer()) {
             Processor processor = SaxonCAPI.objectHandles.get(processorRef);
 
             ObjectHandle handle = SaxonCAPI.createHandle(processor.newDocumentBuilder());
             return handle.rawValue();
         }
-        throw new SaxonApiException("Cannot create DocumentBuilder - Processor is null");
+
+        return SaxonCAPI.STATUS_FAIL;
+
     }
 
 

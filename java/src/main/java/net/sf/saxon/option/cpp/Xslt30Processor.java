@@ -1486,59 +1486,65 @@ public class Xslt30Processor extends SaxonCAPI {
      * Caller must remove object from ObjectHandles pool when no longer required
      * @throws SaxonApiException if error in the transformation. Also if XsltExecutable is null. Exception handled and returned as -2
      */
-    @CEntryPoint(name = "j_callTemplateReturningValue", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long callTemplateReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_callTemplateReturningValue")
+    public static long callTemplateReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
 
         String cwd = null;
-        if (ccwd != WordFactory.nullPointer()) {
-            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
-        }
-        XsltExecutable executable;
-        if (executableRef != WordFactory.nullPointer()) {
-            executable = objectHandles.get(executableRef);
-        } else {
-            throw new SaxonApiException("Error XsltExecutable is null");
-        }
-
-        Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
-        Map<QName, XdmValue> globalParameters = new HashMap<>();
-        Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
-        Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
-        Properties props = new Properties();
-        QName qname = null;
-
-        if (cclarkName != WordFactory.nullPointer()) {
-            String clarkName = SaxonCAPI.toJavaString(cclarkName, WordFactory.nullPointer());
-            qname = QName.fromClarkName(clarkName);
-        }
-        Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
-        Xslt30Transformer transformer = executable.load30();
-        Processor processor = executable.getProcessor();
-
-        //setsource(cwd, transformer, sourceObj, paramsMap);
-        applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
-        Destination xdmResult;
-        boolean returnXdmValue = false;
-        if (paramsMap.containsKey("outvalue")) {
-            //Set if the return type of callTemplate, applyTemplate and transform methods is to return XdmValue,
-            //otherwise return XdmNode object with root Document node
-            Object valuei = paramsMap.get("outvalue");
-            if (valuei instanceof Boolean) {
-                returnXdmValue = (boolean) valuei;
-            } else if (valuei instanceof String && valuei.equals("yes") || valuei.equals("true")) {
-                returnXdmValue = true;
+        try {
+            if (ccwd != WordFactory.nullPointer()) {
+                cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
             }
-        }
-        if (returnXdmValue) {
-            xdmResult = new RawDestination();
-        } else {
-            xdmResult = new XdmDestination();
-        }
-        transformer.callTemplate(qname, xdmResult);
+            XsltExecutable executable;
+            if (executableRef != WordFactory.nullPointer()) {
+                executable = objectHandles.get(executableRef);
+            } else {
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Error XsltExecutable is null");
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
 
-        XdmValue value = getXdmValue(xdmResult, paramsMap);
-        ObjectHandle handle = SaxonCAPI.createHandle(value);
-        return handle.rawValue();
+            Map<QName, XdmValue> staticParameters = (executable != null ? null : new HashMap<>());
+            Map<QName, XdmValue> globalParameters = new HashMap<>();
+            Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
+            Map<QName, XdmValue> initialTemplateTunnelParameters = new HashMap<>();
+            Properties props = new Properties();
+            QName qname = null;
+
+            if (cclarkName != WordFactory.nullPointer()) {
+                String clarkName = SaxonCAPI.toJavaString(cclarkName, WordFactory.nullPointer());
+                qname = QName.fromClarkName(clarkName);
+            }
+            Map<String, Object> paramsMap = setupConfigurationAndBuildMap(processorDataAccumulatorRef, props, null, staticParameters, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters, true);
+            Xslt30Transformer transformer = executable.load30();
+            Processor processor = executable.getProcessor();
+
+            //setsource(cwd, transformer, sourceObj, paramsMap);
+            applyXsltTransformerProperties(cwd, processor, transformer, null, props, paramsMap, globalParameters, initialTemplateParameters, initialTemplateTunnelParameters);
+            Destination xdmResult;
+            boolean returnXdmValue = false;
+            if (paramsMap.containsKey("outvalue")) {
+                //Set if the return type of callTemplate, applyTemplate and transform methods is to return XdmValue,
+                //otherwise return XdmNode object with root Document node
+                Object valuei = paramsMap.get("outvalue");
+                if (valuei instanceof Boolean) {
+                    returnXdmValue = (boolean) valuei;
+                } else if (valuei instanceof String && valuei.equals("yes") || valuei.equals("true")) {
+                    returnXdmValue = true;
+                }
+            }
+            if (returnXdmValue) {
+                xdmResult = new RawDestination();
+            } else {
+                xdmResult = new XdmDestination();
+            }
+            transformer.callTemplate(qname, xdmResult);
+
+            XdmValue value = getXdmValue(xdmResult, paramsMap);
+            ObjectHandle handle = SaxonCAPI.createHandle(value);
+            return handle.rawValue();
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
     }
 
     private void setsource(String cwd, Xslt30Transformer transformer, Object sourceObj, Map<String, Object> paramsMap) throws SaxonApiException {

@@ -174,9 +174,8 @@ const char *xsltApplyStylesheet(sxnc_environment *environi,
                                (char *)properties[j].value, &r);
     }
   }
-
   return c_xsltApplyStylesheet(environi->thread, (void *)proc->value, cwd,
-                               source, stylesheet, (void *)processorDataRef);
+                               source, stylesheet, (void *)processorDataRef, &r);
 }
 
 void executeQueryToFile(sxnc_environment *environi, sxnc_processor *proc,

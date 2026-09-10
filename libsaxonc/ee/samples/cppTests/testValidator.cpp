@@ -313,17 +313,19 @@ void testValidator5(SaxonProcessor *processor, SchemaValidator *val,
       cerr << "Exception thrown = " << message << endl;
     }
     XdmNode *node = val->getValidationReport();
-    const char *value = node->toString();
-    if (value != nullptr) {
-      cout << endl << "Validation Report: " << value << endl;
-      sresult->success++;
-      operator delete((char *)value);
-    } else {
-      cout << endl << "Validation Report value is NULL" << endl;
-      sresult->failure++;
-      sresult->failureList.push_back("testValidator5");
+    if (node != nullptr) {
+      const char *value = node->toString();
+      if (value != nullptr) {
+        cout << endl << "Validation Report: " << value << endl;
+        sresult->success++;
+        operator delete((char *)value);
+      } else {
+        cout << endl << "Validation Report value is NULL" << endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testValidator5");
+      }
+      delete node;
     }
-    delete node;
   }
 }
 

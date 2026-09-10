@@ -171,14 +171,19 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @return long value to the Validator report object in the ObjectHandles pool.
      */
     @CEntryPoint(name = "j_getValidationReport")
-    public static long j_getValidationReport(IsolateThread thread, ObjectHandle schemaValidatorForCpp) {
-        SchemaValidatorForCpp schemaValidatorForCpp1 = SaxonCAPI.objectHandles.get(schemaValidatorForCpp);
-        XdmNode node = schemaValidatorForCpp1.getValidationReport();
-        if (node == null) {
-            return SaxonCAPI.STATUS_FAIL;
+    public static long j_getValidationReport(IsolateThread thread, ObjectHandle schemaValidatorForCpp, SaxonError saxonError) {
+        try {
+            SchemaValidatorForCpp schemaValidatorForCpp1 = SaxonCAPI.objectHandles.get(schemaValidatorForCpp);
+            XdmNode node = schemaValidatorForCpp1.getValidationReport();
+            if (node == null) {
+                return SaxonCAPI.STATUS_FAIL;
+            }
+            ObjectHandle handle = SaxonCAPI.createHandle(node);
+            return handle.rawValue();
+        } catch (Exception ex) {
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        ObjectHandle handle = SaxonCAPI.createHandle(node);
-        return handle.rawValue();
     }
 
 

@@ -114,8 +114,8 @@ public class SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_getArgumentTypesFromSignature", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_getArgumentTypesFromSignature(IsolateThread thread, ObjectHandle signatureRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_getArgumentTypesFromSignature")
+    public static long j_getArgumentTypesFromSignature(IsolateThread thread, ObjectHandle signatureRef) {
         String func_signature = null;
 
         XdmValue signatureValue = objectHandles.get(signatureRef);
@@ -143,8 +143,8 @@ public class SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_getReturnTypeFromSignature", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_getReturnTypeFromSignature(IsolateThread thread, ObjectHandle signatureRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_getReturnTypeFromSignature")
+    public static long j_getReturnTypeFromSignature(IsolateThread thread, ObjectHandle signatureRef){
 
         XdmValue signatureValue = objectHandles.get(signatureRef);
 
@@ -167,32 +167,32 @@ public class SaxonCAPI {
         return SaxonCAPI.STATUS_FAIL;
     }
 
-    @CEntryPoint(name = "j_setPHPNative", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_setPHPNative(IsolateThread thread) throws SaxonApiException {
+    @CEntryPoint(name = "j_setPHPNative")
+    public static long j_setPHPNative(IsolateThread thread){
 //#if EE==true || PE==true
         NativeCall.setPHPNative();
 //#endif
         return SaxonCAPI.STATUS_OK;
     }
 
-    @CEntryPoint(name = "j_setPythonNative", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_setPythonNative(IsolateThread thread) throws SaxonApiException {
+    @CEntryPoint(name = "j_setPythonNative")
+    public static long j_setPythonNative(IsolateThread thread) {
 //#if EE==true || PE==true
         NativeCall.setPythonNative();
 //#endif
         return SaxonCAPI.STATUS_OK;
     }
 
-    @CEntryPoint(name = "j_setIndirectFunctionForNativeCall", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_setIndirectFunctionForNativeCall(IsolateThread thread, NativeFunctionPointer nativeFunctionPointer) throws SaxonApiException {
+    @CEntryPoint(name = "j_setIndirectFunctionForNativeCall")
+    public static long j_setIndirectFunctionForNativeCall(IsolateThread thread, NativeFunctionPointer nativeFunctionPointer){
 //#if EE==true || PE==true
         NativeCall.setIndirectFunctionForNativeCall(nativeFunctionPointer);
 //#endif
         return SaxonCAPI.STATUS_OK;
     }
 
-    @CEntryPoint(name = "j_setIndirectFunctionForPythonNativeCall", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long j_setIndirectFunctionForPythonNativeCall(IsolateThread thread, CFunctionPointer nativeFunctionPointer) throws SaxonApiException {
+    @CEntryPoint(name = "j_setIndirectFunctionForPythonNativeCall")
+    public static long j_setIndirectFunctionForPythonNativeCall(IsolateThread thread, CFunctionPointer nativeFunctionPointer) {
 //#if EE==true || PE==true
         NativeCall.setIndirectFunctionForPythonNativeCall(nativeFunctionPointer);
 //#endif
@@ -317,8 +317,10 @@ public class SaxonCAPI {
     }
 
 
-    @CEntryPoint(name = "j_setLibrary", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long setLibrary(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer libNameRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_setLibrary")
+    public static long setLibrary(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer libNameRef) {
+
+        //TODO remove this method
         if (SaxonCAPI.debug) {
             System.err.println("Java DEBUG en entered setLibrary!!");
         }
@@ -851,14 +853,19 @@ public class SaxonCAPI {
      * @return long value pointing to the Java string object in the ObjectHandle pool. Return -1 if the
      * @throws SaxonApiException if fails to convert C string to Java String
      */
-    @CEntryPoint(name = "j_createStringObject", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long createStringObject(IsolateThread thread, CCharPointer cValue) throws SaxonApiException {
+    @CEntryPoint(name = "j_createStringObject")
+    public static long createStringObject(IsolateThread thread, CCharPointer cValue, SaxonError saxonError) {
         if (cValue != WordFactory.nullPointer()) {
-            String value = SaxonCAPI.toJavaString(cValue, WordFactory.nullPointer());
-            ObjectHandle handle = createHandle(value);
-            return handle.rawValue();
+            try {
+                String value = SaxonCAPI.toJavaString(cValue, WordFactory.nullPointer());
+                ObjectHandle handle = createHandle(value);
+                return handle.rawValue();
+            } catch (Exception e) {
+                SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+                return SaxonCAPI.STATUS_EXCEPTION;
+            }
         }
-        return -1;
+        return SaxonCAPI.STATUS_FAIL;
 
     }
 
@@ -1094,7 +1101,7 @@ public class SaxonCAPI {
         return this.processor;
     }
 
-    public static synchronized long applyPropertyToConfigurationUtil(Processor processor, String name, String value) throws SaxonApiException {
+    public static synchronized long applyPropertyToConfigurationUtil(Processor processor, String name, String value) {
         if (debug) {
             System.err.println("SaxonC DEBUG - applyConfiguration, name=" + name);
             System.err.println("SaxonC DEBUG - applyConfiguration, value=" + value);
@@ -1250,8 +1257,8 @@ public class SaxonCAPI {
      * @return success status. 1 is success, -1 is a fail and -2 is a exception thrown
      * @throws SaxonApiException if processor object is null. Also if we cannot apply a configuration
      */
-    @CEntryPoint(name = "j_applyPropertiesToConfiguration", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static synchronized long applyPropertiesToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef) throws SaxonApiException {
+    @CEntryPoint(name = "j_applyPropertiesToConfiguration")
+    public static synchronized long applyPropertiesToConfiguration(IsolateThread thread, ObjectHandle processorRef, ObjectHandle processorDataRef, SaxonError saxonError) {
 
         Processor processor = objectHandles.get(processorRef);
         if (debug) {
@@ -1259,7 +1266,8 @@ public class SaxonCAPI {
         }
 
         if (processorDataRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Processor is null");
+            SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Processor is null");
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
 
         ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataRef);
@@ -1887,7 +1895,7 @@ public class SaxonCAPI {
      * @param ctypeStr  the type name
      * @return the C char pointer array of the typed name
      */
-    @CEntryPoint(name = "getTypeName", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    @CEntryPoint(name = "getTypeName")
     public static CCharPointer getTypeName(IsolateThread thread, CCharPointer ctypeStr) throws SaxonApiException {
         String typeStr = SaxonCAPI.toJavaString(ctypeStr, WordFactory.nullPointer());
         int fp = StandardNames.getFingerprint(NamespaceUri.SCHEMA, typeStr);

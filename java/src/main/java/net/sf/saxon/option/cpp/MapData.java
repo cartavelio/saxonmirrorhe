@@ -44,7 +44,7 @@ public class    MapData {
         return handle.rawValue();
     }
 
-    @CEntryPoint(name = "j_addMapPair", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_addMapPair")
     public static long j_addMapPair(IsolateThread thread, ObjectHandle mapDataRef, ObjectHandle keyRef, ObjectHandle valueRef) {
         MapData mapData = SaxonCAPI.objectHandles.get(mapDataRef);
         XdmAtomicValue key =  SaxonCAPI.objectHandles.get(keyRef);

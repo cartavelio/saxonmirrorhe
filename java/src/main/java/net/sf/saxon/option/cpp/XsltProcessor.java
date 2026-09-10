@@ -643,53 +643,54 @@ public class XsltProcessor extends SaxonCAPI {
      * @return  result as a string representation
      * @throws SaxonApiException  if error occurs in the transformation or if the processor object is null
      */
-    @CEntryPoint(name = "c_xsltApplyStylesheet", exceptionHandler = SaxonCExceptionCCharHandler.class)
-    public static CCharPointer transformToString1(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
+    @CEntryPoint(name = "c_xsltApplyStylesheet")
+    public static CCharPointer transformToString1(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer csourceFile, CCharPointer cstylesheet, ObjectHandle processorDataAccumulatorRef, SaxonError saxonError) {
 
-        String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
-        String sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
-        String stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
+        try {
+            String cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+            String sourceFile = SaxonCAPI.toJavaString(csourceFile, WordFactory.nullPointer());
+            String stylesheet = SaxonCAPI.toJavaString(cstylesheet, WordFactory.nullPointer());
 
-        Processor processor = objectHandles.get(processorRef);
-        ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
-        String[] params = null;
-        Object[] values = null;
-        if(processorDataAccumulator != null) {
-            params = processorDataAccumulator.getParameterNames();
-            values = processorDataAccumulator.getValues();
-        }
+            Processor processor = objectHandles.get(processorRef);
+            ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+            String[] params = null;
+            Object[] values = null;
+            if (processorDataAccumulator != null) {
+                params = processorDataAccumulator.getParameterNames();
+                values = processorDataAccumulator.getValues();
+            }
 
-        if(processor == null) {
-            throw new SaxonApiException("Processor object no found");
-        }
+            if (processor == null) {
+                throw new SaxonApiException("Processor object no found");
+            }
 
-        XsltExecutable executable = null;
+            XsltExecutable executable = null;
 
 
-        if (debug) {
-            System.err.println("xsltApplyStylesheet, Processor: " + System.identityHashCode(processor));
-        }
+            if (debug) {
+                System.err.println("xsltApplyStylesheet, Processor: " + System.identityHashCode(processor));
+            }
 
             Source source;
             XsltTransformer transformer = null;
             if (stylesheet == null && executable != null) {
                 transformer = executable.load();
             } else if (stylesheet == null) {
-                SaxonApiException ex = new SaxonApiException("Stylesheet not found!");
-
-                throw ex;
+                SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Stylesheet not found");
+                return WordFactory.nullPointer();
             } else {
                 XsltCompiler compiler = processor.newXsltCompiler();
                 source = resolveFileToSource(processor, cwd, stylesheet, ResourceRequest.XSLT_NATURE);
-                if(source == null) {
-                    throw new SaxonApiException("source is null");
+                if (source == null) {
+                    SaxonCExceptionHandler.createStandardErrorResult(saxonError, "Source is null");
+                    return WordFactory.nullPointer();
                 }
                 /*
                 Remove comment
                 if(packagesToLoad.size()>0) {
                     compilePackages(compiler);
                 } */
-                XsltExecutable tempExecutable =   compiler.compile(source);
+                XsltExecutable tempExecutable = compiler.compile(source);
                 tempExecutable.getUnderlyingCompiledStylesheet();
                 transformer = tempExecutable.load();
 
@@ -703,15 +704,20 @@ public class XsltProcessor extends SaxonCAPI {
 
             /*if (sourceFile == null && doc != null) {
                 transformer.setInitialContextNode(doc);
-            } else*/ if (sourceFile != null) {
+            } else*/
+            if (sourceFile != null) {
                 source = resolveFileToSource(processor, cwd, sourceFile, ResourceRequest.XML_NATURE);
                 transformer.setSource(source);
             }
             //transformer.setErrorListener(errorListener);
             transformer.transform();
 
-            final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(sw.toString());
+            final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(sw.toString());
             return holder.get();
+        } catch (Exception ex) {
+            SaxonCExceptionHandler.setErrorDetails(ex, saxonError, null);
+            return WordFactory.nullPointer();
+        }
 
 
 

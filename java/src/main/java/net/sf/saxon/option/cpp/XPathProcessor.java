@@ -120,13 +120,19 @@ public class XPathProcessor extends SaxonCAPI {
      *               is in no namespace.
      * @throws NullPointerException if either the prefix or uri is null.
      */
-    @CEntryPoint(name = "j_xp_declareNamespace", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long declareNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_prefix, CCharPointer c_uri) throws SaxonApiException {
-        String prefix = SaxonCAPI.toJavaString(c_prefix, WordFactory.nullPointer());
-        String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
-        XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
-        xPathProcessor.getCompiler().declareNamespace(prefix, uri);
-        return SaxonCAPI.STATUS_OK;
+    @CEntryPoint(name = "j_xp_declareNamespace")
+    public static long declareNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_prefix, CCharPointer c_uri, SaxonError saxonError) {
+
+        try {
+            String prefix = SaxonCAPI.toJavaString(c_prefix, WordFactory.nullPointer());
+            String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
+            XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
+            xPathProcessor.getCompiler().declareNamespace(prefix, uri);
+            return SaxonCAPI.STATUS_OK;
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
+        }
     }
 
     /**
@@ -141,15 +147,20 @@ public class XPathProcessor extends SaxonCAPI {
      * @param xpathProcessorRef - reference to XPathProcessor object held in the ObjectHandle's pool
      * @param c_qname The name of the variable, expressions as a clark name string
      */
-    @CEntryPoint(name = "j_xp_declareVariable", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long declareVariable(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_qname) throws SaxonApiException {
-        String qname = SaxonCAPI.toJavaString(c_qname, WordFactory.nullPointer());
-        XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
-        XPathCompiler compiler = xPathProcessor.getCompiler();
-        if(compiler != null) {
-            compiler.declareVariable(QName.fromClarkName(qname));
+    @CEntryPoint(name = "j_xp_declareVariable")
+    public static long declareVariable(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_qname, SaxonError saxonError) {
+        try {
+            String qname = SaxonCAPI.toJavaString(c_qname, WordFactory.nullPointer());
+            XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
+            XPathCompiler compiler = xPathProcessor.getCompiler();
+            if (compiler != null) {
+                compiler.declareVariable(QName.fromClarkName(qname));
+            }
+            return SaxonCAPI.STATUS_OK;
+        }  catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        return SaxonCAPI.STATUS_OK;
     }
 
 
@@ -168,15 +179,20 @@ public class XPathProcessor extends SaxonCAPI {
      * @param c_uri The schema namespace to be imported. To import declarations in a no-namespace schema,
      *            supply a zero-length string.
      */
-    @CEntryPoint(name = "j_xp_importSchemaNamespace", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long importSchemaNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_uri) throws SaxonApiException{
-        String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
-        XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
-        XPathCompiler compiler = xPathProcessor.getCompiler();
-        if(compiler != null) {
-            compiler.importSchemaNamespace(uri);
+    @CEntryPoint(name = "j_xp_importSchemaNamespace")
+    public static long importSchemaNamespace(IsolateThread thread, ObjectHandle xpathProcessorRef,  CCharPointer c_uri, SaxonError saxonError) {
+        try {
+            String uri = SaxonCAPI.toJavaString(c_uri, WordFactory.nullPointer());
+            XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);
+            XPathCompiler compiler = xPathProcessor.getCompiler();
+            if (compiler != null) {
+                compiler.importSchemaNamespace(uri);
+            }
+            return SaxonCAPI.STATUS_OK;
+        } catch (Exception e) {
+            SaxonCExceptionHandler.setErrorDetails(e, saxonError, null);
+            return SaxonCAPI.STATUS_EXCEPTION;
         }
-        return SaxonCAPI.STATUS_OK;
     }
 
     /**
@@ -252,7 +268,7 @@ public class XPathProcessor extends SaxonCAPI {
 
     }
 
-    @CEntryPoint(name = "j_xp_getBaseURI", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_xp_getBaseURI")
     public static CCharPointer getBaseURI(IsolateThread thread, ObjectHandle xpathProcessorRef, SaxonCAPI.AllocatorCCharFn alloc) {
 
         XPathProcessor xPathProcessor = SaxonCAPI.objectHandles.get(xpathProcessorRef);

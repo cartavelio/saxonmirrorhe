@@ -958,7 +958,7 @@ XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
       thread, (char *)cwdXE.c_str(),
       (void *)executableRef, (char *)templateName,
       (void *)(processorDataRef == SXN_UNSET ? (void *)NULL
-                                             : (void *)processorDataRef));
+                                             : (void *)processorDataRef), &r);
   if (processorDataRef != SXN_UNSET) {
     j_handles_destroy(thread,(void *)processorDataRef);
     processorDataRef = SXN_UNSET;
