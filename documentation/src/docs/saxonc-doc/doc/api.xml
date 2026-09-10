@@ -3660,7 +3660,7 @@
                                                                      target="_blank">Cython</a>. SaxonC only supports Python3. Cython is required to
          build the extension library.</p>
 
-      <p>The <a class="bodylink" href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html"
+      <p>The <a class="bodylink" href="https://www.saxonica.com/saxon-c/doc13/python/index.html"
       >SaxonC Python API documentation</a> contains full details of the extension API. See
          below for direct links to the main classes.</p>
 
