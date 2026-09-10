@@ -38,7 +38,7 @@ public class MemoryTest {
             long finalFree = getUsedMemory();
             System.err.println("final: " + finalFree);
             System.err.println("Tinytree memory used: " + (finalFree - initFree));
-            ((TinyDocumentImpl) doc).getTree().showSize(new StandardLogger());
+            ((TinyDocumentImpl) doc).getTree().showSize(StandardLogger.makeLogger());
         } catch (XPathException e) {
             fail(e.getMessage());
         }
