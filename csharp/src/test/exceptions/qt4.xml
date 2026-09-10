@@ -108,24 +108,40 @@
                   fo-test-fn-scan-right-001
                   fo-test-fn-scan-right-002
                   fo-test-fn-scan-right-003
+                  fo-test-fn-system-properties-001
+                  fo-test-fn-system-properties-002
+                  fo-test-fn-system-properties-003
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-01"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <!--<exception test-set="app-spec-examples" 
-      test-case=" fo-test-fn-build-dateTime-001
-                  fo-test-fn-build-dateTime-002
-                  fo-test-fn-build-dateTime-003
-                  fo-test-fn-parts-of-dateTime-001
-                  fo-test-fn-parts-of-dateTime-002
-                  fo-test-fn-parts-of-dateTime-003
-                  " 
+   <exception test-set="app-spec-examples" 
+      test-case=" fo-test-fn-jvalue-003 " 
       run="false" report="n/a">
-      <created by="Michael Kay" on="2026-02-10"/>
-      <reason>Functionality not yet implemented</reason>
-   </exception>-->
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>Error in example (see issue 2408, search for jvalue)</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-distinct-ordered-nodes-002" 
+      run="false" report="bug">
+      <created by="Michael Kay" on="2026-04-11"/>
+      <reason>Not implemented: calling jnode($x) twice gives two distinct JNodes</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-fn-graphemes-007" 
+      run="false" report="bug">
+      <created by="Michael Kay" on="2026-04-11"/>
+      <reason>Known restrictions in ICU4N</reason>
+   </exception>
+   
+   
+   
+
+   
    
    <exception test-set="fn-serialize" 
       test-case="serialize-xhtml-149" 
@@ -133,6 +149,43 @@
       <created by="Michael Kay" on="2026-01-07"/>
       <reason>Canonical XHTML serialization not yet implemented</reason>
    </exception>
+   
+   <exception test-set="fn-serialize" 
+      test-case="    serialize-json-206
+                     serialize-json-207
+                     serialize-json-208
+                     serialize-json-300
+                     serialize-json-301
+                     serialize-json-302
+                     serialize-json-303
+                     serialize-json-304
+                     serialize-json-305
+                     serialize-json-306
+                     serialize-json-307
+                     serialize-json-308
+                     serialize-json-309
+                     serialize-json-310
+                     serialize-json-311
+                     serialize-json-312
+                     serialize-json-313
+                     serialize-json-314
+                     serialize-json-315
+                     serialize-json-316
+                     serialize-json-317
+                     serialize-json-318
+                     serialize-json-319
+                     serialize-json-320
+                     serialize-json-321
+                     serialize-json-322
+                     serialize-json-323" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-13"/>
+      <reason>Canonical JSON serialization not available in SaxonCS</reason>
+   </exception>
+   
+   
+ 
+
    
    <exception test-set="fn-serialize" 
       test-case="serialize-json-340 serialize-json-341 serialize-json-342" 
@@ -148,6 +201,20 @@
       <reason>Authentication issue reading from http://timeanddate.com</reason>
    </exception>
    
+   <exception test-set="fn-unparsed-text" 
+      test-case="fn-unparsed-text-bom-023" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-12"/>
+      <reason>We're using a system-supplied TextReader and it's BOM handling doesn't match the spec</reason>
+   </exception>
+   
+   <exception test-set="fn-normalize-unicode" 
+      test-case="fn-normalize-unicode-11-6-0" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-12"/>
+      <reason>Some codepoints normalize differently. Probably due to Unicode version differences.</reason>
+   </exception>
+   
    <exception test-set="fn-xsd-validator" 
       test-case="xsd-validator-092" 
       run="false" report="n/a">
@@ -158,15 +225,23 @@
    <exception test-set="misc-BuiltInKeywords" 
       test-case=" Keywords-fn-scan-left-1
                   Keywords-fn-scan-right-1
-                  
+                  Keywords-fn-system-properties-1
+                  Keywords-fn-invisible-xml-1                
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-05"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
    
+   <exception test-set="misc-BuiltInKeywords" 
+      test-case="Keywords-fn-xsd-validator-1" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-04-11"/>
+      <reason>Problem with test: expects extensible record type in result</reason>
+   </exception>
+   
    <exception test-set="prod-SequenceType" 
-      test-case="built-in-record-type-304" 
+      test-case="built-in-record-type-004 built-in-record-type-204 built-in-record-type-304" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-06"/>
       <reason>Functionality not yet implemented: recursive record types</reason>
@@ -556,6 +631,25 @@
       <created by="Michael Kay" on="2023-06-29"/>
       <reason>Wrong results from AngleSharp? Needs checking. Confirmed 2026-03-25</reason>
    </exception>
+   
+   <exception test-set="fn-parse-html"
+      run="false" test-case="fn-parse-html-015" report="n/a">
+      <created by="Michael Kay" on="2026-04-12"/>
+      <reason>The SaxonCS implementation of parse-html does not expand HTML Template elements</reason>
+   </exception>
+   
+   <exception test-set="fn-parse-html"
+      run="false" test-case="fn-parse-html-016 fn-parse-html-018" report="n/a">
+      <created by="Michael Kay" on="2026-04-12"/>
+      <reason>The SaxonCS implementation of parse-html does not report HTML errors</reason>
+   </exception>
+   
+   <exception test-set="fn-html-doc"
+      run="false" test-case="html-doc-006 html-doc-010" report="n/a">
+      <created by="Michael Kay" on="2026-04-12"/>
+      <reason>The SaxonCS implementation of html-doc does not report HTML errors, and ignores the encoding option.</reason>
+   </exception>
+   
    <!--
    <exception test-set="fn-format-number" test-case="
       numberformat-40-87 numberformat-40-88
@@ -815,6 +909,13 @@
    
    
    -->
+   
+   <exception test-set="EXPath-file" 
+      test-case="EXPath-file-delete-006" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-03-23"/>
+      <reason>PR2548 not yet implemented</reason>
+   </exception>
  
    
 
