@@ -73,15 +73,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
-        register("characters", 1, e -> e.populate( CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
+        register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
         // codepoints-to-string becomes variadic in 4.0:
-        register("codepoints-to-string", 1, e -> e.populate( CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
+        register("codepoints-to-string", 1, e -> e.populate(CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
         // Concat changes in 4.0:
-        register("concat", 1, e -> e.populate( Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
+        register("concat", 1, e -> e.populate(Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
 
         register("contains-sequence", 2, e -> e.populate(SequenceMatching.ContainsSequence::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
@@ -122,22 +122,26 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null));
 
-        register("identity", 1, e -> e.populate( IdentityFn::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+        register("identity", 1, e -> e.populate(IdentityFn::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("in-scope-namespaces", 1, e -> e.populate( InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
+        register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null));
 
         register("intersperse", 2, e -> e.populate(Intersperse::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null));
 
-        register("is-NaN", 1, e -> e.populate( IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+        register("is-NaN", 1, e -> e.populate(IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
+
+        register("items-after", 2, e -> e.populate(ItemsStarting.ItemsAfter::new, AnyItemType.getInstance(), STAR, LATE)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, predicate, ONE, null));
 
         register("items-at", 2, e -> e.populate(net.sf.saxon.functions.ItemsAt::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance())
@@ -155,11 +159,19 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null));
 
-        register("items-after", 2, e -> e.populate(ItemsStarting.ItemsAfter::new, AnyItemType.getInstance(), STAR, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null));
+        SpecificFunctionType valuePredicate = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.SINGLE_BOOLEAN);
+        SpecificFunctionType valueAction = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE},
+                SequenceType.ANY_SEQUENCE);
 
-        register("lowest", 1, e -> e.populate( net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
+        register("iterate-while", 3, e -> e.populate(WhileFn::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null)
+                .arg(1, valuePredicate, ONE, null)
+                .arg(2, valueAction, ONE, null));
+
+        register("lowest", 1, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("lowest", 2, e -> e.populate(net.sf.saxon.functions.hof.HighestOrLowest::new, AnyItemType.getInstance(), STAR, LATE)
@@ -180,10 +192,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, STAR, null));
 
 
-        register("parcel", 1, e -> e.populate( ParcelFn::new, Parcel.TYPE, ONE, 0)
+        register("parcel", 1, e -> e.populate(ParcelFn::new, Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
-        register("parts", 1, e -> e.populate( Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
+        register("parts", 1, e -> e.populate(Parts::new, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
 //        register("range", 2, e -> e.populate( SefFunction::new, AnyItemType.getInstance(), STAR, LATE)
@@ -201,14 +213,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 //                .arg(2, predicate, OPT, null)
 //                .arg(3, MapType.ANY_MAP_TYPE,ONE, null));
 
+        register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
+                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+
         register("replicate", 2, e -> e.populate(Replicate::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
 
-        register("slice", 2, e -> e.populate( Slice::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+        register("slice", 2, e -> e.populate(Slice::new, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null));   // TODO: define a record type
 
@@ -231,20 +244,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("truncate", 1, e -> e.populate(net.sf.saxon.functions.Truncate::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EmptySequence.getInstance()));
 
-        register("unparcel", 1, e -> e.populate( UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
+        register("unparcel", 1, e -> e.populate(UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));
 
-        SpecificFunctionType valuePredicate = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
-                SequenceType.SINGLE_BOOLEAN);
-        SpecificFunctionType valueAction = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.ANY_SEQUENCE},
-                SequenceType.ANY_SEQUENCE);
-
-        register("iterate-while", 3, e -> e.populate(WhileFn::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, valuePredicate, ONE, null)
-                .arg(2, valueAction, ONE, null));
     }
 
 }
