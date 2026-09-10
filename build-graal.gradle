@@ -618,7 +618,7 @@ task graal_eec_jar(
   def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
 
 
-  def saxoncReleaseDir = "${buildDir}/release/saxon${edition}c"
+  def saxoncReleaseDir = "${buildDir}/release/saxonc${edition}"
 
   task "setup_${edition}c_release"(
           dependsOn: [graalEdition, "${edition}c_graalImage"]
@@ -735,13 +735,17 @@ task graal_eec_jar(
             ? "./build64-mac.sh"
             : (systemOs.isLinux()
             ? "./build64-linux.sh"
-            : "build64-windows.bat"))
+            : ".\\build-windows.bat"))
 
 
     doLast {
       exec {
         workingDir "${saxoncReleaseDir}/samples/cppTests"
-        commandLine "${buildCPPScript}", "-L${sharedLibDir}"
+        if(systemOs.isLinux() || systemOs.isMacOsX()) {
+          commandLine "${buildCPPScript}", "-L${sharedLibDir}"
+        } else {
+          commandLine "cmd","/c","${buildCPPScript}", "-L${sharedLibDir}"
+        }
         println "built C++ Wrappers"
       }
     }
