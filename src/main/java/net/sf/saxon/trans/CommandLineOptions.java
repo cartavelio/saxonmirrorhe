@@ -858,6 +858,9 @@ public class CommandLineOptions {
 
     public static XsdSchema loadAdditionalSchemas(Processor proc, String additionalSchemas)
             throws SaxonApiException {
+        if (!proc.isSchemaAware()) {
+            throw new SaxonApiException("The -xsd option requires a Saxon-EE license");
+        }
         XsdCompiler compiler = proc.newXsdCompiler();
         List<File> schemaFiles = new ArrayList<>();
         StringTokenizer st = new StringTokenizer(additionalSchemas, File.pathSeparator);

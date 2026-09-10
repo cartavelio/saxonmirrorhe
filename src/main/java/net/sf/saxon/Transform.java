@@ -68,7 +68,7 @@ public class Transform {
     protected boolean run = true;
     private Logger traceDestination = new StandardLogger();
     private boolean closeTraceDestination = false;
-    protected XsdSchema externalSchema;
+    private XsdSchema externalSchema;
 
     /**
      * Main program, can be used directly from the command line.

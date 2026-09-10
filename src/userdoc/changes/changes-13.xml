@@ -150,7 +150,7 @@
         This is intended primarily for use when compiling stylesheets to SEF files for execution
         under SaxonJS. It allows a file of stub function definitions to be loaded in JSON format,
         representing external Javascript functions that will be available for calling in the
-        target environment. Any attempt to call the functions from SaxonJ itself will fail with
+        target environment. Any attempt to call the functions from SaxonJ or SaxonCS will fail with
         a dynamic error.</p>
         
  
@@ -179,8 +179,11 @@
             <code>return</code>, for example <code>for $x in $X let $y := $x + 1 return f($y)</code>.</p></li>
         </ul>
         
+        <p>Four new axes are implemented: <code>following-or-self</code>, <code>preceding-or-self</code>,
+        <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>.</p>
+        
         <p>Both XQuery and XPath now allow the syntax <code>for key $k $value $v in $map</code> to iterate
-        over the entries in a map.</p>
+        over the entries in a map (in undefined order).</p>
         
         <p>In XQuery, the syntax of item type declarations is now <code>declare type</code> rather than
         <code>declare item-type</code>.</p>
@@ -288,6 +291,8 @@
         
         <p>The functions <code>math:e</code>, <code>math:sinh</code>, <code>math:cosh</code>,
         and <code>math:tanh</code> are implemented.</p>
+        
+        <p>The XSLT-specific function <code>fn:character-map</code> is implemented.</p>
         
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
         as a representation of the JSON null value.</p>

@@ -81,7 +81,7 @@ public class Query {
     private boolean allowExit = true;
     protected String languageVersion = "3.1";
     protected String nsOption;
-    protected XsdSchema externalSchema = null;
+    private XsdSchema externalSchema = null;
 
 
     /**
@@ -770,11 +770,7 @@ public class Query {
 
         String additionalSchemas = options.getOptionValue("xsd");
         if (additionalSchemas != null) {
-            try {
-                externalSchema = CommandLineOptions.loadAdditionalSchemas(processor, additionalSchemas);
-            } catch (SaxonApiException e) {
-                throw new RuntimeException(e);
-            }
+            externalSchema = CommandLineOptions.loadAdditionalSchemas(processor, additionalSchemas);
         }
     }
 

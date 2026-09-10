@@ -300,7 +300,7 @@ namespace Saxon.Impl.XDoc {
         
         protected override AxisIterator iterateDescendants(Saxon.Hej.pattern.NodeTest nodeTest,
             bool includeSelf) {
-            AxisIterator descendants = new Navigator.DescendantEnumeration(this, includeSelf, true);
+            AxisIterator descendants = new Navigator.DescendantIterator(this, includeSelf, true);
             if (nodeTest != AnyNodeTest.getInstance()) {
                 descendants = new Navigator.AxisFilter(descendants, nodeTest);
             }
