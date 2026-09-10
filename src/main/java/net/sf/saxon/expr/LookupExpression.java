@@ -317,7 +317,7 @@ public class LookupExpression extends BinaryExpression {
         return makeElaborator().elaborateForPull().iterate(context);
     }
 
-    private static SequenceIterator optionalGroundedValueIterator(GroundedValue value) {
+    protected static SequenceIterator optionalGroundedValueIterator(GroundedValue value) {
         if (value == null) {
             return EmptyIterator.getInstance();
         } else {

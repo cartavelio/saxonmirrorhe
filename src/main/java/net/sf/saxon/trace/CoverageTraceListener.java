@@ -147,11 +147,11 @@ public class CoverageTraceListener implements TraceListener {
 
     @Override
     public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
-        Integer counter = histogram.get(instruction);
-        if (counter == null) {
+        if (!histogram.containsKey(instruction)) {
             System.err.println("*** Non-registered trace point " + instruction);
-            counter = 0;
+            histogram.put(instruction, 0);
         }
+        Integer counter = histogram.get(instruction);
         int incr = counter+1;
         histogram.put(instruction, incr);
     }
