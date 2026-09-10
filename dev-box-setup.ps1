@@ -83,13 +83,8 @@ If (-Not (Test-Path -Path "$JavaPath")) {
 
 Expand-ArchiveFromUrlOrLocal "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-22.3.1/graalvm-ce-java11-windows-amd64-22.3.1.zip" "$JavaPath"
 
-# Only needed with 22.3.1
-Write-Host -ForegroundColor Green "Install native-image"
-# Needs the call operator & to treat the path as we expect
-& "$GraalPath\bin\gu" install native-image
-
 Write-Host -ForegroundColor Green "Install Python (x86_64)"
-winget install -e --id Python.Python.3.12 --architecture X64 --override "/simple /passive InstallAllUsers=1"
+winget install -e --id Python.Python.3.12 --architecture X64 --scope machine
 
 # Set Env vars in the registry
 $EnvRegistryPath = "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
@@ -123,3 +118,7 @@ If (Test-Path -Path "$PSScriptRoot\saxon-license.lic") {
 }
 
 Write-Host -ForegroundColor Green "Complete. You should restart once Visual Studio Installer has finished..."
+# Only needed with 22.3.1
+Write-Host -ForegroundColor Green "You also need to install GraalVM native-image, which you can do from an Administrator PowerShell with the following line:"
+# Needs the call operator & to treat the path as we expect
+Write-Host "& '$GraalPath\bin\gu.cmd' install native-image"
