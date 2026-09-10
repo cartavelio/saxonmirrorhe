@@ -52,7 +52,7 @@ $pass = 0;
 $fail = 0;
 $error =0;
 $notrun = 0;
-$run_test = null;//"result-document";
+$run_test = "streamable";
 $run_test_case = null;//"result-document-0206";
 $run_assertion = null; //"serialization-matches";
 $total_tests = 0;
@@ -149,9 +149,9 @@ function check_dependency($xml)
                             continue;
                         } elseif ($attrStr == "streaming") {
                             error_log("check_DependencyXX returning false");
-                            unset($xmlNode);
-                            unset($child);
-                            return false;
+                            //unset($xmlNode);
+                            //unset($child);
+                            continue;
                             //break;
                         } else {
                             error_log("check_DependencyXX returning false");
@@ -325,6 +325,10 @@ function parse_environment($xml, $path)
 
                             } else {
                                 $newarray["sources"][".file"] = $href;
+                                $streaming = $nodej->getAttributeValue("streaming");
+                                if($streaming != null and $streaming == "true") {
+                                    $newarray["sources"]["streaming"] = "true";
+                                }
                                 //$array["" . $envName]["sources"][".file"] = $href;
 
                             }
@@ -333,6 +337,9 @@ function parse_environment($xml, $path)
                         }  elseif ($rawuri != null) {
                             //$array["" . $envName]["sources"][$rawuri] = $rawuri;
                             $newarray["sources"][".file"] = $rawuri;
+                            if($streaming != null and $streaming == "true") {
+                                $newarray["sources"]["streaming"] = "true";
+                            }
                         } elseif($validateSources == true) {
                             $newarray["sources"]["validation"] = $validation;
 
@@ -357,7 +364,7 @@ function parse_environment($xml, $path)
            // if($envName == "as-01b") {
                 //error_log("Create env for " . $envName . " dump=" . print_r($newarray, TRUE));
                 $array["" . $envName] = $newarray;
-               // error_log(" Whole dump=" . print_r($array, TRUE));
+                error_log(" Whole dump=" . print_r($array, TRUE));
            // }
         }
         unset($value);
@@ -392,7 +399,7 @@ function test_case($test_set)
     $xml = null;
     $test_path = pathinfo($test_set)['dirname'] . "/";
 
-
+    $result = null;
     if (file_exists($test_set)) {
         $xml = $proc->parseXmlFromFile($test_set);
 
@@ -443,9 +450,9 @@ function test_case($test_set)
                     $nodex = $value->getNodeValue();
                     $testCaseName = $nodex->getAttributeValue("name");
                     echo "<tr><td>$testCaseName</td>";
-                    $result = null;
+
                     if(($run_test_case == null || $run_test_case == $testCaseName) && strpos($exceptionList, $testCaseName) == false) {
-                        $result = "Not run";//$result = run_test_case($nodex, $env, $test_path);
+                        $result = run_test_case($nodex, $env, $test_path);
                     }  else {
                         $result = "Not run";
 
@@ -627,6 +634,7 @@ function collapseWhitespace(string $in) {
 
     global $proc;
     global $xpathProcForCompareNodes;
+    echo "testAssertion cp0";
 
     $xpathProcForAssertions = $proc->newXPathProcessor();
     if($xpathProcForAssertions == NULL) {
@@ -1086,9 +1094,9 @@ function run_test_case($testcase, $env, $path)
     $foundStylesheet = false;
     $xsltproc->clearParameters();
     $reultDocMap = null;
-    
+    $result = null;
     $errorTest = FALSE;
-    $t_env = getNodeFromXPath($testcase, "./environment");
+    $t_env = getNodeFromXPath($testcase, "./*:environment");
 
     $testDirValue = $proc->createAtomicValue(strval($path));
     $env_embedded_file = NULL;
@@ -1099,22 +1107,23 @@ function run_test_case($testcase, $env, $path)
         if($t_env_ref == NULL) {
            $env_embedded_file = getSingleNodeFromXPath($t_env->itemAt(0)->getNodeValue(), "./source[@role='.']/@file");
         }
-       //  error_log("TEST CASE t_env_ref = ".$t_env_ref);
+         error_log("TEST CASE t_env_ref = ".$t_env_ref);
+        
 
 
     }
     $t_dep = getNodeFromXPath($testcase, "./*:dependencies");
-
     $checkDependency = check_dependency($t_dep);//check_dependency($testcase->dependencies);
+    
     if ($checkDependency) {
-        error_log("TEST CASE checkpoint 1 - LLLLLl ");
+        //error_log("TEST CASE checkpoint 1 - LLLLLl ");
         $testElem = getSingleNodeFromXPath($testcase, "./*:test");
 
-         error_log("TEST ELEMENT :".$testcase);
+         //error_log("TEST ELEMENT :".$testcase);
         $testStylesheet = null;
 
         if ($testElem != null) {
-            error_log("TEST CASE checkpoint 2 - LLLLLl ");
+            //error_log("TEST CASE checkpoint 2 - LLLLLl ");
             $test = null;
 
             $asserts = getNodeFromXPath($testcase, "./*:result/*:child::*");
@@ -1124,7 +1133,7 @@ function run_test_case($testcase, $env, $path)
             //exists(/assert[s or x or p]) or  exists(//assert/child::*/s)
 
 
-            if($t_env_ref!= NULL && array_key_exists($t_env_ref , $env)) {
+            if($t_env_ref!= null && array_key_exists($t_env_ref , $env)) {
                 error_log("envvvalue:". print_r($env[$t_env_ref . ""], TRUE));
                 if(array_key_exists("stylesheet", $env[$t_env_ref . ""])) {
                     error_log("Entered stylesheet!");
@@ -1156,6 +1165,7 @@ function run_test_case($testcase, $env, $path)
                 echo "Test case=" . $test;
                 if ($test != null && file_exists($test)) {
                     try {
+
                         //if ($t_env != null) {
                                 if($testElem->getNodeValue() == null) {
                                     error_log("$testElem->getNodeValue() is null");
@@ -1188,9 +1198,12 @@ function run_test_case($testcase, $env, $path)
                                     
                                 }
 
-                                //error_log("before apply stylesheet:".$test);
+                                error_log("before apply stylesheet:".$test);
+                  
                                 $executable = $xsltproc->compileFromFile($test);
-                                if($executable == NULL) {
+                        echo "Test case cp1-1";
+                                if($executable == null) {
+                                    echo "Test case cp1";
                                     $fail++;
                                     if($xsltproc->getErrorMessage() == NULL) {
                                         return "FAIL - executable is NULL";
@@ -1199,16 +1212,16 @@ function run_test_case($testcase, $env, $path)
 
                                     }
                                 }
-                                
+                        echo "Test case cp2";
                                 if($resultSerialized == True) {
                                     $executable->setSaveResultDocument(True);
                                 } 
 
-                        
-                       //error_log("envvvalue:". print_r($env, TRUE));
+                        echo "Test case cp3";
+                       error_log("envvvalue2:". print_r($env, TRUE));
                        // error_log("t_env_ref = ".$t_env_ref);
                         $input = null;
-                        if($t_env_ref!= NULL && array_key_exists($t_env_ref , $env)) {
+                        if($t_env_ref != null && array_key_exists($t_env_ref , $env)) {
                             error_log("env[t_env_ref] value:" . print_r($env[$t_env_ref . ""], TRUE));
                             if(array_key_exists("sources", $env[$t_env_ref . ""])) {
                                 if(array_key_exists(".file", $env[$t_env_ref . ""]["sources"])) {
@@ -1482,6 +1495,14 @@ function run_test_case($testcase, $env, $path)
                             */
 
                     } catch (Exception $ex) {
+                        
+
+                        $errMessage = $xsltproc->getErrorMessage();
+                        if($errorCode == null) {
+                            $errorCode = $xsltproc->getErrorCode();
+                        }
+                        //echo "exception cp12".$errMessage;
+
                         $asserts = getNodeFromXPath($testcase, "./*:result/child::*");
                         if($run_assertion != null and $asserts->itemAt(0)->getNodeValue()->getLocalName() != $run_assertion) {
                             $notrun++;
@@ -1489,8 +1510,11 @@ function run_test_case($testcase, $env, $path)
                             return "Not Run";
 
                         }
+                        $resultDocMap = NULL;
+
+
                         $outcome = testAssertion($path, $asserts->itemAt(0)->getNodeValue(), $result, $resultDocMap, $errorCode);
-                        if (!$outcome) {
+                        if (!$outcome or $result == null) {
                             $fail++;
                             unset($asserts);
                             unset($outcome);
