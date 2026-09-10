@@ -1506,6 +1506,38 @@
       <xsl:apply-templates select="." mode="constructors"/>
    </xsl:template>
    
+   <!-- Handle a switch expression -->
+   
+   <xsl:template match="*[@nodeType='SwitchExpr']" priority="20">
+      <xsl:text>(</xsl:text>
+      <xsl:apply-templates select="selector"/>
+      <xsl:text>) switch {{ {$NL}</xsl:text>
+      <xsl:for-each select="entries/entrie">
+         <xsl:call-template name="indent-extra"/>
+         <xsl:choose>
+            <xsl:when test="@isDefault='true'">_</xsl:when>
+            <xsl:otherwise>
+               <xsl:apply-templates select="labels/label"/>
+            </xsl:otherwise>
+         </xsl:choose>        
+         <xsl:text> => </xsl:text>
+         <xsl:choose>
+            <xsl:when test="count(statements/statement/expression) = 1">
+               <xsl:apply-templates select="statements/statement/expression"/>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:text>{{ {$NL}</xsl:text>
+               <xsl:apply-templates select="statements"/>
+               <xsl:text>}} </xsl:text>
+            </xsl:otherwise>
+         </xsl:choose>
+         <xsl:if test="position() ne last()">,</xsl:if>
+         <xsl:text>{$NL}</xsl:text>
+      </xsl:for-each>
+      <xsl:call-template name="indent"/>
+      <xsl:text>}}</xsl:text>
+   </xsl:template>
+   
    
    <!-- Handle an inline anonymous class, typically `new SomeInterface(x, y, z) { class body }` -->
    <!-- We generate a named static inner class (in a second pass), and at this point we
