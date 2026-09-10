@@ -947,7 +947,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         }
         // Keep it simple for now - independent of the options
         return node.getNodeKind() << 24
-                ^ node.getFingerprint()
+                ^ (node.hasFingerprint() ? node.getFingerprint() : node.getConfiguration().getNamePool().allocateFingerprint(node.getNamespaceUri(), node.getLocalPart()))
                 ^ (node.attributes().size() << 10)
                 ^ Whitespace.normalize(node.getUnicodeStringValue()).hashCode();
 
