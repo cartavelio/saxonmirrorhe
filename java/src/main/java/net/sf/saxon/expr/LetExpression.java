@@ -118,6 +118,25 @@ public class LetExpression extends Assignation {
     }
 
     /**
+     * Register a variable reference that refers to the variable bound in this expression
+     *
+     * @param ref                the variable reference
+     * @param isLoopingReference - true if the reference occurs within a loop, such as the predicate
+     *                           of a filter expression
+     */
+
+    @Override
+    public void addReference(VariableReference ref, boolean isLoopingReference) {
+        super.addReference(ref, isLoopingReference);
+        // If a reference to this variable appears within a try/catch, and the declaration
+        // is outside the try/catch, then we need to use eager evaluation to ensure that errors
+        // are not caught inappropriately. See bug 7083.
+        if (ExpressionTool.isCatchableReference(ref, this)) {
+            needsEagerEvaluation = true;
+        }
+    }
+
+    /**
      * Ask whether the expression can be lifted out of a loop, assuming it has no dependencies
      * on the controlling variable/focus of the loop
      * @param forStreaming true if we are handling streaming code (where rewrites need to be more cautious)

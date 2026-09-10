@@ -187,13 +187,14 @@ public class TryCatch extends Expression {
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         optimizeChildren(visitor, contextInfo);
-        Expression e = getParentExpression();
-        while (e != null) {
-            if (e instanceof LetExpression && ExpressionTool.dependsOnVariable(getTryExpr(), new Binding[]{(LetExpression)e})) {
-                ((LetExpression)e).setNeedsEagerEvaluation(true);
-            }
-            e = e.getParentExpression();
-        }
+        // See bug 7083. Forcing of eager evaluation no longer depends on optimization
+//        Expression e = getParentExpression();
+//        while (e != null) {
+//            if (e instanceof LetExpression && ExpressionTool.dependsOnVariable(getTryExpr(), new Binding[]{(LetExpression)e})) {
+//                ((LetExpression)e).setNeedsEagerEvaluation(true);
+//            }
+//            e = e.getParentExpression();
+//        }
         return this;
     }
 

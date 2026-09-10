@@ -397,6 +397,34 @@ public class ExpressionTool {
     }
 
     /**
+     * Ask whether a variable reference is within a try/catch expression, when the
+     * variable binding is outside the try catch.
+     *
+     * @param reference the variable reference
+     * @param binding   the variable binding
+     * @return true if the variable reference is contained within a try/catch block, with
+     * the variable being declared outside that block. This affects lazy evaluation; an error
+     * in evaluating the variable must not be caught, and the simple way to prevent this is
+     * to use eager evaluation for the variable.
+     */
+    public static boolean isCatchableReference(VariableReference reference, Binding binding) {
+        Expression child = reference;
+        Expression parent = child.getParentExpression();
+        while (true) {
+            if (parent == null) {
+                return false;
+            }
+            if (parent.hasVariableBinding(binding)) {
+                return false;
+            } else if (parent instanceof TryCatch) {
+                return true;
+            }
+            child = parent;
+            parent = child.getParentExpression();
+        }
+    }
+
+    /**
      * Get the focus-setting container of an expression
      * <p>
      * *

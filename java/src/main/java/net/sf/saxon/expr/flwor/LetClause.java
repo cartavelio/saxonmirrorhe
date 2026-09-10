@@ -38,8 +38,12 @@ public class LetClause extends Clause {
 
     public SequenceEvaluator getEvaluator() {
         if (variableEvaluator == null) {
-            variableEvaluator = LearningEvaluator.makeLearningEvaluator(
-                    getSequence(), getSequence().makeElaborator().lazily(true, false));
+            if (rangeVariable.isRequiresEagerEvaluation()) {
+                variableEvaluator = getSequence().makeElaborator().eagerly();
+            } else {
+                variableEvaluator = new LearningEvaluator(
+                        getSequence(), getSequence().makeElaborator().lazily(true, false));
+            }
         }
         return variableEvaluator;
     }
