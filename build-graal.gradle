@@ -1,6 +1,8 @@
 // Find GraalVM to build the SaxonC releases
 def graalHome = null
-["${graalVM}","/Library/Java/JavaVirtualMachines/graalvm-ce-java11-22.2.0/Contents/Home/bin",
+["${graalVM}",
+ "/Library/Java/JavaVirtualMachines/graalvm-ce-java11-22.2.0/Contents/Home/bin",
+ "/lib/jvm/graalvm-ce-java11-22.2.0/bin",
  "c:/irrelevant"].each { graal ->
   if (graalHome == null && graal != "" && pathExists(graal)) {
     graalHome = graal
@@ -76,6 +78,10 @@ task setup_graalJar(
   dependsOn: ["test_graalHome", "graal_eec_jar"],
   description: "Setup the EE jar file for GraalVM"
 ) {
+  inputs.file "${buildDir}/c/jars/eec/saxon-ee-${saxonVersion}.jar"
+  inputs.files fileTree(dir: "${projectDir}/src/graalvm/META-INF")
+  outputs.files fileTree(dir: "${buildDir}/graalvm/META-INF");
+
   doLast {
     mkdir("${buildDir}/graalvm");
   }
@@ -102,6 +108,9 @@ task graalJar(
   dependsOn: ["setup_graalJar"],
   description: "Build the EE jar file for GraalVM"
 ) {
+  inputs.files fileTree(dir: "${buildDir}/graalvm")
+  outputs.file "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar"
+
   def prefixLen = "${buildDir}/graalvm".length()
 
   archiveBaseName = "libsaxon-eec-${saxonVersion}"
@@ -113,25 +122,25 @@ task graalJar(
 }
 
 task graalImage(
+  type: Exec,
   dependsOn: ["graalJar"],
   description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
 ) {
-  doLast {
-    exec {
-      commandLine "${graalHome}/native-image",
-        "-cp", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar", "-o","${buildDir}/c/libsaxon-eec-${saxonVersion}",
-        "--no-fallback", "-H:Path=${buildDir}/c",
-        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-        "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-        "-H:+ReportExceptionStackTraces",
-        "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
-        "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
-        "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
-        "--enable-url-protocols=https",
-        "--shared"
-    }
-  }
+  inputs.file "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar"
+  outputs.files fileTree(dir: "${buildDir}/c", include: "libsaxon-eec-${saxonVersion}.*")
+
+  commandLine "${graalHome}/native-image",
+    "-cp", "${buildDir}/libs/libsaxon-eec-${saxonVersion}.jar", "-o","${buildDir}/c/libsaxon-eec-${saxonVersion}",
+    "--no-fallback", "-H:Path=${buildDir}/c",
+    "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+    "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+    "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+    "-H:+ReportExceptionStackTraces",
+    "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
+    "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
+    "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
+    "--enable-url-protocols=https",
+    "--shared"
 }
 
 
@@ -488,23 +497,31 @@ task graal_eec_jar(
   dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "compile_function_library"],
   description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\""
 ) {
+  inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
+  inputs.files fileTree(dir: "${buildDir}/classes/eec")
+  inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
+  inputs.files fileTree(dir: "${buildDir}/xerces")
+  inputs.files fileTree(dir: "${buildDir}/icu")
+  inputs.file  "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
+  outputs.file "${buildDir}/c/jars/eec/saxon-ee-${saxonVersion}.jar"
+
   archiveBaseName = "saxon-ee-${saxonVersion}"
   destinationDirectory = file("${buildDir}/c/jars/eec")
   manifest {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from ("build/services/saxon-ee") {
+  from ("${buildDir}/services/saxon-ee") {
     include "META-INF/**"
   }
-  from ("build/classes/eec") {
+  from ("${buildDir}/classes/eec") {
     include "net/**/*.class"
     exclude "net/sf/saxon/ant/*.class"
     exclude "**/sql/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
   }
-  from ("src/main/resources") {
+  from ("${projectDir}/src/main/resources") {
     include "net/**"
   }
   from ("${buildDir}/xerces") {
@@ -524,7 +541,116 @@ task graal_eec_jar(
     include "net/sf/saxon/data/sef/function-library.sef.xml"
   }
   doFirst {
-    mkdir "build/c/eec"
+    mkdir "${buildDir}/c/eec"
   }
 }
 
+task setup_pypi(
+  dependsOn: ["graalImage"]
+) {
+  inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
+  outputs.files fileTree(dir: "${buildDir}/pypi", exclude: "dist/**")
+
+  doLast {
+    copy {
+      into "${buildDir}/pypi"
+      from "${projectDir}/src/main/c/Saxon.C.API/python-saxon/pypi_saxonc-ee"
+    }
+  }
+
+  def SAXONC_HOME = null
+  if (systemOs.isMacOsX()) {
+    SAXONC_HOME = "${buildDir}/pypi/libs/darwin"
+  } else if (systemOs.isLinux()) {
+    SAXONC_HOME = "${buildDir}/pypi/libs/nix"
+  } else {
+    throw GradleException("Don't know how to create Python packages on this OS.");
+  }
+
+  doLast {
+    copy {
+      into SAXONC_HOME
+      from "${buildDir}/c"
+      include "libsaxon-eec-*"
+    }
+  }
+
+  doLast {
+    copy {
+      from SAXONC_HOME
+      into "${buildDir}/pypi/src/saxonc_home"
+    }
+  }
+      
+  doLast {
+    copy {
+      from "${projectDir}/src/main/c/Saxon.C.API/graalvm"
+      into "${buildDir}/pypi/Saxon.C.API/graalvm"
+    }
+  }
+
+  doLast {
+    copy {
+      from "${projectDir}/src/main/c/Saxon.C.API/python-saxon"
+      into "${buildDir}/pypi/python_saxon"
+      include "saxonc.pyx"
+      include "saxoncClasses.pxd"
+      include "nodekind.py"
+      include "readme.txt"
+    }
+  }
+
+  doLast {
+    copy {
+      from "${projectDir}/src/main/c/Saxon.C.API"
+      into "${buildDir}/pypi/Saxon.C.API"
+      include "SaxonProcessor.cpp"
+      include "SaxonCGlue.c"
+      include "SaxonCProcessor.c"
+      include "SaxonCXPath.c"
+      include "XdmValue.cpp"
+      include "XdmItem.cpp"
+      include "XdmNode.cpp"
+      include "XdmAtomicValue.cpp"
+      include "XdmFunctionItem.cpp"
+      include "XdmMap.cpp"
+      include "XdmArray.cpp"
+      include "DocumentBuilder.cpp"
+      include "Xslt30Processor.cpp"
+      include "XsltExecutable.cpp"
+      include "XQueryProcessor.cpp"
+      include "XPathProcessor.cpp"
+      include "SchemaValidator.cpp"
+      include "SaxonApiException.cpp"
+      include "SaxonProcessor.h"
+      include "SaxonCGlue.h"
+      include "SaxonCProcessor.h"
+      include "SaxonCXPath.h"
+      include "XdmValue.h"
+      include "XdmItem.h"
+      include "XdmNode.h"
+      include "XdmAtomicValue.h"
+      include "XdmFunctionItem.h"
+      include "XdmMap.h"
+      include "XdmArray.h"
+      include "DocumentBuilder.h"
+      include "Xslt30Processor.h"
+      include "XsltExecutable.h"
+      include "XQueryProcessor.h"
+      include "XPathProcessor.h"
+      include "SchemaValidator.h"
+      include "SaxonApiException.h"
+    }
+  }
+}
+
+task saxoncee_pypi(
+  type: Exec,
+  dependsOn: ["setup_pypi"]
+) {
+  inputs.files setup_pypi.outputs.getFiles()
+  outputs.files fileTree(dir: "${buildDir}/pypi/dist")
+
+  workingDir "${buildDir}/pypi"
+  commandLine "python3", "setup.py", "bdist_wheel"
+}
