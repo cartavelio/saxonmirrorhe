@@ -68,6 +68,26 @@ def testExportSchema2(saxonproc2):
     val.validate()
     assert val.exception_occurred
 
+def testValidatorReport(saxonproc2):
+    saxonproc2.set_cwd('.')
+    saxonproc2.set_configuration_property("xsdversion", "1.1")
+    val = saxonproc2.new_schema_validator()
+    val.set_property('report-node', "true");
+    assert val is not None
+    
+    invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>"
+    sch1 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'><xs:element name='request'><xs:complexType><xs:sequence><xs:element name='a' type='xs:string'/><xs:element name='b' type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = 3'/></xs:complexType></xs:element></xs:schema>"
+    input_ = saxonproc2.parse_xml(xml_text=invalid_xml)
+    assert input_ is not None
+
+    val.set_source_node(input_)
+    val.register_schema(xsd_text=sch1)
+    val.validate()
+
+    report = val.validation_report
+    assert 'validation-report' in str(report)
+    assert val.exception_occurred
+
 
 
 def release(saxonproc):
