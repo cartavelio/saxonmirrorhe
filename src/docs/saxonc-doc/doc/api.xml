@@ -2300,10 +2300,7 @@
          <h1>Saxon\XdmFunctionItem Class</h1>
          <p>extends <a href="../saxon_c_php_xdmitem">Saxon\XdmItem</a></p>
          
-         <!--     PHP_METHOD(XdmFunctionItem,  getName);
-    PHP_METHOD(XdmFunctionItem,  getArity);
-    PHP_METHOD(XdmFunctionItem,  getSystemFunction);
-    PHP_METHOD(XdmFunctionItem,  call); -->
+       
          
          <table>
             <thead>
@@ -2361,16 +2358,6 @@
          </table>
       </section>
       
-      <!-- 
-    PHP_METHOD(XdmArray,  __construct);
-    PHP_METHOD(XdmArray,  __destruct);
-    PHP_METHOD(XdmArray,  get);
-    PHP_METHOD(XdmArray,  put);
-    PHP_METHOD(XdmArray,  addMember);
-    PHP_METHOD(XdmArray,  concat);
-
-    PHP_METHOD(XdmArray,  getArity);
-    PHP_METHOD(XdmArray,  arrayLength); -->
       
       <section id="saxon_c_php_xdmarray" title="Saxon\XdmArray">
          <h1>Saxon\XdmArray Class</h1>
