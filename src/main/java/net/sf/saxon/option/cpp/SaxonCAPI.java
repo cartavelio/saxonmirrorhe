@@ -103,7 +103,7 @@ public class SaxonCAPI {
 
 
     @CEntryPoint(name = "transformSimple")
-    public static CCharPointer transform(IsolateThread thread, CCharPointer xml, CCharPointer xslt) {
+    public static CCharPointer transformSimple(IsolateThread thread, CCharPointer xml, CCharPointer xslt) {
         try {
             String result = transform(CTypeConversion.toJavaString(xml), CTypeConversion.toJavaString(xslt));
             final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(result);
