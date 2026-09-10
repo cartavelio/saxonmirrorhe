@@ -61,7 +61,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// Return a <c>Receiver</c>. Saxon calls this method to obtain a Java <c>Receiver</c>, to which it then sends
+        /// Return a <c>Receiver</c>. Saxon calls this method to obtain a <c>Receiver</c>, to which it then sends
         /// a sequence of events representing the content of an XML document. The method is intended
         /// primarily for internal use, and may give poor diagnostics if used incorrectly.
         /// </summary>
