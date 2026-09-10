@@ -35,7 +35,6 @@ namespace Saxon.Callbacks {
         /// <returns>The resolved URI</returns>
 
         public override Uri ResolveUri(Uri baseUri, string relativeUri) {
-            Uri result = null;
             if (relativeUri.StartsWith("-//")) {
                 // then it's probably a Public ID, which the Microsoft parser doesn't seem to understand.
                 // We'll pass it back unresolved
