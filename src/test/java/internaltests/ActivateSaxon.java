@@ -58,9 +58,22 @@ public class ActivateSaxon {
         processor.setConfigurationProperty("http://saxonica.com/oem-data", deobfuscate(key));
     }
 
+    // Activate Saxon at the level of a s9api Processor, on the underlying configuration, to avoid using deprecated API
+    public static void activate2(Processor processor) {
+        processor.getUnderlyingConfiguration().setConfigurationProperty(
+                "http://saxonica.com/oem-data", deobfuscate(key));
+    }
+
     // Activate Saxon at the level of a s9api Processor using an expired key
     public static void activateExpired(Processor processor) {
         processor.setConfigurationProperty("http://saxonica.com/oem-data", deobfuscate(oldKey));
+    }
+
+    // Activate Saxon at the level of a s9api Processor using an expired key,
+    // on the underlying configuration, to avoid using deprecated API
+    public static void activateExpired2(Processor processor) {
+        processor.getUnderlyingConfiguration().setConfigurationProperty(
+                "http://saxonica.com/oem-data", deobfuscate(oldKey));
     }
 
 }
