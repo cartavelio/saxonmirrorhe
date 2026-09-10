@@ -43,7 +43,7 @@
    
     <exception test-set="or" test-case="or-006">
        <!-- The expression should be optimized to include a lookup in a map, and a general comparison -->
-       <optimization assert="//ifCall[@name='Q{http://www.w3.org/2005/xpath-functions/map}contains'] and //gcEE"/>
+       <optimization assert="//ifCall[@name='Q{http://saxon.sf.net/}map-untyped-contains'] and //gcEE"/>
     </exception>
     
   

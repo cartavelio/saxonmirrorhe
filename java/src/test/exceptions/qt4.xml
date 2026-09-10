@@ -119,9 +119,9 @@
       test-case=" fo-test-fn-build-dateTime-001
                   fo-test-fn-build-dateTime-002
                   fo-test-fn-build-dateTime-003
-                  fo-test-fn-parse-dateTime-001
-                  fo-test-fn-parse-dateTime-002
-                  fo-test-fn-parse-dateTime-003
+                  fo-test-fn-parts-of-dateTime-001
+                  fo-test-fn-parts-of-dateTime-002
+                  fo-test-fn-parts-of-dateTime-003
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-02-10"/>
