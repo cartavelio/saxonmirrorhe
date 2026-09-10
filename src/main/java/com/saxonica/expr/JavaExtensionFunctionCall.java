@@ -45,7 +45,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
     private Class<?> theClass;
     private JavaExternalObjectType declaredType;
     private boolean returnVoidAsThis = false;
-    private SequenceEvaluator[] argumentEvaluators = null;
+
 
     /**
      * Default constructor
@@ -997,34 +997,7 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         }
         out.endElement();
     }
-
-    /**
-     * Allocate evaluation functions for each argument (in field {@code argumentEvaluators})
-     */
-
-    protected void allocateArgumentEvaluators() {
-        int arity = getArity();
-        argumentEvaluators = new SequenceEvaluator[arity];
-        for (int i = 0; i < arity; i++) {
-            argumentEvaluators[i] = getArg(i).makeElaborator().eagerly();
-        }
-    }
-
-    public Sequence[] evaluateArguments(XPathContext c) throws XPathException {
-        int numArgs = getArity();
-        Sequence[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
-        synchronized(this) {
-            if (argumentEvaluators == null) {
-                allocateArgumentEvaluators();
-            }
-        }
-        for (int i = 0; i < numArgs; i++) {
-            actualArgs[i] = argumentEvaluators[i].evaluate(c);
-        }
-        return actualArgs;
-    }
-
-
+    
     /**
      * Make an elaborator for this expression
      *
@@ -1037,13 +1010,33 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
 
     private static class JavaExtensionFunctionCallElaborator extends PullElaborator {
 
+        private SequenceEvaluator[] allocateArgumentEvaluators() {
+            JavaExtensionFunctionCall call = (JavaExtensionFunctionCall) getExpression();
+            int arity = call.getArity();
+            SequenceEvaluator[] argumentEvaluators = new SequenceEvaluator[arity];
+            for (int i = 0; i < arity; i++) {
+                argumentEvaluators[i] = call.getArg(i).makeElaborator().eagerly();
+            }
+            return argumentEvaluators;
+        }
+
+        private Sequence[] evaluateArguments(SequenceEvaluator[] argumentEvaluators, XPathContext c) throws XPathException {
+            JavaExtensionFunctionCall call = (JavaExtensionFunctionCall) getExpression();
+            int numArgs = call.getArity();
+            Sequence[] actualArgs = SequenceTool.makeSequenceArray(numArgs);
+            for (int i = 0; i < numArgs; i++) {
+                actualArgs[i] = argumentEvaluators[i].evaluate(c);
+            }
+            return actualArgs;
+        }
+
 
         @Override
         public PullEvaluator elaborateForPull() {
-            JavaExtensionFunctionCall expr = (JavaExtensionFunctionCall)getExpression();
-            expr.allocateArgumentEvaluators();
+            JavaExtensionFunctionCall expr = (JavaExtensionFunctionCall) getExpression();
+            SequenceEvaluator[] argumentEvaluators = allocateArgumentEvaluators();
             return context -> {
-                Sequence[] actualArgs = expr.evaluateArguments(context);
+                Sequence[] actualArgs = evaluateArguments(argumentEvaluators, context);
                 return expr.call(context, actualArgs).iterate();
             };
         }
@@ -1051,9 +1044,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
         @Override
         public ItemEvaluator elaborateForItem() {
             JavaExtensionFunctionCall expr = (JavaExtensionFunctionCall) getExpression();
-            expr.allocateArgumentEvaluators();
+            SequenceEvaluator[] argumentEvaluators = allocateArgumentEvaluators();
             return context -> {
-                Sequence[] actualArgs = expr.evaluateArguments(context);
+                Sequence[] actualArgs = evaluateArguments(argumentEvaluators, context);
                 return expr.call(context, actualArgs).head();
             };
         }
