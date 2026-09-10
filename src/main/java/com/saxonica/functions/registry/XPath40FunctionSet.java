@@ -156,6 +156,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, OPT, EMPTY)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
+        ItemType anyArityOneFunction =
+                new SpecificFunctionType(SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE);
+
+        register("compose", 1, e -> e.populate(Compose::new, anyArityOneFunction, ONE, BASE)
+                .arg(0, anyArityOneFunction, STAR, null));
+
         // Concat changes in 4.0:
         register("concat", 1, e -> e.populate(Concat::new, BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
