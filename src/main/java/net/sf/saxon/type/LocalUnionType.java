@@ -17,6 +17,8 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -27,7 +29,7 @@ import java.util.function.Predicate;
 
 public class LocalUnionType implements PlainType, UnionType {
 
-    private final List<? extends AtomicType> memberTypes;
+    private List<AtomicType> memberTypes;
 
     /**
      * Get the genre of this item
@@ -50,8 +52,13 @@ public class LocalUnionType implements PlainType, UnionType {
      * @param memberTypes the atomic member types of the union
      */
 
-    public LocalUnionType(List<? extends AtomicType> memberTypes) {
+    public LocalUnionType(List<AtomicType> memberTypes) {
         this.memberTypes = memberTypes;
+    }
+
+    public LocalUnionType(AtomicType... memberTypes) {
+        this.memberTypes = new ArrayList<AtomicType>();
+        this.memberTypes.addAll(Arrays.asList(memberTypes));
     }
 
     public List<? extends AtomicType> getMemberTypes() {

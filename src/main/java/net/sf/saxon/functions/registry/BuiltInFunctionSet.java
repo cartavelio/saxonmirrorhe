@@ -132,8 +132,8 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             return entry;
         }
         // Try for a generalised (XP40) sequence-variadic function
-        Integer minArity = sequenceVariadicFunctions.get(name);
-        if (minArity != null && arity >= minArity) {
+        int minArity = sequenceVariadicFunctions.getOrDefault(name, -1);
+        if (minArity != -1 && arity >= minArity) {
             key = name + "#" + (minArity + 1);
             return functionTable.get(key);
         }

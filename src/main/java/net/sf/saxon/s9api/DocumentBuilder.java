@@ -42,9 +42,7 @@ import java.net.URI;
 public class DocumentBuilder {
 
     private final Configuration config;
-    //#if CSHARP==false
     private SchemaValidator schemaValidator;
-    //#endif
     private boolean dtdValidation;
     private boolean lineNumbering;
     private TreeModel treeModel = TreeModel.TINY_TREE;
@@ -141,7 +139,6 @@ public class DocumentBuilder {
         return lineNumbering;
     }
 
-    //#if CSHARP==false
     /**
      * Set the schemaValidator to be used. This determines whether schema validation is applied to an input
      * document and whether type annotations in a supplied document are retained. If no schemaValidator
@@ -166,7 +163,6 @@ public class DocumentBuilder {
     public SchemaValidator getSchemaValidator() {
         return schemaValidator;
     }
-    //#endif
 
     /**
      * Set whether DTD validation should be applied to documents loaded using this
@@ -328,16 +324,13 @@ public class DocumentBuilder {
             if (dtdValidation) {
                 throw new SaxonApiException("When DTD validation is used, the whitespace stripping policy must be IGNORABLE");
             }
-            //#if CSHARP==false
             if (schemaValidator != null) {
                 throw new SaxonApiException("When schema validation is used, the whitespace stripping policy must be IGNORABLE");
             }
-            //#endif
         }
         ParseOptions options = new ParseOptions(config.getParseOptions());
         options.setDTDValidationMode(dtdValidation ? Validation.STRICT : Validation.STRIP);
 
-        //#if CSHARP==false
         if (schemaValidator != null) {
             options.setSchemaValidationMode(schemaValidator.isLax() ? Validation.LAX : Validation.STRICT);
             if (schemaValidator.getDocumentElementName() != null) {
@@ -348,7 +341,6 @@ public class DocumentBuilder {
                 options.setTopLevelType(schemaValidator.getDocumentElementType());
             }
         }
-        //#endif
 
         if (treeModel != null) {
             options.setModel(treeModel);
