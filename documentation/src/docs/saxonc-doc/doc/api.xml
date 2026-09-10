@@ -1214,7 +1214,9 @@
                   <span class="signature">clone()</span>
                   <div class="fcomment">Create a clone of this <a class="bodylink code"
                                                                   href="../saxon_c_php_xsltexecutable">Saxon\XsltExecutable</a>
-                     object.</div>
+                     object. This is required for multi-threaded processing. A cloned
+                     <a class="bodylink code" href="../saxon_c_php_xsltexecutable">Saxon\XsltExecutable</a> should
+                     be used for each thread used.</div>
                </td>
             </tr>
             <tr>
