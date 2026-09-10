@@ -476,7 +476,8 @@ public abstract class Assignation extends Expression implements LocalBinding {
     private static void countReferences(Binding binding, Expression exp, List<VariableReference> references, int[] results) {
         // results[0] = nominal reference count
         // results[1] = quota nodes visited
-        if (exp instanceof LocalVariableReference ref) {
+        if (exp instanceof LocalVariableReference) {
+            LocalVariableReference ref = (LocalVariableReference) exp;
             if (ref.getBinding() == binding) {
                 ref.recomputeInLoop();
                 results[0] += ref.isInLoop() ? 10 : 1;
