@@ -234,7 +234,7 @@ public class DynamicFunctionCall extends Expression {
      */
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        if ("JS".equals(out.getOptions().target) && out.getOptions().targetVersion >= 2) {
+        if ("JS".equals(out.getOptions().target) && out.getOptions().targetVersion == 2) {
             // for backwards compatibility, output a call on saxon:apply
             out.startElement("ifCall", this);
             out.emitAttribute("name", "Q{http://saxon.sf.net/}apply");
