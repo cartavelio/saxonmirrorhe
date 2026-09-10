@@ -79,6 +79,7 @@ public class StaticQueryContext {
     private String defaultCollationName;
     private Location moduleLocation;
     private OptimizerOptions optimizerOptions;
+    private int languageVersion = 31;
 
 
 
@@ -323,13 +324,15 @@ public class StaticQueryContext {
      * @param version The XQuery language version. Must be 10 (="1.0") or 30 (="3.0") or 31 (="3.1").
      * @since 9.2; changed in 9.3 to expect a DecimalValue rather than a string. Changed in 9.7 to
      * accept an int (30 = "3.0") and to allow "3.1".  From 9.8.0.3 the supplied value is ignored
-     * and the language version is always set to "3.1".
+     * and the language version is always set to "3.1".  From 11.0 the value 40 is accepted.
      * @deprecated since 10.0
      */
 
     public void setLanguageVersion(int version) {
         if (version==10 || version==30 || version==31) {
             // value is ignored
+        } else if (version == 40) {
+            languageVersion = 40;
         } else {
             throw new IllegalArgumentException("languageVersion = " + version);
         }
@@ -341,11 +344,11 @@ public class StaticQueryContext {
      * @return the language version. Either "1.0" or "1.1". Default is "1.0".
      * @since 9.2; changed in 9.3 to return a DecimalValue rather than a string;
      * changed in 9.7 to return an int (30 = "3.0" and so on). Changed in 9.8.0.3 to
-     * always return 31.
+     * always return 31. Changed in 11.0 to return 31 or 40.
      */
 
     public int getLanguageVersion() {
-        return 31;
+        return languageVersion;
     }
 
     /**
@@ -557,7 +560,7 @@ public class StaticQueryContext {
 
     /*@NotNull*/
     public XQueryExpression compileQuery(/*@NotNull*/ String query) throws XPathException {
-        XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", isUpdating, 31);
+        XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", isUpdating, languageVersion);
         if (codeInjector != null) {
             qp.setCodeInjector(codeInjector);
         } else if (config.isCompileWithTracing()) {

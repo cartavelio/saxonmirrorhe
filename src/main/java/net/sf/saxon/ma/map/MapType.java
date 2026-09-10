@@ -293,7 +293,7 @@ public class MapType extends AnyFunctionType {
             return Affinity.SUBSUMED_BY;
         } else if (other.isArrayType()) {
             return Affinity.DISJOINT;
-        } else if (other instanceof TupleItemType) {
+        } else if (other instanceof RecordTest) {
             return TypeHierarchy.inverseRelationship(other.relationship(this, th));
         } else if (other instanceof MapType) {
             // See bug 3720. Two map types can never be disjoint because the empty

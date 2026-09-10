@@ -39,6 +39,15 @@ public interface TupleType extends FunctionItemType {
     SequenceType getFieldType(String field);
 
     /**
+     * Ask whether a given field is optional
+     *
+     * @param field the name of the field
+     * @return true if the field is defined as an optional field
+     */
+
+    public boolean isOptionalField(String field);
+
+    /**
      * Ask whether the tuple type is extensible, that is, whether fields other than those named are permitted
      * @return true if fields other than the named fields are permitted to appear
      */

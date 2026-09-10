@@ -50,6 +50,17 @@ public class XSLExpose extends XSLAcceptExpose {
     }
 
     /**
+     * Ask whether this node is a declaration, that is, a permitted child of xsl:stylesheet
+     * (including xsl:include and xsl:import). The default implementation returns false
+     *
+     * @return true if the element is a permitted child of xsl:stylesheet or xsl:transform
+     */
+    @Override
+    public boolean isDeclaration() {
+        return true;
+    }
+
+    /**
      * Check that the stylesheet element is valid. This is called once for each element, after
      * the entire tree has been built. As well as validation, it can perform first-time
      * initialisation. The default implementation does nothing; it is normally overriden

@@ -43,9 +43,8 @@ public class IntegerRange implements AtomicSequence {
         if (step == 0) {
             throw new IllegalArgumentException("step = 0 in IntegerRange");
         }
-        if ((end < start) != (step < 0)) {
-            throw new IllegalArgumentException(
-                    step > 0 ? "end < start in ascending IntegerRange" : "end > start in descending IntegerRange");
+        if (end != start && (end > start != step > 0)) {
+            throw new IllegalArgumentException("end before start in IntegerRange");
         }
         if (Math.abs((end - start)/step) > Integer.MAX_VALUE) {
             throw new IllegalArgumentException("Maximum length of sequence in Saxon is " + Integer.MAX_VALUE);

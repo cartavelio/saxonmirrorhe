@@ -72,6 +72,7 @@ public class Query {
     private Logger traceDestination = new StandardLogger();
     private boolean closeTraceDestination = false;
     private boolean allowExit = true;
+    protected String languageVersion = "3.1";
 
 
     /**
@@ -152,6 +153,9 @@ public class Query {
                                     "Query string (usually in quotes)");
         options.addRecognizedOption("quit", CommandLineOptions.TYPE_BOOLEAN | CommandLineOptions.VALUE_REQUIRED,
                                     "Quit JVM if query fails");
+        options.addRecognizedOption("qversion", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
+                                    "XQuery language version: 3.1 or 4.0. Default is 3.1");
+        options.setPermittedValues("qversion", new String[]{"3.1", "4.0"}, "3.1");
         options.addRecognizedOption("r", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named URIResolver class");
         options.addRecognizedOption("repeat", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
@@ -269,6 +273,7 @@ public class Query {
 
             XQueryCompiler compiler = processor.newXQueryCompiler();
             compiler.setSchemaAware(schemaAware);
+            compiler.setLanguageVersion(languageVersion);
 
             if (updating) {
                 compiler.setUpdatingEnabled(true);
@@ -281,6 +286,9 @@ public class Query {
                 Object mr = config.getInstance(moduleURIResolverClass, null);
                 if (!(mr instanceof ModuleURIResolver)) {
                     badUsage(moduleURIResolverClass + " is not a ModuleURIResolver");
+                }
+                if (mr instanceof StandardModuleURIResolver) {
+                    ((StandardModuleURIResolver) mr).setConfiguration(config);
                 }
                 compiler.setModuleURIResolver((ModuleURIResolver) mr);
             }
@@ -537,8 +545,10 @@ public class Query {
         }
 
         String qv = options.getOptionValue("qversion");
-        if (qv != null && !"3.1".equals(qv)) {
+        if (qv != null && !"3.1".equals(qv) && !"4.0".equals(qv)) {
             config.getLogger().warning("-qversion ignored: 3.1 is assumed");
+        } else if ("4.0".equals(qv)) {
+            languageVersion = "4.0";
         }
 
         value = options.getOptionValue("repeat");

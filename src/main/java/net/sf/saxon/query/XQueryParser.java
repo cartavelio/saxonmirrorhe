@@ -59,12 +59,14 @@ public class XQueryParser extends XPathParser {
     public final static String XQUERY10 = "1.0";
     public final static String XQUERY30 = "3.0";
     public final static String XQUERY31 = "3.1";
+    public final static String XQUERY40 = "4.0";
 
     private boolean memoFunction = false;
     private boolean streaming = false;
     //protected String queryVersion = null;
     private int errorCount = 0;
     /*@Nullable*/ private XPathException firstError = null;
+    private int languageVersion = 31;
 
     /*@NotNull*/ protected Executable executable;
 
@@ -92,11 +94,13 @@ public class XQueryParser extends XPathParser {
 
     /**
      * Constructor for internal use: this class should be instantiated via the QueryModule
+     * @param languageVersion
      */
 
-    public XQueryParser() {
+    public XQueryParser(int languageVersion) {
         //queryVersion = XQUERY31;
-        setLanguage(ParsedLanguage.XQUERY, 31);
+        this.languageVersion = languageVersion;
+        setLanguage(ParsedLanguage.XQUERY, languageVersion);
     }
 
     /**
@@ -106,8 +110,8 @@ public class XQueryParser extends XPathParser {
      */
 
     private XQueryParser newParser() {
-        XQueryParser qp = new XQueryParser();
-        qp.setLanguage(language, 31);
+        XQueryParser qp = new XQueryParser(languageVersion);
+        qp.setLanguage(language, languageVersion);
         qp.setParserExtension(parserExtension);
         return qp;
     }
@@ -128,7 +132,7 @@ public class XQueryParser extends XPathParser {
             /*@NotNull*/ QueryModule mainModule,
             /*@NotNull*/ Configuration config) throws XPathException {
         try {
-            setLanguage(ParsedLanguage.XQUERY, 31);
+            setLanguage(ParsedLanguage.XQUERY, languageVersion);
             if (config.getXMLVersion() == Configuration.XML10) {
                 query = normalizeLineEndings10(query);
             } else {
@@ -351,7 +355,7 @@ public class XQueryParser extends XPathParser {
 //        }
         language = ParsedLanguage.XQUERY;
         t = new Tokenizer();
-        t.languageLevel = 31;
+        t.languageLevel = languageVersion;
         t.isXQuery = true;
         try {
             t.tokenize(Objects.requireNonNull(queryString), 0, -1);
@@ -425,7 +429,7 @@ public class XQueryParser extends XPathParser {
         executable = exec;
 //        defaultContainer = new SimpleContainer(env.getPackageData());
         t = new Tokenizer();
-        t.languageLevel = 31;
+        t.languageLevel = languageVersion;
         t.isXQuery = true;
         QNameParser qp = new QNameParser(env.getLiveNamespaceResolver())
             .withAcceptEQName(true)

@@ -227,9 +227,10 @@ public interface StaticContext {
     /**
      * Get the XPath language level supported, as an integer (being the actual version
      * number times ten). In Saxon 9.9 the possible values are 20 (XPath 2.0), 30 (XPath 3.0),
-     * 31 (XPath 3.1), and 305 (XPath 3.0 plus the extensions defined in XSLT 3.0).
+     * 31 (XPath 3.1), and 305 (XPath 3.0 plus the extensions defined in XSLT 3.0). Saxon 11
+     * adds support for 40 (XPath 4.0).
      *
-     * @return the XPath language level; the return value will be either 20, 30, 305, or 31
+     * @return the XPath language level; the return value will be either 20, 30, 305, 31 or 40
      * @since 9.7
      */
 

@@ -75,6 +75,9 @@ public class QT3TestDriverHE extends TestDriver {
             case "XP31":
                 spec = Spec.XP31;
                 break;
+            case "XP40":
+                spec = Spec.XP40;
+                break;
             case "XQ10":
                 spec = Spec.XQ10;
                 break;
@@ -84,11 +87,14 @@ public class QT3TestDriverHE extends TestDriver {
             case "XQ31":
                 spec = Spec.XQ31;
                 break;
+            case "XQ40":
+                spec = Spec.XQ40;
+                break;
             case "XT30":  // map function tests
                 spec = Spec.XT30;
                 break;
             default:
-                throw new IllegalArgumentException("The specific language must be one of the following: XP20, XP30, XP31, XQ10, XQ30, XQ31, XT30");
+                throw new IllegalArgumentException("The specific language must be one of the following: XP20, XP30, XP31, XP40, XQ10, XQ30, XQ31, XQ40, XT30");
         }
         resultsDoc = new QT3TestReport(this, spec);
     }
@@ -749,10 +755,11 @@ public class QT3TestDriverHE extends TestDriver {
             applicable = false;
         } else if (value.contains(spec.specAndVersion)) {
             applicable = true;
-        } else if ((spec.specAndVersion.equals("XQ30") || spec.specAndVersion.equals("XQ31")) &&
+        } else if ((spec.specAndVersion.equals("XQ30") || spec.specAndVersion.equals("XQ31")
+                    || spec.specAndVersion.equals("XQ40")) &&
                 (value.contains("XQ10+") || value.contains("XQ30+"))) {
             applicable = true;
-        } else if ((spec.specAndVersion.equals("XP30") || spec.specAndVersion.equals("XP31")) &&
+        } else if ((spec.specAndVersion.equals("XP30") || spec.specAndVersion.equals("XP31") || spec.specAndVersion.equals("XP40")) &&
                 (value.contains("XP20+") || value.contains("XP30+"))) {
             applicable = true;
         }

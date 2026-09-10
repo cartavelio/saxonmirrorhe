@@ -86,6 +86,7 @@ public class QueryModule implements StaticContext {
     private RetainedStaticContext moduleStaticContext = null;
     private Location moduleLocation;
     private OptimizerOptions optimizerOptions;
+    private int languageLevel;
 
     /**
      * Create a QueryModule for a main module, copying the data that has been set up in a
@@ -99,6 +100,7 @@ public class QueryModule implements StaticContext {
         config = sqc.getConfiguration();
         isMainModule = true;
         topModule = this;
+        languageLevel = sqc.getLanguageVersion();
         activeNamespaces = new Stack<>();
         baseURI = sqc.getBaseURI();
         defaultCollationName = sqc.getDefaultCollationName();
@@ -304,6 +306,8 @@ public class QueryModule implements StaticContext {
     public BuiltInFunctionSet getBuiltInFunctionSet() {
         if (isUpdating()) {
             return config.getXQueryUpdateFunctionSet();
+        } else if (languageLevel == 40) {
+            return config.getXPath40FunctionSet();
         } else {
             return config.getXPath31FunctionSet();
         }
@@ -1778,16 +1782,26 @@ public class QueryModule implements StaticContext {
     }
 
     /**
+     * Set the XPath/XQuery language level
+     * @param languageLevel 31 for 3.1, 40 for 4.0.
+     */
+
+    public void setXPathVersion(int languageLevel) {
+        this.languageLevel = languageLevel;
+    }
+
+    /**
      * Get the XPath language level supported, as an integer (being the actual version
-     * number times ten). In Saxon 9.9 the only value supported for XQuery is 3.1
+     * number times ten).
      *
-     * @return the XPath language level; the return value will be 31
-     * @since 9.7
+     * @return the XPath language level; the return value will be 31 for XPath 3.1 and 40 for XPath 4.0
+     * @since 9.7. In Saxon 9.9 the only value supported for XQuery is 3.1. Saxon 11
+     * also supports 4.0 (identified as integer 40).
      */
 
     @Override
     public int getXPathVersion() {
-        return 31;
+        return languageLevel;
     }
 
     /**

@@ -71,6 +71,7 @@ public class XPathParser {
     protected boolean allowXPath30Syntax = false;
     protected boolean allowXPath30XSLTExtensions = false;
     protected boolean allowXPath31Syntax = false;
+    protected boolean allowXPath40Syntax = false;
     protected boolean allowSaxonExtensions = false;
 
     protected boolean scanOnly = false;
@@ -357,18 +358,18 @@ public class XPathParser {
         }
         switch (language) {
             case XPATH:
-                if (!(version == 20 || version == 30 || version == 31)) {
+                if (!(version == 20 || version == 30 || version == 31 || version == 40)) {
                     throw new IllegalArgumentException("Unsupported language version " + version);
                 }
                 break;
             case XSLT_PATTERN:
             case SEQUENCE_TYPE:
-                if (!(version == 20 || version == 30 || version == 31)) {
+                if (!(version == 20 || version == 30 || version == 31 || version == 40)) {
                     throw new IllegalArgumentException("Unsupported language version " + version);
                 }
                 break;
             case XQUERY:
-                if (!(version == 10 || version == 30 || version == 31)) {
+                if (!(version == 10 || version == 30 || version == 31 || version == 40)) {
                     throw new IllegalArgumentException("Unsupported language version " + version);
                 }
                 break;
@@ -379,6 +380,7 @@ public class XPathParser {
         this.languageVersion = version;
         this.allowXPath30Syntax = languageVersion >= 30;
         this.allowXPath31Syntax = languageVersion >= 31;
+        this.allowXPath40Syntax = languageVersion >= 40;
 
     }
 
@@ -753,8 +755,8 @@ public class XPathParser {
                 Expression e1 = parseBinaryExpression(parseUnaryExpression(), 4);
                 // Process ternary conditional
                 if (t.currentToken == Token.QMARK_QMARK) {
-                    if (!allowSaxonExtensions) {
-                        grumble("Ternary conditionals (A ?? B !! C) require Saxon extensions to be enabled");
+                    if (!allowXPath40Syntax) {
+                        grumble("Ternary conditionals (A ?? B !! C) require XPath 4.0 to be enabled");
                     }
                     return parseTernaryExpression(e1);
                 }
@@ -811,19 +813,19 @@ public class XPathParser {
                 case Token.CASTABLE_AS:
                     nextToken();
                     CastingTarget at;
-                    if (allowSaxonExtensions && t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("union")) {
-                        // Saxon 9.8 extension
+                    if (languageVersion >= 40 && t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("union")) {
+                        // Saxon 9.8 / XPath 4.0 proposed extension
                         at = (CastingTarget)parseItemType();
                     } else {
                         expect(Token.NAME);
                         at = getSimpleType(t.currentTokenValue);
-                        if (at == ANY_ATOMIC) {
-                            grumble("No value is castable to xs:anyAtomicType", "XPST0080");
-                        }
-                        if (at == NOTATION) {
-                            grumble("No value is castable to xs:NOTATION", "XPST0080");
-                        }
                         nextToken();
+                    }
+                    if (at == ANY_ATOMIC) {
+                        grumble("No value is castable to xs:anyAtomicType", "XPST0080");
+                    }
+                    if (at == NOTATION) {
+                        grumble("No value is castable to xs:NOTATION", "XPST0080");
                     }
 
                     boolean allowEmpty = t.currentToken == Token.QMARK;
@@ -994,8 +996,8 @@ public class XPathParser {
             case Token.FOLLOWS:
                 return new IdentityComparison(lhs, operator, rhs);
             case Token.BY:
-                if (!allowSaxonExtensions) {
-                    grumble("Range operator 'by' requires Saxon extensions to be enabled");
+                if (!allowXPath40Syntax) {
+                    grumble("Range operator 'by' requires XPath 4.0 to be enabled");
                 }
                 return RangeExpression.makeSteppingExpression(lhs, rhs);
             case Token.TO:
@@ -1672,6 +1674,13 @@ public class XPathParser {
                 case "array":
                     primaryType = parseArrayItemType();
                     break;
+                case "record":
+                case "tuple": // Retained as synonym for the time beinig
+                    primaryType = parseRecordTest(this);
+                    break;
+                case "union":
+                    primaryType = parseUnionType(this);
+                    break;
                 case "empty-sequence":
                     nextToken();
                     expect(Token.RPAR);
@@ -1721,6 +1730,119 @@ public class XPathParser {
             return ANY_ATOMIC;
         }
         return primaryType;
+    }
+
+    /**
+     * Parse a record type (Saxon 9.8 / XPath 4.0 extension).
+     * Syntax: "record" "(" (name (":" sequenceType)?) ("," (name (":" sequenceType)?))* ")"
+     * The keyword "tuple" is accepted as a synonym, for compatibility
+     */
+
+    private ItemType parseRecordTest(XPathParser p) throws XPathException {
+        // The initial "record(" has been read
+        checkLanguageVersion40();
+        Tokenizer t = p.getTokenizer();
+        p.nextToken();
+        List<String> fieldNames = new ArrayList<>(6);
+        List<String> optionalFieldNames = new ArrayList<>(6);
+        List<SequenceType> fieldTypes = new ArrayList<>(6);
+        boolean extensible = false;
+        while (true) {
+            String name;
+            if (t.currentToken == Token.NAME) {
+                name = t.currentTokenValue;
+                if (!NameChecker.isValidNCName(name)) {
+                    p.grumble(Err.wrap(name) + " is not a valid NCName");
+                }
+            } else if (t.currentToken == Token.STRING_LITERAL) {
+                name = t.currentTokenValue;
+            } else {
+                p.grumble("Name of field in tuple must be either an NCName or a quoted string literal");
+                name = "dummy";
+            }
+            if (fieldNames.contains(name)) {
+                p.grumble("Duplicate field name (" + name + ")");
+                name = "dummy";
+            }
+            fieldNames.add(name);
+            p.nextToken();
+            if (t.currentToken == Token.QMARK) {
+                optionalFieldNames.add(name);
+                p.nextToken();
+            }
+            SequenceType arg = SequenceType.NON_EMPTY_SEQUENCE;
+            if (t.currentToken == Token.AS) {
+                p.nextToken();
+                arg = p.parseSequenceType();
+            }
+            fieldTypes.add(arg);
+            if (t.currentToken == Token.RPAR) {
+                break;
+            } else if (t.currentToken == Token.COMMA) {
+                p.nextToken();
+                if (t.currentToken == Token.STAR || t.currentToken == Token.MULT) {
+                    extensible = true;
+                    p.nextToken();
+                    p.expect(Token.RPAR);
+                    break;
+                }
+            } else {
+                p.grumble("Expected ',' or ')' after field in RecordTest, found '" +
+                                  Token.tokens[t.currentToken] + '\'');
+            }
+        }
+        p.nextToken();
+        if (fieldNames.isEmpty()) {
+            p.grumble("RecordTest must contain at least one field");
+            return null;
+        }
+        return new RecordTest(fieldNames, fieldTypes, optionalFieldNames, extensible);
+
+    }
+
+    /**
+     * Parse a union type (Saxon 9.8 extension).
+     * Syntax: "union" "(" qname ("," qname)* ")"
+     */
+
+    public ItemType parseUnionType(XPathParser p) throws XPathException {
+        // The initial "union(" has been read
+        checkLanguageVersion40();
+        Tokenizer t = p.getTokenizer();
+        p.nextToken();
+        List<AtomicType> memberTypes = new ArrayList<>(6);
+
+        while (true) {
+            p.expect(Token.NAME);
+            StructuredQName member = p.getQNameParser().parse(
+                    t.currentTokenValue, p.getStaticContext().getDefaultElementNamespace());
+            ItemType type = p.getPlainType(member);
+            if (type instanceof AtomicType) {
+                memberTypes.add((AtomicType) type);
+            } else if (type instanceof PlainType) {
+                for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
+                    if (pt instanceof AtomicType) {
+                        memberTypes.add((AtomicType) pt);
+                    } else {
+                        p.grumble("Union type " + type + " has a non-atomic member type " + pt);
+                    }
+                }
+            } else {
+                p.grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+            }
+            p.nextToken();
+            if (t.currentToken == Token.RPAR) {
+                break;
+            } else if (t.currentToken == Token.COMMA) {
+                p.nextToken();
+            } else {
+                p.grumble("Expected ',' or ')' after member name in union type, found '" +
+                                  Token.tokens[t.currentToken] + '\'');
+            }
+        }
+        p.nextToken();
+        return new LocalUnionType(memberTypes);
+
     }
 
     /**
@@ -2629,13 +2751,12 @@ public class XPathParser {
         } else if (token == Token.LPAR) {
             result = lookup(this, lhs, parseParenthesizedExpression());
         } else if (token == Token.STRING_LITERAL) {
-            checkSyntaxExtensions("string literal after '?'");
+            checkLanguageVersion40();
             result = lookupName(lhs, t.currentTokenValue);
             nextToken();
         } else if (token == Token.DOLLAR) {
-            checkSyntaxExtensions("variable reference after '?'");
+            checkLanguageVersion40();
             result = lookup(this, lhs, parseVariableReference());
-            nextToken();
         } else {
             grumble("Unexpected " + Token.tokens[token] + " after '?'");
             return null;
@@ -3073,6 +3194,18 @@ public class XPathParser {
     protected void checkLanguageVersion31() throws XPathException {
         if (!allowXPath31Syntax) {
             grumble("The XPath parser is not configured to allow use of XPath 3.1 syntax");
+        }
+    }
+
+    /**
+     * Check that XPath 4.0 is in use
+     *
+     * @throws net.sf.saxon.trans.XPathException if XPath 3.1 support was not requested
+     */
+
+    protected void checkLanguageVersion40() throws XPathException {
+        if (!allowXPath40Syntax) {
+            grumble("The XPath parser is not configured to allow use of XPath 4.0 syntax");
         }
     }
 
