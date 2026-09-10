@@ -13,6 +13,7 @@ import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.value.Cardinality;
 
 /**
  * An {@code XQueryExecutable} represents the compiled form of a query.
@@ -74,7 +75,7 @@ public class XQueryExecutable {
     /*@NotNull*/
     public OccurrenceIndicator getResultCardinality() {
         int card = exp.getExpression().getCardinality();
-        return OccurrenceIndicator.getOccurrenceIndicator(card);
+        return Cardinality.getOccurrenceIndicatorForCardinality(card);
     }
 
     /**

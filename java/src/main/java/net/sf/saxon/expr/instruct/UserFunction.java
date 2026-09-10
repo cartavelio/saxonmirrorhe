@@ -524,17 +524,18 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     /**
      * Set the declared streamability (XSLT 3.0 attribute)
      *
-     * @param streamability the declared streamability (defaults to "unclassified")
+     * @param streamability the declared streamability. Must not be null; use the
+     *                      value {@link FunctionStreamability#UNCLASSIFIED} if not specified
      */
 
     public void setDeclaredStreamability(FunctionStreamability streamability) {
-        this.declaredStreamability = streamability == null ? FunctionStreamability.UNCLASSIFIED : streamability;
+        this.declaredStreamability = streamability;
     }
 
     /**
      * Get the declared streamability (XSLT 3.0 attribute)
      *
-     * @return the declared streamability (defaults to "unclassified")
+     * @return the declared streamability (defaults to {@link FunctionStreamability#UNCLASSIFIED})
      */
 
     public FunctionStreamability getDeclaredStreamability() {

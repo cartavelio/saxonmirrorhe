@@ -17,6 +17,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Schema;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.io.IOException;
@@ -284,7 +285,7 @@ public class XsltExecutable {
          */
 
         public OccurrenceIndicator getDeclaredCardinality() {
-            return OccurrenceIndicator.getOccurrenceIndicator(type.getCardinality());
+            return Cardinality.getOccurrenceIndicatorForCardinality(type.getCardinality());
         }
 
         /**

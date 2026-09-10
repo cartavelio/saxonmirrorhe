@@ -11,7 +11,7 @@ import net.sf.saxon.Configuration;
 
 /**
  * An implementation of {@code UnicodeString} that subclasses Twine8 (so it is only suitable
- * for codepoints up to 255), and that also caches a String reprsenting the same characters.
+ * for codepoints up to 255), and that also caches a String representing the same characters.
  * This is wasteful of space, so it is used predominantly for static constants.
  */
 

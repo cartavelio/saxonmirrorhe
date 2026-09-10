@@ -17,9 +17,9 @@ import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.util.Optional;
+import java.util.function.IntPredicate;
 
 /**
  * {@code NamedXNodeType} is a node type corresponding to the syntax
@@ -249,17 +249,19 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      * matches the node predicate.
      */
     @Override
-    public IntPredicateProxy getMatcher(NodeVectorTree tree) {
+    public IntPredicate getMatcher(NodeVectorTree tree) {
         if (nameTest instanceof SpecificQNameTest) {
             if (schemaType == AnyType.INSTANCE && nillable) {
                 int requiredFingerprint = ((SpecificQNameTest) nameTest).getFingerprint();
                 return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
-                        && tree.getFingerprint(nodeNr) == requiredFingerprint;
+                                && tree.getFingerprint(nodeNr) == requiredFingerprint;
             }
         }
         return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
                                       && matches(tree.getNode(nodeNr));
     }
+
+
 
 
     private boolean matchesAnnotation(SchemaType annotation) {

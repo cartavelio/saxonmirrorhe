@@ -54,7 +54,7 @@ public class GroupByClausePull extends TuplePull {
             while (base.nextTuple(context)) {
                 AtomicValue[] groupingValues = groupingTupleExpr.evaluateItemAllAtomic(context).getValues();
                 GroupByClause.ObjectToBeGrouped otbg = new GroupByClause.ObjectToBeGrouped(
-                        new FlworTuple<>(groupingValues),
+                        new FlworTuple<AtomicValue>(groupingValues),
                         retainedTupleExpr.evaluateItem(context)
                 );
                 GroupByClause.TupleComparisonKey key = groupByClause.getComparisonKey(otbg.groupingValues(), context);

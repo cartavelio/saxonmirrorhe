@@ -108,6 +108,8 @@ public enum Axis {
      */
     NAMESPACE(AxisInfo.NAMESPACE);
 
+    //#if CSHARP == false
+
     private final int axisNumber;
 
     /**
@@ -128,5 +130,7 @@ public enum Axis {
     public int getAxisNumber() {
         return axisNumber;
     }
+
+    //#endif
 }
 

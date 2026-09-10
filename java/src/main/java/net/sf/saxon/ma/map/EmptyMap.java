@@ -7,6 +7,7 @@
 
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.ItemType;
@@ -76,7 +77,7 @@ public class EmptyMap extends MapItem {
      */
     @Override
     public AtomicIterator keys() {
-        return new net.sf.saxon.tree.iter.ListIterator.OfAtomic<AtomicValue>(Collections.emptyList());
+        return AtomicArray.EMPTY_ATOMIC_ARRAY.iterate();
     }
 
     /**

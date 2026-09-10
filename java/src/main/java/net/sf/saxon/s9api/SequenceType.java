@@ -7,6 +7,8 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.value.Cardinality;
+
 /**
  * A {@code SequenceType} is the combination of an ItemType and an OccurrenceIndicator
  */
@@ -117,7 +119,7 @@ public class SequenceType {
     @SuppressWarnings("WeakerAccess")
     public net.sf.saxon.value.SequenceType getUnderlyingSequenceType() {
         return net.sf.saxon.value.SequenceType.makeSequenceType(
-                itemType.getUnderlyingItemType(), occurrenceIndicator.getCardinality());
+                itemType.getUnderlyingItemType(), Cardinality.staticPropertyFromOccurrenceIndicator(occurrenceIndicator));
     }
 
     /**
@@ -133,7 +135,7 @@ public class SequenceType {
             Processor processor, net.sf.saxon.value.SequenceType st) {
         ItemTypeFactory factory = new ItemTypeFactory(processor);
         ItemType it = factory.exposeItemType(st.getPrimaryType());
-        OccurrenceIndicator oc = OccurrenceIndicator.getOccurrenceIndicator(st.getCardinality());
+        OccurrenceIndicator oc = Cardinality.getOccurrenceIndicatorForCardinality(st.getCardinality());
         return makeSequenceType(it, oc);
     }
 

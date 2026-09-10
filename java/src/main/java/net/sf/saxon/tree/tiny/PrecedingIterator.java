@@ -13,7 +13,8 @@ import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.z.IntPredicateProxy;
+
+import java.util.function.IntPredicate;
 
 /**
  * Enumerate all the nodes on the preceding axis from a given start node.
@@ -30,7 +31,7 @@ final public class PrecedingIterator implements SequenceIterator {
     private NodeInfo current;
     private int nextAncestorDepth;
     private final boolean includeAncestors;
-    private final IntPredicateProxy matcher;
+    private final IntPredicate matcher;
     private NodeInfo pending = null;
     private final NodePredicate predicate;
     private final boolean matchesTextNodes;

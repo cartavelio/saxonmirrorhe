@@ -25,6 +25,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.AnyExternalObject;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceExtent;
 
 import javax.xml.transform.OutputKeys;
@@ -584,7 +585,9 @@ public class XdmValue implements Iterable<XdmItem> {
      */
 
     public boolean matches(SequenceType type) {
-        if (!type.getOccurrenceIndicator().allows(size())) {
+        OccurrenceIndicator occurrenceIndicator = type.getOccurrenceIndicator();
+        int size = size();
+        if (!Cardinality.occurrenceIndicatorAllows(occurrenceIndicator, size)) {
             return false;
         }
         ItemType it = type.getItemType();

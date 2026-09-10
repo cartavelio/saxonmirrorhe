@@ -128,7 +128,14 @@ public class XPathParser {
         IndexedStack<LocalBinding> outerVariables,    // Local variables defined in the immediate outer scope (the father scope)
         List<LocalBinding> outerVariablesUsed,        // Local variables from the outer scope that are actually used
         List<UserFunctionParameter> implicitParams    // Parameters corresponding (1:1) with the above
-    ){}
+    ){
+        public InlineFunctionDetails() {
+             this(new IndexedStack<LocalBinding>(),
+                  new ArrayList<LocalBinding>(4),
+                  new ArrayList<UserFunctionParameter>(4));
+        }
+
+    }
 
     public interface Accelerator {
 
@@ -511,20 +518,14 @@ public class XPathParser {
      */
 
     protected String getLanguage() {
-        switch (language) {
-            case XPATH:
-                return "XPath";
-            case XSLT_PATTERN:
-                return "XSLT Pattern";
-            case SEQUENCE_TYPE:
-                return "SequenceType";
-            case XQUERY:
-                return "XQuery";
-            case EXTENDED_ITEM_TYPE:
-                return "Extended ItemType";
-            default:
-                return "XPath";
-        }
+        return switch (language) {
+            case XPATH -> "XPath";
+            case XSLT_PATTERN -> "XSLT Pattern";
+            case SEQUENCE_TYPE -> "SequenceType";
+            case XQUERY -> "XQuery";
+            case EXTENDED_ITEM_TYPE -> "Extended ItemType";
+            default -> "XPath";
+        };
     }
 
     /**
@@ -5215,11 +5216,7 @@ public class XPathParser {
         int offset = t.currentTokenStartOffset;
 
 
-        InlineFunctionDetails details = new InlineFunctionDetails(
-                new IndexedStack<>(),
-                new ArrayList<>(4),
-                new ArrayList<>(4)
-        );
+        InlineFunctionDetails details = new InlineFunctionDetails();
         for (LocalBinding lb : getRangeVariables()) {
             details.outerVariables().push(lb);
         }
@@ -5590,10 +5587,7 @@ public class XPathParser {
         //Tokenizer t = getTokenizer();
         int offset = t.currentTokenStartOffset;
 
-        InlineFunctionDetails details = new InlineFunctionDetails(
-                new IndexedStack<>(),
-                new ArrayList<>(4),
-                new ArrayList<>(4));
+        InlineFunctionDetails details = new InlineFunctionDetails();
         for (LocalBinding lb : getRangeVariables()) {
             details.outerVariables().push(lb);
         }

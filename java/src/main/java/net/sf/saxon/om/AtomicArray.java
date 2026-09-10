@@ -66,7 +66,7 @@ public class AtomicArray implements AtomicSequence {
 
     @Override
     public AtomicIterator iterate() {
-        return new ListIterator.OfAtomic<>(content);
+        return new ListIterator.OfAtomic<AtomicValue>(content);
     }
 
     /**

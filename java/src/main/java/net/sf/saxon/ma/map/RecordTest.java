@@ -678,7 +678,7 @@ public class RecordTest implements RecordType {
      */
     @Override
     public AnnotationList getAnnotationAssertions() {
-        return null;
+        return AnnotationList.EMPTY;
     }
 
     /**
@@ -743,7 +743,7 @@ public class RecordTest implements RecordType {
      */
     @Override
     public UType getUType() {
-        return null;
+        return UType.FUNCTION;
     }
 
     /**

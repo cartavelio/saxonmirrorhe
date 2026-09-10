@@ -572,7 +572,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 } else if (Cardinality.allowsZero(card)) {
                     ItemEvaluator valElab = fnc.getArg(1).makeElaborator().elaborateForItem();
                     return cxt -> {
-                        Item val = valElab.eval(cxt);
+                        GroundedValue val = valElab.eval(cxt);
                         return new SingleEntryMap((AtomicValue) keyElab.eval(cxt),
                                                   val == null ? EmptySequence.INSTANCE : val,
                                                   version);

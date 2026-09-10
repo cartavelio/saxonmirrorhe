@@ -12,13 +12,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate a Java class or interface with C# code that is to be injected literally into the body of the class
- * or interface when converting to C#.
+ * Annotate a Java class or interface with C# "using" directives that are added to the generated C# module.
+ * These are needed primarily when invoking extension methods on an enumeration type.
  */
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 
-public @interface CSharpInjectMembers {
+public @interface CSharpUsing {
     String[] code() default "";
 }

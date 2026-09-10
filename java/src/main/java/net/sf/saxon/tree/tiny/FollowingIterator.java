@@ -12,7 +12,8 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.z.IntPredicateProxy;
+
+import java.util.function.IntPredicate;
 
 /**
  * Iterate over the following axis starting at a given node.
@@ -27,7 +28,7 @@ final class FollowingIterator implements SequenceIterator {
     private final NodePredicate predicate;
     private final boolean includeDescendants;
     int position = 0;
-    private final IntPredicateProxy matcher;
+    private final IntPredicate matcher;
     private NodeInfo pending;
 
     /**

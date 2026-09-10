@@ -1,7 +1,8 @@
 package net.sf.saxon.pattern.nodetest;
 
 import net.sf.saxon.tree.tiny.NodeVectorTree;
-import net.sf.saxon.z.IntPredicateProxy;
+
+import java.util.function.IntPredicate;
 
 public interface NodeVectorMatchMaker extends NodePredicate {
 
@@ -16,6 +17,6 @@ public interface NodeVectorMatchMaker extends NodePredicate {
      * matches the node predicate.
      */
 
-    IntPredicateProxy getMatcher(final NodeVectorTree tree);
+    IntPredicate getMatcher(final NodeVectorTree tree);
 }
 

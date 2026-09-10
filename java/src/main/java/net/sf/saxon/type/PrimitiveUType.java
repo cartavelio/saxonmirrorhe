@@ -8,10 +8,6 @@
 package net.sf.saxon.type;
 
 
-import net.sf.saxon.ma.jnode.AnyJNodeType;
-import net.sf.saxon.transpile.CSharpModifiers;
-import net.sf.saxon.type.gnode.NodeKindType;
-
 public enum PrimitiveUType {
     
     DOCUMENT (0),
@@ -50,7 +46,7 @@ public enum PrimitiveUType {
 
     EXTENSION (30);
 
-
+    //#if CSHARP == false
     private final int bit;
 
     PrimitiveUType(int bit) {
@@ -61,122 +57,46 @@ public enum PrimitiveUType {
         return bit;
     }
 
-    public UType toUType() {
-        return new UType(1<<bit);
+    public static PrimitiveUType forBit(int bitValue) {
+        return values()[bitValue];
     }
 
-    public static PrimitiveUType forBit(int bit) {
-        return values()[bit];
-    }
-
-    @CSharpModifiers(code={"public", "override"})
     public String toString() {
-        switch (this) {
-            case DOCUMENT:
-                return "document";
-            case ELEMENT:
-                return "element";
-            case ATTRIBUTE:
-                return "attribute";
-            case TEXT:
-                return "text";
-            case COMMENT:
-                return "comment";
-            case PI:
-                return "processing-instruction";
-            case NAMESPACE:
-                return "namespace";
-
-            case JNODE:
-                return "JNode";
-
-            case FUNCTION:
-                return "function";
-
-            case STRING:
-                return "string";
-            case BOOLEAN:
-                return "boolean";
-            case DECIMAL:
-                return "decimal";
-            case FLOAT:
-                return "float";
-            case DOUBLE:
-                return "double";
-            case DURATION:
-                return "duration";
-            case DATE_TIME:
-                return "dateTime";
-            case TIME:
-                return "time";
-            case DATE:
-                return "date";
-            case G_YEAR_MONTH:
-                return "gYearMonth";
-            case G_YEAR:
-                return "gYear";
-            case G_MONTH_DAY:
-                return "gMonthDay";
-            case G_DAY:
-                return "gDay";
-            case G_MONTH:
-                return "gMoonth";
-            case HEX_BINARY:
-                return "hexBinary";
-            case BASE64_BINARY:
-                return "base64Binary";
-            case ANY_URI:
-                return "anyURI";
-            case QNAME:
-                return "QName";
-            case NOTATION:
-                return "NOTATION";
-            case UNTYPED_ATOMIC:
-                return "untypedAtomic";
-
-            case EXTENSION:
-                return "external object";
-            default:
-                return "???";
-
-        }
-    }
-
-    public ItemType toItemType() {
         return switch (this) {
-            case DOCUMENT -> NodeKindType.DOCUMENT;
-            case ELEMENT -> NodeKindType.ELEMENT;
-            case ATTRIBUTE -> NodeKindType.ATTRIBUTE;
-            case TEXT -> NodeKindType.TEXT;
-            case COMMENT -> NodeKindType.COMMENT;
-            case PI -> NodeKindType.PROCESSING_INSTRUCTION;
-            case NAMESPACE -> NodeKindType.NAMESPACE;
-            case JNODE -> AnyJNodeType.getInstance();
-            case FUNCTION -> AnyFunctionType.INSTANCE;
-            case STRING -> BuiltInAtomicType.STRING;
-            case BOOLEAN -> BuiltInAtomicType.BOOLEAN;
-            case DECIMAL -> BuiltInAtomicType.DECIMAL;
-            case FLOAT -> BuiltInAtomicType.FLOAT;
-            case DOUBLE -> BuiltInAtomicType.DOUBLE;
-            case DURATION -> BuiltInAtomicType.DURATION;
-            case DATE_TIME -> BuiltInAtomicType.DATE_TIME;
-            case TIME -> BuiltInAtomicType.TIME;
-            case DATE -> BuiltInAtomicType.DATE;
-            case G_YEAR_MONTH -> BuiltInAtomicType.G_YEAR_MONTH;
-            case G_YEAR -> BuiltInAtomicType.G_YEAR;
-            case G_MONTH_DAY -> BuiltInAtomicType.G_MONTH_DAY;
-            case G_DAY -> BuiltInAtomicType.G_DAY;
-            case G_MONTH -> BuiltInAtomicType.G_MONTH;
-            case HEX_BINARY -> BuiltInAtomicType.HEX_BINARY;
-            case BASE64_BINARY -> BuiltInAtomicType.BASE64_BINARY;
-            case ANY_URI -> BuiltInAtomicType.ANY_URI;
-            case QNAME -> BuiltInAtomicType.QNAME;
-            case NOTATION -> BuiltInAtomicType.NOTATION;
-            case UNTYPED_ATOMIC -> BuiltInAtomicType.UNTYPED_ATOMIC;
-            case EXTENSION ->
-                //return JavaExternalObjectType.EXTERNAL_OBJECT_TYPE;
-                    AnyItemType.INSTANCE;
+            case DOCUMENT -> "document";
+            case ELEMENT -> "element";
+            case ATTRIBUTE -> "attribute";
+            case TEXT -> "text";
+            case COMMENT -> "comment";
+            case PI -> "processing-instruction";
+            case NAMESPACE -> "namespace";
+            case JNODE -> "JNode";
+            case FUNCTION -> "function";
+            case STRING -> "string";
+            case BOOLEAN -> "boolean";
+            case DECIMAL -> "decimal";
+            case FLOAT -> "float";
+            case DOUBLE -> "double";
+            case DURATION -> "duration";
+            case DATE_TIME -> "dateTime";
+            case TIME -> "time";
+            case DATE -> "date";
+            case G_YEAR_MONTH -> "gYearMonth";
+            case G_YEAR -> "gYear";
+            case G_MONTH_DAY -> "gMonthDay";
+            case G_DAY -> "gDay";
+            case G_MONTH -> "gMoonth";
+            case HEX_BINARY -> "hexBinary";
+            case BASE64_BINARY -> "base64Binary";
+            case ANY_URI -> "anyURI";
+            case QNAME -> "QName";
+            case NOTATION -> "NOTATION";
+            case UNTYPED_ATOMIC -> "untypedAtomic";
+            case EXTENSION -> "external object";
+            default -> "???";
         };
     }
+    //#endif
+
 }
 

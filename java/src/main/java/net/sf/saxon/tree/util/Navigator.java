@@ -37,9 +37,6 @@ import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
-import net.sf.saxon.type.gnode.XNodeType;
-import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntPredicateProxy;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 
@@ -1202,20 +1200,19 @@ public final class Navigator {
      * the tree has a large fan-out.
      */
 
-    public static IntPredicateProxy getNumberedNodeMatcher(NodePredicate predicate, NodeVectorTree tree) {
+    public static IntPredicate getNumberedNodeMatcher(NodePredicate predicate, NodeVectorTree tree) {
         if (predicate == null || predicate == AnyGNode.TEST) {
             final byte[] nodeKind = tree.getNodeKindArray();
-            return IntPredicateLambda.of(
-                    nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER);
+            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER;
         }
         if (predicate instanceof NodeVectorMatchMaker) {
             return ((NodeVectorMatchMaker)predicate).getMatcher(tree);
         } else {
             final byte[] nodeKind = tree.getNodeKindArray();
-            return IntPredicateLambda.of(
-                    nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER && predicate.test(tree.getNode(nodeNr)));
+            return nodeNr -> nodeKind[nodeNr] != Type.PARENT_POINTER && predicate.test(tree.getNode(nodeNr));
         }
     }
+
 
     /**
      * Get a UType indicating the kind of nodes that can potentially be matched by a NodePredicate,
@@ -1226,9 +1223,6 @@ public final class Navigator {
         // TODO: refine this
         if (predicate instanceof NodeTest) {
             return ((NodeTest)predicate).getUType();
-        }
-        if (predicate instanceof XNodeType) {
-            return ((XNodeType) predicate).getUType();
         }
         return UType.XNODE;
     }

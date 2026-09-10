@@ -440,10 +440,11 @@ public final class EvaluateInstr extends Expression {
 
                 // Create a cache key so the compiled expression can be reused
 
+                Optional<NodeInfo> namespaceContext = Optional.ofNullable(namespaceContextBase);
                 CacheKey cacheKey = new CacheKey(exprText,
                                                  baseUri,
                                                  isSchemaAware,
-                                                 Optional.ofNullable(namespaceContextBase));
+                                                 namespaceContext);
 
 //                StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
 //                fsb.append(baseUri);

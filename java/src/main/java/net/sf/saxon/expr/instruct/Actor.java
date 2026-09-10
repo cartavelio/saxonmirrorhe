@@ -311,21 +311,14 @@ public abstract class Actor implements ExpressionOwner, Location {
         setBody(expr);
     }
 
-    @CSharpReplaceBody(code="if (System.Threading.Volatile.Read(ref bodyEvaluator) == null) {\n"
-            + "                lock (_lock) {\n"
-            + "                    bodyEvaluator = body.makeElaborator().elaborateForPush();\n"
-            + "                    bodyEvaluator ??= body.makeElaborator().elaborateForPush();\n"
-            + "                }\n"
-            + "            }\n"
-            + "            return bodyEvaluator(@out, context);")
     protected TailCall process(Outputter out, XPathContext context) throws XPathException {
         makeBodyEvaluator();
         return pushEvaluator.processLeavingTail(out, context);
     }
 
-    @CSharpReplaceBody(code = "if (System.Threading.Volatile.Read(ref bodyEvaluator) == null) {\n"
+    @CSharpReplaceBody(code = "if (System.Threading.Volatile.Read(ref pushEvaluator) == null) {\n"
             + "                lock (_lock) {\n"
-            + "                    bodyEvaluator ??= body.makeElaborator().elaborateForPush();\n"
+            + "                    pushEvaluator ??= body.makeElaborator().elaborateForPush();\n"
             + "                }\n"
             + "            }\n")
     protected void makeBodyEvaluator() {

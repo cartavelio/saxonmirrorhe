@@ -18,7 +18,8 @@ import net.sf.saxon.tree.iter.LookaheadIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.StringValue;
-import net.sf.saxon.z.IntPredicateProxy;
+
+import java.util.function.IntPredicate;
 
 /**
  * This class supports both the child:: and following-sibling:: axes, which are
@@ -38,7 +39,7 @@ final class SiblingIterator implements SequenceIterator, LookaheadIterator, Atom
     private int nextNodeNr;
     private final TinyNodeImpl parentNode;
     private boolean needToAdvance = false;
-    private final IntPredicateProxy matcher;
+    private final IntPredicate matcher;
 
     /**
      * Return an enumeration over children or siblings of the context node

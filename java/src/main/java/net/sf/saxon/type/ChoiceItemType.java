@@ -48,7 +48,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
     public static ChoiceItemType of(UType uType) {
         List<ItemType> members = new ArrayList<>();
         for (PrimitiveUType primitive : uType.decompose()) {
-            members.add(primitive.toItemType());
+            members.add(UType.toItemType(primitive));
         }
         return new ChoiceItemType(members);
     }

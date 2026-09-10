@@ -12,6 +12,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpUsing;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
@@ -27,6 +28,7 @@ import net.sf.saxon.value.BooleanValue;
  * save the set of primitive types present in the map within this object on the expression
  * tree.
  */
+@CSharpUsing(code="Saxon.Hej.type")
 public class MapUntypedContains extends SystemFunction {
 
     private UType typesPresent = UType.VOID;
@@ -42,7 +44,7 @@ public class MapUntypedContains extends SystemFunction {
                 }
             }
             for (PrimitiveUType prim : typesPresent.decompose()) {
-                BuiltInAtomicType t = (BuiltInAtomicType) prim.toItemType();
+                BuiltInAtomicType t = (BuiltInAtomicType) UType.toItemType(prim);
                 StringConverter converter = t.getStringConverter(rules);
                 ConversionResult av = converter.convert(key);
                 if (av instanceof ValidationFailure) {

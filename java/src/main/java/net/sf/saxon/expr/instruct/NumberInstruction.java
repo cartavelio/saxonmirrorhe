@@ -177,15 +177,11 @@ public class NumberInstruction extends Expression {
 
     @Override
     protected int computeCardinality() {
-        switch (level) {
-            case SIMPLE:
-            case SINGLE:
-            case ANY:
-                return StaticProperty.ALLOWS_ZERO_OR_ONE;
-            case MULTI:
-            default:
-                return StaticProperty.ALLOWS_ZERO_OR_MORE;
-        }
+        return switch (level) {
+            case SIMPLE, SINGLE, ANY -> StaticProperty.ALLOWS_ZERO_OR_ONE;
+            case MULTI -> StaticProperty.ALLOWS_ZERO_OR_MORE;
+            default -> StaticProperty.ALLOWS_ZERO_OR_MORE;
+        };
     }
 
     /**
@@ -216,6 +212,7 @@ public class NumberInstruction extends Expression {
      * @throws XPathException if an error is discovered during this phase
      *                        (typically a type error)
      */
+    
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         Expression e = super.optimize(visitor, contextInfo);

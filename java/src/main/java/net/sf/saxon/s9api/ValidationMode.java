@@ -8,6 +8,7 @@
 package net.sf.saxon.s9api;
 
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 
 /**
@@ -35,31 +36,31 @@ public enum ValidationMode {
      */
     DEFAULT(Validation.DEFAULT);
 
+    //#if CSHARP == false
+
     private final int number;
 
     ValidationMode(int number) {
         this.number = number;
     }
 
-    int getNumber() {
+    @CSharpReplaceBody(code="return (int)number;")
+    public int getNumber() {
         return number;
+        //return Validation.fromValidationMode(this);
     }
 
     /*@NotNull*/
     public static ValidationMode get(int number) {
-        switch (number) {
-            case Validation.STRICT:
-                return STRICT;
-            case Validation.LAX:
-                return LAX;
-            case Validation.STRIP:
-                return STRIP;
-            case Validation.PRESERVE:
-                return PRESERVE;
-            case Validation.DEFAULT:
-            default:
-                return DEFAULT;
-        }
+        return switch (number) {
+            case Validation.STRICT -> STRICT;
+            case Validation.LAX -> LAX;
+            case Validation.STRIP -> STRIP;
+            case Validation.PRESERVE -> PRESERVE;
+            case Validation.DEFAULT -> DEFAULT;
+            default -> DEFAULT;
+        };
     }
+    //#endif
 }
 

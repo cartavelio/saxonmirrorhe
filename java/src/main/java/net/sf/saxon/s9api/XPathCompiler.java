@@ -23,6 +23,7 @@ import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.net.URI;
@@ -402,7 +403,7 @@ public class XPathCompiler {
         XPathVariable var = env.declareVariable(qname.getNamespaceUri(), qname.getLocalName());
         var.setRequiredType(
                 SequenceType.makeSequenceType(
-                        itemType.getUnderlyingItemType(), occurrences.getCardinality()));
+                        itemType.getUnderlyingItemType(), Cardinality.staticPropertyFromOccurrenceIndicator(occurrences)));
     }
 
     /**

@@ -11,7 +11,21 @@ package net.sf.saxon.om;
  * An implementation of NodeName that encapsulates an integer fingerprint, a string prefix, and a reference to the NamePool from which
  * the fingerprint was allocated.
  */
-public record CodedName (int fingerprint, String prefix, NamePool pool) implements NodeName {
+public class CodedName implements NodeName {
+
+    // Don't use a record here, because C# doesn't like Equals() to be overridden
+
+
+    private final int fingerprint;
+    private final String prefix;
+    private final NamePool pool;
+
+    public CodedName(int fingerprint, String prefix, NamePool pool) {
+        this.fingerprint = fingerprint;
+        this.prefix = prefix;
+        this.pool = pool;
+
+    }
 
     /**
      * Get the prefix of the QName.
