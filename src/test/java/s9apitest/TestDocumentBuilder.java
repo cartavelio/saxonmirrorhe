@@ -2,6 +2,10 @@ package s9apitest;
 
 import jaxptest.ConfigTest;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.Invalidity;
+import net.sf.saxon.lib.InvalidityHandler;
+import net.sf.saxon.lib.StandardLogger;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.dom4j.DOM4JNodeWrapper;
 import net.sf.saxon.option.dom4j.DOM4JObjectModel;
@@ -9,6 +13,7 @@ import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMDocumentWrapper;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
@@ -20,7 +25,9 @@ import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -560,6 +567,60 @@ public class TestDocumentBuilder {
             fail(ex.getMessage());
         }
     }
+
+    @Test
+    public void testValidationErrors() {
+        List<Invalidity> report = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            // Validation errors should not go to the configuration's logger
+            proc.getUnderlyingConfiguration().setLogger(new StandardLogger() {
+                /**
+                 * Log a message
+                 *
+                 * @param message the message to be logged
+                 */
+                @Override
+                public void error(String message) {
+                    if (!message.contains("validation errors were reported")) {
+                        fail("Unexpected message: " + message);
+                    }
+                    super.error(message);
+                }
+            });
+            SchemaManager mgr = proc.getSchemaManager();
+            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            SchemaValidator v = mgr.newSchemaValidator();
+
+            v.setInvalidityHandler(new InvalidityHandler() {
+                @Override
+                public void startReporting(String systemId) throws XPathException {
+
+                }
+
+                @Override
+                public void reportInvalidity(Invalidity failure) throws XPathException {
+                    report.add(failure);
+                }
+
+                @Override
+                public Sequence endReporting() throws XPathException {
+                    return null;
+                }
+            });
+
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setSchemaValidator(v);
+
+            builder.build(new File(configTest.getDataDir() + "books-invalid.xml"));
+            fail("unexpected success");
+
+        } catch (SaxonApiException e) {
+            assertTrue(e.getMessage().contains("validation errors were reported"));
+            assertTrue(report.size() >= 3);
+        }
+    }
+
 
     @Test
     public void testParseFromSax() {
