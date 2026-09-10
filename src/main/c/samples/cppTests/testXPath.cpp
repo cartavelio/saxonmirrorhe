@@ -68,32 +68,19 @@ void testXPathValues(SaxonProcessor * processor, XPathProcessor * xpath, sResult
 	}
 
 	XdmNode ** children = input->getChildren();
-cerr<<"xxxx cp0"<<endl;
-    cout<<"number of children for input: "<<input->getChildCount()<<endl;
 	XdmNode ** children0 = children[0]->getChildren();
-    cerr<<"xxxx cp1"<<endl;
 
 	int num = children[0]->getChildCount();
 
-
-	cout<<"number of children: "<<num<<endl;
-
-
-
-
-
     for(int i=0; i<num;i++) {
-        cout<<"checkpoint - 1"<<endl;
         if(children0[i] == nullptr) {
-            cout<<"checkpoint - 1-1 null found"<<endl;
-            continue;
-        } else {
-            cout<<"Node kind ="<<children0[i]->getNodeKind()<<endl;
+            sresult->failure++;
+            sresult->failureList.push_back("testXPathValues-1");
+            return;
         }
         if(children0[i]->getNodeName() != nullptr) {
             cout << "node name:" << children0[i]->getNodeName() << endl;
         }
-        cout<<"checkpoint - 2"<<endl;
     }
 
 
@@ -112,9 +99,7 @@ cerr<<"xxxx cp0"<<endl;
 
 
     xpath->setContextItem((XdmItem *)input);
-    cerr<<"testXPAthValues end cp0 "<<endl;
     XdmValue * resultValues = xpath->evaluate("//person");
-    cerr<<"testXPAthValues end cp2 "<<endl;
     if(resultValues == nullptr) {
          printf("result is null \n");
         SaxonApiException * exception = xpath->getException();
@@ -149,7 +134,6 @@ cerr<<"xxxx cp0"<<endl;
     delete input;
     xpath->clearParameters();
     xpath->clearProperties();
-    cerr<<"testXPAthValues end cp3 "<<endl;
 
 }
 
@@ -331,9 +315,9 @@ int main()
     testXPathValues(processor, xpathProc, sresult);
     testXPathAttrValues(processor, xpathProc, sresult);
     testXPathOnFile(processor, xpathProc, sresult);
-    /*testXPathOnFile2(xpathProc, sresult);
+    testXPathOnFile2(xpathProc, sresult);
     testXPathValues2(processor, xpathProc, sresult);
-*/
+
     std::cout << "\nTest Results - Number of tests= " << (sresult->success + sresult->failure) << ", Successes = "
               << sresult->success << ",  Failures= " << sresult->failure << std::endl;
 

@@ -348,24 +348,27 @@ void testReusability(SaxonProcessor * processor, sResultCount *sresult){
 
 
 //Test requirement of license file - Test should fail
-void testXQueryLineNumberError(XQueryProcessor * queryProc, sResultCount *sresult){
+void testXQueryLineNumberError(const char * cwd, sResultCount *sresult){
  cout<<endl<<"Test testXQueryLineNumberError:"<<endl;
+    SaxonProcessor * processor = new SaxonProcessor(false);
+    XQueryProcessor * queryProc = processor->newXQueryProcessor();
 	queryProc->clearProperties();
 	queryProc->clearParameters();
-    queryProc->setcwd(".");
+    queryProc->setcwd(cwd);
    queryProc->setProperty("s", "../data/cat.xml");
 
     queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
-
+    cout<<"Test testXQueryLineNumberError cp0"<<endl;
     const char * result = queryProc->runQueryToString();
     if(result != nullptr){
-        sresult->success++;
+        sresult->failure++;
+        sresult->failureList.push_back("testXQueryLineNumberError");
+
     	cout<<"Result :"<<result<<endl;
     	delete result;
     } else {
 	if (queryProc->exceptionOccurred()) {
-        sresult->failure++;
-        sresult->failureList.push_back("testXQueryLineNumberError");
+        sresult->success++;
 		    cout<<"Exception found. "<<endl;
         SaxonApiException * exception = queryProc->getException();
         if(exception != nullptr) {
@@ -383,16 +386,17 @@ void testXQueryLineNumberError(XQueryProcessor * queryProc, sResultCount *sresul
 }
 
 //Test requirement of license file - Test should succeed
-void testXQueryLineNumber(SaxonProcessor * processor, sResultCount *sresult){
+void testXQueryLineNumber(const char * cwd, SaxonProcessor * processor, sResultCount *sresult){
   //SaxonProcessor * processor = new SaxonProcessor(true);
   processor->setConfigurationProperty("l", "on");
   XQueryProcessor * queryProc = processor->newXQueryProcessor();
  cout<<endl<<"testXQueryLineNumber:"<<endl;
 
+    string baseURI = string("file://")+processor->getcwd()+string("/");
+    cerr<<" BaseURI="<<baseURI.c_str()<<endl;
+    queryProc->setQueryBaseURI(baseURI.c_str());
 
-    //queryProc->setQueryBaseURI(processor->getcwd());
-
-    queryProc->setProperty("s", "../data/cat.xml");
+   // queryProc->setProperty("s", "../data/cat.xml");
    queryProc->declareNamespace("saxon","http://saxon.sf.net/");
 
     queryProc->setProperty("qs", "saxon:line-number(doc('../data/cat.xml')/out/person[1])"); ///out/person[1]
@@ -463,9 +467,9 @@ int main(int argc, char* argv[])
     cout<<endl<<"============================================================="<<endl<<endl;
     testReusability(processor, sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
-    testXQueryLineNumberError(query,sresult);
+    testXQueryLineNumberError(cwd, sresult);
     cout<<endl<<"============================================================="<<endl<<endl;
-    testXQueryLineNumber(processor, sresult);
+    testXQueryLineNumber(cwd, processor, sresult);
 
     cout<<endl<<"============================================================="<<endl<<endl;
     testxQuery_ICU(processor, query, sresult);

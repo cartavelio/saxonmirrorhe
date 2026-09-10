@@ -33,7 +33,6 @@ bool XdmNode::isAtomic() {
     
     XDM_NODE_KIND XdmNode::getNodeKind(){
 	if(nodeKind == UNKNOWN) {
-        std::cerr<<"j_getNodeKind value="<<value<<std::endl;
 	    int kvalue = (int) j_getNodeKind(SaxonProcessor::sxn_environ->thread, (void *)value);
 		nodeKind = static_cast<XDM_NODE_KIND>(kvalue);
 	} 
@@ -106,15 +105,11 @@ bool XdmNode::isAtomic() {
     }
 
     const char * XdmNode::getNodeName(){
-	std::cerr<<"DEBUG C++: cp0"<<std::endl;
-        std::cerr<<"DEBUG C++: value="<<(long)value<<std::endl;
 	if(nodeName != nullptr) {
 		return nodeName;
 	}
-        std::cerr<<"DEBUG C++: cp01"<<std::endl;
 	allocFn fn = operator new;
 	XDM_NODE_KIND kind = getNodeKind();
-        std::cerr<<"DEBUG C++: cp02"<<std::endl;
 	switch (kind) {
             case DOCUMENT:
             case TEXT:
@@ -124,9 +119,7 @@ bool XdmNode::isAtomic() {
             case NAMESPACE:
             case ELEMENT:
             case ATTRIBUTE:
-                std::cerr<<"DEBUG C++: cp03"<<std::endl;
                 nodeName = j_getNodeName(SaxonProcessor::sxn_environ->thread, (void *)fn, (void *)value);
-            std::cerr<<"DEBUG C++: cp04"<<std::endl;
                 return nodeName;
             default:
                 return nullptr;
@@ -258,16 +251,12 @@ return this;}
 
     int XdmNode::getChildCount(){
 	if(childCount == -1) {
-        std::cerr<<"getChildCount count="<<((int)childCount)<< " value="<<value<<std::endl;
 		childCount = j_getChildCount(SaxonProcessor::sxn_environ->thread, (void *)value);
-        std::cerr<<"getChildCount count="<<childCount<<std::endl;
-
 	}
 	return childCount;
     }
     
     XdmNode** XdmNode::getChildren(bool cached){
-        std::cerr<<"getChildren start"<<std::endl;
         if (cached && children != nullptr) {
             return children;
         }   else {
@@ -278,23 +267,18 @@ return this;}
             if(childCount == 0) {
                 return nullptr;
             }
-            std::cerr<<"getChildren, value="<<value<<std::endl;
             allocFn fn = operator new;
             long long * childNodes = j_getChildren(SaxonProcessor::sxn_environ->thread, (void*) fn, (void *)value);
             if(childNodes == nullptr) {
-                std::cerr<<"getChildren, null returned"<<std::endl;
                 return nullptr;
             }
-            std::cerr<<"getChildren, cp0 childCount="<<childCount<<std::endl;
         children =   new XdmNode*[childCount];
 		for (int p=0; p < childCount; ++p){
-            std::cerr<<"DEBUG C++ loop getChildren, cp1 child value="<<childNodes[p]<<std::endl;
+            //std::cerr<<"DEBUG C++ loop getChildren, cp1 child value="<<childNodes[p]<<std::endl;
             children[p] = new XdmNode(this, (int64_t)childNodes[p], UNKNOWN);
-            std::cerr<<"getChildren cp2"<<std::endl;
 
 		}
             operator delete (childNodes);
-            std::cerr<<"getChildren, cp3"<<std::endl;
 	    return children;
 
     }

@@ -76,27 +76,19 @@ XdmValue::XdmValue(int64_t val, bool arr){
     allocFn fn = operator new;
     long long * results = makeArrayFromXdmValue2(SaxonProcessor::sxn_environ->thread,(void *)fn, (void *)val);
     if(results == nullptr) {
-        std::cerr<<"DEBUG C++ - results is null"<<std::endl;
         return;
     }
 
     int xdmSizei = results[0];
-    std::cerr<<"xdmSize="<<xdmSizei<<std::endl;
     int  typeRef = 0;
 
-    for (int p=1; p <= xdmSizei; ++p){
-        std::cerr<<"results-x["<<p<<"]:="<<results[p]<<std::endl;
-    }
 
     for (int p=1; p <= xdmSizei; ++p){
-
-        std::cerr<<"results["<<p<<"]:="<<results[p]<<std::endl;
         typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results[p]);
          if(typeRef == -2) {
              std::cerr<<"Exception thrown while creating XdmValue from array"<<std::endl;
             return;
         }
-    std::cerr<<"DEBUG C++ - after j_getXdmObjectType typeRef="<<typeRef<<std::endl;
         if(typeRef == 1) {
 
             addXdmItem(new XdmAtomicValue(results[p]));

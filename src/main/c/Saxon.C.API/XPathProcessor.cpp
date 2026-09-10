@@ -90,7 +90,6 @@ XPathProcessor::XPathProcessor(const XPathProcessor &other) {
 
 
 XPathProcessor::~XPathProcessor(){
-    //SaxonProcessor::attachCurrentThread();
     clearProperties();
     clearParameters();
 
@@ -100,7 +99,6 @@ XPathProcessor::~XPathProcessor(){
 }
 
 XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
-    //SaxonProcessor::attachCurrentThread();
   	if (xpathStr == nullptr) {
 	exception = new SaxonApiException("Error:: XPath string cannot be empty or nullptr");
 	return nullptr;
@@ -115,10 +113,8 @@ XdmValue * XPathProcessor::evaluate(const char * xpathStr) {
 	if(results >0) {
 	    XdmValue * value = nullptr;
 
-        std::cerr<<" result"<<results<<std::endl;
         int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)results);
         XdmItem * xdmItem = nullptr;
-        std::cerr<<" Type="<<typeRef<<std::endl;
         if(typeRef == -2) {
             exception = new SaxonApiException();
             return nullptr;
