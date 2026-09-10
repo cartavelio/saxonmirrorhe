@@ -6,10 +6,14 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trace.XSLTTraceListener;
+import org.xml.sax.InputSource;
 
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class ToXml {
 
@@ -57,8 +61,6 @@ public class ToXml {
 
     private static String edition = null;
     private static String icu4jJar = null; // The location of the icu4j jar to read
-    private static String vavrJar = null; // The location of the VAVR jar to read
-    private static String vavrMatchJar = null;
     private File singleInputFile = null;
     private File historicInputDir = null; // directory holding the Java prior to preprocessing
     private File inputDir = null;
@@ -81,10 +83,10 @@ public class ToXml {
                 }
                 repoDir = new File(repoDirName);
                 if (!repoDir.isDirectory()) {
-                    throw new IllegalArgumentException(singleInputFile + " is not a directory");
+                    throw new IllegalArgumentException(repoDir + " is not a directory");
                 }
                 if (!new File(repoDir, "src").exists()) {
-                    throw new IllegalArgumentException(singleInputFile + " is not the Saxon repository");
+                    throw new IllegalArgumentException(repoDir + " is not the Saxon repository");
                 }
             } else if (arg.startsWith("-f:")) {
                 singleInputFile = new File(arg.substring(3));
@@ -129,12 +131,6 @@ public class ToXml {
                 jarVersion = arg.substring(4);
             } else if (arg.startsWith("-icu4j:")) {
                 icu4jJar = arg.substring(7);
-            } else if (arg.startsWith("-vavr:")) {
-                vavrJar = arg.substring(6);
-                System.err.println("vavrJar = " + vavrJar);
-            } else if (arg.startsWith("-vavrMatch:")) {
-                vavrMatchJar = arg.substring(11);
-                System.err.println("vavrMatchJar = " + vavrMatchJar);
             } else if (arg.equals("-debug")) {
                 DEBUG = true;
                 compiler.setCompileWithTracing(true);
@@ -167,7 +163,10 @@ public class ToXml {
                 if (xmlDir == null) {
                     throw new IllegalArgumentException("No -xml directory supplied");
                 }
-                processJavaDirToXml(inputDir, xmlDir, srcDir, symbolSolver);
+                FilesToProcess toBeProcessed = new FilesToProcess();
+                findJavaFiles(inputDir, xmlDir, toBeProcessed);
+                processJavaFiles(toBeProcessed, symbolSolver);
+                //processJavaDirToXml(inputDir, xmlDir, srcDir, symbolSolver);
             }
             if (xmlDir != null && digest != null && csDir == null) {
                 processXmlToDigest(xmlDir, digest);
@@ -200,111 +199,123 @@ public class ToXml {
     }
 
     public void processSingleFile(File filename, File digest, JavaSymbolSolver symbolSolver) throws Exception {
+        if (filename.getAbsolutePath().endsWith(".java")) {
+            CompilationUnit cu = StaticJavaParser.parse(filename);
+            System.err.println("Processing " + filename);
 
-        xmlToCSharp = compiler.compile(new StreamSource(new File("tools/transpiler/xslt/xml-to-cs.xsl")));
+            // Hack; assume the filename contains build/tmp/java and we can work out the relative location from that
+            String fn = filename.getAbsolutePath();
+            int pos = fn.indexOf("build/tmp/java/");
+            if (pos < 0) {
+                throw new IllegalArgumentException("Cannot find build/tmp in filename: " + fn);
+            }
+            fn = fn.substring(pos+15).replace(".java", ".xml");
 
-//        // Generate XML representation
-//        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-////        combinedTypeSolver.add(new ReflectionTypeSolver(false));
-//        combinedTypeSolver.add(new ReflectionTypeSolver() {
-//            // TEMP workaround for Javaparser bug #3080
-//            // Note: using new ReflectionTypeSolver(false) includes the Saxon JAR file in the reflection search,
-//            // which is a problem if it's not the latest Saxon.
-//            protected boolean filterName(String name) {
-//                return super.filterName(name) || name.startsWith("org.");
-//            }
-//        });
-//        // This tells the JavaParser to use the Saxon 10.3 JAR file to resolve references to classes and methods
-//        combinedTypeSolver.add(new JarTypeSolver("/Users/mike/GitHub/saxon2020/build/libs/saxon-he-11.0.jar"));
-//        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
-//        StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
-//        StaticJavaParser.getConfiguration().setAttributeComments(false);
+            XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
+            File xmlOut = new File(xmlDir, fn);
+            System.err.println("Writing to " + xmlOut);
 
-        CompilationUnit cu = StaticJavaParser.parse(filename);
+            // Parse and re-serialize so that we can get indented output...
+            String constructedXml = printer.output(cu);
+            DocumentBuilder builder = processor.newDocumentBuilder();
+            StringReader reader = new StringReader(constructedXml);
+            SAXSource source =  new SAXSource(new InputSource(reader));
+            XdmDestination destination = new XdmDestination();
+            builder.parse(source, destination);
+            Serializer serializer = processor.newSerializer(xmlOut);
+            serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+            serializer.serializeNode(destination.getXdmNode());
+            serializer.close();
+            return;
+        }
+
+        // It wasn't java, assume it was XML
         System.err.println("Processing " + filename);
-        /*List<NameExpr>  nes = cu.findAll(NameExpr .class);
-        nes.forEach(ne -> {
-            System.out.println(( ne.calculateResolvedType().describe()));
-        }); */
-
-        XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
-        //System.err.println(printer.output(cu));
-        File xmlOut = new File(xmlDir, filename.toString().replace(".java", ".xml"));
-        System.err.println("Writing to " + xmlOut);
-        PrintStream p = new PrintStream(xmlOut);
-        p.println(printer.output(cu));
-        //xmlDir.mkdirs();
-//        PrintWriter writer = new PrintWriter(new FileWriter(xmlOut));
-//        writer.write(printer.output(cu));
-//        writer.close();
-
-//        File xmlOut = new File(xmlDir, filename.replace(".java", ".xml"));
-//        xmlDir.mkdirs();
-//        PrintWriter writer = new PrintWriter(
-//                new FileWriter(xmlOut));
-//        writer.write(printer.output(cu));
-//        writer.close();
-
-//        Xslt30Transformer trans = xmlToCSharp.load30();
-//        if (DEBUG) {
-//            trans.setTraceListener(new XSLTTraceListener());
-//        }
-//        Map<QName, XdmValue> params = new HashMap<>();
-//        params.put(new QName("digest"), parseDigest(digest));
-//        trans.setStylesheetParameters(params);
-//        trans.applyTemplates(new StreamSource(new StringReader(xmlOut.toString())), xmlToCSharp.getProcessor().newSerializer(System.out));
+        xmlToCSharp = compiler.compile(new StreamSource(new File(repoDir, "tools/xslt/xml-to-cs.xsl")));
+        Xslt30Transformer trans = xmlToCSharp.load30();
+        if (DEBUG) {
+            trans.setTraceListener(new XSLTTraceListener());
+        }
+        Map<QName, XdmValue> params = new HashMap<>();
+        params.put(new QName("digest"), parseDigest(digest));
+        trans.setStylesheetParameters(params);
+        trans.applyTemplates(new StreamSource(new FileReader(filename)), xmlToCSharp.getProcessor().newSerializer(System.out));
     }
 
-    public void processJavaDirToXml(File inputDir, File xmlDir, File srcDir, JavaSymbolSolver symbolSolver) throws Exception {
+    private void findJavaFiles(File inputDir, File xmlDir, FilesToProcess toBeProcessed) {
         String[] files = inputDir.list();
         if (files != null) {
             for (String file : files) {
-                processJavaFileToXml(inputDir, file, xmlDir, srcDir, symbolSolver);
+                findJavaFiles(inputDir, file, xmlDir, toBeProcessed);
             }
         }
     }
 
-    public void processJavaFileToXml(File directory, String filename, File xmlDir, File srcDir, JavaSymbolSolver symbolSolver) throws Exception {
+    private void findJavaFiles(File directory, String filename, File xmlDir, FilesToProcess toBeProcessed) {
         File file = new File(directory, filename);
         if (file.isDirectory()) {
-            processJavaDirToXml(file, new File(xmlDir, filename), srcDir, symbolSolver);
+            findJavaFiles(file, new File(xmlDir, filename), toBeProcessed);
         } else if (filename.endsWith(".java") && file.canRead()) {
-            try {
-                xmlDir.mkdirs();
-                boolean skip = false;
-                File xmlOut = new File(xmlDir, filename.replace(".java", ".xml"));
-                if (xmlOut.exists() && historicInputDir != null && !forceRebuild) {
-                    File historicSrcFile = getOriginalJavaFile(file);
-                    if (historicSrcFile.exists()) {
-                        skip = xmlOut.lastModified() > historicSrcFile.lastModified();
-                        if (file.lastModified() < historicSrcFile.lastModified()) {
-                            throw new IllegalStateException("Failed to run preprocessor on " + file);
-                        }
+            boolean skip = false;
+            File xmlOut = new File(xmlDir, filename.replace(".java", ".xml"));
+            if (xmlOut.exists() && historicInputDir != null && !forceRebuild) {
+                File historicSrcFile = getOriginalJavaFile(file);
+                if (historicSrcFile.exists()) {
+                    skip = xmlOut.lastModified() > historicSrcFile.lastModified();
+                    if (file.lastModified() < historicSrcFile.lastModified()) {
+                        throw new IllegalStateException("Failed to run preprocessor on " + file);
                     }
                 }
-                if (skip) {
-                    //System.err.println("Unchanged " + filename);
-                } else {
-                    System.err.println("Processing " + filename);
-                    CompilationUnit cu;
-                    try {
-                        cu = StaticJavaParser.parse(file);
-                    } catch (ParseProblemException pe) {
-                        System.err.println("Failed to parse " + filename + " - " + pe.getMessage());
-                        pe.printStackTrace();
-                        return;
-                    }
-                    // Generate XML representation
-
-                    XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
-                    PrintWriter writer = new PrintWriter(new FileWriter(xmlOut));
-                    writer.write(printer.output(cu));
-                    writer.close();
-                }
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
+            }
+            if (skip) {
+                toBeProcessed.skipCount++;
+            } else {
+                toBeProcessed.files.put(file, xmlOut);
             }
         }
+    }
+
+    private void processJavaFiles(FilesToProcess toBeProcessed, JavaSymbolSolver symbolSolver) {
+        System.err.println("Processing " + toBeProcessed.files.size() + " files; " + toBeProcessed.skipCount + " skipped.");
+
+        try {
+            int count = 0;
+            int totalCount = toBeProcessed.files.size();
+
+            for (File javaFile : toBeProcessed.files.keySet()) {
+                File xmlOut = toBeProcessed.files.get(javaFile);
+                File parent = xmlOut.getParentFile();
+                if (!parent.exists()) {
+                    parent.mkdirs();
+                }
+
+                count++;
+                int perc = count * 100 / totalCount;
+
+                System.err.print("\r                                                                        \r");
+                System.err.print("Processing " + perc + "% " + javaFile.getName());
+
+                CompilationUnit cu;
+                try {
+                    cu = StaticJavaParser.parse(javaFile);
+                } catch (ParseProblemException pe) {
+                    System.err.println("Failed to parse " + javaFile + " - " + pe.getMessage());
+                    pe.printStackTrace();
+                    return;
+                }
+                // Generate XML representation
+
+                XmlPrinterMHK printer = new XmlPrinterMHK(symbolSolver, true);
+                PrintWriter writer = new PrintWriter(new FileWriter(xmlOut));
+                writer.write(printer.output(cu));
+                writer.close();
+            }
+        } catch (IOException e) {
+            System.err.println();
+            System.err.println(e.getMessage());
+        }
+
+        System.err.println("\r                                                                        ");
     }
 
     //private static JavaSymbolSolver symbolSolver = getJavaSymbolSolver();
@@ -325,10 +336,6 @@ public class ToXml {
             //combinedTypeSolver.add(new JarTypeSolver(String.format("%s/build/libs/saxon-%s-%s.jar", repoDirName, edition, jarVersion)));
             combinedTypeSolver.add(new JarTypeSolver(jarVersion));
             combinedTypeSolver.add(new JarTypeSolver(icu4jJar));
-            // The gradle script is currently supplying locations for the VAVR jar files in $repo/lib, as using
-            // the versions in .gradle cache didn't work for some reason
-            combinedTypeSolver.add(new JarTypeSolver(vavrJar));
-            combinedTypeSolver.add(new JarTypeSolver(vavrMatchJar));
             JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
             StaticJavaParser.getConfiguration().setAttributeComments(false);
@@ -344,7 +351,9 @@ public class ToXml {
         Map<QName, XdmValue> params = new HashMap<>();
         params.put(new QName("xmlDir"), new XdmAtomicValue(xmlDir.toURI()));
         trans.setStylesheetParameters(params);
-        trans.callTemplate(null, processor.newSerializer(digest));
+        Serializer serializer = processor.newSerializer(digest);
+        serializer.setOutputProperty(Serializer.Property.INDENT, "yes");
+        trans.callTemplate(null, serializer);
     }
 
     
@@ -366,7 +375,7 @@ public class ToXml {
     }
 
     public void processXmlSubDirectoryToCSharp(File xmlDir, File csDir, XdmNode digest, XsltExecutable xmlToCSharp) throws Exception {
-        System.err.println("Processing dir " + xmlDir + " to " + csDir);
+        //System.err.println("Processing dir " + xmlDir + " to " + csDir);
         String[] files = xmlDir.list();
         if (files != null) {
             for (String file : files) {
@@ -377,12 +386,24 @@ public class ToXml {
 
     public void processXmlFileToCSharp(File directory, String filename, File csDir, XdmNode digest, XsltExecutable xmlToCSharp) throws Exception {
         File file = new File(directory, filename);
+        String fn = file.getAbsolutePath();
+        int pos = fn.lastIndexOf("build/tmp/");
+        if (pos > 0) {
+            fn = fn.substring(pos+9);
+            while (fn.length() > 57) {
+                pos = fn.indexOf("/");
+                fn = fn.substring(pos+1);
+            }
+            fn = "..." + fn;
+        }
+
         if (file.isDirectory()) {
-            System.err.println("Processing subdirectory " + file);
+            //System.err.println("Processing subdirectory " + fn);
             processXmlSubDirectoryToCSharp(file, new File(csDir, filename), digest, xmlToCSharp);
         } else if (filename.endsWith(".xml") && file.canRead()) {
             try {
-                System.err.println("Processing file " + file);
+                System.err.print("                                                                        \r");
+                System.err.print("Processing " + fn + "\r");
                 String csFileName = filename.replace(".xml", ".cs");
                 if (internalClasses.contains(csFileName)) {
                     csFileName = "JJ_" + csFileName;
@@ -392,9 +413,19 @@ public class ToXml {
                 Xslt30Transformer trans = xmlToCSharp.load30();
                 Map<QName, XdmValue> params = new HashMap<>();
                 params.put(new QName("digest"), digest);
+
+                MessageHandler handler = new MessageHandler();
+                trans.setMessageHandler(handler);
+
                 trans.setStylesheetParameters(params);
                 trans.setAssertionsEnabled(true);
                 trans.transform(new StreamSource(file), processor.newSerializer(csOut));
+
+                if (handler.hasMessages()) {
+                    System.out.println();
+                    handler.printMessages();
+                }
+
 ////                trans.applyTemplates(new StreamSource(xmlOut), xmlToJava.getProcessor().newSerializer(javaOut));
 //                // Now convert to C#
 //                File csOut = new File(outDir, filename.replace(".java", ".cs"));
@@ -407,4 +438,33 @@ public class ToXml {
         }
     }
 
+    private static class MessageHandler implements Consumer<Message> {
+        List<Message> messages = new ArrayList<>();
+
+        @Override
+        public void accept(Message message) {
+            messages.add(message);
+        }
+
+        public boolean hasMessages() {
+            return !messages.isEmpty();
+        }
+
+        public void printMessages() {
+            for (Message message : messages) {
+                System.out.println(message.getStringValue());
+            }
+            System.out.println();
+            clearMessages();
+        }
+
+        public void clearMessages() {
+            messages.clear();
+        }
+    }
+
+    private static class FilesToProcess {
+        int skipCount = 0;
+        Map<File, File> files = new HashMap<>();
+    }
 }
