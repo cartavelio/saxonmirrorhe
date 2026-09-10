@@ -325,10 +325,14 @@ public class Transform {
 
 
         schemaAware = false;
-        String configFile = options.getOptionValue("config");
-        if (configFile != null) {
+        String configFileName = options.getOptionValue("config");
+        if (configFileName != null) {
+            File configFile = new File(configFileName);
+            if (!configFile.exists()) {
+                quit("Configuration file " + configFileName + " does not exist", 2);
+            }
             try {
-                config = Configuration.readConfiguration(new StreamSource(configFile));
+                config = Configuration.readConfiguration(new StreamSource(configFile.toURI().toString()));
                 initializeConfiguration(config);
                 processor = new Processor(config);
                 schemaAware = config.isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT);
