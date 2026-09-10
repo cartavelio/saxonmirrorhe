@@ -506,7 +506,7 @@ public class DocumentFn extends SystemFunction implements Callable {
 
         // TODO: reflect schema-validation options in document key
 
-        if (strip && packageData instanceof StylesheetPackage) {
+        if (rule instanceof SelectedElementsSpaceStrippingRule && packageData instanceof StylesheetPackage) {
             if (((StylesheetPackage) packageData).getSpaceStrippingRule() != NoElementsSpaceStrippingRule.INSTANCE) {
                 String name = ((StylesheetPackage) packageData).getPackageName();
                 if (name != null) {

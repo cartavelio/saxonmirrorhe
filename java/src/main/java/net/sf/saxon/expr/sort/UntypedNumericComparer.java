@@ -208,7 +208,7 @@ public class UntypedNumericComparer implements AtomicComparer {
         long[] bounds = getBounds(cs);
 
         // Compare the string as if by converting it to the primitive type of the other operand
-        boolean plain = false;
+        boolean plain;
         if (bounds != null) {
             plain = bounds[2] > 0;
             if (a1 instanceof IntegerValue) {
