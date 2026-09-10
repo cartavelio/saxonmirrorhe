@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -158,7 +159,13 @@ public class TypeChecker {
                 if (implausibility) {
                     message += ". Set Feature.ALLOW_IMPLAUSIBLE_EXPRESSIONS to suppress this 4.0 error";
                 }
-                throw new XPathException(message, "XPTY0004")
+
+                String errorCode = "XPTY0004";
+                ItemType suppliedItemType = supplied.getItemType();
+                if (suppliedItemType instanceof FunctionItemType && !(suppliedItemType instanceof ArrayItemType) && reqItemType.isAtomicType()) {
+                    errorCode = "FOTY0013";
+                }
+                throw new XPathException(message, errorCode)
                         .asTypeError()
                         .withLocation(supplied.getLocation());
             }
