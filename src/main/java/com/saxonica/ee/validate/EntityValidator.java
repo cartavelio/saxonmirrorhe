@@ -222,7 +222,6 @@ public class EntityValidator extends ValidatingFilter {
             ValidationFailure ve = new ValidationFailure("Value '" + eref + "' is not declared in the DTD as an unparsed entity name");
             ve.setConstraintReference(1, "cvc-simple-type", "3");
             reportValidationError(ve, false, locationId);
-            //throw ve.makeException();
         }
     }
 

@@ -117,13 +117,12 @@ public class ValidatingFilter extends ProxyReceiver {
     /**
      * Report a validation error
      *
-     * @param err          The validation exception
+     * @param err          The validation failure
      * @param issueComment true if the validation error message is to be written as an XML comment to the
      *                     result document
      * @param locationId   identifies the location in the source document or stylesheet/query where the
      *                     validation error was detected
-     * @throws net.sf.saxon.trans.XPathException
-     *          if reporting the error fails
+     * @throws net.sf.saxon.trans.XPathException if too many invalidities have been reported
      */
     protected void reportValidationError(ValidationFailure err, boolean issueComment, Location locationId)
             throws XPathException {
