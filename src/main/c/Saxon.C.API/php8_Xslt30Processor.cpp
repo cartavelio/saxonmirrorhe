@@ -442,6 +442,30 @@ PHP_METHOD(Xslt30Processor, setJustInTimeCompilation) {
   }
 }
 
+
+PHP_METHOD(Xslt30Processor, importPackage) {
+  Xslt30Processor *xslt30Processor;
+  char *str;
+  size_t len;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xslt30Processor_object *obj =
+      (xslt30Processor_object *)((char *)pobj -
+                                 XtOffsetOf(xslt30Processor_object, std));
+  xslt30Processor = obj->xslt30Processor;
+  if (xslt30Processor != nullptr) {
+
+    if (str != nullptr) {
+      xslt30Processor->importPackage(str);
+    }
+  }
+}
+
+
 PHP_METHOD(Xslt30Processor, setTargetEdition) {
   Xslt30Processor *xslt30Processor;
   char *str;
@@ -618,78 +642,29 @@ PHP_METHOD(Xslt30Processor, exceptionClear) {
 }
 
 zend_function_entry Xslt30Processor_methods[] = {
-    PHP_ME(Xslt30Processor, __destruct, arginfo_saxonc_xp_destruct,
-           ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor, transformFileToFile,
-                                   arginfo_saxonc_xp_transformFileToFile,
-                                   ZEND_ACC_PUBLIC)
-        PHP_ME(Xslt30Processor, transformFileToString,
-               arginfo_saxonc_xp_transformFileToString,
-               ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor, transformFileToValue,
-                                       arginfo_saxonc_xp_transformFileToValue,
-                                       ZEND_ACC_PUBLIC)
-            PHP_ME(Xslt30Processor, compileFromFile,
-                   arginfo_saxonc_xp_compileFromFile,
-                   ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor, compileFromValue,
-                                           arginfo_saxonc_xp_compileFromValue,
-                                           ZEND_ACC_PUBLIC)
-                PHP_ME(
-                    Xslt30Processor, compileFromString,
-                    arginfo_saxonc_xp_compileFromString,
-                    ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor,
-                                            compileFromStringAndSave,
-                                            arginfo_saxonc_xp_compileFromStringAndSave,
-                                            ZEND_ACC_PUBLIC)
-                    PHP_ME(
-                        Xslt30Processor, compileFromFileAndSave,
-                        arginfo_saxonc_xp_compileFromFileAndSave,
-                        ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor,
-                                                compileFromAssociatedFile,
-                                                arginfo_saxonc_xp_compileFromAssociatedFile,
-                                                ZEND_ACC_PUBLIC)
-                        PHP_ME(
-                            Xslt30Processor, setJustInTimeCompilation,
-                            arginfo_saxonc_xp_setJustInTimeCompilation,
-                            ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor,
-                                                    setRelocatable,
-                                                    arginfo_saxonc_xp_setRelocatable,
-                                                    ZEND_ACC_PUBLIC)
-                            PHP_ME(Xslt30Processor, setFastCompilation,
-                                   arginfo_saxonc_xp_setFastCompilation,
-                                   ZEND_ACC_PUBLIC)
-                                PHP_ME(Xslt30Processor, setXsltLanguageVersion,
-                                       arginfo_saxonc_xp_setXsltLanguageVersion,
-                                       ZEND_ACC_PUBLIC)
-                                    PHP_ME(
-                                        Xslt30Processor, setTargetEdition,
-                                        arginfo_saxonc_xp_setTargetEdition,
-                                        ZEND_ACC_PUBLIC) PHP_ME(Xslt30Processor,
-                                                                setParameter,
-                                                                arginfo_saxonc_xp_setParameter,
-                                                                ZEND_ACC_PUBLIC)
-                                        PHP_ME(
-                                            Xslt30Processor,
-                                            clearParameters,
-                                            arginfo_saxonc_xp_clearParameters,
-                                            ZEND_ACC_PUBLIC)
-                                            PHP_ME(
-                                                Xslt30Processor,
-                                                exceptionOccurred,
-                                                arginfo_saxonc_xp_exceptionOccurred,
-                                                ZEND_ACC_PUBLIC)
-                                                PHP_ME(
-                                                    Xslt30Processor,
-                                                    exceptionClear,
-                                                    arginfo_saxonc_xp_exceptionClear,
-                                                    ZEND_ACC_PUBLIC)
-                                                    PHP_ME(
-                                                        Xslt30Processor,
-                                                        getErrorCode,
-                                                        arginfo_saxonc_xp_getErrorCode,
-                                                        ZEND_ACC_PUBLIC)
-                                                        PHP_ME(
-                                                            Xslt30Processor,
-                                                            getErrorMessage,
-                                                            arginfo_saxonc_xp_getErrorMessage,
-                                                            ZEND_ACC_PUBLIC){
-                                                            nullptr, nullptr,
-                                                            nullptr}};
+        PHP_ME(Xslt30Processor, __destruct, arginfo_saxonc_xp_destruct,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, transformFileToFile, arginfo_saxonc_xp_transformFileToFile, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, transformFileToString, arginfo_saxonc_xp_transformFileToString, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, transformFileToValue, arginfo_saxonc_xp_transformFileToValue, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, compileFromFile, arginfo_saxonc_xp_compileFromFile, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, compileFromValue, arginfo_saxonc_xp_compileFromValue, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, compileFromString,arginfo_saxonc_xp_compileFromString, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,compileFromStringAndSave,arginfo_saxonc_xp_compileFromStringAndSave,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, compileFromFileAndSave,arginfo_saxonc_xp_compileFromFileAndSave,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,compileFromAssociatedFile,arginfo_saxonc_xp_compileFromAssociatedFile,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, setJustInTimeCompilation,arginfo_saxonc_xp_setJustInTimeCompilation,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,setRelocatable,arginfo_saxonc_xp_setRelocatable,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, setFastCompilation,arginfo_saxonc_xp_setFastCompilation,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, setXsltLanguageVersion,arginfo_saxonc_xp_setXsltLanguageVersion,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, setTargetEdition, arginfo_saxonc_xp_setTargetEdition, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, importPackage, arginfo_saxonc_xp_importPackage, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor, setParameter, arginfo_saxonc_xp_setParameter, ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,clearParameters,arginfo_saxonc_xp_clearParameters,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,exceptionOccurred,arginfo_saxonc_xp_exceptionOccurred,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,exceptionClear,arginfo_saxonc_xp_exceptionClear,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,getErrorCode,arginfo_saxonc_xp_getErrorCode,ZEND_ACC_PUBLIC)
+        PHP_ME(Xslt30Processor,getErrorMessage,arginfo_saxonc_xp_getErrorMessage,
+        ZEND_ACC_PUBLIC){
+            nullptr, nullptr,
+                    nullptr
+        }};

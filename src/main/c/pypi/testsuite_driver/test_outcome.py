@@ -119,12 +119,21 @@ class PyTestOutcome:
             if self.result_documents:
                 if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
                     print(list(self.result_documents.keys()))
-                doc = self.result_documents[uri]
-                ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result, assert_xpc, catalog_xpc, assert_set)
-                if not ok:
-                    print("**** Assertion failed for result-document " + uri)
+                try:
+                    print("Check assert-result-document")
+                    print("uri=" + uri)
+                    print(*self.result_documents, sep=", ")
+                    doc = self.result_documents[uri]
+                    ok = self.test_assertion2(sub_assertion.get_node_value(),  doc, result, assert_xpc, catalog_xpc, assert_set)
+                    if not ok:
+                        print("**** Assertion failed for result-document " + uri)
 
-                return ok
+                    return ok
+                except Exception as ex:
+                    print("Check assert-result-document")
+                    print(*self.result_documents, sep=", ")
+                    print(ex)
+                    return False
 
             return False
         elif "all-of" == tag:
@@ -295,6 +304,10 @@ class PyTestOutcome:
         result_string = ""
         if result.size == 1:
             result_string = result.item_at(0).string_value
+            result_string = result_string.strip().replace("\r\n", "\n").replace("\n", "")
+
+            '''print("result = " + result_string)
+            print("assertion = " + assertion_string)'''
 
         return result_string == assertion_string
 

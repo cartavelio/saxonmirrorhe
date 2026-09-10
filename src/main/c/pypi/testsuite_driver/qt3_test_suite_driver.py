@@ -711,9 +711,6 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         for key in static_params:
             environment.xslt_proc.set_parameter(key, static_params[key])
 
-        if os.getenv("SAXONC_DEBUG_FLAG") is not None:
-            if used_package is not None:
-                print("WARNING - Import package currently not supported!")
 
 
         if test_query is not None:
@@ -872,67 +869,68 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     not_run += 1
 
 
-def main(argv):
-    global run_test
-    global run_test_case_name
-    global path
-    global results_path
-    global schemaValidator
-    global host_lang
-    global spec
+if __name__ == "__main__":
+    def main(sys.argv[1:]):
+        global run_test
+        global run_test_case_name
+        global path
+        global results_path
+        global schemaValidator
+        global host_lang
+        global spec
 
-    saxon_version = driver_proc.version
+        saxon_version = driver_proc.version
 
-    print("W3 QT3 Test Suite")
-    print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
+        print("W3 QT3 Test Suite")
+        print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
 
-    diri = None
+        diri = None
 
-    if len(sys.argv) > 1:
-        diri = ""
-        try:
-            diri = str(sys.argv[1])
-        except TypeError as ex:
-            print("Error test suite directory missing")
-            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir>')
+        if len(sys.argv) > 1:
+            diri = ""
+            try:
+                diri = str(sys.argv[1])
+            except TypeError as ex:
+                print("Error test suite directory missing")
+                print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir>')
+                sys.exit(2)
+
+            print("Test suite directory = " + diri)
+
+            argvv = sys.argv[1:]
+
+            try:
+                opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
+            except getopt.GetoptError:
+                print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -lang <processor language>')
+                sys.exit(2)
+
+            for opt, arg in opts:
+                if opt == '-h':
+                    print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
+                    sys.exit()
+                elif opt in ("-t", "--testpattern"):
+                    run_test_case_name = arg
+                elif opt in ("-s", "--testset"):
+                    run_test = arg
+                    print('Test set= ', run_test)
+
+                elif opt in ("-o", "--resultdir"):
+                    results_path = arg
+
+                elif opt in ("-l", "--lang"):
+                    host_lang = arg
+                    spec = process_spec(arg)
+
+        '''dir = os.getcwd()'''
+        if spec is None:
+            print("lang option not given")
             sys.exit(2)
 
-        print("Test suite directory = " + diri)
+        path = diri + "/"
+        catalog = path + "catalog.xml"
 
-        argvv = argv[1:]
-
-        try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
-        except getopt.GetoptError:
-            print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -lang <processor language>')
-            sys.exit(2)
-
-        for opt, arg in opts:
-            if opt == '-h':
-                print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
-                sys.exit()
-            elif opt in ("-t", "--testpattern"):
-                run_test_case_name = arg
-            elif opt in ("-s", "--testset"):
-                run_test = arg
-                print('Test set= ', run_test)
-
-            elif opt in ("-o", "--resultdir"):
-                results_path = arg
-
-            elif opt in ("-l", "--lang"):
-                host_lang = arg
-                spec = process_spec(arg)
-
-    '''dir = os.getcwd()'''
-    if spec is None:
-        print("lang option not given")
-        sys.exit(2)
-
-    path = diri + "/"
-    catalog = path + "catalog.xml"
-
-    process_catalog(path, catalog)
+        process_catalog(path, catalog)
 
 
 if __name__ == "__main__":
