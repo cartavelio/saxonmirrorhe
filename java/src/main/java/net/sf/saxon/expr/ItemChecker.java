@@ -29,6 +29,7 @@ import net.sf.saxon.value.Cardinality;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -108,6 +109,11 @@ public final class ItemChecker extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        ItemType req2 = requiredItemType.resolveAliases(
+                visitor.getStaticContext().getPackageData().obtainTypeAliasManager().getTypeAliases(), new Stack<>());
+        if (req2 != requiredItemType) {
+            return new ItemChecker(getBaseExpression(), req2, roleSupplier).typeCheck(visitor, contextInfo);
+        }
         getOperand().typeCheck(visitor, contextInfo);
         Expression operand = getBaseExpression();
 

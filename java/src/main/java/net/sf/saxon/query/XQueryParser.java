@@ -201,7 +201,6 @@ public class XQueryParser extends XPathParser {
 
             for (GlobalVariable var : env.getPackageData().getGlobalVariableList()) {
                 if (languageVersion >= 40 && var.getRequiredType() != SequenceType.ANY_SEQUENCE) {
-                    // TODO: Is this necessary? Doesn't it happen later anyway?
                     var.setRequiredType(var.getRequiredType().resolveAliases(expandedItemTypes, new Stack<>()));
                     TypeChecker checker = env.getConfiguration().getTypeChecker(false);
                     ExpressionVisitor visitor = ExpressionVisitor.make(env);

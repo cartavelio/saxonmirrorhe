@@ -116,5 +116,6 @@ public abstract class JNodeType extends GNodeType {
     public NodeTest asXNodeTest(Configuration config) {
         return ErrorType.getInstance();
     }
+
 }
 

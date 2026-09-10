@@ -402,6 +402,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                         }
                     }
                 }
+                fn.setResultType(fn.getResultType().resolveAliases(aliases, new Stack<>()));
                 fn.compile();
                 Expression body = fn.getBody();
                 Expression e2 = body.simplify();
@@ -410,7 +411,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                     fn.setBody(e2);
                 }
 
-                fn.setResultType(fn.getResultType().resolveAliases(aliases, new Stack<>()));
+
             } catch (XPathException err) {
                 throw new UncheckedXPathException(err);
             }

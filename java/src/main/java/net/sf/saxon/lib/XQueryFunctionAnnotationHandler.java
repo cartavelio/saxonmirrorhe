@@ -32,7 +32,7 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
             this.one = one;
             this.two = two;
             this.errorCode = errorCode;
-            this.where = new HashSet<String>(where.length);
+            this.where = new HashSet<>(where.length);
             Collections.addAll(this.where, where);
         }
 
@@ -47,10 +47,10 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
             new DisallowedCombination(Annotation.UPDATING, null, "XUST0032", "DV"),
             new DisallowedCombination(Annotation.PUBLIC, null, "XQST0125", "IF"),
             new DisallowedCombination(Annotation.PRIVATE, null, "XQST0125", "IF"),
-            new DisallowedCombination(Annotation.PRIVATE, Annotation.PRIVATE, "XQST0106", "DF"),
-            new DisallowedCombination(Annotation.PRIVATE, Annotation.PUBLIC, "XQST0106", "DF"),
-            new DisallowedCombination(Annotation.PUBLIC, Annotation.PUBLIC, "XQST0106", "DF"),
-            new DisallowedCombination(Annotation.PUBLIC, Annotation.PRIVATE, "XQST0106", "DF"),
+            new DisallowedCombination(Annotation.PRIVATE, Annotation.PRIVATE, "XQST0106", "DF", "DI"),
+            new DisallowedCombination(Annotation.PRIVATE, Annotation.PUBLIC, "XQST0106", "DF", "DI"),
+            new DisallowedCombination(Annotation.PUBLIC, Annotation.PUBLIC, "XQST0106", "DF", "DI"),
+            new DisallowedCombination(Annotation.PUBLIC, Annotation.PRIVATE, "XQST0106", "DF", "DI"),
             new DisallowedCombination(Annotation.PRIVATE, Annotation.PRIVATE, "XQST0116", "DV"),
             new DisallowedCombination(Annotation.PRIVATE, Annotation.PUBLIC, "XQST0116", "DV"),
             new DisallowedCombination(Annotation.PUBLIC, Annotation.PUBLIC, "XQST0116", "DV"),
@@ -83,7 +83,7 @@ public class XQueryFunctionAnnotationHandler implements FunctionAnnotationHandle
                                                                      " cannot appear more than once", dc.errorCode);
                                 } else {
                                     throw new XPathException("Annotations %" + ann.getAnnotationQName().getLocalPart() +
-                                                                     " and " + other.getAnnotationQName().getLocalPart() + " cannot appear together",
+                                                                     " and %" + other.getAnnotationQName().getLocalPart() + " cannot appear together",
                                                              dc.errorCode);
                                 }
                             }

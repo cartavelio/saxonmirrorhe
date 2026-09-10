@@ -804,6 +804,24 @@ public class RecordType implements FunctionItemType {
     public boolean isAtomizable(TypeHierarchy th) {
         return false;
     }
+
+    @Override
+    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        List<SequenceType> fieldTypes2 = new ArrayList<>(fieldTypes.size());
+        boolean changed = false;
+        for (String s : fieldNamesInOrder) {
+            SequenceType oldType = fieldTypes.get(s);
+            SequenceType newType = oldType.resolveAliases(aliases, path);
+            if (oldType != newType) {
+                changed = true;
+            }
+            fieldTypes2.add(newType);
+        }
+        if (changed) {
+            return new RecordType(fieldNamesInOrder, fieldTypes2, optionalFields, _extensible, name);
+        }
+        return this;
+    }
 }
 
 // Copyright (c) 2011-2026 Saxonica Limited

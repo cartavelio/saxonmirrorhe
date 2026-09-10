@@ -14,13 +14,15 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.DocumentNodeType;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
+
+import java.util.Stack;
 
 /**
  * InstanceOf Expression: implements "Expr instance of data-type"
@@ -82,6 +84,8 @@ public final class InstanceOfExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        targetType = targetType.resolveAliases(
+                visitor.getStaticContext().getPackageData().obtainTypeAliasManager().getTypeAliases(), new Stack<>());
         getOperand().typeCheck(visitor, contextInfo);
         Expression operand = getBaseExpression();
         if (operand instanceof Literal) {

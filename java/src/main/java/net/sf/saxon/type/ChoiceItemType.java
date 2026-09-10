@@ -475,7 +475,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
         boolean changed = false;
         for (ItemType member : memberTypes) {
             ItemType m2 = member.resolveAliases(aliases, path);
-            if (m2 != null) {
+            if (m2 != member) {
                 changed = true;
             }
         }

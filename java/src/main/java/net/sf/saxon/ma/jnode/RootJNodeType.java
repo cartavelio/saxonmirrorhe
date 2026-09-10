@@ -8,11 +8,16 @@
 package net.sf.saxon.ma.jnode;
 
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 /**
  * Represents the type jnode((), T) where T is a sequence type giving the type
@@ -117,6 +122,15 @@ public class RootJNodeType extends JNodeType {
     @Override
     public String getBasicAlphaCode() {
         return "JR";
+    }
+
+    @Override
+    public ItemType resolveAliases(Map<StructuredQName, ItemType> aliases, Stack<StructuredQName> path) throws XPathException {
+        SequenceType v2 = valueType.resolveAliases(aliases, path);
+        if (v2 != valueType) {
+            return new RootJNodeType(v2);
+        }
+        return this;
     }
 }
 
