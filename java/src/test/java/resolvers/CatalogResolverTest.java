@@ -276,11 +276,11 @@ public class CatalogResolverTest {
         }
     }
 
-    private class Bug5950Resolver implements ResourceResolver {
+    private static class Bug5950Resolver implements ResourceResolver {
 
         @Override
         public Source resolve(ResourceRequest request) throws XPathException {
-            if ("chapter.xml".equals(request.uri)) {
+            if (request.uri.endsWith("/chapter.xml")) {
                 return new SAXSource(new InputSource(Testdata.pathString("bug5950/chapter.xml")));
                 /*
                 // This shows what happens if you return a StAXSource...it goes bang.

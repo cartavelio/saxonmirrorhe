@@ -151,6 +151,31 @@ public class ValidationTestNative {
         }
     }
 
-
+    @Test
+    public void schemaForXslt30Direct() {
+        // See also s9apitest.TestValidator.testSchemaForXslt30Direct()
+        // This test checks that the URI resolver applies to the new schema API as well.
+        LocalErrorListener listener = new LocalErrorListener();
+        try {
+            EnterpriseConfiguration config = new EnterpriseConfiguration();
+            SchemaCompiler compiler = new SchemaCompiler(config);
+            List<Source> sources = new ArrayList<>();
+            sources.add(new StreamSource("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
+            compiler.setErrorReporter(listener);
+            PreparedSchema schema = compiler.loadSources(sources);
+            StringWriter sw = new StringWriter();
+            Receiver out = config.getSerializerFactory().getReceiver(new StreamResult(sw));
+            ParseOptions options = new ParseOptions()
+                    .withSchema(schema)
+                    .withSchemaValidationMode(Validation.STRICT)
+                    .withValidationErrorLimit(1)
+                    .withErrorReporter(listener);
+            Receiver val = schema.getDocumentValidator(out, "", options, null);
+            val.setPipelineConfiguration(out.getPipelineConfiguration());
+            Sender.send(new StreamSource(Testdata.file("caffo/Transform2.xslt")), val, null);
+        } catch (Exception e) {
+            fail("Validation failed");
+        }
+    }
 }
 

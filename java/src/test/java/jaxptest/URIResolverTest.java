@@ -304,11 +304,21 @@ public class URIResolverTest {
         public Source resolve(String href, String base) throws XPathException {
             try {
                 history.add(href);
+
+                SAXBuilder builder = new SAXBuilder();
+
+                if (href.endsWith("/foo.xsl")) {
+                    // This is the top-level file...
+                    Document doc = builder.build(href);
+                    JDOMSource js = new JDOMSource(doc);
+                    js.setSystemId(href);
+                    return js;
+                }
+
                 base = base.replace("/dummy/", "");
                 for (Map.Entry<String, String> entry : mappings.entrySet()) {
                     href = href.replace(entry.getKey(), entry.getValue());
                 }
-                SAXBuilder builder = new SAXBuilder();
                 File file;
                 if (href.endsWith("inc1/inc1.xsl")) {
                     file = Testdata.file("trax/xsl/inc1/inc1.xsl");
