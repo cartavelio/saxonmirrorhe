@@ -25,6 +25,14 @@
     
     <category name="s9api" class="javaonly">
         
+        <p>Added the method <code>ItemTypeFactory.parseItemType(String)</code> as a convenient way of constructing an item type
+            such as <code>map(xs:string, node()*)</code> from its XPath textual representation.</p>
+        
+        <p>Added the method <code>ItemType.with(OccurrenceIndicator)</code> as a convenient way of constructing a sequence type
+        from an <code>ItemType</code> and an <code>OccurrenceIndicator</code>.</p>
+        
+        <p>Added the method <code>SequenceType.matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+        
   
     </category>
 
@@ -42,6 +50,15 @@
         
         <p>With this feature, it becomes possible to run XPath 3.1 queries against LINQ documents, returning nodes in the original LINQ 
             tree.</p>
+        
+        <p>Added the method <code>XdmItemType.Occurs(char occurrenceIndicator)</code> as a convenient way of constructing a sequence type
+            from an <code>ItemType</code> and an occurrence indicator.</p>
+        
+        <p>Added the method <code>XdmSequenceType.matches(XdmValue)</code> to test whether a value matches a sequence type.</p>
+        
+        <p>Added <code>Equals()</code> and <code>GetHashCode()</code> methods to <code>XdmItemType</code> so equivalent types
+        compare equal.</p>
+        
         
         
     </category>
