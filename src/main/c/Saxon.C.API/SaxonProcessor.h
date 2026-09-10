@@ -667,7 +667,7 @@ private:
 
     static int64_t createParameterJArray2(std::map<std::string, XdmValue *> parameters);
 
-    //static jobjectArray createJArray(XdmValue **values, int length);
+    static int64_t createJArray(XdmValue **values, int length);
 
     static const char *checkException();
 };
