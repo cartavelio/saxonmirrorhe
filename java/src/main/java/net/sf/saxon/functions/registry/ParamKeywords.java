@@ -89,7 +89,7 @@ public class ParamKeywords {
         fnParamNames.put("codepoint-equal", "value1|value2");
         fnParamNames.put("codepoints-to-string", "values");
         fnParamNames.put("collation", "options");
-        fnParamNames.put("collation-available", "collation|usage");
+        fnParamNames.put("collation-available", "collation");
         fnParamNames.put("collation-key", "value|collation");
         fnParamNames.put("collection", "source");
         fnParamNames.put("compare", "value1|value2|collation");
