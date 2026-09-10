@@ -67,12 +67,18 @@ public class ChainedEntityResolver implements EntityResolver2 {
 
     @Override
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
-        InputSource is = null;
+        InputSource is;
         if (first instanceof EntityResolver2) {
             is = ((EntityResolver2) first).resolveEntity(name, publicId, baseURI, systemId);
+        } else {
+            is = first.resolveEntity(publicId, systemId);
         }
-        if (is == null && second instanceof EntityResolver2) {
-            is = ((EntityResolver2) second).resolveEntity(name, publicId, baseURI, systemId);
+        if (is == null) {
+            if (second instanceof EntityResolver2) {
+                is = ((EntityResolver2) second).resolveEntity(name, publicId, baseURI, systemId);
+            } else {
+                is = second.resolveEntity(publicId, systemId);
+            }
         }
         return is;
     }
