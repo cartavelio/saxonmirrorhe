@@ -107,10 +107,13 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
         ga.loadLocal(oVar);
         pushNodeName(compiler, expression);
+        int nodeNameVar = methodInfo.allocateLocal(NodeName.class);
+        ga.storeLocal(nodeNameVar);
+        ga.loadLocal(nodeNameVar);
         ga.invokeInstanceMethod(Orphan.class, "setNodeName", NodeName.class);
         ga.loadLocal(oVar);
 
-        FixedAttributeCompiler.validateOrphanAttribute(compiler, instr);
+        FixedAttributeCompiler.validateOrphanAttribute(compiler, instr, null, nodeNameVar);
 
         if (done != null) {
             methodInfo.placeLabel(done);

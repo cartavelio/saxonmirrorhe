@@ -77,8 +77,8 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
                 LabelInfo sameReceiver = methodInfo.newLabel("sameReceiver");
                 //LabelInfo doneReceiver = methodInfo.newLabel("doneReceiver");
                 ga.ifSameObject(sameReceiver);
-                ga.push("CCO C");
-                ga.invokeStaticMethod(Instrumentation.class, "count", String.class);
+                //ga.push("CCO C");
+                //ga.invokeStaticMethod(Instrumentation.class, "count", String.class);
                 ga.newInstance(ComplexContentOutputter.class);
                 ga.dup();
                 ga.loadLocal(validatorVar);

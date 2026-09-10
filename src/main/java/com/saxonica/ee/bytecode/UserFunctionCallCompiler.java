@@ -73,7 +73,7 @@ public class UserFunctionCallCompiler extends ToIteratorCompiler {
             ga.loadLocal(arrVar);
             ga.push(i);
             // TODO: change this to use the new Evaluator mechanism natively
-            LetExpressionCompiler.compileCommonExpr(compiler, userFunctionCall.getArg(i), argumentEvaluators[i], refs);
+            LetExpressionCompiler.compileCommonExpr(compiler, userFunctionCall.getArg(i), argumentEvaluators[i], refs, false);
             ga.dup();
             ga.ifNonNull(notNull.label());
             ga.pop();

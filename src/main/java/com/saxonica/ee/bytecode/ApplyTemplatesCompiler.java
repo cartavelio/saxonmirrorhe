@@ -162,8 +162,8 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
                         compiler,
                         param.getSelectExpression(),
                         param.getEvaluator(),
-                        10
-                );
+                        10,
+                        false);
                 ga.push(param.isTypeChecked());
                 ga.invokeInstanceMethod(ParameterSet.class, "put", StructuredQName.class, Sequence.class, Boolean.TYPE);
                 compiler.generateGetContext();
@@ -218,8 +218,8 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
                         compiler,
                         param.getSelectExpression(),
                         param.getEvaluator(),
-                        10
-                );
+                        10,
+                        false);
                 ga.push(false);
                 ga.invokeInstanceMethod(ParameterSet.class, "put", StructuredQName.class, Sequence.class, Boolean.TYPE);
             }

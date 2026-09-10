@@ -52,7 +52,8 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr),
+                          letExpr.getNominalReferenceCount(), letExpr.isNeedsEagerEvaluation());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
 
@@ -97,7 +98,8 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr),
+                          letExpr.getNominalReferenceCount(), letExpr.isNeedsEagerEvaluation());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
         ga.invokeInstanceMethod(XPathContext.class,"setTemporaryOutputState", Integer.TYPE);
@@ -140,7 +142,8 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr),
+                          letExpr.getNominalReferenceCount(), letExpr.isNeedsEagerEvaluation());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
         ga.invokeInstanceMethod(XPathContext.class,"setTemporaryOutputState", Integer.TYPE);
@@ -162,15 +165,19 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      * @param exp      the expression to be compiled
      * @param evaluator the evaluation mode
      * @param refCount the nominal count of references to this variable
+     * @param forceEagerEvaluation true if eager evaluation is required
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
     public static void compileCommonExpr(CompilerService compiler,
-                                         Expression exp, SequenceEvaluator evaluator, int refCount) throws CannotCompileException {
+                                         Expression exp,
+                                         SequenceEvaluator evaluator,
+                                         int refCount,
+                                         boolean forceEagerEvaluation) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitLineNumber(compiler, ga, exp);
 
-        if (!exp.supportsLazyEvaluation()) {
+        if (forceEagerEvaluation || !exp.supportsLazyEvaluation()) {
             compiler.compileToSequence(exp);
         } else if (evaluator instanceof SharedAppendEvaluator) {
             Block block = (Block) exp;

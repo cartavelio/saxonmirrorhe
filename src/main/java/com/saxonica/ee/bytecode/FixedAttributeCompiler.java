@@ -242,12 +242,13 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         compiler.compileToPrimitive(expr, UnicodeString.class, OnEmpty.RETURN_EMPTY_UNICODE_STRING);
         ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
 
-        validateOrphanAttribute(compiler, instr);
+        validateOrphanAttribute(compiler, instr, instr.getAttributeName(), -1);
         return Orphan.class;
 
     }
 
-    static void validateOrphanAttribute(CompilerService compiler, AttributeCreator instr) {
+    static void validateOrphanAttribute(CompilerService compiler, AttributeCreator instr,
+                                        NodeName nodeName, int nodeNameVar) {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
 
@@ -305,17 +306,21 @@ public class FixedAttributeCompiler extends ToPushCompiler {
             // assert stack: Orphan Orphan Orphan Configuration
             ga.swap();
             // assert stack: Orphan Orphan Configuration Orphan
-            ga.dup();
-            // assert stack: Orphan Orphan Configuration Orphan Orphan
-            ga.invokeInstanceMethod(NodeInfo.class, "getNameCode");
-            // assert stack: Orphan Orphan Configuration Orphan nameCode
+            if (nodeName == null) {
+                ga.loadLocal(nodeNameVar);
+                ga.invokeInstanceMethod(NodeName.class, "getStructuredQName");
+            } else {
+                allocateStatic(compiler, nodeName.getStructuredQName());
+            }
+            //ga.invokeInstanceMethod(NodeInfo.class, "getNameCode");
+            // assert stack: Orphan Orphan Configuration Orphan NodeName
             ga.swap();
-            // assert stack: Orphan Orphan Configuration nameCode Orphan
+            // assert stack: Orphan Orphan Configuration QName Orphan
             ga.invokeInstanceMethod(NodeInfo.class, "getUnicodeStringValue");
-            // assert stack: Orphan Orphan Configuration nameCode stringValue
+            // assert stack: Orphan Orphan Configuration QName stringValue
             ga.push(instr.getValidationAction());
-            // assert stack: Orphan Orphan Configuration nameCode stringValue int
-            ga.invokeInstanceMethod(Configuration.class, "validateAttribute", Integer.TYPE, UnicodeString.class, Integer.TYPE);
+            // assert stack: Orphan Orphan Configuration QName stringValue int
+            ga.invokeInstanceMethod(Configuration.class, "validateAttribute", StructuredQName.class, UnicodeString.class, Integer.TYPE);
             // assert stack: Orphan Orphan SchemaType
             ga.invokeInstanceMethod(Orphan.class, "setTypeAnnotation", SchemaType.class);
             // assert stack: Orphan
