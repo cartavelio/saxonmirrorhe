@@ -13,6 +13,7 @@ import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
+import net.sf.saxon.functions.hof.InlineFunctionItem;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -92,6 +93,7 @@ public class QueryModule implements StaticContext {
     private final Set<QueryModule> importedModules = new HashSet<>();
     private Map<StructuredQName, ItemType> locallyVisibleItemTypes = new HashMap<>();
     private Map<StructuredQName, ItemType> publicItemTypes = new HashMap<>();
+    private List<InlineFunctionItem> inlineFunctionItems = new ArrayList<>();
 
     /**
      * Create a QueryModule for a main module, copying the data that has been set up in a
@@ -1722,6 +1724,26 @@ public class QueryModule implements StaticContext {
     public Map<StructuredQName, ItemType> getPublicItemTypes() {
         return publicItemTypes;
     }
+
+    public void registerInlineFunctionItem(InlineFunctionItem inlineFunctionItem) {
+        inlineFunctionItems.add(inlineFunctionItem);
+    }
+
+    public void processInlineFunctionItems() throws XPathException {
+        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
+            inlineFunctionItem.simplify();
+        }
+        ExpressionVisitor visitor = new ExpressionVisitor(getConfiguration());
+        visitor.setStaticContext(this);
+        
+        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
+            inlineFunctionItem.typeCheck(visitor, ContextItemStaticInfo.ABSENT);
+        }
+        for (InlineFunctionItem inlineFunctionItem : inlineFunctionItems) {
+            inlineFunctionItem.optimize(visitor, ContextItemStaticInfo.ABSENT);
+        }
+    }
+
 
 
 }

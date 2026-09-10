@@ -15,7 +15,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyFunctionType;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.Int64Value;
 
 /**
  * This class implements the function fn:fold-right(), which is a standard function in XQuery 1.1
@@ -52,13 +51,14 @@ public class FoldRightFn extends SystemFunction {
         int arity = function.getArity();
         Sequence[] args = new Sequence[arity];
         for (int i=input.getLength(); i>=1; i--) {
-            args[0] = input.itemAt(i-1);
-            args[1] = zero.materialize();
-            if (arity == 3) {
-                args[2] = Int64Value.makeIntegerValue(i);
+            if (args.length > 0) {
+                args[0] = input.itemAt(i - 1);
+            }
+            if (args.length > 1) {
+                args[1] = zero;
             }
             try {
-                zero = dynamicCall(function, context, args);
+                zero = dynamicCall(function, context, args).materialize();
             } catch (XPathException e) {
                 e.maybeSetContext(context);
                 throw e;

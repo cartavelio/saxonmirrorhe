@@ -471,6 +471,30 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
         return f.call(context, args);
     }
 
+    /**
+     * Add an argument to the argument array, provided the argument array is large enough to accommodate it
+     * @param args the argument array
+     * @param index the position in the argument array
+     * @param value the value of the argument
+     */
+    public static void putIfRequired(Sequence[] args, int index, Sequence value) {
+        if (args.length > index) {
+            args[index] = value;
+        }
+    }
+
+    /**
+     * Add a position argument to the argument array, provided the argument array is large enough to accommodate it
+     * @param args  the argument array
+     * @param index the position of the argument in the argument array
+     * @param position the value of the position argument
+     */
+
+    public static void putPositionIfRequired(Sequence[] args, int index, int position) {
+        if (args.length > index) {
+            args[index] = Int64Value.makeIntegerValue(position);
+        }
+    }
 
     /**
      * Diagnostic print of expression structure. The abstract expression tree

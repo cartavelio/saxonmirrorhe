@@ -12,6 +12,8 @@ import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.hof.FunctionLiteral;
+import net.sf.saxon.functions.hof.InlineFunctionItem;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.*;
@@ -20,6 +22,9 @@ import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.JavaExternalObjectType;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 
@@ -218,6 +223,7 @@ public abstract class FunctionCall extends Expression {
     public void checkFunctionCall(FunctionItem target,
                                   ExpressionVisitor visitor) throws XPathException {
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
+        TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         SequenceType[] argTypes = target.getFunctionItemType().getArgumentTypes();
         FunctionDefinition fd = null;
         if (target instanceof FunctionDefinition) {
@@ -277,7 +283,7 @@ public abstract class FunctionCall extends Expression {
                         }
                     } else if (target instanceof net.sf.saxon.functions.SystemFunction) {
                         // A system function with default argument values
-                        BuiltInFunctionSet.Entry details = ((SystemFunction)target).getDetails();
+                        BuiltInFunctionSet.Entry details = ((SystemFunction) target).getDetails();
                         if (i < details.getMinimumArity()) {
                             // This argument cannot be omitted
                             throw new XPathException("No value supplied for " + RoleDiagnostic.ordinal(i + 1) +
@@ -291,8 +297,21 @@ public abstract class FunctionCall extends Expression {
                     } else {
                         throw new UnsupportedOperationException();
                     }
-                }
-                if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {
+                } else if (target instanceof SystemFunction
+                        && argTypes[i].getPrimaryType() instanceof SpecificFunctionType sft
+                        && arg instanceof FunctionLiteral lit
+                        && lit.getGroundedValue() instanceof InlineFunctionItem ifi
+                        && ifi.getArity() <= sft.getArity()
+                        && th.isSubType(ifi.getBody().getItemType(), sft.getResultType().getPrimaryType())
+                        && Cardinality.subsumes(sft.getResultType().getCardinality(), ifi.getBody().getCardinality())
+                        && noParamIsRestrictive(th, ifi, sft.getArgumentTypes())) {
+                    // NO ACTION - leave arg unchanged
+                    // Special-case the type checking where a system function requires a callback function
+                    // and the callback function is supplied as an inline function expression. In this case
+                    // the system function takes responsibility for supplying valid arguments to the
+                    // callback, and for checking the result, so the callback doesn't need to be coerced
+                    // to a function that performs these checks.
+                } else if (arg != null) {
                     setArg(i, tc.staticTypeCheck(
                             arg,
                             argTypes[i],
@@ -300,6 +319,19 @@ public abstract class FunctionCall extends Expression {
                 }
             }
         }
+    }
+
+    private static boolean noParamIsRestrictive(TypeHierarchy th, InlineFunctionItem ifi, SequenceType[] argTypes) {
+        SequenceType[] declaredTypes = ifi.getFunctionItemType().getArgumentTypes();
+        for (int i=0; i < ifi.getArity(); i++) {
+            SequenceType required = argTypes[i];
+            SequenceType declared = declaredTypes[i];
+            if (!(th.isSubType(required.getPrimaryType(), declared.getPrimaryType()) &&
+                    Cardinality.subsumes(declared.getCardinality(), required.getCardinality()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
 

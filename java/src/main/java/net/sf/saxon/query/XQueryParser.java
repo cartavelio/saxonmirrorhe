@@ -180,7 +180,7 @@ public class XQueryParser extends XPathParser {
             if (streaming) {
                 env.getConfiguration().checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY, "streaming", -1);
             }
-
+            
             // Replace every declared item type by its full expansion
 
             Map<StructuredQName, ItemType> visibleItemTypes = ((QueryModule)env).getLocallyVisibleItemTypes();
@@ -204,7 +204,9 @@ public class XQueryParser extends XPathParser {
                 expandedItemTypes.put(entry.getKey(), expanded);
             }
 
+            ((QueryModule) env).processInlineFunctionItems();
             ((QueryModule) env).setLocallyVisibleItemTypes(expandedItemTypes);
+
 
             for (GlobalVariable var : env.getPackageData().getGlobalVariableList()) {
                 if (languageVersion >= 40 && var.getRequiredType() != SequenceType.ANY_SEQUENCE) {

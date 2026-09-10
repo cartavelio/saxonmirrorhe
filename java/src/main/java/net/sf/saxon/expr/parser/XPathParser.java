@@ -16,10 +16,7 @@ import net.sf.saxon.expr.flwor.LocalVariableBinding;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.*;
-import net.sf.saxon.functions.hof.DynamicPartialApply;
-import net.sf.saxon.functions.hof.FunctionLiteral;
-import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
-import net.sf.saxon.functions.hof.UserFunctionReference;
+import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
@@ -53,7 +50,6 @@ import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.style.ExpressionContext;
 import net.sf.saxon.style.SourceBinding;
-import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.*;
@@ -5693,6 +5689,7 @@ public class XPathParser {
     }
 
     protected Expression parseInlineFunction(AnnotationList annotations) throws XPathException {
+        int offset = t.currentTokenStartOffset;
         nextToken();
         readToken(Token.LPAREN);
         List<UserFunctionParameter> params = new ArrayList<>(8);
@@ -5722,38 +5719,7 @@ public class XPathParser {
         }
         nextToken();
         SequenceType resultType = readOptionalAsClause(SequenceType.ANY_SEQUENCE);
-        return parseInlineFunctionBody(annotations, params, resultType);
-
-    }
-
-    /**
-     * Read a variable name ('$' QName). The current token should be the `$` sign; on return,
-     * the input is positioned at the next token after the QName.
-     * @return the name
-     * @throws XPathException if no name was found
-     */
-    protected StructuredQName readVariableName() throws XPathException {
-        readToken(Token.DOLLAR);
-        String name = readName();
-        return makeStructuredQName(name, NamespaceUri.NULL);
-    }
-
-    protected SequenceType readOptionalAsClause(SequenceType defaultType) throws XPathException {
-        if (tryKeyword("as")) {
-            return parseSequenceType();
-        } else {
-            return defaultType;
-        }
-    }
-
-    protected Expression parseInlineFunctionBody(
-            AnnotationList annotations,
-            List<UserFunctionParameter> params,
-            SequenceType resultType) throws XPathException {
         // the next token should be the "{" at the start of the function body
-
-        int offset = t.currentTokenStartOffset;
-
 
         InlineFunctionDetails details = new InlineFunctionDetails();
         for (LocalBinding lb : getRangeVariables()) {
@@ -5794,37 +5760,52 @@ public class XPathParser {
         setRangeVariables(details.outerVariables());
         inlineFunctionStack.pop();
         return result;
+
+    }
+
+    /**
+     * Read a variable name ('$' QName). The current token should be the `$` sign; on return,
+     * the input is positioned at the next token after the QName.
+     * @return the name
+     * @throws XPathException if no name was found
+     */
+    protected StructuredQName readVariableName() throws XPathException {
+        readToken(Token.DOLLAR);
+        String name = readName();
+        return makeStructuredQName(name, NamespaceUri.NULL);
+    }
+
+    protected SequenceType readOptionalAsClause(SequenceType defaultType) throws XPathException {
+        if (tryKeyword("as")) {
+            return parseSequenceType();
+        } else {
+            return defaultType;
+        }
     }
 
     public static Expression makeInlineFunctionValue(
             XPathParser p, AnnotationList annotations,
             InlineFunctionDetails details, List<UserFunctionParameter> params,
             SequenceType resultType, Expression body) {
-        // Does this function access any outer variables?
-        // If so, we create a UserFunction in which the outer variables are defined as extra parameters
-        // in addition to the declared parameters, and then we return a call to partial-apply() that
-        // sets these additional parameters to the values they have in the calling context.
+        
         int arity = params.size();
 
-        UserFunction uf = new UserFunction();
-        uf.setFunctionName(new StructuredQName("anon", NamespaceUri.ANONYMOUS, "f_" + uf.hashCode()));
-        uf.setPackageData(p.getStaticContext().getPackageData());
-        uf.setBody(body);
-        uf.setAnnotations(annotations);
-        uf.setResultType(resultType);
-        uf.incrementReferenceCount();
-
-        if (uf.getPackageData() instanceof StylesheetPackage pack) {
-            // Add the inline function as a private component to the package, so that it can have binding
-            // slots allocated for any references to global variables or functions, and so that it will
-            // be copied as a hidden component into any using packages
-            Component comp = Component.makeComponent(uf, Visibility.PRIVATE, VisibilityProvenance.DEFAULTED, pack, pack);
-            uf.setDeclaringComponent(comp);
-        }
-
-        Expression result;
         List<UserFunctionParameter> implicitParams = details.implicitParams;
-        if (!implicitParams.isEmpty()) {
+        if (implicitParams.isEmpty()) {
+
+            UserFunctionParameter[] paramArray = params.toArray(new UserFunctionParameter[0]);
+            InlineFunctionItem ifi = new InlineFunctionItem(annotations, paramArray, resultType, body);
+            if (p.getStaticContext() instanceof QueryModule qm) {
+                qm.registerInlineFunctionItem(ifi);
+            }
+            return new FunctionLiteral(ifi);
+
+        } else {
+
+            // Create an InlineFunctionItem with extra parameters for the outer variables.
+            // Then create a dynamic partial application of this inline function item that
+            // supplies the additional parameters
+
             int extraParams = implicitParams.size();
             int expandedArity = params.size() + extraParams;
             UserFunctionParameter[] paramArray = new UserFunctionParameter[expandedArity];
@@ -5835,16 +5816,10 @@ public class XPathParser {
             for (UserFunctionParameter implicitParam : implicitParams) {
                 paramArray[k++] = implicitParam;
             }
-            uf.setParameterDefinitions(paramArray);
-            SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
-            for (int i = 0; i < expandedArity; i++) {
-                int slot = stackFrame.allocateSlotNumber(paramArray[i].getVariableQName(), paramArray[i]);
-                paramArray[i].setSlotNumber(slot);
+            InlineFunctionItem ifi = new InlineFunctionItem(annotations, paramArray, resultType, body);
+            if (p.getStaticContext() instanceof QueryModule qm) {
+                qm.registerInlineFunctionItem(ifi);
             }
-
-            ExpressionTool.allocateSlots(body, expandedArity, stackFrame);
-            uf.setStackFrameMap(stackFrame);
-            result = new UserFunctionReference(uf);
 
             Expression[] partialArgs = new Expression[expandedArity];
             for (int i = 0; i < arity; i++) {
@@ -5864,31 +5839,16 @@ public class XPathParser {
                 ufp.setRequiredType(binding.getRequiredType());
                 partialArgs[ip + arity] = var;
             }
-            result = new DynamicPartialApply(result, partialArgs);
-
-        } else {
-
-            // there are no implicit parameters
-            UserFunctionParameter[] paramArray = params.toArray(new UserFunctionParameter[0]);
-            uf.setParameterDefinitions(paramArray);
-
-            SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
-            for (UserFunctionParameter param : paramArray) {
-                stackFrame.allocateSlotNumber(param.getVariableQName(), param);
-            }
-
-            ExpressionTool.allocateSlots(body, params.size(), stackFrame);
-            uf.setStackFrameMap(stackFrame);
-            result = new UserFunctionReference(uf);
+            return new DynamicPartialApply(new FunctionLiteral(ifi), partialArgs);
+//
+//            if (uf.getPackageData() instanceof StylesheetPackage) {
+//                // Note: inline functions in XSLT are registered as components; but not if they
+//                // are declared within a static expression, e.g. the initializer of a static
+//                // global variable
+//                ((StylesheetPackage) uf.getPackageData()).addComponent(uf.getDeclaringComponent());
+//            }
+//            return result;
         }
-
-        if (uf.getPackageData() instanceof StylesheetPackage) {
-            // Note: inline functions in XSLT are registered as components; but not if they
-            // are declared within a static expression, e.g. the initializer of a static
-            // global variable
-            ((StylesheetPackage) uf.getPackageData()).addComponent(uf.getDeclaringComponent());
-        }
-        return result;
     }
 
 
@@ -6156,7 +6116,7 @@ public class XPathParser {
             LocalVariableReference ref = new LocalVariableReference(arg);
             body = new ContextValueSetter(ref, body);
         }
-        Expression result = makeInlineFunctionValue(this, AnnotationList.EMPTY, details, params, resultType, body);
+        Expression result = makeInlineFunctionValue(this, annotations, details, params, resultType, body);
 
         setLocation(result, offset);
         // restore the previous stack of range variables

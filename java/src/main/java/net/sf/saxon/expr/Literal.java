@@ -72,9 +72,22 @@ public class Literal extends Expression {
     }
 
     /**
+     * Simplify an expression.
+     * @return for a Literal, this always returns the value unchanged: except where the literal might contain
+     * a function item, in which case the referenced inline function item might need to be checked.
+     */
+
+    /*@NotNull*/
+    public Expression simplify() throws XPathException {
+        return this;
+    }
+
+
+    /**
      * TypeCheck an expression
      *
-     * @return for a Value, this always returns the value unchanged
+     * @return for a Literal, this always returns the value unchanged: except where the literal might contain
+     * a function item, in which case the referenced inline function item might need to be checked.
      */
 
     /*@NotNull*/

@@ -58,12 +58,6 @@ public class LocalVariableReference extends VariableReference {
         if (binding == null) {
             throw new UnsupportedOperationException("Cannot copy a variable reference whose binding is unknown");
         }
-//        if (slotNumber < 0) {
-//            // slot numbers have not yet been allocated. This is messy. For the time being, the safest
-//            // thing is to reuse the existing variable reference, which usually works, rather than copying
-//            // it, which will almost certainly fail. See XSLT streaming test case si-attribute-053
-//            return this;
-//        }
         LocalVariableReference ref = new LocalVariableReference(getVariableName());
         ref.copyFrom(this);
         ref.slotNumber = slotNumber;
@@ -148,19 +142,6 @@ public class LocalVariableReference extends VariableReference {
     public String getExpressionName() {
         return "locVarRef";
     }
-
-
-    /**
-     * Replace this VariableReference where appropriate by a more efficient implementation. This
-     * can only be done after all slot numbers are allocated. The efficiency is gained by binding the
-     * VariableReference directly to a local or global slot, rather than going via the Binding object
-     *
-     * @param parent the parent expression of this variable reference
-     */
-
-//    public void refineVariableReference(Expression parent) {
-//        // no-op
-//    }
 
     /**
      * Make an elaborator for this expression

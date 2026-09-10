@@ -280,9 +280,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem fn = (FunctionItem) arguments[1].head();
             GeneralMapBuilder result = FixedMap.getBuilder(map.getSpecVersion());
             int position = 1;
+            Sequence[] args = new Sequence[fn.getArity()];
             for (KeyValuePair pair : map.keyValuePairs()) {
-                BooleanValue match = (BooleanValue) dynamicCall(
-                        fn, context, pair.key(), pair.value(), Int64Value.makeIntegerValue(position++)).head();
+                putIfRequired(args, 0, pair.key());
+                putIfRequired(args, 1, pair.value());
+                putPositionIfRequired(args, 2, position++);
+                BooleanValue match = (BooleanValue) dynamicCall(fn, context, args).head();
                 if (match != null && match.getBooleanValue()) {
                     result.put(pair.key(), pair.value());
                 }
@@ -575,12 +578,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             FunctionItem fn = (FunctionItem) arguments[1].head();
             ZenoSequence results = new ZenoSequence();
             int position = 1;
+            Sequence[] args = new Sequence[fn.getArity()];
             for (KeyValuePair pair : map.keyValuePairs()) {
-                Sequence seq = dynamicCall(fn, context, pair.key(), pair.value(), Int64Value.makeIntegerValue(position++));
-                GroundedValue val = seq.materialize();
-                if (val.getLength() > 0) {
-                    results = results.appendSequence(val);
-                }
+                putIfRequired(args, 0, pair.key());
+                putIfRequired(args, 1, pair.value());
+                putPositionIfRequired(args, 2, position++);
+                Sequence seq = dynamicCall(fn, context, args);
+                results = results.appendSequence(seq.materialize());
             }
             return results;
         }
@@ -674,21 +678,27 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
             SequenceIterator iter = arguments[0].iterate();
             int position = 1;
+            Sequence[] keyArgs = keyFunction == null ? null : new Sequence[keyFunction.getArity()];
+            Sequence[] valArgs = valueFunction == null ? null : new Sequence[valueFunction.getArity()];
             for (Item item; (item = iter.next()) != null; ) {
-                IntegerValue posValue = Int64Value.makeIntegerValue(position++);
                 SequenceIterator keys;
                 if (keyFunction != null) {
-                    keys = dynamicCall(keyFunction, context, item, posValue).iterate();
+                    putIfRequired(keyArgs, 0, item);
+                    putPositionIfRequired(keyArgs, 1, position);
+                    keys = dynamicCall(keyFunction, context, keyArgs).iterate();
                 } else {
                     keys = SingletonIterator.makeIterator(item);
                 }
                 AtomicValue key;
                 GroundedValue value;
                 if (valueFunction != null) {
-                    value = dynamicCall(valueFunction, context, item, posValue).materialize();
+                    putIfRequired(valArgs, 0, item);
+                    putPositionIfRequired(valArgs, 1, position);
+                    value = dynamicCall(valueFunction, context, valArgs).materialize();
                 } else {
                     value = item;
                 }
+                position++;
                 while ((key = (AtomicValue) keys.next()) != null) {
                     mapBuilder.put(key, value);
                 }

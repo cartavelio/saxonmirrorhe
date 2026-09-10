@@ -29,6 +29,8 @@ import net.sf.saxon.type.FunctionItemType;
 
 public class FunctionLiteral extends Literal {
 
+    private int rewriteCounter = 0;
+
     /**
      * Create a literal as a wrapper around a Value
      *
@@ -49,8 +51,7 @@ public class FunctionLiteral extends Literal {
     public FunctionItem getGroundedValue() {
         return (FunctionItem) super.getGroundedValue();
     }
-
-
+    
     /**
      * Simplify an expression
      * @return for a Value, this always returns the value unchanged
@@ -59,8 +60,10 @@ public class FunctionLiteral extends Literal {
     /*@NotNull*/
     @Override
     public Expression simplify() throws XPathException {
-        if (getGroundedValue() instanceof AbstractFunction fn) {
+        if (getGroundedValue() instanceof AbstractFunction fn && rewriteCounter == 0) {
+            rewriteCounter++;
             fn.simplify();
+            rewriteCounter--;
         }
         return this;
     }
@@ -74,8 +77,21 @@ public class FunctionLiteral extends Literal {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        if (getGroundedValue() instanceof AbstractFunction fn) {
+        if (getGroundedValue() instanceof AbstractFunction fn && rewriteCounter == 0) {
+            rewriteCounter++;
             fn.typeCheck(visitor, contextInfo);
+            rewriteCounter--;
+        }
+        return this;
+    }
+
+    @Override
+    public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
+        if (getGroundedValue() instanceof InlineFunctionItem fn && rewriteCounter == 0) {
+            // Prevent recursive optimization
+            rewriteCounter++;
+            fn.optimize(visitor, ContextItemStaticInfo.ABSENT);
+            rewriteCounter--;
         }
         return this;
     }

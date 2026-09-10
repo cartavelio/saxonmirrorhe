@@ -489,13 +489,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             int arity = fn.getArity();
             Sequence[] args = new Sequence[arity];
             for (int i = 0; i < arraySize; i++) {
-                if (arity > 0) {
-                    args[0] = zero;
-                    if (arity > 1) {
-                        args[1] = array.get(i);
-                    }
-                }
-                zero = dynamicCall(fn, context, args);
+                putIfRequired(args, 0, zero);
+                putIfRequired(args, 1, array.get(i));
+                zero = dynamicCall(fn, context, args).materialize();
             }
             return zero;
         }
@@ -578,12 +574,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             List<GroundedValue> list = new ArrayList<>(expectedSize());
             int position = 0;
             for (GroundedValue gv : array.members()) {
-                if (arity > 0) {
-                    args[0] = gv;
-                    if (arity > 1) {
-                        args[1] = new Int64Value(++position);
-                    }
-                }
+                putIfRequired(args, 0, gv);
+                putPositionIfRequired(args, 1, ++position);
                 list.add(dynamicCall(fn, context, args).materialize());
             }
             return makeArray(list);
@@ -606,17 +598,10 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             int arity = fn.getArity();
             Sequence[] args = new Sequence[arity];
             List<GroundedValue> list = new ArrayList<>(expectedSize());
-            int i;
-            for (i=0; i < array1.arrayLength() && i < array2.arrayLength(); i++) {
-                if (arity > 0) {
-                    args[0] = array1.get(i);
-                    if (arity > 1) {
-                        args[1] = array2.get(i);
-                        if (arity > 2) {
-                            args[2] = new Int64Value(i+1);
-                        }
-                    }
-                }
+            for (int i=0; i < array1.arrayLength() && i < array2.arrayLength(); i++) {
+                putIfRequired(args, 0, array1.get(i));
+                putIfRequired(args, 1, array2.get(i));
+                putPositionIfRequired(args, 2, i+1);
                 list.add(dynamicCall(fn, context, args).materialize());
             }
             return makeArray(list);
@@ -1123,14 +1108,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             List<Int64Value> list = new ArrayList<>();
             int arity = fn.getArity();
             Sequence[] args = new Sequence[arity];
-            int i;
-            for (i = 0; i < array1.arrayLength(); i++) {
-                if (arity > 0) {
-                    args[0] = array1.get(i);
-                    if (arity > 1) {
-                        args[1] = new Int64Value(i + 1);
-                    }
-                }
+            for (int i = 0; i < array1.arrayLength(); i++) {
+                putIfRequired(args, 0, array1.get(i));
+                putPositionIfRequired(args, 1, i+1);
                 GroundedValue result = dynamicCall(fn, context, args).materialize();
                 if (result.effectiveBooleanValue()) {
                     list.add(new Int64Value(i+1));
