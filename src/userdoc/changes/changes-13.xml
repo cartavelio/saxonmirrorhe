@@ -4,7 +4,9 @@
     
     <category name="installation">
         
- 
+       <p>The XPath parser and tokenizer have changed beyond all recognition in the 25 years since they were
+       first forked from James Clark's xt implementation. The open-source license terms relating to these
+       components have therefore been removed.</p>
         
         
         
@@ -116,6 +118,13 @@
         <p>The internal APIs for manipulating values of type <code>xs:duration</code>
         and <code>xs:dayTimeDuration</code> have changed, reflecting the fact that
         the seconds component is now held as a <code>BigDecimal</code> value.</p>
+        
+        <p>Some deprecated methods associated with handling of <code>xsl:message</code>
+        output have been removed: in class <code>XsltController</code>, methods
+        <code>setMessageFactory()</code>, <code>setMessageReceiverClassName()</code>,
+            <code>setMessageReceiver()</code>,
+        <code>makeMessageReceiver()</code>, <code>setMessageEmitter()</code>,
+        <code>getMessageEmitter()</code>. </p>
         
         
    

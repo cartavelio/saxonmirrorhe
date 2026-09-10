@@ -10,7 +10,9 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 import java.util.logging.Logger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Attempts to reproduce a bug from Stephen P Cuzner where the MessageListener gets an AIOOB exception
@@ -57,6 +59,109 @@ public class TestMessageListener {
         }
     }
 
+    @Test
+    public void testMessageHandler() {
+        // Rewrite of above testMessage() to use current API
+        try {
+            // Write lots of empty messages. Each message is a empty document of a single node. All the documents
+            // are concatenated in the TinyTree forest; sooner or later one of them will align with the end of the
+            // TinyTree array, which in 9.4 triggers an AIOOB doing the getStringValue() on the content of the document
+            String xsl =
+                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                            "<xsl:template name='main'>" +
+                            "<xsl:for-each select='1 to 5'>" +
+                            "<xsl:message><xsl:for-each select='1 to 5'><a>[<b c='{.}'>42</b>]</a></xsl:for-each></xsl:message>" +
+                            "</xsl:for-each>" +
+                            "<xsl:for-each select='1 to 5000'>" +
+                            "<xsl:message/>" +
+                            "</xsl:for-each>" +
+                            "</xsl:template>" +
+                            "</xsl:transform>";
+            Processor p = new Processor(false);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer t = e.load();
+            t.setInitialTemplate(new QName("main"));
+            final StringBuilder sb = new StringBuilder();
+            t.setMessageHandler(message -> sb.append(message.getContent().getStringValue()));
+            t.setDestination(p.newSerializer(System.out));
+            t.transform();
+            assertEquals(100, sb.length());
+        } catch (SaxonApiException e1) {
+            e1.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testMessageHandlerThrowingException() {
+        // Rewrite of above testMessage() to use current API
+        try {
+            String xsl =
+                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                            "<xsl:template name='main'>" +
+                            "<xsl:for-each select='1 to 5'>" +
+                            "<xsl:message terminate='{. eq 4}'>Yaboo!</xsl:message>" +
+                            "</xsl:for-each>" +
+                            "</xsl:template>" +
+                            "</xsl:transform>";
+            Processor p = new Processor(false);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer t = e.load();
+            t.setInitialTemplate(new QName("main"));
+            final StringBuilder sb = new StringBuilder();
+            t.setMessageHandler(message -> {
+                sb.append(message.getContent().getStringValue());
+                if (message.isTerminate()) {
+                    throw new RuntimeException(message.getStringValue());
+                }
+            });
+            t.setDestination(p.newSerializer(System.out));
+            t.transform();
+            assertEquals(100, sb.length());
+        } catch (RuntimeException rt) {
+            assertEquals("Yaboo!", rt.getMessage());
+        } catch (SaxonApiException e1) {
+            e1.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testMessageListenerThrowingException() {
+        // Rewrite of above testMessage() to use current API
+        try {
+            String xsl =
+                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                            "<xsl:template name='main'>" +
+                            "<xsl:for-each select='1 to 5'>" +
+                            "<xsl:message terminate='{. eq 4}'>Yaboo!</xsl:message>" +
+                            "</xsl:for-each>" +
+                            "</xsl:template>" +
+                            "</xsl:transform>";
+            Processor p = new Processor(false);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer t = e.load();
+            t.setInitialTemplate(new QName("main"));
+            final StringBuilder sb = new StringBuilder();
+            t.setMessageListener(new MessageListener2() {
+                @Override
+                public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
+                    throw new RuntimeException("Yaboo!");
+                }
+            });
+            t.setDestination(p.newSerializer(System.out));
+            t.transform();
+            assertEquals(100, sb.length());
+        } catch (RuntimeException rt) {
+            assertEquals("Yaboo!", rt.getMessage());
+        } catch (SaxonApiException e1) {
+            e1.printStackTrace();
+            fail();
+        }
+    }
     @Test
     public void testMessageLocation() {
         try {

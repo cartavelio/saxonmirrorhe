@@ -1078,6 +1078,45 @@ public class TestIntegratedFunctions {
 
     }
 
+    @Test
+    public void testCardinalityCheck() throws SaxonApiException {
+        // Function returns a sequence of two strings, but declares its result type as xs:string
+        Processor processor = new Processor(true);
+        processor.registerExtensionFunction(new ExtensionFunction() {
+            @Override
+            public QName getName() {
+                return new QName(NamespaceUri.of("https://example.com"), "f");
+            }
+
+            @Override
+            public SequenceType[] getArgumentTypes() {
+                return new SequenceType[0];
+            }
+
+            @Override
+            public SequenceType getResultType() {
+                return ItemType.STRING.with(OccurrenceIndicator.ONE);
+            }
+
+            @Override
+            public XdmValue call(final XdmValue[] xdmValues) {
+                return XdmAtomicValue.makeValue("a")
+                        .append(XdmAtomicValue.makeValue("b"));
+            }
+        });
+        XPathCompiler xPathCompiler = processor.newXPathCompiler();
+        xPathCompiler.declareNamespace("eg", "https://example.com");
+        XPathSelector selector = xPathCompiler.compile("eg:f() eq 'a'").load();
+        try {
+            selector.evaluate();
+            fail("No error thrown");
+        } catch (SaxonApiException e) {
+            assertEquals("XPTY0004", e.getErrorCode().getLocalName());
+        }
+    }
+
+
+
 
 }
 
