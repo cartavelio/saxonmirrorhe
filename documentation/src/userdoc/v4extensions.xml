@@ -1,517 +1,380 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <article id="v4extensions" title="Experimental 4.0 extensions">
-   <h1>Experimental 4.0 extensions</h1>
+	<h1>Experimental 4.0 extensions</h1>
 
-   <p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which
-   will hopefully become part of a version 4.0 set of specifications. Details are at
-      <a href="https://qt4cg.org/" class="bodylink">https://qt4cg.org</a>. </p>
+	<p>A W3C Community Group is working on proposals for extensions to XPath, XSLT, and XQuery, which will hopefully become part of a version 4.0 set of specifications. Details are at <a href="https://qt4cg.org/" class="bodylink">https://qt4cg.org</a>.</p>
 
-   <p>Many of the new features in these drafts have been implemented experimentally in Saxon. Generally, the features
-   are not available unless you explicitly enable them. They should not be considered stable: the
-   details are likely to change as the design progresses.</p>
+	<p>Many of the new features in these drafts have been implemented experimentally in Saxon. Generally, the features are not available unless you explicitly enable them. They should not be considered stable: the details are likely to change as the design progresses.</p>
 
-   <p>In some cases, the community group has agreed new features but Saxon has not yet implemented them.
-      In other cases, Saxon has implemented proposed features that the community group has not yet agreed.
-      In addition, the draft specifications are constantly changing.
-      So the specifications are only an approximate guide to what is implemented in Saxon.</p>
+	<p>In some cases, the community group has agreed new features but Saxon has not yet implemented them. In other cases, Saxon has implemented proposed features that the community group has not yet agreed. In addition, the draft specifications are constantly changing. So the specifications are only an approximate guide to what is implemented in Saxon.</p>
 
 
-   <p>Use one of the following mechanisms to enable syntax extensions:</p>
+	<p>Use one of the following mechanisms to enable syntax extensions:</p>
 
-   <ul>
-      <li>Set the configuration property
-         <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"
-            /> (equivalently, use <code>--allowSyntaxExtensions:on</code> on the command line, 
-         or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
-      <li>Set the language level to 4.0 in a call to an API method such as 
-      <code>XsltCompiler.setXsltLanguageVersion()</code>.</li>
-      <li><p>For XQuery, set the language level to 4.0 in the XQuery declaration in the query prolog of the main module,
-         or use the option <code>-qversion:4.0</code> on the command line.</p>
-      <p>When processing a library module, the effective language level is either the declared version in the prolog
-      of the library module, or the effective language level for the importing module, whichever is greater. It is generally
-      not a good idea to mix language levels, because this causes problems with the semantics of constructs that span
-      modules, for example the type coercions applied when code in one module makes a call on a function declared
-      in another.</p></li>
-   </ul>
+	<ul>
+		<li>Set the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/> (equivalently, use <code>--allowSyntaxExtensions:on</code> on the command line, or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
+		<li>Set the language level to 4.0 in a call to an API method such as <code>XsltCompiler.setXsltLanguageVersion()</code>.</li>
+		<li>
+			<p>For XQuery, set the language level to 4.0 in the XQuery declaration in the query prolog of the main module, or use the option <code>-qversion:4.0</code> on the command line.</p>
+			<p>When processing a library module, the effective language level is either the declared version in the prolog of the library module, or the effective language level for the importing module, whichever is greater. It is generally not a good idea to mix language levels, because this causes problems with the semantics of constructs that span modules, for example the type coercions applied when code in one module makes a call on a function declared in another.</p>
+		</li>
+	</ul>
 
 
-   <p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This gives you an
-   XSLT 3.0 processor running in forwards compatibility mode, rather than an XSLT 4.0 processor.</p>
+	<aside>
+		<p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This gives you an XSLT 3.0 processor running in forwards compatibility mode, rather than an XSLT 4.0 processor.</p>
+	</aside>
+
+	<aside>
+		<p>Like other Saxon extensions, these extensions all require Saxon-PE or higher. They are also available in SaxonCS.</p>
+	</aside>
+
+	<p>Generally, Saxonica aims to avoid making incompatible changes except in major releases. But the features described in this section are experimental, so this policy does not apply: the aim instead will be to respond rapidly to changes in the developing specification.</p>
+
+	<p>Further information:</p>
+	<nav>
+		<ul/>
+	</nav>
 
 
-   <p>Like other Saxon extensions, these extensions all require Saxon-PE or higher.
-      They are also available in SaxonCS.</p>
+	<!-- #new-types moved to expressions.xml#type-system -->
 
-   <p>Generally, Saxonica aims to avoid making incompatible changes except in major releases.
-   But the features described in this section are experimental, so this policy does not apply: the aim
-   instead will be to respond rapidly to changes in the developing specification.</p>
+	<section id="new-function-syntax" title="New function syntax">
 
-   <p>Further information:</p>
-   <nav>
-      <ul/>
-   </nav>
+		<h1>New syntax for declaring and calling functions</h1>
+
+		<p>The proposals for XPath 4.0 include some new syntax and semantics for declaring and calling functions. This section describes what is experimentally implemented in Saxon 12.</p>
 
 
-   <!-- #new-types moved to expressions.xml#type-system -->
+		<nav>
+			<ul/>
+		</nav>
 
-   <section id="new-function-syntax" title="New function syntax">
+		<section id="simple-inline-functions" title="Simple inline functions">
+			<h1>Simple inline functions</h1>
 
-      <h1>New syntax for declaring and calling functions</h1>
+			<p>TODO FIXME: Syntax for inline functions is different in XPath 4.0...</p>
 
-      <p>The proposals for XPath 4.0 include some new syntax and semantics for declaring and calling functions. This section
-         describes what is experimentally implemented in Saxon 12.</p>
+			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available (in various forms) since Saxon 9.8.</aside>
 
+			<h2>Lambda notation</h2>
 
-      <nav>
-         <ul/>
-      </nav>
+			<p>New syntax, similar to lambda expresions in Java, C#, and Javascript, is available for anonymous inline functions. For example, <code>function($a, $b){$a + $b}</code> can be written as <code>($a, $b)->{$a + $b}</code>.</p>
 
-      <section id="simple-inline-functions" title="Simple inline functions">
-         <h1>Simple inline functions</h1>
-         
-         <p>TODO FIXME: Syntax for inline functions is different in XPath 4.0...</p>
+			<aside>This syntax is available from Saxon 12.3. The previous proposal <code>->($a, $b){$a + $b}</code> remains available for the time being. The new form does not allow argument types and return types to be declared.</aside>
 
-         <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available (in various forms) since Saxon 9.8.</aside>
+			<p>The concise syntax is helpful when writing simple callbacks, for example <code>fold-left($seq, 1, ($x, $y)->{$x*$y})</code> to calculate the product of a sequence of numbers.</p>
 
-         <h2>Lambda notation</h2>
+			<p>The parentheses can be omitted around the argument list if there is exactly one argument. But note that whitespace is needed between the variable name and the arrow (this is because names can include a hyphen).</p>
 
-         <p>New syntax, similar to lambda expresions in Java, C#, and Javascript, is available for 
-            anonymous inline functions. For example, <code>function($a, $b){$a + $b}</code> can be written as
-               <code>($a, $b)->{$a + $b}</code>.</p>
-         
-         <aside>This syntax is available from Saxon 12.3. The previous proposal <code>->($a, $b){$a + $b}</code>
-         remains available for the time being. The new form does not allow argument types and return types to
-         be declared.</aside>
-
-         <p>The concise syntax is helpful when writing simple callbacks, for example <code>fold-left($seq, 1, ($x, $y)->{$x*$y})</code>
-            to calculate the product of a sequence of numbers.</p>
-         
-         <p>The parentheses can be omitted around the argument list if there is exactly one argument. But note that whitespace
-         is needed between the variable name and the arrow (this is because names can include a hyphen).</p>
-
-         <!--<p>Argument types and return types can be included in the same way as with the full <code>function</code> syntax,
+			<!--<p>Argument types and return types can be included in the same way as with the full <code>function</code> syntax,
             though the benefits of conciseness typically apply only when these are omitted.</p>
 -->
-         <p>A zero-arity function can be written as, for example, <code>()->{doc('abc.xml')//z}</code>.</p>
+			<p>A zero-arity function can be written as, for example, <code>()->{doc('abc.xml')//z}</code>.</p>
 
-         <h2>Focus functions</h2>
-         <p>Simple inline functions taking a single argument can be simplified even further. For example,
-        the expression <code>function{@code}</code> represents a function that takes a single argument (presumably an element node),
-        and returns a selected attribute of that node. A simple inline function takes a single argument with required type <code>item()</code>,
-        and returns any sequence (type <code>item()*</code>). The function body is evaluated with a singleton focus based
-        on the supplied argument value.</p>
+			<h2>Focus functions</h2>
+			<p>Simple inline functions taking a single argument can be simplified even further. For example, the expression <code>function{@code}</code> represents a function that takes a single argument (presumably an element node), and returns a selected attribute of that node. A simple inline function takes a single argument with required type <code>item()</code>, and returns any sequence (type <code>item()*</code>). The function body is evaluated with a singleton focus based on the supplied argument value.</p>
 
-         <p>Simple inline functions are particularly convenient when providing functions as arguments to higher-order functions,
-        many of which accept a single item as their one argument.
-        For example, to sort employees in order of salary, you can write:</p>
-         <pre><code class="language-xquery">sort(//employee, (), function{@salary})</code></pre>
+			<p>Simple inline functions are particularly convenient when providing functions as arguments to higher-order functions, many of which accept a single item as their one argument. For example, to sort employees in order of salary, you can write:</p>
+			<pre><code class="language-xquery">sort(//employee, (), function{@salary})</code></pre>
 
-         <aside>Earlier Saxon releases experimented with the notations <code>.{@salary}</code> and <code>fn{@salary}</code>.
-            These forms have been dropped. The form <code>->{@salary}</code>, however, remains available for the time
-         being.</aside>
+			<aside>Earlier Saxon releases experimented with the notations <code>.{@salary}</code> and <code>fn{@salary}</code>. These forms have been dropped. The form <code>->{@salary}</code>, however, remains available for the time being.</aside>
 
-         <p>Simple inline functions can access externally-defined local variables in the usual way (that is, they have a closure).</p>
+			<p>Simple inline functions can access externally-defined local variables in the usual way (that is, they have a closure).</p>
 
-         <p>The expression <code class="bold">function{EXPR}</code> is a syntactic shorthand for:</p>
-         <pre><code class="language-xquery">function($x as item()) as item()* {$x!(EXPR)}</code></pre>
+			<p>The expression <code class="bold">function{EXPR}</code> is a syntactic shorthand for:</p>
+			<pre><code class="language-xquery">function($x as item()) as item()* {$x!(EXPR)}</code></pre>
 
 
 
 
-         <h2>Underscore functions</h2>
+			<h2>Underscore functions</h2>
 
-         <aside>This feature has been dropped in Saxon 12.</aside>
+			<aside>This feature has been dropped in Saxon 12.</aside>
 
 
-      </section>
-      <section id="sequence-variadic-functions" title="Variadic functions">
-         <h1>Variadic functions</h1>
+		</section>
+		<section id="sequence-variadic-functions" title="Variadic functions">
+			<h1>Variadic functions</h1>
 
-         <p>Variadic functions can be called with a variable number of positional arguments,
-            rather like the <code>concat()</code> function in previous XPath versions.</p>
+			<p>Variadic functions can be called with a variable number of positional arguments, rather like the <code>concat()</code> function in previous XPath versions.</p>
 
-         <p>Saxon 12 implements variadic functions, but only for built-in system functions
-            (not for user-defined functions).</p>
+			<p>Saxon 12 implements variadic functions, but only for built-in system functions (not for user-defined functions).</p>
 
-         <p>The sequence-variadic functions available include:</p>
+			<p>The sequence-variadic functions available include:</p>
 
-         <ul>
-            <li>
-               <code>fn:concat()</code>
-            </li>
-            <li>
-               <code>fn:codepoints-to-string()</code>
-            </li>
-         </ul>
-      </section>
+			<ul>
+				<li>
+					<code>fn:concat()</code>
+				</li>
+				<li>
+					<code>fn:codepoints-to-string()</code>
+				</li>
+			</ul>
+		</section>
 
-      <section id="optional-parameters" title="Optional parameters">
-         <h1>Optional parameters</h1>
+		<section id="optional-parameters" title="Optional parameters">
+			<h1>Optional parameters</h1>
 
-         <p>Function declarations in XSLT and XQuery can include optional parameters with a default value.</p>
+			<p>Function declarations in XSLT and XQuery can include optional parameters with a default value.</p>
 
-         <ul>
-            <li>
-               <p>XQuery syntax:</p>
-               <pre><code class="language-xquery"><![CDATA[declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S'))
+			<ul>
+				<li>
+					<p>XQuery syntax:</p>
+					<pre><code class="language-xquery"><![CDATA[declare function local:f($x as xs:dateTime, $y as xs:duration := xs:duration('PT0S'))
                          as xs:dateTime]]></code></pre>
-            </li>
-            <li>
-               <p>XSLT syntax:</p>
-               <pre><code class="language-xml"><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
+				</li>
+				<li>
+					<p>XSLT syntax:</p>
+					<pre><code class="language-xml"><![CDATA[<xsl:function name="local:f" as="xs:dateTime>
   <xsl:param name="x" as="xs:dateTime" required="yes"/>
   <xsl:param name="x" as="xs:duration" required="no" select="xs:duration('PT0S')"/>
 </xsl:function>]]></code></pre>
-            </li>
-         </ul>
-
-         <p>If a parameter is optional, then all subsequent parameters must also be optional.</p>
-
-         <p>If two functions in a query or stylesheet have the same name, then they must have non-overlapping
-            arity ranges. The arity range indicates the number of arguments that must be supplied in a call to the
-            function: the minimum is the number of required parameters, the maximum is the number of required parameters
-            plus optional parameters.
-            </p>
-
-         <aside>The rules for XSLT, where different functions may have different import precedence, are more complex:
-            see the specification for details.</aside>
-
-      </section>
-      <section id="keyword-arguments" title="Keyword arguments">
-         <h1>Keyword arguments</h1>
-
-         <p>In a static function call, arguments may be supplied either by position or by name. The call must have zero or more
-            positional parameters followed by zero or more keyword parameters. For example:</p>
-
-         <pre><code class="language-xquery">sort(//employee, key := ->{@salary})</code></pre>
-
-         <p>Although keywords will often be used for optional parameters as in this example, there is no rule requiring this.
-            Whether a parameter is optional or required, the corresponding argument may be supplied either positionally or by keyword.</p>
-
-         <p>The use of keyword arguments to supply options in an options parameter declared with a map type 
-               (for example <code>serialize($x, method:="xml", indent:=true())</code>) is dropped in Saxon 12.</p>
-
-         <p>The draft specification allows keywords to be used in a partial function application (for example
-            <code>f(x := ?, y := ?)</code>) but this is not currently implemented in Saxon.</p>
-
-      </section>
-      <section id="coercion" title="Coercion">
-         <h1>Coercion Rules</h1>
-         <p>In 4.0, the term <em>coercion rules</em> replaces <em>function conversion rules</em>.</p>
-         <p>These rules determine how the supplied value for a function argument or XSLT variable can differ
-            from the declared type.</p>
-         <p>In XQuery 4.0, the coercion rules are now used to convert variable values to their required
-         type. This includes both global variable declarations and local variables bound in <code>let</code>,
-         <code>for [member]</code>, and <code>group by</code> clauses of a FLWOR expression.</p>
-         
-         <h2>Automatic downcasting</h2>
-         
-         <p>The coercion rules now allow downcasting. For example, if the required type is declared as <code>xs:positiveInteger</code>
-            then the supplied value can be <code>42</code>: there is no longer any need for the caller to cast it as 
-            <code>xs:positiveInteger(42)</code>. Of course, an error occurs if the cast fails. The effect of this is to make
-            derived types such as <code>xs:positiveInteger</code> much more usable. Note that this rule doesn't allow any
-            casting operation, only a strict relabelling of the supplied value. For example, if the required type is <code>xs:integer</code>
-            then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code>
-            is allowed.</p>
-         
-         <h2>Arity reduction</h2>
-         
-         <p>The function coercion rules are extended to allow a supplied function item to have lower arity
-            than that implied by the signature of the required type. For example, <code>map:for-each()</code> expects a function with two
-            arguments, which are set respectively to the key and the value of an entry in the map. But if you are only interested in the key,
-            you can supply a function of arity 1, and your function will be called omitting the second argument. Similarly,
-            for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code>
-            which has arity zero: this has the effect that the predicate will always be true.</p>
-         
-         <p>This feature is implemented from Saxon 12.3.</p>
-      </section>
-      <section id="mapping-arrow" title="Mapping arrow operator">
-         <h1>Mapping arrow operator</h1>
-
-         <p>The expression <code>LHS =!> f()</code> applies the function on the right-hand side to each item delivered
-               by the left-hand side individually. For example <code>(-2 to +2) =!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>.
-               The effect is similar to writing <code>(-2 to +2) ! abs(.)</code>, but the operator precedences make it
-               easier to construct a pipeline of operations without parentheses. The rules are similar to the XPath 3.1 arrow
-               operator <code>LHS => f()</code> except that the function is not applied to the value of the left-hand operand
-               as a whole, but to each item individually; it thus combines the functions of <code>=></code> and <code>!</code>,
-               which accounts for the choice of operator symbol.</p>
-
-      </section>
-   </section>
-
-      <section id="other-xpath-extensions" title="Other XPath 4.0 extensions"> 
-
-         <h1>Other XPath 4.0 proposed extensions</h1>
+				</li>
+			</ul>
 
-         <p>This section lists other proposed XPath 4.0 language features that are implemented experimentally
-            in Saxon 12.</p>
+			<p>If a parameter is optional, then all subsequent parameters must also be optional.</p>
 
-         <nav>
-            <ul/>
-         </nav>
+			<p>If two functions in a query or stylesheet have the same name, then they must have non-overlapping arity ranges. The arity range indicates the number of arguments that must be supplied in a call to the function: the minimum is the number of required parameters, the maximum is the number of required parameters plus optional parameters. </p>
 
-         <section id="ternary" title="Ternary conditionals">
-            <h1>Ternary conditionals</h1>
+			<aside>The rules for XSLT, where different functions may have different import precedence, are more complex: see the specification for details.</aside>
 
-            <p>The syntax <code><i>condition</i> ?? <i>thenExpr</i> !! <i>elseExpr</i></code> is introduced
-               as an alternative for <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code>.
-               The semantics are identical.</p>
+		</section>
+		<section id="keyword-arguments" title="Keyword arguments">
+			<h1>Keyword arguments</h1>
 
-            <p>The operator syntax is borrowed from Raku (formerly Perl6), other operators such as "?" and ":"
-               being unavailable for the purpose.</p>
+			<p>In a static function call, arguments may be supplied either by position or by name. The call must have zero or more positional parameters followed by zero or more keyword parameters. For example:</p>
 
-            <p>
-               <em>This feature has recently been dropped from the draft specification, so it should
-               not be used. It will be removed in a future Saxon release.</em>
-            </p>
-         </section>
+			<pre><code class="language-xquery">sort(//employee, key := ->{@salary})</code></pre>
 
-         <section id="braced-conditionals" title="Braced Conditionals">
-            <h1>Braced Conditionals</h1>
+			<p>Although keywords will often be used for optional parameters as in this example, there is no rule requiring this. Whether a parameter is optional or required, the corresponding argument may be supplied either positionally or by keyword.</p>
 
-            <p>The syntax <code>if <i>condition</i> "{"  <i>thenExpr</i> "}" ("else" "{" <i>elseExpr</i> "}")?</code> is introduced
-                  as an alternative for <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code>.
-                  The semantics are identical, but the <code>else</code> part is optional, and defaults to an empty
-                  sequence.</p>
+			<p>The use of keyword arguments to supply options in an options parameter declared with a map type (for example <code>serialize($x, method:="xml", indent:=true())</code>) is dropped in Saxon 12.</p>
 
-            <p>For example, in XQuery, <code>if ($break) {&lt;br/&gt;}</code> outputs a <code>br</code> element
-               if <code>$break</code> is true, and does nothing if it is false.</p>
+			<p>The draft specification allows keywords to be used in a partial function application (for example <code>f(x := ?, y := ?)</code>) but this is not currently implemented in Saxon.</p>
 
+		</section>
+		<section id="coercion" title="Coercion">
+			<h1>Coercion Rules</h1>
+			<p>In 4.0, the term <em>coercion rules</em> replaces <em>function conversion rules</em>.</p>
+			<p>These rules determine how the supplied value for a function argument or XSLT variable can differ from the declared type.</p>
+			<p>In XQuery 4.0, the coercion rules are now used to convert variable values to their required type. This includes both global variable declarations and local variables bound in <code>let</code>, <code>for [member]</code>, and <code>group by</code> clauses of a FLWOR expression.</p>
 
-         </section>
+			<h2>Automatic downcasting</h2>
 
-         <section id="otherwise" title="Otherwise operator">
-            <h1>Otherwise operator</h1>
+			<p>The coercion rules now allow downcasting. For example, if the required type is declared as <code>xs:positiveInteger</code> then the supplied value can be <code>42</code>: there is no longer any need for the caller to cast it as <code>xs:positiveInteger(42)</code>. Of course, an error occurs if the cast fails. The effect of this is to make derived types such as <code>xs:positiveInteger</code> much more usable. Note that this rule doesn't allow any casting operation, only a strict relabelling of the supplied value. For example, if the required type is <code>xs:integer</code> then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code> is allowed.</p>
 
+			<h2>Arity reduction</h2>
 
-            <p>XPath 4.0 proposes an additional operator: <code class="bold"
-                  >otherwise</code>. The expression <code>A otherwise B</code>
-        returns the value of <code>A</code> unless it is an empty sequence, in which case it returns the value of <code>B</code>.
-        For example, the expression:</p>
+			<p>The function coercion rules are extended to allow a supplied function item to have lower arity than that implied by the signature of the required type. For example, <code>map:for-each()</code> expects a function with two arguments, which are set respectively to the key and the value of an entry in the map. But if you are only interested in the key, you can supply a function of arity 1, and your function will be called omitting the second argument. Similarly, for a function that expects a predicate (a function of arity one), you can now supply the value <code>fn:true#0</code> which has arity zero: this has the effect that the predicate will always be true.</p>
 
-            <pre><code class="language-xquery">chapter[title='Introduction'] otherwise chapter[1]</code></pre>
+			<p>This feature is implemented from Saxon 12.3.</p>
+		</section>
+		<section id="mapping-arrow" title="Mapping arrow operator">
+			<h1>Mapping arrow operator</h1>
 
-            <p>returns the chapter(s) entited "Introduction" if such a chapter exists; otherwise it returns the first chapter.</p>
+			<p>The expression <code>LHS =!> f()</code> applies the function on the right-hand side to each item delivered by the left-hand side individually. For example <code>(-2 to +2) =!> abs()</code> returns <code>(2, 1, 0, 1, 2)</code>. The effect is similar to writing <code>(-2 to +2) ! abs(.)</code>, but the operator precedences make it easier to construct a pipeline of operations without parentheses. The rules are similar to the XPath 3.1 arrow operator <code>LHS => f()</code> except that the function is not applied to the value of the left-hand operand as a whole, but to each item individually; it thus combines the functions of <code>=></code> and <code>!</code>, which accounts for the choice of operator symbol.</p>
 
-            <p>The precedence of the operator as implemented in Saxon 13 matches the current XPath 4.0 draft
-               specification (September 2024), which has changed since Saxon 12. The precedence is greater than 
-               comparison operators such as <code>=</code>, but less than arithmetic operators such as <code>+</code>.
-               So <code>$a = $b + $c otherwise $d</code> means <code>$a = (($b + $c) otherwise $d)</code>.
-            Use parentheses to make your intended meaning clear and to avoid any compatibility problems.</p>
+		</section>
+	</section>
 
+	<section id="other-xpath-extensions" title="Other XPath 4.0 extensions">
 
-         </section>
+		<h1>Other XPath 4.0 proposed extensions</h1>
 
-         <section id="short-circuit" title="Short-circuit boolean operators">
-            <h1>Short-circuit boolean operators</h1>
+		<p>This section lists other proposed XPath 4.0 language features that are implemented experimentally in Saxon 12.</p>
 
-            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled.</aside>
+		<nav>
+			<ul/>
+		</nav>
 
-            <p>Saxon 11 implemented two additional boolean operators: <code class="bold"
-                  >orElse</code> and
-                  <code class="bold"
-               >andAlso</code>. These are retained in Saxon 12, but they are likely to be
-                  dropped as the community group has taken a different direction.</p>
+		<section id="braced-conditionals" title="Braced Conditionals">
+			<h1>Braced Conditionals</h1>
 
-            <p>The <code>and</code> and <code>or</code> operators now have stricter rules governing optimization.
-               It is still permitted to evaluate the operands in either order, but an error in evaluating the right-hand
-               operand must not be reported unless evaluation of that operand is actually necessary.</p>
+			<p>The syntax <code>if <i>condition</i> "{" <i>thenExpr</i> "}" ("else" "{" <i>elseExpr</i> "}")?</code> is introduced as an alternative for <code>if (<i>condition</i>) then <i>thenExpr</i> else <i>elseExpr</i></code>. The semantics are identical, but the <code>else</code> part is optional, and defaults to an empty sequence.</p>
 
-            <p>Saxon implements this rule as follows:</p>
+			<p>For example, in XQuery, <code>if ($break) {&lt;br/&gt;}</code> outputs a <code>br</code> element if <code>$break</code> is true, and does nothing if it is false.</p>
 
-            <ul>
-               <li>
-                  <p>In the case of <code>and</code>, an error evaluating one operand is reported only
-                  if evaluation of the other operand returns <code>true</code>.</p>
-               </li>
-               <li>
-                  <p>In the case of <code>or</code>, an error evaluating one operand is reported only
-                     if evaluation of the other operand returns <code>false</code>.</p>
-               </li>
-            </ul>
 
-            <p>This means that the expression:</p>
+		</section>
 
-            <pre><code class="language-xquery">//chapter[pages=0 or length div pages]</code></pre>
+		<section id="otherwise" title="Otherwise operator">
+			<h1>Otherwise operator</h1>
 
-            <p>will never fail with a divide-by-zero error, even if the operands are evaluated in a different order.</p>
 
-            <p>A similar rule is adopted for expressions with multiple predicates, for example
-                  the following is now guaranteed to return no failure if <code>@code</code> is
-                  non-numeric:</p>
+			<p>XPath 4.0 proposes an additional operator: <code class="bold">otherwise</code>. The expression <code>A otherwise B</code> returns the value of <code>A</code> unless it is an empty sequence, in which case it returns the value of <code>B</code>. For example, the expression:</p>
 
-            <pre><code class="language-xquery">@code[. castable as xs:integer][xs:integer(.) = 2]</code></pre>
+			<pre><code class="language-xquery">chapter[title='Introduction'] otherwise chapter[1]</code></pre>
 
+			<p>returns the chapter(s) entited "Introduction" if such a chapter exists; otherwise it returns the first chapter.</p>
 
-         </section>
+			<p>The precedence of the operator as implemented in Saxon 13 matches the current XPath 4.0 draft specification (September 2024), which has changed since Saxon 12. The precedence is greater than comparison operators such as <code>=</code>, but less than arithmetic operators such as <code>+</code>. So <code>$a = $b + $c otherwise $d</code> means <code>$a = (($b + $c) otherwise $d)</code>. Use parentheses to make your intended meaning clear and to avoid any compatibility problems.</p>
 
-         <section id="lookup-generalization" title="Lookup expressions">
-            <h1>Lookup expressions: removal of restrictions</h1>
 
-            <p>The lookup operator "?" (in both its unary and binary forms) can now be followed by:</p>
+		</section>
 
-            <ul>
-               <li>A string literal, for example <code>$person?'date of birth'</code></li>
-               <li>A variable reference, for example <code>$array?$index</code></li>
-            </ul>
+		<section id="short-circuit" title="Short-circuit boolean operators">
+			<h1>Short-circuit boolean operators</h1>
 
-            <p>The effect is the same as if the string literal or variable were written in parentheses.</p>
-         </section>
+			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled.</aside>
 
+			<p>Saxon 11 implemented two additional boolean operators: <code class="bold">orElse</code> and <code class="bold">andAlso</code>. These are retained in Saxon 12, but they are likely to be dropped as the community group has taken a different direction.</p>
 
-         <section id="for-member-expression" title="For-member expressions">
-            <h1>For-member expressions</h1>
+			<p>The <code>and</code> and <code>or</code> operators now have stricter rules governing optimization. It is still permitted to evaluate the operands in either order, but an error in evaluating the right-hand operand must not be reported unless evaluation of that operand is actually necessary.</p>
 
-            <aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
+			<p>Saxon implements this rule as follows:</p>
 
-            <p>The <code class="bold"
-               >for member</code> expression is a Saxon extension to XPath 3.1 syntax introduced in Saxon 10. It allows
-      convenient iterative processing of the members of an array.</p>
+			<ul>
+				<li>
+					<p>In the case of <code>and</code>, an error evaluating one operand is reported only if evaluation of the other operand returns <code>true</code>.</p>
+				</li>
+				<li>
+					<p>In the case of <code>or</code>, an error evaluating one operand is reported only if evaluation of the other operand returns <code>false</code>.</p>
+				</li>
+			</ul>
 
-            <p>For example: </p>
-            <pre><code class="language-xquery">for member $m in [(3,5,6), (8,12)] return sum($m)</code></pre>
-            <p>returns the sequence <code>(14, 20)</code>.</p>
+			<p>This means that the expression:</p>
 
-            <p>A <code>ForMemberExpr</code> is a new kind of <code>ExprSingle</code>; this means it can be used anywhere a <code>ForExpr</code>
-      or <code>LetExpr</code> is allowed. The syntax is:</p>
+			<pre><code class="language-xquery">//chapter[pages=0 or length div pages]</code></pre>
 
-            <samp>ForMemberExpr ::= "for" "member" SimpleForBinding ("," SimpleForBinding)* "return" ExprSingle</samp>
+			<p>will never fail with a divide-by-zero error, even if the operands are evaluated in a different order.</p>
 
-            <p>Here <code>SimpleForBinding</code> takes the same form as in a <code>ForExpr</code>: </p>
-            <samp>"$" VarName "in" ExprSingle</samp>
+			<p>A similar rule is adopted for expressions with multiple predicates, for example the following is now guaranteed to return no failure if <code>@code</code> is non-numeric:</p>
 
-            <p>The semantics are as follows:</p>
+			<pre><code class="language-xquery">@code[. castable as xs:integer][xs:integer(.) = 2]</code></pre>
 
-            <ul>
-               <li>Each expression in a <code>SimpleForBinding</code> must evaluate to a single array.</li>
-               <li>The expression <code>for member $x in X, $y in Y return R</code> is equivalent to 
-          <code>for member $x in X return for member $y in Y return R</code>.</li>
-               <li>The expression <code>for $x in X return R</code> binds the variable <code>$x</code> to each member of the
-        array <code>X</code> in turn, evaluates <code>R</code> with this variable binding in scope, and returns the
-        sequence-concatenation of all the evaluations of <code>R</code>, in order.</li>
-            </ul>
 
-            <aside>The expression <code>for member $x in $X return f($x)</code> is equivalent to 
-            <code>for $x in array:members($x) return f(unparcel($x))</code>.</aside>
+		</section>
 
-            <p>The <code>for member</code> expression is currently available only as a free-standing expression; it cannot be
-      used as a clause within an XQuery FLWOR expression.</p>
+		<section id="lookup-generalization" title="Lookup expressions">
+			<h1>Lookup expressions: removal of restrictions</h1>
 
-            <p>Some further examples:</p>
+			<p>The lookup operator "?" (in both its unary and binary forms) can now be followed by:</p>
 
-            <pre><code class="language-xquery"><![CDATA[let $json := '[{"x":1, "y":"one"}, {"x":2, "y":"two"}]'
+			<ul>
+				<li>A string literal, for example <code>$person?'date of birth'</code></li>
+				<li>A variable reference, for example <code>$array?$index</code></li>
+			</ul>
+
+			<p>The effect is the same as if the string literal or variable were written in parentheses.</p>
+		</section>
+
+
+		<section id="for-member-expression" title="For-member expressions">
+			<h1>For-member expressions</h1>
+
+			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 10.</aside>
+
+			<p>The <code class="bold">for member</code> expression is a Saxon extension to XPath 3.1 syntax introduced in Saxon 10. It allows convenient iterative processing of the members of an array.</p>
+
+			<p>For example: </p>
+			<pre><code class="language-xquery">for member $m in [(3,5,6), (8,12)] return sum($m)</code></pre>
+			<p>returns the sequence <code>(14, 20)</code>.</p>
+
+			<p>A <code>ForMemberExpr</code> is a new kind of <code>ExprSingle</code>; this means it can be used anywhere a <code>ForExpr</code> or <code>LetExpr</code> is allowed. The syntax is:</p>
+
+			<samp>ForMemberExpr ::= "for" "member" SimpleForBinding ("," SimpleForBinding)* "return" ExprSingle</samp>
+
+			<p>Here <code>SimpleForBinding</code> takes the same form as in a <code>ForExpr</code>: </p>
+			<samp>"$" VarName "in" ExprSingle</samp>
+
+			<p>The semantics are as follows:</p>
+
+			<ul>
+				<li>Each expression in a <code>SimpleForBinding</code> must evaluate to a single array.</li>
+				<li>The expression <code>for member $x in X, $y in Y return R</code> is equivalent to <code>for member $x in X return for member $y in Y return R</code>.</li>
+				<li>The expression <code>for $x in X return R</code> binds the variable <code>$x</code> to each member of the array <code>X</code> in turn, evaluates <code>R</code> with this variable binding in scope, and returns the sequence-concatenation of all the evaluations of <code>R</code>, in order.</li>
+			</ul>
+
+			<aside>The expression <code>for member $x in $X return f($x)</code> is equivalent to <code>for $x in array:members($x) return f(unparcel($x))</code>.</aside>
+
+			<p>The <code>for member</code> expression is currently available only as a free-standing expression; it cannot be used as a clause within an XQuery FLWOR expression.</p>
+
+			<p>Some further examples:</p>
+
+			<pre><code class="language-xquery"><![CDATA[let $json := '[{"x":1, "y":"one"}, {"x":2, "y":"two"}]'
 return for member $map in parse-json($json) return $map?y]]></code></pre>
 
-            <p>returns <code>("one", "two")</code>.</p>
+			<p>returns <code>("one", "two")</code>.</p>
 
-            <pre><code class="language-xquery"><![CDATA[let $json := '[[1,2,3], [4,5,6]]'
+			<pre><code class="language-xquery"><![CDATA[let $json := '[[1,2,3], [4,5,6]]'
 return for member $A in parse-json($json), $a in $A return $a*2]]></code></pre>
 
-            <p>returns <code>(2, 4, 6, 8, 10, 12)</code>.</p>
+			<p>returns <code>(2, 4, 6, 8, 10, 12)</code>.</p>
 
-            <p>Note that the result of the expression is a sequence, not an array.</p>
-            
-            
-         </section>
-         
-         <section id="for-let-expressions" title="For and let expressions">
-            <h1>For and let expressions</h1>
-            <p>XPath 4.0 allows multiple <code>let</code> clauses, or multiple <code>for</code> clauses
-               (but not a mixture) in an expression. For example:</p>
-            <ul>
-               <li><code>let $i := 2 let $j := 3 return $i + $j</code></li>
-               <li><code>for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></li>
-            </ul>
-            <p>This feature is implemented from Saxon 12.3.</p>
-         </section>
-
-         <section id="numeric-literals" title="Numeric Literals">
-            <h1>Numeric Literals</h1>
-            <p>Numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>),
-                  and underscores can be used as separators (<code>1_000_000</code>).</p>
-         </section>
-
-         <section id="non-ascii-operators" title="Non-ASCII operator symbols">
-            <h1>Non-ASCII operator symbols</h1>
-            <p>The non-ASCII characters <code>×</code> (xD7) and <code>÷</code> (xF7) can be
-                  used in place of <code>*</code> and <code>div</code> to represent the multiplication and division
-                  operators.</p>
-            <p>The <code>＜</code> and <code>＞</code> characters (xFF1C and xFF1E) can be used
-                  in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than
-                  operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code>
-                  in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>,
-               <code>&gt;&gt;</code>, <code>=&gt;</code>, <code>-&gt;</code>, and <code>=!&gt;</code>.</p>
-            <p>This feature is implemented from Saxon 12.3.</p>
-         </section>
-
-   </section>
-   <section id="xslt-syntax-extensions" title="XSLT 4.0 extensions">
-      <h1>Experimental XSLT 4.0 extensions</h1>
-
-      <aside>Requires Saxon-PE or Saxon-EE. Available in SaxonCS.</aside>
-
-      <p>This section describes features proposed for XSLT 4.0, to the extent they are implemented in Saxon 12.</p>
-
-      <aside>Use of forwards compatibility mode (by specifying <code>version="4.0"</code>, say), does not
-      affect the way these extensions are handled: they are allowed if extensions are enabled, and disallowed
-      if extensions are disabled, regardless of the effective <code>version</code> in the stylesheet.
-    </aside>
-
-      <p>Enabling syntax extensions not only allows the use of the XSLT extensions described in this section,
-    it also allows XPath 4.0 extensions to be used in expressions and sequence types within the stylesheet, 
-    as described in <a class="bodylink" href="/v4extensions/other-xpath-extensions"
-            >Other XPath 4.0 extensions</a> and elsewhere.</p>
-
-      <nav>
-         <ul/>
-      </nav>
+			<p>Note that the result of the expression is a sequence, not an array.</p>
 
 
-      <section id="creating-arrays" title="Creating arrays">
-         <h1>Creating arrays</h1>
-         
-         <p>TODO FIXME: Move this info to xsl:array page, but update it: e.g. composite attribute is
-            no longer used.</p>
-         <p>TODO FIXME: the QT4 specifications are yet to settle on how array members are
-            represented: parcels or value records.</p>
+		</section>
 
-         <p>The new <a class="bodylink code" href="/xsl-elements/array"
-            >xsl:array</a> instruction can be used to
-            create an array. The contents of the array are formed from the sequence returned by the contained sequence constructor.</p>
+		<section id="for-let-expressions" title="For and let expressions">
+			<h1>For and let expressions</h1>
+			<p>XPath 4.0 allows multiple <code>let</code> clauses, or multiple <code>for</code> clauses (but not a mixture) in an expression. For example:</p>
+			<ul>
+				<li><code>let $i := 2 let $j := 3 return $i + $j</code></li>
+				<li><code>for $i in 1 to 10 for $j in 1 to 3 return $i * $j</code></li>
+			</ul>
+			<p>This feature is implemented from Saxon 12.3.</p>
+		</section>
 
-         <p>There are two forms of the instruction.</p>
+		<section id="numeric-literals" title="Numeric Literals">
+			<h1>Numeric Literals</h1>
+			<p>Numeric integer literals can be written in hex (<code>0xFFFF0000</code>) or binary (<code>0b101010</code>), and underscores can be used as separators (<code>1_000_000</code>).</p>
+		</section>
 
-         <ul>
-            <li>
-               <p>To create a simple array in which every member is a singleton item, use <code>&lt;xsl:array composite="no"></code>
-            (this is the default so the attribute can be omitted). Every item delivered by the sequence constructor then becomes
-            an individual member of the array.</p>
-            </li>
-            <li>
-               <p>To create an array in which some members might be non-singleton sequences, use <code>&lt;xsl:array composite="yes"></code>.
-            In this case every item delivered by the sequence constructor must be a <i>parcel</i>. A parcel is an item of type
-            <code>record(value, *)</code>, that is, a map containing an entry whose key is the string "value", and whose corresponding
-            value is an arbitrary sequence. This sequence is used as the value of the array member.</p>
-               <p>It's often convenient to construct a parcel using the <a class="bodylink code"
-                     href="/xsl-elements/array-member"
-                     >xsl:array-member</a> instruction, but that's
-            not the only way to do it. You could also do it, for example, by calling <code>fn:parcel()</code>. Or you could decompose
-            an existing array into parcels using the function <code>array:members</code>, and use some of
-                  those parcels to form the new array.</p>
-            </li>
-         </ul>
-      </section>
-   </section>
-   
-   <section id="xquery40-extensions" title="XQuery 4.0 extensions">
-      <h1>XQuery 4.0 extensions</h1>
-      
-      <p>From 12.3, XQuery switch expressions are generalized so that each <code>case</code> may match multiple values,
-         for example <code>case 0 to 9 return "single"</code>.</p>
-      
-      <p>From 12.3, some of the constructs in a FLWOR <code>window</code> clause become optional, for example it is no longer
-         necessary to say <code>when true()</code>.</p>
-   </section>
+		<section id="non-ascii-operators" title="Non-ASCII operator symbols">
+			<h1>Non-ASCII operator symbols</h1>
+			<p>The non-ASCII characters <code>×</code> (xD7) and <code>÷</code> (xF7) can be used in place of <code>*</code> and <code>div</code> to represent the multiplication and division operators.</p>
+			<p>The <code>＜</code> and <code>＞</code> characters (xFF1C and xFF1E) can be used in place of <code>&lt;</code> and <code>&gt;</code> to represent the less-than and greater-than operators; these characters can also be used in place of <code>&lt;</code> and <code>&gt;</code> in the compound tokens <code>&lt;=</code>, <code>>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>=&gt;</code>, <code>-&gt;</code>, and <code>=!&gt;</code>.</p>
+			<p>This feature is implemented from Saxon 12.3.</p>
+		</section>
+
+	</section>
+	<section id="xslt-syntax-extensions" title="XSLT 4.0 extensions">
+		<h1>Experimental XSLT 4.0 extensions</h1>
+
+		<aside>Requires Saxon-PE or Saxon-EE. Available in SaxonCS.</aside>
+
+		<p>This section describes features proposed for XSLT 4.0, to the extent they are implemented in Saxon 12.</p>
+
+		<aside>Use of forwards compatibility mode (by specifying <code>version="4.0"</code>, say), does not affect the way these extensions are handled: they are allowed if extensions are enabled, and disallowed if extensions are disabled, regardless of the effective <code>version</code> in the stylesheet. </aside>
+
+		<p>Enabling syntax extensions not only allows the use of the XSLT extensions described in this section, it also allows XPath 4.0 extensions to be used in expressions and sequence types within the stylesheet, as described in <a class="bodylink" href="/v4extensions/other-xpath-extensions">Other XPath 4.0 extensions</a> and elsewhere.</p>
+
+		<nav>
+			<ul/>
+		</nav>
+
+
+		<section id="creating-arrays" title="Creating arrays">
+			<h1>Creating arrays</h1>
+
+			<p>TODO FIXME: Move this info to xsl:array page, but update it: e.g. composite attribute is no longer used.</p>
+			<p>TODO FIXME: the QT4 specifications are yet to settle on how array members are represented: parcels or value records.</p>
+
+			<p>The new <a class="bodylink code" href="/xsl-elements/array">xsl:array</a> instruction can be used to create an array. The contents of the array are formed from the sequence returned by the contained sequence constructor.</p>
+
+			<p>There are two forms of the instruction.</p>
+
+			<ul>
+				<li>
+					<p>To create a simple array in which every member is a singleton item, use <code>&lt;xsl:array composite="no"></code> (this is the default so the attribute can be omitted). Every item delivered by the sequence constructor then becomes an individual member of the array.</p>
+				</li>
+				<li>
+					<p>To create an array in which some members might be non-singleton sequences, use <code>&lt;xsl:array composite="yes"></code>. In this case every item delivered by the sequence constructor must be a <i>parcel</i>. A parcel is an item of type <code>record(value, *)</code>, that is, a map containing an entry whose key is the string "value", and whose corresponding value is an arbitrary sequence. This sequence is used as the value of the array member.</p>
+					<p>It's often convenient to construct a parcel using the <a class="bodylink code" href="/xsl-elements/array-member">xsl:array-member</a> instruction, but that's not the only way to do it. You could also do it, for example, by calling <code>fn:parcel()</code>. Or you could decompose an existing array into parcels using the function <code>array:members</code>, and use some of those parcels to form the new array.</p>
+				</li>
+			</ul>
+		</section>
+	</section>
+
+	<section id="xquery40-extensions" title="XQuery 4.0 extensions">
+		<h1>XQuery 4.0 extensions</h1>
+
+		<p>From 12.3, XQuery switch expressions are generalized so that each <code>case</code> may match multiple values, for example <code>case 0 to 9 return "single"</code>.</p>
+
+		<p>From 12.3, some of the constructs in a FLWOR <code>window</code> clause become optional, for example it is no longer necessary to say <code>when true()</code>.</p>
+	</section>
 
 
 
