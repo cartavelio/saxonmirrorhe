@@ -637,7 +637,7 @@ int main() {
        << "============================================================="
        << endl
        << endl;
-  runTest("testMatches", "matches('abcdef', '^\\p{IsBasicLatin}+$')", "false",
+  runTest("testMatches", "matches('abcdef', '^\\p{IsBasicLatin}+$')", "true",
           xpathProc, sresult, document);
 
   cout << endl
