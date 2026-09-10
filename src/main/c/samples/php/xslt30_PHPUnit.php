@@ -495,7 +495,7 @@ final class XSLT30Test extends TestCase
     public function testCallTemplateWithResultValidation(): void
     {
         $saxonProc2 = new Saxon\SaxonProcessor(True);
-        $saxonProc2->setcwd("/home/ond1/work/svn/latest9.9-saxonc/samples/php/");
+        $saxonProc2->setcwd("/var/www/html"); //Change according to dir setup
         $transformer = $saxonProc2->newXslt30Processor();
         $source = "<?xml version='1.0'?>" .
             "                <xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform'" .

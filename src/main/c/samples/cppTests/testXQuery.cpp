@@ -430,7 +430,7 @@ int main(int argc, char* argv[])
     GetCurrentDir( buff, FILENAME_MAX );
     cout<<"CWD = "<< buff<<endl;
     if(cwd != nullptr) {
-        processor->setcwd(cwd);//"/Users/ond1/work/development/git/saxon-dev/saxondev/src/main/c/samples/cppTests"); //set to the current working directory
+        processor->setcwd(cwd); //set to the current working directory
     } else {
         processor->setcwd(buff);
     }
