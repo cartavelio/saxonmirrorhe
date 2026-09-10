@@ -456,6 +456,9 @@
         <p>From 12.3, XQuery switch expressions are generalized so that each <code>case</code> may match multiple values,
         for example <code>case 0 to 9 return "single"</code>.</p>
         
+        <p>From 12.3, some of the constructs in a FLWOR <code>window</code> clause become optional, for example it is no longer
+            necessary to say <code>when true()</code>.</p>
+        
         <h2>XSLT extensions</h2>
         
         
