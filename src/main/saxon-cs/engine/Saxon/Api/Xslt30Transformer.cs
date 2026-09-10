@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Impl.Helpers;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -11,6 +12,9 @@ using Saxon.Hej.s9api;
 using Saxon.Hej.trans;
 using Saxon.Api.Support;
 using Saxon.Callbacks;
+using Saxon.Ejavax.xml.transform;
+using Saxon.Hej;
+using Saxon.Hej.pull;
 using StandardMessageHandler = Saxon.Callbacks.StandardMessageHandler;
 
 namespace Saxon.Api {
@@ -395,7 +399,7 @@ namespace Saxon.Api {
 
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -415,7 +419,7 @@ namespace Saxon.Api {
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
         /// using the supplied base URI,
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -435,8 +439,8 @@ namespace Saxon.Api {
             s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
-               /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -457,7 +461,7 @@ namespace Saxon.Api {
 
         /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
         /// using the supplied base URI,
-        /// sending the results (wrapped in a document node) to a given <c>Destination</c>. The 
+        /// sending the results to a given <c>IDestination</c>. The 
         /// invocation uses any initial mode set using <see cref="InitialMode"/>,
         /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
@@ -552,11 +556,53 @@ namespace Saxon.Api {
             return s9Transformer.applyTemplates(streamSource);
         }
 
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// sending the results to a given <c>IDestination</c>. The 
+        /// invocation uses any initial mode set using <see cref="InitialMode"/>,
+        /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
+        /// </summary>
+        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.</param>
+        /// <param name="destination">The destination of the result document produced by wrapping the result 
+        /// of the apply-templates call in a document node.  If the destination is a <see cref="Serializer"/>, 
+        /// then the serialization parameters set in the serializer are combined with those defined in the 
+        /// stylesheet (the parameters set in the serializer take precedence).</param>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+      
+        public void ApplyTemplates(XmlReader input, IDestination destination) {
+            s9Transformer.applyTemplates(makePullSource(input), destination.UnderlyingDestination);
+        }
+        
+        /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
+        /// using the supplied base URI, returning the raw results as an <c>XdmValue</c>. The 
+        /// invocation uses any initial mode set using <see cref="InitialMode"/>,
+        /// and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
+        /// </summary>
+        /// <param name="input">The source document, encapsulated by an <c>XmlReader</c>.</param>
+        /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
+        /// a document node or serializing the result. If there is more than one item in the selection, the result
+        /// is the concatenation of the results of applying templates to each item in turn.</returns>
+        /// <remarks>
+        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// </remarks>
+        public XdmValue ApplyTemplates(XmlReader input) {
+            return s9Transformer.applyTemplates(makePullSource(input));
+        }
 
+        private PullSource makePullSource(XmlReader reader) {
+            Configuration config = s9Transformer.getUnderlyingController().getConfiguration();
+            PullProvider pp = new DotNetPullProvider(reader);
+            pp.setPipelineConfiguration(config.makePipelineConfiguration());
+            // pp = new PullTracer(pp);  /* diagnostics */
+            PullSource source = new (pp);
+            source.setSystemId(reader.BaseURI);
+            return source;
+        }
 
         /// <summary>
-        /// Invoke the stylesheet by applying templates to a supplied input sequence, sending the results (wrapped
-        /// in a document node) to a given <c>Destination</c>. The invocation uses any initial mode set using 
+        /// Invoke the stylesheet by applying templates to a supplied input sequence, sending the results 
+        /// to a given <c>IDestination</c>. The invocation uses any initial mode set using 
         /// <see cref="InitialMode"/>, and any template parameters set using <see cref="SetInitialTemplateParameters"/>.
         /// </summary>
         /// <param name="selection">The initial value to which templates are to be applied (equivalent to the <code>select</code>
