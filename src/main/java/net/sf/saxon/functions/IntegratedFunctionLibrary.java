@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * A library of integrated function calls, that is, user-written extension functions implemented
- * as instances of the class IntegratedFunction.
+ * as instances of the class {@link ExtensionFunctionDefinition}.
  */
 public class IntegratedFunctionLibrary implements FunctionLibrary {
 
@@ -101,11 +101,7 @@ public class IntegratedFunctionLibrary implements FunctionLibrary {
             return null;
         }
         try {
-            return defn.asFunction();
-//            ExtensionFunctionCall f = defn.makeCallExpression();
-//            FunctionItemType type = new SpecificFunctionType(
-//                    defn.getArgumentTypes(), defn.getResultType(defn.getArgumentTypes()));
-//            return new CallableFunction(functionName, f, type);
+            return defn.asFunction(functionName.getArity());
         } catch (Exception err) {
             throw new XPathException("Failed to create call to extension function " + functionName.getComponentName().getDisplayName(), err);
         }
