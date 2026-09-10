@@ -21,18 +21,18 @@ import net.sf.saxon.value.AtomicValue;
 public class JNodePattern extends Pattern {
 
     private final AtomicValue selector;
-    private final SequenceMatcher contentType;
+    private final SequenceMatcher contentPattern;
 
-    public JNodePattern(AtomicValue selector, SequenceMatcher contentType) {
+    public JNodePattern(AtomicValue selector, SequenceMatcher contentPattern) {
         this.selector = selector;
-        this.contentType = contentType;
+        this.contentPattern = contentPattern;
     }
 
     @Override
     public boolean matches(Item item, XPathContext context) throws XPathException {
         return item instanceof JNode jnode &&
                 (selector == null || (jnode.getSelector() != null && jnode.getSelector().asMapKey(40).equals(selector.asMapKey(40))))
-                && contentType.matches(jnode.getContent(), context);
+                && contentPattern.matches(jnode.getContent(), context);
     }
 
     @Override
@@ -55,24 +55,15 @@ public class JNodePattern extends Pattern {
     @Override
     public double getDefaultPriority() {
         /*
-            If the pattern has one or more predicates, then the default priority is +0.5.
-            The default priority of the pattern jnode(*, *) is -1 (minus one).
-            The default priority of the equivalent pattern jnode(*, item()*) is also -1 (minus one).
-            The default priority of the pattern jnode(S, *), where S is any constant, is 0 (zero).
-            The default priority of the equivalent pattern jnode(S, item()*), where S is any constant, is also 0 (zero).
-            The default priority of the pattern jnode(*, T), where T is any sequence type other than item()*, is 0 (zero).
-            The default priority of the pattern jnode(S, T), where S is any constant, and T is any sequence type other than item()*, is +0.25.
+           If the pattern contains at least one predicate, then +0.5 [handled elsewhere].
+           If the JNodeSelectorPattern is *, then the default priority of the contained pattern, ignoring any occurrence indicator.
+           For example, the default priority of the pattern jnode(*, P*) is the default priority of P.
+           Otherwise, the default priority of the contained pattern, ignoring any occurrence indicator, or zero, whichever is higher.
         */
         if (selector == null) {
-            if (contentType == SequenceMatcher.UNIVERSAL_MATCHER) {
-                return -1;
-            } else {
-                return 0;
-            }
-        } else if (contentType == SequenceMatcher.UNIVERSAL_MATCHER) {
-            return 0;
+            return contentPattern.getItemPattern().getDefaultPriority();
         } else {
-            return 0.25;
+            return Double.max(contentPattern.getItemPattern().getDefaultPriority(), 0);
         }
     }
 
