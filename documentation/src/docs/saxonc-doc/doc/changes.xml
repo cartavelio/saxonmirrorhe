@@ -425,9 +425,9 @@
                         target="_blank">Xslt30Processor</a>
                   </li>
                   <li>Python APIs: <a
-                     href="https://www.saxonica.com/saxon-c/doc/html/saxonc.html#PyXsltProcessor"
+                     href="https://www.saxonica.com/saxon-c/doc1.2/html/saxonc.html#PyXsltProcessor"
                      target="_blank">PyXsltProcessor </a> and <a
-                        href="https://www.saxonica.com/saxon-c/doc/html/saxonc.html#PyXslt30Processor"
+                        href="https://www.saxonica.com/saxon-c/doc1.2/html/saxonc.html#PyXslt30Processor"
                         target="_blank">PyXslt30Processor </a>
                   </li>
                   <li>PHP APIs: <a href="/api/saxon_c_php_api/saxon_c_php_xsltprocessor"
