@@ -231,7 +231,7 @@ public:
   //! element
   /**
    *
-   *
+   * User is responsible for memory management for the attribute nodes. Deallocate using `operator delete`
    * @param name the name of the required attribute, interpreted as a
    * no-namespace name
    * @return NULL if this node is not an element, or if this element has no
@@ -252,8 +252,8 @@ public:
   /**
    *
    *
-   * @param cache - deprecated. User is
-   * responsible for memory management for the attribute nodes.
+   * @param cache - deprecated.
+   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
    * @return NULL if this node is not an element, or if this element has no
    * attribute with the specified name. Otherwise return the attribute nodes as
    * a pointer array.
@@ -262,6 +262,7 @@ public:
 
   //! Get the array of nodes reachable from this node via a given axis.
   /**
+  * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
   * @param axis - identifies which axis is to be navigated. Axis options are as
   follows:
          * ANCESTOR = 0, ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
@@ -305,14 +306,17 @@ public:
 
   //! Get all the child nodes from the current parent node.
   /**
-   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
+   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
+   * Caching is no longer used, the value of cache is ignored.
+   * This param is deprecated and will be removed in a later version.
    * @return pointer array of XdmNode objects
    */
   XdmNode **getChildren(bool cache = false);
 
   //! Get the ith child nodes from the current parent node
   /**
-   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.ß
+   * User is responsible for memory management for the attribute nodes. Deallocate using `delete`
+   * Caching is no longer used, the value of cache is ignored. This param is deprecated and will be removed in a later version.
    * @return a pointer to the ith child node
    */
 
@@ -339,7 +343,7 @@ public:
     void resetRelinquishedChildren();
 
     /**
-      * Internal method used to increment the ref count for an relinquished child only once
+      * Internal method used to increment the ref count for a relinquished child only once
       */
     void incrementRefCountForRelinquishedChildren();
 
