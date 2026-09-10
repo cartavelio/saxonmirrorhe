@@ -1,16 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Saxon.Api;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
-using Org.XmlResolver.Features;
-using Saxon.Callbacks;
-using Saxon.Eej.config;
-using Saxon.Ejava.util;
-using Saxon.Ejavax.xml.transform.sax;
-using Saxon.Hej;
+
 
 namespace SaxonCS_NUnit {
     public class CatalogResolverTest {
@@ -40,6 +33,7 @@ namespace SaxonCS_NUnit {
             builder.DtdValidation = (true);
             try {
                 XdmNode doc = builder.Build(new Uri(ConfigTest.DataDirUri, "resolvers/ok.xml"));
+                Assert.NotNull(doc);
             }
             catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -83,7 +77,7 @@ namespace SaxonCS_NUnit {
 
                 transformer.GlobalContextItem = (doc);
 
-                XdmDestination destination = new XdmDestination();
+                XdmDestination destination = new ();
                 transformer.ApplyTemplates(doc, destination);
 
                 Console.WriteLine(destination.XdmNode);
@@ -124,9 +118,81 @@ namespace SaxonCS_NUnit {
                 Assert.Fail();
             }
         }
+        
+        [Test]
+        public void xmlResolverStylesheetUriResolverOverride() {
+            // Override catalog resolution with specific resolver
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            string included =
+                "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
+                "version='3.0'><xsl:template match='/'><boo/></xsl:template></xsl:transform>";
+            try {
+                XsltCompiler compiler = processor.NewXsltCompiler();
+                compiler.BaseUri = ConfigTest.DataDirUri;
+                compiler.StylesheetModuleResolver = request => new TextResource(included, request.Uri);
+                Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/stylesheet.xsl", FileMode.Open);
+                XsltExecutable exec = compiler.Compile(xsl);
+
+                Xslt30Transformer transformer = exec.Load30();
+
+                DocumentBuilder builder = processor.NewDocumentBuilder();
+                builder.DtdValidation = true;
+                XdmNode doc = builder.Build(new FileStream(ConfigTest.DATA_DIR + "resolvers/input.xml", FileMode.Open));
+
+                transformer.GlobalContextItem = (doc);
+
+                StringWriter sw = new();
+                Serializer destination = processor.NewSerializer(sw);
+                transformer.ApplyTemplates(doc, destination);
+                Assert.That(sw.ToString().Contains("<boo/>"));
+                
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+        
+        [Test]
+        public void xmlResolverStylesheetUriResolverFallback() {
+            // Specific resolver returns null; fallback to catalog resolver
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            string included =
+                "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' " +
+                "version='3.0'><xsl:template match='/'><boo/></xsl:template></xsl:transform>";
+            try {
+                XsltCompiler compiler = processor.NewXsltCompiler();
+                compiler.BaseUri = ConfigTest.DataDirUri;
+                compiler.StylesheetModuleResolver = request => null;
+                Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/stylesheet.xsl", FileMode.Open);
+                XsltExecutable exec = compiler.Compile(xsl);
+
+                Xslt30Transformer transformer = exec.Load30();
+
+                DocumentBuilder builder = processor.NewDocumentBuilder();
+                builder.DtdValidation = true;
+                XdmNode doc = builder.Build(new FileStream(ConfigTest.DATA_DIR + "resolvers/input.xml", FileMode.Open));
+
+                transformer.GlobalContextItem = (doc);
+
+                StringWriter sw = new();
+                Serializer destination = processor.NewSerializer(sw);
+                transformer.ApplyTemplates(doc, destination);
+                Assert.That(sw.ToString().Contains("<p>Hello, world.</p>"));
+                
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
 
         [Test]
-        public void xmlResolverUnparsedTextUriResolver() {
+        public void XsltUnparsedTextUriResolver() {
             Processor processor = new();
             processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
             try {
@@ -154,6 +220,183 @@ namespace SaxonCS_NUnit {
                 Assert.Fail();
             }
         }
+        
+        [Test]
+        public void XsltUnparsedTextUriResolverOverride() {
+            // Override catalog resolver with specific resolver
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            try {
+                XsltCompiler compiler = processor.NewXsltCompiler();
+
+                Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/stylesheet.xsl", FileMode.Open);
+                XsltExecutable exec = compiler.Compile(xsl);
+
+                Xslt30Transformer transformer = exec.Load30();
+
+                DocumentBuilder builder = processor.NewDocumentBuilder();
+                builder.DtdValidation = (false);
+                XdmNode doc = builder.Build(new FileStream(ConfigTest.DATA_DIR + "resolvers/unparsed.xml", FileMode.Open));
+
+                transformer.GlobalContextItem = (doc);
+                transformer.TextResolver = (request) => (request.Uri.ToString() == "http://example.com/text") ? new TextResource("bananas", request.Uri) : null;
+
+                StringWriter sw = new();
+                Serializer destination = processor.NewSerializer(sw);
+                transformer.ApplyTemplates(doc, destination);
+
+                Assert.That(sw.ToString().Contains("bananas"));
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+        
+        [Test]
+        public void XsltUnparsedTextUriResolverFallbackToCatalog() {
+            // Text resolver returns null; fallback to catalog resolver
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            try {
+                XsltCompiler compiler = processor.NewXsltCompiler();
+
+                Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/stylesheet.xsl", FileMode.Open);
+                XsltExecutable exec = compiler.Compile(xsl);
+
+                Xslt30Transformer transformer = exec.Load30();
+
+                DocumentBuilder builder = processor.NewDocumentBuilder();
+                builder.DtdValidation = (false);
+                XdmNode doc = builder.Build(new FileStream(ConfigTest.DATA_DIR + "resolvers/unparsed.xml", FileMode.Open));
+
+                transformer.GlobalContextItem = (doc);
+                transformer.TextResolver = (request) => (request.Uri.ToString() == "http://example.com/there-are-no-bananas") ? new TextResource("bananas", request.Uri) : null;
+
+                StringWriter sw = new();
+                Serializer destination = processor.NewSerializer(sw);
+                transformer.ApplyTemplates(doc, destination);
+
+                Assert.That(sw.ToString().Contains("&lt;catalog"));
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+        
+        [Test]
+        public void XsltUnparsedTextUriResolverFallbackToDirect() {
+            // Text resolver returns null; fallback to direct file access
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            try {
+                XsltCompiler compiler = processor.NewXsltCompiler();
+
+                Stream xsl = new FileStream(ConfigTest.DATA_DIR + "resolvers/stylesheet.xsl", FileMode.Open);
+                XsltExecutable exec = compiler.Compile(xsl);
+
+                Xslt30Transformer transformer = exec.Load30();
+                transformer.SetStylesheetParameters(new Dictionary<QName, XdmValue> {{
+                    new QName("text-uri"), new XdmAtomicValue(new Uri(ConfigTest.DataDirUri, "sample.json"))}});
+                DocumentBuilder builder = processor.NewDocumentBuilder();
+                builder.DtdValidation = (false);
+                XdmNode doc = builder.Build(new FileStream(ConfigTest.DATA_DIR + "resolvers/unparsed.xml", FileMode.Open));
+
+                transformer.GlobalContextItem = (doc);
+                transformer.TextResolver = (request) => (request.Uri.ToString() == "http://example.com/there-are-no-bananas") ? new TextResource("bananas", request.Uri) : null;
+
+                StringWriter sw = new();
+                Serializer destination = processor.NewSerializer(sw);
+                transformer.ApplyTemplates(doc, destination);
+
+                Assert.That(sw.ToString().Contains("\"A green door\""));
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+        
+        [Test]
+        public void XQueryUnparsedTextUriResolver() {
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            try {
+                XQueryCompiler compiler = processor.NewXQueryCompiler();
+                XQueryEvaluator selector = compiler.Compile("string-length(unparsed-text('http://example.com/text'))").Load();
+                XdmValue result = selector.Evaluate();
+                Assert.That(result[0].StringValue == "559");
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+        
+        [Test]
+        public void XQueryUnparsedTextUriResolverOverride() {
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            try {
+                XQueryCompiler compiler = processor.NewXQueryCompiler();
+                XQueryEvaluator selector = compiler.Compile("string-length(unparsed-text('http://example.com/text'))").Load();
+                selector.TextResolver = request =>
+                    request.Uri.ToString() == "http://example.com/text" ? new TextResource("bananas", request.Uri) : null; 
+                XdmValue result = selector.Evaluate();
+                Assert.That(result[0].StringValue == "7");
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+        
+        [Test]
+        public void XQueryUnparsedTextUriResolverFallback() {
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            try {
+                XQueryCompiler compiler = processor.NewXQueryCompiler();
+                compiler.BaseUri = ConfigTest.DataDirUri;
+                XQueryEvaluator selector = compiler.Compile("string-length(unparsed-text('sample.json'))").Load();
+                selector.TextResolver = request =>
+                    request.Uri.ToString() == "http://example.com/text" ? new TextResource("bananas", request.Uri) : null; 
+                XdmValue result = selector.Evaluate();
+                Assert.That(result[0].StringValue == "94");
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+        
+        [Test]
+        public void XPathUnparsedTextUriResolverFallback() {
+            Processor processor = new();
+            processor.SetCatalogFile(ConfigTest.DATA_DIR + "resolvers/catalog.xml");
+            try {
+                XPathCompiler compiler = processor.NewXPathCompiler();
+                compiler.BaseUri = ConfigTest.DataDirUri;
+                XPathSelector selector = compiler.Compile("string-length(unparsed-text('sample.json'))").Load();
+                selector.TextResolver = request =>
+                    request.Uri.ToString() == "http://example.com/text" ? new TextResource("bananas", request.Uri) : null; 
+                XdmValue result = selector.Evaluate();
+                Assert.That(result[0].StringValue == "94");
+            }
+            catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                Assert.Fail();
+            }
+        }
+
 
         [Test]
         public void xmlResolverModuleUriResolver() {
