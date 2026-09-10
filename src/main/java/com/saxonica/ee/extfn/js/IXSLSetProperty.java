@@ -113,14 +113,14 @@ public class IXSLSetProperty extends StyleElement {
             if (!"JS3".equals(exec.getCompilerInfo().getTargetEdition())) {
                 compileError("ixsl:set-property/@convert-value is available only if the target edition is JS3");
             } else {
-                Expression e = IXSL3FunctionSet.getInstance().makeFunction("set-property", 4).makeFunctionCall(name, select, object, convert);
-                e.setRetainedStaticContext(makeRetainedStaticContext());
-                return e;
+                Expression e4 = IXSL3FunctionSet.getInstance().makeFunction("set-property", 4).makeFunctionCall(name, select, object, convert);
+                e4.setRetainedStaticContext(makeRetainedStaticContext());
+                return e4;
             }
         }
-        Expression e = IXSLFunctionSet.getInstance().makeFunction("set-property", 3).makeFunctionCall(name, select, object);
-        e.setRetainedStaticContext(makeRetainedStaticContext());
-        return e;
+        Expression e3 = IXSLFunctionSet.getInstance().makeFunction("set-property", 3).makeFunctionCall(name, select, object);
+        e3.setRetainedStaticContext(makeRetainedStaticContext());
+        return e3;
     }
 
 }
