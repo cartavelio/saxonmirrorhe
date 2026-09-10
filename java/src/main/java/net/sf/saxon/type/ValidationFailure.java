@@ -23,11 +23,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This exception indicates a failure when validating an instance against a type
- * defined in a schema.
+ * This object holds details of a failure when validating an instance against a type
+ * defined in a schema (or a built-in type).
  * <p>This class holds the same information as a ValidationException, except that it is not an exception,
  * and does not carry system overheads such as a stack trace. It is used because operations such as "castable",
- * and validation of values in a union, cause validation failures on a success path and it is costly to throw,
+ * and validation of values in a union, cause validation failures on a success path; and it is costly to throw,
  * or even to create, exception objects on a success path.</p>
  */
 
