@@ -119,10 +119,10 @@ public class Gizmo {
                    "paths -- display all distinct element paths in the document",
                    (cmd) -> list(new StringBuilder("distinct-values(//*!('/'||string-join(ancestor-or-self::*!name(),'/')))")));
         addCommand("precede",
-                   "precede {expression} with {query} -- add result of query before each selected nodes",
+                   "precede {expression} with {query} -- add result of query before each selected node",
                    (cmd) -> update(cmd, "precede"));
         addCommand("prefix",
-                   "prefix {expression} with {query} -- add result of query as first child of each selected nodes",
+                   "prefix {expression} with {query} -- add result of query as first child of each selected node",
                    (cmd) -> update(cmd, "prefix"));
         addCommand("quit",
                    "quit [now] -- stop Gizmo",
@@ -149,7 +149,7 @@ public class Gizmo {
                    "strip -- delete whitespace text nodes",
                    (cmd -> this.delete(new StringBuilder("//text()[not(normalize-space())]"))));
         addCommand("suffix",
-                   "suffix {expression} with {query} -- add result of query as last child of each selected nodes",
+                   "suffix {expression} with {query} -- add result of query as last child of each selected node",
                    (cmd) -> update(cmd, "suffix"));
         addCommand("transform",
                    "transform {filename} -- transform current document using stylesheet in named file",
@@ -411,8 +411,8 @@ public class Gizmo {
 
     /**
      * Read an XPath expression from a supplied input string, execute the expression,
-     * and return an iterator over the result. As a side-effect, modify the supplied
-     * StringBuffer so it contains whatever remains after parsing the expression.
+     * and return an iterator over the result. As a side effect, modify the supplied
+     * StringBuilder so that it contains whatever remains after parsing the expression.
      *
      * @param selection the input buffer, which is modified as a side-effect
      * @return an iterator over the results of the expression
