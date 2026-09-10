@@ -409,6 +409,10 @@
             <li><p>The new <code>map:of()</code> function is renamed <code>map:of-pairs()</code>.</p></li>
             <li><p>The new <code>array:of()</code> function is renamed <code>array:of-members()</code>.</p></li>
             <li><p>Implemented <code>array:split()</code>, <code>map:pair</code>.</p></li>
+            <li><p>The <code>action</code> parameter of <code>fn:replace</code> is implemented, allowing the
+            replacement string to be computed. This makes the Saxon extension function <code>saxon:replace-with</code>
+            obsolescent. The new function is more powerful in that it supplies captured groups to the action
+            function.</p></li>
             <li><p>Constructor functions have a zero-arity version that takes the context item as
                 the default argument. Also, they single argument version can be called using <code>value</code>
                 as the argument keyword.</p></li>
