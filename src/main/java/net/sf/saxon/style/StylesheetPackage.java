@@ -21,7 +21,6 @@ import net.sf.saxon.om.Action;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -815,7 +814,7 @@ public class StylesheetPackage extends PackageData {
         Visibility vis = Visibility.UNDEFINED;
         for (XSLAccept acceptor : acceptors) {
             for (ComponentTest test : acceptor.getWildcardComponentTests()) {
-                if (((NodeTest) test.getQNameTest()).getDefaultPriority() == -0.25 && test.matches(name)) {
+                if (test.isPartialWildcard() && test.matches(name)) {
                     vis = acceptor.getVisibility();
                 }
             }

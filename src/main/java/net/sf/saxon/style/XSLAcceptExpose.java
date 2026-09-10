@@ -11,7 +11,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.trans.ComponentTest;
 import net.sf.saxon.trans.Visibility;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.HashSet;
@@ -32,7 +31,7 @@ public abstract class XSLAcceptExpose extends StyleElement {
         return visibility;
     }
 
-    public Set<ComponentTest> getExplicitComponentTests() throws XPathException {
+    public Set<ComponentTest> getExplicitComponentTests() {
         prepareAttributes();
         return explicitComponentTests;
     }
