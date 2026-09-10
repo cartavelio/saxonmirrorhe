@@ -1,0 +1,89 @@
+[
+{
+  "name":"com.ibm.icu.impl.ICUCurrencyDisplayInfoProvider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ibm.icu.impl.ICUCurrencyMetaInfo",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.ibm.icu.text.RuleBasedCollator"
+},
+{
+  "name":"com.ibm.icu.text.RuleBasedNumberFormat"
+},
+{
+  "name":"com.saxonica.config.EnterpriseConfiguration",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.saxonica.ee.domino.DominoNode"
+},
+{
+  "name":"com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.Enum",
+  "methods":[{"name":"name","parameterTypes":[] }]
+},
+{
+  "name":"java.security.AlgorithmParametersSpi"
+},
+{
+  "name":"java.security.MessageDigestSpi"
+},
+{
+  "name":"java.security.interfaces.DSAPrivateKey"
+},
+{
+  "name":"java.security.interfaces.DSAPublicKey"
+},
+{
+  "name":"java.security.spec.DSAParameterSpec"
+},
+{
+  "name":"java.util.Locale",
+  "allDeclaredClasses":true,
+  "methods":[
+    {"name":"getDefault","parameterTypes":["java.util.Locale$Category"] }, 
+    {"name":"getExtensionKeys","parameterTypes":[] }, 
+    {"name":"getScript","parameterTypes":[] }
+  ],
+  "queriedMethods":[
+    {"name":"forLanguageTag","parameterTypes":["java.lang.String"] }, 
+    {"name":"getExtension","parameterTypes":["char"] }, 
+    {"name":"getUnicodeLocaleAttributes","parameterTypes":[] }, 
+    {"name":"getUnicodeLocaleKeys","parameterTypes":[] }, 
+    {"name":"getUnicodeLocaleType","parameterTypes":["java.lang.String"] }, 
+    {"name":"setDefault","parameterTypes":["java.util.Locale$Category","java.util.Locale"] }
+  ]
+},
+{
+  "name":"java.util.Locale$Category"
+},
+{
+  "name":"org.w3c.dom.Document"
+},
+{
+  "name":"org.xmlresolver.loaders.XmlLoader",
+  "methods":[{"name":"<init>","parameterTypes":["org.xmlresolver.ResolverConfiguration"] }]
+},
+{
+  "name":"sun.security.provider.DSA$SHA1withDSA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.DSAKeyFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.DSAParameters",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.SHA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+}
+]

@@ -745,7 +745,11 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     @CEntryPoint(name = "callFunctionReturningString")
-    public static CCharPointer callFunctionReturningString(String cwd, XsltExecutable executable, String cFuncName /*, Object[] arguments, String[] params, Object[] values*/) throws SaxonApiException {
+    public static CCharPointer callFunctionReturningString(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer ccFuncName /*, Object[] arguments, String[] params, Object[] values*/) throws SaxonApiException {
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        XsltExecutable executable = objectHandles.get(executableRef);
+        String cFuncName = CTypeConversion.toJavaString(ccFuncName);
+
         Map<QName, XdmValue> staticParameters = (executable!= null?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
@@ -771,7 +775,12 @@ public class Xslt30Processor extends SaxonCAPI {
 
 
     @CEntryPoint(name = "callTemplateReturningFile")
-    public static void callTemplateReturningFile(String cwd, XsltExecutable executable, String templateName, String outFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
+    public static void callTemplateReturningFile(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef,  CCharPointer ctemplateName, CCharPointer coutFilename /*, String[] params, Object[] values*/) throws SaxonApiException {
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        XsltExecutable executable = objectHandles.get(executableRef);
+        String templateName = CTypeConversion.toJavaString(ctemplateName);
+        String outFilename = CTypeConversion.toJavaString(coutFilename);
+
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();
@@ -803,7 +812,11 @@ public class Xslt30Processor extends SaxonCAPI {
     }
 
     @CEntryPoint(name = "callTemplateReturningValue")
-    public static long callTemplateReturningValue(String cwd, XsltExecutable executable, String clarkName /*, String[] params, Object[] values*/) throws SaxonApiException {
+    public static long callTemplateReturningValue(IsolateThread thread, CCharPointer ccwd, ObjectHandle executableRef, CCharPointer cclarkName /*, String[] params, Object[] values*/) throws SaxonApiException {
+        String clarkName = CTypeConversion.toJavaString(cclarkName);
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        XsltExecutable executable = objectHandles.get(executableRef);
+
         Map<QName, XdmValue> staticParameters = (executable != null ?  null : new HashMap<>());
         Map<QName, XdmValue> globalParameters = new HashMap<>();
         Map<QName, XdmValue> initialTemplateParameters = new HashMap<>();

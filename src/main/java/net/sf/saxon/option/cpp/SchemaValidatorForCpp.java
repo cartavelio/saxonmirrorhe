@@ -431,8 +431,9 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param values   - the values of the parameters and properties. given as a array of Java objects
      */
     @CEntryPoint(name = "registerSchemaString")
-    public void registerSchemaString(IsolateThread thread, CCharPointer cxsd, CCharPointer csystemId, String[] params, Object[] values) throws SaxonApiException {
-        setProperties(params, values);
+    public static void registerSchemaString(IsolateThread thread, ObjectHandle schemaValidatorRef, CCharPointer cxsd, CCharPointer csystemId, String[] params, Object[] values) throws SaxonApiException {
+        SchemaValidatorForCpp schemaValidatorForCpp = objectHandles.get(schemaValidatorRef);
+        schemaValidatorForCpp.setProperties(params, values);
         String xsd = CTypeConversion.toJavaString(cxsd);
         String systemId = CTypeConversion.toJavaString(csystemId);
 
@@ -444,7 +445,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
 
         //validator.setErrorListener(errorListener);
 
-        schemaManager.load(new StreamSource(new StringReader(xsd), systemId));
+        schemaValidatorForCpp.schemaManager.load(new StreamSource(new StringReader(xsd), systemId));
 
 
     }
@@ -457,11 +458,15 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param outputfile   The file name to which the SCM will be saved
      * @throws SaxonApiException
      */
-    public void exportSchema(String cwd, String outputfile) throws SaxonApiException {
-
+    @CEntryPoint(name = "exportSchema")
+    public static void exportSchema(IsolateThread thread, ObjectHandle schemaValidatorRef, CCharPointer ccwd, CCharPointer coutputfile) throws SaxonApiException {
+        String cwd = CTypeConversion.toJavaString(ccwd);
+        String outputfile = CTypeConversion.toJavaString(coutputfile);
+        SchemaValidatorForCpp schemaValidatorForCpp = objectHandles.get(schemaValidatorRef);
+        Processor processor = schemaValidatorForCpp.getProcessor();
 
         Serializer serializer = resolveOutputFile(processor, cwd, outputfile, ResourceRequest.XSD_NATURE);
-        schemaManager.exportComponents(serializer);
+        schemaValidatorForCpp.schemaManager.exportComponents(serializer);
 
 
     }
