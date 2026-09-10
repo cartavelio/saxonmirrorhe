@@ -16,31 +16,49 @@ saxonc_include_location = libsaxonc_path / 'include'
 saxonc_dll_location = libsaxonc_path / 'bin'
 saxonc_built_libs_location = libsaxonc_path / 'lib'
 
+def is_debug_build():
+    if 'BUILD_DEBUG' in os.environ:
+        return os.environ.get('BUILD_DEBUG') in ['true', '1', 'yes']
+    return False
+
+def get_debug_postfix(is_debug_build):
+    if is_debug_build:
+        if system() == 'Darwin':
+            return '_debug'
+        return 'd'
+    return ''
+
+debug_build = is_debug_build()
+debug_postfix = get_debug_postfix(debug_build)
 saxonc_edition = os.environ.get('SAXONC_BUILD_EDITION')
 saxonc_version = os.environ.get('SAXONC_BUILD_VERSION')
-saxonc_core_libname = "saxonc-core-%s" % saxonc_edition
-saxonc_libname = "saxonc-%s" % saxonc_edition
+
+saxonc_core_libname = f'saxonc-core-{saxonc_edition}{debug_postfix}'
+saxonc_libname = f'saxonc-{saxonc_edition}{debug_postfix}'
 
 if system() == 'Windows':
-    extra_link_args.append("/LIBPATH:%s" % saxonc_built_libs_location)
-    extra_link_args.append("/LIBPATH:%s" % saxonc_dll_location)
+    extra_link_args.append(f'/LIBPATH:{saxonc_built_libs_location}')
+    extra_link_args.append(f'/LIBPATH:{saxonc_dll_location}')
 else:
-    extra_link_args.append("-L%s" % saxonc_built_libs_location)
+    extra_link_args.append(f'-L{saxonc_built_libs_location}')
 
 saxonc_api_sources = []
 
-all_sources = ["src/saxonc/saxonc.pyx"] + [str(os.path.join("src/cpp/lib", src)) for src in saxonc_api_sources]
+all_sources = ['src/saxonc/saxonc.pyx'] + [str(os.path.join('src/cpp/lib', src)) for src in saxonc_api_sources]
 
 saxonc_ext = Extension(
-    "saxonc%s" % saxonc_edition,
+    f'saxonc{saxonc_edition}',
     sources = all_sources,
-    language = "c++",
-    include_dirs = ["src/cpp/include", str(saxonc_include_location)],
+    language = 'c++',
+    include_dirs = ['src/cpp/include', str(saxonc_include_location)],
     extra_link_args = extra_link_args,
     libraries = [saxonc_core_libname, saxonc_libname]
 )
 
 ext_modules = [saxonc_ext]
+cythonize_kwargs = {'compiler_directives': {'language_level': 3}}
+if debug_build:
+    cythonize_kwargs['gdb_debug'] = True
 setup(
-    ext_modules=cythonize(ext_modules, compiler_directives={'language_level': 3},),
+    ext_modules=cythonize(ext_modules, **cythonize_kwargs),
 )

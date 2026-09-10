@@ -3,6 +3,13 @@ cmake_minimum_required(VERSION 3.27)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN YES)
+if(NOT CMAKE_DEBUG_POSTFIX)
+    if(APPLE)
+        set(CMAKE_DEBUG_POSTFIX _debug)
+    else()
+        set(CMAKE_DEBUG_POSTFIX d)
+    endif()
+endif()
 
 string(TOUPPER ${SaxonC_EDITION} SAXON_EDITION)
 

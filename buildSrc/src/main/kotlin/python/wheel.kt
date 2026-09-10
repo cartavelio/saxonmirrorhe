@@ -336,6 +336,8 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
             libsaxoncDirVal = value
         }
 
+    val debug: Property<Boolean> = project.objects.property(false.javaClass).convention(false)
+
     var prefix: String? = null
     protected fun invoke():  TaskProvider<RepairLocalWheel> {
         val builder = this
@@ -346,6 +348,7 @@ class WheelTasksBuilder(val extension: SaxonCPythonExtension, val saxonBuild: Sa
             pythonExe = venvTask.map { it.pythonExe.get() }
             productEdition = extension.edition
             productVersion = saxonBuild.version
+            debug = builder.debug
             wheelSuffix = platformTagTask.flatMap { it.wheelSuffix }
             macosxDeploymentTarget = platformTagTask.flatMap { it.macosxDeploymentTarget }
             sourceDir = builder.sourceDir
