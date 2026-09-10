@@ -263,7 +263,7 @@ namespace TestDriver {
                         return !inverse;
                     }
                     else if ("schema-location-hint".Equals(value)) {
-                        return !inverse;
+                        return (edition.Equals("EE")) ^ inverse;
                     }
                     else if ("info-dtd".Equals(value)) {
                         if (treeModel == "tiny" || treeModel == "linked" ||
@@ -284,7 +284,7 @@ namespace TestDriver {
                         return !inverse;
                     }
                     else if ("fn-load-xquery-module".Equals(value)) {
-                        return !inverse;
+                        return edition.Equals("EE") ^ inverse;
                     }
                     else if ("fn-transform-XSLT".Equals(value)) {
                         return !inverse;
@@ -593,6 +593,27 @@ namespace TestDriver {
                         // that are illegal in XML. So substitute a dummy query.
                         println("*** Failed to read query: " + err.Message);
                         exp = "))) Failed to read query " + err.Message + "((("; // Force a syntax error
+                    }
+                    
+                    if (edition.Equals("HE") && testSetName.Equals("app-spec-examples"))
+                    {
+                        if (exp.Contains("http://www.w3.org/2013/collation/UCA?lang=en;alternate=blanked;strength=primary")) {
+                            writeTestcaseElement(testCaseName, "notRun", "requires ICU", requestedSpec);
+                            notrun++;
+                            return;
+                        }
+
+                        if (exp.Contains("validate lax")) {
+                            writeTestcaseElement(testCaseName, "notRun", "requires schema-awareness", requestedSpec);
+                            notrun++;
+                            return;
+                        }
+
+                        if (exp.Contains("'fallback':function($s)")) {
+                            writeTestcaseElement(testCaseName, "notRun", "requires HOF", requestedSpec);
+                            notrun++;
+                            return;
+                        }
                     }
 
 

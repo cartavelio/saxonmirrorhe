@@ -44,7 +44,11 @@ namespace TestDriver {
         protected bool useXslt30Transformer = true; // Temporary for controlling test processor
         protected bool strict = false;
         protected bool jitFlag = false;
+#if EE        
         protected string edition = "EE";
+#else
+        protected string edition = "HE";
+#endif        
         public bool schemaAware = false;
 
 
