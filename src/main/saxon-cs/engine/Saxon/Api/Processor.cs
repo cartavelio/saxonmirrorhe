@@ -3,6 +3,7 @@ using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 using System.Xml;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej;
@@ -33,6 +34,8 @@ namespace Saxon.Api {
         private TextWriter textWriter = Console.Error;
         private CollectionFinder collectionFinder = (cxt, uri) => new ResourceCollectionWrapper(
             new StandardCollectionFinder().findCollection(cxt.context, uri));
+
+        private TextResolver textResolver;
 
         internal Processor(Saxon.Hej.s9api.Processor p) {
             JProcessor = p;
@@ -142,6 +145,23 @@ namespace Saxon.Api {
             set => JProcessor.getUnderlyingConfiguration().setURIResolver(
                                 new StandardURIResolver(JProcessor.getUnderlyingConfiguration(), value));
         }
+        
+        /// <summary>
+        /// An <c>TextResolver</c>, which will be used for resolving URIs passed to calls on
+        /// <c>unparsed-text()</c>, <c>unparsed-text-lines()</c>, <c>unparsed-text-available()</c>,
+        /// and <c>json-doc()</c>. The default is null, which indicates that Saxon will use its
+        /// own internal mechanisms.
+        /// </summary>
+
+        public TextResolver TextResolver {
+            get => textResolver;
+            set {
+                textResolver = value;
+                Implementation.setUnparsedTextURIResolver((uri, encoding, config) =>
+                    value(uri, Encoding.GetEncoding(encoding)));
+            }
+        }
+
 
 
         /// <summary>
