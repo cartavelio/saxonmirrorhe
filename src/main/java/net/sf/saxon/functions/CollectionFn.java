@@ -92,7 +92,7 @@ public class CollectionFn extends SystemFunction implements Callable {
         return (super.getSpecialProperties(arguments) & ~StaticProperty.NO_NODES_NEWLY_CREATED) | StaticProperty.PEER_NODESET;
     }
 
-    private String getAbsoluteCollectionURI(String href, XPathContext context) throws XPathException {
+    public static String getAbsoluteCollectionURI(String baseUri, String href, XPathContext context) throws XPathException {
         String absoluteURI;
         if (href == null) {
             absoluteURI = context.getConfiguration().getDefaultCollection();
@@ -112,9 +112,8 @@ public class CollectionFn extends SystemFunction implements Callable {
                 if (uri.isAbsolute()) {
                     absoluteURI = uri.toString();
                 } else {
-                    String base = getRetainedStaticContext().getStaticBaseUriString();
-                    if (base != null) {
-                        absoluteURI = ResolveURI.makeAbsolute(href, base).toString();
+                    if (baseUri != null) {
+                        absoluteURI = ResolveURI.makeAbsolute(href, baseUri).toString();
                     } else {
                         throw new XPathException("Relative collection URI cannot be resolved: no base URI available", "FODC0002");
                     }
@@ -225,7 +224,8 @@ public class CollectionFn extends SystemFunction implements Callable {
             throw new XPathException("No default collection has been defined", "FODC0002");
         }
 
-        String absoluteURI = getAbsoluteCollectionURI(href, context);
+        String absoluteURI = getAbsoluteCollectionURI(
+                getRetainedStaticContext().getStaticBaseUriString(), href, context);
 
         // See if the collection has been cached
 

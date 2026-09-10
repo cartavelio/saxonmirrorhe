@@ -460,12 +460,9 @@
         </proto>
       </signatures>
       <status>
-        <p>Saxon implements the zero-argument function by passing a null URI to the registered
-          <a class="javalink" href="net.sf.saxon.lib.CollectionFinder">CollectionFinder</a>. The
-          default <code>StandardCollectionFinder</code>
-          implementation supplied with the product handles this by returning an empty sequence, but
-          a user-supplied <code>CollectionFinder</code> is free to handle this case any way it
-          wishes.</p>
+        <p>Saxon implements the zero-argument function by using the default collection URI registered
+        with the <code>Configuration</code>; if none has been registered, the function raises
+        error <code>FODC0002</code>.</p>
         <p>If a user-defined <code>CollectionFinder</code> has been registered, the action of
           this function is entirely user-defined. A collection finder may be registered using the
           <code>setCollectionFinder()</code> method on the <a class="javalink"
@@ -4585,7 +4582,7 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.3, provided XPath 3.0 is enabled.</p>
+        <p>Available since Saxon 9.3.</p>
         <p>The mechanisms for interpreting collection URIs are essentially the same as for the <a
             class="bodylink code" href="/functions/fn/collection">collection()</a> function, except
           that the <code>CollectionFinder</code> (if used) must return URIs rather than returning parsed

@@ -2467,8 +2467,17 @@ documentBuilder.build(as);]]></code></pre>
         (or with its underlying <code java="net.sf.saxon.Configuration">Configuration</code>) by setting the
         configuration feature <a class="feature" href="DEFAULT_COLLECTION"/>. The value takes the form of a
         collection URI. When the <a class="bodylink code" href="/functions/fn/collection">collection()</a>
-        function is called with no arguments, this is exactly the same as supplying this default collection
-        URI. If no default collection URI has been registered, an empty collection is returned.</p>
+        or <a class="bodylink code" href="/functions/fn/uri-collection">uri-collection()</a>
+        function is called with no arguments, or when the supplied argument is an empty sequence,
+        this is exactly the same as supplying this default collection
+        URI. If no default collection URI has been registered, the function raises error <code>FODC0002</code>.</p>
+      
+      <p>Before the collection URI is passed to the collection finder, it is processed as follows. First it is
+      validated as a URI using the relevant built-in Java or C# mechanisms. If validation fails, another attempt
+      is made after applying the <a class="bodylink code" href="/functions/fn/iri-to-uri">iri-to-uri()</a>
+      function (this is particularly useful if the collection URI includes a query part containing a regular expression,
+      as this will often need to be percent-encoded). If the resulting URI is relative, it is then resolved
+      against the static base URI.</p>
 
     <p>The standard collection finder supports four different kinds of collection: registered collections,
       catalog-based collections, directory-based collections, and (on Java only) zip-based collections:</p>
