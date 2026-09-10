@@ -528,7 +528,7 @@ public interface NodeInfo extends ActiveSource, Item, Location {
     @Override
     default void deliver(Receiver receiver, ParseOptions options) throws XPathException {
         receiver.open();
-        Navigator.copy(this, receiver, CopyOptions.ALL_NAMESPACES|CopyOptions.TYPE_ANNOTATIONS, Loc.NONE);
+        Navigator.copy(this, receiver, CopyOptions.ALL_NAMESPACES|CopyOptions.TYPE_ANNOTATIONS, new Loc(getSystemId(), -1, -1));
         receiver.close();
     }
 
