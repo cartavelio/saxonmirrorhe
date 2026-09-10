@@ -202,6 +202,54 @@ select='name(\$x)'/>]</xsl:template></xsl:stylesheet>");
 
         }
     }
+
+    public function testLineNumber(): void
+    {
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testLineNumber");
+        }
+        $saxonProc1 = new Saxon\SaxonProcessor(False);
+        $saxonProc1->setConfigurationProperty('http://saxon.sf.net/feature/linenumbering', 'on');
+        $xpathProc = $saxonProc1->newXPathProcessor();
+        // Load the source document
+        try {
+            $input = $saxonProc1->parseXmlFromFile("../data/books.xml");
+            $this->assertNotNull($input);
+            $xpathProc->setContextItem($input);
+            $result = $xpathProc->evaluateSingle("//BOOKS/ITEM[@CAT='MMP']/TITLE");
+            $this->assertNotNull($result);
+            $linenum = $result->getLineNumber();
+            $this->assertTrue($linenum == 7);
+        } catch (Exception $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->assertTrue(False, 'Caught exception: ' . $e->getMessage());
+        }
+    }
+
+    public function testColumnNumber(): void
+    {
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+            print("Test: testColumnNumber");
+        }
+        $saxonProc1 = new Saxon\SaxonProcessor(False);
+        $saxonProc1->setConfigurationProperty('http://saxon.sf.net/feature/linenumbering', 'on');
+        $xpathProc = $saxonProc1->newXPathProcessor();
+        // Load the source document
+        try {
+            $input = $saxonProc1->parseXmlFromFile("../data/books.xml");
+            $this->assertNotNull($input);
+            $xpathProc->setContextItem($input);
+            $result = $xpathProc->evaluateSingle("//BOOKS/ITEM[@CAT='MMP']/TITLE");
+            $this->assertNotNull($result);
+            $colnum = $result->getColumnNumber();
+            $this->assertTrue($colnum == 14);
+        } catch (Exception $e) {
+            echo 'Caught exception: ', $e->getMessage(), "\n";
+            $this->assertTrue(False, 'Caught exception: ' . $e->getMessage());
+        }
+    }
+
+
     public function testTransformWithoutArgument2(): void
     {
         if(getenv("SAXONC_DEBUG_FLAG")) {

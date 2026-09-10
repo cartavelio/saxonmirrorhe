@@ -623,9 +623,13 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         const char * getNodeName()
 
-        const char * getLocalName();
+        const char * getLocalName()
 
         XdmValue * getTypedValue()
+
+        int getLineNumber()
+
+        int getColumnNumber()
 
         void resetRelinquishedChildren()
 

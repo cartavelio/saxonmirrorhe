@@ -191,6 +191,14 @@ XdmValue *XdmNode::getTypedValue() {
   }
 }
 
+int XdmNode::getLineNumber(){
+    return j_getLineNumber1(SaxonProcessor::sxn_environ->thread, (void *)value);
+}
+
+int XdmNode::getColumnNumber() {
+    return j_getColumnNumber1(SaxonProcessor::sxn_environ->thread, (void *)value);
+}
+
 XdmItem *XdmNode::getHead() { return this; }
 
 const char *XdmNode::getStringValue() { return XdmItem::getStringValue(); }

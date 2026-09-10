@@ -2041,6 +2041,37 @@ PHP_METHOD(XdmNode, __destruct) {
   }
 }
 
+PHP_METHOD(XdmNode, getLineNumber){
+    XdmNode *xdmNode;
+    zend_object *zobj = Z_OBJ_P(getThis());
+    xdmNode_object *obj =
+        (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
+    xdmNode = obj->xdmNode;
+
+    int linenumber = -1;
+    if (xdmNode != nullptr) {
+        linenumber = xdmNode->getLineNumber();
+    }
+    RETURN_LONG(linenumber);
+}
+
+
+
+
+PHP_METHOD(XdmNode, getColumnNumber){
+    XdmNode *xdmNode;
+    zend_object *zobj = Z_OBJ_P(getThis());
+    xdmNode_object *obj =
+        (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
+    xdmNode = obj->xdmNode;
+
+    int colnumber = -1;
+    if (xdmNode != nullptr) {
+        colnumber = xdmNode->getLineNumber();
+    }
+    RETURN_LONG(colnumber);
+}
+
 PHP_METHOD(XdmNode, getStringValue) {
   XdmNode *xdmNode;
   zval *object = getThis();

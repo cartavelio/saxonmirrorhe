@@ -4925,6 +4925,26 @@ cdef class PyXdmNode(PyXdmItem):
         return self.derivednptr.getRefCount()"""
 
      @property
+     def line_number(self):
+         """
+         line_number(self)
+         Get the line number of the node in a source document.
+         Returns:
+             int: The line number of the node, or -1 if not available.
+         """
+         return self.derivednptr.getLineNumber()
+
+     @property
+     def column_number(self):
+         """
+         column_number(self)
+         Get the column number of the node in a source document.
+         Returns:
+             int: The column number of the node, or -1 if not available.
+         """
+         return self.derivednptr.getColumnNumber()
+
+     @property
      def attribute_count(self):
         """
         attribute_count(self)
