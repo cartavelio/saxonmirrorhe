@@ -5955,7 +5955,8 @@
       </signatures>
       <status>
         <p>Available since Saxon 9.0. The function is obsolescent, replaced by
-          the newer function <code>saxon:xquery</code>. The function is implemented in SaxonCS
+          the newer function <a class="bodylink code" href="/functions/saxon/xquery"
+            >saxon:xquery()</a>. The function is implemented in SaxonCS
           but with the restriction that the type name <code>jt:net.sf.saxon.query.XQueryExpression</code>
          is not available; the type of the result should be declared as <code>item()</code>.</p>
       </status>
@@ -8537,7 +8538,8 @@ return ....
       </signatures>
       <status>
         <p>Available since Saxon 9.0. The function is obsolescent, replaced by
-          the newer function <code>saxon:xquery</code>. The function is implemented in SaxonCS
+          the newer function <a class="bodylink code" href="/functions/saxon/xquery"
+            >saxon:xquery()</a>. The function is implemented in SaxonCS
           but with the restriction that the type name <code>jt:net.sf.saxon.query.XQueryExpression</code>
           is not available; the type of the result should be declared as <code>item()</code>.</p>
       </status>
