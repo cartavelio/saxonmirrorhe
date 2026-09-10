@@ -818,18 +818,8 @@
       </xsl:choose>
    </xsl:template>
    
-   <!--Handle BitSet -->
-   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.BitSet']" 
-      priority="20" mode="methods">
-      <xsl:sequence select="f:applyFormat(., map{
-         'get#1':         '%scope%[%args%]',
-         'set#1':         '%scope%.Set(%args%, true)',
-         'clone#0':       '%scope%.Clone()'
-         })"/>
-   </xsl:template>
-   
    <!-- ImmutableHashTrieMap -->
-   <xsl:template match="*[f:targetType(.) = ('io.vavr.collection.HashMap', 'io.vavr.collection.LinkedHashMap')]" 
+   <xsl:template match="*[f:targetType(.) = ('net.sf.saxon.ma.trie.ImmutableHashTrieMap', 'net.sf.saxon.ma.trie.ImmutableMap')]" 
       priority="20" mode="methods">
       <xsl:choose>
          <xsl:when test="name/@identifier='entrySet' and count(arguments/argument)=0 and self::iterable">
@@ -851,6 +841,41 @@
          </xsl:otherwise>
       </xsl:choose>
    </xsl:template>
+   
+   
+   <!--Handle BitSet -->
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.BitSet']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'get#1':         '%scope%[%args%]',
+         'set#1':         '%scope%.Set(%args%, true)',
+         'clone#0':       '%scope%.Clone()'
+         })"/>
+   </xsl:template>
+   
+   <!--<!-\- ImmutableHashTrieMap -\->
+   <xsl:template match="*[f:targetType(.) = ('io.vavr.collection.HashMap', 'io.vavr.collection.LinkedHashMap')]" 
+      priority="20" mode="methods">
+      <xsl:choose>
+         <xsl:when test="name/@identifier='entrySet' and count(arguments/argument)=0 and self::iterable">
+            <!-\- special case entrySet() when it appears as `for (Map.Entry<K,V> : map.entrySet())` -\->
+            <xsl:apply-templates select="scope" mode="xml-to-cs"/>
+         </xsl:when>
+         <xsl:otherwise>
+            <xsl:sequence select="f:applyFormat(., map{
+               'get#1':             'Saxon.Impl.Helpers.MapUtils.Get(%scope%, %args%)',
+               'getOrDefault#2':    'Saxon.Impl.Helpers.MapUtils.GetOrDefault(%scope%, %args%)',
+               'empty#0':           'new System.Collections.Immutable.ImmutableDictionary()',
+               'isEmpty#0':         '%scope%.Count==0',
+               'keySet#0':          'Saxon.Impl.Helpers.MapUtils.KeySet(%scope%)',
+               'put#2':             '%scope%.SetItem(%args%)',
+               'size#0':            '%scope%.Count',
+               'values#0':          '%scope%.Values',
+               '*':                 '%scope%.%Name%(%args%)' 
+               })"/>     
+         </xsl:otherwise>
+      </xsl:choose>
+   </xsl:template>-->
    
    <!-- net.sf.saxon.ma.trie.ImmutableList -->
    
