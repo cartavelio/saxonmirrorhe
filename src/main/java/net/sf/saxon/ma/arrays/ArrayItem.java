@@ -8,6 +8,7 @@
 package net.sf.saxon.ma.arrays;
 
 import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.GroundedValue;
@@ -18,7 +19,15 @@ import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntSet;
 
 /**
- * Interface supported by different implementations of an XDM array item
+ * Interface supported by different implementations of an XDM array item.
+ *
+ * <p>Saxon uses two main implementations of this interface: {@link SimpleArrayItem}, which is a wrapper
+ * over a Java {@code List} (which is assumed immutable), and {@link ImmutableArrayItem}, which is a wrapper
+ * over a Saxon {@link ZenoChain}, permitting efficient append and prepend operations without copying the
+ * entire content. Many of the expressions and functions that create arrays use a learning strategy to
+ * decide which implementation to use: if a significant number of {@code SimpleArrayItem} instances
+ * are subsequently converted to an {@code ImmutableArrayItem}, then future evaluations of the same
+ * expression will produce an {@code ImmutableArrayItem} directly.</p>
  */
 public abstract class ArrayItem implements Function {
 
@@ -101,6 +110,16 @@ public abstract class ArrayItem implements Function {
                 members().iterator(),
                 member -> new Parcel(member));
     }
+
+    /**
+     * Add a member to this array
+     *
+     * @param newMember the member to be added
+     * @return the new array, comprising the members of this array and then
+     * one additional member.
+     */
+
+    public abstract ArrayItem append(GroundedValue newMember);
 
     /**
      * Concatenate this array with another

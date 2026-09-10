@@ -11,7 +11,6 @@ import net.sf.saxon.expr.Atomizer;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
-import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.NoDynamicContextException;
@@ -25,7 +24,7 @@ import java.util.List;
 /**
  * Implementation of the extension function array:sort(array, function) =&gt; array
  */
-public class ArraySort extends SystemFunction {
+public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
 
     private static class MemberToBeSorted{
         public GroundedValue value;
@@ -89,10 +88,10 @@ public class ArraySort extends SystemFunction {
             throw err;
         }
         List<GroundedValue> outputList = new ArrayList<>(array.arrayLength());
-        for (MemberToBeSorted member: inputList){
+        for (MemberToBeSorted member: inputList) {
             outputList.add(member.value);
         }
-        return new SimpleArrayItem(outputList);
+        return makeArray(outputList);
     }
 
     public static int compareSortKeys(GroundedValue a, GroundedValue b, AtomicComparer comparer) {
