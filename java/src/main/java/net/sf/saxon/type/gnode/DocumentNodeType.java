@@ -155,7 +155,11 @@ public class DocumentNodeType extends XNodeType {
 
     @Override
     public ItemType normalizeItemType() {
-        return new DocumentNodeType((XNodeType)elementTest.normalizeItemType());
+        ItemType t2 = elementTest.normalizeItemType();
+        if (t2 instanceof XNodeType x2) {
+            return new DocumentNodeType(x2);
+        }
+        return this;
     }
 
     @Override
