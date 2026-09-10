@@ -1608,7 +1608,7 @@ public class XPathParser {
             String destructure = null;
             if (allowXPath40Syntax && t.currentToken == Token.LPAREN) {
                 var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "seq" + offset);
-                gatherComponents(componentNames, componentTypes, SequenceType.OPTIONAL_ITEM, Token.RPAREN);
+                gatherComponents(componentNames, componentTypes, SequenceType.ANY_SEQUENCE, Token.RPAREN);
                 destructure = "seq";
             } else if (allowXPath40Syntax && t.currentToken == Token.LSQB) {
                 var = new StructuredQName("vv", NamespaceUri.SAXON_GENERATED_VARIABLE, "arr" + offset);
@@ -1658,8 +1658,13 @@ public class XPathParser {
                 switch (destructure) {
                     case "seq":
                         for (int c = 0; c < componentNames.size(); c++) {
-                            Expression componentValue = new SubscriptExpression(new LocalVariableReference(lastClause),
-                                                                                Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)));
+                            Expression componentValue;
+                            if (c < componentNames.size() - 1) {
+                                componentValue = new SubscriptExpression(new LocalVariableReference(lastClause),
+                                                                         Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)));
+                            } else {
+                                componentValue = new TailExpression(new LocalVariableReference(lastClause), c + 1);
+                            }
                             LetExpression componentBinding = new LetExpression();
                             componentBinding.setVariableQName(componentNames.get(c));
                             componentBinding.setRequiredType(componentTypes.get(c));
@@ -1672,10 +1677,9 @@ public class XPathParser {
                         break;
                     case "arr":
                         for (int c = 0; c < componentNames.size(); c++) {
-                            Expression componentValue = ArrayFunctionSet.getInstance(40).makeFunction("get", 3).makeFunctionCall(
+                            Expression componentValue = ArrayFunctionSet.getInstance(40).makeFunction("get", 2).makeFunctionCall(
                                     new LocalVariableReference(lastClause),
-                                    Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)),
-                                    Literal.makeEmptySequence());
+                                    Literal.makeLiteral(Int64Value.makeIntegerValue(c + 1)));
                             LetExpression componentBinding = new LetExpression();
                             componentBinding.setVariableQName(componentNames.get(c));
                             componentBinding.setRequiredType(componentTypes.get(c));
