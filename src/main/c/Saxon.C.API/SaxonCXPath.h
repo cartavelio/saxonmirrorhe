@@ -78,26 +78,43 @@ int64_t xdmValueAsObj(sxnc_environment *environi, const char *type,
 sxnc_value *xdmValue(sxnc_environment *environi, const char *type,
                      const char *str);
 
+/**
+ * Initialise the Saxon Processor and XPath processor.
+ * This utility function is used to allocate memory on the heap therefore is required to be called before execution of XPath
+ *
+ * @param environi -  Graalvm environment held as the struct sxnc_environment. This function calls malloc on the pointer
+ * @param processor - Pointer to the Saxon Processor which is represented as the struct sxnc_processor
+ *              and is used for creating the XPath processors. This function calls malloc on the pointer
+ * @param xpath - Pointer to the sxnc_xpath struct and is used for the execution of the XPath queries. This function calls malloc on the pointer
+ */
 int c_createXPathProcessor(sxnc_environment *environi,
                            sxnc_processor *processor, sxnc_xpath *xpath);
 
 /**
  * Compile and evaluate an XPath expression, supplied as a character string,
- *with properties and parameters required by the XPath expression
+ * with properties and parameters required by the XPath expression
  * @param cwd  - Current working directory
- * @param xpathStr  - A string containing the source text of the XPath
- *expression
- * @param params - Parameters and properties names required by the XPath
- *expression. This could contain the context node , source as string or file
- *name, etc
- * @param values -  The values for the parameters and properties required by the
- *XPath expression
+ * @param xpathStr  - A string containing the source text of the XPath expression
+ * @param params - Parameters and properties names required by the XPath expression.
+ *                  This could contain the context node , source as string or file name, etc
+ * @param values -  The values for the parameters and properties required by the XPath expression
+ * @return sxnc_value - The sxnc_value struct encapsulates the XdmValue object or NULL if the expression returns an empty sequence.
  **/
 
 sxnc_value *evaluate(sxnc_environment *environi, sxnc_xpath *proc, char *cwd,
                      char *xpathStr, sxnc_parameter *parameters,
                      sxnc_property *properties, int parLen, int propLen);
 
+/**
+ * Compile and evaluate an XPath expression. The result is expected to be a single XdmItem or NULL. supplied as a character string,
+ * with properties and parameters required by the XPath expression
+ * @param cwd  - Current working directory
+ * @param xpathStr  - A string containing the source text of the XPath expression
+ * @param params - Parameters and properties names required by the XPath
+ *                 expression. This could contain the context node , source as string or file name, etc
+ * @param values -  The values for the parameters and properties required by the XPath expression
+ * @eturn sxnc_value - The sxnc_value struct encapsulates the XdmItem object or NULL if the expression returns an empty sequence.
+ **/
 sxnc_value *evaluateSingle(sxnc_environment *environi, sxnc_xpath *proc,
                            char *cwd, char *xpathStr,
                            sxnc_parameter *parameters,
@@ -147,10 +164,16 @@ int size(sxnc_environment *environi, sxnc_value val);
  * as item zero
  * @return the n'th item in the sequence making up the value, counting from zero
  */
+//sxnc_value *itemAt(sxnc_environment *environi, sxnc_value, int i);
 
-sxnc_value *itemAt(sxnc_environment *environi, sxnc_value, int i);
-
-int64_t getvalue(sxnc_environment *environi, sxnc_value);
+/**
+ * Convert the Get the n'th item in the value, counting from zero.
+ *
+ * @param n the item that is required, counting the first item in the sequence
+ * as item zero
+ * @return the n'th item in the sequence making up the value, counting from zero
+ */
+//int64_t getvalue(sxnc_environment *environi, sxnc_value);
 
 /**
  * Get the string value of the item. For a node, this gets the string value
@@ -162,8 +185,7 @@ int64_t getvalue(sxnc_environment *environi, sxnc_value);
 const char *getStringValue(sxnc_environment *environi, sxnc_value value);
 
 /**
- *Get the integer value of the item. if the XdmItem is not castable to an
- *integer then
+ *Get the integer value of the item.
  * @param sxnc_value - Value to convert to integer
  * @failure_value - If the Value is not an integer then we can specify the value
  *to return. Default is zero.
@@ -173,14 +195,40 @@ const char *getStringValue(sxnc_environment *environi, sxnc_value value);
 int getIntegerValue(sxnc_environment *environi, sxnc_value value,
                     int failure_value);
 
+/**
+ *Get the boolean value of the item.
+ * @param sxnc_value - Value to convert to boolean
+ *
+ **/
 bool getBooleanValue(sxnc_environment *environi, sxnc_value value);
 
+/**
+ *Get the long value of the item.
+ * @param sxnc_value - Value to convert to long
+ * @failure_value - If the Value is not a long then we can specify the value
+ * to return. Default is zero.
+ *
+ **/
 long getLongValue(sxnc_environment *environi, sxnc_value value,
                   long failureVal);
 
+/**
+ *Get the float value of the item.
+ * @param sxnc_value - Value to convert to float
+ * @failure_value - If the Value is not a float then we can specify the value
+ * to return. Default is zero.
+ *
+ **/
 float getFloatValue(sxnc_environment *environi, sxnc_value value,
                     float failureVal);
 
+/**
+ *Get the double value of the item.
+ * @param sxnc_value - Value to convert to double
+ * @failure_value - If the Value is not a double then we can specify the value
+ * to return. Default is zero.
+ *
+ **/
 double getDoubleValue(sxnc_environment *environi, sxnc_value value,
                       double failureVal);
 
