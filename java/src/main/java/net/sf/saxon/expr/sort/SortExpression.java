@@ -25,7 +25,6 @@ import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -382,7 +381,7 @@ public class SortExpression extends Expression
         SequenceIterator iter = eval.iterate(c);
         AtomicValue first = (AtomicValue)iter.next();
         if (first == null) {
-            return new AtomicArray(Collections.emptyList());
+            return AtomicArray.EMPTY_ATOMIC_ARRAY;
         }
         AtomicValue second = (AtomicValue) iter.next();
         if (second == null) {

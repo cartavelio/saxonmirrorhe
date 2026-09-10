@@ -69,7 +69,7 @@ public class OrderByClausePush extends TuplePush {
     @Override
     public void close() throws XPathException {
         try {
-            tupleArray.sort((a, b) -> {
+            tupleArray.sort((ThingToBeSorted a, ThingToBeSorted b) -> {
                 try {
                     for (int i = 0; i < comparers.length; i++) {
                         int comp = comparers[i].compareAtomicValues(
