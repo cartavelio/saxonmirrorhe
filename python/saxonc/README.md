@@ -24,21 +24,10 @@ For full documentation for the latest SaxonC release, see the
 
 The main reason for using SaxonC in preference to other XML
 tools available for Python is that it supports all the latest W3C
-standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1.
-
-## What's new in this version?
-
-SaxonC-EE and SaxonC-PE 13 include support for many features in the XPath, XQuery, and XSLT
-4.0 specifications currently in development in the [QT4 Community Group](http://qt4cg.org/).
-
-There's a comprehensive list of changes in this Saxon release in the main
-[Saxon 13 documentation](https://www.saxonica.com/documentation13/), and for details of 
-changes specific to SaxonC, see the [SaxonC 13 documentation](https://www.saxonica.com/saxon-c/documentation13/index.html).
-
-For a record of bugs fixed in each maintenance release, please consult the
-[issues list](https://saxonica.plan.io/projects/saxon/issues) — you can filter
-the list on the property "Fixed in maintenance release". This is also the place
-to report any problems you find.
+standards: XSLT 3.0, XPath 3.1, XQuery 3.1, and XSD 1.1. 
+SaxonC-EE and SaxonC-PE also include support for many features in
+the XPath, XQuery, and XSLT 4.0 specifications currently in
+development in the [QT4 Community Group](http://qt4cg.org/).
 
 ## About SaxonC
 

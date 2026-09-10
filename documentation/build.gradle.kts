@@ -434,7 +434,7 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
   description = "Build the documentation and pages for website"
   dependsOn("update_documentation")
   dependsOn("gen_contents_ref")
-  //dependsOn("gen_feature_matrix")
+  dependsOn("gen_feature_matrix")
   // Just a place to hang dependencies
 }
 
@@ -442,7 +442,7 @@ tasks.register("website") {
   group = LifecycleTasks.DOCUMENTATION_GROUP
   description = "Build the documentation, product descriptions and pages for website"
   dependsOn("documentation")
-  //dependsOn("copy_prod_desc_pdf")
+  dependsOn("copy_prod_desc_pdf")
   dependsOn("saxonc_documentation")
 }
 
@@ -656,8 +656,6 @@ tasks.register<JavaExec>("gen_feature_matrix") {
        "-xsl:${layout.projectDirectory.file("tools/feature-matrix/feature-matrix-to-overview-chart.xsl")}",
        "-o:${layout.buildDirectory.file(matrix).get().asFile}")
 }
-
-// ============================================================
 
 tasks.register("gen_prod_desc") {
   group = "Internal"
