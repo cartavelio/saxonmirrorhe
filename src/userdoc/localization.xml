@@ -499,10 +499,21 @@ config.setLocalizerFactory(new LocalizerFactory() {
       differing levels of conformance:</p>
 
     <ul>
-      <li class="javaonly">On SaxonJ-HE, Saxon uses the collation facilities available directly from the
-        JDK.</li>
-      <li class="javaonly">On SaxonJ-PE and -EE, Saxon uses the collation facilities available from the ICU4J
-        library.</li>
+      <li class="javaonly"><p>On SaxonJ-HE, Saxon uses the collation facilities available directly from the
+        JDK. Because these collations are not always 100% compatible with the UCA as defined by Unicode, 
+        Saxon rejects the collation as unsupported if it specifies <code>fallback=no</code>.</p></li>
+      <li class="javaonly"><p>On SaxonJ-PE and -EE, Saxon uses the collation facilities available from the ICU4J
+        library.</p>
+        <p>Three conditions must be satisfied for this to work:</p>
+        <ul>
+          <p>You must be using the SaxonJ PE or EE JAR files.</p>
+          <p>You must have a license file enabled.</p>
+          <p>The ICU4J JAR file (for example <code>icu4j-72.1.jar</code>) must be on the classpath. </p>
+        </ul>
+        <p>If any of these conditions is not satisfied, Saxon falls back silently to using collations from the JDK. If it is
+          important to use the ICU collations, use <code>fallback=no</code> in the collation URI to prevent this
+          happening.</p>
+      </li>
       <li class="csonly">On SaxonCS, Saxon uses the collation facilities available from the ICU4N library,
         which is a port to C# of a subset of ICU4J.</li>
     </ul>
@@ -551,7 +562,8 @@ config.setLocalizerFactory(new LocalizerFactory() {
           <td>
             <p>
               <code>fallback=no</code> will raise errors in the case of unknown parameter keywords or values.
-              Otherwise erroneous parameters are ignored. </p>
+              It will also raise an error if the ICU collation library is not available.
+              In other cases Saxon falls back to whatever collation is available. </p>
           </td>
         </tr>
         <tr>
