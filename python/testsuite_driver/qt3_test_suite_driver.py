@@ -374,7 +374,7 @@ def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spe
 
     '''set the base URI if specified'''
     base_uri = str(env.base_uri)
-
+    print("set_base_uri(base_uri) cp0 = " + base_uri)
     environment.proc.set_cwd(cwd_from_base_uri(base_uri))
     environment.xquery_proc.set_query_base_uri(base_uri)
     '''TODO There is a bug with the DocumentBuilder base_uri and cwd for the processor'''
@@ -391,7 +391,9 @@ def process_environment(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, spe
                 print("base-uri = " + uri)
                 if uri != "#UNDEFINED":
                     environment.xquery_proc.set_query_base_uri(uri)
+                    environment.xquery_proc.set_cwd(uri)
                     environment.xpath_proc.set_base_uri(uri)
+                    environment.xpath_proc.set_cwd(uri)
                     environment.base_uri = uri
 
     '''set any requested collations - TODO'''
