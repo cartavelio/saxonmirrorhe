@@ -102,10 +102,12 @@ public class CheckSumFilter extends ProxyReceiver {
         for (AttributeInfo att : attributes) {
             checksum ^= hash(att.getNodeName(), sequence);
             checksum ^= hash(att.getValue(), sequence);
+            //#if CSHARP==false
             if (DEBUG) {
                 System.err.println("After attribute " + att.getNodeName().getDisplayName() + ": " + checksum +
                                            "(" + hash(att.getNodeName(), sequence) + "," + hash(att.getValue(), sequence) + ")");
             }
+            //#endif
         }
         super.startElement(elemName, type, attributes, namespaces, location, properties);
     }

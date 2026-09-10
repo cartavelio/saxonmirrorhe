@@ -41,6 +41,11 @@ public final class ErrorType extends NodeTest implements AtomicType, UnionType, 
     private ErrorType() {
     }
 
+    @Override
+    public Genre getGenre() {
+        return Genre.ANY;
+    }
+
     /**
      * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
      * types.

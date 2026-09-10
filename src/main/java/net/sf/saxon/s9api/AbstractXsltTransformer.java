@@ -117,6 +117,32 @@ public abstract class AbstractXsltTransformer {
         return controller.getURIResolver();
     }
 
+    /**
+     * Set an object that will be used to resolve URIs used in
+     * <code>fn:unparsed-text()</code> and related functions.
+     *
+     * @param resolver An object that implements the UnparsedTextURIResolver interface, or
+     *                 null.
+     * @since 11
+     */
+
+    public void setUnparsedTextResolver(UnparsedTextURIResolver resolver) {
+        controller.setUnparsedTextURIResolver(resolver);
+    }
+
+    /**
+     * Get the URI resolver used for <code>fn:unparsed-text()</code> and related functions.
+     *
+     * @return the user-supplied URI resolver if there is one, or the
+     * system-defined one otherwise
+     * @since 11
+     */
+
+    public UnparsedTextURIResolver getUnparsedTextURIResolver() {
+        return controller.getUnparsedTextURIResolver();
+    }
+
+
     //#if CSHARP==false
     /**
      * Set the ErrorListener to be used during this transformation

@@ -183,7 +183,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private ModuleURIResolver standardModuleURIResolver;
     private String styleParserClass;
     private StandardURIResolver systemURIResolver;
-    private UnparsedTextURIResolver unparsedTextURIResolver = new StandardUnparsedTextResolver();
+    private UnparsedTextURIResolver unparsedTextURIResolver;
 
     private transient XPathContext theConversionContext = null;
     private ConversionRules theConversionRules = null;
@@ -392,6 +392,7 @@ public class Configuration implements SourceResolver, NotationSet {
         serializerFactory = new net.sf.saxon.lib.SerializerFactory(this);
         sourceResolver = this;
         //#if CSHARP==false
+        unparsedTextURIResolver = new StandardUnparsedTextResolver();
         mediaQueryEvaluator = (o1, o2) -> 0;
         //#endif
 
@@ -1969,7 +1970,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /**
      * Get the URI resolver used for resolving URIs passed to the unparsed-text(),
-     * unparsed-text-available(), and unparsed-text-lines() functions
+     * unparsed-text-available(), and unparsed-text-lines() functions, as well as json-doc().
      *
      * @return the URI resolver set for these functions, if one has been set, or the
      * standard system-supplied resolver otherwise
@@ -1981,7 +1982,7 @@ public class Configuration implements SourceResolver, NotationSet {
 
     /**
      * Set the URI resolver to be used for resolving URIs passed to the unparsed-text(),
-     * unparsed-text-available(), and unparsed-text-lines() functions
+     * unparsed-text-available(), and unparsed-text-lines() functions, as well as json-doc().
      * @param resolver the URI resolver to be used for these functions.
      */
 

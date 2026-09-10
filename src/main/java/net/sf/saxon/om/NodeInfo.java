@@ -167,8 +167,9 @@ public interface NodeInfo extends Item, Location
 
     /*@Nullable*/
     @Override
+    //#if CSHARP==false
     String getSystemId();
-
+    //#endif
     /**
      * Get the Public ID of the entity containing the node. This method
      * is provided largely so that NodeInfo can act as a {@link Locator}
