@@ -772,7 +772,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             return new AnyURIValue(escapeCS(uri.toString()));
         }
 
-        @CSharpReplaceBody(code="return System.Uri.EscapeDataString(s);")
+        @CSharpReplaceBody(code="return System.Uri.EscapeUriString(s);")
         private static String escapeCS(String s) {
             return s;
         }
