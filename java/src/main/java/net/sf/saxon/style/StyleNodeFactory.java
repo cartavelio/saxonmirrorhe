@@ -296,6 +296,9 @@ public class StyleNodeFactory implements NodeFactory {
 
     /*@Nullable*/
     protected StyleElement makeXSLElement(int f, NodeImpl parent) {
+        if (f == StandardNames.XSL_RESULT_DOCUMENT) {
+            compilation.setCreatesSecondaryResultDocuments(true);
+        }
         return switch (f) {
             case StandardNames.XSL_ACCEPT -> new XSLAccept();
             case StandardNames.XSL_ACCUMULATOR -> new XSLAccumulator();
@@ -362,10 +365,7 @@ public class StyleNodeFactory implements NodeFactory {
             case StandardNames.XSL_PERFORM_SORT -> new XSLPerformSort();
             case StandardNames.XSL_PRESERVE_SPACE -> new XSLPreserveSpace();
             case StandardNames.XSL_PROCESSING_INSTRUCTION -> new XSLProcessingInstruction();
-            case StandardNames.XSL_RESULT_DOCUMENT -> {
-                compilation.setCreatesSecondaryResultDocuments(true);
-                yield new XSLResultDocument();
-            }
+            case StandardNames.XSL_RESULT_DOCUMENT -> new XSLResultDocument();
             case StandardNames.XSL_SEQUENCE -> new XSLSequence();
             case StandardNames.XSL_SORT -> new XSLSort();
             case StandardNames.XSL_SOURCE_DOCUMENT -> new XSLSourceDocument();
