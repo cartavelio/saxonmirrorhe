@@ -45,7 +45,7 @@ public class Sort_1 extends SystemFunction {
         return doSort(inputList, collation, context);
     }
 
-    protected ArrayList<ItemToBeSorted> getItemsToBeSorted(Sequence input) throws XPathException {
+    public static ArrayList<ItemToBeSorted> getItemsToBeSorted(Sequence input) throws XPathException {
         final ArrayList<ItemToBeSorted> inputList = new ArrayList<>();
         int i = 0;
         SequenceIterator iterator = input.iterate();
@@ -60,7 +60,7 @@ public class Sort_1 extends SystemFunction {
         return inputList;
     }
 
-    protected Sequence doSort(final ArrayList<ItemToBeSorted> inputList, StringCollator collation, XPathContext context) throws XPathException {
+    public static Sequence doSort(final ArrayList<ItemToBeSorted> inputList, StringCollator collation, XPathContext context) throws XPathException {
         final AtomicComparer atomicComparer = AtomicSortComparer.makeSortComparer(
                 collation, StandardNames.XS_ANY_ATOMIC_TYPE, context);
         try {
@@ -73,7 +73,6 @@ public class Sort_1 extends SystemFunction {
                     return result;
                 }
             });
-            //GenericSorter.quickSort(0, inputList.size(), sortable);
         } catch (ClassCastException e) {
             throw new XPathException("Non-comparable types found while sorting: " + e.getMessage(), "XPTY0004")
                     .asTypeError();
