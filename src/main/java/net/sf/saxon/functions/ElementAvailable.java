@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.StringLiteral;
@@ -151,25 +152,29 @@ public class ElementAvailable extends SystemFunction {
      * were recognized.
      *
      * @param lexicalName the lexical QName of the element
-     * @param edition the target edition that the stylesheet is to run under, e.g. "HE", "JS"
+     * @param targetEdition the target edition that the stylesheet is to run under, e.g. "HE", "JS"
      * @param context     the XPath evaluation context
      * @return true if the instruction is available, in the sense of the XSLT element-available() function
      * @throws XPathException if a dynamic error occurs (e.g., a bad QName)
      */
 
-    private boolean isElementAvailable(String lexicalName, String edition, XPathContext context) throws XPathException {
+    private boolean isElementAvailable(String lexicalName, String targetEdition, XPathContext context) throws XPathException {
 
         StructuredQName qName = getElementName(lexicalName);
 
         if (qName.hasURI(NamespaceUri.XSLT)) {
             int fp = context.getConfiguration().getNamePool().getFingerprint(NamespaceUri.XSLT, qName.getLocalPart());
             int xsltVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-            boolean known = xsltVersion == 40 ? isXslt40Element(fp) : isXslt30Element(fp);
             if (fp == StandardNames.XSL_EVALUATE) {
-                known = known && !context.getConfiguration().getBooleanProperty(Feature.DISABLE_XSL_EVALUATE);
+                return !context.getConfiguration().getBooleanProperty(Feature.DISABLE_XSL_EVALUATE);
             }
-            return known;
-        } else if (qName.hasURI(NamespaceUri.IXSL) && !edition.equals("JS")) {
+            if (fp == StandardNames.XSL_IMPORT_SCHEMA) {
+                return context.getConfiguration().isLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION)
+                        && targetEdition.equals("EE");
+            }
+            return xsltVersion == 40 ? isXslt40Element(fp) : isXslt30Element(fp);
+
+        } else if (qName.hasURI(NamespaceUri.IXSL) && !targetEdition.equals("JS")) {
             return false;
         }
         return context.getConfiguration().isExtensionElementAvailable(qName);
