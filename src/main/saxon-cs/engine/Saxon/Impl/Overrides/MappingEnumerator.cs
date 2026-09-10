@@ -11,6 +11,8 @@ namespace Saxon.Impl.Overrides {
     /// <typeparam name="S">The type of items returned by the input IEnumerator</typeparam>
     /// <typeparam name="T">The type of items returned by the output IEnumerator</typeparam>
     public class MappingEnumerator<S, T> : SysCollGen.IEnumerator<T> {
+        
+        // TODO: unlike the Java class that this emulates, it doesn't skip items when the mapper returns null
 
         private readonly SysCollGen.IEnumerator<S> baseEnumerator;
         private readonly Func<S, T> mapper;
