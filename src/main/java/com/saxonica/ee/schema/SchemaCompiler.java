@@ -124,7 +124,9 @@ public class SchemaCompiler {
      * Load a schema from a set of schema documents.
      *
      * @param sources       the JAXP Source objects identifying the schema documents to be loaded. These may be either
-     *                      source schema documents in XSD format, or a compiled schema in Saxon's SCM format
+     *                      source schema documents in XSD format, or a compiled schema in Saxon's SCM format.
+     *                      In addition, instances of {@link CachedSchemaSource} are accepted; these represent
+     *                      schemas that have already been compiled and cached.
      *                      If any {@code Source} is an {@link AugmentedSource} with a required target namespace,
      *                      then a {@code SchemaException} is thrown if the schema document that is read does
      *                      not have the required namespace.
@@ -140,50 +142,56 @@ public class SchemaCompiler {
 
             int numberOfSources = 0;
             List<SchemaDocument> schemaDocuments = new ArrayList<>();
+            List<PreparedSchema> cachedSchemas = new ArrayList<>();
 
             for (Source source : sources) {
                 numberOfSources++;
 
-                //#if CSHARP==false
-                if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
-                    // This option is provided to allow the parser set by applications such as Ant to be overridden by
-                    // the parser requested using FeatureKeys.SOURCE_PARSER or FeatureKeys.STYLE_PARSER
-                    ((SAXSource) source).setXMLReader(null);
-                }
-                //#endif
-
-                // SchemaReader.read() constructs a schema document and checks that it is locally valid
-                // according to the XML representation constraints. It also expands included and imported
-                // schema documents
-
-                SchemaDocument schemadoc = SchemaReader.read(source, this, null);
-                if (schemadoc.isCompiledSchemaDocument()) {
-                    if (scmSchema != null) {
-                        throw new SchemaException("An SCM input file must be loaded as a single unit");
-                    }
-                    try {
-                        scmSchema = new PreparedSchema();
-                        scmSchema.importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
-                    } catch (XPathException e) {
-                        throw new SchemaException(e);
-                    }
+                if (source instanceof CachedSchemaSource) {
+                    ((CachedSchemaSource)source).getSchema().copyTo(xsdSchema, this);
                 } else {
-                    if (source instanceof AugmentedSource) {
-                        NamespaceUri required = ((AugmentedSource)source).getRequiredTargetNamespace();
-                        if (required != null) {
-                            if (required.equals(NamespaceUri.NULL) && schemadoc.getTargetNamespace() != NamespaceUri.NULL) {
-                                throw new SchemaException("The schema document at " + source.getSystemId() +
-                                        " is required to be a no-namespace schema, but has a target namespace of " +
-                                        schemadoc.getTargetNamespace());
-                            } else if (!required.equals(schemadoc.getTargetNamespace())) {
-                                throw new SchemaException("The schema document at " + source.getSystemId() +
-                                        " does not have the required target namespace " + required);
-                            }
-                        }
 
+                    //#if CSHARP==false
+                    if (source instanceof SAXSource && config.getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
+                        // This option is provided to allow the parser set by applications such as Ant to be overridden by
+                        // the parser requested using FeatureKeys.SOURCE_PARSER or FeatureKeys.STYLE_PARSER
+                        ((SAXSource) source).setXMLReader(null);
                     }
-                    schemaDocuments.add(schemadoc);
-                    xsdSchema.addSchemaDocument(source.getSystemId());
+                    //#endif
+
+                    // SchemaReader.read() constructs a schema document and checks that it is locally valid
+                    // according to the XML representation constraints. It also expands included and imported
+                    // schema documents
+
+                    SchemaDocument schemadoc = SchemaReader.read(source, this, null);
+                    if (schemadoc.isCompiledSchemaDocument()) {
+                        if (scmSchema != null) {
+                            throw new SchemaException("An SCM input file must be loaded as a single unit");
+                        }
+                        try {
+                            scmSchema = new PreparedSchema();
+                            scmSchema.importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
+                        } catch (XPathException e) {
+                            throw new SchemaException(e);
+                        }
+                    } else {
+                        if (source instanceof AugmentedSource) {
+                            NamespaceUri required = ((AugmentedSource) source).getRequiredTargetNamespace();
+                            if (required != null) {
+                                if (required.equals(NamespaceUri.NULL) && schemadoc.getTargetNamespace() != NamespaceUri.NULL) {
+                                    throw new SchemaException("The schema document at " + source.getSystemId() +
+                                                                      " is required to be a no-namespace schema, but has a target namespace of " +
+                                                                      schemadoc.getTargetNamespace());
+                                } else if (!required.equals(schemadoc.getTargetNamespace())) {
+                                    throw new SchemaException("The schema document at " + source.getSystemId() +
+                                                                      " does not have the required target namespace " + required);
+                                }
+                            }
+
+                        }
+                        schemaDocuments.add(schemadoc);
+                        xsdSchema.addSchemaDocument(source.getSystemId());
+                    }
                 }
             }
             if (scmSchema != null) {

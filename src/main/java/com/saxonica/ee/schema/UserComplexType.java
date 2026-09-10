@@ -277,7 +277,7 @@ public class UserComplexType extends UserDefinedType
             }
 
             if (base instanceof UserComplexType) {
-                result = ((UserComplexType) base).makeCombinedAttributeGroup(compiler);
+                result = ((UserComplexType) base).makeCombinedAttributeGroup();
                 if (!result) {
                     return false;
                 }
@@ -327,7 +327,7 @@ public class UserComplexType extends UserDefinedType
             extendedAttributes.setLocator(this);
             IntHashMap<AttributeUse> map = new IntHashMap<>(20);
             if (base instanceof UserComplexType) {
-                ((UserComplexType) base).makeCombinedAttributeGroup(compiler);
+                ((UserComplexType) base).makeCombinedAttributeGroup();
                 AttributeGroupDecl baseAtts = ((UserComplexType) base).getCombinedAttributeGroup();
                 for (AttributeUse att : baseAtts.getAttributeUses()) {
                     if (!att.isProhibited()) {
@@ -956,7 +956,7 @@ public class UserComplexType extends UserDefinedType
 
         // Make and validate the extended attribute group
         if (result) {
-            result = makeCombinedAttributeGroup(compiler);
+            result = makeCombinedAttributeGroup();
         }
         if (result) {
             result = extendedAttributes.validate(compiler);
@@ -1628,10 +1628,10 @@ public class UserComplexType extends UserDefinedType
             return false;
         }
         ComplexType cbase = (ComplexType) base;
-        makeCombinedAttributeGroup(compiler);
+        makeCombinedAttributeGroup();
         if (cbase instanceof UserComplexType) {
             final UserComplexType ucbase = (UserComplexType) cbase;
-            ucbase.makeCombinedAttributeGroup(compiler);
+            ucbase.makeCombinedAttributeGroup();
             if (ucbase.extendedParticle == null) {
                 ucbase.makeExtendedParticle(compiler);
             }
@@ -2446,7 +2446,7 @@ public class UserComplexType extends UserDefinedType
             if (particle != null) {
                 particle.elaborate(compiler);
             }
-            makeCombinedAttributeGroup(null);
+            makeCombinedAttributeGroup();
             computeIsAllContent();
             extendedAttributes.buildCounterMap();
             for (AttributeUse att : extendedAttributes.getAttributeUses()) {

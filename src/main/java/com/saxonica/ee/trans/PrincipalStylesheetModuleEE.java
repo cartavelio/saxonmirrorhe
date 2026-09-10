@@ -64,12 +64,13 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
             EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
             List<Source> sources = new ArrayList<>();
             SchemaCompiler schemaCompiler = new SchemaCompiler(config);
+
             // Scan the declarations in reverse order, that is, highest precedence first
             for (int i = topLevel.size() - 1; i >= 0; i--) {
                 ComponentDeclaration decl = topLevel.get(i);
                 if (decl.getSourceElement() instanceof XSLImportSchema) {
                     XSLImportSchema is = (XSLImportSchema) decl.getSourceElement();
-                    final Source source = is.asSource(schemaCompiler);
+                    Source source = is.asSource(schemaCompiler);
                     if (source != null) {
                         sources.add(source);
                     }
