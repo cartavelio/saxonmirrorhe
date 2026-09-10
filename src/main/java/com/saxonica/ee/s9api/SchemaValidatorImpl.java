@@ -402,6 +402,22 @@ public class SchemaValidatorImpl extends SchemaValidator {
         return value ==  null ? null : XdmValue.wrap(value);
     }
 
+    /**
+     * Get all the supplied validation parameters
+     *
+     * @return a collection of all the parameters supplied using {@link #setParameter(QName, XdmValue)}
+     * @throws SaxonApiException if any supplied parameter cannot be converted to its required type
+     */
+
+    public ValidationParams getValidationParameters() throws SaxonApiException {
+        try {
+            return convertParams(suppliedParams, processor.getUnderlyingConfiguration().getDeclaredSchemaParameters());
+        } catch (XPathException e) {
+            throw new SaxonApiException(e);
+        }
+    }
+
+
 //    /**
 //     * A task to be performed when validation completes
 //     */
