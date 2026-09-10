@@ -9,7 +9,7 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.Shape;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
@@ -46,9 +46,9 @@ public class FunctionAnnotations extends SystemFunction {
         List<Item> result = new ArrayList<>();
         for (Annotation a : annotationList) {
             result.add(
-                Shape.KEY_VALUE_PAIR.make(
-                    new QNameValue(a.getAnnotationQName(), BuiltInAtomicType.QNAME),
-                    SequenceExtent.makeSequenceExtent(a.getAnnotationParameters())
+                    new SingleEntryMap(
+                        new QNameValue(a.getAnnotationQName(), BuiltInAtomicType.QNAME),
+                        SequenceExtent.makeSequenceExtent(a.getAnnotationParameters())
             ));
         }
         return SequenceExtent.makeSequenceExtent(result);
