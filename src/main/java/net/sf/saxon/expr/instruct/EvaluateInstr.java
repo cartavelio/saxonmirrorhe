@@ -621,7 +621,9 @@ public final class EvaluateInstr extends Expression {
                     expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
                     ContextItemStaticInfo cit;
                     if (instr.getContextItemExpr() != null) {
-                        cit = config.makeContextItemStaticInfo(instr.getContextItemExpr().getItemType(), false);
+                        cit = config.makeContextItemStaticInfo(
+                                instr.getContextItemExpr().getItemType(),
+                                Cardinality.allowsZero(instr.getContextItemExpr().getCardinality()));
                     } else {
                         cit = ContextItemStaticInfo.ABSENT;
                     }
