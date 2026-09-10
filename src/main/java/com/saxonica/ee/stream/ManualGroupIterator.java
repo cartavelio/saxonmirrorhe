@@ -4,10 +4,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.GroupIterator;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.ManualIterator;
+import net.sf.saxon.value.SequenceExtent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +67,8 @@ public class ManualGroupIterator extends ManualIterator implements GroupIterator
     }
 
     @Override
-    public SequenceIterator iterateCurrentGroup() throws XPathException {
-        return new ListIterator.Of<>(currentGroupItems);
+    public Sequence currentGroup() throws XPathException {
+        return SequenceExtent.makeSequenceExtent(currentGroupItems);
     }
 
     public boolean currentGroupContains(Item item) {
