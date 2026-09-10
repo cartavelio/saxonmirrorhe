@@ -5,7 +5,7 @@ platform to the C/C++ platform using GraalVM `native-image`.
 {{ model.productName }} provides processing in XSLT 3.0, XQuery 3.1 and XPath 3.1, and,
 in SaxonC-EE, Schema validation 1.0/1.1.
 
-## What’s included in this download?
+## What's included in this download?
 In this download, the binary shared libraries (.{{ model.soExtension }} files) for the
 core part of Saxon, compiled with `native-image`, which we call
 `{{ model.libsaxoncCore }}`, along with the sources for the C/C++-specific API,
@@ -37,7 +37,7 @@ following snippet for a `CMakeLists.txt`:
 (Where `{{ model.installPrefix }}` is where you installed the libraries.)
 
 If you're planning to compile `{{ model.libsaxonc }}` yourself, to use the C++
-API, then you can use CMake’s `FetchContent` in your `CMakeLists.txt` to
+API, then you can use CMake's `FetchContent` in your `CMakeLists.txt` to
 integrate it into your project:
 
     include(FetchContent)
