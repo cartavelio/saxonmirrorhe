@@ -15,9 +15,9 @@ import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CompressedWhitespace;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.WhitespaceString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Whitespace;
@@ -109,8 +109,8 @@ public class UnicodeNormalizer extends ProxyReceiver {
     }
 
     public UnicodeString normalize(UnicodeString in, boolean containsNullMarkers) {
-        if (in instanceof CompressedWhitespace) {
-            return in.tidy();
+        if (in instanceof WhitespaceString) {
+            return in;
         }
         UnicodeString t = in.tidy();
         if (containsNullMarkers) {

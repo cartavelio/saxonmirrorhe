@@ -17,7 +17,7 @@ import net.sf.saxon.om.FingerprintedQName;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
-import net.sf.saxon.str.CompressedWhitespace;
+import net.sf.saxon.str.IndentWhitespace;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
@@ -291,7 +291,7 @@ public class HTMLIndenter extends ProxyReceiver {
 //        }
 //        nextReceiver.characters(new Twine16(indentChars, 0, spaces + 1),
 //                                Loc.NONE, ReceiverOption.NONE);
-        nextReceiver.characters(CompressedWhitespace.makeIndent(1, spaces),
+        nextReceiver.characters(IndentWhitespace.of(1, spaces),
                                 Loc.NONE, ReceiverOption.NONE);
         sameLine = false;
     }

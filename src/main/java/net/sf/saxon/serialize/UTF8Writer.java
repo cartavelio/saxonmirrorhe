@@ -434,8 +434,8 @@ public final class UTF8Writer extends Writer implements UnicodeWriter {
                 } else if (width == 8) {
                     writeLatin1(s8.getByteArray(), s8.getStart(), s8.getEnd() - s8.getStart());
                 }
-            } else if (chars instanceof CompressedWhitespace) {
-                ((CompressedWhitespace)chars).write(this);
+            } else if (chars instanceof WhitespaceString) {
+                ((WhitespaceString)chars).write(this);
             } else {
                 // probably doesn't happen
                 IntIterator iter = chars.codePoints();

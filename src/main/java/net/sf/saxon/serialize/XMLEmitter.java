@@ -740,8 +740,8 @@ public class XMLEmitter extends Emitter {
             if (openStartTag) {
                 closeStartTag();
             }
-            if (chars instanceof CompressedWhitespace) {
-                ((CompressedWhitespace) chars).write(writer);
+            if (chars instanceof WhitespaceString) {
+                ((WhitespaceString) chars).write(writer);
             } else if (ReceiverOption.contains(properties, ReceiverOption.NO_SPECIAL_CHARS)) {
                 writer.write(chars);
             } else if (!ReceiverOption.contains(properties, ReceiverOption.DISABLE_ESCAPING)) {
@@ -848,8 +848,8 @@ public class XMLEmitter extends Emitter {
         boolean disabled = false;
         final boolean[] specialChars = inAttribute ? attSpecials : specialInText;
 
-        if (chars instanceof CompressedWhitespace) {
-            ((CompressedWhitespace) chars).writeEscape(specialChars, writer);
+        if (chars instanceof WhitespaceString) {
+            ((WhitespaceString) chars).writeEscape(specialChars, writer);
             return;
         }
 

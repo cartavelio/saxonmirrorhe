@@ -148,7 +148,7 @@ public class Whitespace {
      */
 
     public static boolean isAllWhite(UnicodeString content) {
-        if (content instanceof CompressedWhitespace) {
+        if (content instanceof WhitespaceString) {
             return true;
         }
         IntIterator iter = content.codePoints();
