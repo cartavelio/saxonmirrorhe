@@ -178,6 +178,16 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         //#if EE==true || PE==true
         if (version >= 40) {
+
+            ItemType fallbackType = new SpecificFunctionType(
+                    new SequenceType[]{SequenceType.SINGLE_INTEGER},
+                    SequenceType.ANY_SEQUENCE);
+
+            register("get", 3, e -> e.populate(ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.INTEGER, ONE | ABS, null)
+                    .arg(2, fallbackType, ONE | INS, null));
+
             register("empty", 1, e -> e.populate(ArrayEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
@@ -495,7 +505,18 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem array = (ArrayItem) arguments[0].head();
             IntegerValue index = (IntegerValue) arguments[1].head();
-            return array.get(checkSubscript(index, array.arrayLength()) - 1);
+            if (arguments.length <= 2) {
+                return array.get(checkSubscript(index, array.arrayLength()) - 1);
+            } else {
+                int i = index.asSubscript();
+                if (i <= 0 || i >= array.arrayLength()) {
+                    FunctionItem fn = (FunctionItem) arguments[2].head();
+                    return dynamicCall(fn, context, index);
+                } else {
+                    return array.get(i - 1);
+                }
+
+            }
         }
 
     }
