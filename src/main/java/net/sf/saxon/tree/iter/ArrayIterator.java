@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * ArrayIterator is used to enumerate items held in an array.
+ * ArrayIterator is used to enumerate items held in a Java array.
  * The items are always held in the correct sorted order for the sequence.
  *
  * The challenge here is getting the generics right, especially in a way
