@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 /**
  * This class represents a dot-separated sequence of numbers such as 1.12.5, typically
  * used as a software version number.
+ * <p>Also used for import precedences during the "use-when" filter pass on stylesheets.</p>
  * <p>The class provides "smart" ordering, for example 1 &lt; 1.2 &lt; 1.12 &lt; 1.12.6</p>
  */
 
