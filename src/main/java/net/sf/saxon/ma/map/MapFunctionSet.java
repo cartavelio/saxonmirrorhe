@@ -7,7 +7,6 @@
 
 package net.sf.saxon.ma.map;
 
-import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -31,7 +30,9 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in the map
@@ -162,18 +163,18 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(0, AnyItemType.getInstance(), STAR, null)
                     .arg(1, mapBuildKeyArg, ONE, null));
 
-            Expression identityFunction;
-            try {
-                identityFunction = new FunctionLiteral(XPath40FunctionSet.getInstance().makeFunction("identity", 1));
-            } catch (XPathException e) {
-                throw new AssertionError(e);
-            }
+//            Expression identityFunction;
+//            try {
+//                identityFunction = new FunctionLiteral(XPath40FunctionSet.getInstance().makeFunction("identity", 1));
+//            } catch (XPathException e) {
+//                throw new AssertionError(e);
+//            }
             FunctionItemType opFnType = new SpecificFunctionType(
                     new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE},
                     SequenceType.ANY_SEQUENCE);
-            Callable concatCallable = new CallableDelegate(
-                    (cxt, args) -> SequenceExtent.from(new InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
-            //CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
+//            Callable concatCallable = new CallableDelegate(
+//                    (cxt, args) -> SequenceExtent.from(new InsertBefore.InsertIterator(args[0].iterate(), args[1].iterate(), 1)));
+//            //CallableFunction concatSeq = new CallableFunction(2, concatCallable, opFnType);
             register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
                     .arg(0, AnyItemType.getInstance(), STAR, null)
                     .arg(1, mapBuildKeyArg, ONE, null)
