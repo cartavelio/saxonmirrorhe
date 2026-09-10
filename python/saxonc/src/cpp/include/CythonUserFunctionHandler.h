@@ -1,15 +1,259 @@
 //#include "saxonc/UserFunctionHandler.h"
 #include "Python.h"
-//#include "saxonc/XdmValue.h"
+#include "saxonc/XdmValue.h"
+#include "saxonc/XdmNode.h"
 
 extern "C" PyObject * CythonUserFunctionHandler;
+
+
+typedef enum saxonTypeEnum {
+  enumNode,
+  enumString,
+  enumInteger,
+  enumDouble,
+  enumFloat,
+  enumBool,
+  enumArrXdmValue
+} PRIMITIVE_TYPE;
+
+
+std::map<std::string, saxonTypeEnum> typeMap = {
+{"node", enumNode},
+{"Q{http://www.w3.org/2001/XMLSchema}string", enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}duration", enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}dateTime",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}date", enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}gYearMonth", enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}gYear",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}gMonthDay",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}time",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}integer",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}double",enumDouble},
+{"Q{http://www.w3.org/2001/XMLSchema}decimal",enumDouble},
+{"Q{http://www.w3.org/2001/XMLSchema}float",enumFloat},
+{"Q{http://www.w3.org/2001/XMLSchema}boolean",enumBool},
+
+{"Q{http://www.w3.org/2001/XMLSchema}gDay",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}gMonth",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}hexBinary",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}base64Binary",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}anyURI",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}QName",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}NOTATION",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}numeric",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}nonPositiveInteger",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}negativeInteger",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}long",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}int",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}short",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}byte",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}nonNegativeInteger",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}positiveInteger",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}unsignedLong",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}unsignedInt",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}unsignedShort",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}unsignedByte",enumInteger},
+{"Q{http://www.w3.org/2001/XMLSchema}normalizedString",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}token",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}anyType",enumString},
+{"Q{http://www.w3.org/2001/XMLSchema}anySimpleType",enumString},
+{"[xdmvalue", enumArrXdmValue}
+
+};
+
+
+PyObject *makePythonValue(void * value){
+    graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+    int typeRef = j_getXdmObjectType(thread, value);
+
+    allocFn fn = operator new;
+
+    if (typeRef == SXN_EXCEPTION) {
+
+                //throw SaxonApiException();
+
+        //zend_throw_exception(zend_ce_exception, "Error found in converting arguments", 0);
+        return nullptr;
+    }
+
+    XDM_TYPE xdm_type = static_cast<XDM_TYPE>(typeRef);
+
+    if (xdm_type == XDM_ATOMIC_VALUE) {
+
+        char * primType = j_getPrimitiveTypeName(thread,(void *)fn, value);
+
+                //XdmAtomicValue * aitem = (XdmAtomicValue *) (value->getHead());
+                //const char * primType = aitem->getPrimitiveTypeName();
+
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                  std::cerr<<"Primitive type = "<< primType<<std::endl;
+                }
+
+                saxonTypeEnum typeValue;
+
+                if(primType == NULL) {
+                    typeValue = typeMap["Q{http://www.w3.org/2001/XMLSchema}anySimpleType"];
+                } else {
+                    typeValue = typeMap[primType];
+                    operator delete(primType);
+                }
+
+        long bvalue;
+        long lnumber;
+        double dvalue;
+        char * astri = nullptr;
+        PyObject * unicodeStr;
+
+        switch (typeValue) {
+            case saxonTypeEnum::enumBool:
+              bvalue = (long)j_getBooleanValue(thread, value);
+              return PyBool_FromLong(bvalue);
+              break;
+            case saxonTypeEnum::enumInteger:
+              lnumber = j_getLongValue(thread, (void *)value);//aitem->getLongValue();
+              return PyLong_FromLong(lnumber);
+              break;
+            case saxonTypeEnum::enumString:
+              astri = getStringValueForXdmItem(thread,(void *)fn, value, NULL);
+              unicodeStr = PyUnicode_FromString(astri);
+              operator delete(astri);
+              return unicodeStr;
+              break;
+            case saxonTypeEnum::enumDouble:
+            case saxonTypeEnum::enumFloat:
+              dvalue = j_getDoubleValue(thread, value);
+              return PyFloat_FromDouble(dvalue);
+              break;
+
+            default:
+                if (getenv("SAXONC_DEBUG_FLAG")) {
+                  std::cerr<<"Python internal: type not found"<< std::endl;
+                }
+                astri = getStringValueForXdmItem(thread,(void *)fn, value, NULL);//aitem->getStringValue();
+                unicodeStr = PyUnicode_FromString(astri);
+                operator delete(astri);
+                return unicodeStr;
+                break;
+
+        }
+    } else if (xdm_type == XDM_NODE) {
+
+        //TODO shift creation of XdmNode to the python code
+        int64_t copiedValue = (int64_t)j_copy_handles(SaxonProcessor::sxn_environ->thread, value);
+        XdmNode * nxdmItem = new XdmNode(copiedValue);
+
+        return nullptr;
+
+
+      }  else if (xdm_type == XDM_MAP) {
+
+         graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+        int count = j_xdmMap_size(thread, (void *)value);
+        //int count = mitem->mapSize();
+
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PythonValue: XDMMap size="<<count<<std::endl;
+        }
+
+        ///// creating Python dict array
+        //zend_array *ret = zend_new_array(count);
+        //zend_ulong idx = 0;
+        //XdmAtomicValue ** aKeys = mitem->keys();
+
+        //graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+        long long *rawKeys = j_xdmMap_keys(thread,(void *)fn, (void *)value);
+
+        long long * rawMapValues = j_xdmMap_values(thread,(void *)fn, (void *)value);
+
+        char * ss = nullptr;
+
+          if (getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr<<"PHPValue: XDMMap before loop call"<<std::endl;
+          }
+
+        for (int j = 0; j < count; j++) {
+          //XdmValue * avaluej =mitem->get(aKeys[j]);
+          //todo add encoding instead of NULL
+          ss = getStringValueForXdmItem(thread,(void *)fn, (void *)rawKeys[j], NULL);
+          //const char * ss = aKeys[j]->getStringValue();
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PythonValue: XDMMap key str="<<ss<<std::endl;
+        }
+         // zend_string * keyzvalj = zend_string_init(ss, strlen(ss), 0);
+
+
+          PyObject * retvalj = makePythonValue((void *)rawMapValues[j]);
+
+          //TODO add value to the python dict
+          //delete avaluej;
+
+          operator delete(ss);
+
+        }
+        //delete [] aKeys;
+
+
+        for(int j = 0; j < count; j++) {
+          j_handles_destroy(thread, (void *)rawKeys[j]);
+          j_handles_destroy(thread, (void *)rawMapValues[j]);
+        }
+        operator delete(rawKeys);
+        operator delete(rawMapValues);
+        /*delete mitem;
+        delete value;*/
+
+        //value->resetRelinquishedItems();
+        //delete value;
+
+        //TODO XdmMap objectHandle pool not getting cleared.. Clear Keys and values
+
+        return nullptr;//retval;
+
+        } else if (xdm_type == XDM_ARRAY) {
+
+        graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+        int count = j_xdmArray_arrayLength(thread,(void *)value);
+
+        if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr<<"PythonValue: XDMarray size="<<count<<std::endl;
+        }
+
+        ///// creating Python array
+        //TODO create python array
+
+        long idx = 0;
+        int64_t avaluej =-1;
+        PyObject *  retvali = nullptr;
+        for (int j = 0; j < count; j++) {
+
+          avaluej =
+              j_xdmArray_get(thread, (void *)value, j);
+          //XdmValue * avaluej =aitem->get(j);
+          //itemi->incrementRefCount();
+
+          retvali = makePythonValue((void *)avaluej);
+
+          j_handles_destroy(thread, (void *)avaluej);
+
+          //TODO add item to the array
+
+          idx++;
+        }
+        return nullptr;
+
+}
+}
 
 void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes, int numOfArguments,  void ** argumentsi){
     //PyObject_CallNoArgs((PyObject *)func);
     XdmValue ** arguments;
-    PyObject* argsList = nullptr;
+    //PyObject* argsList = nullptr;
     PyObject* arg = nullptr;
+    PyObject *args = nullptr;
     int err;
+
+    allocFn fn = operator new;
+
 
     if (getenv("SAXONC_DEBUG_FLAG")) {
           fprintf(stdout, "We are in a **Cython** function. calling Python logic \n");
@@ -25,7 +269,9 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
 
         graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
 
-        argsList = PyList_New(numOfArguments);
+        //argsList = PyList_New(numOfArguments);
+
+        args = PyTuple_New(numOfArguments);   // n = number of arguments
 
         PyObject * argi = nullptr;
 
@@ -39,43 +285,65 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
 
         XdmValue * tempValue = nullptr;
 
-        for(int i =0; i< numOfArguments; i++) {
+        for(Py_ssize_t i = 0; i < numOfArguments; i++) {
             if (getenv("SAXONC_DEBUG_FLAG")) {
                 fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[i]);
             }
 
-            long argxi = (long)j_copy_handles(thread, (void *)argumentsi[i]);
+            long argxi = (long)argumentsi[i];//j_copy_handles(thread, (void *)argumentsi[i]);
             //arguments[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)argxi);//, (void *)argumentsi[i]));
 
+
+
+
+            if(useNativeTypes) {
+                argi = makePythonValue(argumentsi[i]);
+            } else {
+                argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"), PyLong_FromLong(argxi));
+            }
+
+            if(argi == nullptr){
+                    fprintf(stdout, "after arg convert/make call cp0.\n");
+            }
 
            /*argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"),
                                               (PyObject *) arguments[i]); */
 
-            argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("convert_c_obj"), PyLong_FromLong(argxi));
+            Py_INCREF(argi);        // Ensure ownership
+            PyTuple_SET_ITEM(args, i, argi);  // steals reference
 
             if(argi == Py_None ||  argi == nullptr) {
                 //PyErr_Print();
 
                 return nullptr;
             }
-            err = PyList_SetItem(argsList, i, argi);
+            /*err = PyList_SetItem(argsList, i, argi);
             if (err < 0) {
                 //std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
                 //std::cerr << "Error code"<<err << std::endl;
                 return nullptr;
-            }
+            }*/
         }
 
     }
-
-    PyObject* result = PyObject_CallFunctionObjArgs((PyObject *)func, (PyObject *) proc, argsList, NULL);
-
-    if(argsList != nullptr){
+PyErr_Print();
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+        fprintf(stdout, "Before func call cp1.\n");
+    }
+    PyObject* result = PyObject_Call((PyObject *)func, (PyObject *) proc, args); //PyObject_CallMethodObjArgs((PyObject *)func, (PyObject *) proc, args, NULL);
+ PyErr_Print();
+    if(args != nullptr){
         //TODO decrement ref counts
-        Py_DECREF(argsList);
+        Py_DECREF(args);
+    }
+
+    if(func != nullptr) {
+        Py_DECREF((PyObject *)func);
     }
 
     if(result == Py_None ||  result == nullptr) {
+    fprintf(stderr, "We are in a CythonUserFunctionHandler is null\n");
+    PyErr_Print();
         return nullptr;
     }
 
@@ -102,6 +370,10 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
     }
 
     long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("_get_underlying_int_value")));
+
+    /*if(result != nullptr){
+        Py_DECREF(result);
+    }*/
 
     if(resulti < 0) {
         return nullptr;

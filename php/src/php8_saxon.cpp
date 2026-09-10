@@ -1991,7 +1991,7 @@ void * userFunctionPHPNativeCall(char * functionName, void * proc, void * func, 
             arguments = new XdmValue*[numOfArguments];
             for(int i =0; i< numOfArguments; i++) {
                 if (getenv("SAXONC_DEBUG_FLAG")) {
-                    fprintf(stdout, "Making XdmValue YYYIII ref=%ld.\n", (long)argumentsi[i]);
+                    fprintf(stdout, "Making XdmValue ref=%ld.\n", (long)argumentsi[i]);
                 }
                 argument = j_copy_handles(SaxonProcessor::sxn_environ->thread, (void *)argumentsi[i]);
                 arguments[i] = SaxonProcessor::makeXdmValueFromRef(argument);
