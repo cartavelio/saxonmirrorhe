@@ -759,7 +759,7 @@ public class AlphaCode {
                     throw new IllegalArgumentException("Unknown type " + contentName);
                 }
                 contentTest = new ContentTypeTest(principal.equals("NE") ? Type.ELEMENT : Type.ATTRIBUTE,
-                                                  contentType, config, nillable);
+                                                  AnyNodeTest.getInstance(), contentType, nillable, config);
             }
             if (tree.vennOperands != null) {
                 if (tree.vennOperands.length == 2) {

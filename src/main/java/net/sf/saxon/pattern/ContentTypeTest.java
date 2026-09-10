@@ -9,9 +9,7 @@ package net.sf.saxon.pattern;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.Nilled_1;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.*;
@@ -23,27 +21,32 @@ import java.util.Optional;
 /**
  * NodeTest is an interface that enables a test of whether a node matches particular
  * conditions. ContentTypeTest tests for an element or attribute node with a particular
- * type annotation, regardless of the node name.
+ * type annotation, as well as testing the node name.
+ * <p>Changed in Saxon 13 to test the node name as well as the type, replacing
+ * <code>CombinedNodeTest</code> for this purpose.</p>
  */
 
 public class ContentTypeTest extends NodeTest {
 
     private final int kind;          // element or attribute
+    private final QNameTest nameTest;
     private final SchemaType schemaType;
     private final Configuration config;
-    private boolean nillable = false;
+    private final boolean nillable;
 
     /**
      * Create a ContentTypeTest
      *
      * @param nodeKind   the kind of nodes to be matched: always elements or attributes
+     * @param nameTest   constrains the name of the node
      * @param schemaType the required type annotation, as a simple or complex schema type
-     * @param config     the Configuration, supplied because this KindTest needs access to schema information
      * @param nillable   indicates whether an element with xsi:nil=true satisifies the test
+     * @param config     the Configuration, supplied because this KindTest needs access to schema information
      */
 
-    public ContentTypeTest(int nodeKind, SchemaType schemaType, Configuration config, boolean nillable) {
+    public ContentTypeTest(int nodeKind, QNameTest nameTest, SchemaType schemaType, boolean nillable, Configuration config) {
         this.kind = nodeKind;
+        this.nameTest = nameTest;
         this.schemaType = schemaType;
         this.config = config;
         this.nillable = nillable;
@@ -60,14 +63,6 @@ public class ContentTypeTest extends NodeTest {
         return kind == Type.ELEMENT ? UType.ELEMENT : UType.ATTRIBUTE;
     }
 
-    /**
-     * Indicate whether nilled elements should be matched (the default is false)
-     *
-     * @param nillable true if nilled elements should be matched
-     */
-    public void setNillable(boolean nillable) {
-        this.nillable = nillable;
-    }
 
     /**
      * The test is nillable if a question mark was specified as the occurrence indicator
@@ -105,13 +100,18 @@ public class ContentTypeTest extends NodeTest {
      */
     @Override
     public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-        return kind == nodeKind && matchesAnnotation(annotation);
+        return kind == nodeKind
+                && nameTest.matches(name.getStructuredQName())
+                && matchesAnnotation(annotation);
     }
 
     @Override
     public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
         final byte[] nodeKindArray = tree.getNodeKindArray();
+        final int[] nameCodeArray = tree.getNameCodeArray();
+        final NamePool namePool = tree.getNamePool();
         return IntPredicateLambda.of(nodeNr -> (nodeKindArray[nodeNr]&0x0f) == kind &&
+                nameTest.matchesFingerprint(namePool, nameCodeArray[nodeNr] & 0xfffff) &&
                 matchesAnnotation(((TinyTree) tree).getSchemaType(nodeNr)) &&
                 (nillable || !((TinyTree) tree).isNilled(nodeNr)));
     }
@@ -125,10 +125,19 @@ public class ContentTypeTest extends NodeTest {
      */
 
     @Override
-    public boolean test(/*@NotNull*/ NodeInfo node) {
-        return node.getNodeKind() == kind &&
-                matchesAnnotation(node.getSchemaType())
-                && (nillable || !Nilled_1.isNilled(node));
+    public boolean test(NodeInfo node) {
+        if (node.getNodeKind() != kind) {
+            return false;
+        }
+        if (node.hasFingerprint() && nameTest instanceof NameTest) {
+            return ((NameTest)nameTest).getFingerprint() == node.getFingerprint() &&
+                    matchesAnnotation(node.getSchemaType())
+                    && (nillable || !Nilled_1.isNilled(node));
+        } else {
+            return nameTest.matches(new StructuredQName("", node.getURI(),node.getLocalPart())) &&
+                    matchesAnnotation(node.getSchemaType())
+                    && (nillable || !Nilled_1.isNilled(node));
+        }
     }
 
     private boolean matchesAnnotation(SchemaType annotation) {
@@ -154,7 +163,17 @@ public class ContentTypeTest extends NodeTest {
 
     @Override
     public final double getDefaultPriority() {
-        return 0;
+        // TODO: QT4 issue 1394, the spec needs to define the rules for new nodetest options
+        if (nameTest instanceof AnyNodeTest) {
+            return 0;
+        } else if (nameTest instanceof NameTest) {
+            return 0.25;
+        } else if (nameTest instanceof LocalNameTest || nameTest instanceof NamespaceTest) {
+            return 0.125;
+        } else {
+            // Not sure what this covers...
+            return 0;
+        }
     }
 
     /**
@@ -170,7 +189,7 @@ public class ContentTypeTest extends NodeTest {
 
     /**
      * Get the content type allowed by this NodeTest (that is, the type annotation of the matched nodes).
-     * Return AnyType if there are no restrictions. The default implementation returns AnyType.
+     * @return the required content type; AnyType if there are no restrictions.
      */
 
     @Override
@@ -261,6 +280,7 @@ public class ContentTypeTest extends NodeTest {
     public boolean equals(Object other) {
         return other instanceof ContentTypeTest &&
                 ((ContentTypeTest) other).kind == kind &&
+                ((ContentTypeTest) other).nameTest.equals(nameTest) &&
                 ((ContentTypeTest) other).schemaType == schemaType &&
                 ((ContentTypeTest) other).nillable == nillable;
     }
@@ -281,6 +301,9 @@ public class ContentTypeTest extends NodeTest {
             return explanation;
         }
         NodeInfo node = (NodeInfo) item;
+        if (!nameTest.matches(NameOfNode.makeName(node).getStructuredQName())) {
+            return Optional.of("The node name does not match");
+        }
         if (!matchesAnnotation(((NodeInfo)item).getSchemaType())) {
             if (node.getSchemaType() == Untyped.getInstance()) {
                 return Optional.of("The supplied node has not been schema-validated");

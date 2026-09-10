@@ -246,11 +246,11 @@ public class Copy extends ElementCreator {
         if (getSchemaType() != null) {
             Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                return new ContentTypeTest(Type.ELEMENT, getSchemaType(), config, false);
+                return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), getSchemaType(), false, config);
             }
             Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                return new ContentTypeTest(Type.ATTRIBUTE, getSchemaType(), config, false);
+                return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), getSchemaType(), false, config);
             }
             return AnyNodeTest.getInstance();
         } else {
@@ -260,11 +260,11 @@ public class Copy extends ElementCreator {
                 case Validation.STRIP: {
                     Affinity e = th.relationship(selectItemType, NodeKindTest.ELEMENT);
                     if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                        return new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false);
+                        return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), Untyped.getInstance(), false, config);
                     }
                     Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
                     if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                        return new ContentTypeTest(Type.ATTRIBUTE, BuiltInAtomicType.UNTYPED_ATOMIC, config, false);
+                        return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), BuiltInAtomicType.UNTYPED_ATOMIC, false, config);
                     }
                     if (e != Affinity.DISJOINT || a != Affinity.DISJOINT) {
                         // it might be an element or attribute
@@ -284,13 +284,13 @@ public class Copy extends ElementCreator {
                                 SchemaDeclaration elem = config.getElementDeclaration(fp);
                                 if (elem != null) {
                                     try {
-                                        return new ContentTypeTest(Type.ELEMENT, elem.getType(), config, false);
+                                        return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), elem.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new ContentTypeTest(Type.ELEMENT, AnyType.getInstance(), config, false);
+                                        return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), AnyType.getInstance(), false, config);
                                     }
                                 } else {
                                     // No element declaration now, but there might be one at run-time
-                                    return new ContentTypeTest(Type.ELEMENT, AnyType.getInstance(), config, false);
+                                    return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), AnyType.getInstance(), false, config);
                                 }
                             }
                             Affinity a = th.relationship(selectItemType, NodeKindTest.ATTRIBUTE);
@@ -298,13 +298,13 @@ public class Copy extends ElementCreator {
                                 SchemaDeclaration attr = config.getElementDeclaration(fp);
                                 if (attr != null) {
                                     try {
-                                        return new ContentTypeTest(Type.ATTRIBUTE, attr.getType(), config, false);
+                                        return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), attr.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new ContentTypeTest(Type.ATTRIBUTE, AnySimpleType.getInstance(), config, false);
+                                        return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                     }
                                 } else {
                                     // No attribute declaration now, but there might be one at run-time
-                                    return new ContentTypeTest(Type.ATTRIBUTE, AnySimpleType.getInstance(), config, false);
+                                    return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                 }
                             }
                         } else {

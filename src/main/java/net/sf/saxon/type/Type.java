@@ -8,7 +8,6 @@
 package net.sf.saxon.type;
 
 import com.saxonica.ee.pin.pin.LabeledItem;
-import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
@@ -172,10 +171,7 @@ public abstract class Type {
                     if (eltype.equals(Untyped.getInstance()) || eltype.equals(AnyType.getInstance())) {
                         return new SameNameTest(node);
                     } else {
-                        return new CombinedNodeTest(
-                                new SameNameTest(node),
-                                OperatorSymbol.INTERSECT,
-                                new ContentTypeTest(Type.ELEMENT, eltype, node.getConfiguration(), false));
+                        return new ContentTypeTest(Type.ELEMENT, new SameNameTest(node), eltype, false, node.getConfiguration());
                     }
 
                 case Type.ATTRIBUTE:
@@ -183,10 +179,7 @@ public abstract class Type {
                     if (attype.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
                         return new SameNameTest(node);
                     } else {
-                        return new CombinedNodeTest(
-                                new SameNameTest(node),
-                                OperatorSymbol.INTERSECT,
-                                new ContentTypeTest(Type.ATTRIBUTE, attype, node.getConfiguration(), false));
+                        return new ContentTypeTest(Type.ATTRIBUTE, new SameNameTest(node), attype, false, node.getConfiguration());
                     }
 
                 case Type.TEXT:
@@ -568,7 +561,7 @@ public abstract class Type {
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
      * @param t2      the second type to compare.
      *                This must be a primitive atomic type as defined by {@link ItemType#getPrimitiveType}
-     * @param version the XPath language level (either 20, 30, 305, 31 or 40)
+     * @param allow40 true if the XPath language level is 4.0
      * @return true if the types are guaranteed comparable, as defined by the rules of the "eq" operator,
      *         or if we don't yet know (because some subtypes of the static type are comparable
      *         and others are not). False if they are definitely not comparable.

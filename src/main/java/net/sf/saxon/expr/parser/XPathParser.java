@@ -3888,7 +3888,7 @@ public class XPathParser {
                                 (nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
                             result = nodeTest;
                         } else {
-                            NodeTest typeTest = new ContentTypeTest(nodeKind, schemaType, env.getConfiguration(), nillable);
+                            NodeTest typeTest = new ContentTypeTest(nodeKind, AnyNodeTest.getInstance(), schemaType, nillable, env.getConfiguration());
                             if (nodeTest instanceof NodeKindTest) {
                                 // this represents element(*,T) or attribute(*,T)
                                 result = typeTest;

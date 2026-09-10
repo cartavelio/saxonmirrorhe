@@ -22,6 +22,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.StandardURIChecker;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -139,10 +140,10 @@ public class ComputedElement extends ElementCreator {
 
         final SchemaType schemaType = getSchemaType();
         if (schemaType != null) {
-            itemType = new ContentTypeTest(Type.ELEMENT, schemaType, config, false);
+            itemType = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), schemaType, false, config);
             schemaType.analyzeContentExpression(getContentExpression(), Type.ELEMENT);
         } else if (getValidationAction() == Validation.STRIP || !schemaAware) {
-            itemType = new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false);
+            itemType = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), Untyped.getInstance(), false, config);
         } else {
             // paradoxically, we know less about the type if validation="strict" is specified!
             // We know that it won't be untyped, but we have no way of representing that.

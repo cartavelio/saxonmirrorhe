@@ -377,7 +377,7 @@ public class ItemTypeFactory {
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }
-            contentTest = new ContentTypeTest(Type.ELEMENT, type, config, nillable);
+            contentTest = new ContentTypeTest(Type.ELEMENT, nameTest, type, nillable, config);
         }
         if (contentTest == null) {
             if (nameTest == null) {
@@ -386,15 +386,7 @@ public class ItemTypeFactory {
                 return new ConstructedItemType(nameTest, config);
             }
         } else {
-            if (nameTest == null) {
-                return new ConstructedItemType(contentTest, config);
-            } else {
-                CombinedNodeTest combo = new CombinedNodeTest(
-                        nameTest,
-                        OperatorSymbol.INTERSECT,
-                        contentTest);
-                return new ConstructedItemType(combo, config);
-            }
+            return new ConstructedItemType(contentTest, config);
         }
     }
 
@@ -453,7 +445,7 @@ public class ItemTypeFactory {
             if (type == null) {
                 throw new SaxonApiException("Unknown schema type " + schemaType.getClarkName());
             }
-            contentTest = new ContentTypeTest(Type.ATTRIBUTE, type, config, false);
+            contentTest = new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), type, false, config);
         }
         if (contentTest == null) {
             if (nameTest == null) {

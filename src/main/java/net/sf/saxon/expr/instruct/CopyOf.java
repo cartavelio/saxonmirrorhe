@@ -287,11 +287,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             TypeHierarchy th = config.getTypeHierarchy();
             Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
             if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                return new ContentTypeTest(Type.ELEMENT, schemaType, config, false);
+                return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), schemaType, false, config);
             }
             Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
             if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                return new ContentTypeTest(Type.ATTRIBUTE, schemaType, config, false);
+                return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), schemaType, false, config);
             }
         } else {
             switch (validation) {
@@ -301,11 +301,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     TypeHierarchy th = config.getTypeHierarchy();
                     Affinity e = th.relationship(in, NodeKindTest.ELEMENT);
                     if (e == Affinity.SAME_TYPE || e == Affinity.SUBSUMED_BY) {
-                        return new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false);
+                        return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), Untyped.getInstance(), false, config);
                     }
                     Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
                     if (a == Affinity.SAME_TYPE || a == Affinity.SUBSUMED_BY) {
-                        return new ContentTypeTest(Type.ATTRIBUTE, BuiltInAtomicType.UNTYPED_ATOMIC, config, false);
+                        return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), BuiltInAtomicType.UNTYPED_ATOMIC, false, config);
                     }
                     if (e != Affinity.DISJOINT || a != Affinity.DISJOINT) {
                         // it might be an element or attribute
@@ -330,13 +330,13 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                 SchemaDeclaration elem = config.getElementDeclaration(fp);
                                 if (elem != null) {
                                     try {
-                                        return new ContentTypeTest(Type.ELEMENT, elem.getType(), config, false);
+                                        return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), elem.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new ContentTypeTest(Type.ELEMENT, AnyType.getInstance(), config, false);
+                                        return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), AnyType.getInstance(), false, config);
                                     }
                                 } else {
                                     // Although there is no element declaration now, there might be one at run-time
-                                    return new ContentTypeTest(Type.ELEMENT, AnyType.getInstance(), config, false);
+                                    return new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), AnyType.getInstance(), false, config);
                                 }
                             }
                             Affinity a = th.relationship(in, NodeKindTest.ATTRIBUTE);
@@ -344,13 +344,13 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                 SchemaDeclaration attr = config.getElementDeclaration(fp);
                                 if (attr != null) {
                                     try {
-                                        return new ContentTypeTest(Type.ATTRIBUTE, attr.getType(), config, false);
+                                        return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), attr.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new ContentTypeTest(Type.ATTRIBUTE, AnySimpleType.getInstance(), config, false);
+                                        return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                     }
                                 } else {
                                     // Although there is no attribute declaration now, there might be one at run-time
-                                    return new ContentTypeTest(Type.ATTRIBUTE, AnySimpleType.getInstance(), config, false);
+                                    return new ContentTypeTest(Type.ATTRIBUTE, AnyNodeTest.getInstance(), AnySimpleType.getInstance(), false, config);
                                 }
                             }
                         } else {

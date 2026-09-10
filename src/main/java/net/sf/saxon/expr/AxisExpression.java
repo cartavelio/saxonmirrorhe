@@ -291,9 +291,7 @@ public final class AxisExpression extends Expression {
                                     }
                                     itemType = elementTest;
                                 } else {
-                                    itemType = new CombinedNodeTest(
-                                            elementTest, OperatorSymbol.INTERSECT,
-                                            new ContentTypeTest(Type.ELEMENT, decl.getType(), config, true));
+                                    itemType = new ContentTypeTest(Type.ELEMENT, elementTest.getQNameTest(), decl.getType(), true, config);
                                 }
                             } else {
                                 itemType = elementTest;
@@ -450,10 +448,7 @@ public final class AxisExpression extends Expression {
                                 return Literal.makeEmptySequence();
                             }
                         } else {
-                            itemType = new CombinedNodeTest(
-                                    test,
-                                    OperatorSymbol.INTERSECT,
-                                    new ContentTypeTest(Type.ATTRIBUTE, schemaType, config, false));
+                            itemType = new ContentTypeTest(Type.ATTRIBUTE, test.getQNameTest(), schemaType, false, config);
                         }
                     } catch (SchemaException e) {
                         // ignore the exception
@@ -515,10 +510,7 @@ public final class AxisExpression extends Expression {
                         }
                         return Literal.makeEmptySequence();
                     } else {
-                        itemType = new CombinedNodeTest(
-                                test,
-                                OperatorSymbol.INTERSECT,
-                                new ContentTypeTest(Type.ELEMENT, schemaType, config, true));
+                        itemType = new ContentTypeTest(Type.ELEMENT, test.getQNameTest(), schemaType, true, config);
                         int computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, true);
                         ExpressionTool.resetStaticProperties(this);
                         if (computedCardinality == StaticProperty.ALLOWS_ZERO) {
@@ -582,9 +574,7 @@ public final class AxisExpression extends Expression {
                         if (considerDescendants) {
                             SchemaType st = ((ComplexType) contentType).getDescendantElementType(targetfp);
                             if (st != AnyType.getInstance()) {
-                                itemType = new CombinedNodeTest(
-                                        test, OperatorSymbol.INTERSECT,
-                                        new ContentTypeTest(Type.ELEMENT, st, config, true));
+                                itemType = new ContentTypeTest(Type.ELEMENT, test.getQNameTest(), st, true, config);
                             }
                             //return this;
                         }

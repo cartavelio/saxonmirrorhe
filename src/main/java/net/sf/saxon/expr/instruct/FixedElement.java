@@ -16,11 +16,13 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.ComplexNodePushElaborator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.CombinedNodeTest;
 import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.s9api.Location;
@@ -214,10 +216,9 @@ public class FixedElement extends ElementCreator {
                     schemaType = declaredType;
                 }
 
-                itemType = new CombinedNodeTest(
-                    new NameTest(Type.ELEMENT, fp, env.getConfiguration().getNamePool()),
-                    OperatorSymbol.INTERSECT,
-                    new ContentTypeTest(Type.ELEMENT, schemaType, config, false));
+                itemType = new ContentTypeTest(Type.ELEMENT,
+                                               new NameTest(Type.ELEMENT, fp, env.getConfiguration().getNamePool()),
+                                               schemaType, false, config);
                 if (xsiType != null || !decl.hasTypeAlternatives()) {
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
                     try {
@@ -248,10 +249,9 @@ public class FixedElement extends ElementCreator {
                 } else {
                     schemaType = decl.getType();
                     instr.setValidationOptions(instr.getValidationOptions().withTopLevelType(schemaType));
-                    itemType = new CombinedNodeTest(
-                            new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                            OperatorSymbol.INTERSECT,
-                            new ContentTypeTest(Type.ELEMENT, instr.getSchemaType(), config, false));
+                    itemType = new ContentTypeTest(Type.ELEMENT,
+                                                   new NameTest(Type.ELEMENT, fp, config.getNamePool()),
+                                                   instr.getSchemaType(), false, config);
                     try {
                         schemaType.analyzeContentExpression(content, Type.ELEMENT);
                     } catch (XPathException e) {
@@ -261,23 +261,19 @@ public class FixedElement extends ElementCreator {
                 }
             } else if (validation == Validation.PRESERVE) {
                 // we know the result will be an element of type xs:anyType
-                itemType = new CombinedNodeTest(
-                        new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                        OperatorSymbol.INTERSECT,
-                        new ContentTypeTest(Type.ELEMENT, AnyType.getInstance(), config, false));
+                itemType = new ContentTypeTest(Type.ELEMENT,
+                                            new NameTest(Type.ELEMENT, fp, config.getNamePool()),
+                                               AnyType.getInstance(), false, config);
             } else {
                 // we know the result will be an untyped element
-                itemType = new CombinedNodeTest(
-                        new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                        OperatorSymbol.INTERSECT,
-                        new ContentTypeTest(Type.ELEMENT, Untyped.getInstance(), config, false));
+                itemType = new ContentTypeTest(Type.ELEMENT,
+                                               new NameTest(Type.ELEMENT, fp, config.getNamePool()),
+                                               Untyped.getInstance(), false, config);
             }
         } else {
-            itemType = new CombinedNodeTest(
-                    new NameTest(Type.ELEMENT, fp, config.getNamePool()),
-                    OperatorSymbol.INTERSECT,
-                    new ContentTypeTest(Type.ELEMENT, schemaType, config, false)
-            );
+            itemType = new ContentTypeTest(Type.ELEMENT,
+                                           new NameTest(Type.ELEMENT, fp, config.getNamePool()),
+                                           schemaType, false, config);
             try {
                 schemaType.analyzeContentExpression(content, Type.ELEMENT);
             } catch (XPathException e) {
