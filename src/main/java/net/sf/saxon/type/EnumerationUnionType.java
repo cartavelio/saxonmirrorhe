@@ -123,7 +123,7 @@ public class EnumerationUnionType extends LocalUnionType {
         if (type == null) {
             throw new ValidationFailure(
                     "Value " + Err.wrap(value, Err.VALUE) +
-                            " does not match any member of enumeration type " + getDescription())
+                            " does not match any member of enumeration type " + getDescription(), "XPTY0004")
                     .makeException();
         } else {
             return type.getInstance();
