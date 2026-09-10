@@ -380,21 +380,19 @@
           zero-length string (or untypedAtomic). In all other cases the result is an error.</p>
       </description>
     </function>
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+    <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">build-dateTime</name>
       <signatures>
         <proto return-type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?">
-          <arg desc="The date time record" name="value"/>
-            </proto>
-         </signatures>
-         <status-ok/>
-         <saxon-edition>EE_13</saxon-edition>
-         <description>
-            <p>Constructs a date time value from the values of the components specified.</p>
-         </description>
-      </function>
-
+          <arg desc="The date/time record" name="value"/>
+        </proto>
+      </signatures>
+      <status-ok/>
+      <saxon-edition>PE/EE 13</saxon-edition>
+      <description>
+        <p>Constructs a date/time value from the values of the components specified.</p>
+      </description>
+    </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">build-uri</name>
       <signatures>
@@ -1484,7 +1482,7 @@
     <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">element-to-map-plan</name>
       <signatures>
-        <proto return-type="map(xs:string, (fn:element-conversion-plan-record|fn:attribute-conversion-plan-record)">
+        <proto return-type="map(xs:string, (fn:element-conversion-plan-record|fn:attribute-conversion-plan-record))">
           <arg name="input" type="(document-node() | element())*" 
             desc="An input sequence of element and document nodes"/>
           <in-spec>xpath40</in-spec>
@@ -3825,20 +3823,19 @@
           items, starting a new partition when a supplied condition is true.</p>
       </description>
     </function>
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+    <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">parts-of-dateTime</name>
       <signatures>
         <proto>
-          <arg desc="The date time value"
+          <arg desc="The date/time value"
                name="value"
                type="(xs:dateTime | xs:date | xs:time | xs:gYear | xs:gYearMonth | xs:gMonth | xs:gMonthDay | xs:gDay)?"/>
         </proto>
       </signatures>
-      <status_oka>
-      <saxon-edition>EE_13</saxon-edition>
+      <status_ok/>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>FIXME:</p>
-        <p>Returns the components of a date time value.</p>
+        <p>Returns the components of a date/time value.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3950,7 +3947,6 @@
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">random-number-generator</name>
-      <!-- TODO what is the return type??? -->
       <signatures>
         <proto>
           <arg name="seed" type="xs:anyAtomicType?" default="()" desc="The supplied seed"/>
@@ -4794,17 +4790,16 @@
         <p>Returns the total of a sequence of numbers or durations.</p>
       </description>
     </function>
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+    <function xmlns="http://www.saxonica.com/ns/doc/functions" class="qt4">
       <name namespace="http://www.w3.org/2005/xpath-functions">system-properties</name>
       <signatures>
         <proto return-type="map(xs:QName, xs:anyAtomicType)"/>
       </signatures>
       <status>
-        <p>FIXME:</p>
+        <p>New in XPath 4.0. Not yet implemented in Saxon.</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
       <description>
-        <p>FIXME:</p>
         <p>Returns information about the processor.</p>
       </description>
     </function>
