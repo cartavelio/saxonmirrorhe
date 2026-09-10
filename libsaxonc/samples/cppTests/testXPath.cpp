@@ -793,6 +793,40 @@ void testGetDoubleFromString(SaxonProcessor* processor, sResultCount *sresult) {
   }
 }
 
+
+/**
+* testGetStringValueFromAtomicValue - Test the calling of getStringValue() from the sub-class AtomicValue
+*/
+void testGetStringValueFromAtomicValue(SaxonProcessor* processor, sResultCount *sresult) {
+  cout << endl << "testGetStringValueFromAtomicValue" << endl;
+  try {
+    XdmAtomicValue *v = processor->makeStringValue("Hello");
+
+    if(v == nullptr) {
+      	sresult->failure++;
+      	sresult->failureList.push_back("testGetStringValueFromAtomicValue");
+		return;
+    }
+    const char * result = v->getStringValue();
+
+	if(result != nullptr && CppTestUtils::assertEquals("Hello", result)) {
+      sresult->success++;
+      delete result;
+    } else {
+      sresult->failure++;
+      sresult->failureList.push_back("testGetStringValueFromAtomicValue");
+    }
+  	delete v;
+  } catch (SaxonApiException &e) {
+
+    const char *message = e.getMessage();
+    cout << "Error Message = " << message << endl;
+
+    sresult->failure++;
+    sresult->failureList.push_back("testGetStringValueFromAtomicValue");
+  }
+}
+
 void testEmptyStringFromNull(SaxonProcessor* processor, sResultCount *sresult) {
   cout << endl << " testEmptyStringFromNull" << endl;
   try {
@@ -1393,6 +1427,13 @@ int main(int argc, char *argv[]) {
        << "============================================================="
        << endl
        << endl;
+
+  testGetStringValueFromAtomicValue(processor, sresult);
+  cout << endl
+       << "============================================================="
+       << endl
+       << endl;
+
   testEmptyStringFromNull(processor, sresult);
 
   cout << endl
