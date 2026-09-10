@@ -81,6 +81,7 @@ public class ParamKeywords {
         fnParamNames.put("avg", "values");
         fnParamNames.put("base-uri", "node");
         fnParamNames.put("boolean", "input");
+        fnParamNames.put("build-dateTime", "value");
         fnParamNames.put("build-uri", "parts|options");
         fnParamNames.put("ceiling", "value");
         fnParamNames.put("char", "value");
@@ -106,6 +107,7 @@ public class ParamKeywords {
         fnParamNames.put("current-time", "");
         fnParamNames.put("data", "input");
         fnParamNames.put("dateTime", "date|time");
+        fnParamNames.put("dateTime-record", "year|month|day|hours|minutes|seconds|timezone");
         fnParamNames.put("day-from-date", "value");
         fnParamNames.put("day-from-dateTime", "value");
         fnParamNames.put("days-from-duration", "value");
@@ -234,6 +236,7 @@ public class ParamKeywords {
         fnParamNames.put("partial-apply", "function|arguments");
         fnParamNames.put("partition", "input|split-when");
         fnParamNames.put("parts", "");
+        fnParamNames.put("parts-of-dateTime", "value");
         fnParamNames.put("path", "node|options");
         fnParamNames.put("position", "");
         fnParamNames.put("prefix-from-QName", "value");
