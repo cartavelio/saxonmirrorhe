@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Windows.Input;
-
+#nullable enable
 namespace Saxon.Api.Support {
     /// <summary>
     /// Loads and invokes a user-supplied <c>IProcessorInitializer</c>
@@ -19,7 +19,7 @@ namespace Saxon.Api.Support {
             Assembly plugin = LoadPlugin(initializer);
             int count = 0;
 
-            IProcessorInitializer initializationHook = null;
+            IProcessorInitializer? initializationHook = null;
             foreach (Type type in plugin.GetTypes()) {
                 if (typeof(IProcessorInitializer).IsAssignableFrom(type)) {
                     initializationHook = Activator.CreateInstance(type) as IProcessorInitializer;
@@ -31,7 +31,7 @@ namespace Saxon.Api.Support {
                 string plurality = count == 0 ? "No" : "Multiple";
                 string availableTypes = string.Join(",", plugin.GetTypes().Select(t => t.FullName));
                 throw new ApplicationException(
-                    $"{plurality} types in {plugin} from {plugin.Location} implement Saxon.Api.IProcessorInitializer.\n" +
+                    $"{plurality} types in {plugin} implement Saxon.Api.IProcessorInitializer.\n" +
                     $"Available types: {availableTypes}");
             }
 
@@ -62,16 +62,16 @@ namespace Saxon.Api.Support {
     
     class PluginLoadContext : AssemblyLoadContext
     {
-        private AssemblyDependencyResolver _resolver;
+        private readonly AssemblyDependencyResolver _resolver;
 
         public PluginLoadContext(string pluginPath)
         {
             _resolver = new AssemblyDependencyResolver(pluginPath);
         }
 
-        protected override Assembly Load(AssemblyName assemblyName)
+        protected override Assembly? Load(AssemblyName assemblyName)
         {
-            string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+            string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
             if (assemblyPath != null)
             {
                 return LoadFromAssemblyPath(assemblyPath);
