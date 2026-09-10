@@ -16,7 +16,10 @@ namespace Saxon.Api {
         private XPathException exception;
         internal bool isWarning;
 
-        // internal constructor: Create a new SaxonApiException, wrapping a Saxon XPathException
+        /// <summary>
+        /// Construct a <c>SaxonApiException</c> wrapping another exception (often an XPathException)
+        /// </summary>
+        /// <param name="err">the exception to be wrapped</param>
 
         public SaxonApiException(Exception err) {
             this.exception = (err is XPathException xPathException
@@ -24,10 +27,19 @@ namespace Saxon.Api {
                                 : XPathException.makeXPathException(err));
         }
 
+        /// <summary>
+        /// Construct a <c>SaxonApiException</c> with a given message (and no error code)
+        /// </summary>
+        /// <param name="message">The message to be associated with the exception</param>
         public SaxonApiException(string message) : this(new Saxon.Ejava.lang.Exception(message)) {
             
         }
         
+        /// <summary>
+        /// Construct a <c>SaxonApiException</c> with a given message, supplying an underlying exception as the cause
+        /// </summary>
+        /// <param name="message">The exception message</param>
+        /// <param name="err">The underlying cause of the exception</param>
         public SaxonApiException(string message, Exception err) : this(new Saxon.Ejava.lang.Exception(message, err)) {
             
         }
@@ -53,6 +65,9 @@ namespace Saxon.Api {
         /// <summary>
         /// Return the message associated with this error.
         /// </summary>
+        /// <returns>
+        /// The exception message
+        /// </returns>
 
         public override string Message => exception.getMessage();
 

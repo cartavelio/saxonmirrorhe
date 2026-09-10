@@ -10,8 +10,14 @@ namespace Saxon.Api {
     /// </remarks>
     public class XQueryModuleSource 
     {
+        /// <summary>
+        /// The base URI of the XQuery module
+        /// </summary>
         public Uri BaseUri { get; init; }
         
+        /// <summary>
+        /// The content of the XQuery module, as a string
+        /// </summary>
         public string Content { get; init; }
     }
 }

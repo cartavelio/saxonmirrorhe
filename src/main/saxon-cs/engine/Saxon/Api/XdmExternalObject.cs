@@ -14,7 +14,12 @@ namespace Saxon.Api {
         public XdmExternalObject(T value) : base(new ObjectValue<T>(value)) {
             
         }
-
+        /// <summary>
+        /// Ask whether the item is an atomic value.
+        /// </summary>
+        /// <returns>
+        /// False: the item is not an atomic value.
+        /// </returns>
         public override bool IsAtomic() {
             return false;
         }

@@ -23,7 +23,7 @@ namespace Saxon.Api {
 
         // Wrap a supplied Saxon map
 
-		public XdmMap(Saxon.Hej.ma.map.MapItem map) : base(map) {
+		internal XdmMap(Saxon.Hej.ma.map.MapItem map) : base(map) {
         }
 
 
@@ -33,9 +33,7 @@ namespace Saxon.Api {
         /// <remarks>(Note that the <see cref="XdmValue.Count"/> method returns 1 (one),
         /// because an XDM map is an item.)</remarks>
 
-        public int Size {
-            get { return ((MapItem) value).size(); }
-        }
+        public int Size => ((MapItem) value).size();
 
 
         /// <summary>

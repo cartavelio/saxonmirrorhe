@@ -27,7 +27,19 @@ namespace Saxon.Api {
         /// as input and delivers the content at that <c>Uri</c> as a <c>Stream</c>.</param>
         public SimpleUriResolver(System.Func<Uri, Stream> fetcher) {
             this.fetcher = fetcher;
-        } 
+        }
+        
+        /// <summary>
+        /// Maps a URI to the content of the retrieved resource.
+        /// </summary>
+        /// <param name="absoluteUri">The absolute URI of the resource</param>
+        /// <param name="role">Not used</param>
+        /// <param name="ofObjectToReturn">Not used</param>
+        /// <returns>Returns the resource contents as a <c>Stream</c>.</returns>
+        /// <remarks>
+        /// Implements the .NET-defined <c>XmlResolver</c> interface, with all its quirks. This implementation
+        /// simply calls the function that was supplied as the argument to the constructor.
+        /// </remarks>
         public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
             return fetcher(absoluteUri);
         }

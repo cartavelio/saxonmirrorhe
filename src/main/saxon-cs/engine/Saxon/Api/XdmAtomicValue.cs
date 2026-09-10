@@ -172,7 +172,7 @@ namespace Saxon.Api {
         
         private static AtomicValue _initGeneric(string lexicalForm, XdmAtomicType type) {
 
-        Saxon.Hej.type.ItemType it = type.Unwrap();
+            Saxon.Hej.type.ItemType it = type.Unwrap();
             if (!it.isPlainType()) {
                 throw new SaxonApiException("Requested type is not atomic");
             }

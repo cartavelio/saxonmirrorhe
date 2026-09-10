@@ -36,8 +36,11 @@ namespace Saxon.Api {
         public bool Required { get; }
         
         /// <summary>
-        /// Get details of the location of the variable declaration
+        /// Get details of the location of the parameter declaration
         /// </summary>
+        /// <returns>
+        /// The location of the declaration of this parameter
+        /// </returns>
 
         public Location Location;
     }

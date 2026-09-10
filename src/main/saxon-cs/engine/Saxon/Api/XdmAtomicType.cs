@@ -446,6 +446,10 @@ namespace Saxon.Api {
                    && ((AtomicType)underlyingType).matches((AtomicValue)theItem, null);
         }
 
+        /// <summary>
+        /// Returns the name of this atomic type, as an EQName
+        /// </summary>
+        /// <returns>For example, <c>"Q{http://www.w3.org/2001/XMLSchema}string"</c> for the <c>xs:string</c> data type</returns>
         public override string ToString() {
             return TypeName.EQName;
         }
