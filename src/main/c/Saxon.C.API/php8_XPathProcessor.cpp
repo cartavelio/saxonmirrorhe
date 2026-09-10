@@ -415,7 +415,6 @@ PHP_METHOD(XPathProcessor, setContextItem) {
       xpathProcessor->setContextItem(nullptr);
       return;
     }
-
     const char *objName = ZSTR_VAL(Z_OBJCE_P(oth)->name);
 
     if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -427,7 +426,6 @@ PHP_METHOD(XPathProcessor, setContextItem) {
         if (value != nullptr) {
           xpathProcessor->setContextItem((XdmItem *)value);
           value->incrementRefCount();
-        }
       }
     } else if (strcmp(objName, "Saxon\\XdmAtomicValue") == 0) {
       zend_object *vvobj = Z_OBJ_P(oth);
@@ -456,6 +454,7 @@ PHP_METHOD(XPathProcessor, setContextItem) {
       }
     }
   }
+}
 }
 
 PHP_METHOD(XPathProcessor, setBaseURI) {

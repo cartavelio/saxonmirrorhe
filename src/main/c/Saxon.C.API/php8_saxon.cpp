@@ -238,7 +238,7 @@ PHP_METHOD(SaxonProcessor, createXdmMapValue) {
         c_keys[num_key] = saxonProc->makeIntegerValue(num_key);
       }
 
-      if (Z_TYPE_P(val) != NULL) {
+      if (Z_TYPE_P(val) != IS_NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
 
         if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -328,7 +328,7 @@ PHP_METHOD(SaxonProcessor, createXdmArrayValue) {
 
   if (saxonProc != nullptr) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-      if (Z_TYPE_P(val) != NULL) {
+      if (Z_TYPE_P(val) != IS_NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
 
         if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -2208,10 +2208,7 @@ PHP_METHOD(XdmNode, getChildNode) {
         XdmNode *childNode = xdmNode->getChild(indexi, false);
 
         if (childNode != nullptr) {
-          // std::cerr<<"getChildNode i="<<indexi<<"
-          // Kind="<<childNode->getNodeKind()<<"
-          // pointer="<<(childNode)<<std::endl; std::cerr<<"getChildNode
-          // str="<<(childNode->getStringValue())<<std::endl;
+
           childNode->incrementRefCount();
           zend_object *zobj = Z_OBJ_P(return_value);
           xdmNode_object *vobj =
@@ -2356,6 +2353,50 @@ PHP_METHOD(XdmNode, getParent) {
       vobj->xdmNode = parent;
       return;
     }
+  }
+  RETURN_NULL();
+}
+
+    PHP_METHOD(XdmNode, getAttributeNode) {
+    zval * retval;
+    long indexi = 0;
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &indexi) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  XdmNode *xdmNode;
+  zend_object *zobj = Z_OBJ_P(getThis());
+  xdmNode_object *obj =
+      (xdmNode_object *)((char *)zobj - XtOffsetOf(xdmNode_object, std));
+  xdmNode = obj->xdmNode;
+
+  if (xdmNode != nullptr) {
+    int count = xdmNode->getAttributeCount();
+    if (count > 0 && indexi < count) {
+
+        XdmNode **attNodes = xdmNode->getAttributeNodes();
+        XdmNode * attNode = attNodes[indexi];
+
+        attNode->incrementRefCount();
+        if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
+                   RETURN_NULL();
+        }
+        zend_object *zobj = Z_OBJ_P(return_value);
+        xdmNode_object *vobj =
+                (xdmNode_object *)((char *)zobj -
+                                   XtOffsetOf(xdmNode_object, std));
+        assert(vobj != nullptr);
+        vobj->xdmNode = attNode;
+        for(int i =0; i< count; i ++) {
+            if(indexi != i) {
+                delete attNodes[i];
+            }
+        }
+        delete [] attNodes;
+        return;
+
+       }
+
   }
   RETURN_NULL();
 }
@@ -2827,7 +2868,7 @@ PHP_METHOD(XdmFunctionItem, call) {
 
       arguments = new XdmValue *[argument_length];
       ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
-        if (Z_TYPE_P(val) != NULL) {
+        if (Z_TYPE_P(val) != IS_NULL) {
           const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
 
           if (strcmp(objName, "Saxon\\XdmNode") == 0) {
@@ -3204,7 +3245,9 @@ PHP_METHOD(XdmMap, containsKey) {
   }
   RETURN_BOOL(false);
 }
-
+/*
+TODO implement these methods
+*/
 PHP_METHOD(XdmMap, keys) {}
 
 /*PHP_METHOD(XdmMap, values)
@@ -3637,16 +3680,10 @@ zend_function_entry xdmNode_methods[] = {
                         PHP_ME(XdmNode, getAttributeCount,arginfo_saxonc_xdmnode_getAttributeCount,ZEND_ACC_PUBLIC)
                         PHP_ME(XdmNode, getChildNode,arginfo_saxonc_xdmnode_getChildNode,ZEND_ACC_PUBLIC)
                         PHP_ME(XdmNode, getChildren,arginfo_saxonc_xdmnode_getChildren,ZEND_ACC_PUBLIC)
-                            PHP_ME(XdmNode, getParent,
-                                   arginfo_saxonc_xdmnode_getParent,
-                                   ZEND_ACC_PUBLIC)
-                                PHP_ME(XdmNode, getAttributeNodes,
-                                       arginfo_saxonc_xdmnode_getAttributeNode,
-                                       ZEND_ACC_PUBLIC)
-                                    PHP_ME(
-                                        XdmNode, getAttributeValue,
-                                        arginfo_saxonc_xdmnode_getAttributeValue,
-                                        ZEND_ACC_PUBLIC)
+                        PHP_ME(XdmNode, getParent, arginfo_saxonc_xdmnode_getParent, ZEND_ACC_PUBLIC)
+                        PHP_ME(XdmNode, getAttributeNode, arginfo_saxonc_xdmnode_getAttributeNode, ZEND_ACC_PUBLIC)
+                        PHP_ME(XdmNode, getAttributeNodes, arginfo_saxonc_xdmnode_getAttributeNodes, ZEND_ACC_PUBLIC)
+                        PHP_ME(XdmNode, getAttributeValue,arginfo_saxonc_xdmnode_getAttributeValue,ZEND_ACC_PUBLIC)
                                         PHP_ME(
                                             XdmNode, getTypedValue,
                                             arginfo_saxonc_xdmnode_getTypedValue,

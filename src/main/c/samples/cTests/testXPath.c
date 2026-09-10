@@ -57,7 +57,7 @@ int main() {
 
   bool resultBool =
       effectiveBooleanValue(environi, xpathProc, cwd, "count(/out/person)>0", NULL,
-                            parameters, properties, 0, propLen);
+                            parameters, properties, parLen, propLen);
 
   if (!result) {
     printf("result is null");

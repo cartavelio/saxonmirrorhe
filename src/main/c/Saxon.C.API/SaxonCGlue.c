@@ -151,14 +151,12 @@ void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap,
   (*parLen)++;
   if ((*parLen) >= (*parCap)) {
     (*parCap) *= 2;
-    sxnc_parameter *temp =
-        (sxnc_parameter *)malloc(sizeof(sxnc_parameter) * (*parCap));
-    int i = 0;
-    for (i = 0; i < (*parLen) - 1; i++) {
-      temp[i] = (*parameters)[i];
+    sxnc_parameter * temp = realloc(*parameters, sizeof(sxnc_parameter) * (*parCap));
+    if (temp == NULL) {
+      /* XXX: handle the error */
+      return;
     }
-    free(parameters);
-    parameters = &temp;
+    *parameters = temp;
   }
   int nameLen = strlen(name) + 7;
   char *newName = malloc(sizeof(char) * nameLen);
@@ -178,14 +176,12 @@ void setProperty(sxnc_property **properties, int *propLen, int *propCap,
 
   if (((*propLen) + 1) >= (*propCap)) {
     (*propCap) *= 2;
-    sxnc_property *temp =
-        (sxnc_property *)malloc(sizeof(sxnc_property) * (*propCap));
-    int i = 0;
-    for (i = 0; i < (*propLen) - 1; i++) {
-      temp[i] = (*properties)[i];
+        sxnc_property * temp = realloc(*properties, sizeof(sxnc_property) * (*propCap));
+    if (temp == NULL) {
+      /* XXX: handle the error */
+      return;
     }
-    free(properties);
-    properties = &temp;
+    *properties  = temp;
   }
   int nameLen = strlen(name) + 1;
   char *newName = (char *)malloc(sizeof(char) * nameLen);
