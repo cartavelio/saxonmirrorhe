@@ -17,10 +17,11 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.*;
 
 /**
  * Default implementation of the UnparsedTextURIResolver, used if no other implementation
@@ -106,7 +107,8 @@ public class StandardUnparsedTextResolver
                             inputStream = openClasspathResource(config, systemId);
                         } else {
                             URL url = new URL(systemId);
-                            inputStream = ResourceLoader.urlStream(url);
+                            // This handles encoding detection for HTTP resources
+                            return ResourceLoader.urlReader(url, encoding);
                         }
                     } catch (IOException e) {
                         throw new XPathException("unparsed-text(): cannot retrieve " + systemId, e);
@@ -116,72 +118,38 @@ public class StandardUnparsedTextResolver
                 }
             }
         }
-        // The encoding of the external resource is determined as follows:
-        //
-        // * external encoding information is used if available, otherwise
-        // * if the media type of the resource is text/xml or application/xml (see [RFC 2376]),
-        //   or if it matches the conventions text/*+xml or application/*+xml (see [RFC 7303]
-        //   and/or its successors), then the encoding is recognized as specified in
-        //   [Extensible Markup Language (XML) 1.0 (Fifth Edition)], otherwise
-        // * the value of the $encoding argument is used if present, otherwise
-        // * the processor may use ·implementation-defined· heuristics to determine the likely encoding, otherwise
-        // * UTF-8 is assumed.
+
+        // If we get here, then we've only got an InputStream to work with, so there's no
+        // external encoding information or media type. So we use the requested
+        // encoding if supplied; otherwise "heuristics" (peeking at the start of the stream),
+        // or failing that, UTF-8.
+
 
         // Use the contentType from the HTTP header if available
         String contentType = null;
         if (source instanceof TypedStreamSource) {
             contentType = ((TypedStreamSource) source).getContentType();
-        }
-        if (debug) {
-            err.info("unparsed-text(): content type = " + contentType);
-        }
-        boolean isXmlMediaType = false;
-        if (contentType != null) {
-            String mediaType;
-            int pos = contentType.indexOf(';');
-            if (pos >= 0) {
-                mediaType = contentType.substring(0, pos);
-            } else {
-                mediaType = contentType;
+            if (contentType != null) {
+                ResourceLoader.ParsedContentType parsedContentType = new ResourceLoader.ParsedContentType(contentType);
+                String contentEncoding = parsedContentType.encoding;
+                if (contentEncoding == null) {
+                    encoding = contentEncoding;
+                }
+                if (encoding == null) {
+                    try {
+                        encoding = EncodingDetector.inferStreamEncoding(inputStream, "UTF-8", null);
+                    } catch (IOException e) {
+                        throw new XPathException("Unable to infer encoding", e);
+                    }
+                }
             }
-            mediaType = mediaType.trim();
-            if (debug) {
-                err.info("unparsed-text(): media type = " + mediaType);
-            }
-            isXmlMediaType = (mediaType.startsWith("application/") || mediaType.startsWith("text/")) &&
-                    (mediaType.endsWith("/xml") || mediaType.endsWith("+xml"));
-
-            String charset = "";
-            pos = contentType.toLowerCase().indexOf("charset");
-            if (pos >= 0) {
-                pos = contentType.indexOf('=', pos + 7);
-                if (pos >= 0) {
-                    charset = contentType.substring(pos + 1);
-                }
-                if ((pos = charset.indexOf(';')) > 0) {
-                    charset = charset.substring(0, pos);
-                }
-
-                // attributes can have comment fields (RFC 822)
-                if ((pos = charset.indexOf('(')) > 0) {
-                    charset = charset.substring(0, pos);
-                }
-                // ... and values may be quoted
-                if ((pos = charset.indexOf('"')) > 0) {
-                    charset = charset.substring(pos + 1,
-                                                charset.indexOf('"', pos + 2));
-                }
-                if (debug) {
-                    err.info("unparsed-text(): charset = " + charset.trim());
-                }
-                encoding = charset.trim();
-            }
+            return ResourceLoader.getReaderFromStream(inputStream, encoding);
         }
 
         try {
-            if (encoding == null || isXmlMediaType) {
+            if (encoding == null) {
                 inputStream = InputStreamMarker.ensureMarkSupported(inputStream);
-                encoding = EncodingDetector.inferStreamEncoding(inputStream, debug ? err : null);
+                encoding = EncodingDetector.inferStreamEncoding(inputStream, "utf-8", debug ? err : null);
                 if (debug) {
                     err.info("unparsed-text(): inferred encoding = " + encoding);
                 }
@@ -189,7 +157,7 @@ public class StandardUnparsedTextResolver
         } catch (IOException e) {
             encoding = "UTF-8";
         }
-        return makeReaderFromStream(inputStream, encoding);
+        return ResourceLoader.getReaderFromStream(inputStream, encoding);
     }
 
     @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"classpath: URI scheme is not supported on .NET\");")
@@ -198,19 +166,19 @@ public class StandardUnparsedTextResolver
     }
 
 
-    @CSharpReplaceBody(code = "return new System.IO.StreamReader(stream, System.Text.Encoding.GetEncoding(encoding));")
-    private static Reader makeReaderFromStream(InputStream stream, String encoding) throws XPathException {
-        // The following is necessary to ensure that encoding errors are not recovered.
-        try {
-            Charset charset2 = Charset.forName(encoding);
-            CharsetDecoder decoder = charset2.newDecoder()
-                    .onMalformedInput(CodingErrorAction.REPORT)
-                    .onUnmappableCharacter(CodingErrorAction.REPORT);
-            return new BufferedReader(new InputStreamReader(stream, decoder));
-        } catch (IllegalCharsetNameException | UnsupportedCharsetException icne) {
-            throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
-        }
-    }
+//    @CSharpReplaceBody(code = "return new System.IO.StreamReader(stream, System.Text.Encoding.GetEncoding(encoding));")
+//    public static Reader makeReaderFromStream(InputStream stream, String encoding) throws XPathException {
+//        // The following is necessary to ensure that encoding errors are not recovered.
+//        try {
+//            Charset charset2 = Charset.forName(encoding);
+//            CharsetDecoder decoder = charset2.newDecoder()
+//                    .onMalformedInput(CodingErrorAction.REPORT)
+//                    .onUnmappableCharacter(CodingErrorAction.REPORT);
+//            return new BufferedReader(new InputStreamReader(stream, decoder));
+//        } catch (IllegalCharsetNameException | UnsupportedCharsetException icne) {
+//            throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
+//        }
+//    }
 
 
 }

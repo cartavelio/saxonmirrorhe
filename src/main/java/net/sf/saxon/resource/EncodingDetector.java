@@ -22,18 +22,19 @@ public class EncodingDetector {
      * Try to detect the encoding from the start of the input stream
      *
      * @param is  the input stream
+     * @param defaultEncoding the fallback encoding, normally UTF-8
      * @param err logger to be used for diagnostics, or null
      * @return the inferred encoding, defaulting to UTF-8
      * @throws IOException if it isn't possible to mark the current position on the input stream and read ahead
      */
 
-    public static String inferStreamEncoding(InputStream is, Logger err) throws IOException {
+    public static String inferStreamEncoding(InputStream is, String defaultEncoding, Logger err) throws IOException {
         InputStreamMarker marker = new InputStreamMarker(is);
         marker.mark(100);
         byte[] start = new byte[100];
         int read = is.read(start, 0, 100);
         marker.reset();
-        return inferEncoding(start, read, err);
+        return inferEncoding(start, read, defaultEncoding, err);
     }
 
     /**
@@ -41,11 +42,12 @@ public class EncodingDetector {
      *
      * @param start  the first few bytes of the file
      * @param read   the number of bytes that have been read
+     * @param defaultEncoding the fallback encoding, normally UTF-8
      * @param logger Logger to receive diagnostic messages, or null
      * @return the inferred encoding
      */
 
-    private static String inferEncoding(byte[] start, int read, Logger logger) {
+    private static String inferEncoding(byte[] start, int read, String defaultEncoding, Logger logger) {
         boolean debug = logger != null;
         if (read >= 2) {
             if (ch(start[0]) == 0xFE && ch(start[1]) == 0xFF) {
@@ -113,7 +115,7 @@ public class EncodingDetector {
         if (debug) {
             logger.info("unparsed-text(): assuming fallback encoding (UTF-8)");
         }
-        return "UTF-8";
+        return defaultEncoding;
     }
 
     private static int ch(byte b) {

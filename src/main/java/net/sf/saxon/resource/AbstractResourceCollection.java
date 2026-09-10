@@ -280,7 +280,7 @@ public abstract class AbstractResourceCollection implements ResourceCollection {
                     String enc = encoding;
                     if (enc == null) {
                         stream = InputStreamMarker.ensureMarkSupported(stream);
-                        enc = EncodingDetector.inferStreamEncoding(stream, null);
+                        enc = EncodingDetector.inferStreamEncoding(stream, "UTF-8", null);
                     }
                     return characterContent = CatalogCollection.makeStringFromStream(stream, enc);
                 } catch (IOException e) {

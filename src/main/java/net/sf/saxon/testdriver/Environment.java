@@ -17,6 +17,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryResult;
 import net.sf.saxon.resource.AbstractResourceCollection;
 import net.sf.saxon.resource.ExplicitCollection;
+import net.sf.saxon.resource.ResourceLoader;
 import net.sf.saxon.resource.XmlResource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.DecimalFormatManager;
@@ -32,7 +33,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.*;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.*;
 
 import static net.sf.saxon.s9api.streams.Predicates.attributeEq;
@@ -652,41 +654,50 @@ public class Environment implements ResourceResolver {
 
         }
         if (!resources.isEmpty()) {
-            environment.unparsedTextResolver =
-                    (absoluteURI, encoding, config) -> {
-                        if (encoding == null) {
-                            encoding = encodings.get(absoluteURI);
-                        }
-                        if (encoding == null) {
-                            encoding = "utf-8";
-                        }
-                        try {
-                            // The following is necessary to ensure that encoding errors are not recovered.
-                            Charset charset = Charset.forName(encoding);
-                            CharsetDecoder decoder = charset.newDecoder();
-                            decoder = decoder.onMalformedInput(CodingErrorAction.REPORT);
-                            decoder = decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-                            Object obj = resources.get(absoluteURI);
-                            if (obj instanceof File) {
-                                return new BufferedReader(new InputStreamReader(new FileInputStream((File) obj), decoder));
-                            } else {
-                                URL resource = (URL) resources.get(absoluteURI);
-                                if (resource == null) {
-                                    resource = absoluteURI.toURL();
-                                    //throw new XPathException("Unparsed text resource " + absoluteURI + " not registered in catalog", "FOUT1170");
-                                }
-                                InputStream in = resource.openConnection().getInputStream();
-                                return new BufferedReader(new InputStreamReader(in, decoder));
-                            }
-                            //   return new InputStreamReader(new FileInputStream(resources.get(absoluteURI)), encoding);
-                        } catch (IOException ioe) {
-                            throw new XPathException(ioe.getMessage(), "FOUT1170");
-                        } catch (IllegalCharsetNameException | UnsupportedCharsetException icne) {
-                            throw new XPathException("Invalid encoding name: " + encoding, "FOUT1190");
-                        }
-                    };
+            environment.unparsedTextResolver = new LocalUnparsedTextResolver(resources, encodings);
         }
     }
+
+    private static class LocalUnparsedTextResolver extends StandardUnparsedTextResolver {
+
+        private final HashMap<URI, Object> resources;
+        private final HashMap<URI, String> encodings;
+
+        public LocalUnparsedTextResolver(HashMap<URI, Object> resources, HashMap<URI, String> encodings) {
+            this.resources = resources;
+            this.encodings = encodings;
+        }
+
+        @Override
+        public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
+            try {
+                Object obj = resources.get(absoluteURI);
+                String enc = encodings.get(absoluteURI);
+                if (encoding != null) {
+                    // If an encoding was supplied, check it even if we don't use it. Needed to pass QT3 test fn-unparsed-text-036
+                    try {
+                        Charset.forName(encoding);
+                    } catch (UnsupportedCharsetException e) {
+                        throw new XPathException("Unsupported encoding: " + encoding, "FOUT1190");
+                    }
+                }
+                if (enc == null) {
+                    enc = encoding;
+                }
+                if (obj instanceof File) {
+                    FileInputStream stream = new FileInputStream((File) obj);
+                    if (enc == null) {
+                        enc = "UTF-8";
+                    }
+                    return ResourceLoader.getReaderFromStream(stream, enc);
+                } else {
+                    return super.resolve(absoluteURI, encoding, config);
+                }
+            } catch (IOException e) {
+                throw new XPathException("Failed to resolve unparsed-text URI " + absoluteURI, e);
+            }
+        }
+    } 
 
     private final static String DEFAULT_COLLECTION_URI = "http://www.w3.org/qt3-test-suite/default.collection.uri";
 

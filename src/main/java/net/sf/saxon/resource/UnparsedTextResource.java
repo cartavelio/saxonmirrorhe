@@ -48,7 +48,7 @@ public class UnparsedTextResource implements Resource {
             if (details.encoding == null) {
                 try {
                     InputStream is = new ByteArrayInputStream(details.binaryContent);
-                    details.encoding = EncodingDetector.inferStreamEncoding(is, null);
+                    details.encoding = EncodingDetector.inferStreamEncoding(is, "UTF-8", null);
                     is.close();
                 } catch (IOException e) {
                     throw new XPathException(e); // cannot happen
@@ -90,7 +90,7 @@ public class UnparsedTextResource implements Resource {
                 String enc = encoding;
                 if (enc == null) {
                     stream = InputStreamMarker.ensureMarkSupported(stream);
-                    enc = EncodingDetector.inferStreamEncoding(stream, null);
+                    enc = EncodingDetector.inferStreamEncoding(stream, "UTF-8", null);
                 }
                 unparsedText = CatalogCollection.makeStringFromStream(stream, enc);
             } catch (IOException e) {
