@@ -6,7 +6,7 @@
       and Schema Validation 1.0/1.1 specifications. SaxonC can be used in C/C++, PHP and Python,
       and links to the APIs in each of these languages are provided below.</p>
 
-   <p>The SaxonC API provides six main classes:</p>
+   <p>The SaxonC API provides five main classes:</p>
 
    <table>
       <thead>
@@ -37,27 +37,6 @@
                      >C++</a>
                   <a href="/api/saxon_c_php_api/saxon_c_php_saxonprocessor">PHP</a>
                   <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySaxonProcessor"
-                     >Python</a>
-               </p>
-            </td>
-         </tr>
-         <tr>
-            <td>
-               <p>
-                  <code>XsltProcessor</code>
-               </p>
-            </td>
-            <td>
-               <p>An <code>XsltProcessor</code> represents a factory to compile, load and execute a
-                  stylesheet. It is possible to cache the context and the stylesheet in the
-                     <code>XsltProcessor</code>.</p>
-            </td>
-            <td>
-               <p>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/classXsltProcessor.html"
-                     class="bodylink code">C++</a>
-                  <a href="/api/saxon_c_php_api/saxon_c_php_xsltprocessor">PHP</a>
-                  <a href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXsltProcessor"
                      >Python</a>
                </p>
             </td>
@@ -163,11 +142,6 @@
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXsltProcessor.html"
-               >XsltProcessor</a>
-         </li>
-         <li>
-            <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/classXslt30Processor.html"
                >Xslt30Processor</a>
          </li>
@@ -199,12 +173,24 @@
          </li>
          <li>
             <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmAtomicValue.html"
+               >XdmAtomicValue</a>
+         </li>
+         <li>
+            <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/classXdmNode.html">XdmNode</a>
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmAtomicValue.html"
-               >XdmAtomicValue</a>
+               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmFunctionItem.html">XdmFunctionItem</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmArray.html">XdmArray</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/classXdmMap.html">XdmMap</a>
          </li>
       </ul>
       <p>See the API class list: <a href="https://www.saxonica.com/saxon-c/doc11/html/annotated.html"
@@ -342,19 +328,6 @@
             </tr>
             <tr>
                <td>
-                  <a class="bodylink code" href="../saxon_c_php_xsltprocessor"
-                     >Saxon\XsltProcessor</a>
-               </td>
-               <td>
-                  <span class="signature">newXsltProcessor()</span>
-                  <div class="fcomment">Create an <a class="bodylink code"
-                        href="../saxon_c_php_xsltprocessor">XsltProcessor</a> in the PHP
-                     environment. An XsltProcessor is used to compile and execute XSLT
-                     sytlesheets.</div>
-               </td>
-            </tr>
-            <tr>
-               <td>
                   <a class="bodylink code" href="../saxon_c_php_xslt30processor"
                      >Saxon\Xslt30Processor</a>
                </td>
@@ -364,9 +337,7 @@
                         href="../saxon_c_php_xslt30processor">Xslt30Processor</a> in the PHP
                      environment specifically designed for XSLT 3.0 processing. An Xslt30Processor
                      is used to compile and execute XSLT 3.0 stylesheets, but can also be used for
-                     XSLT 2.0 or 1.0 stylesheets. Use an Xslt30Processor instead of <a
-                        class="bodylink code" href="../saxon_c_php_xsltprocessor">XsltProcessor</a>
-                     for XSLT 3.0 processing.</div>
+                     XSLT 2.0 or 1.0 stylesheets.</div>
                </td>
             </tr>
             <tr>
@@ -432,7 +403,7 @@
 
       </section>
 
-      <section id="saxon_c_php_xsltprocessor" title="Saxon\XsltProcessor">
+      <!--<section id="saxon_c_php_xsltprocessor" title="Saxon\XsltProcessor">
          <h1>Saxon\XsltProcessor Class</h1>
 
 
@@ -645,7 +616,7 @@
             </tr>
          </table>
 
-      </section>
+      </section>-->
 
 
       <section id="saxon_c_php_xslt30processor" title="Saxon\Xslt30Processor">
@@ -1993,11 +1964,6 @@
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXsltProcessor"
-               >PyXsltProcessor</a>
-         </li>
-         <li>
-            <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXslt30Processor"
                >PyXslt30Processor</a>
          </li>
@@ -2027,16 +1993,29 @@
          </li>
          <li>
             <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmNode">PyXdmNode</a>
-         </li>
-         <li>
-            <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmItem">PyXdmItem</a>
          </li>
          <li>
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmAtomicValue"
                >PyXdmAtomicValue</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmNode">PyXdmNode</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmFunctionItem"
+               >PyXdmFunctionItem</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmArray">PyXdmArray</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyXdmMap">PyXdmMap</a>
          </li>
       </ul>
 
