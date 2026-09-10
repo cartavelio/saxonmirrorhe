@@ -196,10 +196,9 @@ public class Twine8 extends UnicodeString {
 
     @Override
     public long indexOf(UnicodeString other, long from) {
-        int from32 = requireInt(from);
-        if (from32 < 0) {
-            from32 = 0;
-        } else if (from32 >= length32()) {
+        if (from < 0) {
+            from = 0L;
+        } else if (from >= length()) {
             return -1;
         }
         if (other.isEmpty()) {
@@ -208,15 +207,15 @@ public class Twine8 extends UnicodeString {
         int initial = other.codePointAt(0);
         int len = StringTool.requireInt(other.length());
         int lastPossible = length32() - len;
-        while (from32 <= lastPossible) {
-            int i = StringTool.requireInt(indexOf(initial, from32));
+        while (from <= lastPossible) {
+            long i = indexOf(initial, from);
             if (i < 0) {
                 return -1;
             }
             if (hasSubstring(other, i)) {
                 return i;
             }
-            from32 = i + 1;
+            from = i + 1L;
         }
         return -1;
     }

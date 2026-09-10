@@ -21,6 +21,7 @@ import net.sf.saxon.pattern.ContentTypeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 
@@ -426,6 +427,7 @@ public class ComputedElement extends ElementCreator {
     }
 
     @Override
+    @CSharpInnerClass(outer = true)
     public ElementCreationDetails makeElementCreationDetails() {
         return new ElementCreationDetails() {
             @Override
@@ -439,8 +441,8 @@ public class ComputedElement extends ElementCreator {
             }
 
             @Override
-            public void processContent(Outputter out, XPathContext context) throws XPathException {
-                getContentExpression().process(out, context);
+            public void processContent(Outputter outputter, XPathContext context) throws XPathException {
+                getContentExpression().process(outputter, context);
             }
         };
     }

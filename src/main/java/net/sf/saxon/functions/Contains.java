@@ -12,11 +12,11 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.BooleanValue;
@@ -40,8 +40,9 @@ public class Contains extends CollatingFunctionFixed {
      */
     @Override
     public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, final Expression... arguments) throws XPathException {
-        if (getStringCollator() == CodepointCollator.getInstance()) {
-            // Performance fast path: bug 3209
+        if (getStringCollator() == CodepointCollator.getInstance() &&
+                !visitor.getConfiguration().getOptimizerOptions().isSet(OptimizerOptions.ELABORATION)) {
+            // Performance fast path: bug 3209. Don't use this when using expression elaboration, which is smarter
             return new SystemFunctionCall.Optimized(this, arguments) {
                 @Override
                 @CSharpModifiers(code = {"public", "override"})
