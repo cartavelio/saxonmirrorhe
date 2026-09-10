@@ -463,7 +463,7 @@ saxon:evaluate($expression)
       <p>This attribute may be set on an <a class="bodylink code"
         href="/xsl-elements/accumulator-rule">xsl:accumulator-rule</a> element. It has no effect
       unless the accumulator is declared streamable and the rule has <code>phase="end"</code>. It is intended
-        for use when the accumulator rule matches an element node. The value
+        for use when the accumulator rule matches an element node, and is ignored for other node kinds. The value
       is a boolean with the default "no".</p>
       
       <p>The effect of setting this attribute is that the code for computing the new accumulator
