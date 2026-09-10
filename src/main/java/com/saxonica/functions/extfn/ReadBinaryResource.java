@@ -26,8 +26,7 @@ public class ReadBinaryResource extends SystemFunction {
             String arg = arguments[0].head().getStringValue();
             InputStream stream;
             try {
-                URL url = new URL(arg);
-                stream = ResourceLoader.urlStream(url);
+                stream = ResourceLoader.urlStream(context.getConfiguration(), arg);
             } catch (RuntimeException e) {
                 throw new XPathException("saxon:read-binary-resource - invalid or inaccessible URL " + arg, SaxonErrorCode.SXJE0053);
             }
