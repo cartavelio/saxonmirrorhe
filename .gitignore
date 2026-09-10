@@ -3,9 +3,11 @@ out/
 /*.iml
 .DS_Store
 .gradle/
+.kotlin/
 build/
 __pycache__
 src/test/testdata/sandpit/
 src/test/testdata/temp/
 csharp/ee/bin/Debug/
 csharp/ee/obj/
+python/.pyenv/
