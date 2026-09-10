@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.function.Consumer;
 
 /**
- * An abstract class providing reusable code for implementing the {@link Destination} interface}
+ * An abstract class providing reusable code for implementing the {@link Destination} interface
  */
 
 abstract public class AbstractDestination implements Destination {
