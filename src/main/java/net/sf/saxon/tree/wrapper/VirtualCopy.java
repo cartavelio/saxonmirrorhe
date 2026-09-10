@@ -729,7 +729,7 @@ public class VirtualCopy implements NodeInfo {
      * the original copied node must be truncated.
      */
 
-    protected static class VirtualCopier implements AxisIterator {
+    protected class VirtualCopier implements AxisIterator {
 
         protected AxisIterator base;
         private final VirtualCopy parent;
@@ -759,9 +759,9 @@ public class VirtualCopy implements NodeInfo {
                     //         the subtree.
                     return null;
                 }
-                VirtualCopy vc = parent.wrap(next);
+                VirtualCopy vc = wrap(next);
                 vc.parent = parent;
-                vc.systemIdSupplier = parent.systemIdSupplier;
+                vc.systemIdSupplier = systemIdSupplier;
                 next = vc;
             }
             return next;

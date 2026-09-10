@@ -49,6 +49,7 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
             rch.setReceiver(receiver);
             rch.setPipelineConfiguration(receiver.getPipelineConfiguration());
             parser.setContentHandler(rch);
+            parser.setDTDHandler(rch);
             parser.setProperty("http://xml.org/sax/properties/lexical-handler", rch);
             if (options.getErrorHandler() != null) {
                 parser.setErrorHandler(parser.getErrorHandler());
