@@ -18,7 +18,7 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
 /**
- * The <tt>SequenceWriter</tt> is used when writing a sequence of items, for
+ * The <code>SequenceWriter</code> is used when writing a sequence of items, for
  * example, when {@code xsl:variable} is used with content and an "as" attribute. The {@code SequenceWriter}
  * builds the sequence; the concrete subclass is responsible for deciding what to do with the
  * resulting items.

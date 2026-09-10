@@ -42,7 +42,7 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:boolean</tt> atomic value
+     * Create an <code>xs:boolean</code> atomic value
      *
      * @param value the boolean value, true or false
      */
@@ -52,9 +52,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:long</tt> atomic value
+     * Create an <code>xs:long</code> atomic value
      *
-     * @param value the <tt>xs:integer</tt> value, as a long
+     * @param value the <code>xs:integer</code> value, as a long
      */
 
     public XdmAtomicValue(long value) {
@@ -62,9 +62,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:int</tt> atomic value
+     * Create an <code>xs:int</code> atomic value
      *
-     * @param value the <tt>xs:integer</tt> value, as a long
+     * @param value the <code>xs:integer</code> value, as a long
      */
 
     public XdmAtomicValue(int value) {
@@ -72,9 +72,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:short</tt> atomic value
+     * Create an <code>xs:short</code> atomic value
      *
-     * @param value the <tt>xs:integer</tt> value, as a long
+     * @param value the <code>xs:integer</code> value, as a long
      */
 
     public XdmAtomicValue(short value) {
@@ -82,9 +82,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:short</tt> atomic value
+     * Create an <code>xs:short</code> atomic value
      *
-     * @param value the <tt>xs:integer</tt> value, as a long
+     * @param value the <code>xs:integer</code> value, as a long
      */
 
     public XdmAtomicValue(byte value) {
@@ -92,9 +92,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:decimal</tt> atomic value
+     * Create an <code>xs:decimal</code> atomic value
      *
-     * @param value the <tt>xs:decimal</tt> value, as a BigDecimal
+     * @param value the <code>xs:decimal</code> value, as a BigDecimal
      */
 
     public XdmAtomicValue(BigDecimal value) {
@@ -102,9 +102,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:double</tt> atomic value
+     * Create an <code>xs:double</code> atomic value
      *
-     * @param value the <tt>xs:double</tt> value, as a double
+     * @param value the <code>xs:double</code> value, as a double
      */
 
     public XdmAtomicValue(double value) {
@@ -112,9 +112,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:float</tt> atomic value
+     * Create an <code>xs:float</code> atomic value
      *
-     * @param value the <tt>xs:float</tt> value, as a float
+     * @param value the <code>xs:float</code> value, as a float
      */
 
     public XdmAtomicValue(float value) {
@@ -122,9 +122,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:string</tt> atomic value
+     * Create an <code>xs:string</code> atomic value
      *
-     * @param value the <tt>xs:string</tt> value, as a string
+     * @param value the <code>xs:string</code> value, as a string
      */
 
     public XdmAtomicValue(String value) {
@@ -132,9 +132,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:anyURI</tt> atomic value
+     * Create an <code>xs:anyURI</code> atomic value
      *
-     * @param value the <tt>xs:anyURI</tt> value, as a URI
+     * @param value the <code>xs:anyURI</code> value, as a URI
      */
 
     public XdmAtomicValue(URI value) {
@@ -142,9 +142,9 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:QName</tt> atomic value
+     * Create an <code>xs:QName</code> atomic value
      *
-     * @param value the <tt>xs:QName</tt> value, as a QName
+     * @param value the <code>xs:QName</code> value, as a QName
      */
 
     public XdmAtomicValue(QName value) {
@@ -153,10 +153,10 @@ public class XdmAtomicValue extends XdmItem {
 
     //#if CSHARP==false
     /**
-     * Create an <tt>xs:dateTime</tt> atomic value from a {@link Instant}. The resulting value
+     * Create an <code>xs:dateTime</code> atomic value from a {@link Instant}. The resulting value
      * will always have a timezone component.
      *
-     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link Instant}
+     * @param value the <code>xs:dateTime</code> value in the form of a {@link Instant}
      * @since 10.0
      */
 
@@ -165,11 +165,11 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:dateTime</tt> atomic value from a {@link ZonedDateTime}. The resulting value
+     * Create an <code>xs:dateTime</code> atomic value from a {@link ZonedDateTime}. The resulting value
      * will always have a timezone component. Note that the timezone offset (e.g. -05:00) is retained,
      * but the civil time zone identity (e.g. America/New_York) is lost.
      *
-     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link ZonedDateTime}
+     * @param value the <code>xs:dateTime</code> value in the form of a {@link ZonedDateTime}
      * @since 10.0
      */
 
@@ -178,10 +178,10 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:dateTime</tt> atomic value from a {@link OffsetDateTime}. The resulting value
+     * Create an <code>xs:dateTime</code> atomic value from a {@link OffsetDateTime}. The resulting value
      * will always have a timezone component. The timezone offset (e.g. -05:00) is retained.
      *
-     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link OffsetDateTime}
+     * @param value the <code>xs:dateTime</code> value in the form of a {@link OffsetDateTime}
      * @since 10.0
      */
 
@@ -190,10 +190,10 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:dateTime</tt> atomic value from a {@link LocalDateTime}. The resulting value
+     * Create an <code>xs:dateTime</code> atomic value from a {@link LocalDateTime}. The resulting value
      * will have no timezone component.
      *
-     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link LocalDateTime}
+     * @param value the <code>xs:dateTime</code> value in the form of a {@link LocalDateTime}
      * @since 10.0
      */
 
@@ -202,10 +202,10 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Create an <tt>xs:date</tt> atomic value from a {@link LocalDate}. The resulting value
+     * Create an <code>xs:date</code> atomic value from a {@link LocalDate}. The resulting value
      * will have no timezone component.
      *
-     * @param value the <tt>xs:dateTime</tt> value in the form of a {@link LocalDate}
+     * @param value the <code>xs:dateTime</code> value in the form of a {@link LocalDate}
      * @since 10.0
      */
 
@@ -226,7 +226,7 @@ public class XdmAtomicValue extends XdmItem {
      *                    atomic types defined in XML Schema, or a user-defined type whose definition appears
      *                    in a schema that is known to the Processor. It must not be an abstract type.
      * @throws SaxonApiException if the type is unknown, or is not atomic, or is namespace-sensitive;
-     *                           or if the value supplied in <tt>lexicalForm</tt> is not in the lexical space of the specified atomic
+     *                           or if the value supplied in <code>lexicalForm</code> is not in the lexical space of the specified atomic
      *                           type.
      */
 

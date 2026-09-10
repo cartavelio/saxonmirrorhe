@@ -32,16 +32,16 @@ public abstract class WhitespaceString extends UnicodeString {
     /**
      * Returns a new <code>UnicodeString</code> that is a subsequence of this sequence.
      * The subsequence starts with the codepoint value at the specified index and
-     * ends with the codepoint value at index <tt>end - 1</tt>.  The length
-     * (in codepoints) of thereturned sequence is <tt>end - start</tt>, so if <tt>start == end</tt>
+     * ends with the codepoint value at index <code>end - 1</code>.  The length
+     * (in codepoints) of thereturned sequence is <code>end - start</code>, so if <code>start == end</code>
      * then an empty sequence is returned.
      *
      * @param start the start index, inclusive
      * @param end   the end index, exclusive
      * @return the specified subsequence
-     * @throws IndexOutOfBoundsException if <tt>start</tt> or <tt>end</tt> are negative,
-     *                                   if <tt>end</tt> is greater than <tt>length()</tt>,
-     *                                   or if <tt>start</tt> is greater than <tt>end</tt>
+     * @throws IndexOutOfBoundsException if <code>start</code> or <code>end</code> are negative,
+     *                                   if <code>end</code> is greater than <code>length()</code>,
+     *                                   or if <code>start</code> is greater than <code>end</code>
      */
     @Override
     public UnicodeString substring(long start, long end) {

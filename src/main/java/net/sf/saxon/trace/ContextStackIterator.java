@@ -45,11 +45,11 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
     }
 
     /**
-     * Returns <tt>true</tt> if the iteration has more elements. (In other
-     * words, returns <tt>true</tt> if <tt>next</tt> would return an element
+     * Returns <code>true</code> if the iteration has more elements. (In other
+     * words, returns <code>true</code> if <code>next</code> would return an element
      * rather than throwing an exception.)
      *
-     * @return <tt>true</tt> if the iterator has more elements.
+     * @return <code>true</code> if the iterator has more elements.
      */
     @Override
     public boolean hasNext() {
@@ -151,7 +151,7 @@ public class ContextStackIterator implements Iterator<ContextStackFrame> {
      * Removes from the underlying collection the last element returned by the
      * iterator (optional operation).
      *
-     * @throws UnsupportedOperationException as the <tt>remove</tt>
+     * @throws UnsupportedOperationException as the <code>remove</code>
      *                                       operation is not supported by this Iterator.
      */
     @Override

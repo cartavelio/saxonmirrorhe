@@ -64,8 +64,8 @@ public class SaxonApiException extends Exception {
     /**
      * Returns the detail message string of this throwable.
      *
-     * @return the detail message string of this <tt>Throwable</tt> instance
-     *         (which may be <tt>null</tt>).
+     * @return the detail message string of this <code>Throwable</code> instance
+     *         (which may be <code>null</code>).
      */
     @Override
     @CSharpModifiers(code={"public", "override"})

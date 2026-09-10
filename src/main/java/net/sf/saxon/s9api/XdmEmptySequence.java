@@ -12,7 +12,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 import java.util.ArrayList;
 
 /**
- * The class <tt>XdmEmptySequence</tt> represents an empty sequence in the XDM Data Model.
+ * The class <code>XdmEmptySequence</code> represents an empty sequence in the XDM Data Model.
  * <p>This is a singleton class: there is only one instance, which may be obtained
  * using the {@link #getInstance} method.</p>
  * <p>An empty sequence may also be represented by an {@link XdmValue} whose length happens to be zero.

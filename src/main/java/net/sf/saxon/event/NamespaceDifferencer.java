@@ -17,7 +17,7 @@ import java.util.Properties;
 import java.util.Stack;
 
 /**
- * <p><tt>NamespaceDifferencer</tt> is a {@link ProxyReceiver} responsible for removing duplicate namespace
+ * <p><code>NamespaceDifferencer</code> is a {@link ProxyReceiver} responsible for removing duplicate namespace
  * declarations. It also ensures that namespace undeclarations are emitted when necessary.</p>
  *
  * <p>The NamespaceDifferencer assumes that in the input event stream, all in-scope namespaces for every element

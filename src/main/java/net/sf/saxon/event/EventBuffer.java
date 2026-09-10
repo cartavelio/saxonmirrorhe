@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An <tt>EventBuffer</tt> is a receiver of events that records the events in memory
+ * An <code>EventBuffer</code> is a receiver of events that records the events in memory
  * for subsequent replay. It is used, for example, in the implementation of try/catch,
  * where events cannot be written directly to the final serializer in case an error
  * occurs and is caught.

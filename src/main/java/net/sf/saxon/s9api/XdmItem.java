@@ -21,10 +21,10 @@ import java.util.stream.Stream;
  * The class XdmItem represents an item in a sequence, as defined by the XDM data model.
  * An item is either an atomic value or a node.
  * <p>An item is a member of a sequence, but it can also be considered as a sequence
- * (of length one) in its own right. <tt>XdmItem</tt> is a subtype of <tt>XdmValue</tt> because every
+ * (of length one) in its own right. <code>XdmItem</code> is a subtype of <code>XdmValue</code> because every
  * Item in the XDM data model is also a value.</p>
  * <p>It cannot be assumed that every sequence of length one will be represented by
- * an <tt>XdmItem</tt>. It is quite possible for an <tt>XdmValue</tt> that is not an <tt>XdmItem</tt> to hold
+ * an <code>XdmItem</code>. It is quite possible for an <code>XdmValue</code> that is not an <code>XdmItem</code> to hold
  * a singleton sequence.</p>
  * <p>Saxon provides two concrete subclasses of <code>XdmItem</code>, namely
  * {@link XdmNode} and {@link XdmAtomicValue}. Users must not attempt to create

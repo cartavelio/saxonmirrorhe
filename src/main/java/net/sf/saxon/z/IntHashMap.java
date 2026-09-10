@@ -382,7 +382,7 @@ public class IntHashMap<T> {
          * Removes from the underlying collection the last element returned by the
          * iterator (optional operation).
          *
-         * @throws UnsupportedOperationException if the <tt>remove</tt>
+         * @throws UnsupportedOperationException if the <code>remove</code>
          *                                       operation is not supported by this Iterator.
          */
         @Override

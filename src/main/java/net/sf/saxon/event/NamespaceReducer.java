@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * <tt>NamespaceReducer</tt> is a {@link ProxyReceiver} responsible for removing duplicate namespace
+ * <code>NamespaceReducer</code> is a {@link ProxyReceiver} responsible for removing duplicate namespace
  * declarations. It also ensures that an {@code xmlns=""} undeclaration is output when
  * necessary. Used on its own, the {@code NamespaceReducer} simply eliminates unwanted
  * namespace declarations. It can also be subclassed, in which case the subclass

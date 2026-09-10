@@ -194,8 +194,8 @@ public class SaxonDuration extends Duration {
      * this duration is "P1.23456S", then 1 is added to SECONDS,
      * 234 is added to MILLISECONDS, and the rest will be unused.</p>
      * <p>Note that because {@link java.util.Calendar#add(int, int)} is using
-     * <tt>int</tt>, <code>Duration</code> with values beyond the
-     * range of <tt>int</tt> in its fields
+     * <code>int</code>, <code>Duration</code> with values beyond the
+     * range of <code>int</code> in its fields
      * will cause overflow/underflow to the given {@link java.util.Calendar}.
      * {@link javax.xml.datatype.XMLGregorianCalendar#add(javax.xml.datatype.Duration)} provides the same
      * basic operation as this method while avoiding

@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A <tt>SchemaValidator</tt> is an object that is used for validating instance documents against a schema.
+ * A <code>SchemaValidator</code> is an object that is used for validating instance documents against a schema.
  * This class is a wrapper for the SchemaValidator designed for SaxonC.
  */
 public class SchemaValidatorForCpp extends SaxonCAPI {

@@ -87,14 +87,14 @@ public class IndentWhitespace extends WhitespaceString {
 
     /**
      * Returns the codepoint value at the specified index.  An index ranges from zero
-     * to <tt>length() - 1</tt>.  The first codepoint value of the sequence is at
+     * to <code>length() - 1</code>.  The first codepoint value of the sequence is at
      * index zero, the next at index one, and so on, as for array
      * indexing.
      *
      * @param index the index of the codepoint value to be returned
      * @return the specified codepoint value
-     * @throws IndexOutOfBoundsException if the <tt>index</tt> argument is negative or not less than
-     *                                   <tt>length()</tt>
+     * @throws IndexOutOfBoundsException if the <code>index</code> argument is negative or not less than
+     *                                   <code>length()</code>
      */
     @Override
     public int codePointAt(long index) {

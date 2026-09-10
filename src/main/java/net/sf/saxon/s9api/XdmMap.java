@@ -234,7 +234,7 @@ public class XdmMap extends XdmFunctionItem {
      * Removes all of the mappings from this map (optional operation).
      * The map will be empty after this call returns.
      *
-     * @throws UnsupportedOperationException if the <tt>clear</tt> operation
+     * @throws UnsupportedOperationException if the <code>clear</code> operation
      *                                       is not supported by this map
      */
     public void clear() {
@@ -242,9 +242,9 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     /**
-     * Returns <tt>true</tt> if this map contains no key-value mappings.
+     * Returns <code>true</code> if this map contains no key-value mappings.
      *
-     * @return <tt>true</tt> if this map contains no key-value mappings
+     * @return <code>true</code> if this map contains no key-value mappings
      */
     @Override
     public boolean isEmpty() {
@@ -252,14 +252,14 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     /**
-     * Returns <tt>true</tt> if this map contains a mapping for the specified
-     * key.  More formally, returns <tt>true</tt> if and only if
-     * this map contains a mapping for a key <tt>k</tt> such that
-     * <tt>(key==null ? k==null : key.equals(k))</tt>.  (There can be
+     * Returns <code>true</code> if this map contains a mapping for the specified
+     * key.  More formally, returns <code>true</code> if and only if
+     * this map contains a mapping for a key <code>k</code> such that
+     * <code>(key==null ? k==null : key.equals(k))</code>.  (There can be
      * at most one such mapping.)
      *
      * @param key key whose presence in this map is to be tested
-     * @return <tt>true</tt> if this map contains a mapping for the specified key
+     * @return <code>true</code> if this map contains a mapping for the specified key
      * @since 9.8. Changed the method signature in 9.9.1.1 to match the implementation: see bug 3969.
      */
     public boolean containsKey(XdmAtomicValue key) {
@@ -416,7 +416,7 @@ public class XdmMap extends XdmFunctionItem {
         /**
          * Returns the value corresponding to this entry.  If the mapping
          * has been removed from the backing map (by the iterator's
-         * <tt>remove</tt> operation), the results of this call are undefined.
+         * <code>remove</code> operation), the results of this call are undefined.
          *
          * @return the value corresponding to this entry
          * @throws IllegalStateException implementations may, but are not
@@ -432,11 +432,11 @@ public class XdmMap extends XdmFunctionItem {
          * Replaces the value corresponding to this entry with the specified
          * value (optional operation).  (Writes through to the map.)  The
          * behavior of this call is undefined if the mapping has already been
-         * removed from the map (by the iterator's <tt>remove</tt> operation).
+         * removed from the map (by the iterator's <code>remove</code> operation).
          *
          * @param value new value to be stored in this entry
          * @return old value corresponding to the entry
-         * @throws UnsupportedOperationException if the <tt>put</tt> operation
+         * @throws UnsupportedOperationException if the <code>put</code> operation
          *                                       is not supported by the backing map
          * @throws ClassCastException            if the class of the specified value
          *                                       prevents it from being stored in the backing map

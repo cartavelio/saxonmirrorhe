@@ -18,7 +18,7 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.SimpleType;
 
 /**
- * An <tt>EventMonitor</tt> is a filter that passes all events down the pipeline unchanged,
+ * An <code>EventMonitor</code> is a filter that passes all events down the pipeline unchanged,
  * keeping a note of whether any data has passed through the filter. At any stage it is possible
  * to ask whether any data has been written.
  * @since 9.9

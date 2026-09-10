@@ -82,7 +82,7 @@ public class XsltCompiler {
 
 
     /**
-     * Protected constructor. The public way to create an <tt>XsltCompiler</tt> is by using the factory method
+     * Protected constructor. The public way to create an <code>XsltCompiler</code> is by using the factory method
      * {@link Processor#newXsltCompiler} .
      *
      * @param processor the Saxon processor

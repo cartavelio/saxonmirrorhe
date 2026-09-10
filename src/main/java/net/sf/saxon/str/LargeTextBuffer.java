@@ -337,16 +337,16 @@ public final class LargeTextBuffer {
     /**
      * Returns a new character sequence that is a subsequence of this sequence.
      * The subsequence starts with the character at the specified index and
-     * ends with the character at index <tt>end - 1</tt>.  The length of the
-     * returned sequence is <tt>end - start</tt>, so if <tt>start == end</tt>
+     * ends with the character at index <code>end - 1</code>.  The length of the
+     * returned sequence is <code>end - start</code>, so if <code>start == end</code>
      * then an empty sequence is returned.
      *
      * @param start the start index, inclusive (codepoints, not bytes)
      * @param end   the end index, exclusive (codepoints, not bytes)
      * @return the specified subsequence
-     * @throws IndexOutOfBoundsException if <tt>start</tt> or <tt>end</tt> are negative,
-     *                                   if <tt>end</tt> is greater than <tt>length()</tt>,
-     *                                   or if <tt>start</tt> is greater than <tt>end</tt>
+     * @throws IndexOutOfBoundsException if <code>start</code> or <code>end</code> are negative,
+     *                                   if <code>end</code> is greater than <code>length()</code>,
+     *                                   or if <code>start</code> is greater than <code>end</code>
      */
     /*@NotNull*/
     public UnicodeString substring(int start, int end) {

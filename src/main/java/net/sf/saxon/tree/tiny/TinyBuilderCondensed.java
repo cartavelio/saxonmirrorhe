@@ -26,7 +26,7 @@ public class TinyBuilderCondensed extends TinyBuilder {
     // of node numbers of text nodes having that hashcode
 
     // Note from the specification of CharSequence:
-    // "It is therefore inappropriate to use arbitrary <tt>CharSequence</tt> instances as elements in a set or as keys in
+    // "It is therefore inappropriate to use arbitrary <code>CharSequence</code> instances as elements in a set or as keys in
     // a map." We therefore take special care over the design of the map.
     // We rely on the fact that all Saxon implementations of CharSequence have a hashCode() that is compatible with String.
     // And we don't use equals() unless both CharSequences are of the same kind.
