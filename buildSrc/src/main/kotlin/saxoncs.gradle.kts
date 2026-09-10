@@ -313,10 +313,6 @@ private fun generateDotnetTasks(buildArch: Architectures, buildConfiguration: CS
     setTaskInputSources(inputSources)
   }
 
-  tasks.named(LifecycleTasks.RELEASE_GROUP) {
-    dependsOn(publish)
-  }
-
   val nupkg = tasks.register<DotNetCreateNupkg>("dotnet-pack-${buildArch}-${suffix}") {
     LifecycleTasks.RELEASE_GROUP
     dotnet = extension.dotnet
@@ -400,6 +396,9 @@ val (configureTask, buildTask, publishTask, nupkgBuildTask, makeAppTask) = gener
 tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
   dependsOn(buildTask)
 }
+tasks.named(LifecycleTasks.RELEASE_GROUP) {
+  dependsOn(publishTask)
+}
 
 val releaseZipArtifactTasks = mutableListOf<TaskProvider<Zip>>()
 
@@ -462,8 +461,7 @@ if (!saxonBuild.targetHost.get().isMacOS) {
     destinationDirectory = layout.buildDirectory.dir("ReleaseZip")
     archiveFileName = "SaxonCS-${saxonBuild.version.get().replace(".", "-")}-MacOS.zip"
 
-    from(buildUnsignedMacOSAppTask)
-//    from(signedMacOSAppTask)
+    from(signedMacOSAppTask)
     into("/SaxonCS.app/")
   }
 
@@ -483,6 +481,10 @@ val artifacts = tasks.register<Copy>("downloadRelease") {
 
   from(releaseZipArtifactTasks)
   from(nupkgBuildTask.map { it.nupkgFile.get() })
+}
+
+tasks.named(LifecycleTasks.RELEASE_TASK_NAME) {
+  dependsOn(artifacts)
 }
 
 releaseArtifacts.outgoing.artifacts(artifacts.map { it.outputs.files })
