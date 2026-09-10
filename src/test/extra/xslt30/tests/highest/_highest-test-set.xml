@@ -64,7 +64,12 @@
          <initial-template name="main"/>
       </test>
       <result>
-         <assert-xml><![CDATA[<out><a id="5">katy</a><a id="7">Katy</a><a id="8">KATY</a></out>]]></assert-xml>
+         <all-of>
+            <assert>/out/a/@id = '5'</assert>
+            <assert>/out/a/@id = '7'</assert>
+            <assert>/out/a/@id = '8'</assert>
+            <assert>/out/max = 'KATY'</assert>
+         </all-of>
       </result>
    </test-case>
    

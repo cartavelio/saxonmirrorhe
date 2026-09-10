@@ -50,7 +50,7 @@
 		<head></head>
 		<body>
 			<div>
-				<ul class="nav">
+				<ul class="nav" pos="{position()}" of="{count(../item)}" last="{last()}">
 					<xsl:variable name="pos" select="position()"/>
 					<xsl:if test="$pos > 1">
 						<li><a href="item_{../item[$pos - 1]/@id}.html">prev</a></li>

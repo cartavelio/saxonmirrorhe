@@ -247,7 +247,7 @@
       </test>
       <result>
          <all-of>
-            <serialization-matches><![CDATA[<!ELEMENT out (a)*>]]></serialization-matches>
+            <serialization-matches><![CDATA[<!ELEMENT out \(a\)\*>]]></serialization-matches>
             <serialization-matches><![CDATA[<!ELEMENT a EMPTY>]]></serialization-matches>
             <serialization-matches><![CDATA[<!ATTLIST a id ID #REQUIRED>]]></serialization-matches>
          </all-of>

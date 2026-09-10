@@ -4,7 +4,7 @@
   xmlns:math="http://www.w3.org/2005/xpath-functions/math"
   xmlns:array="http://www.w3.org/2005/xpath-functions/array"
   xmlns:saxon="http://saxon.sf.net/" 
-  extension-element-prefixes="saxon" exclude-result-prefixes="xs math saxon" version="3.0" expand-text="true">
+  extension-element-prefixes="saxon" exclude-result-prefixes="xs math saxon" version="4.0" expand-text="true">
   
   <!-- array matching in patterns -->
   
@@ -22,7 +22,7 @@
       <D><xsl:next-match/></D>
     </xsl:template>
     
-    <xsl:template match="array(tuple(first, last))">
+    <xsl:template match="array(record(first, last))">
       <AT/>
     </xsl:template> 
     
