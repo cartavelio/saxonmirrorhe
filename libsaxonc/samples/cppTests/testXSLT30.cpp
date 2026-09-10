@@ -683,9 +683,7 @@ void testTransformFromstring2Err2(sResultCount *sresult) {
 
     if (CppTestUtils::exists("SaxonCHE12ErrorOutputFile-Test1.txt")) {
       cout << "The file SaxonCHE12ErrorOutputFile-Test1.txt exists" << endl;
-      string filename1 = "SaxonCHE12ErrorOutputFile-Test1.txt";
-      string text = "XTSE0090  Attribute @select1 is not allowed on element <xsl:for-each>";
-      if(CppTestUtils::CheckWord((char *)filename1.c_str(), (char *)text.c_str())) {
+      if(CppTestUtils::CheckWord("SaxonCHE12ErrorOutputFile-Test1.txt", "XTSE0090  Attribute @select1 is not allowed on element <xsl:for-each>")) {
         sresult->success++;
       } else {
         sresult->failure++;

@@ -11,6 +11,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.BuiltInType;
 import net.sf.saxon.type.Type;
@@ -1655,7 +1656,12 @@ public class XdmUtils {
      */
     @CEntryPoint(name = "j_makeStringValue", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long makeStringValue(IsolateThread thread, CCharPointer str, CCharPointer c_encoding) throws SaxonApiException{
-        String valueStr = SaxonCAPI.toJavaString(str, c_encoding);
+        String valueStr;
+        if (str == WordFactory.nullPointer()) {
+            valueStr = "";
+        } else {
+            valueStr = SaxonCAPI.toJavaString(str, c_encoding);
+        }
 
         XdmAtomicValue value = new XdmAtomicValue(valueStr);
         ObjectHandle handle = SaxonCAPI.createHandle(value);
