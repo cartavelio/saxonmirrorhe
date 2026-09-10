@@ -7,6 +7,10 @@ using Singulink.Numerics;
 
 namespace Saxon.Impl.Helpers {
     public class BigDecimalUtils {
+        // N.B. These constants are repeated in com.saxonica.functions.qt4.DivideDecimals
+        private const int MIN_SCALE = -100;
+        private const int MAX_SCALE = 100;
+        
         public static Singulink.Numerics.BigDecimal ValueOf(long val) {
             return (Singulink.Numerics.BigDecimal)val;
         }
@@ -49,6 +53,17 @@ namespace Saxon.Impl.Helpers {
             catch (System.DivideByZeroException e) {
                 throw new Saxon.Hej.trans.XPathException("Division by zero", "FOAR0001");
             }
+
+            if (requiredDecimalPlaces < MIN_SCALE)
+            {
+                requiredDecimalPlaces = MIN_SCALE;
+            }
+
+            if (requiredDecimalPlaces > MAX_SCALE)
+            {
+                requiredDecimalPlaces = MAX_SCALE;
+            }
+            
             BigDecimal roundedQuotient = Round(preciseQuotient, requiredDecimalPlaces);
             BigDecimal remainder = aDec - roundedQuotient * bDec;
             return new ShapedMap(quotientAndRemainder,
