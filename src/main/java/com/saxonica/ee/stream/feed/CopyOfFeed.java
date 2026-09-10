@@ -454,7 +454,7 @@ public class CopyOfFeed extends AbsorptionFeed {
                     Accumulator acc = watch.getAccumulator();
                     CopiedAccumulatorData data = dataMap.get(acc);
 //                    System.err.println("Copying acc data for " + acc.getAccumulatorName().getDisplayName() +
-//                        " for " + newNode.getDisplayName() + " = " + watch.getPreDescentValue(watch.getLastPredescentNode()));
+//                        " for " + newNode.getDisplayName() + " = " + watch.getPreDescentValueAtDepth(depth));
                     data.addValues(newNode, watch.getPreDescentValueAtDepth(depth), watch.getPostDescentValue(null));
                 }
             }

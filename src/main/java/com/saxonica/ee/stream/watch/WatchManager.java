@@ -129,11 +129,19 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     public void setOutputter(Outputter outputter) {
         outputter.setPipelineConfiguration(getPipelineConfiguration());
         this.outputter = outputter;
-
     }
 
     public Outputter getOutputter() {
         return outputter;
+    }
+
+    @Override
+    public void setPipelineConfiguration(/*@NotNull*/ PipelineConfiguration pipelineConfiguration) {
+        if (this.pipelineConfiguration.getController() != pipelineConfiguration.getController()) {
+            // Bug 6626
+            return;
+        }
+        this.pipelineConfiguration = pipelineConfiguration;
     }
 
     /**
@@ -244,7 +252,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties)
             throws XPathException {
-        trace("startElement " + elementName);
+        trace("startElement " + elementName.getDisplayName());
         try {
             if (startDocumentPending) {
                 startDocumentPending = false;
