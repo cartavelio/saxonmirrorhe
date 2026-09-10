@@ -204,6 +204,10 @@ public class PackageLoaderHE implements IPackageLoader {
         if (!packageElement.getLocalPart().equals("package")) {
             throw new XPathException("Outermost element of XSLT export file must be 'package'", SaxonErrorCode.SXPK0002);
         }
+        String versionAtt = packageElement.getAttributeValue(NamespaceUri.NULL, "version");
+        if (versionAtt != null) {
+            pack.setHostLanguage(HostLanguage.XSLT, Integer.parseInt(versionAtt));
+        }
         String saxonVersionAtt = packageElement.getAttributeValue(NamespaceUri.NULL,"saxonVersion");
         if (saxonVersionAtt == null) {
             saxonVersionAtt = "9.8.0.1"; //Arbitrarily; older SEF files do not have this attribute

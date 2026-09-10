@@ -602,7 +602,11 @@ public abstract class Mode extends Actor {
      * @return a simple string code or "???" if the ruleset is unknown
      */
     public String getCodeForBuiltInRuleSet(BuiltInRuleSet builtInRuleSet) {
-        if (builtInRuleSet instanceof ShallowCopyRuleSet) {
+        if (builtInRuleSet instanceof ShallowCopyAllRuleSet) {
+            return "CA";
+        } else if (builtInRuleSet instanceof ShallowSkipAllRuleSet) {
+            return "SA";
+        } else if (builtInRuleSet instanceof ShallowCopyRuleSet) {
             return "SC";
         } else if (builtInRuleSet instanceof ShallowSkipRuleSet) {
             return "SS";
@@ -641,6 +645,10 @@ public abstract class Mode extends Actor {
             base = FailRuleSet.getInstance();
         } else if (code.startsWith("TC")) {
             base = TextOnlyCopyRuleSet.getInstance();
+        } else if (code.startsWith("CA")) {
+            base = ShallowCopyAllRuleSet.getInstance();
+        } else if (code.startsWith("SA")) {
+            base = ShallowSkipAllRuleSet.getInstance();
         } else {
             throw new IllegalArgumentException(code);
         }
