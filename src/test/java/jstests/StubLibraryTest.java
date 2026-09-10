@@ -2,142 +2,91 @@ package jstests;
 
 //import com.saxonica.ee.extfn.IxslFunctionLibrary;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.config.ProfessionalConfiguration;
-import com.saxonica.ee.extfn.js.IXSLElementFactory;
-import com.saxonica.ee.extfn.js.IXSLFunctionSet;
-import net.sf.saxon.Configuration;
-import net.sf.saxon.functions.FunctionLibrary;
-import net.sf.saxon.functions.FunctionLibraryList;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.ExtensionFunctionCall;
+import net.sf.saxon.lib.ExtensionFunctionDefinition;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.CompilerInfo;
 import net.sf.saxon.trans.XPathException;
-import org.junit.jupiter.api.Assertions;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceType;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.InputSource;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 
-import static net.sf.saxon.s9api.streams.Steps.child;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Created by mike on 27/01/2016.
  */
-public class IxslExtensionTest {
+public class StubLibraryTest {
 
     @Test
-    public void testIxslEval() {
+    public void testLoadStubs() {
+        String stubs = "{\n"
+                + "  \"namespace\": \"http://example.com/\",\n"
+                + "  \"signatures\": {\n"
+                + "    \"sample\": {\n"
+                + "      \"as\": \"xs:boolean\",\n"
+                + "      \"param\": [\n"
+                + "        \"xs:string\"\n"
+                + "      ],\n"
+                + "      \"arity\": [1]\n"
+                + "    }}}";
+        String xsl = "<xsl:transform xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='3.0'>"
+                + "<xsl:template name='xsl:initial-template'><z><xsl:sequence select=\"Q{http://example.com/}sample('data')\"/></z></xsl:template>"
+                + "</xsl:transform>";
         try {
             Processor p = new Processor(true);
-            ProfessionalConfiguration config = (ProfessionalConfiguration)p.getUnderlyingConfiguration();
-            FunctionLibrary lib = IXSLFunctionSet.getInstance();
-            XPathCompiler comp = p.newXPathCompiler();
-            FunctionLibraryList list = config.getBuiltInExtensionLibraryList(31);
-            list.addFunctionLibrary(lib);
-            comp.declareNamespace("ixsl", NamespaceConstant.IXSL);
-            XPathExecutable exec = comp.compile("ixsl:eval('2+2')");
-            XdmItem result = exec.load().evaluateSingle();
-            assertEquals("4", result.getStringValue());
-        } catch (SaxonApiException err) {
-            err.printStackTrace();
-            fail();
-        }
-    }
-
-    @Test
-    public void testBug6140() {
-        try {
-            Processor p = new Processor(true);
-            Configuration configuration = p.getUnderlyingConfiguration();
-            if (configuration instanceof ProfessionalConfiguration) {
-                ProfessionalConfiguration pConfiguration = (ProfessionalConfiguration) configuration;
-                // Add SaxonJS 3.1 extension functions
-                pConfiguration.getBuiltInExtensionLibraryList(31).addFunctionLibrary(IXSLFunctionSet.getInstance());
-
-                //Register extension instructions
-                pConfiguration.setExtensionElementCreator(
-                        NamespaceUri.of("http://saxonica.com/ns/interactiveXSLT"), IXSLElementFactory.FACTORY);
-            }
-
             XsltCompiler comp = p.newXsltCompiler();
-            String xslt = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
-                    "                xmlns:ixsl=\"http://saxonica.com/ns/interactiveXSLT\"\n" +
-                    "                version=\"3.0\">\n" +
-                    "<xsl:template name=\"xsl:initial-template\">\n" +
-                    "  <xsl:sequence select=\"ixsl:eval('2+2')\"/>\n" +
-                    "</xsl:template>\n" +
-                    "</xsl:stylesheet>\n";
-            ByteArrayInputStream bais = new ByteArrayInputStream(xslt.getBytes(StandardCharsets.UTF_8));
-            Source source = new SAXSource(new InputSource(bais));
-
-            XsltExecutable exec = comp.compile(source);
-            Assertions.assertNotNull(exec);
-        } catch (SaxonApiException | XPathException err) {
-            err.printStackTrace();
-            fail();
-        }
-    }
-
-    @Test
-    public void testIxslFunctionAvailableJS() {
-        XdmNode node = testIxslFunctionAvailable("JS");
-        assertFalse(node.select(child("out").then(child("*"))).exists());
-    }
-
-    @Test
-    public void testIxslFunctionAvailableEE() {
-        XdmNode node = testIxslFunctionAvailable("EE");
-        assertFalse(node.select(child("out").then(child("*"))).exists());
-    }
-
-    private XdmNode testIxslFunctionAvailable(String target) {
-        try {
-
-            String xsl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    + "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n"
-                    + "    xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"\n"
-                    + "    xmlns:ixsl=\"http://saxonica.com/ns/interactiveXSLT\"\n"
-                    + "    exclude-result-prefixes=\"xs\"\n"
-                    + "    version=\"3.0\">\n"
-                    + "    \n"
-                    + "    <xsl:template name=\"xsl:initial-template\">\n"
-                    + "        <out>\n"
-                    + "            <in xsl:use-when=\"function-available('ixsl:eval', 1)\">\n"
-                    + "                <result>\n"
-                    + "                    <xsl:sequence select=\"ixsl:eval('2+2')\"/>\n"
-                    + "                </result>\n"
-                    + "            </in>\n"
-                    + "        </out> \n"
-                    + "    </xsl:template>\n"
-                    + "    \n"
-                    + "</xsl:stylesheet>";
-            Processor p = new Processor(true);
-            EnterpriseConfiguration config = (EnterpriseConfiguration) p.getUnderlyingConfiguration();
-            FunctionLibrary lib = IXSLFunctionSet.getInstance();
-            XsltCompiler comp = p.newXsltCompiler();
-            comp.setTargetEdition(target);
+            comp.setJustInTimeCompilation(false);
+            CompilerInfo info = comp.getUnderlyingCompilerInfo();
+            info.importStubFunctionLibrary(new StreamSource(new StringReader(stubs)));
             XsltExecutable exec = comp.compile(new StreamSource(new StringReader(xsl)));
-            try {
-                final XdmDestination destination = new XdmDestination();
-                exec.load30().callTemplate(null, destination);
-                return destination.getXdmNode();
-            } catch (SaxonApiException e) {
-                fail(e.getMessage());
-            }
-        } catch (SaxonApiException err) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            exec.export(baos);
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            p.registerExtensionFunction(new ExtensionFunctionDefinition() {
+                @Override
+                public StructuredQName getFunctionQName() {
+                    return new StructuredQName("", "http://example.com/", "sample");
+                }
+
+                @Override
+                public SequenceType[] getArgumentTypes() {
+                    return new SequenceType[]{SequenceType.SINGLE_STRING};
+                }
+
+                @Override
+                public SequenceType getResultType(SequenceType[] suppliedArgumentTypes) {
+                    return SequenceType.SINGLE_BOOLEAN;
+                }
+
+                @Override
+                public ExtensionFunctionCall makeCallExpression() {
+                    return new ExtensionFunctionCall() {
+                        @Override
+                        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+                            return BooleanValue.get(arguments[0].head().getStringValue().equals("data"));
+                        }
+                    };
+                }
+            });
+            XsltExecutable exec2 = comp.loadExecutablePackage(new StreamSource(bais));
+            Xslt30Transformer trans = exec2.load30();
+            XdmNode result = (XdmNode)trans.callTemplate(null);
+            assertEquals("<z>true</z>", result.toString());
+        } catch (SaxonApiException|XPathException err) {
             err.printStackTrace();
             fail();
         }
-        return null;
     }
+
 }
 

@@ -101,7 +101,7 @@ public class SignatureTest {
                 if (prefix.equals("fn")) {
                     functionSet = XPath40FunctionSet.getInstance();
                 } else if (prefix.equals("math")) {
-                    functionSet = MathFunctionSet.getInstance();
+                    functionSet = MathFunctionSet.getInstance(40);
                 } else if (prefix.equals("map")) {
                     functionSet = MapFunctionSet.getInstance(40);
                 } else if (prefix.equals("array")) {
