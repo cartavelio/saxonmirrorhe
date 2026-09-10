@@ -19,6 +19,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.*;
@@ -54,7 +55,7 @@ public class KeyIndex {
     private final Map <AtomicMatchKey, Object> index;
     private UType keyTypesPresent = UType.VOID;
     private UType keyTypesConvertedFromUntyped = UType.STRING_LIKE;
-    private List<StringValue> untypedKeys;
+    private Set<UnicodeString> untypedKeys;
     private ConversionRules rules;
     private int implicitTimezone;
     private StringCollator collation;
@@ -219,9 +220,9 @@ public class KeyIndex {
                 AtomicMatchKey amk = getCollationKey(keyVal, collation, implicitTimezone);
                 if (actualUType.equals(UType.UNTYPED_ATOMIC) && keydef.isConvertUntypedToOther()) {
                     if (untypedKeys == null) {
-                        untypedKeys = new ArrayList<>(20);
+                        untypedKeys = new HashSet<>(20);
                     }
-                    untypedKeys.add((StringValue)keyVal);
+                    untypedKeys.add(keyVal.getUnicodeStringValue());
                 }
                 addEntry(amk, node, isFirst);
             }
@@ -306,9 +307,9 @@ public class KeyIndex {
             type = BuiltInAtomicType.DOUBLE;
         }
         StringConverter converter = type.getStringConverter(rules);
-        for (StringValue v : untypedKeys) {
-            AtomicMatchKey uk = getCollationKey(v, collation, implicitTimezone);
-            AtomicValue convertedValue = converter.convertString(v.getUnicodeStringValue()).asAtomic();
+        for (UnicodeString v : untypedKeys) {
+            AtomicMatchKey uk = getCollationKey(new StringValue(v), collation, implicitTimezone);
+            AtomicValue convertedValue = converter.convertString(v).asAtomic();
             AtomicMatchKey amk = getCollationKey(convertedValue, collation, implicitTimezone);
             Object value = index.get(uk);
             if (value instanceof NodeInfo) {
