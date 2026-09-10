@@ -198,52 +198,46 @@
         <code>XsltExecutable</code> API</p>
 
     <pre><code class="language-cpp"><![CDATA[SaxonProcessor * processor = new SaxonProcessor(false);
-Xslt30Processor * xslt = processor->newXslt30Transformer();
+Xslt30Processor * xslt = processor->newXslt30Processor();
 
-XdmAtomicValue * value =processor->makeStringValue("Hello to you");
-if(xdmvaluex !=NULL){
-  cerr<<"xdmvaluex ok"<<endl;
-}
-XsltExecutable * executable = xslt->compileFromFile("foo.xsl");
-if(executable == nullptr) {
-  if(proc->exceptionOccurred()) {
-      cout << "Error : " << proc->getErrorMessage() <<endl;
+try {
+    XdmAtomicValue * value =processor->makeStringValue("Hello to you");
+    if(xdmvaluex !=NULL){
+        cerr<<"xdmvaluex ok"<<endl;
+    }
+    XsltExecutable * executable = xslt->compileFromFile("foo.xsl");
 
-  }
-  return;
-}
-executable->setInitialMatchSelectionAsFile("foo.xml");
-executable->setParameter("a-param", (XdmValue *) value);
+    executable->setInitialMatchSelectionAsFile("foo.xml");
+    executable->setParameter("a-param", (XdmValue *) value);
 
-const char *result = executable->applyTemplatesReturningString();
-if(result != NULL) {
-  cerr<<result<<endl;
-} else {
-  cerr<<"Result is NULL"<<endl;
+    const char *result = executable->applyTemplatesReturningString();
+    if(result != nullptr) {
+        cerr<<result<<endl;
+    } else {
+        cerr<<"Result is NULL"<<endl;
+    }
+    executable->clearParameters();
+    executable->clearProperties();
+    delete executable;
+    delete result;
+    delete value;
+} catch(SaxonApiException &e) {
+    cerr << " Exception thrown=" << e.what() << endl;
 }
-executable->clearParameters();
-executable->clearProperties();
-delete executable;
-delete result;
-delete value;
+delete xslt;
+delete processor;
   ]]></code></pre>
 
 
        <p>C++ Example 2: basic XSLT transformation where we compile and execute the transform in one go on the <code>Xslt30Processor</code></p>
 
        <pre><code class="language-cpp"><![CDATA[SaxonProcessor *processor = new SaxonProcessor(true);
-Xslt30Processor * xslt = processor->newXslt30Transformer();
+Xslt30Processor * xslt = processor->newXslt30Processor();
 const char * result = xslt->transformFileToString("cat.xml","test.xsl")<<endl;
 if(result != nullptr) {
   cout<<"Test output: "<<result<<endl;
   delete result;
 
-} else {
-   if(trans->exceptionOccurred()) {
-      cerr<<"Expected failure = "<<trans->getErrorMessage()<<endl;
-   }
-      trans->exceptionClear();
-      processor->release();
 }
   ]]></code></pre>
 
