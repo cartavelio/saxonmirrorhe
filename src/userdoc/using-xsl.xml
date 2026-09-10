@@ -627,15 +627,18 @@
          </tr>
          <tr>
             <td>
-               <p>-target:(EE|PE|HE|JS)</p>
+               <p>-target:(EE|PE|HE|JS|JS2|JS3)</p>
             </td>
             <td>
                <p>Relevant only when <code>-export</code> is specified, identifies the target platform
                   on which the exported stylesheet is to run. When exporting for SaxonJS, the value
-                  "JS" <bold>must</bold> be specified, because this adds information to the
-                  SEF file that is required by SaxonJS. Specifying "JS" means the SEF is produced
-                  in JSON format for use with SaxonJS 2.x. (To generate SEF files for Saxon-JS 1.x, 
-                  you need to revert to Saxon-EE 9.9). In principle, specifying "HE" or "PE" will
+                  "JSx" <bold>must</bold> be specified, because this adds information to the
+                  SEF file that is required by SaxonJS, and it also outputs the SEF file in JSON format. 
+                  Specifying "JS" or "JS2" means the SEF is for use with SaxonJS 2.x. 
+                  The option "JS3" targets SaxonJS 3.x (not yet
+                  available at the time of writing). To generate SEF files for Saxon-JS 1.x, 
+                  you need to revert to Saxon-EE 9.9.</p> 
+               <p>In principle, specifying "HE" or "PE" will
                   inhibit optimizations that generate code which Saxon-HE/Saxon-PE cannot execute;
                   however, this is not fully tested.</p>
             </td>
