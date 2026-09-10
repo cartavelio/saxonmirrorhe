@@ -471,7 +471,7 @@ public class DOMObjectModel extends TreeModel implements ExternalObjectModel {
         if (Node.class.isAssignableFrom(target)) {
             if (nodes.size() != 1) {
                 throw new XPathException("Cannot convert XPath value to Java object: requires a single DOM Node" +
-                        "but supplied value contains " + nodes.size() + " nodes");
+                        " but supplied value contains " + nodes.size() + " nodes");
             }
             return nodes.get(0);
             // could fail if the node is of the wrong kind

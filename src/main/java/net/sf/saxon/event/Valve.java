@@ -8,9 +8,10 @@
 package net.sf.saxon.event;
 
 import net.sf.saxon.om.AttributeMap;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 
@@ -25,7 +26,7 @@ import net.sf.saxon.type.SchemaType;
 public class Valve extends ProxyReceiver {
 
     private boolean started = false;
-    private final String testNamespace;
+    private final NamespaceUri testNamespace;
     private final Receiver alternativeReceiver;
 
     /**
@@ -37,7 +38,7 @@ public class Valve extends ProxyReceiver {
      * @param secondary the secondary Receiver
      */
 
-    public Valve(String testNamespace, Receiver primary, Receiver secondary) {
+    public Valve(NamespaceUri testNamespace, Receiver primary, Receiver secondary) {
         super(primary);
         this.testNamespace = testNamespace;
         this.alternativeReceiver = secondary;
