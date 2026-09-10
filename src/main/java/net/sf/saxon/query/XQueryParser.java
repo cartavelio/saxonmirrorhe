@@ -2353,6 +2353,16 @@ public class XQueryParser extends XPathParser {
                 setLocation(clause, t.currentTokenStartOffset);
                 clause.setRepeated(containsLoopingClause(clauseList));
                 clauseList.add(clause);
+            } else if (t.currentToken == Token.WHILE || isKeyword("while")) {
+                if (!allowXPath40Syntax) {
+                    grumble("The 'while' clause requires XQuery 4.0 to be enabled");
+                }
+                nextToken();
+                Expression condition = parseExprSingle();
+                WhileClause clause = new WhileClause(flwor, condition);
+                setLocation(clause, t.currentTokenStartOffset);
+                clause.setRepeated(containsLoopingClause(clauseList));
+                clauseList.add(clause);
             } else if (isKeyword("trace")) {
                 parseTraceClause(flwor, clauseList);
             } else if (isKeyword("stable") || isKeyword("order")) {
