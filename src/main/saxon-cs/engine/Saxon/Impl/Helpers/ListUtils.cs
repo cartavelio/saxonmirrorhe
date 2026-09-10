@@ -60,5 +60,14 @@ namespace Saxon.Impl.Helpers {
                 ((SysCollGen.List<T>) input).TrimExcess();
             }
         }
+
+        public static T PollFirst<T>(SysCollGen.LinkedList<T> input) where T : class {
+            SysCollGen.LinkedListNode<T> first = input.First;
+            if (first == null) {
+                return null;
+            }
+            input.RemoveFirst();
+            return first.Value;
+        }
     }
 }

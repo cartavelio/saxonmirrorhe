@@ -13,11 +13,11 @@ namespace java.util {
             return _rand.NextDouble();
         }
         public long nextLong() {
-            return (long)(_rand.Next()<<32 | (long)(_rand.Next()));
+            return ((long)_rand.Next()<<32) | (long)(_rand.Next());
         }
 
         public int nextInt(int bound) {
-            throw new NotImplementedException();
+            return _rand.Next(bound);
         }
     }
 }

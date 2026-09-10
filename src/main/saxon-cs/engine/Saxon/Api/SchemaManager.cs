@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-
+using javax.xml.transform.stream;
 using net.sf.saxon;
 
 using net.sf.saxon.s9api;
@@ -61,8 +61,8 @@ namespace Saxon.Api {
         /// </remarks>
         /// 
         public String XsdVersion {
-            get => throw new SaxonApiException("Schema processing requires Saxon-EE");
-            set => throw new SaxonApiException("Schema processing requires Saxon-EE");
+            get => s9schemaManager.getXsdVersion();
+            set => s9schemaManager.setXsdVersion(value);
         }
 
 
@@ -118,10 +118,7 @@ namespace Saxon.Api {
                 reporter = null;
                 //schemaManager.setErrorReporter(new ErrorReporterToStaticError(errorList));
             }
-            get
-            {
-                return errorList;
-            }
+            get => errorList;
         }
 
         /// <summary>Set the <c>ErrorReporter</c> to be used when validating instance documents as a user defined ErrorReporter.
@@ -145,7 +142,8 @@ namespace Saxon.Api {
         /// schema documents</param>        
 
         public void Compile(Stream input, Uri baseUri) {
-            throw new SaxonApiException("Schema processing requires Saxon-EE");
+            StreamSource source = new StreamSource(input, baseUri.ToString());
+            s9schemaManager.load(source);
         }
 
         /// <summary>
@@ -191,8 +189,13 @@ namespace Saxon.Api {
 
         public void Compile(XdmNode node)
         {
-            
-            throw new SaxonApiException("Schema processing requires Saxon-EE");
+            javax.xml.transform.Source source = node.Implementation;
+            try {
+                s9schemaManager.load(source);
+            }
+            catch (net.sf.saxon.s9api.SaxonApiException e) {
+                throw new StaticError(e);
+            }
         }
 
         /// <summary>
@@ -212,9 +215,8 @@ namespace Saxon.Api {
         /// use of <c>&lt;xs:redefine&gt;</c>.</para>
         /// </remarks>
 
-        public SchemaValidator NewSchemaValidator()
-        {
-            throw new SaxonApiException("Schema processing requires Saxon-EE");
+        public SchemaValidator NewSchemaValidator() {
+            return new SchemaValidator(s9schemaManager.newSchemaValidator(), processor);
         }
 
         /// <summary>
