@@ -3,8 +3,8 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.instruct.UserFunction;
-import net.sf.saxon.expr.parser.Evaluator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -60,7 +60,7 @@ public class UserFunctionCallCompiler extends ToIteratorCompiler {
         }
 
         //In the for loop below we expand the evaluateArguments(XPathContext c) method
-        Evaluator[] argumentEvaluators = userFunctionCall.getArgumentEvaluators();
+        SequenceEvaluator[] argumentEvaluators = userFunctionCall.getArgumentEvaluators();
         ga.push(numArgs);
         ga.newArray(Type.getType(Sequence.class));
         int arrVar = methodInfo.allocateLocal(Sequence[].class);

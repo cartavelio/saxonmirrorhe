@@ -8,8 +8,8 @@ import com.saxonica.ee.stream.Streamability;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.parser.Evaluator;
 import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
@@ -22,10 +22,10 @@ import org.objectweb.asm.commons.GeneratorAdapter;
  */
 public class LetExpressionCompiler extends ToIteratorCompiler {
 
-    private Evaluator getEvaluator(LetExpression expr) {
-        Evaluator eval = expr.getEvaluator();
+    private SequenceEvaluator getEvaluator(LetExpression expr) {
+        SequenceEvaluator eval = expr.getEvaluator();
         if (eval == null) {
-            return Evaluator.EagerSequence.INSTANCE;
+            return null; // Evaluator.EagerSequence.INSTANCE;
         } else {
             return eval;
         }
@@ -171,11 +171,12 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
     public static void compileCommonExpr(CompilerService compiler,
-                                         Expression exp, Evaluator evaluationMode, int refCount) throws CannotCompileException {
+                                         Expression exp, SequenceEvaluator evaluationMode, int refCount) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitLineNumber(compiler, ga, exp);
-        switch (evaluationMode.getCode()) {
+        int code = Evaluators.EVALUATE_VARIABLE;
+        switch (code) {  // evaluationMode.getCode()) {
 
             case Evaluators.EVALUATE_LITERAL:
                 //return ((Literal)exp).getValue();
@@ -197,7 +198,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
             case Evaluators.LAZY_TAIL_EXPRESSION:
                 TailExpression tail = (TailExpression) exp;
                 VariableReference vr = (VariableReference) tail.getBaseExpression();
-                compileCommonExpr(compiler, vr, Evaluator.Variable.INSTANCE, refCount);
+                compileCommonExpr(compiler, vr, null /*Evaluator.Variable.INSTANCE*/, refCount);
                 ga.dup();
                 int baseVar = methodInfo.allocateLocal(Sequence.class);
                 ga.storeLocal(baseVar);

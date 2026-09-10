@@ -1675,7 +1675,10 @@ public class OptimizerEE extends Optimizer {
         }
         if (((ComparisonExpression) condition).getAtomicComparer() instanceof UntypedNumericComparer) {
             // Bug 4738, 5000
-            lhs = new UntypedSequenceConverter(lhs.copy(new RebindingMap()), BuiltInAtomicType.DOUBLE);
+            UntypedSequenceConverter usc = new UntypedSequenceConverter(lhs.copy(new RebindingMap()), BuiltInAtomicType.DOUBLE);
+            Converter conv = usc.allocateConverter(getConfiguration(), true);
+            usc.setConverter(conv);
+            lhs = usc;
         }
         if (switchCaseInfo.commonlhs == null) {
             switchCaseInfo.commonlhs = lhs;
