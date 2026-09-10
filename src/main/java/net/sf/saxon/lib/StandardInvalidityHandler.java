@@ -96,13 +96,11 @@ public class StandardInvalidityHandler extends StandardDiagnostics implements In
 
         String explanation = getExpandedMessage(failure);
         String constraintReference = getConstraintReferenceMessage(failure);
-        String validationLocation = ((ValidationFailure) failure).getValidationLocationText();
         String contextLocation = ((ValidationFailure) failure).getContextLocationText();
         String finalMessage = "Validation error " +
                 getLocationMessage(failure) +
                 "\n  " +
                 wordWrap(explanation) +
-                //wordWrap(validationLocation.isEmpty() ? "" : "\n  " + validationLocation) +
                 wordWrap(contextLocation.isEmpty() ? "" : "\n  " + contextLocation) +
                 wordWrap(constraintReference == null ? "" : "\n  " + constraintReference) +
                 formatListOfOffendingNodes((ValidationFailure)failure);
@@ -120,7 +118,7 @@ public class StandardInvalidityHandler extends StandardDiagnostics implements In
 
     public String getLocationMessage(Invalidity err) {
         String locMessage = "";
-        String systemId = null;
+        String systemId;
         NodeInfo node = err.getInvalidNode();
         AbsolutePath path;
         String nodeMessage = null;
@@ -183,7 +181,7 @@ public class StandardInvalidityHandler extends StandardDiagnostics implements In
         if (err.getSchemaPart() == -1) {
             return null;
         }
-        return "See http://www.w3.org/TR/xmlschema-" + err.getSchemaPart() + "/#" + err.getConstraintName()
+        return "See https://www.w3.org/TR/xmlschema11-" + err.getSchemaPart() + "/#" + err.getConstraintName()
             + " clause " + err.getConstraintClauseNumber();
     }
 
