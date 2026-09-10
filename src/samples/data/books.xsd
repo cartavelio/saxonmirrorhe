@@ -25,8 +25,10 @@
     <xs:element ref="CATEGORY"/>
    </xs:sequence>
    <xs:attribute name="DESC" type="xs:string" use="required"/>
-  </xs:complexType>
+   <xs:assert test="every $C in .//CATEGORY satisfies not($C/@DESC = @DESC)"/>
+  </xs:complexType> 
  </xs:element>
+ 
  <xs:element name="CATEGORY">
   <xs:complexType>
    <xs:attribute name="CODE" type="xs:ID" use="required"/>

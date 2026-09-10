@@ -85,5 +85,6 @@
       <CATEGORY CODE="P" DESC="Paperback"/>
       <CATEGORY CODE="MMP" DESC="Mass-market Paperback"/>
       <CATEGORY CODE="H" DESC="Hard Cover"/>
+      <CATEGORY CODE="MC" DESC="Miscellaneous categories"/>
    </CATEGORIES>
 </BOOKLIST>
