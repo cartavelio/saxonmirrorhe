@@ -99,7 +99,7 @@ abstract class TestSuitesExtension
     return when (suite) {
       "qt3" -> submodulesDir.dir("qt3")
       "qt3extra" -> submodulesDir.dir("extra/suites/qt3")
-      "expath" -> layout.buildDirectory.dir("suite/expath")
+      "expath" -> submodulesDir.dir("expath/tests/qt3")
       "xslt30" -> submodulesDir.dir("xslt30")
       "xslt30extra" -> submodulesDir.dir("extra/suites/xslt30")
       "qt4" -> submodulesDir.dir("qt4")
@@ -130,20 +130,12 @@ abstract class TestSuitesExtension
                     taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
-    // This is annoying. We have to copy the suite because
-    // the sandpit is writable...
-    val actualSuiteDir = if (suite == "expath") {
-      layout.buildDirectory.dir("suite/expath/${taskName}")
-    } else {
-      suiteDir(suite)
-    }
-
     val thisSuite = tasks.register<JavaRunner>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       this.edition = plugin.edition
       this.suite = suite
       this.language = language
-      this.suiteDir = actualSuiteDir
+      this.suiteDir = suiteDir(suite)
       this.testargs = testargs
       this.showOutput = project.findProperty("testSuiteShowOutput") != "false"
       exceptionsFile = exceptions(suite)
@@ -158,49 +150,6 @@ abstract class TestSuitesExtension
       }
 
 
-    }
-
-    if (suite == "expath") {
-      val copySuite = tasks.register("${taskName}_copy_suite") {
-        group = "Internal"
-        description = "Copy the expath test suite"
-        inputs.files(submodulesDir.dir("expath/tests/qt3"))
-        outputs.dir(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        doLast {
-          fs.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              exclude("archive/sandpit2/**")
-            }
-          }
-        }
-
-        doLast {
-          // Also, make sure that the file "test.bin" exists
-          // or some tests will fail.
-          fs.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              include("catalog.xml")
-            }
-            rename { "test.bin" }
-          }
-        }
-      }
-
-      val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
-        group = "Internal"
-        description = "Copy the expath test suite sandpit" 
-        dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
-        // sandpit2!?
-        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
-          include("**")
-        }
-      }
-      thisSuite.configure {
-        dependsOn(copySandpit)
-      }
     }
 
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
@@ -274,14 +223,6 @@ abstract class TestSuitesExtension
                       taskName: String): TaskProvider<DefaultTask> {
     val plugin = this
 
-    // This is annoying. We have to copy the suite because
-    // the sandpit is writable...
-    val actualSuiteDir = if (suite == "expath") {
-      layout.buildDirectory.dir("suite/expath/${taskName}")
-    } else {
-      suiteDir(suite)
-    }
-
     val thisSuite = tasks.register<CSharpRunner>(taskName) {
       group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
       dependsOn("dotnetBuild")
@@ -289,7 +230,7 @@ abstract class TestSuitesExtension
       this.edition = plugin.edition
       this.suite = suite
       this.language = language
-      this.suiteDir = actualSuiteDir
+      this.suiteDir = suiteDir(suite)
       this.arch = plugin.arch
       this.netver = plugin.netver
       this.dotnet = plugin.dotnet
@@ -298,43 +239,6 @@ abstract class TestSuitesExtension
       this.testargs = testargs
       exceptionsFile = exceptions(suite)
       reportingRootDir = layout.buildDirectory.dir("test-results")
-    }
-
-    if (suite == "expath") {
-      val copySuite = tasks.register<Copy>("${taskName}_copy_suite") {
-        group = "Internal"
-        description = "Copy the expath test suite"
-        into(layout.buildDirectory.dir("suite/expath/${taskName}"))
-        from(submodulesDir.dir("expath/tests/qt3")) {
-          exclude("archive/sandpit2/**")
-        }
-
-        doLast {
-          // Also, make sure that the file "test.bin" exists
-          // or some tests will fail.
-          fs.copy {
-            into(layout.buildDirectory.dir("suite/expath/${taskName}/file/sandpit"))
-            from(submodulesDir.dir("expath/tests/qt3")) {
-              include("catalog.xml")
-            }
-            rename { "test.bin" }
-          }
-        }
-      }
-
-      val copySandpit = tasks.register<Copy>("${taskName}_copy_sandpit") {
-        group = "Internal"
-        description = "Copy the expath test suite sandpit" 
-        dependsOn(copySuite)
-        into(layout.buildDirectory.dir("suite/expath/${taskName}/archive/sandpit"))
-        // sandpit2!?
-        from(submodulesDir.dir("expath/tests/qt3/archive/sandpit2")) {
-          include("**")
-        }
-      }
-      thisSuite.configure {
-        dependsOn(copySandpit)
-      }
     }
 
     tasks.named(LifecycleTasks.ACCEPTANCE_TEST_TASK_NAME) {
