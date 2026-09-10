@@ -9,7 +9,10 @@ package net.sf.saxon.functions.registry;
 
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RetainedStaticContext;
+import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.functions.Concat;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
@@ -176,15 +179,38 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             if ((entry.properties & SEQV) != 0) {
                 // sequence-variadic functions in 4.0 (e.g..concat, codepoints-to-string)
                 // combine the "variable" arguments into a single argument
+                if (env.getXPathVersion() < 40) {
+                    // Need to special-case the fn:concat() function prior to XPath 4.0
+                    if (localName.equals("concat")) {
+                        if (staticArgs.length < 2) {
+                            reasons.add("concat() prior to XPath 4.0 requires at least two arguments");
+                            return null;
+                        }
+                        // Require each argument to be a singleton
+                        Expression[] a2 = new Expression[staticArgs.length];
+                        for (int i=0; i<staticArgs.length; i++) {
+                            if (staticArgs[i] instanceof StringLiteral) {
+                                a2[i] = staticArgs[i];
+                            } else {
+                                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "concat", i);
+                                a2[i] = CardinalityChecker.makeCardinalityChecker(staticArgs[i], StaticProperty.ALLOWS_ZERO_OR_ONE, role);
+                                a2[i].setRetainedStaticContext(env.makeRetainedStaticContext());
+                            }
+                        }
+                        staticArgs = a2;
+                    }
+                }
                 int declaredArity = entry.arity;
                 Expression[] newArgs = Arrays.copyOf(staticArgs, declaredArity);
                 if (declaredArity > staticArgs.length) {
                     newArgs[declaredArity - 1] = Literal.makeEmptySequence();
                 } else if (declaredArity < staticArgs.length) {
                     Expression block = new Block(Arrays.copyOfRange(staticArgs, declaredArity - 1, staticArgs.length));
+                    ExpressionTool.copyLocationInfo(staticArgs[0], block);
                     newArgs[declaredArity - 1] = block;
                 }
                 staticArgs = newArgs;
+
             }
             RetainedStaticContext rsc = new RetainedStaticContext(env);
             try {
@@ -298,6 +324,10 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
         if (functionName.hasURI(getNamespace()) && getFunctionDetails(functionName.getLocalPart(), arity) != null) {
             RetainedStaticContext rsc = staticContext.makeRetainedStaticContext();
             SystemFunction fn = makeFunction(functionName.getLocalPart(), arity);
+            if (staticContext.getXPathVersion() < 40 && fn instanceof Concat && arity < 2) {
+                // Treat concat() specially prior to 4.0
+                return null;
+            }
             fn.setRetainedStaticContext(rsc);
             return fn;
         } else {

@@ -167,6 +167,7 @@ public class LoopLifter {
                 try {
                     expInfoMap.get(parent).dependees.put(variableSetter, true);
                 } catch (NullPointerException e) {
+                    ExpressionTool.validateTree(parent);
                     e.printStackTrace();
                     throw e;
                 }
