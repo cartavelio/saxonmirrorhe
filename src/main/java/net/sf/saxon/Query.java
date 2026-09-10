@@ -81,6 +81,7 @@ public class Query {
     private boolean allowExit = true;
     protected String languageVersion = "3.1";
     protected String nsOption;
+    protected XsdSchema externalSchema = null;
 
 
     /**
@@ -297,6 +298,9 @@ public class Query {
             XQueryCompiler compiler = processor.newXQueryCompiler();
             compiler.setSchemaAware(schemaAware);
             compiler.setLanguageVersion(languageVersion);
+            if (externalSchema != null) {
+                compiler.useSchema(externalSchema);
+            }
 
             if (updating) {
                 compiler.setUpdatingEnabled(true);
@@ -563,11 +567,10 @@ public class Query {
      * Parse the options supplied on the command line
      *
      * @param options the command line arguments
-     * @throws TransformerException if failures occur. Note, the method may also invoke System.exit().
+     * @throws SaxonApiException if failures occur. Note, the method may also invoke System.exit().
      */
 
-    void parseOptions(CommandLineOptions options)
-            throws TransformerException {
+    void parseOptions(CommandLineOptions options) throws SaxonApiException {
 
         // Apply those options which simply update the Configuration
 
@@ -725,8 +728,6 @@ public class Query {
             config.setSourceParserClass(value);
         }
 
-        String additionalSchemas = options.getOptionValue("xsd");
-
         value = options.getOptionValue("?");
         if (value != null) {
             badUsage("");
@@ -767,8 +768,13 @@ public class Query {
             throw new UnsupportedOperationException(); // TODO: implement me
         }
 
+        String additionalSchemas = options.getOptionValue("xsd");
         if (additionalSchemas != null) {
-            CommandLineOptions.loadAdditionalSchemas(config, additionalSchemas);
+            try {
+                externalSchema = CommandLineOptions.loadAdditionalSchemas(processor, additionalSchemas);
+            } catch (SaxonApiException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -981,6 +987,9 @@ public class Query {
                 builder.setTreeModel(TreeModel.LINKED_TREE);
             } else {
                 builder.setTreeModel(TreeModel.getTreeModel(getConfiguration().getTreeModel()));
+            }
+            if (externalSchema != null) {
+                builder.setSchemaValidator(externalSchema.newValidator());
             }
             if (showTime) {
                 config.getLogger().info("Processing " + sourceInput.getSystemId());

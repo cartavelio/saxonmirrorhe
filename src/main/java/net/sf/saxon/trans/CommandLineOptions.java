@@ -14,7 +14,6 @@ import net.sf.saxon.s9api.*;
 import net.sf.saxon.transpile.CSharpDelegate;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.SchemaException;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xmlresolver.ResolverFeature;
@@ -256,11 +255,10 @@ public class CommandLineOptions {
      * Apply options to the Configuration
      *
      * @param processor the s9api Processor object
-     * @throws javax.xml.transform.TransformerException
-     *          if invalid options are present
+     * @throws SaxonApiException if invalid options are present
      */
 
-    public void applyToConfiguration(/*@NotNull*/ final Processor processor) throws TransformerException {
+    public void applyToConfiguration(/*@NotNull*/ final Processor processor) throws SaxonApiException {
 
         Configuration config = processor.getUnderlyingConfiguration();
 
@@ -276,7 +274,7 @@ public class CommandLineOptions {
                 if (FeatureIndex.exists(fullName)) {
                     FeatureData f = FeatureIndex.getData(fullName);
                     if (f == null) {
-                        throw new XPathException("Unknown configuration feature " + name);
+                        throw new SaxonApiException("Unknown configuration feature " + name);
                     }
 
                     if (f.type == Boolean.class) {
@@ -285,16 +283,16 @@ public class CommandLineOptions {
                         //noinspection ResultOfMethodCallIgnored
                         Integer.valueOf(value);
                     } else if (f.type != String.class) {
-                        throw new XPathException("Property --" + name + " cannot be supplied as a string");
+                        throw new SaxonApiException("Property --" + name + " cannot be supplied as a string");
                     }
                 } else {
-                    throw new XPathException("Unknown configuration property --" + name);
+                    throw new SaxonApiException("Unknown configuration property --" + name);
                 }
             }
             try {
                 processor.getUnderlyingConfiguration().setConfigurationProperty(fullName, value);
             } catch (IllegalArgumentException err) {
-                throw new XPathException("Incorrect value for --" + name + ": " + err.getMessage());
+                throw new SaxonApiException("Incorrect value for --" + name + ": " + err.getMessage());
             }
         }
 
@@ -311,7 +309,7 @@ public class CommandLineOptions {
                         request.uri = s;
                         sourceInput = new DirectResourceResolver(config).resolve(request);
                     } catch (XPathException e) {
-                        throw new XPathException("Catalog file not found: " + s, e);
+                        throw new SaxonApiException("Catalog file not found: " + s, e);
                     }
                     catalogs.add(sourceInput.getSystemId());
                 }
@@ -319,7 +317,7 @@ public class CommandLineOptions {
                 for (String s : optionValue.split(";")) {
                     File catalogFile = new File(s);
                     if (!catalogFile.exists()) {
-                        throw new XPathException("Catalog file not found: " + s);
+                        throw new SaxonApiException("Catalog file not found: " + s);
                     }
                     catalogs.add(catalogFile.toURI().toASCIIString());
                 }
@@ -386,11 +384,16 @@ public class CommandLineOptions {
         //#if CSHARP==false
         optionValue = getOptionValue("or");
         if (optionValue != null) {
-            Object resolver = config.getInstance(optionValue);
+            Object resolver;
+            try {
+                resolver = config.getInstance(optionValue);
+            } catch (XPathException e) {
+                throw new SaxonApiException(e);
+            }
             if (resolver instanceof OutputURIResolver) {
                 config.setConfigurationProperty(Feature.OUTPUT_URI_RESOLVER, (OutputURIResolver) resolver);
             } else {
-                throw new XPathException("Class " + optionValue + " is not an OutputURIResolver");
+                throw new SaxonApiException("Class " + optionValue + " is not an OutputURIResolver");
             }
         }
         //#endif
@@ -404,7 +407,11 @@ public class CommandLineOptions {
 
         optionValue = getOptionValue("r");
         if (optionValue != null) {
-            config.setResourceResolver(config.makeResourceResolver(optionValue));
+            try {
+                config.setResourceResolver(config.makeResourceResolver(optionValue));
+            } catch (XPathException e) {
+                throw new SaxonApiException(e);
+            }
         }
 
         optionValue = getOptionValue("strip");
@@ -488,10 +495,14 @@ public class CommandLineOptions {
     }
 
     @CSharpReplaceBody(code="Saxon.Api.Support.InitializationHandler.doInitialization(new Saxon.Api.Processor(processor), initializationClass);")
-    private void invokeInitializer(Processor processor, String initializationClass) throws TransformerException {
-        Configuration config = processor.getUnderlyingConfiguration();
-        Initializer initializer = (Initializer) config.getInstance(initializationClass);
-        initializer.initialize(config);
+    private void invokeInitializer(Processor processor, String initializationClass) throws SaxonApiException {
+        try {
+            Configuration config = processor.getUnderlyingConfiguration();
+            Initializer initializer = (Initializer) config.getInstance(initializationClass);
+            initializer.initialize(config);
+        } catch (TransformerException e) {
+            throw new SaxonApiException(e);
+        }
     }
 
     private void setCatalogFiles(Configuration config, List<String> catalogs) {
@@ -845,18 +856,21 @@ public class CommandLineOptions {
         return outputName;
     }
 
-    public static void loadAdditionalSchemas(/*@NotNull*/ Configuration config, String additionalSchemas)
-            throws SchemaException {
-        throw new UnsupportedOperationException();
-//        StringTokenizer st = new StringTokenizer(additionalSchemas, File.pathSeparator);
-//        while (st.hasMoreTokens()) {
-//            String schema = st.nextToken();
-//            File schemaFile = new File(schema);
-//            if (!schemaFile.exists()) {
-//                throw new SchemaException("Schema document " + schema + " not found");
-//            }
-//            config.addSchemaSource(new StreamSource(schemaFile));
-//        }
+    public static XsdSchema loadAdditionalSchemas(Processor proc, String additionalSchemas)
+            throws SaxonApiException {
+        XsdCompiler compiler = proc.newXsdCompiler();
+        List<File> schemaFiles = new ArrayList<>();
+        StringTokenizer st = new StringTokenizer(additionalSchemas, File.pathSeparator);
+        while (st.hasMoreTokens()) {
+            String schema = st.nextToken();
+            File schemaFile = new File(schema);
+            if (!schemaFile.exists()) {
+                throw new SaxonApiException("Schema document " + schema + " not found");
+            }
+            schemaFiles.add(schemaFile);
+            //config.addSchemaSource(new StreamSource(schemaFile));
+        }
+        return compiler.compile(schemaFiles.toArray(new File[0]));
     }
 
     public static String featureKeys(String edition) {

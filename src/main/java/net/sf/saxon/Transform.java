@@ -68,6 +68,7 @@ public class Transform {
     protected boolean run = true;
     private Logger traceDestination = new StandardLogger();
     private boolean closeTraceDestination = false;
+    protected XsdSchema externalSchema;
 
     /**
      * Main program, can be used directly from the command line.
@@ -316,6 +317,7 @@ public class Transform {
         //#endif
         int threadCount = 0;
         boolean jit = true;
+
 
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
@@ -727,7 +729,8 @@ public class Transform {
             }
 
             if (additionalSchemas != null) {
-                CommandLineOptions.loadAdditionalSchemas(config, additionalSchemas);
+                externalSchema = CommandLineOptions.loadAdditionalSchemas(processor, additionalSchemas);
+                compiler.useSchema(externalSchema);
             }
 
             options.applyStaticParams(compiler);
@@ -1405,6 +1408,9 @@ public class Transform {
                     builder.setDTDValidation(getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION));
                     builder.setWhitespaceStrippingPolicy(sheet.getWhitespaceStrippingPolicy());
                     builder.setTreeModel(TreeModel.getTreeModel(getConfiguration().getTreeModel()));
+                    if (externalSchema != null) {
+                        builder.setSchemaValidator(externalSchema.newValidator());
+                    }
                     if (getConfiguration().getBooleanProperty(Feature.DTD_VALIDATION_RECOVERABLE)) {
                         source = new AugmentedSource(source, getConfiguration().getParseOptions());
                     }
