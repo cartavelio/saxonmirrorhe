@@ -178,14 +178,6 @@ struct xsltExecutable_object {
   zend_object std;
 };
 
-struct sequenceIterator_object {
-
-  zval * item;
-  int index;
-  int length;
-  zend_object std;
-};
-
 #define PHP_SAXON_EXTNAME "saxonc"
 #define PHP_SAXON_EXTVER "12.5"
 

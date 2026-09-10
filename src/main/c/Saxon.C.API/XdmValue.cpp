@@ -117,7 +117,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
 
 void XdmValue::resetRelinquishedItems(){
     if (getenv("SAXONC_DEBUG_FLAG")) {
-        std::cerr << "resetRelinquishedItems called:" << " ob ref=" << (this)  << std::endl;
+        std::cerr << "resetRelinquishedItems called:" << " ob ref=" << (this)  <<" ref="<<((long)jValues)<< std::endl;
     }
     for (int i = 0; i < xdmSize; i++) {
         if(values[i] != nullptr) {
@@ -162,9 +162,9 @@ XdmValue::~XdmValue() {
       }
     delete valueType;
   }
-  if (jValues > 0) {
+  if (jValues != SXN_UNSET) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr << "XdmValue j_handles_destroy" << std::endl;
+          std::cerr << "XdmValue j_handles_destroy ref="<<((long)jValues) << std::endl;
         }
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)jValues);
     jValues = SXN_UNSET;
@@ -343,3 +343,11 @@ XdmItem *XdmValue::itemAt(int n) {
  * Get the type of the object
  */
 XDM_TYPE XdmValue::getType() { return XDM_VALUE; }
+
+
+ void XdmValue::resetValue(int64_t newValue){
+   jValues = SXN_UNSET;
+   for(int i =0; i < xdmSize; i++){
+   		values[i]->resetValue(newValue);
+   }
+ }

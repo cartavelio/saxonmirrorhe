@@ -174,12 +174,22 @@ public:
    */
   virtual XDM_TYPE getType();
 
+ /**
+ * Internal method to reset the underlying ObjectHandle value
+*/
+ void resetValue(int64_t newValue);
+
+ void resetRelinquishedItems();
+
 protected:
   int64_t value;            /*!< The Java XdmItem reference in Graalvm  */
   const char *stringValue;  /*!< Cached. String representation of the XdmValue,
                                if available */
   const char *itemToString; /*!< Cached. String representation of the XdmValue,
                                if available */
+
+ private:
+
 };
 
 #endif

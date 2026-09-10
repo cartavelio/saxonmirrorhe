@@ -26,6 +26,10 @@ XdmItem::XdmItem(int64_t objRef) {
   refCount = 0;
   stringValue = nullptr;
   itemToString = nullptr;
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    std::cerr << "XdmItem constructor (objRef) called:" << " ob ref=" << (this) << " ref=" << ((long)value)
+              << std::endl;
+  }
 }
 
 bool XdmItem::isAtomic() {
@@ -102,29 +106,17 @@ XDM_TYPE XdmItem::getType() { return XDM_ITEM; }
 XdmItem::~XdmItem() {
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmItem destructor called:" << refCount
-              << " ob ref=" << (this) << " value =" << ((long)value)
+              << " ob ref=" << (this) << " ref=" << ((long)value)
               << std::endl;
   }
-  if (value > 0) {
+  if (value != SXN_UNSET) {
         if (getenv("SAXONC_DEBUG_FLAG")) {
-          std::cerr << "XdmItem j_handles_destroy" << std::endl;
+          std::cerr << "XdmItem j_handles_destroy	" << std::endl;
         }
 
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
   }
   value = SXN_UNSET;
-  /*else {
-       decrementRefCount();
-   }*/
-  /*if (stringValue != nullptr) {
-    delete[] stringValue;
-    stringValue = nullptr;
-  }
-
-  if (itemToString != nullptr) {
-    delete[] itemToString;
-    itemToString = nullptr;
-  } */
 }
 
 void XdmItem::incrementRefCount() {
@@ -135,12 +127,19 @@ void XdmItem::incrementRefCount() {
   }
 }
 
+
+void XdmItem::resetValue(int64_t newValue) {
+  value = newValue;
+}
+
+void XdmItem::resetRelinquishedItems(){}
+
 void XdmItem::decrementRefCount() {
     if (refCount > 0)
         refCount--;
     if (getenv("SAXONC_DEBUG_FLAG")) {
         std::cerr << "after refCount-dec-xdmItem=" << refCount
-                  << " ob ref=" << (this) << std::endl;
+                  << " ob ref=" << (this) <<" ref="<<((long)value)<< std::endl;
     }
-
 }
+

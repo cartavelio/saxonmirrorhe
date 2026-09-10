@@ -153,6 +153,8 @@ class SaxonProcessor {
 
   friend class XdmValue;
 
+ friend class XdmItem;
+
   friend class XdmAtomicValue;
 
   friend class XdmFunctionItem;
@@ -411,6 +413,9 @@ public:
    * one-to-one with the input
    */
   XdmArray *makeArray(XdmValue **values, int length);
+
+
+  static void * makeInternalArray(void **inputs, int length);
 
   //! Make an XdmMap whose argument is a map from the standard template library.
   /**

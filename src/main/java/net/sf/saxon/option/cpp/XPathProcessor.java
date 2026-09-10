@@ -84,7 +84,7 @@ public class XPathProcessor extends SaxonCAPI {
      */
     @CEntryPoint(name = "createXPathProcessor")
     public static long createXPathProcessor(IsolateThread thread) {
-            ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.XPathProcessor(false));
+            ObjectHandle handle = SaxonCAPI.createHandle(new net.sf.saxon.option.cpp.XPathProcessor(false));
             return handle.rawValue();
     }
 
@@ -100,7 +100,7 @@ public class XPathProcessor extends SaxonCAPI {
             if(processor == null) {
                 return 0;
             }
-            ObjectHandle handle = objectHandles.create(XPathProcessor.newInstance(processor));
+            ObjectHandle handle = SaxonCAPI.createHandle(XPathProcessor.newInstance(processor));
             return handle.rawValue();
     }
 
