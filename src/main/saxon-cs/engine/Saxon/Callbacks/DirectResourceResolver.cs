@@ -42,9 +42,9 @@ namespace Saxon.Callbacks {
             }
             try {
                 string href = request.relativeUri ?? request.uri;
-                string baseUri = request.baseUri ?? request.uri;
+                string baseUri = request.baseUri;
                 if (string.IsNullOrEmpty(baseUri)) {
-                    baseUri = System.IO.Directory.GetCurrentDirectory();
+                    baseUri = Saxon.Ejava.io.File.CurrentDirectoryUri().AbsoluteUri;
                 }
                 Uri abs = new Uri(new Uri(baseUri), href);
                 Stream stream = UriUtils.GetStream(abs);

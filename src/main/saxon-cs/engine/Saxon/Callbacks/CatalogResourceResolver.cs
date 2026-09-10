@@ -6,6 +6,7 @@ using Org.XmlResolver;
 using Org.XmlResolver.Features;
 using Org.XmlResolver.Utils;
 using Saxon.Api;
+using Saxon.Ejava.io;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Ejavax.xml.transform.stream;
 using Saxon.Hej.trans;
@@ -64,9 +65,9 @@ namespace Saxon.Callbacks {
                     }
                     else {
                         string href = request.relativeUri ?? request.uri;
-                        string baseUri = request.baseUri ?? request.uri;
+                        string baseUri = request.baseUri;
                         if (string.IsNullOrEmpty(baseUri)) {
-                            baseUri = System.IO.Directory.GetCurrentDirectory();
+                            baseUri = Saxon.Ejava.io.File.CurrentDirectoryUri().AbsoluteUri;
                         }
                         rr = catalogBasedResolver.CatalogResolver.ResolveUri(href, baseUri);
                         
