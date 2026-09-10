@@ -2566,6 +2566,19 @@ public class Configuration implements SourceResolver {
     }
 
     /**
+     * Method to add a schema validator to a pipeline. Non-trivial implementation appears
+     * in EnterpriseConfiguration class
+     * @param options  the parser options
+     * @param systemId  used as base URI
+     * @param destination  the destination of the pipeline
+     * @return in this implementation, the destination unchanged
+     * @throws XPathException if the attempt to get a schema validator fails
+     */
+    public Receiver addValidatorToPipeline(ParseOptions options, String systemId, Receiver destination) throws XPathException {
+        return destination;
+    }
+
+    /**
      * Indicate whether schema validation failures on result documents are to be treated
      * as fatal errors or as warnings. Note that all validation
      * errors are reported to the error() method of the ErrorListener, and processing always
