@@ -592,5 +592,13 @@ val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
   from(featureKeysSources)
 }
 
+val gizmo = tasks.register<JavaExec>("gizmo") {
+  classpath = editionSourceSet.runtimeClasspath
+
+  mainClass = "net.sf.saxon.Gizmo"
+
+  standardInput = System.`in`
+}
+
 releaseZips.outgoing.artifact(downloadRelease) { builtBy(downloadRelease) }
 releaseMaven.outgoing.artifact(stageMaven) { builtBy(stageMaven)}
