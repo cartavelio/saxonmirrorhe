@@ -3164,6 +3164,19 @@ cdef class PyXPathProcessor:
             self.thisxpptr.setContextItem(xdm_item.derivedptr)
         else:
           raise Exception(py_error_message)
+
+     def set_language_version(self, value):
+         """
+         set_language_version(self, version)
+         Say whether an XPath 2.0, XPath 3.0 or XPath 3.1 processor is required.
+         Args:
+             value (str): One of the values 1.0, 2.0, 3.0, 3.05, 3.1.
+         """
+         py_value_string = value.encode('UTF-8') if value is not None else None
+         cdef char * c_value = py_value_string if value is not None else ""
+         self.thisxqptr.setLanguageVersion(c_value)
+
+
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)

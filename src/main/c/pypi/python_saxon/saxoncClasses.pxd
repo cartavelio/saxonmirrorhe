@@ -443,7 +443,9 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         
         void setcwd(const char* cwd)
 
-        void setContextFile(const char * filename) 
+        void setContextFile(const char * filename)
+
+        void setLanguageVersion(const char * version)
 
         bool effectiveBooleanValue(const char * xpathStr) except +raise_py_error
 

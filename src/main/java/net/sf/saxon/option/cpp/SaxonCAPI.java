@@ -1234,6 +1234,14 @@ public class SaxonCAPI {
             source = resolveFileToSource_fallback(cwd, filename);
             return source;
             //throw new SaxonApiException(exception);
+        } catch (NullPointerException exception) {
+            if(debug) {
+                System.err.println("DEBUG: NullPointerException thrown: "+exception.getMessage());
+                System.err.println("DEBUG: Using resolver fallback");
+
+            }
+            source = resolveFileToSource_fallback(cwd, filename);
+            return source;
         }
 
     }
@@ -1370,7 +1378,7 @@ public class SaxonCAPI {
         return serializer;
     }
 
-    public static void testj() throws SaxonApiException {
+    /*public static void testj() throws SaxonApiException {
         SaxonCAPI.debug  = true;
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(Feature.LICENSE_FILE_LOCATION, "/Users/ond1/work/development/git/private/saxon-license.lic");
@@ -1382,15 +1390,15 @@ public class SaxonCAPI {
         File file = SaxonCAPI.resolveFile(processor, "/Users/ond1/work/development/git/saxon-dev/saxondev/build/releases/libsaxon-EEC-mac-x86_64-v12.1/samples/cppTests", "test.sef", ResourceRequest.XSLT_NATURE);
         pack.save(file);
 
-    }  
+    }   */
 
-   /* public static void testj() throws SaxonApiException {
+   public static void testj() throws SaxonApiException {
         SaxonCAPI.debug  = true;
         Processor processor = new Processor(false);
         //processor.setConfigurationProperty("http://saxon.sf.net/feature/allowedProtocols", "http,https");
         processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
-        Source source = SaxonCAPI.resolveFileToSource(processor, "file:///home/ond1/work/repository/temp", "identity1.xsl", ResourceRequest.XSLT_NATURE);
-    }   */
+        Source source = SaxonCAPI.resolveFileToSource(processor, "file:///home/ond1/work/repository/temp/", "identity1.xsl", ResourceRequest.XSLT_NATURE);
+    }   
 
      /*public static void testj() throws SaxonApiException, URISyntaxException {
 
