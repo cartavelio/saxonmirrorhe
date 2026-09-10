@@ -179,16 +179,24 @@ public final class ComputedAttribute extends AttributeCreator {
         if (allowNameAsQName) {
             // Can only happen in XQuery
             Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.SUBEXPRESSION, "computed attribute/name", 0);
-            setNameExp(config.getTypeChecker(false).staticTypeCheck(
-                    getNameExp(), SequenceType.SINGLE_ATOMIC, role, visitor));
-            ItemType nameItemType = getNameExp().getItemType();
-            boolean maybeString = th.relationship(nameItemType, BuiltInAtomicType.STRING) != Affinity.DISJOINT ||
-                    th.relationship(nameItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT;
-            boolean maybeQName = th.relationship(nameItemType, BuiltInAtomicType.QNAME) != Affinity.DISJOINT;
-            if (!(maybeString || maybeQName)) {
-                throw new XPathException(
-                        "The attribute name must be either an xs:string, an xs:QName, or untyped atomic")
-                        .withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
+            if (visitor.getStaticContext().getXPathVersion() >= 40) {
+                // PR2665 - use standard coercion rules
+                setNameExp(config.getTypeChecker(false).staticTypeCheck(
+                        getNameExp(),
+                        SequenceType.one(ChoiceItemType.of(BuiltInAtomicType.STRING, BuiltInAtomicType.QNAME)),
+                        role, visitor));
+            } else {
+                setNameExp(config.getTypeChecker(false).staticTypeCheck(
+                        getNameExp(), SequenceType.SINGLE_ATOMIC, role, visitor));
+                ItemType nameItemType = getNameExp().getItemType();
+                boolean maybeString = th.relationship(nameItemType, BuiltInAtomicType.STRING) != Affinity.DISJOINT ||
+                        th.relationship(nameItemType, BuiltInAtomicType.UNTYPED_ATOMIC) != Affinity.DISJOINT;
+                boolean maybeQName = th.relationship(nameItemType, BuiltInAtomicType.QNAME) != Affinity.DISJOINT;
+                if (!(maybeString || maybeQName)) {
+                    throw new XPathException(
+                            "The attribute name must be either an xs:string, an xs:QName, or untyped atomic")
+                            .withErrorCode("XPTY0004").asTypeError().withLocation(getLocation());
+                }
             }
         } else {
             if (!th.isSubType(getNameExp().getItemType(), BuiltInAtomicType.STRING)) {

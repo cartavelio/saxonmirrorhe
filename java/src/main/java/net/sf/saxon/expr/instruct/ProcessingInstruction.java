@@ -16,7 +16,6 @@ import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NoNamespaceName;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StandardNames;
-import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.Twine8;
@@ -25,6 +24,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
 
 import java.util.function.Supplier;
@@ -111,8 +111,12 @@ public class ProcessingInstruction extends SimpleNodeConstructor {
         // See bug 2110. XQuery does not use the function conversion rules here, and disallows xs:anyURI.
         // In XSLT the name is an AVT so we automatically get a string; in XQuery we'll use the standard
         // mechanism to get an atomic value, and then check the type "by hand" at run time.
+        // PR2665 changes this (for 4.0) to use the standard coercion rules
+
+        SequenceType nameType = visitor.getStaticContext().getXPathVersion() >= 40
+                ? SequenceType.SINGLE_STRING : SequenceType.SINGLE_ATOMIC;
         setNameExp(visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(
-                getNameExp(), SequenceType.SINGLE_ATOMIC, role, visitor));
+                getNameExp(), nameType, role, visitor));
         Expression nameExp = getNameExp();
         adoptChildExpression(nameExp);
 

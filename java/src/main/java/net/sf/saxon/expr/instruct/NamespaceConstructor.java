@@ -88,8 +88,12 @@ public class NamespaceConstructor extends SimpleNodeConstructor {
         // See bug 2110. XQuery does not use the function conversion rules here, and disallows xs:anyURI.
         // In XSLT the name is an AVT so we automatically get a string; in XQuery we'll use the standard
         // mechanism to get an atomic value, and then check the type "by hand" at run time.
-        setNameExp(env.getConfiguration().getTypeChecker(false).staticTypeCheck(
-                getNameExp(), SequenceType.OPTIONAL_ATOMIC, role, visitor));
+        // PR2665 changes this (for 4.0) to use the standard coercion rules
+
+        SequenceType nameType = visitor.getStaticContext().getXPathVersion() >= 40
+                ? SequenceType.OPTIONAL_STRING : SequenceType.OPTIONAL_ATOMIC;
+        setNameExp(visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(
+                getNameExp(), nameType, role, visitor));
         adoptChildExpression(getNameExp());
 
         // Do early checking of name if known statically
