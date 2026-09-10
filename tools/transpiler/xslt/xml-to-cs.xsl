@@ -83,27 +83,9 @@
       <xsl:value-of select="."/>
    </xsl:template>
    
-   <!--<xsl:template match="import[@isStatic='true']" priority="20">
-      <xsl:text>//*** Can't handle static imports: {f:qualifiedName(name)} *** {$NL}</xsl:text>
-   </xsl:template>
-   -->
-   <!--<xsl:template match="import[@isAsterisk='true']" priority="10">
-      <xsl:call-template name="indent"/>
-      <xsl:text>using {f:qualifiedName(name)};{$NL}</xsl:text>
-   </xsl:template>-->
-   
-   <!--<xsl:template match="import">
-      <xsl:call-template name="indent"/>
-      <xsl:text>using {name/@identifier} = {f:qualifiedName(name)};{$NL}</xsl:text>
-   </xsl:template>
-   -->
    <xsl:template match="name | *[@nodeType='Name']">
       <xsl:value-of select="f:renameMethod(@identifier, ..)"/>
    </xsl:template>
-   
-   <!--<xsl:template match="name | *[@nodeType='Name']" mode="sans-scope">
-      <xsl:value-of select="f:qualifiedName(.)"/>
-   </xsl:template>-->
    
    <xsl:template match="scope">
       <xsl:apply-templates select="*"/>
@@ -111,13 +93,12 @@
    
    <!-- This rule compensates for an inadequacy in the JavaParser symbol solver -->
    <xsl:template match="scope[@UNRESOLVED and ends-with(../@RESOLVED_TYPE, @UNRESOLVED)]" priority="10">
-      <!--<xsl:message>Unresolved scope rule {@UNRESOLVED}</xsl:message>-->
       <xsl:choose>
          <xsl:when test="matches(../@RESOLVED_TYPE, '^(java\.|javax\.|net\.sf\.saxon|com.\saxonica)')">
             <xsl:text>{f:renameGenericType(../@RESOLVED_TYPE)}</xsl:text>
          </xsl:when>
          <xsl:otherwise>
-            <xsl:text>/*134*/{f:escapeDottedName(../@RESOLVED_TYPE) => f:adjustTypeNamespace()}</xsl:text>
+            <xsl:text>{f:escapeDottedName(../@RESOLVED_TYPE) => f:adjustTypeNamespace()}</xsl:text>
          </xsl:otherwise>
       </xsl:choose>     
    </xsl:template>
@@ -1280,9 +1261,6 @@
          </xsl:otherwise>
       </xsl:choose>
 
-      <!--<xsl:if test="$expandingDefaults">
-         <xsl:text> /* modifiers = {modifiers/modifier/@keyword}, class modifiers = {ancestor::type[1]/modifiers/modifier/@keyword} */</xsl:text>
-      </xsl:if>-->
       <xsl:choose>
          <xsl:when test="$digestMethod!(@override='1' 
             or (@name='equals' and @sig='java.lang.Object')
@@ -1293,8 +1271,6 @@
          <xsl:when test="($digestMethod[@new='1'])">new </xsl:when>
       </xsl:choose>
       
-    
-      <!--<xsl:if test="annotations/annotation/name/@identifier = 'Virtual'">virtual </xsl:if>-->
    </xsl:template>
 
    
@@ -1557,8 +1533,8 @@
          <xsl:for-each select="../arguments/argument">
             <xsl:variable name="declaredType" as="text()">
                <xsl:choose>
-                  <xsl:when test="@RESOLVED_TYPE">/*AA*/{f:escapeDottedName(@RESOLVED_TYPE) => f:adjustTypeNamespace()}</xsl:when>
-                  <xsl:when test="@RETURN">/*AB*/{f:escapeDottedName(@RETURN) => f:adjustTypeNamespace()}</xsl:when>
+                  <xsl:when test="@RESOLVED_TYPE">{f:escapeDottedName(@RESOLVED_TYPE) => f:adjustTypeNamespace()}</xsl:when>
+                  <xsl:when test="@RETURN">{f:escapeDottedName(@RETURN) => f:adjustTypeNamespace()}</xsl:when>
                   <xsl:when test="@nodeType='ThisExpr'">{$containingClass}{$containingClassParams}</xsl:when>
                   <xsl:otherwise>/* UNKNOWN ARG TYPE */ object</xsl:otherwise>
                </xsl:choose>
@@ -1778,13 +1754,6 @@
       </xsl:choose>      
    </xsl:template>
    
-   <!-- Try converting a non static method reference (out::append) to (it => out.append(it)) -->
-   <!--<xsl:template match="*[@nodeType='MethodReferenceExpr'][scope/type/@UNRESOLVED]" priority="16">
-      <xsl:text>it => </xsl:text>
-      <xsl:apply-templates select="scope"/>
-      <xsl:text>.{f:renameMethod(@identifier, .)}(it) /* instance method reference */</xsl:text>
-   </xsl:template>-->
-   
    <!-- Try converting a non static method reference (out::append) to (out.append) -->
    <xsl:template match="*[@nodeType='MethodCallExpr'][@RESOLVED_TYPE='net.sf.saxon.transpile.CSharp'][name/@identifier='methodRef']
       /arguments/argument[@nodeType='MethodReferenceExpr']" priority="16">
@@ -1808,29 +1777,6 @@
       <xsl:text>({string-join((1 to $arity)!format-integer(., 'a'), ', ')})</xsl:text>
    </xsl:template>
    
-   
-   <!--<initializer nodeType="MethodCallExpr" RETURN="T"
-                        RESOLVED_TYPE="net.sf.saxon.transpile.CSharp">
-                        <name nodeType="SimpleName" identifier="constructorRef"/>
-                        <scope nodeType="NameExpr" UNRESOLVED="CSharp">
-                           <name nodeType="SimpleName" identifier="CSharp"/>
-                        </scope>
-                        <arguments>
-                           <argument nodeType="MethodReferenceExpr" identifier="new">
-                              <scope nodeType="TypeExpr">
-                                 <type nodeType="ClassOrInterfaceType"
-                                    RESOLVED_TYPE="net.sf.saxon.value.Whitespace.Tokenizer">
-                                    <name nodeType="SimpleName" identifier="Tokenizer"/>
-                                    <scope nodeType="ClassOrInterfaceType"
-                                       RESOLVED_TYPE="net.sf.saxon.value.Whitespace">
-                                       <name nodeType="SimpleName" identifier="Whitespace"/>
-                                    </scope>
-                                 </type>
-                              </scope>
-                           </argument>
-                           <argument nodeType="IntegerLiteralExpr" value="1"/>
-                        </arguments>
-   -->
    <xsl:template match="*[@nodeType='MethodReferenceExpr']" priority="10">
       <xsl:text>/* Unresolved method reference */</xsl:text>
       <xsl:apply-templates select="scope"/>
@@ -1960,10 +1906,6 @@
       <xsl:text>/*implicit enum*/ {f:escapeDottedName(f:renameType(f:expressionType(.)))}.{name/@identifier}</xsl:text>
    </xsl:template>
    
-   <!-- match a reference to a field of an outer class -->
-   <!--<xsl:template match="*[@nodeType='NameExpr'][@OUTER_FIELD='1']" priority="20">
-      <xsl:text>outerInstance.{name/@identifier}</xsl:text>
-   </xsl:template>-->
    
    <xsl:template match="*[@nodeType='NameExpr']">
       <xsl:apply-templates select="name"/>
