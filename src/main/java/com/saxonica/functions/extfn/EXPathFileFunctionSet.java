@@ -1293,6 +1293,18 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             return result;
         }
 
+        @Override
+        protected XPathException handleIOError(URI uri, IOException err) {
+            // Overridden to return the EXPath error code
+            String message = "Failed to read input file";
+            if (uri != null && !err.getMessage().equals(uri.toString())) {
+                message += ' ' + uri.toString();
+            }
+            message += " (" + err.getClass().getName() + ')';
+            XPathException e = new XPathException(message, err);
+            e.setErrorCode(ERROR_IO);
+            return e;
+        }
     }
 
     /**
@@ -1306,7 +1318,13 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
      * @throws XPathException                               if the file cannot be read
      */
 
-    @CSharpReplaceBody(code="return file.getInputStreamReader(encoding);")
+    @CSharpReplaceBody(code="try {\n"
+            + "                return file.getInputStreamReader(encoding);\n"
+            + "            }\n"
+            + "            catch (Saxon.Ejava.io.IOException) {\n"
+            + "                error(\"Unsupported encoding \" + encoding, ERROR_UNKNOWN_ENCODING);\n"
+            + "                return null;\n"
+            + "            }")
     private static Reader getInputStreamReader(File file, String encoding) throws XPathException {
         InputStream in = null;
         try {
