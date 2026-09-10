@@ -125,7 +125,7 @@ function sequenceOfArraysParamC($arr1){
   if(is_array($arr1)){
     $out1 = implode_all($arr1);
     echo $out1."\n";
-    return new ArrayIterator($arr1);
+    return new ArrayIterator(array($arr1));
   } else {
     throw new Exception('$arr argument is not an array type');
   }
@@ -209,12 +209,14 @@ function testSequence($saxonProc) {
              if($result != null) {
                 $value = $result->getAtomicValue()->getLongValue();
                 echo 'Correct Result='.$value;
+                echo "\n";
              }
 
              $result2 = $xpath->evaluateSingle("dy:simpleUserFunction2(1)");
              if($result2 != null) {
                 $value = $result2->getAtomicValue()->getLongValue();
                 echo 'Correct Result2='.$value;
+                echo "\n";
              }
          } catch (Exception $e) {
              echo 'Caught exception: ', $e->getMessage(), "\n";
@@ -242,6 +244,7 @@ function testSimpleUserFunction($saxonProc1){
          if($result != null) {
             $value = $result->getAtomicValue()->getLongValue();
             echo 'Result='.$value;
+            echo "\n";
          }
      } catch (Exception $e) {
          echo 'Caught exception: ', $e->getMessage(), "\n";
@@ -288,6 +291,7 @@ function testTwoSequence($saxonProc) {
              if($result != null) {
                 $value = $result->getAtomicValue()->getBooleanValue();
                 echo 'Correct Result='.$value;
+                echo "\n";
              }
 
              $result2 = $xpath->evaluate("ms:twoSequenceParam2(('a','b','c'), (1,2,3))");
@@ -295,12 +299,14 @@ function testTwoSequence($saxonProc) {
                 $size = $result2->size();
                 $value = $result2->itemAt(0)->getStringValue();
                 echo 'Output size='.$size." Result for 1st item = ".$value;
+                echo "\n";
              }
              $result3 = $xpath->evaluate("ms:twoSequenceParam3(['a','b','c'], [1,2,3])");
              if($result3 != null) {
                 $size = $result2->size();
                 $value = $result2->itemAt(0)->getStringValue();
                 echo 'Output size='.$size." Result for 1st item = ".$value;
+                echo "\n";
              }
          } catch (Exception $e) {
              echo 'Caught exception: ', $e->getMessage(), "\n";
@@ -328,7 +334,7 @@ function commonSamplesForSequences($saxonProc) {
                                                         "}", True);
 
          $saxonProc->registerUserFunction("http://www.example.com", "{ \"sequenceOfArraysParamC\": {".
-                                                        "      \"as\": \"xs:integer*\"," .
+                                                        "      \"as\": \"array(xs:integer*)*\"," .
                                                         "      \"param\": [" .
                                                         "        \"array(*)\"" .
                                                         "      ],".
@@ -355,26 +361,32 @@ function commonSamplesForSequences($saxonProc) {
              if($result != null) {
                 $value = $result->getAtomicValue()->getBooleanValue();
                 echo 'Correct Result='.$value;
+                echo "\n";
              }
 
              $result1 = $xpath->evaluateSingle("ms:sequenceOfArraysParamB((array{1,2,3}, array{'a',2,3}))");
              if($result1 != null) {
                 $value = $result1->getAtomicValue()->getBooleanValue();
                 echo 'Correct Result='.$value;
+                echo "\n";
              }
 
              $result1a = $xpath->evaluate("ms:sequenceOfArraysParamC(array{1,2,3})");
              if($result1a != null) {
                 if($result1a instanceof Saxon\XdmValue) {
-                    echo 'Test sequenceOfArraysParamC: XdmValue found';
+                    echo("Test sequenceOfArraysParamC: XdmValue found\n");
                     $value1 = $result1a->getHead();
                     if($value1 instanceof Saxon\XdmArray) {
-                        echo 'Test sequenceOfArraysParamC: XdmArray found item0';
+                        echo 'Test sequenceOfArraysParamC: XdmArray found='.$value1;
+                    } else {
+                        echo("sequenceOfArraysParamC failed type check");
                     }
+                    echo "\n";
 
                 }
                 if($result1a instanceof Saxon\XdmArray) {
                     echo 'Error: Test sequenceOfArraysParamC: XdmArray found';
+                    echo "\n";
                 }
             }
 
@@ -450,7 +462,11 @@ function handlingXdmNodes($saxonProc) {
              $result1 = $xpath->evaluateSingle("ms:documentParam(parse-xml('<doc/>'))");
              if($result1 != null) {
                 $value = $result1->getAtomicValue()->getBooleanValue();
-                echo 'Correct Result='.$value;
+                if($value){
+                echo 'documentParam passed';
+                } else {
+                echo 'documentParam failed';
+                }
              }
 
              $result2 = $xpath->evaluateSingle("ms:nodeParam(parse-xml('<doc/>')/node())");

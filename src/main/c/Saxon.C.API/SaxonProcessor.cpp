@@ -76,7 +76,7 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
-extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, void * c_returnValueType, int occurrenceValue, int useNativeTypes, int numOfArguments, void ** arguments) {
+extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments, void ** arguments) {
     if (getenv("SAXONC_DEBUG_FLAG")) {
         fprintf(stdout, "We are in a c function\n");
     }
@@ -102,12 +102,7 @@ extern "C" void * c_nativeCall(char * functionName, void * proc, void * func, vo
     fflush(stdout);
   }
 
-  XdmValue * returnValueType = SaxonProcessor::makeXdmValueFromRef((int64_t)c_returnValueType);
-  if (getenv("SAXONC_DEBUG_FLAG")) {
-    fprintf(stdout, "after returnValue Type call\n");
-    fflush(stdout);
-  }
-  return phpNativeCall(functionName, proc, returnValueType, occurrenceValue, useNativeTypes, numOfArguments, arguments1);
+  return phpNativeCall(functionName, proc, useNativeTypes, numOfArguments, arguments1);
 
 
 #else
@@ -1070,9 +1065,6 @@ XdmAtomicValue *SaxonProcessor::makeStringValue(std::string str,
 
 XdmAtomicValue *SaxonProcessor::makeIntegerValue(int i) {
   SaxonProcessor::attachCurrentThread();
-  // jobject obj = integerValue(*SaxonProcessor::sxn_environ, i);
-         fprintf(stderr, "In makeIntegerValue\n");
-             fflush(stdout);
   int64_t intValueRef = j_makeIntegerValue(sxn_environ->thread, i);
   XdmAtomicValue *value = new XdmAtomicValue(
       intValueRef, "Q{http://www.w3.org/2001/XMLSchema}integer");
@@ -1097,8 +1089,6 @@ XdmAtomicValue *SaxonProcessor::makeFloatValue(float d) {
 
 XdmAtomicValue *SaxonProcessor::makeLongValue(long l) {
   SaxonProcessor::attachCurrentThread();
-  // jobject obj = longValue(*SaxonProcessor::sxn_environ, l);
-
   int64_t longValueRef = j_makeLongValue(sxn_environ->thread, l);
   XdmAtomicValue *value = new XdmAtomicValue(
       longValueRef, "Q{http://www.w3.org/2001/XMLSchema}long");

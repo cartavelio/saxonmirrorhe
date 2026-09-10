@@ -244,7 +244,6 @@ public class SaxonCAPI {
                             System.out.println("Java DEBUG: return type (as)= " + ((XdmAtomicValue) returnValue).getStringValue());
                         }
                         returnSequenceType = SaxonCAPI.parseSequenceType(processor, ((XdmAtomicValue) returnValue).getStringValue());
-                        returnSequenceType.getOccurrenceIndicator();
                     }
 
                 }
@@ -253,7 +252,7 @@ public class SaxonCAPI {
             throw new SaxonApiException("Invalid signature value");
         }
 
-        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, pythonProc, func, alloc, returnValue, useNativeTypes));
+        processor.registerExtensionFunction(new NativeCall(funcQname, sequenceTypes, returnSequenceType, pythonProc, func, alloc, useNativeTypes));
 
 //#endif
         return  SaxonCAPI.STATUS_OK;

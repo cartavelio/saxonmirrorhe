@@ -1600,7 +1600,7 @@ zval makePHPValue(XdmValue * value){
 
 XdmValue * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 
-       if(Z_TYPE_P(retval) ==0){
+       if(retval == nullptr || Z_TYPE_P(retval) ==0){
             //zend_error(E_ERROR, "Function returned null");
             zend_throw_exception(zend_ce_exception, "Function returned null", 0);
         }
@@ -1633,6 +1633,10 @@ XdmValue * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
   		long num_key;
         XdmValue ** arrItems = nullptr;
 
+        zval *arrIter_retval = nullptr;
+        zval *arrIter_valid = nullptr;
+        XdmValue * valuei = nullptr;
+
         switch (Z_TYPE_P(retval)) {
             case IS_FALSE:
                 resultValue = nprocessor->makeBooleanValue(false);
@@ -1651,7 +1655,9 @@ XdmValue * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
                 resultValue = nprocessor->makeStringValue(estrndup(sVal,len));
                 break;
             case IS_NULL:
-
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"PHP internal: call_user_function return is NULL"<< std::endl;
+              }
                 return nullptr;
             case IS_DOUBLE:
                 resultValue = nprocessor->makeDoubleValue((double)Z_DVAL_P(retval));
@@ -1674,17 +1680,47 @@ XdmValue * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
               break;
 
             case IS_OBJECT:
-
+              if (getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"PHP internal: call_user_function return is an object"<< std::endl;
+              }
                if(Z_OBJCE_P(retval) != nullptr && instanceof_function(Z_OBJCE_P(retval), spl_ce_ArrayIterator)) {
-                 	zend_vobj2 =  Z_OBJ_P(retval);
-                  	vooth = (xdmValue_object *)((char *)zend_vobj2 -
-                                            XtOffsetOf(xdmValue_object, std));
 
-                  	if(vooth != NULL) {
-                          //get items from ArrayIterator
-                    	//resultValue = vooth->xdmValue;
-                  	}
-                 } else {
+                         if (getenv("SAXONC_DEBUG_FLAG") ) {
+                    		std::cerr<<"PHP internal: call_user_function before ArrayIterator.valid cp0"<< std::endl;
+                 		}
+			  	 zend_call_method_with_0_params(Z_OBJ_P(retval), spl_ce_ArrayIterator, NULL, "valid", arrIter_valid);
+
+
+					if (getenv("SAXONC_DEBUG_FLAG")) {
+          				std::cerr<<"PHP internal: makeXdmValueFromPHPZVal ArrIterator valid = "<<((int)(Z_TYPE_P(arrIter_valid)))<< std::endl;
+
+        			}
+                 if(Z_TYPE_P(arrIter_valid) == IS_TRUE) {
+                   if (getenv("SAXONC_DEBUG_FLAG")) {
+                    std::cerr<<"PHP internal: call_user_function return is an ArrayIterator - converting to sequence"<< std::endl;
+                 	}
+                   resultValue = new XdmValue();
+                 	while(Z_TYPE_P(arrIter_valid) == IS_TRUE) {
+                         if (getenv("SAXONC_DEBUG_FLAG")) {
+                    		std::cerr<<"PHP internal: call_user_function before ArrayIterator.current cp0"<< std::endl;
+                 		}
+						zend_call_method_with_0_params(Z_OBJ_P(retval), spl_ce_ArrayIterator, NULL, "current", arrIter_retval);
+						if (getenv("SAXONC_DEBUG_FLAG")) {
+                    		std::cerr<<"PHP internal: call_user_function return is an ArrayIterator.current cp1"<< std::endl;
+                 		}
+						valuei = makeXdmValueFromPHPZVal(nprocessor, arrIter_retval);
+                    	if(valuei != nullptr) {
+                    		resultValue->addXdmItem(valuei->getHead());
+                    	} else {
+                      	//do nothing
+                    	}
+                        zend_call_method_with_0_params(Z_OBJ_P(retval), spl_ce_ArrayIterator, NULL, "next", NULL);
+                        zend_call_method_with_0_params(Z_OBJ_P(retval), spl_ce_ArrayIterator, NULL, "valid", arrIter_valid);
+                 	}
+                 }
+
+              	 break;
+               } else {
 
                 objName =ZSTR_VAL(Z_OBJCE_P(retval)->name);
 
@@ -1753,6 +1789,9 @@ XdmValue * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
                 }
                 }
                 break;
+            case IS_UNDEF:
+                zend_throw_exception(zend_ce_exception, "User extension function throw an extension", 0);
+
             default:
                 zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
         }
@@ -1765,7 +1804,7 @@ XdmValue * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
 
 
 
-void * phpNativeCall(char * functionName, void * proc, XdmValue * returnValueType, int occuranceValue, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
+void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
 {
 
     //JNIEnv *senv = SaxonProcessor::sxn_environ->env;
