@@ -149,7 +149,9 @@ public class StylesheetPackageEE extends StylesheetPackage {
                 presenter.emitAttribute("dmk", dmk);
             }
             String expiry = getConfiguration().getLicenseFeature("Expiration");
-            if (expiry != null && !expiry.equals("never")) {
+            // SEF files only expire if they're created with an evaluation license
+            String evaluation = getConfiguration().getLicenseFeature("Evaluation");
+            if (expiry != null && !expiry.equals("never") && !evaluation.equals("no")) {
                 presenter.emitAttribute("expiry", expiry);
             }
         }
