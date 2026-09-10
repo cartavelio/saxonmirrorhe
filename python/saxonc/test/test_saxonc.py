@@ -2010,54 +2010,11 @@ def testMap3(saxonproc):
 
 
 
-def user_function(saxonproc, values):
-    ''' values: PyXdmValue '''
-    print("In python user function")
-    #saxonproc = PySaxonProcessor()
-    print(values)
-    n_value  = values[0].head.integer_value + 2
-    print(n_value)
-    try:
-        valuex= saxonproc.make_integer_value(n_value)
-        print('print XdmAtomicValue=')
-        print(valuex)
-        return valuex
-    except Exception as err:
-            print(err)
-            return None
-
-
 '''
 Return value: List atomic types and check if we have a python mapping for  it
 Create a function to do type conversion between PyXdm and Python types
 
 '''
-
-
-def testUserFunction():
-    with PySaxonProcessor(license=True) as proc:
-        try:
-            proc.register_user_function("http://www.example.com", user_function, "{ \"myFunc\": {"
-                                                          "      \"as\": \"xs:integer?\","
-                                                          "      \"param\": ["
-                                                          "        \"xs:integer\""
-                                                          "      ],"
-                                                          "      \"arity\": [1]"
-                                                          "    }"
-                                                          "}", use_python_types=False)
-            #add flag to prevent auto converted values
-
-            xpath_processor = proc.new_xpath_processor()
-            xpath_processor.declare_namespace("dy", "http://www.example.com")
-
-            result = xpath_processor.evaluate_single("dy:myFunc(3)")
-
-            '''assert result is not None'''
-            assert result == 6
-        except Exception as err:
-            print(err)
-            assert False
-
 
 def testXdmArray(saxonproc):
     xslt = '''<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0"

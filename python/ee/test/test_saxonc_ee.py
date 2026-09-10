@@ -102,3 +102,46 @@ def testXquery_40_functions_error(saxonproc):
     except Exception:
         assert True
 
+
+
+def user_function(saxonproc, values):
+    ''' values: PyXdmValue '''
+    print("In python user function")
+    #saxonproc = PySaxonProcessor()
+    print(values)
+    n_value  = values[0].head.integer_value + 2
+    print(n_value)
+    try:
+        valuex= saxonproc.make_integer_value(n_value)
+        print('print XdmAtomicValue=')
+        print(valuex)
+        return valuex
+    except Exception as err:
+        print(err)
+        return None
+
+
+def testUserFunction():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.example.com", user_function, "{ \"myFunc\": {"
+                                                                             "      \"as\": \"xs:integer?\","
+                                                                             "      \"param\": ["
+                                                                             "        \"xs:integer\""
+                                                                             "      ],"
+                                                                             "      \"arity\": [1]"
+                                                                             "    }"
+                                                                             "}", use_python_types=False)
+        #add flag to prevent auto converted values
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("dy", "http://www.example.com")
+
+        result = xpath_processor.evaluate_single("dy:myFunc(3)")
+
+        assert result is not None
+        assert result == 6
+    except Exception as err:
+        print(err)
+        assert False
+

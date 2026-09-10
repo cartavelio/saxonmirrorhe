@@ -523,9 +523,10 @@ cdef class PySaxonProcessor:
         Returns:
             PyXdmValue: wrapped Xdm object in Python
         """
+        print("__convert_c_obj cp0!!")
         cdef void *void_ptr = <void *> value
         cdef  saxoncClasses.XdmValue *value_ptr = <saxoncClasses.XdmValue *> void_ptr
-
+        print("__convert_c_obj!!")
 
         if value_ptr is NULL:
             return None
@@ -762,7 +763,6 @@ cdef class PySaxonProcessor:
 
     def register_user_function(self, ns, func, signatureJSON, encoding=None, use_python_types=False):
 
-        print("register user function!!")
         '''PyObject_CallNoArgs(func)'''
         if encoding is None:
             encoding = sys.getdefaultencoding()
@@ -770,6 +770,7 @@ cdef class PySaxonProcessor:
         cdef char * c_ns_str_ = NULL
         cdef void *ptr
         cdef void *proc_ptr
+        cdef void *python_func_ptr
         cdef bool useNativeTypes = use_python_types
         py_signatureJSON_str = signatureJSON.encode(encoding) if signatureJSON is not None else None
         py_ns_str = ns.encode(encoding) if ns is not None else None
@@ -782,6 +783,7 @@ cdef class PySaxonProcessor:
 
         ptr = <void *>func
         proc_ptr = <void *>self
+        saxoncClasses.setNativePythonFunction()
         self.thisptr.registerUserFunctionWithProcessor(proc_ptr, c_ns_str_, ptr, c_signatureJSON_str_, useNativeTypes)
 
     def make_atomic_value(self, value_type, value, encoding=None):

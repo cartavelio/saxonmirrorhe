@@ -77,14 +77,15 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
-extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, void * func, int phpFlag, int useNativeTypes, int numOfArguments, void ** arguments) {
-    if (getenv("SAXONC_DEBUG_FLAG")) {
-        fprintf(stdout, "We are in a c function. calling function name= %s\n", functionName);
-    }
+extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, void * pythonFunc, void * func, int langFlag, int useNativeTypes, int numOfArguments, void ** arguments) {
+  if (getenv("SAXONC_DEBUG_FLAG")) {
+    fprintf(stdout, "We are in a c function. calling function name= %s\n", functionName);
+  }
 
   void * userFuncResult = nullptr;
 
-  if (phpFlag == 1) {
+  if (langFlag == 1) {
+    //PHP logic
     if (getenv("SAXONC_DEBUG_FLAG")) {
       fprintf(stdout, "We are in a c function. calling PHP logic ");
     }
@@ -99,6 +100,16 @@ extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, v
     operator delete(arguments);
 
 
+
+  } else if (langFlag == 2) {
+    //Python logic
+    if (getenv("SAXONC_DEBUG_FLAG")) {
+      fprintf(stdout, "We are in a c function. calling Python logic ");
+    }
+
+    pythonExtensionFunction func1 = pythonExtensionFunction(pythonFunc);
+
+    userFuncResult = func1(pythonFunc, func, useNativeTypes, numOfArguments, arguments);
 
   } else {
     if (getenv("SAXONC_DEBUG_FLAG")) {
@@ -515,7 +526,7 @@ void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, co
 
 
   long status = j_registerFunctionDefinition(thread,(void *)procRef, (char *) ns1,
-                                             (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
+                                             (void *)signatureValue->getUnderlyingValue(), python_procPtr, func, (void *) alloc, (int)useNativeTypes);
 
 
   if(signatureValue != nullptr) {

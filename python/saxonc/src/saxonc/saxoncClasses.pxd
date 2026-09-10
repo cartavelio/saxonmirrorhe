@@ -12,8 +12,9 @@ cdef extern from "CythonExceptionHandler.h" namespace "CythonExceptionHandler":
     cdef void create_saxonc_api_py_exception()
     cdef void handle_saxonc_api_exceptions()
 
-cdef extern from "saxonc/UserFunctionHandler.h":
-  cdef void userFunctionCall(object func)
+cdef extern from "CythonUserFunctionHandler.h":
+  cdef void userFunctionPythonNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments)
+  cdef void setNativePythonFunction()
 
 
 cdef extern from "saxonc/SaxonProcessor.h":

@@ -4,7 +4,7 @@
 
 extern "C" PyObject * CythonUserFunctionHandler;
 
-void * userFunctionNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments){
+void * userFunctionPythonNativeCall(char * functionName, void * proc, void * func, int useNativeTypes, int numOfArguments,  XdmValue ** arguments){
     //PyObject_CallNoArgs((PyObject *)func);
     PyObject* argsList = nullptr;
     PyObject* arg = nullptr;

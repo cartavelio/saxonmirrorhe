@@ -174,10 +174,26 @@ public class SaxonCAPI {
         return SaxonCAPI.STATUS_OK;
     }
 
+    @CEntryPoint(name = "j_setPythonNative", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_setPythonNative(IsolateThread thread) throws SaxonApiException {
+//#if EE==true || PE==true
+        NativeCall.setPythonNative();
+//#endif
+        return SaxonCAPI.STATUS_OK;
+    }
+
     @CEntryPoint(name = "j_setIndirectFunctionForNativeCall", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long j_setIndirectFunctionForNativeCall(IsolateThread thread, NativeFunctionPointer nativeFunctionPointer) throws SaxonApiException {
 //#if EE==true || PE==true
         NativeCall.setIndirectFunctionForNativeCall(nativeFunctionPointer);
+//#endif
+        return SaxonCAPI.STATUS_OK;
+    }
+
+    @CEntryPoint(name = "j_setIndirectFunctionForPythonNativeCall", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_setIndirectFunctionForPythonNativeCall(IsolateThread thread, CFunctionPointer nativeFunctionPointer) throws SaxonApiException {
+//#if EE==true || PE==true
+        NativeCall.setIndirectFunctionForPythonNativeCall(nativeFunctionPointer);
 //#endif
         return SaxonCAPI.STATUS_OK;
     }
@@ -668,7 +684,7 @@ public class SaxonCAPI {
          * call of the function pointer.
          */
         @InvokeCFunctionPointer
-        VoidPointer invoke(IsolateThread thread, CCharPointer functionName, CFunctionPointer proc, CFunctionPointer func, int phpFlag, int useNativeTypes, int numArgs, CLongPointer args);
+        VoidPointer invoke(IsolateThread thread, CCharPointer functionName, CFunctionPointer proc, CFunctionPointer pythonFunc, CFunctionPointer func, int phpFlag, int useNativeTypes, int numArgs, CLongPointer args);
     }
 
 
