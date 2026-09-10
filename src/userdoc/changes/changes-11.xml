@@ -386,8 +386,11 @@
             index construction, or (b) that the sequence <code>//x</code> contains very few items, or (c) that the predicate is
             likely to select a high proportion of the items in the filtered sequence.</p>
         
-        <p>Added <a class="bodylink code" href="/functions/saxon/slice">saxon:slice()</a> based on proposed XPath 4.0 function
-            <code>fn:slice()</code>. For example <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code>.</p>
+        <p>Added <a class="bodylink code" href="/functions/saxon/slice">saxon:slice()</a>. 
+            For example <code>slice(("a", "b", "c"), -1)</code> returns <code>"c"</code>.
+            (The function was originally based on a proposed <code>fn:slice()</code> function, but that has since
+            diverged.)
+        </p>
         
         <p>The function <a class="bodylink code" href="/functions/saxon/escape-NCName">saxon:escape-NCName()</a> can be used to
             turn any string into a valid <code>NCName</code>: for example <code>"date of birth"</code> becomes

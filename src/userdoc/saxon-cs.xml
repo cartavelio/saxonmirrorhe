@@ -161,10 +161,25 @@ an XSLT transformation whose result is then serialized.</p>
 
       <p>There are several places where the classes in the <code>Saxon.Api</code> package provide an "escape hatch" into
 the underlying implementation classes. These are provided for the benefit of applications that for some reason 
-need to mix use of the .NET API with the internal classes converted from the original Java code. The underlying implementation 
-classes are documented
-in Java terms and use Java calling conventions, but this does not stop them being used from any .NET language.
-The places where such escape hatches are provided are shown below:</p>
+need to mix use of the .NET API with the internal classes converted from the original Java code.</p>
+      
+      <p>We do not publish API documentation for the C# version of these implementation classes. However, the Javadoc
+         documentation for the original Java classes will generally provide a useful guide. To find the relevant class,
+         you need to be aware of the mapping from C# type names to Java class names, specifically:</p>
+      
+      <ul>
+         <li>
+            <p>A C# type  named <code>Saxon.Hej.x.y.FooBar</code> corresponds 
+            to the Java class <code>net.sf.saxon.x.y.FooBar</code></p>
+         <p>For example, <code>Saxon.Hej.om.NodeInfo</code> corresponds to <code>net.sf.saxon.om.NodeInfo</code>.</p></li>
+         <li>
+            <p>A C# type  named <code>Saxon.Eej.x.y.FooBar</code> corresponds to the Java class <code>com.saxonica.x.y.FooBar</code></p>
+            <p>For example, <code>Saxon.Eej.ee.schema.ElementDecl</code> corresponds to <code>com.saxonica.ee.schema.ElementDecl</code>.</p></li>
+      </ul>
+      <p>These underlying implementation 
+         classes are documented in Java terms and use Java naming conventions, but this does not stop them being used from any .NET language.</p>
+
+      <p>The places where such escape hatches are provided are shown below:</p>
       <table>
          <thead>
             <tr>
@@ -182,46 +197,46 @@ The places where such escape hatches are provided are shown below:</p>
          <tbody>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.Processor">Saxon.Api.Processor</a></p>
+                  <p><a class="cslink" href="Saxon.Api.Processor"><code>Saxon.Api.Processor</code></a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.Configuration">net.sf.saxon.Configuration</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.Configuration"><code>net.sf.saxon.Configuration</code> (<code>Saxon.Hej.Configuration</code>)</a></p>
                </td>
             </tr>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.XdmNode">Saxon.Api.XdmNode</a></p>
+                  <p><a class="cslink" href="Saxon.Api.XdmNode"><code>Saxon.Api.XdmNode</code></a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.om.NodeInfo">net.sf.saxon.om.NodeInfo</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.om.NodeInfo"><code>net.sf.saxon.om.NodeInfo</code> (<code>Saxon.Hej.om.NodeInfo</code>)</a></p>
                </td>
             </tr>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.XsltTransformer">Saxon.Api.XsltTransformer</a></p>
+                  <p><a class="cslink" href="Saxon.Api.XsltTransformer"><code>Saxon.Api.XsltTransformer</code></a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.Controller">net.sf.saxon.Controller</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.Controller"><code>net.sf.saxon.Controller</code> (<code>Saxon.Hej.Controller</code>)</a></p>
                </td>
             </tr>
             <tr>
                <td>
-                  <p><a class="cslink" href="Saxon.Api.XQueryCompiler">Saxon.Api.XQueryCompiler</a></p>
+                  <p><a class="cslink" href="Saxon.Api.XQueryCompiler"><code>Saxon.Api.XQueryCompiler</code></a></p>
                </td>
                <td>
                   <p>Implementation</p>
                </td>
                <td>
-                  <p><a class="javalink" href="net.sf.saxon.query.StaticQueryContext">net.sf.saxon.query.StaticQueryContext</a></p>
+                  <p><a class="javalink" href="net.sf.saxon.query.StaticQueryContext"><code>net.sf.saxon.query.StaticQueryContext</code> (<code>Saxon.Hej.query.StaticQueryContext</code>)</a></p>
                </td>
             </tr>
          </tbody>

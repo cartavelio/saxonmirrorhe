@@ -4,10 +4,9 @@
 
     <p>Saxonica provides an additional resources download which contains various sample XML
         resources, and several sample applications. The download file is named
-            <code>saxon-resources-10.zip</code>, and is separate from the software download. It is
+            <code>saxon-resources-11.zip</code>, and is separate from the software download. It is
         available from <a href="http://www.saxonica.com/download/download_page.xml" class="bodylink"
-            >Saxonica Downloads</a> or <a href="https://sourceforge.net/projects/saxon/files/"
-            class="bodylink">SourceForge</a> (under the Saxon-HE project). Unzip the contents of
+            >Saxonica Downloads</a>. Unzip the contents of
         this file into the same directory as the Saxon software. The sample applications are found
         in the directory <code>/samples</code>.</p>
 
@@ -36,7 +35,7 @@
             <a class="bodylink" href="jdom2">JDOM2 Example</a>
         </li>
         <li>
-            <a class="bodylink" href="dotnetsamples">Example applications for .NET</a>
+            <a class="bodylink" href="dotnetsamples">Example applications for Saxon-CS</a>
         </li>
         <li>
             <a class="bodylink" href="servlet">Saxon Servlet</a>
@@ -64,7 +63,7 @@
     <section id="books" title="Book List Example">
         <h1>Book List Example</h1>
 
-        <p>The XML file <code>books.xml</code> (derived from a file issued originally by Microsoft)
+        <p>The XML file <code>books.xml</code> 
             is used for a number of demonstrations. This file, along with its DTD
                 <code>books.dtd</code>, is found in the <code>samples/data</code> directory. </p>
 
@@ -74,18 +73,22 @@
             illustrate several Saxon extensions. Run this as follows, with the samples directory as
             the current directory:</p>
 
+        <div class="javaonly">
         <p>
             <i>On the Java platform:</i>
         </p>
         <kbd> java net.sf.saxon.Transform -s:data/books.xml -xsl:styles/books.xsl
                 -o:<i>output.html</i>
         </kbd>
+        </div>
 
+        <div class="csonly">
         <p>
             <i>On the .NET platform:</i>
         </p>
-        <kbd> Transform -s:data/books.xml -xsl:styles/books.xsl -o:<i>output.html</i>
+        <kbd> dotnet SaxonCS transform -s:data/books.xml -xsl:styles/books.xsl -o:<i>output.html</i>
         </kbd>
+        </div>
 
         <p>This produces an HTML page showing the data.</p>
 
@@ -96,14 +99,20 @@
 
         <h2 class="subtitle">Query</h2>
 
-        <p>A query that runs with this data is also supplied. The command to use on the Java
+        <p>A query that runs with this data is also supplied. </p>
+        
+        <div class="javaonly">           
+            <p>The command to use on the Java
             platform is:</p>
         <kbd> java net.sf.saxon.Query -s:data/books.xml -q:query/books.xq -o:<i>output.html</i>
         </kbd>
+        </div>
 
+        <div class="csonly">
         <p>The equivalent on .NET is:</p>
-        <kbd> Query -s:data/books.xml -q:query/books.xq -o:<i>output.html</i>
+        <kbd> dotnet SaxonCS query -s:data/books.xml -q:query/books.xq -o:<i>output.html</i>
         </kbd>
+        </div>
 
         <h2 class="subtitle">Other demonstrations</h2>
 
@@ -111,7 +120,9 @@
                 <code>data/books.xml</code> is <code>data/books.xsd</code>. Also supplied in the
             samples resources is the file <code>data/books-invalid.xml</code>, which (as the name
             suggests) is a version of the books file which is invalid against the schema, and
-                <code>data/more-books.xml</code> which lists some different books. These resources
+                <code>data/more-books.xml</code> which lists some different books.</p> 
+        
+        <p class="javaonly">These resources
             may be used for instance with the sample applications <code>QuickValidator.java</code>,
                 <code>SchemaValidatorExample.java</code>, and
                 <code>SchemaValidatorHandlerExample.java</code>.</p>
@@ -119,6 +130,7 @@
         <p>There is another stylesheet, <code>styles/books-csv.xsl</code>, which converts the data
             in the file <code>data/books.xml</code> into a comma-separated-values file.</p>
 
+        <div class="javaonly">
         <p>The stylesheet <code>styles/total.xsl</code> is used by the <a class="bodylink"
                 href="/samples/jdom2">JDOM2 Example</a> application, and the query
                 <code>query/books-to-html.xq</code> is used by one of the examples in the
@@ -129,11 +141,13 @@
             designed to run against the sample file <code>books.xml</code>. It produces a list of
             all books over 2cm thick that were published during the 6 years since the start of
             2000.</p>
+        
 
         <p>Also see the <a class="bodylink" href="/sql-extension/instructions/example">SQL extension
                 instructions example</a> for details on the sample stylesheet
                 <code>styles/books-sql.xsl</code> which uses Saxon SQL extension instructions to
             load the contents of <code>books.xml</code> into a database table.</p>
+        </div>
     </section>
 
     <section id="tour" title="Knight's Tour">
@@ -144,7 +158,7 @@
 
         <p>This is a program whose output is a knight's tour of the chessboard (the knight can start
             on any square, and has to visit each square exactly once). The XSLT version was
-            published as an example stylesheet in my book <i>XSLT 2.0 Programmers Reference</i> (<a
+            published as an example stylesheet in Michael Kay's book <i>XSLT 2.0 Programmers Reference</i> (<a
                 href="http://www.wrox.com/" class="bodylink">Wrox Press</a>) but has been completely
             reworked so it now makes extensive use of features in XSLT 2.0, XPath 2.0 and XQuery
             (since Saxon 9.6, the query uses XQuery 3.0). It is worth studying the stylesheet and
@@ -155,19 +169,23 @@
         <p>The stylesheet can be found in the file <code>samples/styles/tour.xsl</code>, the query
             in <code>samples/query/tour.xq</code>. No source document is required.</p>
 
+        <div class="javaonly">
         <p>You can run this example with Saxon on the Java platform using a command of the form:</p>
         <kbd> java net.sf.saxon.Transform -it:main -xsl:samples/styles/tour.xsl -o:tour.html
             start=e5 </kbd>
 
         <p>or</p>
         <kbd> java net.sf.saxon.Query -q:samples/query/tour.xq -o:tour.html start=e5 </kbd>
-
+        </div>
+        
+        <div class="csonly">
         <p>On the .NET platform, the equivalent commands are:</p>
-        <kbd> Transform -it:main -xsl:samples/styles/tour.xsl -o:tour.html start=e5 </kbd>
+        <kbd> dotnet SaxonCS transform -it:main -xsl:samples/styles/tour.xsl -o:tour.html start=e5 </kbd>
 
         <p>or</p>
         <kbd> Query -q:samples/query/tour.xq -o:tour.html start=e5 </kbd>
-
+        </div>
+        
         <p>When you display the resulting HTML file in your browser it should look something like
             this:</p>
         <div align="center">
@@ -276,23 +294,29 @@
 
         <p>There is an XSLT stylesheet <code>play.xsl</code> which processes an input play in XML
             and generates a set of linked HTML files (one for the play and one for each scene) in an
-            output directory. To run this on the Java platform, create a directory (say
+            output directory.</p> 
+        
+        <div class="javaonly">
+        <p>To run this on the Java platform, create a directory (say
                 <code>playhtml</code>) and execute the following from the command line:</p>
         <kbd> cd samples<br/> java net.sf.saxon.Transform -s:data/othello.xml -xsl:styles/play.xsl
             dir=playhtml </kbd>
+        </div>
 
+        <div class="csonly">
         <p>The equivalent on .NET is:</p>
-        <kbd> cd samples<br/> Transform -s:data/othello.xml -xsl:styles/play.xsl dir=playhtml </kbd>
-
+        <kbd> cd samples<br/> dotnet SaxonCS transform -s:data/othello.xml -xsl:styles/play.xsl dir=playhtml </kbd>
+        </div>
+        
         <p>The last parameter sets the value of the constant <code>dir</code> to the value
                 <code>playhtml</code>; this constant is referenced from the stylesheet when creating
             output files.</p>
 
+        <div class="javaonly">
         <h2 class="subtitle">Shakespeare XPath Sample Application</h2>
         
-        <p>An example application called <code>XPathExample</code> is provided, with versions for
-            Java and .NET (<code>samples/java/he/XPathExample.java</code> and
-            <code>samples/cs/XPathExample.cs</code> respectively). This is designed to illustrate
+        <p>An example application called <code>XPathExample</code> is provided,  for
+            Java only (<code>samples/java/he/XPathExample.java</code>. This is designed to illustrate
             the use of Saxon's implementation of the JAXP 1.3 XPath API from a Java or C#
             application. It searches a Shakespeare play for all occurrences of a word entered from
             the console, displaying the lines containing that word, and the context where they
@@ -303,19 +327,21 @@
             command-line console, and run the Java application using the command:</p>
         <kbd> cd samples<br/> java he/XPathExample data/othello.xml </kbd>
         
-        <p>Or equivalently to run the .NET application:</p>
-        <kbd> cs/bin/XPathExample data/othello.xml </kbd>
+        
 
         <p>The application prompts for a word. Enter the word (try "castle" or "handkerchief"). The
             lines containing the chosen word are displayed on the console. Exit the application by
             entering ".".</p>
+        </div>
 
+        <div class="javaonly">
         <h2 class="subtitle">Other Sample Applications</h2>
 
         <p>Also see the related sample programs <code>XPathExampleDOM.java</code> - a variant of the
             XPathExample application written to use DOM interfaces, and
                 <code>XPathExampleServlet.java</code> which illustrates the use of the JAXP XPath
             API within a Java servlet.</p>
+        </div>
     </section>
 
     <section id="bible" title="The Bible Example">
@@ -333,19 +359,24 @@
             with the Old Testament text, but not with the other religious texts included in Jon
             Bosak's distribution.</p>
 
-        <p>To run the stylesheet on the Java platform first create an output directory (say
-                <code>htmldir</code>), then execute the following from the command line :</p>
+        <p>To run the stylesheet first create an output directory (say
+                <code>htmldir</code>), then execute the following from the command line.</p>
+        
+        <div class="javaonly">
+            <p>For Java:</p>
         <kbd> java  net.sf.saxon.Transform  -s:data/nt.xml  -xsl:styles/bible.xsl  dir=htmldir </kbd>
-
-        <p>The equivalent on .NET is:</p>
-        <kbd> Transform  -s:data/nt.xml  -xsl:styles/bible.xsl  dir=htmldir </kbd>
-
+        </div>
+        <div class="csonly">
+        <p>For .NET:</p>
+        <kbd> dotnet SaxonCS transform  -s:data/nt.xml  -xsl:styles/bible.xsl  dir=htmldir </kbd>
+        </div>
+        
         <p>The final parameter sets the value of the XSLT parameter <code>dir</code> to the value
                 <code>htmldir</code>, which is referenced within the stylesheet to select a
             directory for output files.</p>
     </section>
 
-    <section id="s9api" title="S9API Examples">
+    <section id="s9api" title="S9API Examples" class="javaonly">
         <h1>S9API Examples</h1>
 
         <p>
@@ -378,7 +409,7 @@
             the object models.</p>
     </section>
 
-    <section id="jaxp" title="JAXP Transformation Examples">
+    <section id="jaxp" title="JAXP Transformation Examples" class="javaonly">
         <h1>JAXP Transformation Examples</h1>
 
         <p>
@@ -403,7 +434,7 @@
             source code for details. By default, they are all executed in turn.</p>
     </section>
 
-    <section id="jdom2" title="JDOM2 Example">
+    <section id="jdom2" title="JDOM2 Example" class="javaonly">
         <h1>JDOM2 Example</h1>
 
         <p>
@@ -423,24 +454,20 @@
             stylesheet.</p>
     </section>
 
-    <section id="dotnetsamples" title="Example applications for .NET">
-        <h1>Example applications for .NET</h1>
+    <section id="dotnetsamples" title="API Examples for .NET" class="csonly">
+        <h1>API Examples for .NET</h1>
 
-        <p>The <code>samples/cs</code> directory contains some sample applications written in C#,
+        <p>The <code>samples/cs</code> directory contains an example application written in C#,
             designed to illustrate use of the Saxon API available in the <code>Saxon.Api</code>
-            namespace. In particular there are three programs <code>ExamplesHE.cs</code>,
-                <code>ExamplesPE.cs</code>, and <code>ExamplesEE.cs</code> relevant to Saxon-HE,
-            Saxon-PE, and Saxon-EE respectively; each shows various ways of invoking XSLT, XQuery,
-            XPath, and schema validation where appropriate. The idea is that you should be able to
+            namespace. The application is named <code>Examples.cs</code>; it shows various ways of invoking XSLT, XQuery,
+            XPath, and schema validation. The idea is that you should be able to
             cut and paste a suitable fragment of code into your own application as a quick way of
             getting started.</p>
 
         <p>The main value of these samples is in reading the source code rather than in actually
             running them; however, running them is also a good check that your installation has been
             set up correctly. A quick look at the comments in the source should enable you to see
-            how they are executed. Note that they all require the environment variable
-                <code>SAXON_HOME</code> to be set to the directory where Saxon is installed: this is
-            used to find the sample data files.</p>
+            how they are executed.</p>
         
         <p>The example applications can be run from the command line (executables are found in the
             <code>samples/cs/bin</code> directory). They take the following arguments:</p>
@@ -448,8 +475,7 @@
         <ul>
             <li>
                 <p><strong>-dir:<i>samples</i></strong> - provides the name of the samples directory
-                    from the <code>saxon-resources</code> download. The default uses the SAXON_HOME environment
-                    variable - but it's normally best to supply this parameter explicitly.</p>
+                    from the <code>saxon-resources</code> download.</p>
             </li>
             <li>
                 <p><strong>-ask:<i>yes|no</i></strong> - with ask:yes (the default), the application
@@ -461,15 +487,10 @@
             </li>
         </ul>
         
-        <p>Also in the same directory is an application <code>TestRunner</code> which is a
-            test harness for running the XSLT, XQuery, and XSD test suites published by W3C (in the
-            case of XSLT, the test data is available to W3C members only); and an application
-            <code>XPathExample</code> which illustrates the use of Saxon's JAXP XPath API from C#
-            (see <a class="bodylink" href="../shakespeare">Shakespeare Example</a> for more
-            information).</p>
+ 
     </section>
 
-    <section id="servlet" title="Saxon Servlet">
+    <section id="servlet" title="Saxon Servlet" class="javaonly">
         <h1>Saxon Servlet</h1>
 
         <p>
