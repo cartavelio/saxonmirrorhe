@@ -62,7 +62,7 @@
         allowing plug-in code to be registered for other
         languages, and there are some open-source components available (issued with the
           <code>saxon-resources</code> download) providing plug-ins for some common European languages.</li>
-      <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU-J library, which
+      <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU4J library, which
         supports a large variety of languages. This does not require any special configuration.</li>
       <li class="csonly">In SaxonCS, spellout numbering is not currently available.</li>
     </ul>
@@ -105,7 +105,7 @@
         localization plug-in is registered using the <code
           java="net.sf.saxon.Configuration#setLocalizerFactory">Configuration.setLocalizerFactory()</code>
         mechanism</li>
-      <li class="javaonly">In SaxonJ-PE and -EE, month and day names are obtained using the ICU-J library. If the full name
+      <li class="javaonly">In SaxonJ-PE and -EE, month and day names are obtained using the ICU4J library. If the full name
         delivered by ICU exceeds the requested maximum lengh, the short name is requested from ICU.</li>
       <li class="csonly">In SaxonCS, month and day names are obtained using the .NET <code>CultureInfo</code> class. If the
         full name (for example <code>CultureInfo.DateTimeFormat.GetMonthName(m)</code>) exceeds the requested
@@ -501,10 +501,10 @@ config.setLocalizerFactory(new LocalizerFactory() {
     <ul>
       <li class="javaonly">On SaxonJ-HE, Saxon uses the collation facilities available directly from the
         JDK.</li>
-      <li class="javaonly">On SaxonJ-PE and -EE, Saxon uses the collation facilities available from the ICU-J
+      <li class="javaonly">On SaxonJ-PE and -EE, Saxon uses the collation facilities available from the ICU4J
         library.</li>
-      <li class="csonly">On SaxonCS, Saxon uses the collation facilities available from the ICU-N library,
-        which is a port to C# of a subset of ICU-J.</li>
+      <li class="csonly">On SaxonCS, Saxon uses the collation facilities available from the ICU4N library,
+        which is a port to C# of a subset of ICU4J.</li>
     </ul>
 
     <p>This feature is requested by using a collation (specified either as a <code>collation</code> attribute

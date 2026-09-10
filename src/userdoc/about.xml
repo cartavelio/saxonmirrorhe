@@ -758,7 +758,7 @@
                   </td>
                   <td>
                      <p>A copy of the open source <a class="bodylink"
-                        href="http://site.icu-project.org">ICU-J</a> localization library, used
+                        href="https://icu.unicode.org">ICU4J</a> localization library, used
                         to support sorting and date/number formatting in a wide variety of
                         languages. If this JAR
                         file is not present on the classpath, this will restrict the collations and
