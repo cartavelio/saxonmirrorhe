@@ -422,7 +422,6 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
   dependsOn("update_documentation")
   dependsOn("gen_contents_ref")
   dependsOn("gen_feature_matrix")
-  dependsOn("saxonc_documentation")
   // Just a place to hang dependencies
 }
 
@@ -617,6 +616,7 @@ tasks.register<JavaExec>("gen_contents_ref") {
   group = "Internal"
   description = "Creates the contents reference file for the user documentation (used for website pages)"
   dependsOn("copy_xml_documentation")
+  dependsOn("copy_base_css")
   
   val catalog = "website/documentation${saxonMajorVersion}/doc/catalog.xml"
   val contents = "website/documentation${saxonMajorVersion}/contents.xml"
