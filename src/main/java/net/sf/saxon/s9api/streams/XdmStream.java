@@ -91,7 +91,7 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * <p>This is an <a href="package-summary.html#StreamOps">intermediate
      * operation</a>.
      *
-     * <p>For example, <code>n.select(child(*)).map(c -> c.getNodeName().getLocalName())</code>
+     * <p>For example, <code>n.select(child(*)).map(c -&gt; c.getNodeName().getLocalName())</code>
      * returns a stream delivering the local names of the element children of <code>n</code>,
      * as instances of <code>java.lang.String</code>.
      * Note the result is a {@link Stream}, not an {@link XdmStream}.</p>
@@ -112,7 +112,7 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * Returns an {@code IntStream} consisting of the results of applying the
      * given function to the elements of this stream.
      *
-     * <p>For example, <code>n.select(child(*)).map(c -> c.getStringValue().length())</code>
+     * <p>For example, <code>n.select(child(*)).map(c -&gt; c.getStringValue().length())</code>
      * returns a stream delivering the lengths of the string-values of the element children of <code>n</code>.
      * Note the result is a {@link Stream}, not an {@link XdmStream}.</p>
      *
@@ -635,11 +635,11 @@ public class XdmStream<T extends XdmItem> implements Stream<T> {
      * Return the result of the stream as a {@code List<XdmNode>}. This is a terminal operation.
      * <p>Node: the method makes it convenient to process the contents of a stream using a for-each
      * loop, for example:</p>
-     * <p><pre>{@code
+     * <pre>{@code
      *     for (XdmNode n : start.select(child().where(isText())).asList()) {
      *          process(n)
      *     }
-     * }</pre></p>
+     * }</pre>
      * <p>A more idiomatic style, however, is to use the {@link #forEach} method:</p>
      * <p>{@code start.select(child().where(isText())).forEach(n -> process(n))}</p>
      * @return the list of nodes delivered by the stream
