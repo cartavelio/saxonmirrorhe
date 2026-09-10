@@ -3,7 +3,6 @@ package com.saxonica.ee.stream.om;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.trans.XPathException;
 
-import static java.lang.System.identityHashCode;
 
 /**
  * A streamed document or element node.
@@ -58,7 +57,7 @@ public abstract class FleetingParentNode extends FleetingNode {
 
     @Override
     public int hashCode() {
-        return identityHashCode(this);
+        return System.identityHashCode(this);
     }
 }
 

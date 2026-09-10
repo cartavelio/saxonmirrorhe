@@ -22,7 +22,10 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.NodeListIterator;
+import net.sf.saxon.transpile.CSharpInnerClass;
+import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.tree.iter.PrependSequenceIterator;
 import net.sf.saxon.type.UType;
 
@@ -252,6 +255,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                     break;
                 default:
                     combiner = null;
+                    break;
 
 
             }
@@ -442,9 +446,8 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         public void close() throws XPathException {
             //System.err.println("CombiningUnionFeed.close() ");
             // Flush out any remaining buffered nodes, using the pull-mode union iterator to merge them
-            NodeListIterator iter0 = new NodeListIterator(lhsBuffer);
-            NodeListIterator iter1 = new NodeListIterator(rhsBuffer);
-            UnionEnumeration union = new UnionEnumeration(iter0, iter1, LocalOrderComparer.getInstance());
+            UnionEnumeration union = new UnionEnumeration(
+                    linkedListIterator(lhsBuffer), linkedListIterator(rhsBuffer), LocalOrderComparer.getInstance());
             processItems(union, getResultFeed());
             super.close();
         }
@@ -561,9 +564,8 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         public void close() throws XPathException {
             //System.err.println("CombiningUnionFeed.close() ");
             // Flush out any remaining buffered nodes, using the pull-mode intersection iterator to merge them
-            NodeListIterator iter0 = new NodeListIterator(lhsBuffer);
-            NodeListIterator iter1 = new NodeListIterator(rhsBuffer);
-            IntersectionEnumeration union = new IntersectionEnumeration(iter0, iter1, LocalOrderComparer.getInstance());
+            IntersectionEnumeration union = new IntersectionEnumeration(
+                    linkedListIterator(lhsBuffer), linkedListIterator(rhsBuffer), LocalOrderComparer.getInstance());
             processItems(union, getResultFeed());
             super.close();
         }
@@ -591,11 +593,13 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
 
     private static class CombiningExceptFeed extends CombiningFeed {
 
-        private NodeInfo latestRhsNode = null;
-        private boolean emitted;
         private final LinkedList<NodeInfo> lhsBuffer = new LinkedList<>();
         private final LinkedList<NodeInfo> rhsBuffer = new LinkedList<>();
-        private final WatchManager watchManager;
+
+        // Following fields are public for C# transpilation purposes
+        public NodeInfo latestRhsNode = null;
+        public boolean emitted;
+        public final WatchManager watchManager;
 
         CombiningExceptFeed(VennExpression exp, ItemFeed result, XPathContext context, WatchManager watchManager) {
             super(exp, result, context);
@@ -617,6 +621,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
          * @throws net.sf.saxon.trans.XPathException May be raised if a dynamic error occurs
          */
         @Override
+        @CSharpInnerClass(outer=true, extra={"Saxon.Eej.ee.stream.om.FleetingParentNode node"})
         public Receiver startSelectedParentNode(FleetingParentNode node, Location location) throws XPathException {
             // The problem here is that we can't control whether we see the LHS event before or after the
             // RHS event - see bug 5488 comment 11. So we add a new LastChanceWatch which will always be called after
@@ -625,26 +630,31 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
             if (currentLabel == 0) {
                 Watch lastChanceWatch = new AbstractWatch() {
                     @Override
+                    @CSharpModifiers(code={"public", "override"})
                     public boolean matchesNode(FleetingNode node, XPathContext context) throws XPathException {
                         return true;
                     }
 
                     @Override
+                    @CSharpModifiers(code = {"public", "override"})
                     public boolean matchesNodesOfKind(UType kind) {
                         return true;
                     }
 
                     @Override
+                    @CSharpModifiers(code = {"public", "override"})
                     public void setAnchorNode(FleetingParentNode anchor) {
 
                     }
 
                     @Override
+                    @CSharpModifiers(code = {"public", "override"})
                     public FleetingParentNode getAnchorNode() {
                         return node;
                     }
 
                     @Override
+                    @CSharpModifiers(code = {"public", "override"})
                     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
                         // System.err.println("Last chance watch firing...");
                         emitted = false;
@@ -652,12 +662,13 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
                         if (node != latestRhsNode) {
                             // System.err.println("Emitting node...");
                             emitted = true;
-                            return getResultFeed().startSelectedParentNode(node, location);
+                            return getResultFeed().startSelectedParentNode(node, locationId);
                         }
                         return null;
                     }
 
                     @Override
+                    @CSharpModifiers(code = {"public", "override"})
                     public void endSelectedParentNode(Location locationId) {
                         // no action
                     }
@@ -752,13 +763,17 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         public void close() throws XPathException {
             //System.err.println("CombiningUnionFeed.close() ");
             // Flush out any remaining buffered nodes, using the pull-mode intersection iterator to merge them
-            NodeListIterator iter0 = new NodeListIterator(lhsBuffer);
-            NodeListIterator iter1 = new NodeListIterator(rhsBuffer);
-            DifferenceEnumeration union = new DifferenceEnumeration(iter0, iter1, LocalOrderComparer.getInstance());
+            DifferenceEnumeration union = new DifferenceEnumeration(
+                    linkedListIterator(lhsBuffer), linkedListIterator(rhsBuffer), LocalOrderComparer.getInstance());
             processItems(union, getResultFeed());
             super.close();
         }
 
+    }
+
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.LinkedListUtils.GetSequenceIterator(nodes);")
+    private static SequenceIterator linkedListIterator(LinkedList<NodeInfo> nodes) {
+        return new ListIterator.Of<>(nodes);
     }
 
     @Override

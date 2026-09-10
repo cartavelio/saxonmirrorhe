@@ -17,6 +17,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.*;
 
 import java.util.*;
@@ -93,13 +94,13 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
     // sequence number to identify the current event
     private long eventNumber = 0;
 
-    //#if CSHARP==false
+    @CSharpReplaceBody(code="")
     private void trace(String message) {
         if (TRACING) {
             System.err.println("WM " + Integer.toHexString(hashCode()) + " " + eventNumber + " " + message);
         }
     }
-    //#endif
+
 
 
     /**

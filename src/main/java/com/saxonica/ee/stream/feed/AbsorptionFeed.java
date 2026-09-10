@@ -108,7 +108,12 @@ public abstract class AbsorptionFeed extends GroundedItemFeed {
             Sequence value = processGroundedItem(item);
             if (!hasFailed()) {
                 if (valuesUnderConstructionStack.isEmpty()) {
-                    processItems(value.iterate(), getNextOutputter());
+                    if (value instanceof Item) {
+                        // common case, fast path
+                        getNextOutputter().append((Item)value);
+                    } else {
+                        processItems(value.iterate(), getNextOutputter());
+                    }
                 } else {
                     // We are currently processing nested elements. The output will have to wait until the elements
                     // are all finished.
