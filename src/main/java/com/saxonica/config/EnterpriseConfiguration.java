@@ -667,7 +667,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 //                }
 //            } else {
                 compiler.validate(schemadoc);
-                setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
+//                setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
 //            }
 
         } catch (UncheckedXPathException e) {
@@ -682,24 +682,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Put a temporary schema marker in the cache, to indicate that a schema for a given
-     * namespace is being processed. Used to detect circularities.
-     * <p>This method is intended for internal use</p>
-     *
-     * @param namespace the target namespace of the schema
-     */
-
-    public synchronized void addSurrogateSchema(NamespaceUri namespace) {
-        checkLicensedFeature(LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
-        setNamespaceStatus(namespace, PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION);
-    }
-
-    /**
      * Get the status of a particular schema namespace.
      *
      * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
      * @return one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
-     * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}
      */
 
     public synchronized int getNamespaceStatus(NamespaceUri namespace) {
@@ -711,7 +698,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      *
      * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
      * @param status    one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
-     *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}
+     *
      */
 
     public synchronized void setNamespaceStatus(NamespaceUri namespace, int status) {
@@ -748,19 +736,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public boolean isSchemaAvailable(NamespaceUri targetNamespace) {
         return getNamespaceStatus(targetNamespace) != PreparedSchema.NAMESPACE_UNKNOWN;
-    }
-
-    /**
-     * Remove the schema for a given namespace. This is done if it is found to be invalid.
-     * Note that this does not actually remove the schema components in this namespace; all it
-     * does is to mark the namespace as removed, which means that a new attempt to load a schema
-     * for this namespace is able to succeed.
-     *
-     * @param namespace the namespace of the schema to be removed
-     */
-
-    public synchronized void removeSchema(NamespaceUri namespace) {
-        namespaceStatus.remove(namespace);
     }
 
     /**
