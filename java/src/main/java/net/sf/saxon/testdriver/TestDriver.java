@@ -97,6 +97,9 @@ public abstract class TestDriver {
         }
         driverSerializer = driverProc.newSerializer();
 
+        exceptionPredicates.add(getProductEdition().substring(6).toLowerCase()); // Assumes Saxon-XX
+        exceptionPredicates.add(getProductVersion());
+
         System.err.println("Testing " + getProductEdition() + " " + Version.getProductVersion());
         System.err.println("Java version " + System.getProperty("java.version"));
 
