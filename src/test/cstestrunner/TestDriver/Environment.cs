@@ -860,6 +860,10 @@ namespace TestDriver {
                 if (validation != "skip") {
                     useTreeModel = "tiny";
                 }
+
+                if (mutable) {
+                    useTreeModel = "linked";
+                }
                 string streaming = ((XdmNode)source).GetAttributeValue(new QName("", "streaming"));
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
