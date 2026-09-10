@@ -4,7 +4,7 @@ def excelsiorJetHome = null
  "/opt/jet15.3-ent-amd64",
  "/usr/local/jet15.3-ent-amd64",
  "c:/jet15.3-ent-amd64"].each { jet ->
-  if (excelsiorJetHome == null && pathExists(jet)) {
+  if (excelsiorJetHome == null && jet != "" && pathExists(jet)) {
     excelsiorJetHome = jet
   }
 }
@@ -12,9 +12,23 @@ def excelsiorJetHome = null
 task test_jetHome(
   description: "Test that excelsiorJetHome is configured"
 ) {
+  def images = new ByteArrayOutputStream()
   doLast {
-    if (excelsiorJetHome == null) {
-      throw new GradleException("Cannot build Saxon/C, excelsiorJetHome undefined")
+    exec {
+      commandLine "docker", "images", "-q", "--filter=reference=jet:${excelsiorJetVersion}",
+                  "--format", "{{.Repository}}:{{.Tag}}"
+      standardOutput = images
+    }
+  }
+  doLast {
+    if (images.toString("utf-8") != "") {
+      println("Running ExcelsiorJet ${excelsiorJetVersion} from Docker container")
+    } else {
+      if (excelsiorJetHome == null) {
+        throw new GradleException("Cannot build Saxon/C, no Docker container and excelsiorJetHome undefined")
+      } else {
+        println("Running ExcelsiorJet from ${excelsiorJetHome}")
+      }
     }
   }
 }
@@ -26,7 +40,7 @@ task test_jetHome(
 
   task "${release}c_copyJet"(
     type: Copy,
-    dependsOn: ["${release}c_jar"],
+    dependsOn: ["${release}c_jar", "${release}c_copyAncillary"],
     description: "Copy the JET project file for ${RELEASE}"
   ) {
     from "${projectDir}/src/jet/libsaxon${release}c.prj"
@@ -56,7 +70,6 @@ task test_jetHome(
   }
 
   task "${release}c_jet"(
-    type: Exec,
     dependsOn: ["${release}c_setupJet", "${release}c_copyLibs", "test_jetHome"],
     description: "Run JET on ${RELEASE}"
   ) {
@@ -64,15 +77,23 @@ task test_jetHome(
     inputs.file("${buildDir}/jet/libsaxon${release}c.jprof")
     inputs.files("${buildDir}/c/jars/${release}c")
     outputs.file("${buildDir}/c/${release}c/libsaxon${release}c.so")
-    workingDir = "${buildDir}/jet"
-    commandLine "${excelsiorJetHome}/bin/jc",
-      "=p", "libsaxon${release}c"
-    /*
-    commandLine "docker", "run",
-      "-e", "PROJECT=libsaxon${release}c",
-      "-v", "${projectDir}:/saxonica",
-      "${dockerBuildContainer}:latest"
-    */
+
+    doLast {
+      try {
+        exec {
+	    commandLine "docker", "run", "--rm", "-v", "${buildDir}:/src", "-i",
+                        "jet:${excelsiorJetVersion}",
+	                "sh", "-c", "cd /src/jet && /usr/local/jet/bin/jc =p libsaxon${release}c"
+	}
+      } catch (Exception ex) {
+        println("Attempt to run jet:${excelsiorJetVersion} in Docker failed; attempting local build...")
+        exec {
+	  workingDir "${buildDir}/jet"
+          commandLine "${excelsiorJetHome}/bin/jc",
+            "=p", "libsaxon${release}c"
+	}
+      }
+    }
   }
 
   if (systemOs.isWindows()) {
@@ -280,6 +301,7 @@ task test_jetHome(
 
 task hec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy HE sources for preprocessing HE"
 ) {
   into "${buildDir}/filtered/hec"
@@ -302,6 +324,7 @@ task hec_setupPreprocess(
 
 task pec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy PE sources for preprocessing PE"
 ) {
   into "${buildDir}/filtered/pec"
@@ -346,6 +369,7 @@ task pec_setupPreprocess(
 
 task eec_setupPreprocess(
   type: Copy,
+  dependsOn: ["hej_featureKeys"],
   description: "Copy EE sources for preprocessing EE"
 ) {
   into "${buildDir}/filtered/eec"
