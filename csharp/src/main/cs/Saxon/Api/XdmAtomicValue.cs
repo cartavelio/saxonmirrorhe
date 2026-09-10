@@ -82,7 +82,8 @@ namespace Saxon.Api {
         /// </summary>
         /// <param name="d">The decimal value</param>
         public XdmAtomicValue(decimal d) : base (
-            new BigDecimalValue(BigDecimal.Parse(d.ToString(System.Globalization.CultureInfo.InvariantCulture)))) {
+            new BigDecimalValue(BigDecimal.Parse(d.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture))) {
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace Saxon.Impl.Helpers {
         }
 
         public static Singulink.Numerics.BigDecimal ValueOf(string s) {
-            return Singulink.Numerics.BigDecimal.Parse(s);
+            return Singulink.Numerics.BigDecimal.Parse(s, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.InvariantCulture);
         }
         
         
