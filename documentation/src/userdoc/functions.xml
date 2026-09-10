@@ -5829,6 +5829,7 @@
       </signatures>
       <status>
         <p>Available since Saxon 9.8.</p>
+        <p>Dropped in Saxon 13. </p>
       </status>
       <saxon-edition>PE/EE 9.8</saxon-edition>
       <details>

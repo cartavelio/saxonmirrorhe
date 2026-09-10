@@ -467,9 +467,12 @@ TODO: rethink redefines and override
             <li><p>Local union types have been generalized to choice types; the syntax
             <code>union(xs:int, xs:long)</code> now becomes <code>(xs:int | xs:long)</code>,
             and unions of other types are allowed (for example <code>(map(*) | array(*))</code>.</p></li>
-            <li>The <code>pin()</code> and <code>label()</code> functions are dropped
+            <li>The <code>fn:pin()</code> and <code>fn:label()</code> functions are dropped
             (replaced by JNodes). For the time being, though, the saxon:deep-update extension function
             continues to use pinned and labelled items; this is likely to change in due course.</li>
+            <li>The functions <code>fn:parcel</code> and <code>fn:unparcel</code> are dropped.
+            In Saxon 12, <code>fn:parcel($x)</code> simply did <code>{'value': $x}</code>, and
+            <code>fn:unparcel($p)</code> simply did <code>$p?value</code>.</li>
         </ul>
         
         <p>Some Saxon extension functions that were essentially prototypes of 
@@ -483,6 +486,8 @@ TODO: rethink redefines and override
             <li><p><code>saxon:is-NaN</code> is superseded by <code>fn:is-NaN</code>.</p></li>
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>.</p></li>
             <li><p><code>saxon:analyze-uri</code> is superseded by <code>fn:parse-uri</code>.</p></li>
+            <li><p><code>saxon:array-member</code> is dropped. A call on <code>saxon:array-member(x)</code>
+            can be replaced with the expression <code>{'value': x}</code>.</p></li>
         </ul>
         
         <p>The <code>saxon:array</code> and <code>saxon:array-member</code> instructions are dropped
