@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -17,7 +18,7 @@ import net.sf.saxon.trans.XPathException;
  * Implement the XSLT current() function
  */
 
-public class Current extends SystemFunction {
+public class Current extends ContextAccessorFunction {
 
     /**
      * The name of the Current function
@@ -26,6 +27,25 @@ public class Current extends SystemFunction {
     /*@NotNull*/ public static final StructuredQName FN_CURRENT =
         new StructuredQName("", NamespaceUri.FN, "current");
 
+    @Override
+    public FunctionItem bindContext(XPathContext context) {
+//        Int64Value value;
+//        try {
+//            value = evaluateItem(context);
+//        } catch (final XPathException e) {
+//            // This happens when we do a dynamic lookup of position() or last() when there is no context item
+//            SymbolicName.F name = new SymbolicName.F(getFunctionName(), getArity());
+//            Callable callable = new CallableDelegate((context1, arguments) -> {
+//                throw e;
+//            });
+//            return new CallableFunction(name, callable, getFunctionItemType());
+//        }
+//        ConstantFunction fn = new ConstantFunction(value);
+//        fn.setDetails(getDetails());
+//        fn.setRetainedStaticContext(getRetainedStaticContext());
+//        return fn;
+        return null;
+    }
 
     /**
      * Evaluate the expression

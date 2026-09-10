@@ -18,12 +18,13 @@ import net.sf.saxon.value.IntegerValue;
 
 /**
  * A ConstantFunction is a zero-argument function that always delivers the same result, supplied
- * at the time the function is instantiated.
+ * at the time the function is instantiated. It is a subclass of system function, which means there must
+ * be a "details" entry giving information about the function name, signature, etc
  */
 
 public class ConstantFunction extends SystemFunction  {
 
-    public GroundedValue value;
+    private final GroundedValue value;
 
     public ConstantFunction(GroundedValue value) {
         this.value = value;

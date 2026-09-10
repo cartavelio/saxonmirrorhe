@@ -9,6 +9,9 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.GroupIterator;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
@@ -16,7 +19,7 @@ import net.sf.saxon.trans.XPathException;
  * Implements the XSLT function current-group()
  */
 
-public class CurrentGroup extends SystemFunction {
+public class CurrentGroup extends ContextAccessorFunction {
 
     /**
      * Make an expression that either calls this function, or that is equivalent to a call
@@ -29,6 +32,22 @@ public class CurrentGroup extends SystemFunction {
     @Override
     public Expression makeFunctionCall(Expression... arguments) {
         return new CurrentGroupCall();
+    }
+
+    @Override
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
+        if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+            throw new XPathException("Dynamic call on current-group() fails (the current group is absent)", "XTDE1061");
+        }
+        GroupIterator gi = context.getCurrentGroupIterator();
+        if (gi == null) {
+            throw new XPathException("There is no current group", "XTDE1061");
+        }
+        GroundedValue group = gi.currentGroup();
+        ConstantFunction fn = new ConstantFunction(group);
+        fn.setDetails(getDetails());
+        fn.setRetainedStaticContext(getRetainedStaticContext());
+        return fn;
     }
 
     /**

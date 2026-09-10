@@ -8,15 +8,48 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.hof.CurriedFunction;
+import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.sxpath.IndependentContext;
+import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
 
 
-public class RegexGroup extends SystemFunction {
+public class RegexGroup extends ContextAccessorFunction {
+
+    @Override
+    public FunctionItem bindContext(XPathContext context) throws XPathException {
+        if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+            return new FixedValueFunction(StringValue.EMPTY_STRING);
+        }
+        RegexIterator ri = context.getCurrentRegexIterator();
+        if (ri == null) {
+            throw new XPathException("There is no current group", "XTDE1061");
+        }
+        int groups = ri.getNumberOfGroups();
+        MapItem map = new HashTrieMap();
+        for (int i=0; i<=groups; i++) {
+            map = map.addEntry(Int64Value.makeIntegerValue(i), new StringValue(ri.getRegexGroup(i)));
+        }
+        final StructuredQName mapGetName = new StructuredQName("map", NamespaceUri.MAP_FUNCTIONS, "get");
+        BuiltInFunctionSet lib = MapFunctionSet.getInstance(40);
+
+        SymbolicName.F symbolicName = new SymbolicName.F(mapGetName, 3);
+        FunctionItem mapGet3 = lib.getFunctionItem(symbolicName, new IndependentContext(context.getConfiguration()));
+        return new CurriedFunction(mapGet3, new Sequence[]{map, null, new FixedValueFunction(StringValue.EMPTY_STRING)});
+    }
 
     /**
      * Evaluate the expression
