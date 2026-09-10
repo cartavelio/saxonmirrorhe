@@ -7,7 +7,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.str.UnicodeString;
 
-public class TempElaborator extends StringElaborator {
+public class StringFnElaborator extends StringElaborator {
 
     public StringEvaluator getStringEvaluator(UnicodeString resultIfEmpty) {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();

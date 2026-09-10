@@ -1,6 +1,5 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.gen;
 
-import com.saxonica.ee.elab.gen.Elaborator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;

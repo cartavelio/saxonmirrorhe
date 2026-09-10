@@ -1,53 +1,33 @@
 package com.saxonica.ee.elab.fn;
 
-import com.saxonica.ee.elab.eval.StringEvaluator;
+import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.Elaborator;
-import com.saxonica.ee.elab.gen.StringElaborator;
+import com.saxonica.ee.elab.gen.ItemElaborator;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.expr.sort.CodepointCollator;
-import net.sf.saxon.functions.SubstringAfter;
-import net.sf.saxon.lib.SubstringMatcher;
-import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.functions.Substring;
+import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.value.StringValue;
 
-public class SubstringAfterFnElaborator extends StringElaborator {
+public class SubstringFnElaborator extends ItemElaborator {
 
-    public StringEvaluator getStringEvaluator(UnicodeString resultIfEmpty) {
+    public ItemEvaluator getItemEvaluator() {
         final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-        final SubstringAfter fn = (SubstringAfter) fnc.getTargetFunction();
-        final SubstringMatcher stringCollator = (SubstringMatcher) fn.getStringCollator();
-        assert stringCollator != null; // We don't go down this path until the collation is known
+        final ItemEvaluator arg0Eval = Elaborator.make(fnc.getArg(0)).getItemEvaluator();
+        final ItemEvaluator arg1Eval = Elaborator.make(fnc.getArg(1)).getItemEvaluator();
 
-        final StringEvaluator arg0Eval = Elaborator.make(fnc.getArg(0)).getStringEvaluator(EmptyUnicodeString.getInstance());
-        final StringEvaluator arg1Eval = Elaborator.make(fnc.getArg(1)).getStringEvaluator(EmptyUnicodeString.getInstance());
-
-        if (stringCollator instanceof CodepointCollator) {
+        if (fnc.getArity() == 2) {
             return context -> {
-                UnicodeString s0 = arg0Eval.eval(context);
-                UnicodeString s1 = arg1Eval.eval(context);
-                if (s1.isEmpty()) {
-                    return s0;
-                }
-                if (s0.isEmpty()) {
-                    return EmptyUnicodeString.getInstance();
-                }
-                long i = s0.indexOf(s1, 0);
-                if (i < 0) {
-                    return EmptyUnicodeString.getInstance();
-                }
-                return s0.substring(i + s1.length());
+                StringValue sv = (StringValue)arg0Eval.eval(context);
+                NumericValue start = (NumericValue)arg1Eval.eval(context);
+                return Substring.substring(sv, start);
             };
         } else {
+            final ItemEvaluator arg2Eval = Elaborator.make(fnc.getArg(1)).getItemEvaluator();
             return context -> {
-                UnicodeString s0 = arg0Eval.eval(context);
-                UnicodeString s1 = arg1Eval.eval(context);
-                if (s1.isEmpty()) {
-                    return s0;
-                }
-                if (s0.isEmpty()) {
-                    return EmptyUnicodeString.getInstance();
-                }
-                return stringCollator.substringAfter(s0, s1);
+                StringValue sv = (StringValue) arg0Eval.eval(context);
+                NumericValue start = (NumericValue) arg1Eval.eval(context);
+                NumericValue len = (NumericValue) arg2Eval.eval(context);
+                return Substring.substring(sv, start, len);
             };
         }
     }

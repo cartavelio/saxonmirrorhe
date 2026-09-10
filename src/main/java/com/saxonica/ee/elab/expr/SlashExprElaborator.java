@@ -1,19 +1,22 @@
-package com.saxonica.ee.elab.insn;
+package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.ContextMappingFunction;
 import net.sf.saxon.expr.ContextMappingIterator;
+import net.sf.saxon.expr.SlashExpression;
 import net.sf.saxon.expr.XPathContextMinor;
-import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.om.FocusIterator;
 
-public class ForEachElaborator extends Elaborator {
+public class SlashExprElaborator extends PullElaborator {
+
+    // TODO: combine ForEach and SlashExpression
 
     @Override
     public PullEvaluator getPullEvaluator() {
-        ForEach forEach = (ForEach) getExpression();
+        SlashExpression forEach = (SlashExpression) getExpression();
         PullEvaluator select = Elaborator.make(forEach.getSelectExpression()).getPullEvaluator();
         PullEvaluator action = Elaborator.make(forEach.getActionExpression()).getPullEvaluator();
         ContextMappingFunction mapper = action::eval;
@@ -26,7 +29,7 @@ public class ForEachElaborator extends Elaborator {
 
     @Override
     public PushEvaluator getPushEvaluator() {
-        ForEach forEach = (ForEach)getExpression();
+        SlashExpression forEach = (SlashExpression)getExpression();
         PullEvaluator select = Elaborator.make(forEach.getSelectExpression()).getPullEvaluator();
         PushEvaluator action = Elaborator.make(forEach.getActionExpression()).getPushEvaluator();
         return (out, context) -> {

@@ -1,63 +1,64 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.gen;
 
+import com.saxonica.ee.elab.eval.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.instruct.FixedElement;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.str.UnicodeString;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class Elaborator {
 
-    private static Map<Class<Expression>, Class<Elaborator>> classMap = new HashMap<>();
-
-    static{
-        classMap.put(FixedElement.class, FixedElementElaborator.class);
-    }
 
     private Expression expression;
 
-    protected Expression getExpression() {
+    public Expression getExpression() {
         return expression;
+    }
+
+    public void setExpression(Expression expr) {
+        this.expression = expr;
     }
 
     protected Configuration getConfiguration() {
         return expression.getConfiguration();
     }
 
+    public Elaborator() {}
+
+
     public static Elaborator make(Expression expression) {
-        return null;
+        if (expression instanceof SystemFunctionCall) {
+            String label = ((SystemFunctionCall)expression).getTargetFunction().getCompilerName();
+            Elaborator elab = ElaboratorMap.getElaborator(label);
+            if (elab == null) {
+                System.err.println("Using fallback elaborator for " + expression.toShortString());
+                return new FallbackElaborator(expression);
+            } else {
+                elab.setExpression(expression);
+                return elab;
+            }
+        } else {
+            String label = expression.getExpressionName();
+            Elaborator elab = ElaboratorMap.getElaborator(label);
+            if (elab == null) {
+                System.err.println("Using fallback elaborator for " + expression.toShortString());
+                return new FallbackElaborator(expression);
+            } else {
+                elab.setExpression(expression);
+                return elab;
+            }
+        }
     }
 
-    public PullEvaluator getPullEvaluator() {
-        return expression::iterate;
-    }
+    public abstract PullEvaluator getPullEvaluator();
 
-    public PushEvaluator getPushEvaluator() {
-        return (out, context) -> expression.process(out, context);
-    }
+    public abstract PushEvaluator getPushEvaluator();
 
-    public ItemEvaluator getItemEvaluator() {
-        PullEvaluator puller = getPullEvaluator();
-        return context -> puller.eval(context).next();
-    }
+    public abstract ItemEvaluator getItemEvaluator();
 
-    public BooleanEvaluator getBooleanEvaluator() {
-        PullEvaluator puller = getPullEvaluator();
-        return context -> ExpressionTool.effectiveBooleanValue(puller.eval(context));
-    }
+    public abstract BooleanEvaluator getBooleanEvaluator();
 
-    public StringEvaluator getStringEvaluator(UnicodeString resultOnEmpty) {
-        ItemEvaluator itemEval = getItemEvaluator();
-        return context -> {
-            Item item = itemEval.eval(context);
-            return item == null ? resultOnEmpty : item.getUnicodeStringValue();
-        };
-    }
-
+    public abstract StringEvaluator getStringEvaluator(UnicodeString resultOnEmpty);
 
 }
 

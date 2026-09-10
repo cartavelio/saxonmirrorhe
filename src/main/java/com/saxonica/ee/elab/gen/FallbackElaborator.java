@@ -1,50 +1,29 @@
 package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 
-public abstract class Elaborator {
+public class FallbackElaborator extends Elaborator {
 
-
-    private Expression expression;
-
-    protected Expression getExpression() {
-        return expression;
+    public FallbackElaborator() {
+        
     }
 
-    protected Configuration getConfiguration() {
-        return expression.getConfiguration();
+    public FallbackElaborator(Expression expr) {
+        super();
+        setExpression(expr);
     }
 
-    public Elaborator(Expression expr) {
-        this.expression = expr;
-    }
-
-
-    public static Elaborator make(Expression expression) {
-        if (expression instanceof SystemFunctionCall) {
-
-        } else {
-            String label = expression.getExpressionName();
-            Elaborator elab = ElaboratorMap.getElaborator(label);
-            if (elab == null) {
-                return new FallbackElaborator(expression);
-            }
-
-
-    }
 
     public PullEvaluator getPullEvaluator() {
-        return expression::iterate;
+        return getExpression()::iterate;
     }
 
     public PushEvaluator getPushEvaluator() {
-        return (out, context) -> expression.process(out, context);
+        return (out, context) -> getExpression().process(out, context);
     }
 
     public ItemEvaluator getItemEvaluator() {

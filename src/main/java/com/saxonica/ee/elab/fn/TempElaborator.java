@@ -5,12 +5,9 @@ import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.StringElaborator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.functions.LowerCase;
-import net.sf.saxon.str.EmptyUnicodeString;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 
-public class StringFnElaborator extends StringElaborator {
+public class TempElaborator extends StringElaborator {
 
     public StringEvaluator getStringEvaluator(UnicodeString resultIfEmpty) {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();

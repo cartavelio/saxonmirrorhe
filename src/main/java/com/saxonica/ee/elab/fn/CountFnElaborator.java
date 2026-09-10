@@ -9,7 +9,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.value.Int64Value;
 
-public class CountElaborator extends ItemElaborator {
+public class CountFnElaborator extends ItemElaborator {
 
     public ItemEvaluator getItemEvaluator() {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();

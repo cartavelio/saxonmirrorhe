@@ -3,29 +3,35 @@ package com.saxonica.ee.elab.gen;
 import com.saxonica.ee.elab.eval.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.tree.iter.SingletonIterator;
 
-public abstract class ItemElaborator extends Elaborator {
+public abstract class PullElaborator extends Elaborator {
 
     @Override
-    public PullEvaluator getPullEvaluator() {
-        ItemEvaluator ie = getItemEvaluator();
-        return context -> new SingletonIterator(ie.eval(context));
-    }
+    public abstract PullEvaluator getPullEvaluator();
 
     @Override
     public PushEvaluator getPushEvaluator() {
-        ItemEvaluator ie = getItemEvaluator();
-        return (out, context) -> out.append(ie.eval(context));
+        PullEvaluator pull = getPullEvaluator();
+        return (out, context) -> {
+            SequenceIterator iter = pull.eval(context);
+            Item it;
+            while ((it = iter.next()) != null) {
+                out.append(it);
+            }
+        };
     }
 
     @Override
-    public abstract ItemEvaluator getItemEvaluator();
+    public ItemEvaluator getItemEvaluator() {
+        PullEvaluator pull = getPullEvaluator();
+        return context -> pull.eval(context).next();
+    }
 
     public BooleanEvaluator getBooleanEvaluator() {
-        ItemEvaluator ie = getItemEvaluator();
-        return context -> ExpressionTool.effectiveBooleanValue(ie.eval(context));
+        PullEvaluator pull = getPullEvaluator();
+        return context -> ExpressionTool.effectiveBooleanValue(pull.eval(context));
     }
 
     @Override

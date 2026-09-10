@@ -4,35 +4,41 @@ import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.gen.BooleanElaborator;
 import com.saxonica.ee.elab.gen.Elaborator;
-import net.sf.saxon.expr.ValueComparison;
-import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.expr.IdentityComparison;
+import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.expr.sort.GlobalOrderComparer;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.value.Cardinality;
 
-public class ValueComparisonElaborator extends BooleanElaborator {
+public class IdentityComparisonElaborator extends BooleanElaborator {
 
     public BooleanEvaluator getBooleanEvaluator() {
-        final ValueComparison exp = (ValueComparison)getExpression();
+        final IdentityComparison exp = (IdentityComparison)getExpression();
         final ItemEvaluator p0 = Elaborator.make(exp.getLhsExpression()).getItemEvaluator();
         final ItemEvaluator p1 = Elaborator.make(exp.getRhsExpression()).getItemEvaluator();
-        final AtomicComparer comparer = exp.getAtomicComparer();
-        final BooleanValue resultWhenEmpty = exp.getResultWhenEmpty();
-        final int operator = exp.getOperator();
-        final boolean needsRuntimeCheck = exp.needsRuntimeComparabilityCheck();
         final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
         final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
+        final int operator = exp.getOperator();
 
         return context -> {
-            AtomicValue v0 = (AtomicValue)p0.eval(context);
+            NodeInfo v0 = (NodeInfo)p0.eval(context);
             if (nullable0 && v0 == null) {
-                return resultWhenEmpty == BooleanValue.TRUE;  // normally false
+                return false;
             }
-            AtomicValue v1 = (AtomicValue)p1.eval(context);
+            NodeInfo v1 = (NodeInfo)p1.eval(context);
             if (nullable1 && v1 == null) {
-                return resultWhenEmpty == BooleanValue.TRUE;  // normally false
+                return false;
             }
-            return ValueComparison.compare(v0, operator, v1, comparer.provideContext(context), needsRuntimeCheck);
+            switch (operator) {
+                case Token.IS:
+                    return v0.equals(v1);
+                case Token.PRECEDES:
+                    return GlobalOrderComparer.getInstance().compare(v0, v1) < 0;
+                case Token.FOLLOWS:
+                    return GlobalOrderComparer.getInstance().compare(v0, v1) > 0;
+                default:
+                    throw new UnsupportedOperationException("Unknown node identity test");
+            }
         };
 
     }

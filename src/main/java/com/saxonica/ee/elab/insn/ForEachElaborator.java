@@ -1,15 +1,16 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.insn;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.ContextMappingFunction;
 import net.sf.saxon.expr.ContextMappingIterator;
 import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.expr.instruct.ForEach;
 import net.sf.saxon.om.FocusIterator;
 
-public class ForEachElaborator extends Elaborator {
+public class ForEachElaborator extends PullElaborator {
 
     @Override
     public PullEvaluator getPullEvaluator() {

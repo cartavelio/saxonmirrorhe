@@ -1,8 +1,9 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.insn;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
+import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.CallTemplate;
 import net.sf.saxon.expr.instruct.ForEach;
@@ -11,7 +12,7 @@ import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 
-public class CallTemplateElaborator extends Elaborator {
+public class CallTemplateElaborator extends PullElaborator {
 
     // TODO: tail recursion
 

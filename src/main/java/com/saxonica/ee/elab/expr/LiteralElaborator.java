@@ -1,17 +1,17 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 
-public class LiteralElaborator extends Elaborator {
+public class LiteralElaborator extends PullElaborator {
 
     @Override
     public PullEvaluator getPullEvaluator() {

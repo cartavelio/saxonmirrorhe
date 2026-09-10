@@ -1,4 +1,4 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.BooleanEvaluator;
 import com.saxonica.ee.elab.gen.BooleanElaborator;

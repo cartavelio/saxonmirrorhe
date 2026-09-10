@@ -1,57 +1,43 @@
 package com.saxonica.ee.elab.expr;
 
-import com.saxonica.ee.elab.eval.PullEvaluator;
+import com.saxonica.ee.elab.eval.BooleanEvaluator;
+import com.saxonica.ee.elab.eval.ItemEvaluator;
+import com.saxonica.ee.elab.gen.BooleanElaborator;
 import com.saxonica.ee.elab.gen.Elaborator;
-import com.saxonica.ee.elab.gen.PullElaborator;
-import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.expr.sort.GlobalOrderComparer;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.expr.ValueComparison;
+import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.Cardinality;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ValueComparisonElaborator extends BooleanElaborator {
 
-public class VennElaborator extends PullElaborator {
+    public BooleanEvaluator getBooleanEvaluator() {
+        final ValueComparison exp = (ValueComparison)getExpression();
+        final ItemEvaluator p0 = Elaborator.make(exp.getLhsExpression()).getItemEvaluator();
+        final ItemEvaluator p1 = Elaborator.make(exp.getRhsExpression()).getItemEvaluator();
+        final AtomicComparer comparer = exp.getAtomicComparer();
+        final BooleanValue resultWhenEmpty = exp.getResultWhenEmpty();
+        final int operator = exp.getOperator();
+        final boolean needsRuntimeCheck = exp.needsRuntimeComparabilityCheck();
+        final boolean nullable0 = Cardinality.allowsZero(exp.getLhsExpression().getCardinality());
+        final boolean nullable1 = Cardinality.allowsZero(exp.getRhsExpression().getCardinality());
 
-    public PullEvaluator getPullEvaluator() {
-        final VennExpression exp = (VennExpression)getExpression();
-        if (exp.getOperator() == Token.UNION) {
-            final List<PullEvaluator> leafEvaluators = new ArrayList<>();
-            gatherUnionLeafEvaluators(exp, leafEvaluators);
-            return context -> {
-                List<SequenceIterator> iterators = new ArrayList<>(leafEvaluators.size());
-                for (PullEvaluator evaluator : leafEvaluators) {
-                    iterators.add(evaluator.eval(context));
-                }
-                return new UnionIterator(iterators, GlobalOrderComparer.getInstance());
-            };
-        } else {
-            PullEvaluator p1 = Elaborator.make(exp.getLhsExpression()).getPullEvaluator();
-            PullEvaluator p2 = Elaborator.make(exp.getRhsExpression()).getPullEvaluator();
-            if (exp.getOperator() == Token.INTERSECT) {
-                return context -> new IntersectionEnumeration(
-                        p1.eval(context), p2.eval(context), GlobalOrderComparer.getInstance());
-            } else {
-                return context -> new DifferenceEnumeration(
-                        p1.eval(context), p2.eval(context), GlobalOrderComparer.getInstance());
+        return context -> {
+            AtomicValue v0 = (AtomicValue)p0.eval(context);
+            if (nullable0 && v0 == null) {
+                return resultWhenEmpty == BooleanValue.TRUE;  // normally false
             }
-        }
+            AtomicValue v1 = (AtomicValue)p1.eval(context);
+            if (nullable1 && v1 == null) {
+                return resultWhenEmpty == BooleanValue.TRUE;  // normally false
+            }
+            return ValueComparison.compare(v0, operator, v1, comparer.provideContext(context), needsRuntimeCheck);
+        };
+
     }
 
-    private static void gatherUnionLeafEvaluators(VennExpression exp, List<PullEvaluator> leafEvaluators) {
-        Expression e1 = exp.getLhsExpression();
-        if (e1 instanceof VennExpression && ((VennExpression) e1).getOperator() == Token.UNION) {
-            gatherUnionLeafEvaluators(((VennExpression) e1), leafEvaluators);
-        } else {
-            leafEvaluators.add(Elaborator.make(e1).getPullEvaluator());
-        }
-        Expression e2 = exp.getRhsExpression();
-        if (e2 instanceof VennExpression && ((VennExpression) e2).getOperator() == Token.UNION) {
-            gatherUnionLeafEvaluators(((VennExpression) e2), leafEvaluators);
-        } else {
-            leafEvaluators.add(Elaborator.make(e2).getPullEvaluator());
-        }
-    }
+
 
 }
 

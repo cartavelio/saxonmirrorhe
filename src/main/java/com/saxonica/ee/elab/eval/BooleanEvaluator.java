@@ -1,4 +1,4 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.eval;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;

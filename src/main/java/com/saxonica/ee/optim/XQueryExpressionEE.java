@@ -149,6 +149,11 @@ public class XQueryExpressionEE extends XQueryExpression {
         isUpdating = isUpdatingExpression;
     }
 
+//    protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
+//        PushEvaluator pusher = Elaborator.make(expression).getPushEvaluator();
+//        pusher.process(dest, context);
+//    }
+
     /**
      * Ask whether this is an update query
      *

@@ -1,14 +1,14 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.ItemEvaluator;
 import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.eval.PushEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.LocalVariableReference;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 
-public class LocalVariableReferenceElaborator extends Elaborator {
+public class LocalVariableReferenceElaborator extends PullElaborator {
 
     @Override
     public PullEvaluator getPullEvaluator() {

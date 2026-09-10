@@ -1,20 +1,20 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.fn;
 
 import com.saxonica.ee.elab.eval.StringEvaluator;
 import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.StringElaborator;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.sort.CodepointCollator;
-import net.sf.saxon.functions.SubstringAfter;
+import net.sf.saxon.functions.SubstringBefore;
 import net.sf.saxon.lib.SubstringMatcher;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 
-public class SubstringAfterFnElaborator extends StringElaborator {
+public class SubstringBeforeFnElaborator extends StringElaborator {
 
     public StringEvaluator getStringEvaluator(UnicodeString resultIfEmpty) {
         final SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-        final SubstringAfter fn = (SubstringAfter) fnc.getTargetFunction();
+        final SubstringBefore fn = (SubstringBefore) fnc.getTargetFunction();
         final SubstringMatcher stringCollator = (SubstringMatcher) fn.getStringCollator();
         assert stringCollator != null; // We don't go down this path until the collation is known
 
@@ -31,23 +31,17 @@ public class SubstringAfterFnElaborator extends StringElaborator {
                 if (s0.isEmpty()) {
                     return EmptyUnicodeString.getInstance();
                 }
-                long i = s0.indexOf(s1, 0);
-                if (i < 0) {
+                long j = s0.indexOf(s1, 0);
+                if (j < 0) {
                     return EmptyUnicodeString.getInstance();
                 }
-                return s0.substring(i + s1.length());
+                return s0.prefix(j);
             };
         } else {
             return context -> {
                 UnicodeString s0 = arg0Eval.eval(context);
                 UnicodeString s1 = arg1Eval.eval(context);
-                if (s1.isEmpty()) {
-                    return s0;
-                }
-                if (s0.isEmpty()) {
-                    return EmptyUnicodeString.getInstance();
-                }
-                return stringCollator.substringAfter(s0, s1);
+                return stringCollator.substringBefore(s0, s1);
             };
         }
     }

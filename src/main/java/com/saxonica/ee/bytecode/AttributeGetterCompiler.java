@@ -14,7 +14,8 @@ import net.sf.saxon.value.StringValue;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 /**
- * Generate bytecode for evaluation of an AxisExpression
+ * Generate bytecode for evaluation of an AttributeGetter - an expression that gets a named attribute
+ * of the context node and returns its value as a string
  */
 public class AttributeGetterCompiler extends ToItemCompiler {
 

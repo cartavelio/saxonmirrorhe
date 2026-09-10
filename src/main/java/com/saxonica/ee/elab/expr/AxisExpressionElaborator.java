@@ -1,7 +1,7 @@
-package com.saxonica.ee.elab;
+package com.saxonica.ee.elab.expr;
 
 import com.saxonica.ee.elab.eval.PullEvaluator;
-import com.saxonica.ee.elab.gen.Elaborator;
+import com.saxonica.ee.elab.gen.PullElaborator;
 import net.sf.saxon.expr.AxisExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
@@ -13,7 +13,7 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
-public class AxisExpressionElaborator extends Elaborator {
+public class AxisExpressionElaborator extends PullElaborator {
 
     public void reportDoesNotExist(Expression expression, XPathContext context) throws XPathException {
         XPathException err = new XPathException("The context item for axis step " +

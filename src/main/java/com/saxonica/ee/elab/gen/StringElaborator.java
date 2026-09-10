@@ -1,17 +1,24 @@
 package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.value.StringValue;
 
-public abstract class ItemElaborator extends Elaborator {
+public abstract class StringElaborator extends Elaborator {
 
     @Override
     public PullEvaluator getPullEvaluator() {
-        ItemEvaluator ie = getItemEvaluator();
-        return context -> new SingletonIterator(ie.eval(context));
+        StringEvaluator strEval = getStringEvaluator(null);
+        return context -> {
+            UnicodeString value = strEval.eval(context);
+            if (value == null) {
+                return EmptyIterator.emptyIterator();
+            } else {
+                return new SingletonIterator(StringValue.makeUStringValue(value));
+            }
+        };
     }
 
     @Override
@@ -21,21 +28,28 @@ public abstract class ItemElaborator extends Elaborator {
     }
 
     @Override
-    public abstract ItemEvaluator getItemEvaluator();
+    public ItemEvaluator getItemEvaluator() {
+        StringEvaluator strEval = getStringEvaluator(null);
+        return context -> {
+            UnicodeString value = strEval.eval(context);
+            if (value == null) {
+                return null;
+            } else {
+                return StringValue.makeUStringValue(value);
+            }
+        };
+    }
 
     public BooleanEvaluator getBooleanEvaluator() {
-        ItemEvaluator ie = getItemEvaluator();
-        return context -> ExpressionTool.effectiveBooleanValue(ie.eval(context));
+        StringEvaluator strEval = getStringEvaluator(null);
+        return context -> {
+            UnicodeString value = strEval.eval(context);
+            return value != null && !value.isEmpty();
+        };
     }
 
     @Override
-    public StringEvaluator getStringEvaluator(UnicodeString resultOnEmpty) {
-        ItemEvaluator ie = getItemEvaluator();
-        return context -> {
-            Item item = ie.eval(context);
-            return item == null ? resultOnEmpty : item.getUnicodeStringValue();
-        };
-    }
+    public abstract StringEvaluator getStringEvaluator(UnicodeString resultOnEmpty);
 
 
 }

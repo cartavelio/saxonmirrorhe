@@ -1,21 +1,18 @@
 package com.saxonica.ee.elab.fn;
 
 import com.saxonica.ee.elab.eval.ItemEvaluator;
-import com.saxonica.ee.elab.eval.PullEvaluator;
 import com.saxonica.ee.elab.gen.Elaborator;
 import com.saxonica.ee.elab.gen.ItemElaborator;
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
-import net.sf.saxon.functions.Count;
-import net.sf.saxon.value.Int64Value;
+import net.sf.saxon.functions.Number_1;
+import net.sf.saxon.value.AtomicValue;
 
-public class CountFnElaborator extends ItemElaborator {
+public class NumberFnElaborator extends ItemElaborator {
 
     public ItemEvaluator getItemEvaluator() {
         SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
-        Expression arg = fnc.getArg(0);
-        PullEvaluator puller = Elaborator.make(arg).getPullEvaluator();
-        return context -> Int64Value.makeIntegerValue(Count.count(puller.eval(context)));
+        ItemEvaluator argEval = Elaborator.make(fnc.getArg(0)).getItemEvaluator();
+        return context -> Number_1.toNumber((AtomicValue)argEval.eval(context));
     }
 
 
