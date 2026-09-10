@@ -2354,7 +2354,7 @@ return `{$key}={$value}`]]></code></pre>
 		<h1>Types</h1>
 		
 		<?source https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#schemas-and-types ?>
-		<p>"Type" is a word that gets used a lot in the XPath specifications and others related to them. The type system of the <i>XQuery and XPath Data Model (XDM)</i> is based on the Schema Component Model described in <i>XML Schema (XSD)</i>.  Most types are pre-defined but in some contexts its is also possible for a user to define a custom type.</p>
+		<p>"Type" is a word that gets used a lot in the XPath specifications and others related to them. The type system of the <i>XQuery and XPath Data Model (XDM)</i> is based on the Schema Component Model described in <i>XML Schema (XSD)</i>.  There are many <a class="bodylink" href="pre-defined-datatypes">pre-defined types</a>, but in some contexts it is also possible for a user to define a custom type.</p>
 		
 		<aside class="qt4">The type system of <i>XDM 4.0</i> is based on <i>XSD 1.1</i>, rather than <i>XSD 1.0</i>.  For more detail, see the <i>XDM 4.0</i> section on <a class="bodylink" href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#xsd-versions">XSD versions</a>.</aside>		
 
@@ -2372,7 +2372,7 @@ return `{$key}={$value}`]]></code></pre>
 		<p>As the type system is hierarchical, in some contexts it is necessary or useful for a sub-type to be recognised as belonging to its super-type or vice versa.  The XDM defines <a href="#coercion">coercion rules</a> to assist with this being handled consistently across implementations.</p>
 
 		<section id="pre-defined-datatypes" title="Pre-defined types">
-			<h2>Pre-defined types</h2>
+			<h1>Pre-defined types</h1>
 
 			<p>Most pre-defined types are defined in the XSD but the XDM and XPath specifications augment these with additional types, such as:</p>
 			<ul>
@@ -2398,7 +2398,7 @@ return `{$key}={$value}`]]></code></pre>
 				</li>
 			</ul>
 		
-			<h3>Table of pre-defined types</h3>
+			<h2>Table of pre-defined types</h2>
 			
 			<p>The table below is an attempt to create an alphabetical list of all the types, how they relate to each other and the categories they are formally or colloquially assigned to in the specification documents.</p>
 			
