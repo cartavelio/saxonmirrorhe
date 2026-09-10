@@ -1,7 +1,6 @@
 package com.saxonica.ee.elab.gen;
 
 import com.saxonica.ee.elab.eval.*;
-import com.saxonica.ee.elab.expr.SystemFunctionCallElaborator;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
@@ -77,23 +76,16 @@ public abstract class Elaborator {
             Elaborator elab;
             Supplier<Elaborator> elabFactory = ElaboratorFactory.getElaborator(label);
             if (elabFactory == null) {
-                elab = new SystemFunctionCallElaborator();
+                elab = new SystemFunctionCall.SystemFunctionCallElaborator();
             } else {
                 elab = elabFactory.get();
             }
             elab.setExpression(expression);
             return elab;
         } else {
-            String label = expression.getExpressionName();
-            Supplier<Elaborator> elabFactory = ElaboratorFactory.getElaborator(label);
-            if (elabFactory == null) {
-                System.err.println("Using fallback elaborator for " + label + ": " + expression.toShortString());
-                return new FallbackElaborator(expression);
-            } else {
-                Elaborator elab = elabFactory.get();
-                elab.setExpression(expression);
-                return elab;
-            }
+            Elaborator elab = expression.getElaborator();
+            elab.setExpression(expression);
+            return elab;
         }
     }
 
