@@ -239,7 +239,7 @@ public:
 
   //! Get the array of nodes reachable from this node via a given axis.
   /**
-  * @param axis - axis identifies which axis is to be navigated. Axis options are as follows:
+  * @param axis - identifies which axis is to be navigated. Axis options are as follows:
          * ANCESTOR = 0, ANCESTOR_OR_SELF = 1, ATTRIBUTE = 2, CHILD = 3,
          * DESCENDANT  = 4, DESCENDANT_OR_SELF = 5, FOLLOWING = 6,
          * FOLLOWING_SIBLING = 7, NAMESPACE = 8, PARENT = 9, PRECEDING = 10,
