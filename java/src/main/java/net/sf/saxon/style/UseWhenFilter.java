@@ -252,8 +252,7 @@ public class UseWhenFilter extends ProxyReceiver {
         Configuration config = getConfiguration();
         ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
         String baseUriStr = baseUri.toString();
-        ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
-        DocumentKey key = DocumentFn.computeDocumentKey(href, baseUriStr, compilation.getPackageData(), options);
+        DocumentKey key = DocumentFn.computeStylesheetDocumentKey(href, baseUriStr, compilation.getPackageData());
         Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
         if (map.containsKey(key)) {
             // In 4.0, ignore an included stylesheet module if it has already been included at the
@@ -840,8 +839,7 @@ public class UseWhenFilter extends ProxyReceiver {
                     Configuration config = getConfiguration();
                     ResourceResolver resolver = compilation.getCompilerInfo().getResourceResolver();
                     String baseUriStr = baseUri.toString();
-                    ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
-                    DocumentKey key = DocumentFn.computeDocumentKey(s, baseUri.toString(), compilation.getPackageData(), options);
+                    DocumentKey key = DocumentFn.computeStylesheetDocumentKey(s, baseUri.toString(), compilation.getPackageData());
                     Map<DocumentKey, TreeInfo> map = compilation.getStylesheetModules();
                     if (map.containsKey(key)) {
                         doc = (DocumentImpl) map.get(key);

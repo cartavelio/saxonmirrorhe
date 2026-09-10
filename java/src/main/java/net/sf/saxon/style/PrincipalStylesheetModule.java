@@ -514,7 +514,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
             } else if (use instanceof XSLInclude) {
                 String href = Whitespace.trim(use.getAttributeValue(NamespaceUri.NULL, "href"));
                 ParseOptions options = new ParseOptions(); //.withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), options);
+                DocumentKey key = DocumentFn.computeStylesheetDocumentKey(href, use.getBaseURI(), compilation.getPackageData());
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
                 if (includedTree == null) {
                     // In 4.0, this can be due to an ignored redundant include

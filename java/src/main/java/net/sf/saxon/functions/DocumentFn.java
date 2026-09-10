@@ -445,14 +445,14 @@ public class DocumentFn extends SystemFunction implements Callable {
     }
 
     /**
-     * Compute a document key
+     * Compute a document key for a stylesheet module
      */
 
-    protected static DocumentKey computeDocumentKey(String href, String baseURI, PackageData packageData) throws XPathException {
-        ParseOptions options = new ParseOptions().withSpaceStrippingRule(new StylesheetSpaceStrippingRule(
-                packageData.getConfiguration().getNamePool()));
-        return computeDocumentKey(href, baseURI, packageData, options);
+    public static DocumentKey computeStylesheetDocumentKey(String href, String baseURI, PackageData packageData) throws XPathException {
+        return computeDocumentKey(href, baseURI, packageData, stylesheetParseOptions);
     }
+
+    private final static ParseOptions stylesheetParseOptions = new ParseOptions();
 
     /**
      * Compute a document key (an absolute URI that can be used to see if a document is already loaded)
@@ -465,7 +465,6 @@ public class DocumentFn extends SystemFunction implements Callable {
     public static DocumentKey computeDocumentKey(
             String href, String baseURI, PackageData packageData, ParseOptions options) {
 
-        boolean strip = options.getSpaceStrippingRule() instanceof AllElementsSpaceStrippingRule;
         String absURI;
 
         // Saxon takes charge of absolutization, leaving the user URIResolver to handle dereferencing only
@@ -487,6 +486,10 @@ public class DocumentFn extends SystemFunction implements Callable {
             } catch (URISyntaxException | IllegalArgumentException err) {
                 absURI = baseURI + "/../" + href;
             }
+        }
+
+        if (options == stylesheetParseOptions) {
+            return new DocumentKey(absURI);
         }
 
         if (options.isXIncludeAware()) {

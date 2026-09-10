@@ -79,33 +79,6 @@ public class XSLAccept extends XSLAcceptExpose {
     }
 
 
-//    /**
-//     * Accept a component from a used package, modifying its visibility if necessary
-//     *
-//     * @param component the component to be accepted; as a side-effect of this method, the
-//     *                  visibility of the component may change
-//     * @throws XPathException if the requested visibility is incompatible with the declared
-//     *                        visibility
-//     */
-//    public void acceptComponent(Component component) throws XPathException {
-//        for (ComponentTest test : getExplicitComponentTests()) {
-//            if (test.matches(component.getActor())) {
-//                // we have already checked that the visibility is compatible
-//                component.setVisibility(getVisibility(), VisibilityProvenance.ACCEPTED);
-//                return;
-//            }
-//        }
-//        for (ComponentTest test : getWildcardComponentTests()) {
-//            if (test.matches(component.getActor())) {
-//                if (isCompatible(component.getVisibility(), getVisibility())) {
-//                    // set the visibility if it is compatible
-//                    component.setVisibility(getVisibility(), VisibilityProvenance.ACCEPTED);
-//                    return;
-//                }
-//            }
-//        }
-//    }
-
     protected void checkCompatibility(SymbolicName name, Visibility declared, Visibility exposed) {
         if (!isCompatible(declared, exposed)) {
             String code = "XTSE3040";
@@ -115,22 +88,14 @@ public class XSLAccept extends XSLAcceptExpose {
     }
 
     public static boolean isCompatible(Visibility declared, Visibility exposed) {
-//        if (declared == null || declared == exposed) {
-//            return true;
-//        }
-        switch (declared) {
-            case PUBLIC:
-                return exposed == Visibility.PUBLIC || exposed == Visibility.PRIVATE ||
-                        exposed == Visibility.FINAL || exposed == Visibility.HIDDEN;
-            case ABSTRACT:
-                return exposed == Visibility.ABSTRACT || exposed == Visibility.HIDDEN;
-            case FINAL:
-                return exposed == Visibility.PRIVATE ||
-                        exposed == Visibility.FINAL || exposed == Visibility.HIDDEN;
-            case UNDEFINED:
-                return true;
-            default:
-                return false;
-        }
+        return switch (declared) {
+            case PUBLIC -> exposed == Visibility.PUBLIC || exposed == Visibility.PRIVATE ||
+                    exposed == Visibility.FINAL || exposed == Visibility.HIDDEN;
+            case ABSTRACT -> exposed == Visibility.ABSTRACT || exposed == Visibility.HIDDEN;
+            case FINAL -> exposed == Visibility.PRIVATE ||
+                    exposed == Visibility.FINAL || exposed == Visibility.HIDDEN;
+            case UNDEFINED -> true;
+            default -> false;
+        };
     }
 }
