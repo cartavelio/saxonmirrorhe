@@ -621,8 +621,12 @@ saxon:evaluate($expression)
       
       <aside>Requires Saxon-PE or Saxon-EE. Available since Saxon 10.</aside>
       
-      <p>The extension attribute <code>saxon:on-duplicates</code> is available on the <code>xsl:map</code>
-      instruction to define how duplicate keys are to be handled. The value is an XPath expression that evaluates
+      <p>The extension attribute <code>saxon:on-duplicates</code> is available on the <a class="bodylink
+        code" href="/xsl-elements/map">xsl:map</a> instruction to define how duplicate keys are to be handled.
+        (From Saxon 11, this is alternatively available with XSLT 4.0 enabled as the synonym
+        <code>on-duplicates</code>, see <a class="bodylink"
+          href="/v4extensions/xslt-syntax-extensions/xsl-map-duplicates">Controlling duplicates on
+          xsl:map</a>.) The value is an XPath expression that evaluates
       to a function. If the constructed map has duplicate keys, this function is called to determine how they
       are to be handled. The function takes two arguments, being two values for the key, and it returns a combined
       value to be used in the map with that key. For example if the function is <code>function($a, $b) { return max(($a, $b)) }</code>

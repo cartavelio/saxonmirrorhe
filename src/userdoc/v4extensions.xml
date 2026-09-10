@@ -1395,11 +1395,11 @@ return for member $A in parse-json($json), $a in $A return $a*2]]></samp>
          of the attribute is an expression, which must evaluate to a function. The function is called when an entry
          in the map would conflict with an existing entry. It is supplied with two arguments, the value of the existing
          entry and the value of the new entry, and it returns a new value to be associated with the duplicate key (or it can
-         throw an error, to replicate the default behavior). For example <code>on-duplicates="->($old, $new){$old, $new}</code>
+         throw an error, to replicate the default behavior). For example <code>on-duplicates="->($old, $new){$old, $new}"</code>
             causes the new value to be the sequence-concatenation of the supplied values, while 
-            <code>on-duplicates="->($old, $new){$old || ',' || $new}</code> concatenates the values with comma as
-            a separator. Specifying <code>on-duplicates="->($old, $new){$old}</code> takes the first of the duplicates, while 
-            <code>on-duplicates="->($old, $new){$new}</code> takes the last.</p>
+            <code>on-duplicates="->($old, $new){$old || ',' || $new}"</code> concatenates the values with comma as
+            a separator. Specifying <code>on-duplicates="->($old, $new){$old}"</code> takes the first of the duplicates, while 
+            <code>on-duplicates="->($old, $new){$new}"</code> takes the last.</p>
       </section>
       
       <section id="creating-arrays" title="Creating arrays">
