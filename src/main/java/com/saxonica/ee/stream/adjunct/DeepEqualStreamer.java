@@ -12,6 +12,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
+import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Item;
@@ -19,6 +20,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.StringValue;
 
 
 /**
@@ -99,17 +101,24 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
 //            } else {
 //                function = (DeepEqual40) call.getTargetFunction();
 //            }
-            Expression collationArg = exp.getArg(2);
-            Item collationVal = collationArg.evaluateItem(context);
-            String collationName = collationVal == null
-                    ? call.getRetainedStaticContext().getDefaultCollationName()
-                    : collationVal.getStringValue();
-            if (exp.getArity() > 3) {
-                Expression optionsArg = exp.getArg(3);
-                MapItem suppliedOptions = (MapItem) optionsArg.evaluateItem(context);
+
+            if (exp.getArity() > 2) {
+                Expression optionsArg = exp.getArg(2);
+                Item optionsVal = optionsArg.evaluateItem(context);
+                MapItem suppliedOptions;
+                if (optionsVal == null || optionsVal instanceof StringValue) {
+                    String collationName = optionsVal == null
+                            ? call.getRetainedStaticContext().getDefaultCollationName()
+                            : optionsVal.getStringValue();
+                    suppliedOptions = new DictionaryMap().addEntry(
+                            new StringValue("collation"),
+                            new StringValue(collationName));
+                } else {
+                    suppliedOptions = (MapItem)optionsVal;
+                }
                 if (suppliedOptions != null) {
                     try {
-                        options = new DeepEqual.DeepEqualOptions(suppliedOptions, collationName, context, 31);
+                        options = new DeepEqual.DeepEqualOptions(suppliedOptions, context, 31);
                     } catch (XPathException e) {
                         dynamicError(e);
                     }
@@ -117,7 +126,7 @@ public class DeepEqualStreamer extends StreamingAdjunct implements FeedMaker {
             }
             if (options == null) {
                 try {
-                    options = new DeepEqual.DeepEqualOptions(new HashTrieMap(), collationName, context, 31);
+                    options = new DeepEqual.DeepEqualOptions(new HashTrieMap(), context, 31);
                 } catch (XPathException e2) {
                     dynamicError(e2);
                 }

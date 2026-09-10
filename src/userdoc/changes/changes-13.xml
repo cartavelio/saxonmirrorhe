@@ -127,6 +127,13 @@
     
     <category name="command-line">
         
+        <p>The <code>Transform</code> command acquires a new option <code>-stublib:filename</code>.
+        This is intended primarily for use when compiling stylesheets to SEF files for execution
+        under SaxonJS. It allows a file of stub function definitions to be loaded in JSON format,
+        representing external Javascript functions that will be available for calling in the
+        target environment. Any attempt to call the functions from SaxonJ itself will fail with
+        a dynamic error.</p>
+        
  
     </category>
     
@@ -171,7 +178,9 @@
             <code>xs:double</code> and <code>xs:decimal</code> are compared by converting both values to
             decimals, not to doubles.</p>
         
-        <p>The <code>deep-equal</code> function now supports the <code>items-equal</code> callback.</p>
+        <p>The <code>deep-equal</code> function now supports the <code>items-equal</code> callback.
+        The <code>collation</code> and <code>options</code> arguments of <code>deep-equal</code>
+        have been combined.</p>
         
         <p>The function <code>fn:format-number</code> can now take an options map as the third argument.</p>
         

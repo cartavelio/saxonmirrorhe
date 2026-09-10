@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -74,6 +75,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                                          SequenceType.OPTIONAL_BOOLEAN));
         OptionsParameter o = new OptionsParameter(40);
         o.addAllowedOption("base-uri", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        o.addAllowedOption("collation", SequenceType.SINGLE_STRING);
         o.addAllowedOption("comments", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("debug", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         //o.addAllowedOption("false-on-error", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -106,24 +108,16 @@ public class DeepEqual extends CollatingFunctionFixed {
 
     @Override
     public Expression makeFunctionCall(Expression... arguments) {
-        Expression[] newArgs = new Expression[4];
+        Expression[] newArgs = new Expression[3];
         newArgs[0] = arguments[0];
         newArgs[1] = arguments[1];
+
         if (arguments.length < 3 || arguments[2] instanceof DefaultedArgumentExpression) {
             newArgs[2] = new StringLiteral(getRetainedStaticContext().getDefaultCollationName());
         } else {
             newArgs[2] = arguments[2];
         }
-        if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
-            if (version < 40) {
-                throw new UncheckedXPathException("4-argument version of fn:deep-equal requires 4.0 to be enabled");
-            } else {
-                newArgs[3] = Literal.makeLiteral(new DictionaryMap());
-            }
-        } else {
-            newArgs[3] = arguments[3];
-        }
-        setArity(4);
+        setArity(3);
         return super.makeFunctionCall(newArgs);
     }
 
@@ -160,7 +154,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 "type-annotations", "type-variety", "typed-values"};
 
 
-        public DeepEqualOptions(MapItem map, String collationName, XPathContext context, int version) throws XPathException {
+        public DeepEqualOptions(MapItem map, XPathContext context, int version) throws XPathException {
             Map<String, GroundedValue> values = OPTION_DETAILS.processSuppliedOptions(map, context);
             for (String option : DeepEqualOptions.booleanOptions) {
                 setBooleanOption(values, option);
@@ -183,7 +177,12 @@ public class DeepEqual extends CollatingFunctionFixed {
                     }
                 }
             }
-            this.collationName = collationName;
+            GroundedValue collationItem = values.get("collation");
+            if (collationItem != null) {
+                this.collationName = collationItem.getStringValue();
+            } else {
+                this.collationName = CodepointCollator.getInstance().getCollationURI();
+            }
             stringCollator = context.getConfiguration().getCollation(collationName);
             if (stringCollator == null) {
                 throw new XPathException("Unknown collation " + collationName, "FOCH0002");
@@ -1057,7 +1056,7 @@ public class DeepEqual extends CollatingFunctionFixed {
     }
 
     /**
-     * Execute a dynamic call to the function
+     * Execute a call to the function
      *
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as Sequences.
@@ -1068,18 +1067,18 @@ public class DeepEqual extends CollatingFunctionFixed {
 
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Item arg3 = arguments.length >= 3 ? arguments[2].head() : null;
-        String collationName = arg3 == null ? getRetainedStaticContext().getDefaultCollationName() : arg3.getStringValue();
-
-        MapItem options  = new DictionaryMap();
-        if (arguments.length >= 4) {
-            MapItem suppliedOptions = (MapItem) arguments[3].head();
-            if (suppliedOptions != null) {
-                options = suppliedOptions;
-            }
+        Item optionsArg = arguments.length >= 3 ? arguments[2].head() : null;
+        MapItem options = new DictionaryMap();
+        if (optionsArg == null) {
+            options = options.addEntry(new StringValue("collation"),
+                                       new StringValue(getRetainedStaticContext().getDefaultCollationName()));
+        } else if (optionsArg instanceof StringValue) {
+            options = options.addEntry(new StringValue("collation"), optionsArg);
+        } else {
+            options = (MapItem) optionsArg;
         }
         //GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
-        DeepEqualOptions eqOptions = new DeepEqualOptions(options, collationName, context, version);
+        DeepEqualOptions eqOptions = new DeepEqualOptions(options, context, version);
         boolean b = deepEqual(arguments[0].iterate(), arguments[1].iterate(), context, eqOptions);
         return BooleanValue.get(b);
     }

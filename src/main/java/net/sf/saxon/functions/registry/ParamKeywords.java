@@ -102,11 +102,10 @@ public class ParamKeywords {
         fnParamNames.put("day-from-date", "value");
         fnParamNames.put("day-from-dateTime", "value");
         fnParamNames.put("days-from-duration", "value");
-        fnParamNames.put("deep-equal", "input1|input2|collation|options");
+        fnParamNames.put("deep-equal", "input1|input2|options");
         fnParamNames.put("default-collation", "");
         fnParamNames.put("decode-from-uri", "value");
         fnParamNames.put("default-language", "");
-        fnParamNames.put("differences", "input1|input2|options|collation");
         fnParamNames.put("distinct-values", "values|collation");
         fnParamNames.put("do-until", "input|action|predicate");
         fnParamNames.put("doc", "href");
