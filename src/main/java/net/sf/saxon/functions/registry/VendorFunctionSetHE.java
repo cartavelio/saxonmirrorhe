@@ -15,14 +15,13 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.map.MapCreate;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.MapUntypedContains;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
-import net.sf.saxon.str.StringConstants;
-import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.AnyItemType;
@@ -32,8 +31,6 @@ import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.SourceLocator;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -90,12 +87,12 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-        RecordTest mapRepresentation = RecordTest.nonExtensible(
-                field("key", SequenceType.SINGLE_ATOMIC, false),
-                field("value", SequenceType.ANY_SEQUENCE, false));
-
-        register("map-as-sequence-of-maps", 1, e -> e.populate(MapAsSequenceOfMaps::new, mapRepresentation, STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
+//        RecordTest mapRepresentation = RecordTest.nonExtensible(
+//                field("key", SequenceType.SINGLE_ATOMIC, false),
+//                field("value", SequenceType.ANY_SEQUENCE, false));
+//
+//        register("map-as-sequence-of-maps", 1, e -> e.populate(MapAsSequenceOfMaps::new, mapRepresentation, STAR, 0)
+//                .arg(0, MapType.ANY_MAP_TYPE, ONE, null));
 
         register("yes-no-boolean", 1, e -> e.populate(YesNoBoolean::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
@@ -287,43 +284,43 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
     }
 
 
-    private static StringValue valueKey = new StringValue(new Twine8(StringConstants.bytes("value")));
+//    private static StringValue valueKey = new StringValue(new Twine8(StringConstants.bytes("value")));
 
-    /**
-     * Implementation of the function saxon:array-as-sequence-of-maps(array)
-     */
+//    /**
+//     * Implementation of the function saxon:array-as-sequence-of-maps(array)
+//     */
+//
+//    public static class ArrayAsSequenceOfMaps extends SystemFunction {
+//        @Override
+//        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+//            ArrayItem array = (ArrayItem) arguments[0].head();
+//            List<Item> mapList = new ArrayList<>();
+//            for (GroundedValue value : array.members()) {
+//                mapList.add(new SingleEntryMap(valueKey, value));
+//            }
+//            return new SequenceExtent.Of<>(mapList);
+//        }
+//    }
 
-    public static class ArrayAsSequenceOfMaps extends SystemFunction {
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            ArrayItem array = (ArrayItem) arguments[0].head();
-            List<Item> mapList = new ArrayList<>();
-            for (GroundedValue value : array.members()) {
-                mapList.add(new SingleEntryMap(valueKey, value));
-            }
-            return new SequenceExtent.Of<>(mapList);
-        }
-    }
-
-    /**
-     * Implementation of the function saxon:map-as-sequence-of-maps(array)
-     */
-
-    public static class MapAsSequenceOfMaps extends SystemFunction {
-        @Override
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            MapItem map = (MapItem) arguments[0].head();
-            List<Item> mapList = new ArrayList<>();
-
-            for (KeyValuePair pair : map.keyValuePairs()) {
-                DictionaryMap dictionary = new DictionaryMap(2);
-                dictionary.initialPut("key", pair.key);
-                dictionary.initialPut("value",pair.value);
-                mapList.add(dictionary);
-            }
-            return new SequenceExtent.Of<>(mapList);
-        }
-    }
+//    /**
+//     * Implementation of the function saxon:map-as-sequence-of-maps(array)
+//     */
+//
+//    public static class MapAsSequenceOfMaps extends SystemFunction {
+//        @Override
+//        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+//            MapItem map = (MapItem) arguments[0].head();
+//            List<Item> mapList = new ArrayList<>();
+//
+//            for (KeyValuePair pair : map.keyValuePairs()) {
+//                DictionaryMap dictionary = new DictionaryMap(2);
+//                dictionary.initialPut("key", pair.key);
+//                dictionary.initialPut("value",pair.value);
+//                mapList.add(dictionary);
+//            }
+//            return new SequenceExtent.Of<>(mapList);
+//        }
+//    }
 
     public static class YesNoBoolean extends SystemFunction {
 

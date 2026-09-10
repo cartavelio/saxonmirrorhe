@@ -14,6 +14,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.flwor.LocalVariableBinding;
 import net.sf.saxon.expr.instruct.*;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.hof.PartialApply;
@@ -4037,26 +4038,40 @@ public class XPathParser {
 
         // have read the "map {" or bare "{"
         int offset = t.currentTokenStartOffset;
-        List<Expression> entries = new ArrayList<>();
+        List<Expression> keys = new ArrayList<>();
+        List<Expression> values = new ArrayList<>();
+        boolean allLiteralKeys = true;
+        boolean allStringKeys = true;
+        boolean allLiteralValues = true;
         nextToken();
         if (t.currentToken != Token.RCURLY) {
             while (true) {
                 Expression key = parseExprSingle();
+                keys.add(key);
+                if (!(key instanceof Literal)) {
+                    allLiteralKeys = false;
+                }
+                if (!(key instanceof StringLiteral)) {
+                    allStringKeys = false;
+                }
                 if (t.currentToken == Token.COLON_EQUALS) {
                     grumble("The ':=' notation is no longer accepted in map expressions: use ':' instead");
                 }
                 readToken(Token.COLON);
                 Expression value = parseStandaloneExpr();
-                Expression entry;
-                if (key instanceof Literal && ((Literal)key).getGroundedValue() instanceof AtomicValue
-                        && value instanceof Literal) {
-                    entry = Literal.makeLiteral(
-                            new SingleEntryMap((AtomicValue) ((Literal)key).getGroundedValue(),
-                                             ((Literal)value).getGroundedValue()));
-                } else {
-                    entry = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, value);
+                values.add(value);
+                if (!(value instanceof Literal)) {
+                    allLiteralValues = false;
                 }
-                entries.add(entry);
+//                Expression entry;
+//
+//                    entry = Literal.makeLiteral(
+//                            new SingleEntryMap((AtomicValue) ((Literal)key).getGroundedValue(),
+//                                             ((Literal)value).getGroundedValue()));
+//                } else {
+//                    entry = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, value);
+//                }
+//                entries.add(entry);
                 if (t.currentToken == Token.RCURLY) {
                     break;
                 } else {
@@ -4066,21 +4081,65 @@ public class XPathParser {
         }
         nextToken();
 
-        Expression result;
-        switch (entries.size()) {
+        Expression result = null;
+        switch (keys.size()) {
             case 0:
                 result = Literal.makeLiteral(EmptyMap.getInstance());
                 break;
             case 1:
-                result = entries.get(0);
+                if (allLiteralKeys && allLiteralValues) {
+                    SingleEntryMap sem = new SingleEntryMap(
+                            (AtomicValue)((Literal)keys.get(0)).getGroundedValue(),
+                            ((Literal)values.get(0)).getGroundedValue());
+                    result = Literal.makeLiteral(sem);
+                } else {
+                    result = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(keys.get(0), values.get(0));
+                }
                 break;
             default:
-                Expression[] entriesArray = new Expression[entries.size()];
-                Block block = new Block(entries.toArray(entriesArray));
-                HashTrieMap options = new HashTrieMap();
-                options.initialPut(new StringValue("duplicates"), new StringValue("reject"));
-                options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
-                result = MapFunctionSet.getInstance(31).makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
+                if (allLiteralKeys) {
+                    // Check for duplicates now
+                    Set<AtomicMatchKey> matchKeys = new HashSet<>();
+                    for (Expression keyExp : keys) {
+                        final AtomicValue keyValue = (AtomicValue) ((Literal) keyExp).getGroundedValue();
+                        AtomicMatchKey key = keyValue.asMapKey();
+                        boolean ok = matchKeys.add(key);
+                        if (!ok) {
+                            grumble("Duplicate key + " + Err.depict(keyValue) + " in map constructor", "XQDY0137");
+                            return null;
+                        }
+                    }
+                }
+                if (allLiteralKeys && allLiteralValues) {
+                    if (allStringKeys) {
+                        DictionaryMap map = new DictionaryMap(keys.size());
+                        for (int i = 0; i < keys.size(); i++) {
+                            String key = ((StringLiteral) keys.get(i)).stringify();
+                            GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
+                            map.initialPut(key, val);
+                        }
+                        result = Literal.makeLiteral(map);
+                    } else {
+                        HashTrieMap map = new HashTrieMap();
+                        for (int i = 0; i < keys.size(); i++) {
+                            AtomicValue key = (AtomicValue) ((Literal) keys.get(i)).getGroundedValue();
+                            GroundedValue val = ((Literal) values.get(i)).getGroundedValue();
+                            map.initialPut(key, val);
+                        }
+                        result = Literal.makeLiteral(map);
+                    }
+                } else {
+                    Expression[] entriesArray = new Expression[keys.size()];
+                    for (int i=0; i<keys.size(); i++) {
+                         entriesArray[i] = MapFunctionSet.getInstance(31)
+                                 .makeFunction("entry", 2).makeFunctionCall(keys.get(i), values.get(i));
+                    }
+                    Block block = new Block(entriesArray);
+                    HashTrieMap options = new HashTrieMap();
+                    options.initialPut(new StringValue("duplicates"), new StringValue("reject"));
+                    options.initialPut(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
+                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2).makeFunctionCall(block, Literal.makeLiteral(options));
+                }
                 break;
         }
         setLocation(result, offset);
