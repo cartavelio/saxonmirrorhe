@@ -174,7 +174,8 @@
       <li>The Unicode Collation Algorithm (UCA) represents a family of collations, with the exact rules
         depending on parameters that are supplied. A typical URI for a UCA collation would be
           <code>http://www.w3.org/2013/collation/UCA?lang=sv;strength=primary</code> where the parameters
-        after the "?" indicate the detailed rules to be applied.</li>
+        after the "?" indicate the detailed rules to be applied. Support for UCA collations varies
+        between different Saxon editions.</li>
     </ul>
 
 
@@ -345,8 +346,22 @@ config.setLocalizerFactory(new LocalizerFactory() {
           important to use the ICU collations, use <code>fallback=no</code> in the collation URI to prevent this
           happening.</p>
       </li>
-      <li class="csonly">On SaxonCS, Saxon uses the collation facilities available from the ICU4N library,
-        which is a port to C# of a subset of ICU4J.</li>
+      <li class="csonly">
+        <p>On SaxonCS-HE, Saxon uses the collation facilities available directly from the
+        core .NET library. Because these collations are not always 100% compatible with the UCA as defined by Unicode, 
+        Saxon rejects the collation as unsupported if it specifies <code>fallback=no</code>.</p>
+        <p>The core .NET library supports string comparison and ordering using a <code>System.Globalization.CultureInfo</code>
+          based on the requested language, and it uses case-blind comparison when requested; other properties in the
+          UCA collation URI are ignored. For operations that require substring matching, such as the <code>fn:contains</code>,
+          <code>fn:starts-with</code>, and <code>fn:substring-before</code> functions, the requested collation is ignored
+          entirely, and the function falls back to codepoint comparison. Similarly, the <code>fn:collation-key</code>
+          function returns the input string unchanged, which effectively means that codepoint comparison is used.</p>
+        </p></li>
+        <li class="csonly">       
+          <p>On SaxonCS-EE, Saxon uses the collation facilities available from the ICU4N library,
+          which is a port to C# of a subset of ICU4J. The current version of ICU4N is an alpha release,
+          but its support for collations appears to be reasonably comprehensive.</p>
+        </li>
     </ul>
 
     <p>This feature is requested by using a collation (specified either as a <code>collation</code> attribute
@@ -393,7 +408,8 @@ config.setLocalizerFactory(new LocalizerFactory() {
           <td>
             <p>
               <code>fallback=no</code> will raise errors in the case of unknown parameter keywords or values.
-              It will also raise an error if the ICU collation library is not available.
+              It will also raise an error if the ICU collation library is not available (which is always the
+              case for SaxonJ-HE and SaxonCS-HE).
               In other cases Saxon falls back to whatever collation is available. </p>
           </td>
         </tr>
@@ -590,9 +606,9 @@ config.setLocalizerFactory(new LocalizerFactory() {
       </tbody>
     </table>
 
-    <h2 class="subtitle">Additional Saxon parameters</h2>
+    <h2 class="subtitle">Additional SaxonJ parameters</h2>
 
-    <p>In addition to the standard parameters, Saxon supports some further parameters of its own:</p>
+    <p>In addition to the standard parameters, SaxonJ supports some further parameters of its own:</p>
 
     <table>
       <thead class="params">
