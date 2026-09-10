@@ -281,8 +281,6 @@
       test-case=" Keywords-fn-scan-left-1
       Keywords-fn-scan-right-1
       Keywords-fn-system-properties-1
-      Keywords-fn-build-dateTime-1
-      Keywords-fn-parts-of-dateTime-1
       Keywords-fn-matching-segments-1
       " 
       run="false" report="n/a">
