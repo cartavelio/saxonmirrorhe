@@ -887,7 +887,7 @@ cdef class PyDocumentBuilder:
             PyXdmNode: The XDM node representation of the XML document
         Raises:
             Exception: Error if the keyword argument is not one of xml_file_name|xml_text|xml_uri.
-            PySaxonApiError: Error if failed to parse XML file or Xml text
+            PySaxonApiError: Error if failure to parse XML file or XML text
         """
         py_error_message = "Error: parse_xml should only contain one of the following keyword arguments: (xml_file_name|xml_text|xml_uri)"
         if len(kwds) != 1:

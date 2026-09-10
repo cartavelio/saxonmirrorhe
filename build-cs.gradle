@@ -622,18 +622,13 @@ task dotnetPublish(
   inputs.file "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/SaxonCS.dll"
   outputs.files fileTree(dir: "${buildDir}/cs/bin/${csconfiguration}/net6.0/${csrid}/publish")
 
-  def singleFile="true"
-  if (systemOs.isMacOsX()) {
-    singleFile="true"
-  }
-
   doLast {
     exec {
       workingDir = "${buildDir}/cs"
       commandLine dotnetex, 'publish', 'SaxonCS.sln',
         '--configuration', csconfiguration, '-r', csrid,
         '--self-contained', 'true',
-        "-p:PublishSingleFile=${singleFile}",
+        "-p:PublishSingleFile=true",
         "-p:Version=${csver}", "-p:PackageVersion=${csver}",
         "-p:Configuration=${csconfiguration}", '-p:Platform=Any CPU'
     }
