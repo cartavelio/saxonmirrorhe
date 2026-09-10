@@ -88,6 +88,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * @return the relevant schema
      */
     @Override
+    @CSharpModifiers(code = {"internal", "override"})
     public XsdSchema getSchema() {
         return schema;
     }

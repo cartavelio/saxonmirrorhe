@@ -1541,6 +1541,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     @CSharpModifiers(code = {"override", "internal"})
     public XsdCompiler makeXsdCompiler(Processor proc) {
+        if (!isLicensedFeature(LicenseFeature.SCHEMA_VALIDATION)) {
+            throw new UnsupportedOperationException("Schema processing requires a licensed Saxon-EE configuration");
+        }
         return new XsdCompilerEE(proc);
     }
 

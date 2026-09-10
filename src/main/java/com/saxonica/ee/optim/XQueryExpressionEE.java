@@ -119,10 +119,6 @@ public class XQueryExpressionEE extends XQueryExpression {
         isUpdating = isUpdatingExpression;
     }
 
-//    @Override
-//    protected SequenceIterator getExpressionIterator(XPathContext context) throws XPathException {
-//        return super.getExpressionIterator(context);
-//    }
 
     PushEvaluator pusher = null;
     

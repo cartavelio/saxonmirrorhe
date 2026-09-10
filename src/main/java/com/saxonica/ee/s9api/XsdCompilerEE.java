@@ -140,6 +140,7 @@ public class XsdCompilerEE extends XsdCompiler {
      */
 
     @Override
+    @CSharpModifiers(code={"internal", "override"})
     public XsdSchema compile(Source... sources) throws SaxonApiException {
         try {
             final EnterpriseConfiguration config = (EnterpriseConfiguration) processor.getUnderlyingConfiguration();
@@ -172,6 +173,7 @@ public class XsdCompilerEE extends XsdCompiler {
      * @throws SaxonApiException if the schema document is not valid.
      */
     @Override
+    @CSharpModifiers(code = {"internal", "override"})
     public XsdSchema compile(File... files) throws SaxonApiException {
         StreamSource[] sources = new StreamSource[files.length];
         for (int i=0; i<files.length; i++) {
@@ -190,6 +192,7 @@ public class XsdCompilerEE extends XsdCompiler {
      * @since 13.0
      */
 
+    @CSharpModifiers(code = {"internal", "override"})
     public XsdSchema combine(XsdSchema... schemas) throws SaxonApiException {
         if (schemas.length == 0) {
             return emptySchema();
@@ -222,6 +225,7 @@ public class XsdCompilerEE extends XsdCompiler {
      * @return an empty schema
      */
 
+    @CSharpModifiers(code = {"internal", "override"})
     public XsdSchema emptySchema() {
         return new XsdSchemaImpl(processor,
                                  new PreparedSchema((EnterpriseConfiguration) processor.getUnderlyingConfiguration()));
@@ -236,7 +240,7 @@ public class XsdCompilerEE extends XsdCompiler {
      * @return the schema that results from importing the SCM file
      */
 
-
+    @CSharpModifiers(code = {"internal", "override"})
     public XsdSchema importComponents(Source source) throws SaxonApiException {
         try {
             SchemaModelLoader loader = new SchemaModelLoader(processor.getUnderlyingConfiguration());
@@ -253,6 +257,7 @@ public class XsdCompilerEE extends XsdCompiler {
      * @param internalSchema the internal schema object
      */
 
+    @CSharpModifiers(code = {"internal", "override"})
     public XsdSchema wrapInternalSchema(Schema internalSchema) {
         if (!(internalSchema instanceof PreparedSchema)) {
             throw new IllegalArgumentException("The internalSchema must be an instance of PreparedSchema");

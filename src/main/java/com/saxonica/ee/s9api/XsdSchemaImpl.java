@@ -6,9 +6,11 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaException;
 
+@CSharpModifiers(code={"internal"})
 public class XsdSchemaImpl extends XsdSchema {
 
     private final Processor processor;
