@@ -5,7 +5,8 @@
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>disable</Nullable>
         <OutputType>Exe</OutputType>
-        <NoWarn>2200;0414;0168;0169;0649</NoWarn>
+        <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
     
     <ItemGroup>

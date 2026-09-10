@@ -4,7 +4,7 @@ using Saxon.Impl.Overrides;
 
 namespace Saxon.Api {
     /// <summary>
-    /// A simple implementation of <c>IResourceCollection<c> that implements a resource
+    /// A simple implementation of <c>IResourceCollection</c> that implements a resource
     /// collection as a list of <c>IResource</c> objects.
     /// </summary>
     public class ExplicitResourceCollection : IResourceCollection {

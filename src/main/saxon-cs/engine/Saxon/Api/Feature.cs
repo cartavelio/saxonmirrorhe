@@ -14,6 +14,14 @@ namespace Saxon.Api
 /// </summary>
 
 public class Feature<T> {
+
+    /// <summary>
+    /// A unique numeric code associated with a feature
+    /// </summary>
+    /// <remarks>
+    /// Feature codes should remain stable across releases so that compiled applications work without recompilation
+    /// </remarks>
+    
     
     public readonly int Code;
 

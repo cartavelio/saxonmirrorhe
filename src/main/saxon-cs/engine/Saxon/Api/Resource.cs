@@ -13,9 +13,9 @@ namespace Saxon.Api {
         internal Saxon.Hej.lib.Resource resource;
         
         /// <summary>
-        /// Construct a <c>Resource<c/> by wrapping an internal representation of the resource
+        /// Construct a <c>Resource</c> by wrapping an internal representation of the resource
         /// </summary>
-        /// <param name="rc"></param>
+        /// <param name="rc">The wrapped resource</param>
         public Resource(Saxon.Hej.lib.Resource rc) {
             resource = rc;
         }
