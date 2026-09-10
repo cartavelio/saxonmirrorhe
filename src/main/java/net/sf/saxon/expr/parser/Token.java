@@ -50,7 +50,7 @@ public abstract class Token {
     /**
      * Left parenthesis
      */
-    public static final int LPAR = 5;
+    public static final int LPAREN = 5;
     /**
      * Equals token ("=")
      */
@@ -170,7 +170,7 @@ public abstract class Token {
     /**
      * Token representing the name of a function and the following "(" symbol
      */
-    public static final int FUNCTION = 35;
+    public static final int FUNCTION_CALL = 35;
 
     /**
      * Token representing the name of an axis and the following "::" symbol
@@ -579,7 +579,7 @@ public abstract class Token {
     /**
      * Right parenthesis
      */
-    public static final int RPAR = 204;
+    public static final int RPAREN = 204;
     /**
      * "." symbol
      */
@@ -666,6 +666,30 @@ public abstract class Token {
 
 
     /**
+     * Pseudo-tokens that are now identified by the parser rather than the tokenizer
+     */
+
+    public static final int ATTRIBUTE_LPAREN = 400;
+    public static final int ELEMENT_LPAREN = 401;
+    public static final int TEXT_LPAREN = 402;
+    public static final int COMMENT_LPAREN = 403;
+    public static final int PROCESSING_INSTRUCTION_LPAREN = 404;
+    public static final int DOCUMENT_NODE_LPAREN = 405;
+    public static final int NAMESPACE_NODE_LPAREN = 406;
+    public static final int NODE_LPAREN = 407;
+    public static final int ITEM_LPAREN = 408;
+    public static final int ARRAY_LPAREN = 409;
+    public static final int MAP_LPAREN = 410;
+    public static final int FUNCTION_LPAREN = 411;
+    public static final int RECORD_LPAREN = 412;
+    public static final int TYPE_LPAREN = 413;
+    public static final int ENUM_LPAREN = 414;
+    public static final int EMPTY_SEQUENCE_LPAREN = 415;
+    public static final int SCHEMA_ATTRIBUTE_LPAREN = 416;
+    public static final int SCHEMA_ELEMENT_LPAREN = 417;
+
+
+    /**
      * The following strings are used to represent tokens in error messages
      */
 
@@ -677,7 +701,7 @@ public abstract class Token {
         tokens[SLASH] = "/";
         tokens[AT] = "@";
         tokens[LSQB] = "[";
-        tokens[LPAR] = "(";
+        tokens[LPAREN] = "(";
         tokens[EQUALS] = "=";
         tokens[COMMA] = ",";
         tokens[SLASH_SLASH] = "//";
@@ -709,7 +733,7 @@ public abstract class Token {
         tokens[SOME] = "some";
         tokens[EVERY] = "every";
         tokens[SATISFIES] = "satisfies";
-        tokens[FUNCTION] = "<function>(";
+        tokens[FUNCTION_CALL] = "<function>(";
         tokens[AXIS] = "<axis>";
         tokens[IF] = "if(";
         tokens[PRECEDES] = "<<";
@@ -759,7 +783,7 @@ public abstract class Token {
         tokens[NAME] = "<name>";
         tokens[STRING_LITERAL] = "<string-literal>";
         tokens[RSQB] = "]";
-        tokens[RPAR] = ")";
+        tokens[RPAREN] = ")";
         tokens[DOT] = ".";
         tokens[DOTDOT] = "..";
         tokens[STAR] = "*";

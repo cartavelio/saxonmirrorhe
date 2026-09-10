@@ -17,7 +17,6 @@ import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trace.Instrumentation;
-import net.sf.saxon.trans.UncheckedXPathException;
 import org.w3c.dom.Document;
 
 import javax.xml.stream.XMLStreamException;
@@ -712,9 +711,10 @@ public abstract class TestDriver {
 
                     try {
                         runTestCase(testCase, xpc);
-                    } catch (SaxonApiException | SaxonApiUncheckedException | UncheckedXPathException ex) {
+                    } catch (Exception ex) {
+                        noteFailure(testSet, name);
                         ex.printStackTrace();
-                        System.err.println("*** Error in evaluating testcase:" + ex.getMessage());
+                        System.err.println("*** Crashed while running testcase: " + ex.getMessage());
                     }
                 }
             });

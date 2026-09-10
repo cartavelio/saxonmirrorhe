@@ -881,9 +881,9 @@ public class XQueryParser extends XPathParser {
                 // no action - ignore namespaced annotations
             }
             nextToken();
-            if (t.currentToken == Token.LPAR) {
+            if (t.currentToken == Token.LPAREN) {
                 nextToken();
-                if (t.currentToken == Token.RPAR) {
+                if (t.currentToken == Token.RPAREN) {
                     grumble("Annotation parameter list cannot be empty");
                 }
                 while (true) {
@@ -913,7 +913,7 @@ public class XQueryParser extends XPathParser {
                             arg = (Literal) parseBinaryLiteral(false);
                             break;
 
-                        case Token.FUNCTION:
+                        case Token.FUNCTION_CALL:
                             // true() and folse() allowed in 4.0
                             if (t.currentTokenValue.equals("true")) {
                                 arg = Literal.makeLiteral(BooleanValue.TRUE);
@@ -928,7 +928,7 @@ public class XQueryParser extends XPathParser {
                                 return null;
                             }
                             nextToken();
-                            expect(Token.RPAR);
+                            expect(Token.RPAREN);
                             nextToken();
                             break;
 
@@ -950,7 +950,7 @@ public class XQueryParser extends XPathParser {
                         grumble("Annotation parameter must be a string or number");
                     }
 
-                    if (t.currentToken == Token.RPAR) {
+                    if (t.currentToken == Token.RPAREN) {
                         nextToken();
                         break;
                     }
@@ -1983,19 +1983,26 @@ public class XQueryParser extends XPathParser {
             }
         }
 
-        // the next token should be the < QNAME "("> pair
+        // the next tokens should be the < QNAME "("> pair - now delivered as two tokens
         int offset = t.currentTokenStartOffset;
         t.setState(Tokenizer.DEFAULT_STATE);
         nextToken();
-        expect(Token.FUNCTION);
+        expect(Token.NAME);
+        String fName = t.currentTokenValue;
+        nextToken();
+        expect(Token.LPAREN);
 
         NamespaceUri uri;
         StructuredQName qName;
-        if (t.currentTokenValue.indexOf(':') < 0) {
+        if (fName.indexOf(':') < 0) {
+            int category = classifyNameFollowedByLeftParen(fName, true);
+            if (category != Token.FUNCTION_CALL) {
+                grumble("'" + fName + "' is a reserved function name");
+            }
             uri = env.getDefaultFunctionNamespace();
-            qName = new StructuredQName("", uri, t.currentTokenValue);
+            qName = new StructuredQName("", uri, fName);
         } else {
-            qName = makeStructuredQName(t.currentTokenValue, NamespaceUri.NULL);
+            qName = makeStructuredQName(fName, NamespaceUri.NULL);
             uri = qName.getNamespaceUri();
         }
 
@@ -2009,7 +2016,7 @@ public class XQueryParser extends XPathParser {
         }
 
         if (isReservedInQuery(uri)) {
-            grumble("The function name " + t.currentTokenValue + " is in a reserved namespace", "XQST0045");
+            grumble("The function name " + fName + " is in a reserved namespace", "XQST0045");
         }
 
         XQueryFunction func = new XQueryFunction();
@@ -2027,7 +2034,7 @@ public class XQueryParser extends XPathParser {
         HashSet<StructuredQName> paramNames = new HashSet<>(8);
         boolean external = false;
         boolean foundDefault = false;
-        if (t.currentToken != Token.RPAR) {
+        if (t.currentToken != Token.RPAREN) {
             while (true) {
                 //     ParamList   ::=     Param ("," Param)*
                 //     Param       ::=     "$" VarName  TypeDeclaration?
@@ -2067,7 +2074,7 @@ public class XQueryParser extends XPathParser {
                                     + "all subsequent parameters must also have default values");
                 }
                 func.addParameter(arg);
-                if (t.currentToken == Token.RPAR) {
+                if (t.currentToken == Token.RPAREN) {
                     break;
                 } else if (t.currentToken == Token.COMMA) {
                     nextToken();
@@ -3111,7 +3118,7 @@ public class XQueryParser extends XPathParser {
         Expression operand = parseExpression();
         List<List<SequenceType>> types = new ArrayList<>(10);
         List<Expression> actions = new ArrayList<>(10);
-        expect(Token.RPAR);
+        expect(Token.RPAREN);
         nextToken();
 
         // The code generated takes the form:
@@ -3281,11 +3288,11 @@ public class XQueryParser extends XPathParser {
 
         Expression operand;
         boolean braced = false;
-        if (t.currentToken == Token.SWITCH) {
+        if (t.currentToken == Token.LPAREN) {
             // On entry, the "(" has already been read
             nextToken();
             operand = parseExpression();
-            expect(Token.RPAR);
+            expect(Token.RPAREN);
             nextToken();
         } else if (t.currentToken == Token.KEYWORD_CURLY) {
             checkLanguageVersion40();

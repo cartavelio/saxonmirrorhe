@@ -168,9 +168,9 @@ public final class Tokenizer {
             precedingTokenValue = "";
             currentToken = Token.UNKNOWN;
         } else if (state == OPERATOR_STATE) {
-            precedingToken = Token.RPAR;
+            precedingToken = Token.RPAREN;
             precedingTokenValue = ")";
-            currentToken = Token.RPAR;
+            currentToken = Token.RPAREN;
         }
     }
 
@@ -287,9 +287,9 @@ public final class Tokenizer {
 
         switch (nextToken)
         {
-        case Token.LPAR:
-            handleLPAR(oldPrecedingToken);
-            break;
+//        case Token.LPAR:
+//            handleLPAR(oldPrecedingToken);
+//            break;
 
         case Token.LCURLY:
             handleLCURLY();
@@ -363,22 +363,6 @@ public final class Tokenizer {
             }
         default:
             // no action needed
-        }
-    }
-
-    private void handleLPAR(int oldPrecedingToken) throws XPathException
-    {
-        int op = getBinaryOp(currentTokenValue);
-        // the test on followsOperator() is to cater for an operator being used as a function name,
-        // e.g. is(): see XQTS test K-FunctionProlog-66
-        if (op == Token.UNKNOWN || followsOperator(oldPrecedingToken))
-        {
-            currentToken = getFunctionType(currentTokenValue);
-            lookAhead();    // swallow the "("
-        }
-        else
-        {
-            currentToken = op;
         }
     }
 
@@ -490,7 +474,7 @@ public final class Tokenizer {
      * Peek ahead at the next token
      */
 
-    int peekAhead() {
+    public int peekAhead() {
         return nextToken;
     }
 
@@ -643,11 +627,11 @@ public final class Tokenizer {
                         }
                         lookAhead();
                     } else {
-                        nextToken = Token.LPAR;
+                        nextToken = Token.LPAREN;
                     }
                     return;
                 case ')':
-                    nextToken = Token.RPAR;
+                    nextToken = Token.RPAREN;
                     return;
                 case '+':
                     nextToken = Token.PLUS;
@@ -1213,59 +1197,7 @@ public final class Tokenizer {
     private boolean isGreaterThanChar(char c) {
         return c == '>' || (languageLevel >= 40 && c == FULL_WIDTH_GT);
     }
-
-    /**
-     * Distinguish nodekind names, "if", and function names, which are all
-     * followed by a "("
-     *
-     * @param s the name - must be interned
-     * @return the token number
-     */
-
-    private int getFunctionType(String s) {
-        switch (s) {
-            case "if":
-                return Token.IF;
-            case "namespace-node":
-            case "function":
-                return languageLevel == 20 ? Token.FUNCTION : Token.KEYWORD_LBRA;
-            case "fn":
-                return languageLevel >= 40 ? Token.KEYWORD_LBRA : Token.FUNCTION;
-            case "array":
-            case "map":
-                 // first reserved in 3.1, unreserved again in 4.0
-                return languageLevel == 31 ? Token.KEYWORD_LBRA : Token.FUNCTION;
-            case "node":
-            case "schema-attribute":
-            case "schema-element":
-            case "processing-instruction":
-            case "empty-sequence":
-            case "document-node":
-            case "comment":
-            case "element":
-            case "item":
-            case "text":
-            case "attribute":
-                return Token.KEYWORD_LBRA;
-            case "atomic":
-            case "tuple": // No longer supported as a synonym of "record", but still recognized for the sake of error messages
-            case "record":
-            case "type":
-            case "union":
-            case "enum":
-                return allowSaxonExtensions ? Token.KEYWORD_LBRA : Token.FUNCTION; // Saxon extension types
-            case "switch":
-                // Reserved in XPath 3.0, even though only used in XQuery
-                return languageLevel == 20 ? Token.FUNCTION : Token.SWITCH;
-            case "otherwise":
-                return Token.OTHERWISE;
-            case "typeswitch":
-                return Token.TYPESWITCH;
-            default:
-                return Token.FUNCTION;
-        }
-    }
-
+    
     /**
      * Test whether the previous token is an operator
      *

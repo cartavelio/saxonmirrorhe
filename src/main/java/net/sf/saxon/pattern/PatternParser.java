@@ -241,14 +241,11 @@ public class PatternParser extends XPathParser {
         Tokenizer t = getTokenizer();
         if (inPredicate > 0) {
             return super.parseExpression();
-        } else if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA &&
+        } else if (allowXPath40Syntax && t.currentToken == Token.NAME && t.peekAhead() == Token.LPAREN &&
                 (t.currentTokenValue.equals("record")  || t.currentTokenValue.equals("type") || t.currentTokenValue.equals("map") || t.currentTokenValue.equals("array"))) {
             ItemType type = parseItemType();
             Expression expr = new ItemTypePattern(type);
             expr.setRetainedStaticContext(env.makeRetainedStaticContext());
-//            Expression expr = new InstanceOfExpression(
-//                    new ContextItemExpression(), SequenceType.makeSequenceType(type, StaticProperty.EXACTLY_ONE));
-//            expr = new FilterExpression(new ContextItemExpression(), expr);
             setLocation(expr);
             while (t.currentToken == Token.LSQB) {
                 expr = parsePredicate(expr).toPattern(env.getConfiguration());
@@ -261,7 +258,7 @@ public class PatternParser extends XPathParser {
             StructuredQName typeName =
                     makeStructuredQName(t.currentTokenValue,env.getDefaultElementNamespace());
             nextToken();
-            expect(Token.RPAR);
+            expect(Token.RPAREN);
             nextToken();
             SchemaType type = env.getConfiguration().getSchemaType(typeName);
             if (type == null || !type.isAtomicType()) {
@@ -321,22 +318,26 @@ public class PatternParser extends XPathParser {
                 case Token.DOTDOT:
                     grumble("Token " + currentTokenDisplay() + " not allowed here in an XSLT pattern");
                     return null;
-                case Token.FUNCTION:
+                case Token.FUNCTION_CALL:
                     if (!firstInPattern) {
                         grumble("In an XSLT pattern, a function call is allowed only as the first step in a path");
                     }
                     return super.parseBasicStep(firstInPattern);
-                case Token.KEYWORD_LBRA:
-                    switch (t.currentTokenValue) {
-                        case "type":
-                        case "tuple":
-                        case "union":
-                        case "map":
-                        case "array":
-                        case "atomic":
-                            return parserExtension.parseTypePattern(this);
-                        default:
-                            return super.parseBasicStep(firstInPattern);
+                case Token.NAME:
+                    if (t.peekAhead() == Token.LPAREN) {
+                        switch (t.currentTokenValue) {
+                            case "type":
+                            case "tuple":
+                            case "union":
+                            case "map":
+                            case "array":
+                            case "atomic":
+                                return parserExtension.parseTypePattern(this);
+                            default:
+                                return super.parseBasicStep(firstInPattern);
+                        }
+                    } else {
+                        return super.parseBasicStep(firstInPattern);
                     }
                 default:
                     return super.parseBasicStep(firstInPattern);
@@ -389,8 +390,8 @@ public class PatternParser extends XPathParser {
 
     /*@NotNull*/
     @Override
-    public Expression parseFunctionCall(Expression prefixArgument) throws XPathException {
-        Expression fn = super.parseFunctionCall(prefixArgument);
+    public Expression parseFunctionCall(String fname, Expression prefixArgument) throws XPathException {
+        Expression fn = super.parseFunctionCall(fname, prefixArgument);
         if (inPredicate <= 0 && !fn.isCallOn(SuperId.class) && !fn.isCallOn(KeyFn.class) &&
                 !fn.isCallOn(Doc.class) && !fn.isCallOn(Root_1.class)) {
             grumble("The " + fn + " function is not allowed at the head of a pattern");
