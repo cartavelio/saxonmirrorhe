@@ -529,7 +529,7 @@ TODO: rethink redefines and override
             <li><p>Item type declarations in XSLT and XQuery</p></li>
             <li><p>PR1355, PR1708 - Named record types in XSLT and XQuery</p></li>
             <li><p>PR1817, PR1853 - Methods</p></li>
-            <li><p>The pipeline operator <code>-></code></p></li>
+            <li><p>The pipeline operator <code>-></code> (partially implemented)</p></li>
             <li><p>try/catch/finally in XQuery</p></li>
             <li><p>xsd-validator function (partially implemented)</p></li>
             <li><p>scan-left and scan-right functions</p></li>
@@ -546,7 +546,7 @@ TODO: rethink redefines and override
             <li><p>The <code>include-template-content</code> option of <code>parse-html</code>
             and <code>html-doc</code>.</p></li>
             <li><p>JSON-Lines input and output</p></li>
-            <li><p></p></li>
+            <li><p>Reporting of captured lookahead groups in fn:analyze-string</p></li>
         </ul>
         
         <p>TODO: Note in documentation that we have included the Blake3 hashing algorithm 
