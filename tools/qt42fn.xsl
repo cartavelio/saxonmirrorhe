@@ -28,20 +28,6 @@
 
 <xsl:template match="/">
   <xsl:apply-templates/>
-<!--
-  <xsl:for-each select="article/section">
-    <xsl:message select="@id/string(), @title/string()"/>
-  </xsl:for-each>
-
-  <xsl:variable name="this" select="."/>
-  <xsl:for-each select="$qt4cg-functions//fos:function">
-    <xsl:variable name="ns" select="sfn:prefix-to-ns(@prefix)"/>
-    <xsl:variable name="name" select="@name/string()"/>
-    <xsl:if test="@prefix != 'op' and empty($this//sfn:function/sfn:name[@namespace=$ns and string(.) = $name])">
-      <xsl:message select="'New: ' || @prefix || ':' || $name"/>
-    </xsl:if>
-  </xsl:for-each>
--->
 </xsl:template>
 
 <xsl:template match="section">
@@ -73,7 +59,7 @@
                   <status>
                     <p>FIXME:</p>
                   </status>
-                  <saxon-edition>EE 13.0</saxon-edition>
+                  <saxon-edition>EE_13</saxon-edition>
                   <description>
                     <p>FIXME:</p>
                     <xsl:for-each select="fos:summary/*">
@@ -106,7 +92,6 @@
   <xsl:variable name="qtf" select="sfn:saxon-to-qt4cg(..)"/>
   <xsl:variable name="prefix" select="sfn:ns-to-prefix(../sfn:name/@namespace)"/>
   <xsl:variable name="name" select="string(../sfn:name)"/>
-
   <xsl:choose>
     <xsl:when test="exists($qtf)">
       <xsl:copy>
@@ -135,13 +120,16 @@
 
 <xsl:template match="fos:proto" mode="proto">
   <xsl:param name="protos" as="element(sfn:proto)*" tunnel="yes"/>
+
+  <xsl:variable name="num" select="count(preceding-sibling::fos:proto)+1"/>
+
   <proto xmlns="http://www.saxonica.com/ns/doc/functions">
     <xsl:sequence select="@return-type"/>
     <xsl:text>&#10;</xsl:text>
     <xsl:apply-templates select="fos:arg" mode="proto"/>
     <in-spec xmlns="http://www.saxonica.com/ns/doc/functions">xpath40</in-spec>
     <xsl:text>&#10;</xsl:text>
-    <xsl:for-each select="$protos[1]/sfn:in-spec">
+    <xsl:for-each select="$protos[1]/sfn:in-spec|$protos[$num]/sfn:description">
       <xsl:sequence select="."/>
       <xsl:text>&#10;</xsl:text>
     </xsl:for-each>

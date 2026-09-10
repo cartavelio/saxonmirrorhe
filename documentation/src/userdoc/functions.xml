@@ -72,6 +72,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns a date value equivalent to the original date, but with the timezone
+              removed.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -89,6 +93,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns a dateTime value equivalent to the original dateTime, but with the timezone
+              removed.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -106,6 +114,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns a time value equivalent to the original time, but with the timezone
+              removed.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -118,7 +130,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if no two items in a supplied sequence are equal.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if no two items in a supplied sequence are equal.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">all-equal</name><signatures>
          <proto return-type="xs:boolean">
@@ -127,7 +139,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if all items in a supplied sequence (after atomization) are equal.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if all items in a supplied sequence (after atomization) are equal.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">analyze-string</name>
@@ -182,7 +194,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Applies template rules to selected items.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Applies template rules to selected items.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">atomic-equal</name><signatures>
          <proto return-type="xs:boolean">
@@ -191,7 +203,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Determines whether two atomic items are equal, under the rules used for comparing keys in a map.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Determines whether two atomic items are equal, under the rules used for comparing keys in a map.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">atomic-type-annotation</name><signatures>
          <proto>
@@ -199,7 +211,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a record containing information about the type annotation of an atomic value.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a record containing information about the type annotation of an atomic value.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">available-environment-variables</name>
@@ -269,6 +281,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the base URI of the context node.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -325,7 +340,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Constructs a URI from the parts provided.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Constructs a URI from the parts provided.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">ceiling</name>
@@ -352,7 +367,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a string containing a particular character or glyph.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a string containing a particular character or glyph.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">character-map</name><signatures>
          <proto return-type="map(xs:string, xs:string)?">
@@ -360,7 +375,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Delivers the content of a character map declared using <code xmlns="">xsl:character-map</code>.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Delivers the content of a character map declared using <code xmlns="">xsl:character-map</code>.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">characters</name><signatures>
          <proto return-type="xs:string*">
@@ -368,7 +383,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Splits the supplied string into a sequence of single-character strings.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Splits the supplied string into a sequence of single-character strings.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">civil-timezone</name><signatures>
          <proto return-type="xs:dayTimeDuration">
@@ -377,7 +392,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the timezone offset from UTC that is in conventional use at a given place and time.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the timezone offset from UTC that is in conventional use at a given place and time.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">codepoint-equal</name>
@@ -429,7 +444,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Constructs a collation URI with requested properties.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Constructs a collation URI with requested properties.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">collation-available</name><signatures>
          <proto return-type="xs:boolean">
@@ -438,7 +453,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Asks whether a collation URI is recognized by the implementation,
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Asks whether a collation URI is recognized by the implementation,
             and whether it has required properties.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -476,6 +491,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns a sequence of items making up the default collection.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -510,6 +528,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Compares two strings using the default collation.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -564,7 +585,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Determines whether one sequence contains another as a contiguous subsequence, using a supplied callback function to compare items.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Determines whether one sequence contains another as a contiguous subsequence, using a supplied callback function to compare items.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">contains-token</name>
@@ -636,7 +657,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Reads an external resource containing CSV, and returns the results as a record
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Reads an external resource containing CSV, and returns the results as a record
             containing information about the names in the header, as well as the data itself.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">csv-to-arrays</name><signatures>
@@ -646,7 +667,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Parses CSV data supplied as a string, returning the results in the form of a sequence
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Parses CSV data supplied as a string, returning the results in the form of a sequence
             of arrays of strings.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">csv-to-xml</name><signatures>
@@ -656,7 +677,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Parses CSV data supplied as a string, returning the results as an XML document, as described by
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Parses CSV data supplied as a string, returning the results as an XML document, as described by
             SPECREF:csv-represent-as-xml:.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -791,7 +812,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the merge key of the 
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the merge key of the 
             merge group currently being processed using the
                <code xmlns="">xsl:merge</code> instruction.</p>
 </description></function>
@@ -838,6 +859,9 @@
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the result of atomizing the context item.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -933,7 +957,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Decodes URI-escaped characters in a string.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Decodes URI-escaped characters in a string.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">deep-equal</name>
@@ -1008,7 +1032,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Removes duplicate GNodes and sorts the input into document order.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Removes duplicate GNodes and sorts the input into document order.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">distinct-values</name>
@@ -1041,7 +1065,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Divides one <code>xs:decimal</code> by another to a defined precision, returning
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Divides one <code>xs:decimal</code> by another to a defined precision, returning
             both the quotient and the remainder.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">do-until</name><signatures>
@@ -1052,7 +1076,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Processes a supplied value repeatedly, continuing when some condition is false,
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Processes a supplied value repeatedly, continuing when some condition is false,
             and returning the value that satisfies the condition.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1227,7 +1251,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the values that appear in a sequence more than once.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the values that appear in a sequence more than once.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">element-available</name>
@@ -1267,7 +1291,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Converts an element node into a map that is suitable for
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Converts an element node into a map that is suitable for
             JSON serialization.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">element-to-map-plan</name><signatures>
@@ -1276,7 +1300,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Analyzes sample data to generate a conversion plan suitable for use by the <em xmlns="" namespace="http://www.saxonica.com/ns/doc/functions">element-to-map</em>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Analyzes sample data to generate a conversion plan suitable for use by the <em xmlns="" namespace="http://www.saxonica.com/ns/doc/functions">element-to-map</em>
             function.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -1366,7 +1390,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Determines whether one sequence ends with another, using a supplied callback function to compare items.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Determines whether one sequence ends with another, using a supplied callback function to compare items.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">environment-variable</name>
@@ -1449,7 +1473,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if every item in the input sequence matches a supplied predicate.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if every item in the input sequence matches a supplied predicate.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">exactly-one</name>
@@ -1496,7 +1520,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a string representation of an <code>xs:QName</code> in the format <code>Q{uri}local</code>.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a string representation of an <code>xs:QName</code> in the format <code>Q{uri}local</code>.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">false</name>
@@ -1616,7 +1640,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the last item in a sequence. </p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the last item in a sequence. </p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">for-each</name>
@@ -1677,6 +1701,11 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Formats a date, using a format controlled by the picture string. The result is
+              equivalent to the 5-argument form of the function, with the third, fourth, and fifth
+              arguments set to an empty sequence.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -1699,6 +1728,11 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Formats a dateTime, using a format controlled by the picture string. The result is
+              equivalent to the 5-argument form of the function, with the third, fourth, and fifth
+              arguments set to an empty sequence.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -1805,6 +1839,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Formats a number as specified by a picture string, using the default decimal
+              format.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -1849,7 +1887,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the annotations of the function item.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the annotations of the function item.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">function-arity</name>
@@ -1879,6 +1917,10 @@
 <in-spec>xpath40</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Determines whether a function with a given name (regardless of arity) is available in
+              the context.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -1896,7 +1938,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-	  </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a string representing the identity of a function item.</p>
+	  </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a string representing the identity of a function item.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">function-lookup</name>
@@ -1950,6 +1992,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns a generated unique ASCII identifier for the context node.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -1964,7 +2009,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Splits the supplied string into a sequence of single-grapheme strings.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Splits the supplied string into a sequence of single-grapheme strings.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">has-children</name>
@@ -1996,7 +2041,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the results of a specified hash, checksum, or
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the results of a specified hash, checksum, or
             cyclic redundancy check function applied to the input.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2026,7 +2071,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns those items from a supplied sequence that have the highest value of a sort key, where
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns those items from a supplied sequence that have the highest value of a sort key, where
             the sort key can be computed using a caller-supplied function.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -2095,7 +2140,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Reads an external resource containing HTML, and returns the result of parsing the resource as HTML.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Reads an external resource containing HTML, and returns the result of parsing the resource as HTML.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">id</name>
@@ -2123,7 +2168,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns its argument value.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns its argument value.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">idref</name>
@@ -2178,7 +2223,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the in-scope namespaces of an element node, as a map.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the in-scope namespaces of an element node, as a map.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">in-scope-prefixes</name>
@@ -2229,7 +2274,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the positions in an input sequence of items that match a supplied predicate.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the positions in an input sequence of items that match a supplied predicate.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">innermost</name>
@@ -2279,7 +2324,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Creates an Invisible XML parser for a grammar.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Creates an Invisible XML parser for a grammar.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">iri-to-uri</name>
@@ -2307,7 +2352,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if the argument is the <code>xs:float</code> or <code>xs:double</code> value <code>NaN</code>.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if the argument is the <code>xs:float</code> or <code>xs:double</code> value <code>NaN</code>.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">items-at</name><signatures>
          <proto return-type="item()*">
@@ -2316,7 +2361,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing the items from <code>$input</code>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing the items from <code>$input</code>
             at positions defined by <code>$at</code>, in the order specified. </p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">jnode-content</name><signatures>
@@ -2325,7 +2370,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the ·content· property of a JNode.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the ·content· property of a JNode.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">jnode-position</name><signatures>
          <proto return-type="xs:anyAtomicType?">
@@ -2333,7 +2378,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the ·position· property of a JNode.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the ·position· property of a JNode.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">jnode-selector</name><signatures>
          <proto return-type="xs:anyAtomicType?">
@@ -2341,7 +2386,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the ·selector· property of a JNode.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the ·selector· property of a JNode.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">json-doc</name>
@@ -2420,7 +2465,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Delivers a root XTERMREF:DM40.dt-JNode: wrapping 
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Delivers a root XTERMREF:DM40.dt-JNode: wrapping 
             a map or array, enabling the use of lookup expression
             to navigate a XTERMREF:DM40.dt-JTree: rooted at that map or array.</p>
 </description></function>
@@ -2459,6 +2504,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns true if the <code>xml:lang</code> value for the context node matches the
+              given language.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -2515,6 +2564,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the local part of the name of the context node.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -2566,7 +2618,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns those items from a supplied sequence that have the lowest value of a sort key, where
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns those items from a supplied sequence that have the lowest value of a sort key, where
             the sort key can be computed using a caller-supplied function.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">map-for-key</name><signatures>
@@ -2576,7 +2628,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Delivers the content of a key, for a specific document or subtree, as a map.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Delivers the content of a key, for a specific document or subtree, as a map.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">matches</name>
@@ -2700,7 +2752,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Outputs trace information and discards the result.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Outputs trace information and discards the result.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">min</name>
@@ -2850,6 +2902,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the name of the context node, as a string in the lexical form of a QName.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -2866,6 +2921,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the namespace URI of the name of the context node.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -2945,6 +3003,10 @@
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the name of the context node, as a QName value (that is, a namespace URI plus
+              local name).</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -2959,7 +3021,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a record containing information about the type annotation of an element or attribute node.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a record containing information about the type annotation of an element or attribute node.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">normalize-space</name>
@@ -2972,6 +3034,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Eliminates redundant spaces from the string value of the context item.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -2989,6 +3054,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Converts a string to Unicode normalization form NFC by modifying the way in which
+              combining characters are represented.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -3026,6 +3095,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Equivalent to <code>number(.)</code>; converts the value of the context item to a
+              double.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -3057,7 +3130,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a function whose effect is to apply a supplied binary operator to two arguments.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a function whose effect is to apply a supplied binary operator to two arguments.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">outermost</name>
@@ -3086,7 +3159,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Parses CSV data, returning the results in the form of a record containing information about the
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Parses CSV data, returning the results in the form of a record containing information about the
             names in the header, as well as the data itself.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">parse-html</name><signatures>
@@ -3096,7 +3169,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>This function takes as input an HTML document, and returns the
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>This function takes as input an HTML document, and returns the
             document node at the root of an XDM tree representing the parsed document.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3124,7 +3197,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Converts a string to an integer, recognizing any radix in the range 2 to 36.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Converts a string to an integer, recognizing any radix in the range 2 to 36.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">parse-json</name>
@@ -3172,7 +3245,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns an <code>xs:QName</code> value formed by parsing an EQName.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns an <code>xs:QName</code> value formed by parsing an EQName.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">parse-uri</name><signatures>
          <proto>
@@ -3181,7 +3254,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Parses the URI provided and returns a map of its parts.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Parses the URI provided and returns a map of its parts.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">parse-xml</name>
@@ -3242,7 +3315,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Performs partial application of a function item by binding values to selected arguments.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Performs partial application of a function item by binding values to selected arguments.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">partition</name><signatures>
          <proto return-type="array(item()*)*">
@@ -3251,7 +3324,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Partitions a sequence of items into a sequence of non-empty arrays containing the same items,
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Partitions a sequence of items into a sequence of non-empty arrays containing the same items,
             starting a new partition when a supplied condition is true.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3379,7 +3452,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the set of captured groups associated with a matching segment
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the set of captured groups associated with a matching segment
             during evaluation of the <code xmlns="">xsl:analyze-string</code> instruction.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3437,7 +3510,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Produces multiple copies of a sequence.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Produces multiple copies of a sequence.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">resolve-QName</name>
@@ -3471,6 +3544,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Resolves a relative URI against the base URI from the static context.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -3512,6 +3588,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the root node (typically but not necessarily a document node) of the tree
+              containing the context node.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -3530,6 +3610,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards positive
+              infinity.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -3556,6 +3640,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Rounds a numeric value to the nearest whole number, rounding x.5 towards the nearest
+              even number.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -3569,7 +3657,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-       </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Produces the sequence of successive partial results from 
+       </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Produces the sequence of successive partial results from 
            the evaluation of <em xmlns="" namespace="http://www.saxonica.com/ns/doc/functions">fn:fold-left</em> with the same arguments.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">scan-right</name><signatures>
@@ -3580,7 +3668,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-       </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Produces the sequence of successive partial results from 
+       </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Produces the sequence of successive partial results from 
            the evaluation of <em xmlns="" namespace="http://www.saxonica.com/ns/doc/functions">fn:fold-right</em> with the same arguments.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">schema-type</name><signatures>
@@ -3589,7 +3677,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a record containing information about a named schema type in the static context.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a record containing information about a named schema type in the static context.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">seconds</name><signatures>
          <proto return-type="xs:dayTimeDuration?">
@@ -3597,7 +3685,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns an <code>xs:dayTimeDuration</code> whose length is a given number of seconds.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns an <code>xs:dayTimeDuration</code> whose length is a given number of seconds.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">seconds-from-dateTime</name>
@@ -3663,7 +3751,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Inserts a separator between adjacent items in a sequence.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Inserts a separator between adjacent items in a sequence.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">serialize</name>
@@ -3699,7 +3787,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the supplied GNode together with its siblings, in document order.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the supplied GNode together with its siblings, in document order.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">slice</name><signatures>
          <proto return-type="item()*">
@@ -3710,7 +3798,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing selected items from a supplied input sequence based on their position.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing selected items from a supplied input sequence based on their position.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">snapshot</name>
@@ -3744,7 +3832,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if at least one item in the input sequence matches a supplied predicate.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if at least one item in the input sequence matches a supplied predicate.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">sort</name>
@@ -3778,7 +3866,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied sequence, based on the value of a number of sort keys supplied as functions.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied sequence, based on the value of a number of sort keys supplied as functions.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">sort-with</name><signatures>
          <proto return-type="item()*">
@@ -3787,7 +3875,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied sequence, according to the order induced by the supplied comparator
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied sequence, according to the order induced by the supplied comparator
             functions.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3819,7 +3907,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Determines whether one sequence starts with another, using a supplied callback function to compare items.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Determines whether one sequence starts with another, using a supplied callback function to compare items.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">static-base-uri</name>
@@ -3868,6 +3956,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the string value of the context node.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -3883,6 +3974,10 @@
 <in-spec>xpath30</in-spec>
 <in-spec>xpath31</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns a string created by concatenating all the items in the given sequence
+              (casting each item to a string), with no separator.</p>
+          </description>
 </proto>
 </signatures>
       <status>
@@ -3903,6 +3998,9 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns the number of characters in the string value of the context item.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -3941,6 +4039,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns those items in the given sequence from the given starting position to the end
+              of the sequence.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -3954,7 +4056,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a contiguous sequence of items from <code>$input</code>, with the start and end
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a contiguous sequence of items from <code>$input</code>, with the start and end
          points located by applying predicates.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -3970,6 +4072,10 @@
 <in-spec>xpath31</in-spec>
 <in-spec>xslt20</in-spec>
 <in-spec>xslt30</in-spec>
+<description>
+            <p>Returns a substring of a given string starting at the given starting position and
+              continuing to the end of the string.</p>
+          </description>
 </proto>
 </signatures>
       <status-ok/>
@@ -4114,7 +4220,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns items from the input sequence prior to the first one that fails to match a supplied predicate.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns items from the input sequence prior to the first one that fails to match a supplied predicate.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">timezone-from-date</name>
@@ -4304,7 +4410,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns all the GNodes reachable from a given start GNode by applying a supplied function repeatedly.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns all the GNodes reachable from a given start GNode by applying a supplied function repeatedly.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">translate</name>
@@ -4353,7 +4459,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns all but the last item in a sequence. </p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns all but the last item in a sequence. </p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">type-available</name>
@@ -4385,7 +4491,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns information about the type of a value, as a string.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns information about the type of a value, as a string.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">unix-dateTime</name><signatures>
          <proto return-type="xs:dateTimeStamp">
@@ -4393,7 +4499,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a dateTime value for a Unix time.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a dateTime value for a Unix time.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions">unordered</name>
@@ -4425,7 +4531,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>The <code>fn:unparsed-binary</code> function reads an external resource (for example, a
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>The <code>fn:unparsed-binary</code> function reads an external resource (for example, a
             file) and returns its contents in binary.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4596,7 +4702,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Absorbs the argument.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Absorbs the argument.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions">while-do</name><signatures>
          <proto return-type="item()*">
@@ -4606,7 +4712,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Processes a supplied value repeatedly, continuing while some condition remains true,
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Processes a supplied value repeatedly, continuing while some condition remains true,
             and returning the first value that does not satisfy the condition.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4636,7 +4742,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Given an XSD schema, delivers a function item that can be invoked to validate a document or element node
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Given an XSD schema, delivers a function item that can be invoked to validate a document or element node
             against this schema.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -4841,14 +4947,14 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the hyperbolic cosine of the argument.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the hyperbolic cosine of the argument.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions/math">e</name><signatures>
          <proto return-type="xs:double">
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns an approximation to the mathematical constant <code xmlns="">e</code>.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns an approximation to the mathematical constant <code xmlns="">e</code>.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/math">exp</name>
@@ -4992,7 +5098,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the hyperbolic sine of the argument.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the hyperbolic sine of the argument.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/math">sqrt</name>
@@ -5042,7 +5148,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the hyperbolic tangent of the argument.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the hyperbolic tangent of the argument.</p>
 </description></function>
 
   </section>
@@ -5057,7 +5163,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a map that typically contains one entry for each item in a supplied input sequence.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a map that typically contains one entry for each item in a supplied input sequence.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/map">contains</name>
@@ -5088,7 +5194,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if the supplied map contains no entries.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if the supplied map contains no entries.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions/map">entries</name><signatures>
          <proto return-type="map(*)*">
@@ -5096,7 +5202,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing all the key-value pairs present in a map, each represented
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing all the key-value pairs present in a map, each represented
             as a TERMREF:dt-single-entry-map:.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -5129,7 +5235,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Selects entries from a map, returning a new map.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Selects entries from a map, returning a new map.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/map">find</name>
@@ -5203,7 +5309,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing all the values present in a map, in order.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing all the values present in a map, in order.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/map">keys</name>
@@ -5232,7 +5338,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing selected keys present in a map.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a sequence containing selected keys present in a map.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/map">merge</name>
@@ -5392,7 +5498,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns an array obtained by evaluating the supplied function once for each item in the input sequence.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns an array obtained by evaluating the supplied function once for each item in the input sequence.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions/array">empty</name><signatures>
          <proto return-type="xs:boolean">
@@ -5400,7 +5506,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if the supplied array contains no members.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns <code>true</code> if the supplied array contains no members.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">filter</name>
@@ -5485,7 +5591,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the last member of an array.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the last member of an array.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">for-each</name>
@@ -5577,7 +5683,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns a sequence of positive integers giving the positions within the array
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns a sequence of positive integers giving the positions within the array
                <code>$array</code> of members that are equal to <code>$target</code>.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions/array">index-where</name><signatures>
@@ -5587,7 +5693,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the positions in an input array of members that match a supplied predicate.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the positions in an input array of members that match a supplied predicate.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">insert-before</name>
@@ -5615,7 +5721,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns the sequence concatenation of the members of an array.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns the sequence concatenation of the members of an array.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">join</name>
@@ -5641,7 +5747,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Delivers the contents of an array as a sequence of value records.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Delivers the contents of an array as a sequence of value records.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions/array">of-members</name><signatures>
          <proto return-type="array(*)">
@@ -5649,7 +5755,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Constructs an array from the contents of a sequence of value records.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Constructs an array from the contents of a sequence of value records.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">put</name>
@@ -5736,7 +5842,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns an array containing selected members of a supplied input array based on their position.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns an array containing selected members of a supplied input array based on their position.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">sort</name>
@@ -5766,7 +5872,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied array, based on the value of a number of sort keys supplied as functions.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied array, based on the value of a number of sort keys supplied as functions.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions/array">sort-with</name><signatures>
          <proto return-type="array(*)">
@@ -5775,7 +5881,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied array, according to the order induced by the supplied comparator
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Sorts a supplied array, according to the order induced by the supplied comparator
             functions.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions"><name namespace="http://www.w3.org/2005/xpath-functions/array">split</name><signatures>
@@ -5784,7 +5890,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Delivers the contents of an array as a sequence of single-member arrays.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Delivers the contents of an array as a sequence of single-member arrays.</p>
 </description></function>
 <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/array">subarray</name>
@@ -5829,7 +5935,7 @@
 <in-spec>xpath40</in-spec>
 </proto>
 
-      </signatures><status><p>FIXME:</p></status><saxon-edition>EE 13.0</saxon-edition><description><p>FIXME:</p><p>Returns an array containing all members except the last from a supplied array.</p>
+      </signatures><status><p>FIXME:</p></status><saxon-edition>EE_13</saxon-edition><description><p>FIXME:</p><p>Returns an array containing all members except the last from a supplied array.</p>
 </description></function>
 
 
