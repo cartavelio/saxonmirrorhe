@@ -55,7 +55,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
 
     @Override
     public Receiver startSelectedParentNode(FleetingParentNode node, Location locationId) throws XPathException {
-        throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
@@ -101,13 +101,7 @@ public abstract class ComplexNodeEventFeed extends ItemFeed {
 
     @Override
     public void endSelectedParentNode(Location locationId) throws XPathException {
-        if (opened && !hasFailed()) {
-            try {
-                getResultFeed().endSelectedParentNode(locationId);
-            } catch (XPathException e) {
-                dynamicError(e);
-            }
-        }
+        // no action
     }
 
     @Override
