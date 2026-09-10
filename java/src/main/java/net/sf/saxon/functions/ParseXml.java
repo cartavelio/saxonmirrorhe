@@ -38,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,12 +77,13 @@ public class ParseXml extends SystemFunction implements Callable {
         if (options == null) {
             options = EmptyMap.getInstance(40);
         }
-        Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
-
         if (input == null) {
             return EmptySequence.INSTANCE;
         }
 
+        Map<String, GroundedValue> checkedOptions =
+                is40 ? getDetails().optionDetails.processSuppliedOptions(options, context, 40) : new HashMap<>();
+        
         ParseOptions parseOptions = context.getConfiguration().getParseOptions();
 
         PackageData pd = getRetainedStaticContext().getPackageData();
