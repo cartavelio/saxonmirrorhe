@@ -1,6 +1,12 @@
 task resources(
-  dependsOn: ["copy_build_scripts", "copy_notices", "resources_userdoc_xml",
-              "resources_userdoc_html", "copy_samples_usecases", "gen_readme"],
+  dependsOn: ["resources_notices",
+              "resources_userdoc_xml",
+              "resources_userdoc_html",
+              "resources_drivers",
+              "samples_common",
+              "samples_j",
+              "samples_n",
+              "gen_readme"],
   description: "Build the saxon-resources download"
 ) {
   // Just a place to hang dependencies
@@ -17,20 +23,8 @@ task releaseResources(
 
 
 // ============================================================
-task copy_build_scripts(
-        type: Copy,
-        description: "Copies the build scripts for saxon-resources"
-) {
-    into "${buildDir}/resources/build"
-    from ("${projectDir}") {
-        include "build.gradle"
-        include "build-doc.gradle"
-        include "build-n.gradle"
-        include "test-suites.gradle"
-    }
-}
 
-task copy_notices(
+task resources_notices(
         type: Copy,
         description: "Copies the notices for saxon-resources"
 ) {
@@ -85,8 +79,6 @@ task resources_html_dotnetdoc(
     }
 }
 
-// TODO source-userdoc previously included style/ and to-static/
-
 task source_userdoc_zip(
         type: Zip,
         dependsOn: ["userdoc_viewer_appJS"]
@@ -94,6 +86,7 @@ task source_userdoc_zip(
     from ("${buildDir}/userdoc") {
         exclude "expanded/**"
         exclude "html/**"
+        exclude "src/**"
         exclude "tmp/**"
     }
     archiveFileName = "source-userdoc.zip"
@@ -108,21 +101,36 @@ task resources_userdoc_xml(
     from "${buildDir}/distributions/source-userdoc.zip"
 }
 
-// TODO drivers - testdriver_classes ???
+task resources_drivers_src(
+        type: Copy,
+        dependsOn: ["hej_compileTestDrivers", "pej_compileTestDrivers", "eej_compileTestDrivers"],
+        description: "Copy test drivers into the resources folder"
+) {
+    into "${buildDir}/resources/drivers/java"
+    from ("${buildDir}/src/testdrivers/eej") {
+        exclude "com/saxonica/js"
+    }
+}
 
-// TODO maybe don't need to do samples and use-cases separately, because eej_samples already does them both???
-//  or maybe testing might mess with samples content
+task resources_drivers(
+        type: Copy,
+        dependsOn: ["resources_drivers_src"],
+        description: "Copy test drivers into the resources folder"
+) {
+    into "${buildDir}/resources/drivers/java/classes"
+    from ("${buildDir}/testdriver_classes/eej") {
+        exclude "com/saxonica/js"
+    }
+}
 
-// samples
 task samples_common(
         type: Copy,
-        dependsOn: ["copy_usecases"],
+        dependsOn: ["copy_usecases", "copy_samples", "copy_config"],
         description: "Assemble Cross-Platform Samples and Use-Cases"
 ) {
     // Just a place to hang dependencies
 }
 
-// use-cases
 task copy_usecases(
         type: Copy,
         description: "Copy use-cases into the resources folder"
@@ -131,13 +139,74 @@ task copy_usecases(
     from "${projectDir}/src/use-cases"
 }
 
-task copy_samples_usecases(
+task copy_samples(
         type: Copy,
-        dependsOn: ["eej_samples"],
-        description: "Copy samples and use-cases into the resources folder"
+        description: "Copy samples into the resources folder"
 ) {
-    into "${buildDir}/resources"
-    from "${buildDir}/output/he/resources" // TODO output/ee/resources ???
+    into "${buildDir}/resources/samples"
+    from ("${projectDir}/src/samples") {
+        include "config/config.xml"
+        include "config/config-HE.xml"
+        include "config/saxon-attributes.xsd"
+        include "data/books.xml"
+        include "data/books-invalid.xml"
+        include "data/more-books.xml"
+        include "data/othello.xml"
+        include "data/books.xsd"
+        include "data/books.dtd"
+        include "data/play.dtd"
+        include "query/tour.xq"
+        include "query/books.xq"
+        include "query/books-to-html.xq"
+        include "scm/scmschema.*"
+        include "schemas/validation-reports.xsd"
+        include "styles/add-ids.xsl"
+        include "styles/bible.xsl"
+        include "styles/books.xsl"
+        include "styles/books.txt"
+        include "styles/play.xsl"
+        include "styles/identity.xsl"
+        include "styles/books-csv.xsl"
+        include "styles/books-sql.xsl"
+        include "styles/rename-to-lowercase.xsl"
+        include "styles/total.xsl"
+        include "styles/tour.xsl"
+        include "styles/summarize.xsl"
+    }
+}
+
+task copy_config(
+        type: Copy,
+        dependsOn: ["config_sample", "copy_samples"],
+        description: "Copy generated config.xsd into the resources folder"
+) {
+    into "${buildDir}/resources/samples/config"
+    from "${buildDir}/samples/config/config.xsd"
+}
+
+task samples_j_src(
+        type: Copy,
+        description: "Copy Java samples into the resources folder"
+) {
+    into "${buildDir}/resources/samples/java"
+    from "${projectDir}/src/samples/java"
+}
+
+task samples_j(
+        type: Copy,
+        dependsOn: ["samples_j_src", "eej_samples_ee"],
+        description: "Copy compiled Java samples into the resources folder"
+) {
+    into "${buildDir}/resources/samples/java/classes"
+    from "${buildDir}/samples/java/ee/classes"
+}
+
+task samples_n(
+        type: Copy,
+        description: "Copy .NET samples into the resources folder"
+) {
+    into "${buildDir}/resources/samples/cs"
+    from "${projectDir}/src/samples/cs"
 }
 
 task gen_readme(

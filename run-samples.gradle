@@ -63,11 +63,11 @@ task config_sample(
 ) {
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
   inputs.files "${projectDir}/src/samples/config/config-raw.xsd"
-  outputs.file "${buildDir}/samples/he/config/config.xsd"
+  outputs.file "${buildDir}/samples/config/config.xsd"
   classpath = configurations.preprocessor
   main = "net.sf.saxon.Transform"
   args "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToSchema.xsl",
-    "-o:${buildDir}/samples/he/config/config.xsd",
+    "-o:${buildDir}/samples/config/config.xsd",
     "-it:main",
     "FeatureKeys=FeatureKeys.xml",
     "AdditionalFeatures=AdditionalFeatures.xml",
