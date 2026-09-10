@@ -45,6 +45,16 @@ public class OpCapture extends Operation {
         return this;
     }
 
+    /**
+     * Get the maximum depth of looping within this operation
+     *
+     * @return the maximum number of nested iterations
+     */
+    @Override
+    public int getMaxLoopingDepth() {
+        return childOp.getMaxLoopingDepth();
+    }
+
     @Override
     @CSharpInnerClass(outer = true, extra = {
             "Saxon.Hej.regex.REMatcher matcher",

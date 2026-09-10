@@ -25,6 +25,7 @@ public class OpRepeat extends Operation {
     protected int min;
     protected int max;
     boolean greedy;
+    int loopingDepth = -1;
 
     OpRepeat(Operation op, int min, int max, boolean greedy) {
         this.op = op;
@@ -70,6 +71,20 @@ public class OpRepeat extends Operation {
     public int getMinimumMatchLength() {
         return min * op.getMinimumMatchLength();
     }
+
+    /**
+     * Get the maximum depth of looping within this operation
+     *
+     * @return the maximum number of nested iterations
+     */
+    @Override
+    public int getMaxLoopingDepth() {
+        if (loopingDepth < 0) {
+            loopingDepth = op.getMaxLoopingDepth() + 1;
+        }
+        return loopingDepth;
+    }
+
 
     @Override
     public Operation optimize(REProgram program, REFlags flags) {
@@ -163,7 +178,7 @@ public class OpRepeat extends Operation {
                     return positions.peek();
                 }
             };
-            return new ForceProgressIterator(base);
+            return new ForceProgressIterator(base, getMaxLoopingDepth());
         } else {
             // reluctant (non-greedy) repeat.
             // rewritten for bug 3902
@@ -198,7 +213,7 @@ public class OpRepeat extends Operation {
                     return pos;
                 }
             };
-            return new ForceProgressIterator(iter);
+            return new ForceProgressIterator(iter, getMaxLoopingDepth());
         }
     }
 

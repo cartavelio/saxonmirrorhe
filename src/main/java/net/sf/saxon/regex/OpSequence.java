@@ -127,6 +127,21 @@ public class OpSequence extends Operation {
     }
 
     /**
+     * Get the maximum depth of looping within this operation
+     *
+     * @return the maximum number of nested iterations
+     */
+    @Override
+    public int getMaxLoopingDepth() {
+        int max = 0;
+        for (Operation o : operations) {
+            max = Integer.max(max, o.getMaxLoopingDepth());
+        }
+        return max;
+    }
+
+
+    /**
      * Display the operation as a regular expression, possibly in abbreviated form
      *
      * @return the operation in a form that is recognizable as a regular expression or abbreviated

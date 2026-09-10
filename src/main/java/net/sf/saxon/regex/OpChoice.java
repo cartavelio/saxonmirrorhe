@@ -82,6 +82,20 @@ public class OpChoice extends Operation {
         return result;
     }
 
+    /**
+     * Get the maximum depth of looping within this operation
+     *
+     * @return the maximum number of nested iterations
+     */
+    @Override
+    public int getMaxLoopingDepth() {
+        int max = 0;
+        for (Operation o : branches) {
+            max = Integer.max(max, o.getMaxLoopingDepth());
+        }
+        return max;
+    }
+
 
     @Override
     public Operation optimize(REProgram program, REFlags flags) {
