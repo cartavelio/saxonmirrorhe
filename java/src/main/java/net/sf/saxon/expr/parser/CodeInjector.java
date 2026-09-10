@@ -12,6 +12,8 @@ import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.flwor.FLWORExpression;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.trace.TraceableComponent;
+import net.sf.saxon.trans.UncheckedXPathException;
+import net.sf.saxon.trans.XPathException;
 
 /**
  * A code injector can be used to add code to the expression tree (for example, diagnostic tracing code)
@@ -43,12 +45,18 @@ public interface CodeInjector {
      * Insert a tracing or monitoring clause into the pipeline of clauses that evaluates a FLWOR expression
      * @param expression the containing FLWOR expression
      * @param clause    the clause whose execution is being monitored
-     * @return an injected clause; or the original. The default implementation returns the original clause
-     * unchanged.
+     * @return an injected clause; or null if no injection is required. The default implementation processes
+     * all child expressions within the FLWOR clause, but leaves the clause otherwise unchanged.
      */
 
     default Clause injectClause(FLWORExpression expression, Clause clause) {
-        return clause;
+        try {
+            clause.processOperands(operand -> operand.setChildExpression(
+                    ExpressionTool.injectCode(operand.getChildExpression(), this)));
+        } catch (XPathException e) {
+            throw new UncheckedXPathException(e);
+        }
+        return null;
     }
 }
 
