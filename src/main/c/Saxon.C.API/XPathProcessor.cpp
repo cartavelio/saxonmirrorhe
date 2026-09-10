@@ -202,7 +202,7 @@ void XPathProcessor::setContextFile(const char *filename) {
   }
 }
 
-void XPathProcessor::setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy){
+/*void XPathProcessor::setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy policy){
     std::map<std::string, std::string>::iterator it;
     it = properties.find("uemp:");
     if (it != properties.end()) {
@@ -220,7 +220,7 @@ UnprefixedElementMatchingPolicy XPathProcessor::getUnprefixedElementMatchingPoli
       return UnprefixedElementMatchingPolicy(valuei);
     }
     return UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE;
-}
+} */
 
 void XPathProcessor::declareNamespace(const char *prefix, const char *uri) {
   SaxonProcessor::attachCurrentThread();

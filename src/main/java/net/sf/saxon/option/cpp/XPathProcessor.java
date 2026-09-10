@@ -335,6 +335,10 @@ public class XPathProcessor extends SaxonCAPI {
             valuei = parameterMap.get("uemp:");
             if(valuei != null && valuei instanceof String) {
                 int valueInt = Integer.parseInt((String)valuei);
+                if (SaxonCAPI.debug) {
+                    System.err.println("DEBUG setUnprefixedElementMatchingPolicy value=" + valueInt);
+                    System.err.println("DEBUG setUnprefixedElementMatchingPolicy size=" + UnprefixedElementMatchingPolicy.values().length);
+                }
                 compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.values()[valueInt]);
             }
 

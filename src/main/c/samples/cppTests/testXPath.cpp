@@ -48,8 +48,8 @@ void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor, XPathProcess
       "f:person><person>wrong person selected</person></out>");
     xpath->setContextItem((XdmItem *)node);
   try {
-    xpath->setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy::ANY_NAMESPACE);
-    XdmItem *result = xpath->evaluateSingle("//person[1]");
+    
+    XdmItem *result = xpath->evaluateSingle("//*:person[1]");
     if( result == nullptr || strcmp(result->getStringValue(), "incorrect") == 0) {
         if(result != nullptr) {
             const char *resultStr = result->getStringValue();
@@ -75,7 +75,7 @@ void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor, XPathProcess
 
   xpath->clearParameters();
   xpath->clearProperties();
-  xpath->setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy::DEFAULT_NAMESPACE);
+
   delete node;
 
 
