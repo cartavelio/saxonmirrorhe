@@ -1,7 +1,23 @@
 package com.saxonica.functions.registry;
 
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
+import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.serialize.CharacterMap;
+import net.sf.saxon.str.UnicodeChar;
+import net.sf.saxon.style.StylesheetPackage;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.QNameValue;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntHashMap;
+import net.sf.saxon.z.IntIterator;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XSLT 4.0.
@@ -23,7 +39,35 @@ public class XSLT40FunctionSet extends XSLT30FunctionSet {
 
     private XSLT40FunctionSet() {
 
+        importFunctionSet(correspondingXPathFunctionSet());
+
+        register("character-map", 1, e -> e.populate(CharacterMapFn::new, new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_STRING),
+                                                     OPT, LATE)
+                .arg(0, BuiltInAtomicType.QNAME, ONE, null));
+
     }
+
+    public static class CharacterMapFn extends SystemFunction {
+        @Override
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            QNameValue name = (QNameValue)arguments[0].head();
+            StylesheetPackage pack = (StylesheetPackage)getRetainedStaticContext().getPackageData();
+            CharacterMap charMap = pack.getCharacterMapIndex().getCharacterMap(name.getStructuredQName());
+            if (charMap == null) {
+                return EmptySequence.getInstance();
+            }
+            IntHashMap<String> intMap = charMap.getMap();
+            DictionaryMap stringMap = new DictionaryMap(intMap.size());
+            IntIterator iter = intMap.keyIterator();
+            while (iter.hasNext()) {
+                int cp = iter.next();
+                stringMap.initialPut(new UnicodeChar(cp).toString(), new StringValue(intMap.get(cp)));
+            }
+            return stringMap;
+        }
+    }
+
+
 
 
 }
