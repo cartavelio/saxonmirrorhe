@@ -252,5 +252,32 @@ public class TestXPathCompiler31 {
         }
     }
 
+    @Test
+    public void testUnprefixedElementPolicy() {
+        try {
+            Processor p = new Processor(false);
+            DocumentBuilder db = p.newDocumentBuilder();
+            XdmNode doc =
+                    db.build(new StreamSource(new StringReader(
+                            "<doc><p>one</p><p xmlns='n2'>two</p><n3:p xmlns:n3='n3'>three</n3:p></doc>")));
+            XPathCompiler c = p.newXPathCompiler();
+            c.setLanguageVersion ("3.1");
+            XdmItem result = c.evaluateSingle("string-join(//p)", doc);
+            assertEquals("one", result.getStringValue());
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.ANY_NAMESPACE);
+            result = c.evaluateSingle("string-join(//p)", doc);
+            assertEquals("onetwothree", result.getStringValue());
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE);
+            c.declareNamespace("", "n2");
+            result = c.evaluateSingle("string-join(//p)", doc);
+            assertEquals("two", result.getStringValue());
+            c.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE_OR_NONE);
+            result = c.evaluateSingle("string-join(//p)", doc);
+            assertEquals("onetwo", result.getStringValue());
+        } catch (Exception e) {
+            fail();
+        }
+    }
+
 }
 
