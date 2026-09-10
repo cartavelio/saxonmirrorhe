@@ -28,6 +28,7 @@ public final class LargeTextBuffer {
     private final static int BITS = 16;
     private final static int SEGLEN = 1 << BITS;
     private final static int MASK = SEGLEN - 1;
+    private final static int MAX_SEGMENTS = 1 << (31 - BITS);
 
     private final static Segment EMPTY_SEGMENT = new Segment8(new byte[]{});
 
@@ -238,6 +239,9 @@ public final class LargeTextBuffer {
      */
 
     private void addSegment(Segment segment) {
+        if (completeSegments.size() == MAX_SEGMENTS) {
+            throw new IllegalStateException("TinyTree capacity exceeded: more than 2^31 characters of text data");
+        }
         completeSegments.add(segment);
     }
 
