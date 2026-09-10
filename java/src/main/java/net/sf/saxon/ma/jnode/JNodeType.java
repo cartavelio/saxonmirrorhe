@@ -2,13 +2,16 @@ package net.sf.saxon.ma.jnode;
 
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeName;
+import net.sf.saxon.pattern.NodeTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
 
-public class JNodeType implements ItemType {
+public class JNodeType extends NodeTest {
 
     private final SequenceType valueType;
 
@@ -110,6 +113,38 @@ public class JNodeType implements ItemType {
     }
 
     /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+    @Override
+    public QNameTest getQNameTest() {
+        return null;
+    }
+
+    /**
+     * Test whether this node test is satisfied by a given node. This method is only
+     * fully supported for a subset of NodeTests, because it doesn't provide all the information
+     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
+     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
+     * node is nilled, and (b) it can't be used to evaluate a node test of the form
+     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
+     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
+     * node tests where the node kind is known to be an attribute.
+     *
+     * @param nodeKind   The kind of node to be matched
+     * @param name       identifies the expanded name of the node to be matched.
+     *                   The value should be null for a node with no name.
+     * @param annotation The actual content type of the node. Null means no constraint.
+     * @return true if the node matches this node test
+     */
+    @Override
+    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
+        return false;
+    }
+
+    /**
      * Get the default priority when this ItemType is used as an XSLT pattern
      *
      * @return the default priority
@@ -128,7 +163,7 @@ public class JNodeType implements ItemType {
      */
     @Override
     public PlainType getAtomizedItemType() {
-        return null;
+        return getValueType().getPrimaryType().getAtomizedItemType();
     }
 
     /**
@@ -140,7 +175,7 @@ public class JNodeType implements ItemType {
      */
     @Override
     public boolean isAtomizable(TypeHierarchy th) {
-        return true;
+        return getValueType().getPrimaryType().isAtomizable(th);
     }
 
     /**

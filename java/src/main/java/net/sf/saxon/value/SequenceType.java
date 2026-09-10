@@ -13,6 +13,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.AnyGNodeTest;
 import net.sf.saxon.pattern.AnyXNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.*;
@@ -363,11 +364,18 @@ public final class SequenceType {
             NodeKindTest.DOCUMENT.zeroOrOne();
 
     /**
-     * A type that allows a sequence of zero or more nodes
+     * A type that allows a sequence of zero or more XNodes
      */
 
     public static final SequenceType NODE_SEQUENCE =
             AnyXNodeTest.getInstance().zeroOrMore();
+
+    /**
+     * A type that allows a sequence of zero or more GNodes
+     */
+
+    public static final SequenceType GNODE_SEQUENCE =
+            AnyGNodeTest.getInstance().zeroOrMore();
 
     /**
      * A type that allows a sequence of zero or more string values

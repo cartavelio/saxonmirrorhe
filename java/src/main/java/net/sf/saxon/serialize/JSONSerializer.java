@@ -12,6 +12,7 @@ import net.sf.saxon.event.ReceiverWithOutputProperties;
 import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
@@ -182,6 +183,8 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
         } else if (item instanceof NodeInfo) {
             String s = serializeNode((NodeInfo) item);
             emitter.writeAtomicValue(new StringValue(s));
+        } else if (item instanceof JNode) {
+            writeSequence(((JNode) item).getValue());
         } else if (unfailing) {
             UnicodeString s = item.getUnicodeStringValue();
             emitter.writeAtomicValue(new StringValue(s));

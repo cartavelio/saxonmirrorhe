@@ -183,7 +183,7 @@ public class SlashExpression extends BinaryExpression
         TypeChecker tc = config.getTypeChecker(false);
         Supplier<RoleDiagnostic> roleSupplier =
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, "XPTY0019");
-        setStart(tc.staticTypeCheck(getStart(), SequenceType.NODE_SEQUENCE, roleSupplier, visitor));
+        setStart(tc.staticTypeCheck(getStart(), SequenceType.GNODE_SEQUENCE, roleSupplier, visitor));
 
         // Now check the second operand
 

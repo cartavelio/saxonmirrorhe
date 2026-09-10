@@ -357,8 +357,8 @@ public class CombinedNodeTest extends NodeTest {
     /*@NotNull*/
     @Override
     public AtomicType getAtomizedItemType() {
-        AtomicType type1 = nodetest1.getAtomizedItemType();
-        AtomicType type2 = nodetest2.getAtomizedItemType();
+        AtomicType type1 = (AtomicType)nodetest1.getAtomizedItemType();
+        AtomicType type2 = (AtomicType)nodetest2.getAtomizedItemType();
         if (type1.isSameType(type2)) {
             return type1;
         }

@@ -13,6 +13,7 @@ import net.sf.saxon.event.SequenceWriter;
 import net.sf.saxon.functions.FormatNumber;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
@@ -137,6 +138,8 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
             emit(serializeAtomicValue((AtomicValue) item));
         } else if (item instanceof NodeInfo) {
             serializeNode((NodeInfo) item);
+        } else if (item instanceof JNode) {
+            serializeJNode((JNode) item);
         } else if (item instanceof MapItem) {
             serializeMap((MapItem) item);
         } else if (item instanceof ArrayItem) {
@@ -360,6 +363,22 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         indent(--indentLevel);
         emit("}");
     }
+
+
+    private void serializeJNode(JNode jNode) throws XPathException {
+        if (afterColon) {
+            indentLevel++;
+        } else {
+            indent(indentLevel++);
+            afterColon = false;
+        }
+        emit("JNode(");
+        outputInternalSequence(jNode.getValue());
+        afterColon = false;
+        indent(--indentLevel);
+        emit(")");
+    }
+
 
     private void outputInternalSequence(Sequence value) throws XPathException {
         boolean first = true;

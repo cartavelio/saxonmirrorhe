@@ -86,6 +86,9 @@ public enum PrimitiveUType {
             case NAMESPACE:
                 return "namespace";
 
+            case JNODE:
+                return "JNode";
+
             case FUNCTION:
                 return "function";
 

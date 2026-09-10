@@ -477,6 +477,9 @@ public final class AxisInfo {
 
     public static UType getTargetUType(UType origin, int axis) {
         UType resultType = UType.VOID;
+        if (origin == UType.JNODE) {
+            return UType.JNODE;
+        }
         Set<PrimitiveUType> origins = origin.intersection(UType.XNODE).decompose();
         for (PrimitiveUType u : origins) {
             UType r = axisTransitions.get(makeKey(u, axis));

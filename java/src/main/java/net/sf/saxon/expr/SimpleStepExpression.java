@@ -190,7 +190,7 @@ public final class SimpleStepExpression extends SlashExpression {
                 };
             } else {
                 return context -> {
-                    NodeInfo start = (NodeInfo) select.eval(context);
+                    GNode start = (GNode) select.eval(context);
                     assert start != null;
                     return step.iterate(start);
                 };

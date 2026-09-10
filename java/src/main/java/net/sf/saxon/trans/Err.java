@@ -305,6 +305,8 @@ public class Err {
                 return "an atomic value";
             case XNODE:
                 return "a node";
+            case JNODE:
+                return "a JNode";
             case FUNCTION:
                 return "a function";
             case MAP:

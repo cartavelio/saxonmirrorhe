@@ -189,7 +189,7 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
 
     /*@NotNull*/
     @Override
-    public AtomicType getAtomizedItemType() {
+    public PlainType getAtomizedItemType() {
         // This is overridden for a ContentTypeTest
         return BuiltInAtomicType.ANY_ATOMIC;
     }

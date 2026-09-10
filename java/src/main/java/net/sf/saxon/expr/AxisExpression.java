@@ -13,6 +13,7 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
+import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -137,12 +138,12 @@ public final class AxisExpression extends Expression {
         }
         Configuration config = visitor.getConfiguration();
 
-        if (contextItemType.getGenre() != Genre.XNODE) {
+        if (!UType.GNODE.subsumes(contextItemType.getUType())) {
             TypeHierarchy th = config.getTypeHierarchy();
             Affinity relation = th.relationship(contextItemType, AnyXNodeTest.getInstance());
             if (relation == Affinity.DISJOINT) {
-                throw new XPathException("Axis step " + this +
-                                                                " cannot be used here: the context item is not a node")
+                throw new XPathException("Axis step "
+                                                 + this + " cannot be used here: the context item is not a node")
                         .asTypeError()
                         .withErrorCode("XPTY0020")
                         .withLocation(getLocation());
@@ -203,6 +204,11 @@ public final class AxisExpression extends Expression {
 
         // Test whether the axis ever selects anything, when starting at this context node
         UType originUType = contextType.getUType();
+
+        if (originUType == UType.JNODE) {
+            itemType = JNodeType.ANY_JNODE;
+            return this;
+        }
         UType targetUType = AxisInfo.getTargetUType(originUType, axis);
         UType testUType = test == null ? UType.XNODE : test.getUType();
         if (targetUType.equals(UType.VOID)) {
@@ -761,7 +767,7 @@ public final class AxisExpression extends Expression {
      * @return the iterator over the axis
      */
 
-    public AxisIterator iterate(NodeInfo origin) {
+    public AxisIterator iterate(GNode origin) {
         if (test == null) {
             return origin.iterateAxis(axis);
         } else {
