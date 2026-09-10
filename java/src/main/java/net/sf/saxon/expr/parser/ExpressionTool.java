@@ -25,7 +25,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.Compilation;
-import net.sf.saxon.style.ScopedBindingElement;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -644,8 +643,6 @@ public class ExpressionTool {
         }
         if (exp instanceof Pattern) {
             nextFree = ((Pattern) exp).allocateSlots(frame, nextFree);
-        } else if (exp instanceof ScopedBindingElement) {
-            nextFree = ((ScopedBindingElement) exp).allocateSlots(frame, nextFree);
         } else {
             for (Operand o : exp.operands()) {
                 nextFree = allocateSlots(o.getChildExpression(), nextFree, frame);

@@ -9,6 +9,8 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -21,6 +23,50 @@ import net.sf.saxon.type.ItemType;
  */
 
 public class FoldRightFn extends SystemFunction {
+
+    /**
+     * Look for an "early exit" rewrite
+     *
+     * <p>Consider:</p>
+     *
+     * <p><code>fold-right(1 to $N, 0, function($item, $sum){
+     *            if ($sum gt 1000)
+     *            then $sum
+     *            else $sum + $item})</code></p>
+     *
+     * <p>We can rewrite this for early exit as:</p>
+     *
+     * <p><code>fold-left(1 to $N, 0, function($item, $sum){
+     *            if ($sum gt 1000)
+     *            then saxon:break-fold($sum)
+     *            else $sum + $item})</code></p>
+     *
+     * <p>The saxon:break-fold() function wraps a value in a wrapper recognized by the Saxon implementation
+     * as a signal to end the iteration. In principle it is available for use by user code.</p>
+     *
+     * <p>In more detail, the optimization is possible if the callback function is an inline
+     * function expression whose body is of the form <code>if (C) then (T) else (E)</code>,
+     * where C has and T have no dependency on $item. </p>
+     *
+     * @param visitor     the expression visitor
+     * @param contextInfo information about the context item
+     * @param arguments   the supplied arguments to the function call. Note: modifying the contents
+     *                    of this array should not be attempted, it is likely to have no effect.
+     * @return the rewritten expression
+     * @throws XPathException should not happen
+     */
+
+    public Expression makeOptimizedFunctionCall(
+            ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments)
+            throws XPathException {
+        if (arguments[2] instanceof FunctionLiteral f &&
+                f.getGroundedValue() instanceof InlineFunctionItem ifi &&
+                ifi.getArity() == 2) {
+            visitor.obtainOptimizer().injectFoldBreak(ifi, visitor, FoldRightFn.class);
+        }
+        return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
+    }
+
 
     /**
      * Get the return type, given knowledge of the actual arguments
@@ -62,6 +108,9 @@ public class FoldRightFn extends SystemFunction {
             } catch (XPathException e) {
                 e.maybeSetContext(context);
                 throw e;
+            }
+            if (zero instanceof FoldLeftFn.BreakResult breakResult) {
+                return breakResult.getObject();
             }
         }
         return zero;

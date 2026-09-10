@@ -12,6 +12,8 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.functions.PositionAndLast;
+import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.hof.InlineFunctionItem;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.*;
@@ -390,6 +392,22 @@ public class Optimizer {
             DynamicFunctionCall functionCall, ExpressionVisitor visitor, ContextItemStaticInfo contextItemType)
             throws XPathException {
         return functionCall;
+    }
+
+    /**
+     * Rewrite the callback function to fold-left or fold-right to inject an early exit. Implemented
+     * only in Saxon-EE.
+     *
+     * @param callback the callback function to fold-left or fold-right (which is modified in-situ)
+     * @param visitor  the expression visitor
+     * @param function
+     * @throws XPathException should not happen
+     */
+
+    public void injectFoldBreak(InlineFunctionItem callback,
+                                ExpressionVisitor visitor,
+                                Class<? extends SystemFunction> function) throws XPathException {
+        // implemented in Saxon-EE
     }
 
     /**
