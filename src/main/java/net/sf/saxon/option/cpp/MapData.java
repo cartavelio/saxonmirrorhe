@@ -23,31 +23,37 @@ public class MapData {
         primitiveMap = new HashMap<XdmAtomicValue, XdmValue>(cap);
     }
 
+
     @CEntryPoint(name = "j_create_mapData", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
-    public static long j_CreateMapData(IsolateThread thread) throws SaxonApiException {
+    public static long j_createMapData(IsolateThread thread) throws SaxonApiException {
         ObjectHandle handle = SaxonCAPI.createHandle(new MapData());
         return handle.rawValue();
     }
 
     @CEntryPoint(name = "j_create_mapDataWithCapacity", exceptionHandler = SaxonCExceptionCLongPointerHandler.class)
-    public static long j_CreateMapDataWithCapacity(IsolateThread thread, int cap) throws SaxonApiException {
+    public static long j_createMapDataWithCapacity(IsolateThread thread, int cap) throws SaxonApiException {
         ObjectHandle handle = SaxonCAPI.createHandle(new MapData(cap));
         return handle.rawValue();
     }
 
-    @CEntryPoint(name = "j_addMapPair")
-    public void addMapPair(IsolateThread thread, XdmAtomicValue key, XdmValue value) {
-        primitiveMap.put(key, value);
+    @CEntryPoint(name = "j_addMapPair", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_addMapPair(IsolateThread thread, ObjectHandle mapDataRef, ObjectHandle keyRef, ObjectHandle valueRef) {
+        MapData mapData = SaxonCAPI.objectHandles.get(mapDataRef);
+        XdmAtomicValue key =  SaxonCAPI.objectHandles.get(keyRef);
+        XdmValue value =  SaxonCAPI.objectHandles.get(valueRef);
+        mapData.primitiveMap.put(key, value);
+
+        return SaxonCAPI.STATUS_OK;
     }
 
 
 
-    @CEntryPoint(name = "j_createXdmMap")
-    public long createXdmMap(IsolateThread thread, ObjectHandle mapDataRef) {
+    @CEntryPoint(name = "j_createXdmMap", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long j_createXdmMap(IsolateThread thread, ObjectHandle mapDataRef) {
         MapData mapData = SaxonCAPI.objectHandles.get(mapDataRef);
-        XdmMap xdmmap = XdmMap.makeMap(primitiveMap);
+        XdmMap xdmMap = XdmMap.makeMap(mapData.primitiveMap);
 
-        ObjectHandle handle = SaxonCAPI.createHandle(xdmmap);
+        ObjectHandle handle = SaxonCAPI.createHandle(xdmMap);
 
         return handle.rawValue();
     }
