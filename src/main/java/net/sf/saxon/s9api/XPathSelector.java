@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * An XPathSelector represents a compiled and loaded XPath expression ready for execution.
- * The XPathSelector holds details of the dynamic evaluation context for the XPath expression.
+ * An {@code XPathSelector} represents a compiled and loaded XPath expression ready for execution.
+ * The {@code XPathSelector} holds details of the dynamic evaluation context for the XPath expression.
  */
 //@CSharpInjectMembers(code = {
 //        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
@@ -96,11 +96,12 @@ public class XPathSelector implements Iterable<XdmItem> {
      * Set the value of a variable
      *
      * @param name  The name of the variable. This must match the name of a variable
-     *              that was declared to the XPathCompiler. No error occurs if the expression does not
+     *              that was declared to the {@link XPathCompiler}. No error occurs if the expression does not
      *              actually reference a variable with this name.
      * @param value The value to be given to the variable.
      * @throws SaxonApiException if the variable has not been declared or if the type of the value
-     *                           supplied does not conform to the required type that was specified when the variable was declared
+     *                           supplied does not conform to the required type that was specified
+     *                           when the variable was declared.
      */
 
     public void setVariable(QName name, XdmValue value) throws SaxonApiException {
@@ -120,8 +121,8 @@ public class XPathSelector implements Iterable<XdmItem> {
     }
 
     /**
-     * Set an object that will be used to resolve URIs used in
-     * fn:doc() and related functions.
+     * Set a resource resolver: an object that will be used to resolve URIs used in
+     * {@code fn:doc()} and similar functions.
      *
      * @param resolver An object that implements the ResourceResolver interface, or null.
      * @since 9.4

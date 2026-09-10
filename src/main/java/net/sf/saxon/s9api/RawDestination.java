@@ -44,7 +44,7 @@ public class RawDestination extends AbstractDestination {
 
     @Override
     public Receiver getReceiver(PipelineConfiguration pipe, SerializationProperties params) {
-        // The Receiver returned by this method is a SequenceOutputter. The SequenceOutputter
+        // The Receiver returned by this method wraps a SequenceOutputter. The SequenceOutputter
         // builds a list of all top-level items passed to it. A top-level document or element
         // node can be passed as a sequence of events, in which case a ComplexContentOutputter
         // is created to build the tree represented by these events; the root document or element

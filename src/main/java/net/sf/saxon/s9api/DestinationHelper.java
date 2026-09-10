@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * A helper class for implementing the {@link Destination} interface
+ * A helper class for implementing the {@link Destination} interface. This is intended for use
+ * (optionally) by implementations of this interface; it is invoked automatically by implementations
+ * that extend {@link AbstractDestination}.
  */
 @CSharpModifiers(code = {"internal"})
 public class DestinationHelper {

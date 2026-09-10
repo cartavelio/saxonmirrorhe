@@ -17,7 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import java.util.Objects;
 
 /**
- * The QName class represents an instance of xs:QName, as defined in the XPath 2.0 data model.
+ * The QName class represents an instance of {@code xs:QName}, as defined in the XPath data model.
  * Internally, it has three components, a namespace URI, a local name, and a prefix. The prefix
  * is intended to be used only when converting the value back to a string.
  * <p>This class also defines a number of QName-valued constants relating to built-in types in

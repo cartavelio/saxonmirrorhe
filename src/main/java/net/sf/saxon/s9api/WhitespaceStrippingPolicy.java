@@ -23,6 +23,11 @@ import java.util.function.Predicate;
 /**
  * WhitespaceStrippingPolicy is class defining the possible policies for handling
  * whitespace text nodes in a source document.
+ *
+ * <p>Standard policies include {@link #NONE} (no whitespace is stripped), {@link #ALL}
+ * (all whitespace-only text nodes are stripped), and {@link #IGNORABLE} (whitespace
+ * text nodes in element-only content are stripped). Custom policies that strip the
+ * content of selected element types can also be defined.</p>
  */
 
 public class WhitespaceStrippingPolicy {

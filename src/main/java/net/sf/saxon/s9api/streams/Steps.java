@@ -42,6 +42,8 @@ import static net.sf.saxon.s9api.streams.Predicates.isText;
  * interface, used to navigate XDM trees, typically as an argument to {@link XdmValue#select}.
  */
 
+// TODO: add the new 4.0 axes, following-sibling-or-self, etc.
+
 public class Steps {
     /**
      * Obtain a {@link Step} that selects the root node of the containing document (which may or may not

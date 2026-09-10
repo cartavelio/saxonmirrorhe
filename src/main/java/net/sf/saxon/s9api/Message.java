@@ -7,12 +7,14 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.lib.NamespaceConstant;
+
 /**
  * A {@code Message} represents the output of an {@code xsl:message} or
  * {@code xsl:assert} instruction.
- * The content of a message is always an XDM document node (in the common case
+ * <p>The content of a message is always an XDM document node (in the common case
  * of purely textual messages, the document node will have a single text node
- * child).
+ * child).</p>
  */
 
 public class Message {
@@ -73,6 +75,7 @@ public class Message {
      * Get the error code associated with the message. If no error
      * code was supplied in the call of {@code xsl:message} or {@code xsl:assert},
      * the default code {@code XTMM9000} or {@code XTMM9001} is used.
+     * System-defined error codes use the namespace {@link NamespaceConstant#ERR}.
      * @return the error code
      */
 

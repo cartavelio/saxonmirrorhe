@@ -15,8 +15,8 @@ import net.sf.saxon.type.Schema;
 public abstract class XsdSchema {
 
     /**
-     * Create a SchemaValidator which can be used to validate instance documents against this schema
-     * @return a new SchemaValidator
+     * Create a {@link SchemaValidator} which can be used to validate instance documents against this schema
+     * @return a new {@code SchemaValidator}
      * @since 13.0
      */
 
@@ -26,7 +26,7 @@ public abstract class XsdSchema {
     /**
      * Create an {@link ItemTypeFactory} which can be used to create {@link ItemType}
      * objects based on the definitions in this schema.
-     * @return an {@link ItemTypeFactory} linked to this schema.
+     * @return an {@code ItemTypeFactory} linked to this schema.
      */
 
     public abstract ItemTypeFactory newItemTypeFactory();
@@ -55,7 +55,7 @@ public abstract class XsdSchema {
 
     /**
      * Export a precompiled Schema Component Model containing all the components (except built-in components)
-     * that have been loaded into this Processor.
+     * in this schema.
      *
      * @param destination the destination to recieve the precompiled Schema Component Model in the form of an
      *                    XML document

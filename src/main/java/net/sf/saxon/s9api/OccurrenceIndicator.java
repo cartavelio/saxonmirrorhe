@@ -18,9 +18,37 @@ import net.sf.saxon.value.Cardinality;
  * and nothing else.
  */
 public enum OccurrenceIndicator {
-    ZERO, ZERO_OR_ONE, ZERO_OR_MORE, ONE, ONE_OR_MORE;
+    /**
+     * Occurrence indicator for a sequence type that only allows zero-length sequences,
+     * that is the type <code>empty-sequence()</code>. May be used with an item type.
+     */
+    ZERO,
+    /**
+     * Occurrence indicator for a sequence that is either empty or that contains a single item,
+     * corresponding to "?" in XPath SequenceType syntax.
+     */
+    ZERO_OR_ONE,
+    /**
+     * Occurrence indicator for a sequence that allows any number of items,
+     * corresponding to "*" in XPath SequenceType syntax.
+     */
+    ZERO_OR_MORE,
+    /**
+     * Occurrence indicator for a sequence that allows exactly one item,
+     * corresponding to the absence of an occurrence indicator in XPath SequenceType syntax.
+     */
+    ONE,
+    /**
+     * Occurrence indicator for a sequence that allows one or more items,
+     * corresponding to "+" in XPath SequenceType syntax.
+     */
+    ONE_OR_MORE;
 
-    protected int getCardinality() {
+    /**
+     * Get the internal cardinality property corresponding to this occurrence indicator
+     * @return the internal cardinality property, for example {@link StaticProperty#ALLOWS_ONE_OR_MORE}.
+     */
+    int getCardinality() {
         OccurrenceIndicator indicator = this;
         switch (indicator) {
             case ZERO:
@@ -38,7 +66,13 @@ public enum OccurrenceIndicator {
         }
     }
 
-    protected static OccurrenceIndicator getOccurrenceIndicator(int cardinality) {
+    /**
+     * Get the {@link OccurrenceIndicator} value corresponding to an internal cardinality property
+     * @param cardinality the internal cardinality property, for example {@link StaticProperty#ALLOWS_ONE_OR_MORE}.
+     * @return the corresponding {@link OccurrenceIndicator}
+     */
+
+    static OccurrenceIndicator getOccurrenceIndicator(int cardinality) {
         switch (cardinality) {
             case StaticProperty.EMPTY:
                 return ZERO;

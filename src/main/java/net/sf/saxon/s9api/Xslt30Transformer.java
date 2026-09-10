@@ -57,10 +57,10 @@ import java.util.function.Supplier;
  * because multi-threaded execution is permitted; rather it is to reduce the damage if it is attempted.</p>
  * <p>An <code>Xslt30Transformer</code> is always constructed by running the
  * method {@link XsltExecutable#load30()}.</p>
- * <p>Unlike <code>XsltTransformer</code>, an <code>Xslt30Transformer</code> is not a <code>Destination</code>.
+ * <p>Unlike {@link XsltTransformer}, an <code>Xslt30Transformer</code> is not a {@link Destination}.
  * To pipe the results of one transformation into another, the target should be an <code>XsltTransfomer</code>
  * rather than an <code>Xslt30Transformer</code>.</p>
- * <p>Evaluation of an Xslt30Transformer proceeds in a number of phases:</p>
+ * <p>Evaluation of an <code>Xslt30Transformer</code> proceeds in a number of phases:</p>
  * <ol>
  * <li>First, values may be supplied for stylesheet parameters and for the global context item. The
  * global context item is used when initializing global variables. Unlike earlier transformation APIs,

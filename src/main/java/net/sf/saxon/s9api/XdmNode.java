@@ -13,6 +13,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.s9api.push.Push;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.s9api.streams.XdmStream;
@@ -30,19 +31,23 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
- * This class represents a node in the XDM data model. A Node is an {@link XdmItem}, and is therefore an
+ * This class represents a node in the XDM data model. An {@code XdmNode} is an {@link XdmItem}, and is therefore an
  * {@link XdmValue} in its own right, and may also participate as one item within a sequence value.
- * <p>An XdmNode is implemented as a wrapper around an object of type {@link net.sf.saxon.om.NodeInfo}.
- * Because this is a key interface within Saxon, it is exposed via this API.</p>
- * <p>The XdmNode interface exposes basic properties of the node, such as its name, its string value, and
- * its typed value. Navigation to other nodes is supported through a single method, {@link #axisIterator},
- * which allows other nodes to be retrieved by following any of the XPath axes.</p>
+ * <p>An {@code XdmNode} is implemented as a wrapper around an object of type {@link net.sf.saxon.om.NodeInfo}.</p>
+ * <p>The {@code XdmNode} interface exposes basic properties of the node, such as its name, its string value, and
+ * its typed value.</p>
  * <p>Note that node identity cannot be inferred from object identity. The same node may be represented
  * by different <code>XdmNode</code> instances at different times, or even at the same time. The {@link #equals}
  * method on this class can be used to test for node identity.</p>
- * <p>Navigation from a node to other related nodes can be achieved using the {@link XdmValue#select(Step)}
- * method which this class inherits. Simple navigation to children or attributes can also be achieved using
- * the {@link #children} and {@link #attribute} methods.</p>
+ * <p>Navigation to other nodes is supported through the method, {@link #axisIterator},
+ * which allows other nodes to be retrieved by following any of the XPath axes.
+ * Simple navigation to children or attributes can also be achieved using
+ * the {@link #children} and {@link #attribute} methods. More complex navigation from a node to
+ * other related nodes can be achieved using the {@link XdmValue#select(Step)}
+ * method which this class inherits. </p>
+ * <p>Nodes are normally constructed by parsing XML (for example, by using a {@link DocumentBuilder}),
+ * or by executing an XSLT stylesheet or XQuery query. Saxon also offers programmatic interfaces
+ * for constructing nodes, for example via the {@link Push} API.</p>
  * @see net.sf.saxon.sapling.SaplingDocument#toXdmNode(Processor)
  * @see net.sf.saxon.sapling.SaplingElement#toXdmNode(Processor)
  *
@@ -53,9 +58,10 @@ public class XdmNode extends XdmItem {
 
 
     /**
-     * Construct an XdmNode as a wrapper around an existing NodeInfo object
+     * Construct an {@code XdmNode} as a wrapper around an existing NodeInfo object. This constructor
+     * is intended primarily for system use.
      *
-     * @param node the NodeInfo object to be wrapped. This can be retrieved using the
+     * @param node the {@link NodeInfo} object to be wrapped. This can be retrieved using the
      *             {@link #getUnderlyingNode} method.
      * @since 9.2 (previously a protected constructor)
      */
@@ -67,7 +73,8 @@ public class XdmNode extends XdmItem {
     /**
      * Get the kind of node.
      *
-     * @return the kind of node, for example {@link XdmNodeKind#ELEMENT} or {@link XdmNodeKind#ATTRIBUTE}
+     * @return the kind of node represented by this object,
+     * for example {@link XdmNodeKind#ELEMENT} or {@link XdmNodeKind#ATTRIBUTE}
      */
 
     public XdmNodeKind getNodeKind() {
@@ -184,7 +191,7 @@ public class XdmNode extends XdmItem {
      * <p>If the node is an element or attribute node that has been validated against a schema,
      * the result will be the name of the schema type (complex or simple type) against which it
      * was validated. If this is an anonymous type, a system-generated name is returned,
-     * having the namespace <code>http://ns.saxonica.com/anonymous-type</code>.</p>
+     * having the namespace {@link NamespaceUri#ANONYMOUS}.</p>
      *
      * <p>If the node is an element or attribute node that has not been validated against
      * a schema, the result will be <code>xs:untyped</code> or <code>xs:untypedAtomic</code>

@@ -30,7 +30,7 @@ import java.io.File;
  *
  * <p>Schema processing requires Saxon-EE. The abstract class {@code XsdCompiler} exists in Saxon-HE
  * and Saxon-PE, but is never instantiated.
- * In Saxon-EE the subclass {@code XsdSchemaCompilerEE} is instantiated to do the heavy lifting, but this
+ * In Saxon-EE the subclass {@code XsdCompilerEE} is instantiated to do the heavy lifting, but this
  * is not normally exposed to users.</p>
  *
  * <p>An {@code XsdCompiler} is created using the factory method {@link Processor#newXsdCompiler}. The normal pattern

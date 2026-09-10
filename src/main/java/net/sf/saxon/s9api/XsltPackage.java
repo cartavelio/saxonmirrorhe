@@ -24,7 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- * An XsltPackage object represents the result of compiling an XSLT 3.0 package, as
+ * An {@code XsltPackage} object represents the result of compiling an XSLT 3.0 package, as
  * represented by an XML document containing an <code>xsl:package</code> element.
  *
  * @since 9.6
@@ -42,9 +42,9 @@ public class XsltPackage {
     }
 
     /**
-     * Get the processor under which this package was created
+     * Get the {@link Processor} under which this package was created
      *
-     * @return the corresponding Processor
+     * @return the corresponding {@code Processor}
      */
 
     public Processor getProcessor() {

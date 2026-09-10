@@ -23,7 +23,6 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.streams.Step;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.coercion.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NumericValue;
 
@@ -50,6 +49,10 @@ public abstract class ItemType implements Predicate<XdmItem> {
 
     protected final net.sf.saxon.type.ItemType underlyingType;
 
+    /**
+     * Construct an item type based on an underlying type defined internally within Saxon
+     * @param underlyingType the underlying item type
+     */
     public ItemType(net.sf.saxon.type.ItemType underlyingType) {
         this.underlyingType = underlyingType;
     }
@@ -115,17 +118,6 @@ public abstract class ItemType implements Predicate<XdmItem> {
 
     public SequenceType zeroOrOne() {
         return SequenceType.makeSequenceType(this, OccurrenceIndicator.ZERO_OR_ONE);
-    }
-
-    /**
-     * Get the {@link CoercionPlan} appropriate to this item type. This is used when (for example) calling
-     * a function that has a parameter declared with this item type; the coercion rules that apply depend
-     * on the item type.
-     * @param xPathVersion Should be 31 or 40; determines the version of the coercion rules to be used
-     */
-
-    public CoercionPlan getCoercionPlan(int xPathVersion) {
-        return ItemCheckingPlan.INSTANCE;
     }
 
     /**

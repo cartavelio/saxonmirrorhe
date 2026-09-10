@@ -39,11 +39,16 @@ import java.util.Objects;
  * The <code>Processor</code> class serves three purposes: it allows global Saxon configuration options to be set;
  * it acts as a factory for generating XQuery, XPath, and XSLT compilers; and it owns certain shared
  * resources such as the Saxon NamePool and compiled schemas. This is the first object that a
- * Saxon application should create. Once established, a Processor may be used in multiple threads.
- * <p>It is possible to run more than one Saxon Processor concurrently, but only when running completely
+ * Saxon application should create. Once established, a {@code Processor} may be used in multiple threads.
+ *
+ * <p>It is possible to run more than one Saxon {@code Processor} concurrently, but only when running completely
  * independent workloads. Nothing can be shared between Processor instances. Within a query or transformation,
- * all source documents and schemas must be built using the same Processor, which must also be used to
+ * all source documents and schemas must be built using the same {@code Processor}, which must also be used to
  * compile the query or stylesheet.</p>
+ *
+ * <p>Internally, the {@code Processor} is a wrapper around a Saxon {@link Configuration} object, and the underlying
+ * {@code Configuration} is available via the {@link #getUnderlyingConfiguration()} method. This exposes additional
+ * Saxon functionality; however, the details may be subject to change from one release to the next.</p>
  */
 
 @CSharpModifiers(code={"internal"})
@@ -54,7 +59,7 @@ public class Processor implements Configuration.ApiProvider {
 
 
     /**
-     * Create a Processor according to the capabilities available.
+     * Create a {@code Processor} according to the capabilities available.
      * <p>This will examine what software is installed, and whether or not a license key is available,
      * and return the most capable configuration available within these constraints. For example
      * if the software is Saxon-EE but the license only allows PE capability, it will return
@@ -67,7 +72,7 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Processor, specifying whether a licensed configuration is required
+     * Create a {@code Processor}, specifying whether a licensed configuration is required
      *
      * @param licensedEdition indicates whether the Processor requires features of Saxon that need a license
      *                        file (that is, features not available in Saxon HE (Home Edition). If true, the method will create
@@ -91,14 +96,14 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Processor based on an existing Configuration. This constructor is useful
+     * Create a {@code Processor} based on an existing {@link Configuration}. This constructor is useful
      * when new components of an application are to use s9api interfaces but existing
      * components use older interfaces (for example, JAXP). It is also useful in cases where,
      * for example, multiple configurations need to be built using the same configuration file
-     * or sharing license data: in such cases, the Configuration can be manually built, and
-     * then wrapped in a Processor.
+     * or sharing license data: in such cases, the {@code Configuration} can be manually built, and
+     * then wrapped in a {@code Processor}.
      *
-     * @param config the Configuration to be used by this processor
+     * @param config the {@link Configuration} to be used by this {@code Processor}
      * @since 9.3
      */
 
@@ -110,9 +115,9 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Processor configured according to the settings in a supplied configuration file.
+     * Create a {@code Processor} configured according to the settings in a supplied configuration file.
      *
-     * @param source the Source of the configuration file
+     * @param source the Source of the configuration file (which is an XML document)
      * @throws SaxonApiException if the configuration file cannot be read, or its contents are invalid
      * @since 9.2
      */
@@ -130,9 +135,9 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a {@code DocumentBuilder}. A DocumentBuilder is used to load source XML documents.
+     * Create a {@link DocumentBuilder}. A {@code DocumentBuilder} is used to load source XML documents.
      *
-     * @return a newly created DocumentBuilder
+     * @return a newly created {@code DocumentBuilder}
      */
 
     /*@NotNull*/
@@ -142,7 +147,7 @@ public class Processor implements Configuration.ApiProvider {
 
     //#if CSHARP==false
     /**
-     * Create a {@code JsonBuilder}. A {@code JsonBuilder} is used to load source JSON documents.
+     * Create a {@link JsonBuilder}. A {@code JsonBuilder} is used to load source JSON documents.
      *
      * @return a newly created {@code JsonBuilder}
      * @since 11
@@ -155,9 +160,9 @@ public class Processor implements Configuration.ApiProvider {
     //#endif
 
     /**
-     * Create an XPathCompiler. An XPathCompiler is used to compile XPath expressions.
+     * Create an {@link XPathCompiler}. An {@code XPathCompiler} is used to compile XPath expressions.
      *
-     * @return a newly created XPathCompiler
+     * @return a newly created {@code XPathCompiler}
      */
 
     /*@NotNull*/
@@ -166,10 +171,9 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create an XsltCompiler. An XsltCompiler is used to compile XSLT stylesheets.
+     * Create an {@link XsltCompiler}. An {@code XsltCompiler} is used to compile XSLT stylesheets.
      *
-     * @return a newly created XsltCompiler
-     * @throws UnsupportedOperationException if this version of the Saxon product does not support XSLT processing
+     * @return a newly created {@code XsltCompiler}
      */
 
     /*@NotNull*/
@@ -178,10 +182,9 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create an XQueryCompiler. An XQueryCompiler is used to compile XQuery queries.
+     * Create an {@link XQueryCompiler}. An {@code XQueryCompiler} is used to compile XQuery queries.
      *
-     * @return a newly created XQueryCompiler
-     * @throws UnsupportedOperationException if this version of the Saxon product does not support XQuery processing
+     * @return a newly created {@code XQueryCompiler}
      */
 
     /*@NotNull*/
@@ -190,9 +193,10 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Serializer
+     * Create a {@link Serializer}. A {@code Serializer} is a {@link Destination} for processes
+     * such as XSLT transformation, that renders the output as a readable file.
      *
-     * @return a new Serializer
+     * @return a new {@code Serializer}
      * @since 9.3
      */
 
@@ -202,11 +206,11 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Serializer initialized to write to a given OutputStream.
+     * Create a {@link Serializer} initialized to write to a given {@link OutputStream}.
      * <p>Closing the output stream after use is the responsibility of the caller.</p>
      *
-     * @param stream The OutputStream to which the Serializer will write
-     * @return a new Serializer
+     * @param stream The {@link OutputStream} to which the {@code Serializer} will write
+     * @return a new {@code Serializer}
      * @since 9.3
      */
 
@@ -218,11 +222,11 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Serializer initialized to write to a given Writer.
+     * Create a {@link Serializer} initialized to write to a given {@link Writer}.
      * <p>Closing the writer after use is the responsibility of the caller.</p>
      *
-     * @param writer The Writer to which the Serializer will write
-     * @return a new Serializer
+     * @param writer The {@link Writer} to which the {@code Serializer} will write
+     * @return a new {@code Serializer}
      * @since 9.3
      */
 
@@ -234,10 +238,10 @@ public class Processor implements Configuration.ApiProvider {
     }
 
     /**
-     * Create a Serializer initialized to write to a given File.
+     * Create a {@link Serializer} initialized to write to a given File.
      *
-     * @param file The File to which the Serializer will write
-     * @return a new Serializer
+     * @param file The {@link File} to which the Serializer will write
+     * @return a new {@code Serializer}
      * @since 9.3
      */
 

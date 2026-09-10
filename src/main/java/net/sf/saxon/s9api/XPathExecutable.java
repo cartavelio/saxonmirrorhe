@@ -19,12 +19,13 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * An XPathExecutable represents the compiled form of an XPath expression.
- * To evaluate the expression, it must first be loaded to form an {@link XPathSelector}.
- * <p>An XPathExecutable is immutable, and therefore thread-safe. It is simplest to load
- * a new XPathSelector each time the expression is to be evaluated. However, the XPathSelector
+ * An {@code XPathExecutable} represents the compiled form of an XPath expression.
+ * To evaluate the expression, it must first be loaded using the {@link #load()}
+ * method to form an {@link XPathSelector}.
+ * <p>An {@code XPathExecutable} is immutable, and therefore thread-safe. It is simplest to load
+ * a new {@code XPathSelector} each time the expression is to be evaluated. However, the {@code XPathSelector}
  * is serially reusable within a single thread.</p>
- * <p>An XPathExecutable is created by using the {@link XPathCompiler#compile} method
+ * <p>An {@code XPathExecutable} is created by using the {@link XPathCompiler#compile} method
  * on the {@link XPathCompiler} class.</p>
  */
 

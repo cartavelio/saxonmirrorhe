@@ -13,12 +13,33 @@ import net.sf.saxon.type.Type;
  * Enumeration class defining the seven kinds of node defined in the XDM model
  */
 public enum XdmNodeKind {
+    /**
+     * Document node
+     */
     DOCUMENT(Type.DOCUMENT),
+    /**
+     * Element node
+     */
     ELEMENT(Type.ELEMENT),
+    /**
+     * Attribute node
+     */
     ATTRIBUTE(Type.ATTRIBUTE),
+    /**
+     * Text node
+     */
     TEXT(Type.TEXT),
+    /**
+     *  Comment node
+     */
     COMMENT(Type.COMMENT),
+    /**
+     * Processing instruction node
+     */
     PROCESSING_INSTRUCTION(Type.PROCESSING_INSTRUCTION),
+    /**
+     * Namespace node
+     */
     NAMESPACE(Type.NAMESPACE);
 
     private final int number;
@@ -27,7 +48,7 @@ public enum XdmNodeKind {
         this.number = number;
     }
 
-    protected int getNumber() {
+    int getNumber() {
         return number;
     }
 

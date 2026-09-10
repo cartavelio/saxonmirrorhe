@@ -25,20 +25,35 @@ import javax.xml.transform.Source;
 
 /**
  * A <code>SchemaValidator</code> is an object that is used for validating instance documents against a schema.
- * The schema consists of the collection of schema components that are available within the schema
- * cache maintained by the SchemaManager, together with any additional schema components located
- * during the course of validation by means of an xsl:schemaLocation or xsi:noNamespaceSchemaLocation
- * attribute within the instance document.
- * <p>If validation fails, an exception is thrown. If validation succeeds, the validated document
- * can optionally be written to a specified destination. This will be a copy of the original document,
- * augmented with default values for absent elements and attributes, and carrying type annotations
- * derived from the schema processing. Expansion of defaults can be suppressed by means of the method
- * {@link #setExpandAttributeDefaults(boolean)}.</p>
+ * A schema (represented by class {@link XsdSchema}) is a collection of schema components, typically obtained
+ * by compiling a set of source schema documents using an {@link XsdCompiler}.
+ * <p>Saxon 13 introduces the ability to have multiple schemas within a single {@link Processor}.
+ * For compatibility, however, it still supports the idea of having a default schema managed
+ * using the {@code Processor}'s {@link SchemaManager}.</p>
+ * <p>The results of validation can be reported in three different ways:</p>
+ * <ul>
+ *     <li>When using the {@link #validate(Source)} method, the method throws an exception
+ *     if validation is unsuccessful. The exception message will merely indicate that the
+ *     document was invalid; it will not contain a detailed list of problems encountered.</li>
+ *     <li>An {@link InvalidityHandler} may be nominated to receive details of every
+ *     validity problem encountered. An implementation of this interface, the
+ *     {@link net.sf.saxon.lib.InvalidityReportGenerator}, assembles all the information
+ *     about validity problems into a single XML report.</li>
+ *     <li>A {@link Destination} may be supplied to receive the validated document,
+ *     complete with type annotations on its nodes to indicate which schema type
+ *     each element and attribute was validated against. This will be a copy of the original document,
+ *     augmented with default values for absent elements and attributes.
+ *     Expansion of defaults can be suppressed by means of the method
+ *  * {@link #setExpandAttributeDefaults(boolean)}.</li>
+ * </ul>
+
  * <p>A <code>SchemaValidator</code> is serially reusable but not thread-safe. That is, it should normally
  * be used in the thread where it is created, but it can be used more than once, to validate multiple
  * input documents.</p>
- * <p>A <code>SchemaValidator</code> is a <code>Destination</code>, which allows it to receive the output of a
+ *
+ * <p>A <code>SchemaValidator</code> is a {@link Destination}, which allows it to receive the output of a
  * query or transformation to be validated.</p>
+ *
  * <p>Saxon does not deliver the full PSVI as described in the XML schema specifications,
  * only the subset of the PSVI properties featured in the XDM data model.</p>
  */
@@ -75,9 +90,9 @@ public abstract class SchemaValidator extends AbstractDestination {
 
     //#if CSHARP==false
     /**
-     * Set the ErrorListener to be used while validating instance documents.
-     * The setErrorReporter, setInvalidityHandler, and setValidityReporting
-     * are mutually exclusive - setting any one of them will cancel the others. Please note
+     * Set the {@link ErrorListener} to be used while validating instance documents.
+     * The {@link #setErrorListener}, setInvalidityHandler, and setValidityReporting
+     * are mutually exclusive - setting any one of them will cancel the others. Note
      * that this method has the drawback of creating an exception for every
      * validation error, which is expensive.
      *
@@ -176,10 +191,13 @@ public abstract class SchemaValidator extends AbstractDestination {
 
     /**
      * Say whether the schema processor is to take account of any xsi:schemaLocation and
-     * xsi:noNamespaceSchemaLocation attributes encountered while validating an instance document
+     * xsi:noNamespaceSchemaLocation attributes encountered while validating an instance document.
+     * Note that from Saxon 13 the definitions in a schema loaded in this way no longer cause
+     * a permanent change to the baseline schema used for validation.
      *
      * @param recognize true if these two attributes are to be recognized; false if they are to
-     *                  be ignored. Default is true.
+     *                  be ignored. The default is taken from the Processor-level property
+     *                  {@link Feature#USE_XSI_SCHEMA_LOCATION}.
      */
 
     public abstract void setUseXsiSchemaLocation(boolean recognize);
@@ -189,7 +207,8 @@ public abstract class SchemaValidator extends AbstractDestination {
      * xsi:noNamespaceSchemaLocation attributes encountered while validating an instance document
      *
      * @return true if these two attributes are to be recognized; false if they are to
-     *         be ignored. Default is true.
+     *         be ignored. The default is taken from the Processor-level property
+     *         {@link Feature#USE_XSI_SCHEMA_LOCATION}.
      */
 
     public abstract boolean isUseXsiSchemaLocation();

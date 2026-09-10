@@ -39,14 +39,14 @@ import java.util.stream.StreamSupport;
 
 /**
  * A value in the XDM data model. A value is a sequence of zero or more items,
- * each item being an atomic value, a node, or a function item.
- * <p>An XdmValue is immutable.</p>
+ * each item being an atomic value, a node, a function item, or (exceptionally) an external object.
+ * <p>An {@code XdmValue} is immutable.</p>
  * <p>A sequence consisting of a single item may be represented as an instance of {@link XdmItem},
- * which is a subtype of XdmValue. However, there is no guarantee that a sequence of length one
- * will always be an instance of XdmItem.</p>
+ * which is a subtype of {@code XdmValue}. However, there is no guarantee that a sequence of length one
+ * will always be an instance of {@code XdmItem}.</p>
  * <p>Similarly, a zero-length sequence may be represented as an instance of {@link XdmEmptySequence},
  * but there is no guarantee that every sequence of length zero will always be an instance of
- * XdmEmptySequence.</p>
+ * {@code XdmEmptySequence}.</p>
  *
  * @since 9.0
  */
@@ -57,7 +57,7 @@ public class XdmValue implements Iterable<XdmItem> {
     private final GroundedValue value;
 
     /**
-     * Create an XdmValue that wraps a supplied <code>GroundedValue</code>. This
+     * Create an {@code XdmValue} that wraps a supplied <code>GroundedValue</code>. This
      * method is primarily for internal use, though it is also available to applications
      * that manipulate data using lower-level Saxon interfaces.
      * <p>Note that this constructor necessarily produces an <code>XdmValue</code> regardless
@@ -72,7 +72,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Create an XdmValue as a sequence of XdmItem objects
+     * Create an {@code XdmValue} as a sequence of XdmItem objects
      *
      * @param items a sequence of XdmItem objects. Note that if this is supplied as a list or similar
      *              collection, subsequent changes to the list/collection will have no effect on the XdmValue.
@@ -88,7 +88,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Create an XdmValue containing the items returned by an {@link Iterator}.
+     * Create an {@code XdmValue} containing the items returned by an {@link Iterator}.
      *
      * @param iterator the iterator that supplies the values
      * @throws SaxonApiException if an error occurs reading values from the supplied iterator
@@ -108,7 +108,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Create an XdmValue containing the results of reading a Stream
+     * Create an {@code XdmValue} containing the results of reading a Stream
      * @param stream the stream to be read
      * @throws SaxonApiException if an error occurs reading values from the supplied stream
      */
@@ -118,7 +118,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Create an XdmValue that wraps an existing Saxon Sequence
+     * Create an {@code XdmValue} that wraps an existing Saxon Sequence
      *
      * @param value the supplied Sequence (which may be a singleton Item),
      * @return an XdmValue corresponding to the supplied Sequence. If the
@@ -185,8 +185,8 @@ public class XdmValue implements Iterable<XdmItem> {
 
 
     /**
-     * Create a new XdmValue by concatenating the contents of this XdmValue and another
-     * XdmValue into a single sequence. The two input XdmValue objects are unaffected by this operation.
+     * Create a new {@code XdmValue} by concatenating the contents of this {@code XdmValue} and another
+     * {@code XdmValue} into a single sequence. The two input {@code XdmValue} objects are unaffected by this operation.
      * <p>Note: creating a sequence of N values by successive calls on this method
      * takes time proportional to N-squared.</p>
      *
@@ -369,7 +369,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Make an XDM sequence from a Java {@link Iterable}. Each value delivered by the iterable
+     * Make an {@code XdmValue} from a Java {@link Iterable}. Each value delivered by the iterable
      * is first converted to an XDM value using the {@link #makeValue(Object)} method;
      * if the result is anything other than a single XDM item, it is then wrapped in an
      * {@link XdmArray}.
@@ -392,7 +392,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Make an XDM value from a Java object. The supplied object may be any of the following:
+     * Make an {@code XdmValue} from a Java object. The supplied object may be any of the following:
      * <ul>
      * <li>An instance of {@link XdmValue} (for example, an
      * {@link XdmNode} or {@link XdmAtomicValue} or {@link XdmArray} or {@link XdmMap}),
@@ -432,7 +432,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Return a new XdmValue containing the nodes present in this XdmValue,
+     * Return a new {@code XdmValue} containing the nodes present in this {@code XdmValue},
      * with duplicates eliminated, and sorted into document order
      * @return the same nodes, sorted into document order, with duplicates eliminated
      * @throws SaxonApiException if anything goes wrong (typically during delayed evaluation of the
@@ -452,9 +452,9 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Get a stream comprising the items in this value
+     * Get a stream comprising the items in this {@code XdmValue}
      *
-     * @return a Stream over the items in this value
+     * @return a Stream over the items in this {@code XdmValue}
      * @since 9.9
      */
     public XdmStream<? extends XdmItem> stream() {
@@ -557,7 +557,7 @@ public class XdmValue implements Iterable<XdmItem> {
     }
 
     /**
-     * Test whether the value matches a supplied SequenceType
+     * Test whether this {@code XdmValue} matches a supplied SequenceType
      * @param type the SequenceType that we are testing against
      * @return true if this value matches the sequence type, false otherwise.
      * @since 12.0

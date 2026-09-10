@@ -12,7 +12,11 @@ import javax.xml.transform.SourceLocator;
 /**
  * A user-written implementation of the MessageListener interface may be registered with the XsltTransformer
  * to receive notification of xsl:message output. Each xsl:message instruction that is evaluated results in
- * a single call to the MessageListener
+ * a single call to the MessageListener.
+ *
+ * <p>This class is obsolescent. The preferred way to receive notification of <code>xsl:message</code>
+ * instructions is the use the method {@link Xslt30Transformer#setMessageHandler}, which is typically
+ * supplied with a lambda expression of type <code>Consumer&lt;Message></code> as its argument.</p>
  */
 public interface MessageListener {
 

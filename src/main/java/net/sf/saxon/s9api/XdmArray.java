@@ -29,7 +29,7 @@ import java.util.List;
 public class XdmArray extends XdmFunctionItem {
 
     /**
-     * Create an empty XdmArray
+     * Create an empty {@link XdmArray}
      */
 
     public XdmArray() {
@@ -37,8 +37,10 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Create an XdmArray that wraps a supplied ArrayItem
-     * @param array the ArrayItem to be encapsulated
+     * Create an {@link XdmArray} that wraps a supplied {@link ArrayItem}, this being the
+     * internal Saxon representation of an XDM array. This method is intended primarily
+     * for system use.
+     * @param array the {@link ArrayItem} to be encapsulated
      */
 
     public XdmArray(ArrayItem array) {
@@ -46,10 +48,10 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Create an XdmArray supplying the members as an array of XdmValue objects
+     * Create an {@link XdmArray} supplying the members as an array of {@link XdmValue} objects
      *
-     * @param members an array of XdmValue objects. Note that subsequent changes to the array will have no effect
-     *                on the XdmValue.
+     * @param members a Java array of {@link XdmValue} objects. Note that subsequent changes to the
+     *                Java array will have no effect on the constructed XDM array.
      */
 
     public XdmArray(XdmValue[] members) {
@@ -65,11 +67,12 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Create an XdmArray supplying the members as a collection of XdmValue objects
+     * Create an {@link XdmArray} supplying the members as a collection of {@link XdmValue} objects
      *
      * @param members a sequence of XdmValue objects. Note that if this is supplied as a list or similar
-     *                collection, subsequent changes to the list/collection will have no effect on the XdmValue.
-     *                Note that the argument can be a single XdmValue representing a sequence, in which case the
+     *                collection, subsequent changes to the list/collection will have no effect on the
+     *                constructed XDM array.
+     *                Note that the argument can be a single {@link XdmValue} representing a sequence, in which case the
      *                constructed array will have one member for each item in the supplied sequence.
      */
 
@@ -200,9 +203,9 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Make an XdmArray whose members are xs:boolean values
+     * Make an XDM array whose members are {@code xs:boolean} values
      * @param input the input array of booleans
-     * @return an XdmArray whose members are xs:boolean values corresponding one-to-one with the input
+     * @return an {@link XdmArray} whose members are {@code xs:boolean} values corresponding one-to-one with the input
      */
 
     public static XdmArray makeArray(boolean[] input) {
@@ -214,10 +217,10 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Make an XdmArray whose members are xs:long values
+     * Make an XDM array whose members are {@code xs:integer} values
      *
      * @param input the input array of integers
-     * @return an XdmArray whose members are xs:integer values corresponding one-to-one with the input
+     * @return an {@link XdmArray} whose members are xs:integer values corresponding one-to-one with the input
      */
 
     public static XdmArray makeArray(long[] input) {
@@ -229,10 +232,10 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Make an XdmArray whose members are xs:integer values
+     * Make an XDM Array whose members are {@code xs:integer} values
      *
      * @param input the input array of integers
-     * @return an XdmArray whose members are xs:integer values corresponding one-to-one with the input
+     * @return an {@link XdmArray} whose members are xs:integer values corresponding one-to-one with the input
      */
 
     public static XdmArray makeArray(int[] input) {
@@ -244,10 +247,10 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Make an XdmArray whose members are xs:integer values
+     * Make an XDM Array whose members are {@code xs:integer} values
      *
      * @param input the input array of integers
-     * @return an XdmArray whose members are xs:integer values corresponding one-to-one with the input
+     * @return an {@link XdmArray} whose members are xs:integer values corresponding one-to-one with the input
      */
 
     public static XdmArray makeArray(short[] input) {
@@ -259,10 +262,10 @@ public class XdmArray extends XdmFunctionItem {
     }
 
     /**
-     * Make an XdmArray whose members are xs:integer values
+     * Make an XDM Array whose members are xs:integer values
      *
      * @param input the input array of integers
-     * @return an XdmArray whose members are xs:integer values corresponding one-to-one with the input
+     * @return an {@link XdmArray} whose members are xs:integer values corresponding one-to-one with the input
      */
 
     public static XdmArray makeArray(byte[] input) {

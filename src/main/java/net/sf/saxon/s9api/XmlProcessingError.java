@@ -14,7 +14,7 @@ import net.sf.saxon.lib.ErrorReporter;
 /**
  * The <b>XmlProcessingError</b> class contains information about an error detected during
  * compilation or execution of a stylesheet, query, XPath expression, or schema
- * @since 10.0. In 11.0, the super-interface {@code StaticError} is dropped, as it had
+ * @since 10.0. In 11.0, the super-interface {@code StaticError} was dropped, as it had
  * become misleading.
  */
 

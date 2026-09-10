@@ -46,13 +46,13 @@ import java.util.function.Supplier;
  * It is safe, however, to reuse the object within a single thread to run the same
  * query several times. Running the query does not change the context
  * that has been established.</p>
- * <p>An <code>XQueryEvaluator</code> is always constructed by running the <code>Load</code>
+ * <p>An <code>XQueryEvaluator</code> is always constructed by running the {@link XQueryExecutable#load()}
  * method of an {@link net.sf.saxon.s9api.XQueryExecutable}.</p>
  * <p>An <code>XQueryEvaluator</code> is itself a <code>Iterable</code>. This makes it possible to
  * evaluate the results in a for-each expression.</p>
  * <p>An <code>XQueryEvaluator</code> is itself a <code>Destination</code>. This means it is possible to use
- * one <code>XQueryEvaluator</code> as the destination to receive the results of another transformation,
- * this providing a simple way for transformations to be chained into a pipeline. When the query is executed
+ * one <code>XQueryEvaluator</code> as the destination to receive the results of another query or transformation,
+ * this providing a simple way for queries to be chained into a pipeline. When the query is executed
  * this way, {@link #setDestination(Destination)} must be called to provide a destination for the result of this query.</p>
  * <p>As a {@code Destination}, an {@code XQueryEvaluator} performs <b>sequence normalization</b> as defined
  * in the Serialization specification, including inserting item separators if required. The input to the

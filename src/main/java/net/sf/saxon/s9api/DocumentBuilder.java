@@ -489,10 +489,11 @@ public class DocumentBuilder {
      *         a well formed (and namespace-well-formed) document, the effect is undefined; Saxon may fail
      *         to detect the error, and construct an unusable tree. </p>
      * @throws SaxonApiException if any failure occurs
-     * @since 9.3
+     * @since 9.3. Changed in 13 to return the interface type {@link BuildingStreamWriter} rather than
+     * a specific implementation type.
      */
 
-    public BuildingStreamWriterImpl newBuildingStreamWriter() throws SaxonApiException {
+    public BuildingStreamWriter newBuildingStreamWriter() throws SaxonApiException {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         Builder builder = treeModel.makeBuilder(pipe);
         builder.setLineNumbering(lineNumbering);

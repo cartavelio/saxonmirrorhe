@@ -28,13 +28,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A {@code JsonBuilder} is used to parse JSON documents
+ * A {@code JsonBuilder} is used to parse JSON documents. It can be instantiated by calling
+ * {@link Processor#newJsonBuilder()}.
  * @since 11
  */
 
 public class JsonBuilder {
 
-    private Configuration config;
+    private final Configuration config;
     private boolean liberal;
 
     protected JsonBuilder(Configuration config) {

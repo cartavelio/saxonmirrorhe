@@ -25,12 +25,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An XsltExecutable represents the compiled form of a stylesheet.
+ * An {@code XsltExecutable} represents the compiled form of a stylesheet.
  * To execute the stylesheet, it must first be loaded to form an {@link XsltTransformer}.
- * <p>An XsltExecutable is immutable, and therefore thread-safe.
- * It is simplest to load a new XsltTransformer each time the stylesheet is to be run.
- * However, the XsltTransformer is serially reusable within a single thread. </p>
- * <p>An XsltExecutable is created by using one of the <code>compile</code> methods on the
+ * <p>An {@code XsltExecutable} is immutable, and therefore thread-safe.
+ * It is simplest to use the {@link #load()} or {@link #load30} method to
+ * load a new {@link XsltTransformer} each time the stylesheet is to be run.
+ * However, the {@code XsltTransformer} is serially reusable within a single thread. </p>
+ * <p>An {@code XsltExecutable} is created by using one of the <code>compile</code> methods on the
  * {@link XsltCompiler} class.</p>
  */
 @CSharpModifiers(code = {"internal"})
@@ -47,9 +48,9 @@ public class XsltExecutable {
     }
 
     /**
-     * Get the Processor that was used to create this XsltExecutable
+     * Get the {@link Processor} that was used to create this {@code XsltExecutable}
      *
-     * @return the original Processor object
+     * @return the original {@code Processor} object
      * @since 9.6
      */
 
@@ -92,16 +93,16 @@ public class XsltExecutable {
     }
 
     /**
-     * Load the stylesheet to prepare it for execution. This version of the load() method
-     * creates an <code>Xslt30Transformer</code> which offers interfaces for stylesheet
+     * Load the stylesheet to prepare it for execution. This version of the {@code load()} method
+     * creates an {@link Xslt30Transformer} which offers interfaces for stylesheet
      * invocation corresponding to those described in the XSLT 3.0 specification. It can be used
      * with XSLT 2.0 or XSLT 3.0 stylesheets, and in both cases it offers new XSLT 3.0 functionality such
      * as the ability to supply parameters to the initial template, or the ability to invoke
      * stylesheet-defined functions, or the ability to return an arbitrary sequence as a result
      * without wrapping it in a document node.
      *
-     * @return An Xslt30Transformer. The returned Xslt30Transformer can be used to set up the
-     *         dynamic context for stylesheet evaluation, and to run the stylesheet.
+     * @return An {@code Xslt30Transformer}. The returned {@code Xslt30Transformer}
+     * can be used to set up the dynamic context for stylesheet evaluation, and to run the stylesheet.
      */
 
     public Xslt30Transformer load30() {
@@ -211,7 +212,8 @@ public class XsltExecutable {
      * of this stylesheet
      *
      * @return a newly constructed WhitespaceStrippingPolicy based on the declarations in
-     * the top-level package of this stylesheet. This policy can be used as input to a {@link DocumentBuilder}.
+     * the top-level package of this stylesheet. This policy can be used as input to
+     * a {@link DocumentBuilder}.
      */
 
     public WhitespaceStrippingPolicy getWhitespaceStrippingPolicy() {

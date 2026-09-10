@@ -88,7 +88,7 @@ public class XdmDestination extends AbstractDestination {
     }
 
     /**
-     * Get the tree model to be used for documents constructed using this XdmDestination.
+     * Get the tree model to be used for documents constructed using this {@code XdmDestination}.
      * By default, the TinyTree is used.
      *
      * @return the tree model in use: typically one of the constants {@link net.sf.saxon.om.TreeModel#TINY_TREE},

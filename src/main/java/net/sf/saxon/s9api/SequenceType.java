@@ -8,7 +8,7 @@
 package net.sf.saxon.s9api;
 
 /**
- * A SequenceType is the combination of an ItemType and an OccurrenceIndicator
+ * A {@code SequenceType} is the combination of an ItemType and an OccurrenceIndicator
  */
 public class SequenceType {
 

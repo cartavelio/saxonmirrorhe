@@ -22,11 +22,8 @@ import java.util.function.Function;
  * is a pair comprising a key (which is an atomic value) and a value (which is an arbitrary value).
  * The map itself is an XDM item.
  * <p>An XdmMap is immutable.</p>
- * <p>As originally issued in Saxon 9.8, this class implemented the {@link java.util.Map} interface.
- * It no longer does so, because it was found that the methods {@link #size()}, {@link #put(XdmAtomicValue, XdmValue)},
- * and {@link #remove} did not adhere to the semantic contract of that interface. Instead, it is now
- * possible to obtain a view of this object as an immutable Java {@link java.util.Map} by calling the
- * method {@link #asImmutableMap()}. See bug 3824.</p>
+ * <p>It is possible to obtain a view of this object as an immutable Java {@link java.util.Map} by calling the
+ * method {@link #asImmutableMap()}.</p>
  *
  * @since 9.8
  */
@@ -34,7 +31,7 @@ import java.util.function.Function;
 public class XdmMap extends XdmFunctionItem {
 
     /**
-     * Create an empty XdmMap
+     * Create an empty {@code XdmMap}
      */
 
     public XdmMap() {
@@ -42,8 +39,9 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     /**
-     * Create an XdmMap whose underlying value is a MapItem
-     * @param map the MapItem to be encapsulated
+     * Create an {@code XdmMap} based on a Saxon internal {@link MapItem}. This method is
+     * intended primarily for system use.
+     * @param map the {@link MapItem} to be encapsulated
      */
 
     public XdmMap(MapItem map) {
@@ -51,10 +49,11 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     /**
-     * Create an XdmMap supplying the entries in the form of a Java Map,
+     * Create an {@code XdmMap} supplying the entries in the form of a Java {@link Map},
      * where the keys and values in the Java Map are XDM values
      *
-     * @param map a Java map whose entries are the (key, value) pairs
+     * @param map a Java map whose entries are the (key, value) pairs. Subsequent changes to the
+     *            Java map have no effect on the constructed {@code XdmMap}.
      * @since 9.8
      */
 

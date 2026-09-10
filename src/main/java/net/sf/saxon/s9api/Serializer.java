@@ -37,9 +37,11 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * A <code>Serializer</code> takes a tree representation of XML and turns it into lexical XML markup.
+ * A <code>Serializer</code> takes an XDM value and outputs a textual representation of the content.
+ * Different serialization methods are defined to support different output formats, for example the XML
+ * method outputs the content as lexical XML, while the JSON method outputs the content as lexical JSON.
  * <p>To construct a <code>Serializer</code>, use the factory method {@link Processor#newSerializer(File)}.</p>
- * <p><i>Note that this is XML serialization in the sense of the W3C XSLT and XQuery specifications.
+ * <p><i>Note that this is serialization in the sense of the W3C XSLT and XQuery specifications.
  * This has nothing to do with the serialization of Java objects, or the {@link java.io.Serializable}
  * interface.</i></p>
  * <p>The serialization may be influenced by a number of serialization parameters. A parameter has a name,

@@ -28,14 +28,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
- * The class XdmFunctionItem represents a function item
+ * The class {@code XdmFunctionItem} represents a function item. There are subclasses for maps and arrays.
  */
 
 @CSharpModifiers(code = {"internal"})
 public class XdmFunctionItem extends XdmItem {
 
     /**
-     * Create an XdmFunctionItem that wraps a supplied <code>Function</code>. This
+     * Create an {@code XdmFunctionItem} that wraps a supplied <code>Function</code>. This
      * method is primarily for internal use, though it is also available to applications
      * that manipulate data using lower-level Saxon interfaces.
      *
@@ -99,7 +99,7 @@ public class XdmFunctionItem extends XdmItem {
     }
 
     /**
-     * Get an equivalent Java Function object representing this XdmFunction.
+     * Get an equivalent Java Function object representing this XDM Function.
      * This is possible only for arity-1 functions.
      * @param processor the processor
      * @return a Java Function. This takes an XdmValue

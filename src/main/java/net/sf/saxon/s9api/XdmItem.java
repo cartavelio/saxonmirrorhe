@@ -18,10 +18,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * The class XdmItem represents an item in a sequence, as defined by the XDM data model.
+ * The class {@code XdmItem} represents an item in a sequence, as defined by the XDM data model.
  * An item may be an atomic value, a node, a function item (including maps and arrays), or an external object.
  * <p>An item is a member of a sequence, but it can also be considered as a sequence
- * (of length one) in its own right. <code>XdmItem</code> is a subtype of <code>XdmValue</code> because every
+ * (of length one) in its own right. <code>XdmItem</code> is a subtype of {@link XdmValue} because every
  * Item in the XDM data model is also a value.</p>
  * <p>It cannot be assumed that every sequence of length one will be represented by
  * an <code>XdmItem</code>. It is quite possible for an <code>XdmValue</code> that is not an <code>XdmItem</code> to hold
@@ -36,9 +36,10 @@ public abstract class XdmItem extends XdmValue {
 
 
     /**
-     * Construct an XdmItem as a wrapper around an existing Saxon Item object
+     * Construct an {@code XdmItem} as a wrapper around an internal Saxon {@link Item} object.
+     * This is intended mainly for system use.
      *
-     * @param item the Item object to be wrapped. This can be retrieved using the
+     * @param item the {@link Item} object to be wrapped. This can be retrieved using the
      *             {@link #getUnderlyingValue} method.
      * @throws NullPointerException if item is null
      * @since 9.5 (previously a protected constructor)

@@ -46,9 +46,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * An XsltCompiler object allows XSLT stylesheets to be compiled. The compiler holds information that
+ * An {@code XsltCompiler} object allows XSLT stylesheets to be compiled. The compiler holds information that
  * represents the static context for the compilation.
- * <p>To construct an {@code XsltCompiler}, use the factory method {@link Processor#newXsltCompiler} on the Processor object.</p>
+ * <p>To construct an {@code XsltCompiler}, use the factory method {@link Processor#newXsltCompiler}
+ * on the {@link Processor} object.</p>
  * <p>An {@code XsltCompiler} may be used repeatedly to compile multiple stylesheets. Any changes made to the
  * {@code XsltCompiler} (that is, to the static context) do not affect stylesheets that have already been compiled.
  * An XsltCompiler may in principle be used concurrently in multiple threads, but in practice this
@@ -86,7 +87,7 @@ public class XsltCompiler {
      * Protected constructor. The public way to create an <code>XsltCompiler</code> is by using the factory method
      * {@link Processor#newXsltCompiler} .
      *
-     * @param processor the Saxon processor
+     * @param processor the Saxon {@link Processor}
      */
 
     protected XsltCompiler(Processor processor) {
@@ -98,7 +99,8 @@ public class XsltCompiler {
     }
 
     /**
-     * Set the {@link XsdSchema} to be used with this {@code XsltCompiler}.
+     * Set the {@link XsdSchema} to be used with this {@code XsltCompiler} for a schema-aware
+     * transformation (requires Saxon-EE).
      *
      * <p>If this method is called, then any <code>xsl:import-schema</code> declaration
      * for a target namespace that is present in the supplied schema (other than an
@@ -126,14 +128,20 @@ public class XsltCompiler {
         usedSchema = schema;
     }
 
+    /**
+     * Get the schema that is to be used for a schema-aware transformation.
+     * @return the schema previous supplied in a call of {@link #useSchema(XsdSchema), or null if
+     * that method has not been called.
+     */
+
     public XsdSchema getUsedSchema() {
         return usedSchema;
     }
 
     /**
-     * Get the Processor from which this XsltCompiler was constructed
+     * Get the {@link Processor} from which this {@code XsltCompiler} was constructed
      *
-     * @return the Processor to which this XsltCompiler belongs
+     * @return the {@link Processor} to which this {@code XsltCompiler} belongs
      * @since 9.3
      */
 
@@ -143,9 +151,9 @@ public class XsltCompiler {
 
     //#if CSHARP==false
     /**
-     * Set the URIResolver to be used during stylesheet compilation. This interface is
+     * Set the {@link URIResolver} to be used during stylesheet compilation. This interface is
      * retained for backwards compatibility reasons. The supplied <code>URIResolver</code>
-     * is wrapped in a <code>ResourceResolver</code>. The <code>ResourceResolver</code>
+     * is wrapped in a {@link ResourceResolver}. The <code>ResourceResolver</code>
      * interface is preferred because more information is made available; most obviously,
      * the absolute URI formed by combining the base URI and relative URI.
      *
@@ -161,7 +169,7 @@ public class XsltCompiler {
     //#endif
 
     /**
-     * Set the <code>ResourceResolver</code> to be used during stylesheet compilation.
+     * Set the {@link ResourceResolver} to be used during stylesheet compilation.
      * The <code>ResourceResolver</code> is used for dereferencing
      * an absolute URI (after URI resolution) to return a {@link javax.xml.transform.Source} representing the
      * location where a stylesheet module can be found.
@@ -202,7 +210,7 @@ public class XsltCompiler {
 
     /**
      * Clear the values of all stylesheet parameters previously set using {@link #setParameter(QName, XdmValue)}.
-     * This resets the parameters to their initial ("undeclared") state
+     * This resets the parameters to their initial (undeclared) state
      */
 
     public void clearParameters() {
@@ -211,11 +219,11 @@ public class XsltCompiler {
 
     //#if CSHARP==false
     /**
-     * Get the URIResolver to be used during stylesheet compilation.
+     * Get the {@link URIResolver} to be used during stylesheet compilation.
      *
-     * @return the URIResolver used during stylesheet compilation. Returns null if no user-supplied
-     * URIResolver has been set.
-     * @deprecated since 11.1 - use a <code>ResourceResolver</code> instead
+     * @return the {@code URIResolver} used during stylesheet compilation. Returns null if no user-supplied
+     * {@code URIResolver} has been set.
+     * @deprecated since 11.1 - use a {@link ResourceResolver} instead
      */
 
     @Deprecated
@@ -230,10 +238,10 @@ public class XsltCompiler {
     //#endif
 
     /**
-     * Get the ResourceResolver to be used during stylesheet compilation.
+     * Get the {@link ResourceResolver} to be used during stylesheet compilation.
      *
-     * @return the ResourceResolver used during stylesheet compilation. Returns null if no user-supplied
-     * ResourceResolver has been set.
+     * @return the {@code ResourceResolver} used during stylesheet compilation. Returns null if no user-supplied
+     * {@code ResourceResolver} has been set.
      */
 
     public ResourceResolver getResourceResolver() {
@@ -242,7 +250,7 @@ public class XsltCompiler {
 
     //#if CSHARP==false
     /**
-     * Set the ErrorListener to be used during this compilation episode
+     * Set the  to be used during this compilation
      *
      * @param listener The error listener to be used. This is notified of all errors detected during the
      *                 compilation.
@@ -251,7 +259,7 @@ public class XsltCompiler {
      *                 {@code ErrorListener} was also notified of run-time errors, unless a different
      *                 {@code ErrorListener} was supplied at run-time. This is no longer the case from
      *                 Saxon 10.0</i></p>
-     * @deprecated since 10.0. Use {@link #setErrorReporter(ErrorReporter)}                
+     * @deprecated since 10.0. Use {@link ErrorListener}{@link #setErrorReporter(ErrorReporter)}
      */
 
     @Deprecated
@@ -260,7 +268,7 @@ public class XsltCompiler {
     }
 
     /**
-     * Get the ErrorListener being used during this compilation episode
+     * Get the {@link ErrorListener} being used during this compilation episode
      *
      * @return listener The error listener in use. This is notified of all errors detected during the
      * compilation. Returns null if no user-supplied ErrorListener has been set.

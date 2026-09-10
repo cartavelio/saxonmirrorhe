@@ -41,12 +41,12 @@ public enum ValidationMode {
         this.number = number;
     }
 
-    protected int getNumber() {
+    int getNumber() {
         return number;
     }
 
     /*@NotNull*/
-    protected static ValidationMode get(int number) {
+    static ValidationMode get(int number) {
         switch (number) {
             case Validation.STRICT:
                 return STRICT;

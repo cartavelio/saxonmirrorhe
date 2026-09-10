@@ -75,9 +75,9 @@ public class XPathCompiler {
     }
 
     /**
-     * Get the Processor from which this XPathCompiler was constructed
+     * Get the {@link Processor} from which this {@code XPathCompiler} was constructed
      *
-     * @return the Processor to which this XPathCompiler belongs
+     * @return the {@link Processor} to which this {@code XPathCompiler} belongs
      * @since 9.3
      */
 
@@ -118,7 +118,7 @@ public class XPathCompiler {
     /**
      * Say whether XPath expressions compiled using this {@code XPathCompiler} are
      * schema-aware. They will automatically be schema-aware if the method
-     * {@link #importSchemaNamespace(String)} is called. An XPath expression
+     * {@link #useSchema(XsdSchema)} is called. An XPath expression
      * must be marked as schema-aware if it is to handle typed (validated)
      * input documents.
      *
@@ -137,9 +137,9 @@ public class XPathCompiler {
     }
 
     /**
-     * Ask whether XPath expressions compiled using this XPathCompiler are
+     * Ask whether XPath expressions compiled using this {@code XPathCompiler} are
      * schema-aware. They will automatically be schema-aware if the method
-     * {@link #importSchemaNamespace(String)} is called. An XPath expression
+     * {@link #useSchema(XsdSchema)} is called. An XPath expression
      * must be marked as schema-aware if it is to handle typed (validated)
      * input documents.
      *
@@ -152,7 +152,7 @@ public class XPathCompiler {
     }
 
     /**
-     * Set the {@link XsdSchema} to be used with this XPathCompiler.
+     * Set the {@link XsdSchema} to be used with this {@code XPathCompiler}.
      *
      * <p>This automatically marks the XPath expression as schema-aware.</p>
      * <p>The method should only be called once; supplying a schema cancels the effect
@@ -221,7 +221,7 @@ public class XPathCompiler {
     }
 
     /**
-     * Set the static base URI for XPath expressions compiled using this XPathCompiler. The base URI
+     * Set the static base URI for XPath expressions compiled using this {@code XPathCompiler}. The base URI
      * is part of the static context, and is used to resolve any relative URIs appearing within an XPath
      * expression, for example a relative URI passed as an argument to the doc() function. If no
      * static base URI is supplied, then the current working directory is used.
@@ -245,7 +245,7 @@ public class XPathCompiler {
     }
 
     /**
-     * Get the static base URI for XPath expressions compiled using this XPathCompiler. The base URI
+     * Get the static base URI for XPath expressions compiled using this {@code XPathCompiler}. The base URI
      * is part of the static context, and is used to resolve any relative URIs appearing within an XPath
      * expression, for example a relative URI passed as an argument to the doc() function. If no
      * static base URI has been explicitly set, this method returns null.
@@ -316,17 +316,9 @@ public class XPathCompiler {
     }
 
     /**
-     * Import a schema namespace: that is, add the element and attribute declarations and type definitions
-     * contained in a given namespace to the static context for the XPath expression.
-     * <p>This method will not cause the schema to be loaded. That must be done separately, using the
-     * {@link SchemaManager}. This method will not fail if the schema has not been loaded (but in that case
-     * the set of declarations and definitions made available to the XPath expression is empty). The schema
-     * document for the specified namespace may be loaded before or after this method is called.</p>
-     * <p>This method does not bind a prefix to the namespace. That must be done separately, using the
-     * {@link #declareNamespace(String, String)} method.</p>
+     * Import a schema namespace.
      *
-     * @param uri The schema namespace to be imported. To import declarations in a no-namespace schema,
-     *            supply a zero-length string.
+     * @param uri The schema namespace to be imported.
      * @since 9.1
      * @deprecated in 13.0. The method now has no effect.
      * Since there is no longer a global schema at {@link Processor} level,

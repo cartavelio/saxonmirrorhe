@@ -13,9 +13,9 @@ import net.sf.saxon.event.TeeOutputter;
 import net.sf.saxon.serialize.SerializationProperties;
 
 /**
- * A TeeDestination allows writing to two destinations at once. For example the output of a transformation
+ * A {@code TeeDestination} allows writing to two destinations at once. For example the output of a transformation
  * can be written simultaneously to a Serializer and to a second Transformation. By chaining together a number
- * of TeeDestinations it is possible to write to any number of destinations at once.
+ * of {@code TeeDestination}s it is possible to write to any number of destinations at once.
  *
  * @since 9.1
  */

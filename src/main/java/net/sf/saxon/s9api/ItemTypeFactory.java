@@ -41,9 +41,10 @@ public class ItemTypeFactory {
      *
      * <p>Since 13.0, an {@code ItemTypeFactory} created using this constructor is no longer capable
      * of creating item types that refer to user-defined types in a schema; this is because the
-     * {@link Processor} no longer holds a unique global schema. Instead, </p>
+     * {@link Processor} no longer holds a unique global schema. Instead, use a factory that is
+     * specific to a given schema by using {@link #ItemTypeFactory(Processor, XsdSchema)}.</p>
      *
-     * @param processor the processor used by this ItemTypeFactory. This must be supplied
+     * @param processor the processor used by this {@code ItemTypeFactory}. This must be supplied
      *                  in the case of user-defined types or types that reference element or attribute names;
      *                  for built-in types it can be omitted.
      */

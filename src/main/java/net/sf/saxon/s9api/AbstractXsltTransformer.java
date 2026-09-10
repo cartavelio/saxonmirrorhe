@@ -40,7 +40,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * A class that exists to contain common code shared between XsltTransformer and Xslt30Transformer
+ * A class that exists to contain common code shared between {@link XsltTransformer} and
+ * {@link Xslt30Transformer}. Not intended for external use.
  */
 
 //@CSharpInjectMembers(code = {
