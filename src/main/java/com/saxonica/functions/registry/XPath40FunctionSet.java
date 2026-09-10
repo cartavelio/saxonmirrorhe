@@ -127,6 +127,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
+        register("civil-timezone", 1, 2, e -> e.populate(CivilTimezoneFn::new, BuiltInAtomicType.DAY_TIME_DURATION, ONE, 0)
+                .arg(0, BuiltInAtomicType.DATE_TIME, ONE, null)
+                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+
         register("codepoints-to-string", 1, e -> e.populate(CodepointsToString::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
