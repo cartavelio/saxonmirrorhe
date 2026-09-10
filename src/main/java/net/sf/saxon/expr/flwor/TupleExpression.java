@@ -22,6 +22,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.JavaExternalObjectType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -216,6 +217,9 @@ public class TupleExpression extends Expression {
                 if (SequenceTool.getLength(v) > 1) {
                     throw new XPathException("Grouping key value cannot be a sequence of more than one item", "XPTY0004");
                 }
+            }
+            if (v instanceof StringValue) {
+                v = ((StringValue) v).economize(); // bug 6446
             }
             tuple[i] = v instanceof AtomicValue ? (AtomicValue) v : null;
         }

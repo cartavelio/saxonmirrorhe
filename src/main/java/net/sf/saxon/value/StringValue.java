@@ -242,6 +242,13 @@ public class StringValue extends AtomicValue {
         return new CodepointIterator(codePoints());
     }
 
+    public StringValue economize() {
+        UnicodeString c2 = content.economize();
+        if (c2 != content) {
+            return new StringValue(c2, metadata);
+        }
+        return this;
+    }
 
     /**
      * Get an object value that implements the XPath equality and ordering comparison semantics for this value.
