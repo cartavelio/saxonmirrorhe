@@ -3206,7 +3206,7 @@
                   <div class="fcomment">Return an array of <a class="bodylink code"
                                                               href="../saxon_c_php_xdmnode">Saxon\XdmNode</a> objects representing
                      the child nodes of this node. If there are no child nodes then return
-                     null. (Note: this method was added in SaxonC 12.4.2.)</div>
+                     null</div>
                </td>
             </tr>
             <tr>
