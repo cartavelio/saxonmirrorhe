@@ -277,7 +277,8 @@ public class XSLMode extends StyleElement {
             String attValue = att.getValue();
             if (f.equals("streamable") || f.equals("on-multiple-match") || f.equals("on-no-match") ||
                     f.equals("warning-on-multiple-match") || f.equals("warning-on-no-match") ||
-                    f.equals("typed") || f.equals("copy-namespaces") || f.equals("visibility")) {
+                    f.equals("typed") || f.equals("visibility") ||
+                    (f.equals("copy-namespaces") && getCompilation().getCompilerInfo().getXsltVersion() >= 40)) {
                 String trimmed = Whitespace.trim(attValue);
                 String normalizedAtt;
                 if ("true".equals(trimmed) || "1".equals(trimmed)) {
