@@ -362,15 +362,15 @@ public class XdmUtils {
         return addr;
     }
 
-    @CEntryPoint(name = "j_makeXdmArray")
-    public static long makeXdmArray(IsolateThread thread, ObjectHandle processorDataAccumulatorRef) {
+    @CEntryPoint(name = "j_makeXdmArray", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long makeXdmArray(IsolateThread thread, ObjectHandle processorDataAccumulatorRef)  throws IllegalArgumentException {
          ProcessorDataAccumulator processorDataAccumulator = SaxonCAPI.objectHandles.get(processorDataAccumulatorRef);
         XdmArray array = null;
          if(processorDataAccumulator.size() == 0) {
              array = new XdmArray();
          }  else {
-             XdmValue[] xdmValues = (XdmValue[]) processorDataAccumulator.getValues();
-             array = new XdmArray(xdmValues);
+             Object[] objValues = processorDataAccumulator.getValues();
+             array = XdmArray.makeArray(objValues);
          }
 
          ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
@@ -380,7 +380,7 @@ public class XdmUtils {
     }
 
 
-    @CEntryPoint(name = "j_makeXdmArrayFromShort")
+    @CEntryPoint(name = "j_makeXdmArrayFromShort", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long makeXdmArrayFromShort(IsolateThread thread, CShortPointer shortPointer, int length) {
 
         XdmArray array = null;
@@ -401,7 +401,7 @@ public class XdmUtils {
     }
 
 
-    @CEntryPoint(name = "j_makeXdmArrayFromStrings")
+    @CEntryPoint(name = "j_makeXdmArrayFromStrings", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long makeXdmArrayFromStrings(IsolateThread thread, CCharPointer ccharPointer, int length) {
 
         XdmArray array = null;
@@ -421,7 +421,7 @@ public class XdmUtils {
          return arrayHandle.rawValue();
     }
 
-    @CEntryPoint(name = "j_makeXdmArrayFromInt")
+    @CEntryPoint(name = "j_makeXdmArrayFromInt", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long makeXdmArrayFromInt(IsolateThread thread, CIntPointer intPointer, int length) {
 
         XdmArray array = null;
@@ -443,7 +443,7 @@ public class XdmUtils {
 
 
 
-    @CEntryPoint(name = "j_makeXdmArrayFromLong")
+    @CEntryPoint(name = "j_makeXdmArrayFromLong", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long makeXdmArrayFromLong(IsolateThread thread, CLongPointer longPointer, int length) {
 
         XdmArray array = null;
@@ -463,7 +463,7 @@ public class XdmUtils {
          return arrayHandle.rawValue();
     }
 
-    @CEntryPoint(name = "j_makeXdmArrayFromBool")
+    @CEntryPoint(name = "j_makeXdmArrayFromBool", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long makeXdmArrayFromBoolean(IsolateThread thread, CIntPointer boolPointer, int length) {
 
         XdmArray array = null;
