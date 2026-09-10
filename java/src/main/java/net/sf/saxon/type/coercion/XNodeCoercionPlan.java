@@ -1,11 +1,13 @@
 package net.sf.saxon.type.coercion;
 
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceExtent;
 
@@ -36,7 +38,8 @@ public final class XNodeCoercionPlan extends CoercionPlan {
      */
 
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
-        if (requiredType.matches(item, request.config.getTypeHierarchy())) {
+        TypeHierarchy th = request.config.getTypeHierarchy();
+        if (requiredType.matches(item, th)) {
             return item;
         }
         if (item instanceof JNode) {
@@ -52,14 +55,23 @@ public final class XNodeCoercionPlan extends CoercionPlan {
             } else {
                 List<Item> result = new ArrayList<>();
                 for (Item it : content.asIterable()) {
-                    if (it instanceof NodeInfo) {
+                    if (requiredType.matches(it, th)) {
                         return content;
                     } else {
-                        throw coercionError(item, requiredType, request);
+                        throw coercionError(it, requiredType, request);
                     }
                 }
                 return SequenceExtent.makeSequenceExtent(result);
             }
+        }
+        if (item instanceof Parcel) {
+            GroundedValue val = ((Parcel) item).getValue();
+            for (Item it : val.asIterable()) {
+                if (!requiredType.matches(it, th)) {
+                    throw coercionError(item, requiredType, request);
+                }
+            }
+            return val;
         }
         throw coercionError(item, requiredType, request);
     }

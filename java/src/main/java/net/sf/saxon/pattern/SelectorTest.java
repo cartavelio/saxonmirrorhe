@@ -16,6 +16,7 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
+import net.sf.saxon.pattern.qname.LocalQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
@@ -159,7 +160,12 @@ public class SelectorTest extends NodeTest {
     public boolean test(GNode gnode) {
         if (gnode instanceof JNode) {
             if (asNCName) {
-                String mapKey = ((SpecificQNameTest)key).getStructuredQName().getLocalPart();
+                String mapKey;
+                if (key instanceof LocalQNameTest) {
+                    mapKey = ((LocalQNameTest)key).getLocalName();
+                } else {
+                    mapKey = ((SpecificQNameTest)key).getStructuredQName().getLocalPart();
+                }
                 return (((JNode)gnode).getSelector().getStringValue().equals(mapKey));
             } else {
                 AtomicValue actual = ((JNode) gnode).getSelector();

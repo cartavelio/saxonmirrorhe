@@ -15,6 +15,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -131,7 +132,11 @@ public class CallableFunction extends AbstractFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-        return callable.call(context, args);
+        try {
+            return callable.call(context, args);
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
 

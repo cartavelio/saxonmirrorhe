@@ -90,7 +90,7 @@ public class ConstantFunction extends AbstractFunction  {
      */
     @Override
     public String getDescription() {
-        return name.getDisplayName() + "#0";
+        return name.getDisplayName() + "#0 (->" + value.toShortString() + ")";
     }
 
     @Override

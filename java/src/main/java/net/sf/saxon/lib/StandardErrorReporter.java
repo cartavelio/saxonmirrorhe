@@ -18,6 +18,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -543,7 +544,9 @@ public class StandardErrorReporter
             Throwable e = err.getCause();
             while (e != null) {
                 if (!(isSAXParseException(e))) {
-                    if (e instanceof RuntimeException) {
+                    if (e instanceof UncheckedXPathException) {
+                        sb.append('\n').append(e.getMessage());
+                    } else if (e instanceof RuntimeException) {
                         StringWriter sw = new StringWriter();
                         appendStackTrace(e, sw);
                         sb.append('\n').append(sw);

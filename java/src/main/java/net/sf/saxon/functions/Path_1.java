@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
@@ -56,6 +57,18 @@ public class Path_1 extends SystemFunction {
         NodeInfo node;
         if (arguments.length == 0) {
             Item item = context.getContextItem();
+            if (item instanceof Parcel) {
+                GroundedValue val = ((Parcel)item).getValue();
+                switch (val.getLength()) {
+                    case 0:
+                        return EmptySequence.getInstance();
+                    case 1:
+                        item = ((Parcel)item).getValue().head();
+                        break;
+                    default:
+                        throw new XPathException("In call to fn:path(), the context value contains more than one item", "XPTY0004");
+                }
+            }
             if (item == null) {
                 throw new XPathException("In call to fn:path(), the context item is absent", "XPDY0002");
             }

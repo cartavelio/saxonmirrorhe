@@ -1876,6 +1876,9 @@ public class XPathParser {
                 grumble("Unknown atomic type " + qname, "XPST0051");
                 assert false;
             }
+            if (t instanceof ErrorType) {
+                return t;
+            }
             if (t instanceof BuiltInAtomicType) {
                 checkAllowedType(env, (BuiltInAtomicType) t);
                 return t;
