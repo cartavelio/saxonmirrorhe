@@ -38,6 +38,10 @@ public class SchemaTestSuiteDriver {
     public final static String testNS = "http://www.w3.org/XML/2004/xml-schema-test-suite/";
     public String scmSchemaLocation = "c:/MyJava/samples/scm/scmschema.scm";
     private final Licensor licensor = new Licensor();
+    private String exceptionFilename = null;
+    private String reportFilename = null;
+    private String errorReportFilename = null;
+    private String summarizeResults = null;
 
     public final static QName QN_bugzilla = new QName("bugzilla");
     public final static QName QN_contributor = new QName("contributor");
@@ -164,6 +168,14 @@ public class SchemaTestSuiteDriver {
                 allowDangling = true;
             } else if (args[i].startsWith("-bytecode:")) {
                 bytecode = args[i].substring(10);
+            } else if (args[i].startsWith("-exceptions:")) {
+                exceptionFilename = args[i].substring(12);
+            } else if (args[i].startsWith("-reportfilename:")) {
+                reportFilename = args[i].substring(16);
+            } else if (args[i].startsWith("-errorfilename:")) {
+                errorReportFilename = args[i].substring(15);
+            } else if (args[i].startsWith("-summarizeresults:")) {
+                summarizeResults = args[i].substring(18);
             } else if (args[i].startsWith("-scm:")) {
                 useSCM = true;
                 scmSchemaLocation = args[i].substring(5);
@@ -217,11 +229,20 @@ public class SchemaTestSuiteDriver {
 
             writeResultFilePreamble(catalogConfig);
 
-            XdmNode exceptionsDoc = catalogProcessor.newDocumentBuilder().build(
-                    new File(localDir + "/exceptions" +
-                                     (versionUnderTest.equals("1.0") ? "" : "11") +
-                                     (useTV ? "tv" : "") +
-                                     ".xml"));
+            String exfn = exceptionFilename;
+            if (exfn == null) {
+                exfn = "exceptions" +
+                        (versionUnderTest.equals("1.0") ? "" : "11") +
+                        (useTV ? "tv" : "");
+            }
+            if (!exfn.contains(".")) {
+                exfn = exfn + ".xml";
+            }
+            if (!exfn.contains("/")) {
+                exfn = localDir + "/" + exfn;
+            }
+
+            XdmNode exceptionsDoc = catalogProcessor.newDocumentBuilder().build(new File(exfn));
 
             XPathCompiler xpath = catalogProcessor.newXPathCompiler();
 
@@ -717,8 +738,19 @@ public class SchemaTestSuiteDriver {
 
 
     private void writeResultFilePreamble(Configuration config) throws IOException, XPathException, XMLStreamException {
-        Writer resultWriter = new BufferedWriter(new FileWriter(new File(localDir + "/SaxonResults"
-                                                                                 + Version.getProductVersion() + "-" + versionUnderTest + ".xml")));
+        String rfn = reportFilename;
+        if (rfn == null) {
+            rfn = "SaxonResults" + Version.getProductVersion() + "-" + versionUnderTest + ".xml";
+        }
+        if (!rfn.contains(".")) {
+            rfn = rfn + ".xml";
+        }
+        if (!rfn.contains("/")) {
+            rfn = localDir + "/" + rfn;
+        }
+        reportFilename = rfn; // We need this later
+
+        Writer resultWriter = new BufferedWriter(new FileWriter(new File(rfn)));
         Properties resultProperties = new Properties();
         resultProperties.setProperty(OutputKeys.METHOD, "xml");
         resultProperties.setProperty(OutputKeys.INDENT, "yes");
@@ -745,10 +777,26 @@ public class SchemaTestSuiteDriver {
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false); //TODO: temporary
         XsltCompiler c = processor.newXsltCompiler();
-        XsltTransformer t = c.compile(new StreamSource(new File(localDir + "/summarize-results.xsl"))).load();
-        Serializer ser = processor.newSerializer(new FileOutputStream(
-                localDir + "/SaxonFailures" + Version.getProductVersion() + ".xml"));
-        XdmNode resultDoc = processor.newDocumentBuilder().build(new File(localDir + "/SaxonResults" + Version.getProductVersion() + "-" + versionUnderTest + ".xml"));
+
+        String xslfn = summarizeResults;
+        if (xslfn == null) {
+            xslfn = "summarize-results.xsl";
+        }
+        if (!xslfn.contains("/")) {
+            xslfn = localDir + "/" + xslfn;
+        }
+        XsltTransformer t = c.compile(new StreamSource(new File(xslfn))).load();
+
+        String errfn = errorReportFilename;
+        if (errfn == null) {
+            errfn = "SaxonFailures" + Version.getProductVersion() + ".xml";
+        }
+        if (!errfn.contains("/")) {
+            errfn = localDir + "/" + errfn;
+        }
+
+        Serializer ser = processor.newSerializer(new FileOutputStream(errfn));
+        XdmNode resultDoc = processor.newDocumentBuilder().build(new File(reportFilename));
         t.setParameter(new QName("in"), resultDoc);
         t.setInitialTemplate(new QName("all-diffs"));
         t.setDestination(ser);
