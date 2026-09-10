@@ -217,6 +217,10 @@ namespace Saxon.Impl.Dom {
             return uri;
         }
 
+        public override NamespaceUri getNamespaceUri() {
+            return NamespaceUri.of(getURI());
+        }
+
         public override string getPrefix() {
             return node.Prefix;
         }
