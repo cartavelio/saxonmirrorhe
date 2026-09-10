@@ -641,7 +641,7 @@ public abstract class Subsumption {
      */
     private static Optional<Affinity> schemaDeclarationAffinity(XNodeType t1, XNodeType t2) {
         Optional<Affinity> result = Optional.empty();
-        //#if EE=true
+        //#if EE==true
         result = SubsumptionEE.schemaDeclarationAffinity(t1, t2);
         //#endif
         return result;
