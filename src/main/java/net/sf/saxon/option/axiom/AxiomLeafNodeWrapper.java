@@ -82,7 +82,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
         String str = node == null ?
                 "NULL" :
                 node.getClass() + " instance " + node;
-        throw new IllegalArgumentException("Bad node type in XOM! " + str);
+        throw new IllegalArgumentException("Bad node type in Axiom tree: " + str);
     }
 
     /**
