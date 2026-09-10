@@ -40,8 +40,8 @@ public class CompareToStringConstant extends CompareToConstant {
      * @param operand   the operand to be compared with an integer constant. This must
      *                  have a static type of NUMERIC, and a cardinality of EXACTLY ONE
      * @param operator  the comparison operator,
-     *                  one of {@link Token#FEQ}, {@link Token#FNE}, {@link Token#FGE},
-     *                  {@link Token#FGT}, {@link Token#FLE}, {@link Token#FLT}
+     *                  one of {@link OperatorSymbol#FEQ}, {@link OperatorSymbol#FNE}, {@link OperatorSymbol#FGE},
+     *                  {@link OperatorSymbol#FGT}, {@link OperatorSymbol#FLE}, {@link OperatorSymbol#FLT}
      * @param comparand the integer constant
      */
 

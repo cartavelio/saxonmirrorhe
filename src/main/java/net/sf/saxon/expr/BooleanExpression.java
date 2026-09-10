@@ -30,7 +30,7 @@ public abstract class BooleanExpression extends BinaryExpression implements Nega
      * Construct a boolean expression
      *
      * @param p1       the first operand
-     * @param operator one of {@link Token#AND} or {@link Token#OR}
+     * @param operator one of {@link OperatorSymbol#AND} or {@link OperatorSymbol#OR}
      * @param p2       the second operand
      */
 

@@ -193,7 +193,7 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @param type1          primitive type of the second operand
      * @param collator       the collation to be used, if any. This is supplied as a SimpleCollation object
      *                       which encapsulated both the collation URI and the collation itself.
-     * @param operator       the comparison operator, fpr example {@link Token#FEQ}
+     * @param operator       the comparison operator, fpr example {@link OperatorSymbol#FEQ}
      * @param allowRecursion flag to stop infinite recursion (the function recurses if the static types
      *                       are not known; it then relies on testing the run-time types)
      * @param allow40

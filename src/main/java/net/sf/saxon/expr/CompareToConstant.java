@@ -56,8 +56,8 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
     /**
      * Get the comparison operator
      *
-     * @return one of {@link Token#FEQ}, {@link Token#FNE}, {@link Token#FGE},
-     *         {@link Token#FGT}, {@link Token#FLE}, {@link Token#FLT}
+     * @return one of {@link OperatorSymbol#FEQ}, {@link OperatorSymbol#FNE}, {@link OperatorSymbol#FGE},
+     *         {@link OperatorSymbol#FGT}, {@link OperatorSymbol#FLE}, {@link OperatorSymbol#FLT}
      */
 
     public OperatorSymbol getComparisonOperator() {
@@ -171,7 +171,7 @@ public abstract class CompareToConstant extends UnaryExpression implements Compa
 
     /**
      * Interpret the result of the comparison
-     * @param operator the operator for example {@link Token#FEQ} or {@link Token#FLE}
+     * @param operator the operator for example {@link OperatorSymbol#FEQ} or {@link OperatorSymbol#FLE}
      * @param c -1, 0, or +1, depending on how the operands compare
      * @return true or false depending on the operator in use
      */

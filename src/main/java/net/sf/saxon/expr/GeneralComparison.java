@@ -637,7 +637,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      *
      * @param a0         the first value
      * @param operator   the singleton version of the comparison operator,
-     *                   for example {@link net.sf.saxon.expr.parser.Token#FEQ}
+     *                   for example {@link net.sf.saxon.expr.parser.OperatorSymbol#FEQ}
      * @param a1         the second value
      * @param comparer   the comparer to be used to perform the comparison. If the comparer is context-sensitive
      *                   then the context must already have been bound using comparer.provideContext().
@@ -724,7 +724,7 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
      * Return the singleton form of the comparison operator, e.g. FEQ for EQUALS, FGT for GT
      *
      * @param op the many-to-many form of the operator, for example {@link Token#LE}
-     * @return the corresponding singleton operator, for example {@link Token#FLE}
+     * @return the corresponding singleton operator, for example {@link OperatorSymbol#FLE}
      */
 
     public static OperatorSymbol getCorrespondingSingletonOperator(OperatorSymbol op) {

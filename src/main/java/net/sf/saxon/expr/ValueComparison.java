@@ -380,8 +380,8 @@ public final class ValueComparison extends BinaryExpression implements Compariso
      * Compare two atomic values, using a specified operator and collation
      *
      * @param v0         the first operand
-     * @param op         the operator, as defined by constants such as {@link net.sf.saxon.expr.parser.Token#FEQ} or
-     *                   {@link net.sf.saxon.expr.parser.Token#FLT}
+     * @param op         the operator, as defined by constants such as {@link net.sf.saxon.expr.parser.OperatorSymbol#FEQ} or
+     *                   {@link net.sf.saxon.expr.parser.OperatorSymbol#FLT}
      * @param v1         the second operand
      * @param comparer   used to compare values. If the comparer is context-sensitive then the context must
      *                   already have been bound using comparer.provideContext().
