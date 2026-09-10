@@ -1973,7 +1973,7 @@ public class OptimizerEE extends Optimizer {
             // Create an accumulator that maintains the value of the xsl:number result
             SlotManager slots = getConfiguration().makeSlotManager();
             StructuredQName valueName = NamespaceUri.NULL.qName("value");
-            slots.allocateSlotNumber(valueName);
+            slots.allocateSlotNumber(valueName, null);
             SuppliedParameterReference ref = new SuppliedParameterReference(0);
             ArithmeticExpression increment = new ArithmeticExpression(ref, Token.PLUS, Literal.makeLiteral(Int64Value.PLUS_ONE, ni));
             increment.setCalculator(Calculator.INTEGER_INTEGER[Calculator.PLUS]);

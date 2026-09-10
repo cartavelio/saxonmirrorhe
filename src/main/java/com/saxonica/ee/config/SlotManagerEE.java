@@ -1,17 +1,41 @@
 package com.saxonica.ee.config;
 
+import net.sf.saxon.expr.Assignation;
+import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.StackFrame;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.lib.Logger;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.z.IntHashMap;
 
 public class SlotManagerEE extends SlotManager {
+
+    private IntHashMap<LocalBinding> bindings = new IntHashMap<>();
+
+    /**
+     * Allocate a slot number for a variable
+     *
+     * @param qName   the name of the variable
+     * @param binding the binding of the variable (only used in Saxon-EE)
+     * @return the allocated slot number (the next one available)
+     */
+
+    public int allocateSlotNumber(StructuredQName qName, LocalBinding binding) {
+        int slot = super.allocateSlotNumber(qName, binding);
+        if (binding != null) {
+            bindings.put(slot, binding);
+        }
+        return slot;
+    }
+
 
     /**
      * Display the values of the variables and parameters in an XPathContext stack frame
@@ -56,8 +80,13 @@ public class SlotManagerEE extends SlotManager {
                     boolean foundOne = false;
                     for (int i = 0; i < map.getNumberOfVariables(); i++) {
                         if (values[i] != null) {
-                            logger.info("        $" + map.getVariableMap().get(i).getDisplayName() +
-                                                " = " + Err.depictSequence(values[i]));
+                            StructuredQName qName = map.getVariableMap().get(i);
+                            String expr = "";
+                            LocalBinding binding = bindings.get(i);
+                            if (qName.hasURI(NamespaceUri.SAXON_GENERATED_VARIABLE) && binding instanceof Assignation) {
+                                expr = " {" + ((Assignation)binding).getSequence().toShortString() + "}";
+                            }
+                            logger.info("        $" + qName.getDisplayName() + expr + " = " + Err.depictSequence(values[i]));
                             foundOne = true;
                         }
                     }

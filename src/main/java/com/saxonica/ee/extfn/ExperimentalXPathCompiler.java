@@ -149,14 +149,14 @@ public class ExperimentalXPathCompiler {
         return new FunctionLibrary() {
 
             @Override
-            public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
+            public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
                 return library.containsKey(functionName);
             }
 
 
             @Override
             public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
-                if (isAvailable(functionName, env.getPackageData().getImportedSchema(), env.getXPathVersion())) {
+                if (isAvailable(functionName, env.getXPathVersion())) {
                     UserFunction fn = library.get(functionName);
                     fn.setFunctionName(functionName.getComponentName());
                     //lib.put(functionName, fn);
@@ -431,6 +431,16 @@ public class ExperimentalXPathCompiler {
         }
 
         @Override
+        public boolean isImportedSchema(NamespaceUri namespace) {
+            return false;
+        }
+
+        @Override
+        public Set<NamespaceUri> getImportedSchemaNamespaces() {
+            return Collections.emptySet();
+        }
+
+        @Override
         public NamespaceResolver getNamespaceResolver() {
             return this;
         }
@@ -573,7 +583,7 @@ public class ExperimentalXPathCompiler {
             int count = ((Assignation) exp).getRequiredSlots();
             nextFree += count;
             if (frame != null) {
-                frame.allocateSlotNumber(((Assignation) exp).getVariableQName());
+                frame.allocateSlotNumber(((Assignation) exp).getVariableQName(), (Assignation) exp);
             }
         }
         if (exp instanceof LocalParam && ((LocalParam) exp).getSlotNumber() < 0) {
@@ -584,7 +594,7 @@ public class ExperimentalXPathCompiler {
             for (Clause c : ((FLWORExpression) exp).getClauseList()) {
                 for (LocalVariableBinding b : c.getRangeVariables()) {
                     b.setSlotNumber(nextFree++);
-                    frame.allocateSlotNumber(b.getVariableQName());
+                    frame.allocateSlotNumber(b.getVariableQName(), b);
                 }
             }
         }
