@@ -1011,7 +1011,10 @@ public class DeepEqual40 extends CollatingFunctionFixed {
 
         MapItem options  = new DictionaryMap();
         if (arguments.length >= 4) {
-            options = (MapItem)arguments[3].head();
+            MapItem suppliedOptions = (MapItem) arguments[3].head();
+            if (suppliedOptions != null) {
+                options = suppliedOptions;
+            }
         }
         //GenericAtomicComparer comparer = new GenericAtomicComparer(getStringCollator(), context);
         DeepEqualOptions eqOptions = new DeepEqualOptions(options, collationName, context);
