@@ -2,40 +2,64 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.transpile.CSharpReplaceBody;
 
-public class ReplacementsList {
+import java.util.Objects;
+import java.util.Optional;
 
-    private final ImmutableHashTrieMap<Integer, GroundedValue> replacementValues;
+public class Replacements {
 
-    public ReplacementsList() {
-        replacementValues = emptyMap();
+    private final ImmutableHashTrieMap<Integer, Optional<GroundedValue>> replacementValues;
+    private final int numberReplaced;
+    private final int numberRemoved;
+
+    public Replacements() {
+        replacementValues = ImmutableHashTrieMap.empty();
+        numberReplaced = 0;
+        numberRemoved = 0;
     }
 
-    private ReplacementsList(ImmutableHashTrieMap<Integer, GroundedValue> replacements) {
-        this.replacementValues = replacements;
+    private Replacements(ImmutableHashTrieMap<Integer, Optional<GroundedValue>> removals, int numberReplaced, int numberRemoved) {
+        this.replacementValues = removals;
+        this.numberReplaced = numberReplaced;
+        this.numberRemoved = numberRemoved;
     }
 
-    @CSharpReplaceBody(code = "return System.Collections.Immutable.ImmutableDictionary<int, Saxon.Hej.om.GroundedValue>.Empty;")
-    private ImmutableHashTrieMap<Integer, GroundedValue> emptyMap() {
-        return ImmutableHashTrieMap.empty();
-    }
-
-    public static ReplacementsList empty = new ReplacementsList();
+    public static Replacements empty = new Replacements();
 
     public GroundedValue get(Integer value) {
-        return replacementValues.get(value);
+        Optional<GroundedValue> result = replacementValues.get(value);
+        if (result != null && result.isPresent()) {
+            return result.get();
+        }
+        return null;
     }
 
-    public ReplacementsList remove(Integer value) {
+    public boolean contains(Integer value) {
+        Optional<GroundedValue> result = replacementValues.get(value);
+        return result != null;
+    }
+
+    public int getNumberReplaced() {
+        return numberReplaced;
+    }
+
+    public int getNumberRemoved() {
+        return numberRemoved;
+    }
+
+    public Replacements remove(Integer value) {
         if (replacementValues.get(value) == null) {
             return this;
         }
-        return new ReplacementsList(replacementValues.remove(value));
+        return new Replacements(replacementValues.put(value, Optional.empty()), numberReplaced, numberRemoved + 1);
     }
 
-    public ReplacementsList put(Integer index, GroundedValue newValue) {
-        return new ReplacementsList(replacementValues.put(index, newValue));
+    public Replacements replace(Integer index, GroundedValue newValue) {
+        Objects.requireNonNull(newValue);
+        if (replacementValues.get(index) == null) {
+            return new Replacements(replacementValues.put(index, Optional.of(newValue)), numberReplaced + 1, numberRemoved);
+        }
+        return new Replacements(replacementValues.put(index, Optional.of(newValue)), numberReplaced, numberRemoved);
     }
 
 
