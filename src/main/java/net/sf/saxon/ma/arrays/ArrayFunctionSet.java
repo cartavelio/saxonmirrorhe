@@ -17,6 +17,7 @@ import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -52,6 +53,17 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         register("append", 2, e -> e.populate( ArrayAppend::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
+
+        register("build", 1, e -> e.populate(ArrayBuild::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR | NAV, null));
+
+        ItemType buildFunctionType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_ITEM},
+                SequenceType.ANY_SEQUENCE);
+
+        register("build", 2, e -> e.populate(ArrayBuild::new, AnyItemType.getInstance(), STAR, 0)
+                .arg(0, AnyItemType.getInstance(), STAR | NAV, null)
+                .arg(1, buildFunctionType, ONE | INS, null));
 
         ItemType filterFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
@@ -692,6 +704,42 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             }
             return makeArray(members);
         }
+
+    }
+
+    /**
+     * Implementation of the proposed XP40 function array:of(parcel*) =&gt; array
+     */
+    public static class ArrayBuild extends ArrayGeneratingFunction {
+
+        @Override
+        public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            List<GroundedValue> members = new ArrayList<>(expectedSize());
+            SequenceIterator iter = arguments[0].iterate();
+            if (arguments.length == 1) {
+                try {
+                    for (Item it; (it = iter.next()) != null; ) {
+                        members.add(it);
+                    }
+                } catch (UncheckedXPathException e) {
+                    iter.close();
+                    throw e.getXPathException();
+                }
+            } else {
+                FunctionItem fn = (FunctionItem) arguments[1].head();
+                try {
+                    for (Item it; (it = iter.next()) != null; ) {
+                        members.add(dynamicCall(fn, context, new GroundedValue[]{it}).materialize());
+                    }
+                } catch (UncheckedXPathException e) {
+                    iter.close();
+                    throw e.getXPathException();
+                }
+            }
+            return makeArray(members);
+        }
+
+
 
     }
 
