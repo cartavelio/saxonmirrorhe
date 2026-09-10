@@ -54,6 +54,10 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
                 .arg(2, ArrayItemType.getInstance(), ONE, null)
                 .arg(3, MapType.ANY_MAP_TYPE, OPT, null));
 
+        register("catch", 2, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), ONE, null)
+                .arg(1, AnyFunctionType.getInstance(), ONE, null));
+
         register("doc", 1, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
@@ -67,6 +71,10 @@ public class IXSL3FunctionSet extends BuiltInFunctionSet {
         register("eval", 2, e -> e.populate(IXSLFunctionSet.Eval::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
+
+        register("finally", 2, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), ONE, SIDE|LATE)
+                .arg(0, AnyItemType.getInstance(), ONE, null)
+                .arg(1, AnyFunctionType.getInstance(), ONE, null));
 
         register("get", 3, e -> e.populate(IXSLFunctionSet.Stub::new, AnyItemType.getInstance(), STAR, SIDE|LATE)
                 .arg(0, AnyItemType.getInstance(), ONE, null)
