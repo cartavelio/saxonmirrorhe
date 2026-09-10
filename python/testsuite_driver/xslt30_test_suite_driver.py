@@ -147,8 +147,9 @@ def process_catalog(path: pathlib.Path, catalogi: pathlib.Path):
             if results_path is None:
                 results_path = path
             test_report.write_result_file_postamble(driver_proc, results_path)
-        else:
-            print(f'Failed to open {catalogi}')
+    else:
+        print(f'Failed to open {catalogi}')
+    Environment.environment_cleanup()
 
 
 def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySaxonProcessor, test_set_file: pathlib.Path):
@@ -687,16 +688,27 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
             file_name = principle_package.get_node_value().get_attribute_value("file")
             if file_name != "":
                 output_file = (file_name[-4] + "_created_from_test_driver.sef")
-                environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True, output_file=output_file, lang=spec.version)
-                environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file, lang=spec.version)
-                print("Checking the output file " + str(os.path.join(environment.xslt_proc.cwd, output_file)) +": ")
+                output_file1 = str(os.path.join(environment.xslt_proc.cwd, output_file))
                 try:
-                    output_file1 = str(os.path.join(environment.xslt_proc.cwd, output_file))
+                    environment.xslt_proc.compile_stylesheet(stylesheet_file=file_name, save=True,
+                                                             output_file=output_file1, lang=spec.version)
+                    environment.sheet = environment.xslt_proc.compile_stylesheet(stylesheet_file=output_file1,
+                                                                                 lang=spec.version)
+                    if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                        print("Checking the output file " + str(
+                            os.path.join(environment.xslt_proc.cwd, output_file1)) + ": ")
+
                     if os.path.exists(output_file1):
+                        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                            print("Removing output file " + output_file1)
                         os.remove(output_file1)
                     else:
                         print("The output file " + output_file1 + " does not exist")
                 except Exception as ex:
+                    if os.path.exists(output_file1):
+                        if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
+                            print("Removing output file " + output_file1)
+                        os.remove(output_file1)
                     print(ex)
 
         if environment.sheet is None:
