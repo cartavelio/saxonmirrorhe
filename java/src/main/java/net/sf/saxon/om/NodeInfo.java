@@ -464,7 +464,6 @@ public interface NodeInfo extends GNode, Location
      */
 
     default Iterable<? extends NodeInfo> children() {
-        //return new Navigator.ChildrenAsIterable(this);
         return new IterableSequenceIterator<>(iterateChildAxis(null));
     }
 

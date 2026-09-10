@@ -344,7 +344,8 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
 
         // output the children
 
-        for (NodeInfo child : children()) {
+        SequenceIterator children = iterateChildAxis(null);
+        for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
             child.copy(out, copyOptions, locationId);
         }
 

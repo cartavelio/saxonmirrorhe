@@ -24,11 +24,16 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ArrayIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
+import net.sf.saxon.tree.jiter.IterableUsingIteratorSupplier;
+import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.AnyGNodeType;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.function.Supplier;
 
 /**
  * ParentNodeImpl is an implementation of a non-leaf node (specifically, an Element node
@@ -136,8 +141,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
     protected final SequenceIterator iterateChildren(NodePredicate test) {
         if (_children == null) {
             return EmptyIterator.getInstance();
-        } else if (_children instanceof NodeImpl) {
-            NodeImpl child = (NodeImpl) _children;
+        } else if (_children instanceof NodeImpl child) {
             if (test == null || test == AnyGNode.TEST) {
                 return SingletonIterator.makeIterator(child);
             } else {
@@ -149,6 +153,42 @@ public abstract class ParentNodeImpl extends NodeImpl {
             } else {
                 return new ChildEnumeration(this, test);
             }
+        }
+    }
+
+    /**
+     * Return the sequence of children of this node, as an {@code Iterable}. This
+     * method is designed to allow iteration over the children in a Java "for each" loop,
+     * in the form <code>for (NodeInfo child : children()) {...}</code>
+     *
+     * @return the children of the node, as an {@code Iterable}.
+     */
+
+    @Override
+    public Iterable<? extends NodeInfo> children() {
+        if (_children == null) {
+            return Collections.emptyList();
+        } else if (_children instanceof NodeImpl child) {
+            return Collections.singleton(child);
+        } else {
+            return Arrays.asList((NodeImpl[]) _children);
+        }
+    }
+
+    @Override
+    public Iterable<? extends NodeInfo> children(NodePredicate filter) {
+        if (_children == null) {
+            return Collections.emptyList();
+        } else if (filter == null || filter == AnyGNodeType.getInstance()) {
+            return children();
+        } else if (_children instanceof NodeImpl child) {
+            return filter.test(child) ? Collections.singleton(child) : Collections.emptyList();
+        } else {
+            NodeImpl[] nodeArray = (NodeImpl[]) _children;
+            Iterator<NodeImpl> iter = Arrays.asList(nodeArray).listIterator();
+            Supplier<Iterator<NodeImpl>> supplier =
+                () -> new MappingJavaIterator<>(iter, n -> filter.test(n) ? n : null);
+            return new IterableUsingIteratorSupplier<>(supplier);
         }
     }
 

@@ -156,7 +156,8 @@ public abstract class Type {
                 case Type.DOCUMENT:
                     // Need to know whether the document is well-formed and if so what the element type is
                     ItemType elementType = null;
-                    for (NodeInfo n : node.children()) {
+                    SequenceIterator children = node.iterateChildAxis(null);
+                    for (NodeInfo n; (n = (NodeInfo) children.next()) != null; ) {
                         int kind = n.getNodeKind();
                         if (kind == Type.TEXT) {
                             elementType = null;

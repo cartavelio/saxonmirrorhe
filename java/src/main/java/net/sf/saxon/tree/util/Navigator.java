@@ -704,7 +704,8 @@ public final class Navigator {
         switch (node.getNodeKind()) {
             case Type.DOCUMENT: {
                 out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     child.copy(out, copyOptions, locationId);
                 }
                 out.endDocument();
@@ -740,7 +741,8 @@ public final class Navigator {
 
                 // output the children
 
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     child.copy(out, copyOptions, locationId);
                 }
 
@@ -802,7 +804,8 @@ public final class Navigator {
         switch (node.getNodeKind()) {
             case Type.DOCUMENT: {
                 out.startDocument(CopyOptions.getStartDocumentProperties(copyOptions));
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     copy(child, out, copyOptions, locationId);
                 }
                 out.endDocument();
@@ -827,7 +830,8 @@ public final class Navigator {
 
                 // output the children
 
-                for (NodeInfo child : node.children()) {
+                SequenceIterator children = node.iterateChildAxis(null);
+                for (NodeInfo child; (child = (NodeInfo) children.next()) != null; ) {
                     copy(child, out, copyOptions, locationId);
                 }
 
