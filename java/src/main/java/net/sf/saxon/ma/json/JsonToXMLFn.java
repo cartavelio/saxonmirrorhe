@@ -51,7 +51,7 @@ public class JsonToXMLFn extends SystemFunction {
         jsonToXmlOptions.addAllowedOption("validate", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("escape", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         jsonToXmlOptions.addAllowedOption("fallback", SequenceType.one(fallbackType), null);
-        jsonToXmlOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
+        //jsonToXmlOptions.addAllowedOption("number-parser", SequenceType.one(parserType), null);
         return jsonToXmlOptions;
     }
 
@@ -131,7 +131,7 @@ public class JsonToXMLFn extends SystemFunction {
         JsonHandlerXML handler = new JsonHandlerXML(context, getRetainedStaticContext(), flags);
         if (options != null) {
             handler.setFallbackFunction(checkedOptions, context);
-            parser.setNumberParser(checkedOptions);
+            //parser.setNumberParser(checkedOptions);
         }
         parser.parse(input.codePoints(), flags, handler, context);
         return handler.getResult();
