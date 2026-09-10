@@ -535,7 +535,8 @@ public class ICUNumbererPE extends AbstractNumberer {
             result = getDateFormat(MONTH_SHORT).format(d);
         }
         if (result.length() > maxWidth) {
-            result = getDateFormat(MONTH_NARROW).format(d);
+            //result = getDateFormat(MONTH_NARROW).format(d);
+            result = result.substring(0, maxWidth);
         }
         return wordCase(result, TITLE_CASE);
     }
@@ -560,11 +561,12 @@ public class ICUNumbererPE extends AbstractNumberer {
             result = getDateFormat(DAY_SHORT).format(d);
         }
         if (result.length() > maxWidth) {
-            result = getDateFormat(DAY_SHORT2).format(d);
+            result = result.substring(0, maxWidth);
+//            result = getDateFormat(DAY_SHORT2).format(d);
         }
-        if (result.length() > maxWidth) {
-            result = getDateFormat(DAY_NARROW).format(d);
-        }
+//        if (result.length() > maxWidth) {
+//            result = getDateFormat(DAY_NARROW).format(d);
+//        }
         return wordCase(result, TITLE_CASE);
     }
 }
