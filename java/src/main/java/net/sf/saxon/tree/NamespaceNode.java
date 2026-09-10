@@ -506,7 +506,7 @@ public class NamespaceNode implements NodeInfo {
 
     @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
-        out.append(this);
+        throw new IllegalArgumentException("copy() applied to namespace node");
     }
 
     /**

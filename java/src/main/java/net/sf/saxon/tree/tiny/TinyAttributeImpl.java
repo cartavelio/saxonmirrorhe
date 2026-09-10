@@ -255,7 +255,7 @@ final public class TinyAttributeImpl extends TinyNodeImpl {
 
     @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) {
-        throw new UnsupportedOperationException("copy() applied to attribute node");
+        throw new IllegalArgumentException("copy() applied to attribute node");
     }
 
     /**

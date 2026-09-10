@@ -18,6 +18,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.Type;
 import net.sf.saxon.value.Whitespace;
 
 import javax.xml.transform.OutputKeys;
@@ -204,7 +205,11 @@ public class UncommittedSerializer extends ProxyReceiver {
     @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item instanceof NodeInfo) {
-            ((NodeInfo) item).copy(this, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, locationId);
+            NodeInfo node = (NodeInfo) item;
+            if (node.getNodeKind() == Type.ATTRIBUTE || node.getNodeKind() == Type.NAMESPACE) {
+                throw new XPathException("Cannot write a free-standing attribute or namespace node directly to the serializer", "SENR0001");
+            }
+            node.copy(this, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, locationId);
         } else {
             if (!committed) {
                 switchToMethod("xml");

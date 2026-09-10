@@ -242,7 +242,7 @@ public class AttributeImpl extends NodeImpl {
 
     @Override
     public void copy(/*@NotNull*/ Receiver out, int copyOptions, Location locationId) throws XPathException {
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("copy() applied to attribute node");
     }
 
     /**
