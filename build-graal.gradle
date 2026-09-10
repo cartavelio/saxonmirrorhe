@@ -680,6 +680,11 @@ task graal_eec_jar(
       copy {
         from "${projectDir}/src/main/c/command"
         into "${saxoncReleaseDir}/command"
+        filter { line ->
+          line.replaceAll('@@VERSION@@', saxonVersion)
+                  .replace('@@edition@@', edition)
+                  .replace('@@EDITION@@', edition.toUpperCase())
+        }
       }
     }
 
