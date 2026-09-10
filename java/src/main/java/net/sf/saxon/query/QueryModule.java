@@ -307,7 +307,7 @@ public class QueryModule implements StaticContext {
 
     public BuiltInFunctionSet getBuiltInFunctionSet() {
         if (isUpdating()) {
-            return config.getXQueryUpdateFunctionSet();
+            return config.getXQueryUpdateFunctionSet(languageLevel);
         } else {
             return config.getXPathFunctionSet(languageLevel);
         }

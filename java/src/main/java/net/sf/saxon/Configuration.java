@@ -1425,7 +1425,7 @@ public class Configuration implements SourceResolver, NotationSet {
         }
     }
 
-    public BuiltInFunctionSet getXQueryUpdateFunctionSet() {
+    public BuiltInFunctionSet getXQueryUpdateFunctionSet(int version) {
         return null;
     }
 
