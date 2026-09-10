@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -25,12 +25,12 @@ import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 
 /**
  * This class represents the expression "(dot)", which always returns the context item.
- * This may be a AtomicValue or a Node.
  */
 
 public class ContextItemExpression extends Expression {
@@ -110,6 +110,9 @@ public class ContextItemExpression extends Expression {
             ee.setOriginalExpression(this);
             ExpressionTool.copyLocationInfo(this, ee);
             return ee;
+        } else if (Cardinality.allowsMany(contextInfo.getCardinality())) {
+            // context item is generalized to context value in 4.0 - but only in restricted circumstances
+            return new ContextValueExpression();
         } else {
             staticInfo = contextInfo;
         }

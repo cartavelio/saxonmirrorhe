@@ -7,42 +7,47 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.parser.ContextItemStaticInfo;
+import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.PathMap;
+import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.value.SequenceType;
 
 
 /**
- * This class represents the expression "(dot)", which always returns the context item.
+ * This class represents the expression "(dot)", when the static context indicates that the
+ * context value may be a general sequence.
+ *
+ * In XPath 4.0, the context item is generalized to a context value. The idea of a context item
+ * is so deeply embedded, however, that for the most part we still assume that the context value
+ * will be a single item. However, if the static context tells us that the context value may be
+ * bound to a general sequence (for example, in an array filter expression $array?[filter]), the
+ * context item expression is rewritten as a context value expression. In this situation the
+ * dynamic context holds the context value wrapped as a {@link Parcel} to turn it into a single
+ * item.
  */
 
-public class ContextItemExpression extends Expression {
-
-    private ContextItemStaticInfo staticInfo = ContextItemStaticInfo.DEFAULT;
-    private String errorCodeForAbsentContext = "XPDY0002";
-    private boolean absentContextIsTypeError = false; // absurdly, but that's what the spec says
+public class ContextValueExpression extends Expression {
 
     /**
      * Create the expression
      */
 
-    public ContextItemExpression() {
+    public ContextValueExpression() {
     }
 
     /**
@@ -55,7 +60,7 @@ public class ContextItemExpression extends Expression {
 
     @Override
     public String getExpressionName() {
-        return "dot";
+        return "dott";
     }
 
     /**
@@ -68,29 +73,7 @@ public class ContextItemExpression extends Expression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        ContextItemExpression cie2 = new ContextItemExpression();
-        cie2.staticInfo = staticInfo;
-        cie2.setErrorCodeForUndefinedContext(errorCodeForAbsentContext, false);
-        ExpressionTool.copyLocationInfo(this, cie2);
-        return cie2;
-    }
-
-    public void setErrorCodeForUndefinedContext(String errorCode, boolean isTypeError) {
-        errorCodeForAbsentContext = errorCode;
-        absentContextIsTypeError = isTypeError;
-    }
-
-    public String getErrorCodeForUndefinedContext() {
-        return errorCodeForAbsentContext;
-    }
-
-    /**
-     * Set static information about the context item
-     * @param info static information about the context item
-     */
-
-    public void setStaticInfo(ContextItemStaticInfo info) {
-        staticInfo = info;
+        return new ContextValueExpression();
     }
 
     /**
@@ -100,18 +83,6 @@ public class ContextItemExpression extends Expression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, /*@Nullable*/ ContextItemStaticInfo contextInfo) throws XPathException {
-        if (contextInfo.getItemType() == ErrorType.getInstance()) {
-            visitor.issueWarning("Evaluation will always fail: there is no context item", SaxonErrorCode.SXWN9027, getLocation());
-            ErrorExpression ee = new ErrorExpression(
-                    "There is no context item",
-                    getErrorCodeForUndefinedContext(),
-                    absentContextIsTypeError);
-            ee.setOriginalExpression(this);
-            ExpressionTool.copyLocationInfo(this, ee);
-            return ee;
-        } else {
-            staticInfo = contextInfo;
-        }
         return this;
     }
 
@@ -133,13 +104,6 @@ public class ContextItemExpression extends Expression {
     /*@NotNull*/
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        // In XSLT, we don't catch this error at the typeCheck() phase because it's done one XPath expression
-        // at a time. So we repeat the check here.
-        if (contextItemType == null) {
-            throw new XPathException("The context item is undefined at this point")
-                    .withErrorCode(getErrorCodeForUndefinedContext()).withLocation(getLocation())
-                    .asTypeErrorIf(absentContextIsTypeError);
-        }
         return this;
     }
 
@@ -150,7 +114,7 @@ public class ContextItemExpression extends Expression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return staticInfo.getItemType();
+        return AnyItemType.getInstance();
     }
 
     /**
@@ -166,24 +130,13 @@ public class ContextItemExpression extends Expression {
         return contextItemType;
     }
 
-
-    /**
-     * Ask whether the context item may possibly be undefined
-     *
-     * @return true if it might be undefined
-     */
-
-    public boolean isContextPossiblyUndefined() {
-        return staticInfo.isPossiblyAbsent();
-    }
-
     /**
      * Get the static cardinality
      */
 
     @Override
     protected int computeCardinality() {
-        return StaticProperty.EXACTLY_ONE;
+        return StaticProperty.ALLOWS_ZERO_OR_MORE;
     }
 
     /**
@@ -200,7 +153,7 @@ public class ContextItemExpression extends Expression {
 
     @Override
     public int getImplementationMethod() {
-        return EVALUATE_METHOD;
+        return ITERATE_METHOD;
     }
 
     /**
@@ -208,7 +161,7 @@ public class ContextItemExpression extends Expression {
      */
 
     public boolean equals(Object other) {
-        return other instanceof ContextItemExpression;
+        return other instanceof ContextValueExpression;
     }
 
     /**
@@ -217,7 +170,7 @@ public class ContextItemExpression extends Expression {
 
     @Override
     protected int computeHashCode() {
-        return "ContextItemExpression".hashCode();
+        return "ContextValueExpression".hashCode();
     }
 
     @Override
@@ -278,7 +231,7 @@ public class ContextItemExpression extends Expression {
      *
      * @param config the Saxon configuration
      * @return the equivalent pattern
-     * @throws net.sf.saxon.trans.XPathException
+     * @throws XPathException
      *          if conversion is not possible
      */
     @Override
@@ -294,7 +247,7 @@ public class ContextItemExpression extends Expression {
      */
     @Override
     public String getStreamerName() {
-        return "ContextItemExpr";
+        return "ContextValueExpr";
     }
 
     /**
@@ -308,28 +261,15 @@ public class ContextItemExpression extends Expression {
         if (item == null) {
             reportAbsentContext(context);
         }
+        if (item instanceof Parcel) {
+            return ((Parcel)item).getValue().iterate();
+        }
         return SingletonIterator.makeIterator(item);
     }
 
-    /**
-     * Evaluate the expression
-     */
-
-    @Override
-    public Item evaluateItem(XPathContext context) throws XPathException {
-        Item item = context.getContextItem();
-        if (item == null) {
-            reportAbsentContext(context);
-        }
-        return item;
-    }
 
     public void reportAbsentContext(XPathContext context) throws XPathException {
-        if (absentContextIsTypeError) {
-            typeError("The context item is absent", getErrorCodeForUndefinedContext(), context);
-        } else {
-            dynamicError("The context item is absent", getErrorCodeForUndefinedContext(), context);
-        }
+        typeError("The context value is absent", "XPDY0002", context);
     }
 
     /**
@@ -349,15 +289,7 @@ public class ContextItemExpression extends Expression {
 
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
-        destination.startElement("dot", this);
-        ItemType type = getItemType();
-        if (!(type == AnyItemType.getInstance())) {
-            SequenceType st = SequenceType.makeSequenceType(type,StaticProperty.EXACTLY_ONE);
-            destination.emitAttribute("type", st.toAlphaCode());
-        }
-        if (staticInfo.isPossiblyAbsent()) {
-            destination.emitAttribute("flags", "a");
-        }
+        destination.startElement("dott", this);
         destination.endElement();
     }
 
@@ -374,45 +306,31 @@ public class ContextItemExpression extends Expression {
 
     @Override
     public Elaborator getElaborator() {
-        return new ContextItemElaborator();
+        return new ContextValueElaborator();
     }
 
     /**
      * Elaborator for the context item expression, "dot".
      */
 
-    public static class ContextItemElaborator extends ItemElaborator {
-
-        public ItemEvaluator elaborateForItem() {
-            ContextItemExpression cie = (ContextItemExpression) getExpression();
-            if (cie.isContextPossiblyUndefined()) {
-                return context -> {
-                    Item current = context.getContextItem();
-                    if (current == null) {
-                        cie.reportAbsentContext(context);
-                    }
-                    return current;
-                };
-            } else {
-                return XPathContext::getContextItem;
-            }
-        }
+    public static class ContextValueElaborator extends PullElaborator {
 
         @Override
         public PullEvaluator elaborateForPull() {
-            ContextItemExpression cie = (ContextItemExpression) getExpression();
-            if (cie.isContextPossiblyUndefined()) {
-                return context -> {
-                    Item current = context.getContextItem();
-                    if (current == null) {
-                        cie.reportAbsentContext(context);
-                    }
-                    return SingletonIterator.makeIterator(current);
-                };
-            } else {
-                return context -> SingletonIterator.makeIterator(context.getContextItem());
-            }
+            ContextValueExpression cie = (ContextValueExpression) getExpression();
+            return context -> {
+                Item current = context.getContextItem();
+                if (current == null) {
+                    cie.reportAbsentContext(context);
+                }
+                if (current instanceof Parcel) {
+                    return ((Parcel)current).getValue().iterate();
+                }
+                return SingletonIterator.makeIterator(current);
+            };
+
         }
+
     }
 }
 

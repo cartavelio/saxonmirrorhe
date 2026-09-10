@@ -11,6 +11,7 @@ import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -47,6 +48,10 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
             //});
             //FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
             //return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
+        }
+        if (ci instanceof Parcel) {
+            throw new XPathException("Context value for " +
+                                             getFunctionName().getDisplayName() + " must be a single item", "XPTY0004");
         }
         return new ConstantFunction(getFunctionName(), evaluate(ci, context), getFunctionItemType().getResultType());
     }

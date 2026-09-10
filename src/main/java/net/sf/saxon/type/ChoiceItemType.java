@@ -13,6 +13,7 @@ import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -44,6 +45,11 @@ public class ChoiceItemType<T extends ItemType> implements ItemType, ChoiceType 
             }
         }
         return new LocalUnionType<>(atomicMemberTypes);
+    }
+
+    public static ChoiceItemType<ItemType> of(ItemType... memberTypes) {
+        List<ItemType> members = Arrays.asList(memberTypes);
+        return new ChoiceItemType<>(members);
     }
 
     protected final List<T> memberTypes;

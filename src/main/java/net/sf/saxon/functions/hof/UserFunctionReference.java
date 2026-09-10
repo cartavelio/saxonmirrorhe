@@ -37,7 +37,9 @@ import java.util.Arrays;
  * A UserFunctionReference is an expression in the form local:f#1 where local:f is a user-defined function.
  * Evaluating the expression returns a function item. The reason that UserFunctionReference is treated
  * as an expression rather than a value is that the binding to the actual function may be deferred, for
- * example if the function is overridden in a different package.
+ * example if the function is overridden in a different package. In addition, if the function is context
+ * dependent, the function item that results will have a captured context, captured at the time the
+ * UserFunctionReference is evaluated.
  *
  * <p>Also used on some occasions for references to system functions.</p>
  */

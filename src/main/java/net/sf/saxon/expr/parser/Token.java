@@ -615,6 +615,10 @@ public abstract class Token {
      */
     public static final int QMARK = 213;
     /**
+     * Question mark symbol followed by '['. That is, "?["
+     */
+    public static final int QMARK_LSQB = 214;
+    /**
      * "}" symbol (XQuery only)
      */
     public static final int RCURLY = 215;
@@ -767,6 +771,7 @@ public abstract class Token {
         tokens[FOR] = "for";
         tokens[SUFFIX] = "<*:local-name>";
         tokens[QMARK] = "?";
+        tokens[QMARK_LSQB] = "?[";
         tokens[LCURLY] = "{";
         tokens[KEYWORD_CURLY] = "<keyword> {";
         tokens[RCURLY] = "}";

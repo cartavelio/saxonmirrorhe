@@ -44,7 +44,7 @@ public class ParamKeywords {
         arrayParamNames.put("from-sequence", "input|action");
         arrayParamNames.put("get", "array|position|fallback");
         arrayParamNames.put("head", "array");
-        arrayParamNames.put("index-of", "array|search|collation");
+        arrayParamNames.put("index-of", "array|target|collation");
         arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
         arrayParamNames.put("join", "arrays");
@@ -84,6 +84,7 @@ public class ParamKeywords {
         fnParamNames.put("characters", "value");
         fnParamNames.put("codepoint-equal", "value1|value2");
         fnParamNames.put("codepoints-to-string", "values");
+        fnParamNames.put("collation", "options");
         fnParamNames.put("collation-key", "value|collation");
         fnParamNames.put("collection", "uri");
         fnParamNames.put("compare", "value1|value2|collation");
@@ -154,7 +155,7 @@ public class ParamKeywords {
         fnParamNames.put("implicit-timezone", "");
         fnParamNames.put("in-scope-namespaces", "element");
         fnParamNames.put("in-scope-prefixes", "element");
-        fnParamNames.put("index-of", "input|search|collation");
+        fnParamNames.put("index-of", "input|target|collation");
         fnParamNames.put("index-where", "input|predicate");
         fnParamNames.put("innermost", "nodes");
         fnParamNames.put("insert-before", "input|position|insert");

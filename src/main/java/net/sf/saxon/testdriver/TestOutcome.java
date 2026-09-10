@@ -973,6 +973,11 @@ public class TestOutcome {
     private boolean assertDeepEq(XdmNode assertion, SingleResultDoc result, XPathCompiler assertXpc) throws SaxonApiException {
         if (isException()) {
             return false;
+        } else if (result.value == null) {
+            if (driver.debug) {
+                System.err.println("Result is null");
+            }
+            return false;
         } else {
             assertXpc.declareVariable(new QName("result"));
             XPathSelector s = assertXpc.compile("deep-equal($result , (" + assertion.getStringValue() + "))").load();

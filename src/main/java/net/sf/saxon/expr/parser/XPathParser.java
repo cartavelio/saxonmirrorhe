@@ -2745,6 +2745,9 @@ public class XPathParser {
             } else if (t.currentToken == Token.QMARK || t.currentToken == Token.QMARK_QMARK) {
                 step = parseLookup(step);
                 setLocation(step);
+            } else if (t.currentToken == Token.QMARK_LSQB) {
+                step = parseFilterExprAM(step);
+                setLocation(step);
             } else {
                 break;
             }
@@ -2771,6 +2774,18 @@ public class XPathParser {
         expect(Token.RSQB);
         nextToken();
         step = new FilterExpression(step, predicate);
+        setLocation(step);
+        return step;
+    }
+
+
+    protected Expression parseFilterExprAM(Expression step) throws XPathException {
+        checkLanguageVersion40();
+        nextToken();
+        Expression predicate = parsePredicate();
+        expect(Token.RSQB);
+        nextToken();
+        step = new FilterExpressionAM(step, predicate);
         setLocation(step);
         return step;
     }
@@ -5023,7 +5038,7 @@ public class XPathParser {
         StructuredQName argQName = new StructuredQName("saxon", NamespaceUri.SAXON, "dot");
 
         UserFunctionParameter arg = new UserFunctionParameter();
-        arg.setRequiredType(SequenceType.SINGLE_ITEM);
+        arg.setRequiredType(SequenceType.ANY_SEQUENCE);
         arg.setVariableQName(argQName);
         arg.setSlotNumber(0);
         params.add(arg);
@@ -5041,7 +5056,7 @@ public class XPathParser {
             body.setRetainedStaticContext(getStaticContext().makeRetainedStaticContext());
 
             LocalVariableReference ref = new LocalVariableReference(arg);
-            body = new ForEach(ref, body);
+            body = new ContextValueSetter(ref, body);
         }
         Expression result = makeInlineFunctionValue(this, AnnotationList.EMPTY, details, params, resultType, body);
 

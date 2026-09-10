@@ -9,32 +9,28 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.ItemElaborator;
-import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.Parcel;
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.arrays.SimpleArrayItem;
-import net.sf.saxon.ma.map.*;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
-import net.sf.saxon.type.*;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.SequenceType;
-
-import java.util.function.Supplier;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.UType;
 
 
 /**
- * Filter expression for maps and arrays, introduced in 4.0.
- * Syntax {@code value?[filter]}
+ * Abstract expression of the form "with context value A evaluate B". There is currently
+ * no concrete syntax for this (see QT4 issue 755, which proposes one), but it is used
+ * internally to set the context value for the body of a focus function.
  */
 
-public class FilterExpressionAM extends BinaryExpression
+public class ContextValueSetter extends BinaryExpression
         implements ContextSwitchingExpression {
 
     /**
@@ -45,8 +41,8 @@ public class FilterExpressionAM extends BinaryExpression
      *              sequence; this may return either nodes or atomic values (but not a mixture of the two)
      */
 
-    public FilterExpressionAM(Expression start, Expression step) {
-        super(start, Token.QMARK_LSQB, step);
+    public ContextValueSetter(Expression start, Expression step) {
+        super(start, Token.BANG, step);
     }
 
     @Override
@@ -54,36 +50,9 @@ public class FilterExpressionAM extends BinaryExpression
         return arg==0 ? OperandRole.FOCUS_CONTROLLING_SELECT : OperandRole.FOCUS_CONTROLLED_ACTION;
     }
 
-    /**
-     * Get the left-hand operand
-     * @return the left-hand operand
-     */
-
-    public Expression getStart() {
-        return getLhsExpression();
-    }
-
-    /**
-     * Set the left-hand operand
-     * @param start the left-hand operand
-     */
-
-    public void setStart(Expression start) {
-        setLhsExpression(start);
-    }
-
-    /**
-     * Set the right-hand operand
-     * @param step the right-hand operand
-     */
-
-    public void setStep(Expression step) {
-        setRhsExpression(step);
-    }
-
     @Override
     public String getExpressionName() {
-        return "filterExprAM";
+        return "contextValueSetter";
     }
 
     /**
@@ -94,7 +63,7 @@ public class FilterExpressionAM extends BinaryExpression
 
     @Override
     public Expression getSelectExpression() {
-        return getStart();
+        return getLhsExpression();
     }
 
     /**
@@ -109,7 +78,7 @@ public class FilterExpressionAM extends BinaryExpression
     }
 
     /**
-     * Determine the data type of the items returned by this exprssion
+     * Determine the data type of the items returned by this expression
      *
      * @return the type of the start expression
      */
@@ -117,7 +86,7 @@ public class FilterExpressionAM extends BinaryExpression
     /*@NotNull*/
     @Override
     public final ItemType getItemType() {
-        return getStart().getItemType();
+        return getRhsExpression().getItemType();
     }
 
 
@@ -129,7 +98,7 @@ public class FilterExpressionAM extends BinaryExpression
      */
     @Override
     public UType getStaticUType(UType contextItemType) {
-        return getStart().getStaticUType(contextItemType);
+        return getRhsExpression().getStaticUType(contextItemType);
     }
 
 
@@ -143,51 +112,11 @@ public class FilterExpressionAM extends BinaryExpression
 
         getLhs().typeCheck(visitor, contextInfo);
 
-        // If the first expression is known to be empty, just return empty without checking the step expression.
-        // (Checking the step expression can cause spurious errors, such as "the context item is absent")
-
-        if (Literal.isEmptySequence(getStart())) {
-            return getStart();
-        }
-
-        // The first operand must be of type (map(*)|array(*))?
-
-        Configuration config = visitor.getConfiguration();
-        TypeChecker tc = config.getTypeChecker(false);
-        Supplier<RoleDiagnostic> roleSupplier =
-                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?[]", 0, "XPTY0004");
-        ItemType mapOrArray = ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.ANY_ARRAY_TYPE);
-        SequenceType optionalMapOrArray = SequenceType.makeSequenceType(mapOrArray, StaticProperty.ALLOWS_ZERO_OR_ONE);
-        setStart(tc.staticTypeCheck(getStart(), optionalMapOrArray, roleSupplier, visitor));
-
-        // The second operand must be of type xs:boolean?
-
-        ItemType startType = getStart().getItemType();
-        if (startType == ErrorType.getInstance()) {
-            // implies the start expression will return an empty sequence, so the whole expression is void
-            return Literal.makeEmptySequence();
-        }
-
-        ItemType iterandType = AnyItemType.getInstance();
-        int iterandCardinality = StaticProperty.ALLOWS_ONE;
-        if (startType instanceof ArrayItemType) {
-            iterandType = ((ArrayItemType)startType).getMemberType().getPrimaryType();
-            iterandCardinality = ((ArrayItemType) startType).getMemberType().getCardinality();
-        } else if (startType instanceof MapType) {
-            iterandType = RecordTest.nonExtensible(
-                    new RecordTest.Field("key", SequenceType.SINGLE_ATOMIC, false),
-                    new RecordTest.Field("value", SequenceType.ANY_SEQUENCE, false));
-        }
-
-        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(iterandType, false);
-        cit.setCardinality(iterandCardinality);
-        cit.setContextSettingExpression(getStart());
+        final Configuration config = visitor.getConfiguration();
+        ContextItemStaticInfo cit = config.makeContextItemStaticInfo(getLhsExpression().getItemType(), false);
+        cit.setCardinality(getLhsExpression().getCardinality());
+        cit.setContextSettingExpression(getLhsExpression());
         getRhs().typeCheck(visitor, cit);
-
-        Supplier<RoleDiagnostic> roleSupplier1 =
-                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?[]", 1, "XPTY0004");
-        setStep(tc.staticTypeCheck(getRhsExpression(), SequenceType.OPTIONAL_BOOLEAN, roleSupplier1, visitor));
-        // TODO: no, this will invoke coercion which we don't want
 
         return this;
     }
@@ -195,18 +124,7 @@ public class FilterExpressionAM extends BinaryExpression
 
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        getLhs().optimize(visitor, contextItemType);
-        if (Literal.isEmptySequence(getSelectExpression())) {
-            return getSelectExpression();
-        }
-        getLhsExpression().setFiltered(true);
-
-        ContextItemStaticInfo baseItemType = visitor.getConfiguration().makeContextItemStaticInfo(
-                AnyItemType.getInstance(), false);     // TODO: improve this
-        baseItemType.setContextSettingExpression(getSelectExpression());
-        getRhs().optimize(visitor, baseItemType);
-        // TODO: recognize positional filters such as position() lt 5.
-        return this;
+        return super.optimize(visitor, contextItemType);
     }
 
     /**
@@ -219,7 +137,7 @@ public class FilterExpressionAM extends BinaryExpression
      */
     @Override
     public int getImplementationMethod() {
-        return EVALUATE_METHOD;
+        return ITERATE_METHOD;
     }
 
     /**
@@ -232,18 +150,18 @@ public class FilterExpressionAM extends BinaryExpression
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        return new FilterExpressionAM(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
+        return new ContextValueSetter(getLhsExpression().copy(rebindings), getRhsExpression().copy(rebindings));
     }
 
     /**
      * Get the static properties of this expression (other than its type). The result is
-     * bit-signficant. These properties are used for optimizations. In general, if
+     * bit-significant. These properties are used for optimizations. In general, if
      * property bit is set, it is true, but if it is unset, the value is unknown.
      */
 
     @Override
     protected int computeSpecialProperties() {
-        return getLhsExpression().getSpecialProperties();
+        return getRhsExpression().getSpecialProperties();
     }
 
 
@@ -253,7 +171,7 @@ public class FilterExpressionAM extends BinaryExpression
 
     @Override
     protected int computeCardinality() {
-        return getLhsExpression().getCardinality();
+        return getRhsExpression().getCardinality();
     }
 
     /**
@@ -261,20 +179,20 @@ public class FilterExpressionAM extends BinaryExpression
      */
 
     public boolean equals(Object other) {
-        if (!(other instanceof FilterExpressionAM)) {
+        if (!(other instanceof ContextValueSetter)) {
             return false;
         }
-        FilterExpressionAM p = (FilterExpressionAM) other;
+        ContextValueSetter p = (ContextValueSetter) other;
         return getLhsExpression().isEqual(p.getLhsExpression()) && getRhsExpression().isEqual(p.getRhsExpression());
     }
 
     /**
-     * get HashCode for comparing two expressions
+     * Get hashCode for comparing two expressions
      */
 
     @Override
     protected int computeHashCode() {
-        return "FilterExprAM".hashCode() + getLhsExpression().hashCode() + getRhsExpression().hashCode();
+        return "ContextValueSetter".hashCode() + getLhsExpression().hashCode() + getRhsExpression().hashCode();
     }
 
 
@@ -285,7 +203,7 @@ public class FilterExpressionAM extends BinaryExpression
 
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
-        destination.startElement("filterAM", this);
+        destination.startElement("setCxt", this);
         getLhsExpression().export(destination);
         getRhsExpression().export(destination);
         destination.endElement();
@@ -301,19 +219,23 @@ public class FilterExpressionAM extends BinaryExpression
 
     public String toString() {
         return ExpressionTool.parenthesize(getLhsExpression())
-                + "?[" + getRhsExpression() + "]";
+                + "!!" + getRhsExpression();
     }
 
     @Override
     public String toShortString() {
         return ExpressionTool.parenthesizeShort(getLhsExpression())
-                + "?[" + getRhsExpression().toShortString() + "]";
+                + "!!" + getRhsExpression().toShortString();
     }
 
     public Item evaluateItem(XPathContext context) throws XPathException {
         return makeElaborator().elaborateForItem().eval(context);
     }
 
+    @Override
+    public SequenceIterator iterate(XPathContext context) throws XPathException {
+        return makeElaborator().elaborateForPull().iterate(context);
+    }
 
     /**
      * Make an elaborator for this expression
@@ -323,74 +245,34 @@ public class FilterExpressionAM extends BinaryExpression
 
     @Override
     public Elaborator getElaborator() {
-        return new FilterExprAMElaborator();
+        return new ContextValueSetterElaborator();
     }
 
     /**
      * Elaborator for a filterAM expression.
      */
 
-    public static class FilterExprAMElaborator extends ItemElaborator {
-
-        // TODO: combine ForEach and SlashExpression
+    public static class ContextValueSetterElaborator extends PullElaborator {
 
         @Override
-        public ItemEvaluator elaborateForItem() {
-            FilterExpressionAM expr = (FilterExpressionAM) getExpression();
-            ItemEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForItem();
-            ItemEvaluator predicate = expr.getActionExpression().makeElaborator().elaborateForItem();
+        public PullEvaluator elaborateForPull() {
+            ContextValueSetter expr = (ContextValueSetter) getExpression();
+            SequenceEvaluator select = expr.getLhsExpression().makeElaborator().eagerly();
+            PullEvaluator action = expr.getRhsExpression().makeElaborator().elaborateForPull();
             return context -> {
-                Item input = select.eval(context);
-                if (input == null) {
-                    return null;
-                } else if (input instanceof MapItem) {
-                    return filteredMap(context, (MapItem)input, predicate);
-                } else if (input instanceof ArrayItem) {
-                    return filteredArray(context, (ArrayItem) input, predicate);
+                XPathContext c2 = context.newMinorContext();
+                Sequence lhs = select.evaluate(context);
+                if (lhs instanceof Item) {
+                    ManualIterator iter = new ManualIterator((Item)lhs);
+                    c2.setCurrentIterator(iter);
+                    return action.iterate(c2);
                 } else {
-                    throw new AssertionError("Type checking failure");
+                    ManualIterator iter = new ManualIterator(new Parcel(lhs.materialize()));
+                    c2.setCurrentIterator(iter);
+                    return action.iterate(c2);
                 }
             };
         }
-
-        private MapItem filteredMap(XPathContext context, MapItem input, ItemEvaluator predicate) throws XPathException {
-            HashTrieMap result = new HashTrieMap();
-            int size = input.size();
-            ManualIterator focus = new ManualIterator();
-            XPathContext c2 = context.newMinorContext();
-            c2.setCurrentIterator(focus);
-            focus.setLengthFinder(() -> size);
-            for (KeyValuePair pair : input.keyValuePairs()) {
-                ShapedMap kvp = new ShapedMap(Shape.KEY_VALUE_PAIR, pair.key, pair.value);
-                focus.setContextItem(kvp);
-                focus.incrementPosition();
-                Item predicateValue = predicate.eval(c2);
-                if (predicateValue != null && ((BooleanValue)predicateValue).getBooleanValue()) {
-                    result = result.addEntry(pair.key, pair.value);
-                }
-            }
-            return result;
-        }
-
-        private ArrayItem filteredArray(XPathContext context, ArrayItem input, ItemEvaluator predicate) throws XPathException {
-            ArrayItem result = SimpleArrayItem.EMPTY_ARRAY;
-            int size = input.arrayLength();
-            ManualIterator focus = new ManualIterator();
-            XPathContext c2 = context.newMinorContext();
-            c2.setCurrentIterator(focus);
-            focus.setLengthFinder(() -> size);
-            for (GroundedValue member : input.members()) {
-                Item contextItem = member.getLength() == 1 ? member.head() : new Parcel(member);
-                focus.setContextItem(contextItem);
-                focus.incrementPosition();
-                Item predicateValue = predicate.eval(c2);
-                if (predicateValue != null && ((BooleanValue) predicateValue).getBooleanValue()) {
-                    result = result.append(member);
-                }
-            }
-            return result;
-        }
-
 
     }
 }

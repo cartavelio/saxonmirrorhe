@@ -13,6 +13,7 @@ import net.sf.saxon.expr.UserFunctionCall;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionBinder;
@@ -122,11 +123,11 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
     throws XPathException {
         boolean debug = env.getConfiguration().getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS);
         Logger err = env.getConfiguration().getLogger();
-        if (debug) {
+        if (debug && !NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri())) {
             err.info("Looking for function " + functionName.getComponentName().getEQName() + "#" + functionName.getArity());
         }
         for (FunctionLibrary lib : libraryList) {
-            if (debug) {
+            if (debug && !(lib instanceof FunctionLibraryList)) {
                 err.info("Trying " + lib.getClass().getName());
             }
             Expression func = lib.bind(functionName, staticArgs, keywords, env, reasons);
@@ -134,7 +135,7 @@ public class FunctionLibraryList implements FunctionLibrary, XQueryFunctionBinde
                 return func;
             }
         }
-        if (debug) {
+        if (debug && !NamespaceUri.isReserved(functionName.getComponentName().getNamespaceUri())) {
             err.info("Function " + functionName.getComponentName().getEQName() + " not found!");
         }
         return null;

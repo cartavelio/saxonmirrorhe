@@ -12,6 +12,7 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -125,6 +126,12 @@ public final class AxisExpression extends Expression {
             throw new XPathException("Axis step " + this + " cannot be used here: the context item is absent")
                     .withErrorCode("XPDY0002")
                     .withLocation(getLocation());
+        } else if (contextInfo.getCardinality() != StaticProperty.ALLOWS_ONE) {
+            // XPath 4.0 generalizes the context item to context value
+            SlashExpression slash = new SlashExpression(new ContextValueExpression(), this);
+            Expression sortedSlash = new DocumentSorter(slash);
+            ExpressionTool.copyLocationInfo(this, sortedSlash);
+            return sortedSlash;
         } else {
             staticInfo = contextInfo;
         }
@@ -169,10 +176,6 @@ public final class AxisExpression extends Expression {
         StaticContext env = visitor.getStaticContext();
         Configuration config = env.getConfiguration();
         ItemType contextType = contextInfo.getItemType();
-        Schema schema = visitor.getSchemaForTypeChecking();
-        if (schema == null) {
-            schema = env.getPackageData().getImportedSchema();
-        }
 
         if (!(contextType instanceof NodeTest)) {
             contextType = AnyNodeTest.getInstance();
@@ -280,7 +283,7 @@ public final class AxisExpression extends Expression {
                                     outermostElementNames.get().size() == 1) {
                                 IntIterator oeni = outermostElementNames.get().iterator();
                                 int outermostElementName = oeni.hasNext() ? oeni.next() : -1;
-                                SchemaDeclaration decl = env.getPackageData().getImportedSchema().getElementDecl(outermostElementName);
+                                SchemaDeclaration decl = config.getElementDeclaration(outermostElementName);
                                 if (decl == null) {
                                     if (warnings) {
                                         visitor.issueWarning("Element " + config.getNamePool().getEQName(outermostElementName) +
@@ -355,16 +358,16 @@ public final class AxisExpression extends Expression {
                     } else if (axis == AxisInfo.ATTRIBUTE) {
                         boolean found = false;
                         if (targetfp == -1) {
-                            for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
-                                if (((ComplexType)extension).allowsAttributes(schema)) {
+                            for (SchemaType extension : config.getExtensionsOfType(contentType)) {
+                                if (((ComplexType)extension).allowsAttributes()) {
                                     found = true;
                                     break;
                                 }
                             }
                         } else {
-                            for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
+                            for (SchemaType extension : config.getExtensionsOfType(contentType)) {
                                 try {
-                                    if (((ComplexType)extension).getAttributeUseType(targetName, schema) != null) {
+                                    if (((ComplexType)extension).getAttributeUseType(targetName) != null) {
                                         found = true;
                                         break;
                                     }
@@ -402,7 +405,7 @@ public final class AxisExpression extends Expression {
                 return Literal.makeEmptySequence();
             } else if (((ComplexType) contentType).isEmptyContent() &&
                     (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF)) {
-                for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
+                for (SchemaType extension : config.getExtensionsOfType(contentType)) {
                     if (!((ComplexType)extension).isEmptyContent()) {
                         return this;
                     }
@@ -415,9 +418,9 @@ public final class AxisExpression extends Expression {
                 }
                 return Literal.makeEmptySequence();
             } else if (axis == AxisInfo.ATTRIBUTE) {
-               if (targetfp == -1) {
+                if (targetfp == -1) {
                     if (warnings) {
-                        if (!((ComplexType) contentType).allowsAttributes(schema)) {
+                        if (!((ComplexType) contentType).allowsAttributes()) {
                             visitor.issueWarning(
                                     "The complex type " + contentType.getDescription() +
                                             " allows no attributes other than the standard attributes in the xsi namespace",
@@ -436,7 +439,7 @@ public final class AxisExpression extends Expression {
                         } else if (targetfp == StandardNames.XSI_NIL) {
                             schemaType = BuiltInAtomicType.BOOLEAN;
                         } else {
-                            schemaType = ((ComplexType) contentType).getAttributeUseType(targetName, schema);
+                            schemaType = ((ComplexType) contentType).getAttributeUseType(targetName);
                         }
                         if (schemaType == null) {
                             if (warnings) {
@@ -461,11 +464,11 @@ public final class AxisExpression extends Expression {
                     int childfp = targetfp;
                     if (targetName == null) {
                         // select="child::*"
-                        if (((ComplexType) contentType).containsElementWildcard(schema)) {
+                        if (((ComplexType) contentType).containsElementWildcard()) {
                             return this;
                         }
                         IntHashSet children = new IntHashSet();
-                        ((ComplexType) contentType).gatherAllPermittedChildren(schema, children, false);
+                        ((ComplexType) contentType).gatherAllPermittedChildren(children, false);
                         if (children.isEmpty()) {
                             if (warnings) {
                                 visitor.issueWarning(
@@ -487,14 +490,14 @@ public final class AxisExpression extends Expression {
                             return this;
                         }
                     }
-                    SchemaType schemaType = ((ComplexType) contentType).getElementParticleType(childfp, schema, true);
+                    SchemaType schemaType = ((ComplexType) contentType).getElementParticleType(childfp, true);
                     if (schemaType == null) {
                         if (warnings) {
                             StructuredQName childElement = getConfiguration().getNamePool().getStructuredQName(childfp);
                             String message = "The complex type " + contentType.getDescription() +
                                     " does not allow a child element named " + getDiagnosticName(childElement, env);
                             IntHashSet permitted = new IntHashSet();
-                            ((ComplexType) contentType).gatherAllPermittedChildren(schema, permitted, false);
+                            ((ComplexType) contentType).gatherAllPermittedChildren(permitted, false);
                             if (!permitted.contains(-1)) {
                                 IntIterator kids = permitted.iterator();
                                 while (kids.hasNext()) {
@@ -516,7 +519,7 @@ public final class AxisExpression extends Expression {
                                 test,
                                 Token.INTERSECT,
                                 new ContentTypeTest(Type.ELEMENT, schemaType, config, true));
-                        int computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, schema, true);
+                        int computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, true);
                         ExpressionTool.resetStaticProperties(this);
                         if (computedCardinality == StaticProperty.ALLOWS_ZERO) {
                             // this shouldn't happen, because we've already checked for this a different way.
@@ -545,13 +548,13 @@ public final class AxisExpression extends Expression {
                 // specific path that avoids searching branches of the tree where the element cannot occur
                 try {
                     IntHashSet descendants = new IntHashSet();
-                    ((ComplexType) contentType).gatherAllPermittedDescendants(schema, descendants);
+                    ((ComplexType) contentType).gatherAllPermittedDescendants(descendants);
                     if (descendants.contains(-1)) {
                         return this;
                     }
                     if (descendants.contains(targetfp)) {
                         IntHashSet children = new IntHashSet();
-                        ((ComplexType) contentType).gatherAllPermittedChildren(schema, children, false);
+                        ((ComplexType) contentType).gatherAllPermittedChildren(children, false);
                         IntHashSet usefulChildren = new IntHashSet();
                         boolean considerSelf = false;
                         boolean considerDescendants = false;
@@ -562,13 +565,13 @@ public final class AxisExpression extends Expression {
                                 usefulChildren.add(c);
                                 considerSelf = true;
                             }
-                            SchemaType st = ((ComplexType) contentType).getElementParticleType(c, schema, true);
+                            SchemaType st = ((ComplexType) contentType).getElementParticleType(c, true);
                             if (st == null) {
                                 throw new AssertionError("Can't find type for child element " + c);
                             }
                             if (st instanceof ComplexType) {
                                 IntHashSet subDescendants = new IntHashSet();
-                                ((ComplexType) st).gatherAllPermittedDescendants(schema, subDescendants);
+                                ((ComplexType) st).gatherAllPermittedDescendants(subDescendants);
                                 if (subDescendants.contains(targetfp)) {
                                     usefulChildren.add(c);
                                     considerDescendants = true;
@@ -577,7 +580,7 @@ public final class AxisExpression extends Expression {
                         }
                         itemType = test;
                         if (considerDescendants) {
-                            SchemaType st = ((ComplexType) contentType).getDescendantElementType(schema, targetfp);
+                            SchemaType st = ((ComplexType) contentType).getDescendantElementType(targetfp);
                             if (st != AnyType.getInstance()) {
                                 itemType = new CombinedNodeTest(
                                         test, Token.INTERSECT,
@@ -895,7 +898,7 @@ public final class AxisExpression extends Expression {
      */
 
     @Override
-    protected int computeCardinality() {
+    protected final int computeCardinality() {
         NodeTest originNodeType;
         NodeTest nodeTest = test;
         ItemType contextItemType = staticInfo.getItemType();
@@ -908,11 +911,10 @@ public final class AxisExpression extends Expression {
             return StaticProperty.ALLOWS_ZERO_OR_MORE;
         }
         if (axis == AxisInfo.ATTRIBUTE && nodeTest instanceof NameTest) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 try {
-                    return ((ComplexType) contentType).getAttributeUseCardinality(nodeTest.getMatchingNodeName(), schema);
+                    return ((ComplexType) contentType).getAttributeUseCardinality(nodeTest.getMatchingNodeName());
                 } catch (SchemaException err) {
                     // shouldn't happen; play safe
                     return StaticProperty.ALLOWS_ZERO_OR_ONE;
@@ -922,19 +924,17 @@ public final class AxisExpression extends Expression {
             }
             return StaticProperty.ALLOWS_ZERO_OR_ONE;
         } else if (axis == AxisInfo.CHILD && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
-                return ((ComplexType) contentType).getElementParticleCardinality(nodeTest.getFingerprint(), schema, true);
+                return ((ComplexType) contentType).getElementParticleCardinality(nodeTest.getFingerprint(), true);
             } else {
                 return StaticProperty.EMPTY;
             }
         } else if (axis == AxisInfo.DESCENDANT && nodeTest instanceof NameTest && nodeTest.getPrimitiveType() == Type.ELEMENT) {
-            Schema schema = getRetainedStaticContext().getPackageData().getImportedSchema();
             SchemaType contentType = originNodeType.getContentType();
             if (contentType instanceof ComplexType) {
                 try {
-                    return ((ComplexType) contentType).getDescendantElementCardinality(schema, nodeTest.getFingerprint());
+                    return ((ComplexType) contentType).getDescendantElementCardinality(nodeTest.getFingerprint());
                 } catch (SchemaException err) {
                     // shouldn't happen; play safe
                     return StaticProperty.ALLOWS_ZERO_OR_MORE;

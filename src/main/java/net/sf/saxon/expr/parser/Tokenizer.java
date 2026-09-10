@@ -566,6 +566,10 @@ public final class Tokenizer {
                             inputOffset++;
                             nextToken = Token.QMARK_QMARK;
                             return;
+                        } else if (input.charAt(inputOffset) == '[') {
+                            inputOffset++;
+                            nextToken = Token.QMARK_LSQB;
+                            return;
                         }
                     }
                     nextToken = Token.QMARK;

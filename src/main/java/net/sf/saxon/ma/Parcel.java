@@ -17,7 +17,10 @@ import net.sf.saxon.value.StringValue;
 /**
  * A Parcel is a way of wrapping an arbitrary sequence as a single item. It is implemented
  * as a single-entry map, the single key being the string "value", and the corresponding
- * value being the wrapped value.
+ * value being the wrapped value. It is used in particular to wrap the context value when
+ * this is not a single item: this is to avoid disruption to the large amount of Saxon code
+ * that is written to assume the context value will be a single item (which it is most of the
+ * time).
  */
 public class Parcel extends SingleEntryMap {
 

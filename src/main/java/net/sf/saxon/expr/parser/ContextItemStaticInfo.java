@@ -8,6 +8,7 @@
 package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
@@ -27,6 +28,7 @@ public class ContextItemStaticInfo {
     private final boolean contextMaybeUndefined;
     private Expression contextSettingExpression;
     private boolean parentless;
+    private int cardinality = StaticProperty.ALLOWS_ONE;
 
     /**
      * Create a ContextItemStaticInfo
@@ -65,6 +67,22 @@ public class ContextItemStaticInfo {
 
     public UType getContextItemUType() {
         return itemType.getUType();
+    }
+
+    /**
+     * Set the cardinality of the context value. XPath 4.0 allows the context value to be any sequence
+     * @param cardinality the cardinality of the context value
+     */
+    public void setCardinality(int cardinality) {
+        this.cardinality = cardinality;
+    }
+
+    /**
+     * Get the cardinality of the context value. XPath 4.0 allows the context value to be any sequence
+     * @return the cardinality of the context value
+     */
+    public int getCardinality() {
+        return cardinality;
     }
 
     /**
