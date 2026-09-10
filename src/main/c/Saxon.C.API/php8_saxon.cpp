@@ -700,7 +700,13 @@ PHP_METHOD(SaxonProcessor, parseJsonFromFile) {
   saxonProcessor = obj->saxonProcessor;
   if (saxonProcessor != nullptr) {
 
-    XdmNode *node = saxonProcessor->parseXmlFromFile(source);
+    XdmNode *node = nullptr;
+    try {
+        node = saxonProcessor->parseXmlFromFile(source);
+      } catch (SaxonApiException &e) {
+         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+      }
+
     if (node != nullptr) {
 
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
@@ -765,8 +771,12 @@ PHP_METHOD(SaxonProcessor, parseXmlFromString) {
       }
     }
 
-    XdmNode *node =
-        saxonProcessor->parseXmlFromString(source, encoding, validator);
+    XdmNode *node = nullptr;
+    try {
+        node = saxonProcessor->parseXmlFromString(source, encoding, validator);
+      } catch (SaxonApiException &e) {
+         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+      }
     if (node != nullptr) {
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
         RETURN_NULL();
@@ -822,7 +832,13 @@ PHP_METHOD(SaxonProcessor, parseXmlFromFile) {
         validator = ooth->schemaValidator;
       }
     }
-    XdmNode *node = saxonProcessor->parseXmlFromFile(source, validator);
+    XdmNode *node = nullptr;
+
+    try{
+        node = saxonProcessor->parseXmlFromFile(source, validator);
+      } catch (SaxonApiException &e) {
+         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+      }
     if (node != nullptr) {
 
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
@@ -877,7 +893,12 @@ PHP_METHOD(SaxonProcessor, parseXmlFromUri) {
         validator = ooth->schemaValidator;
       }
     }
-    XdmNode *node = saxonProcessor->parseXmlFromUri(source, validator);
+    XdmNode *node = nullptr;
+    try{
+        node = saxonProcessor->parseXmlFromUri(source, validator);
+      } catch (SaxonApiException &e) {
+         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+      }
     if (node != nullptr) {
 
       if (object_init_ex(return_value, xdmNode_ce) != SUCCESS) {
