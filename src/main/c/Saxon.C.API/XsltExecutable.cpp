@@ -391,6 +391,10 @@ void XsltExecutable::setcwd(const char *dir) {
   }
 }
 
+const char * XsltExecutable::getcwd() {
+  return cwdXE.c_str();
+}
+
 void XsltExecutable::exportStylesheet(const char *filename) {
   long status =
       j_save(SaxonProcessor::sxn_environ->thread, (char *)cwdXE.c_str(),

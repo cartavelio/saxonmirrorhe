@@ -1263,6 +1263,16 @@ cdef class PyXslt30Processor:
         self.processor = processor
         self.__parameters = {}
 
+     @property
+     def cwd(self):
+        """
+        cwd(self)
+        Property represents the current working directory
+        """
+        cdef const char* c_string = self.thisxptr.getcwd()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
+
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
@@ -1778,6 +1788,16 @@ cdef class PyXsltExecutable:
         self.__parameters = {}
         self.__initial_template_parameters = {}
         self.__initial_tunneling_template_parameters = {}
+
+    @property
+    def cwd(self):
+        """
+        cwd(self)
+        Property represents the current working directory
+        """
+        cdef const char* c_string = self.thisxptr.getcwd()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
 
     def set_cwd(self, cwd):
         """
@@ -3205,6 +3225,16 @@ cdef class PyXQueryProcessor:
         c_baseuri = py_base_string if base_uri is not None else ""
         self.thisxqptr.setQueryBaseURI(c_baseuri)
 
+     @property
+     def cwd(self):
+        """
+        cwd(self)
+        Property represents the current working directory
+        """
+        cdef const char* c_string = self.thisxqptr.getcwd()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
+
      def set_cwd(self, cwd):
         """
         set_cwd(self, cwd)
@@ -3405,6 +3435,16 @@ cdef class PyXPathProcessor:
         py_cwd_string = cwd.encode('UTF-8') if cwd is not None else None
         cdef char * c_cwd = py_cwd_string if cwd is not None else ""
         self.thisxpptr.setcwd(c_cwd)
+
+    @property
+    def cwd(self):
+        """
+        cwd(self)
+        Property represents the current working directory
+        """
+        cdef const char* c_string = self.thisxpptr.getcwd()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
 
     def effective_boolean_value(self, xpath_str, encoding = None):
         """
@@ -3679,6 +3719,16 @@ cdef class PySchemaValidator:
         cdef char * c_cwd = py_cwd_string if cwd is not None else ""
         self.thissvptr.setcwd(c_cwd)
 
+    @property
+    def cwd(self):
+        """
+        cwd(self)
+        Property represents the current working directory
+        """
+        cdef const char* c_string = self.thissvptr.getcwd()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
+
     def register_schema(self, **kwds):
         """
         register_schema(self, **kwds)
@@ -3738,6 +3788,19 @@ cdef class PySchemaValidator:
             self.thissvptr.setOutputFile(c_source)
         else:
             raise Warning("Unable to set output_file. output_file has the value None")
+
+    def get_output_file(self):
+        """
+        get_output_file(self)
+        Set the name of the output file that will be used by the validator.
+        Args:
+            Returns:
+                str: The output file name used for use by the validator
+        """
+        cdef const char* c_string = self.thissvptr.getOutputFile()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
+
 
     def validate(self, **kwds):
         """

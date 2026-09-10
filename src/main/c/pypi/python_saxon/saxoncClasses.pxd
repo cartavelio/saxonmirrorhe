@@ -25,6 +25,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         # set the current working directory
         void setcwd(char* cwd)
+
         const char* getcwd()
 
         void registerUserFunction(const char * ns, XdmValue * (*func)(int, XdmValue **), const char * signatureJSON, bool useNativeTypes) except +raise_py_error
@@ -174,6 +175,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         # set the current working directory
         void setcwd(const char* cwd)
 
+        const char* getcwd()
+
         # Set the output file of where the transformation result is sent
         void setOutputFile(const char* outfile)
 
@@ -181,7 +184,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setJustInTimeCompilation(bool jit)
 
         # Get just-in-time compilation of template rules flag.
-        void getJustInTimeCompilation(bool jit)
+        void getJustInTimeCompilation()
 
         void setXsltLanguageVersion(const char* version)
 
@@ -272,6 +275,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         XsltExecutable() except +raise_py_error
         # set the current working directory
         void setcwd(const char* cwd)
+
+        const char* getcwd()
 
         # Set the base output URI.
         void setBaseOutputURI(const char * baseURI)
@@ -420,6 +425,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setcwd(const char* cwd)
 
+        const char* getcwd()
+
         void registerSchemaFromNode(XdmNode * node)    except +raise_py_error
 
         void registerSchemaFromFile(const char * xsd)   except +raise_py_error
@@ -429,6 +436,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void exportSchema(const char * fileName)  except +raise_py_error
 
         void setOutputFile(const char * outputFile)
+
+        const char* getOutputFile();
 
         void validate(const char * sourceFile) except +raise_py_error
    
@@ -484,6 +493,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setContextItem(XdmItem * item)
         
         void setcwd(const char* cwd)
+
+        const char* getcwd()
 
         void setContextFile(const char * filename)
 
@@ -568,6 +579,8 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
         void setQueryBaseURI(const char * baseURI)
 
         void setcwd(const char* cwd)
+
+        const char* getcwd()
 
         const char* checkException()
 

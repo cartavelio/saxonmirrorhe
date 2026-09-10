@@ -382,6 +382,7 @@ PHP_METHOD(XPathProcessor, getcwd);
 PHP_METHOD(SchemaValidator, __destruct);
 PHP_METHOD(SchemaValidator, setSourceNode);  // checks for old values, then add new one, increment refCount
 PHP_METHOD(SchemaValidator, setOutputFile);
+PHP_METHOD(SchemaValidator, getOutputFile);
 PHP_METHOD(SchemaValidator, exportSchema);
 PHP_METHOD(SchemaValidator, registerSchemaFromFile);
 PHP_METHOD(SchemaValidator, registerSchemaFromString);

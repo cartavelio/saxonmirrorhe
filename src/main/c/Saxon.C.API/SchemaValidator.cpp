@@ -85,10 +85,18 @@ void SchemaValidator::setcwd(const char *dir) {
   }
 }
 
+const char * SchemaValidator::getcwd() {
+  return cwdV.c_str();
+}
+
 void SchemaValidator::setOutputFile(const char *sourceFile) {
   if (sourceFile != nullptr) {
     outputFile = std::string(sourceFile);
   }
+}
+
+const char * SchemaValidator::getOutputFile() {
+  return outputFile.c_str();
 }
 
 void SchemaValidator::setLax(bool l) { lax = l; }

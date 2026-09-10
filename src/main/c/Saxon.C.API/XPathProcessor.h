@@ -137,6 +137,13 @@ public:
    */
   void setcwd(const char *cwd);
 
+ /**
+  * Get the current working directory.
+  * Memory dellocation of string internally handled
+  * @returns const char* - cwd of the XPath Processor
+  */
+ const char * getcwd();
+
   /** Set the context item from file
    */
   void setContextFile(const char *filename);
