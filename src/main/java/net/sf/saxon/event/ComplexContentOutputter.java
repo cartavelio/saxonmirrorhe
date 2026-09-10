@@ -782,14 +782,14 @@ public final class ComplexContentOutputter extends Outputter implements Receiver
 
         nextReceiver.startElement(elcode, currentSimpleType, attributes, pendingNSMap, startElementLocationId, props);
 
+        finishStartContent(inherited);
+    }
+
+    private void finishStartContent(NamespaceMap inherited)
+    {
         boolean inherit = !ReceiverOption.contains(startElementProperties, ReceiverOption.DISINHERIT_NAMESPACES);
         inheritedNamespaces.push(inherit ? pendingNSMap : inherited);
 
-        finishStartContent();
-    }
-
-    private void finishStartContent()
-    {
         pendingAttributes.clear();
         pendingNSMap = NamespaceMap.emptyMap();
         previousAtomic = false;
