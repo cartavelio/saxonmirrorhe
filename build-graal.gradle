@@ -748,8 +748,29 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/samples"
         into "${saxoncReleaseDir}/samples"
+        if (edition != "ee") {
+          exclude "Validate.c"
+        }
+        if (systemOs.isLinux()) {
+          exclude "**/build64-mac.sh"
+          exclude "**/build-windows.bat"
+        } else if (systemOs.isMacOsX()) {
+          exclude "**/build64-linux.sh"
+          exclude "**/build-windows.bat"
+        } else {
+          exclude "**/build64-linux.sh"
+          exclude "**/build64-mac.sh"
+        }
+
         filter { line ->
+          if (edition != 'ee' && line.contains('Validate')) {
+            line = "";
+          }
+          if (arch == 'aarch64') {
+            line = line.replace('-m64 ', '')
+          }
           line.replaceAll('@@VERSION@@', saxonVersion)
+                  .replace('@@libdir@@', libdir)
                   .replace('@@edition@@', edition)
                   .replace('@@EDITION@@', edition.toUpperCase())
         }
@@ -760,7 +781,21 @@ task all_saxonc_releases() {
       copy {
         from "${projectDir}/src/main/c/command"
         into "${saxoncReleaseDir}/command"
+        if (edition != "ee") {
+          exclude "Validate.c"
+        }
+        if (systemOs.isWindows()) {
+          exclude "build-saxonc-commands.sh"
+        } else {
+          exclude "build-saxonc-commands.bat"
+        }
         filter { line ->
+          if (edition != 'ee' && line.contains('Validate')) {
+            line = "";
+          }
+          if (arch == 'aarch64') {
+            line = line.replace('-m64 ', '')
+          }
           line.replaceAll('@@VERSION@@', saxonVersion)
                   .replace('@@edition@@', edition)
                   .replace('@@EDITION@@', edition.toUpperCase())
