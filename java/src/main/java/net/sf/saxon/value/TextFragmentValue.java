@@ -854,14 +854,14 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
-            boolean matchesDoc = predicate.test(fragment);
-            boolean matchesText = predicate.test(this);
+            boolean matchesDoc = predicate == null || predicate.test(fragment);
+            boolean matchesText = predicate == null || predicate.test(this);
             if (matchesDoc && matchesText) {
                 NodeInfo[] nodes = {this, fragment};
                 return new ArrayIterator.OfNodes<>(nodes);
-            } else if (matchesDoc /* && !matchesText */) {
+            } else if (matchesDoc) {
                 return SingletonIterator.makeIterator(fragment);
-            } else if (matchesText /* && !matchesDoc */) {
+            } else if (matchesText) {
                 return SingletonIterator.makeIterator(this);
             } else {
                 return EmptyIterator.INSTANCE;
