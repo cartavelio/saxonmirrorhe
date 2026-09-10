@@ -139,6 +139,8 @@ val bundleDependencies = tasks.register<UnjarBundleDependencies>("bundleJarDepen
         jar("jline-${project.findProperty("jlineVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}.jar")
         jar("xmlresolver-${project.findProperty("xmlresolverVersion")}-data.jar")
+        jar("vavr-champ-${findProperty("vavrVersion")}.jar")
+        jar("vavr-match-${findProperty("vavrVersion")}.jar")
     }
 }
 
