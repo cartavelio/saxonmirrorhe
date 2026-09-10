@@ -18,7 +18,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodePredicateLambda;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.pattern.PortableNamedType;
+import net.sf.saxon.pattern.PortableNamedXNodeType;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -355,7 +355,7 @@ public final class Navigator {
         if (node.getLocalPart().isEmpty()) {
             same = NodeKindType.of(kind);
         } else {
-            same = new PortableNamedType(kind, node.getQName());
+            same = new PortableNamedXNodeType(kind, node.getQName());
         }
 
         Controller controller = context == null ? null : context.getController();

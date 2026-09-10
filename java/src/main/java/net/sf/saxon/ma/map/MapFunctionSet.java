@@ -178,20 +178,18 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         });
 
         ItemType actionType = new SpecificFunctionType(
-                SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
+                SequenceType.SINGLE_ATOMIC,
+                SequenceType.ANY_SEQUENCE,
+                SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, e -> {
-            return e.populate(MapForEach::new, AnyItemType.INSTANCE, STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                    .arg(1, actionType, ONE | INS, null);
-        });
+        register("for-each", 2, e -> e.populate(MapForEach::new, AnyItemType.INSTANCE, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                .arg(1, actionType, ONE | INS, null));
 
-        register("get", 2, e -> {
-            return e.populate(MapGet::new, AnyItemType.INSTANCE, STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
-        });
+        register("get", 2, e -> e.populate(MapGet::new, AnyItemType.INSTANCE, STAR, 0)
+                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
 
 
@@ -202,12 +200,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.SINGLE_ATOMIC,
                     SequenceType.ANY_SEQUENCE);
 
-            register("get", 3, e -> {
-                return e.populate(MapGet::new, AnyItemType.INSTANCE, STAR, 0)
-                        .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                        .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                        .arg(2, AnyItemType.INSTANCE, STAR | INS, null);
-            });
+            register("get", 3, e -> e.populate(MapGet::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
+                    .arg(2, AnyItemType.INSTANCE, STAR | INS, null));
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
                     SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
@@ -217,23 +213,19 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                     SequenceType.ANY_SEQUENCE);
 
-            register("build", 1, 4, e -> {
-                return e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                        .arg(0, AnyItemType.INSTANCE, STAR, null)
-                        .arg(1, mapBuildKeyArg, OPT, null)
-                        .arg(2, mapBuildValueArg, OPT, null)
-                        .arg(3, MapType.ANY_MAP_TYPE, OPT, null)
-                        .setOptionDetails(mergeOptionDetails);
-            });
+            register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, AnyItemType.INSTANCE, STAR, null)
+                    .arg(1, mapBuildKeyArg, OPT, null)
+                    .arg(2, mapBuildValueArg, OPT, null)
+                    .arg(3, MapType.ANY_MAP_TYPE, OPT, null)
+                    .setOptionDetails(mergeOptionDetails));
 
             ItemType filterFunctionType = new SpecificFunctionType(
                     SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
                     SequenceType.OPTIONAL_BOOLEAN);
 
-            register("items", 1, e -> {
-                return e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
-                        .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
-            });
+            register("items", 1, e -> e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             register("keys-where", 2, e -> e.populate(MapKeysWhere::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
@@ -265,13 +257,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
             // TODO: drop this, renamed map:items
-            register("values", 1, e -> {
-                return e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
-                        .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
-            });
+            register("values", 1, e -> e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
             SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
-                    SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
+                    SequenceType.SINGLE_ATOMIC,
+                    SequenceType.ANY_SEQUENCE,
+                    SequenceType.SINGLE_INTEGER,
                     SequenceType.OPTIONAL_BOOLEAN
             );
 
@@ -328,8 +320,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             MapItem map = (MapItem) arguments[0].head();
             FunctionItem fn = (FunctionItem) arguments[1].head();
             GeneralMapBuilder result = FixedMap.getBuilder(map.getSpecVersion());
+            int position = 1;
             for (KeyValuePair pair : map.keyValuePairs()) {
-                BooleanValue match = (BooleanValue)dynamicCall(fn, context, pair.key, pair.value).head();
+                BooleanValue match = (BooleanValue)dynamicCall(
+                        fn, context, pair.key, pair.value, Int64Value.makeIntegerValue(position++)).head();
                 if (match != null && match.getBooleanValue()) {
                     result.put(pair.key, pair.value);
                 }
@@ -621,8 +615,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             MapItem map = (MapItem) arguments[0].head();
             FunctionItem fn = (FunctionItem) arguments[1].head();
             ZenoSequence results = new ZenoSequence();
+            int position = 1;
             for (KeyValuePair pair : map.keyValuePairs()) {
-                Sequence seq = dynamicCall(fn, context, pair.key, pair.value);
+                Sequence seq = dynamicCall(fn, context, pair.key, pair.value, Int64Value.makeIntegerValue(position++));
                 GroundedValue val = seq.materialize();
                 if (val.getLength() > 0) {
                     results = results.appendSequence(val);

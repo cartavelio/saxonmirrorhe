@@ -20,14 +20,14 @@ import net.sf.saxon.type.gnode.XNodeType;
 import java.util.Optional;
 
 /**
- * PortableNamedType is variant of the {@link net.sf.saxon.type.gnode.NamedXNodeType} class
+ * {@code PortableNamedXNodeType} is variant of the {@link net.sf.saxon.type.gnode.NamedXNodeType} class
  * that works across Configurations.
  * It is used in the function signatures of functions like {@code fn:analyze-string};
  * these signatures appear in Java static data, so they cannot be tied to a particular
  * configuration.
  */
 
-public class PortableNamedType extends XNodeType {
+public class PortableNamedXNodeType extends XNodeType {
 
     private final int nodeKind;
     private final UType uType;
@@ -41,7 +41,7 @@ public class PortableNamedType extends XNodeType {
      * @since 13.0
      */
 
-    public PortableNamedType(int nodeKind, QNameTest qNameTest) {
+    public PortableNamedXNodeType(int nodeKind, QNameTest qNameTest) {
         this.qNameTest = qNameTest;
         this.nodeKind = nodeKind;
         this.uType = UType.fromTypeCode(nodeKind);
@@ -55,7 +55,7 @@ public class PortableNamedType extends XNodeType {
      * @since 13.0
      */
 
-    public PortableNamedType(int nodeKind, StructuredQName requiredName) {
+    public PortableNamedXNodeType(int nodeKind, StructuredQName requiredName) {
         this.qNameTest = new PortableQNameTest(requiredName);
         this.nodeKind = nodeKind;
         this.uType = UType.fromTypeCode(nodeKind);
@@ -195,9 +195,9 @@ public class PortableNamedType extends XNodeType {
      */
 
     public boolean equals(Object other) {
-        return other instanceof PortableNamedType &&
-                ((PortableNamedType) other).qNameTest.equals(qNameTest) &&
-                ((PortableNamedType) other).nodeKind == nodeKind ;
+        return other instanceof PortableNamedXNodeType &&
+                ((PortableNamedXNodeType) other).qNameTest.equals(qNameTest) &&
+                ((PortableNamedXNodeType) other).nodeKind == nodeKind ;
     }
 
 //    @Override

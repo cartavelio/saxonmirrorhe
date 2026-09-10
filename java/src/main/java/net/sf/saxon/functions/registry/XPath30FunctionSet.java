@@ -12,7 +12,7 @@ import net.sf.saxon.functions.hof.*;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.pattern.PortableNamedType;
+import net.sf.saxon.pattern.PortableNamedXNodeType;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.DocumentNodeType;
@@ -48,7 +48,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, ONE, null));
 
         ItemType analyzeStringReturnType =
-                     new PortableNamedType(
+                     new PortableNamedXNodeType(
                              Type.ELEMENT,
                              new StructuredQName("", NamespaceUri.FN, "analyze-string-result"));
         register("analyze-string", 3, e -> e.populate( AnalyzeStringFn::new, analyzeStringReturnType,

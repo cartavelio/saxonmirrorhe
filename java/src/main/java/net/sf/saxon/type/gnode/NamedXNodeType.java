@@ -10,6 +10,7 @@ package net.sf.saxon.type.gnode;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.Nilled_1;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.PortableNamedXNodeType;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -29,6 +30,10 @@ import java.util.function.IntPredicate;
  * QNameTest (which embraces wildcards and choices) and whose type
  * annotation matches a given schema type; it is also conditional on whether
  * the node is nilled.</p>
+ * <p>A {@code NamedXNodeType} is tied to one {@link Configuration}, which means it
+ * cannot be used in the signature of a built-in function, as these are shared
+ * across configurations. An alternative is therefore available in the class
+ * {@link PortableNamedXNodeType}.</p>
  */
 
 public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, NodeVectorMatchMaker {
