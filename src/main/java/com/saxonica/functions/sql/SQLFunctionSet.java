@@ -57,7 +57,16 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
                 // Read result from RS only once, because
                 // of JDBC-Specifications
                 String result = rs.getString(col);
+                //System.err.println("Column " + col + " getColumnName()=" + metaData.getColumnName(col) + " getColumnLabel()=" + metaData.getColumnLabel(col));
                 String sqlName = metaData.getColumnName(col);
+                if (map.containsStringKey(sqlName)) {
+                    int suffix = 1;
+                    String baseName = sqlName;
+                    sqlName = baseName + suffix;
+                    while (map.containsStringKey(sqlName)) {
+                        sqlName = baseName + (++suffix);
+                    }
+                }
                 map.initialPut(sqlName, result == null ? EmptySequence.getInstance() : new StringValue(result));
                 // TODO: use SQL data type
             }
