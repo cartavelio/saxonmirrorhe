@@ -1145,7 +1145,7 @@ def compareManifests(File jarfile, File jargold) {
   println("       : $jargold")
   ZipEntry entry
   while ((entry = zs.getNextEntry()) != null) {
-    if (!entry.getName().contains('$')) {
+    if (!entry.getName().contains('$') && !entry.getName().contains('META-INF/TE-')) {
       jarmanifest.add(entry.getName())
     }
   }
