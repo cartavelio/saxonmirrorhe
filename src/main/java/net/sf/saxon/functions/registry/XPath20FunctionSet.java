@@ -98,7 +98,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         // Concat changes in 4.0:
         // TODO: reimpose restrictions if 4.0 not in use
         register("concat", 1, Concat.class, BuiltInAtomicType.STRING, ONE, SEQV)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, OPT, null);
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null);
 
         register("contains", 2, Contains.class, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
