@@ -721,9 +721,23 @@ namespace Saxon.Api {
             
             private readonly Saxon.Api.ResourceResolver resolver;
 
+            /// <summary>
+            /// Create a wrapped text resolver
+            /// </summary>
+            /// <param name="resolver">the resolver to be wrapped</param>
             public WrappedTextResolver(Saxon.Api.ResourceResolver resolver) {
                 this.resolver = resolver;
             }
+            
+            /// <summary>
+            /// Resolve a URI for an unparsed text document
+            /// </summary>
+            /// <param name="absoluteURI">The requested URI, made absolute</param>
+            /// <param name="encoding">The requested encoding if any (or null if absent)</param>
+            /// <param name="config">The Saxon configuration</param>
+            /// <returns>A reader giving access to the text</returns>
+            /// <exception cref="Saxon.Hej.trans.XPathException">If the encoding is not available,
+            /// or if the returned resource is not a text resource.</exception>
 
             public TextReader resolve(Uri absoluteURI, string encoding, Configuration config) {
                 Encoding enc;
