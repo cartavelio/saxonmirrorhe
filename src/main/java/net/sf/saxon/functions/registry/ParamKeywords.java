@@ -288,7 +288,7 @@ public class ParamKeywords {
         fnParamNames.put("year-from-dateTime", "value");
         fnParamNames.put("years-from-duration", "value");
         fnParamNames.put("zero-or-one", "input");
-        mapParamNames.put("build", "input|keys|value|combine");
+        mapParamNames.put("build", "input|keys|value|options");
         mapParamNames.put("contains", "map|key");
         mapParamNames.put("empty", "map");
         mapParamNames.put("entries", "map");
@@ -301,7 +301,7 @@ public class ParamKeywords {
         mapParamNames.put("keys", "map");
         mapParamNames.put("keys-where", "map|predicate");
         mapParamNames.put("merge", "maps|options");
-        mapParamNames.put("of-pairs", "input|combine");
+        mapParamNames.put("of-pairs", "input|options");
         mapParamNames.put("pair", "key|value");
         mapParamNames.put("pairs", "map");
         mapParamNames.put("put", "map|key|value");

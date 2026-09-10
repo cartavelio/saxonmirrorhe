@@ -381,7 +381,7 @@ public class FilterExpressionAM extends BinaryExpression
                     result.put(pair.key, pair.value);
                 }
             }
-            return result.getCompletedMap();
+            return result.getCompletedMap(context);
         }
 
         private ArrayItem filteredArray(XPathContext context, ArrayItem input, SequenceEvaluator predicate) throws XPathException {

@@ -1,5 +1,6 @@
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trace.Instrumentation;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * Builder class for constructing ordered maps. The builder simply accumulates keys and values
@@ -28,7 +28,7 @@ public class GeneralMapBuilder {
      * Callback function to combine two values (for duplicate keys) into one. If
      * null, duplicates are rejected as an error.
      */
-    private BiFunction<GroundedValue, GroundedValue, GroundedValue> combiner;
+    private MapFunctionSet.MapMerge.OnDuplicatesAction combiner;
 
 
 
@@ -44,7 +44,7 @@ public class GeneralMapBuilder {
      *                 be used in the result map.
      */
 
-    public void setCombiner(BiFunction<GroundedValue, GroundedValue, GroundedValue> combiner) {
+    public void setDuplicatesAction(MapFunctionSet.MapMerge.OnDuplicatesAction combiner) {
         this.combiner = combiner;
     }
 
@@ -80,6 +80,21 @@ public class GeneralMapBuilder {
      */
 
     public MapItem getCompletedMap() throws XPathException {
+        if (combiner != null) {
+            throw new AssertionError("needs XPathContext");
+        }
+        return getCompletedMap(null);
+    }
+
+    /**
+     * Get the constructed map. This method must only be called once, because the
+     * lists of keys and values are used within the constructed map and are mutable.
+     *
+     * @return the constructed map
+     * @throws XPathException if duplicate keys were found, and not detected earlier
+     */
+
+    public MapItem getCompletedMap(XPathContext context) throws XPathException {
         if (keys.size() == 0) {
             return EmptyMap.getInstance();
         } else if (keys.size() == 1) {
@@ -106,7 +121,7 @@ public class GeneralMapBuilder {
                 } else if (combiner == null) {
                     throw new XPathException("Duplicate key " + Err.depict(key) + " in map");
                 } else {
-                    GroundedValue newVal = combiner.apply(existing, value);
+                    GroundedValue newVal = combiner.combine(existing, value, context);
                     map = map.put(key, newVal);
                 }
             }
