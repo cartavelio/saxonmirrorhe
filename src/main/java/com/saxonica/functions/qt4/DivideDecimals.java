@@ -1,23 +1,27 @@
-package com.saxonica.functions.extfn;
+package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.Shape;
+import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.BigDecimalValue;
+import net.sf.saxon.value.DecimalValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.NumericValue;
 
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * Implements the saxon:decimal-divide() function
+ * Implements the proposed QT4 divide-decimals function
  */
 
-public class DecimalDivide extends SystemFunction {
+public class DivideDecimals extends SystemFunction {
 
     /**
      * Evaluate this function call at run-time
@@ -32,21 +36,38 @@ public class DecimalDivide extends SystemFunction {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        NumericValue d1 = (NumericValue)arguments[0].head();
-        NumericValue d2 = (NumericValue)arguments[1].head();
+        DecimalValue d1 = (DecimalValue)arguments[0].head();
+        DecimalValue d2 = (DecimalValue)arguments[1].head();
         if (d1 == null || d2 == null) {
             return EmptySequence.getInstance();
         }
-        int scale = (int) ((IntegerValue)arguments[2].head()).longValue();
-        return divide(d1, d2, scale);
+        int precision = 0;
+        if (arguments.length > 2) {
+            IntegerValue precisionArg = (IntegerValue) arguments[2].head();
+            if (precisionArg != null) {
+                precision = (int)precisionArg.longValue();
+            }
+        }
+        return divide(d1, d2, precision);
 
     }
 
     @CSharpReplaceBody(code="return new Saxon.Hej.value.BigDecimalValue(Singulink.Numerics.BigDecimal.Divide(d1.getDecimalValue(), d2.getDecimalValue(), scale < 18 ? 18 :scale, Singulink.Numerics.RoundingMode.ToZero)).round(scale);")
-    private NumericValue divide(NumericValue d1, NumericValue d2, int scale) throws ValidationException {
-        return new BigDecimalValue(
-                d1.getDecimalValue().divide(d2.getDecimalValue(), scale, RoundingMode.DOWN));
+    private MapItem divide(DecimalValue d1, DecimalValue d2, int scale) throws XPathException {
+        try {
+            if (scale == 0) {
+                BigDecimal[] pair = d1.getDecimalValue().divideAndRemainder(d2.getDecimalValue());
+                return new ShapedMap(quotientAndRemainder, new BigDecimalValue(pair[0]), new BigDecimalValue(pair[1]));
+            }
+            BigDecimal quotient = d1.getDecimalValue().divide(d2.getDecimalValue(), scale, RoundingMode.DOWN);
+            BigDecimal remainder = d1.getDecimalValue().subtract(quotient.multiply(d2.getDecimalValue()));
+            return new ShapedMap(quotientAndRemainder, new BigDecimalValue(quotient), new BigDecimalValue(remainder));
+        } catch (ArithmeticException e) {
+            throw new XPathException("Division by zero", "FOAR0001");
+        }
     }
+
+    public static Shape quotientAndRemainder = new Shape(new Twine8("quotient"), new Twine8("remainder"));
 
 
 }

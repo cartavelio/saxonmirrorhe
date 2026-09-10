@@ -227,6 +227,11 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
+        register("divide-decimals", 2, 3, e -> e.populate(DivideDecimals::new, BuiltInAtomicType.INTEGER, OPT, BASE)
+                .arg(0, BuiltInAtomicType.DECIMAL, ONE, null)
+                .arg(1, BuiltInAtomicType.DECIMAL, ONE, null)
+                .arg(2, BuiltInAtomicType.INTEGER, OPT, null));
+
         register("do-until", 3, e -> e.populate(DoUntilFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, valueAction, ONE, null)
