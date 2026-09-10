@@ -1131,7 +1131,6 @@ public class SaxonCAPI {
         if (builderRef == WordFactory.nullPointer()) {
             builder = proci.newDocumentBuilder();
             if (debug) {
-                Charset.availableCharsets().
                 System.err.println("New documentBuilder obj: " + System.identityHashCode(builder));
             }
         } else {
