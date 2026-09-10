@@ -34,7 +34,7 @@ SaxonApiException::SaxonApiException(const char * m){
     if(m != nullptr) {
         //message = (char *)m;
         size_t destination_size = sizeof (m);
-
+        message = (char *)malloc(sizeof(char)*destination_size);
         snprintf(message, destination_size, "%s", m);
     } else {
         message = nullptr;
@@ -71,6 +71,23 @@ SaxonApiException::SaxonApiException(const char * m){
         }
         cppException = true;
 	}
+
+
+
+ SaxonApiException::~SaxonApiException() throw() {
+    if(message != nullptr) {
+        delete message;
+    }
+    if(errorCode != nullptr) {
+        delete errorCode;
+    }
+    if(systemId != nullptr) {
+        delete systemId;
+    }
+    if(!cppException) {
+        j_clearException(SaxonProcessor::sxn_environ->thread);
+    }
+}
 
 
 

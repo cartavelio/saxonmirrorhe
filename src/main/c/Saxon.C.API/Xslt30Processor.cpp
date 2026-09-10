@@ -184,12 +184,10 @@ std::map<std::string,XdmValue*>& Xslt30Processor::getParameters(){
 
 void Xslt30Processor::exceptionClear(){
  if(exception != nullptr) {
-     std::cerr<<"exceptionClear called"<<std::endl;
  	delete exception;
  	exception = nullptr;
-     j_clearException(SaxonProcessor::sxn_environ->thread);
  }
-  
+
  }
 
    void Xslt30Processor::setcwd(const char* dir){
@@ -204,10 +202,8 @@ SaxonApiException* Xslt30Processor::getException() {
 
 void Xslt30Processor::createException(const char * message) {
     if(exception != nullptr) {
-        std::cerr<<"creatException cp0"<<std::endl;
         delete exception;
         exception = nullptr;
-        std::cerr<<"creatException cp1"<<std::endl;
     }
     if(message == nullptr) {
       exception = new SaxonApiException();
@@ -239,9 +235,11 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
     void Xslt30Processor::compileFromFileAndSave(const char* xslFilename, const char* filename){
         if(xslFilename == nullptr) {
             createException("XSL filename is null");
+            return;
         }
         if(filename == nullptr) {
             createException("Output filename is null");
+            return;
         }
         long status = j_compileFromFileAndSave(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)xslFilename, (char *)filename);
         if(status == -2) {
@@ -252,6 +250,7 @@ void Xslt30Processor::compileFromXdmNodeAndSave(XdmNode * node, const char* file
 XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
     if(stylesheetStr == nullptr) {
         createException("XSL string is null");
+        return nullptr;
     }
         int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
 
@@ -270,6 +269,7 @@ XsltExecutable * Xslt30Processor::compileFromString(const char* stylesheetStr) {
 XsltExecutable * Xslt30Processor::compileFromXdmNode(XdmNode * node) {
     if(node == nullptr) {
         createException("XSL node is null");
+        return nullptr;
     }
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromXdmNode(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (void *)node->getUnderlyingValue(), (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
@@ -302,14 +302,12 @@ XsltExecutable * Xslt30Processor::compileFromAssociatedFile(const char* source) 
 XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
     if(stylesheet == nullptr) {
         createException("XSL filename is null");
-        //return nullptr;
+        return nullptr;
     }
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  objRef = j_compileFromFile(SaxonProcessor::sxn_environ->thread, (void *)cppXT, (char *)cwdXT.c_str(), (char *)stylesheet, (int)jitCompilation, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
     if(objRef == -2) {
-        std::cerr<<"cp xxxx compileFromFile"<<std::endl;
         createException();
-        std::cerr<<"cp2 xxxx compileFromFile"<<std::endl;
         return nullptr;
     }
     XsltExecutable * executable = new XsltExecutable(proc->procRef,objRef, cwdXT, proc->getResourcesDirectory());
@@ -317,22 +315,21 @@ XsltExecutable * Xslt30Processor::compileFromFile(const char* stylesheet) {
 }
 
 
-XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
-		const char* stylesheetfile) {
+XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,const char* stylesheetfile) {
 
 
 
 	if(sourcefile == nullptr && stylesheetfile == nullptr){
-	
+        createException("Found null file name");
 		return nullptr;
 	}
     int64_t processorDataRef = SaxonProcessor::createParameterJArray(parameters, properties);
     int64_t  result = j_transformToValue(SaxonProcessor::sxn_environ->thread,(char *)cwdXT.c_str(), (void *)cppXT, (void *)-1, (char *)sourcefile, (char *)stylesheetfile, (void *)(processorDataRef == -1 ? (void *) NULL: (void *)processorDataRef));
 
-
-    if (result > -1) {
+std::cerr<<"transformFileToValue result="<<result<<std::endl;
+    if (result > 0) {
                 int  typeRef = j_getXdmObjectType(SaxonProcessor::sxn_environ->thread, (void *)result);
-
+        std::cerr<<"transformFileToValue type="<<typeRef<<std::endl;
 			    XdmValue * value = new XdmValue();
           		XdmItem * xdmItem = nullptr;
 
@@ -364,7 +361,7 @@ XdmValue * Xslt30Processor::transformFileToValue(const char* sourcefile,
                     }
 				    value = new XdmValue(result, false);
           		    return value;
-    }else {
+    }else if(result == -2) {
 
 			createException();
 
@@ -381,7 +378,6 @@ void Xslt30Processor::transformFileToFile(const char* source,
 	if(exceptionOccurred()) {
 		//Possible error detected in the compile phase. Processor not in a clean state.
 		//Require clearing exception.
-        std::cerr<<"Error: Xslt30Processor not in a clean state. - Exception found"<<std::endl;
 		return;	
 	}
 	if(stylesheet==nullptr){

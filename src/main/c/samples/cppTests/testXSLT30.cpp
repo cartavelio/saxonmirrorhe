@@ -997,7 +997,11 @@ void exampleSimple3aError(SaxonProcessor *saxonProc, Xslt30Processor *proc, sRes
 
         cout << "Expected failure of test exampleSimple3aError:" << endl;
         if(proc->exceptionOccurred()) {
-            cout<<proc->getErrorMessage()<<endl;
+            const char * message = proc->getErrorMessage();
+            if(message!= nullptr) {
+                cout << proc->getErrorMessage() << endl;
+
+            }
         }
 
         sresult->success++;
@@ -1272,6 +1276,8 @@ void xmarkTest2(Xslt30Processor *proc, sResultCount *sresult) {
 
                 }
                 delete exception;
+                exception = nullptr;
+
             } /*else {
                 cerr << "Exception object is nullptr" << endl;
                 SaxonProcessor::sxn_environ->env->ExceptionDescribe();
