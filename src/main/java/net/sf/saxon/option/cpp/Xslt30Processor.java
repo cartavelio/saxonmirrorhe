@@ -895,6 +895,7 @@ public class Xslt30Processor extends SaxonCAPI {
 
             if (sourceFilename == null && doc != null) {
                 transformer.setGlobalContextItem(doc);
+                transformer.transform(doc.asSource(), serializer);
             } else if (sourceFilename != null) {
                 source = resolveFileToSource(cwd, sourceFilename);
 
