@@ -386,7 +386,6 @@ PHP_METHOD(XPathProcessor, getcwd);
 PHP_METHOD(XsdCompiler, __destruct);
 PHP_METHOD(XsdCompiler, setXsdVersion);
 PHP_METHOD(XsdCompiler, getXsdVersion);
-PHP_METHOD(XsdCompiler, getOutputFile);
 PHP_METHOD(XsdCompiler, compileFromString);
 PHP_METHOD(XsdCompiler, compileFromFile);
 PHP_METHOD(XsdCompiler, compileFromNode);

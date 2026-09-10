@@ -85,30 +85,6 @@ PHP_METHOD(XsdCompiler, getXsdVersion){
 }
 
 
-PHP_METHOD(XsdCompiler, getOutputFile){
-  XsdCompiler *xsdCompiler;
-
-    if (ZEND_NUM_ARGS() > 0) {
-      WRONG_PARAM_COUNT;
-    }
-
-  zend_object *pobj = Z_OBJ_P(getThis());
-  xsdCompiler_object *obj =
-      (xsdCompiler_object *)((char *)pobj -
-                                 XtOffsetOf(xsdCompiler_object, std));
-  xsdCompiler = obj->xsdCompiler;
-  if (xsdCompiler != nullptr) {
-
-    const char * verStr = xsdCompiler->getXsdVersion();
-    if(verStr != nullptr) {
-      RETURN_STRING(verStr);
-    } else {
-      RETURN_NULL();
-    }
-  }
-}
-
-
 PHP_METHOD(XsdCompiler, compileFromString){
   XsdCompiler *xsdCompiler;
   char *schemaStr;
