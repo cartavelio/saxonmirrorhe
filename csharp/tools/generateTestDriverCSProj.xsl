@@ -11,6 +11,7 @@
 <xsl:param name="saxonVersion" as="xs:string" required="yes"/>
 <xsl:param name="csrid" as="xs:string" required="yes"/>
 <xsl:param name="edition" as="xs:string" required="yes"/>
+<xsl:param name="configuration" as="xs:string" required="yes"/>
 <xsl:param name="optimize" as="xs:string" select="'true'"/>
 
 <xsl:template name="xsl:initial-template">
@@ -21,6 +22,11 @@
         <Compile Include="..\..\..\..\src\test\testrunner\**"/>
         <Compile Remove="..\..\..\..\**\.DS_Store"/>
       </ItemGroup>
+      <ItemGroup>
+        <Reference Include="SaxonCS">
+          <HintPath>../SaxonCS/bin/{$configuration}/net8.0/{$csrid}/SaxonCS.dll</HintPath>
+        </Reference>
+    </ItemGroup>
     </Project>
   </xsl:result-document>
 
