@@ -160,9 +160,9 @@
          designed primarily for internal use within SaxonC.</p>
    </section>
 
-   <section id="api-query-c" title="From a C application">
+   <section id="api-xpath-c" title="From a C application">
 
-       <h1>XQuery from a C application</h1>
+       <h1>XPath from a C application</h1>
 
 
       <p>In this section we give a tutorial of how to setup a C API application. In <a class="bodylink code"
@@ -208,20 +208,18 @@
          create_graalvm_isolate(environi);
          ]]></samp>
 
-      <p>Thirdly, we next have to create the Saxon Processor which is used to create the XSLT processors. The last argument is required to specify if the SaxonProcessor is to be
-         run with license enabled or off:</p>
-      <samp><![CDATA[int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
+      <p>Thirdly, we next have to create the Saxon Processor which is used to create the XPath processor. The last argument is required to specify if the SaxonProcessor is to be
+         run with license enabled or off. After we have created the <code>SaxonProcessor</code> we can then create the <code>XPathProcessor</code> to
+         evaluate the XPath expressions:</p>
+      <samp><![CDATA[int checkProc = c_createSaxonProcessor(environ, processor, 0);
+      sxnc_xpath *xpathProc = (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
+      int checkProc = c_createXPathProcessor(environi, processor, xpathProc);]]></samp>
 
-      <p>We can now execute XSLT stylesheet files. The following example we are executing the stylesheet and saving the results as a string representation.
-         Notice here we have not supplied any parameters or properties:</p>
-      <samp><![CDATA[const char *result =
-            xsltApplyStylesheet(environ, processor, cwd, "../data/sample.xml",
-                                "../data/test.xsl", 0, 0, 0, 0);]]]></samp>
 
       <p>In the next example we execute an XPath expression. We also have some XDM values that we can pass as parameters to the XPath evaluate function.
       Please note that there are several utility function in SaxonCXPath.h to construct a Xdm values:</p>
 
-      <samp><![CDATA[setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
+      <samp><![CDATA[setProperty(&properties, &propLen, &propCap, "s", "../data/people.xml");
 
         sxnc_value *result = evaluate(environ, xpathProc, cwd, "/out/person",
                                       parameters, properties, 0, propLen);]]></samp>
@@ -411,10 +409,10 @@
       <ol>
 
          <li><p>In the C++ and Python APIs we can navigate the tree using the <code>getChildren()</code> method which returns all the child nodes
-            at a given parent node. For PHP the <code>getChildNode()</code> method requires an intger index argument,
+            at a given parent node. For PHP the <code>getChildNode()</code> method requires an integer index argument,
             which we can use with the <code>getChildCount()</code> method to navigate the child nodes.
             We also have the methods <code>getParent()</code> navigate back up the tree and the method <code>getAttributeNodes()</code> and <code>getAttributeValue(name)</code> to retrieve the attribute nodes.</p></li>
-         <li><p>In SaxonC 12.3, as an alternative to 1. we have the method <code>axisNodes()</code> which provides a more powerful navigation to traverse the tree according
+         <li><p>In SaxonC 12.3, as an alternative to option 1. we have the method <code>axisNodes()</code> which provides a more powerful navigation to traverse the tree according
          to a tree axis. Axis options are as follows: ANCESTOR, ANCESTOR_OR_SELF, ATTRIBUTE, CHILD, DESCENDANT, DESCENDANT_OR_SELF, FOLLOWING,
             FOLLOWING_SIBLING, NAMESPACE, PARENT, PRECEDING, PRECEDING_SIBLING and SELF.</p></li>
       </ol>
