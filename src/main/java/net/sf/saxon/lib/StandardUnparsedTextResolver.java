@@ -179,6 +179,9 @@ public class StandardUnparsedTextResolver
 
         try {
             if (encoding == null || isXmlMediaType) {
+                if (!inputStream.markSupported()) {
+                    inputStream = new BufferedInputStream(inputStream);
+                }
                 encoding = EncodingDetector.inferStreamEncoding(inputStream, debug ? err : null);
                 if (debug) {
                     err.info("unparsed-text(): inferred encoding = " + encoding);
@@ -188,8 +191,6 @@ public class StandardUnparsedTextResolver
             encoding = "UTF-8";
         }
         return makeReaderFromStream(inputStream, encoding);
-
-
     }
 
     @CSharpReplaceBody(code="throw new Saxon.Hej.trans.XPathException(\"classpath: URI scheme is not supported on .NET\");")
