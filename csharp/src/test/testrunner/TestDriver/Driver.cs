@@ -410,7 +410,7 @@ namespace TestDriver {
                     bool appliesThisEdition = substrings.Any(ed => ed.Equals(saxonEdition));
 
                     if (appliesThisEdition) {
-                        if (runVal == "false") {
+                        if (runVal == "false" || runVal == "XQ") {
                             foreach (string tc in Regex.Split(testName.Trim(), "\\s+")) {
                                 exceptionsMap.TryAdd(tc, entry);
                             }

@@ -571,7 +571,7 @@ namespace TestDriver {
                     }
                 }
 
-                if ("false".Equals(runAtt)) {
+                if ("false".Equals(runAtt) || ("XQ".Equals(runAtt) && hostLang.StartsWith("XP"))) {
                     writeTestcaseElement(testCaseName, reportAtt, reasonMsg, requestedSpec);
                     notrun++;
                     return;
