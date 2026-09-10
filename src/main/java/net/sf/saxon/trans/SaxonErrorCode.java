@@ -663,6 +663,12 @@ public class SaxonErrorCode {
 
     public static final String SXWN9051 = "SXWN9051";
 
+    /**
+     * 4.0 incompatibility, union pattern whose branches have differing priority
+     */
+
+    public static final String SQWN9052 = "SXWN9052";
+
 
     /**
      * SXSD1000: unknown attribute group

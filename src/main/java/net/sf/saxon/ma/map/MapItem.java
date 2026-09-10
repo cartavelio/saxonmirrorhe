@@ -259,7 +259,7 @@ public abstract class MapItem implements FunctionItem {
             int pos = 0;
             for (KeyValuePair pair : keyValuePairs()) {
                 if (pos++ > 0) {
-                    sb.append(",");
+                    sb.append(", ");
                 }
                 sb.append(Err.depict(pair.key))
                         .append(":")
@@ -267,7 +267,17 @@ public abstract class MapItem implements FunctionItem {
             }
             sb.append("}");
         } else {
-            sb.append("(:size ").append(count).append(":)}");
+            int pos = 0;
+            for (KeyValuePair pair : keyValuePairs()) {
+                if (pos++ > 0) {
+                    sb.append(", ");
+                }
+                sb.append(Err.depict(pair.key));
+                if (pos > 5) {
+                    break;
+                }
+            }
+            sb.append("... (:size ").append(count).append(":)}");
         }
         return sb.toString();
     }

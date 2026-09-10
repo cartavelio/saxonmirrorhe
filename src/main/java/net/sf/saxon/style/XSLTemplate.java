@@ -594,10 +594,27 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         }
 
         // If the pattern is a union pattern and there is no priority specified, split into
-        // multiple template rules so each can be given its own priority.
+        // multiple template rules so each can be given its own priority. This rule changes
+        // in 4.0
         if (match != null) {
             subPatterns = new ArrayList<>(2);
             if (prioritySpecified) {
+                subPatterns.add(match);
+            } else if (getCompilation().getCompilerInfo().getXsltVersion() >= 40) {
+                List<Pattern> localSubPatterns = new ArrayList<>(2);
+                gatherSubPatterns(match, localSubPatterns);
+                if (localSubPatterns.size() > 1) {
+                    double prio = localSubPatterns.get(0).getDefaultPriority();
+                    for (int i=1; i<localSubPatterns.size(); i++) {
+                        if (prio != localSubPatterns.get(i).getDefaultPriority()) {
+                            compileWarning("The behavior of a union pattern whose branches have"
+                                                   + " different default priority may change in XSLT 4.0. "
+                                                   + " Allocate an explicit priority, or split into multiple template rules",
+                                           SaxonErrorCode.SQWN9052);
+                            break;
+                        }
+                    }
+                }
                 subPatterns.add(match);
             } else {
                 gatherSubPatterns(match, subPatterns);

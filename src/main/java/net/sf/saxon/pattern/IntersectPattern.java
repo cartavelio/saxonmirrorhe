@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A pattern formed as the difference of two other patterns
+ * A pattern formed as the intersection of two other patterns
  */
 
 public class IntersectPattern extends VennPattern {

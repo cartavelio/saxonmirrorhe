@@ -25,6 +25,7 @@ import java.util.Set;
  * Bug #5368 concludes that we can't simply treat "A except B" as meaning that a node must
  * match pattern A and not match pattern B; similarly for the intersect operator. There
  * are however special cases where we can do so, for example "@* except @code".
+ * The spec is changed in 4.0 so that intersect and except have the intuitive meanings.
  */
 
 public abstract class VennPattern extends Pattern {

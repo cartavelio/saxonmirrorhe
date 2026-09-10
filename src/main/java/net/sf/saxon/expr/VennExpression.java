@@ -661,8 +661,10 @@ public class VennExpression extends BinaryExpression {
             // into a pattern that matches a node if A matches and B does not. We can only do this in special
             // cases, in particular (a) where both operands use the attribute or child axis, and (b) where
             // one of the patterns is anchored at the root of the tree (for example //xxx/yyy or $var/xxx or id('x')/xxx)
+            // The semantics are changed in 4.0, see PR 1773.
+            boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
             int commonAxis = ExpressionTool.getAxisNavigation(this);
-            if (commonAxis == AxisInfo.CHILD || commonAxis == AxisInfo.ATTRIBUTE
+            if (is40 || commonAxis == AxisInfo.CHILD || commonAxis == AxisInfo.ATTRIBUTE
                     || independentOfContextItem(getLhsExpression())
                     || independentOfContextItem(getRhsExpression())) {
                 if (operator == OperatorSymbol.EXCEPT) {
