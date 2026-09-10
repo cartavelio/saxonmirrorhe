@@ -17,7 +17,7 @@ namespace java.io {
             this.autoFlush = autoFlush;
         }
         public PrintStream(String fileName) {
-            outputStream = new FileStream(fileName, System.IO.FileMode.OpenOrCreate);
+            outputStream = new FileStream(fileName, System.IO.FileMode.Create);
         }
 
         public void Println(string str) {

@@ -31,7 +31,7 @@ namespace javax.xml.transform.stream {
         }
         
         public void setSystemId(java.io.File file) {
-            this.sysId = file.toURI().OriginalString;
+            this.sysId = file.toURI().ToString();
         }
 
         public void setOutputStream(System.IO.Stream stream) {
