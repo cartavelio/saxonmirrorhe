@@ -133,6 +133,9 @@ public class DeepEqual40 extends CollatingFunctionFixed {
             }
             this.collationName = collationName;
             stringCollator = context.getConfiguration().getCollation(collationName);
+            if (stringCollator == null) {
+                throw new XPathException("Unknown collation " + collationName, "FOCH0002");
+            }
             comparer = GenericAtomicComparer.makeAtomicComparer(
                     BuiltInAtomicType.ANY_ATOMIC, BuiltInAtomicType.ANY_ATOMIC,
                     stringCollator, context);
@@ -846,7 +849,7 @@ public class DeepEqual40 extends CollatingFunctionFixed {
 
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Item arg3 = arguments[2].head();
+        Item arg3 = arguments.length >= 3 ? arguments[2].head() : null;
         String collationName = arg3 == null ? getRetainedStaticContext().getDefaultCollationName() : arg3.getStringValue();
 
         MapItem options  = new DictionaryMap();

@@ -250,7 +250,7 @@ public abstract class FunctionCall extends Expression {
                     if (arg instanceof DefaultedArgumentExpression.DefaultCollationArgument) {
                         arg = new StringLiteral(visitor.getStaticContext().getDefaultCollationName());
                     } else {
-                        arg = fd.getDefaultValueExpression(i);
+                        arg = fd.getDefaultValueExpression(i).copy(new RebindingMap());
                     }
                 }
                 if (arg != null && !(arg instanceof DefaultedArgumentExpression)) {

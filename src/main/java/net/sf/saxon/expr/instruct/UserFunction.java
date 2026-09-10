@@ -11,10 +11,7 @@ import net.sf.saxon.Controller;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
-import net.sf.saxon.expr.parser.ContextItemStaticInfo;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.functions.registry.FunctionDefinition;
@@ -1107,7 +1104,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
                 if (defaultVal == null) {
                     defaultVal = new DefaultedArgumentExpression(); // to be fixed up later
                 }
-                expandedArgs[a] = defaultVal;
+                expandedArgs[a] = defaultVal.copy(new RebindingMap());
                 //expandedArgs[a] = new ErrorExpression("UseDefault", "UseDefault", false); // for now
             }
         }

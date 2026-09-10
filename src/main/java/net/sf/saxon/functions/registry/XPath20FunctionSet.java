@@ -151,11 +151,11 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 //                .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
         register("deep-equal", 2, 4, e -> e.populate(DeepEqual40::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
-                .arg(0, Type.ITEM_TYPE, STAR, null)
-                .arg(1, Type.ITEM_TYPE, STAR, null)
-                .arg(2, BuiltInAtomicType.STRING, OPT, null)
+                .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
+                .arg(1, Type.ITEM_TYPE, STAR | ABS, null)
+                .arg(2, BuiltInAtomicType.STRING, OPT | ABS, null)
                 .withDefault(2, new DefaultedArgumentExpression.DefaultCollationArgument()) // TODO: should be default collation
-                .arg(3, MapType.ANY_MAP_TYPE, OPT, null))
+                .arg(3, MapType.ANY_MAP_TYPE, OPT | ABS, null))
                 .withDefault(3, Literal.makeLiteral(new DictionaryMap()));
 
         register("default-collation", 0, e -> e.populate(() -> new StaticContextAccessor.DefaultCollation(), BuiltInAtomicType.STRING, ONE, DCOLL));

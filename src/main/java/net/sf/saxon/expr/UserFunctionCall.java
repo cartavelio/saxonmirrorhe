@@ -228,7 +228,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         for (Operand o : operands()) {
             Expression arg = o.getChildExpression();
             if (arg instanceof ErrorExpression && ((ErrorExpression)arg).getErrorCodeLocalPart().equals("UseDefault")) {
-                arg = target.getDefaultValueExpression(i);
+                arg = target.getDefaultValueExpression(i).copy(new RebindingMap());
                 o.setChildExpression(arg);
             }
             if (i == 0 && target.getDeclaredStreamability().isConsuming()) {
