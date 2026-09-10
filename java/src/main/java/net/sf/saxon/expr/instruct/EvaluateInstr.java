@@ -261,6 +261,7 @@ public final class EvaluateInstr extends Expression {
                                              getSchemaAwareExpr() == null ? null : getSchemaAwareExpr().copy(rebindings));
         ExpressionTool.copyLocationInfo(this, e2);
         e2.setRetainedStaticContext(getRetainedStaticContext());
+        e2.defaultXPathNamespace = defaultXPathNamespace;
         e2.importedSchemaNamespaces = importedSchemaNamespaces;
         e2.setActualParams(WithParam.copy(e2, getActualParams(), rebindings));
         if (optionsOp != null) {
@@ -298,7 +299,7 @@ public final class EvaluateInstr extends Expression {
             buff.setLength(buff.length() - 1);
             out.emitAttribute("schNS", buff.toString());
         }
-        if(defaultXPathNamespace != null) {
+        if (defaultXPathNamespace != null) {
             out.emitAttribute("dxns", defaultXPathNamespace.toString());
         }
         out.setChildRole("xpath");
