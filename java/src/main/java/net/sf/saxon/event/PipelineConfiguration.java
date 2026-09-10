@@ -14,6 +14,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.HostLanguage;
+import net.sf.saxon.str.UnicodeWriter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class PipelineConfiguration {
     private Map<String, Object> components;
     private XPathContext context;
     private java.util.function.Function<NodeInfo, Object> copyInformee;
+    private UnicodeWriter unicodeWriter; // Bug 7156
 
     /**
      * Create a PipelineConfiguration. Note: the normal way to create
@@ -314,6 +316,13 @@ public class PipelineConfiguration {
 
     public XPathContext getXPathContext() {
         return context;
+    }
+
+    public void setUnicodeWriter(UnicodeWriter unicodeWriter) {
+        this.unicodeWriter = unicodeWriter;
+    }
+    public UnicodeWriter getUnicodeWriter() {
+        return unicodeWriter;
     }
 
 }

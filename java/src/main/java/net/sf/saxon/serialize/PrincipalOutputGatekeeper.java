@@ -7,16 +7,24 @@
 
 package net.sf.saxon.serialize;
 
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ProxyReceiver;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.om.*;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.om.AttributeMap;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Destination;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.SaxonApiException;
+import net.sf.saxon.s9api.Serializer;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.type.SchemaType;
+
+import java.io.Writer;
 
 /**
  * This class is added to the output pipeline for the principal result destination for a transformation
@@ -127,15 +135,21 @@ public class PrincipalOutputGatekeeper extends ProxyReceiver {
                     .withErrorCode("XTDE1490");
         }
         usedAsSecondaryResult = true;
-        if (nextReceiver != null) {     // Bug 7156
-            nextReceiver.close();
-        }
     }
 
     public Receiver makeReceiver(SerializationProperties params) {
         try {
             Destination dest = controller.getPrincipalDestination();
             if (dest != null) {
+                if (dest instanceof Serializer serializer) {
+                    // Bug 7156: try to reuse the existing writer / output stream
+                    PipelineConfiguration pipe = nextReceiver.getPipelineConfiguration();
+                    UnicodeWriter writer = pipe.getUnicodeWriter();
+                    if (writer instanceof Writer javaWriter) {
+                        serializer.setOutputWriter(javaWriter);
+                        serializer.setCloseOnCompletion(true);
+                    }
+                }
                 return dest.getReceiver(controller.makePipelineConfiguration(), params);
             }
         } catch (SaxonApiException e) {

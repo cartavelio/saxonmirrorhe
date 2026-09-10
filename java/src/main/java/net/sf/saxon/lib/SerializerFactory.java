@@ -384,6 +384,10 @@ public class SerializerFactory {
             if (emitter != null) {
                 emitter.setOutputProperties(props);
             }
+            if (uWriter != null) {
+                // Bug 7156
+                pipe.setUnicodeWriter(uWriter);
+            }
             //target = new RegularSequenceChecker(target); // add this back in for diagnostics only
             target.setSystemId(result.getSystemId());
             return target;
