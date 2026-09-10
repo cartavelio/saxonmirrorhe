@@ -193,15 +193,20 @@ public class AnalyzeStringFn extends RegexFunction {
          * Method to be called when a lookahead captured group is encountered
          *
          * @param groupNumber the group number of the captured group
+         * @param groupName   the name of the group, if any (otherwise null)
          * @param position    the position within the input string of the captured group
          * @param value       the captured substring
          */
 
-        public void onLookaheadGroup(int groupNumber, int position, UnicodeString value) throws XPathException {
+        public void onLookaheadGroup(int groupNumber, UnicodeString groupName, int position, UnicodeString value) throws XPathException {
             out.startElement(vocab.lookaheadGroupName, vocab.lookaheadGroupType,
                              Loc.NONE, ReceiverOption.NONE);
             out.attribute(vocab.groupNrName, vocab.groupNrType, "" + groupNumber,
                           Loc.NONE, ReceiverOption.NONE);
+            if (groupName != null) {
+                out.attribute(vocab.groupNameName, vocab.groupNameType, groupName.toString(),
+                              Loc.NONE, ReceiverOption.NONE);
+            }
             out.attribute(vocab.positionName, vocab.positionType, "" + position,
                           Loc.NONE, ReceiverOption.NONE);
             out.attribute(vocab.valueName, vocab.valueType, value.toString(),

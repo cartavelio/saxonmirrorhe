@@ -204,6 +204,10 @@ public class REMatcher {
         return program.groupNamesByIndex.get(which);
     }
 
+    public int getGroupNumber(UnicodeString name) {
+        return program.groupsByName.getOrDefault(name, -1);
+    }
+
     /**
      * Match the current regular expression program against the current
      * input string, starting at index i of the input string.  This method

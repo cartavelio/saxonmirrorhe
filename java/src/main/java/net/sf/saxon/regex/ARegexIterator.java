@@ -187,7 +187,6 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
      */
 
     @Override
-
     public UnicodeString getRegexGroup(int number) {
         if (!isMatching()) {
             return null;
@@ -197,6 +196,14 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
         }
         UnicodeString us = _matcher.getParen(number);
         return (us == null ? EmptyUnicodeString.getInstance() : us);
+    }
+
+    public UnicodeString getRegexGroup(UnicodeString name) {
+        int groupNr = _matcher.getGroupNumber(name);
+        if (groupNr < 0) {
+            return null;
+        }
+        return getRegexGroup(groupNr);
     }
 
     /**
@@ -267,7 +274,8 @@ public class ARegexIterator implements RegexIterator, LastPositionFinder {
                     }
                     final int position = _matcher.getParenStart(i);
                     final UnicodeString value = _matcher.search.substring(position, _matcher.getParenEnd(i));
-                    e.add(new GroupAction(groupNr, () -> handler.onLookaheadGroup(groupNr, position + 1, value)));
+                    final UnicodeString groupName = _matcher.getGroupName(i);
+                    e.add(new GroupAction(groupNr, () -> handler.onLookaheadGroup(groupNr, groupName, position + 1, value)));
                 } else if (start != -1) {
                     int end = _matcher.getParenEnd(i) - _matcher.getParenStart(0);
                     if (start < end) {

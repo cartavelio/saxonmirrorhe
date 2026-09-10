@@ -43,10 +43,12 @@ public interface RegexMatchHandler {
 
     /**
      * Method to be called when a lookahead captured group is encountered
+     *
      * @param groupNumber the group number of the captured group
-     * @param position the position within the input string of the captured group
-     * @param value the captured substring
+     * @param groupName   the name of the group, if any (otherwise null)
+     * @param position    the position within the input string of the captured group
+     * @param value       the captured substring
      */
 
-    void onLookaheadGroup(int groupNumber, int position, UnicodeString value) throws XPathException;
+    void onLookaheadGroup(int groupNumber, UnicodeString groupName, int position, UnicodeString value) throws XPathException;
 }

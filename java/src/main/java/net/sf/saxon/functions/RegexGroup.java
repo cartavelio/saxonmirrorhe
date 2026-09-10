@@ -7,15 +7,15 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.ma.map.*;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.ma.map.AbstractFixedMap;
+import net.sf.saxon.ma.map.GeneralMapBuilder;
+import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.*;
+import net.sf.saxon.regex.ARegexIterator;
 import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.SymbolicName;
@@ -71,16 +71,23 @@ public class RegexGroup extends ContextAccessorFunction {
         if (iter == null) {
             return StringValue.EMPTY_STRING;
         }
-        NumericValue gp0 = (NumericValue) arguments[0].head();
-        UnicodeString s = iter.getRegexGroup((int) gp0.longValue());
-        return StringValue.makeUStringValue(s);
-    }
-
-    private static class AlwaysEmpty implements Callable {
-        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            return StringValue.EMPTY_STRING;
+        Item arg = arguments[0].head();
+        if (arg instanceof StringValue) {
+            // TODO: generalize to avoid the cast
+            UnicodeString s = ((ARegexIterator)iter).getRegexGroup(arg.getUnicodeStringValue());
+            return StringValue.makeUStringValue(s);
+        } else {
+            NumericValue gp0 = (NumericValue) arguments[0].head();
+            UnicodeString s = iter.getRegexGroup((int) gp0.longValue());
+            return StringValue.makeUStringValue(s);
         }
-
     }
+
+//    private static class AlwaysEmpty implements Callable {
+//        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+//            return StringValue.EMPTY_STRING;
+//        }
+//
+//    }
 }
 

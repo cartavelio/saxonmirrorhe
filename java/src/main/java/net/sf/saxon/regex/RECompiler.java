@@ -473,6 +473,7 @@ public class RECompiler {
                 } else {
                     syntaxError("Expected '<' after \\k");
                 }
+                break;
 
             case '0':
                 syntaxError("Octal escapes not allowed");
