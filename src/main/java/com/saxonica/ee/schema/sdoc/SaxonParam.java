@@ -112,7 +112,7 @@ public class SaxonParam extends AnnotationParent {
     public SequenceType makeSequenceType(String sequenceType, StaticContext env)
             throws SchemaException {
         try {
-            XPathParser parser = new XPathParser();
+            XPathParser parser = new XPathParser(env);
             return parser.parseSequenceType(sequenceType, env);
         } catch (XPathException err) {
             error(err.getMessage());

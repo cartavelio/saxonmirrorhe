@@ -27,6 +27,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.PackageData;
+import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
@@ -591,39 +592,40 @@ public class ProfessionalConfiguration extends Configuration {
     /**
      * Make an expression Parser for a specified version of XPath or XQuery
      *
-     * @param language        set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
-     * @param updating        indicates whether or not XQuery update syntax may be used. Note that XQuery Update
-     *                        is supported only in Saxon-EE
+     * @param language set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
+     * @param updating indicates whether or not XQuery update syntax may be used. Note that XQuery Update
+     *                 is supported only in Saxon-EE
+     * @param env
      * @return the XPath or Query Parser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
      */
 
     @Override
-    public XPathParser newExpressionParser(String language, boolean updating) throws XPathException {
+    public XPathParser newExpressionParser(String language, boolean updating, StaticContext env) throws XPathException {
         if (updating) {
             throw new IllegalArgumentException("XQuery Update requires Saxon-EE");
         }
         if ("XQ".equals(language)) {
-            XQueryParser parser = new XQueryParser();
+            XQueryParser parser = new XQueryParser(env);
             if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new XQueryParserExtensionPE());
             }
             return parser;
         } else if ("XP".equals(language)) {
-            XPathParser parser = super.newExpressionParser(language, updating);
+            XPathParser parser = super.newExpressionParser(language, updating, env);
             if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new SaxonSyntaxExtension());
             }
             return parser;
         } else if ("PATTERN".equals(language)) {
-            PatternParser parser = new PatternParser();
+            PatternParser parser = new PatternParser(env);
             if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new SaxonSyntaxExtension());
             }
             return parser;
         } else {
-            return super.newExpressionParser(language, updating);
+            return super.newExpressionParser(language, updating, env);
         }
     }
 

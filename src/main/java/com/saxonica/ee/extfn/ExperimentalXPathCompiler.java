@@ -286,7 +286,7 @@ public class ExperimentalXPathCompiler {
     private static Expression make(String expression, StaticContext env,
                                    boolean inCatch, boolean allowEmpty) throws XPathException {
         try {
-            XPathParser parser = env.getConfiguration().newExpressionParser("XP", false);
+            XPathParser parser = env.getConfiguration().newExpressionParser("XP", false, env);
             if (inCatch) {
                 parser.setCatchDepth(1);
             }
@@ -696,7 +696,7 @@ public class ExperimentalXPathCompiler {
                 }
             });
             env.setXPathLanguageLevel(31);
-            XPathParser parser = new XPathParser();
+            XPathParser parser = new XPathParser(env);
             SequenceType st = parser.parseSequenceType(input, env);
             return makeMap(st);
 

@@ -1437,21 +1437,22 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     /**
      * Make an expression Parser for a specified version of XPath or XQuery
      *
-     * @param language        set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
-     * @param updating        indicates whether or not XQuery update syntax may be used. Note that XQuery Update
-     *                        is supported only in Saxon-EE
+     * @param language set to "XP" (XPath) or "XQ" (XQuery) or "PATTERN" (XSLT Patterns)
+     * @param updating indicates whether or not XQuery update syntax may be used. Note that XQuery Update
+     *                 is supported only in Saxon-EE
+     * @param env
      * @return the QueryParser
      * @throws net.sf.saxon.trans.XPathException if this version of Saxon does not support the
      *                                           requested options
      */
 
     @Override
-    public XPathParser newExpressionParser(String language, boolean updating) throws XPathException {
+    public XPathParser newExpressionParser(String language, boolean updating, StaticContext env) throws XPathException {
         if (updating && !isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
             throw new IllegalArgumentException("XQuery Update requires a Saxon-EE license");
         }
         if ("XQ".equals(language)) {
-            XQueryParser parser = new XQueryParser();
+            XQueryParser parser = new XQueryParser(env);
             if (isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
                 parser.setParserExtension(new XQueryParserExtensionEE(updating));
             } else if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
@@ -1459,7 +1460,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             }
             return parser;
         } else {
-            XPathParser parser = super.newExpressionParser(language, updating);
+            XPathParser parser = super.newExpressionParser(language, updating, env);
             parser.setAccelerator(new QuickXPathParser());
             return parser;
         }

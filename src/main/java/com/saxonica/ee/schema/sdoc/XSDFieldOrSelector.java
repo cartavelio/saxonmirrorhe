@@ -85,7 +85,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
         Pattern selector;
         Expression exp;
         try {
-            exp = new XPathParser().parse(xpath, 0, Token.EOF, env);
+            exp = new XPathParser(env).parse(xpath, 0, Token.EOF, env);
             boolean allowExtensions = getXSDSchema().getAllowedExtensions().contains("id-xpath-syntax");
             if (allowExtensions) {
                 List<String> reasonsForFailure = new ArrayList<>();
@@ -94,7 +94,7 @@ public class XSDFieldOrSelector extends AnnotationParent {
                     throw new XPathException(reasonsForFailure.get(0));
                 }
             } else {
-                SelectionParser selectionParser = new SelectionParser();
+                SelectionParser selectionParser = new SelectionParser(env);
                 selector = selectionParser.parseSelector(xpath, env, isField);
                 exp = selectionParser.getOptimizedExpression();
             }

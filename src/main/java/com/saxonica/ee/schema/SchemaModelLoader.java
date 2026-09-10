@@ -608,7 +608,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             env.setXPathLanguageLevel(20);
             Pattern selector;
             try {
-                selector = new SelectionParser().parseSelector(xpath, env, isField);
+                selector = new SelectionParser(env).parseSelector(xpath, env, isField);
             } catch (XPathException err) {
                 throw new SchemaException(err);
             }

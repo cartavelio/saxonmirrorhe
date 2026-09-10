@@ -152,15 +152,18 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
             FunctionLibraryList libList = new FunctionLibraryList();
             libList.addFunctionLibrary(new ExecutableFunctionLibrary(config));
             executable.setFunctionLibrary(libList);
-            XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", isUpdating());
-            if (getCodeInjector() != null) {
-                qp.setCodeInjector(getCodeInjector());
-            }
+
             QueryLibrary topModule = new QueryLibraryImpl(this);
             executable.setTopLevelPackage(topModule.getPackageData());
             topModule.setExecutable(executable);
             topModule.setIsMainModule(false);
+
+            XQueryParser qp = (XQueryParser) config.newExpressionParser("XQ", isUpdating(), topModule);
+            if (getCodeInjector() != null) {
+                qp.setCodeInjector(getCodeInjector());
+            }
             qp.parseLibraryModule(query, topModule);
+
             topModule.bindUnboundFunctionCalls();
             topModule.bindUnboundVariables();
             compiledLibraries.put(topModule.getModuleNamespace(), topModule);

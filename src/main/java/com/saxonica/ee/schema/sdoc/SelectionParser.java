@@ -26,6 +26,10 @@ public class SelectionParser extends XPathParser {
     boolean isFieldSubset;
     Expression optimizedExpression;
 
+    public SelectionParser(StaticContext env) {
+        super(env);
+    }
+
     /**
      * Parse a string representing the restricted XPath expression allowed
      * in an XML Schema selector or field attribute
