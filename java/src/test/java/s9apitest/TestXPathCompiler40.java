@@ -77,7 +77,7 @@ public class TestXPathCompiler40 {
 
     @Test
     public void testArrayFilter() {
-        String result = good("[1,2,3,4]?[. ge 2]?* => string-join('-')");
+        String result = good("[1,2,3,4]/*[. ge 2] => string-join('-')");
         assertEquals("2-3-4", result);
     }
 

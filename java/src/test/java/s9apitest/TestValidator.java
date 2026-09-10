@@ -1363,21 +1363,21 @@ public class TestValidator {
 
         try {
             Processor proc = new Processor();
-
             proc.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, multiple);
+            XsdCompiler compiler = proc.newXsdCompiler();
 
             String dir = configTest.getDataDir() + "/petrk/AbstractType-2/";
 
             System.err.println("Loading from file:");
 
             if (fromNode) {
-                loadSchemaFromNode(proc, new File(dir + "src/schema.xsd"));
-                loadSchemaFromNode(proc, new File(dir + "src/schema1.xsd"));
-                loadSchemaFromNode(proc, new File(dir + "src/schema2.xsd"));
+                loadSchemaFromNode(compiler, new File(dir + "src/schema.xsd"));
+                loadSchemaFromNode(compiler, new File(dir + "src/schema1.xsd"));
+                loadSchemaFromNode(compiler, new File(dir + "src/schema2.xsd"));
             } else {
-                loadSchemaOK(proc, new File(dir + "src/schema.xsd"));
-                loadSchemaOK(proc, new File(dir + "src/schema1.xsd"));
-                loadSchemaOK(proc, new File(dir + "src/schema2.xsd"));
+                loadSchemaOK(compiler, new File(dir + "src/schema.xsd"));
+                loadSchemaOK(compiler, new File(dir + "src/schema1.xsd"));
+                loadSchemaOK(compiler, new File(dir + "src/schema2.xsd"));
             }
 
             System.err.println("Loading successful");
@@ -1388,21 +1388,21 @@ public class TestValidator {
         }
     }
 
-    private static void loadSchemaOK(Processor proc, File urlStr) throws SaxonApiException {
+    private static void loadSchemaOK(XsdCompiler compiler, File urlStr) throws SaxonApiException {
         Source s = new StreamSource(urlStr);
-        proc.getSchemaManager().load(s);
+        compiler.compile(s);
     }
 
-    private static void loadSchemaFromNode(Processor proc, File urlStr) throws SaxonApiException {
+    private static void loadSchemaFromNode(XsdCompiler compiler, File urlStr) throws SaxonApiException {
         Source s = new StreamSource(urlStr);
         // Note: At 9.8, the test fails if line numbering is switched off, because line numbers
         // are used to determine identity of schema components.
-        DocumentBuilder builder = proc.newDocumentBuilder();
+        DocumentBuilder builder = compiler.getProcessor().newDocumentBuilder();
         builder.setLineNumbering(true);
         XdmNode ni = builder.build(s);
         //System.out.println( QueryResult.serialize(ni) );
         //System.out.println( ni.getSystemId() );
-        proc.getSchemaManager().load(ni.asSource());
+        compiler.compile(ni.asSource());
 
     }
 
@@ -1551,8 +1551,9 @@ public class TestValidator {
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
-            SchemaManager manager = processor.getSchemaManager();
-            SchemaValidator validator = manager.newSchemaValidator();
+            XsdCompiler manager = processor.newXsdCompiler();
+            XsdSchema schema = manager.emptySchema();
+            SchemaValidator validator = schema.newValidator();
 
             validator.setUseXsiSchemaLocation(useHints);
 
@@ -1576,7 +1577,7 @@ public class TestValidator {
             XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
             XsdCompiler compiler = processor.newXsdCompiler();
-            XsdSchema schema = compiler.minimalSchema();
+            XsdSchema schema = compiler.emptySchema();
             SchemaValidator validator = schema.newValidator();
 
             validator.setUseXsiSchemaLocation(useHints);
@@ -1616,12 +1617,13 @@ public class TestValidator {
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
-            SchemaManager manager = processor.getSchemaManager();
-            SchemaValidator validator = manager.newSchemaValidator();
+            XsdCompiler manager = processor.newXsdCompiler();
+            XsdSchema schema = manager.emptySchema();
+            SchemaValidator validator = schema.newValidator();
             validator.setUseXsiSchemaLocation(useHints);
 
             XQueryCompiler comp = processor.newXQueryCompiler();
-            comp.useSchema(manager.getXsdSchema());
+            comp.useSchema(schema); //???
             XQueryEvaluator eval = comp.compile(".").load();
             eval.setContextItem(source);
             eval.run(validator);
@@ -1644,7 +1646,7 @@ public class TestValidator {
             XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
             XsdCompiler compiler = processor.newXsdCompiler();
-            XsdSchema schema = compiler.minimalSchema();
+            XsdSchema schema = compiler.emptySchema();
             SchemaValidator validator = schema.newValidator();
             validator.setUseXsiSchemaLocation(useHints);
 

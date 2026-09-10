@@ -711,10 +711,11 @@ public class TestXQueryCompiler {
             eval.setErrorListener(listener);
             eval.setContextItem(foo);
             XdmValue val = eval.evaluate();
-            fail();
+            fail("unexpected success");
         } catch (SaxonApiException e) {
-            assertEquals(0, listener.errors.size());
-            assertTrue(listener.fatalErrors.size() > 0);
+            // Changes in Saxon 13, validation error now treated as "error" rather than "fatal error"
+            assertEquals(1, listener.errors.size());
+            assertEquals(0, listener.fatalErrors.size());
         }
     }
 

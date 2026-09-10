@@ -262,7 +262,7 @@ public class TestTypes {
             p.setConfigurationProperty(Feature.XQUERY_VERSION, "4.0");
             ItemTypeFactory itf = new ItemTypeFactory(p);
             ItemType it1 = itf.parseItemType("record(x as xs:double, y as xs:double)");
-            ItemType it2 = itf.parseItemType("record(x as xs:double, y as xs:double, *)");
+            ItemType it2 = itf.parseItemType("record(x as xs:double, y as xs:double*)");
             ItemType it3 = itf.parseItemType("record(x as xs:double, y as xs:double, z as xs:string)");
             XdmMap map = new XdmMap();
             map = map.put(new XdmAtomicValue("x"), new XdmAtomicValue(1.23));
