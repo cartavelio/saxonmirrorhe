@@ -92,10 +92,11 @@ def process_catalog(path: pathlib.Path, catalogi: pathlib.Path):
     global schemaValidator
     cat_builder = driver_proc.new_document_builder()
     xpc = driver_proc.new_xpath_processor()
-    if os.getenv("SAXON_LICENSE_DIR") is not None:
-        driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
-                                               os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
+
     try:
+        if os.getenv("SAXON_LICENSE_DIR") is not None:
+            driver_proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+                                                   os.getenv("SAXON_LICENSE_DIR") + "/saxon-license.lic")
         schemaValidator = driver_proc.new_schema_validator()
     except saxonc.PySaxonApiError as ex:
         print("*** Failed to create PySchemaValidator :" + str(ex))
