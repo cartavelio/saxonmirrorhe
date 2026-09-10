@@ -564,10 +564,20 @@ PHP_METHOD(SaxonProcessor, setCatalog) {
 
 PHP_METHOD(SaxonProcessor, setCatalogFiles) {
   SaxonProcessor *saxonProcessor;
-  char *catalogFile;
+  zval *items_zval;
   size_t len;
+  HashTable *arr_hash;
 
-  if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &catalogFile, &len) ==
+
+  zval *val;
+  long num_key;
+  int argument_length = 0;
+  zend_string *key;
+  int i =0;
+
+  const char ** catalogFiles = nullptr;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &items_zval) ==
       FAILURE) {
     RETURN_NULL();
   }
@@ -578,9 +588,26 @@ PHP_METHOD(SaxonProcessor, setCatalogFiles) {
                                 XtOffsetOf(saxonProcessor_object, std));
   saxonProcessor = obj->saxonProcessor;
   if (saxonProcessor != nullptr) {
+    arr_hash = Z_ARRVAL_P(items_zval);
+    argument_length = zend_hash_num_elements(arr_hash);
 
-    if (catalogFile != nullptr) {
-      saxonProcessor->setCatalogFiles(catalogFile);
+    catalogFiles = new const char *[argument_length];
+
+    ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
+      if (Z_TYPE_P(val) == IS_STRING) {
+        catalogFiles[i]  = Z_STRVAL_P(val);
+
+        i++;
+      } else {
+        // TODO error warning
+      }
+    }
+    ZEND_HASH_FOREACH_END();
+
+
+
+    if (catalogFiles != nullptr) {
+      saxonProcessor->setCatalogFiles(catalogFile, argument_length);
     }
   }
 }
@@ -3435,37 +3462,17 @@ zend_function_entry SaxonProcessor_methods[] = {
                ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromString,
                                        arginfo_saxonc_parseXmlFromString,
                                        ZEND_ACC_PUBLIC)
-            PHP_ME(SaxonProcessor, parseXmlFromFile,
-                   arginfo_saxonc_parseXmlFromFile,
-                   ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor, parseXmlFromUri,
-                                           arginfo_saxonc_parseXmlFromUri,
-                                           ZEND_ACC_PUBLIC)
-                PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,
-                       ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
-                                               newXPathProcessor,
-                                               arginfo_saxonc_newXPathProcessor,
-                                               ZEND_ACC_PUBLIC)
-                    PHP_ME(
-                        SaxonProcessor, newDocumentBuilder,
-                        arginfo_saxonc_newDocumentBuilder,
-                        ZEND_ACC_PUBLIC) PHP_ME(SaxonProcessor,
-                                                newXslt30Processor,
-                                                arginfo_saxonc_newXslt30Processor,
-                                                ZEND_ACC_PUBLIC)
-                        PHP_ME(SaxonProcessor, newXQueryProcessor,
-                               arginfo_saxonc_newXQueryProcessor,
-                               ZEND_ACC_PUBLIC)
-                            PHP_ME(SaxonProcessor, newSchemaValidator,
-                                   arginfo_saxonc_newSchemaValidator,
-                                   ZEND_ACC_PUBLIC)
-                                PHP_ME(SaxonProcessor, setCatalog,
-                                       arginfo_saxonc_setCatalog,
-                                       ZEND_ACC_PUBLIC)
-                                    PHP_ME(
-                                        SaxonProcessor,
-                                        setConfigurationProperty,
-                                        arginfo_saxonc_setConfigurationProperty,
-                                        ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, parseXmlFromFile,arginfo_saxonc_parseXmlFromFile,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, parseXmlFromUri,arginfo_saxonc_parseXmlFromUri,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, setcwd, arginfo_saxonc_setcwd,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor,newXPathProcessor,arginfo_saxonc_newXPathProcessor,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, newDocumentBuilder,arginfo_saxonc_newDocumentBuilder,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor,newXslt30Processor,arginfo_saxonc_newXslt30Processor,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, newXQueryProcessor,arginfo_saxonc_newXQueryProcessor,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, newSchemaValidator,arginfo_saxonc_newSchemaValidator,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, setCatalog, arginfo_saxonc_setCatalog,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor, setCatalogFiles, arginfo_saxonc_setCatalogFiles,ZEND_ACC_PUBLIC)
+        PHP_ME(SaxonProcessor,setConfigurationProperty,arginfo_saxonc_setConfigurationProperty,ZEND_ACC_PUBLIC)
     // PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr,
     // ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor, version, arginfo_saxonc_version, ZEND_ACC_PUBLIC)
