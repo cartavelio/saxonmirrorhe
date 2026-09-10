@@ -217,7 +217,6 @@ def String pathToURI(String path) {
 
 task gen_config_schema(
         type: JavaExec,
-        dependsOn: ["hej_featureKeys"],
         description: "Generate the configuration file schema"
 ) {
     inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
