@@ -1716,7 +1716,9 @@ public abstract class StyleElement extends ElementImpl {
         try {
             exp = exp.typeCheck(makeExpressionVisitor(),
                                 config.makeContextItemStaticInfo(Type.ITEM_TYPE, Optionality.OPTIONAL));
-            exp = ExpressionTool.resolveCallsToCurrentFunction(exp);
+            if (!(this instanceof XSLLocalParam && name.equals("select") && getParent() instanceof XSLFunction)) {
+                exp = ExpressionTool.resolveCallsToCurrentFunction(exp);
+            }
             return exp;
         } catch (XPathException err) {
             // we can't report a dynamic error such as divide by zero unless the expression

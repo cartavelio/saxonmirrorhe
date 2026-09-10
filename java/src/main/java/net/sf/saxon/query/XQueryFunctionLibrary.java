@@ -13,7 +13,6 @@ import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
@@ -287,18 +286,18 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
 
 
             // Inject any default value expressions
-            for (int i = 0; i < ufc.getArguments().length; i++) {
-                if (ufc.getArg(i) instanceof DefaultedArgumentExpression) {
-                    Supplier<Expression> def = fd.getParameterDefinitions()[i].getDefaultValueExpression();
-                    if (def == null) {
-                        throw new XPathException("Argument " + (i + 1) + " has no default value in function "
-                                                         + functionName.getComponentName().getEQName(), "XPST0017");
-                    }
-                    ufc.setArg(i, def.get().copy(new RebindingMap()));
-
-                }
-                ufc.adoptChildExpression(ufc.getArg(i));
-            }
+//            for (int i = 0; i < ufc.getArguments().length; i++) {
+//                if (ufc.getArg(i) instanceof DefaultedArgumentExpression) {
+//                    Supplier<Expression> def = fd.getParameterDefinitions()[i].getDefaultValueExpression();
+//                    if (def == null) {
+//                        throw new XPathException("Argument " + (i + 1) + " has no default value in function "
+//                                                         + functionName.getComponentName().getEQName(), "XPST0017");
+//                    }
+//                    ufc.setArg(i, def.get().copy(new RebindingMap()));
+//
+//                }
+//                ufc.adoptChildExpression(ufc.getArg(i));
+//            }
 
 
             UserFunction fn = fd.getUserFunction();

@@ -34,6 +34,7 @@ import java.util.Arrays;
 
 public class XPathContextMajor extends XPathContextMinor {
 
+    private GroundedValue currentValue;
     private ParameterSet localParameters;
     private ParameterSet tunnelParameters;
     /*@Nullable*/ private TailCallLoop.TailCallInfo tailCallInfo;
@@ -105,6 +106,7 @@ public class XPathContextMajor extends XPathContextMinor {
     @Override
     public XPathContextMajor newContext() {
         XPathContextMajor c = new XPathContextMajor();
+        c.currentValue = currentValue;
         c.controller = controller;
         c.currentIterator = currentIterator;
         c.stackFrame = stackFrame;
@@ -140,6 +142,7 @@ public class XPathContextMajor extends XPathContextMinor {
         XPathContextMajor c = new XPathContextMajor();
         XPathContextMajor p = prev.getMajorContext();
         c.controller = p.getController();
+        c.currentValue = p.currentValue;
         c.currentIterator = prev.getCurrentIterator();
         c.stackFrame = prev.getStackFrame();
         c.localParameters = p.getLocalParameters();
@@ -220,6 +223,24 @@ public class XPathContextMajor extends XPathContextMinor {
         if (threadManager != null) {
             threadManager.waitForChildThreads();
         }
+    }
+
+    /**
+     * Set the current value (for fn:current())
+     * @param value the new current value
+     */
+
+    public void setCurrentValue(GroundedValue value) {
+        this.currentValue = value;
+    }
+
+    /**
+     * Get the current value (for fn:current())
+     * @return the current value
+     */
+
+    public GroundedValue getCurrentValue() {
+        return currentValue;
     }
 
 

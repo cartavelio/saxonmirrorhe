@@ -636,9 +636,10 @@ public class GlobalVariable extends Actor
                 XPathContextMajor c2 = context.newCleanContext();
                 c2.setOrigin(this);
                 if (hasAccessToGlobalContext) {
-                    ManualIterator mi =
-                            new ManualIterator(context.getController().getGlobalContextItem());
+                    Item globalContextItem = context.getController().getGlobalContextItem();
+                    ManualIterator mi = new ManualIterator(globalContextItem);
                     c2.setCurrentIterator(mi);
+                    c2.setCurrentValue(globalContextItem);
                 } else {
                     c2.setCurrentIterator(null);
                 }
@@ -671,6 +672,7 @@ public class GlobalVariable extends Actor
             }
         }
     }
+
 
     /**
      * Evaluate the variable

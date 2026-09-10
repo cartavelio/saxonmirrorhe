@@ -107,6 +107,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
                 e2.setParentExpression(null);
                 exp = e2;
             }
+            //exp = ExpressionTool.resolveCallsToCurrentFunction(exp);
             if (optimizer.isOptionSet(OptimizerOptions.MISCELLANEOUS)) {
                 e2 = exp.optimize(visitor, cit);
                 if (e2 != exp) {
@@ -388,6 +389,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             }
 
             XPathContextMajor context = initialContext(env, controller);
+            context.setCurrentValue(env.getContextValue());
 
             // In tracing/debugging mode, evaluate all the global variables first
             if (controller.getTraceListener() != null) {

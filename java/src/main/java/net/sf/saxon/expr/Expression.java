@@ -316,7 +316,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
         return (p & StaticProperty.NO_NODES_NEWLY_CREATED) != 0 && (p & StaticProperty.HAS_SIDE_EFFECTS) == 0
                 && ((d & StaticProperty.DEPENDS_ON_ASSIGNABLE_GLOBALS) == 0)
                 && ((d & StaticProperty.DEPENDS_ON_POSITION) == 0)   // bug 3758
-                && ((d & StaticProperty.DEPENDS_ON_LAST) == 0);
+                && ((d & StaticProperty.DEPENDS_ON_LAST) == 0)
+                && ((d & StaticProperty.DEPENDS_ON_CURRENT_ITEM) == 0);
     }
 
     /**

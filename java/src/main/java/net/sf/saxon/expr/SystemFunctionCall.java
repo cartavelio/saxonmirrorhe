@@ -152,6 +152,9 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 || isCallOn(CurrentMergeKey.class) || isCallOn(CurrentMergeKeyArray.class)) {
             dep |= StaticProperty.DEPENDS_ON_CURRENT_GROUP;
         }
+        if (isCallOn(Current.class)) {
+            dep |= StaticProperty.DEPENDS_ON_CURRENT_ITEM;
+        }
         return dep;
     }
 

@@ -504,7 +504,7 @@ public class XQueryParser extends XPathParser {
         parseProlog();
         processPreamble();
         if (t.currentToken != Token.EOF) {
-            grumble("Unrecognized content found after the variable and function declarations in a library module");
+            grumble("Unrecognized content (" + t.currentToken + ") found after the variable and function declarations in a library module");
         }
         if (errorCount != 0) {
             XPathException err = new XPathException("Static errors were reported in the imported library module");
@@ -1901,15 +1901,15 @@ public class XQueryParser extends XPathParser {
                     foundDefault = true;
                     Expression defaultValue;
                     nextToken();
-                    if (isKeywordPair("context", "value")) {
-                        nextToken();
-                        nextToken();
-                        // Use a call on the XSLT current() function as a placeholder
-                        defaultValue = SystemFunction.makeCall("current", env.makeRetainedStaticContext());
-                    } else {
+//                    if (isKeywordPair("context", "value")) {
+//                        nextToken();
+//                        nextToken();
+//                        // Use a call on the XSLT current() function as a placeholder
+//                        defaultValue = SystemFunction.makeCall("current", env.makeRetainedStaticContext());
+//                    } else {
                         defaultValue = parseExprSingle();
                         defaultValue.setRetainedStaticContext(env.makeRetainedStaticContext());
-                    }
+//                    }
                     arg.setDefaultValueExpression(() -> defaultValue);
                     arg.setRequired(false);
                 } else if (foundDefault) {

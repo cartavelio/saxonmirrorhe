@@ -467,17 +467,6 @@ public final class EvaluateInstr extends Expression {
                                                  isSchemaAware,
                                                  namespaceContext);
 
-//                StringBuilder fsb = new StringBuilder(exprText.length() + (baseUri == null ? 4 : baseUri.length()) + 40);
-//                fsb.append(baseUri);
-//                fsb.append("##");
-//                fsb.append(schemaAwareAttr);
-//                fsb.append("##");
-//                fsb.append(exprText);
-//                if (namespaceContextBase != null) {
-//                    fsb.append("##");
-//                    namespaceContextBase.generateId(fsb);
-//                }
-//                String cacheKey = fsb.toString();
                 Collection<XPathVariable> declaredVars = null;
 
                 Controller controller = context.getController();
@@ -508,9 +497,6 @@ public final class EvaluateInstr extends Expression {
                     // Expression needs to be compiled. First create the static context...
 
                     int version = instr.getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-//                    if (version == 30) {
-//                        version = 31;
-//                    }
                     MapItem options = (optionsEval == null ? EmptyMap.INSTANCE_40 : (MapItem) optionsEval.eval(context));
 
                     IndependentContext env = new IndependentContext(config);
@@ -599,7 +585,7 @@ public final class EvaluateInstr extends Expression {
                     ExpressionVisitor visitor = ExpressionVisitor.make(env);
                     TypeChecker tc = config.getTypeChecker(false);
                     expr = tc.staticTypeCheck(expr, instr.requiredType, role, visitor);
-                    expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
+                    //expr = ExpressionTool.resolveCallsToCurrentFunction(expr);
                     ContextItemStaticInfo cit;
                     if (instr.getContextItemExpr() != null) {
                         boolean allowsEmpty = Cardinality.allowsZero(instr.getContextItemExpr().getCardinality());
@@ -629,6 +615,7 @@ public final class EvaluateInstr extends Expression {
                 } else {
                     ManualIterator mono = new ManualIterator(focus);
                     c2.setCurrentIterator(mono);
+                    c2.setCurrentValue(focus);
                 }
                 if (!trusted) {
                     c2.setUntrusted();

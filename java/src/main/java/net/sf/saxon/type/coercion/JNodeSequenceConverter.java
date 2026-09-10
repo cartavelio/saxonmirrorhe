@@ -359,7 +359,7 @@ public final class JNodeSequenceConverter extends UnaryExpression {
      */
 
     public String toString() {
-        return "toJNode(" + getBaseExpression() + ")";
+        return "JCoerce(" + getBaseExpression() + ")";
     }
 
     @Override

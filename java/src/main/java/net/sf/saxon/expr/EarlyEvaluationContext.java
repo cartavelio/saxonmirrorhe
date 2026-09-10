@@ -133,6 +133,11 @@ public class EarlyEvaluationContext implements XPathContext {
         return null;
     }
 
+    @Override
+    public GroundedValue getCurrentValue() {
+        return null;
+    }
+
     /**
      * Get the Controller. May return null when running outside XSLT or XQuery
      */

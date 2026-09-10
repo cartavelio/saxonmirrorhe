@@ -1595,8 +1595,9 @@ public class XPathParser {
                 temp.setRequiredType(requiredType);
                 temp.setVariableQName(varQName);
                 LocalVariableReference tempRef = new LocalVariableReference(result);
-                LookupExpression lookup = new LookupExpression(tempRef,
-                                                               new StringLiteral("value"));
+//                LookupExpression lookup = new LookupExpression(tempRef,
+//                                                               new StringLiteral("value"));
+               Expression lookup = SystemFunction.makeCall("jvalue", env.makeRetainedStaticContext(), tempRef);
                 temp.setSequence(lookup);
                 declareRangeVariable(temp);
                 numberOfVariables++;
@@ -5286,12 +5287,12 @@ public class XPathParser {
             for (int i = 0; i < fc.getArguments().length; i++) {
                 if (fc.getArg(i) instanceof DefaultedArgumentExpression) {
                     if (fc instanceof UserFunctionCall ufc) {
-                        UserFunction uf = ufc.getFunction();
-                        Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
-                        if (def != null && def.get() != null) {
-                            fc.setArg(i, def.get().copy(new RebindingMap()));
-                            // Otherwise, no action: it's a forward reference that will be resolved later
-                        }
+//                        UserFunction uf = ufc.getFunction();
+//                        Supplier<Expression> def = uf.getParameterDefinitions()[i].getDefaultValueExpression();
+//                        if (def != null && def.get() != null) {
+//                            fc.setArg(i, def.get().copy(new RebindingMap()));
+//                            // Otherwise, no action: it's a forward reference that will be resolved later
+//                        }
                     } else if (fc instanceof SystemFunctionCall sfc) {
                         Supplier<Expression> def = sfc.getTargetFunction().getDetails().getDefaultValueExpression(i);
                         fc.setArg(i, def == null ? Literal.makeEmptySequence() : def.get());

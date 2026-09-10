@@ -1082,6 +1082,18 @@ public class ExpressionTool {
             ContextItemExpression cie = new ContextItemExpression();
             copyLocationInfo(exp, cie);
             return cie;
+        } else if (callsFunction(exp, Current.FN_CURRENT, false)) {
+            return new CurrentValueSetter(exp);
+        } else {
+            return exp;
+        }
+    }
+
+    public static Expression resolveCallsToCurrentFunction0(Expression exp) {
+        if (exp.isCallOn(Current.class)) {
+            ContextItemExpression cie = new ContextItemExpression();
+            copyLocationInfo(exp, cie);
+            return cie;
         } else {
             if (callsFunction(exp, Current.FN_CURRENT, true)) {
                 // replace trivial (same-focus) calls to current by a simple "."
@@ -1096,6 +1108,7 @@ public class ExpressionTool {
                 let.setSequence(new CurrentItemExpression());
                 replaceCallsToCurrent(exp, let);
                 let.setAction(exp);
+                ExpressionTool.resetPropertiesWithinSubtree(let);
                 return let;
             } else {
                 return exp;

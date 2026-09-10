@@ -307,6 +307,13 @@ public interface XPathContext {
     Rule getCurrentTemplateRule();
 
     /**
+     * Get the current value (the value returned by the fn:current() function).
+     * @return the current value, or null if there is no current value
+     */
+
+    GroundedValue getCurrentValue();
+
+    /**
      * Get the current group iterator. This supports the current-group() and
      * current-grouping-key() functions in XSLT 2.0
      *

@@ -291,6 +291,11 @@ public class XPathContextMinor implements XPathContext {
         }
     }
 
+    @Override
+    public GroundedValue getCurrentValue() {
+        return getMajorContext().getCurrentValue();
+    }
+
     /**
      * Get the URI resolver. This gets the local URIResolver set in the XPathContext if there
      * is one; if not, it gets the URIResolver from the Controller (which itself defaults to the

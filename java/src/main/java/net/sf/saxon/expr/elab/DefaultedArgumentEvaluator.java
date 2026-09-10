@@ -7,22 +7,33 @@
 
 package net.sf.saxon.expr.elab;
 
+import net.sf.saxon.Controller;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.instruct.Executable;
+import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.functions.Current;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.ManualIterator;
 
 /**
- * A {@link SequenceEvaluator} for literals. This is a trivial implementation of the interface,
- * because the value of a literal is already known.
+ * A {@link SequenceEvaluator} for default function arguments that depend on
+ * the value of current(), which is defined to return the context item of the
+ * function call
  */
 
-public class LiteralEvaluator implements SequenceEvaluator {
+public class DefaultedArgumentEvaluator implements SequenceEvaluator {
 
-    final GroundedValue value;
+    final UserFunction target;
+    final Expression defaultArgumentExpression;
 
-    public LiteralEvaluator(GroundedValue value) {
-        this.value = value;
+    public DefaultedArgumentEvaluator(UserFunction target, Expression expr) {
+        this.defaultArgumentExpression = expr;
+        this.target = target;
     }
 
     /**
@@ -34,7 +45,38 @@ public class LiteralEvaluator implements SequenceEvaluator {
      */
     @Override
     public Sequence evaluate(XPathContext context) throws XPathException {
-        return value;
+        // Special case for the expression current()
+        if (defaultArgumentExpression.isCallOn(Current.class)) {
+            return context.getContextItem();
+        }
+
+        Controller controller = context.getController();
+        Executable exec = controller.getExecutable();
+        boolean hasAccessToGlobalContext = true;
+//        if (exec instanceof PreparedStylesheet) {
+//            hasAccessToGlobalContext = target == null || target.getDeclaringPackage() == ((PreparedStylesheet) exec).getTopLevelPackage();
+//        }
+        XPathContextMajor c2 = context.newCleanContext();
+        if (hasAccessToGlobalContext) {
+            Item globalContextItem = context.getController().getGlobalContextItem();
+            ManualIterator mi = new ManualIterator(globalContextItem);
+            c2.setCurrentIterator(mi);
+            c2.setCurrentValue(globalContextItem);
+        } else {
+            c2.setCurrentIterator(null);
+        }
+//        if (getStackFrameMap() != null) {
+//            c2.openStackFrame(getStackFrameMap());
+//        }
+//        c2.setCurrentComponent(target);
+//        int savedOutputState = c2.getTemporaryOutputState();
+        c2.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
+        c2.setCurrentOutputUri(null);
+        c2.setCurrentValue(context.getContextItem());
+        return defaultArgumentExpression.makeElaborator().eagerly().evaluate(c2);
     }
+
+
+
 
 }

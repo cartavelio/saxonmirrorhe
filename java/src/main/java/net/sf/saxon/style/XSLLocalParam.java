@@ -105,16 +105,18 @@ public class XSLLocalParam extends XSLGeneralVariable {
                             ufp.setFunctionStreamability(uf.getDeclaredStreamability());
                         }
                         Expression defaultVal = sourceBinding.getSelectExpression();
+//                        if (defaultVal != null) {
+//                            if (!(defaultVal instanceof Literal || defaultVal instanceof ContextItemExpression)) {
+//                                 compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
+//                            }
+//                        }
+//                        if (defaultVal == null && !sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
+//                            defaultVal = new DefaultedArgumentExpression(uf, pos);
+//                        }
                         if (defaultVal != null) {
-                            if (!(defaultVal instanceof Literal || defaultVal instanceof ContextItemExpression)) {
-                                 compileError("The default value for a function parameter must be either a literal, or '.' (temporary Saxon restriction)");
-                            }
+                            final Expression finalDefault = defaultVal;
+                            ufp.setDefaultValueExpression(() -> finalDefault);
                         }
-                        if (defaultVal == null && !sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
-                            defaultVal = new DefaultedArgumentExpression(uf, pos);
-                        }
-                        final Expression finalDefault = defaultVal;
-                        ufp.setDefaultValueExpression(() -> finalDefault);
                     }
                 } else {
                     if (!sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {

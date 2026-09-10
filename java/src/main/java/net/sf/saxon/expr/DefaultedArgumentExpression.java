@@ -54,7 +54,7 @@ public class DefaultedArgumentExpression extends PseudoExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        return this;
+        return new DefaultedArgumentExpression(function, arg);
     }
 
 
@@ -70,6 +70,16 @@ public class DefaultedArgumentExpression extends PseudoExpression {
         return "defaultValue";
     }
 
+    @Override
+    public int getDependencies() {
+        Supplier<Expression> defaultVal = function.getDefaultValueExpression(arg);
+        if (defaultVal == null ||
+                (defaultVal.get().getDependencies() & StaticProperty.DEPENDS_ON_CURRENT_ITEM) != 0) {
+            return StaticProperty.DEPENDS_ON_CONTEXT_ITEM | StaticProperty.DEPENDS_ON_CURRENT_ITEM;
+        } else {
+            return 0;
+        }
+    }
 
     /**
      * Diagnostic print of expression structure. The abstract expression tree
@@ -80,7 +90,6 @@ public class DefaultedArgumentExpression extends PseudoExpression {
     public void export(ExpressionPresenter destination) throws XPathException {
         throw new UnsupportedOperationException();
     }
-
 
     @Override
     public Elaborator getElaborator() {

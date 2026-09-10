@@ -21,7 +21,6 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 
 /**
@@ -63,11 +62,11 @@ public class XPathDynamicContext {
                         SaxonErrorCode.SXXP0004);
             }
         }
-        TypeHierarchy th = contextObject.getConfiguration().getTypeHierarchy();
         if (!contextItemType.matches(item)) {
             throw new XPathException("Supplied context item does not match required context item type " +
                                              contextItemType);
         }
+        contextObject.setCurrentValue(item);
         ManualIterator iter = new ManualIterator(item);
         contextObject.setCurrentIterator(iter);
         if (item instanceof NodeInfo && ((NodeInfo)item).getSystemId() != null) {

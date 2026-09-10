@@ -214,17 +214,32 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         int i = 0;
         for (Operand o : operands()) {
             Expression arg = o.getChildExpression();
+            // Handle omitted arguments where there is a default value defined
+            if (ExpressionTool.containsSubexpression(arg, DefaultedArgumentExpression.class)) {
+                // Get the default value expression from the function definition
+                Expression defaultExp = target.getDefaultValueExpression(i).get();
+                if ((defaultExp.getDependencies() & StaticProperty.DEPENDS_ON_CURRENT_ITEM) != 0) {
+                    argumentEvaluators[i] = new DefaultedArgumentEvaluator(target, defaultExp);
+                    i++;
+                    continue;
+                    // TODO: add type checking
+                } else {
+                    arg = defaultExp;
+                }
+            }
             if (arg instanceof ErrorExpression && ((ErrorExpression)arg).getErrorCodeLocalPart().equals("UseDefault")) {
                 arg = target.getDefaultValueExpression(i).get();
                 o.setChildExpression(arg);
             }
-            if (i == 0 && FunctionStreamabilityHelper.isConsuming(target.getDeclaredStreamability())) {
+            if (arg instanceof Literal lit) {
+                argumentEvaluators[i] = new LiteralEvaluator(lit.getGroundedValue());
+            } else if (i == 0 && FunctionStreamabilityHelper.isConsuming(target.getDeclaredStreamability())) {
                 streamingArgumentEvaluator = new StreamingArgumentEvaluator(arg);
                 argumentEvaluators[i] = arg.makeElaborator().eagerly();
             } else if (target.getParameterDefinitions()[i].isIndexedVariable()) {
                 PullEvaluator argPull = arg.makeElaborator().elaborateForPull();
                 argumentEvaluators[i] = new IndexedVariableEvaluator(argPull);
-            } else if ((arg.getDependencies() & UNHANDLED_DEPENDENCIES) != 0) {
+           } else if ((arg.getDependencies() & UNHANDLED_DEPENDENCIES) != 0) {
                 // If the argument contains a call to a user-defined function, then it might be a recursive call.
                 // It's better to evaluate it now, rather than waiting until we are on a new stack frame, as
                 // that can blow the stack if done repeatedly. (See test func42)
@@ -682,7 +697,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public PullEvaluator elaborateForPull() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-            //expr.allocateArgumentEvaluators();
             if (expr.bindingSlot >= 0) {
                 // XSLT packages in general need dynamic binding
                 return context -> {
@@ -705,6 +719,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     try {
                         Sequence[] actualArgs = expr.evaluateArguments(context);
                         XPathContextMajor c2 = targetFunction.makeNewContext(context, expr);
+                        c2.setCurrentValue(context.getCurrentValue());
                         return targetFunction.call(c2, actualArgs).iterate();
                     } catch (StackOverflowError err) {
                         throw reportStackOverflow(expr);

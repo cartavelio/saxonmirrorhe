@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
@@ -15,7 +16,10 @@ import net.sf.saxon.trans.XPathException;
 
 /**
  * Implement the XSLT current() function. A static call on current() is converted at compile time to a variable
- * reference.
+ * reference. PR2868 makes this available in XPath 4.0 and XQuery 4.0
+ *
+ * <p>Prior to 13.1, expressions using current() were rewritten to use a variable reference. From 13.1 the
+ * implementation follows the spec by making the current value part of the XPathContext object.</p>
  */
 
 public class Current extends SystemFunction {
@@ -24,7 +28,7 @@ public class Current extends SystemFunction {
      * The name of the Current function
      */
 
-    /*@NotNull*/ public static final StructuredQName FN_CURRENT =
+    public static final StructuredQName FN_CURRENT =
         NamespaceUri.FN.qName("current");
     
     /**
@@ -38,7 +42,14 @@ public class Current extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        throw new XPathException("Dynamic evaluation of the current() function is not allowed", "XTDE1360");
+        //throw new XPathException("Dynamic evaluation of the current() function is not allowed", "XTDE1360");
+        GroundedValue currentValue = context.getCurrentValue();
+        if (currentValue == null) {
+            boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
+            throw new XPathException("There is no current value", is40 ? "XPDY0002": "XTDE1360");
+        } else {
+            return currentValue;
+        }
     }
 }
 
