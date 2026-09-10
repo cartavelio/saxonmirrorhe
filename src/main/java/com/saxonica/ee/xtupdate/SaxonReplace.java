@@ -77,7 +77,7 @@ public class SaxonReplace extends StyleElement {
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         Expression content = compileSequenceConstructor(exec, decl, false);
-        return new ReplaceNodeExpression(select, content, Validation.PRESERVE);
+        return new ReplaceNodeExpression(select, content, Validation.PRESERVE, true);
     }
 
 }

@@ -19,6 +19,7 @@ public class InsertAttributeAction extends PendingUpdateAction {
     private final SimpleType typeCode;
     private final String value;
     private final int properties;
+    private final boolean inherit;
 
     /**
      * Create a InsertAttributeAction
@@ -28,14 +29,21 @@ public class InsertAttributeAction extends PendingUpdateAction {
      * @param typeCode   the type annotation of the new attribute
      * @param value      the string value of the new attribute
      * @param properties properties including IS_ID and IS_IDREF properties
+     * @param inherit    true if any new namespace bindings are to be inherited by descendant elements
      */
 
-    InsertAttributeAction(MutableNodeInfo element, NodeName name, SimpleType typeCode, String value, int properties) {
+    InsertAttributeAction(MutableNodeInfo element, NodeName name,
+                          SimpleType typeCode, String value, int properties, boolean inherit) {
         this.element = element;
         this.name = fixNodeName(name);
         this.typeCode = typeCode;
         this.value = value;
         this.properties = properties;
+        this.inherit = inherit;
+    }
+
+    public boolean isInheritNamespaces() {
+        return inherit;
     }
 
     /**
@@ -56,7 +64,7 @@ public class InsertAttributeAction extends PendingUpdateAction {
                     " that is already present on the target element", "XUDY0021");
         }
         affectedRootSet.add((MutableNodeInfo)element.getRoot());
-        element.addAttribute(name, typeCode, value, properties);
+        element.addAttribute(name, typeCode, value, properties, inherit);
         element.removeTypeAnnotation();
     }
 

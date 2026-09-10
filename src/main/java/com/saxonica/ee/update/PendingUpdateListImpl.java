@@ -448,13 +448,13 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                     pendingRenames.put((MutableNodeInfo) action.getTargetNode(), nc);
                     nc = newName;
                 }
-                ((MutableNodeInfo) action.getTargetNode()).rename(nc);
+                ((MutableNodeInfo) action.getTargetNode()).rename(nc, ((RenameAction)action).isInheritNamespaces());
             }
         }
         // Apply any pending renames
         if (pendingRenames != null) {
             for (Map.Entry<MutableNodeInfo, NodeName> e : pendingRenames.entrySet()) {
-                e.getKey().rename(e.getValue());
+                e.getKey().rename(e.getValue(), true);
             }
         }
         // Create any attributes that result from replacements
@@ -466,7 +466,8 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                             a.getNodeName(),
                             a.getType(),
                             a.getValue(),
-                            ReceiverOption.NONE);
+                            ReceiverOption.NONE,
+                            ((ReplaceAttributeAction)action).isInheritNamespaces());
                 }
             }
         }
@@ -479,7 +480,8 @@ public class PendingUpdateListImpl implements PendingUpdateList {
                         a.getAttributeName(),
                         a.getNewTypeCode(),
                         a.getNewStringValue(),
-                        ReceiverOption.NONE);
+                        ReceiverOption.NONE,
+                        ((InsertAttributeAction)action).isInheritNamespaces());
             }
         }
         element.removeTypeAnnotation();

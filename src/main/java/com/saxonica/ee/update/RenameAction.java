@@ -15,6 +15,7 @@ public class RenameAction extends PendingUpdateAction {
 
     private final NodeInfo node;
     private final NodeName newName;
+    private final boolean inherit;
 
     /**
      * Create a RenameAction
@@ -23,9 +24,10 @@ public class RenameAction extends PendingUpdateAction {
      * @param newName the new name
      */
 
-    RenameAction(NodeInfo node, NodeName newName) {
+    RenameAction(NodeInfo node, NodeName newName, boolean inherit) {
         this.node = node;
         this.newName = fixNodeName(newName);
+        this.inherit = inherit;
     }
 
     /**
@@ -37,7 +39,7 @@ public class RenameAction extends PendingUpdateAction {
     @Override
     public void apply(XPathContext context, Set<MutableNodeInfo> affectedRootSet) {
         affectedRootSet.add((MutableNodeInfo)node.getRoot());
-        ((MutableNodeInfo) node).rename(newName);
+        ((MutableNodeInfo) node).rename(newName, inherit);
         int kind = node.getNodeKind();
         if (kind == Type.ELEMENT || kind == Type.ATTRIBUTE) {
             ((MutableNodeInfo) node).removeTypeAnnotation();
@@ -79,6 +81,10 @@ public class RenameAction extends PendingUpdateAction {
     @Override
     public int getApplyPhase() {
         return PHASE;
+    }
+
+    public boolean isInheritNamespaces() {
+        return inherit;
     }
 
     private final static int PHASE = 0;

@@ -22,6 +22,7 @@ public class RenameExpression extends BasicUpdatingExpression {
     private final String defaultNamespace;
     private final Operand nameOp;
     private final Operand targetOp;
+    private final boolean inheritNamespaces;
 
     /**
      * Create a RenameExpression
@@ -30,13 +31,16 @@ public class RenameExpression extends BasicUpdatingExpression {
      * @param name             expression that computes the new name
      * @param nsContext        the static namespace context (needed at runtime)
      * @param defaultNamespace the default namespace for elements and types
+     * @param inherit          true if namespaces mode is inherit
      */
 
-    public RenameExpression(Expression target, Expression name, NamespaceResolver nsContext, /*@Nullable*/ String defaultNamespace) {
+    public RenameExpression(Expression target, Expression name, NamespaceResolver nsContext,
+            /*@Nullable*/ String defaultNamespace, boolean inherit) {
         nameOp = new Operand(this, name, OperandRole.SINGLE_ATOMIC);
         targetOp = new Operand(this, target, OperandRole.INSPECT);
         this.nsContext = nsContext;
         this.defaultNamespace = defaultNamespace == null ? NamespaceConstant.NULL : defaultNamespace;
+        this.inheritNamespaces = inherit;
     }
 
     public Expression getTargetExp() {
@@ -142,7 +146,10 @@ public class RenameExpression extends BasicUpdatingExpression {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        RenameExpression exp = new RenameExpression(getTargetExp().copy(rebindings), getNameExp().copy(rebindings), nsContext, defaultNamespace);
+        RenameExpression exp = new RenameExpression(
+                getTargetExp().copy(rebindings),
+                getNameExp().copy(rebindings),
+                nsContext, defaultNamespace, inheritNamespaces);
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -157,6 +164,9 @@ public class RenameExpression extends BasicUpdatingExpression {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("rename", this);
+        if (inheritNamespaces) {
+            out.emitAttribute("flags", "i");
+        }
         getTargetExp().export(out);
         getNameExp().export(out);
         out.endElement();
@@ -273,7 +283,7 @@ public class RenameExpression extends BasicUpdatingExpression {
         }
 
         try {
-            RenameAction action = new RenameAction(node, name);
+            RenameAction action = new RenameAction(node, name, inheritNamespaces);
             action.setOriginator(this);
             ((PendingUpdateListImpl) pul).add(action);
         } catch (XPathException e) {

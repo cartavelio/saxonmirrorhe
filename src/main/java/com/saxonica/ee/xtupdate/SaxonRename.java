@@ -86,7 +86,8 @@ public class SaxonRename extends StyleElement {
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
         return new RenameExpression(select, newName,
                                     getAllNamespaces(),
-                                    getDefaultXPathNamespace());
+                                    getDefaultXPathNamespace(),
+                                    true);
     }
 
 }

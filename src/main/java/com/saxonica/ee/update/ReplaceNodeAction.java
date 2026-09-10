@@ -13,6 +13,7 @@ public class ReplaceNodeAction extends PendingUpdateAction {
 
     private final NodeInfo[] content;
     private final MutableNodeInfo targetNode;
+    private final boolean inherit;
 
     /**
      * Create a ReplaceNodeAction
@@ -24,9 +25,10 @@ public class ReplaceNodeAction extends PendingUpdateAction {
      * @param targetNode the node that defines where the new nodes will be inserted
      */
 
-    ReplaceNodeAction(NodeInfo[] content, MutableNodeInfo targetNode) {
+    ReplaceNodeAction(NodeInfo[] content, MutableNodeInfo targetNode, boolean inherit) {
         this.content = content;
         this.targetNode = targetNode;
+        this.inherit = inherit;
     }
 
     /**
@@ -40,7 +42,7 @@ public class ReplaceNodeAction extends PendingUpdateAction {
         NodeInfo root = targetNode.getRoot();
         MutableNodeInfo parent = (MutableNodeInfo) targetNode.getParent();
         if (!parent.isDeleted() && !targetNode.isDeleted()) {
-            targetNode.replace(content, true);
+            targetNode.replace(content, inherit);
             affectedRootSet.add((MutableNodeInfo)root);
             parent.removeTypeAnnotation();
         }

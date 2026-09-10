@@ -30,6 +30,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
     private final Operand targetOp;
     private final Operand replacementOp;
     private final int constructionMode;
+    private final boolean inheritNamespaces;
 
     /**
      * Create a ReplaceNodeExpression
@@ -38,12 +39,15 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
      * @param replacement      expression that supplies the replacement node(s)
      * @param constructionMode set to Validation.STRIP or Validation.PRESERVE - indicates whether the
      *                         replacement nodes retain their type annotation
+     * @param inheritNamespaces true if namespaces mode is inherit
      */
 
-    public ReplaceNodeExpression(Expression target, Expression replacement, int constructionMode) {
+    public ReplaceNodeExpression(Expression target, Expression replacement,
+                                 int constructionMode, boolean inheritNamespaces) {
         targetOp = new Operand(this, target, OperandRole.INSPECT);
         replacementOp = new Operand(this, replacement, OperandRole.SINGLE_ATOMIC);
         this.constructionMode = constructionMode;
+        this.inheritNamespaces = inheritNamespaces;
     }
 
     public Expression getTargetExp() {
@@ -134,7 +138,8 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
     @Override
     public Expression copy(RebindingMap rebindings) {
         ReplaceNodeExpression exp =
-                new ReplaceNodeExpression(getTargetExp().copy(rebindings), getReplacementExp().copy(rebindings), constructionMode);
+                new ReplaceNodeExpression(getTargetExp().copy(rebindings), getReplacementExp().copy(rebindings),
+                                          constructionMode, inheritNamespaces);
         ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
@@ -151,6 +156,9 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("replaceNodes", this);
         out.emitAttribute("constructionMode", constructionMode+"");
+        if (inheritNamespaces) {
+            out.emitAttribute("flags", "i");
+        }
         getTargetExp().export(out);
         getReplacementExp().export(out);
         out.endElement();
@@ -168,7 +176,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        List<Item> content = new ArrayList<Item>();
+        List<Item> content = new ArrayList<>();
         NodeInfo target = (NodeInfo) getTargetExp().evaluateItem(context);
         if (target == null) {
             XPathException err = new XPathException("Target of replace expression must not be empty", "XUDY0027");
@@ -234,7 +242,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                                   Loc.NONE, properties));
             }
 
-            ReplaceAttributeAction action = new ReplaceAttributeAction(parent, target, atts);
+            ReplaceAttributeAction action = new ReplaceAttributeAction(parent, target, atts, inheritNamespaces);
             action.setOriginator(this);
             ((PendingUpdateListImpl) pul).add(action);
 
@@ -255,7 +263,8 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
             }
             if (content.isEmpty()) {
                 try {
-                    ReplaceNodeAction action = new ReplaceNodeAction(new NodeImpl[]{}, (MutableNodeInfo) target);
+                    ReplaceNodeAction action = new ReplaceNodeAction(
+                            new NodeImpl[]{}, (MutableNodeInfo) target, inheritNamespaces);
                     action.setOriginator(this);
                     ((PendingUpdateListImpl) pul).add(action);
                 } catch (XPathException e) {
@@ -304,7 +313,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
                     array[i] = (NodeInfo) extent.itemAt(i);
                 }
                 try {
-                    ReplaceNodeAction action = new ReplaceNodeAction(array, (MutableNodeInfo) target);
+                    ReplaceNodeAction action = new ReplaceNodeAction(array, (MutableNodeInfo) target, inheritNamespaces);
                     action.setOriginator(this);
                     ((PendingUpdateListImpl) pul).add(action);
                 } catch (XPathException e) {

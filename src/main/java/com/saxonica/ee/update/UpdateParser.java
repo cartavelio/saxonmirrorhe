@@ -221,7 +221,8 @@ public class UpdateParser {
         p.expect(Token.WITH);
         p.nextToken();
         Expression replacement = p.parseExprSingle();
-        Expression e = new ReplaceNodeExpression(target, replacement, ((QueryModule) p.getStaticContext()).getConstructionMode());
+        final QueryModule env = (QueryModule) p.getStaticContext();
+        Expression e = new ReplaceNodeExpression(target, replacement, env.getConstructionMode(), env.isInheritNamespaces());
         return p.makeTracer(e, null);
     }
 
@@ -257,13 +258,15 @@ public class UpdateParser {
 
     public static Expression parseRenameExpression(XPathParser p) throws XPathException {
         int offset = p.getTokenizer().currentTokenStartOffset;
-        StaticContext env = p.getStaticContext();
+        QueryModule env = (QueryModule) p.getStaticContext();
         p.nextToken();
         Expression target = p.parseExprSingle();
         p.expect(Token.AS);
         p.nextToken();
         Expression newName = p.parseExprSingle();
-        Expression e = new RenameExpression(target, newName, env.getNamespaceResolver(), env.getDefaultElementNamespace());
+        boolean inherit = env.isInheritNamespaces();
+        Expression e = new RenameExpression(target, newName, env.getNamespaceResolver(),
+                                            env.getDefaultElementNamespace(), inherit);
         return p.makeTracer(e, null);
     }
 }

@@ -294,7 +294,8 @@ public class InsertExpression extends BasicUpdatingExpression {
                             NameOfNode.makeName(copiedNode),
                             attributeType,
                             copiedNode.getStringValue(),
-                            properties);
+                            properties,
+                            inheritNamespaces);
                     action.setOriginator(this);
                     ((PendingUpdateListImpl) pul).add(action);
                 } catch (XPathException e) {

@@ -97,14 +97,16 @@ public class PackageLoaderEE extends PackageLoaderPE {
         eMap.put("rename", (loader, element) -> {
             Expression target = loader.getFirstChildExpression(element);
             Expression namer = loader.getSecondChildExpression(element);
-            return new RenameExpression(target, namer, null, null);
+            String flags = element.getAttributeValue("", "flags");
+            return new RenameExpression(target, namer, null, null, flags != null && flags.contains("i"));
         });
 
         eMap.put("replaceNodes", (loader, element) -> {
             int constructionMode = Validation.getCode(element.getAttributeValue("", "constructionMode"));
             Expression target = loader.getFirstChildExpression(element);
             Expression replacement = loader.getSecondChildExpression(element);
-            return new ReplaceNodeExpression(target, replacement, constructionMode);
+            String flags = element.getAttributeValue("", "flags");
+            return new ReplaceNodeExpression(target, replacement, constructionMode, flags != null && flags.contains("i"));
         });
 
         eMap.put("replaceValue", (loader, element) -> {

@@ -17,6 +17,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
     private final NodeInfo element;
     private final NodeInfo oldAttribute;
     private final AttributeMap newAttributes;
+    private final boolean inherit;
 
     /**
      * Create a ReplaceAttributeAction
@@ -24,12 +25,19 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
      * @param element       the element into which it is to be inserted
      * @param oldAttribute  the name of the old attribute to be replaced
      * @param newAttributes the attributes that are to replace the target attribute
+     * @param inherit       true if any namespaces added as a consequence of replacing the attribute
+     *                      are to be inherited
      */
 
-    ReplaceAttributeAction(NodeInfo element, NodeInfo oldAttribute, AttributeMap newAttributes) {
+    ReplaceAttributeAction(NodeInfo element, NodeInfo oldAttribute, AttributeMap newAttributes, boolean inherit) {
         this.element = element;
         this.oldAttribute = oldAttribute;
         this.newAttributes = newAttributes;
+        this.inherit = inherit;
+    }
+
+    public boolean isInheritNamespaces() {
+        return inherit;
     }
 
     /**
@@ -60,7 +68,7 @@ public class ReplaceAttributeAction extends PendingUpdateAction {
             if (element.getAttributeValue(name.getURI(), name.getLocalPart()) != null) {
                 throw new XPathException("Attempting to add an attribute that already exists");
             }
-            ((MutableNodeInfo) element).addAttribute(name, typeCode, value, properties);
+            ((MutableNodeInfo) element).addAttribute(name, typeCode, value, properties, inherit);
         }
         ((MutableNodeInfo) element).removeTypeAnnotation();
     }
