@@ -3,6 +3,8 @@ import com.saxonica.build.java.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.*
+import org.gradle.process.ExecOperations
+import javax.inject.Inject
 
 plugins {
     id("java-library")
@@ -433,8 +435,10 @@ tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
     dependsOn(test)
 }
 
+open class DefaultWithExec @Inject constructor(@Internal val execOperations: ExecOperations): DefaultTask()
+
 // This is not a <Javadoc> task because the Gradle task is so lame
-val editionJavadoc = tasks.register("editionJavadoc") {
+val editionJavadoc = tasks.register<DefaultWithExec>("editionJavadoc") {
     group =  LifecycleTasks.DOCUMENTATION_GROUP
   dependsOn(editionSourceSet.output)
 
@@ -486,7 +490,7 @@ val editionJavadoc = tasks.register("editionJavadoc") {
   }
 
   doLast {
-    exec {
+    execOperations.exec {
       commandLine(command)
     }
   }
@@ -707,40 +711,3 @@ val copy_feature_keys = tasks.register<Copy>("copy_feature_keys") {
 
 releaseZips.outgoing.artifact(downloadRelease) { builtBy(downloadRelease) }
 releaseMaven.outgoing.artifact(stageMaven) { builtBy(stageMaven)}
-
-/* FIXME: this requires access to EE for validation even when HE/PE are being built
-for (features in listOf("all", "current")) {
-  val includeObsolete = if (features == "current") "false()" else "true()"
-  val gen_config = tasks.register<JavaExec>("gen_config_file_${features}") {
-    group = "Internal"
-    description = "Generate test configuration file for ${extension.edition.get().uppercase()}"
-
-    inputs.files(copy_feature_keys)
-    outputs.files(layout.buildDirectory.file("config/generated-config-${features}.xml"))
-
-    classpath = editionSourceSet.output + configurations.named("downloadReleaseBundled").get()
-
-    mainClass = "net.sf.saxon.Transform"
-    args("-xsl:${layout.buildDirectory.file("featureKeys/xsl/FeatureKeysToConfigFile.xsl").get()}",
-         "-s:${layout.buildDirectory.file("featureKeys/xml/config-base.xml").get()}",
-         "-o:${layout.buildDirectory.file("config/generated-config-${features}.xml").get()}",
-         "edition=${extension.edition.get().uppercase()}",
-         "platform=J",
-         "?include-obsolete=${includeObsolete}")
-  }
-
-  val val_config = tasks.register<JavaExec>("validate_gen_config_file_${features}") {
-    group = "Internal"
-    dependsOn(gen_config)
-    inputs.files(configXsd)
-    outputs.files(layout.buildDirectory.file("config/reportfile-${features}.xml"))
-
-    classpath = editionSourceSet.output + configurations.named("downloadReleaseBundled").get()
-    mainClass = "com.saxonica.Validate"
-
-    args("-s:${layout.buildDirectory.file("config/generated-config-${features}.xml").get()}",
-         "-xsd:${configXsd.get()}",
-         "-report:${layout.buildDirectory.file("config/reportfile-${features}.xml").get()}")
-  }
-}
-*/
