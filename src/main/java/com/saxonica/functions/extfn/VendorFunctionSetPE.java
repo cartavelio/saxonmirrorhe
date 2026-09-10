@@ -823,7 +823,7 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
             if (input == null) {
                 return EmptySequence.getInstance();
             }
-            StringValue format = (StringValue) arguments[0].head();
+            StringValue format = (StringValue) arguments[1].head();
             DateTimeFormatter formatter;
             try {
                 formatter = new DateTimeFormatterBuilder()
