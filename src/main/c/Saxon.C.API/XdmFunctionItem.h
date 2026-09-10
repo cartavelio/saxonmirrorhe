@@ -77,6 +77,14 @@ public:
    */
   virtual int getArity();
 
+    //! Get the string value of the XdmArray item.
+    /**
+     * Get the string value of the function
+     *
+     * @return nothing; this method always throws an exception
+     */
+    const char *getStringValue();
+
   //! Get a system function
   /**
    * This can be any function defined in XPath 3.1 functions and operators,

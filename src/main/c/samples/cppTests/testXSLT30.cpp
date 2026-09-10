@@ -2156,6 +2156,9 @@ void testContextNotRootNamedTemplateValue(SaxonProcessor *proc,
 
 void testCallSystemFunction(SaxonProcessor *proc, sResultCount *sresult) {
 
+cout << endl << "Test: testCallSystemFunction" << endl;
+
+
   XdmFunctionItem *fi = XdmFunctionItem::getSystemFunction(
       proc, "{http://www.w3.org/2005/xpath-functions}parse-json", 1);
   if (fi == nullptr) {
@@ -2169,17 +2172,66 @@ void testCallSystemFunction(SaxonProcessor *proc, sResultCount *sresult) {
   xdmValue[0]->addXdmItem(proc->makeStringValue("[1,2,3]"));
   XdmValue *result = fi->call(proc, xdmValue, 1);
 
-  std::cerr << "Result = " << result->toString() << endl;
-  if (result->size() == 1) {
+  if(result != nullptr) {
 
-    cout << "testCallSystemFunction = " << result->getHead()->getStringValue()
-         << endl;
-    sresult->success++;
+  std::cerr << "Result = " << result->toString() << "Size ="<< result->size() << endl;
+  if (result->size() == 1) {
+     XdmItem * item  = result->getHead();
+     if(item != nullptr) {
+     try {
+        const char *  itemStr = item->getStringValue();
+        if(itemStr != nullptr) {
+            cout << "testCallSystemFunction - should not pass here = " << itemStr
+                 << endl;
+             sresult->failure++;
+             sresult->failureList.push_back("testCallSystemFunction");
+            delete itemStr;
+            }
+     } catch (SaxonApiException &e) {
+           cout << "Check exception is thrown: " << e.what() << endl;
+
+     }
+      cout<<"item->getType() = "<<(item->getType())<<endl;
+     if(item->getType() == XDM_ARRAY) {
+         sresult->success++;
+         XdmArray * array = (XdmArray *)item;
+         int arraySize = array->arrayLength();
+         for (int i =0; i < arraySize; i++) {
+            XdmValue * avalue = array->get(i);
+            if(avalue != nullptr) {
+                XdmItem *  aitem = avalue->getHead();
+                const char * aitemStr =aitem->getStringValue();
+                std::cout << "Array item  =" << aitemStr<<std::endl;
+                delete aitemStr;
+                delete aitem;
+                delete avalue;
+            }
+         }
+     } else {
+             sresult->failure++;
+             sresult->failureList.push_back("testCallSystemFunctionA");
+     }
+
+    delete item;
+    delete result;
+    delete xdmValue[0];
+    delete [] xdmValue;
+    delete fi;
+    return;
+    }
+
 
   } else {
-    sresult->failure++;
-    sresult->failureList.push_back("testCallSystemFunction");
+             sresult->failure++;
+             sresult->failureList.push_back("testCallSystemFunction");
   }
+  }
+   delete xdmValue[0];
+   delete [] xdmValue;
+   delete fi;
+   sresult->failure++;
+   sresult->failureList.push_back("testCallSystemFunction");
+
 }
 
 void testPipeline(SaxonProcessor *proc, sResultCount *sresult) {
