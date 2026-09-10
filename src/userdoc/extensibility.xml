@@ -5,626 +5,101 @@
 
   <p>This section describes how to extend the capability of Saxon XSLT stylesheets and XQuery
     queries by adding extension functions, extending the configuration and other user hooks.</p>
+  
+  <aside>For information about built-in Saxon extensions (which are often built using these
+    extensibility mechanisms) see <a class="bodylink" href="/extensions">Saxon Extensions</a>.</aside>
+  
+  <p>The most important extensibility mechanism is the ability to write extension functions
+  in Java or C# that can be invoked from XPath expressions (either free-standing XPath expressions,
+  or expressions embedded in XSLT, XQuery, or XSD).</p>
+  
+  <p>For general information about extension functions, see <a class="bodylink" href="extension-functions">Extension Functions</a>.</p>
+  
+  <p class="javaonly">To write extension functions in Java, see <a class="bodylink" href="extension-functions-J">Extension Functions (Java)</a>.</p>
 
-  <p>The first two columns of the tables below indicate which sections of this page are applicable
-    to XSLT and which are applicable to XQuery. The next three columns indicate which Saxon editions
-    the information applies to.</p>
-  <table>
-    <tr>
-      <td>
-        <p>XSLT</p>
-      </td>
-      <td>
-        <p>XQuery</p>
-      </td>
-      <td>
-        <p>HE</p>
-      </td>
-      <td>
-        <p>PE</p>
-      </td>
-      <td>
-        <p>EE</p>
-      </td>
-      <td>
-        <p>
-          <strong>Contents</strong>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="java-to-xdm-conversion">Converting Java values to XDM values</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="integratedfunctions">Integrated extension functions</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p> </p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="functions">Reflexive extension functions (Java)</a>
-        </p>
-      </td>
-    </tr>
+  <p class="csonly">To write extension functions in C#, see <a class="bodylink" href="extension-functions-CS">Extension Functions (C#)</a>.</p>
+  
+  <p>For other extensibility mechanisms, see the following sections:</p>
+  
+  <ul>
+    <li><p class="javaonly"><a class="bodylink" href="instructions">Writing XSLT Extension Instructions</a></p></li>
+    <li><p class="javaonly"><a class="bodylink" href="output-filters">Customizing Serialization</a></p></li>
+    <li><p><a class="bodylink" href="collation">Collations</a></p></li>
+    <li><p class="javaonly"><a class="bodylink" href="localizing">Localizing Numbers and Dates</a></p></li>
+    <li><p><a class="bodylink" href="uri-resolution">Resolving URIs</a></p></li>
+  </ul>
+  
  
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p> </p>
-      </td>
-      <td>
-        <p> </p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="instructions">Writing XSLT extension instructions</a>
-        </p>
-      </td>
-    </tr>
-  </table>
-  <p>In the section <a class="bodylink" href="config-extend">Extending the Configuration</a> are other mechanisms for extending the
-    configuration, whose support is indicated thus:</p>
-  <table>
-    <tr>
-      <td>
-        <p>XSLT</p>
-      </td>
-      <td>
-        <p>XQuery</p>
-      </td>
-      <td>
-        <p>HE</p>
-      </td>
-      <td>
-        <p>PE</p>
-      </td>
-      <td>
-        <p>EE</p>
-      </td>
-      <td>
-        <p>
-          <strong>Contents</strong>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="config-extend/output-filters">Customizing serialization</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="config-extend/collation">Collation</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p> </p>
-      </td>
-      <td>
-        <p> </p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="config-extend/collation/UCA">Using the Unicode Collation
-            Algorithm</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="config-extend/localizing">Implementing localized numbers and
-            dates</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="config-extend/uri-resolution/uri-resolver">Writing a URI
-            Resolver for input files</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p> </p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="config-extend/uri-resolution/output-uri-resolver">Resolving the
-            URIs of Output Files</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>§</p>
-      </td>
-      <td>
-        <p>
-          <a class="bodylink" href="config-extend/uri-resolution/collection-uri-resolver">Writing a
-            URI Resolver for collections</a>
-        </p>
-      </td>
-    </tr>
-  </table>
-  <section id="java-to-xdm-conversion" title="Converting Java values to XDM values">
-    <div class="javaonly">
-    <h1>Converting Java values to XDM values</h1>
+  <section id="extension-functions" title="Extension Functions">
+    <h1>Extension Functions</h1>
+    <aside>XSLT uses the term <i>extension functions</i>; XQuery calls them <i>external functions</i>. They are the same thing,
+    and Saxon generally uses the XSLT term.</aside>
+    <p>The term <i>extension function</i> refers to a function that is available for calling within a stylesheet or query, but
+    which is neither a built-in function provided by the Saxon processor, nor a user-written function written using XSLT or XQuery
+    syntax within the stylesheet or query itself. For the purposes of this chapter, an extension function is a function
+    written in Java or C# and made available to the Saxon configuration so that it can be recognized when compiling the
+    stylesheet or query.</p>
+    <p>Extension functions, like other functions, are identified by name and arity. The name is a QName with a non-null namespace,
+    which must not be a reserved namespaces, and should generally be the same for all functions in a function library. The arity
+    identifies the number of arguments to the function.</p>
+    <p>Because extension functions are written in procedural languages such as Java and C#, they can have side-effects. An obvious
+      example might be a function that sends an email message. A less obvious example would be a function that returns the next line
+      in an input file (the side effect here is to change the current position in the file). The fact that functions can have side-effects is
+    both a benefit and a danger. It's a benefit because it greatly increases the power of what XSLT and XQuery can achieve; it's a danger
+    because it doesn't fit at all well with the functional and declarative nature of these languages, and can play havoc with
+    optimization. Saxon tries to manage the problem of side-effects pragmatically, but if you want to create such functions, you
+    need to be aware of the dangers.</p>
     
-    <p>This section describes the general rules applied by Saxon for converting Java values to
-      XDM values. These rules are used in a number of places, for example:</p>
+    <p>Saxon provides a variety of APIs for writing extension functions, described in the following sections.</p>
     
-    <ul>
-      <li><p>Converting the result of a Java extension function to a value that can be used in XPath expressions.</p></li>
-      <li><p>Conversion of the value supplied in a call to <code>Transformer.setParameter()</code> in the
-        JAXP Transformation API.</p></li>
-      <li><p>Conversion of the value returned by a call to <code>VariableResolver.resolver()</code> in the JAXP
-        XPath API.</p></li>
-      <li><p>Conversion of the first argument supplied in a call to <code>XPathExpression.evaluate()</code> in the JAXP
-        XPath API (this argument supplies the context item. The JAXP documentation is written for XPath 1.0 where the
-        context item is always a node, but Saxon extends it with support for later XPath versions, where this restriction
-        is removed).</p></li>
-      <li><p>Conversion of the result of an external function implemented using the <code>FunctionResolver</code>
-        mechanism in the JAXP XPath API.</p></li>
-    </ul>
+    <p class="javaonly">To write extension functions in Java, see <a class="bodylink" href="../extension-functions-J">Extension Functions (Java)</a>.</p>
     
-    <p>In some of these contexts there are additional rules applied; for example the handling of a Java <code>null</code>
-      varies. These variations are noted in the specific API documentation.</p>
+    <p class="csonly">To write extension functions in C#, see <a class="bodylink" href="../extension-functions-J">Extension Functions (C#)</a>.</p>
     
-    <p>These conventions do not apply to APIs that define their own rules, for example the XQJ API for invoking XQuery.
-      To achieve greater type safety, Saxon's s9api API generally requires explicit conversion of values rather 
-      than relying on implicit conversion rules.</p>
-    
-    <nav>
-      <ul/>
-    </nav>
-      <!-- TODO are these supposed to be subsections? -->
-    
-    <h2>Conversion from Saxon-specific classes</h2>
-    
-    <p>If the Java object is an instance of a Saxon-defined class, and the Saxon-defined class is an implementation
-      of an XDM value, then the value will be accepted with no conversion.</p>
-    
-    <p>This includes the following cases:</p>
-    
-    <ul>
-      <li>
-        <p>The Saxon class <a class="javalink"
-          href="net.sf.saxon.om.Sequence"
-          >net.sf.saxon.om.Sequence</a> and its subclasses, including:
-          <ul>
-            <li><a class="javalink" href="net.sf.saxon.om.NodeInfo">NodeInfo</a> (for nodes)</li>
-            <li><a class="javalink" href="net.sf.saxon.value.AtomicValue">AtomicValue</a> and its subclasses such as 
-              <a class="javalink" href="net.sf.saxon.value.IntegerValue">IntegerValue</a>, 
-              <a class="javalink" href="net.sf.saxon.value.BooleanValue">BooleanValue</a>,
-              <a class="javalink" href="net.sf.saxon.value.DateTimeValue">DateTimeValue</a> etc.</li>
-            <li><a class="javalink" href="net.sf.saxon.om.Function">Function</a> representing a function item</li>
-            <li><a class="javalink" href="net.sf.saxon.ma.map.MapItem">MapItem</a> representing a map</li>
-            <li><a class="javalink" href="net.sf.saxon.ma.arrays.ArrayItem">ArrayItem</a> representing an array</li>
-            <li><a class="javalink" href="net.sf.saxon.om.ZeroOrOne">ZeroOrOne</a>, 
-              <a class="javalink" href="net.sf.saxon.om.ZeroOrMore">ZeroOrMore</a>,
-              <a class="javalink" href="net.sf.saxon.om.OneOrMore">OneOrMore</a> and 
-              <a class="javalink" href="net.sf.saxon.om.One">One</a>
-              representing sequences with defined cardinality (these are parameterized by the item type, for example
-              <code>OneOrMore&lt;IntegerValue&gt;</code> for a sequence of integers)</li>
-          </ul>
-        </p>
-      </li>
-      <li>
-        <p>The Saxon class <a class="javalink"
-          href="net.sf.saxon.s9api.XdmValue"
-          >net.sf.saxon.s9api.XdmValue</a> and its subclasses, including:</p>
-        <ul>
-          <li><a class="javalink"
-            href="net.sf.saxon.s9api.XdmAtomicValue"
-            >net.sf.saxon.s9api.XdmAtomicValue</a> for atomic values</li>
-          <li><a class="javalink"
-            href="net.sf.saxon.s9api.XdmNode"
-            >net.sf.saxon.s9api.XdmNode</a> for nodes</li>
-          <li><a class="javalink" href="net.sf.saxon.s9api.XdmFunctionItem">XdmFunctionItem</a> for function items</li>
-          <li><a class="javalink" href="net.sf.saxon.s9api.XdmMap">XdmMap</a> for maps</li>
-          <li><a class="javalink" href="net.sf.saxon.s9api.XdmArray">XdmArray</a> for arrays</li>
-          <li><a class="javalink" href="net.sf.saxon.s9api.XdmEmptySequence">XdmEmptySequence</a> for an empty sequence.</li>
-        </ul>
-        <aside><p>If you want to pass a map or array, it's best to do explicit construction
-          of an <code>XdmMap</code> or <code>XdmArray</code> object using the static factory
-          methods provided by these classes.</p></aside>
-      </li>
-      <li>
-        <p>The Saxon class <a class="javalink"
-          href="net.sf.saxon.om.SequenceIterator">net.sf.saxon.om.SequenceIterator</a> (an
-          iterator over a sequence): in this case the XPath value will be the sequence represented by this
-          iterator. The iterator should be positioned at its start position, and it will normally 
-          be consumed, unless for some reason the result can be obtained without consuming the iterator.</p>
-      </li>
-    </ul>
-    
-    <h2>Converting Atomic Values</h2>
-    
-    <p>This section describes Java classes that are recognized as equivalents to XDM atomic types.</p>
-    
-    <ul>
-      <li>
-        <p>If the Java value is a <code>boolean</code> or <code>Boolean</code>, the XPath result is an <code>xs:boolean</code>.</p>
-      </li>
-      <li>
-        <p>If the Java value is a <code>double</code> or <code>Double</code>, the XPath result is an <code>xs:double</code>.</p>
-      </li>
-      <li>
-        <p>If the Java value is a <code>float</code> or <code>Float</code>, the XPath result is an <code>xs:float</code>.</p>
-      </li>
-      <li>
-        <p>If the Java value is an <code>int</code>, <code>short</code>, <code>long</code>, <code>byte</code>, or one of their
-          object wrapper equivalents, the XPath result is an instance of the
-          corresponding subtype of <code>xs:integer</code>: for example a Java short produces
-          an instance of <code>xs:short</code>.</p>
-      </li>
-      <li>
-        <p>If the Java value is a <code>String</code>, the XPath result is an <code>xs:string</code>.
-          Unless otherwise specified, Saxon does not actually check that the characters in the
-          Java string are legal XML characters.</p>
-      </li>
-      <li>
-        <p>If the Java value is a <code>char</code> or <code>Character</code>, it is converted
-          to a single-character <code>xs:string</code>. Again, Saxon does not normally check that
-          the value is a legal XML character.</p>
-      </li>
-      <li>
-        <p>Instances of the Java classes <code>java.net.URI</code> and <code>java.net.URL</code> are converted to
-          instances of <code>xs:anyURI</code> by calling the <code>toString()</code> method on the
-          supplied object.</p>
-      </li>
-      <li>
-        <p>An instance of <code>javax.xml.namespace.QName</code> is converted to
-          an instance of <code>xs:QName</code> having the same prefix, namespace URI, and local part.</p>
-      </li>
-      <li>
-        <p>An instance of <code>java.lang.BigInteger</code> is converted to
-          an instance of <code>xs:integer</code> with the same numeric value.</p>
-      </li>
-      <li>
-        <p>An instance of <code>java.lang.BigDecimal</code> is converted to
-          an instance of <code>xs:decimal</code> with the same numeric value.</p>
-      </li>
-      <li><p>Java classes representing dates and times are converted as follows:</p>
-        <ul>
-          <li><p><code>java.util.Date</code> is converted to <code>xs:dateTime</code> by calling
-            <code>getTime()</code> to convert to milliseconds since 1 Jan 1970. The resulting
-            <code>xs:dateTime</code> value will be UTC.</p></li>
-          <li><p><code>java.time.Instant</code> is converted to <code>xs:dateTime</code> with
-            nanosecond precision. The resulting
-            <code>xs:dateTime</code> value will be UTC.</p></li>
-          <li><p><code>java.time.OffsetDateTime</code> is converted to an <code>xs:dateTime</code> 
-            with the same timezone offset, with nanosecond precision.</p></li>
-          <li><p><code>java.time.ZonedDateTime</code> is first converted to an <code>java.time.OffsetDateTime</code>
-            by calling <code>toOffsetDateTime()</code>, and this is then converted as described above.</p></li>
-          <li><p><code>java.time.LocalDateTime</code> is converted to an <code>xs:dateTime</code> value with
-            the same components (year, month, day, etc); the resulting <code>xs:dateTime</code> value
-            will have no timezone component.</p></li>
-          <li><p><code>java.time.LocalDate</code> is converted to an <code>xs:dateTime</code> value with
-            the same components (year, month, day); the resulting <code>xs:date</code> value
-            will have no timezone component.</p></li>
-        </ul>
-      </li>
-      
-      
-    </ul>
-    
-    <h2>Converting Nodes</h2>
-    
-    <p>This section describes Java classes that are recognized as representing XDM Nodes.</p>
-    
-    <ul>
-      <li>
-        <p>If the supplied Java value is an instance of the Saxon class <a class="javalink"
-          href="net.sf.saxon.om.NodeInfo">net.sf.saxon.om.NodeInfo</a> (a node in a Saxon tree),
-          the XPath value will be a sequence containing a single node.</p>
-      </li>
-      <li>
-        <p>If the supplied Java value is an instance of <code>javax.xml.transform.Source</code> (other
-          than a <code>NodeInfo</code>), a tree is built from the specified <code>Source</code>
-          object, and the XPath result is the root node of this tree.</p>
-      </li>
-      <li>
-        <p>If the supplied Java value is an instance of <a class="javalink"
-          href="net.sf.saxon.om.TreeInfo">net.sf.saxon.om.TreeInfo</a> then the root
-          node of this tree is used.</p>
-      </li>
-      <li>
-        <p>If the supplied value is a DOM Node, and it is recognized as a wrapper around a Saxon
-          node, then the node is unwrapped and the underlying Saxon node is returned. If the
-          returned value is some other kind of DOM Node, then a Saxon wrapper is added. (This is an
-          imperfect solution, since it can lead to problems with node identity and document order.)
-        </p>
-      </li>
-      <li>
-        <p>If the supplied value is a DOM <code>NodeList</code>, the list of nodes is returned as a
-          Saxon node-set. Each node is handled in the same way as a Node that is returned directly
-          as the result.</p>
-      </li>
-      <li>
-        <p>If third party object models such as JDOM2, DOM4J, XOM, or AXIOM have been registered with the
-          Saxon Configuration, then the Java classes representing nodes in these various object models
-          are recognized. The supplied node will be wrapped as an XDM node, which does not involve copying,
-          so relationships among nodes in the same tree are preserved.</p>
-      </li>
-    </ul>
-    
-    <h2>Converting Sequences</h2>
-    
-    <p>Java collections are converted to XDM sequences:</p>
-    
-    <ul><li>
-      <p>If the returned value is an instance of the Java class <code>java.util.Collection</code>,
-        or if it is an array, the XPath value will be the sequence represented by the contents of
-        this <code>Collection</code> or array. The members of the collection or array will each be
-        converted to an XPath value, by applying these rules recursively.
-        An error is reported if the result contains a list or array nested within another list or
-        array. The contents of the list or array are copied immediately on return from the
-        function, so the original <code>List</code> or array object itself may be safely
-        re-used.</p>
-    </li>
-      <li>
-        <p>There is an exception to this rule where the return type is defined as <code>byte[]</code>.
-          Partly for historical reasons, and partly to reflect the fact that a <code>byte[]</code> array
-          is often used to represent binary data in the form of a sequence of octets, a <code>byte[]</code>
-          value is converted to a sequence of <code>xs:unsignedByte</code> items, each in the range 0..255.</p>
-        
-      </li>
-    </ul>
-    
-    <p>Note that Java maps (instances of <code>java.util.Map</code> are <emph>not</emph> converted
-      to XDM maps. Such a conversion can be achieved using the static factory method <code>XdmMap.makeMap()</code>.</p>
-    
-    <aside><p>Java collections and arrays are converted to XDM sequences, never to XDM arrays.
-      If you want to pass an XDM array, it's best to construct it explicitly using the static factory
-      method <code>XdmArray.makeArray()</code>.</p></aside>
-    
-    <h2>Wrapped Java Objects</h2>
-    
-    
-    <p>If the supplied value is any other Java object, it is returned as a "wrapped
-      Java object". The required type for a wrapped object of Java class <code>java.util.Map</code>
-      is written using the QName <code>jt:java.util.Map</code>, where the namespace prefix
-      <code>jt</code> represents the namespace <code>http://saxon.sf.net/java-type</code>.</p>
-    </div>
+  
+ 
     
   </section>
-  <section id="integratedfunctions" title="Integrated extension functions">
-    <h1>Integrated extension functions</h1>
-
-
-    <p>There are two ways of writing extension functions. The traditional way is to map the name of
-      the function to a <dfn>Java</dfn> or <dfn>C#</dfn> method: specifically, the namespace URI
-      of the function name maps to the Java or C# class name, and the local part of the function
-      name maps to the Java or .NET method name. These are known as <i>reflexive</i> extension
-      functions, and are described in later pages (use of these requires Saxon-PE or Saxon-EE,
-      and they are not available under Saxon-CS).</p>
-
-    <p>Since Saxon 9.2, this technique has been supplemented by a new mechanism, referred to as
-        <i>integrated extension functions</i> (available in all Saxon editions). </p>
-
-    <p>There are several advantages in this approach:</p>
-    <ul>
-      <li>
-        <p>You can choose any function name you like, in any namespace.</p>
-      </li>
-      <li>
-        <p>The function signature is made explicit, in terms of XPath types for the arguments and
-          result.</p>
-      </li>
-      <li>
-        <p>There is no ambiguity about which of several candidate Java or C# methods is
-          invoked.</p>
-      </li>
-      <li>
-        <p>There is less scope for configuration problems involving dynamic loading of named
-          classes.</p>
-      </li>
-      <li>
-        <p>All conversions from XPath values to Java or C# values are entirely under user
-          control.</p>
-      </li>
-      <li>
-        <p>The function implementation is activated at compile time, allowing it to perform
-          optimization based on the expressions supplied as arguments, or to save parts of the
-          static context that it needs, such as the static base URI or the current namespace
-          context.</p>
-      </li>
-      <li>
-        <p>The function declares its properties, for example whether it uses the context item and
-          whether it has side-effects, making it easier for the optimizer to manipulate the function
-          call intelligently.</p>
-      </li>
-      <li>
-        <p>Integrated extension functions are more secure, because the function must be explicitly
-          registered by the calling application before it can be called.</p>
-      </li>
-    </ul>
-
-    <p>There are several ways of writing integrated extension functions, both in Java and C#: 
-      simple APIs that make it very easy to implement a function, and richer APIs that allow
-      more capability, especially the ability to use the static and dynamic XPath context.
-      The resulting combinations are described on the following
-      pages.</p>
-
-    <nav>
-      <ul/>
-    </nav>
-
-    <section id="ext-simple-J" title="Java extension functions: simple interface">
+  
+  <section id="extension-functions-J" title="Extension Functions (Java)">
+    
+      <h1>Writing Extension Functions in Java</h1>
       <div class="javaonly">
-      <h1>Java extension functions: simple interface</h1>
+        <aside>The mechanisms described here work equally well for other JVM-based languages such as Scala.</aside>
+        <p>Saxon provides three mechanisms for writing extension functions in Java:</p>
+        <ul>
+          <li><p><a class="bodylink" href="ext-simple-J">The Simple Interface</a>. This allows you to create an extension function
+          by writing a class that implements the interface <code class="javalink">net.sf.saxon.s9api.ExtensionFunction</code>,
+            and registering your implementation with the <code class="javalink">net.sf.saxon.s9api.Processor</code> object.</p></li>
+          <li><p><a class="bodylink" href="ext-full-J">The Full Interface</a>. This allows you to create an extension function
+            by writing a class that implements the interface <code class="javalink">net.sf.saxon.s9api.ExtensionFunctionDefinition</code>,
+            and registering your implementation with the <code class="javalink">net.sf.saxon.s9api.Processor</code> object. This
+          interface is considerably more complex, but it gives more capability: in particular it allows the function full access
+          to the XPath static and dynamic context.</p></li>
+          <li><p><a class="bodylink" href="reflexive-functions">The Reflexive Interface</a>. This allows you to call arbitrary Java code 
+            (public methods in public classes found on the classpath) directly. This mechanism requires Saxon-PE or -EE.
+          There are complex rules for mapping XPath function names to Java class and method names, and for converting between
+          Java data types and XPath data types.</p> 
+            <p><b>Reflexive extension functions pose a security risk</b>, because an untrusted stylesheet
+          or query can make calls to Java methods that expose information on your web server (for example, they can read and write files
+          in filestore). Unless the stylesheet or query is trusted, they should therefore be disabled: 
+          see <a class="feature" href="ALLOW_EXTERNAL_FUNCTIONS">ALLOW_EXTERNAL_FUNCTIONS</a>.</p></li>
+        </ul>
+      </div>
+     
+      <section id="ext-simple-J" title="Simple Interface">
 
-
-
-      <p>The simple API for integrated Java extension functions is available via the s9api class <a
-          class="javalink" href="net.sf.saxon.s9api.ExtensionFunction">ExtensionFunction</a>. Here
-        is an example that defines an extension function to calculate square roots, registers this
-        extension function with the s9api <a class="javalink" href="net.sf.saxon.s9api.Processor"
-          >Processor</a>, and then invokes it from an XPath expression:</p>
-
-      <samp><![CDATA[  Processor proc = new Processor(false);
+          <h1>Java Extension Functions: Simple Interface</h1>
+          
+          
+          
+          <p>The simple API for integrated Java extension functions is available via the s9api class <a
+            class="javalink" href="net.sf.saxon.s9api.ExtensionFunction">ExtensionFunction</a>. Here
+            is an example that defines an extension function to calculate square roots, registers this
+            extension function with the s9api <a class="javalink" href="net.sf.saxon.s9api.Processor"
+              >Processor</a>, and then invokes it from an XPath expression:</p>
+          
+          <samp><![CDATA[  Processor proc = new Processor(false);
   ExtensionFunction sqrt = new ExtensionFunction() {
       public QName getName() {
           return new QName("http://math.com/", "sqrt");
@@ -636,7 +111,7 @@
           );
       }
 
-      public net.sf.saxon.s9api.SequenceType[] getArgumentTypes() {
+      public SequenceType[] getArgumentTypes() {
           return new SequenceType[]{
               SequenceType.makeSequenceType(
                   ItemType.DOUBLE, OccurrenceIndicator.ONE)};
@@ -658,19 +133,17 @@
   ev.setVariable(new QName("arg"), new XdmAtomicValue(2.0));
   XdmValue val = ev.evaluate();
   String result = val.toString();]]></samp>
-
-      <p>Full details of the interface are defined in the Javadoc for class <a class="javalink"
-          href="net.sf.saxon.s9api.ExtensionFunction">ExtensionFunction</a>.</p>
-
-      <p>The main restrictions of the simple interface are (a) that the extension function has no
-        access to static or dynamic context information, and (b) that it does not support pipelined
-        evaluation of the arguments or result. To avoid these restrictions, use the <a
-          class="bodylink" href="../ext-full-J">full interface</a> described on the next page.</p>
-      </div>
-    </section>
-
-    <section id="ext-full-J" title="Java extension functions: full interface">
-      <div class="javaonly">
+          
+          <p>Full details of the interface are defined in the Javadoc for class <a class="javalink"
+            href="net.sf.saxon.s9api.ExtensionFunction">ExtensionFunction</a>.</p>
+          
+          <p>The main restriction of the simple interface is that the extension function has no
+            access to static or dynamic context information. To avoid these restrictions, use the <a
+              class="bodylink" href="../ext-full-J">full interface</a> described on the next page.</p>
+        
+      </section>
+      
+    <section id="ext-full-J" title="Full Interface" class="javaonly">
       <h1>Java extension functions: full interface</h1>
 
 
@@ -726,7 +199,8 @@
     public ExtensionFunctionCall makeCallExpression() {
         return new ExtensionFunctionCall() {
             @Override
-            public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+            public Sequence call(XPathContext context, Sequence[] arguments) 
+                            throws XPathException {
                 long v0 = ((IntegerValue)arguments[0]).longValue();
                 long v1 = ((IntegerValue)arguments[1]).longValue();
                 long result = v0<<v1;
@@ -743,7 +217,7 @@
       <p>and it can then be called like this:</p>
 
       <samp><![CDATA[declare namespace eg="http://example.com/saxon-extension";
-          for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
+for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
 
       <p>The methods that must be implemented (or that may be implemented) by an integrated
         extension function are listed in the table below. Further details are in the Javadoc.</p>
@@ -977,116 +451,21 @@
           <code>XQConnection</code> by casting it to the Saxon implementation class
           (<code>SaxonXQDataSource</code> or <code>SaxonXQConnection</code>) and calling
           <code>getConfiguration()</code>.</p>
-      </div>
     </section>
-    
-    <section id="ext-simple-N" title="C# extension functions: simple interface">
-      <div class="csonly">
-      <h1>C# extension functions: simple interface</h1>
       
-      <p>A simple extension function can be registered in Saxon-CS by calling the method</p>
-      
-      <p><code>Processor.RegisterExtensionFunction(QName, arity, Func&lt;XdmValue[], XdmValue&gt;)</code></p>
-      
-      <p>The first two arguments are the name and arity of the function. The third argument is the
-      implementation of the function, which can conveniently be supplied as a simple lambda expression.
-      For example, a square-root function might be:</p>
-      
-      <p><code>proc.RegisterExtensionFunction(new QName("urn:math", "sqrt"), 1, 
-        val => new XdmAtomicValue(Math.sqrt(val.GetDoubleValue()))</code></p>
-      
-      <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>.</p>
-      
-      <p>Note that because nothing is known about the expected types of the function arguments or result,
-        any conversions needed are entirely the responsibility of the function implementation.
-      </p>
-      
-     
-      <p>The main restrictions of the simple interface are that the extension function has no
-        access to static or dynamic context information. To avoid these restrictions, use the <a
-          class="bodylink" href="../ext-fns-N">full interface</a> described on the next page.</p>
-      </div>
-    </section>
-
-    <section id="ext-fns-N" title="C# extension functions: full interface">
-      <div class="csonly">
-      <h1>C# extension functions: full interface</h1>
-
-   <p>TODO: there's actually an intermediate interface using class <code>ExtensionFunction</code> but I'm not
-   documenting it because I don't know if we want to retain it...</p>
-
-      <p>The full API for integrated .NET extension functions is available via the .NET classes
-        <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a> and 
-        <a class="cslink" href="Saxon.Api.ExtensionFunctionCall">ExtensionFunctionCall</a>, both
-        defined in the <code>Saxon.Api</code> module. Here is a simple example that defines an extension function
-        to calculate square roots, registers this extension function with the 
-        <a class="cslink" href="Saxon.Api.Processor">Processor</a>, and then invokes it from an XPath expression:</p>
-
-      <samp><![CDATA[public class Sqrt : ExtensionFunctionDefinition {
-            
-    public override QName FunctionName {
-        get { return new QName("http://math.com/", "sqrt") };
-    }
-                
-    public override int MinimumNumberOfArguments {
-        get { return 1 };
-    }
-                
-    public override int MaximumNumberOfArguments {
-        get { return 1 };
-    }
-                
-    public override XdmSequenceType[] ArgumentTypes {
-        get { return new XdmSequenceType[] {
-               new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
-               }
-        }
-    }
-                
-    public override XdmSequenceType ResultType(XdmSequenceType[] ArgumentTypes) {
-        return new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?');
-    }
-                
-    public override bool TrustResultType {
-        get { return true };
-    }
-                
-    public override ExtensionFunctionCall MakeFunctionCall() {
-        return new SqrtCall();
-    }
-}
-            
-public class SqrtCall : ExtensionFunctionCall {
-
-    public override IEnumerator<XdmItem> Call(IEnumerator<XdmItem>[] arguments, DynamicContext context) 
-    {
-        Boolean exists = arguments[0].MoveNext();
-        if (exists) {
-            XdmAtomicValue arg = (XdmAtomicValue)arguments[0].Current;
-            double val = (double)arg.Value;
-            double sqrt = System.Math.Sqrt(val);
-            return new XdmAtomicValue(sqrt).GetEnumerator();
-        } else {
-            return EmptyEnumerator<XdmItem>.INSTANCE;
-        }
-    }
-}
-            
-Processor proc = new Processor();
-proc.RegisterExtensionFunction(new Sqrt());
-XPathCompiler xpc = proc.NewXPathCompiler();
-xpc.DeclareNamespace("mf", "http://math.com/");
-XdmItem result = xpc.EvaluateSingle("mf:sqrt(2)", null);
-Console.WriteLine("Square root of 2 is " + result);]]></samp>
-
-
-      <p>Full details of the interface are defined in the <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
-      </div>
-    </section>
-  </section>
-  <section id="functions" title="Writing reflexive extension functions in Java">
+     <section id="reflexive-functions" title="Reflexive Extension Functions">
     <div class="javaonly">
-    <h1>Writing reflexive extension functions in Java</h1>
+    <h1>Converting Java values to XDM values</h1>
+    
+    <p>This section describes the general rules applied by Saxon for converting Java values to
+      XDM values. These rules are used in a number of places, for example:</p>
+    
+    <ul>
+      <li>
+        <p>The namespace URI can define the class (for example <code>java:java.io.File</code>), and
+          the local name then defines the method or field name (for example <code>exists</code>).</p>
+      </li>
+    <h1>Writing Reflexive Extension Functions in Java</h1>
 
     <aside>This section applies to Saxon-PE and Saxon-EE only</aside>
 
@@ -1202,7 +581,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
     </div>
     <section id="choosing-overload" title="Choosing among overloaded methods">
       <div class="javaonly">
-      <h1>Choosing among overloaded methods</h1>
+      <h1>Choosing among Overloaded Methods</h1>
 
 
       <p>If there is no method with the required name and number of parameters, Saxon reports a
@@ -1551,7 +930,7 @@ public static int lineNumber(XPathContext c) {
       </div>
     </section>
 
-    <section id="constructors" title="Calling Java Constructors">
+    <section id="constructors" title="Calling Constructors">
       <div class="javaonly">
       <h1>Calling Java Constructors</h1>
 
@@ -1688,7 +1067,7 @@ public static int lineNumber(XPathContext c) {
       </div>
     </section>
   
-  <section id="converting-args" title="Converting Arguments to Java Extension Functions">
+  <section id="converting-args" title="Converting the Arguments">
     <div class="javaonly">
     <h1>Converting Arguments to Java Extension Functions</h1>
 
@@ -2316,7 +1695,7 @@ public static int lineNumber(XPathContext c) {
       </div>
     </section>
   </section>
-    <section id="function-result" title="Converting the Result of a Java Extension Function">
+    <section id="function-result" title="Converting the Result">
       <div class="javaonly">
       <h1>Converting the Result of a Java Extension Function</h1>
       
@@ -2367,7 +1746,7 @@ public static int lineNumber(XPathContext c) {
       
       </div>
     </section>
-  <section id="exceptions" title="Handling exceptions in reflexive extension functions">
+  <section id="exceptions" title="Handling Exceptions">
     <div class="javaonly">
     <h1>Handling exceptions in reflexive extension functions</h1>
 
@@ -2401,7 +1780,372 @@ public static int lineNumber(XPathContext c) {
       called function throws an exception. Failures to invoke the extension function are mapped to
       Saxon error codes and the original Java exception is not directly available.</p>
     </div>
+  </section> 
+    
   </section>
+  </section>
+  
+  <section id="extension-functions-CS" title="Extension Functions (C#)">
+    <h1>Writing Extension Functions in C#</h1>
+    <div class="csonly">
+    
+    <aside>The same mechanisms can in principle be used with other languages in the .NET environment, such as
+    VB.NET and F#.</aside>
+    
+    <p>There are two interfaces provided for writing extension functions in C#:</p>
+    
+    <ul>
+      <li><p>The <a class="bodylink" href="ext-simple-N">simple interface</a> allows
+      a function to be implemented using a lambda expression.</p></li>
+      <li><p>The <a class="bodylink" href="ext-fns-N">full interface</a> allows
+        a function to be written as an implementation of the interface 
+        <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a>.</p></li>
+    </ul>
+    
+    <aside>Reflexive extension functions are not available in Saxon-CS. There are several reasons for this:
+    the security risks; the complexity of dynamic loading in the .NET environment; and the complexity
+    of mapping C# data types to XPath data types.</aside>
+    </div>
+    <section id="ext-simple-N" title="Simple Interface">
+      <div class="csonly">
+        <h1>C# Extension Functions: Simple Interface</h1>
+        
+        <p>A simple extension function can be registered in Saxon-CS by calling the method</p>
+        
+        <samp>processor.RegisterExtensionFunction(QName, XdmItemType, Func&lt;XdmValue[], XdmValue&gt;)</samp>
+      
+      <p>The first argument is the name of the function, for example <code>new QName("urn:math", "sqrt")</code>.</p>
+      
+      <p>The second argument is the function type. This is most conveniently provided using XPath <code>ItemType</code>
+      syntax, for example <code>processor.ParseItemType("function(xs:double?) as xs:double?")</code>.</p>
+        
+        <p>The third argument is the
+          implementation of the function, which can conveniently be supplied as a simple lambda expression.
+          For example, a square-root function might be:</p>
+        
+      <samp>proc.RegisterExtensionFunction(
+                       new QName("urn:math", "sqrt"), 
+                       proc.ParseItemType("function(xs:double) as xs:double"), 
+                       val => new XdmAtomicValue(Math.sqrt(val.GetDoubleValue()))</samp>
+        
+        <p>This can then be invoked from XPath as <code>Q{urn:math}sqrt(2)</code>.</p>
+        
+        
+        <p>The main restrictions of the simple interface are that the extension function has no
+          access to static or dynamic context information. To avoid these restrictions, use the <a
+            class="bodylink" href="../ext-fns-N">full interface</a> described on the next page.</p>
+      </div>
+    </section>
+    
+    <section id="ext-fns-N" title="Full Interface">
+      <div class="csonly">
+        <h1>C# Extension Functions: Full Interface</h1>
+        
+        
+        
+        <p>The full API for integrated .NET extension functions is available via the .NET classes
+          <a class="cslink" href="Saxon.Api.ExtensionFunctionDefinition">ExtensionFunctionDefinition</a> and 
+          <a class="cslink" href="Saxon.Api.ExtensionFunctionCall">ExtensionFunctionCall</a>, both
+          defined in the <code>Saxon.Api</code> module. Here is a simple example that defines an extension function
+          to calculate square roots, registers this extension function with the 
+          <a class="cslink" href="Saxon.Api.Processor">Processor</a>, and then invokes it from an XPath expression:</p>
+        
+        <samp><![CDATA[public class Sqrt : ExtensionFunctionDefinition {
+            
+    public override QName FunctionName => new QName("http://math.com/", "sqrt");
+                
+    public override int MinimumNumberOfArguments => 1;
+                
+    public override int MaximumNumberOfArguments => 1;
+                
+    public override XdmSequenceType[] ArgumentTypes =>
+        new XdmSequenceType[] {
+           new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?')
+        };
+                
+    public override XdmSequenceType ResultType(XdmSequenceType[] ArgumentTypes) {
+        return new XdmSequenceType(XdmAtomicType.BuiltInAtomicType(QName.XS_DOUBLE), '?');
+    }
+                
+    public override bool TrustResultType {
+        get { return true };
+    }
+                
+    public override ExtensionFunctionCall MakeFunctionCall() {
+        return new SqrtCall();
+    }
+}
+            
+public class SqrtCall : ExtensionFunctionCall {
+
+    public override XdmValue Call(XdmValue[] arguments, DynamicContext context) {
+        bool exists = arguments[0].Any;
+        if (exists) {
+            XdmAtomicValue arg = (XdmAtomicValue)arguments[0][0];
+            double val = (double)arg.Value;
+            double sqrt = System.Math.Sqrt(val);
+            return new XdmAtomicValue(sqrt);
+        } else {
+            return XdmEmptySequence.Instance;
+        }
+    }
+}
+            
+Processor proc = new Processor();
+proc.RegisterExtensionFunction(new Sqrt());
+XPathCompiler xpc = proc.NewXPathCompiler();
+xpc.DeclareNamespace("mf", "http://math.com/");
+XdmItem result = xpc.EvaluateSingle("mf:sqrt(2)", null);
+Console.WriteLine("Square root of 2 is " + result);]]></samp>
+        
+        
+        <p>Full details of the interface are defined in the <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
+      </div>
+    </section>
+
+  </section>
+ 
+  <section id="java-to-xdm-conversion" title="Converting Java values to XDM values">
+    <div class="javaonly">
+    <h1>Converting Java values to XDM values</h1>
+    
+    <p>This section describes the general rules applied by Saxon for converting Java values to
+      XDM values. These rules are used in a number of places, for example:</p>
+    
+    <ul>
+      <li><p>Converting the result of a Java extension function to a value that can be used in XPath expressions.</p></li>
+      <li><p>Conversion of the value supplied in a call to <code>Transformer.setParameter()</code> in the
+        JAXP Transformation API.</p></li>
+      <li><p>Conversion of the value returned by a call to <code>VariableResolver.resolver()</code> in the JAXP
+        XPath API.</p></li>
+      <li><p>Conversion of the first argument supplied in a call to <code>XPathExpression.evaluate()</code> in the JAXP
+        XPath API (this argument supplies the context item. The JAXP documentation is written for XPath 1.0 where the
+        context item is always a node, but Saxon extends it with support for later XPath versions, where this restriction
+        is removed).</p></li>
+      <li><p>Conversion of the result of an external function implemented using the <code>FunctionResolver</code>
+        mechanism in the JAXP XPath API.</p></li>
+    </ul>
+    
+    <p>In some of these contexts there are additional rules applied; for example the handling of a Java <code>null</code>
+      varies. These variations are noted in the specific API documentation.</p>
+    
+    <p>These conventions do not apply to APIs that define their own rules, for example the XQJ API for invoking XQuery.
+      To achieve greater type safety, Saxon's s9api API generally requires explicit conversion of values rather 
+      than relying on implicit conversion rules.</p>
+    
+    <nav>
+      <ul/>
+    </nav>
+    
+    <h2>Conversion from Saxon-specific classes</h2>
+    
+    <p>If the Java object is an instance of a Saxon-defined class, and the Saxon-defined class is an implementation
+      of an XDM value, then the value will be accepted with no conversion.</p>
+    
+    <p>This includes the following cases:</p>
+    
+    <ul>
+      <li>
+        <p>The Saxon class <a class="javalink"
+          href="net.sf.saxon.om.Sequence"
+          >net.sf.saxon.om.Sequence</a> and its subclasses, including:
+          <ul>
+            <li><a class="javalink" href="net.sf.saxon.om.NodeInfo">NodeInfo</a> (for nodes)</li>
+            <li><a class="javalink" href="net.sf.saxon.value.AtomicValue">AtomicValue</a> and its subclasses such as 
+              <a class="javalink" href="net.sf.saxon.value.IntegerValue">IntegerValue</a>, 
+              <a class="javalink" href="net.sf.saxon.value.BooleanValue">BooleanValue</a>,
+              <a class="javalink" href="net.sf.saxon.value.DateTimeValue">DateTimeValue</a> etc.</li>
+            <li><a class="javalink" href="net.sf.saxon.om.Function">Function</a> representing a function item</li>
+            <li><a class="javalink" href="net.sf.saxon.ma.map.MapItem">MapItem</a> representing a map</li>
+            <li><a class="javalink" href="net.sf.saxon.ma.arrays.ArrayItem">ArrayItem</a> representing an array</li>
+            <li><a class="javalink" href="net.sf.saxon.om.ZeroOrOne">ZeroOrOne</a>, 
+              <a class="javalink" href="net.sf.saxon.om.ZeroOrMore">ZeroOrMore</a>,
+              <a class="javalink" href="net.sf.saxon.om.OneOrMore">OneOrMore</a> and 
+              <a class="javalink" href="net.sf.saxon.om.One">One</a>
+              representing sequences with defined cardinality (these are parameterized by the item type, for example
+              <code>OneOrMore&lt;IntegerValue&gt;</code> for a sequence of integers)</li>
+          </ul>
+        </p>
+      </li>
+      <li>
+        <p>The Saxon class <a class="javalink"
+          href="net.sf.saxon.s9api.XdmValue"
+          >net.sf.saxon.s9api.XdmValue</a> and its subclasses, including:</p>
+        <ul>
+          <li><a class="javalink"
+            href="net.sf.saxon.s9api.XdmAtomicValue"
+            >net.sf.saxon.s9api.XdmAtomicValue</a> for atomic values</li>
+          <li><a class="javalink"
+            href="net.sf.saxon.s9api.XdmNode"
+            >net.sf.saxon.s9api.XdmNode</a> for nodes</li>
+          <li><a class="javalink" href="net.sf.saxon.s9api.XdmFunctionItem">XdmFunctionItem</a> for function items</li>
+          <li><a class="javalink" href="net.sf.saxon.s9api.XdmMap">XdmMap</a> for maps</li>
+          <li><a class="javalink" href="net.sf.saxon.s9api.XdmArray">XdmArray</a> for arrays</li>
+          <li><a class="javalink" href="net.sf.saxon.s9api.XdmEmptySequence">XdmEmptySequence</a> for an empty sequence.</li>
+        </ul>
+        <aside><p>If you want to pass a map or array, it's best to do explicit construction
+          of an <code>XdmMap</code> or <code>XdmArray</code> object using the static factory
+          methods provided by these classes.</p></aside>
+      </li>
+      <li>
+        <p>The Saxon class <a class="javalink"
+          href="net.sf.saxon.om.SequenceIterator">net.sf.saxon.om.SequenceIterator</a> (an
+          iterator over a sequence): in this case the XPath value will be the sequence represented by this
+          iterator. The iterator should be positioned at its start position, and it will normally 
+          be consumed, unless for some reason the result can be obtained without consuming the iterator.</p>
+      </li>
+    </ul>
+    
+    <h2>Converting Atomic Values</h2>
+    
+    <p>This section describes Java classes that are recognized as equivalents to XDM atomic types.</p>
+    
+    <ul>
+      <li>
+        <p>If the Java value is a <code>boolean</code> or <code>Boolean</code>, the XPath result is an <code>xs:boolean</code>.</p>
+      </li>
+      <li>
+        <p>If the Java value is a <code>double</code> or <code>Double</code>, the XPath result is an <code>xs:double</code>.</p>
+      </li>
+      <li>
+        <p>If the Java value is a <code>float</code> or <code>Float</code>, the XPath result is an <code>xs:float</code>.</p>
+      </li>
+      <li>
+        <p>If the Java value is an <code>int</code>, <code>short</code>, <code>long</code>, <code>byte</code>, or one of their
+          object wrapper equivalents, the XPath result is an instance of the
+          corresponding subtype of <code>xs:integer</code>: for example a Java short produces
+          an instance of <code>xs:short</code>.</p>
+      </li>
+      <li>
+        <p>If the Java value is a <code>String</code>, the XPath result is an <code>xs:string</code>.
+          Unless otherwise specified, Saxon does not actually check that the characters in the
+          Java string are legal XML characters.</p>
+      </li>
+      <li>
+        <p>If the Java value is a <code>char</code> or <code>Character</code>, it is converted
+          to a single-character <code>xs:string</code>. Again, Saxon does not normally check that
+          the value is a legal XML character.</p>
+      </li>
+      <li>
+        <p>Instances of the Java classes <code>java.net.URI</code> and <code>java.net.URL</code> are converted to
+          instances of <code>xs:anyURI</code> by calling the <code>toString()</code> method on the
+          supplied object.</p>
+      </li>
+      <li>
+        <p>An instance of <code>javax.xml.namespace.QName</code> is converted to
+          an instance of <code>xs:QName</code> having the same prefix, namespace URI, and local part.</p>
+      </li>
+      <li>
+        <p>An instance of <code>java.lang.BigInteger</code> is converted to
+          an instance of <code>xs:integer</code> with the same numeric value.</p>
+      </li>
+      <li>
+        <p>An instance of <code>java.lang.BigDecimal</code> is converted to
+          an instance of <code>xs:decimal</code> with the same numeric value.</p>
+      </li>
+      <li><p>Java classes representing dates and times are converted as follows:</p>
+        <ul>
+          <li><p><code>java.util.Date</code> is converted to <code>xs:dateTime</code> by calling
+            <code>getTime()</code> to convert to milliseconds since 1 Jan 1970. The resulting
+            <code>xs:dateTime</code> value will be UTC.</p></li>
+          <li><p><code>java.time.Instant</code> is converted to <code>xs:dateTime</code> with
+            nanosecond precision. The resulting
+            <code>xs:dateTime</code> value will be UTC.</p></li>
+          <li><p><code>java.time.OffsetDateTime</code> is converted to an <code>xs:dateTime</code> 
+            with the same timezone offset, with nanosecond precision.</p></li>
+          <li><p><code>java.time.ZonedDateTime</code> is first converted to an <code>java.time.OffsetDateTime</code>
+            by calling <code>toOffsetDateTime()</code>, and this is then converted as described above.</p></li>
+          <li><p><code>java.time.LocalDateTime</code> is converted to an <code>xs:dateTime</code> value with
+            the same components (year, month, day, etc); the resulting <code>xs:dateTime</code> value
+            will have no timezone component.</p></li>
+          <li><p><code>java.time.LocalDate</code> is converted to an <code>xs:dateTime</code> value with
+            the same components (year, month, day); the resulting <code>xs:date</code> value
+            will have no timezone component.</p></li>
+        </ul>
+      </li>
+      
+      
+    </ul>
+    
+    <h2>Converting Nodes</h2>
+    
+    <p>This section describes Java classes that are recognized as representing XDM Nodes.</p>
+    
+    <ul>
+      <li>
+        <p>If the supplied Java value is an instance of the Saxon class <a class="javalink"
+          href="net.sf.saxon.om.NodeInfo">net.sf.saxon.om.NodeInfo</a> (a node in a Saxon tree),
+          the XPath value will be a sequence containing a single node.</p>
+      </li>
+      <li>
+        <p>If the supplied Java value is an instance of <code>javax.xml.transform.Source</code> (other
+          than a <code>NodeInfo</code>), a tree is built from the specified <code>Source</code>
+          object, and the XPath result is the root node of this tree.</p>
+      </li>
+      <li>
+        <p>If the supplied Java value is an instance of <a class="javalink"
+          href="net.sf.saxon.om.TreeInfo">net.sf.saxon.om.TreeInfo</a> then the root
+          node of this tree is used.</p>
+      </li>
+      <li>
+        <p>If the supplied value is a DOM Node, and it is recognized as a wrapper around a Saxon
+          node, then the node is unwrapped and the underlying Saxon node is returned. If the
+          returned value is some other kind of DOM Node, then a Saxon wrapper is added. (This is an
+          imperfect solution, since it can lead to problems with node identity and document order.)
+        </p>
+      </li>
+      <li>
+        <p>If the supplied value is a DOM <code>NodeList</code>, the list of nodes is returned as a
+          Saxon node-set. Each node is handled in the same way as a Node that is returned directly
+          as the result.</p>
+      </li>
+      <li>
+        <p>If third party object models such as JDOM2, DOM4J, XOM, or AXIOM have been registered with the
+          Saxon Configuration, then the Java classes representing nodes in these various object models
+          are recognized. The supplied node will be wrapped as an XDM node, which does not involve copying,
+          so relationships among nodes in the same tree are preserved.</p>
+      </li>
+    </ul>
+    
+    <h2>Converting Sequences</h2>
+    
+    <p>Java collections are converted to XDM sequences:</p>
+    
+    <ul><li>
+      <p>If the returned value is an instance of the Java class <code>java.util.Collection</code>,
+        or if it is an array, the XPath value will be the sequence represented by the contents of
+        this <code>Collection</code> or array. The members of the collection or array will each be
+        converted to an XPath value, by applying these rules recursively.
+        An error is reported if the result contains a list or array nested within another list or
+        array. The contents of the list or array are copied immediately on return from the
+        function, so the original <code>List</code> or array object itself may be safely
+        re-used.</p>
+    </li>
+      <li>
+        <p>There is an exception to this rule where the return type is defined as <code>byte[]</code>.
+          Partly for historical reasons, and partly to reflect the fact that a <code>byte[]</code> array
+          is often used to represent binary data in the form of a sequence of octets, a <code>byte[]</code>
+          value is converted to a sequence of <code>xs:unsignedByte</code> items, each in the range 0..255.</p>
+        
+      </li>
+    </ul>
+    
+    <p>Note that Java maps (instances of <code>java.util.Map</code> are <emph>not</emph> converted
+      to XDM maps. Such a conversion can be achieved using the static factory method <code>XdmMap.makeMap()</code>.</p>
+    
+    <aside><p>Java collections and arrays are converted to XDM sequences, never to XDM arrays.
+      If you want to pass an XDM array, it's best to construct it explicitly using the static factory
+      method <code>XdmArray.makeArray()</code>.</p></aside>
+    
+    <h2>Wrapped Java Objects</h2>
+    
+    
+    <p>If the supplied value is any other Java object, it is returned as a "wrapped
+      Java object". The required type for a wrapped object of Java class <code>java.util.Map</code>
+      is written using the QName <code>jt:java.util.Map</code>, where the namespace prefix
+      <code>jt</code> represents the namespace <code>http://saxon.sf.net/java-type</code>.</p>
+    </div>
+    
   </section>
  
   
@@ -2602,16 +2346,10 @@ public static int lineNumber(XPathContext c) {
     
     </div>
   </section>
-  <section id="config-extend" title="Extending the Configuration">
-    <h1>Extending the Configuration</h1>
-    <p>This section describes various ways in which the configuration can be extended.</p>
-    <p>These methods are described further in the following pages.</p>
-    <nav>
-      <ul/>
-    </nav>
+ 
 
-    <section id="collation" title="Collation">
-      <h1>Collation</h1>
+    <section id="collation" title="Collations">
+      <h1>Collations</h1>
       <p>Collations used for comparing strings can be specified by means of a URI. A collation URI
         may be used as an argument to many of the <a class="bodylink" href="/functions">standard
           functions</a>, and also as an attribute of various instructions (<dfn><code>xsl:sort</code></dfn>,
@@ -2649,7 +2387,14 @@ public static int lineNumber(XPathContext c) {
           support available in the built-in Java library; the languages this supports depend on the
           particular Java installation, and not all parameters are supported. For this reason,
           Saxon-HE supports UCA collations only if fallback implementation is allowed (that is,
-          if the option <code>fallback=no</code> is not present in the collation URI.</p></li>
+          if the option <code>fallback=no</code> is not present in the collation URI.</p>
+          
+          <p class="csonly">Saxon-CS implements UCA collations using the ICU-N open source library;
+          this is an incomplete port of ICU-J to C#. At the time of publication, the ICU-N library 
+          is at alpha release status, so it may not be fully complete and conformant.</p>
+            
+            <p>See also <a class="bodylink" href="UCA">Unicode Collation Algorithm</a>.</p>
+          </li>
         </ul></p>
       
       <p>For backwards compatibility reasons the standard collation resolver in Saxon also
@@ -2822,6 +2567,7 @@ public static int lineNumber(XPathContext c) {
         </tbody>
       </table>
       
+      <div class="javaonly">
       <p>If you want to use your own URIs to define collations, there are two ways of doing this:</p>
       
       <ul>
@@ -2987,8 +2733,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
           open-source component. You must agree to release it under the Mozilla Public License or
           under any other recognized open source license that Saxon might adopt in the future.</i>
       </p>-->
-      </div>
-      
+
       <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
       <xi:include href="extensibility/other-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     </section>
@@ -3200,5 +2945,5 @@ config.setLocalizerFactory(new LocalizerFactory() {
         format, for example <code>{http://my-namespace/uri}local-name</code>, and the value will be
         the value as given, after evaluation as an attribute value template.</p>
     </section>
-  </section>
+
 </article>
