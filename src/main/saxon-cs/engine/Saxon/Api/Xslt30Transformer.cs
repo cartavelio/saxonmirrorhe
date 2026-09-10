@@ -137,7 +137,7 @@ namespace Saxon.Api {
         // internal method
         internal Receiver GetDestinationReceiver(IDestination destination) {
             Receiver r = s9Transformer.getDestinationReceiver(s9Transformer.getUnderlyingController(),
-                destination.GetUnderlyingDestination());
+                destination.UnderlyingDestination);
             return r;
         }
 
@@ -409,7 +409,7 @@ namespace Saxon.Api {
         /// If the initial mode is declared streamable, this will perform a streamed transformation.
         /// </remarks>
         public void ApplyTemplates(Stream input, IDestination destination) {
-            s9Transformer.applyTemplates(new StreamSource(input), destination.GetUnderlyingDestination());
+            s9Transformer.applyTemplates(new StreamSource(input), destination.UnderlyingDestination);
         }
 
 
@@ -432,7 +432,7 @@ namespace Saxon.Api {
         public void ApplyTemplates(Stream input, Uri baseUri, IDestination destination) {
             StreamSource streamSource =
                 new (input, Uri.EscapeUriString(baseUri.ToString()));
-            s9Transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
+            s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
                /// <summary>Invoke the stylesheet by applying templates to a supplied source document, 
@@ -451,7 +451,7 @@ namespace Saxon.Api {
         /// </remarks>
       
         public void ApplyTemplates(TextReader input, IDestination destination) {
-            s9Transformer.applyTemplates(new StreamSource(input), destination.GetUnderlyingDestination());
+            s9Transformer.applyTemplates(new StreamSource(input), destination.UnderlyingDestination);
         }
 
 
@@ -473,7 +473,7 @@ namespace Saxon.Api {
         /// </remarks>
         public void ApplyTemplates(TextReader input, Uri baseUri, IDestination destination) {
             StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
-            s9Transformer.applyTemplates(streamSource, destination.GetUnderlyingDestination());
+            s9Transformer.applyTemplates(streamSource, destination.UnderlyingDestination);
         }
         
         /// <summary>
@@ -490,7 +490,7 @@ namespace Saxon.Api {
         /// (the parameters set in the serializer take precedence).</param>
         /// <remarks>since 9.9.1.5</remarks>
         public void Transform(Stream input, IDestination destination) {
-            s9Transformer.transform(new StreamSource(input), destination.GetUnderlyingDestination());
+            s9Transformer.transform(new StreamSource(input), destination.UnderlyingDestination);
         }
 
         /// <summary>
@@ -510,7 +510,7 @@ namespace Saxon.Api {
         /// <remarks>since 9.9.1.5</remarks>
         public void Transform(Stream input, Uri baseUri, IDestination destination) {
             StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
-            s9Transformer.transform(streamSource, destination.GetUnderlyingDestination());
+            s9Transformer.transform(streamSource, destination.UnderlyingDestination);
         }
 
 
@@ -566,7 +566,7 @@ namespace Saxon.Api {
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
         public void ApplyTemplates(XdmValue selection, IDestination destination) {
-            s9Transformer.applyTemplates(selection, destination.GetUnderlyingDestination());
+            s9Transformer.applyTemplates(selection, destination.UnderlyingDestination);
         }
 
 
@@ -599,7 +599,7 @@ namespace Saxon.Api {
         /// (the parameters set in the serializer take precedence).</param> 
         public void CallTemplate(QName templateName, IDestination destination) {
             templateName ??= new QName("xsl", NamespaceConstant.XSLT, "initial-template");
-            s9Transformer.callTemplate(templateName, destination.GetUnderlyingDestination());
+            s9Transformer.callTemplate(templateName, destination.UnderlyingDestination);
         }
 
 
@@ -640,7 +640,7 @@ namespace Saxon.Api {
         /// then the serialization parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
         public void CallFunction(QName function, XdmValue[] arguments, IDestination destination) {
-            s9Transformer.callFunction(function, arguments, destination.GetUnderlyingDestination());
+            s9Transformer.callFunction(function, arguments, destination.UnderlyingDestination);
         }
     }
 }

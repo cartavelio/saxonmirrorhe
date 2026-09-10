@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -287,7 +288,7 @@ namespace Saxon.Api {
         /// <returns> a new <c>Serializer</c> </returns>
         public Serializer NewSerializer(TextWriter textWriter) {
             Serializer s = new Serializer(this, JProcessor.newSerializer());
-            s.SetOutputWriter(textWriter);
+            s.OutputWriter = textWriter;
             return s;
         }
 
@@ -299,7 +300,7 @@ namespace Saxon.Api {
         /// <returns> a new Serializer </returns>
         public Serializer NewSerializer(Stream stream) {
             Serializer s = new Serializer(this, JProcessor.newSerializer());
-            s.SetOutputStream(stream);
+            s.OutputStream = stream;
             return s;
         }
 
@@ -380,6 +381,20 @@ namespace Saxon.Api {
         /// </summary>
 
         public CollectionFinder StandardCollectionFinder { get; private set; }
+
+        /// <summary>
+        /// Register a specific collection URI
+        /// </summary>
+        /// <param name="collectionUri">The collection URI</param>
+        /// <param name="collection">The contents of the collection</param>
+        /// <remarks>
+        /// Registered collections take priority over any a user-supplied <c>CollectionFinder</c>
+        /// </remarks>
+        /// 
+        public void RegisterCollection(Uri collectionUri, IEnumerable<IResource> collection) {
+            string collUri = collectionUri.ToString();
+            Implementation.registerCollection(collUri, new ResourceCollectionUnwrapper(collUri, collection));
+        }
 
         /// <summary>
         /// Register an extension function with the <c>Processor</c>. This interface provides
@@ -474,7 +489,7 @@ namespace Saxon.Api {
         public void WriteXdmValue(XdmValue sequence, IDestination destination) {
             try {
                 PipelineConfiguration pipe = JProcessor.getUnderlyingConfiguration().makePipelineConfiguration();
-                Receiver r = destination.GetUnderlyingDestination().getReceiver(pipe,
+                Receiver r = destination.UnderlyingDestination.getReceiver(pipe,
                     pipe.getConfiguration().obtainDefaultSerializationProperties());
                 r.open();
                 foreach (XdmItem item in sequence) {

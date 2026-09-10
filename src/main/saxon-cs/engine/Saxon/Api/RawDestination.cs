@@ -1,4 +1,5 @@
 using System;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -28,9 +29,9 @@ namespace Saxon.Api {
         /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>
         /// </remarks>
-        /// <returns>returns the underlying Destination object</returns>
-		public Saxon.Hej.s9api.Destination GetUnderlyingDestination() {
-            return destination;
+        /// <value>returns the underlying Destination object</value>
+        public Destination UnderlyingDestination {
+            get { return destination; }
         }
 
         /// <summary>

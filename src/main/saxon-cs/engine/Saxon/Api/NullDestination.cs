@@ -1,4 +1,5 @@
 using System;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -29,12 +30,11 @@ namespace Saxon.Api {
         /// <summary>
         /// The underlying <c>Destination</c> object in the Saxon implementation, which in the NullDestination is null.
         /// </summary>
-        /// <returns>returns null</returns>
-		public Saxon.Hej.s9api.Destination GetUnderlyingDestination()
-        {
-            return destination;
+        /// <value>returns null</value>
+        public Destination UnderlyingDestination {
+            get { return destination; }
         }
-        
+
         /// <summary>
         /// Define an action to be performed when writing to the Destination is complete.
         /// </summary>

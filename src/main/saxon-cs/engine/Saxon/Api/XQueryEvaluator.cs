@@ -248,7 +248,7 @@ namespace Saxon.Api {
         /// <exception cref="SaxonApiException">Throws a <c>DynamicError</c> if any run-time failure
         /// occurs while evaluating the expression.</exception>
         public void Run(IDestination destination) {
-            evaluator.setDestination(destination.GetUnderlyingDestination());
+            evaluator.setDestination(destination.UnderlyingDestination);
             evaluator.run();
             closeAction?.Invoke();
         }
@@ -285,7 +285,7 @@ namespace Saxon.Api {
 
         public void RunStreamed(Stream input, Uri baseUri, IDestination destination) {
             StreamSource source = new (input, baseUri.ToString());
-            Implementation.runStreamed(source, destination.GetUnderlyingDestination());
+            Implementation.runStreamed(source, destination.UnderlyingDestination);
         }
 
         /// <summary>

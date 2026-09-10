@@ -38,7 +38,7 @@ namespace Saxon.Api.Support {
             {
                 if (ReferenceEquals(resultList[i], result))
                 {
-                    ((IDestination)destinationList[i]).GetUnderlyingDestination().close();
+                    ((IDestination)destinationList[i]).UnderlyingDestination.close();
                     resultList.RemoveAt(i);
                     destinationList.RemoveAt(i);
                     return;
@@ -65,7 +65,7 @@ namespace Saxon.Api.Support {
                 throw new TransformerException("Invalid base output URI " + baseString, err);
             }
             IDestination destination = handler(href, baseUri);
-            Receiver result = destination.GetUnderlyingDestination().getReceiver(pipe, sp);
+            Receiver result = destination.UnderlyingDestination.getReceiver(pipe, sp);
             resultList.Add(result);
             destinationList.Add(destination);
             return result;

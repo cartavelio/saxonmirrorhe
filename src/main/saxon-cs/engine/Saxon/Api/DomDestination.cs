@@ -1,4 +1,5 @@
 using System.Xml;
+using Saxon.Hej.s9api;
 using Saxon.Impl.Dom;
 
 namespace Saxon.Api {
@@ -107,13 +108,10 @@ namespace Saxon.Api {
         /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>
         /// </remarks>
-        /// <returns>returns the underlying Destination object</returns>
-		public Saxon.Hej.s9api.Destination GetUnderlyingDestination()
-        {
-            return destination;
+        /// <value>returns the underlying Destination object</value>
+        public Destination UnderlyingDestination {
+            get { return destination; }
         }
-
-
     }
 }
 

@@ -6,6 +6,7 @@ using Saxon.Hej.serialize;
 using Saxon.Hej.z;
 using SysCollGen = System.Collections.Generic;
 using System.Collections.Generic;
+using Saxon.Hej.s9api;
 
 namespace Saxon.Api {
     /// <summary>
@@ -334,66 +335,55 @@ namespace Saxon.Api {
             CharacterMap map = new CharacterMap(name.GetStructuredQName(), content);
             characterMapIndex.putCharacterMap(name.GetStructuredQName(), map);
         }
-			
+
 
         /// <summary>Specify the destination of the serialized output, in the
         /// form of a file name</summary>
-        /// <param name="filename">The name of the file to receive the serialized output. This
-        /// method sets the destination base URI to the URI corresponding to the name of the supplied file.</param>
+        /// <value>
+        ///     The name of the file to receive the serialized output. This
+        ///     method sets the destination base URI to the URI corresponding to the name of the supplied file.
+        /// </value>
         /// <exception cref="SaxonApiException">Throws a <c>SaxonApiException</c> if it is not possible to 
         /// create an output stream to write to this file, for example, if the filename is in a
         /// directory that does not exist.</exception>
-
-        public void SetOutputFile(string filename)
-        {
-            try
-            {
-                jSerializer.setOutputFile(new Saxon.Ejava.io.File(filename));
-            }
-            catch (Saxon.Ejava.io.IOException err)
-            {
-                throw new SaxonApiException(err);
+        public string OutputFile {
+            set {
+                try {
+                    jSerializer.setOutputFile(new Saxon.Ejava.io.File(value));
+                }
+                catch (Saxon.Ejava.io.IOException err) {
+                    throw new SaxonApiException(err);
+                }
             }
         }
 
 
         /// <summary>Specify the destination of the serialized output, in the
-        /// form of a <c>Stream</c>.</summary>
+        /// form of a <c>Stream</c>. This must be a stream that allows writing.</summary>
         /// <remarks>Saxon will not close the stream on completion; this is the
         /// caller's responsibility.</remarks>
-        /// <param name="stream">The stream to which the output will be written.
-        /// This must be a stream that allows writing.</param>
 
-        public void SetOutputStream(Stream stream)
-        {
-
-            jSerializer.setOutputStream(stream);
+        public Stream OutputStream {
+            set => jSerializer.setOutputStream(value);
         }
-			
-        /// <summary>Get the current output destination.</summary> 
-        /// <returns>an <c>OutputStream</c>, <c>Writer</c>, or <c>File</c>, depending on the previous calls to
-        /// <c>SetOutputstream</c>, <c>SetOutputWriter</c>, or <c>SetOutputFile</c>; or null, if no output destintion has
-        /// been set up.</returns>
 
-        public object GetOutputDestination(){
-            return jSerializer.getOutputDestination();		
-        }
-        
         /// <summary>Specify the destination of the serialized output, in the
         /// form of a <c>TextWriter</c>.</summary>
-        /// <remarks>Note that when writing to a <c>TextWriter</c>, character encoding is
+        /// <remarks>
+        /// <para>Note that when writing to a <c>TextWriter</c>, character encoding is
         /// the responsibility of the <c>TextWriter</c>, not the <c>Serializer</c>. This
         /// means that the encoding requested in the output properties is ignored; it also
         /// means that characters that cannot be represented in the target encoding will
         /// use whatever fallback representation the <c>TextWriter</c> defines, rather than
-        /// being represented as XML character references.</remarks>
-        /// <param name="textWriter">The stream to which the output will be written.
-        /// This must be a stream that allows writing. Saxon will not close the
-        /// <c>TextWriter</c> on completion; this is the caller's responsibility.</param>
+        /// being represented as XML character references.</para>
+        /// <para>
+        /// Saxon will not close the
+        /// <c>TextWriter</c> on completion; this is the caller's responsibility.
+        /// </para>
+        /// </remarks>
 
-        public void SetOutputWriter(TextWriter textWriter)
-        {
-            jSerializer.setOutputWriter(textWriter);
+        public TextWriter OutputWriter {
+            set => jSerializer.setOutputWriter(value);
         }
 
 
@@ -449,7 +439,7 @@ namespace Saxon.Api {
 
 
         /// <summary>
-        /// The underlying <c>Destination</c> object in the Saxon implementation
+        /// The underlying <c>Saxon.Hej.s9api.Destination</c> object in the Saxon implementation
         /// </summary>
         /// <remarks>
         /// <para>This property provides access to internal methods in the Saxon engine that are
@@ -461,29 +451,8 @@ namespace Saxon.Api {
         /// (and the objects it provides access to) is included in the Saxon JavaDoc documentation.
         /// </para>
         /// </remarks>
-        /// <returns>returns the underlying Destination object</returns>
-		public Saxon.Hej.s9api.Destination GetUnderlyingDestination()
-        {
-            return jSerializer;
-        }
-
-
-        // /// <summary>
-        // /// Close the destination and notify all registered listeners that it has been closed.
-        // /// This method is intended for internal use by Saxon. The method first calls
-        // /// <see cref="Close"/> to close the destination, then it calls <c>Saxon.Ejava.util.function.Consumer.accept()</c> 
-        // /// on each of the listeners in turn to notify the fact that it has been closed.
-        // /// </summary>
-        // public void CloseAndNotify()
-        // {
-        //     try
-        //     {
-        //         jSerializer.closeAndNotify();
-        //     }
-        //     catch (Saxon.Hej.s9api.SaxonApiException exception) {
-        //         throw new StaticError(exception);
-        //     }
-        // }
+        /// <value>returns the underlying Destination object</value>
+        public Saxon.Hej.s9api.Destination UnderlyingDestination => jSerializer;
 
 
         /// <summary>This property determines the base Uri of the constructed <c>Serializer</c>. 
