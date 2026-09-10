@@ -33,7 +33,7 @@ public class GroupEndingTester extends GroupBoundaryTester {
     @Override
     public boolean notifyItem() throws XPathException {
         boolean startNew = foundEndingItem;
-        foundEndingItem = pattern.matches(getLocalContext().getContextItem(), getLocalContext());
+        foundEndingItem = pattern.matchesItem(getLocalContext().getContextItem(), getLocalContext());
         return startNew;
     }
 

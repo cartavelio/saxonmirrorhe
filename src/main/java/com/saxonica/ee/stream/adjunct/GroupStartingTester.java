@@ -32,7 +32,7 @@ public class GroupStartingTester extends GroupBoundaryTester {
      */
     @Override
     public boolean notifyItem() throws XPathException {
-        return pos++ == 0 || pattern.matches(getLocalContext().getContextItem(), getLocalContext());
+        return pos++ == 0 || pattern.matchesItem(getLocalContext().getContextItem(), getLocalContext());
     }
 
 }

@@ -46,11 +46,11 @@ public class AncestorCharacteristic extends Characteristic {
             return BooleanValue.FALSE;
         }
         if (isParent) {
-            return BooleanValue.get(pattern.matches(((NodeInfo)item).getParent(), context));
+            return BooleanValue.get(pattern.matchesItem(((NodeInfo)item).getParent(), context));
         } else {
             NodeInfo a = (NodeInfo)item;
             while (a != null) {
-                if (pattern.matches(a, context)) {
+                if (pattern.matchesItem(a, context)) {
                     return BooleanValue.TRUE;
                 }
                 a = a.getParent();
