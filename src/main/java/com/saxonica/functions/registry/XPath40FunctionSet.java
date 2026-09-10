@@ -1,5 +1,6 @@
 package com.saxonica.functions.registry;
 
+import com.saxonica.ee.pin.pin.LabelFn;
 import com.saxonica.functions.qt4.*;
 import com.saxonica.functions.qt4.csv.CsvToArrays;
 import com.saxonica.functions.qt4.csv.CsvToXml;
@@ -16,7 +17,6 @@ import net.sf.saxon.ma.json.JsonToXMLFn;
 import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
-import com.saxonica.ee.pin.pin.LabelFn;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.transpile.CSharp;
@@ -291,6 +291,15 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
+
+        register("format-number", 2, e -> e.populate(FormatNumber::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
+                .arg(0, NumericType.getInstance(), OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null));
+
+        register("format-number", 3, e -> e.populate(FormatNumber::new, BuiltInAtomicType.STRING, ONE, NS | LATE)
+                .arg(0, NumericType.getInstance(), OPT, null)
+                .arg(1, BuiltInAtomicType.STRING, ONE, null)
+                .arg(2, AnyItemType.getInstance(), OPT, null));
 
         register("format-time", 2, 5, e -> e.populate(FormatDate::new, BuiltInAtomicType.STRING,
                                                    OPT, CARD0)
