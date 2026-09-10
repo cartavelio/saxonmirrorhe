@@ -7,7 +7,6 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -78,11 +77,6 @@ public abstract class DelegatingMapItem extends MapItem {
     @Override
     public MapType getItemType(TypeHierarchy th) {
         return (MapType)base.getItemType(th);
-    }
-
-    @Override
-    public UType getKeyUType() {
-        return base.getKeyUType();
     }
 
     public MapItem getBaseItem() {
