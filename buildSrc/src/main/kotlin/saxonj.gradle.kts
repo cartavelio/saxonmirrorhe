@@ -3,11 +3,10 @@ import com.saxonica.build.java.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.*
-import org.gradle.process.ExecOperations
-import javax.inject.Inject
 
 plugins {
     id("java-library")
+    `jvm-test-suite`
 }
 
 repositories {
@@ -42,7 +41,6 @@ extension.version = findProperty("saxonVersion") as String
 
 // Create the custom source sets before any dependencies need to be set
 val editionSourceSet = sourceSets.create("edition")
-val editionTestSourceSet = sourceSets.create("editionTest")
 
 // Prevent transitive dependencies from pulling in the wrong (or multiple) versions of things
 configurations.all {
@@ -59,7 +57,6 @@ val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val javaFeatureKeysBucket by configurations.dependencyScope("javaFeatureKeysBucket")
 val featureKeysBucket by configurations.dependencyScope("featureKeysBucket")
 val configXsdBucket by configurations.dependencyScope("configXsdBucket")
-//val releaseArtifacts by configurations.consumable("releaseArtifacts")
 val sourceArtifacts by configurations.consumable("sourceArtifacts")
 val resources by configurations.consumable("resources")
 val filteredSourcesDir by configurations.consumable("filteredSourcesDir")
@@ -104,11 +101,15 @@ val editionImplementation by configurations.getting {
     extendsFrom(configurations["implementation"])
 }
 editionCompileOnly.extendsFrom(configurations.compileOnly.get())
-val editionTestImplementation = configurations["editionTestImplementation"]
-editionTestImplementation.extendsFrom(configurations.testImplementation.get())
 
 configurations["compileOnly"].extendsFrom(editionCompileAndTestOnly)
-configurations["testImplementation"].extendsFrom(editionCompileAndTestOnly)
+
+val testImplementation by configurations.getting {
+  extendsFrom(editionCompileAndTestOnly)
+}
+val testImplementationResolvable by configurations.resolvable("testImplementationResolvable") {
+  extendsFrom(testImplementation)
+}
 
 configurations.configureEach {
   exclude("net.sf.saxon", "Saxon-HE")
@@ -252,20 +253,6 @@ sourceSets.named("edition") {
     }
 }
 
-sourceSets.named("editionTest") {
-    java {
-        setSrcDirs(listOf(javaTestSourceRoot))
-
-        compileClasspath += editionSourceSet.output
-        runtimeClasspath += editionSourceSet.output
-    }
-    resources {
-        setSrcDirs(listOf(javaTestResourceRoot))
-    }
-}
-
-val processEditionTestResources = tasks.named<ProcessResources>("processEditionTestResources")
-
 sourceSets {
     main {
         java {
@@ -280,101 +267,94 @@ tasks.register("allJars") {
     finalizedBy("testDriversDownloadJar")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+testing {
+  suites {
+    val test by getting(JvmTestSuite::class) {
+      useJUnitJupiter()
+    }
 
-tasks.named<JavaCompile>("compileEditionTestJava") {
-    classpath += editionSourceSet.output
+    register<JvmTestSuite>("editionTest") {
+      sources {
+        java {
+          setSrcDirs(listOf(javaTestSourceRoot))
+        }
+        resources {
+          setSrcDirs(listOf(javaTestResourceRoot))
+        }
+      }
+      dependencies {
+        implementation(editionSourceSet.output)
+        implementation(testImplementationResolvable)
+      }
+
+      targets {
+        val processEditionTestResources = tasks.named<ProcessResources>("processEditionTestResources")
+        val resourceJars = processEditionTestResources.map {
+          files(it.destinationDir).asFileTree.filter { f ->
+            f.extension == "jar"
+          }
+        }
+
+        all {
+          testTask.configure {
+            useJUnitPlatform {
+              excludeTags("performance", "mikeonly")
+            }
+
+            environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
+            classpath += resourceJars.get()
+          }
+          tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
+            dependsOn(testTask)
+          }
+        }
+      }
+    }
+  }
 }
 
 tasks.named<Test>("test") {
     environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
 }
 
-val test = tasks.register<Test>("editionTest") {
-    useJUnitPlatform {
-      excludeTags("performance", "mikeonly")
-    }
-
-    description = "Runs JUnit tests."
-    group = "verification"
-    environment("SAXON_TEST_DATA", extension.testDataDir.map { it.asFile }.get().toString())
-
-    val resourceJars = processEditionTestResources.map {
-      files(it.destinationDir).asFileTree.filter { f ->
-        f.extension == "jar"
-      }
-    }
-
-    testClassesDirs = editionTestSourceSet.output.classesDirs
-    classpath = files(resourceJars, editionTestSourceSet.runtimeClasspath)
-}
-
-tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
-    dependsOn(test)
-}
-
-open class DefaultWithExec @Inject constructor(@Internal val execOperations: ExecOperations): DefaultTask()
-
 // This is not a <Javadoc> task because the Gradle task is so lame
-val editionJavadoc = tasks.register<DefaultWithExec>("editionJavadoc") {
-    group =  LifecycleTasks.DOCUMENTATION_GROUP
-  dependsOn(editionSourceSet.output)
+val editionJavadoc = tasks.register<Exec>("editionJavadoc") {
+  group =  LifecycleTasks.DOCUMENTATION_GROUP
+  inputs.files(editionSourceSet.output)
 
   outputs.dir(layout.buildDirectory.dir("javadoc"))
 
-  val sourcepath = layout.buildDirectory.dir("src/main/java").get()
-  val packages = mutableSetOf<String>()
-
-  val command = mutableListOf<String>()
-  command.addAll(listOf(
-      "javadoc",
-      "-sourcepath", "${sourcepath}",
-      "-Xdoclint:none", // -Xdoclint:all, accessibility, html, missing, reference, syntax, none
-      "-quiet",
-      "-d", "${layout.buildDirectory.dir("javadoc").get()}",
-      "-protected",
-      "-bottom", "Copyright (c) 2004-2025 Saxonica Limited. All rights reserved.",
-      "-doctitle", "Saxon ${extension.version.get()} Java API Documentation",
-      "-group", "s9api Interfaces", "net.sf.saxon.s9api:net.sf.saxon.s9api.push:net.sf.saxon.s9api.streams",
-      "-group", "Other Interfaces", "com.saxonica.config:net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
-      "-group", "External Interfaces", "javax.xml.xquery",
-      "-source", "1.8"))
-
-  val sb = StringBuilder()
-  sb.append(editionSourceSet.output.first())
-  editionSourceSet.compileClasspath.forEach { it -> 
-    sb.append(":${it}")
+  executable = "javadoc"
+  val sourceDir = layout.buildDirectory.dir("src/main/java").get()
+  val sourcePath = sourceDir.asFile.toPath()
+  val relativizedPath: (File) -> java.nio.file.Path = { f ->
+    sourcePath.relativize(f.toPath().parent)
   }
-  command.add("-classpath")
-  command.add(sb.toString())
-
-  doFirst {
-    val filesep = System.getProperty("file.separator")
-    //def filesep = fileSeparator
-    val fsre = filesep.replace("\\\\", "\\\\\\\\")
-    val prefixLen = "${sourcepath}".length + 1
-
-    fileTree(mapOf("dir" to sourcepath)).forEach { pkg ->
-      var fn = pkg.toString()
-      fn = fn.substring(prefixLen)
-      val pos = fn.lastIndexOf(filesep)
-      fn = fn.substring(0, pos).replace(fsre, ".")
-      packages.add(fn)
-    }
-
-    for (pkg in packages) {
-      command.add(pkg)
-    }
+  val toPackageName: (java.nio.file.Path) -> String = { p ->
+    p.iterator().asSequence().joinToString(".")
   }
 
-  doLast {
-    execOperations.exec {
-      commandLine(command)
-    }
-  }
+  args(
+    "-sourcepath", "${sourcePath}",
+    "-Xdoclint:none", // -Xdoclint:all, accessibility, html, missing, reference, syntax, none
+    "-quiet",
+    "-d", "${layout.buildDirectory.dir("javadoc").get()}",
+    "-protected",
+    "-bottom", "Copyright (c) 2004-2025 Saxonica Limited. All rights reserved.",
+    "-doctitle", "Saxon ${extension.version.get()} Java API Documentation",
+    "-group", "s9api Interfaces", "net.sf.saxon.s9api:net.sf.saxon.s9api.push:net.sf.saxon.s9api.streams",
+    "-group", "Other Interfaces", "com.saxonica.config:net.sf.saxon:net.sf.saxon.lib:net.sf.saxon.om:net.sf.saxon.query:net.sf.saxon.sxpath:net.sf.saxon.value:net.sf.saxon.type:net.sf.saxon.xpath:net.sf.saxon.xqj",
+    "-group", "External Interfaces", "javax.xml.xquery",
+    "-source", "1.8"
+  )
+
+  args("-classpath", editionSourceSet.compileClasspath.joinToString(":"))
+  args(sourceDir.asFileTree
+    .map(relativizedPath).toSet()
+    .map(toPackageName)
+  )
 }
+
 tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
     dependsOn(editionJavadoc)
 }
