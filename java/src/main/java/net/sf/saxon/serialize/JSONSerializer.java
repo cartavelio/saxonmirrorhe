@@ -35,7 +35,6 @@ import java.util.*;
 
 /**
  * This class implements the JSON serialization method defined in XSLT+XQuery Serialization 3.1.
- *
  */
 
 public class JSONSerializer extends SequenceWriter implements ReceiverWithOutputProperties {

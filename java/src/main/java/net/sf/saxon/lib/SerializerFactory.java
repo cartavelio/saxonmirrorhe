@@ -15,6 +15,7 @@ import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.SequenceWrapper;
 import net.sf.saxon.serialize.*;
 import net.sf.saxon.stax.StAXResultHandlerImpl;
+import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.Err;
@@ -334,6 +335,22 @@ public class SerializerFactory {
                     CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
                     ProxyReceiver normalizer = makeUnicodeNormalizer(pipe, props);
                     return customizeJSONSerializer(js, props, characterMapExpander, normalizer);
+
+                }
+                case "csv": {
+                    if (uWriter == null) {
+                        uWriter = expandedResult.obtainUnicodeWriter();
+                    }
+                    CSVEmitter je = new CSVEmitter(pipe, uWriter, props);
+                    if (expandedResult != null) {
+                        je.setMustClose(expandedResult.isMustCloseAfterUse());
+                    }
+
+                    CharacterMapExpander characterMapExpander = makeCharacterMapExpander(pipe, props, charMapIndex);
+                    if (characterMapExpander != null) {
+                        je.setCharacterMap(characterMapExpander.getCharacterMap());
+                    }
+                    return je;
 
                 }
                 case "adaptive": {
@@ -1168,6 +1185,7 @@ public class SerializerFactory {
 
                 case SaxonOutputKeys.ALLOW_DUPLICATE_NAMES:
                 case SaxonOutputKeys.CANONICAL:
+                case SaxonOutputKeys.CSV_HEADER:
                 case SaxonOutputKeys.ESCAPE_SOLIDUS:
                 case SaxonOutputKeys.JSON_LINES:
                 case SaxonOutputKeys.INDENT_ATTRIBUTES:
@@ -1202,7 +1220,6 @@ public class SerializerFactory {
                     break;
                 case SaxonOutputKeys.ITEM_SEPARATOR:
                     // no checking needed
-
                     break;
                 case OutputKeys.METHOD:
                 case SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD:
@@ -1247,6 +1264,13 @@ public class SerializerFactory {
                         }
                     }
                     break;
+
+                case SaxonOutputKeys.CSV_SEPARATOR:
+                case SaxonOutputKeys.CSV_QUOTE_CHARACTER:
+                    checkExtensions(key);
+                    checkSingleCharacter(key, value);
+                    break;
+
                 default:
                     throw new XPathException("Unknown serialization parameter " + Err.wrap(key), "XQST0109");
             }
@@ -1290,8 +1314,8 @@ public class SerializerFactory {
             if (SaxonOutputKeys.JSON_NODE_OUTPUT_METHOD.equals(key)) {
                 allowed = "xml|html|xhtml|text";
             } else {
-                allowed = "xml|html|xhtml|text|json|adaptive";
-                if ("json".equals(value) || "adaptive".equals(value)) {
+                allowed = "xml|html|xhtml|text|json|csv|adaptive";
+                if ("json".equals(value) || "adaptive".equals(value) || "csv".equals(value)) {
                     return value;
                 }
             }
@@ -1306,6 +1330,12 @@ public class SerializerFactory {
             }
         }
         return value;
+    }
+
+    private static void checkSingleCharacter(String key, String value) throws XPathException {
+        if (StringTool.getStringLength(value) != 1) {
+            throw new XPathException("Serialization parameter " + Err.wrap(key) + " must be a single character", "SEPM0016");
+        }
     }
 
     private static void checkNormalizationForm(String value) throws XPathException {

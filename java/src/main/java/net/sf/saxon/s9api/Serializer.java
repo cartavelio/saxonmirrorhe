@@ -122,6 +122,12 @@ public class Serializer extends AbstractDestination {
          */
         CDATA_SECTION_ELEMENTS(OutputKeys.CDATA_SECTION_ELEMENTS),
 
+        CSV_HEADER(SaxonOutputKeys.CSV_HEADER),
+
+        CSV_QUOTE_CHARACTER(SaxonOutputKeys.CSV_QUOTE_CHARACTER),
+
+        CSV_SEPARATOR(SaxonOutputKeys.CSV_SEPARATOR),
+
         /**
          * Set to any string to indicate that the output is to include a DOCTYPE declaration with this public id
          */
@@ -420,6 +426,9 @@ public class Serializer extends AbstractDestination {
             case BYTE_ORDER_MARK -> SaxonOutputKeys.BYTE_ORDER_MARK;
             case CANONICAL -> SaxonOutputKeys.BYTE_ORDER_MARK;
             case CDATA_SECTION_ELEMENTS -> OutputKeys.CDATA_SECTION_ELEMENTS;
+            case CSV_HEADER -> SaxonOutputKeys.CSV_HEADER;
+            case CSV_QUOTE_CHARACTER ->  SaxonOutputKeys.CSV_QUOTE_CHARACTER;
+            case CSV_SEPARATOR -> SaxonOutputKeys.CSV_SEPARATOR;
             case DOCTYPE_PUBLIC -> OutputKeys.DOCTYPE_PUBLIC;
             case DOCTYPE_SYSTEM -> OutputKeys.DOCTYPE_SYSTEM;
             case ENCODING -> OutputKeys.ENCODING;

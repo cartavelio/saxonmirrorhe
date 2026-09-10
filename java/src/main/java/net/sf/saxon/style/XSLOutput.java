@@ -157,7 +157,7 @@ public class XSLOutput extends StyleElement {
         if (method != null) {
             if ("xml".equals(method) || "html".equals(method) ||
                     "text".equals(method) || "xhtml".equals(method) ||
-                    "json".equals(method) || "adaptive".equals(method)) {
+                    "json".equals(method) || "csv".equals(method) || "adaptive".equals(method)) {
                 checkAndPut(sf, OutputKeys.METHOD, method, details, precedences, thisPrecedence);
                 //details.put(OutputKeys.METHOD, method);
             } else {
@@ -166,7 +166,7 @@ public class XSLOutput extends StyleElement {
                     parts = NameChecker.getQNameParts(method);
                     String prefix = parts[0];
                     if (prefix.isEmpty()) {
-                        compileError("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name", "XTSE1570");
+                        compileError("method must be xml, html, xhtml, text, csv, json, adaptive, or a prefixed name", "XTSE1570");
                     } else {
                         NamespaceUri uri = getURIForPrefix(prefix, false);
                         if (uri == null) {

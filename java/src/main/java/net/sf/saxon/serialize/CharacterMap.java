@@ -22,7 +22,7 @@ import net.sf.saxon.z.IntIterator;
  */
 public class CharacterMap {
 
-    private StructuredQName name;
+    private final StructuredQName name;
     private final IntHashMap<String> charMap;
     private int min = Integer.MAX_VALUE;    // the lowest mapped character
     private int max = 0;                    // the highest mapped character

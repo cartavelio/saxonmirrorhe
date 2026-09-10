@@ -305,6 +305,10 @@ public class SaxonOutputKeys {
 
     public static final String NORMALIZATION_FORM = "normalization-form";
 
+    public static final String CSV_HEADER = "csv-header";
+    public static final String CSV_QUOTE_CHARACTER = "csv-quote-character";
+    public static final String CSV_SEPARATOR = "csv-separator";
+
     /**
      * recognize-binary = yes|no.
      * <p>If set to "yes", and the output is being written using output method "text", Saxon will recognize

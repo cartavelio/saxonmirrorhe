@@ -716,7 +716,8 @@ public class ResultDocument extends Instruction
                     }
                     if (value.equals("xml") || value.equals("html") ||
                             value.equals("text") || value.equals("xhtml") ||
-                            value.equals("json") || value.equals("adaptive") ||
+                            value.equals("json") || value.equals("csv") ||
+                            value.equals("adaptive") ||
                             prevalidated || value.startsWith("{")) {
                         details.setProperty(OutputKeys.METHOD, value);
                     } else if (value.startsWith("Q{")) {
@@ -727,7 +728,7 @@ public class ResultDocument extends Instruction
                             parts = NameChecker.getQNameParts(value);
                             String prefix = parts[0];
                             if (prefix.isEmpty()) {
-                                throw new XPathException("method must be xml, html, xhtml, text, json, adaptive, or a prefixed name")
+                                throw new XPathException("method must be xml, html, xhtml, text, json, csv, adaptive, or a prefixed name")
                                         .withErrorCode("SEPM0016").asStaticError();
                             } else if (nsResolver != null) {
                                 NamespaceUri muri = nsResolver.getURIForPrefix(prefix, false);

@@ -92,6 +92,9 @@ public class Serialize extends SystemFunction implements Callable {
 
         if (version >= 40) {
             op.addAllowedOption("canonical", SequenceType.SINGLE_BOOLEAN);
+            op.addAllowedOption("csv-header", SequenceType.SINGLE_BOOLEAN);
+            op.addAllowedOption("csv-quote-character", SequenceType.SINGLE_STRING);
+            op.addAllowedOption("csv-separator", SequenceType.SINGLE_STRING);
             op.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN); //yes-no-param-type
             op.addAllowedOption("indent-attributes", SequenceType.SINGLE_BOOLEAN);//yes-no-param-type
             op.addAllowedOption("indent-unit", SequenceType.SINGLE_STRING);
@@ -247,6 +250,15 @@ public class Serialize extends SystemFunction implements Callable {
         }
         if ((seqVal = map.get("canonical")) != null) {
             props.setProperty("canonical", toYesNoTypeString(seqVal));
+        }
+        if ((seqVal = map.get("csv-header")) != null) {
+            props.setProperty("csv-header", toYesNoTypeString(seqVal));
+        }
+        if ((seqVal = map.get("csv-quote-character")) != null) {
+            props.setProperty("csv-quote-character", seqVal.head().getStringValue());
+        }
+        if ((seqVal = map.get("csv-separator")) != null) {
+            props.setProperty("csv-separator", seqVal.head().getStringValue());
         }
         if ((seqVal = map.get("doctype-public")) != null) {
             props.setProperty("doctype-public", seqVal.head().getStringValue());

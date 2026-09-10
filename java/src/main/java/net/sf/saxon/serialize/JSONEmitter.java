@@ -39,8 +39,6 @@ import java.util.function.Function;
 
 public class JSONEmitter {
 
-    //private final ExpandedStreamResult result;
-
     private final Configuration config;
     private final UnicodeWriter writer;
     private boolean normalize;
@@ -116,14 +114,6 @@ public class JSONEmitter {
         canonicalEscapeOptions = new JsonReceiver.EscapeOptions(
                 false, true, false, IntPredicateLambda.of(c -> c < 31));
 
-//        String max = details.getProperty(SaxonOutputKeys.LINE_LENGTH);
-//        if (max != null) {
-//            try {
-//                maxLineLength = Integer.parseInt(max);
-//            } catch (NumberFormatException err) {
-//                // ignore the error.
-//            }
-//        }
         String spaces = details.getProperty(SaxonOutputKeys.INDENT_SPACES);
         if (spaces != null) {
             try {
