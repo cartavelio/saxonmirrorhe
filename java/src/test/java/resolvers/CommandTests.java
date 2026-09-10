@@ -1,8 +1,8 @@
 package resolvers;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Transform;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Logger;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CommandTests {
-    private final ConfigTest configTest = new ConfigTest();
     private static class RetentiveLogger extends Logger {
 
         private final List<String> output = new ArrayList<>();
@@ -67,8 +66,8 @@ public class CommandTests {
     @Test
     public void testWithoutCatalog() {
         String[] args = {
-                "-xsl:" + configTest.getDataDir() + "resolvers/style.xsl",
-                "-s:" + configTest.getDataDir() + "resolvers/input.xml",
+                "-xsl:" + Testdata.path("resolvers/style.xsl"),
+                "-s:" + Testdata.path("resolvers/input.xml"),
                 "-quit:off"
         };
         try {
@@ -83,9 +82,9 @@ public class CommandTests {
     @Test
     public void testWithCatalog() {
         String[] args = {
-                "-xsl:" + configTest.getDataDir() + "resolvers/style.xsl",
-                "-s:" + configTest.getDataDir() + "resolvers/input.xml",
-                "-catalog:" + configTest.getDataDir() + "resolvers/catalog.xml",
+                "-xsl:" + Testdata.path("resolvers/style.xsl"),
+                "-s:" + Testdata.path("resolvers/input.xml"),
+                "-catalog:" + Testdata.path("resolvers/catalog.xml"),
                 "-quit:off"
         };
         try {
