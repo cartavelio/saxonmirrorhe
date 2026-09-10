@@ -563,7 +563,7 @@ public class SimpleTypeDefinition extends UserSimpleType implements UserSchemaCo
         // Check that the facets are legal
         List<Facet> facets = getLocalFacetList();
         for (Facet facet : facets) {
-            Class facetClass = facet.getClass();
+            Class<?> facetClass = facet.getClass();
             if (facetClass.equals(PatternFacet.class) || facetClass.equals(EnumerationFacet.class) || facetClass.equals(AssertionFacet.class)) {
                 //OK
             } else {

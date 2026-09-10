@@ -391,10 +391,12 @@ public abstract class SelectorWatch extends PatternWatch {
 
         protected final AtomicSequence compact(AtomicSequence value) {
             if (value instanceof StringValue) {
-                return new CompactStringValue(value.getUnicodeStringValue());
-            } else {
-                return value;
+                CompactStringValue c = CompactStringValue.tryToMake(value.getUnicodeStringValue());
+                if (c != null) {
+                    return c;
+                }
             }
+            return value;
         }
 
         /**

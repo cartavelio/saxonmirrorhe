@@ -75,6 +75,10 @@ public class SlotManagerEE extends SlotManager {
                 StackFrame stack = context.getStackFrame();
                 SlotManager map = stack.getStackFrameMap();
                 Sequence[] values = stack.getStackFrameValues();
+                if (map.getNumberOfVariables() != values.length) {
+                    logger.info("     Inconsistent stack frame: expecting " + map.getNumberOfVariables() + " variables, but found " + values.length);
+                    return;
+                }
                 if (map.getNumberOfVariables() > 0) {
                     logger.info("     Local variables");
                     boolean foundOne = false;
@@ -96,7 +100,7 @@ public class SlotManagerEE extends SlotManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             assert false;
             // better to display nothing than to crash when producing extra diagnostics
         }

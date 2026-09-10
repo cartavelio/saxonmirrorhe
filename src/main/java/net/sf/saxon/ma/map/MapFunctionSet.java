@@ -181,6 +181,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             register("pairs", 1, e -> e.populate(MapPairs::new, KVP_TYPE_INEXTENSIBLE, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
+            register("sort", 1, e -> e.populate(MapSort::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+
             register("empty", 1, e -> e.populate(MapEmpty::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
@@ -634,19 +637,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             assert map != null;
-            //if (arguments.length == 1) {
-                return SequenceTool.toLazySequence(map.keys());
-//            } else {
-//                FunctionItem fn = (FunctionItem) arguments[1].head();
-//                ZenoSequence results = new ZenoSequence();
-//                for (KeyValuePair pair : map.keyValuePairs()) {
-//                    BooleanValue selected = (BooleanValue)fn.call(context, new Sequence[]{pair.value}).head();
-//                    if (selected.getBooleanValue()) {
-//                        results = results.append(pair.key);
-//                    }
-//                }
-//                return results;
-//            }
+            return SequenceTool.toLazySequence(map.keys());
         }
     }
 
@@ -1021,8 +1012,24 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         }
     }
 
+    /**
+     * Implementation of the function map:of-pairs() =&gt; Map
+     */
+    public static class MapSort extends SystemFunction {
 
-   /**
+        @Override
+        public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+            MapItem input = (MapItem)arguments[0].head();
+            MapItem sortedMap = new SortedMap();
+            for (KeyValuePair pair : input.keyValuePairs()) {
+                sortedMap = sortedMap.addEntry(pair.key, pair.value);
+            }
+            return sortedMap;
+        }
+    }
+
+
+    /**
      * Implementation of the extension function map:put() =&gt; Map
      */
 

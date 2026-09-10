@@ -63,13 +63,6 @@ public class TemplateRuleInitializer {
                 Mode m = mgr.obtainMode(modeName, false);
                 visitor.setOptimizeForStreaming(m.isDeclaredStreamable());
                 Expression body = templateRule.getBody().typeCheck(visitor, cisi);
-//
-//                if (templateRule.getRequiredType() != null && templateRule.getRequiredType() != SequenceType.ANY_SEQUENCE) {
-//                    Supplier<RoleDiagnostic> role = () ->
-//                            new RoleDiagnostic(RoleDiagnostic.TEMPLATE_RESULT, xslTemplate.getDiagnosticId(), 0, "XTTE0505");
-//                    body = config.getTypeChecker(false).staticTypeCheck(body, templateRule.getRequiredType(), role, visitor);
-//                }
-
                 templateRule.setBody(ExpressionTool.optimizeComponentBody(
                         body, compilation, visitor, cisi, false));
 

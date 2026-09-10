@@ -41,7 +41,6 @@ public class StringValue extends AtomicValue {
     public static final StringValue FALSE = new StringValue(StringConstants.FALSE);
     public static final StringValue CR = new StringValue("\r");
     public static final StringValue LF = new StringValue("\n");
-    public static final StringValue CRLF = new StringValue("\r\n");
 
     public static final StringValue ZERO_LENGTH_UNTYPED = StringValue.makeUntypedAtomic(EmptyUnicodeString.getInstance());
 
@@ -369,19 +368,30 @@ public class StringValue extends AtomicValue {
         return s;
     }
 
+    public static class StringXPathComparable implements XPathComparable {
+
+        StringCollator collator;
+        UnicodeString value;
+        public StringXPathComparable(UnicodeString value, StringCollator collator) {
+            this.collator = collator;
+            this.value = value;
+        }
+        @Override
+        public int compareTo(XPathComparable o) {
+            if (o instanceof StringValue) {
+                return collator.compareStrings(value, ((StringValue) o).content);
+            } else if (o instanceof StringXPathComparable) {
+                return collator.compareStrings(value, ((StringXPathComparable)o).value);
+            } else {
+                throw new ClassCastException("Cannot compare xs:string to " + o.toString());
+            }
+        }
+    }
+
     @Override
     @CSharpInnerClass(outer=true, extra={"Saxon.Hej.lib.StringCollator collator"})
     public XPathComparable getXPathComparable(StringCollator collator, int implicitTimezone) throws NoDynamicContextException {
-        return new XPathComparable() {
-            @Override
-            public int compareTo(XPathComparable o) {
-                if (o instanceof StringValue) {
-                    return collator.compareStrings(getContent(), ((StringValue)o).content);
-                } else {
-                    throw new ClassCastException("Cannot compare xs:string to " + o.toString());
-                }
-            }
-        };
+        return new StringXPathComparable(getContent(), collator);
     }
 
     /**

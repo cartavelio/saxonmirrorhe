@@ -44,6 +44,17 @@ public class Twine8 extends UnicodeString {
     }
 
     /**
+     * Constructor
+     *
+     * @param bytes the byte array containing the characters in the range 0-255.
+     * @param start the position of the first byte to use
+     * @param end the position of the first byte to not be used
+     */
+    public Twine8(byte[] bytes, int start, int end) {
+        this(Arrays.copyOfRange(bytes, start, end));
+    }
+
+    /**
      * Create a Twine8 from an array of characters that are known to be single byte chars
      * @param chars character array, all characters in range must be LE 255
      * @param start offset of first character to be used

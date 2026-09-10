@@ -8,17 +8,12 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.PlainType;
-import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.SequenceType;
 
 import java.util.Comparator;
 import java.util.Iterator;
 
-public class SortedMap extends MapItem {
+public class SortedMap extends MapTypeMaintainer {
 
     private static class KeyComparator implements Comparator<AtomicValue> {
 
@@ -149,40 +144,5 @@ public class SortedMap extends MapItem {
         return new SortedMap(map2);
     }
 
-    /**
-     * Ask whether the map conforms to a given map type
-     *
-     * @param keyType   the required keyType
-     * @param valueType the required valueType
-     * @param th        the type hierarchy cache for the configuration
-     * @return true if the map conforms to the required type
-     */
-    @Override
-    public boolean conforms(PlainType keyType, SequenceType valueType, TypeHierarchy th) {
-        return false;
-    }
-
-    /**
-     * Get the type of the map. This method is used largely for diagnostics, to report
-     * the type of a map when it differs from the required type.
-     *
-     * @param th the type hierarchy cache
-     * @return the type of this map
-     */
-    @Override
-    public ItemType getItemType(TypeHierarchy th) {
-        return null;
-    }
-
-    /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     * empty, return UType.VOID
-     */
-    @Override
-    public UType getKeyUType() {
-        return null;
-    }
 }
 

@@ -279,10 +279,9 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                 case "stack-trace": {
                     final XPathContext errorContext = error.getXPathContext();
                     if (errorContext == null) {
-                        return new SimpleLazyFunction(EmptySequence::getInstance, SequenceType.OPTIONAL_STRING);
+                        return EmptySequence.getInstance();
                     } else {
-                        return new SimpleLazyFunction(() -> new StringValue(StandardDiagnostics.stackTrace(errorContext)),
-                                                      SequenceType.OPTIONAL_STRING);
+                        return new LazyString(() -> StandardDiagnostics.stackTrace(errorContext));
                     }
                     
                 }
@@ -320,13 +319,12 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     }
 
                     final XPathContext errorContext = error.getXPathContext();
-                    FunctionItem stackTraceFn;
+                    GroundedValue stackTrace;
                     if (errorContext == null) {
-                        stackTraceFn = new SimpleLazyFunction(EmptySequence::getInstance, SequenceType.OPTIONAL_STRING);
+                        stackTrace = EmptySequence.getInstance();
                     } else {
-                        stackTraceFn = new SimpleLazyFunction(
-                                () -> new StringValue(StandardDiagnostics.stackTrace(errorContext)),
-                                SequenceType.OPTIONAL_STRING);
+                        stackTrace = new LazyString(
+                                () -> StandardDiagnostics.stackTrace(errorContext));
                     }
 
                     return new ShapedMap(errorMapShape,
@@ -337,7 +335,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                                            new Int64Value(line),
                                            new Int64Value(column),
                                            EmptySequence.getInstance(),
-                                           stackTraceFn
+                                           stackTrace
                                         );
                 }
                 default:

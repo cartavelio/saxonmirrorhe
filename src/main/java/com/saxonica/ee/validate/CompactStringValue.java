@@ -2,7 +2,8 @@ package com.saxonica.ee.validate;
 
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.Slice8;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
@@ -10,36 +11,54 @@ import net.sf.saxon.tree.iter.SingleAtomicIterator;
 import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntIterator;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
 /**
  * A compact representation of an atomic xs:string value used in saved tables for key and keyref constraints,
- * designed to economize on space.
- * @since 9.6
+ * designed to economize on space, used only when the string consists exclusively of 8-bit characters
+ * @since 9.6. Changed in 13.0 to wrap byte[] rather than char[]
  */
 public class CompactStringValue implements AtomicSequence {
 
-    private final char[] value;
+    private final byte[] value;
 
-    // Note: we could go further and store a UTF-8 byte array. The difficulty would be that getSchemaComparable()
-    // would either (a) have to reconstruct the string, which would make for expensive comparisons, or (b) generate
-    // a value that does not compare equal with the original; which is not a problem if all strings are represented
-    // using this class, but is problematic in the more general case. For the moment, getting the storage down to a
-    // single char[] is a big win over 9.5 and earlier releases.
-
-    public CompactStringValue(UnicodeString content) {
-        this.value = content.toString().toCharArray();
+    public CompactStringValue(byte[] content) {
+        this.value = content;
     }
 
-    public CompactStringValue(String content) {
-        this.value = content.toCharArray();
+    /**
+     * Try to make a CompactStringValue for a supplied UnicodeString
+     * @param str the supplied string
+     * @return a CompactStringValue if possible (specifically, if the characters are all <= 255); otherwise return null
+     */
+    public static CompactStringValue tryToMake(UnicodeString str) {
+        if (str instanceof Twine8) {
+            return new CompactStringValue(((Twine8)str).getByteArray());
+        } else if (str instanceof Slice8) {
+            return new CompactStringValue(((Slice8) str).asByteArray());
+        } else {
+            int len = str.length32();
+            byte[] bytes = new byte[len];
+            IntIterator iter = str.codePoints();
+            int p=0;
+            while (iter.hasNext()) {
+                int cp = iter.next();
+                if (cp > 255) {
+                    return null;
+                } else {
+                    bytes[p++] = (byte)(cp & 255);
+                }
+            }
+            return new CompactStringValue(bytes);
+        }
     }
 
     @Override
     public StringValue head() {
-        return new StringValue(new String(value));
+        return new StringValue(new Twine8(value));
     }
 
     @Override
@@ -62,20 +81,6 @@ public class CompactStringValue implements AtomicSequence {
         return getUnicodeStringValue();
     }
 
-//    @Override
-//    public SchemaComparable getSchemaComparable() {
-//        return this;
-//    }
-//
-//    @Override
-//    public int compareTo(@NotNull SchemaComparable o) {
-//        if (o instanceof CompactStringValue) {
-//            return new String(value).compareTo(new String(((CompactStringValue)o).value));
-//        } else {
-//            return SequenceTool.INDETERMINATE_ORDERING;
-//        }
-//    }
-
     @Override
     public boolean equals(Object obj) {
         return obj instanceof CompactStringValue && Arrays.equals(value, ((CompactStringValue) obj).value);
@@ -92,12 +97,12 @@ public class CompactStringValue implements AtomicSequence {
 
     @Override
     public UnicodeString getUnicodeStringValue() {
-        return StringView.of(new String(value)).tidy();
+        return new Twine8(value);
     }
 
     @Override
     public String getStringValue() throws XPathException {
-        return new String(value);
+        return getUnicodeStringValue().toString();
     }
 
     @Override
@@ -122,12 +127,9 @@ public class CompactStringValue implements AtomicSequence {
 
     /*@NotNull*/
     public String toString() {
-        return new String(value);
+        return getUnicodeStringValue().toString();
     }
 
-    public char[] getChars() {
-        return value;
-    }
 
 }
 

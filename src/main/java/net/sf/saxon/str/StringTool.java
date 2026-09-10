@@ -126,7 +126,7 @@ public class StringTool {
         }
         return new Twine8(bytes);
     }
-
+    
     /**
      * Get an iterator over the codepoints in a {@link CharSequence} - typically a {@code String}
      * @param value the supplied string

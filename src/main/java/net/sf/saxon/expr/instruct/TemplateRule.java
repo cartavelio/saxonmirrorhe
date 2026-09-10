@@ -10,7 +10,6 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.PushEvaluator;
-import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
@@ -454,22 +453,22 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         }
     }
 
-    protected void copyTo(TemplateRule tr) {
-        if (body != null) {
-            tr.body = body.copy(new RebindingMap());
-        }
-        if (matchPattern != null) {
-            tr.matchPattern = matchPattern.copy(new RebindingMap());
-        }
-        tr.requiredType = requiredType;
-        tr.declaredStreamable = declaredStreamable; // ? this can vary from one mode to another
-        tr.requiredContextItemType = requiredContextItemType;
-        tr.absentFocus = absentFocus;
-        tr.stackFrameMap = stackFrameMap;
-        tr.packageData = packageData;
-        tr.systemId = systemId;
-        tr.lineNumber = lineNumber;
-    }
+//    protected void copyTo(TemplateRule tr) {
+//        if (body != null) {
+//            tr.body = body.copy(new RebindingMap());
+//        }
+//        if (matchPattern != null) {
+//            tr.matchPattern = matchPattern.copy(new RebindingMap());
+//        }
+//        tr.requiredType = requiredType;
+//        tr.declaredStreamable = declaredStreamable; // ? this can vary from one mode to another
+//        tr.requiredContextItemType = requiredContextItemType;
+//        tr.absentFocus = absentFocus;
+//        tr.stackFrameMap = stackFrameMap;
+//        tr.packageData = packageData;
+//        tr.systemId = systemId;
+//        tr.lineNumber = lineNumber;
+//    }
 
     @Override
     public void setChildExpression(Expression expr) {

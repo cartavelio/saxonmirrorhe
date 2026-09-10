@@ -3758,12 +3758,21 @@ public class XPathParser {
                 if (empty) {
                     return NodeKindTest.DOCUMENT;
                 } else {
-                    if (!(isKeyword("element") || isKeyword("schema-element"))) {
-                        grumble("Argument to document-node() must be element(...) or schema-element(...)");
+                    if (isKeyword("element") || isKeyword("schema-element")) {
+                        NodeTest inner = parseKindTest();
+                        readToken(Token.RPAREN);
+                        return new DocumentNodeTest(inner);
+                    } else if (allowXPath40Syntax) {
+                        List<NodeTest> tests = parseNameTestUnion(Type.ELEMENT);
+                        readToken(Token.RPAREN);
+                        if (tests.size() == 1) {
+                            return new DocumentNodeTest(tests.get(0));
+                        } else {
+                            return new DocumentNodeTest(NameTestUnion.of(tests));
+                        }
+                    } else {
+                        grumble("After 'document-node('", " expected 'element' or 'schema-element'");
                     }
-                    NodeTest inner = parseKindTest();
-                    readToken(Token.RPAREN);
-                    return new DocumentNodeTest(inner);
                 }
 
             case "processing-instruction":

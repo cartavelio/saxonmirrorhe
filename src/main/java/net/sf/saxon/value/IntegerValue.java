@@ -47,6 +47,7 @@ public abstract class IntegerValue extends DecimalValue {
 
     /*@NotNull*/ private static final long[] ranges = {
             // arrange so the most frequently used types are near the start
+            StandardNames.XS_DECIMAL, NO_LIMIT, NO_LIMIT,
             StandardNames.XS_INTEGER, NO_LIMIT, NO_LIMIT,
             StandardNames.XS_LONG, Long.MIN_VALUE, Long.MAX_VALUE,
             StandardNames.XS_INT, Integer.MIN_VALUE, Integer.MAX_VALUE,
