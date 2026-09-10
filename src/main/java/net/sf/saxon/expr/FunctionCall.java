@@ -211,14 +211,23 @@ public abstract class FunctionCall extends Expression {
                                   ExpressionVisitor visitor) throws XPathException {
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(visitor.getStaticContext().isInBackwardsCompatibleMode());
         SequenceType[] argTypes = target.getFunctionItemType().getArgumentTypes();
-        int n = target.getArity();
-        for (int i = 0; i < n; i++) {
+        if (target.isSequenceVariadic() && getArity() == 1) {
             String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, i);
-            setArg(i, tc.staticTypeCheck(
-                    getArg(i),
-                    argTypes[i],
+            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, 0);
+            setArg(0, tc.staticTypeCheck(
+                    getArg(0),
+                    new SequenceType(argTypes[0].getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE),
                     role, visitor));
+        } else {
+            int n = target.getArity();
+            for (int i = 0; i < n; i++) {
+                String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
+                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, i);
+                setArg(i, tc.staticTypeCheck(
+                        getArg(i),
+                        argTypes[i],
+                        role, visitor));
+            }
         }
     }
 

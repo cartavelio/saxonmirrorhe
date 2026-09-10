@@ -12,18 +12,18 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.ma.arrays.ArrayFunctionSet;
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.arrays.ArrayItemType;
-import net.sf.saxon.ma.arrays.SquareArrayConstructor;
+import net.sf.saxon.ma.arrays.*;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -130,19 +130,21 @@ public class ApplyFn extends SystemFunction  {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         final Function function = (Function) arguments[0].head();
-        ArrayItem args = (ArrayItem)arguments[1].head();
+        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
+        FunctionItemType fit = function.getFunctionItemType();
+
+        ArrayItem args = (ArrayItem) arguments[1].head();
 
         if (function.getArity() != args.arrayLength()) {
             String errorCode = isDynamicFunctionCall() ? "XPTY0004" : "FOAP0001";
             XPathException err = new XPathException(
                     "Number of arguments required for dynamic call to " + function.getDescription() + " is " + function.getArity() +
-                    "; number supplied = " + args.arrayLength(), errorCode);
+                            "; number supplied = " + args.arrayLength(), errorCode);
             err.setIsTypeError(isDynamicFunctionCall());
             err.setXPathContext(context);
             throw err;
         }
-        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-        FunctionItemType fit = function.getFunctionItemType();
+
         Sequence[] argArray = new Sequence[args.arrayLength()];
         if (fit == AnyFunctionType.ANY_FUNCTION) {
             for (int i = 0; i < argArray.length; i++) {
@@ -153,7 +155,7 @@ public class ApplyFn extends SystemFunction  {
                 SequenceType expected = fit.getArgumentTypes()[i];
                 RoleDiagnostic role;
                 if (isDynamicFunctionCall()) {
-                    role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "result of " + dynamicFunctionCall, i);
+                    role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, dynamicFunctionCall.toString(), 0);
                 } else {
                     role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, "fn:apply", i + 1);
                 }
@@ -162,6 +164,23 @@ public class ApplyFn extends SystemFunction  {
                 argArray[i] = converted.materialize();
             }
         }
+
+        if (function.isSequenceVariadic()) {
+            List<Item> members = new ArrayList<>();
+            ArrayItem suppliedArgs = (ArrayItem) arguments[1].head();
+            for (GroundedValue mem : suppliedArgs.members()) {
+                for (Item it : mem.asIterable()) {
+                    members.add(it);
+                }
+            }
+            final GroundedValue argSequence = SequenceExtent.makeSequenceExtent(members);
+            List<GroundedValue> singletonArg = new ArrayList<>(1);
+            singletonArg.add(argSequence);
+        } else {
+
+        }
+
+
         Sequence rawResult = dynamicCall(function, context, argArray);
         if (function.isTrustedResultType()) {
             // trust system functions to return a result of the correct type

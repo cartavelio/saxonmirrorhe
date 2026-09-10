@@ -12,11 +12,13 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
-import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.*;
+import net.sf.saxon.str.EmptyUniString;
+import net.sf.saxon.str.UniStringConsumer;
+import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.FunctionItemType;
@@ -46,7 +48,7 @@ public class Concat extends SystemFunction implements PushableFunction {
     @Override
     public FunctionItemType getFunctionItemType() {
         SequenceType[] argTypes = new SequenceType[getArity()];
-        Arrays.fill(argTypes, (getDetails().properties & BuiltInFunctionSet.SEQV) == 0 ? SequenceType.OPTIONAL_ATOMIC : SequenceType.ATOMIC_SEQUENCE);
+        Arrays.fill(argTypes, SequenceType.ATOMIC_SEQUENCE);
         return new SpecificFunctionType(argTypes, SequenceType.SINGLE_STRING);
     }
 

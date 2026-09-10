@@ -100,6 +100,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             throw new IllegalArgumentException(importee.getNamespace());
         }
         functionTable.putAll(importee.functionTable);
+        sequenceVariadicFunctions.putAll(importee.sequenceVariadicFunctions);
         //importedFunctions.add(importee);
     }
 
@@ -132,12 +133,12 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
             key = name + "#" + (minArity + 1);
             return functionTable.get(key);
         }
-        // Try for a variable-arity function (concat only up to 3.1)
-        if (name.equals("concat") && arity >= 2 && getNamespace().equals(NamespaceConstant.FN)) {
-            key = "concat#-1";
-            entry = functionTable.get(key);
-            return entry;
-        }
+//        // Try for a variable-arity function (concat only up to 3.1)
+//        if (name.equals("concat") && arity >= 2 && getNamespace().equals(NamespaceConstant.FN)) {
+//            key = "concat#-1";
+//            entry = functionTable.get(key);
+//            return entry;
+//        }
         return null;
     }
 
