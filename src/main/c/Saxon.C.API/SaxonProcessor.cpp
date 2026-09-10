@@ -15,7 +15,7 @@
 #include "XdmAtomicValue.h"
 
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 #include <signal.h>
@@ -782,7 +782,7 @@ void SaxonProcessor::setCatalog(const char *catalogFile, bool isTracing) {
 
 
 XdmNode *SaxonProcessor::parseXmlFromString(const char *source, SchemaValidator * validator) {
-
+     std::cerr<<"C++ parseXmlFromString source="<<source<<std::endl;
     jmethodID mID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(saxonCAPIClass, "parseXmlString",
                                                                                     "(Ljava/lang/String;Lnet/sf/saxon/s9api/Processor;Lnet/sf/saxon/s9api/DocumentBuilder;Lnet/sf/saxon/s9api/SchemaValidator;Ljava/lang/String;)Lnet/sf/saxon/s9api/XdmNode;");
     if (!mID) {
@@ -942,19 +942,12 @@ void SaxonProcessor::release() {
 /* ========= Factory method for Xdm ======== */
 
 XdmAtomicValue *SaxonProcessor::makeStringValue(const char *str) {
-    jobject obj = getJavaStringValue(SaxonProcessor::sxn_environ, str);
-    static jmethodID mssID_atomic = nullptr;
-    if (mssID_atomic == nullptr) {
-        mssID_atomic = (jmethodID) (SaxonProcessor::sxn_environ->env->GetMethodID(xdmAtomicClass, "<init>",
-                                                                                  "(Ljava/lang/String;)V"));
-    }
-    if (!mssID_atomic) {
-        std::cerr << "XdmAtomic constructor (String)" << std::endl;
-        return nullptr;
-    }
-    jobject obj2 = (jobject) (SaxonProcessor::sxn_environ->env->NewObject(xdmAtomicClass, mssID_atomic, obj));
+
+
+    jobject obj2 = (jobject) createSaxonProcessor2(SaxonProcessor::sxn_environ->env, xdmAtomicClass, "(Ljava/lang/String;)V", SaxonProcessor::sxn_environ->env->NewStringUTF(str));
+
     XdmAtomicValue *value = new XdmAtomicValue(obj2, "xs:string");
-    SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
+    //SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj);
     SaxonProcessor::sxn_environ->env->DeleteLocalRef(obj2);
     return value;
 }

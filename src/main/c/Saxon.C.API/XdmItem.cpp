@@ -58,7 +58,10 @@ jobject XdmItem::getUnderlyingValue(){
 #ifdef DEBUG
 	std::cerr<<std::endl<<"XdmItem-getUnderlyingValue:"<<std::endl; 
 #endif
-	if(value == nullptr) {
+	if(!value) {
+#ifdef DEBUG
+	     std::cerr<<std::endl<<"XdmItem-getUnderlyingValue - nullptr:"<<std::endl;
+#endif
 		return nullptr;	
 	}
 	return value;

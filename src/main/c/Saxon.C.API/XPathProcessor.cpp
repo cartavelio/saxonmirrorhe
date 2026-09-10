@@ -162,14 +162,7 @@ if (!mID) {
             } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayClass)           == JNI_TRUE) {
                 xdmItem =  new XdmArray(resulti);
             }
-            if(sizex == 1) {
-
-				delete value;
-				//SaxonProcessor::sxn_environ->env->DeleteLocalRef(resultsi);
-				SaxonProcessor::sxn_environ->env->DeleteLocalRef(results);
-
-				return xdmItem;
-			}
+  
 
 			value->addXdmItem(xdmItem);
 		}
@@ -459,7 +452,7 @@ std::cerr<<"xpathStr: = "<<xpathStr<<std::endl;
 	return result;
 }
 return false;
-}
+}                                                 
 
 
 void XPathProcessor::setParameter(const char * name, XdmValue*value, bool withParam) {

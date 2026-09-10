@@ -174,7 +174,9 @@ void XsltExecutable::setInitialMode(const char * modeName){
 
 
 void XsltExecutable::setParameter(const char *name, XdmValue *value) {
+std::cout<<"setParameter() called"<<std::endl;
     if (value != nullptr && name != nullptr) {
+    std::cout<<"setParameter() - XdmValue  name="<<name<<", value="<<value->getType()<<" valu="<<value->toString()<<std::endl;
         //value->incrementRefCount();
         int s = parameters.size();
         std::string skey = "param:" + std::string(name);
@@ -192,6 +194,13 @@ void XsltExecutable::setParameter(const char *name, XdmValue *value) {
             }
         }
     }
+//#ifdef DEBUG
+    else {
+                std::cout<<"setParameter() - XdmValue is null"<<std::endl;
+          }
+//#endif
+
+
 }
 
 void XsltExecutable::setInitialTemplateParameters(std::map<std::string, XdmValue *> _itparameters, bool _tunnel) {
@@ -746,7 +755,7 @@ XsltExecutable::callFunctionReturningString(const char *functionName, XdmValue *
     static jmethodID afsmID = nullptr;
 
     if(afsmID == nullptr) {
-        (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
+       afsmID =  (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,
                                                                         "callFunctionReturningString",
                                                                         "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)[B");
     }
@@ -1067,10 +1076,6 @@ const char * XsltExecutable::callTemplateReturningString(const char *templateNam
 XdmValue *XsltExecutable::callTemplateReturningValue(const char *templateName) {
 
 
-    if(templateName == nullptr) {
-	std::cerr<<"template name given as null"<<std::endl;
-	return nullptr;
-    }
     static jmethodID ctsvmID = nullptr;
     if (ctsvmID == nullptr) {
         ctsvmID = (jmethodID) SaxonProcessor::sxn_environ->env->GetStaticMethodID(cppClass,

@@ -7,12 +7,11 @@
   <xsl:template match="*">
 	<output>
 	<!--<xsl:value-of select="normalize-unicode('Eisbär', 'NFKD')" />-->
-    <xsl:for-each select="person" >
+    <xsl:for-each select="//person" >
 	<out><xsl:value-of select="."/></out>
     </xsl:for-each>
       <out><xsl:value-of select="$numParam*2"/></out>
     </output>
-	<xsl:message>Testing message1</xsl:message>
 	<xsl:message>Testing message2</xsl:message>
   </xsl:template>
   
