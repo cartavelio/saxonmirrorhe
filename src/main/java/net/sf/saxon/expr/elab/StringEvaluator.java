@@ -10,8 +10,19 @@ package net.sf.saxon.expr.elab;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;
 
+/**
+ * A StringEvaluator is a function that typically encapsulates the logic for
+ * evaluating an expression that returns a string.
+ */
 @FunctionalInterface
 public interface StringEvaluator {
+
+    /**
+     * Evaluate the encapsulated expression
+     * @param context the evaluation context
+     * @return the result, as a string; or null to represent an empty sequence
+     * @throws XPathException if a dynamic error occurs
+     */
 
     String eval(XPathContext context) throws XPathException;
 }

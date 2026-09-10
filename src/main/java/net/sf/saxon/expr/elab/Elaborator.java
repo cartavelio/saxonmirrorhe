@@ -186,7 +186,10 @@ public abstract class Elaborator {
 
     public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
         UnicodeStringEvaluator evaluator = elaborateForUnicodeString(zeroLengthWhenAbsent);
-        return context -> evaluator.eval(context).toString();
+        return context -> {
+            UnicodeString u = evaluator.eval(context);
+            return u == null ? handleNullString(zeroLengthWhenAbsent) : u.toString();
+        };
     }
 
 
