@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.SlotManager;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trans.DecimalFormatManager;
 import net.sf.saxon.trans.KeyManager;
@@ -55,6 +56,7 @@ public class PackageData {
         targetEdition = config.getEditionCode();
         globalSlotManager = config.makeSlotManager();
         importedSchema = config.emptySchema();
+        hostLanguageVersion = config.getBooleanProperty(Feature.ALLOW_SYNTAX_EXTENSIONS) ? 40 : 31;
     }
 
     /**

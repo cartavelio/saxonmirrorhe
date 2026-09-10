@@ -1442,14 +1442,15 @@ public class Configuration implements SourceResolver {
     /**
      * Make a function in the "fn" namespace
      *
-     * @param localName the local name of the function
-     * @param arity     the arity of the function
+     * @param localName       the local name of the function
+     * @param arity           the arity of the function
+     * @param languageVersion the XPath language version (times ten: 31 means 3.1)
      * @return the function
      */
 
-    public SystemFunction makeSystemFunction(String localName, int arity) {
+    public SystemFunction makeSystemFunction(String localName, int arity, int languageVersion) {
         try {
-            return getXSLTFunctionSet(30).makeFunction(localName, arity);
+            return getXSLTFunctionSet(languageVersion <= 31 ? 30 : 40).makeFunction(localName, arity);
         } catch (XPathException e) {
             return null;
         }
