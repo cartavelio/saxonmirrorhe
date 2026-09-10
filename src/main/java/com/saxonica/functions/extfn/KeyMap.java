@@ -6,9 +6,11 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RangeKey;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -28,8 +30,10 @@ public class KeyMap extends SystemFunction {
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         String keyName = arguments[0].head().getStringValue();
         NodeInfo doc = (NodeInfo) arguments[1].head();
-        String min = arguments[2].head().getStringValue();
-        String max = arguments[3].head().getStringValue();
+        Item minItem = arguments[2].head();
+        Item maxItem = arguments[3].head();
+        UnicodeString min = minItem == null ? null : minItem.getUnicodeStringValue();
+        UnicodeString max = maxItem == null ? null : maxItem.getUnicodeStringValue();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
 
         StructuredQName keyQName = StructuredQName.fromLexicalQName(

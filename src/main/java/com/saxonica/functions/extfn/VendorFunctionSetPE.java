@@ -11,6 +11,7 @@ import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.number.NamedTimeZone;
 import net.sf.saxon.functions.ContextItemAccessorFunction;
 import net.sf.saxon.functions.Doc_2;
+import net.sf.saxon.functions.ParcelFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
@@ -18,6 +19,7 @@ import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
+import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapType;
@@ -119,6 +121,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
 
         register("analyze-uri", 1, AnalyzeUri.class, analyzeUriResult, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
+
+        register("array-member", 1, ParcelFn.class, Parcel.TYPE, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, null);
 
         register("base64Binary-to-octets", 1, Base64BinaryToOctets.class, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, ONE, null);
