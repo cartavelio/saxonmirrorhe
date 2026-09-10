@@ -7,10 +7,7 @@
 
 package net.sf.saxon.functions.registry;
 
-import net.sf.saxon.expr.Callable;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.XPathParser;
@@ -287,7 +284,7 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     if (errorContext == null) {
                         return new ConstantAnonymousFunction(EmptySequence.getInstance(), SequenceType.OPTIONAL_STRING);
                     } else {
-                        Callable callable = (cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext));
+                        Callable callable = new CallableDelegate((cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext)));
                         return new CallableFunction(0, callable,
                                                     new SpecificFunctionType(new SequenceType[]{}, SequenceType.OPTIONAL_STRING));
                     }
@@ -331,7 +328,8 @@ public class VendorFunctionSetHE extends BuiltInFunctionSet {
                     if (errorContext == null) {
                         stackTraceFn = new ConstantAnonymousFunction(EmptySequence.getInstance(), SequenceType.OPTIONAL_STRING);
                     } else {
-                        Callable callable = (cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext));
+                        Callable callable = new CallableDelegate(
+                                (cxt, args) -> new StringValue(StandardDiagnostics.stackTrace(errorContext)));
                         stackTraceFn = new CallableFunction(0, callable,
                                                     new SpecificFunctionType(new SequenceType[]{}, SequenceType.OPTIONAL_STRING));
                     }
