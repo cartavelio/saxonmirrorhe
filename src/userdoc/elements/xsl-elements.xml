@@ -617,9 +617,11 @@
             <in-spec>xslt40</in-spec>
     
             <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
-            <status>Available from Saxon 11; requires syntax extensions to be enabled. Also available in
-                earlier releases under the synonym 
-                <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a>.</status>
+            <status>
+                <p>Available from Saxon 11; requires syntax extensions to be enabled. Also available
+                    in earlier releases under the synonym 
+                <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a>.</p>
+            </status>
             <see-also name="array-member" type="xsl-elements"/>
             <!--TODO <see-also name="parcel" type="functions"/>-->
 
@@ -652,9 +654,11 @@
             <in-spec>xslt40</in-spec>
             
             <saxon-edition>PE/EE 11_EXPERIMENTAL</saxon-edition>
-            <status>Available from Saxon 11; requires syntax extensions to be enabled. Also available in
+            <status>
+                <p>Available from Saxon 11; requires syntax extensions to be enabled. Also available in
                 earlier releases under the synonym 
-                <a class="bodylink code" href="/extensions/instructions/array-member">saxon:array-member</a>.</status>
+                <a class="bodylink code" href="/extensions/instructions/array-member">saxon:array-member</a>.</p>
+            </status>
             <see-also name="array" type="xsl-elements"/>
             
         </xsl-element>
@@ -2317,9 +2321,6 @@
                     declaration</a> and <a class="bodylink"
                     href="/v4extensions/new-types/type-aliases">Type aliases</a>.</p>
             </status>
-            <status>Available from Saxon 11; requires syntax extensions to be enabled. Also available in
-                earlier releases under the synonym 
-                <a class="bodylink code" href="/extensions/instructions/array">saxon:array</a>.</status>
         </xsl-element>
     </section>
 
@@ -4559,10 +4560,13 @@
             <in-spec>xslt20</in-spec>
             <in-spec>xslt30</in-spec>
             <saxon-edition>ALL</saxon-edition>
-            <status>The SaxonJ implementation uses <code>java.util.Arrays.sort()</code>: see the
-            Javadoc documentation for that method for information about the performance characteristics
-            of the sort algorithm. The SaxonCS implementation uses <code>System.Array.sort()</code>:
-            see the .NET documentation for details of the sort algorithm used.</status>
+            <status>
+                <p>The SaxonJ implementation uses <code>java.util.Arrays.sort()</code>: see the
+                    Javadoc documentation for that method for information about the performance
+                    characteristics of the sort algorithm. The SaxonCS implementation uses
+                    <code>System.Array.sort()</code>: see the .NET documentation for details of the
+                    sort algorithm used.</p>
+            </status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="for-each" type="xsl-elements"/>
             <see-also name="for-each-group" type="xsl-elements"/>
@@ -4685,10 +4689,9 @@
                     earlier drafts of the XSLT 3.0 specification. It first became available since Saxon
                     9.7.0.8, in Saxon-EE only (with XSLT 3.0 enabled), and becomes fully available
                 in all Saxon editions from 9.8 (but streaming requires Saxon-EE).</p>
-                <p><p>If streaming is requested and the expression cannot be evaluated in streaming mode, execution fails,
+                <p>If streaming is requested and the expression cannot be evaluated in streaming mode, execution fails,
                     unless the configuration property <a class="feature" href="STREAMING_FALLBACK"/> is set,
                     in which case it is executed in non-streaming mode, after issuing a warning.</p>
-                </p>
             </status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="for-each" type="xsl-elements"/>
