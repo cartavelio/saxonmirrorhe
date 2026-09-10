@@ -42,7 +42,7 @@ public final class XSLForEachGroup extends StyleElement {
     /*@Nullable*/ private Expression select = null;
     private Expression groupBy = null;
     private Expression groupAdjacent = null;
-    private Expression breakWhen = null;
+    private Expression splitWhen = null;
     private Pattern starting = null;
     private Pattern ending = null;
     private Expression collationName;
@@ -86,7 +86,7 @@ public final class XSLForEachGroup extends StyleElement {
         String groupAdjacentAtt = null;
         String startingAtt = null;
         String endingAtt = null;
-        String breakWhenAtt = null;
+        String splitWhenAtt = null;
         String collationAtt = null;
 
         for (AttributeInfo att : attributes()) {
@@ -120,12 +120,21 @@ public final class XSLForEachGroup extends StyleElement {
                     endingAtt = value;
                     break;
                 case "break-when":
-                    // Saxon extension
+                    // TODO: drop this, it was renamed split-when
                     if (requireXslt40Attribute("break-when")) {
-                        breakWhenAtt = "function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean " +
+                        splitWhenAtt = "function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean " +
                                 "{ Q{http://www.w3.org/2005/xpath-functions}boolean(" + value + ") }";
                         //System.err.println(breakWhenAtt);
-                        breakWhen = makeExpression(breakWhenAtt, att);
+                        splitWhen = makeExpression(splitWhenAtt, att);
+                    }
+                    break;
+                case "split-when":
+                    // 4.0 extension
+                    if (requireXslt40Attribute("split-when")) {
+                        splitWhenAtt = "function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean " +
+                                "{ Q{http://www.w3.org/2005/xpath-functions}boolean(" + value + ") }";
+                        //System.err.println(breakWhenAtt);
+                        splitWhen = makeExpression(splitWhenAtt, att);
                     }
                     break;
                 case "collation":
@@ -150,7 +159,7 @@ public final class XSLForEachGroup extends StyleElement {
                 (groupAdjacentAtt == null ? 0 : 1) +
                 (startingAtt == null ? 0 : 1) +
                 (endingAtt == null ? 0 : 1) +
-                (breakWhenAtt == null ? 0 : 1);
+                (splitWhenAtt == null ? 0 : 1);
         if (c != 1) {
             compileError("Exactly one of the attributes group-by, group-adjacent, group-starting-with, " +
                     "and group-ending-with must be specified", "XTSE1080"); //TODO: add break-when when it becomes mainstream
@@ -224,16 +233,16 @@ public final class XSLForEachGroup extends StyleElement {
             } catch (XPathException err) {
                 compileError(err);
             }
-        } else if (breakWhen != null) {
-            breakWhen = typeCheck("break-when", breakWhen);
+        } else if (splitWhen != null) {
+            splitWhen = typeCheck("break-when", splitWhen);
             try {
                 SpecificFunctionType breakWhenType = new SpecificFunctionType(
                         new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM}, SequenceType.SINGLE_BOOLEAN);
                 Supplier<RoleDiagnostic> role = () ->
                         new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:for-each-group/break-when", 0, "XTTE1100");
-                breakWhen = tc.staticTypeCheck(breakWhen,
-                                                   SequenceType.makeSequenceType(breakWhenType, StaticProperty.EXACTLY_ONE),
-                                                   role, visitor);
+                splitWhen = tc.staticTypeCheck(splitWhen,
+                                               SequenceType.makeSequenceType(breakWhenType, StaticProperty.EXACTLY_ONE),
+                                               role, visitor);
             } catch (XPathException err) {
                 compileError(err);
             }
@@ -293,9 +302,9 @@ public final class XSLForEachGroup extends StyleElement {
         } else if (ending != null) {
             algorithm = ForEachGroup.GROUP_ENDING;
             key = ending;
-        } else if (breakWhen != null) {
-            algorithm = ForEachGroup.GROUP_BREAKING_WHEN;
-            key = breakWhen;
+        } else if (splitWhen != null) {
+            algorithm = ForEachGroup.GROUP_SPLIT_WHEN;
+            key = splitWhen;
         }
 
         Expression action = compileSequenceConstructor(compilation, decl, true);

@@ -44,7 +44,7 @@ public class ForEachGroup extends Instruction
     public static final int GROUP_ADJACENT = 1;
     public static final int GROUP_STARTING = 2;
     public static final int GROUP_ENDING = 3;
-    public static final int GROUP_BREAKING_WHEN = 4;
+    public static final int GROUP_SPLIT_WHEN = 4;
 
     private final byte algorithm;
     private StringCollator collator;             // collation used for the grouping comparisons
@@ -617,7 +617,7 @@ public class ForEachGroup extends Instruction
             case GROUP_ENDING:
                 groupIterator = new GroupEndingIterator(selectPull, (Pattern) getGroupingKey(), context);
                 break;
-            case GROUP_BREAKING_WHEN:
+            case GROUP_SPLIT_WHEN:
                 FunctionItem breakWhen = (FunctionItem)getGroupingKey().evaluateItem(context);
                 groupIterator = new GroupBreakingIterator(selectPull, breakWhen, context);
                 break;
@@ -719,7 +719,7 @@ public class ForEachGroup extends Instruction
         }
         out.setChildRole("select");
         getSelectExpression().export(out);
-        out.setChildRole(algorithm == GROUP_BY || algorithm == GROUP_ADJACENT || algorithm == GROUP_BREAKING_WHEN
+        out.setChildRole(algorithm == GROUP_BY || algorithm == GROUP_ADJACENT || algorithm == GROUP_SPLIT_WHEN
                                  ? "key" : "match");
         getGroupingKey().export(out);
         if (getSortKeyDefinitions() != null) {
@@ -745,8 +745,8 @@ public class ForEachGroup extends Instruction
                 return "starting";
             case GROUP_ENDING:
                 return "ending";
-            case GROUP_BREAKING_WHEN:
-                return "breaking";
+            case GROUP_SPLIT_WHEN:
+                return "split";
             default:
                 return "** unknown algorithm **";
         }
@@ -820,7 +820,7 @@ public class ForEachGroup extends Instruction
                 case GROUP_ENDING:
                     return context -> new GroupEndingIterator(selectPull, (Pattern) expr.getGroupingKey(), context);
 
-                case GROUP_BREAKING_WHEN:
+                case GROUP_SPLIT_WHEN:
                     return context -> {
                         FunctionItem breakWhen = (FunctionItem) expr.getGroupingKey().evaluateItem(context);
                         return new GroupBreakingIterator(selectPull, breakWhen, context);
