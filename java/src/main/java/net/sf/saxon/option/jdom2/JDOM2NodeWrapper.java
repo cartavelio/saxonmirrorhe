@@ -463,7 +463,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
                 return Navigator.filter(base, nodeTest);
             }
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 

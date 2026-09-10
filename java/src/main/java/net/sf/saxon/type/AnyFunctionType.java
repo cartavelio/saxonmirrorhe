@@ -32,18 +32,6 @@ public class AnyFunctionType implements FunctionItemType {
     /*@NotNull*/ public final static AnyFunctionType INSTANCE = new AnyFunctionType();
 
     /**
-     * Get the singular instance of this type (Note however that subtypes of this type
-     * may have any number of instances)
-     *
-     * @return the singular instance of this type
-     */
-
-    /*@NotNull*/
-    public static AnyFunctionType getInstance() {
-        return INSTANCE;
-    }
-
-    /**
      * Get the corresponding {@link net.sf.saxon.type.UType}. A UType is a union of primitive item
      * types.
      *

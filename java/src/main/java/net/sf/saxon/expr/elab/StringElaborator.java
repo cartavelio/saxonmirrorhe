@@ -31,7 +31,7 @@ public abstract class StringElaborator extends Elaborator {
         return context -> {
             UnicodeString value = strEval.eval(context);
             if (value == null) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             } else {
                 return SingletonIterator.makeIterator(StringValue.makeUStringValue(value));
             }

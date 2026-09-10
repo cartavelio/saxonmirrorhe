@@ -38,7 +38,7 @@ public class EventSourceTest {
                 return new EventSource() {
                     @Override
                     public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-                        AttributeMap attributes = EmptyAttributeMap.getInstance();
+                        AttributeMap attributes = EmptyAttributeMap.INSTANCE;
                         NamespaceMap namespaces = NamespaceMap.emptyMap();
                         receiver.startDocument(ReceiverOption.NONE);
                         receiver.startElement(new NoNamespaceName("a"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);

@@ -1040,20 +1040,20 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 case 1:
                     return context -> {
                         if (conditions[0].eval(context)) return actions[0].iterate(context);
-                        return EmptyIterator.getInstance();
+                        return EmptyIterator.INSTANCE;
                     };
                 case 2:
                     return context -> {
                         if (conditions[0].eval(context)) return actions[0].iterate(context);
                         if (conditions[1].eval(context)) return actions[1].iterate(context);
-                        return EmptyIterator.getInstance();
+                        return EmptyIterator.INSTANCE;
                     };
                 case 3:
                     return context -> {
                         if (conditions[0].eval(context)) return actions[0].iterate(context);
                         if (conditions[1].eval(context)) return actions[1].iterate(context);
                         if (conditions[2].eval(context)) return actions[2].iterate(context);
-                        return EmptyIterator.getInstance();
+                        return EmptyIterator.INSTANCE;
                     };
                 case 4:
                     return context -> {
@@ -1061,7 +1061,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                         if (conditions[1].eval(context)) return actions[1].iterate(context);
                         if (conditions[2].eval(context)) return actions[2].iterate(context);
                         if (conditions[3].eval(context)) return actions[3].iterate(context);
-                        return EmptyIterator.getInstance();
+                        return EmptyIterator.INSTANCE;
                     };
                 default:
                     return context -> {
@@ -1070,7 +1070,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                                 return actions[i].iterate(context);
                             }
                         }
-                        return EmptyIterator.getInstance();
+                        return EmptyIterator.INSTANCE;
                     };
             }
         }

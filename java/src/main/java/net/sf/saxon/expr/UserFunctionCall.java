@@ -670,7 +670,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                     }
                     Sequence[] actualArgs = expr.evaluateArguments(context, false);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
-                    return EmptyIterator.getInstance();
+                    return EmptyIterator.INSTANCE;
                 };
             } else {
                 TailCallLoop.TailCallFunction info = new TailCallLoop.TailCallFunction();
@@ -678,7 +678,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
                 return context -> {
                     Sequence[] actualArgs = expr.evaluateArguments(context, false);
                     ((XPathContextMajor) context).requestTailCall(info, actualArgs);
-                    return EmptyIterator.getInstance();
+                    return EmptyIterator.INSTANCE;
                 };
             }
         }

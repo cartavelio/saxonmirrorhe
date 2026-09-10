@@ -14,15 +14,9 @@ import java.util.Iterator;
  * An implementation of AttributeMap representing an empty AttributeMap
  */
 
-public class EmptyAttributeMap implements AttributeMap {
+public enum EmptyAttributeMap implements AttributeMap {
 
-    private static final EmptyAttributeMap THE_INSTANCE = new EmptyAttributeMap();
-
-    private EmptyAttributeMap(){}
-
-    public static EmptyAttributeMap getInstance() {
-        return THE_INSTANCE;
-    }
+    INSTANCE;
 
     /**
      * Return the number of attributes in the map.

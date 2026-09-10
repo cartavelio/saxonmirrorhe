@@ -256,7 +256,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
     @Override
     public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
         if (tree.alpha[nodeNr] < 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
         if (predicate instanceof NamedXNodePredicate fpTest) {
             int fp = fpTest.getRequiredFingerprint();
@@ -269,12 +269,12 @@ public class TinyElementImpl extends TinyParentNodeImpl {
                         if (fpTest.isFingerprintSufficient() || predicate.test(att)) {
                             return new SingletonIterator(att);
                         } else {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                     }
                     index++;
                 }
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
         }
         return new AttributeIterator(tree, nodeNr, predicate);
@@ -308,7 +308,7 @@ public class TinyElementImpl extends TinyParentNodeImpl {
         java.util.function.Function<NodeInfo, Object> informee = pipe.getCopyInformee();
         SchemaType elementType = Untyped.getInstance();
         SimpleType attributeType = BuiltInAtomicType.UNTYPED_ATOMIC;
-        AttributeMap emptyAttributes = EmptyAttributeMap.getInstance();
+        AttributeMap emptyAttributes = EmptyAttributeMap.INSTANCE;
 
 
         do {

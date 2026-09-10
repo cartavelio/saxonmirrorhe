@@ -578,7 +578,7 @@ public class SequenceTool {
     public static AttributeMap attributeMapFromList(List<AttributeInfo> list) {
         int n = list.size();
         if (n == 0) {
-            return EmptyAttributeMap.getInstance();
+            return EmptyAttributeMap.INSTANCE;
         } else if (n == 1) {
             return SingletonAttributeMap.of(list.get(0));
         } else if (n <= SmallAttributeMap.LIMIT) {

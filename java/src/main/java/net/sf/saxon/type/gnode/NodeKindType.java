@@ -136,7 +136,7 @@ public class NodeKindType extends XNodeType implements NodeVectorMatchMaker {
 
     @Override
     public boolean matches(Item item) {
-        return item instanceof NodeInfo && kind == ((NodeInfo) item).getNodeKind();
+        return item instanceof NodeInfo node && kind == node.getNodeKind();
     }
 
     /**

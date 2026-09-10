@@ -140,7 +140,7 @@ public abstract class ParentNodeImpl extends NodeImpl {
 
     protected final SequenceIterator iterateChildren(NodePredicate test) {
         if (_children == null) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else if (_children instanceof NodeImpl child) {
             if (test == null || test == AnyGNode.TEST) {
                 return SingletonIterator.makeIterator(child);

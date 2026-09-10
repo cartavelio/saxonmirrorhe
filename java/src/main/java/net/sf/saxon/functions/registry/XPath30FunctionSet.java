@@ -60,7 +60,7 @@ public class XPath30FunctionSet extends BuiltInFunctionSet {
         register("apply", 2, e -> {
             return e.populate(ApplyFn::new, AnyItemType.getInstance(),
                                   STAR, LATE)
-                    .arg(0, AnyFunctionType.getInstance(), ONE, null)
+                    .arg(0, AnyFunctionType.INSTANCE, ONE, null)
                     .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE, null);
         });
 

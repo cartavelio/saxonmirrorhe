@@ -143,76 +143,40 @@ public enum PrimitiveUType {
     }
 
     public ItemType toItemType() {
-        switch (this) {
-            case DOCUMENT:
-                return NodeKindType.DOCUMENT;
-            case ELEMENT:
-                return NodeKindType.ELEMENT;
-            case ATTRIBUTE:
-                return NodeKindType.ATTRIBUTE;
-            case TEXT:
-                return NodeKindType.TEXT;
-            case COMMENT:
-                return NodeKindType.COMMENT;
-            case PI:
-                return NodeKindType.PROCESSING_INSTRUCTION;
-            case NAMESPACE:
-                return NodeKindType.NAMESPACE;
-
-            case JNODE:
-                return AnyJNodeType.getInstance();
-
-            case FUNCTION:
-                return AnyFunctionType.getInstance();
-
-            case STRING:
-                return BuiltInAtomicType.STRING;
-            case BOOLEAN:
-                return BuiltInAtomicType.BOOLEAN;
-            case DECIMAL:
-                return BuiltInAtomicType.DECIMAL;
-            case FLOAT:
-                return BuiltInAtomicType.FLOAT;
-            case DOUBLE:
-                return BuiltInAtomicType.DOUBLE;
-            case DURATION:
-                return BuiltInAtomicType.DURATION;
-            case DATE_TIME:
-                return BuiltInAtomicType.DATE_TIME;
-            case TIME:
-                return BuiltInAtomicType.TIME;
-            case DATE:
-                return BuiltInAtomicType.DATE;
-            case G_YEAR_MONTH:
-                return BuiltInAtomicType.G_YEAR_MONTH;
-            case G_YEAR:
-                return BuiltInAtomicType.G_YEAR;
-            case G_MONTH_DAY:
-                return BuiltInAtomicType.G_MONTH_DAY;
-            case G_DAY:
-                return BuiltInAtomicType.G_DAY;
-            case G_MONTH:
-                return BuiltInAtomicType.G_MONTH;
-            case HEX_BINARY:
-                return BuiltInAtomicType.HEX_BINARY;
-            case BASE64_BINARY:
-                return BuiltInAtomicType.BASE64_BINARY;
-            case ANY_URI:
-                return BuiltInAtomicType.ANY_URI;
-            case QNAME:
-                return BuiltInAtomicType.QNAME;
-            case NOTATION:
-                return BuiltInAtomicType.NOTATION;
-            case UNTYPED_ATOMIC:
-                return BuiltInAtomicType.UNTYPED_ATOMIC;
-
-            case EXTENSION:
+        return switch (this) {
+            case DOCUMENT -> NodeKindType.DOCUMENT;
+            case ELEMENT -> NodeKindType.ELEMENT;
+            case ATTRIBUTE -> NodeKindType.ATTRIBUTE;
+            case TEXT -> NodeKindType.TEXT;
+            case COMMENT -> NodeKindType.COMMENT;
+            case PI -> NodeKindType.PROCESSING_INSTRUCTION;
+            case NAMESPACE -> NodeKindType.NAMESPACE;
+            case JNODE -> AnyJNodeType.getInstance();
+            case FUNCTION -> AnyFunctionType.INSTANCE;
+            case STRING -> BuiltInAtomicType.STRING;
+            case BOOLEAN -> BuiltInAtomicType.BOOLEAN;
+            case DECIMAL -> BuiltInAtomicType.DECIMAL;
+            case FLOAT -> BuiltInAtomicType.FLOAT;
+            case DOUBLE -> BuiltInAtomicType.DOUBLE;
+            case DURATION -> BuiltInAtomicType.DURATION;
+            case DATE_TIME -> BuiltInAtomicType.DATE_TIME;
+            case TIME -> BuiltInAtomicType.TIME;
+            case DATE -> BuiltInAtomicType.DATE;
+            case G_YEAR_MONTH -> BuiltInAtomicType.G_YEAR_MONTH;
+            case G_YEAR -> BuiltInAtomicType.G_YEAR;
+            case G_MONTH_DAY -> BuiltInAtomicType.G_MONTH_DAY;
+            case G_DAY -> BuiltInAtomicType.G_DAY;
+            case G_MONTH -> BuiltInAtomicType.G_MONTH;
+            case HEX_BINARY -> BuiltInAtomicType.HEX_BINARY;
+            case BASE64_BINARY -> BuiltInAtomicType.BASE64_BINARY;
+            case ANY_URI -> BuiltInAtomicType.ANY_URI;
+            case QNAME -> BuiltInAtomicType.QNAME;
+            case NOTATION -> BuiltInAtomicType.NOTATION;
+            case UNTYPED_ATOMIC -> BuiltInAtomicType.UNTYPED_ATOMIC;
+            case EXTENSION ->
                 //return JavaExternalObjectType.EXTERNAL_OBJECT_TYPE;
-                return AnyItemType.INSTANCE;
-            default:
-                throw new IllegalArgumentException();
-
-        }
+                    AnyItemType.INSTANCE;
+        };
     }
 }
 

@@ -619,7 +619,7 @@ public class UseWhenFilter extends ProxyReceiver {
                 attMap.remove(attName);
             }
         }
-        AttributeMap resultAtts = EmptyAttributeMap.getInstance();
+        AttributeMap resultAtts = EmptyAttributeMap.INSTANCE;
         for (AttributeInfo att : attMap.values()) {
             resultAtts = resultAtts.put(new AttributeInfo(
                     att.getNodeName(), att.getType(), att.getValue(), att.getLocation(), att.getProperties()));

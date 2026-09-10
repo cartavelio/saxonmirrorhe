@@ -66,7 +66,7 @@ public class TailIterator
             try {
                 GroundedValue value = SequenceTool.toGroundedValue(base);
                 if (start > value.getLength()) {
-                    return EmptyIterator.getInstance();
+                    return EmptyIterator.INSTANCE;
                 } else {
                     return new ValueTailIterator(value, start - 1);
                 }
@@ -78,7 +78,7 @@ public class TailIterator
             for (int i = 0; i < start - 1; i++) {
                 Item b = base.next();
                 if (b == null) {
-                    return EmptyIterator.getInstance();
+                    return EmptyIterator.INSTANCE;
                 }
             }
             return new TailIterator(base, start);

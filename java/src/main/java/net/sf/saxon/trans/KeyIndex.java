@@ -375,7 +375,7 @@ public class KeyIndex {
 
     private SequenceIterator entryIterator(Object value) {
         if (value == null) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else if (value instanceof NodeInfo) {
             return SingletonIterator.makeIterator((NodeInfo) value);
         } else {

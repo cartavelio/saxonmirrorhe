@@ -384,7 +384,7 @@ DynamicFunctionCall extends Expression {
                     SequenceIterator fnIter = functionEvaluator.iterate(context);
                     FunctionItem first = (FunctionItem) fnIter.next();
                     if (first == null) {
-                        return EmptyIterator.getInstance();
+                        return EmptyIterator.INSTANCE;
                     }
 
                     Sequence[] argValues = new Sequence[argEvaluators.length];

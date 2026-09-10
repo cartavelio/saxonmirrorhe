@@ -109,7 +109,7 @@ public class LookupAllExpression extends UnaryExpression {
 
         if (!isArrayLookup && !isMapLookup) {
             if (th.relationship(containerType, MapType.ANY_MAP_TYPE) == Affinity.DISJOINT) {
-                if (th.relationship(containerType, ArrayItemType.getInstance()) == Affinity.DISJOINT) {
+                if (th.relationship(containerType, ArrayItemType.INSTANCE) == Affinity.DISJOINT) {
                     if (Cardinality.allowsZero(getBaseExpression().getCardinality())) {
                         visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence "
                                                      + containerType, SaxonErrorCode.SXWN9026, getLocation());

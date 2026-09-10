@@ -200,7 +200,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateAncestorAxis(test);
                     };
@@ -209,7 +209,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateAncestorOrSelfAxis(test);
                     };
@@ -218,7 +218,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateAttributeAxis(test);
                     };
@@ -227,7 +227,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateChildAxis(test);
                     };
@@ -236,7 +236,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateDescendantAxis(test);
                     };
@@ -245,7 +245,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateDescendantOrSelfAxis(test);
                     };
@@ -254,7 +254,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateFollowingAxis(test);
                     };
@@ -263,7 +263,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateFollowingOrSelfAxis(test);
                     };
@@ -272,7 +272,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateFollowingSiblingAxis(test);
                     };
@@ -281,7 +281,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateFollowingSiblingOrSelfAxis(test);
                     };
@@ -290,7 +290,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateNamespaceAxis(test);
                     };
@@ -299,7 +299,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateParentAxis(test);
                     };
@@ -308,7 +308,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iteratePrecedingAxis(test);
                     };
@@ -317,7 +317,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iteratePrecedingOrSelfAxis(test);
                     };
@@ -326,7 +326,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iteratePrecedingSiblingAxis(test);
                     };
@@ -335,7 +335,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iteratePrecedingSiblingOrSelfAxis(test);
                     };
@@ -344,7 +344,7 @@ public final class SimpleStepExpression extends SlashExpression {
                     return context -> {
                         GNode origin = (GNode) select.eval(context);
                         if (origin == null) {
-                            return EmptyIterator.getInstance();
+                            return EmptyIterator.INSTANCE;
                         }
                         return origin.iterateSelfAxis(test);
                     };

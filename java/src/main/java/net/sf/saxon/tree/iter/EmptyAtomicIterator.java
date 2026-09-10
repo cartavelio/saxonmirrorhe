@@ -8,8 +8,9 @@
 package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
-import net.sf.saxon.om.*;
-import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.value.AtomicValue;
 
 /**
  * EmptyIterator: an iterator over an empty sequence. Since such an iterator has no state,
@@ -17,21 +18,11 @@ import net.sf.saxon.value.EmptySequence;
  * getInstance() method.
  */
 
-public enum EmptyIterator implements SequenceIterator,
+public enum EmptyAtomicIterator implements AtomicIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator,
-        LookaheadIterator, AtomizedValueIterator {
+        LookaheadIterator {
 
     INSTANCE;
-
-    /**
-     * Deliver the atomic value that is next in the atomized result
-     *
-     * @return the next atomic value
-     */
-    @Override
-    public AtomicSequence nextAtomizedValue() {
-        return null;
-    }
 
     /**
      * Get the next item.
@@ -39,7 +30,7 @@ public enum EmptyIterator implements SequenceIterator,
      * @return the next item. For the EmptyIterator this is always null.
      */
     @Override
-    public Item next() {
+    public AtomicValue next() {
         return null;
     }
 
@@ -67,7 +58,7 @@ public enum EmptyIterator implements SequenceIterator,
      */
     /*@NotNull*/
     @Override
-    public EmptyIterator getReverseIterator() {
+    public EmptyAtomicIterator getReverseIterator() {
         return this;
     }
 
@@ -80,12 +71,12 @@ public enum EmptyIterator implements SequenceIterator,
 
     @Override
     public GroundedValue materialize() {
-        return EmptySequence.INSTANCE;
+        return AtomicArray.EMPTY_ATOMIC_ARRAY;
     }
 
     @Override
     public GroundedValue getResidue() {
-        return EmptySequence.INSTANCE;
+        return AtomicArray.EMPTY_ATOMIC_ARRAY;
     }
 
     @Override

@@ -90,7 +90,7 @@ public final class SequenceCollector extends SequenceWriter {
 
     public SequenceIterator iterate() {
         if (list.isEmpty()) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else {
             return new ListIterator.Of<>(list);
         }

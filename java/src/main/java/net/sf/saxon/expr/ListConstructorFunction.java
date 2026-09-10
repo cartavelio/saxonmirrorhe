@@ -140,7 +140,7 @@ public class ListConstructorFunction extends AbstractFunction {
         AtomicValue val = (AtomicValue) args[0].head();
         if (val == null) {
             if (allowEmpty) {
-                return EmptyAtomicSequence.getInstance();
+                return AtomicArray.EMPTY_ATOMIC_ARRAY;
             } else {
                 XPathException e = new XPathException("Cast expression does not allow an empty sequence to be supplied", "XPTY0004");
                 e.setIsTypeError(true);

@@ -180,7 +180,7 @@ public class StaxBridge implements PullProvider {
 
                     int attCount = reader.getAttributeCount();
                     if (attCount == 0) {
-                        attributes = EmptyAttributeMap.getInstance();
+                        attributes = EmptyAttributeMap.INSTANCE;
                     } else {
                         List<AttributeInfo> attList = new ArrayList<>();
                         for (int i=0; i<attCount; i++) {

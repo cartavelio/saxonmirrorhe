@@ -334,7 +334,7 @@ public abstract class Pattern extends PseudoExpression {
             if (matchesItem(doc, context)) {
                 return SingletonIterator.makeIterator(doc);
             } else {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
         } else if (UType.ATTRIBUTE.subsumes(uType)) {
             SequenceIterator allElements = doc.iterateDescendantAxis(NodeKindType.ELEMENT);

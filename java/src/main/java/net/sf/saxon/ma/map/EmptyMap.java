@@ -9,7 +9,6 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.PlainType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -77,7 +76,7 @@ public class EmptyMap extends MapItem {
      */
     @Override
     public AtomicIterator keys() {
-        return EmptyIterator.ofAtomic();
+        return new net.sf.saxon.tree.iter.ListIterator.OfAtomic<AtomicValue>(Collections.emptyList());
     }
 
     /**

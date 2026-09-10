@@ -1250,12 +1250,12 @@ public final class Navigator {
         if (node != null && (nodeTest == null || nodeTest.test(node))) {
             return new SingletonIterator(node);
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 
     public static SequenceIterator orSelf(GNode origin, SequenceIterator iter, NodePredicate predicate) {
-        if (iter == EmptyIterator.getInstance()) {
+        if (iter == EmptyIterator.INSTANCE) {
             return filteredSingleton(origin, predicate);
         } else if (predicate == null || predicate.test(origin)) {
             return new PrependIterator(origin, iter);
@@ -1578,7 +1578,7 @@ public final class Navigator {
                         children = Reverse.getReverseIterator(children);
                     }
                 } else {
-                    children = EmptyIterator.getInstance();
+                    children = EmptyIterator.INSTANCE;
                 }
                 if (forwards && includeSelf) {
                     return start;
@@ -1623,13 +1623,13 @@ public final class Navigator {
                     // gets children of the attribute's parent node
                     NodeInfo parent = (NodeInfo)start.getParent();
                     if (parent == null) {
-                        siblingEnum = EmptyIterator.getInstance();
+                        siblingEnum = EmptyIterator.INSTANCE;
                     } else {
                         siblingEnum = parent.iterateChildAxis(AnyGNode.TEST);
                     }
                     break;
                 default:
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.INSTANCE;
                     break;
             }
         }
@@ -1661,7 +1661,7 @@ public final class Navigator {
             GNode nexta = (GNode)ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.INSTANCE;
                 } else {
                     siblingEnum = nexta.iterateFollowingSiblingAxis(AnyGNode.TEST);
                 }
@@ -1720,7 +1720,7 @@ public final class Navigator {
                 case Type.ELEMENT, Type.TEXT, Type.COMMENT, Type.PROCESSING_INSTRUCTION, Type.JNODE ->
                     // get preceding-sibling enumeration
                     start.iteratePrecedingSiblingAxis(AnyGNode.TEST);
-                default -> EmptyIterator.getInstance();
+                default -> EmptyIterator.INSTANCE;
             };
         }
 
@@ -1752,7 +1752,7 @@ public final class Navigator {
             GNode nexta = (GNode)ancestorEnum.next();
             if (nexta != null) {
                 if (nexta.getNodeKind() == Type.DOCUMENT) {
-                    siblingEnum = EmptyIterator.getInstance();
+                    siblingEnum = EmptyIterator.INSTANCE;
                 } else {
                     siblingEnum = nexta.iteratePrecedingSiblingAxis(AnyGNode.TEST);
                 }

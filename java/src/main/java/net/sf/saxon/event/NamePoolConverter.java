@@ -55,7 +55,7 @@ public class NamePoolConverter extends ProxyReceiver {
         checkType(type);
         int fp = newPool.allocateFingerprint(elemName.getNamespaceUri(), elemName.getLocalPart());
         final CodedName newElemName = new CodedName(fp, elemName.getPrefix(), newPool);
-        AttributeMap newAtts = EmptyAttributeMap.getInstance();
+        AttributeMap newAtts = EmptyAttributeMap.INSTANCE;
         for (AttributeInfo att : attributes) {
             checkType(att.getType());
             int afp = newPool.allocateFingerprint(att.getNodeName().getNamespaceUri(), att.getNodeName().getLocalPart());

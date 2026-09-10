@@ -55,7 +55,7 @@ public enum EmptySequence implements GroundedValue {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate() {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**

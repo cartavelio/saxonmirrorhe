@@ -407,7 +407,7 @@ public class ReceivingContentHandler
             AttributeMap attributes;
 
             if (atts.getLength() == 0) {
-                attributes = EmptyAttributeMap.getInstance();
+                attributes = EmptyAttributeMap.INSTANCE;
             } else {
                 attributes = makeAttributeMap(atts, localLocator);
             }

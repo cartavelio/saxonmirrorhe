@@ -53,9 +53,9 @@ public abstract class JPConverter {
         converterMap.put(XdmItem.class, new FromXdmValue(AnyItemType.getInstance(), StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmAtomicValue.class, new FromXdmValue(BuiltInAtomicType.ANY_ATOMIC, StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmNode.class, new FromXdmValue(AnyXNodeType.getInstance(), StaticProperty.ALLOWS_ONE));
-        converterMap.put(XdmFunctionItem.class, new FromXdmValue(AnyFunctionType.getInstance(), StaticProperty.ALLOWS_ONE));
+        converterMap.put(XdmFunctionItem.class, new FromXdmValue(AnyFunctionType.INSTANCE, StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmMap.class, new FromXdmValue(MapType.ANY_MAP_TYPE, StaticProperty.ALLOWS_ONE));
-        converterMap.put(XdmArray.class, new FromXdmValue(ArrayItemType.getInstance(), StaticProperty.ALLOWS_ONE));
+        converterMap.put(XdmArray.class, new FromXdmValue(ArrayItemType.ANY_ARRAY_TYPE, StaticProperty.ALLOWS_ONE));
         converterMap.put(XdmEmptySequence.class, new FromXdmValue(ErrorType.getInstance(), StaticProperty.ALLOWS_ZERO));
         converterMap.put(SequenceIterator.class, FromSequenceIterator.INSTANCE);
         converterMap.put(Sequence.class, FromSequence.INSTANCE);

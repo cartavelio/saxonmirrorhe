@@ -472,7 +472,7 @@ public interface NodeInfo extends GNode, Location
     }
 
     default AttributeMap attributes() {
-        AttributeMap atts = EmptyAttributeMap.getInstance();
+        AttributeMap atts = EmptyAttributeMap.INSTANCE;
         if (getNodeKind() == Type.ELEMENT) {
             SequenceIterator iter = iterateAttributeAxis(AnyGNode.TEST);
             NodeInfo attr;

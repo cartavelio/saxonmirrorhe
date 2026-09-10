@@ -9,7 +9,6 @@ package net.sf.saxon.tree.iter;
 
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.om.*;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
 /**
@@ -18,29 +17,11 @@ import net.sf.saxon.value.EmptySequence;
  * getInstance() method.
  */
 
-public class EmptyIterator implements SequenceIterator,
+public enum EmptyIterator implements SequenceIterator,
         ReversibleIterator, LastPositionFinder, GroundedIterator,
         LookaheadIterator, AtomizedValueIterator {
 
-    private static final EmptyIterator theInstance = new EmptyIterator();
-
-    /**
-     * Get an EmptyIterator, an iterator over an empty sequence.
-     *
-     * @return an EmptyIterator (in practice, this always returns the same
-     *         one)
-     */
-    /*@NotNull*/
-    public static EmptyIterator getInstance() {
-        return theInstance;
-    }
-
-    /**
-     * Protected constructor
-     */
-
-    protected EmptyIterator() {
-    }
+    INSTANCE;
 
     /**
      * Deliver the atomic value that is next in the atomized result
@@ -130,36 +111,6 @@ public class EmptyIterator implements SequenceIterator,
         return true;
     }
 
-    /**
-     * Static method to get an empty AtomicIterator
-     *
-     * @return an empty AtomicIterator
-     */
-
-    public static AtomicIterator ofAtomic() {
-        return OfAtomic.THE_INSTANCE;
-    }
-
-    /**
-     * An empty iterator for use where a sequence of atomic values is required
-     */
-
-    private static class OfAtomic extends EmptyIterator implements AtomicIterator {
-
-        public final static OfAtomic THE_INSTANCE = new OfAtomic();
-
-        /**
-         * Get the next item.
-         *
-         * @return the next item. For the EmptyIterator this is always null.
-         */
-        @Override
-        public AtomicValue next() {
-            return null;
-        }
-
-    }
-
-
+ 
 }
 

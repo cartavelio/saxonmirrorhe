@@ -458,7 +458,7 @@ public class LiteralResultElement extends StyleElement {
             final Location loc = Loc.NONE;
 
             NamespaceMap map = getAllNamespaces().put("xsl", NamespaceUri.XSLT);
-            AttributeMap atts = EmptyAttributeMap.getInstance();
+            AttributeMap atts = EmptyAttributeMap.INSTANCE;
             atts = atts.put(new AttributeInfo(
                     new NoNamespaceName("version"), BuiltInAtomicType.UNTYPED_ATOMIC, version==null ? "4.0" : version, loc, ReceiverOption.NONE));
             if (processorVersion >= 40 && getAttributeValue(NamespaceUri.XSLT, "expand-text") == null) {
@@ -469,7 +469,7 @@ public class LiteralResultElement extends StyleElement {
             builder.startElement(new CodedName(st, "xsl", getNamePool()), Untyped.getInstance(),
                                  atts, map, loc, ReceiverOption.NONE);
 
-            atts = EmptyAttributeMap.getInstance();
+            atts = EmptyAttributeMap.INSTANCE;
             atts = atts.put(new AttributeInfo(new NoNamespaceName("match"), BuiltInAtomicType.UNTYPED_ATOMIC, "/", loc, ReceiverOption.NONE));
 
             int te = StandardNames.XSL_TEMPLATE;

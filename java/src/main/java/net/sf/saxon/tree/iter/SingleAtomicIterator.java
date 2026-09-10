@@ -10,6 +10,8 @@ package net.sf.saxon.tree.iter;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.value.AtomicValue;
 
+import java.util.Objects;
+
 
 /**
  * SingletonIterator: an iterator over a sequence of exactly one atomic value
@@ -35,17 +37,13 @@ public class SingleAtomicIterator
      * Factory method.
      *
      * @param item the item to iterate over
-     * @return a SingletonIterator over the supplied item, or an EmptyIterator
-     * if the supplied item is null.
+     * @return a SingletonIterator over the supplied item
      */
 
     /*@NotNull*/
     public static AtomicIterator makeIterator(AtomicValue item) {
-        if (item == null) {
-            return EmptyIterator.ofAtomic();
-        } else {
-            return new SingleAtomicIterator(item);
-        }
+        Objects.requireNonNull(item);
+        return new SingleAtomicIterator(item);
     }
 
     /*@NotNull*/

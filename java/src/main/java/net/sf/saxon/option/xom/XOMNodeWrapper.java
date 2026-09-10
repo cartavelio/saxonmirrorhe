@@ -635,7 +635,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                     new ChildAxisIterator(this, true, true, nodeTest),
                     nodeTest);
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 
@@ -657,7 +657,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
                 return new SteppingNavigator.DescendantAxisIterator(
                         this, false, predicate);
             } else {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
 
         }

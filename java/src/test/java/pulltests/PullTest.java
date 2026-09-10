@@ -92,7 +92,7 @@ public class PullTest {
                 return new EventSource() {
                     @Override
                     public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
-                        AttributeMap attributes = EmptyAttributeMap.getInstance();
+                        AttributeMap attributes = EmptyAttributeMap.INSTANCE;
                         NamespaceMap namespaces = NamespaceMap.emptyMap();
                         receiver.open();
                         receiver.startDocument(ReceiverOption.NONE);

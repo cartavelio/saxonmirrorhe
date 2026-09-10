@@ -767,7 +767,7 @@ public class Block extends Instruction {
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
         if (size() == 0) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else if (size() == 1) {
             return child(0).iterate(context);
         } else {

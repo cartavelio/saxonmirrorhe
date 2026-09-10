@@ -103,7 +103,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
 
                     // apply-templates to all attributes
                     SequenceIterator attributes = node.iterateAttributeAxis(AnyGNode.TEST);
-                    if (attributes != EmptyIterator.getInstance()) {
+                    if (attributes != EmptyIterator.INSTANCE) {
                         c2.setOrigin(this);
                         c2.trackFocus(attributes);
                         TailCall tc = c2.getCurrentMode().getActor().applyTemplates(parameters, tunnelParams, null, out, c2, locationId);

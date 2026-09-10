@@ -460,7 +460,7 @@ public final class Orphan implements MutableNodeInfo {
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -472,7 +472,7 @@ public final class Orphan implements MutableNodeInfo {
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -484,7 +484,7 @@ public final class Orphan implements MutableNodeInfo {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**

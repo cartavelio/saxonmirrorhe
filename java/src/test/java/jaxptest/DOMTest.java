@@ -1403,7 +1403,7 @@ public class DOMTest {
             domWriter.setPipelineConfiguration(config.makePipelineConfiguration());
             domWriter.open();
             domWriter.startDocument(ReceiverOption.NONE);
-            AttributeMap atts = EmptyAttributeMap.getInstance();
+            AttributeMap atts = EmptyAttributeMap.INSTANCE;
             atts = atts.put(new AttributeInfo(new NoNamespaceName("id"), BuiltInAtomicType.UNTYPED_ATOMIC, "iii", Loc.NONE, ReceiverOption.IS_ID));
             domWriter.startElement(new NoNamespaceName("root"), Untyped.getInstance(),
                                    atts, NamespaceMap.emptyMap(),

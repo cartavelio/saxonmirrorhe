@@ -201,7 +201,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**

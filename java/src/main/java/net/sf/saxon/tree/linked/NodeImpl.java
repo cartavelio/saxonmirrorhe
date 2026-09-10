@@ -220,7 +220,7 @@ public abstract class NodeImpl
 
     @Override
     public AttributeMap attributes() {
-        return EmptyAttributeMap.getInstance();
+        return EmptyAttributeMap.INSTANCE;
     }
 
     /**
@@ -531,7 +531,7 @@ public abstract class NodeImpl
         if (this instanceof ParentNodeImpl) {
             return ((ParentNodeImpl) this).iterateChildren(predicate);
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 
@@ -547,7 +547,7 @@ public abstract class NodeImpl
         if (hasChildNodes()) {
             return new SteppingNavigator.DescendantAxisIterator(this, false, predicate);
         } else {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
     }
 

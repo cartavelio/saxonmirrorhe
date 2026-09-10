@@ -96,7 +96,7 @@ public class MemoSequence implements Sequence {
                 switch (used) {
                     case 0:
                         state = State.EMPTY;
-                        return EmptyIterator.getInstance();
+                        return EmptyIterator.INSTANCE;
                     case 1:
                         assert reservoir != null;
                         return SingletonIterator.makeIterator(reservoir[0]);
@@ -111,7 +111,7 @@ public class MemoSequence implements Sequence {
                 throw new UncheckedXPathException(de);
 
             case EMPTY:
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
 
             case ERROR:
                 XPathException e2 = new XPathException("Attempting to read a local variable when an error in that variable has already been reported", "XTDE0640");

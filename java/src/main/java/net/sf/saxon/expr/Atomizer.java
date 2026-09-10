@@ -584,14 +584,14 @@ public final class Atomizer extends UnaryExpression {
         if (SequenceTool.supportsGetLength(base)) {
             int count = SequenceTool.getLength(base);
             if (count == 0) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             } else if (count == 1) {
                 Item first = base.next();
                 Objects.requireNonNull(first);
                 return first.atomize().iterate();
             }
-        } else if (base instanceof AtomizedValueIterator) {
-            return new AxisAtomizingIterator((AtomizedValueIterator)base);
+        } else if (base instanceof AtomizedValueIterator atomizingIter) {
+            return new AxisAtomizingIterator(atomizingIter);
         }
         if (oneToOne) {
             return new UntypedAtomizingIterator(base);
@@ -604,7 +604,7 @@ public final class Atomizer extends UnaryExpression {
         if (sequence instanceof AtomicSequence) {
             return (AtomicSequence)sequence;
         } else if (sequence instanceof EmptySequence) {
-            return EmptyAtomicSequence.getInstance();
+            return AtomicArray.EMPTY_ATOMIC_ARRAY;
         } else {
             SequenceIterator iter = getAtomizingIterator(sequence.iterate(), false);
             return new AtomicArray(iter);

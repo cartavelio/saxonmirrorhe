@@ -438,7 +438,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -450,7 +450,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return EmptyIterator.INSTANCE;
     }
 
     /**
@@ -864,7 +864,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
             } else if (matchesText /* && !matchesDoc */) {
                 return SingletonIterator.makeIterator(this);
             } else {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
         }
 
@@ -877,7 +877,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -889,7 +889,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -901,7 +901,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -925,7 +925,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -949,7 +949,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -984,7 +984,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**
@@ -1008,7 +1008,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
         @Override
         public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         }
 
         /**

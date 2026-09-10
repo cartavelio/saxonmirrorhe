@@ -323,7 +323,7 @@ public class LookupExpression extends BinaryExpression {
 
     protected static SequenceIterator optionalGroundedValueIterator(GroundedValue value) {
         if (value == null) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else {
             return value.iterate();
         }
@@ -498,8 +498,8 @@ public class LookupExpression extends BinaryExpression {
                                         GroundedValue member = ((ArrayItem) baseItem).get(subscript);
                                         return member.iterate();
                                     }
-                                        return EmptyIterator.getInstance();
-//                                            throw new XPathException(
+                                    return EmptyIterator.INSTANCE;
+                                    //                                            throw new XPathException(
 //                                                    "An item on the LHS of the '?' operator (" + expr.getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
 //                                                            baseItem.toShortString() + ") is not an integer", "XPTY0004")
 //                                                    .asTypeError()

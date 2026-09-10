@@ -298,7 +298,7 @@ public class DOMSender {
         NodeName name = getNodeName(element.getTagName(), true);
         final Location loc = new Loc(systemId, -1, -1);
 
-        AttributeMap attributes = EmptyAttributeMap.getInstance();
+        AttributeMap attributes = EmptyAttributeMap.INSTANCE;
         NamedNodeMap atts = element.getAttributes();
         if (atts != null) {
             final int len = atts.getLength();

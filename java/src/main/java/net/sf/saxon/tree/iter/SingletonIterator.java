@@ -47,7 +47,7 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
     /*@NotNull*/
     public static SequenceIterator makeIterator(Item item) {
         if (item == null) {
-            return EmptyIterator.getInstance();
+            return EmptyIterator.INSTANCE;
         } else {
             return new SingletonIterator(item);
         }

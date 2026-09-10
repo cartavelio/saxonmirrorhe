@@ -47,7 +47,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
      */
 
     public ElementImpl() {
-        this.attributeMap = EmptyAttributeMap.getInstance();
+        this.attributeMap = EmptyAttributeMap.INSTANCE;
     }
 
     /**

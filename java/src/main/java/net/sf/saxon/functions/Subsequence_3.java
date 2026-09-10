@@ -74,48 +74,48 @@ public class Subsequence_3 extends SystemFunction implements Callable {
             // Fast path where the second and third arguments evaluate to integers
             long lstart = startVal.longValue();
             if (lstart > Integer.MAX_VALUE) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             long llength = lengthVal.longValue();
             if (llength > Integer.MAX_VALUE) {
                 llength = Integer.MAX_VALUE;
             }
             if (llength < 1) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             long lend = lstart + llength - 1;
             if (lend < 1) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             int start = lstart < 1 ? 1 : (int) lstart;
             return SubsequenceIterator.make(seq, start, (int) lend);
         } else {
             if (startVal.isNaN()) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             if (startVal.compareTo(Int64Value.MAX_LONG) > 0) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             startVal = startVal.round(0);
 
             if (lengthVal.isNaN()) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             lengthVal = lengthVal.round(0);
 
             if (lengthVal.compareTo(Int64Value.ZERO) <= 0) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             NumericValue rend = (NumericValue) ArithmeticExpression.compute(
                     startVal, Calculator.PLUS, lengthVal, context);
             if (rend.isNaN()) {
                 // Can happen when start = -INF, length = +INF
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
             rend = (NumericValue) ArithmeticExpression.compute(
                     rend, Calculator.MINUS, Int64Value.PLUS_ONE, context);
             if (rend.compareTo(Int64Value.ZERO) <= 0) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
 
             long lstart;
@@ -125,7 +125,7 @@ public class Subsequence_3 extends SystemFunction implements Callable {
                 lstart = startVal.longValue();
             }
             if (lstart > Integer.MAX_VALUE) {
-                return EmptyIterator.getInstance();
+                return EmptyIterator.INSTANCE;
             }
 
             long lend;

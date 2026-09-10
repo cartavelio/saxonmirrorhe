@@ -365,7 +365,7 @@ public class SequenceWrapper extends SequenceReceiver {
     private void namespace(NamespaceBindingSet namespaceBindings, int properties) throws XPathException {
         NamespaceMap ns = NamespaceMap.emptyMap();
         ns = ns.addAll(namespaceBindings);
-        out.startElement(resultNamespace, Untyped.getInstance(), EmptyAttributeMap.getInstance(), ns, Loc.NONE, 0);
+        out.startElement(resultNamespace, Untyped.getInstance(), EmptyAttributeMap.INSTANCE, ns, Loc.NONE, 0);
         out.startContent();
         out.endElement();
     }

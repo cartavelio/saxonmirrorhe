@@ -145,8 +145,8 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      */
     @Override
     public int getRequiredFingerprint() {
-        if (nameTest instanceof SpecificQNameTest) {
-            return ((SpecificQNameTest)nameTest).getFingerprint();
+        if (nameTest instanceof SpecificQNameTest qTest) {
+            return qTest.getFingerprint();
         }
         return -1;
     }
@@ -224,8 +224,8 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
             if (node.getNodeKind() != kind) {
                 return false;
             }
-            if (node.hasFingerprint() && nameTest instanceof SpecificQNameTest) {
-                return ((SpecificQNameTest) nameTest).getFingerprint() == node.getFingerprint() &&
+            if (node.hasFingerprint() && nameTest instanceof SpecificQNameTest qTest) {
+                return qTest.getFingerprint() == node.getFingerprint() &&
                         matchesAnnotation(node.getSchemaType())
                         && (nillable || !Nilled_1.isNilled(node));
             } else {
