@@ -1,5 +1,6 @@
 package internaltests;
 
+import com.saxonica.config.JavaLocalizerFactory;
 import com.saxonica.config.ProfessionalConfiguration;
 import com.saxonica.config.pe.ICUNumbererPE;
 import net.sf.saxon.Configuration;
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * JUnit tests to check that Saxon's local numbering is consistent with ICU numbering
  */
-public class TestNumbering {
+public class NumberingTests {
 
     private void compareCardinal(long number, ICUNumbererPE icu, Numberer he) {
         String heNumber = he.format(number, BMPString.of("w"), 0, "_", "a", "").replace('-', ' ').replace(",", "");
@@ -33,6 +34,7 @@ public class TestNumbering {
         Configuration icuConfig = new ProfessionalConfiguration();
         ICUNumbererPE icu = ICUNumbererPE.getNumberer(locale, "xxx", icuConfig);
         Configuration heConfig = new Configuration();
+        heConfig.setLocalizerFactory(new JavaLocalizerFactory(heConfig));
         Numberer he = heConfig.makeNumberer(lang, null);
         for (long i=0; i<=100; i++) {
              compareCardinal(i, icu, he);
