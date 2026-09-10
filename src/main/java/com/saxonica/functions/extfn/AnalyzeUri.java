@@ -5,7 +5,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicComponent;
+import net.sf.saxon.functions.Parts;
 
 /**
  * This class implements the saxon:analyze-uri() function which returns a map containing the components
@@ -26,7 +26,7 @@ public class AnalyzeUri extends SystemFunction {
 
     @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return AtomicComponent.uriComponents(arguments[0].head().getStringValue());
+        return Parts.uriComponents(arguments[0].head().getStringValue());
     }
 
 
