@@ -4,7 +4,9 @@
 
     <xsl:output method="xhtml" indent="yes"/>
     
-    <xsl:variable name="version" select="featureMatrix/@version"/>
+    <xsl:variable name="version" select="featureMatrix/@version" as="xs:string"/>
+    <xsl:variable name="Cversion" select="featureMatrix/@Cversion" as="xs:string"/>
+    <xsl:variable name="JSversion" select="featureMatrix/@JSversion" as="xs:string"/>
 
     <xsl:template match="featureMatrix">
         <xsl:processing-instruction name="xml-stylesheet">href="../make-menu.xsl" type="text/xsl"</xsl:processing-instruction>
@@ -63,7 +65,8 @@
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:variable name="topic-shortName" select="shortName"/>
-                                        <xsl:variable name="details" select="details"/>
+                                        <xsl:variable name="details" select="details[@link]"/>
+                                        <xsl:variable name="JSdetails" select="details[@JSlink]"/>
                                         <xsl:variable name="spec" select="spec"/>
                                         <xsl:for-each select="products/product[(not(exists(@level)) or @level ne 'Open')]">
                                         <tr>
@@ -97,7 +100,22 @@
                                                                     </xsl:if>
                                                                 </xsl:for-each>
                                                             </p>
-                                                        </xsl:if> 
+                                                        </xsl:if>
+                                                        <xsl:if test="exists($JSdetails)">
+                                                            <p>
+                                                                <xsl:text>SaxonJS further info: </xsl:text>
+                                                                <xsl:for-each
+                                                                    select="$JSdetails">
+                                                                    <a href="../saxon-js/documentation/index.html#!{@JSlink}"
+                                                                        class="bodylink">
+                                                                        <xsl:value-of select="@JSname"/>
+                                                                    </a>
+                                                                    <xsl:if test="not(position()=last())">
+                                                                        <xsl:text>, </xsl:text>
+                                                                    </xsl:if>
+                                                                </xsl:for-each>
+                                                            </p>
+                                                        </xsl:if>
                                                         <xsl:if test="exists($spec)">
                                                             <p><a href="{$spec/@link}" target="_blank">
                                                                 <i><xsl:value-of
