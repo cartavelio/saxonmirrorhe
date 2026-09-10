@@ -190,7 +190,12 @@ public class ParseOptions {
             if (parserFeatures == null) {
                 parserFeatures = new HashMap<>();
             }
-            parserFeatures.putAll(options.parserFeatures);
+            // Bug 5167
+            for (Map.Entry<String, Boolean> feature : options.parserFeatures.entrySet()) {
+                if (feature.getValue()) {
+                    parserFeatures.put(feature.getKey(), true);
+                }
+            }
         }
         if (options.parserProperties != null) {
             if (parserProperties == null) {
