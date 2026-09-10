@@ -12,7 +12,6 @@ import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.expr.EarlyEvaluationContext;
 import net.sf.saxon.expr.JPConverter;
 import net.sf.saxon.expr.StaticProperty;
-import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.Validation;
@@ -351,19 +350,20 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
         }
         SchemaType st = BuiltInType.getSchemaType(saxonType);
         ContentTypeTest contentTest = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), st, false, config);
-        return makeElementTest(nodename, contentTest, config);
+        return makeElementTest(nodename, st, false, config);
 
     }
 
-    private static XQItemType makeElementTest(QName nodename, ContentTypeTest contentTest, Configuration config) {
+    private static XQItemType makeElementTest(QName nodename, SchemaType schemaType, boolean nillable, Configuration config) {
+        QNameTest nameTest;
         if (nodename == null) {
-            return new SaxonXQItemType(contentTest, config);
+            nameTest = AnyNodeTest.getInstance();
         } else {
-            NameTest nameTest = new NameTest(
+            nameTest = new NameTest(
                     Type.ELEMENT, NamespaceUri.of(nodename.getNamespaceURI()), nodename.getLocalPart(), config.getNamePool());
-            CombinedNodeTest combined = new CombinedNodeTest(nameTest, OperatorSymbol.INTERSECT, contentTest);
-            return new SaxonXQItemType(combined, config);
         }
+        ContentTypeTest combined = new ContentTypeTest(Type.ELEMENT, nameTest, schemaType, nillable, config);
+        return new SaxonXQItemType(combined, config);
     }
 
     /*@NotNull*/
@@ -386,8 +386,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
             throw new XQException("Type " + typename + " not found in schema");
         }
 
-        ContentTypeTest contentTest = new ContentTypeTest(Type.ELEMENT, AnyNodeTest.getInstance(), st, allowNill, config);
-        return makeElementTest(nodename, contentTest, config);
+        return makeElementTest(nodename, st, allowNill, config);
     }
 
     /*@NotNull*/
