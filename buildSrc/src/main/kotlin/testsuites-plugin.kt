@@ -130,10 +130,10 @@ abstract class TestSuitesExtension
         }
       }
       "qt4" -> {
-        if (language.contains("3")) {
-          exceptionsDir.file("qt3.xml")
-        } else {
+        if (language.contains("4")) {
           exceptionsDir.file("qt4.xml")
+        } else {
+          exceptionsDir.file("qt3.xml")
         }
       }
       "xslt30" -> {
@@ -144,10 +144,10 @@ abstract class TestSuitesExtension
         }
       }
       "xslt40" -> {
-        if (language.contains("3")) {
-          exceptionsDir.file("xslt30.xml")
-        } else {
+        if (language.contains("4")) {
           exceptionsDir.file("xslt40.xml")
+        } else {
+          exceptionsDir.file("xslt30.xml")
         }
       }
       "qt3extra" -> exceptionsDir.file("qt3extra.xml")

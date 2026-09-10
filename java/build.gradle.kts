@@ -304,6 +304,7 @@ testSuites.configure("expath", "XP31", mapOf("unfolded" to "on"))
 testSuites.configure("expath", "XQ31")
 testSuites.configure("expath", "XQ40")
 
+testSuites.configure("qt3", "XP20")
 testSuites.configure("qt3", "XP31")
 testSuites.configure("qt3", "XP31", mapOf("opt" to "0"))
 testSuites.configure("qt3", "XP31", mapOf("tree" to "DOM"))
@@ -323,6 +324,7 @@ testSuites.configure("qt3extra", "XP40")
 testSuites.configure("qt3extra", "XQ31")
 testSuites.configure("qt3extra", "XQ40")
 
+testSuites.configure("qt4", "XP20")
 testSuites.configure("qt4", "XP31")
 
 testSuites.configure("qt4", "XQ31")
