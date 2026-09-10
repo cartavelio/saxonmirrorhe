@@ -864,6 +864,15 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             return array.remove(0);
         }
     }
+
+    public static GroundedValue arrayMembers(ArrayItem input) {
+        List<MapItem> parcels = new ArrayList<>(input.arrayLength());
+        for (GroundedValue member : input.members()) {
+            parcels.add(new ShapedMap(VALUE_RECORD, member));
+        }
+        return SequenceExtent.makeSequenceExtent(parcels);
+    }
+
     //#if EE==true || PE==true
 
     /**
@@ -874,17 +883,8 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         @Override
         public GroundedValue call(XPathContext context, Sequence[] arguments) throws XPathException {
             ArrayItem input = (ArrayItem) arguments[0].head();
-            return members(input);
+            return arrayMembers(input);
         }
-
-        public static GroundedValue members(ArrayItem input) {
-            List<MapItem> parcels = new ArrayList<>(input.arrayLength());
-            for (GroundedValue member : input.members()) {
-                parcels.add(new ShapedMap(VALUE_RECORD, member));
-            }
-            return SequenceExtent.makeSequenceExtent(parcels);
-        }
-
     }
 
     /**
@@ -1012,7 +1012,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             // Convert the array to a sequence of parcels; invoke fn:slice; then unparcel the result
             ArrayItem input = (ArrayItem) arguments[0].head();
-            GroundedValue parcels = ArrayMembers.members(input);
+            GroundedValue parcels = arrayMembers(input);
             Sequence[] newArgs = Arrays.copyOf(arguments, arguments.length);
             newArgs[0] = parcels;
             GroundedValue slicedParcels = Slice.slice(newArgs);

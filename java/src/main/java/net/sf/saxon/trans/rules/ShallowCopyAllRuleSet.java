@@ -71,7 +71,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
             ProxyOutputter checker = new ShallowCopyProxyOutputterForArrays(cco, locationId);
   
             collector.setSystemId(out.getSystemId());
-            GroundedValue inputMembers = ArrayFunctionSet.ArrayMembers.members(arrayItem);
+            GroundedValue inputMembers = ArrayFunctionSet.arrayMembers(arrayItem);
             SequenceIterator iter = inputMembers.iterate();
 
             PipelineConfiguration pipe = out.getPipelineConfiguration();
