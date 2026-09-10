@@ -3,13 +3,12 @@
    <h1>Using XPath</h1>
 
 
-   <p>This section describes how to use Saxon as a class library for XPath processing from Java or C#, without
-      making any use of XSLT stylesheets. It includes information on the XPath API, and the API for
-      the Saxon implementation of the XPath object model. On other pages you will find the <a
-         class="bodylink" href="/using-xsl/embedding">API for XSLT transformation</a>, the <a
-         class="bodylink" href="/using-xquery/api-query">API for running XQuery</a>, and the <a
-         class="bodylink" href="/schema-processing/validation-api">API for schema
-      validation.</a></p>
+   <p>This section describes how to use Saxon as a class library for XPath processing from Java, C#, C/C++,
+      Python or PHP, without making any use of XSLT stylesheets or XQuery queries. It includes information on
+      the XPath API, and the API for the Saxon implementation of the XPath object model. In other sections you
+      will find the information for <a class="bodylink" href="/using-xsl">Using XSLT</a>, <a class="bodylink"
+         href="/using-xquery">Using XQuery</a>, and <a class="bodylink" href="/schema-processing">Using XML
+            Schema</a> from applications in Java, C#, etc.</p>
 
    <p>For information about the different ways of loading source documents, see <a class="bodylink"
          href="/sourcedocs">Handling XML documents</a>.</p>
@@ -38,11 +37,10 @@
    </div>
    
    <p class="csonly">On .NET, XPath processing is available via classes in the Saxon.Api namespace, as described at <a
-      class="bodylink" href="dotnet-xpath">Evaluating XPath expressions from C#</a>.</p>
+      class="bodylink" href="dotnet-xpath">Evaluating XPath expressions from a C# application</a>.</p>
    
    <p class="conly">For details about XPath processing from SaxonC, see <a class="bodylink"
-      href="https://www.saxonica.com/saxon-c/documentation12/#!using-xpath">Using XPath</a> in the SaxonC
-      documentation.</p>
+      href="saxonc-xpath">Evaluating XPath expressions from a C/C++, Python or PHP application</a>.</p>
    
    <p>Saxon allows XPath expressions to be evaluated either against its own native tree models of
       XML (the tiny tree and linked tree), or against trees built using external third-party libraries:</p>
@@ -206,8 +204,8 @@
             <code>double</code>, <code>float</code> or <code>int</code>, and methods such as <code>getBooleanValue()</code>
              and <code>getStringValue()</code> are available to convert in the other direction. Similarly for PHP.</p></li>
          <li class="conly"><p>In Python, an <code>PyXdmAtomicValue</code> can be constructed directly from a Python <code>bool</code>, <code>str</code>, <code>long</code>,
-            or <code>float</code>, and methods such as <code>double_value</code>
-            and <code>integer_value</code> are available to convert in the other direction.</p></li>
+            or <code>float</code>, and methods such as <code>double_value()</code>
+            and <code>integer_value()</code> are available to convert in the other direction.</p></li>
       </ul>
          
       
@@ -579,8 +577,8 @@ XPath xpath = xpathFactory.newXPath();
       </section>
    </section>
    
-   <section id="dotnet-xpath" title="Evaluating XPath expressions from C#" class="csonly">
-         <h1>Evaluating XPath expressions from C#</h1>
+   <section id="dotnet-xpath" title="From a C# application" class="csonly">
+         <h1>Evaluating XPath expressions from a C# application</h1>
          
          
          
@@ -619,7 +617,7 @@ XPath xpath = xpathFactory.newXPath();
                      href="Saxon.Api.XPathSelector">XPathSelector</a>. The
                   <code>XPathSelector</code> can be serially reused, but it must not be shared
                   across multiple threads. Set any options required for the specific XPath execution
-                  (for example, the initial context node, the values of any variables referenced in the
+                  (for example, the initial context node, and the values of any variables referenced in the
                   expression), and then call one of the methods <code>GetEnumerator()</code>,
                   <code>Evaluate()</code>, or <code>EvaluateSingle()</code> to execute the XPath
                   expression.</p>
@@ -652,6 +650,350 @@ XPath xpath = xpathFactory.newXPath();
             <code>saxon-resources</code> file, see module <code>Examples.cs</code>.</p>
          
          
+      
+   </section>
+   
+   <section id="saxonc-xpath" title="From a C/C++, Python or PHP application" class="conly">
+      <h1>Evaluating XPath expressions from a C/C++, Python or PHP application</h1>
+      
+      <p>This section describes how to use SaxonC as a library for XPath processing from the C, C++, Python, or
+         PHP API.</p>
+      
+      <nav except="node-navigation">
+         <ul/>
+      </nav>
+      
+      <p>It also provides information on <a class="bodylink" href="node-navigation">XdmNode navigation</a>
+         with the SaxonC API.</p>
+      
+      <section id="c-api-xpath" title="From a C application" class="conly">
+         
+         <h1>XPath from a C application</h1>
+         
+         <p>The SaxonC C API can be used to evaluate XPath expressions from your own C application. Functions 
+            are provided to perform XPath processing in <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCXPath_8h.html"
+               >SaxonCXPath.h</a>: namely <code>evaluate()</code>, <code>evaluateSingle()</code> and
+            <code>effectiveBooleanValue()</code>.</p>
+         
+         <p>For these XPath evaluation functions, the XPath expression string is supplied as an argument, and
+            expression parameters and other properties are supplied using the structs
+            <code>sxnc_parameter</code> and <code>sxnc_property</code>, respectively. For
+            <code>evaluate()</code> and <code>evaluateSingle()</code>, the results are returned as an XDM type
+            given as the struct <code>sxn_value</code>. The <code>effectiveBooleanValue()</code> function
+            returns a bool.</p>
+         
+         <p>You can evaluate an XPath expression using the SaxonC C interface as follows:</p>
+         
+         <ol>
+            <li>
+               <p>The first step is the memory allocation for the processor and variables required by SaxonC.
+                  To simplify the process, the utility function <code>initSaxonc()</code> can be used to alloc
+                  the following variables:</p>
+               
+               <ul>
+                  <li>environ - SaxonC environment given as the struct <code>sxnc_environment</code>.</li>
+                  <li>processor - The SaxonC processor data structure given as the struct
+                     <code>sxnc_processor</code> which is used as a reference to the Saxon
+                     <code>Processor</code> object in Java.</li>
+                  <li>parameters - The <code>sxnc_parameter</code> struct (an array) is used to represent the
+                     external variables supplied to the XPath expression. Note that there are several utility
+                     functions to construct XDM values provided in SaxonCXPath.h. For further details on
+                     supplying parameters, see the <a
+                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        class="bodylink">Configuration</a> section in the SaxonC documentation.</li>
+                  <li>properties - The <code>sxnc_property</code> struct (an array) is used to represent the
+                     required configuration properties and options for the processor. For a full list of the
+                     available properties see the <a class="bodylink"
+                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        >Configuration</a> section in the SaxonC documentation.</li>
+               </ul>
+               
+               <p>For example:</p>
+               
+               <samp><![CDATA[   int cap = 10;
+   sxnc_parameter *parameters;
+   int parLen = 0, parCap;
+   parCap = cap;
+   sxnc_property *properties;
+   int propLen = 0;
+   parCap = cap;
+   sxnc_environment *environ;
+   sxnc_processor *processor;
+
+   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></samp>
+            </li>
+            <li>
+               <p>Next set up the GraalVM environment to create and initialize a new independent VM instance,
+                  using the <code>create_graalvm_isolate()</code> function. This is required by the SaxonC
+                  processors.</p>
+               <samp><![CDATA[   sxnc_environment *environ;
+   create_graalvm_isolate(environi);]]></samp>
+            </li>
+            <li>
+               <p>Use the <code>c_createSaxonProcessor()</code> function to create a SaxonC processor, which
+                  is used to create the XPath processor. The last argument is used to specify whether the
+                  processor is to be run with license enabled (i.e. for Saxon-EE and Saxon-PE) or off - set
+                  using values '1' and '0' respectively.</p>
+               <samp><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
+            </li>
+            <li>
+               <p>Use the <code>c_createXPathProcessor()</code> function to create an XPath processor, which
+                  is used to evaluate XPath expressions.</p>
+               <samp><![CDATA[   sxnc_xpath *xpathProc = (sxnc_xpath *)malloc(sizeof(sxnc_xpath));
+   int checkProc = c_createXPathProcessor(environi, processor, xpathProc);]]></samp>
+            </li>
+            <li>
+               <p>Supply properties for the expression using the <code>setProperty()</code> function.</p>
+               <p>For example, set the source document as follows:</p>
+               <samp><![CDATA[   setProperty(&properties, &propLen, &propCap, "s", "../data/people.xml");]]></samp>
+            </li>
+            <li>
+               <p>You can now evaluate an XPath expression, using the <code>evaluate()</code>,
+                  <code>evaluateSingle()</code> or <code>effectiveBooleanValue()</code> functions. For
+                  example, you could evaluate an XPath expression using:</p>
+               <samp><![CDATA[   sxnc_value *result = evaluate(environ, xpathProc, cwd, "/out/person",
+      parameters, properties, 0, propLen);]]]></samp>
+            </li>
+            <li>
+               <p>At the end of the program it is necessary to deallocate the memory created for the Saxon
+                  processor, parameters and properties; and cleanly release resources created by GraalVM.</p>
+               <samp><![CDATA[   graal_tear_down(environi->thread);
+   freeSaxonc(&environi, &processor, &parameters, &properties);]]></samp>
+            </li>
+         </ol>
+         
+      </section>
+      
+      <section id="cpp-api-xpath" title="From a C++ application" class="conly">
+         
+         <h1>XPath from a C++ application</h1>
+         
+         <p>The SaxonC C++ interface is custom-designed API for XPath processing, allowing integrated access to all
+            Saxon's XML processing capabilities in a uniform way. The C++ interface also provides the internal
+            API on which the Python and PHP APIs are built.</p>
+         
+         <p>You can evaluate an XPath expression using the C++ interface in a number of ways, for
+            instance as follows:</p>
+         
+         <ol>
+            <li>
+               <p>Create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html"
+                  >SaxonProcessor</a> and set any global configuration options on the
+                  <code>SaxonProcessor</code>.</p>
+            </li>
+            <li>
+               <p>Build the source document by calling <code>newDocumentBuilder()</code> to create
+                  a <code>DocumentBuilder</code>, setting appropriate options, and then calling the
+                  <code>parseXmlFromFile()</code> or <code>parseXmlFromString()</code> methods. This
+                  returns an <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html">XdmNode</a> which can
+                  be supplied as the context item to the XPath expression.</p>
+            </li>
+            <li>
+               <p>Call <code>newXPathProcessor()</code> to create an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/classXPathProcessor.html"
+                  >XPathProcessor</a>, and set any options required for the specific XPath execution (for
+                  example, declaring namespace prefixes that are used in the XPath expression, the initial
+                  context node, and the values of any variables referenced in the expression).</p>
+            </li>
+            <li>
+               <p>To compile and evaluate the expression, call one of the methods <code>evaluate()</code>,
+                  <code>evaluateSingle()</code> or <code>effectiveBooleanValue()</code> to execute a specified
+                  XPath expression.</p>
+            </li>
+            <li>
+               <p>The result of an XPath expression is in general an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html">XdmValue</a>,
+                  representing a value as defined in the XDM data model (that is, a sequence of nodes and/or
+                  atomic values). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/classXdmItem.html" >XdmItem</a>, <a
+                        class="bodylink code"
+                        href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html" >XdmNode</a>, and
+                  <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/classXdmAtomicValue.html"
+                     >XdmAtomicValue</a>, and these relate directly to the corresponding concepts in XDM.
+                  Various methods are available to translate between this model and native C++ data types.</p>
+            </li>
+         </ol>
+         
+         <p>Note that the <code>XPathProcessor</code> only provides compile-and-go methods to execute an
+            expression directly without going through an explicit compilation process. This provides a simpler
+            approach if the expression is only evaluated once; but means that an <code>XPathProcessor</code> is
+            not really suitable for reuse.</p>
+         
+         <p>Examples of the use of the C++ API to evaluate XPath expressions are included in the
+            SaxonC download file in the directory <code>samples/cppTests</code>, see file
+            <code>testXPath.cpp</code>.</p>
+         
+         
+      </section>
+      
+      <section id="python-api-xpath" title="From a Python application" class="conly">
+         
+         <h1>XPath from a Python application</h1>
+         
+         <p>The SaxonC Python interface is custom-designed API for XPath processing, allowing integrated access to all
+            Saxon's XML processing capabilities in a uniform way. The Python API is directly built upon the
+            C++ API for XPath.</p>
+         
+         <p>You can evaluate an XPath expression using the Python interface in a number of ways, for
+            instance as follows:</p>
+         
+         <ol>
+            <li>
+               <p>Create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"
+                  >PySaxonProcessor</a> and set any global configuration options on the
+                  <code>PySaxonProcessor</code>.</p>
+            </li>
+            <li>
+               <p>Build the source document by calling <code>new_document_builder()</code> to create
+                  a <code>DocumentBuilder</code>, setting appropriate options, and then calling the
+                  <code>parse_xml()</code> method. This returns a <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmNode" >PyXdmNode</a>
+                  which can be supplied as the context item to the XPath expression.</p>
+            </li>
+            <li>
+               <p>Call <code>new_xpath_processor()</code> to create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXPathProcessor"
+                  >PyXPathProcessor</a>, and set any options required for the specific XPath execution (for
+                  example, declaring namespace prefixes that are used in the XPath expression, the initial
+                  context node, and the values of any variables referenced in the expression).</p>
+            </li>
+            <li>
+               <p>To compile and evaluate the expression, call one of the methods <code>evaluate()</code>,
+                  <code>evaluate_single()</code> or <code>effective_boolean_value()</code> to execute a
+                  specified XPath expression.</p>
+            </li>
+            <li>
+               <p>The result of an XPath expression is in general a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmValue">PyXdmValue</a>,
+                  representing a value as defined in the XDM data model (that is, a sequence of nodes and/or
+                  atomic values). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmItem" >PyXdmItem</a>, <a
+                        class="bodylink code"
+                        href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmNode" >PyXdmNode</a>, and
+                  <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmAtomicValue"
+                     >PyXdmAtomicValue</a>, and these relate directly to the corresponding concepts in XDM.
+                  Various methods are available to translate between this model and native Python data types.</p>
+            </li>
+         </ol>
+         
+         <p>Note that the <code>PyXPathProcessor</code> only provides compile-and-go methods to execute an
+            expression directly without going through an explicit compilation process. This provides a simpler
+            approach if the expression is only evaluated once; but means that a <code>PyXPathProcessor</code> is
+            not really suitable for reuse.</p>
+         
+         <p>Examples of the use of the Python API to evaluate XPath expressions are included in the
+            SaxonC download file in the directory <code>pypi</code>, see file <code>test_saxonc.py</code> and also the test
+            driver in <code>testsuite_driver/xslt30_test_suite_driver.py</code>.</p>
+         
+      </section>
+      
+      <section id="php-api-xpath" title="From a PHP application" class="conly">
+         
+         <h1>XPath from a PHP application</h1>
+         
+         <p>The SaxonC PHP interface is custom-designed API for XPath processing, allowing integrated access to all
+            Saxon's XML processing capabilities in a uniform way. The PHP API is directly built upon the PHP API for XPath.</p>
+         
+         <p>You can evaluate an XPath expression using the PHP interface in a number of ways, for
+            instance as follows:</p>
+         
+         <ol>
+            <li>
+               <p>Create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor"
+                  >Saxon\SaxonProcessor</a> and set any global configuration options on the
+                  <code>SaxonProcessor</code>.</p>
+            </li>
+            <li>
+               <p>Build the source document by calling <code>newDocumentBuilder()</code> to create
+                  a <code>DocumentBuilder</code>, setting appropriate options, and then calling the
+                  <code>parseXmlFromFile()</code> or <code>parseXmlFromString()</code> methods. This
+                  returns a <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmnode"
+                     >Saxon\XdmNode</a> which can be supplied as the context item to the XPath expression.</p>
+            </li>
+            <li>
+               <p>Call <code>newXPathProcessor()</code> to create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xpathprocessor"
+                  >Saxon\XPathProcessor</a>, and set any options required for the specific XPath execution (for
+                  example, declaring namespace prefixes that are used in the XPath expression, the initial
+                  context node, and the values of any variables referenced in the expression).</p>
+            </li>
+            <li>
+               <p>To compile and evaluate the expression, call one of the methods <code>evaluate()</code>,
+                  <code>evaluateSingle()</code> or <code>effectiveBooleanValue()</code> to execute a specified
+                  XPath expression.</p>
+            </li>
+            <li>
+               <p>The result of an XPath expression is in general an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmvalue">XdmValue</a>,
+                  representing a value as defined in the XDM data model (that is, a sequence of nodes and/or
+                  atomic values). Subclasses of <code>XdmValue</code> include <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmitem"
+                     >XdmItem</a>, <a class="bodylink code"
+                        href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmnode"
+                        >XdmNode</a>, and <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmatomicvalue"
+                     >XdmAtomicValue</a>, and these relate directly to the corresponding concepts in XDM.
+                  Various methods are available to translate between this model and native PHP data types.</p>
+            </li>
+         </ol>
+         
+         <p>Note that the <code>XPathProcessor</code> only provides compile-and-go methods to execute an
+            expression directly without going through an explicit compilation process. This provides a simpler
+            approach if the expression is only evaluated once; but means that an <code>XPathProcessor</code> is
+            not really suitable for reuse.</p>
+         
+         <p>Examples of the use of the PHP API to evaluate XPath expressions are included in the
+            SaxonC download file in the directory <code>samples/php</code>, see file <code>xpathExamples.php</code>.</p>
+         
+      </section>
+      
+      <section id="node-navigation" title="XdmNode navigation" class="conly">
+         <h1>XdmNode navigation</h1>
+         
+         <p>The <code>XdmNode</code> class provides DOM like methods to navigate nodes in a tree. The options
+            available in the C++, Python and PHP APIs are as follows:</p>
+         
+         <ol>
+            <li>
+               <p>In the C++ and Python APIs, simple navigation down the tree can be achieved using the
+                  <code>getChildren()</code> method (or <code>children</code> property in Python) which
+                  returns all the child nodes at a given parent node.</p>  
+               <p>For PHP, navigate down the tree using the <code>getChildNode()</code> method, which requires
+                  an integer index argument, and returns the i'th child node (use the
+                  <code>getChildCount()</code> method to get the number of child nodes).</p>
+               <p>Use the method <code>getParent()</code> (<code>get_parent()</code> in Python) to navigate
+                  back up the tree, and the methods <code>getAttributeNodes()</code> and
+                  <code>getAttributeValue(name)</code> (<code>attributes</code> property and
+                  <code>get_attribute_value(name)</code> in Python) to retrieve the attribute nodes and their
+                  values.</p>
+            </li>
+            <li>
+               <p>Since SaxonC 12.3, as an alternative to the above, the <code>axisNodes()</code> method
+                  (<code>axis_nodes()</code> in Python) is available which provides navigation of the tree
+                  using the XPath axes. The axis options are: ANCESTOR, ANCESTOR_OR_SELF, ATTRIBUTE, CHILD,
+                  DESCENDANT, DESCENDANT_OR_SELF, FOLLOWING, FOLLOWING_SIBLING, NAMESPACE, PARENT, PRECEDING,
+                  PRECEDING_SIBLING and SELF.</p></li>
+         </ol>
+         
+         <p>For more information and other methods, see the API documentation:</p>
+         <ul>
+            <li>C++ API: <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html">XdmNode</a></li>
+            <li>Python API: <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmNode">PyXdmNode</a></li>
+            <li>PHP API: <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmnode">XdmNode</a></li>
+         </ul>
+         
+      </section>
       
    </section>
    

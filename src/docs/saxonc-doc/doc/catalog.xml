@@ -4,11 +4,6 @@
    <section ref="starting">Getting started</section>
    <section ref="changes">Change history</section>
    <section ref="configuration">Configuration</section>
-   <section ref="sourcedocs">Handling XML documents</section>
-   <section ref="using-xsl">Using XSLT</section>
-   <section ref="using-xquery">Using XQuery</section>
-   <section ref="using-xpath">Using XPath</section>
-   <section ref="using-schema-processor">Using XML Schema (XSD)</section>
    <section ref="api">SaxonC API</section>
    <section ref="samples">SaxonC samples</section>
    <!--<section ref="extensibility">Extension functions in C++/PHP</section> -->

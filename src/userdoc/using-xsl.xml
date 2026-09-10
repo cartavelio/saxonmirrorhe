@@ -4,15 +4,19 @@
 
 
    <p>This section describes how to use XSLT stylesheets with Saxon, either from the command line,
-      from the <dfn>Java API</dfn> or <dfn>C# API</dfn>, or from <dfn>Ant</dfn>:</p>
+      from the <dfn>Java API</dfn>, <dfn>C# API</dfn>, or SaxonC C/C++, Python or PHP APIs, or from <dfn>Ant</dfn>:</p>
 
-   <nav except="xslt30 compiling performanceanalysis">
+   <nav except="xslt30 compiling stylesheet-output performanceanalysis">
       <ul/>
    </nav>
+   
+   <!--<p class="conly">For information on using XSLT from a SaxonC application in C/C++, Python or PHP, see the
+      corresponding <a class="bodylink" href="https://www.saxonica.com/saxon-c/documentation12/#!using-xsl"
+         >Using XSLT</a> section in the SaxonC documentation.</p>-->
 
    <p>It also includes useful information on <a class="bodylink" href="compiling">Compiling a
-         stylesheet</a>, and <a class="bodylink" href="performanceanalysis">Performance
-      analysis</a>.</p>
+      stylesheet</a>, <a class="bodylink" href="stylesheet-output">Handling output</a>, and <a
+         class="bodylink" href="performanceanalysis">Performance analysis</a>.</p>
 
    <p>Furthermore, a summary description of the current Saxon implementation of <a class="bodylink"
          href="xslt30">XSLT 3.0</a> is provided, with links to other relevant sections of the
@@ -1388,7 +1392,7 @@
       </section>
    </section>
    
-   <section id="Saxon-Api-transformation" title="From a C# application" class="csonly">
+   <section id="saxon-api-transformation" title="From a C# application" class="csonly">
       <h1>XSLT transformations from C#</h1>
       
       
@@ -1587,6 +1591,393 @@
 
    Console.WriteLine("\nOutput written to " + outfile + "\n");]]></samp>
          
+   </section>
+   
+   <section id="saxonc-transformation" title="From a C/C++, Python or PHP application" class="conly">
+      <h1>XSLT transformations from a C/C++, Python or PHP application</h1>
+      
+      <p>This section describes how to use XSLT stylesheets with SaxonC, from the C, C++, Python, or PHP
+         API.</p>
+      
+      <nav>
+         <ul/>
+      </nav>
+      
+      <section id="c-api-transformation" title="From a C application" class="conly">
+         <h1>XSLT transformations from a C application</h1>
+         
+         <p>The SaxonC C API can be used to invoke transformations from your own C application. Functions are
+            provided to perform XSLT transformations in <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
+               >SaxonCProcessor.h</a>. Note that this API is more basic than the C++ version, in particular,
+            with the C API the compile and run phases happen together within the same function call.</p>
+         
+         <p>For these XSLT transformation functions, the XML document source and XSLT stylesheet are supplied
+            as arguments, and stylesheet parameters and other properties are supplied using the structs
+            <code>sxnc_parameter</code> and <code>sxnc_property</code>, respectively. The transformation
+            results can be output to file using the <code>xsltSaveResultToFile()</code> function, or string
+            representation using the <code>xsltApplyStylesheet()</code> function.</p>
+         
+         <p>You can perform a transformation using the SaxonC C interface as follows:</p>
+         
+         <ol>
+            <li>
+               <p>The first step is the memory allocation for the processor and variables required by SaxonC.
+                  To simplify the process, the utility function <code>initSaxonc()</code> can be used to alloc
+                  the following variables:</p>
+               
+               <ul>
+                  <li>environ - SaxonC environment given as the struct <code>sxnc_environment</code>.</li>
+                  <li>processor - The SaxonC processor data structure given as the struct
+                     <code>sxnc_processor</code> which is used as a reference to the Saxon
+                     <code>Processor</code> object in Java.</li>
+                  <li>parameters - The <code>sxnc_parameter</code> struct (an array) is used to represent the
+                     stylesheet parameters supplied to the XSLT transform. For further details see the <a
+                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        class="bodylink">Configuration</a> section in the SaxonC documentation.</li>
+                  <li>properties - The <code>sxnc_property</code> struct (an array) is used to represent the
+                     required configuration properties and options for the processor. For a full list of the
+                     available properties see the <a class="bodylink"
+                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        >Configuration</a> section in the SaxonC documentation.</li>
+               </ul>
+               
+               <p>For example:</p>
+               
+               <samp><![CDATA[   int cap = 10;
+   sxnc_parameter *parameters;
+   int parLen = 0, parCap;
+   parCap = cap;
+   sxnc_property *properties;
+   int propLen = 0;
+   parCap = cap;
+   sxnc_environment *environ;
+   sxnc_processor *processor;
+
+   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></samp>
+            </li>
+            <li>
+               <p>Next set up the GraalVM environment to create and initialize a new independent VM instance,
+                  using the <code>create_graalvm_isolate()</code> function. This is required by the SaxonC
+                  processors.</p>
+               <samp><![CDATA[   sxnc_environment *environ;
+   create_graalvm_isolate(environi);]]></samp>
+            </li>
+            <li>
+               <p>Use the <code>c_createSaxonProcessor()</code> function to create a SaxonC processor, which
+                  is used for XSLT and XQuery processing. The last argument is used to specify whether the
+                  processor is to be run with license enabled (i.e. for Saxon-EE and Saxon-PE) or off - set
+                  using values '1' and '0' respectively.</p>
+               <samp><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
+            </li>
+            <li>
+               <p>You can now execute XSLT stylesheets, using the <code>xsltSaveResultToFile()</code> or
+                  <code>xsltApplyStylesheet()</code> functions. For example, you could execute a stylesheet
+                  and return the results as a string representation, using:</p>
+               <samp><![CDATA[   const char *result =
+      xsltApplyStylesheet(environ, processor, cwd, "../data/sample.xml",
+         "../data/test.xsl", 0, 0, 0, 0);]]]></samp>
+               <p>Notice here we have not supplied any parameters or properties.</p>
+            </li>
+            <li>
+               <p>At the end of the program it is necessary to deallocate the memory created for the Saxon
+                  processor, parameters and properties; and cleanly release resources created by GraalVM.</p>
+               <samp><![CDATA[   graal_tear_down(environi->thread);
+   freeSaxonc(&environi, &processor, &parameters, &properties);]]></samp>
+            </li>
+         </ol>
+         
+      </section>
+
+      <section id="cpp-api-transformation" title="From a C++ application" class="conly">
+         <h1>XSLT transformations from a C++ application</h1>
+         
+         <p>Rather than running XSLT transformations from the command line, you may want to invoke
+            transformations from your own C++ application. If you use Saxon repeatedly to perform multiple
+            transformations, this will always be much faster than running it each time from the command line.</p>
+         
+         <p>You can perform a transformation using the SaxonC C++ interface as follows:</p>
+         
+         <ol>
+            <li>
+               <p>Create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html" >SaxonProcessor</a>
+                  and set any global configuration options on the <code>SaxonProcessor</code> object. If your
+                  stylesheet uses any features that require SaxonC-PE or SaxonC-EE, be sure to use the
+                  constructor <code>new SaxonProcessor(true)</code>.</p>
+            </li>
+            <li>
+               <p>Call <code>newXslt30Processor()</code> to create an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/classXslt30Processor.html"
+                  >Xslt30Processor</a>, and set any options that are local to a specific compilation (for
+                  example, the destination of error messages).</p>
+               <aside><p>Error messages that occur during the compile phase are handled internally in SaxonC and
+                  thrown as the C++ exception <code>SaxonApiException</code>. Throwing exceptions is fine for an
+                  application run from a console, but not so good if it's executing on a web server, or behind a
+                  graphical interface. In such cases you'll want to catch the exception and handle it
+                  accordingly.</p></aside>
+            </li>
+            <li>
+               <p>Call one of the methods <code>compileFromFile()</code>, <code>compileFromString()</code> or
+                  <code>compileFromAssociatedFile()</code> to compile a stylesheet. The result is a pointer to
+                  the <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/classXsltExecutable.html"
+                     >XsltExecutable</a> object, which can be used as often as you like, in the same thread or in
+                  different threads.</p>
+               <p>The <code>XsltExecutable</code> class was introduced in SaxonC 11.1, and provides new ways of
+                  executing stylesheet code that are defined in the XSLT 3.0 specification, though Saxon also allows
+                  you to use the same entry points with 1.0 or 2.0 stylesheets. Among the new capabilities are:</p>
+               <ul>
+                  <li>You can invoke a specific stylesheet function, with parameters, rather than invoking a named
+                     template or template rule.</li>
+                  <li>If you start execution with a named template or template rule, you can supply values for the
+                     parameters defined on that template, as well as the global stylesheet parameters, using the
+                     <code>setParameter()</code> method. The <code>SaxonProcessor</code> has a number of utility
+                     methods to create XDM objects, for example <code>makeStringValue()</code> to create an
+                     <code>XdmAtomicValue</code> object from a char pointer array, which can be used for the
+                     values of parameters.</li>
+                  <li>
+                     <p>Whether you execute a template or a function, you can return the results in raw string as a
+                        char pointer array, to file or as an XDM type. For example, a function (or template) might
+                        return a sequence of strings, or a single boolean, or a map, or even a function.</p>
+                     <p>It is possible to capture the secondary result documents into an <code>std:map</code> (as the
+                        pair URI key and <code>XdmNode</code>) using the <code>setCaptureResultDocuments()</code>
+                        method. This overrides the default mechanism of writing the result documents to file. To
+                        retrieve the result documents call the method <code>getResultDocuments()</code> after
+                        the execution of the stylesheet.</p>
+                  </li>
+                  <li>
+                     <p>There is no longer any necessary relationship between the "principal source document" (if it
+                        still exists) and the context item for evaluating global variables. The two things are quite
+                        independent of each other.</p>
+                     <p>The principal source document can be set on the <code>XsltExecutable</code> using the
+                        <code>setInitialMatchSelection()</code> or <code>setInitialMatchSelectionAsFile()</code>
+                        methods. The <code>SaxonProcessor</code> provides methods for parsing XML documents from file
+                        and from a string literal (e.g <code>parseXmlFromFile()</code>); while the
+                        <code>DocumentBuilder</code> class is more feature rich, for instance it can be used to parse
+                        and validate XML documents by setting a <code>SchemaValidator</code>.</p>
+                     <p>It is sometimes a requirement to supply the context item to be used when evaluating global
+                        variables and parameters; which can be done using the <code>setGlobalContextItem()</code> or
+                        <code>setGlobalContextFromFile()</code> methods.</p>
+                  </li>
+               </ul>
+               <p>For more details about the configuration options available, and how to set these properties and
+                  parameters, see <a class="bodylink"
+                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                     >Configuration</a> in the SaxonC documentation.</p>
+            </li>
+            <li>
+               <p>To run a transformation, there are several methods available on the <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/classXsltExecutable.html"
+                  >XsltExecutable</a> to execute the compiled stylesheet. For example, to evaluate a stylesheet
+                  using apply-templates invocation there are three methods available:
+                  <code>applyTemplatesReturningString()</code>, <code>applyTemplatesReturningValue()</code> and
+                  <code>applyTemplatesReturningFile()</code>. As the names suggest these methods return the
+                  output of the transformation as a serialized string (as a char pointer array), or a pointer to
+                  an <code>XdmValue</code> object or file on disk, respectively. Similarly there are other
+                  methods available to initiate call-template invocation or function call invocation.</p>
+            </li>
+         </ol>
+         
+         <p>Alternatively, it is also possible to run one shot transformations using the methods
+            <code>transformFileToFile()</code>, <code>transformFileToString()</code> and
+            <code>transformFileToValue()</code> directly on the <code>Xslt30Processor</code> without going
+            through an explicit compilation process. But note that these methods have limited features and are
+            not designed for XSLT 3.0. For XSLT 3.0 it is advisable to use one of the compile methods above to
+            create a <code>XsltExecutable</code>.</p>
+         
+         
+      </section>
+
+      <section id="python-api-transformation" title="From a Python application" class="conly">
+         <h1>XSLT transformations from a Python application</h1>
+         
+         <p>You can perform a transformation using the SaxonC Python interface as follows:</p>
+         
+         <ol>
+            <li>
+               <p>Create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"
+                  >PySaxonProcessor</a> and
+                  set any global configuration options on the <code>PySaxonProcessor</code> object. If your stylesheet
+                  uses any features that require saxoncpe or saxoncee, be sure to use the constructor <code>proc
+                     = PySaxonProcessor(license=True)</code>.</p>
+            </li>
+            <li>
+               <p>Call <code>new_xslt30_processor()</code> to create an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXslt30Processor">PyXslt30Processor</a>,
+                  and set any options that are local to a specific compilation (for example, the destination of error
+                  messages).</p>
+               <aside>Error messages that occur during the compile phase are handled internally in SaxonC and
+                  thrown as the Python exception <code>PySaxonApiError</code>. Throwing exceptions is fine for an
+                  application run from a console, but not so good if it's executing on a web server, or behind a
+                  graphical interface. In such cases you'll want to catch the exception and handle it accordingly.</aside>
+            </li>
+            <li>
+               <p>Call the <code>compile_stylesheet()</code> method to compile a stylesheet. The result is a
+                  pointer to the <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXsltExecutable"
+                     >PyXsltExecutable</a> object, which can be used as often as you like, in the same thread or
+                  in different threads.</p>
+               <p>The <code>PyXsltExecutable</code> class was introduced in SaxonC 11.1, and provides new ways of
+                  executing stylesheet code that are defined in the XSLT 3.0 specification, though Saxon also allows
+                  you to use the same entry points with 1.0 or 2.0 stylesheets. Among the new capabilities are:</p>
+               <ul>
+                  <li>You can invoke a specific stylesheet function, with parameters, rather than invoking a named
+                     template or template rule.</li>
+                  <li>If you start execution with a named template or template rule, you can supply values for the
+                     parameters defined on that template, as well as the global stylesheet parameters, using the
+                     <code>set_parameter()</code> method. The <code>PySaxonProcessor</code> has a number of utility
+                     methods to create XDM objects, for example <code>make_string_value()</code> to create an
+                     <code>PyXdmAtomicValue</code> object from a char pointer array, which can be used for the
+                     values of parameters.</li>
+                  <li>
+                     <p>Whether you execute a template or a function, you can return the results in raw string as a
+                        char pointer array, to file or as an XDM type. For example, a function (or template) might
+                        return a sequence of strings, or a single boolean, or a map, or even a function.</p>
+                     <p>It is possible to capture the secondary result documents into an <code>std:map</code> (as the
+                        pair URI key and <code>PyXdmNode</code>) using the <code>set_capture_result_documents()</code>
+                        method. This overrides the default mechanism of writing the result documents to file. To
+                        retrieve the result documents call the method <code>get_result_documents()</code> after
+                        the execution of the stylesheet.</p>
+                  </li>
+                  <li>
+                     <p>There is no longer any necessary relationship between the "principal source document" (if it
+                        still exists) and the context item for evaluating global variables. The two things are quite
+                        independent of each other.</p>
+                     <p>The principal source document can be set on the <code>PyXsltExecutable</code> using the
+                        <code>set_initial_match_selection()</code> method. The <code>PySaxonProcessor</code>
+                        provides a method <code>parse_xml()</code> for parsing XML documents from file or from a
+                        string literal; while the <code>PyDocumentBuilder</code> class is more feature rich, for
+                        instance it can be used to parse and validate XML documents by setting a
+                        <code>PySchemaValidator</code>.</p>
+                     <p>It is sometimes a requirement to supply the context item to be used when evaluating global
+                        variables and parameters; which can be done using the
+                        <code>set_global_context_item()</code> method.</p>
+                  </li>
+               </ul>
+               <p>For more details about the configuration options available, and how to set these properties and
+                  parameters, see <a class="bodylink"
+                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                     >Configuration</a> in the SaxonC documentation.</p>
+            </li>
+            <li>
+               <p>To run a transformation, there are several methods available on the <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXsltExecutable"
+                  >PyXsltExecutable</a> to execute the compiled stylesheet. For example, to evaluate a stylesheet
+                  using apply-templates invocation there are three methods available:
+                  <code>apply_templates_returning_string()</code>, <code>apply_templates_returning_value()</code>
+                  and <code>apply_templates_returning_file()</code>. As the names suggest these methods return
+                  the output of the transformation as a serialized string (str), <code>PyXdmValue</code> object
+                  or file on disk, respectively. Similarly there are other methods available to initiate
+                  call-template invocation or function call invocation.</p>
+            </li>
+         </ol>
+         
+         <p>Alternatively, it is also possible to run one shot transformations using the methods
+            <code>transform_to_file()</code>, <code>transform_to_string()</code> and
+            <code>transform_to_value()</code> directly on the <code>PyXslt30Processor</code> without going
+            through an explicit compilation process. But note that these methods have limited features and are
+            not designed for XSLT 3.0. For XSLT 3.0 it is advisable to use the <code>compile_stylesheet()</code>
+            method as above to create a <code>PyXsltExecutable</code>.</p>
+         
+         
+      </section>
+
+      <section id="php-api-transformation" title="From a PHP application" class="conly">
+         <h1>XSLT transformations from a PHP application</h1>
+         
+         <p>You can perform a transformation using the SaxonC PHP interface as follows:</p>
+         
+         <ol>
+            <li>
+               <p>Create a <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
+                  >SaxonProcessor</a> and set any global configuration options on the <code>SaxonProcessor</code>
+                  object. If your stylesheet uses any features that require SaxonC-PE or SaxonC-EE, be sure to
+                  use the constructor <code>new SaxonProcessor(true)</code>.</p>
+            </li>
+            <li>
+               <p>Call <code>newXslt30Processor()</code> to create an <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
+                  >Xslt30Processor</a>, and set any options that are local to a specific compilation (for
+                  example, the destination of error messages).</p>
+               <aside><p>Error messages that occur during the compile phase are handled internally in SaxonC and
+                  thrown as a PHP exception. Throwing exceptions is fine for an application run from a console,
+                  but not so good if it's executing on a web server, or behind a graphical interface. In such
+                  cases you'll want to catch the exception and handle it accordingly.</p></aside>
+            </li>
+            <li>
+               <p>Call one of the methods <code>compileFromFile()</code>, <code>compileFromString()</code> or
+                  <code>compileFromAssociatedFile()</code> to compile a stylesheet. The result is a pointer to
+                  the <a class="bodylink code"
+                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_xsltexecutable"
+                     >XsltExecutable</a> object, which can be used as often as you like, in the same thread or in
+                  different threads.</p>
+               <p>The <code>XsltExecutable</code> class was introduced in SaxonC 11.1, and provides new ways of
+                  executing stylesheet code that are defined in the XSLT 3.0 specification, though Saxon also allows
+                  you to use the same entry points with 1.0 or 2.0 stylesheets. Among the new capabilities are:</p>
+               <ul>
+                  <li>You can invoke a specific stylesheet function, with parameters, rather than invoking a named
+                     template or template rule.</li>
+                  <li>If you start execution with a named template or template rule, you can supply values for the
+                     parameters defined on that template, as well as the global stylesheet parameters, using the
+                     <code>setParameter()</code> method. The <code>SaxonProcessor</code> has a number of utility
+                     methods to create XDM objects, for example <code>makeStringValue()</code> to create an
+                     <code>XdmAtomicValue</code> object from a char pointer array, which can be used for the
+                     values of parameters.</li>
+                  <li>
+                     <p>Whether you execute a template or a function, you can return the results in raw string as a
+                        char pointer array, to file or as an XDM type. For example, a function (or template) might
+                        return a sequence of strings, or a single boolean, or a map, or even a function.</p>
+                     <p>It is possible to capture the secondary result documents into an <code>std:map</code> (as the
+                        pair URI key and <code>XdmNode</code>) using the <code>setCaptureResultDocuments()</code>
+                        method. This overrides the default mechanism of writing the result documents to file. To
+                        retrieve the result documents call the method <code>getResultDocuments()</code> after
+                        the execution of the stylesheet.</p>
+                  </li>
+                  <li>
+                     <p>There is no longer any necessary relationship between the "principal source document" (if it
+                        still exists) and the context item for evaluating global variables. The two things are quite
+                        independent of each other.</p>
+                     <p>The principal source document can be set on the <code>XsltExecutable</code> using the
+                        <code>setInitialMatchSelection()</code> or <code>setInitialMatchSelectionAsFile()</code>
+                        methods. The <code>SaxonProcessor</code> provides methods for parsing XML documents from file
+                        and from a string literal (e.g <code>parseXmlFromFile()</code>); while the
+                        <code>DocumentBuilder</code> class is more feature rich, for instance it can be used to parse
+                        and validate XML documents by setting a <code>SchemaValidator</code>.</p>
+                     <p>It is sometimes a requirement to supply the context item to be used when evaluating global
+                        variables and parameters; which can be done using the <code>setGlobalContextItem()</code> or
+                        <code>setGlobalContextFromFile()</code> methods.</p>
+                  </li>
+               </ul>
+               <p>For more details about the configuration options available, and how to set these properties and
+                  parameters, see <a class="bodylink"
+                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                     >Configuration</a> in the SaxonC documentation.</p>
+            </li>
+            <li>
+               <p>To run a transformation, there are several methods available on the <a class="bodylink code"
+                  href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_xsltexecutable"
+                  >XsltExecutable</a> to execute the compiled stylesheet. For example, to evaluate a stylesheet
+                  using apply-templates invocation there are three methods available:
+                  <code>applyTemplatesReturningString()</code>, <code>applyTemplatesReturningValue()</code> and
+                  <code>applyTemplatesReturningFile()</code>. As the names suggest these methods return the
+                  output of the transformation as a serialized string (as a char pointer array), or a pointer to
+                  an <code>XdmValue</code> object or file on disk, respectively. Similarly there are other
+                  methods available to initiate call-template invocation or function call invocation.</p>
+            </li>
+         </ol>
+         
+         <p>Alternatively, it is also possible to run one shot transformations using the methods
+            <code>transformFileToFile()</code>, <code>transformFileToString()</code> and
+            <code>transformFileToValue()</code> directly on the <code>Xslt30Processor</code> without going
+            through an explicit compilation process. But note that these methods have limited features and are
+            not designed for XSLT 3.0. For XSLT 3.0 it is advisable to use one of the compile methods above to
+            create a <code>XsltExecutable</code>.</p>
+         
+         
+      </section>
    </section>
    
    <section id="xsltfromant" title="From Ant" class="javaonly">
@@ -1987,10 +2378,10 @@
          <ul/>
       </nav>
 
-      <p class="conly">In SaxonC, the mechanisms for controlling the stylesheet output are different to Java
+      <!--<p class="conly">In SaxonC, the mechanisms for controlling the stylesheet output are different to Java
          and C#. For details, please see the SaxonC specific information provided in the SaxonC documentation:
          <a href="https://www.saxonica.com/saxon-c/documentation12/#!using-xsl/stylesheet-output"
-            class="bodylink">Handling output</a>.</p>
+            class="bodylink">Handling output</a>.</p>-->
       
       <section id="principal-output" title="Principal output">
          <h1>Principal output</h1>
@@ -2054,6 +2445,28 @@
                   for further transformation.</p>
                
             </li>
+            
+            <li class="conly">In the SaxonC C interface, transformation output is returned as a serialized
+               string (pointer to a char array) or sent to a specified file.</li>
+            
+            <li class="conly"><p>In the SaxonC C++, Python and PHP interfaces, there are multiple transform
+               methods on <code>XsltExecutable</code> which specify how to handle the output from the
+               different kinds of transformation invocation. These methods have the naming convention of
+               <code>[prefix]ReturningValue</code>, <code>[prefix]ReturningString</code> and
+               <code>[prefix]ReturningFile</code> (or <code>[prefix]_returning_value</code>, etc. in Python);
+               where <code>[prefix]</code> is <code>applyTemplates</code>, <code>callTemplate</code>, or
+               <code>callFunction</code>.</p>
+               <p>The output can be returned as a serialized string (pointer to a char array) using the
+                  <code>[prefix]ReturningString</code> methods, or sent to a specified file using the
+                  <code>[prefix]ReturningFile</code> methods.</p>
+               <p>You can capture the raw output of the transformation as an <code>XdmValue</code> by calling
+                  the <code>XsltExecutable</code> method <code>setResultAsRawValue()</code>
+                  (<code>set_result_as_raw_value()</code> in Python), and using one of the
+                  <code>[prefix]ReturningValue</code> methods.</p>
+               <p>If you want to perform further processing on the output, you can send it to a
+                  <code>SchemaValidator</code> for validation, or to an <code>XsltExecutable</code> for
+                  further transformation.</p>
+            </li>
          </ul>
       </section>
       
@@ -2076,7 +2489,7 @@
          against the <b>base output URI</b> of the transformation. The
          base output URI defaults to the destination of the principal output.</p>
          <p>The destination and format of secondary outputs can be influenced using the
-         Java or C# API:</p>
+         API:</p>
          
          <ul>
             <li class="javaonly"><p>The JAXP interface was designed for XSLT 1.0 and it
@@ -2121,6 +2534,25 @@
                   want to attach the serialized result to an email message and send it to a nominated recipient.</p>
                
             </li>
+            <li class="conly">
+               <p>In the SaxonC interface, the <code>XsltExecutable</code> has a method
+                  <code>setCaptureResultDocuments()</code> (<code>set_capture_result_documents()</code> in
+                  Python) which accepts two boolean flags: the first argument is a flag where the value true
+                  enables the capturing of secondary result documents in a map (<code>std::map&lt;
+                     std::string, XdmValue * &gt;</code> in C++); the second argument is used to specify that
+                  the results should be captured as raw values. After executing the transformation, call the
+                  <code>getResultDocuments()</code> method (<code>get_result_documents()</code> in Python) to
+                  return the map. The string in the map is the document URI. The default is to send secondary
+                  documents to file storage.</p>
+               <p>In PHP the <code>getResultDocuments()</code> method returns the map as a <code>XdmMap</code>.</p>
+               <p>In Python the <code>get_result_documents()</code> method returns a Python <code>dict</code>
+                  (i.e. <code>dict [str, PyXdmValue]</code>).</p>
+               <p>For example in Python you could do the following:</p>
+               <samp><![CDATA[  xslt_excutable.set_capture_result_documents(True)
+  result = xslt_executable.call_template_returning_value(template_name='main', base_output_uri=base_output_uri)
+  result_documents = xslt_executable.get_result_documents()]]></samp>
+               
+            </li>
          </ul>
          <p>In the case of an <code>xsl:result-document</code> instruction
             with no <code>href</code> attribute, the output is sent to the principal output destination,
@@ -2152,7 +2584,8 @@
          <div class="javaonly">
          <p>A Java application can customize the handling of <code>xsl:message</code>
             output by calling the <code>setMessageHandler()</code> method on the <code java="net.sf.saxon.s9api.XsltTransformer">XsltTransformer</code>
-            or <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the message is of type <code>Consumer&lt;Message&gt;</code>
+            or <code java="net.sf.saxon.s9api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the
+            method is of type <code>Consumer&lt;Message&gt;</code>
          and it will typically be supplied as a lambda expression, for example:</p>
          
             <samp>transformer.setMessageHandler(msg -> System.err.println(">>" + msg.getContent().getStringValue()));</samp>
@@ -2161,14 +2594,31 @@
          <div class="csonly">
             <p>A C# application can customize the handling of <code>xsl:message</code>
                output by setting the <code>MessageListener</code> property on the <code cs="Saxon.Api.XsltTransformer">XsltTransformer</code>
-               or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code>. The argument to the message is of type <code>Action&lt;Message&gt;</code>
+               or <code cs="Saxon.Api.Xslt30Transformer">Xslt30Transformer</code>. The value of the property should be of type <code>Action&lt;Message&gt;</code>
                and it will typically be supplied as a lambda expression, for example:</p>
             
             <samp>transformer.MessageListener = msg => Console.Error.WriteLine(">>" + msg.Content.StringValue);</samp>
             
          </div>
+         <div class="conly">
+            <p>A SaxonC application in C++, Python or PHP can customize the handling of
+               <code>xsl:message</code> output by calling the <code>setSaveXslMessage(bool show, const char*
+                  filename = nullptr)</code> method (<code>set_save_xsl_message()</code> in Python) on the
+               <code>XsltExecutable</code>. The first argument to the method is a boolean which indicates
+               whether <code>xsl:message</code> output is sent to the standard error listener (the default is
+               true). The second argument can be used to send the <code>xsl:message</code> ouput to a
+               specified file: each message is appended at the end of the file. After executing the
+               transformation, the <code>xsl:message</code> output can be retrieved using the
+               <code>getXslMessages()</code> method (<code>get_xsl_messages()</code> in Python), which returns
+               the sequence of messages as an <code>XdmValue</code>, for example in C++:</p>
+            
+            <samp><![CDATA[  executable->setSaveXslMessage(true);
+  result = executable->transformToString();
+  XdmValue * messages = executable->getXslMessages();]]></samp>
+            
+         </div>
          
-         <p>The <code>Message</code> object passed to the supplied message handler contains the content of
+         <p>In Java and C#, the <code>Message</code> object passed to the supplied message handler contains the content of
          the message as an <code>XdmNode</code>, the location of the <code>xsl:message</code> instruction,
          the error code to be used, and a boolean value indicating whether <code>terminate="yes"</code>
          was specified.</p>
