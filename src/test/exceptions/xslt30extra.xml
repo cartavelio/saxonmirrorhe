@@ -1,147 +1,152 @@
 <exceptions>
-  
-    <exception test-case="stream-001" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-002" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-003" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-005" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-006" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-007" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-008" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-009" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-010" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-011" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-012" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-013" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-014" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-015" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-016" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-017" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-018" run="true">
-      <optimization explain="false" assert="empty(//stream)"/>
-    </exception>
-    <exception test-case="stream-019" run="true">
-      <optimization explain="false" assert="empty(//stream)"/>
-    </exception>
-    <exception test-case="stream-020" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="stream-021" run="true">
-      <optimization explain="false" assert="exists(//stream)"/>
-    </exception>
-    <exception test-case="opt-001" run="true">
-      <optimization explain="false" assert="exists(//fn[@name='key'])"/>
-    </exception>
+
+  <exception test-case="stream-001" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-002" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-003" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-005" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-006" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-007" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-008" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-009" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-010" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-011" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-012" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-013" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-014" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-015" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-016" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-017" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-018" run="true">
+    <optimization explain="false" assert="empty(//stream)"/>
+  </exception>
+  <exception test-case="stream-019" run="true">
+    <optimization explain="false" assert="empty(//stream)"/>
+  </exception>
+  <exception test-case="stream-020" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="stream-021" run="true">
+    <optimization explain="false" assert="exists(//stream)"/>
+  </exception>
+  <exception test-case="opt-001" run="true">
+    <optimization explain="false" assert="exists(//fn[@name='key'])"/>
+  </exception>
   <exception test-case="opt-001-ni" run="true">
     <optimization explain="false" assert="empty(//fn[@name='key'])"/>
   </exception>
-    <exception test-case="opt-002" run="true">
-      <optimization explain="false" assert="exists(//fn[@name='key'])"/>
-    </exception>
-    <exception test-case="opt-003" run="true">
-      <optimization explain="false" assert="exists(//operator[@op='*']/variableReference)"/>
-    </exception>
-    <exception test-case="opt-004" run="true">
-      <optimization explain="false" assert="exists(//globalVariables//functionCall[@name='round'])"/>
-    </exception>
-    <exception test-case="opt-005" run="true">
-      <optimization explain="false" assert="exists(//directElement/copyOf/choose)"/>
-    </exception>
-    <exception test-case="opt-006" run="true">
-      <optimization explain="false" assert="exists(//globalVariables//@op[. eq 'eq'])"/>
-    </exception>
-    <exception test-case="opt-007" run="true">
-      <optimization explain="false"
-        assert="exists(//copyOf//let/be//functionCall[@name eq 'number'])"/>
-    </exception>
-    <exception test-case="opt-008" run="true">
-      <optimization explain="false"
-        assert="exists(//filterExpression/functionCall[@name eq 'number'])"/>
-    </exception>
-    <exception test-case="opt-009" run="true">
-      <optimization explain="false"
-        assert="exists(//templateRule//let/be//functionCall[@name eq 'key'])"/>
-    </exception>
-    <exception test-case="opt-010" run="true">
-      <optimization explain="false"
-        assert="exists(//copyOf/operator[@op='|']/functionCall[@name='fn:key'][2])"/>
-    </exception>
-    <exception test-case="opt-010-ni" run="true">
-      <optimization explain="false" assert="empty(//functionCall[@name='fn:key'])"/>
-    </exception>
-    <exception test-case="opt-011" run="true">
-      <optimization explain="false" assert="empty(//functionCall[@name='count'])"/>
-    </exception>
-    <exception test-case="opt-012" run="true">
-      <optimization explain="false" assert="exists(//axis[@name='descendant'])"/>
-    </exception>
-    <exception test-case="opt-013" run="true">
-      <optimization explain="false" assert="count(//lastItem) eq 3"/>
-    </exception>
-    <exception test-case="opt-014" run="true">
-      <optimization explain="false" assert="count(//functionCall[@name=('empty','exists')]) eq 3"/>
-    </exception>
-    <exception test-case="opt-014bc" run="true">
-      <optimization explain="false" assert="count(//functionCall[@name=('empty','exists')]) eq 3"/>
-    </exception>
-    <exception test-case="opt-015" run="true">
-      <optimization explain="false"
-        assert="count(//functionCall[@name='empty']) eq 1 and count(//functionCall[@name='exists']) eq 2  "/>
-    </exception>
-    <exception test-case="opt-016" run="true">
-      <optimization explain="false"
-        assert="exists(//integerRangeTest) and count(//functionCall[@name='subsequence']) eq 2"/>
-    </exception>
-    <exception test-case="opt-017" run="true">
-      <optimization explain="false" assert="exists(//globalVariables//operator[@op='div'])"/>
-    </exception>
-    <exception test-case="opt-018" run="true">
-      <optimization explain="false" assert="exists(//directElement/valueOf/literal)"/>
-    </exception>
-    <exception test-case="opt-019" run="true">
-      <optimization explain="false" assert="exists(//directElement/valueOf/literal)"/>
-    </exception>
-    <exception test-case="opt-020" run="true">
-      <optimization explain="false" assert="exists(//directElement/valueOf/literal[@value='12'])"/>
-    </exception>
-    <exception test-case="opt-021" run="true">
-      <optimization explain="false" assert="exists(//switch)"/>
-    </exception>
-    <exception test-case="opt-023" run="true">
-      <optimization explain="false"
-        assert="exists(//slash[axis[@name='child'][contains(@nodeTest, '|')]])"/>
-    </exception>
+  <exception test-case="opt-002" run="true">
+    <optimization explain="false" assert="exists(//fn[@name='key'])"/>
+  </exception>
+  <exception test-case="opt-003" run="true">
+    <optimization explain="false" assert="exists(//arith[@op='*']/gVarRef)"/>
+  </exception>
+  <exception test-case="opt-004" run="true">
+    <optimization explain="false" assert="exists(//globalVariable//fn[@name='round'])"/>
+  </exception>
+  <exception test-case="opt-005" run="true">
+    <optimization explain="false" assert="exists(//elem/copyOf/choose)"/>
+  </exception>
+  <exception test-case="opt-006" run="true">
+    <optimization explain="false" assert="exists(//elem/copyOf/slash/choose/varRef)"/>
+  </exception>
+  <exception test-case="opt-007" run="true">
+    <optimization explain="false"
+      assert="exists(//templateRule/let/fn[@name eq 'number']) and exists(//slash[axis][subscript[axis][varRef]])"/>
+    <slash>
+      <axis name="descendant-or-self" nodeTest="N"/>
+      <subscript>
+        <axis name="child" nodeTest="NE nQ{}section"/>
+        <varRef name="Q{http://saxon.sf.net/generated-variable}v0" slot="0"/>
+      </subscript>
+    </slash>
+  </exception>
+  <exception test-case="opt-008" run="true">
+    <optimization explain="false" assert="exists(//filter/fn[@name eq 'number'])"/>
+  </exception>
+  <exception test-case="opt-009" run="true">
+    <optimization explain="false" assert="exists(//templateRule//let/*[1]//fn[@name eq 'key'])"/>
+  </exception>
+  <exception test-case="opt-010" run="true">
+    <optimization explain="false" assert="exists(//copyOf/union[@op='|']/fn[@name='key'][2])"/>
+  </exception>
+  <exception test-case="opt-011" run="true">
+    <optimization explain="false" assert="empty(//fn[@name='count'])"/>
+  </exception>
+  <exception test-case="opt-012" run="true">
+    <optimization explain="false" assert="exists(//axis[@name='descendant'])"/>
+  </exception>
+  <exception test-case="opt-013" run="true">
+    <optimization explain="false"
+      assert="count(//filter/fn[@name='empty']/axis[@name='following-sibling'][@nodeTest='NE nQ{}para']) eq 3"
+    />
+  </exception>
+  <exception test-case="opt-014" run="true">
+    <optimization explain="false"
+      assert="count(//valueOf/convert/fn[@name=('empty','exists')]) eq 3"/>
+  </exception>
+  <exception test-case="opt-015" run="true">
+    <optimization explain="false"
+      assert="count(//valueOf/convert/fn[@name=('empty','exists')]) eq 3"/>
+  </exception>
+  <exception test-case="opt-016" run="true">
+    <optimization explain="false"
+      assert="exists(//att[@name='x']//intRangeTest) and count(//att/gVarRef) eq 2"/>
+  </exception>
+  <exception test-case="opt-017" run="true">
+    <optimization explain="false" 
+      assert="exists(//att[@name='x']//intRangeTest) and count(//att/gVarRef) eq 2"/>
+  </exception>
+  <exception test-case="opt-018" run="true">
+    <optimization explain="false" assert="exists(//globalVariable//arith[@op='div'])"/>
+  </exception>
+  <exception test-case="opt-019" run="true">
+    <optimization explain="false" assert="exists(//elem/valueOf/str[@val='0'])"/>
+  </exception>
+  <exception test-case="opt-020" run="true">
+    <optimization explain="false" assert="exists(//elem/valueOf/str[@val='12'])"/>
+  </exception>
+  <exception test-case="opt-021" run="true">
+    <optimization explain="false" assert="exists(//switch)"/>
+  </exception>
+  <exception test-case="opt-023" run="true">
+    <optimization explain="false"
+      assert="exists(//slash[axis[@name='child'][@nodeTest = 'NE u[NE nQ{}c,NE nQ{}d]']])"/>
+  </exception>
+  <exception test-case="opt-026" run="true">
+    <optimization explain="false" assert="exists(//indexedFilter2)"/>
+  </exception>
 
 
 
