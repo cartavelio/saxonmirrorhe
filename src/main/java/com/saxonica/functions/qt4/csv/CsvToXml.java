@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class CsvToXml extends CsvFunction {
     /**
-     * Sets OptionsParameter with all the needed options. {@see #extendedOptions}
+     * Sets OptionsParameter with all the needed options. {@link #extendedOptions}
      */
     public static OptionsParameter OPTION_DETAILS = extendedOptions();
 

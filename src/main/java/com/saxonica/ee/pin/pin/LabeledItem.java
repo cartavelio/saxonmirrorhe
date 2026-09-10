@@ -5,7 +5,7 @@ import net.sf.saxon.om.Item;
 
 /**
  * A <code>LabeledItem</code> represents an item together with a label. Most operations on a labeledItem
- * simply delegate to the subject item.</p>
+ * simply delegate to the subject item.
  * <p>Because of the widespread use of tests such as {@code XX instanceof NodeInfo}, concrete implementations
  * of LabeledItem are subclasses of NodeInfo, AtomicValue, etc</p>
  */
