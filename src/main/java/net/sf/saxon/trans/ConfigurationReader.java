@@ -159,7 +159,7 @@ public class ConfigurationReader implements Receiver {
             }
         }
         setSystemId(source.getSystemId());
-        ActiveSource activeSource = Version.platform.resolveSource(source, localConfig);
+        ActiveSource activeSource = Version.platform.resolveSource(source, null, localConfig);
         activeSource.deliver(this, new ParseOptions());
         // TODO: set an error handler
         // TODO: set location information

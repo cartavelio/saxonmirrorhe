@@ -327,18 +327,19 @@ public class JavaPlatform implements Platform {
      * Convert a Source to an ActiveSource. This method is present in the Platform
      * because different Platforms accept different kinds of Source object.
      *
-     * @param source A source object, typically the source supplied as the first
-     *               argument to {@link Transformer#transform(Source, Result)}
-     *               or similar methods.
-     * @param config The Configuration. This provides the SourceResolver with access to
-     *               configuration information; it also allows the SourceResolver to invoke the
-     *               resolveSource() method on the Configuration object as a fallback implementation.
+     * @param source  A source object, typically the source supplied as the first
+     *                argument to {@link Transformer#transform(Source, Result)}
+     *                or similar methods.
+     * @param options
+     * @param config  The Configuration. This provides the SourceResolver with access to
+     *                configuration information; it also allows the SourceResolver to invoke the
+     *                resolveSource() method on the Configuration object as a fallback implementation.
      * @return a source object that Saxon knows how to process. Return null if the Source object is not
      * recognized
      * @throws XPathException if the Source object is recognized but cannot be processed
      */
     @Override
-    public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
+    public ActiveSource resolveSource(Source source, ParseOptions options, Configuration config) throws XPathException {
         if (source instanceof ActiveSource) {
             return (ActiveSource)source;
         }

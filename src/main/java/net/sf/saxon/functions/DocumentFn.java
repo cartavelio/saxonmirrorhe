@@ -255,7 +255,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             }
 
             //System.err.println("URI resolver returned " + source.getClass() + " " + source.getSystemId());
-            source = config.getSourceResolver().resolveSource(source, config);
+            source = config.getSourceResolver().resolveSource(source, options, config);
             //System.err.println("Resolved source " + source.getClass() + " " + source.getSystemId());
 
             TreeInfo newdoc;

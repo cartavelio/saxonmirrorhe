@@ -93,7 +93,7 @@ public abstract class Sender {
         }
 
         if (!(source instanceof ActiveSource)) {
-            source = config.resolveSource(source, config);
+            source = config.resolveSource(source, options, config);
         }
 
         if (source == null) {

@@ -824,7 +824,7 @@ public class XsltController extends Controller {
                 underSource = ((AugmentedSource) source).getContainedSource();
             }
             Configuration config = getConfiguration();
-            Source s2 = config.getSourceResolver().resolveSource(underSource, config);
+            Source s2 = config.getSourceResolver().resolveSource(underSource, config.getParseOptions(), config);
             if (s2 != null) {
                 underSource = s2;
             }

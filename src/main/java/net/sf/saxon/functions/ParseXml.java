@@ -269,7 +269,7 @@ public class ParseXml extends SystemFunction implements Callable {
 
             StringReader sr = new StringReader(inputArg.getStringValue());
             StreamSource ss = new StreamSource(sr, baseUri);
-            Source pullSource = Version.platform.resolveSource(ss, config);
+            Source pullSource = Version.platform.resolveSource(ss, options, config);
 
             Builder b = TreeModel.TINY_TREE.makeBuilder(controller.makePipelineConfiguration());
             Receiver s = b;

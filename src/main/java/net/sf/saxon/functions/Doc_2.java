@@ -177,7 +177,7 @@ public class Doc_2 extends SystemFunction implements Callable {
         } catch (URISyntaxException e) {
             throw new XPathException("Invalid URI supplied to saxon:doc - " + e.getMessage(), "FODC0002");
         }
-        Source source = config.getSourceResolver().resolveSource(new StreamSource(abs.toASCIIString()), config);
+        Source source = config.getSourceResolver().resolveSource(new StreamSource(abs.toASCIIString()), options, config);
 
         TreeInfo newdoc;
         if (DocumentFn.sourceIsTree(source)) {

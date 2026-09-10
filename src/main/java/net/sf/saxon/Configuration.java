@@ -4119,12 +4119,13 @@ public class Configuration implements SourceResolver, NotationSet {
     /**
      * Resolve a Source.
      *
-     * @param source A source object, typically the source supplied as the first
-     *               argument to {@link javax.xml.transform.Transformer#transform(javax.xml.transform.Source, javax.xml.transform.Result)}
-     *               or similar methods.
-     * @param config The Configuration. This provides the SourceResolver with access to
-     *               configuration information; it also allows the SourceResolver to invoke the
-     *               resolveSource() method on the Configuration object as a fallback implementation.
+     * @param source  A source object, typically the source supplied as the first
+     *                argument to {@link Transformer#transform(Source, Result)}
+     *                or similar methods.
+     * @param options
+     * @param config  The Configuration. This provides the SourceResolver with access to
+     *                configuration information; it also allows the SourceResolver to invoke the
+     *                resolveSource() method on the Configuration object as a fallback implementation.
      * @return a source object that Saxon knows how to process. This must be an instance of one
      * of the classes  StreamSource, SAXSource, DOMSource, {@link net.sf.saxon.lib.AugmentedSource},
      * {@link net.sf.saxon.om.NodeInfo},
@@ -4136,7 +4137,7 @@ public class Configuration implements SourceResolver, NotationSet {
     /*@Nullable*/
     @Override
     @CSharpInnerClass(outer=true, extra={"Saxon.Ejavax.xml.transform.Source source", "Saxon.Hej.Configuration config"})
-    public ActiveSource resolveSource(Source source, Configuration config) throws XPathException {
+    public ActiveSource resolveSource(Source source, ParseOptions options, Configuration config) throws XPathException {
         if (source instanceof ActiveSource) {
             return (ActiveSource) source;
         }
@@ -4145,7 +4146,7 @@ public class Configuration implements SourceResolver, NotationSet {
                 @Override
                 public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
                     options = options.merge(((AugmentedSource) source).getParseOptions());
-                    resolveSource(((AugmentedSource) source).getContainedSource(), config)
+                    resolveSource(((AugmentedSource) source).getContainedSource(), options, config)
                             .deliver(receiver, options);
                 }
 
@@ -4162,7 +4163,7 @@ public class Configuration implements SourceResolver, NotationSet {
         }
 
         // Try delegating to the Platform for platform-specific parsing strategies
-        ActiveSource activeSource = Version.platform.resolveSource(source, config);
+        ActiveSource activeSource = Version.platform.resolveSource(source, options, config);
         if (activeSource != null) {
             return activeSource;
         }
@@ -4248,7 +4249,7 @@ public class Configuration implements SourceResolver, NotationSet {
             ParseOptions options = parseOptions;
 
             // Resolve user-defined implementations of Source
-            Source src2 = resolveSource(source, this);
+            Source src2 = resolveSource(source, options, this);
             if (src2 == null) {
                 throw new XPathException("Unknown source class " + source.getClass().getName());
             }

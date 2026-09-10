@@ -447,7 +447,7 @@ public abstract class AbstractXsltTransformer {
         }
         Configuration config = controller.getConfiguration();
         try {
-            source = config.getSourceResolver().resolveSource(source, config);
+            source = config.getSourceResolver().resolveSource(source, new ParseOptions(), config);
         } catch (XPathException e) {
             return false;
         }

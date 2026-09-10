@@ -29,19 +29,20 @@ public interface SourceResolver {
     /**
      * Resolve a Source.
      *
-     * @param source A source object, typically the source supplied as the first
-     *               argument to {@link javax.xml.transform.Transformer#transform(javax.xml.transform.Source, javax.xml.transform.Result)}
-     *               or similar methods.
-     * @param config The Configuration. This provides the SourceResolver with access to
-     *               configuration information; it also allows the SourceResolver to invoke the
-     *               resolveSource() method on the Configuration object as a fallback implementation.
+     * @param source  A source object, typically the source supplied as the first
+     *                argument to {@link javax.xml.transform.Transformer#transform(Source, javax.xml.transform.Result)}
+     *                or similar methods.
+     * @param options Parsing options, for use if relevant
+     * @param config  The Configuration. This provides the SourceResolver with access to
+     *                configuration information; it also allows the SourceResolver to invoke the
+     *                resolveSource() method on the Configuration object as a fallback implementation.
      * @return a source object that Saxon knows how to process. Any implementation of <code>ActiveSource</code>
      * is acceptable.
      * @throws XPathException if the Source object is recognized but cannot be processed
      */
 
     /*@Nullable*/
-    ActiveSource resolveSource(Source source, Configuration config) throws XPathException;
+    ActiveSource resolveSource(Source source, ParseOptions options, Configuration config) throws XPathException;
 
 }
 
