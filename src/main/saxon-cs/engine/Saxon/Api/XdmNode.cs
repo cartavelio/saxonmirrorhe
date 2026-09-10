@@ -11,6 +11,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.pattern;
 using Saxon.Hej.tree.wrapper;
 using Saxon.Api.Support;
+using Saxon.Hej.type;
 using Saxon.Impl.Helpers;
 using Type = Saxon.Hej.type.Type;
 
@@ -162,6 +163,33 @@ namespace Saxon.Api {
         /// </remarks>
 
         public int ColumnNumber => ((NodeInfo) value).getColumnNumber();
+
+        /// <summary>
+        /// The name of the type annotation of the node. 
+        /// </summary>
+        /// <remarks>
+        /// <para>For elements and attributes, this
+        /// will be the name of the schema type against which the node was validated; if
+        /// the node has not been validated it will be <c>xs:untyped</c> for elements,
+        /// and <c>xs:untypedAtomic</c> for attributes.
+        /// </para>
+        /// <para>For a document node, the value will be <c>xs:anyType</c> if the document
+        /// has been validated, or <c>xs:untyped</c> otherwise.
+        /// </para>
+        /// <para>For any other kind of node, the value will be null.
+        /// </para>
+        /// <para>If the node has been validated against an anonymous type in the schema,
+        /// the result will be a system-generated name, with the namespace URI
+        /// <c>http://ns.saxonica.com/anonymous-type</c>.
+        /// </para>
+        /// </remarks>
+
+        public QName TypeAnnotationName {
+            get {
+                SchemaType type = ((NodeInfo)value).getSchemaType();
+                return type == null ? null : new QName(type.getStructuredQName());
+            }
+        }
 
         /// <summary>
         /// The typed value of the node, as an instance of <c>XdmValue</c>.
