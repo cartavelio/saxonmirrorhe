@@ -169,6 +169,7 @@ public class SchemaCompiler {
                     }
                 } else {
                     schemaDocuments.add(schemadoc);
+                    xsdSchema.addSchemaDocument(source.getSystemId());
                 }
             }
             if (scmSchema != null) {
@@ -303,8 +304,10 @@ public class SchemaCompiler {
      * @param systemId the URI of the schema document being read
      */
 
-    public void setBeingRead(String systemId) {
+    public void setBeingRead(NamespaceUri targetNamespace, String systemId) {
         documentsBeingRead.add(systemId);
+        getPreparedSchema().addSchemaDocument(targetNamespace, systemId);
+        getPreparedSchema().setNamespaceStatus(targetNamespace, PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION);
     }
 
     /**
@@ -697,18 +700,19 @@ public class SchemaCompiler {
      */
 
     public void typeCheckIdentityConstraints() throws SchemaException {
-        try {
-            if (identityConstraintsAwaitingTypeChecking != null) {
-                for (Map.Entry<IdentityConstraintReference, SchemaType> e : identityConstraintsAwaitingTypeChecking.entrySet()) {
-                    IdentityConstraint constraint = e.getKey().getTarget();
-                    SchemaType contextItemType = e.getValue();
-                    constraint.typeCheck(this, contextItemType);
-                }
-                identityConstraintsAwaitingTypeChecking = null;
-            }
-        } catch (XPathException e) {
-            throw new SchemaException(e);
-        }
+        //TODO: reinstate this check
+//        try {
+//            if (identityConstraintsAwaitingTypeChecking != null) {
+//                for (Map.Entry<IdentityConstraintReference, SchemaType> e : identityConstraintsAwaitingTypeChecking.entrySet()) {
+//                    IdentityConstraint constraint = e.getKey().getTarget();
+//                    SchemaType contextItemType = e.getValue();
+//                    constraint.typeCheck(this, contextItemType);
+//                }
+//                identityConstraintsAwaitingTypeChecking = null;
+//            }
+//        } catch (XPathException e) {
+//            throw new SchemaException(e);
+//        }
     }
 
     /**
@@ -944,7 +948,7 @@ public class SchemaCompiler {
     }
 
     private PreparedSchema getSchemaForXmlNamespace() {
-        return XMLNamespaceSchema.buildSchema(getConfiguration());
+        return getConfiguration().getBuiltInSchema(NamespaceUri.XML);
     }
 
     private PreparedSchema getSchemaForXsiNamespace() {

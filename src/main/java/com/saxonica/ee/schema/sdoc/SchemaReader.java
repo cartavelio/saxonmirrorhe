@@ -158,7 +158,7 @@ public abstract class SchemaReader {
             throw err;
         }
 
-        compiler.setBeingRead(source.getSystemId());
+        compiler.setBeingRead(schemaDocument.getTargetNamespace(), source.getSystemId());
         top.processAllAttributes();
         top.validateSubtree(compiler);
         compiler.markAsRead(source.getSystemId(), top);

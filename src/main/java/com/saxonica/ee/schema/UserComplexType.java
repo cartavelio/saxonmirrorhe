@@ -1633,6 +1633,9 @@ public class UserComplexType extends UserDefinedType
         if (cbase instanceof UserComplexType) {
             final UserComplexType ucbase = (UserComplexType) cbase;
             ucbase.makeCombinedAttributeGroup(compiler);
+            if (ucbase.extendedParticle == null) {
+                ucbase.makeExtendedParticle(compiler);
+            }
 //            CompiledComplexType compiledBase = schema.g
 //            if (!ucbase.compiled) {
 //                ucbase.compile(compiler);
@@ -1651,6 +1654,9 @@ public class UserComplexType extends UserDefinedType
 //        if (!compiled) {
 //            compile(compiler);
 //        }
+        if (extendedParticle == null) {
+            makeExtendedParticle(compiler);
+        }
         String subsumeError = isSubsumedBy(cbase, compiler);
         if (subsumeError != null) {
             if (subsumeError.startsWith("?")) {
@@ -1690,7 +1696,11 @@ public class UserComplexType extends UserDefinedType
         if (compiler != null) {
             lookForCycles(new Stack<SchemaComponent>(), compiler);
         }
-        if (getDerivationMethod() == Derivation.DERIVATION_EXTENSION) {
+        if (getBaseType() instanceof SimpleType) {
+            extendedParticle = particle;
+            return extendedParticle;
+        }
+        if (getDerivationMethod() == Derivation.DERIVATION_EXTENSION ) {
             // For derivation by extension, construct a new Sequence compositor
             // combining the particles from the base type and this type
             ComplexType cbase = (ComplexType) getBaseType();
@@ -1931,7 +1941,11 @@ public class UserComplexType extends UserDefinedType
                 return "Derived type has empty content model, but base type does not allow empty content";
             }
         } else {
-            //compiler.scheduleAutomatonCheck(this, sub);
+            compiler.getPreparedSchema().compileComplexType(compiler, this);
+            CompiledComplexType cct1 = compiler.getPreparedSchema().getCompiledComplexType(this);
+            compiler.getPreparedSchema().compileComplexType(compiler, sub);
+            CompiledComplexType cct2 = compiler.getPreparedSchema().getCompiledComplexType(sub);
+            compiler.scheduleAutomatonCheck(cct1, cct2);
             return null;
             //return FiniteStateMachine.subsumesMachine(machine, sub.machine, compiler);
         }
@@ -2084,7 +2098,7 @@ public class UserComplexType extends UserDefinedType
     //@Override
     public SchemaType getElementParticleType(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
         CompiledComplexType compiledType = ((PreparedSchema)schema).getCompiledComplexType(this);
-        return compiledType.getElementParticleType(elementName,schema, considerExtensions);
+        return compiledType.getElementParticleType(elementName, schema, considerExtensions);
     }
 
     /**
@@ -2250,7 +2264,7 @@ public class UserComplexType extends UserDefinedType
     public String subsumesAll(UserComplexType sub, SchemaCompiler compiler) throws SchemaException {
         // We've already handled the case where the base type itself uses xs:all. The only other cases
         // that can succeed is where the base type uses an xs:any wildcard, or where the derived xs:all type
-        // is a singleton
+        // is a singleton. (For example, Microsoft test case ParticlesHa070.)
         AllModelGroup subAll = (AllModelGroup) sub.getAllCompositor().getGroup();
         if (subAll.getNumberOfElementParticles() == 1) {
             ModelGroup seq = new SequenceModelGroup();

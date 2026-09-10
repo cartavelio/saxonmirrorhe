@@ -48,10 +48,10 @@ public class CompiledComplexType {
     private FiniteStateMachine machine;
 
     /**
-     * Flag to indicate that the type has been compiled
+     * Flag to indicate that the validation machinery for the type has been built
      */
 
-    private boolean compiled = false;
+    private boolean built = false;
 
     /**
      * Table of context-determined types for element children
@@ -788,10 +788,16 @@ public class CompiledComplexType {
      * @throws SchemaException to indicate an invalid schema
      */
 
-    public void compile(SchemaCompiler compiler) throws SchemaException {
+    public void buildValidationMachinery(SchemaCompiler compiler) throws SchemaException {
         // Only compile a type once
-        if (compiled || type.getValidationStatus() == INVALID) {
+        if (built || type.getValidationStatus() == INVALID) {
             return;
+        }
+
+        // Ensure the base type is compiled first
+        SchemaType base = type.getBaseType();
+        if (base instanceof UserComplexType) {
+            compiler.getPreparedSchema().compileComplexType(compiler, (UserComplexType) base);
         }
 
         //System.err.println("Compiling type " + getDescription() + " (" + this + ")");
@@ -807,7 +813,8 @@ public class CompiledComplexType {
             err.info("  mixed content: " + type.isMixedContent());
             err.info("  base type: " + type.getBaseType().getDescription());
         }
-        compiled = true;
+
+        built = true;
 
         if (type.isSimpleContent() || type.isEmptyContent()) {
             machine.getInitialState().setFinalState(true);
@@ -882,8 +889,8 @@ public class CompiledComplexType {
         if (debug) {
             getConfiguration().getLogger().info("Recompiling type " + type.getDescription());
         }
-        compiled = false;
-        compile(compiler);
+        built = false;
+        buildValidationMachinery(compiler);
         // See bug 4554. Generation of the finite state machine is now deferred, so the expensive part
         // of the operation is only performed once, at the end
     }
@@ -894,7 +901,7 @@ public class CompiledComplexType {
 
     public void cancelValidation() {
         //setValidationStatus(UNVALIDATED);
-        compiled = false;
+        built = false;
     }
 
     /**

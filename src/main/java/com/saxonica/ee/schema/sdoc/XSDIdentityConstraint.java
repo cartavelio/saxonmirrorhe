@@ -58,13 +58,13 @@ public class XSDIdentityConstraint extends SchemaElement {
         checkMutuallyExclusiveAttributes("ref", "refer");
 
         String refAtt = atts.getValue(NamespaceUri.NULL, "ref");
-        StructuredQName nameCode;
+        StructuredQName qName;
 
         if (refAtt != null) {
             if (getXSDSchema().getSchemaCompiler().getLanguageVersion() == Configuration.XSD10) {
                 error("The @ref attribute cannot be used on an integrity constraint unless XSD 1.1 is enabled");
             }
-            nameCode = getComponentName(refAtt, USE_DEFAULT_NS);
+            qName = getComponentName(refAtt, USE_DEFAULT_NS);
             isRef = true;
 
         } else {
@@ -74,7 +74,7 @@ public class XSDIdentityConstraint extends SchemaElement {
                 missingAttribute("name");
                 name = "saxon-error-" + getLocalPart() + "-name"; // for error recovery
             }
-            nameCode = getComponentName(name, REQUIRE_TARGET_NS);
+            qName = getComponentName(name, REQUIRE_TARGET_NS);
 
             //-- keyref
             if (getFingerprint() == StandardNames.XS_KEYREF) {
@@ -105,17 +105,17 @@ public class XSDIdentityConstraint extends SchemaElement {
             //identityConstraint.setSchema(schema);
             identityConstraint.setConfiguration((EnterpriseConfiguration) getConfiguration());
             identityConstraint.setLocator(this);
-            identityConstraint.setConstraintName(nameCode);
+            identityConstraint.setConstraintName(qName);
 
-            if (schema.getIdentityConstraint(nameCode) != null) {
-                duplicate("identity constraint", name);
+            if (schema.getIdentityConstraint(qName) != null) {
+                duplicate("identity constraint", qName);
             }
 
             schema.addIdentityConstraint(identityConstraint);
             
         }
 
-        constraintName = nameCode;
+        constraintName = qName;
 
     }
 

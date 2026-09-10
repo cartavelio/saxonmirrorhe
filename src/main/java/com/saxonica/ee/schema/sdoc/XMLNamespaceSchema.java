@@ -32,14 +32,13 @@ public class XMLNamespaceSchema {
 
         // xml:lang attribute
 
-        List<TypeReference> members = new ArrayList<TypeReference>(2);
+        List<TypeReference> members = new ArrayList<>(2);
         members.add(new TypeReference(StandardNames.XS_LANGUAGE, config, null));
 
         UserAtomicType zls = new UserAtomicType(config);
+        int zlsFingerprint = StandardNames.XML_ZERO_LENGTH_STRING_TYPE;
         zls.setBaseTypeReference(new TypeReference(StandardNames.XS_STRING, config, null));
-        zls.setTypeName(
-            new StructuredQName("saxon", NamespaceUri.SAXON, "zero-length-string"),
-            config.getNamePool().allocateFingerprint(NamespaceUri.SAXON, "zero-length-string"));
+        zls.setTypeName(config.getNamePool().getStructuredQName(zlsFingerprint), zlsFingerprint);
         schema.addType(zls);
 
         List<Facet> facetList = new ArrayList<>(1);
@@ -47,7 +46,7 @@ public class XMLNamespaceSchema {
         lengthFacet.setNumericValue(0);
         facetList.add(lengthFacet);
         zls.setFacetList(facetList);
-        final TypeReference zlsRef = new TypeReference(zls.getFingerprint(), config, null);
+        final TypeReference zlsRef = new TypeReference(zlsFingerprint, config, null);
         zlsRef.setTarget(zls);
         members.add(zlsRef);
 
@@ -66,7 +65,7 @@ public class XMLNamespaceSchema {
         UserAtomicType sp = new UserAtomicType(config);
         sp.setBaseTypeReference(new TypeReference(StandardNames.XS_NCNAME, config, null));
         sp.setTypeName(StandardNames.getStructuredQName(StandardNames.XML_SPACE_TYPE), StandardNames.XML_SPACE_TYPE);
-        facetList = new ArrayList<Facet>(1);
+        facetList = new ArrayList<>(1);
         EnumerationFacet defaultFacet = new EnumerationFacet();
         defaultFacet.setValue("default");
         EnumerationFacet preserveFacet = new EnumerationFacet();

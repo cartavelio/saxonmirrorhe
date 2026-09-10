@@ -217,9 +217,9 @@ public abstract class IdentityConstraint extends SchemaStructure
         IndependentContext env = new IndependentContext(config);
         env.setWarningHandler((message, code, loc) -> compiler.warning(message, code, this));
         env.setSchemaAware(true);
-        env.getPackageData().setImportedSchema(compiler.getPreparedSchema());
 
         ExpressionVisitor visitor = ExpressionVisitor.make(env);
+        visitor.setSchemaForTypeChecking(compiler.getPreparedSchema());
         ItemType contextItemType = new ContentTypeTest(Type.ELEMENT, contextType, config, false);
         ContextItemStaticInfo cit = config.makeContextItemStaticInfo(contextItemType, true);
         selector.setSelectExpression(selector.getSelectExpression().typeCheck(visitor, cit));

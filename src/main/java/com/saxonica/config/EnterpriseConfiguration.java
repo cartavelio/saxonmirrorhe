@@ -8,6 +8,7 @@ import com.saxonica.ee.parallel.ThreadManagerEE;
 import com.saxonica.ee.schema.*;
 import com.saxonica.ee.schema.sdoc.SchemaDocument;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
+import com.saxonica.ee.schema.sdoc.XMLNamespaceSchema;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.DecomposingFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
@@ -875,6 +876,16 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         namedSchemaCache.put(name, schema);
     }
 
+    public PreparedSchema getBuiltInSchema(NamespaceUri uri) {
+        PreparedSchema schema = schemaCache.get(uri);
+        if (schema == null) {
+            if (uri.equals(NamespaceUri.XML)) {
+                schema = XMLNamespaceSchema.buildSchema(this);
+                schemaCache.put(uri, schema);
+            }
+        }
+        return schema;
+    }
 
 
     /**

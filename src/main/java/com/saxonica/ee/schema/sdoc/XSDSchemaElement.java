@@ -505,7 +505,7 @@ public class XSDSchemaElement extends SchemaElement {
                         break;
                     }
                     if (schema.getAttributeDecl(att.getComponentName()) != null) {
-                        duplicate("attribute declaration", att.getDisplayName());
+                        duplicate("attribute declaration", att.getComponentName());
                     }
                     schema.addAttributeDecl(att);
                     break;
@@ -517,7 +517,7 @@ public class XSDSchemaElement extends SchemaElement {
                         break;
                     }
                     if (schema.getAttributeGroup(ag.getAttributeGroupName()) != null) {
-                        duplicate("attribute group", ag.getDisplayName());
+                        duplicate("attribute group", ag.getAttributeGroupName());
                     } else {
                         schema.addAttributeGroup(ag);
                     }
@@ -527,7 +527,7 @@ public class XSDSchemaElement extends SchemaElement {
                     UserComplexType complexType = ((XSDComplexType) child).getComplexType();
                     int fpt = complexType.getFingerprint();
                     if (schema.getSchemaType(complexType.getTypeName()) != null && fpt > 1023) {
-                        duplicate("complex type", complexType.getName());
+                        duplicate("complex type", complexType.getTypeName());
                     } else {
                         schema.addType(complexType);
                     }
@@ -546,7 +546,7 @@ public class XSDSchemaElement extends SchemaElement {
                     }
                     int fingerprint = typeDef.getFingerprint();
                     if (schema.getSchemaType(typeDef.getTypeName()) != null && fingerprint > 1023) {
-                        duplicate("simple type", typeDef.getDisplayName());
+                        duplicate("simple type", typeDef.getTypeName());
                     } else {
                         schema.addType(typeDef);
                     }
@@ -556,7 +556,7 @@ public class XSDSchemaElement extends SchemaElement {
                     ElementDecl element = ((XSDElement) child).getElementDeclaration();
                     String elname = element.getName();
                     if (schema.getElementDecl(element.getComponentName()) != null) {
-                        duplicate("element declaration", elname);
+                        duplicate("element declaration", element.getComponentName());
                     }
                     schema.addElementDecl(element);
                     break;
@@ -569,7 +569,7 @@ public class XSDSchemaElement extends SchemaElement {
                         // error already reported
                     } else {
                         if (schema.getGroup(group.getModelGroupName()) != null) {
-                            duplicate("group", groupName);
+                            duplicate("group", group.getModelGroupName());
                         } else {
                             schema.addGroup(group);
                         }
@@ -580,7 +580,7 @@ public class XSDSchemaElement extends SchemaElement {
                 case StandardNames.XS_notation:
                     Notation n = ((XSDNotation) child).getNotation();
                     if (schema.getNotation(n.getNotationName()) != null) {
-                        duplicate("notation", n.getNotationName().getDisplayName());
+                        duplicate("notation", n.getNotationName());
                     } else {
                         schema.addNotation(n);
                     }

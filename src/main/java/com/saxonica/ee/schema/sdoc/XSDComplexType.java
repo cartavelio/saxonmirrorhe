@@ -103,7 +103,7 @@ public class XSDComplexType extends SchemaElement {
             if (!isRedefinition) {
                 if (schema.getSchemaType(complexType.getTypeName()) != null && fp > 1023) {
                     // don't report duplicates for built-in types: this might be the schema for schemas
-                    duplicate("type", attValue);
+                    duplicate("type", typeName);
                 }
             }
         } else {

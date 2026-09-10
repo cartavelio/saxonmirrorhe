@@ -588,12 +588,12 @@ public abstract class SchemaElement extends ElementImpl {
      *          thrown if the errorListener
      *          decides that it's a fatal error.
      */
-
-    protected void duplicate(String category, String name) throws SchemaException {
+    
+    protected void duplicate(String category, StructuredQName name) throws SchemaException {
         error("The schema already contains " +
-                indefiniteArticle(category, "a") +
-                ' ' + category +
-                " named " + Err.wrap(name));
+                      indefiniteArticle(category, "a") +
+                      ' ' + category +
+                      " named " + name.getEQName());
     }
 
 
@@ -1000,7 +1000,9 @@ public abstract class SchemaElement extends ElementImpl {
 
             StringBuilder msg = new StringBuilder(64);
             if (child.getNodeKind() == Type.ELEMENT) {
-                msg.append("Element " + Err.wrap(child.getDisplayName(), Err.ELEMENT) + " cannot appear here: expected ");
+                msg.append("Element ")
+                        .append(Err.wrap(child.getDisplayName(), Err.ELEMENT))
+                        .append(" cannot appear here: expected ");
                 if (terms.length == 0) {
                     msg.append("no more child elements");
                 } else if (terms.length == 1) {
@@ -1017,7 +1019,9 @@ public abstract class SchemaElement extends ElementImpl {
                     msg.append(" or nothing");
                 }
             } else {
-                msg.append("Text node '" + Err.wrap(child.getUnicodeStringValue()) + "' cannot appear here");
+                msg.append("Text node '")
+                        .append(Err.wrap(child.getUnicodeStringValue()))
+                        .append("' cannot appear here");
             }
 
             if (child instanceof SchemaElement) {

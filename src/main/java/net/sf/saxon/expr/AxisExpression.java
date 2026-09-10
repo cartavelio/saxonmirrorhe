@@ -169,7 +169,10 @@ public final class AxisExpression extends Expression {
         StaticContext env = visitor.getStaticContext();
         Configuration config = env.getConfiguration();
         ItemType contextType = contextInfo.getItemType();
-        Schema schema = env.getPackageData().getImportedSchema();
+        Schema schema = visitor.getSchemaForTypeChecking();
+        if (schema == null) {
+            schema = env.getPackageData().getImportedSchema();
+        }
 
         if (!(contextType instanceof NodeTest)) {
             contextType = AnyNodeTest.getInstance();
@@ -892,7 +895,7 @@ public final class AxisExpression extends Expression {
      */
 
     @Override
-    protected final int computeCardinality() {
+    protected int computeCardinality() {
         NodeTest originNodeType;
         NodeTest nodeTest = test;
         ItemType contextItemType = staticInfo.getItemType();

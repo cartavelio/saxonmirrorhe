@@ -67,6 +67,38 @@
    
    <exception test-set="Complex" test-case="complex018">
      <reason>Bug 16786: no content model after openContent element</reason>
-   </exception>  
+   </exception>
+
+  <exception test-contributor="Microsoft" test-set="MS-Additional2006-07-15" test-case="addB161"
+    author="MHK" date="2023-07-31">
+    <reason>
+      Like addB158, an XSD 1.1 processor does not have to report an error here, it can ignore
+      the additional schema document.
+    </reason>
+  </exception>
+  
+  <exception test-contributor="Microsoft" test-set="MS-Additional2006-07-15" test-case="addB164"
+    author="MHK" date="2023-07-31">
+    <reason>
+      Like addB158, an XSD 1.1 processor does not have to report an error here, it can ignore
+      the additional schema document.
+    </reason>
+  </exception>
+  
+  <exception test-contributor="Microsoft" test-set="MS-Additional2006-07-15" test-case="addB187"
+    author="MHK" date="2023-07-31">
+    <reason>
+      Test tries to use a custom version of the schema for the XML namespace,
+      XSD 1.1 is explicit that the effect of this is unpredictable
+    </reason>
+  </exception>
+  
+  <exception test-contributor="Microsoft" test-set="MS-Additional2006-07-15" test-case="addB188"
+          author="MHK" date="2023-07-31">
+    <reason>
+      Test tries to use a custom version of the schema for the XML namespace,
+      XSD 1.1 is explicit that the effect of this is unpredictable
+    </reason>
+  </exception>  
 </exceptions>
 

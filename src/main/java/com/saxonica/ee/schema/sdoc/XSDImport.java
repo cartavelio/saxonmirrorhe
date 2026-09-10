@@ -82,19 +82,19 @@ public class XSDImport extends AnnotationParent {
             }
         }
 
-        // For the XML namespace, use the built-in version if the schema location is known or if already loaded
+        // For the XML namespace, use the built-in version ignoring any schemaLocation
 
         if (targetNamespace.equals(NamespaceUri.XML)) {
-            if (schemaLocation == null ||
+            if (!(schemaLocation == null ||
                     schemaLocation.equals("http://www.w3.org/2001/xml.xsd") ||
-                    schemaLocation.equals("http://www.w3.org/2001/03/xml.xsd")) {
-                // Use the built-in version, or none if already loaded
-                if (config.getNamespaceStatus(targetNamespace) != PreparedSchema.NAMESPACE_KNOWN) {
-                    importedSchema = XMLNamespaceSchema.buildSchema(config);
-                    //config.addSchema(importedSchema);
-                }
-                return;
+                    schemaLocation.equals("http://www.w3.org/2001/03/xml.xsd"))) {
+                warning("The supplied schemaLocation for the XML namespace is ignored; Saxon always uses the standard W3C version");
             }
+            // Use the built-in version, or none if already loaded
+            if (config.getNamespaceStatus(targetNamespace) != PreparedSchema.NAMESPACE_KNOWN) {
+                importedSchema = config.getBuiltInSchema(targetNamespace);
+            }
+            return;
         }
 
         if (targetNamespace.equals(thisSchemaDocument.getTargetNamespace())) {
@@ -124,7 +124,7 @@ public class XSDImport extends AnnotationParent {
         }
 
         // Is another document for the same schema namespace already cached in the Configuration?
-        int status = config.getNamespaceStatus(targetNamespace);
+        int status = compiler.getPreparedSchema().getNamespaceStatus(targetNamespace);
         if (status == PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
             // This implies a cycle of imports. Alternatively, it means that a concurrent
             // process is loading a schema with this namespace...
@@ -209,6 +209,7 @@ public class XSDImport extends AnnotationParent {
             XSDSchemaElement s = importee.getXSDSchemaElement();
             errors = importee.getXSDSchemaElement().getErrorCount();
             importedSchema = s.getSchema();
+            compiler.getPreparedSchema().addSchemaDocument(targetNamespace, schemaLocation);
         } catch (SchemaException e) {
             processSchemaException(schemaLocation, namespace, e);
             return;

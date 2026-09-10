@@ -11,6 +11,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.type.Schema;
 
 /**
  * The ExpressionVisitor supports the various phases of processing of an expression tree which require
@@ -28,6 +29,7 @@ public class ExpressionVisitor  {
     private int depth = 0;
     private boolean inliningFunctions = false;
     private boolean suppressWarnings = false;
+    private Schema schemaForTypeChecking = null;
 
     private final static int MAX_DEPTH = 500;
 
@@ -215,6 +217,28 @@ public class ExpressionVisitor  {
     public void setInliningFunctions(boolean inliningFunctions) {
         this.inliningFunctions = inliningFunctions;
     }
+
+    /**
+     * Set a schema to be used for type-checking, which may be different from the schema used when compiling
+     * the expression. This is used when type-checking XSD integrity constraints.
+     * @param schema the schema to be used when type-checking expressions (especially axis expressions)
+     */
+
+    public void setSchemaForTypeChecking(Schema schema) {
+        this.schemaForTypeChecking = schema;
+    }
+
+    /**
+     * Get the schema to be used for type-checking, which may be different from the schema used when compiling
+     * the expression. This is used when type-checking XSD integrity constraints.
+     *
+     * @return the schema to be used when type-checking expressions (especially axis expressions)
+     */
+
+    public Schema getSchemaForTypeChecking() {
+        return this.schemaForTypeChecking;
+    }
+
 
 }
 

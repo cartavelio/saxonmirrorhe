@@ -22,6 +22,7 @@ import net.sf.saxon.type.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -505,6 +506,7 @@ public abstract class ContentValidator extends ValidatingFilter {
             } else {
                 PreparedSchema schema = validationContext.getSchema();
                 CompiledComplexType compiledType = schema.getCompiledComplexType((UserComplexType) complexType);
+                Objects.requireNonNull(compiledType);
                 val = new ComplexContentValidator(elementDecl, compiledType, nextReceiver);
             }
         }

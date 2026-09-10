@@ -3,12 +3,10 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.*;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StandardNames;
-
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.SchemaException;
@@ -71,26 +69,23 @@ public class XSDOverride extends SchemaElement {
             throw new SchemaException("The xsl:override/@schemaLocation resolves to a source with no known system ID");
         }
 
-        StringBuilder fsb = new StringBuilder(64);
-        fsb.append(source.getSystemId());
-        fsb.append("?referrer=");
-        fsb.append(documentBase);
-        fsb.append(";index=");
-        fsb.append(Navigator.getNumberSimple(this, null) + "");
-        String key = fsb.toString();
+        String key = source.getSystemId()
+                + "?referrer="
+                + documentBase
+                + ";index="
+                + Navigator.getNumberSimple(this, null);
         if (compiler.isBeingRead(key)) {
             replacementSchema = null;
             return;
         }
         //System.err.println("Processing override " + key);
-        compiler.setBeingRead(key);
+        compiler.setBeingRead(getXSDSchema().getTargetNamespace(), key);
         if (compiler.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null) {
             error("Saxon can't handle overriding of a schema document that has already been loaded by a different route");
             return;
         }
 
         try {
-            PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
             SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, this);
             originalSchemaDocument = schemaDoc;
             originalSchema = schemaDoc.getXSDSchemaElement().getSchema();

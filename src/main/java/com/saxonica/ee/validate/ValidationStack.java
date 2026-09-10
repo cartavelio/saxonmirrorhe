@@ -44,7 +44,7 @@ import java.util.*;
 
 public class ValidationStack extends ValidatingFilter {
 
-    private final PreparedSchema schema;
+    private PreparedSchema schema;
     private final Stack<ContentValidator> stack = new Stack<>();
     private final Stack<Location> locationStack = new Stack<>();
     private final Receiver outputReceiver;
@@ -160,6 +160,7 @@ public class ValidationStack extends ValidatingFilter {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties)
             throws XPathException {
+        schema = getValidationContext().getSchema(); // The XSIAttributeHandler might have set a different schema
         locationStack.push(location.saveLocation());
         SchemaType xsiType = getValidationContext().getXSIType();
         if (isNilled) {

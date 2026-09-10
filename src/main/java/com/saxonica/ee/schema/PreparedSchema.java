@@ -67,6 +67,8 @@ public class PreparedSchema implements Schema, NotationSet {
 
     private Map<NamespaceUri, List<String>> targetNamespaces = new HashMap<>();
 
+    private Set<String> schemaLocations = new HashSet<>();
+
     private final HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
 
     /**
@@ -331,12 +333,6 @@ public class PreparedSchema implements Schema, NotationSet {
         }
     }
 
-    private boolean isBuiltInNamespace(NamespaceUri namespace) {
-        return namespace.equals(NamespaceUri.XML) ||
-                namespace.equals(NamespaceUri.FN) ||
-                namespace.equals(NamespaceUri.SCHEMA_INSTANCE);
-    }
-
     /**
      * Make a {@code schema-element} node test for a given element name
      *
@@ -547,10 +543,6 @@ public class PreparedSchema implements Schema, NotationSet {
 
     public CompiledComplexType getCompiledComplexType(UserComplexType type) {
         return compiledComplexTypes.get(type);
-    }
-
-    public CompiledComplexType getCompiledComplexType(StructuredQName typeName) {
-        return compiledComplexTypes.get(typesByName.get(typeName));
     }
 
     /**
@@ -875,6 +867,26 @@ public class PreparedSchema implements Schema, NotationSet {
         return targetNamespaces;
     }
 
+    public void addSchemaDocument(NamespaceUri targetNamespace, String location) {
+        List<String> existing = targetNamespaces.get(targetNamespace);
+        if (existing == null) {
+            existing = new ArrayList<>();
+            existing.add(location);
+            targetNamespaces.put(targetNamespace, existing);
+        } else {
+            existing.add(location);
+        }
+        schemaLocations.add(location);
+    }
+
+    public void addSchemaDocument(String location) {
+        schemaLocations.add(location);
+    }
+
+    public boolean includesSchemaLocation(String location) {
+        return schemaLocations.contains(location);
+    }
+
     /**
      * Get the NamePool used by this schema
      *
@@ -1068,8 +1080,8 @@ public class PreparedSchema implements Schema, NotationSet {
 
             final SchemaType existing = destination.getSchemaType(fp);
             if (existing != null &&
-                type.getRedefinitionLevel() == existing.getRedefinitionLevel() &&
-                !type.isSameType(existing)) {
+                    type.getRedefinitionLevel() == existing.getRedefinitionLevel() &&
+                    !type.isSameType(existing)) {
                 String loc = "";
                 if (existing instanceof SourceLocator) {
                     loc = existingLocation((SourceLocator) existing);
@@ -1214,11 +1226,19 @@ public class PreparedSchema implements Schema, NotationSet {
                 if (result && (s instanceof SimpleTypeDefinition)) {
                     UserSimpleType st = ((SimpleTypeDefinition) s).getWorkingType();
                     typesByName.put(st.getTypeName(), st);
-//                    PreparedSchema superSchema = compiler.getConfiguration().getUnnamedSchema();
-//                    if (superSchema.getSchemaType(st.getTypeName()) == s) {
-//                        superSchema.typesByName.put(st.getTypeName(), st);
-//                    }
                 }
+            }
+        }
+
+        for (SchemaType uct : typesByName.values()) {
+            if (uct instanceof UserComplexType) {
+                compileComplexType(compiler, ((UserComplexType)uct));
+            }
+        }
+
+        for (SchemaType uct : anonymousTypesByName.values()) {
+            if (uct instanceof UserComplexType) {
+                compileComplexType(compiler, ((UserComplexType) uct));
             }
         }
 
@@ -1882,15 +1902,14 @@ public class PreparedSchema implements Schema, NotationSet {
         return type;
     }
 
-    public CompiledComplexType compileComplexType(SchemaCompiler compiler, UserComplexType type) throws SchemaException {
+    public void compileComplexType(SchemaCompiler compiler, UserComplexType type) throws SchemaException {
         CompiledComplexType cct = getCompiledComplexType(type);
         if (cct != null) {
-            return cct;
+            return;
         }
         cct = new CompiledComplexType(this, type);
-        cct.compile(compiler);
         compiledComplexTypes.put(type, cct);
-        return cct;
+        cct.buildValidationMachinery(compiler);
     }
 
 
