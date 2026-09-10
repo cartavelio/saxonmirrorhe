@@ -214,7 +214,7 @@ public class RoleDiagnostic {
                             (name.isEmpty() ? "the anonymous function" : name + "()");
                 }
             case MAP_CONSTRUCTOR:
-                return ordinal(operand) + " entry in the map constructor";
+                return ordinal(operand) + " entry in the map constructor (which has no following ':')";
 
             default:
                 return "";

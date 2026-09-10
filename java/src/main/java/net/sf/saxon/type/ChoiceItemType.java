@@ -465,7 +465,11 @@ public class ChoiceItemType implements ItemType, ChoiceType {
 
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        return Optional.empty();
+        return Optional.of("The supplied value "
+                                   + item.toShortString()
+                                   + " does not match"
+                                   + (memberTypes.size() == 2 ? " either" : " any")
+                                   + " of the alternatives");
     }
 
     @Override
