@@ -25,7 +25,7 @@ namespace Saxon.Api {
         internal XdmAtomicValue() {
         }
 
-        public XdmAtomicValue(AtomicValue atomicValue) : base(atomicValue) {
+		public XdmAtomicValue(Saxon.Hej.value.AtomicValue atomicValue) : base(atomicValue) {
             
         }
 

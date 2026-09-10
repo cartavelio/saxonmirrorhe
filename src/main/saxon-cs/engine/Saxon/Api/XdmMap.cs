@@ -23,7 +23,7 @@ namespace Saxon.Api {
 
         // Wrap a supplied Saxon map
 
-        public XdmMap(MapItem map) : base(map) {
+		public XdmMap(Saxon.Hej.ma.map.MapItem map) : base(map) {
         }
 
 

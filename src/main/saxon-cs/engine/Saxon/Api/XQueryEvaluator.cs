@@ -163,7 +163,7 @@ namespace Saxon.Api {
         /// <para>The supplied destination is ignored if a <c>TraceListener</c> is in use.</para>
         /// </remarks>
 
-        public StandardLogger TraceFunctionDestination {
+		public StandardLogger TraceFunctionDestination {
             set {
                 traceFunctionDestination = value;
                 evaluator.setTraceFunctionDestination(value);

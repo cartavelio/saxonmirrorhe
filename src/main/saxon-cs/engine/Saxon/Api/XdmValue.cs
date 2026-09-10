@@ -381,7 +381,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>An object representing the XDM value in the
         /// underlying Saxon implementation.</returns>
-        public GroundedValue Unwrap() {
+		public Saxon.Hej.om.GroundedValue Unwrap() {
             return value;
         }
 

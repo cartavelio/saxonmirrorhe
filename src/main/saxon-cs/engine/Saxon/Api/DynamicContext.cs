@@ -48,7 +48,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
 
-        public XPathContext Implementation => context;
+		public Saxon.Hej.expr.XPathContext Implementation => context;
     }
 }
 

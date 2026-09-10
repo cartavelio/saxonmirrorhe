@@ -363,7 +363,7 @@ namespace Saxon.Api {
         /// Saxon uses internally.
         /// </summary>
 
-        public StructuredQName GetStructuredQName() {
+		public Saxon.Hej.om.StructuredQName GetStructuredQName() {
             return sqName;
         }
         
