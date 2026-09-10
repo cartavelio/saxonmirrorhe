@@ -174,13 +174,13 @@
       <reason>Wrong results from validator.nu? Needs checking.</reason>
    </exception>
    
-   <exception test-set="fn-format-number" test-case="
+   <!--<exception test-set="fn-format-number" test-case="
       numberformat-40-87 numberformat-40-88
       " run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Third argument as xs:QName not yet implemented</reason>
    </exception>
-   
+   -->
    <exception test-set="fn-message" run="false" report="n/a">
       <created by="Michael Kay" on="2023-02-28"/>
       <reason>Function fn:message not yet implemented</reason>
@@ -192,7 +192,7 @@
    </exception>-->
    
 
-   <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
+   <!--<exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
       try-catch-map2
       try-catch-map3
       try-catch-map4
@@ -201,7 +201,7 @@
       try-catch-map7" run="false" report="n/a">
       <created by="Michael Kay" on="2023-06-28"/>
       <reason>Try/Catch binding a map of error information - not yet implemented</reason>
-   </exception>
+   </exception>-->
    
  
  <!--  <exception test-set="app-spec-examples" 
@@ -269,7 +269,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-csv-to-simple-rows-001
       fo-test-fn-csv-to-simple-rows-002
       fo-test-fn-csv-to-simple-rows-003
@@ -282,8 +282,8 @@
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
    </exception>
-   
-   <exception test-set="app-spec-examples" 
+   -->
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-csv-to-xml-001
       fo-test-fn-csv-to-xml-002
       fo-test-fn-csv-to-xml-003
@@ -296,16 +296,16 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-function-annotations-001
       fo-test-fn-function-annotations-002
       fo-test-fn-function-annotations-003" 
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-spec-examples" 
       test-case="fo-test-fn-invisible-xml-001
@@ -316,7 +316,7 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
-   <exception test-set="app-spec-examples" 
+   <!--<exception test-set="app-spec-examples" 
       test-case="fo-test-fn-parse-csv-001
       fo-test-fn-parse-csv-002
       fo-test-fn-parse-csv-003
@@ -342,7 +342,7 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-16"/>
       <reason>Functionality not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="app-spec-examples" 
       test-case="fo-test-map-substitute-001
