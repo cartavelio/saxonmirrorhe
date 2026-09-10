@@ -145,8 +145,8 @@ namespace Saxon.Api {
         /// For a document constructed using the document
         /// builder, this is available only if the line numbering option was set when the document was built (and
         /// then only for element nodes). If the line number is not available, the value -1 is returned.
-        /// Line numbers will typically be as reported by a SAX parser; this means that the line number for an element
-        /// node is the line number containing the closing ">" of the start tag.
+        /// Line numbers will be as reported by the XML parser; the Microsoft XML parser reports the line number
+        /// of the opening "&lt;" of the start tag.
         /// </remarks>
 
         public int LineNumber => ((NodeInfo) value).getLineNumber();
@@ -158,8 +158,8 @@ namespace Saxon.Api {
         /// For a document constructed using the document
         /// builder, this is available only if the line numbering option was set when the document was built (and
         /// then only for element nodes). If the column number is not available, the value -1 is returned.
-        /// Line numbers will typically be as reported by a SAX parser; this means that the column number for an element
-        /// node is the column number containing the closing ">" of the start tag.
+        /// Column numbers will be as reported by the XML parser; the Microsoft XML parser reports the column number
+        /// of the opening "&lt;" of the start tag.
         /// </remarks>
 
         public int ColumnNumber => ((NodeInfo) value).getColumnNumber();
