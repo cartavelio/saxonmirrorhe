@@ -6,6 +6,7 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.trans.ConfigurationReader;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 /**
  * Subclass of ConfigurationReader providing functionality particular to Saxon Professional Edition
@@ -19,6 +20,7 @@ public class ConfigurationReaderPE extends ConfigurationReader {
      */
 
     @Override
+    @CSharpReplaceBody(code="base.readExtensionElement(atts);")
     protected void readExtensionElement(AttributeMap atts) {
         String namespace = null;
         String className = null;
