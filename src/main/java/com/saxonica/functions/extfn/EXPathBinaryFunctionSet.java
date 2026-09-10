@@ -56,6 +56,10 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
     private static final String ERROR_CONVERSION = "conversion-error";
     private static final String ERROR_SIGNIFICANCE_ORDER = "unknown-significance-order";
 
+    private static final long QUIET_DOUBLE_NAN = 0x7ff8_0000_0000_0000L;
+    private static final int QUIET_SINGLE_NAN = 0x7fc0_0000;
+
+
     private void init() {
 
         register("and", 2, BinaryAnd.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
@@ -103,8 +107,8 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
 
         register("insert-before", 3, BinaryInsertBefore.class, BuiltInAtomicType.BASE64_BINARY, OPT, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance())
-                .arg(1, BuiltInAtomicType.INTEGER, ONE, EmptySequence.getInstance())
-                .arg(2, BuiltInAtomicType.BASE64_BINARY, OPT, EmptySequence.getInstance());
+                .arg(1, BuiltInAtomicType.INTEGER, ONE, null)
+                .arg(2, BuiltInAtomicType.BASE64_BINARY, OPT, null);
 
         register("join", 1, BinaryJoin.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.BASE64_BINARY, STAR, null);
@@ -328,11 +332,12 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 encoding = arguments[1].head().getStringValue();
             }
             //checkEncoding(encoding);
-            byte[] data = new byte[0];
+            byte[] data;
             try {
                 data = BinaryResource.encode(s, encoding);
             } catch (XPathException e) {
                 e.setErrorCodeQName(new StructuredQName("bin", ERROR_NAMESPACE, EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                throw e;
             }
             return one(data);
         }
@@ -540,7 +545,14 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             DoubleValue value = (DoubleValue)arguments[0].head();
-            return pack(Double.doubleToRawLongBits(value.getDoubleValue()), 8, endianness(arguments, 1));
+            long bits;
+            if (value.isNaN()) {
+                // Normalise NaN representation
+                bits = QUIET_DOUBLE_NAN;
+            } else {
+                bits = Double.doubleToRawLongBits(value.getDoubleValue());
+            }
+            return pack(bits, 8, endianness(arguments, 1));
         }
     }
 
@@ -548,7 +560,14 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             FloatValue value = (FloatValue) arguments[0].head();
-            return pack(Float.floatToRawIntBits(value.getFloatValue()), 4, endianness(arguments, 1));
+            int bits;
+            if (value.isNaN()) {
+                // Normalise NaN representation
+                bits = QUIET_SINGLE_NAN;
+            } else {
+                bits = Float.floatToRawIntBits(value.getFloatValue());
+            }
+            return pack(bits, 4, endianness(arguments, 1));
         }
     }
 
@@ -744,8 +763,8 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             return Double.isNaN(d) ? DoubleValue.NaN : new DoubleValue(d);
 
         }
-        @CSharpReplaceBody(code="return System.BitConverter.ToDouble(unpackBytes(bytes, offset, len, bigEndian, true), 0);")
-        private double toDouble(byte[] bytes, int offset, int len, boolean bigEndian) {
+        @CSharpReplaceBody(code="return Saxon.Impl.Helpers.Utils.bytesToDouble(bytes, offset, bigEndian);")
+        private static double toDouble(byte[] bytes, int offset, int len, boolean bigEndian) {
             long bits = unpack(bytes, offset, len, bigEndian);
             return Double.longBitsToDouble(bits);
         }
@@ -762,7 +781,7 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             return Float.isNaN(f) ? FloatValue.NaN : new FloatValue(f);
         }
 
-        @CSharpReplaceBody(code = "return System.BitConverter.ToSingle(unpackBytes(bytes, offset, len, bigEndian, true), 0);")
+        @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.Utils.bytesToFloat(bytes, offset, bigEndian);")
         private float toFloat(byte[] bytes, int offset, int len, boolean bigEndian) {
             int bits = (int)unpack(bytes, offset, len, bigEndian);
             return Float.intBitsToFloat(bits);
@@ -783,14 +802,18 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 return Int64Value.ZERO;
             }
             if (len > 7) {
-                BigInteger big = new BigInteger(unpackBytes(in, offset, len,
-                                                            bigEnd, false));
+                BigInteger big = bigIntegerFromBytes(offset, len, in, bigEnd);
                 return new BigIntegerValue(big);
             } else {
                 long signExt = negative ? -(1L << (8 * len)) : 0;
                 long result = unpack(in, offset, len, bigEnd);
                 return new Int64Value(result | signExt);
             }
+        }
+
+        @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.BigIntegerUtils.FromBytes(@in, offset, len, false, bigEnd);")
+        private BigInteger bigIntegerFromBytes(int offset, int len, byte[] in, boolean bigEnd) {
+            return new BigInteger(unpackBytes(in, offset, len, bigEnd, false));
         }
     }
 
@@ -808,13 +831,17 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 return Int64Value.ZERO;
             }
             if (len > 7) {
-                BigInteger big = new BigInteger(unpackBytes(in, offset, len,
-                                                            bigEnd, true));
+                BigInteger big = bigIntegerFromBytes(in, offset, len, bigEnd);
                 return new BigIntegerValue(big);
             } else {
                 long result = unpack(in, offset, len, bigEnd);
                 return new Int64Value(result);
             }
+        }
+
+        @CSharpReplaceBody(code="return Saxon.Impl.Helpers.BigIntegerUtils.FromBytes(@in, offset, len, true, bigEnd);")
+        private static BigInteger bigIntegerFromBytes(byte[] in, int offset, int len, boolean bigEnd) {
+            return new BigInteger(unpackBytes(in, offset, len, bigEnd, true));
         }
     }
 

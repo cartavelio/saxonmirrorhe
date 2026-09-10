@@ -45,7 +45,6 @@ public class SaxonReplace extends StyleElement {
     @Override
     protected void prepareAttributes() {
         String selectAtt = null;
-        String contentAtt = null;
 
         for (AttributeInfo att : attributes()) {
             NodeName attName = att.getNodeName();

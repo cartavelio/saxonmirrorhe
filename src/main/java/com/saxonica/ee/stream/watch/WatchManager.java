@@ -90,11 +90,13 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
     private final List<GroupingScope> capturingScopes = new ArrayList<>();
 
+    //#if CSHARP==false
     private void trace(String message) {
         if (TRACING) {
             System.err.println("WM " + Integer.toHexString(hashCode()) + " " + message);
         }
     }
+    //#endif
 
 
     /**

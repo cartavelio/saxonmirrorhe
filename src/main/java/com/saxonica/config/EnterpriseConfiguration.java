@@ -791,13 +791,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
     }
 
-//    private synchronized void addSchemaForFnNamespace() {
-//        if (getNamespaceStatus(NamespaceConstant.FN) == PreparedSchema.NAMESPACE_UNKNOWN) {
-//            FnNamespaceSchema.buildSchema(this);
-//            setNamespaceStatus(NamespaceConstant.FN, PreparedSchema.NAMESPACE_KNOWN);
-//        }
-//    }
-
     /**
      * Get the status of a particular schema namespace.
      *
