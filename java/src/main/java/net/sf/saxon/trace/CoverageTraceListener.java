@@ -9,13 +9,10 @@ package net.sf.saxon.trace;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.PushToReceiver;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.instruct.Executable;
-import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.expr.instruct.TraceExpression;
+import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardLogger;
 import net.sf.saxon.lib.TraceListener;
@@ -33,8 +30,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.RuleTarget;
 
 import java.net.URL;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A trace listener that records coverage data (actually execution counts) for instructions in
@@ -42,19 +38,24 @@ import java.util.Map;
  */
 
 public class CoverageTraceListener implements TraceListener {
-
-    private URL stylesheet = null;
-    private PreparedStylesheet reportingStylesheet;
-    // The transformStack allows for the fact that multiple transformations can be initiated using fn:transform(),
-    // and all are reported to the same TimingTraceListener
-    //private final Stack<TimingRun> transformStack = new Stack<>();
     private Configuration config;
 
-    private IdentityHashMap<Traceable, Integer> histogram;
+    // We need to maintain separate histograms for each module. Earlier versions of this class
+    // mapped traceable expressions. This version simplifies it to just track hits per line
+    // number.
+    private final Map<String, CoverageRecord> histograms = new HashMap<>();
 
+    private Map<String, CoverageRecord> queryMap = null;
 
+    private int openCount = 0;
 
     private Logger out = new StandardLogger();
+
+    public CoverageTraceListener() {}
+
+    public CoverageTraceListener(Map<String, CoverageRecord> queryMap) {
+        this.queryMap = queryMap;
+    }
 
     /**
      * Set the PrintStream to which the output will be written.
@@ -62,19 +63,18 @@ public class CoverageTraceListener implements TraceListener {
      * @param stream the PrintStream to be used for output. By default, the output is written
      *               to System.err.
      */
-
     @Override
     public void setOutputDestination(Logger stream) {
         out = stream;
     }
 
     /**
-     * Set the URI of the stylesheet to be used for formatting the results
+     * Set the URI of the stylesheet to be used for formatting the results.
+     * Ignored by this listener.
      * @param stylesheet the URI of the stylesheet
      */
-
     public void setStylesheet(URL stylesheet) {
-        this.stylesheet = stylesheet;
+        // ignored
     }
 
     /**
@@ -83,18 +83,26 @@ public class CoverageTraceListener implements TraceListener {
 
     @Override
     public void open(/*@NotNull*/ Controller controller) {
+        openCount++;
         config = controller.getConfiguration();
-        histogram = getAllTracePoints(controller);
-//        int depth = transformStack.size();
-//        transformStack.push(new TimingRun(controller, depth));
+        if (queryMap != null) {
+            histograms.putAll(queryMap);
+        } else {
+            getAllTracePoints(controller);
+        }
     }
 
     /**
-     * Called at end. This method builds the XML out and analyzed html output
+     * Called at end. This method builds the XML output.
      */
-
     @Override
     public void close() {
+        openCount--;
+
+        if (openCount > 0) {
+            return;
+        }
+
         try {
             SerializationProperties props = new SerializationProperties();
             props.setProperty("method", "xml");
@@ -106,39 +114,29 @@ public class CoverageTraceListener implements TraceListener {
             Push push = new PushToReceiver(result);
             Document doc = push.document(true);
             Element root = doc.element("coverage");
-            for (Map.Entry<Traceable, Integer> entry : histogram.entrySet()) {
-                Traceable traceable = entry.getKey();
-                Location loc = traceable.getLocation();
-                int count = entry.getValue();
-                Element point = root.element(new QName("T"))
-                        .attribute(new QName("type"), XSLTTraceListener.tagName(traceable))
-                        .attribute(new QName("module"), loc.getSystemId())
-                        .attribute(new QName("line"), ""+loc.getLineNumber())
-                        .attribute(new QName("column"), ""+loc.getColumnNumber())
-                        .attribute(new QName("count"), ""+count);
-                if (traceable.getObjectName() != null) {
-                    point.attribute(new QName("name"), traceable.getObjectName().getDisplayName());
+
+            for (String module : histograms.keySet()) {
+                Element group = root.element(new QName("module"))
+                        .attribute(new QName("module"), module);
+                CoverageRecord record = histograms.get(module);
+
+                List<Integer> linenumbers = record.coveredLines();
+
+                int index = 0;
+                while (index < linenumbers.size()) {
+                    int lineno = linenumbers.get(index);
+                    group.element(new QName("T"))
+                            .attribute(new QName("line"), ""+lineno)
+                            .attribute(new QName("count"), ""+record.getCover(lineno));
+
+                    index++;
                 }
-                traceable.gatherProperties((key, value) -> {
-                    try {
-                        point.attribute(new QName(key), value.toString());
-                    } catch (SaxonApiException e) {
-                        // discard any failing properties
-                    }
-                });
             }
+
             doc.close();
-
-
-//            if (reportingStylesheet == null) {
-//                reportingStylesheet = getStyleSheet();
-//            }
-//            TimingRun run = transformStack.pop();
-//            run.complete(reportingStylesheet, out);
         } catch (SaxonApiException | XPathException e) {
             // no action
         }
-
     }
 
     /**
@@ -147,13 +145,27 @@ public class CoverageTraceListener implements TraceListener {
 
     @Override
     public void enter(Traceable instruction, Map<String, Object> properties, XPathContext context) {
-        if (!histogram.containsKey(instruction)) {
-            System.err.println("*** Non-registered trace point " + instruction);
-            histogram.put(instruction, 0);
+        if (instruction instanceof ComponentTracer) {
+            Expression body = ((ComponentTracer) instruction).getBody();
+            if (body instanceof TraceExpression) {
+                enter(((TraceExpression) body).getBody(), properties, context);
+            } else {
+                enter(body, properties, context);
+            }
+            return;
         }
-        Integer counter = histogram.get(instruction);
-        int incr = counter+1;
-        histogram.put(instruction, incr);
+
+        Location loc = instruction.getLocation();
+
+        if (loc == null || loc.getSystemId() == null || loc.getLineNumber() <= 0) {
+            return;
+        }
+
+        if (!histograms.containsKey(loc.getSystemId())) {
+            histograms.put(loc.getSystemId(), new CoverageRecord());
+        }
+        CoverageRecord record = histograms.get(loc.getSystemId());
+        record.addCover(loc.getLineNumber());
     }
 
     /**
@@ -182,88 +194,63 @@ public class CoverageTraceListener implements TraceListener {
     public void endCurrentItem(Item item) {
     }
 
-//    /**
-//     * Prepare Stylesheet to render the analyzed XML data out.
-//     * This method can be overridden in a subclass to produce the output in a different format.
-//     */
-//    /*@NotNull*/
-//    protected PreparedStylesheet getStyleSheet() throws XPathException {
-//        InputStream in = getStylesheetInputStream();
-//        StreamSource ss = new StreamSource(in, "profile.xsl");
-//
-//        CompilerInfo info = config.getDefaultXsltCompilerInfo();
-//        PreparedStylesheet pss = Compilation.compileSingletonPackage(config, info, ss);
-//        try {
-//            in.close();
-//        } catch (IOException err) {
-//            out.warning("Preparation of profiling stylesheet failed: " + err.getMessage());
-//        }
-//        return pss;
-//    }
-
-
-//    /**
-//     * Get an input stream containing the stylesheet used for formatting results.
-//     * The method is protected so that a user-written stylesheet can be supplied in a subclass.
-//     * @return the input stream containing the stylesheet for processing the results.
-//     */
-//
-//    protected InputStream getStylesheetInputStream() {
-//        if (stylesheet == null) {
-//            return Version.platform.locateResource("profile.xsl", new ArrayList<>());
-//        } else {
-//            try {
-//                return stylesheet.openConnection().getInputStream();
-//            } catch (IOException e) {
-//                System.err.println("Unable to read " + stylesheet + "; using default stylesheet for -TP output");
-//                return Version.platform.locateResource("profile.xsl", new ArrayList<>());
-//            }
-//        }
-//    }
-
-
-
-    private static IdentityHashMap<Traceable, Integer> getAllTracePoints(Controller controller) {
+    private void getAllTracePoints(Controller controller) {
         Executable exec = controller.getExecutable();
-        IdentityHashMap<Traceable, Integer> histogram = new IdentityHashMap<>();
         for (PackageData pack : exec.getPackages()) {
-            StylesheetPackage ssPack = ((StylesheetPackage) pack);
-            for (Component component : ssPack.getComponentIndex().values()) {
-                if (component.getActor() instanceof Mode) {
-                    try {
-                        ((Mode)component.getActor()).processRules(rule -> {
-                            RuleTarget t = rule.getAction();
-                            if (t instanceof TemplateRule) {
-                                histogram.put((TemplateRule)t, 0);
-                                Expression templateBody = ((TemplateRule)t).getBody();
-                                gatherTracePoints(templateBody, histogram);
-                            }
-                        });
-                    } catch (XPathException e) {
-                        System.err.println("*** " + e.getMessage());
-                        // ignore failures
+            if (pack instanceof StylesheetPackage) {
+                StylesheetPackage ssPack = ((StylesheetPackage) pack);
+                for (Component component : ssPack.getComponentIndex().values()) {
+                    if (component.getActor() instanceof Mode) {
+                        try {
+                            ((Mode)component.getActor()).processRules(rule -> {
+                                RuleTarget t = rule.getAction();
+                                if (t instanceof TemplateRule) {
+                                    updateHistograms((TemplateRule) t);
+                                    Expression templateBody = ((TemplateRule)t).getBody();
+                                    gatherTracePoints(templateBody);
+                                }
+                            });
+                        } catch (XPathException e) {
+                            System.err.println("*** " + e.getMessage());
+                            // ignore failures
+                        }
+                    } else if (component.getActor() instanceof Traceable) {
+                        updateHistograms((Traceable) component.getActor());
+                        Expression body = component.getActor().getBody();
+                        gatherTracePoints(body);
                     }
-                } else if (component.getActor() instanceof Traceable) {
-                    histogram.put(((Traceable)component.getActor()), 0);
-                    Expression body = component.getActor().getBody();
-                    gatherTracePoints(body, histogram);
                 }
-
             }
         }
-        return histogram;
     }
 
-    private static void gatherTracePoints(Expression expr, IdentityHashMap<Traceable, Integer> histogram) {
+    private void gatherTracePoints(Expression expr) {
         if (expr != null) {
             if (expr instanceof TraceExpression) {
-                histogram.put(((TraceExpression) expr).getBody(), 0);
+                //System.err.println(XSLTTraceListener.tagName(expr));
+                Expression traceExpression = ((TraceExpression) expr).getBody();
+                if (traceExpression instanceof ComponentTracer) {
+                    gatherTracePoints(((ComponentTracer) traceExpression).getBody());
+                } else {
+                    updateHistograms(((TraceExpression) expr).getBody());
+                }
             }
             for (Operand o : expr.operands()) {
-                gatherTracePoints(o.getChildExpression(), histogram);
+                gatherTracePoints(o.getChildExpression());
             }
         }
     }
 
+    private void updateHistograms(Traceable traceable) {
+        Location loc = traceable.getLocation();
+        if (loc == null || loc.getSystemId() == null || loc.getLineNumber() <= 0) {
+            return;
+        }
+        if (!histograms.containsKey(loc.getSystemId())) {
+            histograms.put(loc.getSystemId(), new CoverageRecord());
+        }
+        CoverageRecord record = histograms.get(loc.getSystemId());
+        record.addLocation(loc.getLineNumber());
+    }
 }
 

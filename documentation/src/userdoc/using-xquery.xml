@@ -496,6 +496,19 @@
                   <a class="bodylink" href="../performanceanalysis">Performance analysis</a>.</p>
             </td>
          </tr>
+
+         <tr class="javaonly">
+            <td>
+               <p>-TC:filename</p>
+            </td>
+            <td>
+               <p>This is equivalent to setting
+                  <code>-T:net.sf.saxon.trace.CoverageTraceListener</code> and
+                  <code>-Tout:filename</code>; that is, it causes coverage profile information
+                  to be set to the specified file. This also disables the JIT compiler as it
+                  inhibits coverage analysis.</p>
+            </td>
+         </tr>
         
          <tr class="javaonly">
             <td>
