@@ -2244,7 +2244,7 @@ cdef class PyXsltExecutable:
         cdef PyXdmArray aaval = None
         cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
-        xdmValue = self.thisxptr.callTemplateReturningValue(c_templateName if not template_name else NULL)
+        xdmValue = self.thisxptr.callTemplateReturningValue(c_templateName if c_templateName != "" else NULL)
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
@@ -2307,7 +2307,7 @@ cdef class PyXsltExecutable:
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
         c_templateName = py_template_name_string if template_name is not None else ""
         
-        c_string  = self.thisxptr.callTemplateReturningString(c_templateName if c_templateName else NULL)
+        c_string  = self.thisxptr.callTemplateReturningString(c_templateName if c_templateName != "" else NULL)
         return make_py_str(c_string)
      
      def call_template_returning_file(self, str template_name=None, **kwds):
@@ -2345,7 +2345,7 @@ cdef class PyXsltExecutable:
               c_outputfile = py_output_string if value is not None else ""
         py_template_name_string = template_name.encode('UTF-8') if template_name is not None else None
         c_templateName = py_template_name_string if template_name is not None else ""
-        self.thisxptr.callTemplateReturningFile(c_templateName if not template_name else NULL, c_outputfile)
+        self.thisxptr.callTemplateReturningFile(c_templateName if c_templateName != "" else NULL, c_outputfile)
 
      def call_function_returning_value(self, str function_name, list args, **kwds):
         """

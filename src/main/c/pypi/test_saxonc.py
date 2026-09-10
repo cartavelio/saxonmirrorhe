@@ -11,10 +11,10 @@ def saxonproc():
     return PySaxonProcessor()
 @pytest.fixture
 def files_dir():
-    return "../../samples/php"
+    return "../samples/php"
 @pytest.fixture
 def data_dir():
-    return "../../samples/data/"
+    return "../samples/data/"
 def test_create_bool():
     """Create SaxonProcessor object with a boolean argument"""
     sp1 = PySaxonProcessor(license=True)
