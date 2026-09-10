@@ -21,6 +21,12 @@
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
+   
+   <exception test-set="fn-resolve-uri" 
+      test-case="fn-resolve-uri-36 fn-resolve-uri-37" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-29"/>
+      <reason>Empty sequence in arg2 - not yet implemented</reason>
+   </exception>
 <!--
    
    <exception test-set="fn-range"  run="false" report="n/a">
@@ -102,7 +108,7 @@
       <reason>Known bug in ICU</reason>
    </exception>
    
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-build-uri-1" run="false" report="disputed">
+ <!--  <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-build-uri-1" run="false" report="disputed">
       <created by="Michael Kay" on="2023-03-16"/>
       <reason>Auto-generated test is incorrect</reason>
    </exception>
@@ -126,7 +132,45 @@
       <created by="Michael Kay" on="2023-03-16"/>
       <reason>array:get#3 not yet implemented</reason>
    </exception>
+   -->
+
+   <exception test-set="misc-BuiltInKeywords" 
+      test-case="Keywords-array-subarray-1
+      Keywords-fn-resolve-uri-1
+      Keywords-fn-subsequence-1
+      Keywords-fn-substring-1
+      Keywords-fn-tokenize-1
+      Keywords-fn-trace-1
+      Keywords-fn-unparsed-text-1
+      Keywords-fn-unparsed-text-available-1
+      Keywords-fn-unparsed-text-lines-1
+       " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>See bug #6102</reason>
+   </exception>
    
+   <exception test-set="misc-BuiltInKeywords" 
+      test-case="Keywords-map-of-1
+      Keywords-map-pairs-1
+      Keywords-map-values-1
+      Keywords-fn-replace-1
+      Keywords-array-values-1
+      " run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Function not implemented yet</reason>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" 
+      test-case="Keywords-fn-json-1" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Function likely to be renamed</reason>
+   </exception>
+
+
+Keywords-fn-all-1
+
+
+Keywords-fn-some-1
 
 
    
@@ -228,6 +272,23 @@
       <reason>Third argument as xs:QName not yet implemented</reason>
    </exception>
    
+   <exception test-set="prod-ForClause.member" test-case="for-member-032" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Bug 6104</reason>
+   </exception>
+   
+   <exception test-set="prod-TryCatchExpr" test-case="try-catch-map1
+      try-catch-map2
+      try-catch-map3
+      try-catch-map4
+      try-catch-map5
+      try-catch-map6
+      try-catch-map7" run="false" report="n/a">
+      <created by="Michael Kay" on="2023-06-28"/>
+      <reason>Try/Catch binding a map of error information - not yet implemented</reason>
+   </exception>
+   
+ 
    
 
    
