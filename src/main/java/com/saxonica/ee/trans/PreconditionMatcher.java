@@ -1,9 +1,10 @@
 package com.saxonica.ee.trans;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleChain;
 import net.sf.saxon.trans.rules.RuleSearchState;
-import net.sf.saxon.trans.XPathException;
 
 /**
  * This class contains the stateful part of the precondition checker. A new PreconditionMatcher is allocated
@@ -30,7 +31,7 @@ public class PreconditionMatcher extends RuleSearchState {
     public PreconditionMatcher(RuleChain chain, XPathContext context) {
         super();
         this.context = context;
-        if (chain.optimizationData != null) {
+        if (chain.hasOptimizationData()) {
             ModeEE.RuleChainOptimizationData data = (ModeEE.RuleChainOptimizationData)chain.optimizationData;
             preconditionState = new int[data.preconditions.size()];
             characteristics = new Object[data.characteristics.size()];
@@ -58,6 +59,20 @@ public class PreconditionMatcher extends RuleSearchState {
 
     public void setPreconditionState(int slot, boolean value) {
         preconditionState[slot] = value ? Precondition.PRECONDITION_TRUE : Precondition.PRECONDITION_FALSE;
+    }
+
+    /**
+     * Use this search state to check whether the preconditions for a particular rule
+     * are satisfied
+     *
+     * @param rule the rule being tested
+     * @return true if all preconditions are satisfied; in the HE implementation, there
+     * are no preconditions, so this is always true.
+     * @throws XPathException if evaluation of preconditions fails.
+     */
+
+    public boolean checkPreconditions(Rule rule) throws XPathException {
+        return ((RuleEE)rule).checkPreconditions(this);
     }
 
     /**

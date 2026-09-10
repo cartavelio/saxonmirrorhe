@@ -914,6 +914,9 @@ public class OptimizerEE extends Optimizer {
 
     @Override
     public FilterExpression reorderPredicates(FilterExpression f, ExpressionVisitor visitor, ContextItemStaticInfo cisi) throws XPathException {
+        if (!isOptionSet(OptimizerOptions.REORDER_PREDICATES)) {
+            return f;
+        }
         Expression base = f.getBase();
         if (!(base instanceof FilterExpression)) {
             return f;
@@ -947,10 +950,11 @@ public class OptimizerEE extends Optimizer {
             return f0.getCost() < f1.getCost() ? -1 : +1;
         });
 
+        Expression predicate = null;
         for (Expression e : filters) {
-            base = new FilterExpression(base, e);
+            predicate = predicate == null ? e : new AndExpression(predicate, e);
         }
-        return (FilterExpression) base;
+        return new FilterExpression(base, predicate);
     }
 
     private static void addTerms(Expression predicate, List<Expression> filters) {
@@ -1503,7 +1507,7 @@ public class OptimizerEE extends Optimizer {
         }
         //System.err.println("TryInline UFC " + System.identityHashCode(functionCall));
         UserFunction function = functionCall.getFunction();
-        Optional<Boolean> b = function.isInlineable();
+        Optional<Boolean> functionInlineable = function.isInlineable();
         boolean isInlineable;
         // TODO: inline streamable functions where possible. The main difficulty is that the
         // expression that results will do "let $x := (streamable node)" which isn't streamable.
@@ -1512,7 +1516,7 @@ public class OptimizerEE extends Optimizer {
         // optimizeForStreaming() is set). However it causes one or two unexplained test failures.
         if (function.getDeclaredStreamability() != FunctionStreamability.UNCLASSIFIED) {
             isInlineable = false;
-        } else if (!b.isPresent()) {
+        } else if (functionInlineable.isEmpty()) {
             if (function.getBody() == null) {
                 // bug 2226
                 return functionCall;
@@ -1531,7 +1535,12 @@ public class OptimizerEE extends Optimizer {
                             functionCall.getRetainedStaticContext().getPackageData() == function.getPackageData();
             function.setInlineable(isInlineable);
         } else {
-            isInlineable = b.get();
+            isInlineable = functionInlineable.get();
+        }
+
+        if (isInlineable && function.getNumberOfParameters() > function.getMinimumArity()) {
+            // some parameters may be defaulted. For the time being, prevent inlining
+            isInlineable = false;
         }
 
         if (isInlineable) {

@@ -63,8 +63,12 @@ public class ModeEE extends ModePE {
     }
 
     @Override
-    protected PreconditionMatcher makeRuleSearchState(RuleChain chain, XPathContext context) {
-        return new PreconditionMatcher(chain, context);
+    protected RuleSearchState makeRuleSearchState(RuleChain chain, XPathContext context) {
+        if (chain.hasOptimizationData()) {
+            return new PreconditionMatcher(chain, context);
+        } else {
+            return RuleSearchState.getInstance();
+        }
     }
 
 
@@ -132,7 +136,10 @@ public class ModeEE extends ModePE {
      */
     @Override
     protected boolean ruleMatches(Rule r, Item item, XPathContextMajor context, RuleSearchState ruleSearchState) throws XPathException {
-        return r.isAlwaysMatches() || ((RuleEE) r).checkPreconditions((PreconditionMatcher) ruleSearchState) && r.matches(item, context);
+        return r.isAlwaysMatches() ||
+                ruleSearchState.checkPreconditions(r)
+                //((RuleEE) r).checkPreconditions((PreconditionMatcher) ruleSearchState)
+                        && r.matches(item, context);
     }
 
     /**
