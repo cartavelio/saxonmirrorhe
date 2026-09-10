@@ -651,7 +651,12 @@ public final class EvaluateInstr extends Expression {
 
                 if (instr.getActualParams() != null) {
                     for (int i = 0; i < instr.getActualParams().length; i++) {
-                        int slot = slotMap.getVariableMap().indexOf(instr.getActualParams()[i].getVariableQName());
+                        final StructuredQName variableQName = instr.getActualParams()[i].getVariableQName();
+                        if (dynamicParams != null && dynamicParams.get(new QNameValue(variableQName, BuiltInAtomicType.QNAME)) != null) {
+                            // Don't evaluate xsl:with-param if there is a dynamic parameter of the same name
+                            continue;
+                        }
+                        int slot = slotMap.getVariableMap().indexOf(variableQName);
                         c2.setLocalVariable(slot, instr.getActualParams()[i].getSelectValue(context));
                     }
                 }
