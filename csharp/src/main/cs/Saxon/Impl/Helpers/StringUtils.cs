@@ -53,6 +53,8 @@ namespace Saxon.Impl.Helpers {
                         encodingName = "UTF-16BE";
                     } else if (value[0] == 0xff && value[1] == 0xfe) {
                         encodingName = "UTF-16LE";
+                    } else {
+                        encodingName = "UTF-16BE"; 
                     }
                 }
             }
@@ -64,9 +66,9 @@ namespace Saxon.Impl.Helpers {
             }
             try {
                 string decoded = new string(encoding.GetChars(value, offset, len));
-                if (decoded.StartsWith(BOM)) {
-                    decoded = decoded[1..];
-                }
+                // if (decoded.StartsWith(BOM)) {
+                //     decoded = decoded[1..];
+                // }
 
                 return decoded;
             }
