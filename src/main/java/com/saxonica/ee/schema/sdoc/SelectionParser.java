@@ -81,9 +81,6 @@ public class SelectionParser extends XPathParser {
     protected Expression parseUnionExpression() throws XPathException {
         Expression exp = parseRelativePath();
         while (t.currentToken == Token.VBAR) {
-            if (t.currentTokenValue.equals("union")) {
-                grumble("Union operator in the selector/field XPath subset must be written as '|'");
-            }
             nextToken();
             exp = new VennExpression(exp, OperatorSymbol.UNION, parseRelativePath());
             setLocation(exp);
@@ -164,7 +161,7 @@ public class SelectionParser extends XPathParser {
                 return ae2;
             }
         } else if (t.peekAhead() == Token.COLON_COLON) {
-            int axis = AxisInfo.getAxisNumber(t.currentTokenValue);
+            int axis = AxisInfo.getAxisNumber(t.currentName());
             if (axis != AxisInfo.CHILD && axis != AxisInfo.ATTRIBUTE) {
                 grumble("Only the child and attribute axes are permitted");
             }
