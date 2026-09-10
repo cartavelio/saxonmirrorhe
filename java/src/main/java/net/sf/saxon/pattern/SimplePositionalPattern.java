@@ -12,6 +12,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.tree.util.Navigator;
@@ -56,7 +57,7 @@ public final class SimplePositionalPattern extends Pattern {
      * Get the node test
      * @return the node test used
      */
-    public NodeTest getNodeTest() {
+    public NodePredicate getNodeTest() {
         return nodeTest;
     }
     /**

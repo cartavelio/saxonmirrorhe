@@ -263,8 +263,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
             return Literal.makeLiteral(BooleanValue.FALSE, this);
         }
 
-        if (t0.equals(BuiltInAtomicType.ANY_ATOMIC) || t0.equals(BuiltInAtomicType.UNTYPED_ATOMIC) ||
-                t1.equals(BuiltInAtomicType.ANY_ATOMIC) || t1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
+        if (pt0.equals(BuiltInAtomicType.ANY_ATOMIC) || pt0.equals(BuiltInAtomicType.UNTYPED_ATOMIC) ||
+                pt1.equals(BuiltInAtomicType.ANY_ATOMIC) || pt1.equals(BuiltInAtomicType.UNTYPED_ATOMIC)) {
             // then no static type checking is possible
         } else {
             if (!Type.isPossiblyComparable(pt0, pt1, OperatorInfo.isOrderedOperator(singletonOperator), allow40)) {
@@ -294,8 +294,8 @@ public abstract class GeneralComparison extends BinaryExpression implements Comp
 
         if (!Cardinality.allowsMany(c0) /*c0 == StaticProperty.EXACTLY_ONE*/ &&
                 !Cardinality.allowsMany(c1) /*c1 == StaticProperty.EXACTLY_ONE */ &&
-                !t0.equals(BuiltInAtomicType.ANY_ATOMIC) &&
-                !t1.equals(BuiltInAtomicType.ANY_ATOMIC)) {
+                !pt0.equals(BuiltInAtomicType.ANY_ATOMIC) &&
+                !pt1.equals(BuiltInAtomicType.ANY_ATOMIC)) {
 
             // Use a value comparison if both arguments are singletons, and if the comparison operator to
             // be used can be determined.

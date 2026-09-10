@@ -269,7 +269,7 @@ public abstract class FunctionCall extends Expression {
 //                                                                 (getFunctionName() == null ? "" : getFunctionName().getDisplayName()),
 //                                                         "XPST0141");
                             } else {
-                                arg = defaultValue.get();
+                                arg = defaultValue.get().copy(new RebindingMap());
                             }
                             adoptChildExpression(arg);
                         }

@@ -82,8 +82,8 @@ public class CastExpression extends CastingExpression implements Callable {
             }
         }
 
-        PlainType sourceType = (PlainType) sourceItemType;
-        Affinity r = th.relationship(sourceType, getTargetType());
+        //PlainType sourceType = (PlainType) sourceItemType;
+        Affinity r = th.relationship(sourceItemType, getTargetType());
         if (r == Affinity.SAME_TYPE) {
             return operand;
         } else if (r == Affinity.SUBSUMED_BY) {
@@ -94,11 +94,11 @@ public class CastExpression extends CastingExpression implements Callable {
 
             ConversionRules rules = visitor.getConfiguration().getConversionRules();
 
-            if (sourceType.isAtomicType() && sourceType != BuiltInAtomicType.ANY_ATOMIC) {
+            if (sourceItemType.isAtomicType() && sourceItemType != BuiltInAtomicType.ANY_ATOMIC) {
                 //System.err.println("Allocating converter from " + sourceType + " to " + getTargetType());
-                converter = rules.getConverter((AtomicType)sourceType, getTargetType());
+                converter = rules.getConverter((AtomicType)sourceItemType, getTargetType());
                 if (converter == null) {
-                    throw new XPathException("Casting from " + sourceType + " to " + getTargetType() +
+                    throw new XPathException("Casting from " + sourceItemType + " to " + getTargetType() +
                             " can never succeed")
                             .withErrorCode("XPTY0004")
                             .withLocation(getLocation())

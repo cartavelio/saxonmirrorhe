@@ -13,6 +13,7 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
+import net.sf.saxon.expr.parser.RetainedStaticContext;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ParseOptions;
@@ -26,9 +27,7 @@ import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.Whitespace;
+import net.sf.saxon.value.*;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -44,6 +43,20 @@ import java.util.Map;
  */
 
 public class Doc extends SystemFunction implements Callable {
+
+
+    public static OptionsParameter makeOptionsParameter(int version) {
+        OptionsParameter docOptions = new OptionsParameter(version);
+        docOptions.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.getInstance());
+        docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
+        docOptions.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        return docOptions;
+    }
 
     private ParseOptions parseOptions;
 
@@ -158,7 +171,7 @@ public class Doc extends SystemFunction implements Callable {
         if (getArity() >= 2) {
             options = (MapItem) arguments[1].head();
         }
-        if (options != null && !((MapItem)options).isEmpty()) {
+        if (options != null && !options.isEmpty()) {
             // 4.0 spec provides an options parameter. For this case we create a clean
             // XML parser rather than using one from the pool. This is (a) to avoid the problems
             // of resetting it to a virgin state before returning it to the pool, and (b)
@@ -166,7 +179,7 @@ public class Doc extends SystemFunction implements Callable {
             // off the classpath.
 
             Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
-            parseOptions = processOptions(checkedOptions);
+            parseOptions = processOptions(checkedOptions, getRetainedStaticContext());
 
         } else {
 
@@ -187,7 +200,7 @@ public class Doc extends SystemFunction implements Callable {
             throw new XPathException("Failed to load document " + href, "FODC0002", context);
         }
         Controller controller = context.getController();
-        if (parseOptions != null && controller instanceof XsltController) {
+        if (controller instanceof XsltController) {
             ((XsltController) controller).getAccumulatorManager().setApplicableAccumulators(
                     item.getTreeInfo(), parseOptions.getApplicableAccumulators()
             );
@@ -196,7 +209,7 @@ public class Doc extends SystemFunction implements Callable {
     }
 
     @CSharpReplaceBody(code="return new Saxon.Hej.lib.ParseOptions();")
-    private ParseOptions processOptions(Map<String, GroundedValue> checkedOptions) throws XPathException {
+    public static ParseOptions processOptions(Map<String, GroundedValue> checkedOptions, RetainedStaticContext retainedStaticContext) throws XPathException {
         // TODO: (a) reuse the factory, (b) avoid Java 13 dependency
         SAXParserFactory factory = SAXParserFactory.newDefaultNSInstance();
         XMLReader parser;
@@ -216,6 +229,11 @@ public class Doc extends SystemFunction implements Callable {
             } catch (SAXException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        val = checkedOptions.get("stable");
+        if (val != null && !val.effectiveBooleanValue()) {
+            parseOptions = parseOptions.withStable(false);
         }
 
         val = checkedOptions.get("allow-external-entities");
@@ -258,10 +276,10 @@ public class Doc extends SystemFunction implements Callable {
             xsdValidating = !"skip".equals(validationValue);
             if (validationValue.equals("strict")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.STRICT);
-                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getImportedSchema());
+                parseOptions = parseOptions.withSchema(retainedStaticContext.getImportedSchema());
             } else if (validationValue.equals("lax")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.LAX);
-                parseOptions = parseOptions.withSchema(getRetainedStaticContext().getImportedSchema());
+                parseOptions = parseOptions.withSchema(retainedStaticContext.getImportedSchema());
             } else if (validationValue.equals("skip")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
             } else if (validationValue.startsWith("type ")) {
@@ -275,7 +293,7 @@ public class Doc extends SystemFunction implements Callable {
                 } catch (XPathException e) {
                     throw e.withErrorCode("FODC0008");
                 }
-                Schema schema = getRetainedStaticContext().getImportedSchema();
+                Schema schema = retainedStaticContext.getImportedSchema();
                 SchemaType type = schema.getSchemaType(typeName);
                 if (type == null) {
                     throw new XPathException("Unknown type " + eqName, "FODC0008");

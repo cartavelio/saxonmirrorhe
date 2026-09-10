@@ -548,7 +548,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                     Item origin = context.getContextItem();
                     GroundedValue selection = (GroundedValue) getEvaluator.evaluate(context);
                     if (origin instanceof MapOrArray) {
-                        origin = new RootJNode((MapOrArray) origin);
+                        origin = RootJNode.obtainRootJNode((MapOrArray) origin);
                     }
                     if (origin instanceof JNode) {
                         GroundedValue content = ((JNode) origin).getContent();
@@ -632,7 +632,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                 Item origin = context.getContextItem();
                 GroundedValue selection = (GroundedValue) getEvaluator.evaluate(context);
                 if (origin instanceof MapOrArray) {
-                    origin = new RootJNode((MapOrArray) origin);
+                    origin = RootJNode.obtainRootJNode((MapOrArray) origin);
                 }
                 Set<AtomicMatchKey> matchKeys = new HashSet<>();
                 for (Item it : selection.asIterable()) {

@@ -171,6 +171,9 @@ public class LoopLifter {
             markDependencies(exp, choose);
         }
         for (Operand o : exp.operands()) {
+            if (o.getChildExpression().getParentExpression() != exp) {
+                throw new IllegalStateException("Bad parent pointer in expression tree at: " + exp);
+            }
             gatherInfo(o.getChildExpression(), level+1, o.isEvaluatedRepeatedly() ? loopLevel+1 : loopLevel, threaded);
         }
     }

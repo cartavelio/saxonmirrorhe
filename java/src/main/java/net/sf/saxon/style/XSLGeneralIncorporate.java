@@ -8,6 +8,7 @@
 package net.sf.saxon.style;
 
 import net.sf.saxon.functions.DocumentFn;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.DocumentKey;
 import net.sf.saxon.om.NodeName;
@@ -110,7 +111,7 @@ public abstract class XSLGeneralIncorporate extends StyleElement {
                 return null;
             }
 
-            DocumentKey key = DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), false);
+            DocumentKey key = DocumentFn.computeDocumentKey(href, getBaseURI(), getCompilation().getPackageData(), new ParseOptions());
             includedSheet = (XSLStylesheet)psm.getStylesheetDocument(key);
             if (includedSheet != null) {
                 // we already have the stylesheet document in cache; but we need to create a new module,

@@ -59,7 +59,7 @@ public class ParamKeywords {
         arrayParamNames.put("size", "array");
         arrayParamNames.put("slice", "array|start|end|step");
         arrayParamNames.put("split", "array");
-        arrayParamNames.put("sort", "array|collations|key");
+        arrayParamNames.put("sort", "array|collation|key");
         arrayParamNames.put("sort-by", "array|keys");
         arrayParamNames.put("subarray", "array|start|length");
         arrayParamNames.put("tail", "array");
@@ -180,10 +180,13 @@ public class ParamKeywords {
         fnParamNames.put("items-before", "input|predicate");
         fnParamNames.put("items-ending-where", "input|predicate");
         fnParamNames.put("items-starting-where", "input|predicate");
+        fnParamNames.put("jnode-content", "input");
+        fnParamNames.put("jnode-position", "input");
+        fnParamNames.put("jnode-selector", "input");
         fnParamNames.put("json", "input|options");
         fnParamNames.put("json-doc", "source|options");
         fnParamNames.put("json-to-xml", "value|options");
-        fnParamNames.put("label", "input");
+        fnParamNames.put("jtree", "input");
         fnParamNames.put("lang", "language|node");
         fnParamNames.put("last", "");
         fnParamNames.put("load-xquery-module", "module-uri|options");
@@ -229,7 +232,6 @@ public class ParamKeywords {
         fnParamNames.put("partition", "input|split-when");
         fnParamNames.put("parts", "");
         fnParamNames.put("path", "node|options");
-        fnParamNames.put("pin", "input");
         fnParamNames.put("position", "");
         fnParamNames.put("prefix-from-QName", "value");
         fnParamNames.put("random-number-generator", "seed");

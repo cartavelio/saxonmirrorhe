@@ -40,7 +40,7 @@ public class AnalyzeStringFn extends RegexFunction {
         public SimpleType groupNrType = BuiltInAtomicType.UNTYPED_ATOMIC;
     }
 
-    private ResultNamesAndTypes vocab = new ResultNamesAndTypes();
+    private final ResultNamesAndTypes vocab = new ResultNamesAndTypes();
 
     @Override
     protected boolean allowRegexMatchingEmptyString() {

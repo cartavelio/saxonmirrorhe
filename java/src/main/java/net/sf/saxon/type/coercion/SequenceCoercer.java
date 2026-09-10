@@ -7,6 +7,7 @@
 
 package net.sf.saxon.type.coercion;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
@@ -14,6 +15,7 @@ import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -171,6 +173,14 @@ public final class SequenceCoercer extends UnaryExpression {
                 getBaseExpression().copy(rebindings), requiredType, roleSupplier, allow40);
         ExpressionTool.copyLocationInfo(this, fsc2);
         return fsc2;
+    }
+
+    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+        if (requiredType.equals(SequenceType.GNODE_SEQUENCE)) {
+            return getBaseExpression().toPattern(config, topLevel);
+        } else {
+            return super.toPattern(config, topLevel);
+        }
     }
 
     /**

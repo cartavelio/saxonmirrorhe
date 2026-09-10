@@ -397,17 +397,18 @@ DynamicFunctionCall extends Expression {
                     return new MappingIterator(new PrependIterator(first, fnIter), item -> {
                         FunctionItem fn = (FunctionItem) item;
                         FunctionItemType fit = fn.getFunctionItemType();
-                        if (fn.getArity() != argEvaluators.length) {
+                        int arity = fn.getArity();
+                        if (arity > argEvaluators.length) {
                             String errorCode = "XPTY0004";
                             throw new XPathException(
-                                    "Number of arguments required for dynamic call to " + fn.getDescription() + " is " + fn.getArity() +
+                                    "Number of arguments required for dynamic call to " + fn.getDescription() + " is " + arity +
                                             "; number supplied = " + argEvaluators.length, errorCode)
                                     .asTypeError()
                                     .withXPathContext(context)
                                     .withLocation(expr.getLocation());
                         }
-                        Sequence[] coercedArgs = new Sequence[argEvaluators.length];
-                        for (int i = 0; i < argEvaluators.length; i++) {
+                        Sequence[] coercedArgs = new Sequence[arity];
+                        for (int i = 0; i < arity; i++) {
                             SequenceType expected = fit.getArgumentTypes()[i];
                             Sequence actual = argValues[i];
                             if (!expected.equals(SequenceType.ANY_SEQUENCE)) {

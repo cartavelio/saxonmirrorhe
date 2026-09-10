@@ -30,7 +30,7 @@ public class GeneralMapBuilder {
      * Callback function to combine two values (for duplicate keys) into one. If
      * null, duplicates are rejected as an error.
      */
-    private MapFunctionSet.OnDuplicatesAction combiner;
+    protected MapFunctionSet.OnDuplicatesAction combiner;
 
     private boolean allStrings = true;
 
@@ -191,7 +191,7 @@ public class GeneralMapBuilder {
     }
 
 
-    private static boolean hasPossibleDuplicates(List<AtomicValue> keys) {
+    protected static boolean hasPossibleDuplicates(List<AtomicValue> keys) {
         int filterSize = keys.size() < 50 ? 1024 : 65536;
         int mask = filterSize - 1;
         BitSet bloom = new BitSet(filterSize);

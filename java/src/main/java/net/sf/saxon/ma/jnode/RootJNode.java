@@ -32,6 +32,10 @@ public class RootJNode extends JNode {
         this.value = value;
     }
 
+    public static RootJNode obtainRootJNode(MapOrArray value) {
+        return value.obtainRootJNode();
+    }
+
     /**
      * Get the value/content property of the JNode
      * @return the wrapped value/content

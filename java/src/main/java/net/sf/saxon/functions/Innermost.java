@@ -14,10 +14,14 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.UType;
 
 import java.util.Properties;
 
@@ -48,11 +52,13 @@ public class Innermost extends SystemFunction {
      */
     @Override
     public Expression makeOptimizedFunctionCall(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo, Expression... arguments) throws XPathException {
-        if ((arguments[0].getSpecialProperties() & StaticProperty.PEER_NODESET) != 0) {
-            return arguments[0];
-        }
-        if ((arguments[0].getSpecialProperties() & StaticProperty.ORDERED_NODESET) != 0) {
-            presorted = true;
+        if (!arguments[0].getItemType().getUType().overlaps(UType.JNODE)) {
+            if ((arguments[0].getSpecialProperties() & StaticProperty.PEER_NODESET) != 0) {
+                return arguments[0];
+            }
+            if ((arguments[0].getSpecialProperties() & StaticProperty.ORDERED_NODESET) != 0) {
+                presorted = true;
+            }
         }
         return super.makeOptimizedFunctionCall(visitor, contextInfo, arguments);
     }

@@ -353,7 +353,7 @@ public class LookupByValuePredicate extends UnaryExpression {
                 return new MappingIterator(lhs, item -> {
                     JNode jNode;
                     if (item instanceof MapOrArray) {
-                        jNode = new RootJNode((MapOrArray)item);
+                        jNode = RootJNode.obtainRootJNode((MapOrArray)item);
                     } else {
                         jNode = (JNode)item;
                     }

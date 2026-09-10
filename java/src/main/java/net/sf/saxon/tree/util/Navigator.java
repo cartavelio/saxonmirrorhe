@@ -1105,7 +1105,7 @@ public final class Navigator {
 
     public static boolean isAncestorOrSelf(GNode a, GNode d) {
         int k = a.getNodeKind();
-        if (k != Type.ELEMENT && k != Type.DOCUMENT) {
+        if (a instanceof NodeInfo && k != Type.ELEMENT && k != Type.DOCUMENT) {
             return a.equals(d);
         }
         // Fast path for the TinyTree implementation
@@ -1507,11 +1507,7 @@ public final class Navigator {
             }
         }
 
-        public void advance() {
-
-        }
-
-    } // end of class DescendantEnumeration
+    } // end of class DescendantIterator
 
     /**
      * General purpose implementation of the following axis, in terms of the

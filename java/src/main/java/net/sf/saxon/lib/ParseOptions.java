@@ -11,7 +11,8 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.FilterFactory;
 import net.sf.saxon.expr.accum.Accumulator;
-import net.sf.saxon.ma.map.Vavr;
+import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
+import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.om.SpaceStrippingRule;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
@@ -87,7 +88,7 @@ public class ParseOptions {
 
     }
 
-    private final io.vavr.collection.HashMap<Key, Object> properties;
+    private final ImmutableHashTrieMap<Key, Object> properties;
 
     private List<Key> cacheKeys;
     private List<Object> cacheValues;
@@ -105,13 +106,13 @@ public class ParseOptions {
      * Private constructor for internal use: create a ParseOptions object with supplied content
      * @param properties the initial property values to be set
      */
-    private ParseOptions(io.vavr.collection.HashMap<Key, Object> properties) {
+    private ParseOptions(ImmutableHashTrieMap<Key, Object> properties) {
         this.properties = properties;
     }
 
     @CSharpReplaceBody(code = "return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.lib.ParseOptions.Key,System.Object>.Empty;")
-    private io.vavr.collection.HashMap<Key, Object> init() {
-        return io.vavr.collection.HashMap.empty();
+    private ImmutableHashTrieMap<Key, Object> init() {
+        return ImmutableHashTrieMap.empty();
     }
     /**
      * Look to see if the result of an update is already cached.
@@ -184,7 +185,7 @@ public class ParseOptions {
      * @return the value of the property (null if it has not been set)
      */
     private Object getProperty(Key key) {
-        return Vavr.get(properties, key);
+        return properties.get(key);
     }
 
     /**
@@ -193,7 +194,7 @@ public class ParseOptions {
      * @return true if the property has a value
      */
     private boolean hasProperty(Key key) {
-        return !properties.containsKey(key);
+        return properties.get(key) != null;
     }
 
     /**
@@ -1245,12 +1246,12 @@ public class ParseOptions {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        Vavr.forEach(properties, (key, value) -> {
-            sb.append(key);
+        for (TrieKVP<Key, Object> kvp : properties) {
+            sb.append(kvp.key);
             sb.append('=');
-            sb.append(value);
+            sb.append(kvp.value);
             sb.append(' ');
-        });
+        }
         return sb.toString();
     }
 }

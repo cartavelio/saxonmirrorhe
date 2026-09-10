@@ -185,6 +185,9 @@ public class DocumentFn extends SystemFunction implements Callable {
 
         Configuration config = c.getConfiguration();
 
+        // See if the call is required to be stable
+        boolean stable = options.isStable();
+
         // If the href contains a fragment identifier, strip it out now
         String[] parts = extractFragment(href);
         String fragmentId = parts[1];
@@ -206,41 +209,44 @@ public class DocumentFn extends SystemFunction implements Callable {
         }
 
         // Resolve relative URI
-        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData);
+        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, options);
 
         // see if the document is already loaded
 
-        TreeInfo doc = config.getGlobalDocumentPool().find(documentKey);
-        if (doc != null) {
-            return doc.getRootNode();
-        }
-
+        TreeInfo doc = null;
         DocumentPool pool = controller.getDocumentPool();
 
-        //noinspection SynchronizationOnLocalVariableOrMethodParameter
-        synchronized (controller) {
-            doc = pool.find(documentKey);
+        if (stable) {
+            doc = config.getGlobalDocumentPool().find(documentKey);
             if (doc != null) {
-                return getFragment(doc, fragmentId, c, locator);
+                return doc.getRootNode();
             }
+            
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized(controller) {
+                doc = pool.find(documentKey);
+                if (doc != null) {
+                    return getFragment(doc, fragmentId, c, locator);
+                }
 
-            // check that the document was not written by this transformation
+                // check that the document was not written by this transformation
 
-            if (controller instanceof XsltController &&
-                    !((XsltController)controller).checkUniqueOutputDestination(documentKey)) {
-                pool.markUnavailable(documentKey);
-                throw new XPathException(
+                if (controller instanceof XsltController &&
+                        !((XsltController) controller).checkUniqueOutputDestination(documentKey)) {
+                    pool.markUnavailable(documentKey);
+                    throw new XPathException(
                             "Cannot read a document that was written during the same transformation: " + documentKey)
-                        .withXPathContext(c)
-                        .withErrorCode("XTRE1500")
-                        .withLocation(locator);
-            }
+                            .withXPathContext(c)
+                            .withErrorCode("XTRE1500")
+                            .withLocation(locator);
+                }
 
-            if (pool.isMarkedUnavailable(documentKey)) {
-                throw new XPathException("Document has been marked not available: " + documentKey)
-                        .withXPathContext(c)
-                        .withErrorCode("FODC0002")
-                    .withLocation(locator);
+                if (pool.isMarkedUnavailable(documentKey)) {
+                    throw new XPathException("Document has been marked not available: " + documentKey)
+                            .withXPathContext(c)
+                            .withErrorCode("FODC0002")
+                            .withLocation(locator);
+                }
             }
         }
 
@@ -323,14 +329,16 @@ public class DocumentFn extends SystemFunction implements Callable {
             // check on the document pool, and if this has happened, we discard the document
             // we have just built and use the one from the pool instead.
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
-            synchronized (controller) {
-                doc = pool.find(documentKey);
-                if (doc != null) {
-                    return getFragment(doc, fragmentId, c, locator);
-                }
-                controller.registerDocument(newdoc, documentKey);
-                if (controller instanceof XsltController) {
-                    ((XsltController) controller).addUnavailableOutputDestination(documentKey);
+            if (stable) {
+                synchronized(controller) {
+                    doc = pool.find(documentKey);
+                    if (doc != null) {
+                        return getFragment(doc, fragmentId, c, locator);
+                    }
+                    controller.registerDocument(newdoc, documentKey);
+                    if (controller instanceof XsltController) {
+                        ((XsltController) controller).addUnavailableOutputDestination(documentKey);
+                    }
                 }
             }
             return getFragment(newdoc, fragmentId, c, locator);
@@ -435,7 +443,9 @@ public class DocumentFn extends SystemFunction implements Callable {
      */
 
     protected static DocumentKey computeDocumentKey(String href, String baseURI, PackageData packageData) throws XPathException {
-        return computeDocumentKey(href, baseURI, packageData, true);
+        ParseOptions options = new ParseOptions().withSpaceStrippingRule(new StylesheetSpaceStrippingRule(
+                packageData.getConfiguration().getNamePool()));
+        return computeDocumentKey(href, baseURI, packageData, options);
     }
 
     /**
@@ -444,11 +454,12 @@ public class DocumentFn extends SystemFunction implements Callable {
      * @param baseURI  the base URI
      * @param packageData the package in which the call to doc() or document() appears (affects options
  *                    such as strip-space)
-     * @param strip true if the document is subject to whitespace stripping (typically a source document),
-     *              otherwise false
+     * @param options the parsing options
      */
     public static DocumentKey computeDocumentKey(
-            String href, String baseURI, PackageData packageData, boolean strip) {
+            String href, String baseURI, PackageData packageData, ParseOptions options) {
+
+        boolean strip = options.getSpaceStrippingRule() instanceof AllElementsSpaceStrippingRule;
         String absURI;
 
         // Saxon takes charge of absolutization, leaving the user URIResolver to handle dereferencing only
@@ -471,6 +482,18 @@ public class DocumentFn extends SystemFunction implements Callable {
                 absURI = baseURI + "/../" + href;
             }
         }
+
+        if (options.isXIncludeAware()) {
+            absURI = absURI + "?XI";
+        }
+
+        if (options.getSpaceStrippingRule() == AllElementsSpaceStrippingRule.getInstance()) {
+            absURI = absURI + "?StripAll";
+        } else if (options.getSpaceStrippingRule() == NoElementsSpaceStrippingRule.getInstance()) {
+            absURI = absURI + "?StripNone";
+        }
+
+        // TODO: reflect schema-validation options in document key
 
         if (strip && packageData instanceof StylesheetPackage &&
                 ((StylesheetPackage) packageData).getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance()) {
@@ -512,7 +535,11 @@ public class DocumentFn extends SystemFunction implements Callable {
             }
         }
 
-        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, true);
+        ParseOptions options = config.getParseOptions()
+                .withSpaceStrippingRule(
+                        new StylesheetSpaceStrippingRule(
+                                packageData.getConfiguration().getNamePool()));
+        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, options);
 
         // see if the document is already loaded
 
@@ -539,7 +566,6 @@ public class DocumentFn extends SystemFunction implements Callable {
             throw de;
         }
 
-        ParseOptions options = config.getParseOptions();
         if (params != null) {
             options = options.merge(params.makeParseOptions(config));
         }
@@ -588,7 +614,9 @@ public class DocumentFn extends SystemFunction implements Callable {
 
         // Resolve relative URI
 
-        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, true);
+        ParseOptions options = new ParseOptions().withSpaceStrippingRule(new StylesheetSpaceStrippingRule(
+                packageData.getConfiguration().getNamePool()));
+        DocumentKey documentKey = computeDocumentKey(href, baseURI, packageData, options);
 
         Controller controller = context.getController();
         Configuration config = controller.getConfiguration();

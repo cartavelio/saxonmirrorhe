@@ -1,10 +1,7 @@
 package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.ma.jnode.JNode;
-import net.sf.saxon.ma.map.GeneralMapBuilder;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -47,26 +44,30 @@ public final class MapCoercionPlan extends CoercionPlan {
             return SequenceExtent.from(coercedValue);
         }
         if (item instanceof MapItem) {
-            GeneralMapBuilder builder = new GeneralMapBuilder();
-            CoercionPlan keyPlan = requiredKeyType.getCoercionPlan(40);
-            CoercionPlan valuePlan = requiredValueType.getPrimaryType().getCoercionPlan(40);
-            if (keyPlan == null) {
-                keyPlan = new IdentityCoercionPlan();
-            }
-            if (valuePlan == null) {
-                valuePlan = new IdentityCoercionPlan();
-            }
-            for (KeyValuePair pair : ((MapItem)item).keyValuePairs()) {
-                builder.put(
-                        (AtomicValue)keyPlan.coerceItem(pair.key, requiredKeyType, request),
-                        SequenceTool.toGroundedValue(valuePlan.coerceSequence(
-                                        pair.value.iterate(), requiredValueType, request))
-                        );
-            }
-            try {
-                return builder.getCompletedMap();
-            } catch (XPathException e) {
-                throw e.withErrorCode("XPTY0004").asTypeError();
+            if (requiredType.matches(item, request.config.getTypeHierarchy())) {
+                return item;
+            } else {
+                GeneralMapBuilder builder = item instanceof ExtensibleMap ? new GeneralMapBuilder() : FixedMap.getBuilder();
+                CoercionPlan keyPlan = requiredKeyType.getCoercionPlan(40);
+                CoercionPlan valuePlan = requiredValueType.getPrimaryType().getCoercionPlan(40);
+                if (keyPlan == null) {
+                    keyPlan = new IdentityCoercionPlan();
+                }
+                if (valuePlan == null) {
+                    valuePlan = new IdentityCoercionPlan();
+                }
+                for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
+                    builder.put(
+                            (AtomicValue) keyPlan.coerceItem(pair.key, requiredKeyType, request),
+                            SequenceTool.toGroundedValue(valuePlan.coerceSequence(
+                                    pair.value.iterate(), requiredValueType, request))
+                    );
+                }
+                try {
+                    return builder.getCompletedMap();
+                } catch (XPathException e) {
+                    throw e.withErrorCode("XPTY0004").asTypeError();
+                }
             }
         } else {
             throw coercionError(item, requiredType, request);

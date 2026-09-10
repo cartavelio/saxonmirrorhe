@@ -302,7 +302,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             FunctionItem fn = (FunctionItem) arguments[1].head();
-            GeneralMapBuilder result = new GeneralMapBuilder();
+            GeneralMapBuilder result = FixedMap.getBuilder();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue match = (BooleanValue)dynamicCall(fn, context, pair.key, pair.value).head();
                 if (match != null && match.getBooleanValue()) {
@@ -724,28 +724,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             if (it == ErrorType.getInstance()) {
                 return MapType.EMPTY_MAP_TYPE;
             } else if (it instanceof MapType) {
-                boolean maybeCombined = true;  // see bug 3980
-//                if (args.length == 1) {
-//                    maybeCombined = false;
-//                } else if (args[1] instanceof Literal) {
-//                    MapItem options = (MapItem) ((Literal) args[1]).getGroundedValue().head();
-//                    if (options != null) {
-//                        GroundedValue dupes = options.get(StringValue.bmp("duplicates"));
-//                        try {
-//                            if (dupes != null && !"combine".equals(dupes.getStringValue())) {
-//                                maybeCombined = false;
-//                            }
-//                        } catch (XPathException e) {
-//                            //
-//                        }
-//                    }
-//                }
-                if (maybeCombined) {
-                    return new MapType(((MapType) it).getKeyType(),
+                // see bug 3980
+                return new MapType(((MapType) it).getKeyType(),
                                        SequenceType.zeroOrMore(((MapType) it).getValueType().getPrimaryType()));
-                } else {
-                    return it;
-                }
+
             } else {
                 return super.getResultItemType(args);
             }
@@ -790,7 +772,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                                         OnDuplicatesAction onDuplicates)
                 throws XPathException {
             //MapBuilder mapBuilder = context.getConfiguration().makeMapBuilder(retainOrder, false);
-            GeneralMapBuilder builder = new GeneralMapBuilder();
+            GeneralMapBuilder builder = FixedMap.getBuilder();
             builder.setDuplicatesAction(onDuplicates);
             MapItem next;
             while ((next = (MapItem) iter.next()) != null) {

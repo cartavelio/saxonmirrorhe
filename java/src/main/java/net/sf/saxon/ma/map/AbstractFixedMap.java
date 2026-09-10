@@ -1,14 +1,14 @@
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * A general-purpose XDM map implementation that is ordered, that holds any kind of key,
@@ -44,6 +44,11 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
 
         @Override
         public MapItem getCompletedMap() throws XPathException {
+            if (keys.size() == 0) {
+                return EmptyMap.getInstance();
+            } else if (keys.size() == 1) {
+                return new SingleEntryMap(keys.get(0), values.get(0));
+            }
             AtomicValue[] keyArray = keys.toArray(new AtomicValue[0]);
             GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
             HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keyArray.length);
@@ -55,6 +60,66 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
             }
             return new FixedMap(keyArray, valueArray, index);
         }
+
+        /**
+         * Get the constructed map. This method must only be called once, because the
+         * lists of keys and values are used within the constructed map and are mutable.
+         *
+         * @param context The dynamic context: needed only when calling a combiner function
+         *                to combine duplicate entries
+         * @return the constructed map
+         * @throws XPathException if duplicate keys were found, and not detected earlier
+         */
+
+        public MapItem getCompletedMap(XPathContext context) throws XPathException {
+            if (keys.size() == 0) {
+                return EmptyMap.getInstance();
+            } else if (keys.size() == 1) {
+                return new SingleEntryMap(keys.get(0), values.get(0));
+            }
+            // quick scan for possible duplicates using a bloom filter
+            boolean possibleDuplicates = hasPossibleDuplicates(keys);
+            if (possibleDuplicates) {
+                // If there are possible duplicates, then we build the map now, with a more thorough
+                // check for duplicates as we build it.
+                List<AtomicValue> keyList = new ArrayList<>(keys.size());
+                List<GroundedValue> valueList = new ArrayList<>(keys.size());
+
+                HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keys.size());
+                int serial = 0;
+                for (int i = 0; i < keys.size(); i++) {
+                    AtomicMatchKey key = keys.get(i).asMapKey();
+                    Integer existing = index.get(key);
+                    if (existing == null) {
+                        index.put(key, serial++);
+                        keyList.add(keys.get(i));
+                        valueList.add(values.get(i));
+                    } else if (combiner == null) {
+                        throw new XPathException("Duplicate key " + Err.depict(keys.get(i)) + " in map");
+                    } else {
+                        GroundedValue newVal;
+                        try {
+                            newVal = combiner.combine(valueList.get(existing), values.get(i), context);
+                        } catch (UncheckedXPathException e) {
+                            throw new XPathException("Duplicate key " + Err.depict(keys.get(i))
+                                                             + " in map. First value: "
+                                                             + Err.depictSequence(valueList.get(existing)) + "; second value: "
+                                                             + Err.depictSequence(values.get(i)), e).withErrorCode(e.getXPathException().getErrorCodeQName());
+                        }
+                        valueList.set(existing, newVal);
+                    }
+                }
+
+                AtomicValue[] keyArray = keyList.toArray(new AtomicValue[0]);
+                GroundedValue[] valueArray = valueList.toArray(new GroundedValue[0]);
+
+                return new FixedMap(keyArray, valueArray, index);
+
+            } else {
+                return getCompletedMapConfidently();
+            }
+        }
+
 
         /**
          * Get the constructed map, knowing that there are no duplicate keys.
@@ -207,7 +272,11 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return ExtensibleMap.copyOf(this).put(key, value);
+        if (get(key) != null) {
+            return new MapReplacingOne(this, key, value);
+        } else {
+            return new MapPlusOne(this, key, value);
+        }
     }
 
     /**
@@ -219,7 +288,11 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return ExtensibleMap.copyOf(this).remove(key);
+        if (get(key) != null) {
+            return new MapMinusOne(this, key.asMapKey());
+        } else {
+            return this;
+        }
     }
 
 }

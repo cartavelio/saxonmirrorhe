@@ -2526,7 +2526,6 @@ public class XPathParser {
         nextToken();
         readToken(Token.LPAREN);
         if (t.currentToken == Token.STAR) {
-            // Allow both to be safe
             nextToken();
             readToken(Token.RPAREN);
             return ArrayItemType.ANY_ARRAY_TYPE;
@@ -3148,6 +3147,19 @@ public class XPathParser {
                     case "record": {
                         checkLanguageVersion40("nodeTest record(...)");
                         ItemType type = parseRecordTest(this);
+                        AxisExpression ae = new AxisExpression(
+                                AxisInfo.CHILD,
+                                new NodeTypeTest(
+                                        new SpecificJNodeType(SequenceType.one(type),
+                                                              env.getConfiguration().getTypeHierarchy())));
+                        setLocation(ae);
+                        return ae;
+                    }
+                    case "array":
+                    case "map":
+                    case "enum": {
+                        checkLanguageVersion40("nodeTest " + name + "()");
+                        ItemType type = parseItemType();
                         AxisExpression ae = new AxisExpression(
                                 AxisInfo.CHILD,
                                 new NodeTypeTest(
@@ -3786,11 +3798,13 @@ public class XPathParser {
             }
         } else if (token instanceof Token.NumericLiteral) {
             NumericValue number = ((Token.NumericLiteral)token).getValue();
-            if (!(number instanceof IntegerValue)) {
-                grumble("Number following '?' must be an integer");
-            }
-            if (((Token.NumericLiteral) token).getRadix() != 10) {
-                grumble("Number following '?' must be a decimal integer");
+            if (!allowXPath40Syntax) {
+                if (!(number instanceof IntegerValue)) {
+                    grumble("Number following '?' must be an integer");
+                }
+                if (((Token.NumericLiteral) token).getRadix() != 10) {
+                    grumble("Number following '?' must be a decimal integer");
+                }
             }
             nextToken();
             result = makeLookupExpression(env.getConfiguration(), lhs, Literal.makeLiteral(number));
@@ -4114,8 +4128,6 @@ public class XPathParser {
 
             case "type": {
                 checkLanguageVersion40("nodeTest type()");
-                nextToken();
-                readToken(Token.LPAREN);
                 SequenceType type = parseSequenceType();
                 readToken(Token.RPAREN);
                 return new SpecificJNodeType(type,
@@ -4126,6 +4138,24 @@ public class XPathParser {
                 checkLanguageVersion40("nodeTest record(...)");
                 nextToken();
                 ItemType type = parseRecordTest(this);
+                return new SpecificJNodeType(SequenceType.one(type),
+                                             env.getConfiguration().getTypeHierarchy());
+            }
+            case "array": {
+                checkLanguageVersion40("nodeTest " + kind + "()");
+                ItemType type = parseArrayItemType();
+                return new SpecificJNodeType(SequenceType.one(type),
+                                             env.getConfiguration().getTypeHierarchy());
+            }
+            case "map": {
+                checkLanguageVersion40("nodeTest " + kind + "()");
+                ItemType type = parseMapItemType();
+                return new SpecificJNodeType(SequenceType.one(type),
+                                             env.getConfiguration().getTypeHierarchy());
+            }
+            case "enum": {
+                checkLanguageVersion40("nodeTest " + kind + "()");
+                ItemType type = parseEnumType();
                 return new SpecificJNodeType(SequenceType.one(type),
                                              env.getConfiguration().getTypeHierarchy());
             }
@@ -4370,7 +4400,7 @@ public class XPathParser {
                         }
                         result = Literal.makeLiteral(mapBuilder.getCompletedMap());
                     } else {
-                        GeneralMapBuilder builder = new GeneralMapBuilder();
+                        GeneralMapBuilder builder = FixedMap.getBuilder();
                         for (Expression expression : operands) {
                             FunctionCall operand = (FunctionCall) expression;
                             Literal keyExp = (Literal) operand.getArguments()[0];

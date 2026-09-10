@@ -1,8 +1,8 @@
 package net.sf.saxon.ma.map;
 
-import io.vavr.collection.HashMap;
-import io.vavr.control.Option;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
+import net.sf.saxon.ma.trie.ImmutableIntSet;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.value.AtomicValue;
@@ -31,20 +31,20 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
 
     private final ZenoChain<AtomicValue> keys;
     private final ZenoChain<GroundedValue> values;
-    private final io.vavr.collection.HashMap<AtomicMatchKey, Integer> index;
-    private final io.vavr.collection.HashSet<Integer> removals;
+    private final ImmutableHashTrieMap<AtomicMatchKey, Integer> index;
+    private final ImmutableIntSet removals;
 
     public ExtensibleMap() {
         this.keys = new ZenoChain<>();
         this.values = new ZenoChain<>();
-        this.index = io.vavr.collection.HashMap.empty();
-        this.removals = io.vavr.collection.HashSet.empty();
+        this.index = ImmutableHashTrieMap.empty();
+        this.removals = new ImmutableIntSet();
     }
 
     private ExtensibleMap(ZenoChain<AtomicValue> keys,
                           ZenoChain<GroundedValue> values,
-                          io.vavr.collection.HashMap<AtomicMatchKey, Integer> index,
-                          io.vavr.collection.HashSet<Integer> removals
+                          ImmutableHashTrieMap<AtomicMatchKey, Integer> index,
+                          ImmutableIntSet removals
                           ) {
         this.keys = keys;
         this.values = values;
@@ -61,8 +61,8 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
     public static ExtensibleMap copyOf(MapItem map) {
         ZenoChain<AtomicValue> keys = new ZenoChain<>();
         ZenoChain<GroundedValue> values = new ZenoChain<>();
-        io.vavr.collection.HashMap<AtomicMatchKey, Integer> index = io.vavr.collection.HashMap.empty();
-        io.vavr.collection.HashSet<Integer> removals = io.vavr.collection.HashSet.empty();
+        ImmutableHashTrieMap<AtomicMatchKey, Integer> index = ImmutableHashTrieMap.empty();
+        ImmutableIntSet removals = new ImmutableIntSet();
         int offset = 0;
         for (KeyValuePair pair : map.keyValuePairs()) {
             keys = keys.add(pair.key);
@@ -80,11 +80,11 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        Option<Integer> offset = index.get(key.asMapKey());
-        if (offset.isEmpty() || removals.contains(offset.get())) {
+        Integer offset = index.get(key.asMapKey());
+        if (offset == null || removals.contains(offset)) {
             return null;
         }
-        return values.get(offset.get());
+        return values.get(offset);
     }
 
     /**
@@ -96,11 +96,11 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
      */
 
     public int getOffset(AtomicValue key) {
-        Option<Integer> offset = index.get(key.asMapKey());
-        if (offset.isEmpty() || removals.contains(offset.get())) {
+        Integer offset = index.get(key.asMapKey());
+        if (offset == null || removals.contains(offset)) {
             return -1;
         }
-        return offset.get();
+        return offset;
     }
 
     /**
@@ -198,7 +198,7 @@ public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
             int last = keys.size();
             ZenoChain<AtomicValue> keys2 = keys.add(key);
             ZenoChain<GroundedValue> values2 = values.add(value);
-            HashMap<AtomicMatchKey, Integer> index2 = index.put(key.asMapKey(), last);
+            ImmutableHashTrieMap<AtomicMatchKey, Integer> index2 = index.put(key.asMapKey(), last);
             return new ExtensibleMap(keys2, values2, index2, removals);
         }
 

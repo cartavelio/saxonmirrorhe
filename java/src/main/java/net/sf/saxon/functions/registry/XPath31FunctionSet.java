@@ -96,10 +96,6 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                  OPT, FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
 
-        register("innermost", 1, e -> e.populate(Innermost::new, AnyGNodeType.getInstance(),
-                                                 STAR, 0)
-                .arg(0, AnyGNodeType.getInstance(), STAR | NAV, null));
-
         register("json-doc", 1, e -> e.populate( JsonDoc::new, AnyItemType.getInstance(),
                  OPT, LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));

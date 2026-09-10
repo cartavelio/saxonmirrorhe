@@ -17,6 +17,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.ExecutableFunctionLibrary;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
@@ -511,7 +512,8 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
                 declarations.add((XSLUsePackage) use);
             } else if (use instanceof XSLInclude) {
                 String href = Whitespace.trim(use.getAttributeValue(NamespaceUri.NULL, "href"));
-                DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), false);
+                ParseOptions options = new ParseOptions().withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                DocumentKey key = DocumentFn.computeDocumentKey(href, use.getBaseURI(), compilation.getPackageData(), options);
                 TreeInfo includedTree = compilation.getStylesheetModules().get(key);
                 if (includedTree == null) {
                     // In 4.0, this can be due to an ignored redundant include

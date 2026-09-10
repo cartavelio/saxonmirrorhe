@@ -161,6 +161,9 @@ public class Path_1 extends SystemFunction {
                 }
                 if (n.getNodeKind() == Type.DOCUMENT) {
                     return new StringValue(fsb.toString());
+                } else if (lexical) {
+                    fsb.insert(0, "fn:root()");
+                    return new StringValue(fsb.toString());
                 } else {
                     fsb.insert(0, qualifier(NamespaceUri.FN, namespaces) + "root()");
                     return new StringValue(fsb.toString());
@@ -297,27 +300,27 @@ public class Path_1 extends SystemFunction {
                 AtomicValue selector = n.getSelector();
                 UnicodeString selectorStr = selector.getUnicodeStringValue();
                 if (selector instanceof StringValue && NameChecker.isValidNCName(selectorStr.codePoints())) {
-                    buffer = buffer.concat(SLASH).concat(selectorStr);
+                    buffer = SLASH.concat(selectorStr).concat(buffer);
                 } else if (selector instanceof StringValue) {
-                    buffer = buffer.concat(SLASH).concat(new Twine8("get(\"")).concat(selectorStr).concat(new Twine8("\")"));
+                    buffer = SLASH.concat(selectorStr).concat(new Twine8("get(\"")).concat(buffer).concat(new Twine8("\")"));
                 } else if (selector instanceof NumericValue) {
-                    buffer = buffer.concat(SLASH).concat(new Twine8("get(")).concat(selectorStr).concat(new UnicodeChar(')'));
+                    buffer = SLASH.concat(selectorStr).concat(new Twine8("get(")).concat(buffer).concat(new UnicodeChar(')'));
                 } else if (selector instanceof QNameValue) {
-                    buffer = buffer.concat(SLASH)
-                                   .concat(StringView.of(((QNameValue)selector).getStructuredQName().getEQName()));
+                    buffer = SLASH.concat(StringView.of(((QNameValue) selector).getStructuredQName().getEQName()))
+                                   .concat(buffer);
                 } else if (selector instanceof BooleanValue) {
                     if (((BooleanValue) selector).getBooleanValue()) {
-                        buffer = buffer.concat(new Twine8("/get(true())"));
+                        buffer = new Twine8("/get(true())").concat(buffer);
                     } else {
-                        buffer = buffer.concat(new Twine8("/get(false())"));
+                        buffer = new Twine8("/get(false())").concat(buffer);
                     }
                 } else {
-                    buffer = buffer.concat(SLASH)
-                            .concat(new Twine8("get("))
+                    buffer = new Twine8("/get(")
                             .concat(StringView.of(selector.getPrimitiveType().getDisplayName()))
                             .concat(new Twine8("(\""))
                             .concat(selectorStr)
-                            .concat(new Twine8("\"))"));
+                            .concat(new Twine8("\"))"))
+                            .concat(buffer);
                 }
             }
         }

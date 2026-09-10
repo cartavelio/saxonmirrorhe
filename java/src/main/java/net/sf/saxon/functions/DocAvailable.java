@@ -9,24 +9,21 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.lib.ParseOptions;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
+
+import java.util.Map;
 
 /**
  * Implement the fn:doc-available() function
  */
 
 public class DocAvailable extends SystemFunction  {
-
-    private boolean isDocAvailable(AtomicValue hrefVal, XPathContext context) throws XPathException {
-        if (hrefVal == null) {
-            return false;
-        }
-        String href = hrefVal.getStringValue();
-        return docAvailable(href, context);
-    }
 
     /**
      * Evaluate the expression
@@ -39,13 +36,44 @@ public class DocAvailable extends SystemFunction  {
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        return BooleanValue.get(isDocAvailable((AtomicValue) arguments[0].head(), context));
+        boolean result = false;
+        AtomicValue hrefVal = (AtomicValue) arguments[0].head();
+        if (hrefVal != null) {
+
+            ParseOptions parseOptions = context.getConfiguration().getParseOptions();
+
+            MapItem options = null;
+            if (getArity() >= 2) {
+                options = (MapItem) arguments[1].head();
+            }
+            if (options != null && !options.isEmpty()) {
+                Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
+                parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
+
+            } else {
+
+                PackageData pd = getRetainedStaticContext().getPackageData();
+                if (pd instanceof StylesheetPackage) {
+                    parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                } else {
+                    parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                }
+
+
+            }
+
+
+            String href = hrefVal.getStringValue();
+            result = docAvailable(href, parseOptions, context);
+        }
+        return BooleanValue.get(result);
     }
 
-    public boolean docAvailable(String href, XPathContext context) {
+    private boolean docAvailable(String href, ParseOptions parseOptions, XPathContext context) {
         try {
             PackageData packageData = getRetainedStaticContext().getPackageData();
-            DocumentKey documentKey = DocumentFn.computeDocumentKey(href, getStaticBaseUriString(), packageData);
+            DocumentKey documentKey;
+            documentKey = DocumentFn.computeDocumentKey(href, getStaticBaseUriString(), packageData, parseOptions);
             DocumentPool pool = context.getController().getDocumentPool();
             if (pool.isMarkedUnavailable(documentKey)) {
                 return false;
@@ -54,7 +82,7 @@ public class DocAvailable extends SystemFunction  {
             if (doc != null) {
                 return true;
             }
-            Item item = DocumentFn.makeDoc(href, getStaticBaseUriString(), packageData, null, context, null, true);
+            Item item = DocumentFn.makeDoc(href, getStaticBaseUriString(), packageData, parseOptions, context, null, true);
             if (item != null) {
                 return true;
             } else {

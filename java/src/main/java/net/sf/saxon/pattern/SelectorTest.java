@@ -98,7 +98,16 @@ public class SelectorTest extends NodeTest {
      */
     @Override
     public UType getUType() {
-        return UType.GNODE;
+        switch (nodeKind) {
+            case Type.ELEMENT:
+                return UType.JNODE.union(UType.ELEMENT);
+            case Type.ATTRIBUTE:
+                return UType.ATTRIBUTE;
+            case Type.NAMESPACE:
+                return UType.NAMESPACE;
+            default:
+                return UType.GNODE;
+        }
     }
 
 

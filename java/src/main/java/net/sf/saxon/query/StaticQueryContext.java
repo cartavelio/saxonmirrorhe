@@ -757,6 +757,7 @@ public class StaticQueryContext {
         declareNamespace("local", NamespaceUri.LOCAL);
         declareNamespace("err", NamespaceUri.ERR);
         declareNamespace("output", NamespaceUri.OUTPUT);
+        declareNamespace("xq", NamespaceUri.XQUERY);
         declareNamespace("saxon", NamespaceUri.SAXON);
         declareNamespace("", NamespaceUri.NULL);
 

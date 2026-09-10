@@ -474,7 +474,7 @@ public abstract class Pattern extends PseudoExpression {
      */
 
     public Pattern convertToTypedPattern(String val) throws XPathException {
-        return null;
+        return this;
     }
 
     @Override
