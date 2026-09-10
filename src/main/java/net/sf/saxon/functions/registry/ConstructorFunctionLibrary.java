@@ -301,6 +301,8 @@ public class ConstructorFunctionLibrary implements FunctionLibrary {
                 return new ConstantFunction(arityOneConstructor.getFunctionName(),
                                             result,
                                             arityOneConstructor.getFunctionItemType().getResultType());
+            } catch (XPathException xe) {
+                throw xe;
             } catch (Exception e) {
                 throw new XPathException("Unsuitable context for constructor function "
                                                  + getDescription() + ": " + e.getMessage());

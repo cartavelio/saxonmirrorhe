@@ -418,6 +418,10 @@ public abstract class NodeTest implements NodePredicate, ItemTypeWithSequenceTyp
         return NoCoercionPlan.INSTANCE;
     }
 
+    /**
+     * Get a concise string representation of this node test for use in diagnostics
+     * @return a suitably abbreviated respresention of the node test
+     */
     public String toShortString() {
         return toString();
     }

@@ -78,8 +78,6 @@ public class ConversionRules {
         cr.converterCache.clear();
     }
 
-
-
     public void setTypeHierarchy(TypeHierarchy typeHierarchy) {
         this.typeHierarchy = typeHierarchy;
     }
@@ -253,6 +251,8 @@ public class ConversionRules {
                 return new Converter.DownCastingConverter(targetType, this);
             } else if (st == StandardNames.XS_STRING || st == StandardNames.XS_UNTYPED_ATOMIC) {
                 return makeStringConverter(targetType);
+            } else if (tt == StandardNames.XS_ERROR) {
+                return new Converter.ConverterToError();
             } else {
                 Converter stageOne = makeConverter(sourceType, primTarget);
                 if (stageOne == null) {

@@ -15,7 +15,6 @@ import net.sf.saxon.lib.FunctionAnnotationHandler;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SameNameTest;
@@ -318,61 +317,65 @@ public class TypeHierarchy {
             } else if (t1 instanceof NodeTest) {
                 if (t2.isPlainType() || t2 instanceof FunctionItemType) {
                     return DISJOINT;
-                } else {
-                    // both types are NodeTests
-                    if (t1 instanceof AnyNodeTest) {
-                        return SUBSUMES;
-                    } else if (t2 instanceof AnyNodeTest) {
-                        return SUBSUMED_BY;
-                    } else if (t2 instanceof ErrorType) {
-                        return DISJOINT;
-                    } else {
-                        // first find the relationship between the node kinds allowed
-                        Affinity nodeKindRelationship;
-                        UType m1 = t1.getUType();
-                        UType m2 = t2.getUType();
-                        if (!m1.overlaps(m2)) {
-                            return DISJOINT;
-                        } else if (m1.equals(m2)) {
-                            nodeKindRelationship = SAME_TYPE;
-                        } else if (m2.subsumes(m1)) {
-                            nodeKindRelationship = SUBSUMED_BY;
-                        } else if (m1.subsumes(m2)) {
-                            nodeKindRelationship = SUBSUMES;
-                        } else {
-                            nodeKindRelationship = OVERLAPS;
-                        }
-
-                        // Now find the relationship between the node names allowed.  See bug 3713
-                        Affinity nodeNameRelationship = nameTestRelationship(
-                                ((NodeTest)t1).getQNameTest(),
-                                ((NodeTest)t2).getQNameTest());
-
-                        // now find the relationship between the content types allowed
-
-                        Affinity contentRelationship = computeContentRelationship(t1, t2);
-
-                        // now analyse the three different relationships
-
-                        if (nodeKindRelationship == SAME_TYPE &&
-                                nodeNameRelationship == SAME_TYPE &&
-                                contentRelationship == SAME_TYPE) {
-                            return SAME_TYPE;
-                        } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMES) &&
-                                (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMES) &&
-                                (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMES)) {
-                            return SUBSUMES;
-                        } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMED_BY) &&
-                                (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMED_BY) &&
-                                (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMED_BY)) {
-                            return SUBSUMED_BY;
-                        } else if (nodeNameRelationship == DISJOINT || contentRelationship == DISJOINT) {
-                            return DISJOINT;
-                        } else {
-                            return OVERLAPS;
-                        }
-                    }
                 }
+                    // both types are NodeTests
+//                    if (t1 instanceof AnyNodeTest) {
+//                        return SUBSUMES;
+//                    } else if (t2 instanceof AnyNodeTest) {
+//                        return SUBSUMED_BY;
+//                    } else if (t2 instanceof ErrorType) {
+//                        return DISJOINT;
+//                    } else {
+                // first find the relationship between the node kinds allowed
+                Affinity nodeKindRelationship;
+                UType m1 = t1.getUType();
+                UType m2 = t2.getUType();
+                if (!m1.overlaps(m2)) {
+                    return DISJOINT;
+                } else if (m1.equals(m2)) {
+                    nodeKindRelationship = SAME_TYPE;
+                } else if (m2.subsumes(m1)) {
+                    nodeKindRelationship = SUBSUMED_BY;
+                } else if (m1.subsumes(m2)) {
+                    nodeKindRelationship = SUBSUMES;
+                } else {
+                    return OVERLAPS;
+                }
+
+                // Now find the relationship between the node names allowed.  See bug 3713
+                Affinity nodeNameRelationship = nameTestRelationship(
+                        ((NodeTest)t1).getQNameTest(),
+                        ((NodeTest)t2).getQNameTest());
+
+                if (nodeNameRelationship == DISJOINT || nodeNameRelationship == OVERLAPS) {
+                    return nodeNameRelationship;
+                }
+
+                // now find the relationship between the content types allowed
+
+                Affinity contentRelationship = computeContentRelationship(t1, t2);
+
+                // now analyse the three different relationships
+
+                if (nodeKindRelationship == SAME_TYPE &&
+                        nodeNameRelationship == SAME_TYPE &&
+                        contentRelationship == SAME_TYPE) {
+                    return SAME_TYPE;
+                } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMES) &&
+                        (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMES) &&
+                        (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMES)) {
+                    return SUBSUMES;
+                } else if ((nodeKindRelationship == SAME_TYPE || nodeKindRelationship == SUBSUMED_BY) &&
+                        (nodeNameRelationship == SAME_TYPE || nodeNameRelationship == SUBSUMED_BY) &&
+                        (contentRelationship == SAME_TYPE || contentRelationship == SUBSUMED_BY)) {
+                    return SUBSUMED_BY;
+                } else if (contentRelationship == DISJOINT) {
+                    return DISJOINT;
+                } else {
+                    return OVERLAPS;
+                }
+//                    }
+//                }
             } else if (t1 instanceof AnyExternalObjectType) {
                 if (!(t2 instanceof AnyExternalObjectType)) {
                     return DISJOINT;

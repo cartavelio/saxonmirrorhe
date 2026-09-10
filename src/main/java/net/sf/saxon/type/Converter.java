@@ -184,6 +184,17 @@ public abstract class Converter {
 
     }
 
+    /**
+     * Converter to class xs:error, which always fails
+     */
+
+    public static class ConverterToError extends Converter {
+        @Override
+        public ConversionResult convert(AtomicValue input) {
+            return new ValidationFailure("Conversion to xs:error always fails");
+        }
+    }
+
 
     /**
      * Converter that does nothing except change the type annotation of the value. The caller
