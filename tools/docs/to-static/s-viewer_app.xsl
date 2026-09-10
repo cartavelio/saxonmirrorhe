@@ -140,7 +140,7 @@ docs-count: <xsl:value-of select="count($section-docs/*)"/>
 
                 <head>
                     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-                    <title>Saxon Documentation</title>
+                    <title>Saxon documentation</title>
                     <meta name="viewport"
                         content="width=768px, minimum-scale=1.0, maximum-scale=1.0"/>
                     <link href="{concat($css-path, 'viewer_app.css')}" rel="stylesheet" type="text/css"/>
