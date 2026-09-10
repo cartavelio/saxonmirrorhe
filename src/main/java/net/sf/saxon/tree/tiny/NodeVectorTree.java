@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.tiny;
 
+import net.sf.saxon.om.NamePool;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.type.Type;
@@ -54,6 +55,8 @@ public interface NodeVectorTree {
     byte[] getNodeKindArray();
 
     int[] getNameCodeArray();
+
+    NamePool getNamePool();
 
 
 }

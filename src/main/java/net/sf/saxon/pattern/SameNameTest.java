@@ -137,6 +137,18 @@ public class SameNameTest extends NodeTest implements QNameTest {
     }
 
     /**
+     * Test whether the QNameTest matches a given fingerprint
+     *
+     * @param namePool the name pool
+     * @param fp       the fingerprint of the QName to be matched
+     * @return true if the name matches, false if not
+     */
+    @Override
+    public boolean matchesFingerprint(NamePool namePool, int fp) {
+        return fp == getFingerprint();
+    }
+
+    /**
      * Determine the default priority of this node test when used on its own as a Pattern
      */
 
@@ -256,21 +268,6 @@ public class SameNameTest extends NodeTest implements QNameTest {
     public String exportQNameTest() {
         // Not applicable
         return "";
-    }
-
-    /**
-     * Generate Javascript code to test if a name matches the test.
-     *
-     * @return JS code as a string. The generated code will be used
-     * as the body of a JS function in which the argument name "q" is an
-     * XdmQName object holding the name. The XdmQName object has properties
-     * uri and local.
-     * @param targetVersion the version of SaxonJS being targeted
-     */
-    @Override
-    public String generateJavaScriptNameTest(int targetVersion) {
-        // Not applicable
-        return "false";
     }
 
 }
