@@ -499,9 +499,9 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             config.getLogger().info("Processing streamed input " + systemId);
         }
         try {
-            SerializationProperties params = expression.getExecutable().getPrimarySerializationProperties();
-            Receiver receiver = destination.getReceiver(config.makePipelineConfiguration(), params);
+            Receiver receiver = getDestinationReceiver(destination);
             expression.runStreamed(context, source, receiver, null);
+            destination.closeAndNotify();
         } catch (TransformerException e) {
             throw new SaxonApiException(e);
         }
