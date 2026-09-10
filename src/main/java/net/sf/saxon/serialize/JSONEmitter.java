@@ -14,12 +14,11 @@ import net.sf.saxon.ma.json.JsonReceiver;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.str.StringView;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.IntegerValue;
-import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.type.Converter;
+import net.sf.saxon.value.*;
 
 import javax.xml.transform.OutputKeys;
 import java.io.IOException;
@@ -177,7 +176,10 @@ public class JSONEmitter {
             emit("null");
         } else if (item instanceof NumericValue) {
             NumericValue num = (NumericValue)item;
-            if (num.isNaN()) {
+            if (item instanceof DecimalValue) {
+                // Avoid exponential notation
+                emit(num.getUnicodeStringValue());
+            } else if (num.isNaN()) {
                 if (unfailing) {
                     emit("NaN");
                 } else {
@@ -189,15 +191,19 @@ public class JSONEmitter {
                 } else {
                     throw new XPathException("JSON has no way of representing Infinity", "SERE0020");
                 }
-            } else if (item instanceof IntegerValue) {
-                // " Implementations MAY serialize the numeric value using any
-                //   lexical representation of a JSON number defined in [RFC 7159]. "
-                // This avoids exponential notation for integers such as 1123456.
-                emit(num.longValue() + "");
-            } else if (num.isWholeNumber() && !num.isNegativeZero() && num.abs().compareTo(1_000_000_000_000_000_000L) < 0) {
-                emit(num.longValue() + "");
+            } else if (num.isNegativeZero()) {
+                emit("-0");
             } else {
-                emit(num.getStringValue());
+                double val = num.getDoubleValue();
+                double abs = Math.abs(val);
+                if (num.isWholeNumber() && abs < 1e18) {
+                    emit(num.longValue() + "");
+                } else if (abs < 1e18 && abs > 1e-18) {
+                    // Avoid exponential notation except in extremis
+                    emit(Converter.DoubleToDecimal.INSTANCE.convert(num).asAtomic().getUnicodeStringValue());
+                } else {
+                    emit(num.getUnicodeStringValue());
+                }
             }
         } else if (item instanceof BooleanValue) {
             emit(item.getStringValue());
@@ -351,6 +357,15 @@ public class JSONEmitter {
     }
 
     private void emit(String s) throws XPathException {
+        assert writer != null;
+        try {
+            writer.write(s);
+        } catch (IOException e) {
+            throw new XPathException(e);
+        }
+    }
+
+    private void emit(UnicodeString s) throws XPathException {
         assert writer != null;
         try {
             writer.write(s);
