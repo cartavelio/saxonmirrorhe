@@ -586,7 +586,7 @@ public class StaticQueryContext {
         char[] buffer = new char[4096];
         StringBuilder sb = new StringBuilder(4096);
         while (true) {
-            int n = source.read(buffer);
+            int n = source.read(buffer, 0, buffer.length);
             if (n > 0) {
                 sb.append(buffer, 0, n);
             } else {
@@ -757,7 +757,6 @@ public class StaticQueryContext {
         declareNamespace("local", NamespaceUri.LOCAL);
         declareNamespace("err", NamespaceUri.ERR);
         declareNamespace("output", NamespaceUri.OUTPUT);
-        declareNamespace("xq", NamespaceUri.XQUERY);
         declareNamespace("saxon", NamespaceUri.SAXON);
         declareNamespace("", NamespaceUri.NULL);
 
