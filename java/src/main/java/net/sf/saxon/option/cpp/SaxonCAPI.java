@@ -358,6 +358,19 @@ public class SaxonCAPI {
     }
 
     /**
+     * Static method to get the edition the Processor object is licensed as
+     * @param thread - Graalvm runtime data structure for a thread
+     * @param processorRef - long value pointing to a SaxonProcessor object in the ObjectHandle pool
+     * @return product version given as a C string - C Char pointer array
+     */
+    @CEntryPoint(name = "j_c_getSaxonEdition")
+    public static CCharPointer getSaxonEdition(IsolateThread thread, ObjectHandle processorRef) {
+        Processor processor = objectHandles.get(processorRef);
+        final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(processor.getSaxonEdition());
+        return holder.get();
+    }
+
+    /**
      *  Static Support method for main transform program.
      * @param thread   - Graalvm runtime data structure for a thread
      * @param processorDataRef - long value referencing ProcessorDataAccumulator object in the ObjectHandle pool. Used to pass processor data and options
