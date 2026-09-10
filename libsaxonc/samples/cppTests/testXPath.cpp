@@ -150,8 +150,6 @@ void testNullSetBaseURI(SaxonProcessor *processor, sResultCount *sresult) {
 
 }
 
-
-
 XdmNode *getRoot(XdmNode *document)
 {
   XdmNode *root = nullptr;
@@ -443,7 +441,7 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
       cout << "child node:" << (childStr) << endl;
       operator delete((char *)childStr);
     }
-    XdmNode **namespaces = child->axisNodes(EnumXdmAxis::FOLLOWING_SIBLING);
+    XdmNode **namespaces = child->axisNodes(EnumXdmAxis::NAMESPACE);
     int namespaceCount = child->axisNodeCount();
 
     cout << "namespace count=" << namespaceCount << endl;
@@ -730,7 +728,6 @@ void testEmptyXdmValueToString(SaxonProcessor *processor, XPathProcessor *xpath,
 
 
 }
-
 
 // Test case on the evaluate method in XPathProcessor. Here we test that we have
 // morethan one XdmItem.
