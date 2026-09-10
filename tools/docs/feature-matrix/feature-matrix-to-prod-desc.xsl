@@ -5,16 +5,30 @@
     <!-- Use this stylesheet to generate the output prod-desc.xml
         (the source document for the product descriptions), 
         from the input tools/docs/feature-matrix/feature-matrix.xml-->
-<!--    2021-03-18 TODO Use of documentation{$version} for all links is dependent on website redirects -->
 
     <xsl:output method="xml" indent="yes"/>
     
-    <xsl:variable name="edition" as="xs:string*" select="('HE', 'PE', 'EE', 'EE-T', 'EE-Q', 'EE-V', 'CS')"/>
+    <xsl:variable name="all-variants" as="xs:string*">
+        <xsl:for-each select="featureMatrix/packages/package">
+            <xsl:variable name="package" select="."/>
+            <xsl:for-each select="tokenize(@platforms, '\s')[. ne 'JS']">
+                <xsl:value-of select="concat(., '-', $package/@edition)"/>
+            </xsl:for-each>
+        </xsl:for-each>
+        <xsl:value-of select="'JS'"/>
+    </xsl:variable>
+    
     <xsl:variable name="version" select="featureMatrix/@version"/>
+    <xsl:variable name="js-version" select="featureMatrix/@JSversion"/>
+    <xsl:variable name="c-version" select="featureMatrix/@Cversion"/>
 
     <xsl:template match="featureMatrix">
         <xsl:variable name="release-date" select="@release"/>
-        <doc version="Version {$version} released {$release-date}">
+        <xsl:variable name="js-release-date" select="@JSrelease"/>
+        <xsl:variable name="c-release-date" select="@Crelease"/>
+        <doc version="Version {$version} released {$release-date}" 
+            js-version="Version {$js-version} released {$js-release-date}" 
+            c-version="Version {$c-version} released {$c-release-date}">
             <xsl:text>&#xa;</xsl:text>
             <xsl:comment>Generated - <xsl:value-of select="current-dateTime()"/> from
                 tools/docs/feature-matrix/feature-matrix.xml,
@@ -93,20 +107,42 @@
 
     <xsl:template name="feature-sections">
         <xsl:param name="topic"/>
-        <xsl:for-each select="feature[@class eq $topic]/products/product[@editions]">
+        <xsl:for-each select="feature[@class eq $topic]/products/product">
             <xsl:variable name="topic-shortName" select="ancestor::feature/shortName"/>
-            <xsl:variable name="editions" select="@editions"/>
             <xsl:variable name="details" select="ancestor::feature/details"/>
             <xsl:variable name="spec" select="ancestor::feature/spec"/>
             <xsl:variable name="lang" select="ancestor::feature/@lang"/>
+            <xsl:variable name="product-siblings" select="parent::products/product"/>
+            <xsl:variable name="variants" as="xs:string*">
+                <xsl:choose>
+                    <xsl:when test="count($product-siblings) gt 1">
+                        <xsl:choose>
+                            <xsl:when test="@level eq 'Basic'">
+                                <xsl:sequence select="local:get-variants-range($product-siblings[@level eq 'Basic'],
+                                    $product-siblings[contains(@level, 'Adv')])"/>
+                            </xsl:when>
+                            <xsl:when test="@level eq 'Open'">
+                                <xsl:sequence select="local:get-variants-range($product-siblings[@level eq 'Open'],
+                                    $product-siblings[@level eq 'Inc'])"/>
+                            </xsl:when>
+                            <xsl:otherwise>
+                                <xsl:sequence select="local:get-variants(.)"/>
+                            </xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:sequence select="local:get-variants(.)"/>
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
             <section
                 title="{$topic-shortName}{if (exists(@level) and @level ne 'Inc') then concat(' (',local:prod-desc-level(@level),')') else ''}"
-                variant="{$editions}">
+                variant="{string-join($variants, ' ')}">
                 <!-- Feature descriptions may differ by product.
                     The primary mechanism for this is to use multiple products/product elements:
                     these result in multiple rows in the Feature Matrix table, as well as
                     alternative descriptions in the Product Descriptions.
-                    The second mechanism is to use description/@editions and alt-description
+                    The second mechanism is to use description and alt-description
                     elements. These will result in alternative descriptions in the PDs, but not in
                     the Feature Matrix. (e.g. used to add info for 'Import stylesheet packages' when
                     product does not also have 'Export' feature) -->
@@ -114,13 +150,17 @@
                     <xsl:when test="exists(description)">
                         <xsl:copy-of select="description/*"/>
                     </xsl:when>
-                    <xsl:when test="ancestor::feature/description/@editions">
+                    <xsl:when test="ancestor::feature/alt-description">
                         <xsl:variable name="feature" select="ancestor::feature"/>
-                        <div variant="{$feature/description/@editions}">
-                            <xsl:copy-of select="$feature/description/*"/>
-                        </div>
+                        <xsl:for-each select="$feature/description">
+                            <xsl:variable name="variants" select="local:get-variants(.)" as="xs:string*"/>
+                            <div variant="{string-join($variants, ' ')}">
+                                <xsl:copy-of select="./*"/>
+                            </div>
+                        </xsl:for-each>
                         <xsl:for-each select="$feature/alt-description">
-                            <div variant="{./@editions}">
+                            <xsl:variable name="variants" select="local:get-variants-range(., $feature/description)" as="xs:string*"/>
+                            <div variant="{string-join($variants, ' ')}">
                                 <xsl:copy-of select="./*"/>
                             </div>
                         </xsl:for-each>
@@ -134,7 +174,7 @@
                     repeated. These are included instead at the Language level using the
                     'language-section' template. -->
                 <xsl:if test="empty($lang) and exists($details)">
-                    <p>For more details see: <xsl:for-each select="$details">
+                    <p variant="{string-join($variants[. ne 'JS'], ' ')}">For more details see: <xsl:for-each select="$details[@link]">
                         <xsl:variable name="ext" select="if (./@subpages='has-subpages') then
                             '/index.html' else '.html'"/>
                             <a href="https://www.saxonica.com/html/documentation{$version}/{./@link}{$ext}"
@@ -143,7 +183,15 @@
                                 <xsl:text>, </xsl:text>
                             </xsl:if>
                         </xsl:for-each>. </p>
-                    
+                    <xsl:if test="$variants = 'JS'">
+                        <p variant="JS">For more details see: <xsl:for-each select="$details[@JSlink]">
+                            <a href="https://www.saxonica.com/saxon-js/documentation/index.html#!{./@JSlink}"
+                                class="bodylink"><xsl:value-of select="./@JSname"/></a>
+                            <xsl:if test="not(position() = last())">
+                                <xsl:text>, </xsl:text>
+                            </xsl:if>
+                        </xsl:for-each>. </p>
+                    </xsl:if>
                 </xsl:if>
                 <xsl:if test="empty($lang) and exists($spec)">
                     <p>
@@ -163,9 +211,34 @@
         <xsl:param name="topic"/>
         <!-- Add a paragraph (conditional on edition variant) listing excluded features -->
         <xsl:variable name="features" select="feature[@class eq $topic]"/>
-        <xsl:for-each select="$edition">
-            <xsl:variable name="exclusions"
-                select="$features[not(tokenize(products/product/@editions, '\s') = current())]"/>
+        <xsl:variable name="JS-relevant" select="$topic ne 'XQuery'" as="xs:boolean"/>
+        <xsl:for-each select="$all-variants">
+            <xsl:variable name="platform" select="tokenize(., '-')[1]"/>
+            <xsl:variable name="edition" select="tokenize(., '-')[2]"/>
+            <xsl:variable name="exclusions" as="element(feature)*">
+                <xsl:choose>
+                    <xsl:when test="$platform eq 'J'">
+                        <xsl:sequence
+                            select="$features[not(tokenize(local:editions-from-minimal(products/product/@J),
+                            '\s') = $edition)]"/>
+                    </xsl:when>
+                    <xsl:when test="$platform eq 'CS'">
+                        <xsl:sequence
+                            select="$features[not(tokenize(local:editions-from-minimal(products/product/@CS),
+                            '\s') = $edition)]"/>
+                    </xsl:when>
+                    <xsl:when test="$platform eq 'C'">
+                        <xsl:sequence
+                            select="$features[not(tokenize(local:editions-from-minimal(products/product/@C),
+                            '\s') = $edition)]"/>
+                    </xsl:when>
+                    <xsl:when test="$platform eq 'JS' and $JS-relevant">
+                        <xsl:sequence
+                            select="$features[not(tokenize(local:editions-from-minimal(products/product/@JS),
+                            '\s') = 'HE')]"/>
+                    </xsl:when>
+                </xsl:choose>
+            </xsl:variable>
             <xsl:if test="exists($exclusions)">
                 <p variant="{.}">Optional features not provided:
                     <xsl:for-each select="$exclusions">
@@ -182,7 +255,7 @@
         <xsl:variable name="details" select="$features[@lang][1]/details"/>
         <xsl:variable name="spec" select="$features[@lang][1]/spec"/>
         <xsl:if test="exists($details)">
-            <p>For more details see: <xsl:for-each select="$details">
+            <p variant="{string-join($all-variants[. ne 'JS'], ' ')}">For more details see: <xsl:for-each select="$details[@link]">
                 <xsl:variable name="ext" select="if (./@subpages='has-subpages') then
                     '/index.html' else '.html'"/>
                 <a href="https://www.saxonica.com/html/documentation{$version}/{./@link}{$ext}"
@@ -191,9 +264,21 @@
                     <xsl:text>, </xsl:text>
                 </xsl:if>
             </xsl:for-each>. </p>
+            <xsl:if test="$JS-relevant">
+                <p variant="JS">For more details see: <xsl:for-each select="$details[@JSlink]">
+                    <a href="https://www.saxonica.com/saxon-js/documentation/index.html#!{./@JSlink}"
+                        class="bodylink"><xsl:value-of select="./@JSname"/></a>
+                    <xsl:if test="not(position() = last())">
+                        <xsl:text>, </xsl:text>
+                    </xsl:if>
+                </xsl:for-each>. </p>
+            </xsl:if>
         </xsl:if>
         <xsl:if test="exists($spec)">
             <p>
+                <xsl:if test="not($JS-relevant)">
+                    <xsl:attribute name="variant" select="string-join($all-variants[. ne 'JS'], ' ')"/>
+                </xsl:if>
                 <xsl:text>Relevant W3C Specification: </xsl:text>
                 <a href="{$spec/@link}" class="bodylink">
                     <xsl:value-of
@@ -210,9 +295,9 @@
                 <tbody>
                     <tr>
                         <td class="important">
-                            <xsl:for-each select="$edition">
+                            <xsl:for-each select="$all-variants">
                                 <title variant="{.}">
-                                    <xsl:value-of select="concat('Product Description for ', local:edition-name(.))"/>
+                                    <xsl:value-of select="concat('Product Description for ', local:variant-name(.))"/>
                                 </title>
                             </xsl:for-each>
                         </td>
@@ -240,15 +325,10 @@
     </xsl:template>
 
     <xsl:template name="doc-desc">
-        <!-- do we need any caveats here about what product description conforms to?-->     
-        
-        <!-- This document lists the features that Saxon-X supports, and describes the level of that support.-->
-        <!-- This document lists the features supported by Saxon-X, and describes the level of that support.-->
-        <!-- This document lists the features provided by Saxon 9.x -X.-->   
-        <xsl:for-each select="$edition">
+        <xsl:for-each select="$all-variants">
             <p variant="{.}">
-                <xsl:value-of select="concat('This document lists the features provided by Saxon ',
-                    $version, ' ', local:edition-desc(.), '.')"/>
+                <xsl:value-of select="concat('This document lists the features provided by ',
+                    local:variant-desc(.), '.')"/>
             </p>
         </xsl:for-each>
         <p>This document does not form part of any contract unless expressly incorporated.</p>
@@ -260,9 +340,9 @@
             <table>
                 <tbody>
                     <tr>
-                        <xsl:for-each select="$edition">
+                        <xsl:for-each select="$all-variants">
                             <td class="footerName" variant="{.}">
-                                <xsl:value-of select="concat('Product Description for ', local:edition-name(.))"/>
+                                <xsl:value-of select="concat('Product Description for ', local:variant-name(.))"/>
                             </td>
                         </xsl:for-each>
                         <td class="copyright right">
@@ -274,45 +354,81 @@
         </section>
     </xsl:template>
     
-    <xsl:function name="local:edition-name" as="xs:string">
-        <xsl:param name="edition" as="xs:string"/>
+    <xsl:function name="local:variant-name" as="xs:string">
+        <xsl:param name="variant" as="xs:string"/>
+        <xsl:variable name="platform" select="tokenize($variant, '-')[1]"/>
+        <xsl:variable name="edition" select="tokenize($variant, '-')[2]"/>
+        <xsl:variable name="package-name">
+            <xsl:choose>
+                <xsl:when test="$edition = 'HE'">(Home Edition)</xsl:when>
+                <xsl:when test="$edition = 'PE'">(Professional Edition)</xsl:when>
+                <xsl:when test="$edition = 'EE'">(Enterprise Edition)</xsl:when>
+                <xsl:when test="$edition = 'EET'">(Enterprise Edition, Transformation Package)</xsl:when>
+                <xsl:when test="$edition = 'EEQ'">(Enterprise Edition, Query Package)</xsl:when>
+                <xsl:when test="$edition = 'EEV'">(Enterprise Edition, Validation Package)</xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="'&#xa0;'"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:choose>
-            <xsl:when test="$edition = 'HE'">Saxon-HE (Home Edition)</xsl:when>
-            <xsl:when test="$edition = 'PE'">Saxon-PE (Professional Edition)</xsl:when>
-            <xsl:when test="$edition = 'EE'">Saxon-EE (Enterprise Edition)</xsl:when>
-            <xsl:when test="$edition = 'EE-T'">Saxon-EE-T (Enterprise Edition, Transformation Package)</xsl:when>
-            <xsl:when test="$edition = 'EE-Q'">Saxon-EE-Q (Enterprise Edition, Query Package)</xsl:when>
-            <xsl:when test="$edition = 'EE-V'">Saxon-EE-V (Enterprise Edition, Validation Package)</xsl:when>
-            <xsl:when test="$edition = 'CS'">SaxonCS</xsl:when>
+            <xsl:when test="$platform eq 'JS'">
+                <xsl:value-of select="'SaxonJS'"/>
+            </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="'&#xa0;'"/>
+                <xsl:value-of select="concat('Saxon', $variant, ' ', $package-name)"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
     
-    <xsl:function name="local:edition-desc" as="xs:string">
-        <xsl:param name="edition" as="xs:string"/>
-        <xsl:choose>
-            <xsl:when test="$edition = 'HE'">open source Home Edition (Saxon-HE)</xsl:when>
-            <xsl:when test="$edition = 'PE'">Professional Edition (Saxon-PE)</xsl:when>
-            <xsl:when test="$edition = 'EE'">Enterprise Edition (Saxon-EE)</xsl:when>
-            <xsl:when test="$edition = 'EE-T'">Enterprise Edition, Transformation Package 
-                (Saxon-EE-T) - a license that enables all the facilities of Saxon Professional
-                Edition, plus XSD schema validation, plus enterprise features (including Schema
-                Awareness) for XSLT (but not XQuery)</xsl:when>
-            <xsl:when test="$edition = 'EE-Q'">Enterprise Edition, Query Package 
-                (Saxon-EE-Q) - a license that enables all the facilities of Saxon Professional
-                Edition, plus XSD schema validation, plus enterprise features (including Schema
-                Awareness) for XQuery (but not XSLT)</xsl:when>
-            <xsl:when test="$edition = 'EE-V'">Enterprise Edition, Validation Package 
-                (Saxon-EE-V) - a license that enables all the facilities of Saxon Professional
-                Edition, plus XSD schema validation; it does not include Schema Aware XSLT or
-                XQuery</xsl:when>
-            <xsl:when test="$edition = 'CS'">SaxonCS, supported on .NET 5</xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="'&#xa0;'"/>
-            </xsl:otherwise>
-        </xsl:choose>
+    <xsl:function name="local:variant-desc" as="xs:string">
+        <xsl:param name="variant" as="xs:string"/>
+        <xsl:variable name="platform" select="tokenize($variant, '-')[1]"/>
+        <xsl:variable name="edition" select="tokenize($variant, '-')[2]"/>
+        <xsl:variable name="package-desc">
+            <xsl:choose>
+                <xsl:when test="$platform eq 'JS'"></xsl:when>
+                <xsl:when test="$edition = 'HE'"> open source Home Edition (Saxon-HE)</xsl:when>
+                <xsl:when test="$edition = 'PE'"> Professional Edition (Saxon-PE)</xsl:when>
+                <xsl:when test="$edition = 'EE'"> Enterprise Edition (Saxon-EE)</xsl:when>
+                <xsl:when test="$edition = 'EET'"> Enterprise Edition, Transformation Package 
+                    (Saxon-EET) - a license that enables all the facilities of Saxon Professional
+                    Edition, plus XSD schema validation, plus enterprise features (including Schema
+                    Awareness) for XSLT (but not XQuery)</xsl:when>
+                <xsl:when test="$edition = 'EEQ'"> Enterprise Edition, Query Package 
+                    (Saxon-EEQ) - a license that enables all the facilities of Saxon Professional
+                    Edition, plus XSD schema validation, plus enterprise features (including Schema
+                    Awareness) for XQuery (but not XSLT)</xsl:when>
+                <xsl:when test="$edition = 'EEV'"> Enterprise Edition, Validation Package 
+                    (Saxon-EEV) - a license that enables all the facilities of Saxon Professional
+                    Edition, plus XSD schema validation; it does not include Schema Aware XSLT or
+                    XQuery</xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="'&#xa0;'"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="platform-desc">
+            <xsl:choose>
+                <xsl:when test="$platform = 'J'">, for Java</xsl:when>
+                <xsl:when test="$platform = 'CS'">, supported on .NET 5</xsl:when>
+                <xsl:when test="$platform = 'C'">, for C/C++, PHP and Python</xsl:when>
+                <xsl:when test="$platform = 'JS'">, for JavaScript in the browser and on Node.js</xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="'&#xa0;'"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="version-number">
+            <xsl:choose>
+                <xsl:when test="$platform = 'C'"><xsl:value-of select="$c-version"/></xsl:when>
+                <xsl:when test="$platform = 'JS'"><xsl:value-of select="$js-version"/></xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$version"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:value-of select="concat('Saxon', $platform, ' ', $version-number, $package-desc, $platform-desc)"/>
     </xsl:function>
 
     <xsl:function name="local:prod-desc-level" as="xs:string">
@@ -329,6 +445,49 @@
                 <xsl:value-of select="'&#xa0;'"/>
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:function>
+    
+    <xsl:function name="local:editions-from-minimal" as="xs:string">
+        <xsl:param name="minEdition" as="xs:string?"/>
+        <xsl:variable name="ordered-editions" select="'HE PE EEV EET EEQ EE'"/>
+        <xsl:choose>
+            <xsl:when test="empty($minEdition)"><xsl:value-of select="''"/></xsl:when>
+            <xsl:when test="contains($minEdition, 'EET') and contains($minEdition, 'EEQ')">EET EEQ EE</xsl:when>
+            <xsl:when test="contains($minEdition, 'EET') and not(contains($minEdition, 'EEQ'))">EET EE</xsl:when>
+            <xsl:when test="contains($ordered-editions, $minEdition)"><xsl:value-of
+                select="concat($minEdition, substring-after($ordered-editions, $minEdition))"/></xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="''"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    
+    <xsl:function name="local:get-variants" as="xs:string*">
+        <xsl:param name="block" as="element()"/>
+        <xsl:sequence>
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block/@J))!concat('J-',.)"/>
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block/@CS))!concat('CS-',.)"/>
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block/@C))!concat('C-',.)"/>
+            <xsl:if test="$block/@JS"><xsl:value-of select="'JS'"/></xsl:if>
+        </xsl:sequence>
+    </xsl:function>
+    
+    <xsl:function name="local:get-variants-range" as="xs:string*">
+        <xsl:param name="block1" as="element()"/>
+        <xsl:param name="block2" as="element()"/>
+        <xsl:variable name="lower" as="xs:string*">
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block1/@J))!concat('J-',.)"/>
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block1/@CS))!concat('CS-',.)"/>
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block1/@C))!concat('C-',.)"/>
+            <xsl:if test="$block1/@JS"><xsl:value-of select="'JS'"/></xsl:if>
+        </xsl:variable>
+        <xsl:variable name="upper" as="xs:string*">
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block2/@J))!concat('J-',.)"/>
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block2/@CS))!concat('CS-',.)"/>
+            <xsl:sequence select="tokenize(local:editions-from-minimal($block2/@C))!concat('C-',.)"/>
+            <xsl:if test="$block2/@JS"><xsl:value-of select="'JS'"/></xsl:if>
+        </xsl:variable>
+        <xsl:sequence select="$lower[not(. = $upper)]"/>
     </xsl:function>
 
 </xsl:stylesheet>
