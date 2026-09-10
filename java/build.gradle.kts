@@ -368,6 +368,7 @@ testSuites.configure("xslt30extra", "XT40", mapOf("jit" to "on"))
 
 testSuites.configure("xsltfromqt4", "XT40")
 testSuites.configure("xsltfromqt4", "XT40", mapOf("opt" to "0"))
+testSuites.configure("xsltfromqt4", "XT40", mapOf("export" to "on"))
 
 testSuites.configure("xslt40", "XT40")
 testSuites.configure("xslt40", "XT40", mapOf("opt" to "0"))
