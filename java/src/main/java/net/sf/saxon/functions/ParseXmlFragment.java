@@ -87,7 +87,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
 
 
 
-    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.ParseXmlFragment.eval(inputArg, baseUri, stripSpace, context);")
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.ParseXmlFragment.eval((Saxon.Hej.value.StringValue)inputArg, baseUri, stripSpace, context);")
     private NodeInfo evalParseXmlFragment(
             AtomicValue inputArg, String baseUri, boolean stripSpace, XPathContext context)
             throws XPathException {
