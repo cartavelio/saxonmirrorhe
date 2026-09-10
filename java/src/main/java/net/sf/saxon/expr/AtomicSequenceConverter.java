@@ -174,8 +174,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
-        Expression operand = getBaseExpression().simplify(env);
+    public Expression simplify() throws XPathException {
+        Expression operand = getBaseExpression().simplify();
         setBaseExpression(operand);
         if (operand instanceof Literal && requiredItemType instanceof AtomicType) {
             if (Literal.isEmptySequence(operand)) {

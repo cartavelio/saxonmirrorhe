@@ -162,9 +162,9 @@ public class PatternParser extends XPathParser {
                     AnyXNodeType.getInstance(), Optionality.OPTIONAL);
             Pattern pat;
             try {
-                pat = PatternMaker.fromExpression(exp.simplify(env).typeCheck(visitor, cit), env.getConfiguration(), true);
+                pat = PatternMaker.fromExpression(exp.simplify().typeCheck(visitor, cit), env.getConfiguration(), true);
             } catch (XPathException e) {
-                pat = PatternMaker.fromExpression(exp.simplify(env), env.getConfiguration(), true);
+                pat = PatternMaker.fromExpression(exp.simplify(), env.getConfiguration(), true);
             }
 
             pat.setOriginalText(pattern);

@@ -293,11 +293,11 @@ public class Choose extends Instruction implements ConditionalInstruction {
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
+    public Expression simplify() throws XPathException {
         for (int i = 0; i < size(); i++) {
-            setCondition(i, getCondition(i).simplify(env));
+            setCondition(i, getCondition(i).simplify());
             try {
-                setAction(i, getAction(i).simplify(env));
+                setAction(i, getAction(i).simplify());
             } catch (XPathException err) {
                 // mustn't throw the error unless the branch is actually selected, unless its a type error
                 if (err.isTypeError()) {
@@ -1094,6 +1094,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                     if (conditions[2].eval(context)) return actions[2].eval(context);
                     return null;
                 };
+                
                 case 4 -> context -> {
                     if (conditions[0].eval(context)) return actions[0].eval(context);
                     if (conditions[1].eval(context)) return actions[1].eval(context);
@@ -1123,33 +1124,57 @@ public class Choose extends Instruction implements ConditionalInstruction {
                 actions[i] = expr.getAction(i).makeElaborator().elaborateForPush();
             }
             switch (count) {
-                case 1:
+                case 1 -> {
+                    final BooleanEvaluator cond0 = conditions[0];
+                    final PushEvaluator act0 = actions[0];
                     return (output, context) -> {
-                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
+                        if (cond0.eval(context)) return act0.processLeavingTail(output, context);
                         return null;
                     };
-                case 2:
+                }
+                case 2 -> {
+                    final BooleanEvaluator cond0 = conditions[0];
+                    final BooleanEvaluator cond1 = conditions[1];
+                    final PushEvaluator act0 = actions[0];
+                    final PushEvaluator act1 = actions[1];
                     return (output, context) -> {
-                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
-                        if (conditions[1].eval(context)) return actions[1].processLeavingTail(output, context);
+                        if (cond0.eval(context)) return act0.processLeavingTail(output, context);
+                        if (cond1.eval(context)) return act1.processLeavingTail(output, context);
                         return null;
                     };
-                case 3:
+                }
+                case 3 -> {
+                    final BooleanEvaluator cond0 = conditions[0];
+                    final BooleanEvaluator cond1 = conditions[1];
+                    final BooleanEvaluator cond2 = conditions[2];
+                    final PushEvaluator act0 = actions[0];
+                    final PushEvaluator act1 = actions[1];
+                    final PushEvaluator act2 = actions[2];
                     return (output, context) -> {
-                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
-                        if (conditions[1].eval(context)) return actions[1].processLeavingTail(output, context);
-                        if (conditions[2].eval(context)) return actions[2].processLeavingTail(output, context);
+                        if (cond0.eval(context)) return act0.processLeavingTail(output, context);
+                        if (cond1.eval(context)) return act1.processLeavingTail(output, context);
+                        if (cond2.eval(context)) return act2.processLeavingTail(output, context);
                         return null;
                     };
-                case 4:
+                }
+                case 4 -> {
+                    final BooleanEvaluator cond0 = conditions[0];
+                    final BooleanEvaluator cond1 = conditions[1];
+                    final BooleanEvaluator cond2 = conditions[2];
+                    final BooleanEvaluator cond3 = conditions[2];
+                    final PushEvaluator act0 = actions[0];
+                    final PushEvaluator act1 = actions[1];
+                    final PushEvaluator act2 = actions[2];
+                    final PushEvaluator act3 = actions[2];
                     return (output, context) -> {
-                        if (conditions[0].eval(context)) return actions[0].processLeavingTail(output, context);
-                        if (conditions[1].eval(context)) return actions[1].processLeavingTail(output, context);
-                        if (conditions[2].eval(context)) return actions[2].processLeavingTail(output, context);
-                        if (conditions[3].eval(context)) return actions[3].processLeavingTail(output, context);
+                        if (cond0.eval(context)) return act0.processLeavingTail(output, context);
+                        if (cond1.eval(context)) return act1.processLeavingTail(output, context);
+                        if (cond2.eval(context)) return act2.processLeavingTail(output, context);
+                        if (cond3.eval(context)) return act3.processLeavingTail(output, context);
                         return null;
                     };
-                default:
+                }
+                default -> {
                     return (output, context) -> {
                         for (int i = 0; i < count; i++) {
                             if (conditions[i].eval(context)) {
@@ -1158,6 +1183,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                         }
                         return null;
                     };
+                }
             }
         }
 

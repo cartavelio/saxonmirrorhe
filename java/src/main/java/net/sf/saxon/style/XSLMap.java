@@ -106,7 +106,7 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
         if (select == null) {
             select = compileSequenceConstructor(exec, decl, false);
         }
-        select = select.simplify(getStaticContext());
+        select = select.simplify();
         // Custom type-checking; the checking performed by map:merge() gives poor diagnostics
         TypeChecker tc = getConfiguration().getTypeChecker(false);
         Supplier<RoleDiagnostic> role =

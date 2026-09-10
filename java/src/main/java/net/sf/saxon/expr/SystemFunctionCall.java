@@ -629,7 +629,8 @@ public class SystemFunctionCall extends StaticFunctionCall implements Negatable 
                 final SequenceEvaluator eval0 = argumentEvaluators[0];
                 return context -> {
                     try {
-                        return fn1.call1(context, eval0.evaluate(context)).head();
+                        Sequence seq = fn1.call1(context, eval0.evaluate(context));
+                        return seq.head();
                     } catch (XPathException err) {
                         throw err.maybeWithLocation(expr.getLocation()).maybeWithContext(context);
                     }

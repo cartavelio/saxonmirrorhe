@@ -75,8 +75,8 @@ public final class SingletonAtomizer extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
-        Expression operand = getBaseExpression().simplify(env);
+    public Expression simplify() throws XPathException {
+        Expression operand = getBaseExpression().simplify();
         if (operand instanceof Literal && ((Literal) operand).getGroundedValue() instanceof AtomicValue) {
             return operand;
         }

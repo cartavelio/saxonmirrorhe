@@ -45,6 +45,30 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
     }
 
     /**
+     * A namespace map holding the standard namespaces as defined in XQuery 4.0
+     */
+
+    public static NamespaceMap STANDARD_QUERY_NAMESPACES = makeStandardXQueryNamespaces();
+
+    private static NamespaceMap makeStandardXQueryNamespaces() {
+        NamespaceMap m = new NamespaceMap();
+        // The list must be in alphabetical order of prefixes
+        m.prefixes = new String[]{"array", "err", "fn", "local", "map", "math", "output", "xq", "xs", "xsi"};
+        m.uris = new NamespaceUri[]{
+                NamespaceUri.ARRAY_FUNCTIONS,
+                NamespaceUri.ERR,
+                NamespaceUri.FN,
+                NamespaceUri.LOCAL,
+                NamespaceUri.MAP_FUNCTIONS,
+                NamespaceUri.MATH,
+                NamespaceUri.OUTPUT,
+                NamespaceUri.XQUERY,
+                NamespaceUri.SCHEMA,
+                NamespaceUri.SCHEMA_INSTANCE};
+        return m;
+    }
+
+    /**
      * Get a namespace map containing a single namespace binding
      * @param prefix the namespace prefix
      * @param uri the namespace uri
@@ -674,6 +698,26 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
             sb.append(nb.getPrefix()).append("=").append(nb.getNamespaceUri()).append(" ");
         }
         return sb.toString();
+    }
+
+    public NamespaceMap withoutUndeclarations() {
+        boolean found = false;
+        for (NamespaceUri uri : uris) {
+            if (uri.isEmpty()) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            NamespaceMap m2 = this;
+            for (NamespaceBinding binding : getNamespaceBindings()) {
+                if (binding.getNamespaceUri().isEmpty()) {
+                    m2 = m2.remove(binding.getPrefix());
+                }
+            }
+            return m2;
+        }
+        return this;
     }
 
     @Override

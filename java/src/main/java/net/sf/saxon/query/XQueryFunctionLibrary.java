@@ -443,7 +443,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             try {
                 fn.compile();
                 Expression body = fn.getBody();
-                Expression e2 = body.simplify(env);
+                Expression e2 = body.simplify();
                 if (e2 != body) {
                     ExpressionTool.copyLocationInfo(body, e2);
                     fn.setBody(e2);
@@ -452,7 +452,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                     Supplier<Expression> init = fn.getDefaultValueExpression(i);
                     if (init != null) {
                         Expression initExp = init.get();
-                        e2 = initExp.simplify(env);
+                        e2 = initExp.simplify();
                         if (e2 != initExp) {
                             fn.setDefaultValueExpression(i, e2);
                         }

@@ -61,7 +61,7 @@ public class VennExpression extends BinaryExpression {
      *                                           rewriting
      */
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
+    public Expression simplify() throws XPathException {
         // Force both operands to be sorted in document order. If this turns out to be unnecessary, it will
         // get optimized away
         if (!(getLhsExpression() instanceof DocumentSorter)) {
@@ -70,7 +70,7 @@ public class VennExpression extends BinaryExpression {
         if (!(getRhsExpression() instanceof DocumentSorter)) {
             setRhsExpression(new DocumentSorter(getRhsExpression()));
         }
-        return super.simplify(env);
+        return super.simplify();
     }
 
     /**
@@ -480,7 +480,7 @@ public class VennExpression extends BinaryExpression {
                 ExpressionTool.copyLocationInfo(this, filter);
                 FilterExpression f = new FilterExpression(exp0.getSelectExpression(), filter);
                 ExpressionTool.copyLocationInfo(this, f);
-                return f.simplify(visitor.getStaticContext())
+                return f.simplify()
                         .typeCheck(visitor, contextItemType)
                         .optimize(visitor, contextItemType);
             }

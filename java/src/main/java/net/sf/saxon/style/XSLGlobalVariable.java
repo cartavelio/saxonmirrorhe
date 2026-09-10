@@ -333,7 +333,7 @@ public class XSLGlobalVariable extends StyleElement implements StylesheetCompone
                 ContextItemStaticInfo cisi = gcr == null
                         ? getConfiguration().getDefaultContextItemStaticInfo()
                         : gcr.makeGlobalContextInfo(getConfiguration());
-                exp2 = select.simplify(getStaticContext()).typeCheck(visitor, cisi);
+                exp2 = select.simplify().typeCheck(visitor, cisi);
             } catch (XPathException err) {
                 compileError(err);
             }

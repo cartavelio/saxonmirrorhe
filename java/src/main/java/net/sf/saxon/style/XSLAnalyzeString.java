@@ -210,8 +210,8 @@ public class XSLAnalyzeString extends StyleElement {
             return new AnalyzeString(select,
                                      regex,
                                      flags,
-                                     matchingBlock == null ? null : matchingBlock.simplify(env),
-                                     nonMatchingBlock == null ? null : nonMatchingBlock.simplify(env),
+                                     matchingBlock == null ? null : matchingBlock.simplify(),
+                                     nonMatchingBlock == null ? null : nonMatchingBlock.simplify(),
                                      pattern)
                     .withLocation(saveLocation());
         } catch (XPathException e) {

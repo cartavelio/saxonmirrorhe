@@ -23,6 +23,9 @@ public class EscapeHtmlUri extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
+        if (arg == null) {
+            return StringValue.EMPTY_STRING;
+        }
         final String s = arg.getStringValue();
         return new StringValue(HTMLURIEscaper.escapeURL(s, false, getRetainedStaticContext().getConfiguration()));
     }

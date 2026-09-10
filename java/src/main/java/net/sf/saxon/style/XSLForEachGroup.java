@@ -314,7 +314,7 @@ public final class XSLForEachGroup extends StyleElement {
         try {
 
             ForEachGroup instr = new ForEachGroup(select,
-                    action.simplify(getStaticContext()),
+                    action.simplify(),
                     algorithm,
                     key,
                     collator,

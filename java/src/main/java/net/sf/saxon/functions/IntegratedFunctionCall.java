@@ -144,7 +144,7 @@ public class IntegratedFunctionCall extends FunctionCall implements Callable {
                 return exp;
             } else {
                 ExpressionTool.copyLocationInfo(this, exp2);
-                return exp2.simplify(visitor.getStaticContext())
+                return exp2.simplify()
                         .typeCheck(visitor, contextInfo)
                         .optimize(visitor, contextInfo);
             }

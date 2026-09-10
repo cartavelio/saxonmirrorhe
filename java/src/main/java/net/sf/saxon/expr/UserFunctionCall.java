@@ -844,6 +844,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public UpdateEvaluator elaborateForUpdate() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
+            expr.allocateArgumentEvaluators();
             UserFunction targetFunction = expr.getFunction(); // This is XQuery: target function is known
             return (context, pul) -> {
                 Sequence[] actualArgs = expr.evaluateArguments(context, false);

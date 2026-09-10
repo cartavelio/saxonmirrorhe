@@ -226,7 +226,7 @@ public class ForExpression extends Assignation {
                     ((step2.getDependencies() & (StaticProperty.DEPENDS_ON_POSITION | StaticProperty.DEPENDS_ON_LAST)) == 0)) {
                 Expression newPath = new SlashExpression(getSequence(), path2.getActionExpression());
                 ExpressionTool.copyLocationInfo(this, newPath);
-                newPath = newPath.simplify(visitor.getStaticContext()).typeCheck(visitor, contextItemType);
+                newPath = newPath.simplify().typeCheck(visitor, contextItemType);
                 if (newPath instanceof SlashExpression) {
                     // if not, it has been wrapped in a DocumentSorter or Reverser, which makes it ineligible.
                     // see test qxmp299, where this condition isn't satisfied

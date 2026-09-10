@@ -161,7 +161,7 @@ public abstract class FunctionCall extends Expression {
 
     protected final Expression simplifyArguments(StaticContext env) throws XPathException {
         for (int i = 0; i < getArguments().length; i++) {
-            Expression exp = getArg(i).simplify(env);
+            Expression exp = getArg(i).simplify();
             if (exp != getArg(i)) {
                 adoptChildExpression(exp);
                 setArg(i, exp);

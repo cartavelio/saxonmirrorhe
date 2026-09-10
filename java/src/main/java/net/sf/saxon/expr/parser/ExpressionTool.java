@@ -81,7 +81,7 @@ public class ExpressionTool {
         Expression exp = parser.parse(expression, start, finished, env);
         // TODO: parser.parse() already sets the retained static context
         setDeepRetainedStaticContext(exp, env.makeRetainedStaticContext());
-        exp = exp.simplify(env);
+        exp = exp.simplify();
         return exp;
     }
 

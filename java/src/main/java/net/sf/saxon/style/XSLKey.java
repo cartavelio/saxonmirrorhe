@@ -274,7 +274,7 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
 
             try {
                 use = Atomizer.makeAtomizer(body, null);
-                use = use.simplify(env);
+                use = use.simplify();
             } catch (XPathException e) {
                 compileError(e);
             }

@@ -191,10 +191,10 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
-        WithParam.simplify(getActualParams(), env);
-        WithParam.simplify(getTunnelParams(), env);
-        setSelect(getSelect().simplify(env));
+    public Expression simplify() throws XPathException {
+        WithParam.simplify(getActualParams());
+        WithParam.simplify(getTunnelParams());
+        setSelect(getSelect().simplify());
         return this;
     }
 

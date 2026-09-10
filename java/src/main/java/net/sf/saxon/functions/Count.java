@@ -26,7 +26,7 @@ import net.sf.saxon.value.IntegerValue;
 /**
  * Implementation of the fn:count function
  */
-public class Count extends SystemFunction {
+public class Count extends SystemFunction implements ArityOneFunction {
 
     /**
      * Get the number of items in a sequence identified by a SequenceIterator
@@ -81,8 +81,20 @@ public class Count extends SystemFunction {
      */
     @Override
     public IntegerValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        Sequence arg = arguments[0];
-        int size = arg instanceof GroundedValue ? ((GroundedValue)arg).getLength() : count(arg.iterate());
+        return call1(context, arguments[0]);
+    }
+
+    /**
+     * Call a function with one argument
+     *
+     * @param context the dynamic evaluation context
+     * @param arg0    the first argument
+     * @return the result of the function call
+     * @throws XPathException if the call fails with a dynamic error
+     */
+    @Override
+    public IntegerValue call1(XPathContext context, Sequence arg0) throws XPathException {
+        int size = arg0 instanceof GroundedValue ? ((GroundedValue) arg0).getLength() : count(arg0.iterate());
         return Int64Value.makeIntegerValue(size);
     }
 

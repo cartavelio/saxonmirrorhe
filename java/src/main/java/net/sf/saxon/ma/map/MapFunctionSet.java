@@ -913,7 +913,13 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     if (fnc.getArg(1) instanceof Literal optionsArg) {
                         // options are known statically
                         try {
-                            MapItem options = (MapItem) optionsArg.getGroundedValue();
+                            GroundedValue optionsValue = optionsArg.getGroundedValue();
+                            MapItem options;
+                            if (optionsValue.getLength() == 0) {
+                                options = EmptyMap.INSTANCE_40;
+                            } else {
+                                options = (MapItem) optionsArg.getGroundedValue();
+                            }
                             int version = options.getSpecVersion();
                             XPathContext context = new EarlyEvaluationContext(getConfiguration());
                             fnc.getTargetFunction().getDetails().optionDetails.processSuppliedOptions(options, context, version);

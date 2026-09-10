@@ -155,10 +155,10 @@ public class WithParam  {
      * @throws XPathException if a static error is found
      */
 
-    public static void simplify(WithParam[] params, StaticContext env) throws XPathException {
+    public static void simplify(WithParam[] params) throws XPathException {
         if (params != null) {
             for (WithParam param : params) {
-                param.selectOp.setChildExpression(param.selectOp.getChildExpression().simplify(env));
+                param.selectOp.setChildExpression(param.selectOp.getChildExpression().simplify());
             }
         }
     }

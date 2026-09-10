@@ -10,7 +10,6 @@ package net.sf.saxon.pattern;
 import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
-import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -73,9 +72,9 @@ public abstract class VennPattern extends Pattern {
      */
 
     @Override
-    public Pattern simplify(StaticContext env) throws XPathException {
-        p1 = p1.simplify(env);
-        p2 = p2.simplify(env);
+    public Pattern simplify() throws XPathException {
+        p1 = p1.simplify();
+        p2 = p2.simplify();
         return this;
     }
 

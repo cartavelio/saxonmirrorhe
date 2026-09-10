@@ -79,6 +79,7 @@ public class XQueryParser extends XPathParser {
     public final Set<NamespaceUri> importedModules = new HashSet<>(5);
     final List<Import> schemaImports = new ArrayList<>(5);
     final List<Import> moduleImports = new ArrayList<>(5);
+    private List<DraftExpression> draftExpressions = new ArrayList<>();
 
     private final Set<StructuredQName> outputPropertiesSeen = new HashSet<>(4);
     private Properties parameterDocProperties;
@@ -1761,7 +1762,7 @@ public class XQueryParser extends XPathParser {
             Expression exp = parseExprSingle();
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
-            exp = exp.simplify(env);
+            exp = exp.simplify();
             ContextItemStaticInfo info = env.getConfiguration().makeContextItemStaticInfo(requiredSequenceType, Optionality.OPTIONAL);
             exp.setRetainedStaticContext(env.makeRetainedStaticContext());
             exp = exp.typeCheck(visitor, info);

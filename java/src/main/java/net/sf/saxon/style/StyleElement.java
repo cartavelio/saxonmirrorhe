@@ -2414,7 +2414,7 @@ public abstract class StyleElement extends ElementImpl {
             SortKeyDefinition[] keys = new SortKeyDefinition[numberOfSortKeys];
             int k = 0;
             for (NodeInfo child : children(XSLSortOrMergeKey.class::isInstance)) {
-                keys[k++] = (SortKeyDefinition) ((XSLSortOrMergeKey) child).getSortKeyDefinition().simplify(getStaticContext());
+                keys[k++] = (SortKeyDefinition) ((XSLSortOrMergeKey) child).getSortKeyDefinition().simplify();
             }
             return new SortKeyDefinitionList(keys);
 

@@ -433,7 +433,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             if (visibility == Visibility.ABSTRACT) {
                 compileError("A function defined with visibility='abstract' must have no body");
             }
-            exp = exp.simplify(getStaticContext());
+            exp = exp.simplify();
         }
 
         UserFunction fn = getCompiledFunction();

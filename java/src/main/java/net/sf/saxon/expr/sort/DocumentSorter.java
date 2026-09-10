@@ -82,8 +82,8 @@ public class DocumentSorter extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
-        Expression operand = getBaseExpression().simplify(env);
+    public Expression simplify() throws XPathException {
+        Expression operand = getBaseExpression().simplify();
         if (operand.hasSpecialProperty(StaticProperty.ORDERED_NODESET)) {
             // this can happen as a result of further simplification
             return operand;

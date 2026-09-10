@@ -28,6 +28,9 @@ public class EncodeForUri extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
+        if (arg == null) {
+            return StringValue.EMPTY_STRING;
+        }
         final UnicodeString s = arg.getUnicodeStringValue();
         return escape(s, "-_.~");
     }

@@ -388,8 +388,8 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     /*@NotNull*/
-    public Expression simplify(StaticContext env) throws XPathException {
-        simplifyChildren(env);
+    public Expression simplify() throws XPathException {
+        simplifyChildren();
         return this;
     }
 
@@ -402,12 +402,12 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
      */
 
     /*@NotNull*/
-    protected final void simplifyChildren(StaticContext env) throws XPathException {
+    protected final void simplifyChildren() throws XPathException {
         for (Operand o : operands()) {
             if (o != null) {
                 Expression e = o.getChildExpression();
                 if (e != null) {
-                    Expression f = e.simplify(env);
+                    Expression f = e.simplify();
                     o.setChildExpression(f);
                 }
             }

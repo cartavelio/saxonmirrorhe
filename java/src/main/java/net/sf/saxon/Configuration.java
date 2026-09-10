@@ -2073,7 +2073,7 @@ public class Configuration implements SourceResolver {
      *
      * @param regex        the regular expression as a string
      * @param flags        the value of the flags attribute
-     * @param hostLanguage one of "XSD10", "XSD11", XP20" or "XP30". Also allow combinations, e.g. "XP20/XSD11".
+     * @param hostLanguage one of "XSD10", "XSD11", XP20", "XP30", "XP40". Also allow combinations, e.g. "XP20/XSD11".
      * @param warnings     if non-null, any warnings from the regular expression compiler will be added to this list.
      *                     If null, the warnings are ignored.
      * @return the compiled regular expression

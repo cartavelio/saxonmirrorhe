@@ -25,6 +25,9 @@ public class DocumentUri_1 extends ScalarSystemFunction  {
 
     @Override
     public AtomicValue evaluate(Item item, XPathContext context) throws XPathException {
+        if (item == null) {
+            return null;
+        }
         return getDocumentURI((NodeInfo)item, context);
     }
 

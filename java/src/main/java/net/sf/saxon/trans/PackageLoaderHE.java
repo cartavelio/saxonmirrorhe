@@ -1971,7 +1971,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 inst.setInheritanceFlags(flags);
             }
             inst.setContentExpression(content);
-            return inst.simplify(loader.makeStaticContext(element));
+            return inst.simplify();
         });
         
         eMap.put("conditionalSort", (loader, element) -> {

@@ -98,9 +98,9 @@ public class FixedElement extends ElementCreator {
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
+    public Expression simplify() throws XPathException {
         preservingTypes |= !getPackageData().isSchemaAware();
-        return super.simplify(env);
+        return super.simplify();
     }
 
     /**

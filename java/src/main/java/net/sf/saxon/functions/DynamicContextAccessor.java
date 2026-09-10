@@ -26,7 +26,7 @@ import net.sf.saxon.value.StringValue;
  * where the function item is created.
  */
 
-public abstract class DynamicContextAccessor extends SystemFunction {
+public abstract class DynamicContextAccessor extends SystemFunction implements ArityZeroFunction {
 
     private AtomicValue boundValue;
 
@@ -35,6 +35,18 @@ public abstract class DynamicContextAccessor extends SystemFunction {
     }
 
     public abstract AtomicValue evaluate(XPathContext context) throws XPathException;
+
+    /**
+     * Call a function with no arguments
+     *
+     * @param context the dynamic evaluation context
+     * @return the result of the function call
+     * @throws XPathException if the call fails with a dynamic error
+     */
+    @Override
+    public AtomicValue call0(XPathContext context) throws XPathException {
+        return evaluate(context);
+    }
 
     /**
      * Evaluate the expression

@@ -93,8 +93,8 @@ public class GeneralPositionalPattern extends Pattern {
      */
 
     @Override
-    public Pattern simplify(StaticContext env) throws XPathException {
-        positionExpr = positionExpr.simplify(env);
+    public Pattern simplify() throws XPathException {
+        positionExpr = positionExpr.simplify();
         return this;
     }
 

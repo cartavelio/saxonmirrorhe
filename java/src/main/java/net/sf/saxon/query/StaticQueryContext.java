@@ -16,10 +16,7 @@ import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.expr.parser.OptimizerOptions;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.NamePool;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
@@ -91,6 +88,8 @@ public class StaticQueryContext {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private Schema preLoadedSchema = null;
+
+    public static NamespaceMap globalNamespaces = NamespaceMap.STANDARD_QUERY_NAMESPACES;
 
 
     /**
@@ -733,10 +732,16 @@ public class StaticQueryContext {
         }
         if (uri.isEmpty()) {
             userDeclaredNamespaces.remove(prefix);
+            globalNamespaces = globalNamespaces.remove(prefix);
         } else {
             userDeclaredNamespaces.put(prefix, uri);
+            globalNamespaces = globalNamespaces.put(prefix, uri);
         }
 
+    }
+
+    public NamespaceMap getGlobalNamespaces() {
+        return globalNamespaces;
     }
 
     /**

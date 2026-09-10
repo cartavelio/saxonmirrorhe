@@ -191,7 +191,7 @@ public class XSLMerge extends StyleElement {
                     action = Literal.makeEmptySequence();
                 }
                 try {
-                    action = action.simplify(getStaticContext());
+                    action = action.simplify();
                 } catch (XPathException e) {
                     compileError(e);
                 }

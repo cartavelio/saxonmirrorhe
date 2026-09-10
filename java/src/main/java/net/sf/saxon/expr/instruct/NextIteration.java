@@ -67,8 +67,8 @@ public class NextIteration extends Instruction implements TailCallLoop.TailCallI
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
-        WithParam.simplify(actualParams, env);
+    public Expression simplify() throws XPathException {
+        WithParam.simplify(actualParams);
         return this;
     }
 

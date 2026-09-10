@@ -53,8 +53,7 @@ public class QueryModule implements StaticContext {
     private String baseURI;
     private NamespaceUri moduleNamespace; // null only if moduleIsMainModule is false
     private HashMap<String, NamespaceUri> explicitPrologNamespaces;
-    private NamespaceMap fixedModuleNamespaces;
-    private IndexedStack<NamespaceBinding> activeNamespaces;  // The namespace bindings declared in element constructors
+    private Stack<NamespaceMap> activeNamespaces;  // The namespace bindings declared in element constructors
     private HashMap<StructuredQName, GlobalVariable> variables;
     // global variables declared in this module
     private HashMap<StructuredQName, GlobalVariable> libraryVariables;
@@ -108,7 +107,7 @@ public class QueryModule implements StaticContext {
         moduleIsMainModule = true;
         topModule = this;
         languageLevel = sqc.getLanguageVersion();
-        activeNamespaces = new IndexedStack<>();
+        activeNamespaces = new Stack<>();
         baseURI = sqc.getBaseURI();
         defaultCollationName = sqc.getDefaultCollationName();
         try {
@@ -170,7 +169,7 @@ public class QueryModule implements StaticContext {
         }
         init(userQueryContext);
         packageData = importer.getPackageData();
-        activeNamespaces = new IndexedStack<>();
+        activeNamespaces = new Stack<>();
         executable = null;
         optimizerOptions = importer.optimizerOptions;
     }
@@ -194,7 +193,7 @@ public class QueryModule implements StaticContext {
         //importedSchemata.add(NamespaceConstant.JSON);
         importedModuleNamespaces = new HashSet<>(5);
         moduleNamespace = null;
-        activeNamespaces = new IndexedStack<>();
+        activeNamespaces = new Stack<>();
 
         explicitPrologNamespaces = new HashMap<>(10);
         if (sqc != null) {
@@ -1336,8 +1335,9 @@ public class QueryModule implements StaticContext {
             throw new NullPointerException("Null namespace URI supplied to declareActiveNamespace()");
         }
 
-        NamespaceBinding entry = new NamespaceBinding(prefix, uri);
-        activeNamespaces.push(entry);
+        NamespaceMap nsMap = activeNamespaces.isEmpty() ? NamespaceMap.emptyMap() : activeNamespaces.peek();
+        nsMap = nsMap.put(prefix, uri);
+        activeNamespaces.push(nsMap);
 
     }
 
@@ -1435,16 +1435,15 @@ public class QueryModule implements StaticContext {
     /*@Nullable*/
     public NamespaceUri checkURIForPrefix(/*@NotNull*/ String prefix) {
         // Search the active namespaces first, then the passive ones.
-        if (activeNamespaces != null) {
-            for (int i = activeNamespaces.size() - 1; i >= 0; i--) {
-                if (activeNamespaces.get(i).getPrefix().equals(prefix)) {
-                    NamespaceUri ns = activeNamespaces.get(i).getNamespaceUri();
-                    if (ns.isEmpty() && !prefix.equals("")) {
-                        // the namespace is undeclared
-                        return null;
-                    }
-                    return ns;
+        if (!activeNamespaces.isEmpty()) {
+            NamespaceMap nsMap = activeNamespaces.peek();
+            NamespaceUri ns = nsMap.getNamespaceUri(prefix);
+            if (ns != null) {
+                if (ns.isEmpty() && !prefix.equals("")) {
+                    // the namespace is undeclared
+                    return null;
                 }
+                return ns;
             }
         }
         if (prefix.isEmpty()) {
@@ -1555,21 +1554,10 @@ public class QueryModule implements StaticContext {
 
     /*@NotNull*/
     NamespaceMap getActiveNamespaceBindings() {
-        if (activeNamespaces == null) {
+        if (activeNamespaces.isEmpty()) {
             return NamespaceMap.emptyMap();
         }
-        NamespaceMap result = NamespaceMap.emptyMap();
-        HashSet<String> prefixes = new HashSet<>(10);
-        for (int n = activeNamespaces.size() - 1; n >= 0; n--) {
-            NamespaceBinding an = activeNamespaces.get(n);
-            if (!prefixes.contains(an.getPrefix())) {
-                prefixes.add(an.getPrefix());
-                if (!an.getNamespaceUri().isEmpty()) {
-                    result = result.put(an.getPrefix(), an.getNamespaceUri());
-                }
-            }
-        }
-        return result;
+        return activeNamespaces.peek().withoutUndeclarations();
     }
 
     /**
@@ -1597,20 +1585,12 @@ public class QueryModule implements StaticContext {
         if (!defaultElementNamespace.isEmpty()) {
             result = result.put("", defaultElementNamespace);
         }
-        if (activeNamespaces == null) {
+        if (activeNamespaces.isEmpty()) {
             return result;
         }
-        HashSet<String> prefixes = new HashSet<>(10);
-        for (int n = activeNamespaces.size() - 1; n >= 0; n--) {
-            NamespaceBinding an = activeNamespaces.get(n);
-            if (!prefixes.contains(an.getPrefix())) {
-                prefixes.add(an.getPrefix());
-                if (an.getNamespaceUri().isEmpty()) {
-                    result = result.remove(an.getPrefix());
-                } else {
-                    result = result.put(an.getPrefix(), an.getNamespaceUri());
-                }
-            }
+        NamespaceMap activeNS = activeNamespaces.peek();
+        for (NamespaceBinding binding : activeNS.getNamespaceBindings()) {
+            result = result.put(binding.getPrefix(), binding.getNamespaceUri());
         }
         return result;
     }

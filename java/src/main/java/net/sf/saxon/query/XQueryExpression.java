@@ -91,7 +91,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
             ExpressionVisitor visitor = ExpressionVisitor.make(mainModule);
             Optimizer optimizer = visitor.obtainOptimizer();
             visitor.setOptimizeForStreaming(streaming);
-            Expression e2 = exp.simplify(mainModule);
+            Expression e2 = exp.simplify();
             if (e2 != exp) {
                 ExpressionTool.copyLocationInfo(exp, e2);
                 e2.setParentExpression(null);
@@ -132,7 +132,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         for (GlobalVariable var : getPackageData().getGlobalVariableList()) {
             Expression top = var.getBody();
             if (top != null) {
-                Expression e2 = top.simplify(mainModule);
+                Expression e2 = top.simplify();
                 if (top != e2) {
                     var.setBody(e2);
                     ExpressionTool.copyLocationInfo(top, e2);

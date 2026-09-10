@@ -431,7 +431,7 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
                     body.setRetainedStaticContext(rsc);
 
                     ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
-                    body = body.simplify(staticContext).typeCheck(visitor, ContextItemStaticInfo.ABSENT);
+                    body = body.simplify().typeCheck(visitor, ContextItemStaticInfo.ABSENT);
 
                     // Try to extract new global variables from the body of the function
                     //body = config.getOptimizer().promoteExpressionsToGlobal(body, visitor);

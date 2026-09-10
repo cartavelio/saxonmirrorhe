@@ -114,11 +114,11 @@ public final class Atomizer extends UnaryExpression {
 
     /*@NotNull*/
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
+    public Expression simplify() throws XPathException {
         //untyped = !getContainer().getPackageData().isSchemaAware();
         untyped = !getPackageData().isSchemaAware();
         computeSingleValued(getConfiguration().getTypeHierarchy());
-        Expression operand = getBaseExpression().simplify(env);
+        Expression operand = getBaseExpression().simplify();
         if (operand instanceof Literal) {
             GroundedValue val = ((Literal) operand).getGroundedValue();
 

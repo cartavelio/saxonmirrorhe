@@ -14,7 +14,6 @@ import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -67,7 +66,6 @@ public final class BigDecimalValue extends DecimalValue {
 
     public BigDecimalValue(BigDecimal value) {
         super(BuiltInAtomicType.DECIMAL);
-        Instrumentation.count("new BigDecimal#1");
         this.value = value.stripTrailingZeros();
     }
 
@@ -80,7 +78,6 @@ public final class BigDecimalValue extends DecimalValue {
 
     public BigDecimalValue(BigDecimal value, AtomicMetadata typeLabel) {
         super(typeLabel);
-        Instrumentation.count("new BigDecimal#2");
         this.value = value.stripTrailingZeros();
     }
 
@@ -94,7 +91,6 @@ public final class BigDecimalValue extends DecimalValue {
 
     private BigDecimalValue(BigDecimal value, AtomicMetadata typeLabel, boolean alreadyScaled) {
         super(typeLabel);
-        Instrumentation.count("new BigDecimal#3");
         this.value = value;
     }
 
@@ -614,7 +610,6 @@ public final class BigDecimalValue extends DecimalValue {
                 scaledValue = value.setScale(scale, RoundingMode.HALF_EVEN);
                 break;
         }
-        Instrumentation.count("BigDecimalValue.round");
         return new BigDecimalValue(scaledValue.stripTrailingZeros());
     }
 

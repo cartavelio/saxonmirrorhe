@@ -24,13 +24,26 @@ import net.sf.saxon.value.EmptySequence;
  * empty sequence, and has no context dependencies.
  */
 
-public abstract class ScalarSystemFunction extends SystemFunction {
+public abstract class ScalarSystemFunction extends SystemFunction implements ArityOneFunction {
+
+    /**
+     * Call a function with one argument
+     *
+     * @param context the dynamic evaluation context
+     * @param arg0    the first argument
+     * @return the result of the function call
+     * @throws XPathException if the call fails with a dynamic error
+     */
+    @Override
+    public Sequence call1(XPathContext context, Sequence arg0) throws XPathException {
+        return SequenceTool.itemOrEmpty(evaluate(arg0.head(), context));
+    }
 
     /**
      * Abstract method that must be supplied in subclasses to perform the evaluation
      * @param arg the supplied argument
      * @param context the dynamic context
-     * @return the result of the evaluation
+     * @return the result of the evaluation. May be null indicating the result is an empty sequence.
      * @throws XPathException if a dynamic error occurs
      */
 

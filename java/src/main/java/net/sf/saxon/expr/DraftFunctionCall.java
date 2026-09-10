@@ -17,6 +17,8 @@ import net.sf.saxon.functions.IContextAccessorFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.om.*;
+import net.sf.saxon.query.QueryModule;
+import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -25,7 +27,10 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.QNameValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static net.sf.saxon.expr.parser.XPathParser.makeNamedFunctionReference;
 
@@ -38,7 +43,7 @@ import static net.sf.saxon.expr.parser.XPathParser.makeNamedFunctionReference;
 public class DraftFunctionCall extends DraftExpression {
 
     private final String lexicalName;
-    private final StaticContext staticContext;
+    private final QueryModule queryModule;
     private final Operand[] operanda;
     private final List<Object> placeMarkerArgs;
     private final Map<StructuredQName, Integer> keywordArgs;
@@ -48,12 +53,12 @@ public class DraftFunctionCall extends DraftExpression {
      */
 
     public DraftFunctionCall(String lexicalName,
-                             StaticContext staticContext,
+                             QueryModule queryModule,
                              Expression[] arguments,
                              List<Object> placeMarkerArgs,
                              Map<StructuredQName, Integer> keywordArgs) {
         this.lexicalName = lexicalName;
-        this.staticContext = staticContext;
+        this.queryModule = queryModule;
         this.operanda = new Operand[arguments.length];
         int i=0;
         for (Expression arg : arguments) {
@@ -99,7 +104,7 @@ public class DraftFunctionCall extends DraftExpression {
         for (Operand operand : operanda) {
             a2[i++] = operand.getChildExpression().copy(rebindings);
         }
-        return new DraftFunctionCall(lexicalName, staticContext, a2, placeMarkerArgs, keywordArgs);
+        return new DraftFunctionCall(lexicalName, queryModule, a2, placeMarkerArgs, keywordArgs);
     }
 
     private Expression[] getArguments() {
@@ -193,18 +198,18 @@ public class DraftFunctionCall extends DraftExpression {
     }
 
     @Override
-    public Expression simplify(StaticContext env) throws XPathException {
-        simplifyChildren(env);
+    public Expression simplify() throws XPathException {
+        simplifyChildren();
         StructuredQName qName;
         int arity = operanda.length;
-        FunctionLibrary lib = staticContext.getFunctionLibrary();
-        NamespaceUri defaultFunctionNamespace = staticContext.getDefaultFunctionNamespace();
+        FunctionLibrary lib = queryModule.getFunctionLibrary();
+        NamespaceUri defaultFunctionNamespace = queryModule.getDefaultFunctionNamespace();
         if (NameChecker.isValidNCName(lexicalName)) {
-            if (env.getXPathVersion() >= 40) {
+            if (queryModule.getXPathVersion() >= 40) {
                 // For an unprefixed function name in 4.0, we look first for a no-namespace name,
                 // then for a name in the default function namespace.
                 SymbolicName.F sn = new SymbolicName.F(new StructuredQName("",NamespaceUri.NULL, lexicalName), arity);
-                if (lib.getFunctionItem(sn, env) != null) {
+                if (lib.getFunctionItem(sn, queryModule) != null) {
                     qName = sn.getComponentName();
                 } else {
                     qName = new StructuredQName("", defaultFunctionNamespace, lexicalName);
@@ -213,13 +218,14 @@ public class DraftFunctionCall extends DraftExpression {
                 qName = new StructuredQName("", defaultFunctionNamespace, lexicalName);
             }
         } else {
-            NamespaceResolver resolver = staticContext.getNamespaceResolver();
+            NamespaceResolver resolver = getRetainedStaticContext();
             QNameParser qp = new QNameParser(resolver)
-                    .withAcceptEQName(true, env.getXPathVersion());
+                    .withAcceptEQName(true, queryModule.getXPathVersion())
+                    .withUnescaper(new XQueryParser.Unescaper(queryModule.getConfiguration().getValidCharacterChecker()));
             qName = qp.parse(lexicalName, NamespaceUri.NULL);
         }
 
-        if (env.getConfiguration().isDisabledFunction(qName)) {
+        if (queryModule.getConfiguration().isDisabledFunction(qName)) {
             throw new XPathException("Function " + qName.getEQName() + " has been disabled in this Saxon Configuration", "XPST0017")
                     .withLocation(getLocation());
         }
@@ -231,7 +237,7 @@ public class DraftFunctionCall extends DraftExpression {
         SymbolicName.F functionName = new SymbolicName.F(qName, arity);
         List<String> reasons = new ArrayList<>();
         Expression[] args = getArguments();
-        Expression exp = lib.bind(functionName, args, keywordArgs, staticContext, reasons);
+        Expression exp = lib.bind(functionName, args, keywordArgs, queryModule, reasons);
         if (exp == null) {
             StringBuilder sb = new StringBuilder();
             sb.append("Cannot find a ").append(args.length).append(
@@ -241,7 +247,8 @@ public class DraftFunctionCall extends DraftExpression {
             }
             throw new XPathException(sb.toString(), "XPST0017").asStaticError();
         }
-        ExpressionTool.copyLocationInfo(this,exp);
+        exp.setRetainedStaticContext(getRetainedStaticContext());
+        ExpressionTool.copyLocationInfo(this, exp);
         return exp;
     }
 
@@ -250,9 +257,9 @@ public class DraftFunctionCall extends DraftExpression {
             Expression[] args,
             List<Object> placeMarkerArgs) throws XPathException {
 
-        FunctionLibrary lib = staticContext.getFunctionLibrary();
+        FunctionLibrary lib = queryModule.getFunctionLibrary();
         SymbolicName.F sn = new SymbolicName.F(name, args.length);
-        FunctionItem target = lib.getFunctionItem(sn, staticContext);
+        FunctionItem target = lib.getFunctionItem(sn, queryModule);
         if (target == null) {
             StringBuilder sb = new StringBuilder();
             sb.append("Cannot find a ").append(args.length).append(
@@ -262,7 +269,7 @@ public class DraftFunctionCall extends DraftExpression {
         if (target instanceof IContextAccessorFunction) {
             // For a context-dependent function, return a call on function-lookup(), which saves the context
             SystemFunction lookup = XPath31FunctionSet.getInstance().makeFunction("function-lookup", 2);
-            lookup.setRetainedStaticContext(staticContext.makeRetainedStaticContext());
+            lookup.setRetainedStaticContext(queryModule.makeRetainedStaticContext());
             return lookup.makeFunctionCall(Literal.makeLiteral(new QNameValue(name, BuiltInAtomicType.QNAME)),
                                            Literal.makeLiteral(Int64Value.makeIntegerValue(args.length)));
 

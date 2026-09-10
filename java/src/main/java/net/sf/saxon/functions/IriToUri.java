@@ -43,6 +43,9 @@ public class IriToUri extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) throws XPathException {
+        if (arg == null) {
+            return StringValue.EMPTY_STRING;
+        }
         return new StringValue(iriToUri(arg.getUnicodeStringValue()));
     }
 

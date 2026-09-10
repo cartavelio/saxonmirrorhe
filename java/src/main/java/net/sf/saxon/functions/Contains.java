@@ -21,7 +21,7 @@ import net.sf.saxon.value.StringValue;
 /**
  * Implements the fn:contains() function, with the collation already known
  */
-public class Contains extends CollatingFunctionFixed {
+public class Contains extends CollatingFunctionFixed implements ArityTwoFunction {
 
     @Override
     public boolean isSubstringMatchingFunction() {
@@ -43,6 +43,22 @@ public class Contains extends CollatingFunctionFixed {
         StringValue s0 = (StringValue) arguments[0].head();
         StringValue s1 = (StringValue) arguments[1].head();
         return BooleanValue.get(contains(s0, s1, (SubstringMatcher)getStringCollator()));
+    }
+
+    /**
+     * Call a function with two arguments
+     *
+     * @param context the dynamic evaluation context
+     * @param arg0    the first argument
+     * @param arg1    the second argument
+     * @return the result of the function call
+     * @throws XPathException if the call fails with a dynamic error
+     */
+    @Override
+    public Sequence call2(XPathContext context, Sequence arg0, Sequence arg1) throws XPathException {
+        StringValue s0 = (StringValue) arg0.head();
+        StringValue s1 = (StringValue) arg1.head();
+        return BooleanValue.get(contains(s0, s1, (SubstringMatcher) getStringCollator()));
     }
 
     /**
@@ -71,41 +87,33 @@ public class Contains extends CollatingFunctionFixed {
             if (collation == CodepointCollator.getInstance()) {
                 final StringEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForString(true);
                 final StringEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForString(true);
-                switch (name) {
-                    case "contains":
-                        return context -> arg0Eval.eval(context).contains(arg1Eval.eval(context));
-                    case "starts-with":
-                        return context -> arg0Eval.eval(context).startsWith(arg1Eval.eval(context));
-                    case "ends-with":
-                        return context -> arg0Eval.eval(context).endsWith(arg1Eval.eval(context));
-                    default:
-                        throw new UnsupportedOperationException();
-                }
+                return switch (name) {
+                    case "contains" -> context -> arg0Eval.eval(context).contains(arg1Eval.eval(context));
+                    case "starts-with" -> context -> arg0Eval.eval(context).startsWith(arg1Eval.eval(context));
+                    case "ends-with" -> context -> arg0Eval.eval(context).endsWith(arg1Eval.eval(context));
+                    default -> throw new UnsupportedOperationException();
+                };
             } else {
                 final UnicodeStringEvaluator arg0Eval = fnc.getArg(0).makeElaborator().elaborateForUnicodeString(true);
                 final UnicodeStringEvaluator arg1Eval = fnc.getArg(1).makeElaborator().elaborateForUnicodeString(true);
-                switch (name) {
-                    case "contains":
-                        return context -> {
-                            UnicodeString s0 = arg0Eval.eval(context);
-                            UnicodeString s1 = arg1Eval.eval(context);
-                            return collation.contains(s0, s1);
-                        };
-                    case "starts-with":
-                        return context -> {
-                            UnicodeString s0 = arg0Eval.eval(context);
-                            UnicodeString s1 = arg1Eval.eval(context);
-                            return collation.startsWith(s0, s1);
-                        };
-                    case "ends-with":
-                        return context -> {
-                            UnicodeString s0 = arg0Eval.eval(context);
-                            UnicodeString s1 = arg1Eval.eval(context);
-                            return collation.endsWith(s0, s1);
-                        };
-                    default:
-                        throw new UnsupportedOperationException();
-                }
+                return switch (name) {
+                    case "contains" -> context -> {
+                        UnicodeString s0 = arg0Eval.eval(context);
+                        UnicodeString s1 = arg1Eval.eval(context);
+                        return collation.contains(s0, s1);
+                    };
+                    case "starts-with" -> context -> {
+                        UnicodeString s0 = arg0Eval.eval(context);
+                        UnicodeString s1 = arg1Eval.eval(context);
+                        return collation.startsWith(s0, s1);
+                    };
+                    case "ends-with" -> context -> {
+                        UnicodeString s0 = arg0Eval.eval(context);
+                        UnicodeString s1 = arg1Eval.eval(context);
+                        return collation.endsWith(s0, s1);
+                    };
+                    default -> throw new UnsupportedOperationException();
+                };
             }
 
         }

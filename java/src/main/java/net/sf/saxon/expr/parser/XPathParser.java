@@ -4132,7 +4132,6 @@ public class XPathParser {
             }
             case "record": {
                 checkLanguageVersion40("nodeTest record(...)");
-                nextToken();
                 ItemType type = parseRecordTest(this);
                 return new SpecificJNodeType(SequenceType.one(type),
                                              env.getConfiguration().getTypeHierarchy());
@@ -4658,9 +4657,9 @@ public class XPathParser {
         arguments = args.toArray(arguments);
 
         Expression fcall = null;
-        if (env instanceof QueryModule) {
+        if (env instanceof QueryModule qm) {
             fcall = new DraftFunctionCall(fname,
-                                          env,
+                                          qm,
                                           arguments,
                                           placeMarkerArgs,
                                           keywordArgs);
@@ -5049,9 +5048,9 @@ public class XPathParser {
         int arity = (int) number.longValue();
         nextToken();
 
-        if (env instanceof QueryModule) {
+        if (env instanceof QueryModule qm) {
             // In XQuery, defer binding till the end, to cope with forwards references
-            return new DraftFunctionReference(fname,env.getNamespaceResolver(), env.getDefaultFunctionNamespace(), arity);
+            return new DraftFunctionReference(fname, qm, env.getNamespaceResolver(), arity);
         }
 
         StructuredQName functionName = null;
@@ -5603,12 +5602,14 @@ public class XPathParser {
 
     private final static String[] reservedFunctionNames31 = new String[]{
             "array", "attribute", "comment", "document-node", "element", "empty-sequence", "function", "if", "item", "map",
-            "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"
+            "namespace-node", "node", "processing-instruction", "schema-attribute",
+            "schema-element", "switch", "text", "typeswitch"
     };
 
     private final static String[] reservedFunctionNames40 = new String[]{
-            "attribute", "comment", "document-node", "element", "empty-sequence", "fn", "function", "if", "item",
-            "namespace-node", "node", "processing-instruction", "schema-attribute", "schema-element", "switch", "text", "typeswitch"
+            "array", "attribute", "comment", "document-node", "element", "enum", "fn", "function", "get", "if", "item",
+            "jnode", "map", "namespace-node", "node", "processing-instruction", "schema-attribute",
+            "schema-element", "switch", "text", "typeswitch"
     };
 
     /**
