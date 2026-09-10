@@ -1029,9 +1029,9 @@
       </p>
       
       <p>See <a class="bodylink"
-        href="https://github.com/xmlresolver/xmlresolver">https://github.com/xmlresolver/xmlresolver</a> 
+        href="https://codeberg.org/XmlResolver/xmlresolver">https://codeberg.org/XmlResolver/xmlresolver</a> 
         and <a class="bodylink"
-          href="https://github.com/xmlresolver/xmlresolverdata">https://github.com/xmlresolver/xmlresolverdata</a></p>
+          href="https://codeberg.org/XmlResolver/xmlresolverdata">https://codeberg.org/XmlResolver/xmlresolverdata</a></p>
       
       <p>The <code>xmlresolver</code> library
       provides an advanced implementation of the SAX <code>EntityResolver</code>,

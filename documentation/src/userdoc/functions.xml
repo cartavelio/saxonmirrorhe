@@ -6012,8 +6012,8 @@
       </status>
       <saxon-edition>PE/EE 11</saxon-edition>
       <description>
-        <p>Returns a sequence containing all the key-value pairs present in a map, each represented
-          as a single-entry map.</p>
+        <p>Returns a sequence containing all the key-value pairs present in a map (in entry order), each
+          represented as a single-entry map.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
@@ -6083,7 +6083,7 @@
       <name namespace="http://www.w3.org/2005/xpath-functions/map">for-each</name>
       <description>
         <p>Processes every key/value pair in a map by applying the given function, returning the
-          results as a sequence in unpredictable order.</p>
+          results as a sequence in entry order.</p>
       </description>
       <signatures>
         <proto return-type="item()*">
@@ -6102,6 +6102,9 @@
           function <code>map:for-each-entry</code> (which was available since Saxon 9.4). Available
           in XSLT, XPath, and XQuery, whether or not 3.0 is available.</p>
         <p>XPath 3.1 version implemented since Saxon 9.7.</p>
+        <p class="qt4">From XPath 4.0, the entries in a map are ordered (previously order was not
+          significant). Since Saxon 13.0, map order is preserved whether or not XPath 4.0 features are
+          enabled, so this function always now returns the results in entry order.</p>
       </status>
       <saxon-edition>ALL_SINCE_10 PE/EE_9.6</saxon-edition>
     </function>
@@ -6139,13 +6142,13 @@
       <status-ok/>
       <saxon-edition>PE/EE 13</saxon-edition>
       <description>
-        <p>Returns a sequence containing all the values present in a map, in order.</p>
+        <p>Returns a sequence containing all the values present in a map, in entry order.</p>
       </description>
     </function>
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://www.w3.org/2005/xpath-functions/map">keys</name>
       <description>
-        <p>Returns the set of keys found in an input map, in arbitrary order.</p>
+        <p>Returns a sequence containing all the keys present in a map, in entry order.</p>
       </description>
       <signatures>
         <proto return-type="xs:anyAtomicType*">
@@ -6159,6 +6162,9 @@
         <p>Available as defined in XSLT 3.0 since Saxon 9.4; in XSLT, XPath, and XQuery, whether or
           not 3.0 is available.</p>
         <p>XPath 3.1 version implemented since Saxon 9.7.</p>
+        <p class="qt4">From XPath 4.0, the entries in a map are ordered (previously order was not
+          significant). Since Saxon 13.0, map order is preserved whether or not XPath 4.0 features are
+          enabled, so this function always now returns the results in entry order.</p>
       </status>
       <saxon-edition>ALL_SINCE_9.7</saxon-edition>
     </function>
@@ -8639,7 +8645,7 @@ declare %a:colour("blue", 3) function local:f() as xs:integer {3};</code></pre>
             <li>To process an item that is an array, then process each of the array's members in
               order (each member is, in general, a sequence).</li>
             <li>To process an item that is a map, then for each key-value entry (K, V) in the map
-              (in implementation-dependent order) perform both of the following steps, in order: 
+              (in entry order) perform both of the following steps, in order: 
               <ul>
                 <li>If K is the same key as <code>$key</code>, then add a new map to the result
                   sequence (with entries "key", "value", and "map" as described above).</li>

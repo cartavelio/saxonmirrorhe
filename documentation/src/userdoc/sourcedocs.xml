@@ -206,8 +206,8 @@
         <p>Catalog-based resolution is performed using a third-party library:</p>
       
         <ul>
-          <li>For SaxonJ and SaxonC, project <code>xmlresolver/xmlresolver</code> on GitHub.</li>
-          <li class="csonly">For SaxonCS, project <code>xmlresolver/xmlresolvercs</code> on GitHub.</li>
+          <li>For SaxonJ and SaxonC, project <code>XmlResolver/xmlresolver</code> on Codeberg.</li>
+          <li class="csonly">For SaxonCS, project <code>XmlResolver/xmlresolvercs</code> on Codeberg.</li>
         </ul>
       
       <aside>Both these libraries are open source products developed and maintained by Norm Tovey-Walsh,
