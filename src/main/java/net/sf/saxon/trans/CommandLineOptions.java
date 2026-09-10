@@ -474,14 +474,18 @@ public class CommandLineOptions {
 
     }
 
-    @CSharpReplaceBody(code="config.getCommonResourceResolver().SetFeature(Org.XmlResolver.Features.ResolverFeature.CATALOG_FILES, catalogs);")
-    private void setCatalogFiles(Configuration config, ArrayList<String> catalogs) throws XPathException {
+    private void setCatalogFiles(Configuration config, List<String> catalogs) {
         ResourceResolver rr = config.getResourceResolver();
-        if (rr instanceof CatalogResourceResolver) {
-            ((CatalogResourceResolver)rr).setFeature(ResolverFeature.CATALOG_FILES, catalogs);
+        if (rr instanceof ConfigurableResourceResolver) {
+            setCatalogFiles(((ConfigurableResourceResolver) rr), catalogs);
         } else {
-            throw new IllegalStateException("The resolver in the Configuration is not a CatalogResolver");
+            throw new IllegalStateException("The resolver in the Configuration is not a ConfigurableResourceResolver");
         }
+    }
+
+    @CSharpReplaceBody(code="crr.setFeature(Org.XmlResolver.Features.ResolverFeature.CATALOG_FILES, catalogs);")
+    public static void setCatalogFiles(ConfigurableResourceResolver crr, List<String> catalogs) {
+        crr.setFeature(ResolverFeature.CATALOG_FILES, catalogs);
     }
 
     /**

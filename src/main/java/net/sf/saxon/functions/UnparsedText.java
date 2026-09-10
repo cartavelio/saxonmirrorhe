@@ -118,7 +118,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                     if (cache != null) {
                         UnicodeString existing = cache.get(absoluteURI);
                         if (existing != null) {
-                            if (existing.codePointAt(0) == errorValue) {
+                            if (existing.length() > 0 && existing.codePointAt(0) == errorValue) {
                                 throw new XPathException(existing.substring(1).toString(), "FOUT1170");
                             }
                             return new StringValue(existing);

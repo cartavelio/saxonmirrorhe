@@ -2,8 +2,10 @@ package net.sf.saxon.lib;
 
 import net.sf.saxon.resource.TypedStreamSource;
 import net.sf.saxon.trans.XPathException;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.ext.EntityResolver2;
 import org.xmlresolver.*;
 
 import javax.xml.transform.Source;
@@ -12,16 +14,16 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * The standard implementation of the CommonResourceResolver used by Saxon.
- *
- * This class extends the {@Link CommonResourceResolver} providing concrete implementations of
- * all of the resolver interfaces. This class delegates actual resolution to an underlying
- * {@link org.xmlresolver.Resolver} that it wraps.
+ * The standard implementation of the ResourceResolver for use with catalogs.
+
  *
  * @since 11
  */
 
-public class CatalogResourceResolver extends CommonResourceResolver {
+public class CatalogResourceResolver implements
+        ResourceResolver, ConfigurableResourceResolver,
+        EntityResolver, EntityResolver2 {
+
     private org.xmlresolver.Resolver catalogBasedResolver;
 
     /**
@@ -48,16 +50,16 @@ public class CatalogResourceResolver extends CommonResourceResolver {
         this.catalogBasedResolver = resolver;
     }
 
-    /**
-     * Return a new instance of the resolver. This method creates a new CommonResourceResolver
-     * that uses the same underlying {@link org.xmlresolver.Resolver}.
-     * @return A new CatalogResourceResolver.
-     */
-    public CommonResourceResolver newInstance() {
-        CommonResourceResolver newResolver = new CatalogResourceResolver(catalogBasedResolver);
-        newResolver.copyFrom(this);
-        return newResolver;
-    }
+//    /**
+//     * Return a new instance of the resolver. This method creates a new CommonResourceResolver
+//     * that uses the same underlying {@link org.xmlresolver.Resolver}.
+//     * @return A new CatalogResourceResolver.
+//     */
+//    public CommonResourceResolver newInstance() {
+//        CommonResourceResolver newResolver = new CatalogResourceResolver(catalogBasedResolver);
+//        newResolver.copyFrom(this);
+//        return newResolver;
+//    }
 
 //    /**
 //     * Chains an entity resolver.
@@ -177,7 +179,7 @@ public class CatalogResourceResolver extends CommonResourceResolver {
                 return result;
             }
         }
-        return nextResourceResolver == null ? null : nextResourceResolver.resolve(request);
+        return null;
     }
 
     /**
@@ -199,9 +201,9 @@ public class CatalogResourceResolver extends CommonResourceResolver {
         if (catalogBasedResolver != null) {
             result = catalogBasedResolver.getExternalSubset(name, baseURI);
         }
-        if (result == null && nextEntityResolver2 != null) {
-            result = nextEntityResolver2.getExternalSubset(name, baseURI);
-        }
+//        if (result == null && nextEntityResolver2 != null) {
+//            result = nextEntityResolver2.getExternalSubset(name, baseURI);
+//        }
         return result;
     }
 
@@ -232,12 +234,12 @@ public class CatalogResourceResolver extends CommonResourceResolver {
             if (catalogBasedResolver != null) {
                 result = catalogBasedResolver.resolveEntity(name, publicId, baseURI, systemId);
             }
-            if (result == null && nextEntityResolver2 != null) {
-                result = nextEntityResolver2.resolveEntity(name, publicId, baseURI, systemId);
-            }
-            if (result == null && nextEntityResolver != null && nextEntityResolver != nextEntityResolver2) {
-                result = nextEntityResolver.resolveEntity(publicId, systemId);
-            }
+//            if (result == null && nextEntityResolver2 != null) {
+//                result = nextEntityResolver2.resolveEntity(name, publicId, baseURI, systemId);
+//            }
+//            if (result == null && nextEntityResolver != null && nextEntityResolver != nextEntityResolver2) {
+//                result = nextEntityResolver.resolveEntity(publicId, systemId);
+//            }
             return result;
         } catch (IllegalArgumentException e) {
             if (e.getCause() instanceof IOException) {
@@ -267,12 +269,12 @@ public class CatalogResourceResolver extends CommonResourceResolver {
         if (catalogBasedResolver != null) {
             result = catalogBasedResolver.resolveEntity(publicId, systemId);
         }
-        if (result == null && nextEntityResolver2 != null) {
-            result = nextEntityResolver2.resolveEntity(publicId, systemId);
-        }
-        if (result == null && nextEntityResolver != null && nextEntityResolver != nextEntityResolver2) {
-            result = nextEntityResolver.resolveEntity(publicId, systemId);
-        }
+//        if (result == null && nextEntityResolver2 != null) {
+//            result = nextEntityResolver2.resolveEntity(publicId, systemId);
+//        }
+//        if (result == null && nextEntityResolver != null && nextEntityResolver != nextEntityResolver2) {
+//            result = nextEntityResolver.resolveEntity(publicId, systemId);
+//        }
         return result;
     }
 
@@ -293,14 +295,15 @@ public class CatalogResourceResolver extends CommonResourceResolver {
      * @return The resource or null if it could not be found.
      * @throws TransformerException if an error occurs during the attempt to resolve the URI.
      */
-    @Override
+    //@Override
     public Source resolveNamespace(String uri, String nature, String purpose) throws TransformerException {
         Source result = null;
         if (catalogBasedResolver != null) {
             result = catalogBasedResolver.resolveNamespace(uri, nature, purpose);
-        } if (catalogBasedResolver == null && nextNamespaceResolver != null) {
-            result = nextNamespaceResolver.resolveNamespace(uri, nature, purpose);
         }
+//        if (catalogBasedResolver == null && nextNamespaceResolver != null) {
+//            result = nextNamespaceResolver.resolveNamespace(uri, nature, purpose);
+//        }
         return result;
     }
 }

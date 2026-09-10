@@ -1,5 +1,13 @@
 package net.sf.saxon.z;
 
+/**
+ * This interface represents an integer predicate (that is, a boolean function of an integer).
+ * It is provided for the purpose of C# transpilation: in Java, an IntPredicate can be implemented
+ * either as a class implementing {@link java.util.function.IntPredicate}, or as a lambda expression,
+ * but this duality is not available in C#. A class that implements {@link java.util.function.IntPredicate}
+ * should therefore implement this extension of the interface, so that it can be transpiled to C#.
+ */
+
 public interface IntPredicateProxy
 //#if CSHARP==false
         extends java.util.function.IntPredicate

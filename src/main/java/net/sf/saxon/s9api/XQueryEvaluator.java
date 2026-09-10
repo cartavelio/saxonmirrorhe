@@ -404,6 +404,8 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
             }
         } catch (TransformerException e) {
             throw new SaxonApiException(e);
+        } catch (UncheckedXPathException e) {
+            throw new SaxonApiException(e.getXPathException());
         }
     }
 

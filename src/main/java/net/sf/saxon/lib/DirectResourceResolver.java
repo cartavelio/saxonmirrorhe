@@ -62,11 +62,15 @@ public class DirectResourceResolver implements ResourceResolver {
         }
 
         Source ss;
+        //#if CSHARP==false
         if (ResourceRequest.XSLT_NATURE.equals(request.nature)) {
             ss = new SAXSource(config.getStyleParser(), new InputSource(request.uri));
         } else {
+            //#endif
             ss = new StreamSource(request.uri);
+            //#if CSHARP==false
         }
+        //#endif
 
         if (id != null) {
             final String idFinal = id;

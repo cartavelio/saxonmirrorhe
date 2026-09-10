@@ -21,7 +21,7 @@ public class ConcatenatingIterator<E> implements Iterator<E> {
     Iterator<? extends E> active;
 
     /**
-     * Create an iterator that concatenates the results of two supplied iterator. The
+     * Create an iterator that concatenates the results of two supplied iterators. The
      * second iterator isn't created until it is actually needed.
      * @param first the first iterator
      * @param second a function that can be called to supply the second iterator

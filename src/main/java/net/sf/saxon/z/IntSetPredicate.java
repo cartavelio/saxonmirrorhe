@@ -55,12 +55,12 @@ public class IntSetPredicate implements IntPredicateProxy {
      * Convenience predicate that always matches
      */
 
-    public final static IntPredicateProxy ALWAYS_TRUE = new IntPredicateLambda(i -> true);
+    public final static IntPredicateProxy ALWAYS_TRUE = IntPredicateLambda.of(i -> true);
 
     /**
      * Convenience predicate that never matches
      */
 
-    public final static IntPredicateProxy ALWAYS_FALSE = new IntPredicateLambda(i -> false);
+    public final static IntPredicateProxy ALWAYS_FALSE = IntPredicateLambda.of(i -> false);
 
 }

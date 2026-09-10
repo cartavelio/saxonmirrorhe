@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
@@ -420,11 +421,15 @@ public class ForExpression extends Assignation {
 
     @Override
     public void evaluatePendingUpdates(XPathContext context, PendingUpdateList pul) throws XPathException {
-        int slot = getLocalSlotNumber();
-        SequenceTool.supply(getSequence().iterate(context), (ItemConsumer<? super Item>) item -> {
-            context.setLocalVariable(slot, item);
-            getAction().evaluatePendingUpdates(context, pul);
-        });
+        try {
+            int slot = getLocalSlotNumber();
+            SequenceTool.supply(getSequence().iterate(context), (ItemConsumer<? super Item>) item -> {
+                context.setLocalVariable(slot, item);
+                getAction().evaluatePendingUpdates(context, pul);
+            });
+        } catch (UncheckedXPathException e) {
+            throw e.getXPathException();
+        }
     }
 
     /**

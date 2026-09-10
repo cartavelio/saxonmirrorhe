@@ -20,7 +20,7 @@ import java.net.URI;
  */
 
 @FunctionalInterface
-@CSharpDelegate(true)
+@CSharpDelegate(false)
 public interface UnparsedTextURIResolver {
 
     /**
