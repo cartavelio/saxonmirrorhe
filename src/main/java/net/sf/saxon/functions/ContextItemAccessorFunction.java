@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -47,7 +48,7 @@ public class ContextItemAccessorFunction extends ContextAccessorFunction {
                     getFunctionName().getDisplayName() + " is absent", "XPDY0002");
             });
             FunctionItemType fit = new SpecificFunctionType(new SequenceType[]{}, SequenceType.ANY_SEQUENCE);
-            return new CallableFunction(0, callable, fit);
+            return new CallableFunction(new SymbolicName.F(getFunctionName(), 0), callable, fit);
         }
         ConstantFunction fn = new ConstantFunction(evaluate(ci, context));
         fn.setDetails(getDetails());
