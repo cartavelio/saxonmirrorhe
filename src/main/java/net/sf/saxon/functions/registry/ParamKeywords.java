@@ -101,6 +101,7 @@ public class ParamKeywords {
         fnParamNames.put("days-from-duration", "value");
         fnParamNames.put("deep-equal", "input1|input2|collation|options");
         fnParamNames.put("default-collation", "");
+        fnParamNames.put("decode-from-uri", "value");
         fnParamNames.put("default-language", "");
         fnParamNames.put("differences", "input1|input2|options|collation");
         fnParamNames.put("distinct-values", "values|collation");
@@ -116,6 +117,7 @@ public class ParamKeywords {
         fnParamNames.put("environment-variable", "name");
         fnParamNames.put("error", "code|description|error-object");
         fnParamNames.put("escape-html-uri", "value");
+        fnParamNames.put("every", "input|predicate");
         fnParamNames.put("exactly-one", "input");
         fnParamNames.put("exists", "input");
         fnParamNames.put("expanded-QName", "value");
@@ -129,7 +131,7 @@ public class ParamKeywords {
         fnParamNames.put("for-each-pair", "input1|input2|action");
         fnParamNames.put("format-date", "value|picture|language|calendar|place");
         fnParamNames.put("format-dateTime", "value|picture|language|calendar|place");
-        fnParamNames.put("format-integer", "value|picture|lang");
+        fnParamNames.put("format-integer", "value|picture|language");
         fnParamNames.put("format-number", "value|picture|decimal-format-name");
         fnParamNames.put("format-time", "value|picture|language|calendar|place");
         fnParamNames.put("function-arity", "function");
@@ -202,7 +204,7 @@ public class ParamKeywords {
         fnParamNames.put("parse-uri", "uri|options");
         fnParamNames.put("parse-xml", "value");
         fnParamNames.put("parse-xml-fragment", "value");
-        fnParamNames.put("partition", "input|break-when");
+        fnParamNames.put("partition", "input|split-when");
         fnParamNames.put("parts", "");
         fnParamNames.put("path", "node");
         fnParamNames.put("position", "");
