@@ -8,6 +8,7 @@
 package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
@@ -36,7 +37,13 @@ public class NormalizeUnicode extends SystemFunction {
         if (sv == null) {
             return StringValue.EMPTY_STRING;
         }
-        String nf = arguments.length == 1 ? "NFC" : Whitespace.trim(arguments[1].head().getStringValue());
+        String nf = "NFC";
+        if (arguments.length > 1) {
+            Item option = arguments[1].head();
+            if (option != null) {
+                nf = Whitespace.trim(option.getStringValue());
+            }
+        }
         return new StringValue(normalize(sv.getStringValue(), nf));
     }
 
