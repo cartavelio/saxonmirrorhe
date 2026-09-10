@@ -293,12 +293,15 @@ public class XsltCompiler {
 
     /**
      * Say that the stylesheet must be compiled to be schema-aware, even if it contains no
-     * xsl:import-schema declarations. Normally a stylesheet is treated as schema-aware
-     * only if it contains one or more xsl:import-schema declarations. If it is not schema-aware,
+     * {@code xsl:import-schema} declarations. By default a stylesheet is treated as schema-aware
+     * only if it contains one or more {@code xsl:import-schema} declarations. If it is not schema-aware,
      * then all input documents must be untyped, and validation of temporary trees is disallowed
      * (though validation of the final result tree is permitted). Setting the argument to true
      * means that schema-aware code will be compiled regardless.
      *
+     * <p>Setting the value to true has no effect (it is not an error) if the configuration does
+     * not support schema processing. (Schema processing requires a Saxon-EE license.)</p>
+     * 
      * @param schemaAware If true, the stylesheet will be compiled with schema-awareness
      *                    enabled even if it contains no xsl:import-schema declarations. If false, the stylesheet
      *                    is treated as schema-aware only if it contains one or more xsl:import-schema declarations.
