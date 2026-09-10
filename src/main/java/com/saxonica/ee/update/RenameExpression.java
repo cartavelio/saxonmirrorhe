@@ -13,6 +13,8 @@ import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
+import java.util.function.Supplier;
+
 /**
  * A rename expression in XQuery Update
  */
@@ -107,20 +109,28 @@ public class RenameExpression extends BasicUpdatingExpression {
         // for the empty-sequence case, so we do two separate type check operations
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "insert", 1);
-        role0.setErrorCode("XUDY0027");
-        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.NON_EMPTY_SEQUENCE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSupplier0 = () -> {
+            RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "insert", 1);
+            role0.setErrorCode("XUDY0027");
+            return role0;
+        };
+        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.NON_EMPTY_SEQUENCE, roleSupplier0, visitor));
 
-        role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "rename", 0);
-        role0.setErrorCode("XUTY0012");
-        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.OPTIONAL_NODE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSUpplier1 = () -> {
+            RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "rename", 0);
+            role0.setErrorCode("XUTY0012");
+            return role0;
+        };
+        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.OPTIONAL_NODE, roleSUpplier1, visitor));
 
         // The name operand must be of type atomicValue. We check the specific atomic type dynamically.
 
-        RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "rename", 1);
-        //role1.setSourceLocator(this);
-        role1.setErrorCode("XPTY0004");
-        setNameExp(tc.staticTypeCheck(getNameExp(), SequenceType.SINGLE_ATOMIC, role1, visitor));
+        Supplier<RoleDiagnostic> roleSUpplier2 = () -> {
+            RoleDiagnostic role1 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "rename", 1);
+            role1.setErrorCode("XPTY0004");
+            return role1;
+        };
+        setNameExp(tc.staticTypeCheck(getNameExp(), SequenceType.SINGLE_ATOMIC, roleSUpplier2, visitor));
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         ItemType supplied = getNameExp().getItemType();
         if (th.relationship(supplied, BuiltInAtomicType.STRING) == Affinity.DISJOINT &&

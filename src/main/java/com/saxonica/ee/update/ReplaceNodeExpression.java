@@ -21,6 +21,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A "replace node" expression in XQuery Update
@@ -117,13 +118,19 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
         // for the empty-sequence case, so we do two separate type check operations
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "replace", 0);
-        role0.setErrorCode("XUDY0027");
-        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.NON_EMPTY_SEQUENCE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSupplier0 = () -> {
+            RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "replace", 0);
+            role0.setErrorCode("XUDY0027");
+            return role0;
+        };
+        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.NON_EMPTY_SEQUENCE, roleSupplier0, visitor));
 
-        role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "replace", 0);
-        role0.setErrorCode("XUTY0008");
-        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.OPTIONAL_NODE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSupplier1 = () -> {
+            RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "replace", 0);
+            role0.setErrorCode("XUTY0008");
+            return role0;
+        };
+        setTargetExp(tc.staticTypeCheck(getTargetExp(), SequenceType.OPTIONAL_NODE, roleSupplier1, visitor));
         return this;
     }
 

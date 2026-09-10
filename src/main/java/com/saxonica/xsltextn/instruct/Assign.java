@@ -14,6 +14,8 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * Compiled instruction deriving from saxon:assign element in stylesheet.
  * <p>The saxon:assign element has mandatory attribute name and optional attribute expr.
@@ -55,7 +57,8 @@ public class Assign extends Instruction implements BindingReference {
                                 ContextItemStaticInfo contextInfo) throws XPathException {
         typeCheckChildren(visitor, contextInfo);
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.VARIABLE, binding.getObjectName().getDisplayName(), 0);
         selectOp.setChildExpression(
                 tc.staticTypeCheck(getSelectExpr(), binding.getRequiredType(), role, visitor));
         return this;

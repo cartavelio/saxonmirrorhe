@@ -24,8 +24,8 @@ public class UntypedSequenceConverterElaborator extends PullElaborator {
         final AtomicSequenceConverter.AtomicSequenceMappingFunction mapper =
                 new AtomicSequenceConverter.AtomicSequenceMappingFunction();
         mapper.setConverter(converter);
-        if (expr.getRoleDiagnostic() != null) {
-            mapper.setErrorCode(expr.getRoleDiagnostic().getErrorCode());
+        if (expr.getRoleSupplier() != null) {
+            mapper.setErrorCode(expr.getRoleSupplier().get().getErrorCode());
         }
         final PullEvaluator baseEval = makeElaborator(expr.getBaseExpression()).elaborateForPull();
         return context -> {

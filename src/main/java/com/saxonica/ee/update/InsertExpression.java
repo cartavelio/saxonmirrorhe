@@ -23,6 +23,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * An insert expression in XQuery Update
@@ -124,13 +125,21 @@ public class InsertExpression extends BasicUpdatingExpression {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "insert", 1);
-        role0.setErrorCode("XUDY0027");
-        setTargetExpression(tc.staticTypeCheck(getTargetExpression(), SequenceType.NON_EMPTY_SEQUENCE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSupplier0 = () -> {
+            RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "insert", 1);
+            role0.setErrorCode("XUDY0027");
+            return role0;
+        };
+        setTargetExpression(tc.staticTypeCheck(
+                getTargetExpression(), SequenceType.NON_EMPTY_SEQUENCE, roleSupplier0, visitor));
 
-        role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "insert", 1);
-        role0.setErrorCode(position == Token.AFTER || position == Token.BEFORE ? "XUTY0006" : "XUTY0005");
-        setTargetExpression(tc.staticTypeCheck(getTargetExpression(), SequenceType.OPTIONAL_NODE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSupplier1 = () -> {
+            RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "insert", 1);
+            role0.setErrorCode(position == Token.AFTER || position == Token.BEFORE ? "XUTY0006" : "XUTY0005");
+            return role0;
+        };
+        setTargetExpression(tc.staticTypeCheck(
+                getTargetExpression(), SequenceType.OPTIONAL_NODE, roleSupplier1, visitor));
         return this;
     }
 

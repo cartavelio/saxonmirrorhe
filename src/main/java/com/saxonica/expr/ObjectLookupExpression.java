@@ -1,10 +1,10 @@
 package com.saxonica.expr;
 
 import com.saxonica.functions.extfn.ObjectMap;
-import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -13,6 +13,7 @@ import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Saxon extension: a lookup expression of the form X?Y where X is a Java external object and Y
@@ -57,7 +58,7 @@ public class ObjectLookupExpression extends LookupExpression {
         // Now check the second operand
 
         getRhs().typeCheck(visitor, contextInfo);
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
         TypeChecker tc = config.getTypeChecker(false);
         SequenceType req = BuiltInAtomicType.STRING.oneOrMore();
         setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role, visitor));

@@ -12,13 +12,16 @@ import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AnyItemType;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.JavaExternalObjectType;
+import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.SequenceType;
 
-import java.lang.reflect.Type;
 import java.lang.reflect.*;
+import java.util.function.Supplier;
 
 
 /**
@@ -156,7 +159,8 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             SequenceType st = SequenceType.makeSequenceType(config.getJavaExternalObjectType(theClass), StaticProperty.EXACTLY_ONE);
             ItemType at = getArg(0).getItemType();
             if (at instanceof JavaExternalObjectType) {
-                RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0);
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0);
                 setArg(0, tc.staticTypeCheck(getArg(0), st, role, visitor));
                 argumentConverters[0] = PJConverter.UnwrapExternalObject.INSTANCE;
             } else if (theClass.equals(java.lang.Object.class)) {
@@ -168,8 +172,8 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 argumentConverters[0] = PJConverter.allocate(
                     config, at, getArg(0).getCardinality(), theClass);
                 if (st != null) {
-                    RoleDiagnostic role = new RoleDiagnostic(
-                            RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0);
+                    Supplier<RoleDiagnostic> role =
+                            () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), 0);
                     try {
                         setArg(0, tc.staticTypeCheck(
                                 getArg(0), st, role, visitor));
@@ -198,8 +202,9 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
                 }
             }
             if (st != null) {
-                RoleDiagnostic role = new RoleDiagnostic(
-                        RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), i);
+                final int pos = i;
+                Supplier<RoleDiagnostic> role =
+                        () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, getFunctionName().getDisplayName(), pos);
                 try {
                     setArg(i, tc.staticTypeCheck(
                             getArg(i), st, role, visitor));
@@ -887,7 +892,8 @@ public class JavaExtensionFunctionCall extends FunctionCall implements Callable 
             StructuredQName functionName, int argPosition, XPathContext context)
     throws XPathException {
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.FUNCTION, functionName.getDisplayName(), argPosition);
+        Supplier<RoleDiagnostic> role =
+                () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, functionName.getDisplayName(), argPosition);
         return th.applyFunctionConversionRules(
                 suppliedValue.materialize(), requiredType, role, Loc.NONE);
     }

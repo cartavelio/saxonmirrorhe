@@ -3,10 +3,10 @@ package com.saxonica.ee.update;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.CopyOf;
-import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
+import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.AnyNodeTest;
@@ -16,6 +16,7 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Parser utility methods for the XQuery Update extensions
@@ -129,8 +130,8 @@ public class UpdateParser {
             p.expect(Token.ASSIGN);
             p.nextToken();
             Expression rhs = p.parseExprSingle();
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "copyModify", 0);
-            role.setErrorCode("XUTY0013");
+            Supplier<RoleDiagnostic> role =
+                    () -> new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "copyModify", 0, "XUTY0013");
             rhs = new ItemChecker(rhs, AnyNodeTest.getInstance(), role);
             rhs = CardinalityChecker.makeCardinalityChecker(rhs, StaticProperty.EXACTLY_ONE, role);
             boolean preserve = ((QueryModule) p.getStaticContext()).isPreserveNamespaces();

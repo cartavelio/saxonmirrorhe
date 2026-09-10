@@ -10,6 +10,8 @@ import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
 
+import java.util.function.Supplier;
+
 /**
  * A delete expression in XQuery Update
  */
@@ -71,10 +73,14 @@ public class DeleteExpression extends BasicUpdatingExpression {
 
         // The targetExpression operand must be of type node()*
 
-        RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "delete", 0);
-        //role0.setSourceLocator(this);
-        role0.setErrorCode("XUTY0007");
-        setTargetExp(visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(getTargetExp(), SequenceType.NODE_SEQUENCE, role0, visitor));
+        Supplier<RoleDiagnostic> roleSupplier = () -> {
+            RoleDiagnostic role0 = new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "delete", 0);
+            role0.setErrorCode("XUTY0007");
+            return role0;
+        };
+
+        setTargetExp(visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(
+                getTargetExp(), SequenceType.NODE_SEQUENCE, roleSupplier, visitor));
         return this;
     }
 

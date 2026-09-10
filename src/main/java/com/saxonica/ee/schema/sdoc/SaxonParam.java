@@ -67,11 +67,13 @@ public class SaxonParam extends AnnotationParent {
             Expression expr = ExpressionTool.make(select, env,
                 0, Token.EOF, null);
             //expr.setContainer(env);
-            RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.PARAM, name, 0);
             ExpressionVisitor visitor = ExpressionVisitor.make(env);
             ItemType contextItemType = Type.ITEM_TYPE;
             expr = expr.typeCheck(visitor, config.makeContextItemStaticInfo(contextItemType, true));
-            expr = config.getTypeChecker(false).staticTypeCheck(expr, requiredType, role, visitor);
+            expr = config.getTypeChecker(false).staticTypeCheck(expr,
+                                                                requiredType,
+                                                                () -> new RoleDiagnostic(RoleDiagnostic.PARAM, name, 0),
+                                                                visitor);
             SlotManager stackFrameMap = config.makeSlotManager();
             ExpressionTool.allocateSlots(expr, stackFrameMap.getNumberOfVariables(), stackFrameMap);
             Controller controller = new Controller(config);

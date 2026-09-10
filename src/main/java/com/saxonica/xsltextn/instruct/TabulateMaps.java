@@ -28,6 +28,7 @@ import net.sf.saxon.value.StringValue;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 
 /**
@@ -113,12 +114,12 @@ public class TabulateMaps extends Instruction {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/root", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/root", 0);
         SequenceType required = SequenceType.FUNCTION_ITEM_SEQUENCE;
         setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
 
         required = MapType.SEQUENCE_OF_MAPS;
-        role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/select", 0);
+        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "saxon:tabulate-maps/select", 0);
         setSelectExpression(tc.staticTypeCheck(getSelectExpression(), required, role, visitor));
 
         return this;

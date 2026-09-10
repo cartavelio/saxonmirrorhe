@@ -968,7 +968,6 @@ public class CompilerService implements ICompilerService {
             throw new AssertionError(getCurrentClass().className + " != " + className);
         }
         for (StaticVariableInfo staticVar : getCurrentClass().staticVarsMap.values()) {
-
             cv.visitField(Opcodes.ACC_PUBLIC + Opcodes.ACC_STATIC, staticVar.name, Type.getType(staticVar.classVar).getDescriptor(), null, null).visitEnd();
 
         }
@@ -989,10 +988,9 @@ public class CompilerService implements ICompilerService {
 
                 try {
                     myClass.getField(staticVar.name).set(null, staticVar.object);
-                } catch (NoSuchFieldException ex) {
-                    System.out.println(staticVar.name + " NoSuchException error");
+                } catch (NoSuchFieldException | NoClassDefFoundError ex) {
+                    System.out.println(staticVar.name + ex.getMessage());
                     String classStr = new String(classFile, StandardCharsets.UTF_8);
-
                     System.out.println(classStr);
                     throw new AssertionError(ex);
 
@@ -1026,7 +1024,7 @@ public class CompilerService implements ICompilerService {
         } else {
             name = "n" + name + getUniqueNumber();
         }
-
+        name = makeValidJavaName(name);
 
         StaticVariableInfo staticVariableInfo = new StaticVariableInfo();
         staticVariableInfo.name = name;

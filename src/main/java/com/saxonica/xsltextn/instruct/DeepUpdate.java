@@ -1,5 +1,9 @@
 package com.saxonica.xsltextn.instruct;
 
+import com.saxonica.xsltextn.pedigree.Pedigree;
+import com.saxonica.xsltextn.pedigree.PedigreeArrayItem;
+import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
+import com.saxonica.xsltextn.pedigree.PedigreeValue;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Instruction;
@@ -7,10 +11,6 @@ import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.MapItem;
-import com.saxonica.xsltextn.pedigree.Pedigree;
-import com.saxonica.xsltextn.pedigree.PedigreeArrayItem;
-import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
-import com.saxonica.xsltextn.pedigree.PedigreeValue;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
@@ -20,6 +20,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.IdentityHashMap;
+import java.util.function.Supplier;
 
 
 /**
@@ -93,14 +94,14 @@ public class DeepUpdate extends Instruction {
 
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
-        RoleDiagnostic role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/root", 0);
+        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/root", 0);
         SequenceType required = SequenceType.FUNCTION_ITEM_SEQUENCE;
         setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
 
-        role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/select", 0);
+        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/select", 0);
         setSelectExpression(tc.staticTypeCheck(getSelectExpression(), required, role, visitor));
 
-        role = new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/action", 0);
+        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/action", 0);
         setActionExpression(tc.staticTypeCheck(getActionExpression(), SequenceType.ANY_SEQUENCE, role, visitor));
 
         return this;

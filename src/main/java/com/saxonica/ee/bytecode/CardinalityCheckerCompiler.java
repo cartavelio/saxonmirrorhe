@@ -13,6 +13,8 @@ import net.sf.saxon.type.ItemType;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import java.util.function.Supplier;
+
 public class CardinalityCheckerCompiler extends ToIteratorCompiler {
 
 
@@ -98,7 +100,8 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         int requiredCardinality = ((CardinalityChecker) expression).getRequiredCardinality();
-        RoleDiagnostic role = ((CardinalityChecker) expression).getRoleLocator();
+        Supplier<RoleDiagnostic> roleSupplier = ((CardinalityChecker) expression).getRoleSupplier();
+        RoleDiagnostic role = roleSupplier.get();
 
         visitAnnotation(compiler, "CardinalityCheckerCompiler-Itr");
         visitLineNumber(compiler, ga, expression);
@@ -199,7 +202,8 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         // assert stack : checkingIterator baseIterator checkingIterator baseIterator
 
         ga.push(requiredCardinality);
-        allocateStatic(compiler, role);
+        //ga.pushNull();
+        allocateStatic(compiler, roleSupplier.get());
         allocateStatic(compiler, expression.getLocation());
         ga.invokeConstructor(CardinalityCheckingIterator.class, SequenceIterator.class, Integer.TYPE, RoleDiagnostic.class, Location.class);
 

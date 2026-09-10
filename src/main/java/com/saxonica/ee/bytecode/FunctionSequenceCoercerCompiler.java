@@ -76,7 +76,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         LabelInfo isFunctionLab = mi.newLabel("isFunctionLab");
         ga.ifInstance(Function.class, isFunctionLab);
         // stack: item
-        allocateStatic(compiler, functionCoercer.getRole());
+        allocateStatic(compiler, functionCoercer.getRoleSupplier());
         // stack: item role
         ga.swap();
         // stack: role item
@@ -155,7 +155,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
         ga.loadArg(0);
         ga.checkCast(Type.getType(Function.class));
         allocateStatic(compiler, expr.getItemType());
-        allocateStatic(compiler, expr.getRole());
+        allocateStatic(compiler, expr.getRoleSupplier());
         ga.invokeStaticMethod(CoercedFunction.class, "coerce", Function.class, SpecificFunctionType.class,
                 RoleDiagnostic.class);
         ga.returnValue();
