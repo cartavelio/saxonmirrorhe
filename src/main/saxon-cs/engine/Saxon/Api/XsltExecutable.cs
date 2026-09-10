@@ -9,8 +9,9 @@ namespace Saxon.Api {
     /// </summary>
     /// <remarks>
     /// <para>An <c>XsltExecutable</c> is immutable, and therefore thread-safe. It is simplest to
-    /// load a new <c>XsltEvaluator</c> each time the stylesheet is to be run. However, the 
-    /// <c>XsltEvaluator</c> is serially reusable within a single thread.</para>
+    /// load a new <c>XsltTransformer</c> or <c>Xslt30Transformer</c> each time the stylesheet is
+    /// to be run. The <c>XsltTransformer</c> or <c>Xslt30Transformer</c> is not thread-safe,
+    /// though it is serially reusable within a single thread.</para>
     /// <para>An <c>XsltExecutable</c> is created by using one of the <c>Compile</c>
     /// methods on the <see cref="XsltCompiler"/> class.</para>
     /// </remarks>    
