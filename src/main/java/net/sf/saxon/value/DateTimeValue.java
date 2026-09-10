@@ -920,11 +920,15 @@ public final class DateTimeValue extends CalendarValue
      * @param instant the Julian instant: a decimal value whose integer part is the Julian day number
      *                multiplied by the number of seconds per day, and whose fractional part is the fraction of the second.
      * @return the xs:dateTime value corresponding to the Julian instant. This will always be in timezone Z.
+     * @throws XPathException if the result is out of range
      */
 
     /*@NotNull*/
-    public static DateTimeValue fromJulianInstant(/*@NotNull*/ BigDecimal instant) {
+    public static DateTimeValue fromJulianInstant(/*@NotNull*/ BigDecimal instant) throws XPathException {
         BigInteger julianSecond = instant.toBigInteger();
+        if (julianSecond.abs().compareTo(BigInteger.valueOf((long)Integer.MAX_VALUE * 24*60*60)) > 0) {
+            throw new XPathException("xs:dateTime value out of range", "FODT0001");
+        }
         BigDecimal nanoseconds = instant.subtract(new BigDecimal(julianSecond)).multiply(BigDecimalValue.ONE_BILLION);
         long js = julianSecond.longValue();
         long jd = js / (24L * 60L * 60L);

@@ -483,23 +483,23 @@ public class DateValue extends GDateValue implements XPathComparable {
      * @return a DateValue with no timezone information set
      */
 
-    public static DateValue dateFromJulianDayNumber(int julianDayNumber) {
+    public static DateValue dateFromJulianDayNumber(long julianDayNumber) {
         return new DateValue(mutableDateFromJulianDayNumber(julianDayNumber));
     }
 
-    private static MutableGDateValue mutableDateFromJulianDayNumber(int julianDayNumber) {
+    private static MutableGDateValue mutableDateFromJulianDayNumber(long julianDayNumber) {
         if (julianDayNumber >= 0) {
-            int L = julianDayNumber + 68569 + 1;    // +1 adjustment for days starting at noon
-            int n = (4 * L) / 146097;
+            long L = julianDayNumber + 68569 + 1;    // +1 adjustment for days starting at noon
+            long n = (4 * L) / 146097;
             L = L - (146097 * n + 3) / 4;
-            int i = (4000 * (L + 1)) / 1461001;
+            long i = (4000 * (L + 1)) / 1461001;
             L = L - (1461 * i) / 4 + 31;
-            int j = (80 * L) / 2447;
-            int d = L - (2447 * j) / 80;
+            long j = (80 * L) / 2447;
+            long d = L - (2447 * j) / 80;
             L = j / 11;
-            int m = j + 2 - (12 * L);
-            int y = 100 * (n - 49) + i + L;
-            return new MutableGDateValue(y, m, d, true, NO_TIMEZONE, BuiltInAtomicType.DATE);
+            long m = j + 2 - (12 * L);
+            long y = 100 * (n - 49) + i + L;
+            return new MutableGDateValue((int)y, (int)m, (int)d, true, NO_TIMEZONE, BuiltInAtomicType.DATE);
         } else {
             // add 12000 years and subtract them again...
             MutableGDateValue dt = mutableDateFromJulianDayNumber(julianDayNumber +
