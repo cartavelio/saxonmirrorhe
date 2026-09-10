@@ -20,6 +20,7 @@ import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
@@ -498,7 +499,6 @@ public class SchemaValidatorImpl extends SchemaValidator {
         if (threadCount < 1) {
             threadCount = 1;
         }
-        ExecutorService executorService = config.getMultithreadingFactory().makeExecutorService(threadCount);
         if (destination != null) {
             throw new IllegalStateException("Cannot validate multiple documents when destination is set externally");
         }
@@ -508,20 +508,52 @@ public class SchemaValidatorImpl extends SchemaValidator {
             reportDestination = ((InvalidityReportGeneratorEE) invalidityHandler).getDestination();
         }
 
-        InvalidityHandler singleTaskHandler = null;
+        doParallelValidation(sources, config, reportDocs);
+
+        final Location loc = Loc.NONE;
+        if (reportDestination != null) {
+            Receiver receiver = reportDestination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
+            try {
+                receiver.open();
+                receiver.startDocument(ReceiverOption.NONE);
+                receiver.startElement(new FingerprintedQName("", InvalidityReportGenerator.REPORT_NS, "validation-reports"),
+                                      Untyped.getInstance(),
+                                      EmptyAttributeMap.getInstance(),
+                                      NamespaceMap.of("", InvalidityReportGenerator.REPORT_NS),
+                                      loc, ReceiverOption.NONE);
+
+                for (XdmNode node : reportDocs) {
+                    for (XdmNode de : node.children()) {
+                        de.getUnderlyingNode().copy(receiver, 0, loc);
+                    }
+                }
+
+                receiver.endElement();
+                receiver.endDocument();
+                receiver.close();
+            } catch (XPathException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @CSharpReplaceBody(code = "Saxon.Impl.Parallel.Validation.ValidateMultiple(processor, sources, invalidityHandler, reportDocs);")
+    private void doParallelValidation(Iterable<Source> sources, EnterpriseConfiguration config, ReportList reportDocs) throws SaxonApiException {
+        InvalidityReportGeneratorEE singleReporter = null;
         Action completionAction = null;
         BlockingQueue<Future<Outcome<Boolean>>> queue = new LinkedBlockingQueue<>();
+        ExecutorService executorService = config.getMultithreadingFactory().makeExecutorService(threadCount);
 
         for (Source source : sources) {
             if (invalidityHandler != null) {
                 XdmDestination dest = new XdmDestination();
 
-                singleTaskHandler = processor.getUnderlyingConfiguration().createValidityReporter();
-                ((InvalidityReportGeneratorEE)singleTaskHandler).setDestination(dest);
-                final InvalidityReportGeneratorEE singleReportHandler = (InvalidityReportGeneratorEE) singleTaskHandler;
-                singleReportHandler.setXsdVersion(processor.getUnderlyingConfiguration().getXsdVersion() == Configuration.XSD11 ? "1.1" : "1.0");
+                singleReporter = (InvalidityReportGeneratorEE)processor.getUnderlyingConfiguration().createValidityReporter();
+                singleReporter.setDestination(dest);
+                final InvalidityReportGeneratorEE singleReportHandler = (InvalidityReportGeneratorEE) singleReporter;
+                singleReporter.setXsdVersion(processor.getUnderlyingConfiguration().getXsdVersion() == Configuration.XSD11 ? "1.1" : "1.0");
                 try {
-                    singleReportHandler.startReporting(source.getSystemId());
+                    singleReporter.startReporting(source.getSystemId());
 
                 } catch (XPathException e) {
                     e.printStackTrace();
@@ -533,7 +565,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
                 };
             }
             final Action action = completionAction;
-            final InvalidityHandler handler = singleTaskHandler;
+            final InvalidityHandler handler = singleReporter;
             //Future<Outcome<Boolean>> result = executorService.submit(new ValidationTask(s, singleTaskHandler, completionAction));
             Future<Outcome<Boolean>> result = executorService.submit(() -> {
                 //Configuration config = processor.getUnderlyingConfiguration();
@@ -602,34 +634,14 @@ public class SchemaValidatorImpl extends SchemaValidator {
                 e.printStackTrace();
             }
         }
-
-        final Location loc = Loc.NONE;
-        if (reportDestination != null) {
-            Receiver receiver = reportDestination.getReceiver(config.makePipelineConfiguration(), config.obtainDefaultSerializationProperties());
-            try {
-                receiver.open();
-                receiver.startDocument(ReceiverOption.NONE);
-                receiver.startElement(new FingerprintedQName("", InvalidityReportGenerator.REPORT_NS, "validation-reports"),
-                                      Untyped.getInstance(),
-                                      EmptyAttributeMap.getInstance(),
-                                      NamespaceMap.of("", InvalidityReportGenerator.REPORT_NS),
-                                      loc, ReceiverOption.NONE);
-
-                for (XdmNode node : reportDocs) {
-                    for (XdmNode de : node.children()) {
-                        de.getUnderlyingNode().copy(receiver, 0, loc);
-                    }
-                }
-
-                receiver.endElement();
-                receiver.endDocument();
-                receiver.close();
-            } catch (XPathException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
+    /**
+     * A list to hold the individual validation reports, with thread-safe list append operation.
+     * It's assumed that there's a concurrent phase during which nodes are added to the list,
+     * followed by a single-threaded phase in which the list is enumerated.
+     */
+    @CSharpModifiers(code={"public"})
     private static class ReportList implements Iterable<XdmNode> {
 
         private final List<XdmNode> backing = new ArrayList<>();
@@ -644,8 +656,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         }
     }
 
-
-    @CSharpReplaceBody(code="return false;") // TODO: implement me
+    //#if CSHARP==false
     private boolean tryToFinish(ExecutorService executorService) {
         try {
             return executorService.awaitTermination(24, TimeUnit.HOURS);
@@ -655,6 +666,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
             return false;
         }
     }
+    //#endif
 
     /**
      * Validate an instance document supplied as a Source object

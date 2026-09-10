@@ -55,14 +55,14 @@ public class UnescapeNCName extends SystemFunction {
                         if (hex.length() == 0) {
                             out.append('_');
                         } else {
-                            int code = Integer.parseUnsignedInt(hex.toString(), 16);
+                            int code = Integer.parseInt(hex.toString(), 16);
                             if (!XMLCharacterData.isValid11(code)) {
                                 throw new XPathException("Invalid escaped XML character: " + hex, "FORG0001");
                             }
                             out.append(code);
                         }
                         break;
-                    } else if ("0123456789abcdefABCDEF".indexOf(digit) >= 0) {
+                    } else if (digit < 128 && "0123456789abcdefABCDEF".indexOf((char)digit) >= 0) {
                         hex.append((char)digit);
                     } else {
                         throw new XPathException("Invalid character '" + Integer.toHexString(digit) + " in escaped NCName");
