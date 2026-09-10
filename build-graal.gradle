@@ -6,7 +6,7 @@ private String findGraalHome(String edition) {
   if (home == null) {
     String prefix = "graalvm-${edition.toLowerCase()}"
     // Where might we find GraalVM?
-    ["/Library/Java/JavaVirtualMachines", "/lib/jvm", "C:/GraalVM"].each { root ->
+    ["/Library/Java/JavaVirtualMachines", "/lib/jvm", "/opt", "C:/GraalVM"].each { root ->
       File rdir = new File(root)
       if (rdir.exists() && rdir.isDirectory()) {
         rdir.list().each { fn ->
