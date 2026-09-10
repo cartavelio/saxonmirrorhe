@@ -662,8 +662,7 @@
  
         <h2>Extension Instructions</h2>
         
-        <p>A new instruction <a class="bodylink code" href="/extensions/instructions/for-each-member">saxon:for-each-member</a> is
-            available; it iterates over the members of a supplied array.</p>
+        <p>A new instruction <code>saxon:for-each-member</code> is available; it iterates over the members of a supplied array.</p>
         
         <p>For example:</p>
         

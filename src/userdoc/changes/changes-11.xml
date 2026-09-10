@@ -441,6 +441,11 @@
             <code>composite="no"</code>, the members of the array must be singletons, and are returned by the sequence constructor
             as a normal sequence of items.</p>
         
+        <p>The <code>saxon:for-each-member</code> instruction, introduced in Saxon 10, has been dropped. For
+            new alternative methods to interate over the members of an array, see <a class="bodylink"
+                href="/v4extensions/xslt-syntax-extensions/iteration-maps-arrays">Iterating over maps and
+                arrays</a>.</p>
+        
  
         <h2>XPath Syntax Extensions</h2>
         
