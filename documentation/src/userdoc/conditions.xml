@@ -19,7 +19,7 @@
   <ul>
     <li>
       <p><i>Category A</i> consists of open-source code which was written as part of Saxon either by the initial
-        developer, or by another contributor. All such components are subject only to the MPL 2.0
+        developer, or by another contributor. All such components are made available subject to the MPL 2.0
         license. Details of third-party <a class="bodylink" href="contributors">Contributions</a> are provided, for
         information.</p>
     </li>
@@ -94,12 +94,13 @@
   
   <p>Saxonica does not actively solicit contributions to the code from external developers. We will accept
   contributions only if the requirements and design have been agreed in advance, if comprehensive test material 
-  is supplied in a suitable form, and if a contribution agreement is signed.</p>
+  is supplied in a suitable form, and if a contribution agreement is signed. We will only accept contributions
+  whose quality we can determine by inspection, which generally rules out any code generated using AI tools.</p>
  
   
   <p>SaxonJ-HE includes a separate JAR file, <code>saxon-xqj-13.x.jar</code>, which contains Saxon's
     support for the XQJ interface, a standard API for access to XQuery engines from Java. In
-    previous Saxon releases this was made available as part of the main JAR file. It has been
+    earlier Saxon releases this was made available as part of the main JAR file. It has been
     decoupled because it has been pointed out that the license under which Oracle distributes XQJ is
     not a pure open source license under the definition used by the Open Source Initiative:
     specifically, it does not allow modifications, and it does not allow redistribution except as
@@ -140,13 +141,51 @@
         components gives you additional rights, which are described above.</p>
   </div>
   <div class="csonly">
+    
+    <p>SaxonCS is built from SaxonJ by converting the Java source code of SaxonJ to C#, using a transpiler
+    developed and owned by Saxonica. The transpiler is written largely in XSLT 3.0, but also makes use of the open-source 
+        <a href="http://javaparser.org" class="bodylink">javaparser</a> library.</p>
+    
+    <p>SaxonCS products are targeted at .NET 10, and do not run on .NET Framework.</p>
+    
+    <p>From Saxon 13, two SaxonCS products are shipped: SaxonCS-HE and SaxonCS-EE. These are described in the 
+    following sections. There is no product corresponding to SaxonJ-PE.</p>
+    
+    <h2 class="subtitle">SaxonCS-HE</h2>
+
+    <p>SaxonCS-HE is released for the first time at version 13.0, with functionality corresponding
+      very closely to the functionality of the SaxonJ-HE product, but converted to C#.</p>
+    
+    <p>The C# code used to build SaxonCS-HE is in two parts: native (hand-written) C# code specific to
+    this product, and C# code generated from the source code of SaxonJ-HE, using a transpiler
+    developed and owned by Saxonica. In licensing terms, this makes SaxonCS-HE, in the language
+    of the Mozilla Public License, an "executable form" of the open-source SaxonJ-HE product.
+    It is therefore made available under the MPL, which means it technically counts as an open source product,
+    the source in question being the original Java.
+    However, because the tools used to build the product from its original Java source code are not
+    made generally available, the normal properties of open source software (such as the ability
+    to edit the source and produce a modified version) do not apply; for all practical purposes
+    the product can be considered to be closed-source software made available free of charge.</p>
+    
+    <p>Saxonica proposes to make the C# code of SaxonCS-HE available in a public repository.
+    This will contain a mixture of human-written C# source code and transpiler-generated C# code.
+    This will be made available to help users who need a deep understanding of the product's behaviour,
+    but there is no license to make modifications or copies of the code.</p>
+    
+    <aside>
+      <p>The reason the transpiler is not made publicly available is that it has not been developed
+      to the standard needed to enable use by third parties. For example, it only handles a subset
+      of the Java language, and that subset is not well documented. It would require considerable
+      development to enable it to handle any signficant Java code base other than Saxon itself.</p>
+    </aside>
+    
+    
     <h2 class="subtitle">SaxonCS-EE</h2>
+
     <p>SaxonCS-EE is a commercial Saxonica product built from the following components:</p>
     
     <ol>
-      <li><p>The Java source code of SaxonJ-EE (see above), converted to C# using a Saxonica-produced transpiler.
-        The transpiler is written largely in XSLT 3.0, but also makes use of the open-source 
-        <a href="http://javaparser.org" class="bodylink">javaparser</a> library.</p></li>
+      <li><p>The Java source code of SaxonJ-EE (see above), converted to C# using a Saxonica-produced transpiler.</p></li>
       <li><p>Additional Saxonica-owned code written in C#, to provide a C# API and to integrate with .NET
         components such as the <code>System.Xml.XmlReader</code> parser.</p></li>
       <li><p>Third party libraries referenced by means of <code>nuget</code> dependencies. These libraries are 
@@ -161,8 +200,8 @@
           <li>ICU4N.RegionData</li>
           <li>ICU4N.Transliterator</li>
           <li>Microsoft.AspNetCore.StaticFiles</li>
-          <li>Org.XmlResolver</li>
-          <li>Org.XmlResolverData</li>
+          <li>XmlResolver</li>
+          <li>XmlResolverData</li>
           <li>Singulink.Numerics.BigDecimal</li>
           <li>Singulink.Numerics.BigIntegerExtensions</li>
           <li>System.Collections.Immutable</li>
@@ -207,13 +246,13 @@
   <h2 class="subtitle">Redistribution</h2>
 
   <div class="javaonly">
-      <p>Redistribution of SaxonJ-HE is freely permitted under the terms of the Mozilla Public
+      <p>Redistribution of SaxonJ-HE and SaxonCS-HE is freely permitted under the terms of the Mozilla Public
       License 2.0. Note that this requires inclusion of all the necessary notices. If any source code
       changes are made, the license requires that they be published (or at any rate, made available to
       your users); but you are not required to publish the source of your own application code if it
       is in separate modules.</p>
   
-    <p>If you produce a product that includes or requires SaxonJ-HE, please refer to it prominently as
+    <p>If you produce a product that includes or requires SaxonJ-HE or SaxonCS-HE, please refer to it prominently as
       "The Saxon XSLT and XQuery Processor from Saxonica Limited", and include the URL of the home
       page, which is at <a href="https://www.saxonica.com/" class="bodylink"
         >https://www.saxonica.com/</a>. As a courtesy, please take reasonable steps to ensure that your
@@ -240,7 +279,7 @@
 
     <p>All contributors listed in this section explicitly asked or agreed to have their code
       published as part of the Saxon open source product and thus explicitly or implicitly agreed to
-      its release under some version of the Mozilla public license. Saxonica has made the decision
+      its release under some version of the Mozilla public license. Saxonica made the decision
       (from release 9.5) to move forward to Mozilla Public License version 2.0, as permitted by
       earlier versions of the MPL.</p>
 
@@ -552,98 +591,7 @@
     
 
    
-    <h2 class="subtitle">B2 XPath parser</h2>
-
-    <table border="1">
-      <tr>
-        <td>
-          <p>Origin</p>
-        </td>
-        <td>
-          <p>James Clark (www.jclark.com)</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Description</p>
-        </td>
-        <td>
-          <p>Top-down parser and lexical tokenizer for XPath</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Approximate LOC</p>
-        </td>
-        <td>
-          <p>1000 (including data sets)</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Saxon packages / modules</p>
-        </td>
-        <td>
-          <p><code>net.sf.saxon.expr.*</code>, modules <code>XPathParser</code>,
-              <code>Tokenizer</code>, <code>Token</code>. Used in both the Java and C# products.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Modifications</p>
-        </td>
-        <td>
-          <p>Almost entirely rewritten over the years, with enhancements to handle XPath 2.0/3.0/3.1 and XQuery 1.0/3.0/3.1
-            syntax, improved error reporting, etc.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Availability of source</p>
-        </td>
-        <td>
-          <p>Derives from James Clark's xt product, which in its original form is at
-              <code>http://www.jclark.com/xml/xt-old.html</code>. Package
-              <code>com.jclark.xsl.expr</code>, modules <code>ExprParser</code> and
-              <code>ExprTokenizer</code></p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>Source version used</p>
-        </td>
-        <td>
-          <p>Unknown. Snapshot taken in 1999.</p>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <p>License</p>
-        </td>
-        <td>
-          <p>James Clark (see below). Apparently copyright has since been transferred to the Thai
-            Open Source Center Ltd.</p>
-        </td>
-      </tr>
-    </table>
-    <aside> Copyright (c) 1998, 1999 James Clark<br/>
-      <br/> Permission is hereby granted, free of charge, to any person obtaining a copy of this
-      software and associated documentation files (the "Software"), to deal in the Software without
-      restriction, including without limitation the rights to use, copy, modify, merge, publish,
-      distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
-      Software is furnished to do so, subject to the following conditions:<br/>
-      <br/> The above copyright notice and this permission notice shall be included in all copies or
-      substantial portions of the Software.<br/>
-      <br/> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-      INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-      PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL JAMES CLARK BE LIABLE FOR ANY CLAIM, DAMAGES OR
-      OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-      IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br/>
-      <br/> Except as contained in this notice, the name of James Clark shall not be used in
-      advertising or otherwise to promote the sale, use or other dealings in this Software without
-      prior written authorization from James Clark.<br/>
-      <br/>
-    </aside>
+    
 
     <h2 class="subtitle">B3 Apache Jakarta Regexp engine</h2>
 
@@ -798,6 +746,84 @@
         </td>
       </tr>
     </table>
+    
+    <h2 class="subtitle">B6 JSON numeric canonicalization</h2>
+
+    <p>Formatting of floating point numbers into the format mandated by the JSON canonicalization spec.</p>
+
+    <table border="1">
+      <tr>
+        <td>
+          <p>Origin</p>
+        </td>
+        <td>
+          <p>Cloned from https://github.com/erdtman/java-json-canonicalization.
+            The package has full support for JSON Canonicalization (RFC8785). The only part Saxon uses
+            is the double-to-string conversion, but this is the majority of the code.</p>
+          <p>Copyright 2006-2018 WebPKI.org (http://webpki.org).
+            Apache License.</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Description</p>
+        </td>
+        <td>
+          <p>JSON Canonical number representation</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Approximate LOC</p>
+        </td>
+        <td>
+          <p>2100</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Saxon packages / modules</p>
+        </td>
+        <td>
+          <p>Package net.sf.saxon.serialize.jcs 
+            Included in both the Java and C# products; however, the C# version is inactive.</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Modifications</p>
+        </td>
+        <td>
+          <p>Very minor modifications to enable transpilation of the source code to C#. Changes listed
+          in the package-info.java file.</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Availability of source</p>
+        </td>
+        <td>
+          <p>https://github.com/erdtman/java-json-canonicalization</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>Source version used</p>
+        </td>
+        <td>
+          <p>Snapshot taken on 2025-12-12</p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>License</p>
+        </td>
+        <td>
+          <p>Apache License, version 2.0</p>
+        </td>
+      </tr>
+    </table>
+
 
     
     
@@ -856,47 +882,7 @@
       dealings in this Software without prior written authorization of the copyright holder. <br/>
     </aside>
     
-    <p>
-      <strong>VAVR</strong>
-    </p>
-      
-    <p>See https://vavr.io</p>
-      
-    <p>VAVR is a library of functional (also called persistent or immutable) data structures
-    such as trees and lists. SaxonJ (from release 13) uses the VAVR library to underpin
-    its implementation of XDM maps, and for various other purposes.</p>
-      
-      <p>At the time of writing the main VAVR release (version 0.10.5) has a performance bug
-      (see https://github.com/vavr-io/vavr/issues/2727) that seriously affects Saxon.
-      Saxon is therefore using a fork of the VAVR library that resolves this problem
-      by reimplementing the affected data structure using a tree design called a
-      CHAMP-trie. The relevant code is at https://github.com/wrandelshofer/vavr.</p>
-      
-      <p>The code is available under the MIT license:</p>
-      
-      <aside>
-Copyright 2024 Vavr, https://vavr.io
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. 
-      </aside>
-      
-
+    
     <p>
       <strong>XQJ</strong>
     </p>
