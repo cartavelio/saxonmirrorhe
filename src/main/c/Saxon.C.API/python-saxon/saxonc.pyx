@@ -585,7 +585,6 @@ cdef class PySaxonProcessor:
 
 
         if len(dataMap) == 0:
-            print("make_map is none")
             return None
 
         newMap_ = PyXdmMap()
@@ -1922,10 +1921,12 @@ cdef class PyXsltExecutable:
         if type_== 4:
             aval = PyXdmAtomicValue()
             aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmValue
+            aval.thisvptr.incrementRefCount()
             return aval
         elif type_ == 3:
             nval = PyXdmNode()
             nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmValue
+            nval.thisvptr.incrementRefCount()
             return nval
         elif type_ == 5:
             fval = PyXdmFunctionItem()
@@ -3484,6 +3485,7 @@ cdef class PyXdmValue:
         if type(self) is PyXdmValue and self.thisvptr != NULL:
             if self.thisvptr.getRefCount() < 1:
                 del self.thisvptr
+                self.thisvptr = NULL
             else:
                 self.thisvptr.decrementRefCount()
      def add_xdm_item(self, PyXdmItem value):
@@ -3665,6 +3667,7 @@ cdef class PyXdmItem(PyXdmValue):
         if type(self) is PyXdmItem and self.derivedptr != NULL:
             if self.derivedptr.getRefCount() < 1:
                 del self.derivedptr
+                self.derivedptr = self.thisvptr = NULL
             else:
                 self.derivedptr.decrementRefCount()
         '''if type(self) is PyXdmItem:
@@ -3809,6 +3812,7 @@ cdef class PyXdmNode(PyXdmItem):
         if type(self) is PyXdmNode and self.derivednptr != NULL:
                  if self.derivednptr.getRefCount() < 1:
                      del self.derivednptr
+                     self.derivednptr = self.derivedptr = self.thisvptr = NULL
                  else:
                      self.derivednptr.decrementRefCount()
      @property

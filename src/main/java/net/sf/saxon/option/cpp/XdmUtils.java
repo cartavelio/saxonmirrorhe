@@ -98,13 +98,15 @@ public class XdmUtils {
         return holder.get();
     }
 
-    @CEntryPoint(name = "getStringValueForXdmItem")
-    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value) {
+    @CEntryPoint(name = "getStringValueForXdmItem", exceptionHandler = SaxonCExceptionCCharHandler.class)
+    public static CCharPointer getStringValue_XdmItem(IsolateThread thread, SaxonCAPI.AllocatorCCharFn alloc, ObjectHandle value)  throws SaxonApiException {
         if(value == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
         }
         XdmItem item = SaxonCAPI.objectHandles.get(value);
-
+        if(item == null) {
+            throw new SaxonApiException("XdmItem is null cannot getStringValue");
+        }
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.getStringValue());
         return a;
     }
