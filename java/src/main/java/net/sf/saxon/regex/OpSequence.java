@@ -104,6 +104,20 @@ public class OpSequence extends Operation {
         return 0;
     }
 
+    /**
+     * Ask whether the expression is allowed within a lookbehind
+     */
+
+    @Override
+    public boolean isAllowedWithinLookbehind() {
+        for (Operation op : operations) {
+            if (!op.isAllowedWithinLookbehind()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean containsCapturingExpressions() {
         for (Operation o : operations) {

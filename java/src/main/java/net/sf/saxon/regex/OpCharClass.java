@@ -46,6 +46,15 @@ public class OpCharClass extends Operation {
         }
     }
 
+    /**
+     * Ask whether the expression is allowed within a lookbehind
+     */
+
+    @Override
+    public boolean isAllowedWithinLookbehind() {
+        return true;
+    }
+
     @Override
     public IntIterator iterateMatches(REMatcher matcher, int position) {
         UnicodeString in = matcher.search;

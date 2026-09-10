@@ -63,6 +63,23 @@ public class OpChoice extends Operation {
         return m;
     }
 
+    /**
+     * Ask whether the expression is allowed within a lookbehind
+     */
+
+    @Override
+    public boolean isAllowedWithinLookbehind() {
+        for (Operation op : branches) {
+            if (!op.isAllowedWithinLookbehind()) {
+                return false;
+            }
+            if (op.getMatchLength() == -1) {
+                throw new RESyntaxException("Lookbehind alternatives must all be fixed-length");
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean containsCapturingExpressions() {
         for (Operation o : branches) {

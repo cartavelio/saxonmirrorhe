@@ -65,6 +65,15 @@ public class OpAtom extends Operation {
         return new SingletonCharacterClass(atom.codePointAt(0));
     }
 
+    /**
+     * Ask whether the expression is allowed within a lookbehind
+     */
+
+    @Override
+    public boolean isAllowedWithinLookbehind() {
+        return true;
+    }
+
     @Override
     public IntIterator iterateMatches(REMatcher matcher, int position) {
         UnicodeString in = matcher.search;

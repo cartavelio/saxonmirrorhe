@@ -26,8 +26,11 @@ public class OpLookbehind extends Operation {
 
     OpLookbehind(Operation childOp, boolean positive) throws RESyntaxException {
         this.childOp = childOp;
+        if (!childOp.isAllowedWithinLookbehind()) {
+            throw new RESyntaxException("Disallowed construct within lookbehind: " + childOp.display());
+        }
         if (childOp instanceof OpChoice) {
-            for (Operation op : ((OpChoice)childOp).branches) {
+            for (Operation op : ((OpChoice) childOp).branches) {
                 if (op.getMatchLength() == -1) {
                     throw new RESyntaxException("Lookbehind alternatives must all be fixed-length");
                 }
