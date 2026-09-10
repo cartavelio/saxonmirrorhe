@@ -1109,7 +1109,7 @@ tasks.register("pyBuildVenv") {
         workingDir layout.buildDirectory.dir("${edition}c_pypi")
 
         executable file(project.pythonEnv.venvPython)
-        args "setup.py", "bdist_wheel"
+        args "-m", "build", "--wheel"
       }
     }
   }
