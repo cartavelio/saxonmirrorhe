@@ -416,11 +416,18 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
             // module.
 
             if (compiledFunction == null) {
+                ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
+
                 SlotManager map = config.makeSlotManager();
                 UserFunctionParameter[] params = getParameterDefinitions();
                 for (int i = 0; i < params.length; i++) {
                     params[i].setSlotNumber(i);
                     map.allocateSlotNumber(params[i].getVariableQName(), params[i]);
+                    if (params[i].getDefaultValueExpression() != null) {
+                        Expression defaultExpr = params[i].getDefaultValueExpression().get();
+                        Expression def2 = defaultExpr.typeCheck(visitor, ContextItemStaticInfo.DEFAULT);
+                        params[i].setDefaultValueExpression(() -> def2);
+                    }
                 }
 
                 // type-check the body of the function
@@ -430,7 +437,6 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
                     rsc = getStaticContext().makeRetainedStaticContext();
                     body.setRetainedStaticContext(rsc);
 
-                    ExpressionVisitor visitor = ExpressionVisitor.make(staticContext);
                     body = body.simplify().typeCheck(visitor, ContextItemStaticInfo.ABSENT);
 
                     // Try to extract new global variables from the body of the function
