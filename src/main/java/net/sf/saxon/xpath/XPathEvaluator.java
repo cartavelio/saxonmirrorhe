@@ -157,6 +157,7 @@ public class XPathEvaluator implements XPath {
      * of features defined in XPath 2.0 or later versions; it merely causes selected
      * features (as defined in the XPath specification) to retain 1.0 behavior
      * @param enabled set to true to enable 1.0 compatibility mode (default is false).
+     * @since 13.0
      */
 
     public void setBackwardsCompatibilityMode(boolean enabled) {
@@ -166,6 +167,7 @@ public class XPathEvaluator implements XPath {
     /**
      * Ask if XPath 1.0 backwards compatibility mode is enabled.
      * @return true if 1.0 compatibility mode is enabled (default is false).
+     * @since 13.0
      */
 
     public boolean isBackwardsCompatibilityMode() {
