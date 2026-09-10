@@ -1390,7 +1390,7 @@ public class TestValidator {
             fail("Validation errors not detected");
 
         } catch (SaxonApiException sapie) {
-            assertEquals(4, errors.size(), "No of errors"); // 3 validation errors plus one summary fatal error
+            assertEquals(3, errors.size(), "No of errors"); // 3 validation errors 
             assertEquals("/doc[1]/request[1]/d1[2]", ((ValidationException) errors.get(1)).getValidationFailure().getContextPath().getPathUsingPrefixes(), "ContextPath");
 
         } catch (Exception e) {

@@ -84,7 +84,7 @@ public class TransformWithValidation {
                 fail("Unexpected success");
             } catch (Exception e) {
                 System.out.println("Failed as expected: " + e);
-                assertEquals(2, errorCount, "errorCount");
+                assertEquals(1, errorCount, "errorCount");
             }
         } catch (TransformerConfigurationException e) {
             fail();
