@@ -816,6 +816,7 @@ def main(argv):
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
 
     diri = None
+    catalog_name = "catalog.xml"
 
     if len(sys.argv) > 1:
         diri = str(sys.argv[1])
@@ -824,27 +825,31 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:", ["testpattern", "testset", "resultdir"])
+            opts, args = getopt.getopt(argvv, "hc:t:s:o:", ["catalog","testpattern", "testset", "resultdir"])
         except getopt.GetoptError:
-            print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
+            print('xslt30_test_suite_driver.py -c <catalogname> -t <testpattern> -s <testset> -o <resultdir>')
             sys.exit(2)
 
         for opt, arg in opts:
             if opt == '-h':
-                print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir>')
+                print('HELP: xslt30_test_suite_driver.py -c <catalogname> -t <testpattern> -s <testset> -o <resultdir>')
                 sys.exit()
             elif opt in ("-t", "--testpattern"):
                 run_test_case_name = arg
             elif opt in ("-s", "--testset"):
                 run_test = arg
                 print('Test set= ', run_test)
+            elif opt in ("-c", "--catalog"):
+                catalog_name = arg
 
             elif opt in ("-o", "--resultdir"):
                 results_path = arg
 
     '''dir = os.getcwd()'''
-    path = diri + "/xslt30-test/"
-    catalog = path + "catalog.xml"
+    path = diri + '/'
+    catalog = path + catalog_name
+
+    print("catalog=" + catalog)
 
     process_catalog(path, catalog)
 

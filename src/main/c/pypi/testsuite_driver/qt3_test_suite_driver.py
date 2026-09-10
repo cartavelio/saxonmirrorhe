@@ -914,6 +914,7 @@ def main(argv):
 
     diri = None
     spec = None
+    catalog_name = "catalog.xml"
 
     if len(sys.argv) > 1:
         diri = ""
@@ -929,7 +930,7 @@ def main(argv):
         argvv = argv[1:]
 
         try:
-            opts, args = getopt.getopt(argvv, "ht:s:o:l:", ["testpattern", "testset", "resultdir", "lang"])
+            opts, args = getopt.getopt(argvv, "hc:t:s:o:l:", ["catalog", "testpattern", "testset", "resultdir", "lang"])
         except getopt.GetoptError:
             print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -l <processor language>')
             sys.exit(2)
@@ -937,7 +938,7 @@ def main(argv):
         print(args)
         for opt, arg in opts:
             if opt == '-h':
-                print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> -l <language>')
+                print('HELP: qt3_test_suite_driver.py -c <catalogname> -t <testpattern> -s <testset> -o <resultdir> -l <language>')
                 sys.exit()
             elif opt in ("-t", "--testpattern"):
                 run_test_case_name = arg
@@ -946,6 +947,8 @@ def main(argv):
                 print('Test set= ', run_test)
             elif opt in ("-o", "--resultdir"):
                 results_path = arg
+            elif opt in ("-c", "--catalog"):
+                catalog_name = arg
 
             elif opt in ("-l", "--lang"):
                 host_lang = arg
@@ -958,7 +961,7 @@ def main(argv):
         sys.exit(2)
 
     path = diri + "/"
-    catalog = path + "catalog.xml"
+    catalog = path + catalog_name
 
     process_catalog(path, catalog)
 
