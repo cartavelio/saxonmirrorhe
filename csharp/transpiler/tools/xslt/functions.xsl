@@ -155,6 +155,7 @@
       'java.util.TreeMap': 'System.Collections.Generic.SortedDictionary',
       'java.util.TreeSet': 'System.Collections.Generic.SortedSet',
       'java.util.Stack': 'System.Collections.Generic.Stack',
+      'net.sf.saxon.CommandExitException': 'Saxon.Api.CommandExitException',
       'net.sf.saxon.expr.sort.LFUCache.EntryWithCounter': 'net.sf.saxon.expr.sort.LFUCache&lt;K,V>.EntryWithCounter',
       (: 'net.sf.saxon.lib.ExtensionFunctionCall': 'Saxon.Api.ExtensionFunctionCall', :)
       (: 'net.sf.saxon.lib.ExtensionFunctionDefinition': 'Saxon.Api.ExtensionFunctionDefinition', :)
