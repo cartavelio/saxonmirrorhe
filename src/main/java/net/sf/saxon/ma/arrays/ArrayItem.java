@@ -183,4 +183,4 @@ public abstract class ArrayItem implements Function {
     
 }
 
-// Copyright (c) 2014-2020 Saxonica Limited
+// Copyright (c) 2014-2022 Saxonica Limited

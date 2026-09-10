@@ -318,4 +318,4 @@ public class ArrayItemType extends AnyFunctionType {
 
 }
 
-// Copyright (c) 2015-2020 Saxonica Limited
+// Copyright (c) 2015-2022 Saxonica Limited

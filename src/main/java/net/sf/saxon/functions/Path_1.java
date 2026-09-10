@@ -101,5 +101,5 @@ public class Path_1 extends ScalarSystemFunction {
 
 }
 
-// Copyright (c) 2012-2020 Saxonica Limited
+// Copyright (c) 2012-2022 Saxonica Limited
 
