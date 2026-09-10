@@ -183,7 +183,7 @@ public class Environment implements URIResolver {
         environment.xpathCompiler.setLanguageVersion(xpVersion);
         environment.xqueryCompiler = environment.processor.newXQueryCompiler();
         environment.xqueryCompiler.setBaseURI(env.getBaseURI());
-        environment.xqueryCompiler.setLanguageVersion(xpVersion);
+        environment.xqueryCompiler.setLanguageVersion(xpVersion.equals("2.0") ? "3.1" : xpVersion);
         if (driver.spec.shortSpecName.equals("XT")) {
             environment.xsltCompiler = environment.processor.newXsltCompiler();
             environment.xsltCompiler.setXsltLanguageVersion(driver.spec.version);

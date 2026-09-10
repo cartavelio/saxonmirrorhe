@@ -40,6 +40,7 @@
   <test-case name="new-element-04">
     <description>Element with attribute content</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP30+ XQ30+"/>
     <test><![CDATA[saxon:new-element(QName('', 'a'), parse-xml("<x y='3'/>")//@*)]]></test>
     <result>
       <all-of>

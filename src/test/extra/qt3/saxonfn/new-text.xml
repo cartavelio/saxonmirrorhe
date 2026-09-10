@@ -54,6 +54,7 @@
   <test-case name="new-text-05">
     <description>Ampersands are OK (test written to work in both XPath and XQuery)</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP30+ XQ30+"/>
     <test>saxon:new-text('foo'|| codepoints-to-string(38) ||'bar')</test>
     <result>
       <assert-string-value><![CDATA[foo&bar]]></assert-string-value>

@@ -16,6 +16,7 @@
   <test-case name="new-document-02">
     <description>Basic test - document with element content</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP30+ XQ30+"/>
     <test><![CDATA[saxon:new-document(parse-xml("<a/>"))]]></test>
     <result>
       <all-of>
@@ -28,6 +29,7 @@
   <test-case name="new-document-03">
     <description>Basic test - document with element content and comments</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP30+ XQ30+"/>
     <test><![CDATA[saxon:new-document(parse-xml("<!--BEFORE--><a/><!--AFTER-->"))]]></test>
     <result>
       <all-of>
@@ -40,6 +42,7 @@
   <test-case name="new-document-04">
     <description>Basic test - document fragment</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP30+ XQ30+"/>
     <test><![CDATA[saxon:new-document(parse-xml-fragment("<a/><b/>"))]]></test>
     <result>
       <all-of>
@@ -62,6 +65,7 @@
   <test-case name="new-document-06">
     <description>array in content</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP31+ XQ31+"/>
     <test>saxon:new-document([1 to 5])</test>
     <result>
       <assert-string-value>1 2 3 4 5</assert-string-value>
@@ -71,6 +75,7 @@
   <test-case name="new-document-50">
     <description>Worked example</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP31+ XQ31+"/>
     <test><![CDATA[
       let $json := '[ 
                      {"first":"Michael",
@@ -94,6 +99,7 @@
   <test-case name="new-document-90">
     <description>attributes not allowed in document content</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP30+ XQ30+"/>
     <test><![CDATA[saxon:new-document(parse-xml("<a id='3'/>")//@id)]]></test>
     <result>
       <error code="XTDE0420"/>
@@ -103,6 +109,7 @@
   <test-case name="new-document-91">
     <description>maps not allowed in document content</description>
     <created by="Michael Kay" on="2020-02-09"/>
+    <dependency type="spec" value="XP30+ XQ30+"/>
     <test><![CDATA[saxon:new-document(map{'a':22})]]></test>
     <result>
       <error code="XTDE0450"/>
