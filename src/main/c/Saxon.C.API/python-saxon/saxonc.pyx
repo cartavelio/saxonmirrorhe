@@ -1631,7 +1631,7 @@ cdef class PyXsltExecutable:
         Clear all properties set on the processor
         """
         self.thisxptr.clearProperties()
-     def set_initial_template_parameters(self, bool tunnel, dict parameters):
+     def set_initial_template_parameters(self, bool tunnel, dict kwds):
         """
         set_initial_template_parameters(self, bool tunnel, dict kwds)
         Set parameters to be passed to the initial template. These are used
