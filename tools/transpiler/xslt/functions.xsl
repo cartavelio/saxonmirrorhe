@@ -52,6 +52,11 @@
       'java.lang.System#out' : 'Out',
       'java.lang.System#in' : 'In'}"/>
    
+   <xsl:variable name="renamedClasses" as="map(xs:string, xs:string)" select="map{
+      'ResourceResolver': 'JJ_ResourceResolver',
+      'ResourceRequest': 'JJ_ResourceRequest'
+      }"/>
+   
    <!-- The following table defines mappings from Java class names to .NET class names. -->
    <!-- These class names are translated wherever they appear. The fields, methods,
       and constructors applied to the class are translated according to the rules
@@ -149,10 +154,14 @@
       (: 'net.sf.saxon.lib.ExtensionFunctionDefinition': 'Saxon.Api.ExtensionFunctionDefinition', :)
       'net.sf.saxon.functions.ParseXmlFragment': 'Saxon.Impl.Helpers.ParseXmlFragment',
       'net.sf.saxon.lib.CatalogResourceResolver': 'Saxon.Callbacks.CatalogResourceResolver',
-      'net.sf.saxon.lib.CommonResourceResolver': 'Saxon.Callbacks.CommonResourceResolver',
+      'net.sf.saxon.lib.ConfigurableResourceResolver': 'Saxon.Callbacks.ConfigurableResourceResolver',
+      (:'net.sf.saxon.lib.CommonResourceResolver': 'Saxon.Callbacks.CommonResourceResolver',:)
+      'net.sf.saxon.lib.DirectResourceResolver': 'Saxon.Callbacks.DirectResourceResolver',
+      'net.sf.saxon.lib.ResourceRequest': 'Saxon.Hej.lib.JJ_ResourceRequest',
+      'net.sf.saxon.lib.ResourceResolver': 'Saxon.Hej.lib.JJ_ResourceResolver',
       'net.sf.saxon.lib.StandardLogger': 'Saxon.Callbacks.StandardLogger',
-      'net.sf.saxon.lib.StandardModuleURIResolver': 'Saxon.Callbacks.StandardModuleURIResolver',
-      'net.sf.saxon.lib.StandardUnparsedTextResolver': 'Saxon.Callbacks.StandardUnparsedTextResolver',
+      (:'net.sf.saxon.lib.StandardModuleURIResolver': 'Saxon.Callbacks.StandardModuleURIResolver',:)
+      (:'net.sf.saxon.lib.StandardUnparsedTextResolver': 'Saxon.Callbacks.StandardUnparsedTextResolver',:)
       'net.sf.saxon.lib.StandardURIResolver': 'Saxon.Callbacks.StandardURIResolver',
       'net.sf.saxon.ma.arrays.ImmutableArrayItem': 'Saxon.Impl.DataModel.ImmArray',
       'net.sf.saxon.ma.map.HashTrieMap': 'Saxon.Impl.DataModel.ImmMap',
@@ -184,7 +193,8 @@
       'net.sf.saxon.resource.Loader': 'Saxon.Impl.Overrides.ResourceLoader',
       (:'net.sf.saxon.s9api.XmlProcessingError': 'Saxon.Api.XmlProcessingError':)
       'net.sf.saxon.tree.util.ProcInstParser': 'Saxon.Impl.Helpers.ProcInstParser',
-      'net.sf.saxon.tree.jiter.MappingJavaIterator': 'Saxon.Impl.Overrides.MappingEnumerator'
+      'net.sf.saxon.tree.jiter.MappingJavaIterator': 'Saxon.Impl.Overrides.MappingEnumerator',
+      'org.xmlresolver.ResolverFeature': 'Org.XmlResolver.Features.ResolverFeature'
       }"/>
    
    <xsl:variable name="jdkExceptionTypes" as="xs:string*" select="

@@ -9,8 +9,7 @@ import net.sf.saxon.s9api.*;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ToXml {
 
@@ -20,12 +19,29 @@ public class ToXml {
     private boolean DEBUG = false;
 
     /**
-     * Main program with three arguments. The program processes an input directory of Java source
-     * code, recursively, and outputs a corresponding directory containing XML files with the abstract
-     * syntax tree of the input. It then converts these XML files back to Java to check that everything
-     * is working.
+     * List of classes that are renamed (by prefixing with "JJ_") to make them less visible as public classes,
+     * because they otherwise have the same local name as a class in the public API. The list needs to be
+     * kept aligned with the list in functions.xsl
+     */
+
+    private static List<String> internalClasses = new ArrayList<>();
+    static {
+        internalClasses.add("ResourceResolver.cs");
+        internalClasses.add("ResourceRequest.cs");
+    }
+
+    /**
+     * Main program with three arguments.
      *
-     * @param args 0:input directory 1:output XML directory 2:output Java/C# directory
+     * With the arguments -j:dir and -xml:dir, the program processes an input directory of Java source
+     * code, recursively, and outputs a corresponding directory containing XML files with the abstract
+     * syntax tree of the input. The -h:dir argument identifies a directory containing an older version
+     * of the Java input, allowing the conversion to be skipped if the input has not changed.
+     *
+     * With the arguments -xml:dir and -cs:dir, the program processes the directory of XML files, and
+     * converts each file to C#. The -digest argument identifies a digest file containing details of the
+     * classes and methods, primarily so that C# "virtual" and "override" modifiers can be attached to
+     * methods where required.
      * @throws Exception on failure
      */
 
@@ -327,7 +343,11 @@ public class ToXml {
         } else if (filename.endsWith(".xml") && file.canRead()) {
             try {
                 System.err.println("Processing file " + file);
-                File csOut = new File(csDir, filename.replace(".xml", ".cs"));
+                String csFileName = filename.replace(".xml", ".cs");
+                if (internalClasses.contains(csFileName)) {
+                    csFileName = "JJ_" + csFileName;
+                }
+                File csOut = new File(csDir, csFileName);
                 csDir.mkdirs();
                 Xslt30Transformer trans = xmlToCSharp.load30();
                 Map<QName, XdmValue> params = new HashMap<>();
