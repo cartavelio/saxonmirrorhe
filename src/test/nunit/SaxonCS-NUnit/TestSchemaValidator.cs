@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
 using System.IO;
-using System.Text;
 using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
-using Saxon.Hej.trace;
 using Processor = Saxon.Api.Processor;
 using SchemaManager = Saxon.Api.SchemaManager;
 using SchemaValidator = Saxon.Api.SchemaValidator;
-using XdmDestination = Saxon.Api.XdmDestination;
 
 namespace SaxonCS_NUnit {
     internal class TestSchemaValidator {

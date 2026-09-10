@@ -1,19 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using NUnit.Framework;
 using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
-using Saxon.Hej.om;
-using Saxon.Hej.tree.util;
-using Saxon.Hej.tree.wrapper;
-using Saxon.Impl.XDoc;
 
 namespace SaxonCS_NUnit {
     public class TestLinq {

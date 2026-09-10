@@ -11,8 +11,6 @@ using Saxon.Api;
 using NUnit.Framework;
 using System.Xml;
 using Saxon.Hej;
-using Saxon.Hej.expr.instruct;
-using Saxon.Hej.functions;
 using Saxon.Hej.om;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
@@ -965,7 +963,7 @@ namespace SaxonCS_NUnit {
                                 Configuration config = proc.Implementation;
                                 SchemaType parentType = parent.Implementation.getSchemaType();
                                 int fp = config.getNamePool().allocateFingerprint(NamespaceUri.of(qName.Uri), qName.LocalName);
-                                int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, schema, true);
+                                int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
                                 return new XdmAtomicValue(Cardinality.allowsZero(cardinality));
                             });
                 XsltCompiler comp = proc.NewXsltCompiler();

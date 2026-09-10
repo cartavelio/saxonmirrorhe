@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
 using System.IO;
-using System.Text;
 using Saxon.Api;
-using NUnit.Framework;
-using System.Xml;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 using Saxon.Hej;
 
 namespace SaxonCS_NUnit

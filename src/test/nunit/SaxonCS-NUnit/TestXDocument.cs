@@ -9,7 +9,6 @@ using NUnit.Framework;
 using Saxon.Api;
 using Saxon.Ejavax.xml.transform;
 using Saxon.Hej.om;
-using Saxon.Hej.tree.util;
 using Saxon.Hej.tree.wrapper;
 
 namespace SaxonCS_NUnit {
