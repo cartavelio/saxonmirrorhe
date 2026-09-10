@@ -45,17 +45,25 @@ import java.util.*;
  * was required.</p>
  */
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unchecked", "ReplaceNullCheck"})
 public class ParseOptions {
 
     @CSharpSimpleEnum
     private enum Key {
+        //#if CSHARP==false
+        PARSER_FEATURES,
+        PARSER_PROPERTIES,
+        ENTITY_RESOLVER,
+        XINCLUDE_AWARE,
+        XML_READER,
+        XML_READER_MAKER,
+        //#endif
         ADD_COMMENTS_AFTER_VALIDATION_ERRORS,
         APPLICABLE_ACCUMULATORS,
         CHECK_ENTITY_REFERENCES,
         CONTINUE_AFTER_VALIDATION_ERRORS,
         DTD_VALIDATION,
-        ENTITY_RESOLVER,
+
         ERROR_HANDLER,
         ERROR_REPORTER,
         EXPAND_ATTRIBUTE_DEFAULTS,
@@ -63,8 +71,6 @@ public class ParseOptions {
         INVALIDITY_HANDLER,
         LINE_NUMBERING,
         MODEL,
-        PARSER_FEATURES,
-        PARSER_PROPERTIES,
         PLEASE_CLOSE,
         SCHEMA_VALIDATION,
         SPACE_STRIPPING_RULE,
@@ -76,10 +82,9 @@ public class ParseOptions {
         VALIDATION_ERROR_LIMIT,
         VALIDATION_PARAMS,
         VALIDATION_STATISTICS_RECIPIENT,
-        WRAP_DOCUMENT,
-        XINCLUDE_AWARE,
-        XML_READER,
-        XML_READER_MAKER
+        WRAP_DOCUMENT
+
+
     }
 
     private final ImmutableMap<Key, Object> properties;
@@ -268,6 +273,7 @@ public class ParseOptions {
                  result = result.withFilter(ff);
             }
         }
+        //#if CSHARP==false
         if (other.getParserFeatures() != null) {
             for (Map.Entry<String, Boolean> entry : other.getParserFeatures().entrySet()) {
                  result = result.withParserFeature(entry.getKey(), entry.getValue());
@@ -278,6 +284,7 @@ public class ParseOptions {
                 result = result.withParserProperty(entry.getKey(), entry.getValue());
             }
         }
+        //#endif
 
         if (!other.isExpandAttributeDefaults()) {
             // expand defaults unless the other options says don't
@@ -409,6 +416,7 @@ public class ParseOptions {
         return withProperty(Key.TREE_MODEL, model);
     }
 
+    //#if CSHARP==false
     /**
      * Add a parser feature to a map, which will be applied to the XML parser later
      *
@@ -455,23 +463,46 @@ public class ParseOptions {
      * Get a particular parser feature added
      *
      * @param uri The feature name as a URIs
-     * @return The feature value as boolean
+     * @return The feature value as boolean (returns false if the feature has not been set, or
+     * if it has been set to false)
      */
-    public boolean getParserFeature(String uri) {
-        Set<String> parserFeatures = (Set<String>)getProperty(Key.PARSER_FEATURES);
-        return parserFeatures != null && parserFeatures.contains(uri);
+    public boolean hasParserFeature(String uri) {
+        Map<String, Boolean> parserFeatures = (Map<String, Boolean>) getProperty(Key.PARSER_FEATURES);
+        if (parserFeatures == null) {
+            return false;
+        }
+        Boolean value = parserFeatures.get(uri);
+        return value != null && value;
+    }
+
+    /**
+     * Ask if a particular parser feature has been set (either to true or false)
+     *
+     * @param uri The feature name as a URIs
+     * @return true if the feature has been set
+     */
+    public boolean isParserFeatureSet(String uri) {
+        Map<String, Boolean> parserFeatures = (Map<String, Boolean>) getProperty(Key.PARSER_FEATURES);
+        if (parserFeatures == null) {
+            return false;
+        }
+        Boolean value = parserFeatures.get(uri);
+        return value != null;
     }
 
     /**
      * Get a particular parser property added
      *
      * @param name The properties as a URIs
-     * @return The property value (which may be any object)
+     * @return The property value (which may be any object), or null if the property has not been set
      */
     public Object getParserProperty(String name) {
-        //return parserProperties.get(name);
-
-        return null; // TODO
+        Map<String, Object> parserProperties = (Map<String, Object>) getProperty(Key.PARSER_PROPERTIES);
+        if (parserProperties == null) {
+            return null;
+        } else {
+            return parserProperties.get(name);
+        }
     }
 
     /**
@@ -480,7 +511,12 @@ public class ParseOptions {
      * @return A map of (feature, value) pairs
      */
     public Map<String, Boolean> getParserFeatures() {
-        return (Map<String, Boolean>)getProperty(Key.PARSER_FEATURES);
+        Map<String, Boolean> parserFeatures = (Map<String, Boolean>) getProperty(Key.PARSER_FEATURES);
+        if (parserFeatures == null) {
+            return Collections.emptyMap();
+        } else {
+            return parserFeatures;
+        }
     }
 
     /**
@@ -489,9 +525,15 @@ public class ParseOptions {
      * @return A map of (feature, string) pairs
      */
     public Map<String, Object> getParserProperties() {
-        return (Map<String, Object>)getProperty(Key.PARSER_PROPERTIES);
+        Map<String, Object> parserProperties = (Map<String, Object>)getProperty(Key.PARSER_PROPERTIES);
+        if (parserProperties == null) {
+            return Collections.emptyMap();
+        } else {
+            return parserProperties;
+        }
     }
 
+    //#endif
     /**
      * Get the tree model that will be used.
      *
@@ -688,10 +730,12 @@ public class ParseOptions {
      */
 
     public ParseOptions withDTDValidationMode(int option) {
-
-        return withParserFeature("http://xml.org/sax/features/validation",
-                                 option == Validation.STRICT || option == Validation.LAX)
-                .withProperty(Key.DTD_VALIDATION, option);
+        return
+        //#if CSHARP==false
+                withParserFeature("http://xml.org/sax/features/validation",
+                                 option == Validation.STRICT || option == Validation.LAX).
+        //#endif
+                withProperty(Key.DTD_VALIDATION, option);
     }
 
     /**
@@ -872,8 +916,6 @@ public class ParseOptions {
     }
 
     //#endif
-
-
     /**
      * <p>Set state of XInclude processing.</p>
      * <p>If XInclude markup is found in the document instance, should it be
@@ -885,10 +927,9 @@ public class ParseOptions {
      *              <code>false</code>
      * @since 8.9
      */
+    @CSharpReplaceBody(code="if (state) throw new System.NotSupportedException(\"XInclude is not supported in SaxonCS\"); else return this;")
     public ParseOptions withXIncludeAware(boolean state) {
-        // TODO
-        //return addParserFeature("http://apache.org/xml/features/xinclude", state);
-        return null;
+        return withParserFeature("http://apache.org/xml/features/xinclude", state);
     }
 
     /**
@@ -897,9 +938,9 @@ public class ParseOptions {
      * @return true if setXIncludeAware() has been called
      */
 
+    @CSharpReplaceBody(code = "return false;")
     public boolean isXIncludeAwareSet() {
-        return false; // TODO
-        //return parserFeatures != null && parserFeatures.containsKey("http://apache.org/xml/features/xinclude");
+        return isParserFeatureSet("http://apache.org/xml/features/xinclude");
     }
 
     /**
@@ -908,11 +949,11 @@ public class ParseOptions {
      * @return current state of XInclude processing. Default value is false.
      */
 
+    @CSharpReplaceBody(code = "return false;")
     public boolean isXIncludeAware() {
-        return false; // TODO
-//            return parserFeatures != null
-//                    && parserFeatures.getOrDefault("http://apache.org/xml/features/xinclude", false);
+        return hasParserFeature("http://apache.org/xml/features/xinclude");
     }
+
 
     /**
      * Set an ErrorReporter to be used when parsing

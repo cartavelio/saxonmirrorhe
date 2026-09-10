@@ -4283,23 +4283,24 @@ public class Configuration implements SourceResolver, NotationSet {
     public void setConfigurationProperty(String name, Object value) {
         if (FeatureIndex.exists(name)) {
             setFeature(FeatureIndex.getData(name), value);
-        } else {
-            if (name.startsWith(FeatureKeys.XML_PARSER_FEATURE)) {
-                String uri = name.substring(FeatureKeys.XML_PARSER_FEATURE.length());
-                try {
-                    uri = URLDecoder.decode(uri, "utf-8");
-                } catch (UnsupportedEncodingException e) {
-                    throw new IllegalArgumentException(e);
-                }
-                defaultParseOptions = defaultParseOptions.withParserFeature(uri, requireBoolean(name, value));
-            } else if (name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
-                String uri = name.substring(FeatureKeys.XML_PARSER_PROPERTY.length());
-                uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
-                defaultParseOptions = defaultParseOptions.withParserProperty(uri, value);
 
-            } else {
-                throw new IllegalArgumentException("Unrecognized configuration feature: " + name);
+        //#if CSHARP==false
+        } else if (name.startsWith(FeatureKeys.XML_PARSER_FEATURE)) {
+            String uri = name.substring(FeatureKeys.XML_PARSER_FEATURE.length());
+            try {
+                uri = URLDecoder.decode(uri, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException(e);
             }
+            defaultParseOptions = defaultParseOptions.withParserFeature(uri, requireBoolean(name, value));
+        } else if (name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
+            String uri = name.substring(FeatureKeys.XML_PARSER_PROPERTY.length());
+            uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
+            defaultParseOptions = defaultParseOptions.withParserProperty(uri, value);
+        //#endif
+            
+        } else {
+            throw new IllegalArgumentException("Unrecognized configuration feature: " + name);
         }
     }
 
