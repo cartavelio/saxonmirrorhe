@@ -496,6 +496,28 @@ TODO: rethink redefines and override
         
         <p>The extension functions <code>saxon:line-number</code> and <code>saxon:column-number</code>
         now return an empty sequence if the argument value is an empty sequence.</p>
+        
+        <p>The extension instruction <code>saxon:tabulate-maps</code> is dropped, as it depends
+        on features like pins and labels that were proposed for XPath 4.0 but subsequently replaced
+        by JNodes. Practical use cases for <code>saxon:tabulate-maps</code> can readily be rewritten
+        to use JNode-based path expressions: the example in the documentation:</p>
+        
+        <p><code>&lt;saxon:tabulate-maps root="parse-json($input)" select="?*?cities?*"/></code></p>
+        
+        <p>might become:</p>
+        
+        <p><![CDATA[
+<xsl:variable name="root" select="parse-json($input) -> jtree()"/>
+<xsl:select>
+   array {
+     for $e in $root/*/cities/*
+     return 
+       map:merge(($e,
+                  {'_keys': array { ancestor-or-self::* ! json-selector() } },
+                  ancestor::map(*)/child::type(xs:anyAtomicType)
+                 ))
+   }
+</xsl:select>]]></p>
 
         <h2>4.0 Features not yet implemented</h2>
         
