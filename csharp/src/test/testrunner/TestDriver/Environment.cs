@@ -1020,22 +1020,31 @@ namespace TestDriver {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
                     builder.SchemaValidator = null;
                 } 
-                else {
-                    SchemaValidator validator = environment.schema.NewValidator();
-                    if ("lax".Equals(validation)) {
-                        validator.Lax = true;
-                        builder.SchemaValidator = validator;
-                        builder.SchemaValidationMode = SchemaValidationMode.Lax;
-                    }
-                    else {
-                        builder.SchemaValidator = validator;
-                        builder.SchemaValidationMode = SchemaValidationMode.Strict;
-                    }
+                else
+                {
+                    if (environment.schemaAware)
+                    {
+                        SchemaValidator validator = environment.schema.NewValidator();
+                        if ("lax".Equals(validation)) {
+                            validator.Lax = true;
+                            builder.SchemaValidator = validator;
+                            builder.SchemaValidationMode = SchemaValidationMode.Lax;
+                        }
+                        else {
+                            builder.SchemaValidator = validator;
+                            builder.SchemaValidationMode = SchemaValidationMode.Strict;
+                        }
 
-                    environment.xpathCompiler.SchemaAware = true;
-                    environment.xqueryCompiler.SchemaAware = true;
-                    if (environment.xsltCompiler != null) {
-                        environment.xsltCompiler.SchemaAware = true;
+                        environment.xpathCompiler.SchemaAware = true;
+                        environment.xqueryCompiler.SchemaAware = true;
+                        if (environment.xsltCompiler != null) {
+                            environment.xsltCompiler.SchemaAware = true;
+                        }
+                    }
+                    else
+                    {
+                        builder.SchemaValidationMode = SchemaValidationMode.None;
+                        builder.SchemaValidator = null;
                     }
                 }
 

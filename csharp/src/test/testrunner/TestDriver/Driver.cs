@@ -308,7 +308,16 @@ namespace TestDriver {
             }
             XdmNode catalog = catBuilder.Build(new Uri(Path.GetFullPath(catalogFile)));
             XPathCompiler xpc = driverProc.NewXPathCompiler();
-            xpc.XPathLanguageVersion = "4.0";
+
+            if (requestedSpec == Spec.XP40 || requestedSpec == Spec.XQ40 || requestedSpec == Spec.XT40)
+            {
+                xpc.XPathLanguageVersion = "4.0";
+            }
+            else
+            {
+                xpc.XPathLanguageVersion = "3.1";
+            }
+            
             xpc.Caching = true;
             xpc.DeclareNamespace("", catalogNamespace());
 
