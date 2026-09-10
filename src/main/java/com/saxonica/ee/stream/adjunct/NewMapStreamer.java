@@ -16,10 +16,7 @@ import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.AnchorPattern;
@@ -268,7 +265,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
 
     private static class NewMapSimpleFeed extends ItemFeed {
 
-        HashTrieMap resultMap;
+        MapBuilder resultMap;
 
         NewMapSimpleFeed(Expression exp, ItemFeed result, XPathContext context) {
             super(exp, result, context);
@@ -284,7 +281,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         @Override
         public void open(Terminator terminator) throws XPathException {
             super.open(terminator);
-            resultMap = new HashTrieMap();
+            resultMap = HashTrieMap.getBuilder();
         }
 
         /**
@@ -296,11 +293,11 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
         public void append(Item item) throws XPathException {
             if (item instanceof MapItem) {
                 for (KeyValuePair pair : ((MapItem) item).keyValuePairs()) {
-                    boolean existing = resultMap.initialPut(pair.key, pair.value);
-                    if (existing) {
+                    if (resultMap.get(pair.key) != null) {
                         XPathException err = new XPathException("Duplicate key value in map: " + Err.depict(pair.key), "XTDE3365");
                         dynamicError(err);
                     }
+                    resultMap.put(pair.key, pair.value);
                 }
             } else {
                 // Should be caught by type-checking?
@@ -321,7 +318,7 @@ public class NewMapStreamer extends StreamingAdjunct implements FeedMaker {
             //System.err.println("NMA close() " + toString());
             if (!hasFailed()) {
                 Outputter out = getNextOutputter();
-                out.append(resultMap);
+                out.append(resultMap.getCompletedMap());
                 out.close();
             }
             resultMap = null;

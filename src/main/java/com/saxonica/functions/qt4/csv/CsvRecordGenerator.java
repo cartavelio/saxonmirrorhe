@@ -138,15 +138,15 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      */
 
     private MapItem makeColumnIndex(List<String> names) {
-        DictionaryMap index = new DictionaryMap(names.size());
+        MapBuilder index = DictionaryMap.getBuilder(names.size());
         int pos = 1;
         for (String name : names) {
-            if (!name.isEmpty() && !index.contains(name)) {
-                index.initialPut(name, Int64Value.makeIntegerValue(pos));
+            if (!name.isEmpty() && index.get(name) == null) {
+                index.put(name, Int64Value.makeIntegerValue(pos));
             }
             pos++;
         }
-        return index;
+        return index.getCompletedMap();
     }
 
     /**
@@ -158,16 +158,16 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
      */
 
     private MapItem makeColumnIndex(GroundedValue names) {
-        DictionaryMap index = new DictionaryMap(names.getLength());
+        MapBuilder index = DictionaryMap.getBuilder(names.getLength());
         int pos = 1;
         for (Item item : names.asIterable()) {
             String name = item.getStringValue();
-            if (!name.isEmpty() && !index.contains(name)) {
-                index.initialPut(name, Int64Value.makeIntegerValue(pos));
+            if (!name.isEmpty() && index.get(name) == null) {
+                index.put(name, Int64Value.makeIntegerValue(pos));
             }
             pos++;
         }
-        return index;
+        return index.getCompletedMap();
     }
 
     /**

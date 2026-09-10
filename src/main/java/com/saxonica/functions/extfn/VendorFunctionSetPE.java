@@ -22,6 +22,7 @@ import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.*;
@@ -45,7 +46,9 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntPredicateProxy;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -981,11 +984,11 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
             ParameterSet params = context.getTunnelParameters();
             params.materializeValues();
             StructuredQName[] names = params.getParameterNames();
-            HashTrieMap map = new HashTrieMap();
+            MapBuilder map = HashTrieMap.getBuilder();
             for (int i = 0; i < params.size(); i++) {
-                map.initialPut(new QNameValue(names[i], BuiltInAtomicType.QNAME), params.getValue(i).materialize());
+                map.put(new QNameValue(names[i], BuiltInAtomicType.QNAME), params.getValue(i).materialize());
             }
-            return map;
+            return map.getCompletedMap();
         }
     }
 

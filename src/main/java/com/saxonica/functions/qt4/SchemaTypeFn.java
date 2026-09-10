@@ -8,6 +8,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.ConstructorFunctionLibrary;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.FunctionItem;
@@ -84,10 +85,10 @@ public class SchemaTypeFn extends SystemFunction {
     }
 
     public static MapItem makeSchemaRecord(SchemaType st) {
-        DictionaryMap result = new DictionaryMap(10);
-        result.initialPut("is-simple", BooleanValue.get(st.isSimpleType()));
+        MapBuilder result = DictionaryMap.getBuilder(10);
+        result.put("is-simple", BooleanValue.get(st.isSimpleType()));
         if (!st.isAnonymousType()) {
-            result.initialPut("name", new QNameValue(st.getStructuredQName(), BuiltInAtomicType.QNAME));
+            result.put("name", new QNameValue(st.getStructuredQName(), BuiltInAtomicType.QNAME));
         }
         SchemaType base = st.getBaseType();
         if (base == null) {
@@ -99,9 +100,9 @@ public class SchemaTypeFn extends SystemFunction {
             final SchemaType finalBase = base;
             SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(finalBase),
                                                            SequenceType.one(schemaTypeRecord));
-            result.initialPut("base-type", fn);
+            result.put("base-type", fn);
         } else {
-            result.initialPut("base-type", new ConstantFunction(EmptySequence.getInstance(), SequenceType.EMPTY_SEQUENCE));
+            result.put("base-type", new ConstantFunction(EmptySequence.getInstance(), SequenceType.EMPTY_SEQUENCE));
         }
         String variety = "*unknown*";
         if (st.isSimpleType()) {
@@ -123,12 +124,12 @@ public class SchemaTypeFn extends SystemFunction {
                 variety = "element-only";
             }
         }
-        result.initialPut("variety", new StringValue(variety));  // TODO: should be an enum type
+        result.put("variety", new StringValue(variety));  // TODO: should be an enum type
 
         if (st.isComplexType() && ((ComplexType) st).isSimpleContent()) {
             SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(((ComplexType) st).getSimpleContentType()),
                                                            SequenceType.one(schemaTypeRecord));
-            result.initialPut("simple-content-type", fn);
+            result.put("simple-content-type", fn);
         }
 
         if (st.isAtomicType() && !st.isSameType(BuiltInAtomicType.ANY_ATOMIC)) {
@@ -140,7 +141,7 @@ public class SchemaTypeFn extends SystemFunction {
             final AtomicType finalResult = prim;
             SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(finalResult),
                                                            SequenceType.one(schemaTypeRecord));
-            result.initialPut("primitive-type", fn);
+            result.put("primitive-type", fn);
 
         }
 
@@ -148,7 +149,7 @@ public class SchemaTypeFn extends SystemFunction {
             final SimpleType itemType = ((ListType)st).getItemType();
             SimpleLazyFunction fn = new SimpleLazyFunction(() -> makeSchemaRecord(itemType),
                                                            SequenceType.one(schemaTypeRecord));
-            result.initialPut("members", fn);
+            result.put("members", fn);
         }
         if (st.isSimpleType() && ((SimpleType) st).isUnionType()) {
             final List<? extends PlainType> memberTypes = ((UnionType) st).getPlainMemberTypes();
@@ -160,7 +161,7 @@ public class SchemaTypeFn extends SystemFunction {
                 }
                 return SequenceExtent.makeSequenceExtent(memberTypeRecords);
             }, SequenceType.zeroOrMore(schemaTypeRecord));
-            result.initialPut("members", fn);
+            result.put("members", fn);
         }
 
         if (st.isAtomicType()) {
@@ -168,17 +169,17 @@ public class SchemaTypeFn extends SystemFunction {
                 TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
                 return BooleanValue.get(((AtomicType) st).matches(args[0].head(), th));
             }, new SpecificFunctionType(SequenceType.SINGLE_ITEM, SequenceType.SINGLE_BOOLEAN));
-            result.initialPut("matches", matches);
+            result.put("matches", matches);
         }
 
         if (st.isSimpleType()) {
             final FunctionItem constructor =
                     ConstructorFunctionLibrary.makeConstructorFunction((SimpleType) st, ConversionRules.DEFAULT, null);
             if (constructor != null) {
-                result.initialPut("constructor", constructor);
+                result.put("constructor", constructor);
             }
         }
-        return result;
+        return result.getCompletedMap();
     }
 
 

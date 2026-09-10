@@ -20,7 +20,8 @@ import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
@@ -281,11 +282,10 @@ public class CompileXPath extends SystemFunction {
         expr.export(out);
         NodeInfo node = b.getCurrentRoot().iterateAxis(AxisInfo.CHILD).next();
         StringValue st = new StringValue(expr.getStaticType().toAlphaCode());
-        HashTrieMap result = new HashTrieMap();
-        result.initialPut(StringValue.bmp("expr"), node);
-        result.initialPut(StringValue.bmp("type"), st);
-
-        return result;
+        MapBuilder result = DictionaryMap.getBuilder();
+        result.put("expr", node);
+        result.put("type", st);
+        return result.getCompletedMap();
     }
 
     private static class LocalFunctionLibrary extends ExecutableFunctionLibrary {

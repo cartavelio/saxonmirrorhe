@@ -8,6 +8,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.CharacterMap;
@@ -74,13 +75,13 @@ public class XSLT40FunctionSet extends XSLT30FunctionSet {
                 return EmptySequence.getInstance();
             }
             IntHashMap<String> intMap = charMap.getMap();
-            DictionaryMap stringMap = new DictionaryMap(intMap.size());
+            MapBuilder stringMap = DictionaryMap.getBuilder(intMap.size());
             IntIterator iter = intMap.keyIterator();
             while (iter.hasNext()) {
                 int cp = iter.next();
-                stringMap.initialPut(new UnicodeChar(cp).toString(), new StringValue(intMap.get(cp)));
+                stringMap.put(new UnicodeChar(cp).toString(), new StringValue(intMap.get(cp)));
             }
-            return stringMap;
+            return stringMap.getCompletedMap();
         }
     }
 

@@ -1,15 +1,14 @@
 package com.saxonica.functions.extfn;
 
 import com.saxonica.functions.qt4.pin.LabeledArrayItem;
-import com.saxonica.functions.qt4.pin.LabeledMapItem;
 import com.saxonica.functions.qt4.pin.LabeledItem;
+import com.saxonica.functions.qt4.pin.LabeledMapItem;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
@@ -33,6 +32,8 @@ public class MapSearch extends SystemFunction {
         return SequenceExtent.makeSequenceExtent(result);
     }
 
+    private final static Shape HIT_SHAPE = new Shape(new Twine8("key"), new Twine8("value"), new Twine8("map"));
+
     private void processSequence(GroundedValue seq, AtomicValue key, FunctionItem tester, XPathContext context, List<Item> result) throws XPathException {
         GroundedValue in = ((Sequence) seq).materialize();
         SequenceIterator iter = in.iterate();
@@ -54,11 +55,7 @@ public class MapSearch extends SystemFunction {
                 if (value != null) {
                     Sequence test = tester == null ? BooleanValue.TRUE : tester.call(context, new Sequence[]{value});
                     if (((BooleanValue)test.head()).getBooleanValue()) {
-                        DictionaryMap hit = new DictionaryMap();
-                        hit.initialPut("key", key);
-                        hit.initialPut("value", value);
-                        hit.initialPut("map", map);
-                        result.add(hit);
+                        result.add(new ShapedMap(HIT_SHAPE, key, value, map));
                     }
                 }
                 for (KeyValuePair entry : map.keyValuePairs()) {

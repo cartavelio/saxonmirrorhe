@@ -22,10 +22,7 @@ import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.functions.registry.XSLT30FunctionSet;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -882,13 +879,13 @@ public class OptimizerEE extends Optimizer {
                 }
             }
             if (allStrings) {
-                DictionaryMap dict = new DictionaryMap();
+                MapBuilder dict = DictionaryMap.getBuilder();
                 for (Item item : literal.getGroundedValue().asIterable()) {
-                    dict.initialPut(item.getStringValue(), BooleanValue.TRUE);
+                    dict.put(item.getStringValue(), BooleanValue.TRUE);
                 }
-                map = dict;
+                map = dict.getCompletedMap();
             } else {
-                HashTrieMap trie = new HashTrieMap();
+                MapBuilder trie = HashTrieMap.getBuilder();
                 for (Item item : literal.getGroundedValue().asIterable()) {
                     if (item instanceof AtomicValue) {
                         // if the values have complex comparison semantics, give up
@@ -904,12 +901,12 @@ public class OptimizerEE extends Optimizer {
                         if (item instanceof QualifiedNameValue) {
                             return null;
                         }
-                        trie.initialPut((AtomicValue) item, BooleanValue.TRUE);
+                        trie.put((AtomicValue) item, BooleanValue.TRUE);
                     } else {
                         return null;
                     }
                 }
-                map = trie;
+                map = trie.getCompletedMap();
             }
             Expression e2;
             TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();

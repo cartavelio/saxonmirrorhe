@@ -10,6 +10,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
@@ -75,10 +76,10 @@ public class ObjectMap extends SystemFunction {
 
     public static MapItem toMap(Configuration config, ObjectValue<?> value, String required) {
         Object obj = value.getObject();
-        DictionaryMap mapView = new DictionaryMap();
+        MapBuilder mapView = DictionaryMap.getBuilder();
         if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION) ||
                 !config.getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
-            return mapView; // empty map; method calls not available
+            return mapView.getCompletedMap(); // empty map; method calls not available
         }
 
         // See bug 6286. To try and prevent reflexive use of methods on an inaccessible class, we
@@ -98,7 +99,7 @@ public class ObjectMap extends SystemFunction {
                     unboundArgs[i] = i + 1;
                 }
                 CurriedFunction fn = new CurriedFunction(method, boundArgs, unboundArgs);
-                mapView.initialPut(key, fn);
+                mapView.put(key, fn);
             }
         }
 
@@ -113,12 +114,12 @@ public class ObjectMap extends SystemFunction {
                     unboundArgs[i] = i + 1;
                 }
                 CurriedFunction fn = new CurriedFunction(method, boundArgs, unboundArgs);
-                mapView.initialPut(key, fn);
+                mapView.put(key, fn);
             }
         }
 
-        mapView.initialPut("this", new ConstantFunction(value, SequenceType.SINGLE_FUNCTION));
-        return mapView;
+        mapView.put("this", new ConstantFunction(value, SequenceType.SINGLE_FUNCTION));
+        return mapView.getCompletedMap();
     }
 
     /**

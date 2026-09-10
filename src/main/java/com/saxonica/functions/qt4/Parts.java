@@ -7,8 +7,10 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
@@ -62,7 +64,7 @@ public class Parts extends SystemFunction implements Callable {
 
     @Override
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
-        DictionaryMap result = new DictionaryMap();
+        MapBuilder builder = DictionaryMap.getBuilder();
         AtomicValue subject = (AtomicValue)args[0].head();
         AtomicType type = subject.getPrimitiveType();
         if (type.getBaseType() == BuiltInAtomicType.DURATION) {
@@ -74,13 +76,13 @@ public class Parts extends SystemFunction implements Callable {
         }
         for (Map.Entry<String, ComponentDetails> component : details.entrySet()) {
             try {
-                result.initialPut(component.getKey(), SequenceTool.toGroundedValue(component.getValue().supplier.apply(subject)));
+                builder.put(component.getKey(), SequenceTool.toGroundedValue(component.getValue().supplier.apply(subject)));
             } catch (UncheckedXPathException e) {
                 throw e.getXPathException();
             }
         }
-        result.initialPut("value", subject);
-        return result;
+        builder.put("value", subject);
+        return builder.getCompletedMap();
     }
 
     private static class ComponentDetails {
@@ -370,51 +372,51 @@ public class Parts extends SystemFunction implements Callable {
     }
 
     public static DictionaryMap uriComponents(String arg) {
-        DictionaryMap dict = new DictionaryMap();
+        MapBuilder builder = DictionaryMap.getBuilder();
         try {
             URI uri = new URI(arg);
             doExtraChecks(uri);
-            dict.initialPut("isValid", BooleanValue.TRUE);
+            builder.put("isValid", BooleanValue.TRUE);
             boolean absolute = uri.isAbsolute();
-            dict.initialPut("isAbsolute", BooleanValue.get(absolute));
-            dict.initialPut("isOpaque", BooleanValue.get(uri.isOpaque()));
+            builder.put("isAbsolute", BooleanValue.get(absolute));
+            builder.put("isOpaque", BooleanValue.get(uri.isOpaque()));
             URI surrogateURI = absolute ? uri : getSurrogateURI(uri);
             String val = absolute ? uri.getAuthority() : null;
             if (val != null) {
-                dict.initialPut("authority", new StringValue(val));
+                builder.put("authority", new StringValue(val));
             }
             val = absolute ? uri.getRawAuthority() : null;
             if (val != null) {
-                dict.initialPut("rawAuthority", new StringValue(val));
+                builder.put("rawAuthority", new StringValue(val));
             }
             val = absolute ? uri.getUserInfo() : null;
             if (val != null) {
-                dict.initialPut("userInfo", new StringValue(val));
+                builder.put("userInfo", new StringValue(val));
             }
             val = absolute ? uri.getRawUserInfo() : null;
             if (val != null) {
-                dict.initialPut("rawUserInfo", new StringValue(val));
+                builder.put("rawUserInfo", new StringValue(val));
             }
             val = absolute ? uri.getScheme() : null;
             if (val != null) {
-                dict.initialPut("scheme", new StringValue(val));
+                builder.put("scheme", new StringValue(val));
             }
             val = absolute ? uri.getHost() : null;
             if (val != null) {
-                dict.initialPut("host", new StringValue(val));
+                builder.put("host", new StringValue(val));
             }
             val = surrogateURI.getSchemeSpecificPart();
             if (val != null) {
-                dict.initialPut("schemeSpecificPart", new StringValue(val));
+                builder.put("schemeSpecificPart", new StringValue(val));
             }
             val = surrogateURI.getRawSchemeSpecificPart();
             if (val != null) {
-                dict.initialPut("rawSchemeSpecificPart", new StringValue(val));
+                builder.put("rawSchemeSpecificPart", new StringValue(val));
             }
             if (absolute) {
                 int port = uri.getPort();
                 if (port >= 0) {
-                    dict.initialPut("port", new Int64Value(port));
+                    builder.put("port", new Int64Value(port));
                 }
             }
             val = surrogateURI.getPath();
@@ -428,20 +430,20 @@ public class Parts extends SystemFunction implements Callable {
                     // For a relative URI such as "books.xml", return "books.xml" rather than "/books.xml"
                     val = val.substring(1);
                 }
-                dict.initialPut("path", new StringValue(val));
+                builder.put("path", new StringValue(val));
             }
             val = surrogateURI.getRawPath();
             if (val != null) {
-                dict.initialPut("rawPath", new StringValue(val));
+                builder.put("rawPath", new StringValue(val));
             }
             val = surrogateURI.getRawQuery();
             if (val != null) {
-                dict.initialPut("rawQuery", new StringValue(val));
+                builder.put("rawQuery", new StringValue(val));
             }
             val = surrogateURI.getQuery();
             if (val != null) {
-                dict.initialPut("query", new StringValue(val));
-                DictionaryMap params = new DictionaryMap();
+                builder.put("query", new StringValue(val));
+                MapBuilder params = DictionaryMap.getBuilder();
                 StringTokenizer t = new StringTokenizer(val, ";&");
                 while (t.hasMoreTokens()) {
                     String tok = t.nextToken();
@@ -449,30 +451,31 @@ public class Parts extends SystemFunction implements Callable {
                     if (eq >= 0) {
                         String keyword = tok.substring(0, eq);
                         String value = tok.substring(eq + 1);
-                        params.initialAppend(keyword, new StringValue(value));
+                        GroundedValue existing = builder.get(keyword);
+                        params.put(keyword, existing == null ? new StringValue(value) : existing.concatenate(new StringValue(value)));
                     } else {
-                        params.initialAppend(tok, EmptySequence.getInstance());
+                        params.put(tok, EmptySequence.getInstance());
                     }
                 }
-                dict.initialPut("queryParams", params);
+                builder.put("queryParams", params.getCompletedMap());
             }
             val = surrogateURI.getRawFragment();
             if (val != null) {
-                dict.initialPut("rawFragment", new StringValue(val));
+                builder.put("rawFragment", new StringValue(val));
             }
             val = surrogateURI.getFragment();
             if (val != null) {
-                dict.initialPut("fragment", new StringValue(val));
+                builder.put("fragment", new StringValue(val));
             }
             val = uri.toASCIIString();
             if (val != null) {
-                dict.initialPut("asciiString", new StringValue(val));
+                builder.put("asciiString", new StringValue(val));
             }
-            return dict;
+            return (DictionaryMap)builder.getCompletedMap();
         } catch (URISyntaxException e) {
-            dict.initialPut("isValid", BooleanValue.FALSE);
-            dict.initialPut("error", new StringValue(e.getMessage()));
-            return dict;
+            builder.put("isValid", BooleanValue.FALSE);
+            builder.put("error", new StringValue(e.getMessage()));
+            return (DictionaryMap) builder.getCompletedMap();
         }
     }
 

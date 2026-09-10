@@ -10,10 +10,10 @@ public class ExperimentalSequenceTypeMarshaller {
         return new StringValue(AlphaCode.fromXdmMap(type));
     }
 
-    public static MapItem marshal(StringValue type) {
-        String input = type.getStringValue();
-        return AlphaCode.toXdmMap(input);
-    }
+//    public static MapItem marshal(StringValue type) {
+//        String input = type.getStringValue();
+//        return AlphaCode.toXdmMap(input);
+//    }
 
 }
 

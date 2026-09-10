@@ -3,6 +3,7 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
@@ -35,7 +36,7 @@ public class Index extends SystemFunction {
                 throw new XPathException("The function saxon:index() has changed to expect a function as its second argument");
             } else if (arg1 instanceof FunctionItem) {
                 FunctionItem function = (FunctionItem) arg1;
-                HashTrieMap imap = new HashTrieMap();
+                MapBuilder imap = HashTrieMap.getBuilder();
                 Sequence[] functionArgs = SequenceTool.makeSequenceArray(1);
                 SequenceIterator iter = arguments[0].iterate();
                 Item next;
@@ -47,18 +48,18 @@ public class Index extends SystemFunction {
                     while ((key = (AtomicValue)keyIterator.next()) != null) {
                         GroundedValue existingVal = imap.get(key);
                         if (existingVal == null) {
-                            imap.initialPut(key, next);
+                            imap.put(key, next);
                         } else if (existingVal instanceof ZenoSequence) {
-                            imap.initialPut(key, ((ZenoSequence) existingVal).append(next));
+                            imap.put(key, ((ZenoSequence) existingVal).append(next));
                         } else {
                             ZenoSequence zenoSeq = new ZenoSequence();
                             zenoSeq = zenoSeq.appendSequence(existingVal);
                             zenoSeq = zenoSeq.append(next);
-                            imap.initialPut(key, zenoSeq);
+                            imap.put(key, zenoSeq);
                         }
                     }
                 }
-                return imap;
+                return imap.getCompletedMap();
             } else {
                 throw new XPathException("Second argument of saxon:index must be a function item")
                     .withXPathContext(context);

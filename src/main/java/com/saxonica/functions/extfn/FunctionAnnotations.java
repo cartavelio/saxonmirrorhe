@@ -2,8 +2,9 @@ package com.saxonica.functions.extfn;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.RecordTest;
+import net.sf.saxon.ma.map.Shape;
+import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Item;
@@ -38,10 +39,9 @@ public class FunctionAnnotations extends SystemFunction {
 
         List<Item> result = new ArrayList<>();
         for (Annotation ann : annotations) {
-            DictionaryMap map = new DictionaryMap();
-            map.initialPut("name", new QNameValue(ann.getAnnotationQName(), BuiltInAtomicType.QNAME));
-            map.initialPut("params", new AtomicArray(ann.getAnnotationParameters()));
-            result.add(map);
+            result.add(new ShapedMap(Shape.KEY_VALUE_PAIR,
+                                          new QNameValue(ann.getAnnotationQName(), BuiltInAtomicType.QNAME),
+                                          new AtomicArray(ann.getAnnotationParameters())));
         }
         return SequenceExtent.makeSequenceExtent(result);
     }

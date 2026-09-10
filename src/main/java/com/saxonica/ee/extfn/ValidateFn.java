@@ -12,6 +12,7 @@ import net.sf.saxon.lib.StandardInvalidityHandler;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.KeyValuePair;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.Err;
@@ -252,62 +253,62 @@ public class ValidateFn extends SystemFunction {
                 throw new XPathException("Input to saxon:validate must be a document, element, or attribute node", "XPTY0004");
         }
 
-        DictionaryMap result = new DictionaryMap();
+        MapBuilder result = DictionaryMap.getBuilder();
         if (errorList.isEmpty()) {
             if (buildTree) {
-                result.initialPut("node", resultNode);
+                result.put("node", resultNode);
             }
-            result.initialPut("valid", BooleanValue.TRUE);
-            return result;
+            result.put("valid", BooleanValue.TRUE);
+            return result.getCompletedMap();
 
         } else {
 
-            result.initialPut("valid", BooleanValue.FALSE);
+            result.put("valid", BooleanValue.FALSE);
             if (returnTreeOnFailure) {
-                result.initialPut("node", resultNode);
+                result.put("node", resultNode);
             }
             List<Item> errors = new ArrayList<>(errorList.size());
             for (Invalidity te : errorList) {
 
                 ValidationFailure v = (ValidationFailure) te;
-                DictionaryMap im = new DictionaryMap();
+                MapBuilder im = DictionaryMap.getBuilder();
                 if (v.getErrorCodeQName() != null) {
-                    im.initialPut("code", new QNameValue(v.getErrorCodeQName(), BuiltInAtomicType.QNAME));
+                    im.put("code", new QNameValue(v.getErrorCodeQName(), BuiltInAtomicType.QNAME));
                 }
-                im.initialPut("message", new StringValue(v.getMessage()));
+                im.put("message", new StringValue(v.getMessage()));
 
                 if (v.getSchemaPart() != -1) {
-                    im.initialPut("specPart", new Int64Value(v.getSchemaPart()));
+                    im.put("specPart", new Int64Value(v.getSchemaPart()));
                 }
                 if (v.getConstraintName() != null) {
-                    im.initialPut("constraint", new StringValue(v.getConstraintName()));
+                    im.put("constraint", new StringValue(v.getConstraintName()));
                 }
                 if (v.getConstraintClauseNumber() != null) {
-                    im.initialPut("clause", new StringValue(v.getConstraintClauseNumber()));
+                    im.put("clause", new StringValue(v.getConstraintClauseNumber()));
                 }
                 if (v.getLineNumber() != -1) {
-                    im.initialPut("line", new Int64Value(v.getLineNumber()));
+                    im.put("line", new Int64Value(v.getLineNumber()));
                 }
                 if (v.getColumnNumber() != -1) {
-                    im.initialPut("colummn", new Int64Value(v.getColumnNumber()));
+                    im.put("colummn", new Int64Value(v.getColumnNumber()));
                 }
                 if (v.getSystemId() != null) {
-                    im.initialPut("systemId", new StringValue(v.getSystemId()));
+                    im.put("systemId", new StringValue(v.getSystemId()));
                 }
                 if (v.getPublicId() != null) {
-                    im.initialPut("publicId", new StringValue(v.getPublicId()));
+                    im.put("publicId", new StringValue(v.getPublicId()));
                 }
                 if (v.getInvalidNode() != null) {
-                    im.initialPut("node", v.getInvalidNode());
+                    im.put("node", v.getInvalidNode());
                 }
                 if (v.getPath() != null) {
-                    im.initialPut("path", new StringValue(v.getPath().getPathUsingUris()));
+                    im.put("path", new StringValue(v.getPath().getPathUsingUris()));
                 }
 
-                errors.add(im);
+                errors.add(im.getCompletedMap());
             }
-            result.initialPut("errors", SequenceExtent.makeSequenceExtent(errors));
-            return result;
+            result.put("errors", SequenceExtent.makeSequenceExtent(errors));
+            return result.getCompletedMap();
 
 
         }

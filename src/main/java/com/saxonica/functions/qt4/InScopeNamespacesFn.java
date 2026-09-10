@@ -4,6 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.HashTrieMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.om.NamespaceBinding;
 import net.sf.saxon.om.NamespaceMap;
 import net.sf.saxon.om.NodeInfo;
@@ -38,15 +39,15 @@ public class InScopeNamespacesFn extends SystemFunction {
             return EmptySequence.getInstance();
         }
         // Can't use a dictionary map because the prefixes are of type NCName, not string
-        HashTrieMap dict = new HashTrieMap();
-        dict.initialPut(new StringValue("xml", BuiltInAtomicType.NCNAME), new AnyURIValue(NamespaceConstant.XML));
+        MapBuilder dict = HashTrieMap.getBuilder();
+        dict.put(new StringValue("xml", BuiltInAtomicType.NCNAME), new AnyURIValue(NamespaceConstant.XML));
         for (NamespaceBinding binding : nsMap) {
             StringValue prefix = binding.getPrefix().isEmpty()
                     ? EMPTY_STRING_TYPE.getInstance()
                     : new StringValue(binding.getPrefix(), BuiltInAtomicType.NCNAME);
-            dict.initialPut(prefix, new AnyURIValue(binding.getNamespaceUri().toUnicodeString()));
+            dict.put(prefix, new AnyURIValue(binding.getNamespaceUri().toUnicodeString()));
         }
-        return dict;
+        return dict.getCompletedMap();
     }
 
 }

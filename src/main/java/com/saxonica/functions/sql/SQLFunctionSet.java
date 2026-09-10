@@ -7,6 +7,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.AtomicSequence;
@@ -52,25 +53,25 @@ public class SQLFunctionSet extends BuiltInFunctionSet {
         int icol = rs.getMetaData().getColumnCount();
         while (rs.next()) {                            // next row
             //System.out.print("<- SQL : "+ rowStart);
-            DictionaryMap map = new DictionaryMap();
+            MapBuilder map = DictionaryMap.getBuilder(icol);
             for (int col = 1; col <= icol; col++) {     // next column
                 // Read result from RS only once, because
                 // of JDBC-Specifications
                 String result = rs.getString(col);
                 //System.err.println("Column " + col + " getColumnName()=" + metaData.getColumnName(col) + " getColumnLabel()=" + metaData.getColumnLabel(col));
                 String sqlName = metaData.getColumnName(col);
-                if (map.contains(sqlName)) {
+                if (map.get(sqlName) != null) {
                     int suffix = 1;
                     String baseName = sqlName;
                     sqlName = baseName + suffix;
-                    while (map.contains(sqlName)) {
+                    while (map.get(sqlName) != null) {
                         sqlName = baseName + (++suffix);
                     }
                 }
-                map.initialPut(sqlName, result == null ? EmptySequence.getInstance() : new StringValue(result));
+                map.put(sqlName, result == null ? EmptySequence.getInstance() : new StringValue(result));
                 // TODO: use SQL data type
             }
-            out.add(map);
+            out.add(map.getCompletedMap());
             //System.out.println(rowEnd);
         }
         return out;

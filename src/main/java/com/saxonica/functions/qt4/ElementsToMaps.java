@@ -544,12 +544,12 @@ public class ElementsToMaps extends SystemFunction {
      * @param cc     the conversion context
      */
     private MapItem makeEmptyPlusElementContent(NodeInfo element, ConversionContext cc) {
-        DictionaryMap innerMap = new DictionaryMap();
+        MapBuilder innerMap = DictionaryMap.getBuilder();
         addAttributes(element, cc, innerMap);
         if (element.isNilled()) {
-            innerMap.initialPut("#content", JSONEmitter.JSON_NULL);
+            innerMap.put("#content", JSONEmitter.JSON_NULL);
         }
-        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap);
+        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap.getCompletedMap());
     }
 
     /**
@@ -574,17 +574,17 @@ public class ElementsToMaps extends SystemFunction {
      */
 
     private MapItem makeSimplePlusElementContent(NodeInfo element, ConversionContext cc) {
-        DictionaryMap innerMap = new DictionaryMap();
+        MapBuilder innerMap = DictionaryMap.getBuilder();
         addAttributes(element, cc, innerMap);
-        innerMap.initialPut("#content", element.isNilled() ? JSONEmitter.JSON_NULL : cc.makeSimpleContent(element));
-        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap);
+        innerMap.put("#content", element.isNilled() ? JSONEmitter.JSON_NULL : cc.makeSimpleContent(element));
+        return new SingleEntryMap(new StringValue(cc.makeName(element)), innerMap.getCompletedMap());
     }
 
-    private static void addAttributes(NodeInfo element, ConversionContext cc, DictionaryMap map) {
+    private static void addAttributes(NodeInfo element, ConversionContext cc, MapBuilder map) {
         AxisIterator atts = element.iterateAxis(AxisInfo.ATTRIBUTE);
         for (NodeInfo att; (att = atts.next()) != null; ) {
             if (att.getNamespaceUri() != NamespaceUri.SCHEMA_INSTANCE) {
-                map.initialPut(cc.makeName(att), cc.makeSimpleContent(att));
+                map.put(cc.makeName(att), cc.makeSimpleContent(att));
             }
         }
     }
@@ -741,10 +741,10 @@ public class ElementsToMaps extends SystemFunction {
                         list.add(new SingleEntryMap(new StringValue("#comment"), new StringValue(child.getStringValue())));
                         break;
                     case Type.PROCESSING_INSTRUCTION:
-                        DictionaryMap inner = new DictionaryMap();
-                        inner.initialPut("#target", new StringValue(child.getLocalPart(), BuiltInAtomicType.NCNAME));
-                        inner.initialPut("#data", new StringValue(child.getStringValue()));
-                        list.add(new SingleEntryMap(new StringValue("#processing-instruction"), inner));
+                        MapBuilder inner = DictionaryMap.getBuilder(2);
+                        inner.put("#target", new StringValue(child.getLocalPart(), BuiltInAtomicType.NCNAME));
+                        inner.put("#data", new StringValue(child.getStringValue()));
+                        list.add(new SingleEntryMap(new StringValue("#processing-instruction"), inner.getCompletedMap()));
                         break;
                     case Type.ELEMENT:
                         list.add(processElement(child, cc));
