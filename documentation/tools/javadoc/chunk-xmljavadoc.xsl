@@ -209,8 +209,13 @@ History
               <p>
                  <xsl:call-template name="comment-first-para"/>
               </p>
-              <xsl:apply-templates select="d:description/h:body/(h:p|h:ul|h:ol)"
-                 mode="comment"/>
+               <xsl:apply-templates select="d:description/h:body/h:*[not(local-name() = 
+                   ('code', 'a', 'b', 'i', 'em', 'br', 'sup'))]"
+                   mode="comment"/>
+               <!-- Ignore phrasing content elements used in the unwrapped first para 
+                   - e.g. code, a, b, i, em, br, sup 
+                   But process all other elements used
+                   - e.g. p, ol, ul, hr, h2, h4, table, dl, pre -->
            </xsl:if>
         </div>
     </xsl:template>
@@ -289,6 +294,7 @@ History
     
     <xsl:template match="h:p" mode="purpose"/>
     <xsl:template match="h:ul" mode="purpose"/>
+    <xsl:template match="h:h2" mode="purpose"/>
     
 
     
