@@ -331,6 +331,15 @@ public class XPathProcessor extends SaxonCAPI {
 
         }
 
+        if(parameterMap.containsKey("uemp:")){
+            valuei = parameterMap.get("uemp:");
+            if(valuei != null && valuei instanceof String) {
+                int valueInt = Integer.parseInt((String)valuei);
+                compiler.setUnprefixedElementMatchingPolicy(UnprefixedElementMatchingPolicy.values()[valueInt]);
+            }
+
+        }
+
         if(parameterMap.containsKey("backwardsCom:")) {
             compiler.setBackwardsCompatible(true);
         }

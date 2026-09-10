@@ -690,7 +690,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             if ":" in initial_function_name:
                 initial_function_name_split = initial_function_name.split(':')
                 prefix = initial_function_name_split[0]
-                namespaces = initial_function_node.node_axis(8)
+                namespaces = initial_function_node.axis_nodes(8)
                 for ns in namespaces:
                     uri_str = ns.string_value
                     ns_prefix = ns.name

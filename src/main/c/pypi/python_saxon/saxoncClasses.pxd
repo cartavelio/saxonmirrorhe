@@ -575,9 +575,11 @@ cdef extern from "@@location@@Saxon.C.API/XdmItem.h":
         bool isArray()
 
 
-
-
 cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
+
+    cdef cppclass EnumXdmAxis:
+      pass
+
     cdef cppclass XdmNode(XdmItem):
         bool isAtomic()
 
@@ -601,7 +603,9 @@ cdef extern from "@@location@@Saxon.C.API/XdmNode.h":
 
         int axisNodeCount()
 
-        XdmNode **axisNodes(int axis)
+        XdmNode **axisNodes(EnumXdmAxis axis)
+
+        EnumXdmAxis convertEnumXdmAxis(int n)
 
         XdmNode** getChildren()
 

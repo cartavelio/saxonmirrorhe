@@ -212,7 +212,7 @@ public class SaxonCException  {
             exception = new SaxonApiException(throwable);
         }
         String systemId = exception.getSystemId();
-        if(systemId.isEmpty()) {
+        if(systemId == null || systemId.isEmpty()) {
             return WordFactory.nullPointer();
         }
         CCharPointer a = SaxonCAPI.stringToNative2(alloc, systemId);
