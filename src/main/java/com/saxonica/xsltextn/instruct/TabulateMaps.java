@@ -1,10 +1,15 @@
 package com.saxonica.xsltextn.instruct;
 
+import com.saxonica.functions.extfn.WithPedigree;
 import com.saxonica.xsltextn.pedigree.Pedigree;
 import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
 import com.saxonica.xsltextn.pedigree.PedigreeValue;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -16,6 +21,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
@@ -227,6 +233,33 @@ public class TabulateMaps extends Instruction {
         out.endElement();
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new TabulateMapsElaborator();
+    }
+
+    private static class TabulateMapsElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            TabulateMaps expr = (TabulateMaps) getExpression();
+            PullEvaluator rootPull = expr.getRootExpression().makeElaborator().elaborateForPull();
+            return (output, context) -> {
+                Item root;
+                SequenceIterator rootIterator = rootPull.iterate(context);
+                SequenceIterator mappedRootIterator =
+                        MappingIterator.map(rootIterator,
+                                            item -> SingletonIterator.makeIterator(WithPedigree.makeRootWithPedigree(item)));
+
+                XPathContext c2 = context.newMinorContext();
+                FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
+                while ((root = trackingIterator.next()) != null) {
+                    expr.processRootItem(output, root, c2);
+                }
+                return null;
+            };
+        }
+    }
 }
 
 // Copyright (c) 2011-2022 Saxonica Limited

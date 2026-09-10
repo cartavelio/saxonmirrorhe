@@ -103,7 +103,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
             throw new XPathException("Exporting a package requires a Saxon-EE license");
         }
         presenter.setDefaultNamespace(NamespaceUri.SAXON_XSLT_EXPORT);
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions)presenter.getOptions();
+        ExpressionPresenter.ExportOptions options = presenter.getOptions();
         options.componentMap = new HashMap<>();
         options.packageMap = new HashMap<>();
         options.packageMap.put(this, 0);
@@ -122,7 +122,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
         if (errorMessageOnExport != null) {
             throw new XPathException("Stylesheet package cannot be exported: " + errorMessageOnExport, errorCodeOnExport);
         }
-        ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) presenter.getOptions();
+        ExpressionPresenter.ExportOptions options = presenter.getOptions();
         Map<Component, Integer> componentIdMap = options.componentMap;
         Map<StylesheetPackage, Integer> packageIdMap = options.packageMap;
         presenter.startElement("package");
@@ -163,8 +163,8 @@ public class StylesheetPackageEE extends StylesheetPackage {
         presenter.emitAttribute("saxonProduct", Version.getProductName() + '-' + config.getEditionCode());
         presenter.emitAttribute("saxonVersion", Version.getProductVersion());
         presenter.emitAttribute("buildDateTime", DateTimeValue.now().getStringValue());
-        presenter.emitAttribute("target", ((ExpressionPresenter.ExportOptions) presenter.getOptions()).target);
-        presenter.emitAttribute("targetVersion", ((ExpressionPresenter.ExportOptions) presenter.getOptions()).targetVersion+"");
+        presenter.emitAttribute("target", presenter.getOptions().target);
+        presenter.emitAttribute("targetVersion", presenter.getOptions().targetVersion+"");
         presenter.emitAttribute("relocatable", isRelocatable() ? "true" : "false");
         presenter.emitAttribute("implicit", isImplicitPackage() ? "true" : "false");
         for (StylesheetPackage used : getUsedPackages()) {

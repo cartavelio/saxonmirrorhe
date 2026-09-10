@@ -99,7 +99,7 @@ public class Assign extends Instruction implements BindingReference {
 
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
-        if ("JS".equals(((ExpressionPresenter.ExportOptions) out.getOptions()).target)) {
+        if ("JS".equals(out.getOptions().target)) {
             throw new XPathException("Export failure: SaxonJS does not implement saxon:assign");
         }
         out.startElement("assign", this);
