@@ -55,7 +55,7 @@ public class XHTML1Emitter extends XMLEmitter {
     @Override
     protected void writeEmptyElementTagCloser(String displayName, /*@NotNull*/ NodeName name) throws IOException {
         if (isRecognizedHtmlElement(name) && emptyTags1.contains(name.getLocalPart())) {
-            writer.writeAscii(StringConstants.EMPTY_TAG_END);
+            writer.writeAscii(StringConstants.EMPTY_TAG_END_XHTML);
         } else {
             writer.writeAscii(StringConstants.EMPTY_TAG_MIDDLE);
             writer.write(displayName);
