@@ -942,9 +942,27 @@ task eej_MetaInf(
 
 // ============================================================
 
+task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
+  // Chicken, meet egg. We need to build the compiler to compile the
+  // stylesheet to provide function implementations for SaxonJ
+  inputs.files fileTree("${projectDir}/src/main/xslt")
+  outputs.files "${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml"
+  doLast {
+    javaexec {
+      classpath = configurations.productTests + project.files(file("${buildDir}/classes/eej"))
+      main = "com.saxonica.Transform"
+      args "-xsl:src/main/xslt/function-library.xsl",
+        "-export:${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml",
+        "-target:HE", "-nogo", "--allowSyntaxExtensions:on"
+    }
+  }
+}
+
+// ============================================================
+
 task hejJar(
   type: Jar,
-  dependsOn: ["hej_MetaInf", "hejCompile"],
+  dependsOn: ["hej_MetaInf", "hejCompile", "compile_function_library"],
   description: "Build the HE jar file"
 ) {
   archiveBaseName = "saxon-he-${saxonVersion}"
@@ -959,7 +977,7 @@ task hejJar(
     include "net/**/*.class"
     exclude "net/sf/saxon/option/**"
   }
-  from ("src/main/resources") {
+  from ("${buildDir}/resources/main") {
     include "net/sf/saxon/data/**"
   }
   doLast {
@@ -1008,7 +1026,7 @@ if (file("${projectDir}/src/main/java/com/saxonica/xqj").exists()) {
 
 task pejJar(
   type: Jar,
-  dependsOn: ["pej_MetaInf", "pejCompile"],
+  dependsOn: ["pej_MetaInf", "pejCompile", "compile_function_library"],
   description: "Build the PE jar file"
 ) {
   archiveBaseName = "saxon-pe-${saxonVersion}"
@@ -1040,7 +1058,7 @@ task pejJar(
     exclude "com/saxonica/functions/sql/**"
     exclude "net/sf/saxon/option/sql/**"
   }
-  from ("src/main/resources") {
+  from ("${buildDir}/resources/main") {
     include "net/sf/saxon/data/**"
   }
   doLast {
@@ -1065,7 +1083,7 @@ task pejJarSql(
 
 task eejJar(
   type: Jar,
-  dependsOn: ["eej_MetaInf", "eejCompile", "asm_unzip"],
+  dependsOn: ["eej_MetaInf", "eejCompile", "asm_unzip", "compile_function_library"],
   description: "Build the EE jar file"
 ) {
   archiveBaseName = "saxon-ee-${saxonVersion}"
@@ -1086,7 +1104,7 @@ task eejJar(
     exclude "com/saxonica/functions/sql/**"
     exclude "net/sf/saxon/option/sql/**"
   }
-  from ("src/main/resources") {
+  from ("${buildDir}/resources/main") {
     include "net/sf/saxon/data/**"
   }
   doLast {
@@ -1412,7 +1430,7 @@ task mavenHeJavadocJar(
   }
 }
 
-task mavenHeSaxonJar(type: Jar, dependsOn: hejJar) {
+task mavenHeSaxonJar(type: Jar, dependsOn: [hejJar, "compile_function_library"]) {
   archiveBaseName = "MavenHE"
   archiveVersion = saxonVersion
   manifest {
@@ -1426,7 +1444,7 @@ task mavenHeSaxonJar(type: Jar, dependsOn: hejJar) {
     include "net/**/*.class"
     exclude "net/sf/saxon/option/**"
   }
-  from ("src/main/resources") {
+  from ("${buildDir}/resources/main") {
     include "net/sf/saxon/data/**"
   }
   doLast {
@@ -1434,7 +1452,8 @@ task mavenHeSaxonJar(type: Jar, dependsOn: hejJar) {
   }
 }
 
-task mavenHeSourceJar(type: Jar, dependsOn: ["hej_preprocess", "eej_preprocess"]) {
+task mavenHeSourceJar(type: Jar,
+                      dependsOn: ["hej_preprocess", "eej_preprocess", "compile_function_library"]) {
   archiveBaseName = "MavenHE"
   classifier = 'sources'
   archiveVersion = saxonVersion
@@ -1445,7 +1464,7 @@ task mavenHeSourceJar(type: Jar, dependsOn: ["hej_preprocess", "eej_preprocess"]
     include "com/saxonica/xqj/**/*.java"
     include "javax/**/*.java"
   }
-  from ("src/main/resources") {
+  from ("${buildDir}/resources/main") {
     include "net/sf/saxon/data/**"
   }
   doLast {

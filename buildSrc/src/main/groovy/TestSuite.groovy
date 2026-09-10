@@ -137,6 +137,7 @@ class TestSuite {
       description msg
 
       def depends = ["${prod}Compile", "${prod}_compileTestDrivers"]
+      depends += ["compile_function_library"]
       depends += options.getOrDefault("depends", [])
       depends.each { name ->
         dependsOn name
@@ -144,7 +145,8 @@ class TestSuite {
 
       classpath = project.configurations.testDrivers \
         + project.files("${project.buildDir}/classes/${prod}") \
-        + project.files("${project.buildDir}/testdriver_classes/${prod}")
+        + project.files("${project.buildDir}/testdriver_classes/${prod}") \
+        + project.files("${project.buildDir}/resources/main")
 
       def testargs = [directory,
                       options["catalog"],
