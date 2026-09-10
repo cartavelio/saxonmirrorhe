@@ -7,6 +7,7 @@
 
 package net.sf.saxon.functions;
 
+import com.saxonica.ee.config.StandardSchemaResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.ComplexContentOutputter;
@@ -20,7 +21,10 @@ import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.SimpleType;
+import net.sf.saxon.type.Untyped;
 
 /**
  * Implements the fn:analyze-string function defined in XPath 3.0.
@@ -47,7 +51,7 @@ public class AnalyzeStringFn extends RegexFunction {
         return false;
     }
 
-    private synchronized void init(Configuration config, Schema schema) throws XPathException {
+    private synchronized void init(Configuration config, boolean schemaAware) throws XPathException {
         vocab.resultName = new FingerprintedQName("", NamespaceUri.FN, "analyze-string-result");
         vocab.nonMatchName = new FingerprintedQName("", NamespaceUri.FN, "non-match");
         vocab.matchName = new FingerprintedQName("", NamespaceUri.FN, "match");
@@ -55,11 +59,11 @@ public class AnalyzeStringFn extends RegexFunction {
         vocab.groupNrName = new NoNamespaceName("nr");
 
         //#if EE==true
-        if (schema != null) {
-            vocab.resultType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"));
+        if (schemaAware) {
+            vocab.resultType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"));
             vocab.nonMatchType = BuiltInAtomicType.STRING;
-            vocab.matchType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "match-type"));
-            vocab.groupType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "group-type"));
+            vocab.matchType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "match-type"));
+            vocab.groupType = config.getSchemaType(new StructuredQName("", NamespaceUri.FN, "group-type"));
             vocab.groupNrType = BuiltInAtomicType.POSITIVE_INTEGER;
             if (vocab.resultType == null || vocab.matchType == null || vocab.groupType == null) {
                 throw new XPathException("Schema for analyze-string has not been successfully loaded");
@@ -85,25 +89,24 @@ public class AnalyzeStringFn extends RegexFunction {
         } else {
             input = inputItem.getUnicodeStringValue();
         }
-        RegularExpression re = getRegularExpression(arguments);
+        RegularExpression re = getRegularExpression(arguments, 1, 2);
         RegexIterator iter = re.analyze(input);
 
         //#if EE==true
         if (vocab.resultName == null) {
             boolean schemaAware = context.getController().getExecutable().isSchemaAware();
             Configuration config = context.getConfiguration();
-            Schema schema = null;
-            if (schemaAware) {
-                schema = getRetainedStaticContext().getPackageData().getImportedSchema();
-                if ((schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "analyze-string-result-type"))) == null) {
-                    schema = config.getSchemaForBuiltInNamespace(NamespaceUri.FN);
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized(config) {
+                if (schemaAware && !config.isSchemaAvailable(NamespaceUri.FN)) {
+                    config.addSchemaSource(StandardSchemaResolver.fetchResource("xpath-functions.scm", config));
                 }
             }
-            init(context.getConfiguration(), schema);
+            init(context.getConfiguration(), schemaAware);
         }
         //#endif
         //#if EE==false
-        init(context.getConfiguration(), null);
+        init(context.getConfiguration(), false);
         //#endif
 
         final Builder builder = context.getController().makeBuilder();

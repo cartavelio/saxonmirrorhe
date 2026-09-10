@@ -68,7 +68,7 @@ public class Matches extends RegexFunction {
      */
     @Override
     public BooleanValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        RegularExpression re = getRegularExpression(arguments);
+        RegularExpression re = getRegularExpression(arguments, 1, 2);
         StringValue arg = (StringValue)arguments[0].head();
         UnicodeString in = arg==null ? EmptyUnicodeString.getInstance() : arg.getUnicodeStringValue();
         boolean result = re.containsMatch(in);

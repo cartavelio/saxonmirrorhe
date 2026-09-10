@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 
 /**
@@ -716,7 +716,7 @@ public class REMatcher {
      * expression object doesn't match at any position, the original String is returned
      * unchanged).
      */
-    public UnicodeString replaceWith(UnicodeString in, Function<UnicodeString, UnicodeString> replacer) {
+    public UnicodeString replaceWith(UnicodeString in, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacer) {
         // String to return
         UnicodeBuilder sb = new UnicodeBuilder();
 
@@ -731,7 +731,15 @@ public class REMatcher {
                 sb.append(in.codePointAt(i));
             }
             UnicodeString matchingSubstring = in.substring(getParenStart(0), getParenEnd(0));
-            UnicodeString replacement = replacer.apply(matchingSubstring);
+            int nrOfGroups = program.maxParens - 1;
+            UnicodeString[] groups = new UnicodeString[nrOfGroups];
+            for (int i=0; i<nrOfGroups; i++) {
+                groups[i] = getParen(i+1);
+                if (groups[i] == null) {
+                    groups[i] = EmptyUnicodeString.getInstance();
+                }
+            }
+            UnicodeString replacement = replacer.apply(matchingSubstring, groups);
             IntIterator iter = replacement.codePoints();
             while (iter.hasNext()) {
                 sb.append(iter.next());

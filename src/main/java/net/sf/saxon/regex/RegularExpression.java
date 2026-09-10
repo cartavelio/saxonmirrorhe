@@ -11,7 +11,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * This interface represents a compiled regular expression. There are different
@@ -82,7 +82,7 @@ public interface RegularExpression {
      * @throws XPathException if the replacement string is invalid
      */
 
-    UnicodeString replaceWith(UnicodeString input, Function<UnicodeString, UnicodeString> replacement) throws XPathException;
+    UnicodeString replaceWith(UnicodeString input, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacement) throws XPathException;
 
     /**
      * Get the flags used at the time the regular expression was compiled.

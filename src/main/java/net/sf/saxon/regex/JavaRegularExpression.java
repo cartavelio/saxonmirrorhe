@@ -16,7 +16,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -146,8 +146,8 @@ public class JavaRegularExpression implements RegularExpression {
      * @throws XPathException if the replacement string is invalid
      */
     @Override
-    public UnicodeString replaceWith(UnicodeString input, Function<UnicodeString, UnicodeString> replacement) throws XPathException {
-        throw new XPathException("saxon:replace-with() is not supported with the Java regex engine");
+    public UnicodeString replaceWith(UnicodeString input, BiFunction<UnicodeString, UnicodeString[], UnicodeString> replacement) throws XPathException {
+        throw new XPathException("fn:replace#5 is not supported with the Java regex engine");
     }
 
     /**
