@@ -119,8 +119,7 @@ namespace Saxon.Api {
         public XdmArray AppendMember(XdmValue value) {
             try {
                 GroundedValue member = value.value;
-                ArrayItem newArray =
-                    Saxon.Hej.ma.arrays.ArrayFunctionSet.ArrayAppend.append((ArrayItem) this.value, member);
+                ArrayItem newArray = ((ArrayItem)this.value).append(member);
                 return (XdmArray) Wrap(newArray);
             }
             catch (Saxon.Hej.trans.XPathException e) {
