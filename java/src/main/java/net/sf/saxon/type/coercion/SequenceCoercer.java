@@ -176,7 +176,7 @@ public final class SequenceCoercer extends UnaryExpression {
     }
 
     public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
-        if (requiredType.equals(SequenceType.GNODE_SEQUENCE)) {
+        if (requiredType.equals(SequenceType.GNODE_SEQUENCE) || requiredType.equals(SequenceType.NODE_SEQUENCE)) {
             return getBaseExpression().toPattern(config, topLevel);
         } else {
             return super.toPattern(config, topLevel);
