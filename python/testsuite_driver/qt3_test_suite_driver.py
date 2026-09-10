@@ -346,6 +346,8 @@ def ensure_dependency_satisfied(dependency: saxonc.PyXdmNode, env: Environment):
     return True
 
 def cwd_from_base_uri(base_uri: str):
+    if base_uri is None:
+        return None
     cwd = os.path.dirname(urlparse(base_uri).path)
     if os.path.isdir(cwd):
         return cwd

@@ -168,9 +168,7 @@ PHP_METHOD(SaxonProcessor, __construct) {
     char cwd[256];
 
     VCWD_GETCWD(cwd, sizeof(cwd));
-    if (cwd != nullptr) {
-      saxonProc->setcwd(cwd);
-    }
+    saxonProc->setcwd(cwd);
 #endif
     delete cwdi;
 
@@ -1419,18 +1417,19 @@ zval makePHPValue(void * value){
     long lnumber;
     double dvalue;
     const char * astri = nullptr;
+    saxon_error_t r = SAXON_ERROR_DEFAULT;
 
     switch (typeValue) {
       case saxonTypeEnum::enumBool:
-      bvalue = j_getBooleanValue(thread, (void *)value) != 0;//aitem->getBooleanValue();
+      bvalue = j_getBooleanValue(thread, (void *)value, &r) != 0;
       ZVAL_BOOL(&retval, bvalue);
       break;
       case saxonTypeEnum::enumInteger:
-      lnumber = j_getLongValue(thread, (void *)value);//aitem->getLongValue();
+      lnumber = j_getLongValue(thread, (void *)value, &r);
       ZVAL_LONG(&retval, lnumber);
       break;
       case saxonTypeEnum::enumString:
-        astri = (const char *)getStringValueForXdmItem(thread,(void *)fn, (void *)value, NULL);//aitem->getStringValue();
+        astri = (const char *)getStringValueForXdmItem(thread,(void *)fn, (void *)value, NULL,  &r);//aitem->getStringValue();
       ZVAL_STRING(&retval, astri);
       break;
       case saxonTypeEnum::enumDouble:
@@ -1448,12 +1447,10 @@ zval makePHPValue(void * value){
         break;
 
     }
-    //delete aitem;
-    /*if(value->getType() == XDM_VALUE) {
-  		delete value;
-    }*/
-    //value->resetRelinquishedItems();
-    //delete value;
+    if (r.status != SAXON_OK) {
+       zend_throw_exception(zend_ce_exception, r.message, 0);
+    }
+
   	return retval;
 } else if (xdm_type == XDM_NODE) {
   int64_t copiedValue = (int64_t)j_copy_handles(SaxonProcessor::sxn_environ->thread, value);
@@ -1492,12 +1489,16 @@ zval makePHPValue(void * value){
   ///// creating PHP array
   zend_array *ret = zend_new_array(count);
   zend_ulong idx = 0;
-  //XdmAtomicValue ** aKeys = mitem->keys();
+  saxon_error_t r = SAXON_ERROR_DEFAULT;
 
   //graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
   long long *rawKeys = j_xdmMap_keys(thread,(void *)fn, (void *)value);
 
-  long long * rawMapValues = j_xdmMap_values(thread,(void *)fn, (void *)value);
+  long long * rawMapValues = j_xdmMap_values(thread,(void *)fn, (void *)value, &r);
+
+    if (r.status != SAXON_OK) {
+       zend_throw_exception(zend_ce_exception, r.message, 0);
+    }
 
   char * ss = nullptr;
 
@@ -1508,7 +1509,7 @@ zval makePHPValue(void * value){
   for (int j = 0; j < count; j++) {
     //XdmValue * avaluej =mitem->get(aKeys[j]);
     //todo add encoding instead of NULL
-    ss = getStringValueForXdmItem(thread,(void *)fn, (void *)rawKeys[j], NULL);
+    ss = getStringValueForXdmItem(thread,(void *)fn, (void *)rawKeys[j], NULL, &r);
     //const char * ss = aKeys[j]->getStringValue();
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr<<"PHPValue: XDMMap key str="<<ss<<std::endl;

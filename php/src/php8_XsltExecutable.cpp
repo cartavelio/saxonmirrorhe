@@ -80,6 +80,7 @@ PHP_METHOD(XsltExecutable, getXslMessages) {
    RETURN_NULL();
 
 }
+}
 
 
 PHP_METHOD(XsltExecutable, clearXslMessages) {

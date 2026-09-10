@@ -11,8 +11,8 @@ XPath 3.1, and Schema validation 1.0/1.1.
 ## C++ API
 
 The main classes in the SaxonC C++ API are: SaxonProcessor, Xslt30Processor,
-XsltExecutable, XQueryProcessor, XPathProcessor, SchemaValidator and
-DocumentBuilder.
+XsltExecutable, XQueryProcessor, XPathProcessor, XsdCompiler, XsdSchema, 
+SchemaValidator and DocumentBuilder.
 
 The following classes provide a subset of the XDM model: XdmValue,
 XdmItem, XdmAtomicValue, XdmNode, XdmFunctionItem, XdmArray, and
