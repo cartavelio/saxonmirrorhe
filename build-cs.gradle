@@ -66,6 +66,7 @@ task eecs_setupPreprocess(
   exclude "net/sf/saxon/functions/registry/OnDemandFunctionSet.java"
   exclude "net/sf/saxon/lib/CatalogResourceResolver.java"
   exclude "net/sf/saxon/lib/ChainedEntityResolver.java"
+  exclude "net/sf/saxon/lib/ConfigurableResourceResolver.java"
   exclude "net/sf/saxon/lib/DirectResourceResolver.java"
   exclude "net/sf/saxon/lib/EntityResolverWrappingResourceResolver.java"
   exclude "net/sf/saxon/lib/ErrorReporterToListener.java"

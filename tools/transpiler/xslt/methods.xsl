@@ -276,7 +276,7 @@
    
    <xsl:template match="*[@RESOLVED_TYPE='java.lang.Integer']" priority="30" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
-         'parseInt#1':     'System.Int32.Parse(%args%)',
+         'parseInt#1':     'Saxon.Impl.Helpers.Utils.ParseInt(%args%)',
          'parseInt#2':     'Saxon.Impl.Helpers.Utils.ParseInt(%args%)',
          'signum#1':       'System.Math.Sign(%args%)',
          'valueOf#1':      'System.Int32.Parse(%args%)',
@@ -781,6 +781,7 @@
          'removeFirst#0': '%scope%.RemoveFirst()',
          'set#2':         '%scope%[%arg1%] = %arg2%',
          'size#0':        '%scope%.Count',
+         'sort#1':        'Saxon.Impl.Helpers.ListUtils.Sort(%scope%, %args%)',
          'subList#2':     'Saxon.Impl.Helpers.ListUtils.SubList(%scope%, %args%)',
          'toArray#1':     '%scope%.ToArray()', (: Linq extension method :)
          'trimToSize#0':  'Saxon.Impl.Helpers.ListUtils.TrimToSize(%scope%)',
