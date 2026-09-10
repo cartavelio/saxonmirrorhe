@@ -30,7 +30,7 @@
 
       <p>Further details about installing Saxon on the .NET platform are described at <a class="bodylink" href="/about/installationdotnet">Installation (.NET)</a>.</p>
 
-      <p>The commands <code>Transform</code>, <code>Query</code>, and <code>Validate</code> take the same parameters
+      <p>The commands <code>transform</code>, <code>query</code>, and <code>validate</code> take the same parameters
 as their Java counterparts, with some exceptions. They are described in the following places:</p>
       <ul>
          <li>
