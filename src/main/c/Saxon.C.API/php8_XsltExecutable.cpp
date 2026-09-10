@@ -296,7 +296,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
 
 
 	try {
-    xdmValue * result = xsltExecutable->callFunctionReturningValue(functionName, arguments, argument_length);
+    XdmValue * result = xsltExecutable->callFunctionReturningValue(functionName, arguments, argument_length);
 	if(result != nullptr) {
 	        result->incrementRefCount();
             if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
@@ -312,12 +312,14 @@ PHP_METHOD(XsltExecutable, callFunctionReturningValue)
     }catch(SaxonApiException &e) {
                             zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
                         }
+	    }
+
 	    RETURN_NULL();
-        }
+
     }
 
 
-}
+
 
 PHP_METHOD(XsltExecutable, callFunctionReturningString){
     XsltExecutable *xsltExecutable;
@@ -398,8 +400,9 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
         zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
 
-
+  }
     RETURN_NULL();
+
 }
 
 
@@ -465,7 +468,7 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
 	else {
 	zend_throw_exception(zend_ce_exception, "unrecognised type of function argument", 0);
 	}
-         }}else {
+         }else {
 		zend_throw_exception(zend_ce_exception, "Null found in function argument", 0);
         }
       } ZEND_HASH_FOREACH_END();
@@ -476,8 +479,9 @@ PHP_METHOD(XsltExecutable, callFunctionReturningString){
                 zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
     }
+    }
 
-}
+
 
 PHP_METHOD(XsltExecutable, callTemplateReturningValue){
 
