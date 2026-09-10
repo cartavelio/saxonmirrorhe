@@ -586,7 +586,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          
          <h1>New Syntax for Declaring and Calling Functions</h1>
 
-         <p>The proposals for XPath 4.0 include some new syntax for declaring and calling functions. This section
+         <p>The proposals for XPath 4.0 include some new syntax and semantics for declaring and calling functions. This section
          describes what is experimentally implemented in Saxon 11.</p>
 
          
@@ -695,6 +695,18 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
             <aside>The current proposal is undecided as to whether ":" or ":=" should be used after the keyword. Saxon 11 allows either.</aside>
             
       </section>
+         <section id="downcasting" title="Automatic Downcasting">
+            <h1>Automatic Downcasting</h1>
+            
+            <p>The function conversion rules (which determine how the supplied value for a function argument or XSLT variable can differ
+               from the declared type) now allow downcasting. For example, if the required type is declared as <code>xs:positiveInteger</code>
+               then the supplied value can be <code>42</code>: there is no longer any need for the caller to cast it as 
+               <code>xs:positiveInteger(42)</code>. Of course, an error occurs if the cast fails. The effect of this is to make
+               derived types such as <code>xs:positiveInteger</code> much more usable. Note that this rule doesn't allow any
+               casting operation, only a strict relabelling of the supplied value. For example, if the required type is <code>xs:integer</code>
+               then you can supply the decimal value 3.0, but you can't supply 3.1, even though casting 3.1 to <code>xs:integer</code>
+               is allowed.</p>
+
       </section>
          
          <section id="other-xpath-extensions" title="Other XPath 4.0 Extensions">
