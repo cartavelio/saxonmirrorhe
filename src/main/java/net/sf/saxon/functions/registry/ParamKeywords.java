@@ -41,7 +41,7 @@ public class ParamKeywords {
         arrayParamNames.put("for-each", "array|action");
         arrayParamNames.put("for-each-pair", "array1|array2|action");
         arrayParamNames.put("from-sequence", "input|action");
-        arrayParamNames.put("get", "array|position");
+        arrayParamNames.put("get", "array|position|fallback");
         arrayParamNames.put("head", "array");
         arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
@@ -256,7 +256,7 @@ public class ParamKeywords {
         mapParamNames.put("filter", "map|predicate");
         mapParamNames.put("find", "input|key");
         mapParamNames.put("for-each", "map|action");
-        mapParamNames.put("get", "map|key");
+        mapParamNames.put("get", "map|key|fallback");
         mapParamNames.put("group-by", "input|key");
         mapParamNames.put("keys", "map");
         mapParamNames.put("merge", "maps|options");
