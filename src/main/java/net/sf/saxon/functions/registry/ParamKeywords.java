@@ -105,6 +105,7 @@ public class ParamKeywords {
         fnParamNames.put("default-language", "");
         fnParamNames.put("differences", "input1|input2|options|collation");
         fnParamNames.put("distinct-values", "values|collation");
+        fnParamNames.put("do-until", "input|action|predicate");
         fnParamNames.put("doc", "href");
         fnParamNames.put("doc-available", "href");
         fnParamNames.put("document-uri", "node");
@@ -162,7 +163,7 @@ public class ParamKeywords {
         fnParamNames.put("items-before", "input|predicate");
         fnParamNames.put("items-ending-where", "input|predicate");
         fnParamNames.put("items-starting-where", "input|predicate");
-        fnParamNames.put("iterate-while", "input|predicate|action");
+        fnParamNames.put("while-do", "input|predicate|action");
         fnParamNames.put("json", "input|options");
         fnParamNames.put("json-doc", "href|options");
         fnParamNames.put("json-to-xml", "value|options");
@@ -219,6 +220,7 @@ public class ParamKeywords {
         fnParamNames.put("root", "node");
         fnParamNames.put("round", "value|precision");
         fnParamNames.put("round-half-to-even", "value|precision");
+        fnParamNames.put("seconds", "value");
         fnParamNames.put("seconds-from-dateTime", "value");
         fnParamNames.put("seconds-from-duration", "value");
         fnParamNames.put("seconds-from-time", "value");
