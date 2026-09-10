@@ -121,7 +121,8 @@ public class DynamicLoader implements IDynamicLoader {
                 // functions
                 traceOut.error("The class " + className + " could not be loaded: " + e.getMessage());
             }
-            throw new XPathException("Failed to load " + className + getMissingJarFileMessage(className), e);
+            String id = e.getMessage().equals(className) ? "required class" : className;
+            throw new XPathException("Failed to load " + id + getMissingJarFileMessage(className), e);
         }
 
     }

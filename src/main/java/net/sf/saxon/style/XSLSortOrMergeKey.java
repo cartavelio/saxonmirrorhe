@@ -86,7 +86,12 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
                 compileError("Collation name '" + collationString + "' is not a valid URI");
                 collationString = NamespaceConstant.CODEPOINT_COLLATION_URI;
             }
-            stringCollator = findCollation(collationString, getBaseURI());
+            try {
+                stringCollator = findCollation(collationString, getBaseURI());
+            } catch (XPathException err) {
+                compileError("Failed to load collation " + collationString + ": " + err.getMessage(), "XTDE1035");
+                stringCollator = CodepointCollator.getInstance();     // for recovery paths
+            }
             if (stringCollator == null) {
                 compileError("Collation " + collationString + " has not been defined", "XTDE1035");
                 stringCollator = CodepointCollator.getInstance();     // for recovery paths

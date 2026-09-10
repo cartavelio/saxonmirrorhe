@@ -245,7 +245,12 @@ public class XSLKey extends StyleElement implements StylesheetComponent {
         Configuration config = env.getConfiguration();
         StringCollator collator = null;
         if (collationName != null) {
-            collator = findCollation(collationName, getBaseURI());
+            try {
+                collator = findCollation(collationName, getBaseURI());
+            } catch (XPathException err) {
+                compileError("Failed to load collation " + collationName + ": " + err.getMessage(), "XTSE1210");
+                collator = CodepointCollator.getInstance();     // for recovery paths
+            }
             if (collator == null) {
                 compileError("The collation name " + Err.wrap(collationName, Err.URI) + " is not recognized", "XTSE1210");
                 collator = CodepointCollator.getInstance();
