@@ -169,12 +169,15 @@
         
         <h2>New features from the 4.0 specifications</h2>
         
+        <p><emph>References of the form </emph>PR nnnn <emph>refer to pull requests against the
+        specifications in <a href="https://github.com/qt4cg/qtspecs/pulls">GitHub</a>.</emph></p>
+        
         <p>Filter expressions accept a sequence of integer positions, for example <code>$in[3 to 5]</code>
         or <code>$in[1, 4, 7]</code>.</p>
         
         <p>The precedence of the <code>otherwise</code> operator has changed. The expression
             <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
-            not as <code>(@price otherwise @cost) * 2</code>.</p>
+            not as <code>(@price otherwise @cost) * 2</code>. (PR 1031)</p>
         
         <p>In XPath, the <code>for</code> and <code>let</code> expressions now accept a larger subset
         of XQuery <code>FLWOR</code> syntax. Specifically:</p>
@@ -189,7 +192,7 @@
         </ul>
         
         <p>Four new axes are implemented: <code>following-or-self</code>, <code>preceding-or-self</code>,
-        <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>.</p>
+        <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>. (PR 1532)</p>
         
         <p>Both XQuery and XPath now allow the syntax <code>for key $k $value $v in $map</code> to iterate
         over the entries in a map (in undefined order).</p>
@@ -204,7 +207,7 @@
         
         <p>In a try/catch expression, the variable <code>err:map</code> is available within the catch clause.</p>
         
-        <p>Variadic functions (syntax <code>declare %variadic function</code>) are implemented in XQuery.</p>
+        <!--<p>Variadic functions (syntax <code>declare %variadic function</code>) are implemented in XQuery.</p>-->
         
         <p>The second <code>$position</code> argument is available on function callbacks made by the functions
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
@@ -228,11 +231,12 @@
         <p>The functions <code>fn:min</code> and <code>fn:max</code> now return one of the items from
         the input sequence <emph>as is</emph>, rather than converting it to <code>xs:double</code>.</p>
         
-        <p>The functions <code>fn:seconds</code>, <code>fn:subsequence-where</code>, 
-            <code>fn:take-while</code>, and <code>fn-unix-dateTime</code> are implemented.</p>
+        <p>The functions <code>fn:seconds</code> (PR 984), <code>fn:subsequence-where</code> (PR 940), 
+            <code>fn:take-while</code> (PR 1008), and <code>fn-unix-dateTime</code> (PR 1358, 1435)
+            are implemented.</p>
         
         <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function
-        <code>fn:do-until</code> is implemented.</p>
+        <code>fn:do-until</code> is implemented. (PR 962)</p>
         
         <p>The function <code>fn:round</code> acquires a third argument that can be used to control
         the rounding mode.</p>
@@ -254,11 +258,11 @@
         <p>The function <code>fn:compare</code>, previously used only to compare strings, is extended
         to compare any comparable atomic values.</p>
         
-        <p>The new function <code>fn:sort-with</code> is implemented.</p>
+        <p>The new function <code>fn:sort-with</code> is implemented. (PR 795)</p>
         
         <p>The new functions <code>fn:collation</code> and <code>fn:collation-available</code> are implemented.</p>
         
-        <p>The new function <code>fn:graphemes</code> is implemented.</p>
+        <p>The new function <code>fn:graphemes</code> is implemented. (PR 1068)</p>
         
         <p>The new function <code>fn:hash</code> is implemented.</p>
         
@@ -276,7 +280,7 @@
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
-            flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>.</p>
+            flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (PR 1022)</p>
         
         <p>The <code>fn:parse-json</code> and <code>fn:json-doc</code> functions accept an option
         to allow JSON null to be represented by something other than an empty sequence, for example
@@ -284,10 +288,11 @@
         
         <p>The function <code>fn:load-xquery-module</code> accepts a new option <code>content</code>
         whose value is the text of the module to be loaded, as a string. This works whether or not
-        4.0 is enabled.</p>
+        4.0 is enabled. (PR 1333)</p>
         
         <p>The rules for the <code>number-parser</code> callback in <code>fn:parse-json</code> and 
-            <code>fn:json-doc</code> have been changed to reflect changes in the specification.</p>
+            <code>fn:json-doc</code> have been changed to reflect changes in the specification.
+        (PR 1058, PR 1080)</p>
         
         <p>The <code>xml-to-json</code> function is changed so that numbers in the input are output with
         their lexical representation unchanged, other than changes (such as removing leading zeroes or
@@ -296,19 +301,24 @@
         attempt to solve this problem, has been dropped.</p>
         
         <p>The <code>escape-solidus</code> option of <code>xml-to-json</code> is implemented. (This is available
-        whether or not 4.0 is enabled).</p>
+        whether or not 4.0 is enabled). (PR 1353)</p>
         
         <p>In decimal format properties, it is now possible to set composite values for some properties,
         for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
-        in the picture string, but the value "pc" will appear in the output.</p>
+        in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
         
         <p>The functions <code>math:e</code>, <code>math:sinh</code>, <code>math:cosh</code>,
-        and <code>math:tanh</code> are implemented.</p>
+        and <code>math:tanh</code> are implemented. (PR 1205)</p>
         
         <p>The XSLT-specific function <code>fn:character-map</code> is implemented.</p>
         
+        <p>In the EXPath binary module, the handling of byte order marks in <code>bin:encode-string</code>
+        and <code>bin:decode-string</code> has been clarified in the specification, and this has resulted
+        in changes to the Saxon implementation. The changed behaviour applies whether or not 4.0 is enabled.
+        (PR 1765)</p>
+        
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
-        as a representation of the JSON null value.</p>
+        as a representation of the JSON null value. (PR 1028)</p>
         
         <p>The implementation of enumeration types has been aligned with the current specification.
         Most practical use cases are unaffected, but:</p>
