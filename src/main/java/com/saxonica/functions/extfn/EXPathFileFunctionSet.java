@@ -769,12 +769,12 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             } else {
                 uri = toFile(filePath).toURI().normalize();
             }
-            return new AnyURIValue(escapeCS(uri.toString()));
+            return new AnyURIValue(escapeCS(uri));
         }
 
-        @CSharpReplaceBody(code="return System.Uri.EscapeUriString(s);")
-        private static String escapeCS(String s) {
-            return s;
+        @CSharpReplaceBody(code="return Saxon.Impl.Helpers.UriUtils.EscapeFilePath(s);")
+        private static String escapeCS(URI s) {
+            return s.toString();
         }
     }
 
