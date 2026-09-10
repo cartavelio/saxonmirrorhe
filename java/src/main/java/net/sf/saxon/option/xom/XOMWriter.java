@@ -164,7 +164,7 @@ public class XOMWriter extends net.sf.saxon.event.Builder {
                 try {
                     element.addNamespaceDeclaration(nsprefix, nsuri);
                 } catch (MalformedURIException e) {
-                    throw new XPathException("XOM requires namespace names to be legal URIs: " + uri);
+                    throw new XPathException("XOM requires namespace names to be legal URIs: " + nsuri);
                 }
             }
         }
