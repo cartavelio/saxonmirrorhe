@@ -532,7 +532,10 @@
    <xsl:function name="f:allocateInnerClassName" as="xs:string">
       <xsl:param name="creationExpr" as="element(*)"/>
       <xsl:variable name="resolvedName" select="f:resolveTypeName($creationExpr/type)"/>
-      <xsl:text>Inner_{tokenize(f:degenerify($resolvedName), '\.')[last()]}_{generate-id($creationExpr)}</xsl:text>
+      <xsl:variable name="allocatedId" as="xs:string">
+         <xsl:number select="$creationExpr" level="any"/>
+      </xsl:variable>
+      <xsl:text>Inner_{tokenize(f:degenerify($resolvedName), '\.')[last()]}_{$allocatedId}</xsl:text>
    </xsl:function>
    
    <xsl:function name="f:resolveTypeName">
