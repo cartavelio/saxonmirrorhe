@@ -122,7 +122,7 @@ public class StringMapBuilder {
                     UnicodeString key = keyArray[i];
                     boolean isNew = AbstractFixedMap.putOffsetIfAbsent(index, key, ix);
                     if (!isNew) {
-                        throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
+                        throw new XPathException("Duplicate key " + Err.wrap(key) + " in map", "FOJS0003");
                     }
                     ix++;
                 }

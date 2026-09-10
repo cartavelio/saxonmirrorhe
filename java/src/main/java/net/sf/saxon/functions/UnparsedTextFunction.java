@@ -15,7 +15,6 @@ import net.sf.saxon.lib.DirectResourceResolver;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.StandardUnparsedTextResolver;
-import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.Err;
@@ -25,7 +24,6 @@ import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntPredicateProxy;
 
@@ -37,7 +35,6 @@ import java.net.URI;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.UnmappableCharacterException;
-import java.util.function.Function;
 
 
 /**
@@ -301,9 +298,9 @@ public abstract class UnparsedTextFunction extends SystemFunction {
                     used = reader.read(buffer, 0, buffer.length);
                 } catch (IOException ioe) {
                     // Proxy for C# System.Text.DecoderFallbackException
-                    throw new UncheckedXPathException(ioe);
+                    throw new UncheckedXPathException(new XPathException(ioe).withErrorCode("FOUT1200"));
                 } catch (Exception e) {
-                    throw new UncheckedXPathException(new IOException(e.getMessage(), e));
+                    throw new UncheckedXPathException(new XPathException(new IOException(e.getMessage(), e)).withErrorCode("FOUT1200"));
                 }
                 if (isEndOfFile(used)) {
                     try {
