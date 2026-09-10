@@ -22,7 +22,7 @@ namespace Saxon.Api {
     /// <remarks>
     /// <para>An <c>XdmNode</c> is implemented as a wrapper around an object
     /// of type <c>Saxon.Hej.NodeInfo</c>. Because this is a key interface
-    /// within Saxon, it is exposed via this API, even though it is a Java
+    /// within Saxon, it is exposed via this API, even though it is an internal
     /// interface that is not part of the API proper.</para>
     /// <para>The <c>XdmNode</c> interface exposes basic properties of the node, such
     /// as its name, its string value, and its typed value. Navigation to other nodes
@@ -32,6 +32,15 @@ namespace Saxon.Api {
     [Serializable]
     public class XdmNode : XdmItem {
 
+        /// <summary>
+        /// Construct an XdmNode as a wrapper around an instance of the internal class <c>Saxon.Hej.om.NodeInfo</c>
+        /// </summary>
+        /// <remarks>
+        /// Applications using the class <c>Saxon.Hej.om.NodeInfo</c> should be aware that it is subject to occasional
+        /// changes from one release to the next. For documentation on this class, see the Saxon-EE Javadoc documentation
+        /// for the very similar class <c>net.sf.saxon.om.NodeInfo</c>.
+        /// </remarks>
+        /// <param name="node">The object to be wrapped</param>
 		public XdmNode(Saxon.Hej.om.NodeInfo node) : base(node) {
             
         }

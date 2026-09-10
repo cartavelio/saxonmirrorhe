@@ -1,5 +1,4 @@
 using System;
-using Saxon.Hej;
 using Saxon.Hej.expr;
 using Saxon.Hej.om;
 
@@ -14,33 +13,16 @@ namespace Saxon.Api {
     /// property of the <c>XdmValue</c>.</para>
     /// <para>There are two ways of creating an instance of this class: either evaluate
     /// an XPath or XQuery or XSLT expression that returns a function item, or use the
-    /// static method <c>GetSystemFunction</c> to obtain a built-in system function.</para>
+    /// method <c>Processor.GetSystemFunction</c> to obtain a built-in system function.</para>
+    /// <para>Arrays and Maps are functions, so the types <c>XdmArray</c> and <c>XdmMap</c>
+    /// extend <c>XdmFunctionItem</c>.</para>
     /// </remarks>
     [Serializable]
     public class XdmFunctionItem : XdmItem {
-        protected XdmFunctionItem() {
-        }
 
-		public XdmFunctionItem(Saxon.Hej.om.Function function) : base(function) {
+        // Internal constructor: create an XdmFunctionItem by wrapping an internal function object
+        internal XdmFunctionItem(Saxon.Hej.om.Function function) : base(function) {
         }
-        
-         /// <summary>
-         /// Get a system function. This can be any function defined in XPath 3.1 functions and operators,
-         /// including functions in the math, map, and array namespaces. It can also be a Saxon extension
-         /// function, provided a licensed Processor is used.
-         /// </summary>
-         /// <param name="processor">The Saxon Processor object</param>
-         /// <param name="name">The function name</param>
-         /// <param name="arity">The function arity</param>
-         /// <returns> the requested function, or null if there is no such function. Note that some functions
-         /// (those with particular context dependencies) may be unsuitable for dynamic calling.
-         /// </returns>
-         
-        public static XdmFunctionItem getSystemFunction(Processor processor, QName name, int arity) {
-            Configuration config = processor.Implementation;
-            Function f = config.getSystemFunction(name.GetStructuredQName(), arity);
-            return f==null ? null : new XdmFunctionItem(f);
-    }
 
         /// <summary>
         /// The name of the function, as a QName

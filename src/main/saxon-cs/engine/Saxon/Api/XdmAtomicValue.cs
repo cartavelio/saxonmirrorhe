@@ -25,6 +25,15 @@ namespace Saxon.Api {
         internal XdmAtomicValue() {
         }
 
+        /// <summary>
+        /// Construct an XdmNode as a wrapper around an instance of the internal class <c>Saxon.Hej.value.AtomicValue</c>
+        /// </summary>
+        /// <remarks>
+        /// Applications using the class <c>Saxon.Hej.value.AtomicValue</c> should be aware that it is subject to occasional
+        /// changes from one release to the next. For documentation on this class, see the Saxon-EE Javadoc documentation
+        /// for the very similar class <c>net.sf.saxon.value.AtomicValue</c>.
+        /// </remarks>
+        /// <param name="atomicValue">The object to be wrapped</param>
 		public XdmAtomicValue(Saxon.Hej.value.AtomicValue atomicValue) : base(atomicValue) {
             
         }
