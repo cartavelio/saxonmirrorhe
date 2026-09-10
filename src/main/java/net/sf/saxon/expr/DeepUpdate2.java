@@ -99,7 +99,7 @@ public class DeepUpdate2 extends Instruction {
         TypeChecker tc = visitor.getConfiguration().getTypeChecker(false);
 
         if (operation != -1) {
-            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "deep-update/root", 0);
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.SUBEXPRESSION, "update/root", 0);
             SequenceType required = operation == Token.UPDATE_MAP ? MapType.SINGLE_MAP_ITEM : ArrayItemType.SINGLE_ARRAY;
             setRootExpression(tc.staticTypeCheck(getRootExpression(), required, role, visitor));
         }

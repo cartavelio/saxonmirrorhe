@@ -109,7 +109,7 @@ public abstract class XSLSortOrMergeKey extends StyleElement {
         if (select != null) {
             try {
                 Supplier<RoleDiagnostic> role = () ->
-                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, getDisplayName() + "//select", 0);
+                        new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:" + getLocalPart() + "/select", 0);
                 select = getConfiguration().getTypeChecker(false).staticTypeCheck(select,
                         SequenceType.ATOMIC_SEQUENCE, role, makeExpressionVisitor());
             } catch (XPathException err) {

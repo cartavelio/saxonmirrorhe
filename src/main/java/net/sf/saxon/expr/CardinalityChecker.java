@@ -55,8 +55,6 @@ public final class CardinalityChecker extends UnaryExpression {
         super(sequence);
         requiredCardinality = cardinality;
         this.roleSupplier = role;
-        //computeStaticProperties();
-        //adoptChildExpression(sequence);
     }
 
     /**
@@ -158,18 +156,6 @@ public final class CardinalityChecker extends UnaryExpression {
         }
         return this;
     }
-
-
-//    /**
-//     * Set the error code to be returned (this is used when evaluating the functions such
-//     * as exactly-one() which have their own error codes)
-//     *
-//     * @param code the error code to be used
-//     */
-//
-//    public void setErrorCode(String code) {
-//        roleSupplier.setErrorCode(code);
-//    }
 
     /**
      * Get the RoleLocator, which contains diagnostic information for use if the cardinality check fails

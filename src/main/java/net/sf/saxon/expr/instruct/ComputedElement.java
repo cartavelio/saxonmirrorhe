@@ -160,7 +160,7 @@ public class ComputedElement extends ElementCreator {
 
         if (allowNameAsQName) {
             // Can only happen in XQuery
-            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "element/name", 0);
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.SUBEXPRESSION, "computed element/name", 0);
             setNameExp(config.getTypeChecker(false).staticTypeCheck(
                     getNameExp(), SequenceType.SINGLE_ATOMIC, role, visitor));
             ItemType supplied = getNameExp().getItemType();

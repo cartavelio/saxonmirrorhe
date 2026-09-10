@@ -185,10 +185,10 @@ public class AnalyzeString extends Instruction implements ContextOriginator {
         // see bug 7976
         setSelect(tc.staticTypeCheck(getSelect(), required, role, visitor));
 
-        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/regex", 0);
+        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:analyze-string/regex", 0);
         setRegex(tc.staticTypeCheck(getRegex(), SequenceType.SINGLE_STRING, role, visitor));
 
-        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "analyze-string/flags", 0);
+        role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "xsl:analyze-string/flags", 0);
         setFlags(tc.staticTypeCheck(getFlags(), SequenceType.SINGLE_STRING, role, visitor));
 
         return this;

@@ -186,12 +186,12 @@ public final class ComputedAttribute extends AttributeCreator {
     public void localTypeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
         nameOp.typeCheck(visitor, contextItemType);
 
-        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.INSTRUCTION, "attribute/name", 0);
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
 
         if (allowNameAsQName) {
             // Can only happen in XQuery
+            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.SUBEXPRESSION, "computed attribute/name", 0);
             setNameExp(config.getTypeChecker(false).staticTypeCheck(
                     getNameExp(), SequenceType.SINGLE_ATOMIC, role, visitor));
             ItemType nameItemType = getNameExp().getItemType();

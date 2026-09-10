@@ -51,6 +51,7 @@ public class RoleDiagnostic {
     public static final int OPTION = 15;
     public static final int CHARACTER_MAP_EXPANSION = 16;
     public static final int FOR_MEMBER = 17;
+    public static final int SUBEXPRESSION = 18;
 
     //public static final int DOCUMENT_ORDER = 17;  // 9.8 and earlier
     //public static final int MAP_CONSTRUCTOR = 18;  // 9.8 and earlier
@@ -151,7 +152,7 @@ public class RoleDiagnostic {
                 } else {
                     return "value of variable $" + name;
                 }
-            case INSTRUCTION:
+            case INSTRUCTION: {
                 int slash = name.indexOf('/');
                 String attributeName = "";
                 if (slash >= 0) {
@@ -159,6 +160,16 @@ public class RoleDiagnostic {
                     name = name.substring(0, slash);
                 }
                 return "@" + attributeName + " attribute of " + (name.equals("LRE") ? "a literal result element" : name);
+            }
+            case SUBEXPRESSION: {
+                int slash = name.indexOf('/');
+                String operandName = "";
+                if (slash >= 0) {
+                    operandName = name.substring(slash + 1);
+                    name = name.substring(0, slash);
+                }
+                return operandName + " sub-expression of the " + name + " expression";
+            }
             case FUNCTION_RESULT:
                 if (name.isEmpty()) {
                     return "result of the anonymous function";
