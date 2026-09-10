@@ -728,11 +728,30 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
       
+      <kbd>array:empty(
+         $array	as array(*)	
+         ) as xs:boolean</kbd>
+      
+      <p>Returns true if the size of the array is zero.</p>
+      
+      <kbd>array:exists(
+         $array	as array(*)	
+         ) as xs:boolean</kbd>
+      
+      <p>Returns true if the size of the array is not zero.</p>
+      
       <kbd>array:foot(
          $array	as array(*)	
          ) as item()*</kbd>
       
       <p>Returns the last member of an array.</p>
+      
+      <kbd>array:index-where(
+         $array	as array(*),
+         $predicate as function(item()*) as xs:boolean
+         ) as xs:integer*</kbd>
+      
+      <p>Returns the integer positions of members of the array for which the predicate returns true.</p>
       
       <kbd>array:members($array as array(*)) as record(value)*</kbd>
       

@@ -297,7 +297,8 @@
         
         <p>The proposed 4.0 functions <code>map:build()</code> and <code>map:filter()</code> are implemented.</p>
         
-        <p>The proposed 4.0 functions <code>array:foot()</code> and <code>array:trunk()</code> are implemented.</p>
+        <p>The proposed 4.0 functions <code>array:empty()</code>, <code>array:exists()</code>, 
+            <code>array:foot()</code>, <code>array:index-where()</code>, and <code>array:trunk()</code> are implemented.</p>
         
         <h2>Dropped or Changed Extension Functions</h2>
         
