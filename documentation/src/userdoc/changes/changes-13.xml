@@ -542,6 +542,7 @@ TODO: rethink redefines and override
             <li><p>The pipeline operator <code>-></code> (partially implemented)</p></li>
             <li><p>try/catch/finally in XQuery</p></li>
             <li><p>xsd-validator function (partially implemented)</p></li>
+            <li><p>PR2013 - fn:csv-doc function</p></li>
             <li><p>scan-left and scan-right functions</p></li>
             <li><p>PR1864, PR1877 - type specifiers in lookup expressions</p></li>
             <li><p>PR1875 - params passed implicitly through xsl:next-match</p></li>
