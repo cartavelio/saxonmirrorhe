@@ -283,7 +283,7 @@
             <xsl:when test="$edition = 'EE-T'">Saxon-EE-T (Enterprise Edition, Transformation Package)</xsl:when>
             <xsl:when test="$edition = 'EE-Q'">Saxon-EE-Q (Enterprise Edition, Query Package)</xsl:when>
             <xsl:when test="$edition = 'EE-V'">Saxon-EE-V (Enterprise Edition, Validation Package)</xsl:when>
-            <xsl:when test="$edition = 'CS'">Saxon-CS</xsl:when>
+            <xsl:when test="$edition = 'CS'">SaxonCS</xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="'&#xa0;'"/>
             </xsl:otherwise>
@@ -308,7 +308,7 @@
                 (Saxon-EE-V) - a license that enables all the facilities of Saxon Professional
                 Edition, plus XSD schema validation; it does not include Schema Aware XSLT or
                 XQuery</xsl:when>
-            <xsl:when test="$edition = 'CS'">Saxon-CS, supported on .NET 5</xsl:when>
+            <xsl:when test="$edition = 'CS'">SaxonCS, supported on .NET 5</xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="'&#xa0;'"/>
             </xsl:otherwise>

@@ -2201,7 +2201,7 @@
                 regular expressions, and to determine whether the serializer allows XML 1.1
                 documents to be constructed. </p>
             <p>The default is 1.0.</p>
-            <p>Saxon-CS uses the <code>System.Xml</code> parser, which does not support XML 1.1.</p>
+            <p>SaxonCS uses the <code>System.Xml</code> parser, which does not support XML 1.1.</p>
         </desc>
     </feature>
     <feature>

@@ -280,7 +280,7 @@ task javadoc_linkchecker(
 }
 
 task dotnet_doc_parsecs(
-// modified to use Saxon-CS input rather than Saxon-.NET - MHK 2021-08-18
+// modified to use SaxonCS input rather than Saxon-.NET - MHK 2021-08-18
   type: JavaExec,
   dependsOn: ["eecs_dll"],
   description: "Parse dotnet cs files for docs"

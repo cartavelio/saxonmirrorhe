@@ -360,7 +360,7 @@
       <p>Saxon provides all the features defined in the XQuery Update 1.0 specification. The
         implementation allows XQuery Update 1.0 syntax to be mixed with XQuery 3.1 syntax.
       </p>
-      <p><i>XQuery Update in Saxon-CS is offered "as is": the feature is present, but has not been extensively tested.</i></p>
+      <p><i>XQuery Update in SaxonCS is offered "as is": the feature is present, but has not been extensively tested.</i></p>
     </description>
     <spec level="Recommendation" date="17 March 2011" link="http://www.w3.org/TR/xquery-update-10/"/>
     <details link="conformance/update" name="XQuery Update 1.0 conformance"/>
@@ -628,7 +628,7 @@
     <description>
       <p>A selection of EXSLT extension functions are provided (in the modules Common, Dates and
         Times, Math, Random, and Sets), as listed in the documentation. </p>
-      <p>Only the <code>exslt:node-set</code> function is available in Saxon-CS.</p>
+      <p>Only the <code>exslt:node-set</code> function is available in SaxonCS.</p>
     </description>
     <!-- TODO split into levels - CS "limited" -->
     <details link="extensions/functions/exslt" name="EXSLT extensions"/>

@@ -15,7 +15,7 @@
     <Copyright>Copyright © 2021 Saxonica, Ltd.</Copyright>
     <PackageProjectUrl>https://saxonica.com/</PackageProjectUrl>
     <PackageReleaseNotes>These are the drivers for the various test suites.</PackageReleaseNotes>
-    <PackageSummary>Test drivers for Saxon-CS.</PackageSummary>
+    <PackageSummary>Test drivers for SaxonCS.</PackageSummary>
   </PropertyGroup>
 
   <ItemGroup>

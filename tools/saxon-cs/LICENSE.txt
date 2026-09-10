@@ -1,7 +1,7 @@
-Saxon-CS License
+SaxonCS License
 ================
 
-Saxon-CS is proprietary software created and distributed by Saxonica Ltd.
+SaxonCS is proprietary software created and distributed by Saxonica Ltd.
 
 Use of the software is subject to the terms and conditions published from time to time
 at https://saxonica.com/license/license.xml, or other conditions that may be agreed

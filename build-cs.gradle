@@ -21,7 +21,7 @@ csver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
 
 task eecs_featureKeys(
   type: JavaExec,
-  description: "Construct the feature keys for Saxon-CS"
+  description: "Construct the feature keys for SaxonCS"
 ) {
   // Task name is misleading: the output is used unchanged for HE and PE
   inputs.files fileTree(dir: "${projectDir}/tools/featureKeys")
@@ -356,7 +356,7 @@ task eecs_project_files (
 
 task eecs_dll(
   dependsOn: ["eecs_project_files"],
-  description: "Compile Saxon-CS DLL for EE"
+  description: "Compile SaxonCS DLL for EE"
 ) {
   inputs.files fileTree(dir: "${buildDir}/cs/Saxon")
   inputs.files fileTree(dir: "${projectDir}/src/main/saxon-cs")

@@ -8,7 +8,7 @@
         <xd:desc>
             <xd:p><xd:b>(re)Created on:</xd:b> October 17, 2018</xd:p>
             <xd:p><xd:b>Author:</xd:b> O'Neil Delpratt, Saxonica</xd:p>
-            <xd:p><xd:b>Revised for Saxon-CS:</xd:b> Michael Kay, Saxonica</xd:p>
+            <xd:p><xd:b>Revised for SaxonCS:</xd:b> Michael Kay, Saxonica</xd:p>
             <xd:p>Generates FeatureKeys.cs from FeatureKeys.xml</xd:p>
         </xd:desc>
     </xd:doc>
@@ -132,7 +132,7 @@ public class Feature<T> {
     
     <xsl:template match="feature[not(tokenize(platforms)='CS')]/desc" mode="#all">
         <xsl:text>&#xa;    /// &lt;summary&gt;</xsl:text>
-        <xsl:text>&#xa;    /// Not applicable to Saxon-CS</xsl:text>
+        <xsl:text>&#xa;    /// Not applicable to SaxonCS</xsl:text>
         <xsl:text>&#xa;    /// &lt;/summary&gt;</xsl:text>
     </xsl:template>
 
