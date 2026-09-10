@@ -54,6 +54,7 @@ public final class BigDecimalValue extends DecimalValue {
     public final static BigDecimal HOURS_PER_DAY = BigDecimal.valueOf(24);
     public final static BigDecimal SECONDS_PER_DAY = BigDecimal.valueOf(24 * 60 * 60);
     public final static BigDecimal SECONDS_PER_HOUR = BigDecimal.valueOf(60 * 60);
+    public final static BigDecimal SECONDS_PER_MINUTE = SIXTY;
 
     /**
      * Constructor supplying a BigDecimal

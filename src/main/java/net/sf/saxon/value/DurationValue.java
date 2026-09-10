@@ -25,6 +25,7 @@ import net.sf.saxon.type.ValidationFailure;
 
 import java.math.BigDecimal;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 /**
  * A value of type xs:duration. A duration is represented as an integer number of months (limited to 32 bits)
@@ -37,8 +38,16 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     protected final int _months;
     protected final BigDecimal _seconds;
 
+    private final static Pattern unsignedDecimal = Pattern.compile("[0-9]+(\\.[0-9]+)");
+    private final static Pattern unsignedInteger = Pattern.compile("[0-9]+");
+
     /**
-     *
+     * Construct an xs:duration from the number of months and seconds
+     * @param months the integer number of months.
+     * @param seconds the decimal number of seconds. Must be negative or zero if months is negative; must
+     *                be positive or zero if months is positive.
+     * @param typeLabel allows a subtype of xs:duration to be constructed - but not xs:dayTimeDuration
+     *                  or xs:yearMonthDuration, as these have separate subclasses.
      */
 
     public DurationValue(int months, BigDecimal seconds, AtomicType typeLabel) {
@@ -49,24 +58,6 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         }
         this._months = months;
         this._seconds = seconds;
-    }
-
-
-
-    protected static void formatFractionalSeconds(UnicodeBuilder sb, int seconds, long nanosecs) {
-        String mss = nanosecs + "";
-        if (seconds == 0) {
-            mss = "0000000000" + mss;
-            mss = mss.substring(mss.length() - 10);
-        }
-        sb.append(mss.substring(0, mss.length() - 9));
-        sb.append('.');
-        int lastSigDigit = mss.length() - 1;
-        while (mss.charAt(lastSigDigit) == '0') {
-            lastSigDigit--;
-        }
-        sb.append(mss.substring(mss.length() - 9, lastSigDigit + 1));
-        sb.append('S');
     }
 
     /**
@@ -123,29 +114,21 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                 return badDuration("missing unit letter at end", s);
             }
             char delim = tok.nextToken().charAt(0);
-            if (delim != 'S' && part.contains(".")) {
-                return badDuration("decimal point is allowed only in the 'S' component", s, "FODT0002");
+            if (!unsignedInteger.matcher(part).matches()) {
+                if (delim != 'S') {
+                    return badDuration("components other than 'S' must be unsigned integers", s);
+                }
+                if (!unsignedDecimal.matcher(part).matches()) {
+                    return badDuration("invalid decimal format for 'S' component", s);
+                }
             }
             BigDecimal partValue;
             try {
                 partValue = new BigDecimal(part).stripTrailingZeros();
             } catch (NumberFormatException err) {
-                return badDuration("non-numeric '" + delim + "' component", s, "FODT0002");
+                // Should not happen, we have already tested
+                return badDuration("non-numeric '" + delim + "' component", s);
             }
-//            if (delim == 'S' && part.contains(".")) {
-//                // TODO: check the exact syntax of the decimal
-//                secondsValue = new BigDecimal(part);
-//            } else {
-//                value = simpleInteger(part);
-//                if (value < 0) {
-//                    if (value == -2) {
-//                        return badDuration("component of duration exceeds Saxon limits", s, "FODT0002");
-//                    } else {
-//                        return badDuration("invalid or non-numeric component", s);
-//                    }
-//                }
-//            }
-
 
             switch (delim) {
                 case 'Y':
@@ -210,13 +193,6 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
                     state = 5;
                     components++;
                     break;
-//                case '.':
-//                    if (state < 4 || state > 6) {
-//                        return badDuration("misplaced decimal point", s);
-//                    }
-//                    seconds = value;
-//                    state = 7;
-//                    break;
                 case 'S':
                     if (state < 4 || state > 7) {
                         return badDuration("S is out of sequence", s);
@@ -289,7 +265,8 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * Create a copy of this atomic value, with a different type label
      *
      * @param typeLabel the type label of the new copy. The caller is responsible for checking that
-     *                  the value actually conforms to this type.
+     *                  the value actually conforms to this type. This method can't be used to create
+     *                  an instance of xs:dayTimeDuration or xs:yearMonthDuration.
      */
 
     @Override
@@ -349,10 +326,6 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         return Math.abs(getDaysHoursMinutesAndSeconds()[0].longValue());
     }
 
-    private final static BigDecimal SECONDS_PER_DAY = BigDecimal.valueOf(24L * 60L * 60L);
-    private final static BigDecimal SECONDS_PER_HOUR = BigDecimal.valueOf(60L * 60L);
-    private final static BigDecimal SECONDS_PER_MINUTE = BigDecimal.valueOf(60L);
-
     /**
      * Get the days, hours, minute, and seconds components, in normalized form, as
      * an array of four decimal values (the first three will always be integral). All four
@@ -361,11 +334,11 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      */
     public BigDecimal[] getDaysHoursMinutesAndSeconds() {
         BigDecimal[] result = new BigDecimal[4];
-        BigDecimal[] D_HMS = _seconds.divideAndRemainder(SECONDS_PER_DAY);
+        BigDecimal[] D_HMS = _seconds.divideAndRemainder(BigDecimalValue.SECONDS_PER_DAY);
         result[0] = D_HMS[0];
-        BigDecimal[] H_MS = D_HMS[1].divideAndRemainder(SECONDS_PER_HOUR);
+        BigDecimal[] H_MS = D_HMS[1].divideAndRemainder(BigDecimalValue.SECONDS_PER_HOUR);
         result[1] = H_MS[0];
-        BigDecimal[] M_S = H_MS[1].divideAndRemainder(SECONDS_PER_MINUTE);
+        BigDecimal[] M_S = H_MS[1].divideAndRemainder(BigDecimalValue.SECONDS_PER_MINUTE);
         result[2] = M_S[0];
         result[3] = M_S[1];
         return result;
@@ -404,7 +377,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     /**
      * Get the total number of months (ignoring the days/hours/minutes/seconds)
      *
-     * @return the total number of months, that is (getYears()*12) + getMonths(), as a positive
+     * @return the total number of months, that is <code>getYears()*12 + getMonths()</code, as a positive
      *         or negative number according as the duration is positive or negative
      */
 
@@ -415,7 +388,8 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     /**
      * Get the total number of seconds (ignoring the years/months)
      *
-     * @return the total number of seconds, as a positive
+     * @return the total number of seconds (across the days, hours, minutes,
+     *         and seconds components), as a positive
      *         or negative number according as the duration is positive or negative,
      *         with the fractional part indicating parts of a second
      */
@@ -446,53 +420,40 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
         }
         int years = getYears();
         int months = getMonths();
-        long days = getDays();
-        int hours = getHours();
-        int minutes = getMinutes();
-        BigDecimal seconds = getSeconds();
+
+        BigDecimal[] dhms = getDaysHoursMinutesAndSeconds();
+        long days = dhms[0].abs().longValueExact();
+        int hours = dhms[1].abs().intValueExact();
+        int minutes = dhms[2].abs().intValueExact();
+        BigDecimal seconds = dhms[3].abs();
 
         sb.append("P");
         if (years != 0) {
-            sb.append(years + "Y");
+            sb.append(UnicodeString.fromLong(years)).append('Y');
         }
         if (months != 0) {
-            sb.append(months + "M");
+            sb.append(UnicodeString.fromLong(months)).append('M');
         }
         if (days != 0) {
-            sb.append(days + "D");
+            sb.append(UnicodeString.fromLong(days)).append('D');
         }
         if (hours != 0 || minutes != 0 || seconds.signum() != 0) {
-            sb.append("T");
+            sb.append('T');
         }
         if (hours != 0) {
-            sb.append(hours + "H");
+            sb.append(UnicodeString.fromLong(hours)).append('H');
         }
         if (minutes != 0) {
-            sb.append(minutes + "M");
+            sb.append(UnicodeString.fromLong(minutes)).append('M');
         }
         if (seconds.signum() != 0) {
-            StringBuilder fsb = new StringBuilder();
-            BigDecimalValue.decimalToString(seconds.stripTrailingZeros(), fsb);
-            sb.append(fsb.toString() + "S");
+            BigDecimalValue.decimalToUnicodeString(seconds.stripTrailingZeros(), sb);
+            sb.append('S');
         }
 
         return sb.toUnicodeString();
 
     }
-
-//    /**
-//     * Get length of duration in seconds, assuming an average length of month. (Note, this defines a total
-//     * ordering on durations which is different from the partial order defined in XML Schema; XPath 2.0
-//     * currently avoids defining an ordering at all. But the ordering here is consistent with the ordering
-//     * of the two duration subtypes in XPath 2.0.)
-//     *
-//     * @return the duration in seconds, as a double
-//     */
-//
-//    public double getLengthInSeconds() {
-//        double a = _months * (365.242199 / 12.0) * 24 * 60 * 60 + _seconds + ((double) _nanoseconds / 1_000_000_000);
-//        return _negative ? -a : a;
-//    }
 
     /**
      * Get a component of the normalized value
@@ -578,7 +539,7 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
     }
 
     public int hashCode() {
-        return getTotalSeconds().hashCode();
+        return _months ^ getTotalSeconds().hashCode();
     }
 
     /**

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<release number="12" date="2023-01-12" xmlns="http://www.saxonica.com/ns/doc/changes">
+    
+    <category name="installation">
+        
+ 
+        
+        
+        
+        
+    </category>
+    
+    <category name="Functions, operators, and data types for XPath 3.1">
+         <p>The implementation of <code>xs:duration</code> and <code>xs:dayTimeDuration</code>
+         has changed so the seconds component (representing the number of days, hours, minutes,
+         and seconds) is now held internally as a <code>BigDecimal</code> value. This affects the
+         range of values and precision that can be maintained (both are now essentially unlimited),
+         and prevents arithmetic exceptions when manipulating extremely large or small
+         values. The change also affects the internal APIs for constructing and manipulating 
+         instances of these two types.</p>
+        
+        <p>The months component is unaffected: the total number of months in a duration
+        remains limited to 2^31.</p>
+ 
+        
+    </category>-->
+    
+    <!--<category name="xslt30">
+
+ 
+    </category>-->
+    
+    <!--<category name="xpath31">
+
+ 
+    </category>-->
+    
+    <!--<category name="functions31">
+
+ 
+    </category>-->
+    
+    <category name="s9api" class="javaonly">
+        
+  
+        
+  
+    </category>
+    
+    <category name="xquery31">
+ 
+    </category>
+
+    <category name="JAXP" class="javaonly">
+        
+   
+    </category>
+    
+    <category name="dotnet" class="csonly">
+        
+  
+        
+    </category>
+    
+    <category name="localization" class="javaonly">
+        
+ 
+        
+    </category>
+    
+    <category name="spi">
+        
+        <p>The internal APIs for manipulating values of type <code>xs:duration</code>
+        and <code>xs:dayTimeDuration</code> have changed, reflecting the fact that
+        the seconds component is now held as a <code>BigDecimal</code> value.</p>
+   
+    </category>
+
+    <category name="serialization">
+        
+  
+    </category>
+    
+    <category name="command-line">
+        
+ 
+    </category>
+    
+    <category name="extensions">
+        
+ 
+
+    
+    </category>
+    
+    <category name="extensibility">
+
+    </category>
+    
+    <!--<category name="sql" class="javaonly">
+        
+       
+  
+    </category>-->
+    
+    
+    
+    <!--<category name="xquery-update" class="javaonly">
+        
+       
+    </category>-->
+    
+    <category name="optimization">
+        
+  
+        
+    </category>
+    
+   
+
+
+</release>
