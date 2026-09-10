@@ -498,11 +498,13 @@ public class AtomicSequenceConverter extends UnaryExpression {
         destination.emitAttribute("from", AlphaCode.fromItemType(getBaseExpression().getItemType()));
         destination.emitAttribute("to", AlphaCode.fromItemType(requiredItemType));
         String flags = "";
-        if (converter.isPromoter()) {
-            flags = "p";
-        }
-        if (converter instanceof Converter.DownCastingConverter) {
-            flags = "d";
+        if (converter != null) {
+            if (converter.isPromoter()) {
+                flags = "p";
+            }
+            if (converter instanceof Converter.DownCastingConverter) {
+                flags = "d";
+            }
         }
         if (!flags.isEmpty()) {
             destination.emitAttribute("flags", flags);
@@ -510,7 +512,8 @@ public class AtomicSequenceConverter extends UnaryExpression {
         if (getRoleSupplier() != null) {
             destination.emitAttribute("diag", getRoleSupplier().get().save());
         }
-        if (converter.isPromoter() && "JS".equals(destination.getOptions().target) && destination.getOptions().targetVersion >= 2) {
+        if (converter != null && converter.isPromoter()
+                && "JS".equals(destination.getOptions().target) && destination.getOptions().targetVersion >= 2) {
             // See bug 6239. For backwards compatibility, output a cvUntyped instruction. This is no longer needed for SaxonJ
             // because the promoting converter does promotion and conversion from untypedAtomic in a single operation.
             destination.startElement("cvUntyped");
