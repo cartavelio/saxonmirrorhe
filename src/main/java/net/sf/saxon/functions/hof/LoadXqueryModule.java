@@ -30,6 +30,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         op.addAllowedOption("xquery-version", SequenceType.SINGLE_DECIMAL);
         op.addAllowedOption("location-hints", SequenceType.STRING_SEQUENCE);
         op.addAllowedOption("context-item", SequenceType.OPTIONAL_ITEM);
+        op.addAllowedOption("content", SequenceType.OPTIONAL_STRING);
         op.addAllowedOption("variables", SequenceType.makeSequenceType(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE), StaticProperty.EXACTLY_ONE)); // standard type?
         op.addAllowedOption("vendor-options", SequenceType.makeSequenceType(new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE), StaticProperty.EXACTLY_ONE));
         return op;
@@ -80,6 +82,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         Sequence variablesOption = null;
         Sequence contextItemOption = null;
         Sequence vendorOptionsOption = null;
+        Sequence contentOption = null;
         if (args.length == 2) {
             MapItem suppliedOptions = (MapItem) args[1].head();
             if (suppliedOptions == null) {
@@ -96,6 +99,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             locationHintsOption = checkedOptions.get("location-hints");
             variablesOption = checkedOptions.get("variables");
             contextItemOption = checkedOptions.get("context-item");
+            contentOption = checkedOptions.get("content");
             vendorOptionsOption = checkedOptions.get("vendor-options");
 
         }
@@ -114,42 +118,57 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         if (moduleUri.isEmpty()) {
             throw new XPathException("First argument of fn:load-xquery-module() must not be a zero length string", "FOQM0001");
         }
-        List<String> locationHints = new ArrayList<>(); // location hints are currently ignored by QT3TestDriver?
-        if (locationHintsOption != null) {
-            SequenceIterator iterator = locationHintsOption.iterate();
-            Item hint;
-            while ((hint = iterator.next()) != null) {
-                locationHints.add(hint.getStringValue());
-            }
-        }
 
-        // Set the vendor options (configuration features) -- at the moment none supported
-        /*if (vendorOptionsOption != null) {
-            MapItem vendorOptions = (MapItem) options.get(new StringValue("vendor-options")).head();
-        }*/
+        StreamSource[] streamSources = null;
+
+        String content = null;
+        if (contentOption != null) {
+            content = contentOption.head().getStringValue();
+            streamSources = new StreamSource[1];
+            streamSources[0] = new StreamSource(new StringReader(content), getRetainedStaticContext().getStaticBaseUriString());
+        }
 
         Configuration config = context.getConfiguration();
         StaticQueryContext staticQueryContext = config.newStaticQueryContext();
-        ModuleURIResolver moduleURIResolver = config.getModuleURIResolver();
-        if (moduleURIResolver == null) {
-            moduleURIResolver = new StandardModuleURIResolver(config);
-        }
-        staticQueryContext.setModuleURIResolver(moduleURIResolver);
-        String baseURI = getRetainedStaticContext().getStaticBaseUriString();
-        staticQueryContext.setBaseURI(baseURI);
-        StreamSource[] streamSources;
-        try {
-            String[] hints = locationHints.toArray(new String[0]);
-            streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.toString(), baseURI, hints);
-            if (streamSources == null) {
-                streamSources = new StandardModuleURIResolver(config).resolve(moduleUri.toString(), baseURI, hints);
+
+        if (content == null) {
+            List<String> locationHints = new ArrayList<>(); // location hints are currently ignored by QT3TestDriver?
+            if (locationHintsOption != null) {
+                SequenceIterator iterator = locationHintsOption.iterate();
+                Item hint;
+                while ((hint = iterator.next()) != null) {
+                    locationHints.add(hint.getStringValue());
+                }
             }
-        } catch (XPathException e) {
-            e.maybeSetErrorCode("FOQM0002");
-            throw e;
-        }
-        if (streamSources.length == 0) {
-            throw new XPathException("No library module found with specified target namespace " + moduleUri, "FOQM0002");
+
+
+            // Set the vendor options (configuration features) -- at the moment none supported
+            /*if (vendorOptionsOption != null) {
+                MapItem vendorOptions = (MapItem) options.get(new StringValue("vendor-options")).head();
+            }*/
+
+
+            ModuleURIResolver moduleURIResolver = config.getModuleURIResolver();
+            if (moduleURIResolver == null) {
+                moduleURIResolver = new StandardModuleURIResolver(config);
+            }
+            staticQueryContext.setModuleURIResolver(moduleURIResolver);
+            String baseURI = getRetainedStaticContext().getStaticBaseUriString();
+            staticQueryContext.setBaseURI(baseURI);
+
+            try {
+                String[] hints = locationHints.toArray(new String[0]);
+                streamSources = staticQueryContext.getModuleURIResolver().resolve(moduleUri.toString(), baseURI, hints);
+                if (streamSources == null) {
+                    streamSources = new StandardModuleURIResolver(config).resolve(moduleUri.toString(), baseURI, hints);
+                }
+            } catch (XPathException e) {
+                e.maybeSetErrorCode("FOQM0002");
+                throw e;
+            }
+            if (streamSources.length == 0) {
+                throw new XPathException("No library module found with specified target namespace " + moduleUri, "FOQM0002");
+            }
         }
 
 
