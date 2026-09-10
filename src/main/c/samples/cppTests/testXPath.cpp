@@ -8,9 +8,9 @@
 
 using namespace std;
 
-typedef XdmValue *(*pfnExample)(int, XdmValue **);
 
-extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArguments, void ** arguments) {
+
+/*extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArguments, void ** arguments) {
   //fprintf(stdout, "We are in a c function\n");
   fprintf(stdout, "We are in a c function name= %s\n", functionName);
 
@@ -28,7 +28,7 @@ extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArgume
   XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
   return (void *)result->getUnderlyingValue();
 
-}
+}    */
 XdmValue * myFunc(int length, XdmValue ** values) {
 
     fprintf(stdout, "We are in the C++ myFunc function\n");

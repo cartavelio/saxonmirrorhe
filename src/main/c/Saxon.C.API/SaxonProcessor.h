@@ -118,7 +118,9 @@ struct UserFunctionDescriptor{
 
     //extern "C" int c_nativeCall(char * functionName);
 
+typedef XdmValue *(*sxnExtensionFunction)(int, XdmValue **);
 
+extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArguments, void ** arguments);
 
 
 

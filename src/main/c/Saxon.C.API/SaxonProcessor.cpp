@@ -76,6 +76,46 @@ void SaxonProcessor::getInfo() {
 
 #endif
 
+extern "C" void * c_nativeCall(char * functionName, void * func, int numOfArguments, void ** arguments) {
+    //fprintf(stdout, "We are in a c function\n");
+    fprintf(stdout, "We are in a c function name= %s\n", functionName);
+
+    fprintf(stdout, "We are in a c function pointer= %p\n", func);
+    sxnExtensionFunction func1 = sxnExtensionFunction(func);
+
+    fflush(stdout);
+
+    //void ** arguments1 = (void **)malloc(sizeof(void *) * 1);
+    XdmValue ** arguments1 = new XdmValue*[numOfArguments];
+    for(int i =0; i< numOfArguments; i++) {
+        arguments1[i] = new XdmValue((int64_t)arguments[i]);
+    }
+
+    XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
+    return (void *)result->getUnderlyingValue();
+
+}
+
+void * c_nativeCall1(char * functionName, void * func, int numOfArguments, void ** arguments) {
+    //fprintf(stdout, "We are in a c function\n");
+    fprintf(stdout, "We are in a c function name= %s\n", functionName);
+
+    fprintf(stdout, "We are in a c function pointer= %p\n", func);
+    sxnExtensionFunction func1 = sxnExtensionFunction(func);
+
+    fflush(stdout);
+
+    //void ** arguments1 = (void **)malloc(sizeof(void *) * 1);
+    XdmValue ** arguments1 = new XdmValue*[numOfArguments];
+    for(int i =0; i< numOfArguments; i++) {
+        arguments1[i] = new XdmValue((int64_t)arguments[i]);
+    }
+
+    XdmValue * result = func1(numOfArguments, arguments1);   // call of the user function
+    return (void *)result->getUnderlyingValue();
+
+}
+
 
   // utility method  with input signature of the userFunction and the params pointer
 
