@@ -254,7 +254,7 @@ public class XsltController extends Controller {
      * @param uri A URI that is not available as an output destination
      */
 
-    public void addUnavailableOutputDestination(DocumentKey uri) {
+    public synchronized void addUnavailableOutputDestination(DocumentKey uri) {
         if (allOutputDestinations == null) {
             allOutputDestinations = new HashSet<>(20);
         }
@@ -268,7 +268,7 @@ public class XsltController extends Controller {
      * @param uri A URI that is being made available as an output destination
      */
 
-    public void removeUnavailableOutputDestination(DocumentKey uri) {
+    public synchronized void removeUnavailableOutputDestination(DocumentKey uri) {
         if (allOutputDestinations != null) {
             allOutputDestinations.remove(uri);
         }
@@ -285,7 +285,7 @@ public class XsltController extends Controller {
      * it may return different results for the same URI at different points in the transformation.
      */
 
-    public boolean isUnusedOutputDestination(DocumentKey uri) {
+    public synchronized boolean isUnusedOutputDestination(DocumentKey uri) {
         return allOutputDestinations == null || !allOutputDestinations.contains(uri);
     }
 
