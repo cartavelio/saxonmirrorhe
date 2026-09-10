@@ -412,7 +412,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
         if (visibilityAtt != null) {
             visibility = interpretVisibilityValue(visibilityAtt, "");
             if (nameAtt == null) {
-                compileError("xsl:template/@visibility can be specified only if the template has a @name attribute", "XTSE0020");
+                compileError("xsl:template/@visibility can be specified only if the template has a @name attribute", "XTSE0500");
             } else {
                 compiledNamedTemplate.setDeclaredVisibility(getVisibility());
             }
