@@ -248,7 +248,7 @@ public class PatternParser extends XPathParser {
             expr.setRetainedStaticContext(env.makeRetainedStaticContext());
             setLocation(expr);
             while (t.currentToken == Token.LSQB) {
-                expr = parsePredicate(expr).toPattern(env.getConfiguration());
+                expr = parsePredicate(expr).toPattern(env.getConfiguration(), false);
             }
             return expr;
         } else if (allowXPath40Syntax && t.currentToken instanceof Token.NameToken && t.peekAhead() == Token.LPAREN &&

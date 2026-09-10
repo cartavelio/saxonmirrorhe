@@ -640,13 +640,13 @@ public class VennExpression extends BinaryExpression {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config   the Saxon configuration
+     * @param topLevel
      * @return the equivalent pattern
-     * @throws net.sf.saxon.trans.XPathException
-     *          if conversion is not possible
+     * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
         if (isPredicatePattern(getLhsExpression()) || isPredicatePattern(getRhsExpression())) {
             throw new XPathException(
                     "Cannot use a predicate pattern as an operand of a union, intersect, or except operator",
@@ -654,27 +654,27 @@ public class VennExpression extends BinaryExpression {
         }
         if (operator == OperatorSymbol.UNION) {
             return new UnionPattern(
-                    getLhsExpression().toPattern(config),
-                    getRhsExpression().toPattern(config));
+                    getLhsExpression().toPattern(config, false),
+                    getRhsExpression().toPattern(config, false));
         } else {
             // Bug #5368 means it's dangerous to assume that the expression (A except B) can be translated
             // into a pattern that matches a node if A matches and B does not. We can only do this in special
             // cases, in particular (a) where both operands use the attribute or child axis, and (b) where
             // one of the patterns is anchored at the root of the tree (for example //xxx/yyy or $var/xxx or id('x')/xxx)
             // The semantics are changed in 4.0, see PR 1773.
-            boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
             int commonAxis = ExpressionTool.getAxisNavigation(this);
-            if (is40 || commonAxis == AxisInfo.CHILD || commonAxis == AxisInfo.ATTRIBUTE
+            if (commonAxis == AxisInfo.CHILD || commonAxis == AxisInfo.ATTRIBUTE
                     || independentOfContextItem(getLhsExpression())
-                    || independentOfContextItem(getRhsExpression())) {
+                    || independentOfContextItem(getRhsExpression())
+                    || (topLevel && getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40)) {
                 if (operator == OperatorSymbol.EXCEPT) {
                     return new ExceptPattern(
-                            getLhsExpression().toPattern(config),
-                            getRhsExpression().toPattern(config));
+                            getLhsExpression().toPattern(config, false),
+                            getRhsExpression().toPattern(config, false));
                 } else {
                     return new IntersectPattern(
-                            getLhsExpression().toPattern(config),
-                            getRhsExpression().toPattern(config));
+                            getLhsExpression().toPattern(config, false),
+                            getRhsExpression().toPattern(config, false));
                 }
             }
             return new GeneralNodePattern(this, (NodeTest)getItemType());

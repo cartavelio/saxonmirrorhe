@@ -786,20 +786,20 @@ public class SlashExpression extends BinaryExpression
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config   the Saxon configuration
+     * @param topLevel
      * @return the equivalent pattern
-     * @throws net.sf.saxon.trans.XPathException
-     *          if conversion is not possible
+     * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
         Expression head = getLeadingSteps();
         Expression tail = getLastStep();
         if (head instanceof ItemChecker) {
             // No need to type check the context item
             ItemChecker checker = (ItemChecker) head;
             if (checker.getBaseExpression() instanceof ContextItemExpression) {
-                return tail.toPattern(config);
+                return tail.toPattern(config, false);
             }
         } else if (tail instanceof VennExpression) {
             // Bug 4645. Rewrite a/(b|c) as (a/b union a/c). Note this rewrite isn't safe for
@@ -812,11 +812,11 @@ public class SlashExpression extends BinaryExpression
                         head.copy(new RebindingMap()), ve.getRhsExpression());
                 VennExpression topExpansion = new VennExpression(
                         lhExpansion, ve.operator, rhExpansion);
-                return topExpansion.toPattern(config);
+                return topExpansion.toPattern(config, false);
             }
         }
 
-        Pattern tailPattern = tail.toPattern(config);
+        Pattern tailPattern = tail.toPattern(config, false);
         if (tailPattern instanceof NodeTestPattern) {
             if (tailPattern.getItemType() instanceof ErrorType) {
                 return tailPattern;
@@ -834,13 +834,13 @@ public class SlashExpression extends BinaryExpression
                 if (mid.getAxis() == AxisInfo.DESCENDANT_OR_SELF &&
                         (mid.getNodeTest() == null || mid.getNodeTest() instanceof AnyNodeTest)) {
                     axis = AxisInfo.ANCESTOR;
-                    headPattern = start.getSelectExpression().toPattern(config);
+                    headPattern = start.getSelectExpression().toPattern(config, false);
                 }
             }
         }
         if (headPattern == null) {
             axis = PatternMaker.getAxisForPathStep(tail);
-            headPattern = head.toPattern(config);
+            headPattern = head.toPattern(config, false);
         }
         return new AncestorQualifiedPattern(tailPattern, headPattern, axis);
     }

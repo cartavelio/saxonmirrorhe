@@ -86,14 +86,14 @@ public final class FirstItemExpression extends SingleItemFilter {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config   the Saxon configuration
+     * @param topLevel
      * @return the equivalent pattern
-     * @throws net.sf.saxon.trans.XPathException
-     *          if conversion is not possible
+     * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
-        Pattern basePattern = getBaseExpression().toPattern(config);
+    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
+        Pattern basePattern = getBaseExpression().toPattern(config, false);
         ItemType type = basePattern.getItemType();
         if (type instanceof NodeTest) {
             Expression baseExpr = getBaseExpression();

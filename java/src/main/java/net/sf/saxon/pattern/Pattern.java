@@ -471,7 +471,7 @@ public abstract class Pattern extends PseudoExpression {
     }
 
     @Override
-    public Pattern toPattern(Configuration config) {
+    public Pattern toPattern(Configuration config, boolean topLevel) {
         return this;
     }
 

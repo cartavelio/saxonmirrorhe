@@ -1089,16 +1089,17 @@ public final class FilterExpression extends BinaryExpression implements ContextS
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config   the Saxon configuration
+     * @param topLevel
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
         Expression base = getSelectExpression();
         Expression filter = getFilter();
         TypeHierarchy th = config.getTypeHierarchy();
-        Pattern basePattern = base.toPattern(config);
+        Pattern basePattern = base.toPattern(config, false);
         if (!isPositional(th)) {
             return new BasePatternWithPredicate(basePattern, filter);
         } else if (basePattern instanceof NodeTestPattern &&

@@ -653,12 +653,13 @@ public final class AxisExpression extends Expression {
     /**
      * Convert this expression to an equivalent XSLT pattern
      *
-     * @param config the Saxon configuration
+     * @param config   the Saxon configuration
+     * @param topLevel
      * @return the equivalent pattern
      * @throws net.sf.saxon.trans.XPathException if conversion is not possible
      */
     @Override
-    public Pattern toPattern(Configuration config) throws XPathException {
+    public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
 
         NodeTest test = getNodeTest();
         Pattern pat;
