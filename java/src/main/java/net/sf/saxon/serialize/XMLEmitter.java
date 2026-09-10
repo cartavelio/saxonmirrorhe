@@ -520,7 +520,7 @@ public class XMLEmitter extends Emitter {
     public void namespace(String nsprefix, NamespaceUri nsuri, boolean isFirst) throws XPathException {
         try {
             if (nsprefix.isEmpty()) {
-                if (isFirst) {
+                if (isFirst || indentForNextAttribute < 0) {
                     writer.writeAscii(' ');
                 } else {
                     writeAttributeIndentString();
@@ -537,7 +537,7 @@ public class XMLEmitter extends Emitter {
                             .withErrorCode("SERE0008");
                 }
                 if (undeclareNamespaces || !nsuri.isEmpty()) {
-                    if (isFirst) {
+                    if (isFirst || indentForNextAttribute < 0) {
                         writer.writeAscii(' ');
                     } else {
                         writeAttributeIndentString();
@@ -554,7 +554,8 @@ public class XMLEmitter extends Emitter {
     /**
      * Set the indentation to be used for attributes (this excludes the length of the
      * element name itself)
-     * @param indent the number of spaces to be output before each attribute (on a new line)
+     * @param indent the number of spaces to be output before each attribute (on a new line), or -1 if
+     *               attributes are not to be indented
      */
 
     public void setIndentForNextAttribute(int indent) {
@@ -579,7 +580,7 @@ public class XMLEmitter extends Emitter {
         }
 
         try {
-            if (isFirst) {
+            if (isFirst || indentForNextAttribute < 0) {
                 writer.writeAscii(' ');
             } else {
                 writeAttributeIndentString();
@@ -599,12 +600,8 @@ public class XMLEmitter extends Emitter {
     }
 
     protected void writeAttributeIndentString() throws IOException {
-        if (indentForNextAttribute < 0) {
-            writer.writeAscii(' ');
-        } else {
-            writer.writeAscii('\n');
-            writer.writeRepeatedAscii((byte)0x20, indentForNextAttribute);
-        }
+        writer.writeAscii('\n');
+        writer.writeRepeatedAscii((byte)0x20, indentForNextAttribute);
     }
 
 

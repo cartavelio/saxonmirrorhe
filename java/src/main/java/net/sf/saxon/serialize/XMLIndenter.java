@@ -26,10 +26,7 @@ import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.OutputKeys;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * XMLIndenter: This ProxyReceiver indents elements, by adding character data where appropriate.
@@ -51,6 +48,7 @@ public class XMLIndenter extends ProxyReceiver {
     private int suppressedAtLevel = -1;
     private Set<NodeName> suppressedElements = null;
     private final XMLEmitter emitter;
+    private Optional<Boolean> indentAttributes = Optional.empty(); // Yes, No, or Maybe
 
 
     /**
@@ -88,7 +86,10 @@ public class XMLIndenter extends ProxyReceiver {
                 suppressedElements.add(FingerprintedQName.fromEQName(eqName));
             }
         }
-
+        s = props.getProperty(SaxonOutputKeys.INDENT_ATTRIBUTES);
+        if (s != null) {
+            indentAttributes = Optional.of("yes".equals(Whitespace.trim(s)));
+        }
     }
 
     /**
@@ -110,10 +111,6 @@ public class XMLIndenter extends ProxyReceiver {
                              Location location, int properties) throws XPathException {
         if (afterStartTag || afterEndTag) {
             boolean doubleSpaced = isDoubleSpaced(nameCode);
-//            if (doubleSpaced) {
-//                line = 0;
-//                column = 0;
-//            }
             indent(doubleSpaced);
         } else {
             flushPendingWhitespace();
@@ -146,7 +143,9 @@ public class XMLIndenter extends ProxyReceiver {
         }
 
         // Calculate indentation to be applied to attributes/namespaces
-        if (suppressedAtLevel < 0) {
+        boolean maybeIndentAttributes = indentAttributes.isEmpty();
+        boolean forceIndentAttributes = indentAttributes.isPresent() && indentAttributes.get();
+        if (suppressedAtLevel < 0 && maybeIndentAttributes) {
             int len = 0;
             for (NamespaceBindingSet nbs : namespaces) {
                 for (NamespaceBinding binding : nbs) {
@@ -168,7 +167,14 @@ public class XMLIndenter extends ProxyReceiver {
             if (len > getLineLength()) {
                 int indent = (level - 1) * getIndentCharCount() + 2;
                 emitter.setIndentForNextAttribute(indent);
+            } else {
+                emitter.setIndentForNextAttribute(-1);
             }
+        } else if (forceIndentAttributes) {
+            int indent = (level - 1) * getIndentCharCount() + 2;
+            emitter.setIndentForNextAttribute(indent);
+        } else {
+            emitter.setIndentForNextAttribute(-1);
         }
         nextReceiver.startElement(nameCode, type, attributes, namespaces, location, properties);
     }

@@ -75,7 +75,6 @@ public class XSLResultDocument extends StyleElement {
         fans.add("undeclare-prefixes");
 
         fans.add(SaxonOutputKeys.ATTRIBUTE_ORDER);
-        fans.add(SaxonOutputKeys.CANONICAL);
         fans.add(SaxonOutputKeys.CHARACTER_REPRESENTATION);
         fans.add(SaxonOutputKeys.CONDITIONAL_CDATA);
         fans.add(SaxonOutputKeys.DOUBLE_SPACE);
@@ -156,7 +155,10 @@ public class XSLResultDocument extends StyleElement {
             } else if (fans.contains(f) || (f.startsWith("{") && !StandardNames.SAXON_ASYCHRONOUS.equals(f))) {
                 // this is a serialization attribute
                 String val = value;
-                if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR) && !f.equals(SaxonOutputKeys.NEWLINE)) {
+                if (!f.equals(SaxonOutputKeys.ITEM_SEPARATOR)
+                        && !f.equals(SaxonOutputKeys.NEWLINE)
+                        && !f.equals(SaxonOutputKeys.LINE_ENDING)
+                        && !f.equals(SaxonOutputKeys.INDENT_UNIT)) {
                     val = Whitespace.trim(value);
                 }
                 if (f.equals(SaxonOutputKeys.ESCAPE_SOLIDUS)) {
