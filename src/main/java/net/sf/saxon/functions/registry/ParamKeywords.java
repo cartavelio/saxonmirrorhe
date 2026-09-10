@@ -44,7 +44,7 @@ public class ParamKeywords {
         arrayParamNames.put("from-sequence", "input|action");
         arrayParamNames.put("get", "array|position|fallback");
         arrayParamNames.put("head", "array");
-        arrayParamNames.put("index-of", "input|search|collation");
+        arrayParamNames.put("index-of", "array|search|collation");
         arrayParamNames.put("index-where", "array|predicate");
         arrayParamNames.put("insert-before", "array|position|member");
         arrayParamNames.put("join", "arrays");
@@ -92,6 +92,7 @@ public class ParamKeywords {
         fnParamNames.put("contains-subsequence", "input|subsequence|compare");
         fnParamNames.put("contains-token", "value|token|collation");
         fnParamNames.put("count", "input");
+        fnParamNames.put("csv-to-arrays", "value|options");
         fnParamNames.put("current-date", "");
         fnParamNames.put("current-dateTime", "");
         fnParamNames.put("current-time", "");

@@ -2433,27 +2433,6 @@ public class XQueryParser extends XPathParser {
             }
         }
 
-//        if (codeInjector != null) {
-//            List<Clause> expandedList = new ArrayList<>(clauseList.size() * 2);
-//            expandedList.add(clauseList.get(0));
-//            for (int i = 1; i < clauseList.size(); i++) {
-//                Clause extra = codeInjector.injectClause(
-//                        clauseList.get(i - 1),
-//                        env
-//                );
-//                if (extra != null) {
-//                    expandedList.add(extra);
-//                }
-//                expandedList.add(clauseList.get(i));
-//            }
-//            Clause extra = codeInjector.injectClause(
-//                    clauseList.get(clauseList.size() - 1), env);
-//            if (extra != null) {
-//                expandedList.add(extra);
-//            }
-//            clauseList = expandedList;
-//        }
-
         flwor.init(clauseList, returnExpression);
         setLocation(flwor, exprOffset);
         return flwor;

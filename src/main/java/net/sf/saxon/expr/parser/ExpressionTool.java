@@ -548,29 +548,6 @@ public class ExpressionTool {
         return seq.iterate();
     }
 
-//    /**
-//     * Helper method to construct an item representing the results of the expression when all that
-//     * the expression itself offers is a process() method.
-//     *
-//     * @param exp     the expression
-//     * @param context the dynamic evaluation context
-//     * @return an iterator over the results of the expression
-//     * @throws XPathException if a dynamic error occurs
-//     */
-//
-//    public static Item getItemFromProcessMethod(Expression exp, XPathContext context) throws XPathException {
-//        Controller controller = context.getController();
-//        if (controller == null) {
-//            throw new NoDynamicContextException("No controller available");
-//        }
-//        SequenceCollector seq = controller.allocateSequenceOutputter(1);
-//        exp.process(new ComplexContentOutputter(seq), context);
-//        seq.close();
-//        Item result = seq.getFirstItem();
-//        seq.reset();
-//        return result;
-//    }
-
     /**
      * Allocate slot numbers to range variables
      *
@@ -589,6 +566,10 @@ public class ExpressionTool {
             nextFree += count;
             if (frame != null) {
                 frame.allocateSlotNumber(((Assignation) exp).getVariableQName(), (Assignation) exp);
+                if (count == 2) {
+                    LocalVariableBinding pos = ((ForExpression) exp).getPositionVariable();
+                    frame.allocateSlotNumber(pos.getVariableQName(), pos);
+                }
             }
         }
         if (exp instanceof LocalParam && ((LocalParam) exp).getSlotNumber() < 0) {
