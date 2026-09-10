@@ -144,8 +144,7 @@ public class XsltPackage {
      * Save this compiled package to filestore for a particular target environment
      *
      * @param file the file to which the compiled package should be saved
-     * @param target the target environment. The only value currently recognized is "JS",
-     *               which exports the package for running under SaxonJS 2.
+     * @param target the target environment (for example "EE" or "JS")
      * @throws SaxonApiException if the compiled package cannot be saved to the specified
      *                           location, or if the package was compiled with just-in-time
      *                           compilation enabled.
