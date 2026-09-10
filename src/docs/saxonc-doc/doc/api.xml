@@ -1593,7 +1593,11 @@
                <td>
                   <span class="signature">setLanguageVersion(string $version)</span>
                   <div class="fcomment">Say which version of XQuery should be used.
-                     Version - "3.1" or "4.0" in the current Saxon release.</div>
+                     Version - "3.1" or "4.0" in the current Saxon release.
+                     Set the XQuery (and XPath) language level to be supported by the
+                     processor. Set the value to "4.0" to enable support for experimental features defined in
+                     the XQuery 4.0 proposal (which is likely to change before it stabilizes). The values "3.1"
+                     and "4.0" are recognized.</div>
                </td>
             </tr>
             <tr>
@@ -2048,8 +2052,9 @@
                <td>
                   <span class="signature">registerSchemaFromNode(<a class="bodylink code"
                                           href="../saxon_c_php_xdmnode">XdmNode</a> $node)</span>
-                  <div class="fcomment">Register the schema supplied as an Xdm Node Object.
-                     The schema document supplied as an XdmNode object</div>
+                  <div class="fcomment">Register a schema document supplied as an <a
+                     class="bodylink code" href="../saxon_c_php_xdmnode">XdmNode</a> object, as specified
+                     by the $node argument.</div>
                </td>
             </tr>
             <tr>
