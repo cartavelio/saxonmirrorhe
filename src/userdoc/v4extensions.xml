@@ -475,6 +475,8 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 
       <p>The second argument may be omitted and defaults to <code>fn:identity#1</code>, so 
          <code>fn:all((1=1, 2=2, 3=4))</code> returns false.</p>
+      
+      <aside><p>The function has been renamed <code>fn:every</code>; for the time being both names are available.</p></aside>
 
       <kbd>fn:all-different(
          $values	as xs:anyAtomicType*,	
@@ -539,7 +541,21 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          ) as xs:string?</kbd>
 
       <p>Converts a QName into <code>Q{uri}local</code> notation.</p>
-
+      
+      <kbd>fn:every(
+         $input	as item()*,	
+         $predicate	as function(item()) as xs:boolean	:= fn:identity#1
+         ) as xs:boolean</kbd>
+      
+      <p>Returns true if every item in <code>$input</code> satisfies the predicate.</p>
+      
+      <p>For example, <code>fn:every(*, fn{boolean(self::para)})</code> returns true if every child element of the
+         context item is a <code>para</code> element.</p>
+      
+      <p>The second argument may be omitted and defaults to <code>fn:identity#1</code>, so 
+         <code>fn:every((1=1, 2=2, 3=4))</code> returns false.</p>
+      
+      
       <kbd>fn:foot(
          $input	as item()*	
          ) as item()?</kbd>
@@ -672,9 +688,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       useful because they enable an array to be treated as a sequence of items, by wrapping each member of the
       array as a parcel.</p>
       
-      <p>
-         <em>Likely to be dropped.</em>
-      </p>
+      <aside><p>This function has been dropped from the spec.</p></aside>
 
       <kbd>fn:parse-html($input as xs:string) as document-node</kbd>
 
@@ -766,6 +780,15 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       <kbd>fn:unparcel($parcel as record(value, *)) as item()*</kbd>
 
       <p>Reverses the effect of the <code>fn:parcel()</code> function. (Equivalent to <code>$parcel?value</code>.)</p>
+      
+      <aside><p>This function has been dropped from the spec.</p></aside>
+      
+      <kbd>fn:void(
+         $input	as item()*	
+         ) as empty-sequence()</kbd>
+      
+      <p>Returns the empty sequence, unconditionally. The Saxon implementation always evaluates the <code>$input</code>
+      argument eagerly, making it useful to force evaluation of an expression that has side-effects.</p>
 
       <kbd>fn:xdm-to-json($input as item()*, $options as map(*)) as xs:string</kbd>
       

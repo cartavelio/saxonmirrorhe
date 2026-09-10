@@ -405,6 +405,10 @@
             which has the same effect as omitting the argument.</p></li>
             <li><p>The <code>fn:duplicate-values()</code> function is implemented. This returns all
             values that appear more than once in the input sequence.</p></li>
+            <li><p>The <code>fn:void()</code> function is implemented. This evaluates the supplied argument,
+                raises an error if evaluation fails, and then returns an empty sequence. The function is primarily
+            designed (like the <code>saxon:do</code> instruction) for evaluating expressions that have side-effects,
+            such as functions in the EXPath file module.</p></li>
             <li><p>The new <code>fn:all()</code> function is renamed <code>fn:every()</code>.</p></li>
             <li><p>The new <code>map:of()</code> function is renamed <code>map:of-pairs()</code>.</p></li>
             <li><p>The new <code>array:of()</code> function is renamed <code>array:of-members()</code>.</p></li>
