@@ -53,10 +53,7 @@ namespace Saxon.Api {
         /// validation, the absence of an element declaration results in the content being considered valid.
         /// </summary>
 
-        public abstract bool Lax {
-            get;
-            set;
-        }
+        public abstract bool Lax { get; set; }
 
         /// <summary>
         /// This property defines whether the schema processor will recognize, and attempt to
@@ -64,10 +61,7 @@ namespace Saxon.Api {
         /// attributes encountered in the instance document. The default value is true.
         /// </summary>
 
-        public abstract bool UseXsiSchemaLocation {
-            get;
-            set;
-        }
+        public abstract bool UseXsiSchemaLocation { get; set; }
 
 
         /// <summary>Set the validation reporting feature, which saves the validation errors in an XML file</summary>
@@ -77,9 +71,7 @@ namespace Saxon.Api {
         /// <summary>Set the <c>InvalidityHandler</c> to be used when validating instance documents;
         /// the invalidity handler is called once at the start of validation, once for each
         /// validation failure, and once at the end.</summary>
-        public abstract IInvalidityHandler InvalidityHandler {
-            set;
-        }
+        public abstract IInvalidityHandler InvalidityHandler { set; }
 
         /// <summary>Set the <c>InvalidityListener</c> to be used when validating instance documents;
         /// this is a simple delegate callback which is called once for each validation failure.</summary>
@@ -87,9 +79,7 @@ namespace Saxon.Api {
         /// in a user-supplied list. This effect can be achieved by declaring <c>List&lt;ValidationFailure> ErrorList</c>
         /// and setting the <c>InvalidityListener</c> property to <c>ErrorList.Add</c>.</remarks> 
 
-        public abstract Action<ValidationFailure> InvalidityListener {
-            set;
-        }
+        public abstract Action<ValidationFailure> InvalidityListener { set; }
 
         /// <summary>
         /// Add an instance document to the list of documents to be validated by a subsequent call
@@ -261,10 +251,7 @@ namespace Saxon.Api {
         /// If no value is supplied, there is no constraint on the required element name.
         /// </summary>
         /// 
-        public abstract QName DocumentElementName {
-            get;
-            set;
-        }
+        public abstract QName DocumentElementName { get; set; }
 
         /// <summary>
         /// The name of the required type of the top-level element of the document to be validated.
@@ -272,10 +259,7 @@ namespace Saxon.Api {
         /// If no value is supplied, there is no constraint on the required type
         /// </summary>
        
-        public abstract QName DocumentElementTypeName {
-            get;
-            set;
-        }
+        public abstract QName DocumentElementTypeName { get; set; }
         
 
         internal abstract Saxon.Hej.s9api.SchemaValidator UnderlyingSchemaValidator { get; }
@@ -306,10 +290,7 @@ namespace Saxon.Api {
         /// the document during validation as if they were present in the instance being validated)
         /// </summary>
         /// 
-        public abstract bool ExpandAttributeDefaults {
-            get;
-            set;
-        }
+        public abstract bool ExpandAttributeDefaults { get; set; }
 
         /// <summary>
         /// Run the validation of a set of instance documents, previously
@@ -350,9 +331,7 @@ namespace Saxon.Api {
         /// </para>
         /// </remarks>
         /// <value>The underlying Destination object</value>
-        public abstract Saxon.Hej.s9api.Destination UnderlyingDestination {
-            get;
-        }
+        public abstract Saxon.Hej.s9api.Destination UnderlyingDestination { get; }
 
         /// <summary>
         /// Define an action to be performed when writing to the Destination is complete.
