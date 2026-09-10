@@ -394,7 +394,7 @@ task dotnet_doc_merge(
   description: "Merge API docs for dotnet"
 ) {
   inputs.file "${buildDir}/dotnetdoc/names.xml"
-  inputs.file "${buildDir}/csout/engine.xml"
+  inputs.file "${buildDir}/cs/csout/engine.xml"
   inputs.file "${projectDir}/tools/docs/dotnet/merge.xsl"
   outputs.file "${buildDir}/dotnetdoc/merged.xml"
   classpath = configurations.documentation
@@ -404,7 +404,7 @@ task dotnet_doc_merge(
     "-xsl:${projectDir}/tools/docs/dotnet/merge.xsl",
     "-o:${buildDir}/dotnetdoc/merged.xml",
     "names-file=${buildDir}/dotnetdoc/names.xml",
-    "api-doc-file=${buildDir}/csout/engine.xml"
+    "api-doc-file=${buildDir}/cs/csout/engine.xml"
 }
 
 task dotnet_doc_css(
