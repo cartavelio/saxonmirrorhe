@@ -1,11 +1,13 @@
 package s9apitest;
 
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trace.Instrumentation;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -73,6 +75,12 @@ public class TestAssert {
         } catch (SaxonApiException e1) {
             fail();
         }
+    }
+
+    @Test
+    public void testInstrumentationDisabled() {
+        // Designed to prevent a recurrence of bug 5955 - in a production release, instrumentation should be off
+        assertFalse(Instrumentation.ACTIVE);
     }
 }
 
