@@ -11,6 +11,8 @@ using Saxon.Hej.type;
 using Saxon.Hej.value;
 using WSP = Saxon.Api.WhitespacePolicy;
 
+#nullable enable
+
 namespace System.Impl.Helpers {
     public class DotNetPullProvider : Saxon.Hej.pull.PullProvider, Saxon.Hej.s9api.Location {
         private Saxon.Hej.@event.PipelineConfiguration pipe;

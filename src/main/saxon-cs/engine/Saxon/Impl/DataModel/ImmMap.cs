@@ -10,6 +10,8 @@ using Saxon.Hej.value;
 using SaxonKVP = Saxon.Hej.ma.map.KeyValuePair;
 using Type = Saxon.Hej.type.Type;
 
+#nullable enable
+
 namespace Saxon.Impl.DataModel {
     /**
      * This is a re-implementation of the Java class Saxon.Hej.ma.map.HashTrieMap,
@@ -420,17 +422,17 @@ namespace Saxon.Impl.DataModel {
         * @return an iterator over the keys, in undefined order
         */
         public override AtomicIterator keys() {
-            return new KeyIterator(imap);
+            return new KeyIteratorImpl(imap);
         }
 
         public override IEnumerable<SaxonKVP> keyValuePairs() {
             return imap.Values;
         }
 
-        public class KeyIterator : AtomicIterator {
+        private class KeyIteratorImpl : AtomicIterator {
             private readonly IEnumerator<Saxon.Hej.ma.map.KeyValuePair> _enumerator;
 
-            public KeyIterator(SCI.ImmutableDictionary<AtomicMatchKey, SaxonKVP> dictionary) {
+            public KeyIteratorImpl(SCI.ImmutableDictionary<AtomicMatchKey, SaxonKVP> dictionary) {
                 _enumerator = dictionary.Values.GetEnumerator();
             }
 

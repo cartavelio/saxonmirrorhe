@@ -122,8 +122,7 @@ namespace Saxon.Impl.DataModel {
                 return t2;
             }
             else {
-                SaxonKVP existing;
-                if (!imap.TryGetValue(k, out existing)) {
+                if (!imap.TryGetValue(k, out SaxonKVP? existing)) {
                     // key not present, create a new entry at the end
                     ExtendedKeyValuePair quad = new (key, value, null, lastKey);
                     imap2 = imap.SetItem(k, quad);

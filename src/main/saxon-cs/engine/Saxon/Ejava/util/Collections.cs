@@ -59,7 +59,7 @@ namespace Saxon.Ejava.util
             return new SysCollGen.List<T>();
         }
         
-        public static void reverse<T>(System.Collections.Generic.List<T> list) {
+        public static void reverse<T>(System.Collections.Generic.IList<T> list) {
             list.Reverse();
         }
         

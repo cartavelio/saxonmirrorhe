@@ -71,7 +71,7 @@ namespace Saxon.Impl.Helpers {
         /// <param name="map">The map to be interated over.</param>
         /// <returns>An iterator of key value pairs</returns>
         /// <remarks>
-        /// <para>I tried to make this more generic but it got too complicated.
+        /// <para>I tried to make this more generic but it got too complicated.</para>
         /// </remarks>
 
         public static SysCollGen.IEnumerator<Saxon.Hej.ma.map.KeyValuePair> convertStringKeyValuePairs(

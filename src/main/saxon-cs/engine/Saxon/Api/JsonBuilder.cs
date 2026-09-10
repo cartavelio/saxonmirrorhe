@@ -38,7 +38,7 @@ namespace Saxon.Api {
                 System.Collections.Generic.IDictionary<string,Saxon.Hej.om.GroundedValue> options = new System.Collections.Generic.Dictionary<string, Saxon.Hej.om.GroundedValue>();
                 Saxon.Impl.Helpers.MapUtils.Put(options, "liberal", Saxon.Hej.value.BooleanValue.get(Liberal));
                 Saxon.Impl.Helpers.MapUtils.Put(options, "escape", Saxon.Hej.value.BooleanValue.TRUE);
-                Saxon.Hej.om.Item result = Saxon.Hej.ma.json.ParseJsonFn.parse(content.ToString(), options, context);
+                Saxon.Hej.om.Item result = Saxon.Hej.ma.json.ParseJsonFn.parse(content.codePoints(), options, context);
                 return XdmValue.Wrap(result);
             } catch (Exception e) when (e is Saxon.Hej.trans.XPathException || e is System.IO.IOException) {
                 throw new SaxonApiException(e);
