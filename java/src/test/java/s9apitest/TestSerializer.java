@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -652,6 +653,59 @@ public class TestSerializer {
             fail();
         } catch (XMLStreamException e) {
             fail();
+        }
+    }
+
+    @Test
+    public void testSerializationListener() {      // Feature #7217
+        try {
+            Processor proc = new Processor(true);
+            StringReader sr = new StringReader("<doc><e>text</e></doc>");
+            SAXSource source = new SAXSource(new InputSource(sr));
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode node = builder.build(source);
+            XsltCompiler xqcomp = proc.newXsltCompiler();
+            sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                                          "<xsl:output indent='yes' cdata-section-elements='e'/>" +
+                                          "<xsl:template match='/'><xsl:result-document omit-xml-declaration='yes'><xsl:copy-of select='.'/></xsl:result-document></xsl:template>" +
+                                          "</xsl:stylesheet>");
+            SAXSource style = new SAXSource(new InputSource(sr));
+            XsltTransformer trans = xqcomp.compile(style).load();
+
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            Serializer serializer = proc.newSerializer(os);
+
+            serializer.setOutputProperty(Serializer.Property.BYTE_ORDER_MARK, "no");
+            serializer.setOutputProperty(Serializer.Property.ENCODING, "utf-8");
+            serializer.setOutputProperty(Serializer.Property.INDENT, "no");
+            serializer.setOutputProperty(Serializer.Property.METHOD, "xml");
+            serializer.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "no");
+            serializer.setOutputProperty(Serializer.Property.SAXON_INDENT_SPACES, "2");
+
+            serializer.setSerializationListener(event -> {
+                assertEquals("xml", event.properties().getProperty("method"));
+                assertEquals("no", event.properties().getProperty("indent"));
+                assertEquals("no", event.properties().getProperty("byte-order-mark"));
+                assertEquals("no", event.properties().getProperty("omit-xml-declaration"));
+                assertEquals("utf-8", event.properties().getProperty("encoding"));
+                assertEquals("Q{}e", event.properties().getProperty("cdata-section-elements").trim());
+                assertEquals("2", event.properties().getProperty("{http://saxon.sf.net/}indent-spaces"));
+                assertTrue(event.properties().getPropertyNames().contains("cdata-section-elements"));
+                assertTrue(event.properties().getPropertyNames().contains("{http://saxon.sf.net/}indent-spaces"));
+                assertNull(event.outputURI());
+            });
+
+            trans.setSource(node.asSource());
+            trans.setDestination(serializer);
+            trans.transform();
+
+            String result = os.toString();
+            assertTrue(result.contains("<?xml"), "XML declaration exists");
+            assertTrue(result.contains("doc><e"), "Indented");
+            assertTrue(result.contains("<e><![CDATA"), "Cdata section");
+
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
         }
     }
    
