@@ -241,11 +241,9 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
          licenses. For more information see the <a href="https://www.saxonica.com/license/license.xml"
             target="_blank">Licenses</a> section on the main Saxonica website.</p>
 
-      <p>Although SaxonC technically adheres to the definition of open source software, there are
-         practical limitations. Specifically, the "Source Code Form" of the product, in the
-         terminology of the MPL license, consists primarily of Java source code, and in order to
-         build SaxonC from the Java source code, you need access to the Excelsor JET development
-         tools, which are no longer commercially available to new users.</p>
+     <p>The "Source Code Form" of the open-source SaxonC-HE product, in the terminology of the
+       MPL license, consists primarily of Java code. In order to build SaxonC from this Java source code, a
+       user must compile it to a native library using GraalVM Native Image, which is freely available.</p>
 
 
    </section>
