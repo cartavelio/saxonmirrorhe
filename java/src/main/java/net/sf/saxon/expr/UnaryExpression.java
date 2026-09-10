@@ -27,9 +27,6 @@ public abstract class UnaryExpression extends Expression {
 
     public UnaryExpression(Expression p0) {
         operand = new Operand(this, p0, getOperandRole());
-//        if (p0.getRetainedStaticContext() != null) {
-//            setRetainedStaticContext(p0.getRetainedStaticContext());
-//        }
         ExpressionTool.copyLocationInfo(p0, this);
     }
 
