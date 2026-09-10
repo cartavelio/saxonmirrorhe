@@ -32,6 +32,8 @@ public final class GeneralNodePattern extends Pattern {
 
     private Expression equivalentExpr = null;
     private NodeTest itemType = null;
+    private NodeTest topNodeTest = null;
+    private Expression rump = null;
 
     /**
      * Create a GeneralNodePattern
@@ -43,6 +45,16 @@ public final class GeneralNodePattern extends Pattern {
     public GeneralNodePattern(Expression expr, NodeTest itemType) {
         equivalentExpr = expr;
         this.itemType = itemType;
+        if (expr instanceof SlashExpression) {
+            Expression head = ((SlashExpression)expr).getFirstStep();
+            if (head instanceof SimpleStepExpression) {
+                head = ((SimpleStepExpression)head).getAxisExpression();
+            }
+            if (head instanceof AxisExpression && ((AxisExpression)head).getAxis() == AxisInfo.CHILD) {
+                topNodeTest = ((AxisExpression) head).getNodeTest();
+                rump = ((SlashExpression) expr).getRemainingSteps();
+            }
+        }
     }
 
     /**
@@ -84,7 +96,7 @@ public final class GeneralNodePattern extends Pattern {
 
     @Override
     public Pattern typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType) throws XPathException {
-        ContextItemStaticInfo cit = visitor.getConfiguration().getDefaultContextItemStaticInfo();
+        ContextItemStaticInfo cit = new ContextItemStaticInfo(AnyNodeTest.getInstance(), false);
         equivalentExpr = equivalentExpr.typeCheck(visitor, cit);
         return this;
     }
@@ -175,14 +187,20 @@ public final class GeneralNodePattern extends Pattern {
             return false;
         }
         AxisIterator anc = ((NodeInfo) item).iterateAxis(AxisInfo.ANCESTOR_OR_SELF);
+        NodeInfo top = (NodeInfo)item;
         while (true) {
             NodeInfo a = anc.next();
             if (a == null) {
+                // The first step in a pattern, if it uses the child axis, is interpreted as "child-or-top" (test case match-274)
+                if (topNodeTest != null && UType.CHILD_NODE_KINDS.matches(top)) {
+                    return topNodeTest.test(top) && isSelected(((NodeInfo) item), top, rump, context);
+                }
                 return false;
             }
             if (matchesBeneathAnchor((NodeInfo) item, a, context)) {
                 return true;
             }
+            top = a;
         }
     }
 
@@ -220,12 +238,16 @@ public final class GeneralNodePattern extends Pattern {
             }
         }
 
+        return isSelected(node, anchor, equivalentExpr, context);
+    }
+
+    private boolean isSelected(NodeInfo node, NodeInfo anchor, Expression selector, XPathContext context) throws XPathException {
         // System.err.println("Testing positional pattern against node " + node.generateId());
         XPathContext c2 = context.newMinorContext();
         ManualIterator iter = new ManualIterator(anchor);
         c2.setCurrentIterator(iter);
         try {
-            SequenceIterator nsv = equivalentExpr.iterate(c2);
+            SequenceIterator nsv = selector.iterate(c2);
             while (true) {
                 NodeInfo n = (NodeInfo)nsv.next();
                 if (n == null) {
