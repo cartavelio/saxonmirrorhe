@@ -39,11 +39,15 @@ namespace Saxon.Impl.Helpers {
                 a.getDecimalValue(), b.getDecimalValue(), precision, Singulink.Numerics.RoundingMode.ToZero);
             BigDecimal roundedQuotient = BigDecimal.Round(quotient, precision, RoundingMode.ToZero);
             BigDecimal remainder = a.getDecimalValue() - roundedQuotient * b.getDecimalValue();
-            return new ShapedMap(Saxon.Eej.functions.qt4.DivideDecimals.quotientAndRemainder,
+            return new ShapedMap(quotientAndRemainder,
                 new BigDecimalValue(roundedQuotient),
                 new BigDecimalValue(remainder));
 
         }
+        
+        private static Saxon.Hej.ma.map.Shape quotientAndRemainder = 
+            new Saxon.Hej.ma.map.Shape(new Saxon.Hej.str.Twine8("quotient"), new Saxon.Hej.str.Twine8("remainder"));
+
         
         public static Singulink.Numerics.BigDecimal Idiv(Singulink.Numerics.BigDecimal a, Singulink.Numerics.BigDecimal b) {
             Singulink.Numerics.BigDecimal quot = a / b;

@@ -161,6 +161,7 @@ task hecs_setupPreprocess(
   exclude "net/sf/saxon/tree/iter/NodeWrappingFunction.java"
   exclude "net/sf/saxon/tree/jiter/TopDownStackIterable.java"
   exclude "net/sf/saxon/tree/jiter/MappingJavaIterator.java"
+  exclude "net/sf/saxon/tree/jiter/ReverseListIterable.java"
   exclude "net/sf/saxon/tree/lib/StandardEntityResolver.java"
   exclude "net/sf/saxon/tree/lib/StandardErrorHandler.java"
   exclude "net/sf/saxon/tree/util/AttributeCollectionImpl.java"
@@ -316,6 +317,8 @@ task hecs_transpile_to_xml(
     "-xml:${buildDir}/he_xmlout",
     "-h:${projectDir}/src/main/java",
     "-src:${projectDir}/src/main/java",
+    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
+    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
     "-he:${saxonVersion}",
     "-icu4j:${icu4jJar}"
   doFirst {
@@ -373,6 +376,8 @@ task hecs_generateCSharp(
     "-xml:${buildDir}/he_xmlout",
     "-digest:${buildDir}/he_refined-digest.xml",
     "-he:${saxonVersion}",
+    "-vavr:${projectDir}/lib/vavr-0.10.5.jar",
+    "-vavrMatch:${projectDir}/lib/vavr-match-0.10.5.jar",
     "-icu4j:${icu4jJar}"
     "-debug"
   doFirst {

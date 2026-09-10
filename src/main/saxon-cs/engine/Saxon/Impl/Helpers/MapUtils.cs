@@ -1,9 +1,5 @@
-using System;
 using SysCollGen = System.Collections.Generic;
-using System.Linq;
-using NSec.Cryptography;
 using Saxon.Hej.value;
-using KeyValuePair = Saxon.Hej.ma.map.KeyValuePair;
 
 namespace Saxon.Impl.Helpers {
     public class MapUtils {
@@ -21,8 +17,8 @@ namespace Saxon.Impl.Helpers {
                 map[pair.Key] = pair.Value;
             }
         }
-        public static void Merge<K,V>(SysCollGen.IDictionary<K, V> map, K key, V value, Func<V, V, V> function) {
-            throw new NotImplementedException();
+        public static void Merge<K,V>(SysCollGen.IDictionary<K, V> map, K key, V value, System.Func<V, V, V> function) {
+            throw new System.NotImplementedException();
         }
         public static SysCollGen.ISet<K> KeySet<K,V>(SysCollGen.IDictionary<K, V> map) {
             return new SysCollGen.HashSet<K>(map.Keys);
@@ -33,7 +29,7 @@ namespace Saxon.Impl.Helpers {
         //unless null.
 
         public static V ComputeIfAbsent<K,V>(SysCollGen.IDictionary<K, V> map, K key,
-                                             Func<K,V> mappingFunction) where V : class {
+                                             System.Func<K,V> mappingFunction) where V : class {
             if (map.ContainsKey(key)) {
                 return map[key];
             } else {
