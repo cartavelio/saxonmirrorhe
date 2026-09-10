@@ -19,15 +19,15 @@ configure access to these items.
   `$SAXON_EXTRA_TEST_SUITE_DIR/data/xmark`.
 * `W3C_EXPATH_TEST_SUITE_DIR`, the `tests/qt3` directory of the XPath test suite
   from `git@github.com:expath/expath-cg.git`.
-* `W3C_QT3_TEST_SUITE_DIR`, the path to a local clone of the QT3 test suite repo from
-  `git@github.com:w3c/qt3tests.git`.
-* `W3C_QT4_TEST_SUITE_DIR`, the path to a local clone of the QT4 test suite repo from
-  `git@github.com:qt4cg/qt4tests.git`.
-* `W3C_XSD_TEST_SUITE_DIR` the path to a local clone of the XSD test suite repo
+* `W3C_QT3_TEST_SUITE_DIR`, the `qt3tests` directory of the QT3 test suite
+  from `git@github.com:w3c/qt3tests.git`.
+* `W3C_QT4_TEST_SUITE_DIR`, the `qt4cg/tests` directory of the QT4 test suite
+  from `git@github.com:qt4cg/qt4tests.git`.
+* `W3C_XSD_TEST_SUITE_DIR` the `xsdtests` directory of the XSD test suite
   from `git@github.com:w3c/xsdtests.git`.
-* `W3C_XSLT30_TEST_SUITE_DIR`, the path to a local clone of the XSLT 3.0 test suite repo from
+* `W3C_XSLT30_TEST_SUITE_DIR`, the XSLT 3.0 test suite from
   `git@github.com:w3c/xslt30-test.git`.
-* `W3C_XSLT40_TEST_SUITE_DIR`, the path to a local clone of the XSLT 4.0 test suite repo from
+* `W3C_XSLT40_TEST_SUITE_DIR`, the XSLT 4.0 test suite from
   `git@github.com:qt4cg/xslt40-test.git`.
 * `W3C_QT4_SPECS_DIR`, the path to a local clone of the QT4 specifications repo from
   `git@github.com:qt4cg/qtspecs.git`.
@@ -109,71 +109,6 @@ safe to completely delete the build directory before executing a task.
 This ensures that _everything_ necessary to execute the task will be
 rebuilt from the current sources.
 
-### Building wheels
-
-Building wheels is complicated. There are three different Saxon
-products each with five different flavors of wheel and each for
-several different versions of Python:
-
-* Mac for x86 and aarch64
-* Linux for x86 and arm64
-* Windows for x86 (and someday, maybe also arm64)
-
-We rely on `cibuildwheel` to create relocatable shared libraries. That
-requires building the Linux wheel versions of SaxonC with particular
-(and slightly older) versions of the C++ toolchain.
-
-* Mac for x86 can be built on an Intel Mac
-* Mac for aarch64 be built on an Apple Silicon Mac
-* Linux for x86 is built in a [Docker container](https://saxonica.plan.io/projects/ci-tools/repository/33/revisions/main/show/docker/saxondev)
-* Linux for Arm64 is built in a VMWare container on an Apple Silicon
-  Mac. The `cibuildwheel` process runs in that container because there
-  is no Arm64 host available on GitHub.
-* Windows for x86 is built on a Windows machine
-
-The `cibuildwheel` for all of the platforms except Linux/arm64 runs in
-the [BuildWheels](https://github.com/Saxonica/BuildWheels/) repository
-on GitHub. Because we don’t have the sources for SaxonC available on
-GitHub, a yet even more complicated process is used.
-
-1. Build SaxonC for Python wheels using the `saxonc_stage_wheels`
-   target in the appropriate environment.
-2. Copy the staged wheels from the `build/distributions/` directory to
-   the staging area on `dev.saxonica.com`. The staging area is
-   `/var/www/html/dev.saxonica.com/github-wheel-sources/USER/`, where
-   USER is your login id.
-3. Update the `config.json` file in the `BuildWheels` project.
-4. Push the change to `config.json` to trigger a build.
-
-The `config.json` file has several properties:
-
-```
-{
-  "user": "norm",
-  "macx86_64": true,
-  "macaarch64": true,
-  "macpath": "/Volumes/Saxonica/src/saxonica/saxondev",
-  "linux": false,
-  "windows": false,
-  "date": "2023-05-02T19-00-00"
-}
-```
-
-* `user` identifies the user and determines which staged libraries will be retrieved.
-* `macx86_64` and `macaarch64` determine whether the Mac wheels should be built.
-* `macpath` is the absolute path to the `saxondev` repository on the
-  machine where you built the Mac release. This is required by the Mac version of the
-  tool that builds relocatable shared libraries.
-* `linux` determines whether the (x86) Linux wheels should be built.
-* `windows` determines whether the Windows wheels should be built.
-* `date` is actually irrelevant, but gives you something to change if
-  you need to trigger new build for the same configuration.
-
-The `saxonc_build_wheels` target will automate all of this for you on
-a Mac. It doesn’t work for Linux because you have to build in a
-container anyway. It doesn’t work for Windows because it relies on
-`scp` and other tools that aren’t typically installed.
-
 ## Signing jars
 
 If your environment is configured to sign jars, running the release
@@ -250,10 +185,6 @@ If you want to run just a single test suite, for example, the XSLT 3.0
 test suite against EE with bytecode and jit enabled, you can run just
 that task (e.g., `eeXslt30TestSuite_XT30_bcon_jit`).
 (The names get a little clunky.)
-
-The Python test suites are qt3 and xslt30. They can be run with any of
-the Python builds. The build target `all_python_test_suites` will run
-them all. The individual tests are `{h,e,p}ec_{xslt30,qt3}_test_suite`
 
 ### The test suites
 

@@ -230,7 +230,7 @@ class SaxonTestSuite {
           if (testReportArchive != null
               && reportdir.startsWith(resultOutputPath)) {
             def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
+            arcpath += "${project.ext.saxonVersion3}/"
             arcpath += "${options['suite']}/${project.ext.DSTAMP}"
             saveTheResults(options, arcpath)
           }
@@ -270,11 +270,11 @@ class SaxonTestSuite {
     }
 
     def resultFn = "${options['reportDirectory']}/"
-    resultFn += "SaxonResults${project.ext.saxonVersion}-"
+    resultFn += "SaxonResults${project.ext.saxonVersion3}-"
     resultFn += options['language'] + ".xml"
 
     def errorFn = "${options['reportDirectory']}/"
-    errorFn += "SaxonFailures${project.ext.saxonVersion}-"
+    errorFn += "SaxonFailures${project.ext.saxonVersion3}-"
     errorFn += options['language'] + "-errors.xml"
 
     Task run = project.task("run__${testTaskName}", type: JavaExec) {
@@ -374,7 +374,7 @@ class SaxonTestSuite {
           if (testReportArchive != null
               && reportdir.startsWith(resultOutputPath)) {
             def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
+            arcpath += "${project.ext.saxonVersion3}/"
             arcpath += "${options['suite']}/${project.ext.DSTAMP}"
             saveTheXsdResults(options, arcpath)
           }
@@ -512,7 +512,7 @@ class SaxonTestSuite {
           if (testReportArchive != null
               && reportdir.startsWith(resultOutputPath)) {
             def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
+            arcpath += "${project.ext.saxonVersion3}/"
             arcpath += "${options['suite']}/${project.ext.DSTAMP}"
             saveTheResults(options, arcpath)
           }
@@ -552,11 +552,11 @@ class SaxonTestSuite {
     }
 
     def resultFn = "${options['reportDirectory']}/"
-    resultFn += "SaxonResults${project.ext.saxonVersion}-"
+    resultFn += "SaxonResults${project.ext.saxonVersion3}-"
     resultFn += options['language'] + ".xml"
 
     def errorFn = "${options['reportDirectory']}/"
-    errorFn += "SaxonFailures${project.ext.saxonVersion}-"
+    errorFn += "SaxonFailures${project.ext.saxonVersion3}-"
     errorFn += options['language'] + "-errors.xml"
 
     Task run = project.task("run__${testTaskName}", type: Exec) {
@@ -651,7 +651,7 @@ class SaxonTestSuite {
           if (testReportArchive != null
               && reportdir.startsWith(resultOutputPath)) {
             def arcpath = "${this.testReportArchive}/${options['product']}/"
-            arcpath += "${project.ext.saxonVersion}/"
+            arcpath += "${project.ext.saxonVersion3}/"
             arcpath += "${options['suite']}/${project.ext.DSTAMP}"
             saveTheXsdResults(options, arcpath)
           }
@@ -757,6 +757,9 @@ class SaxonTestSuite {
     // N.B. The eej and eedotnet patterns are different!
     def eedotnet = (parts[0] == "eedotnet")
     if (eedotnet) {
+      // Only two digits?
+      def vparts = pver.split("\\.")
+      pver = vparts[0] + "." + vparts[1]
       reportfn = "${options['reportDirectory']}/SaxonResults${pver}n.xml";
     }
 

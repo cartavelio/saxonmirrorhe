@@ -1014,94 +1014,145 @@ task saxonc_doc_sef(
           "--generateByteCode:off"
 }
 
-task saxonc_api_doc(
-  dependsOn: ["saxonc_doxygen", "saxonc_pydoc3"],
-  description: "Build the SaxonC API documentation for website"
-) {
-  inputs.files fileTree(dir: "${buildDir}/doc_pypi/documentation")
-  inputs.file "${buildDir}/doc_pypi/saxoncee.html"
-  outputs.files fileTree("${buildDir}/saxonc-doc")
+// ============================================================
+// These tasks assume that the build will be run in the
+// saxonica-docbuild container.
+
+def saxonDocPythonSetupTask = tasks.register("saxonc_doc_pypi", PythonSetup) {
+  saxoncHomeFiles.from(tasks.named("eec_build_graal_image"))
+  graalImageHeaderFiles.from(tasks.named("eec_build_graal_image").map { it.headerFiles })
+  pypiDir = layout.projectDirectory.dir("src/main/c/pypi")
+  saxonCApiDir = layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+  outputDir = layout.buildDirectory.dir("doc_pypi")
+  it.edition = "ee"
+  it.libpath = systemOs.isWindows() ? 'libs\\\\win\\\\' : ''
+  it.version3 = saxonVersion3
+}
+
+def docSaxoncDoxygenTask = tasks.register("saxonc_doxygen") {
+  inputs.dir layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+  inputs.files saxonDocPythonSetupTask
+  outputs.dir layout.buildDirectory.dir("doxygen-output")
 
   doLast {
     copy {
-      into "${buildDir}/saxonc-doc/doc${saxonMajorVersion}"
-      from "${buildDir}/doc_pypi/documentation"
+      into layout.buildDirectory.dir("doxygen")
+      from saxonDocPythonSetupTask
+    }
+
+    copy {
+      into layout.buildDirectory.dir("doxygen/Saxon.C.API")
+      from layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+      include "Doxyfile"
+      include "README.md"
+      filter { line ->
+        line.replaceAll('@@VERSION@@', saxonVersion)
+                .replace('@@LOGO@@', "${projectDir}/src/docs/doc/img/saxonica_logo.gif")
+                .replace('@@OUTPUT@@', layout.buildDirectory.dir("doxygen-output").get().toString())
+      }
+    }
+
+    exec {
+      workingDir layout.buildDirectory.dir("doxygen")
+      commandLine 'doxygen', "Saxon.C.API/Doxyfile"
     }
   }
+}
+
+def pyenvDocPythonTask = tasks.register("pyenv_doc", PythonPyenv) {
+  pyenvExe = tasks.named("pyenvExe").map { it.pyenv.get() }
+  pythonVersion = "3.9.19"
+  pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
+}
+
+def pyenvDocPythonExeTask = tasks.register('pyenv_doc_python_exe', PythonPyenvPythonExe) {
+  pyenvExe = tasks.named("pyenvExe").map { it.pyenv.get() }
+  pyenvVersionName = pyenvDocPythonTask.map { it.pyenvVersionName.get() }
+}
+
+def branchDocVenvTask = tasks.register("branch_doc_python_venv", PythonVenv) {
+  pyenvPythonExe = pyenvDocPythonExeTask.map { it.pythonExe.get() }
+  suffix = "doc"
+}
+
+def docWheelPlatformTagTask = tasks.register("doc_python_wheel_platform_tag", WheelCompatibilityTags) {
+  pyenvExe = tasks.named("pyenvExe").map { it.pyenv.get() }
+  pythonVersion = pyenvDocPythonTask.map { it.pythonVersion.get() }
+  pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
+  manylinuxTarget = "manylinux_2_24"
+}
+
+tasks.register("saxonc_doc_python_pipInstall", PipInstall) {
+  pipExe = branchDocVenvTask.map { it.pipExe.get() }
+  requirements = tasks.named("saxonc_doc_pypi").map { it.packageDir.map { it.file("requirements.txt") }.get() }
+}
+
+def docBuildWheelTask = tasks.register("saxonc_doc_python_build_wheel", BuildWheel) {
+  pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
+  productEdition = "ee"
+  productVersion = saxonVersion3
+  wheelSuffix = docWheelPlatformTagTask.flatMap { it.wheelSuffix }
+  macosxDeploymentTarget = docWheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+  sourceDir = tasks.named("saxonc_doc_pypi").map { it.packageDir.get() }
+  outputDir = layout.buildDirectory.dir("doc_python_wheel")
+}
+
+def docRepairWheelTask = tasks.register("saxonc_doc_python_repair_wheel", RepairLocalWheel) {
+  outputDir = layout.buildDirectory.dir("doc_python_wheel")
+  manylinuxTarget = "manylinux_2_24"
+  pythonExe = branchDocVenvTask.map { it.pythonExe.get() }
+  pythonVenvTask = branchDocVenvTask
+  productEdition = "ee"
+  repairedWheelFilePlatformSuffix = docWheelPlatformTagTask.flatMap { it.repairedWheelSuffix }
+  libraryDir = tasks.named("eec_build_graal_image").map { it.libraryDir.get() }
+  wheel = docBuildWheelTask.map { it.wheel.get() }
+}
+
+def docInstallWheelTask = tasks.register("saxonc_doc_python_install_wheel", InstallLocalWheel) {
+  pipExe = branchDocVenvTask.map { it.pipExe.get() }
+  wheel = docRepairWheelTask.map { it.wheel.get() }
+}
+
+def docPydocTask = tasks.register("saxonc_doc_python_pydoc") {
+  dependsOn tasks.named("saxonc_doc_python_pipInstall")
+  dependsOn docInstallWheelTask
+  inputs.files tasks.named("saxonc_doc_pypi")
+  inputs.file branchDocVenvTask.map { it.pythonExe.get() }
+  outputs.file layout.buildDirectory.file("saxonc-pydoc/saxoncee.html")
+
   doLast {
+    exec {
+      workingDir layout.buildDirectory.dir("saxonc-pydoc")
+      executable branchDocVenvTask.flatMap { it.pythonExe }.get()
+      args "-m", "pydoc", "-w", "saxoncee"
+    }
+  }
+}
+
+tasks.register("saxonc_api_doc") {
+  inputs.files docSaxoncDoxygenTask
+  inputs.files docPydocTask
+  outputs.dir layout.buildDirectory.dir("saxonc-doc")
+
+  doLast {
+    def outputDir = layout.buildDirectory.dir("saxonc-doc/doc${saxonMajorVersion}")
+
     copy {
-      into "${buildDir}/saxonc-doc/doc${saxonMajorVersion}/html"
-      from "${buildDir}/doc_pypi"
+      into outputDir
+      from docSaxoncDoxygenTask.map { layout.buildDirectory.dir("doxygen-output") }
+    }
+
+    copy {
+      into outputDir.map { it.dir("html") }
+      from docPydocTask
       include "saxoncee.html"
       rename {
         "saxonc.html"
       }
       filter { line ->
-        line.replaceAll('@@VERSION@@', saxonVersion)
-          .replace('@@edition@@', 'ee')
-          .replace('@@EDITION@@', 'EE')
-          .replace("saxoncee.html", "saxonc.html")
+        line.replace("saxoncee.html", "saxonc.html")
       }
     }
   }
 }
 
-// ============================================================
-// These tasks assume that the build will be run in the
-// saxonica-docbuild container.
-
-task saxonc_doc_pypi(type: Copy, dependsOn: ['saxon_eec_local_wheel']) {
-  into "${buildDir}/doc_pypi"
-  from "${buildDir}/eec_pypi"
-}
-
-task saxonc_doxygen(dependsOn: ['saxonc_doc_pypi']) {
-  inputs.files fileTree(dir: "${projectDir}/src/main/c/Saxon.C.API")
-  outputs.files fileTree(dir: "${buildDir}/doc_pypi/documentation")
-  doLast {
-    copy {
-      into "${buildDir}/doc_pypi/Saxon.C.API"
-      from "${projectDir}/src/main/c/Saxon.C.API"
-      include "Doxyfile"
-      include "README.md"
-      filter { line ->
-        line.replaceAll('@@VERSION@@', saxonVersion)
-          .replace('@@LOGO@@', "${projectDir}/src/docs/doc/img/saxonica_logo.gif")
-          .replace('@@OUTPUT@@', 'documentation')
-      }
-    }
-  }
-
-  doLast {
-    exec {
-      workingDir "${buildDir}/doc_pypi"
-      commandLine 'doxygen', 'Saxon.C.API/Doxyfile'
-    }
-  }
-}
-
-task saxonc_pydoc3(dependsOn: ['saxonc_doc_pypi', 'saxonc_doxygen']) {
-  inputs.files fileTree(dir: "${buildDir}/doc_pypi", exclude: "*.html")
-  outputs.file "${buildDir}/doc_pypi/saxoncee.html"
-
-  doLast {
-    exec {
-      workingDir "${buildDir}/doc_pypi"
-      commandLine 'python3', '-m', 'pip', 'install', '-r', 'requirements.txt'
-    }
-  }
-
-  doLast {
-    exec {
-      workingDir "${buildDir}/doc_pypi"
-      commandLine 'python3', 'setup.py', 'build_ext', '-if'
-    }
-  }
-
-  doLast {
-    exec {
-      workingDir "${buildDir}/doc_pypi"
-      commandLine pydocex, '-w', 'saxoncee'
-    }
-  }
-}

@@ -1,3 +1,18 @@
+import java.security.MessageDigest
+
+static String wheelShaDigest(File file) {
+  def digest = MessageDigest.getInstance("sha1")
+  def inputstream = file.newInputStream()
+  def buffer = new byte[16384]
+  def len
+  while((len=inputstream.read(buffer)) > 0) {
+    digest.update(buffer, 0, len)
+  }
+  def sha1sum = digest.digest()
+  BigInteger bigInt = new BigInteger(1, sha1sum)
+  return bigInt.toString(16).padLeft(32, '0')
+}
+
 private String findGraalBin(String edition) {
   String home = System.getenv("GRAALVM_${edition.toUpperCase()}_HOME")
   if (home == null) {
@@ -374,34 +389,38 @@ tasks.register("graal_hec_jar", Jar) {
   from(layout.buildDirectory.dir("xerces")) {
     include "**/*.class"
     include "**/*.properties"
+    include "org/xmlresolver/cat*.xml"
+    include "org/xmlresolver/schemas/**/*"
+    include "org/xmlresolver/www.rddl.org/**/*"
+    include "org/xmlresolver/www.w3.org/**/*"
+    include "org/xmlresolver/xmlcatalogs.org/**/*"
+    include "org/xmlresolver/xmlresolver.org/**/*"
     exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
     exclude "META-INF/MANIFEST.MF"
   }
 }
 
-task graal_pec_jar(
-  type: Jar,
-  dependsOn: ["graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-              "processResources", "unjar_ICU4jJar"],
-  description: "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
-) {
-  inputs.files fileTree(dir: "${buildDir}/services/saxon-pe/META-INF")
-  inputs.files fileTree(dir: "${buildDir}/classes/pec")
-  inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
-  inputs.files fileTree(dir: "${buildDir}/xerces")
-  inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("pec/jars/saxon-pe-${saxonVersion3}.jar")).withPropertyName("saxonJar")
+tasks.register("graal_pec_jar", Jar) {
+  dependsOn "graal_pecCompile", "pej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
+          "processResources", "unjar_ICU4jJar"
+  description "Build the PE jar file for SaxonC \"unjar_ICU4jJar\", \"unjar_JLineJar\""
+
+  inputs.files fileTree(layout.buildDirectory.dir("services/saxon-pe/META-INF"))
+  inputs.files fileTree(layout.buildDirectory.dir("classes/pec"))
+  inputs.files fileTree(layout.projectDirectory.dir("src/main/resources/net"))
+  inputs.files fileTree(layout.buildDirectory.dir("xerces"))
+  inputs.files fileTree(layout.buildDirectory.dir("icu"))
 
   archiveBaseName = "saxon-pe-${saxonVersion3}"
-  destinationDirectory = file("${buildDir}/pec/jars")
+  destinationDirectory = layout.buildDirectory.dir("pec/build/graalvm")
   manifest {
     attributes "Project-Name": "Saxon-PE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from ("build/services/saxon-pe") {
+  from (layout.buildDirectory.dir("services/saxon-pe")) {
     include "META-INF/**"
   }
-  from ("build/classes/pec") {
+  from (layout.buildDirectory.dir("classes/pec")) {
     include "net/**/*.class"
     exclude "net/sf/saxon/ant/*.class"
     exclude "**/sql/**/*.class"
@@ -421,27 +440,33 @@ task graal_pec_jar(
     exclude "com/saxonica/config/EnterpriseXPathFactory.class"
     include "javax/xml/xquery/*.class"
   }
-  from ("${buildDir}/xerces") {
-      include "**/*.class"
-      include "**/*.properties"
-      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from ("${buildDir}/htmlparser") {
-      include "**/*.class"
-      include "**/*.properties"
-      exclude "META-INF/MANIFEST.MF"
-    }   
-  from ("src/main/resources") {
+  from (layout.buildDirectory.dir("xerces")) {
+    include "**/*.class"
+    include "**/*.properties"
+    include "org/xmlresolver/cat*.xml"
+    include "org/xmlresolver/schemas/**/*"
+    include "org/xmlresolver/www.rddl.org/**/*"
+    include "org/xmlresolver/www.w3.org/**/*"
+    include "org/xmlresolver/xmlcatalogs.org/**/*"
+    include "org/xmlresolver/xmlresolver.org/**/*"
+    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+    exclude "META-INF/MANIFEST.MF"
+  }
+  from (layout.buildDirectory.dir("htmlparser")) {
+    include "**/*.class"
+    include "**/*.properties"
+    exclude "META-INF/MANIFEST.MF"
+  }
+  from (layout.projectDirectory.dir("src/main/resources")) {
     include "net/**"
   }
-  from ("${buildDir}/icu") {
-      include "**/*.class"
-      include "**/*.*"
-      include "**/*.properties"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from ("${buildDir}/jLine") {
+  from (layout.buildDirectory.dir("icu")) {
+    include "**/*.class"
+    include "**/*.*"
+    include "**/*.properties"
+    exclude "META-INF/MANIFEST.MF"
+  }
+  from (layout.buildDirectory.dir("jLine")) {
     include "**/*.class"
     include "**/*.*"
     include "**/*.properties"
@@ -449,57 +474,60 @@ task graal_pec_jar(
   }
 }
 
-task graal_eec_jar(
-  type: Jar,
-  dependsOn: ["graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
-              "processResources","unjar_ICU4jJar"],
-  description: "Build the EE jar file for SaxonC, removed  \"unjar_ICU4jJar\", \"unjar_JLineJar\""
-) {
-  inputs.files fileTree(dir: "${buildDir}/services/saxon-ee/META-INF")
-  inputs.files fileTree(dir: "${buildDir}/classes/eec")
-  inputs.files fileTree(dir: "${projectDir}/src/main/resources/net")
-  inputs.files fileTree(dir: "${buildDir}/xerces")
-  inputs.files fileTree(dir: "${buildDir}/icu")
-  outputs.file(layout.buildDirectory.file("eec/jars/saxon-ee-${saxonVersion3}.jar")).withPropertyName("saxonJar")
+tasks.register("graal_eec_jar", Jar) {
+  dependsOn "graal_eecCompile", "eej_MetaInf", "rejar_Xerces", "unjar_htmlParser",
+          "processResources", "unjar_ICU4jJar"
+  description "Build the EE jar file for SaxonC, removed \"unjar_ICU4jJar\", \"unjar_JLineJar\""
+
+  inputs.files fileTree(layout.buildDirectory.dir("services/saxon-ee/META-INF"))
+  inputs.files fileTree(layout.buildDirectory.dir("classes/eec"))
+  inputs.files fileTree(layout.projectDirectory.dir("src/main/resources/net"))
+  inputs.files fileTree(layout.buildDirectory.dir("xerces"))
+  inputs.files fileTree(layout.buildDirectory.dir("icu"))
 
   archiveBaseName = "saxon-ee-${saxonVersion3}"
-  destinationDirectory = file("${buildDir}/eec/jars")
+  destinationDirectory = layout.buildDirectory.dir("eec/build/graalvm")
   manifest {
     attributes "Project-Name": "Saxon-EE"
     attributes "Main-Class": "net.sf.saxon.Transform"
   }
-  from ("${buildDir}/services/saxon-ee") {
+  from (layout.buildDirectory.dir("services/saxon-ee")) {
     include "META-INF/**"
   }
-  from ("${buildDir}/classes/eec") {
+  from (layout.buildDirectory.dir("classes/eec")) {
     include "net/**/*.class"
     exclude "net/sf/saxon/ant/*.class"
     exclude "**/sql/**/*.class"
     include "com/saxonica/**/*.class"
     include "javax/xml/xquery/*.class"
   }
-  from ("${projectDir}/src/main/resources") {
+  from (layout.projectDirectory.dir("src/main/resources")) {
     include "net/**"
   }
-  from ("${buildDir}/xerces") {
-      include "**/*.class"
-      include "**/*.properties"
-      exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from ("${buildDir}/htmlparser") {
-      include "**/*.class"
-      include "**/*.properties"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from ("${buildDir}/icu") {
-      include "**/*.class"
-      include "**/*.*"
-      include "**/*.res"
-      include "**/*.properties"
-      exclude "META-INF/MANIFEST.MF"
-    }
-  from ("${buildDir}/jLine") {
+  from (layout.buildDirectory.dir("xerces")) {
+    include "**/*.class"
+    include "**/*.properties"
+    include "org/xmlresolver/cat*.xml"
+    include "org/xmlresolver/schemas/**/*"
+    include "org/xmlresolver/www.rddl.org/**/*"
+    include "org/xmlresolver/www.w3.org/**/*"
+    include "org/xmlresolver/xmlcatalogs.org/**/*"
+    include "org/xmlresolver/xmlresolver.org/**/*"
+    exclude "org.w3c.dom.html.HTMLDOMImplementation.class"
+    exclude "META-INF/MANIFEST.MF"
+  }
+  from (layout.buildDirectory.dir("htmlparser")) {
+    include "**/*.class"
+    include "**/*.properties"
+    exclude "META-INF/MANIFEST.MF"
+  }
+  from (layout.buildDirectory.dir("icu")) {
+    include "**/*.class"
+    include "**/*.*"
+    include "**/*.properties"
+    exclude "META-INF/MANIFEST.MF"
+  }
+  from (layout.buildDirectory.dir("jLine")) {
     include "**/*.class"
     include "**/*.*"
     include "**/*.res"
@@ -557,6 +585,54 @@ def textReplacementFilter(String edition, String location='../', String libpath=
   }
 }
 
+def pyenvExeTask = tasks.register('pyenvExe', PyenvExe)
+
+def pyenvTask = tasks.register("pyenv", PythonPyenv) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = project.pythonVersion
+  pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
+}
+
+def pyenvValgrindTask = tasks.register("pyenvValgrind", PythonPyenv) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = project.pythonVersion
+  pythonBuildDefinitionsDir = layout.projectDirectory.dir("python")
+  debugVariant = "valgrind"
+}
+
+def pyenvPythonExeTask = tasks.register('pyenvPythonExe', PythonPyenvPythonExe) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pyenvVersionName = pyenvTask.map { it.pyenvVersionName.get() }
+}
+
+def pyenvPythonValgrindExeTask = tasks.register('pyenvValgrindPythonExe', PythonPyenvPythonExe) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pyenvVersionName = pyenvValgrindTask.map { it.pyenvVersionName.get() }
+}
+
+def branchVenvTask = tasks.register("branchVenv", PythonVenv) {
+  pyenvPythonExe = pyenvPythonExeTask.map { it.pythonExe.get() }
+}
+
+def branchDebugVenvTask = tasks.register("branchDebugVenv", PythonVenv) {
+  pyenvPythonExe = pyenvPythonValgrindExeTask.map { it.pythonExe.get() }
+  suffix = "debug"
+}
+
+def wheelPlatformTagTask = tasks.register("wheelPlatformTag", WheelCompatibilityTags) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = pyenvTask.map { it.pythonVersion.get() }
+  pythonExe = branchVenvTask.map { it.pythonExe.get() }
+  manylinuxTarget = project.manylinuxTarget
+}
+
+def wheelDebugPlatformTagTask = tasks.register("wheelDebugPlatformTag", WheelCompatibilityTags) {
+  pyenvExe = pyenvExeTask.map { it.pyenv.get() }
+  pythonVersion = pyenvTask.map { it.pythonVersion.get() }
+  pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
+  manylinuxTarget = project.manylinuxTarget
+}
+
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "ce" : "ee"
   def graalEdition = "ce"
@@ -587,59 +663,17 @@ def textReplacementFilter(String edition, String location='../', String libpath=
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 
-  tasks.register("${edition}c_graalImage") {
-    dependsOn "graal_${graalEdition}_home"
-    description "Builds the GraalVM native image for ${edition}c"
-
-    def saxonSourceJar = tasks.named("${edition}c_graalJar").map { it.archiveFile }
-    inputs.file saxonSourceJar
-    outputs.files fileTree(layout.buildDirectory.dir("c")).matching {
-      include "libsaxon-${edition}c-${saxonVersion3}.*"
-      include "libsaxon-${edition}c-${saxonVersion3}_dynamic.h"
-      include "graal_isolate*"
-    }
-
-    doLast {
-      exec {
-        executable nativeImage(graalEdition)
-        args "-cp", file(saxonSourceJar.get()),
-                "-o", file(layout.buildDirectory.file("${edition}c/libsaxon-${edition}c-${saxonVersion3}")),
-                "--no-fallback", "-H:Path=${file(layout.buildDirectory.file("${edition}c")).toString()}",
-                "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-                "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-                "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-                "-H:+ReportExceptionStackTraces",
-                "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
-                "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
-                "--trace-class-initialization=jdk.xml.internal.SecuritySupport",
-                "--enable-url-protocols=https",
-                "--enable-url-protocols=http",
-                "--shared"
-      }
-    }
+  tasks.register("${edition}c_build_graal_image", GraalNativeImageTask) {
+    sourceJar = tasks.named("${edition}c_graalJar").flatMap { it.archiveFile }
+    libVersionedName = "libsaxon-${edition}c-${saxonVersion3}"
+    outputDir = layout.buildDirectory.dir("${edition}c/libsaxon")
   }
 
-  task "${edition}c_graalImageExe"(
-          dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
-          description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
-  ) {
-    doLast {
-      def image = nativeImage(graalEdition)
-      exec {
-        commandLine image,
-                "-cp", "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion3}.jar",
-                "net.sf.saxon.Transform", "-o", "${buildDir}/${edition}c/saxon-${edition}c-${saxonVersion3}",
-                "--no-fallback", "-H:Path=${buildDir}/${edition}c",
-                "-H:+AllowVMInspection",
-                "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-                "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-                "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-                "-H:+ReportExceptionStackTraces",
-                "--trace-class-initialization=javax.xml.parsers.FactoryFinder",
-                "--trace-class-initialization=net.sf.saxon.s9api.streams.Steps",
-                "--trace-class-initialization=jdk.xml.internal.SecuritySupport"
-      }
-    }
+  tasks.register("${edition}c_build_graal_debug_image", GraalNativeImageTask) {
+    sourceJar = tasks.named("${edition}c_graalJar").flatMap { it.archiveFile }
+    libVersionedName = "libsaxon-${edition}c-${saxonVersion3}"
+    outputDir = layout.buildDirectory.dir("${edition}c/libsaxon-debug")
+    debug = true
   }
 }
 
@@ -649,181 +683,94 @@ task all_saxonc_releases() {
 
 ["he", "pe", "ee"].each { edition ->
   def EDITION = edition.toUpperCase()
-  def graalEdition = "graal_ce_home"
 
   def arch = System.getProperty("os.arch") 
   def saxoncReleaseName = "libsaxon-${EDITION}C-${systemOsName}-${arch}-v${saxonVersion3}"
-  def saxoncReleaseDir = "${buildDir}/releases/${saxoncReleaseName}"
+  def saxoncReleasePath = "releases/${saxoncReleaseName}"
 
-  task "setup_${edition}c_release"(
-          dependsOn: [graalEdition, "${edition}c_graalImage"]
-  ) {
-    inputs.files fileTree(dir: "${projectDir}/src/main/c")
-    outputs.files fileTree(dir: saxoncReleaseDir, exclude: "dist/**")
+  ["debug", "release"].each { releaseKind ->
+    def graalTaskNameFragment = releaseKind == "debug" ? "_debug" : ""
+    def releasePath = "${saxoncReleasePath}${releaseKind == "debug" ? "-debug" : ""}"
 
-    def libdir = (systemOs.isMacOsX()
-                        ? "libs/darwin"
-                        : (systemOs.isLinux()
-                           ? "libs/nix"
-                           : "libs/win"))
+    tasks.register("${edition}c_${releaseKind}_graal_shared_libs", Copy) {
+      def libdir = (systemOs.isMacOsX()
+              ? "libs/darwin"
+              : (systemOs.isLinux()
+              ? "libs/nix"
+              : "libs/win"))
 
-    def saxonc_lib = (systemOs.isLinux()
-                      ? "libsaxon-${edition}c-*.so"
-                      : (systemOs.isMacOsX()
-                         ? "libsaxon-${edition}c-*.dylib"
-                         : "libsaxon-${edition}c-*.*"))
-
-    doLast {
-      copy {
-        into "${saxoncReleaseDir}/${libdir}"
-        from "${buildDir}/${edition}c"
-        include "${saxonc_lib}"
-      }
+      from tasks.named("${edition}c_build_graal${graalTaskNameFragment}_image").map { it.sharedLibraryFiles }
+      into layout.buildDirectory.dir("${releasePath}/${libdir}")
     }
 
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c"
-        into "${saxoncReleaseDir}"
+    tasks.register("${edition}c_${releaseKind}_graal_headers", Copy) {
+      from tasks.named("${edition}c_build_graal${graalTaskNameFragment}_image").map { it.headerFiles }
+      into layout.buildDirectory.dir("${releasePath}/Saxon.C.API/graalvm")
+    }
+
+    tasks.register("${edition}c_${releaseKind}_c_files", Copy) {
+      into layout.buildDirectory.dir(releasePath)
+      from(layout.projectDirectory.dir("src/main/c")) {
         include "README.md"
+        include "samples/**"
+        include "command/**"
+        include "pypi/**"
+        include "Saxon.C.API/*.h"
+        include "Saxon.C.API/*.c"
+        include "Saxon.C.API/*.cpp"
+        include "Saxon.C.API/config.m4"
+        include "Saxon.C.API/config.w32"
+        exclude "pypi/python_saxon/**"
+        if (edition != "ee") {
+          exclude "command/Validate.c"
+        }
+
         filter textReplacementFilter(edition)
       }
-    }
 
-    doLast {
-      copy {
-        from "${buildDir}/${edition}c/"
-        into "${saxoncReleaseDir}/Saxon.C.API/graalvm"
-        include "graal*.h"
-        include "libsaxon-${edition}c*.h"
-      }
-    }
-
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/pypi"
-        into "${saxoncReleaseDir}/pypi"
-        filter textReplacementFilter(edition)
-      }
-    }
-
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/pypi/python_saxon"
-        into "${saxoncReleaseDir}/pypi/python_saxon"
+      from(layout.projectDirectory.dir("src/main/c")) {
+        include "pypi/python_saxon/**"
         filter textReplacementFilter(edition, '../../')
       }
-    }
 
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/samples"
-        into "${saxoncReleaseDir}/samples"
-        filter textReplacementFilter(edition)
+      from(layout.projectDirectory.dir("src/docs")) {
+        include "notices/JAMESCLARK.txt"
+        include "notices/JLINE2.txt"
+        include "notices/LICENSE.txt"
       }
     }
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/command"
-        into "${saxoncReleaseDir}/command"
-        if (edition != "ee") {
-          exclude "Validate.c"
+
+    tasks.register("${edition}c_${releaseKind}_dir") {
+      inputs.files(tasks.named("${edition}c_${releaseKind}_graal_shared_libs").map { it.outputs.files })
+      inputs.files(tasks.named("${edition}c_${releaseKind}_graal_headers").map { it.outputs.files })
+      inputs.files(tasks.named("${edition}c_${releaseKind}_c_files").map { it.outputs.files })
+
+      outputs.dir(layout.buildDirectory.dir(releasePath))
+
+      if (systemOs.isMacOsX()) {
+        doLast {
+          exec {
+            workingDir layout.buildDirectory.dir("${saxoncReleasePath}/libs/darwin")
+            executable "/usr/bin/install_name_tool"
+            args "-id", "@rpath/libsaxon-${edition}c-${saxonVersion3}.dylib", "libsaxon-${edition}c-${saxonVersion3}.dylib"
+          }
         }
-        filter textReplacementFilter(edition)
       }
-    }
-
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/Saxon.C.API"
-        into "${saxoncReleaseDir}/Saxon.C.API"
-        include "SaxonProcessor.cpp"
-        include "SaxonCGlue.c"
-        include "SaxonCProcessor.c"
-        include "SaxonCXPath.c"
-        include "XdmValue.cpp"
-        include "XdmItem.cpp"
-        include "XdmNode.cpp"
-        include "XdmAtomicValue.cpp"
-        include "XdmFunctionItem.cpp"
-        include "XdmMap.cpp"
-        include "XdmArray.cpp"
-        include "DocumentBuilder.cpp"
-        include "Xslt30Processor.cpp"
-        include "XsltExecutable.cpp"
-        include "XQueryProcessor.cpp"
-        include "XPathProcessor.cpp"
-        include "SchemaValidator.cpp"
-        include "SaxonApiException.cpp"
-        include "CythonExceptionHandler.cpp"
-        include "SaxonProcessor.h"
-        include "SaxonCGlue.h"
-        include "SaxonCProcessor.h"
-        include "SaxonCXPath.h"
-        include "XdmValue.h"
-        include "XdmItem.h"
-        include "XdmNode.h"
-        include "XdmAtomicValue.h"
-        include "XdmFunctionItem.h"
-        include "XdmMap.h"
-        include "XdmArray.h"
-        include "DocumentBuilder.h"
-        include "Xslt30Processor.h"
-        include "XsltExecutable.h"
-        include "XQueryProcessor.h"
-        include "XPathProcessor.h"
-        include "CythonExceptionHandler.h"
-        include "SchemaValidator.h"
-        include "SaxonApiException.h"
-        include "php8_DocumentBuilder.cpp"
-        include "php8_Xslt30Processor.cpp"
-        include "php8_saxon_arginfo.h"
-        include "php8_SchemaValidator.cpp"
-        include "php8_XsltExecutable.cpp"
-        include "php8_saxon.cpp"
-        include "php8_XPathProcessor.cpp"
-        include "php8_saxon.h"
-        include "php8_XQueryProcessor.cpp"
-        include "config.m4"
-        include "config.w32"
-        filter textReplacementFilter(edition)
-      }
-    }
-
-    doLast {
-      copy {
-        into "${saxoncReleaseDir}/notices"
-        from "${projectDir}/src/docs/notices"
-        include "JAMESCLARK.txt"
-        include "JLINE2.txt"
-        include "LICENSE.txt"
-      }
-    }
-
-    if (systemOs.isMacOsX()) {
-      doLast {
-        exec {
-          workingDir "${saxoncReleaseDir}/libs/darwin"
-          executable "/usr/bin/install_name_tool"
-          args "-id", "@rpath/libsaxon-${edition}c-${saxonVersion3}.dylib", "libsaxon-${edition}c-${saxonVersion3}.dylib"
-        }
-      }        
     }
   }
 
-  Task t = task "zip_${edition}c_release"(
-    type: Zip,
-    dependsOn: ["setup_${edition}c_release"]
-  ) {
-    from "${buildDir}/releases"
+  def t = tasks.register("zip_${edition}c_release", Zip) {
+    dependsOn "${edition}c_release_dir"
+
+    from layout.buildDirectory.dir("releases")
     include "${saxoncReleaseName}/**"
     archiveFileName = "${saxoncReleaseName}.zip"
   }
   all_saxonc_releases.dependsOn t
 
-  task "buildCPP_${edition}"(
-          dependsOn: ["setup_${edition}c_release"]
-  ) {
+  tasks.register("buildCPP_${edition}") {
+    dependsOn "${edition}c_release_dir"
+
     def buildCPPScript = (systemOs.isMacOsX()
             ? "./build64-mac.sh"
             : (systemOs.isLinux()
@@ -832,9 +779,9 @@ task all_saxonc_releases() {
 
     doLast {
       exec {
-        workingDir "${saxoncReleaseDir}/samples/cppTests"
+        workingDir layout.buildDirectory.dir("${saxoncReleasePath}/samples/cppTests")
         if(systemOs.isLinux() || systemOs.isMacOsX()) {
-          commandLine "${buildCPPScript}", "-L${sharedLibDir}"
+          commandLine "${buildCPPScript}", "-L${file(layout.buildDirectory.file("${edition}c"))}"
         } else {
           commandLine "cmd","/c","${buildCPPScript}"
         }
@@ -844,239 +791,113 @@ task all_saxonc_releases() {
   }
 
   ["XSLT30", "XPath", "XQuery", "Validator"].each { proc ->
-    task "runCPP_${edition}_${proc}"(
-             dependsOn: ["buildCPP_${edition}"]
-     ) {
-       doLast {
-         exec {
-           workingDir "${saxoncReleaseDir}/samples/cppTests"
-           commandLine "./test${proc}"
-           println "built C++ Wrappers"
-         }
-       }
-     }
+    tasks.register("runCPP_${edition}_${proc}") {
+      dependsOn "buildCPP_${edition}"
+
+      doLast {
+        exec {
+          workingDir layout.buildDirectory.dir("${saxoncReleasePath}/samples/cppTests")
+          commandLine "./test${proc}"
+          println "built C++ Wrappers"
+        }
+      }
+    }
   }
 }
 
-tasks.register("pyBuildVenv") {
-  description "Ensure there is a Python Venv for the current branch, creating one if none exists"
+Provider<Directory> pythonBuildRootPath(String edition, Boolean debug = false) {
+  layout.buildDirectory.dir("${edition}c/python${debug ? "-debug" : ""}")
+}
 
-  // only if the venv is not there
-  // (caching this won't work - we don't know the outputs until the task is run)
-//  onlyIf {
-//    !file(project.pythonEnv.venvDirPath.map { "${it}/pyvenv.cfg" }).exists()
-//  }
-  outputs.file(project.pythonEnv.venvDirPath.map { "${it}/pyvenv.cfg" })
-  outputs.dir(project.pythonEnv.venvDirPath.map{ it.toString() })
-
-  doFirst {
-    exec {
-      logger.info("Creating Python Venv for ${project.branches.current.get()}")
-      executable project.pythonEnv.systemPythonBinary.get()
-      args "-m", "venv", project.pythonEnv.venvDirPath.get()
-    }
-  }
+Provider<Directory> pythonPackageDirPath(String edition, Boolean debug = false) {
+  pythonBuildRootPath(edition, debug).map { it.dir("saxonc${edition}${debug ? "-debug" : ""}") }
 }
 
 ["he", "pe", "ee"].each { edition ->
-  //def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
   def graalEdition = "graal_ce_home"
-  def pypiDir = layout.buildDirectory.dir("${edition}c_pypi")
-
+  def pythonPackageDir = pythonPackageDirPath(edition)
+  def pythonPackageDebugDir = pythonPackageDirPath(edition, true)
   def libpath = systemOs.isWindows() ? 'libs\\\\win\\\\' : ''
 
-  tasks.register("setup_${edition}c_pypi") {
-    dependsOn graalEdition, "${edition}c_graalImage"
-
-    inputs.dir layout.projectDirectory.dir("src/main/c/pypi")
-    inputs.dir layout.projectDirectory.dir("src/main/c/Saxon.C.API")
-    outputs.file(layout.buildDirectory.file("${edition}c_pypi/requirements.txt"))
-
-    outputs.files layout.buildDirectory.files("${edition}c_pypi").asFileTree.matching {
-      exclude "dist/**"
-    }
-
-    doLast {
-      copy {
-        into layout.buildDirectory.dir("${edition}c_pypi")
-        from layout.projectDirectory.dir("src/main/c/pypi")
-        filter textReplacementFilter(edition, '', libpath)
-      }
-    }
-    
-
-    doLast {
-      def platformDir = (systemOs.isMacOsX() ? "darwin" : (systemOs.isLinux() ? "nix" : "win"))
-      def SAXONC_HOME = pypiDir.map { it.file("libs/${platformDir}") }
-
-      if (SAXONC_HOME == null) {
-        throw GradleException("Don't know how to create Python packages on this OS.");
-      }
-      copy {
-        into SAXONC_HOME
-        from layout.buildDirectory.dir("c")
-        include "graal*.h"
-        include "libsaxon-${edition}c-${saxonVersion3}.*"
-      }
-    }
-
-    // What does this do?
-    doLast {
-      copy {
-        from "${buildDir}/${edition}c/"
-        into "${buildDir}/${edition}c_pypi/Saxon.C.API/graalvm"
-        include "graal*.h"
-        include "libsaxon-${edition}c*.h"
-      }
-    }
-    
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/pypi/python_saxon"
-        into "${buildDir}/${edition}c_pypi/python_saxon"
-        include "saxonc.pyx"
-        include "saxoncClasses.pxd"
-        include "readme.txt"
-        filter textReplacementFilter(edition)
-      }
-    }
-
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/pypi/python_saxon"
-        into "${buildDir}/${edition}c_pypi"
-        include "test_saxonc.py"
-        include "test_saxon_schema.py"
-        filter textReplacementFilter(edition)
-      }
-    }
-
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/pypi/python_saxon"
-        into "${buildDir}/${edition}c_pypi/samples"
-        include "saxon_example.py"
-        include "saxon_example2.py"
-        include "saxon_example3.py"
-        filter textReplacementFilter(edition)
-      }
-    }
-
-    doLast {
-      copy {
-        from "${projectDir}/src/main/c/Saxon.C.API"
-        into "${buildDir}/${edition}c_pypi/Saxon.C.API"
-        include "SaxonProcessor.cpp"
-        include "SaxonCGlue.c"
-        include "SaxonCProcessor.c"
-        include "SaxonCXPath.c"
-        include "XdmValue.cpp"
-        include "XdmItem.cpp"
-        include "XdmNode.cpp"
-        include "XdmAtomicValue.cpp"
-        include "XdmFunctionItem.cpp"
-        include "XdmMap.cpp"
-        include "XdmArray.cpp"
-        include "DocumentBuilder.cpp"
-        include "Xslt30Processor.cpp"
-        include "XsltExecutable.cpp"
-        include "XQueryProcessor.cpp"
-        include "XPathProcessor.cpp"
-        include "SchemaValidator.cpp"
-        include "SaxonApiException.cpp"
-        include "CythonExceptionHandler.cpp"
-        include "SaxonProcessor.h"
-        include "SaxonCGlue.h"
-        include "SaxonCProcessor.h"
-        include "SaxonCXPath.h"
-        include "XdmValue.h"
-        include "XdmItem.h"
-        include "XdmNode.h"
-        include "XdmAtomicValue.h"
-        include "XdmFunctionItem.h"
-        include "XdmMap.h"
-        include "XdmArray.h"
-        include "CythonExceptionHandler.h"
-        include "DocumentBuilder.h"
-        include "Xslt30Processor.h"
-        include "XsltExecutable.h"
-        include "XQueryProcessor.h"
-        include "XPathProcessor.h"
-        include "SchemaValidator.h"
-        include "SaxonApiException.h"
-        filter textReplacementFilter(edition)
-      }
-    }
+  def editionString = edition
+  tasks.register("setup_${edition}c_pypi_debug", PythonSetup) {
+    saxoncHomeFiles.from(tasks.named("${edition}c_build_graal_debug_image"))
+    graalImageHeaderFiles.from(tasks.named("${edition}c_build_graal_debug_image").map { it.headerFiles })
+    pypiDir = layout.projectDirectory.dir("src/main/c/pypi")
+    saxonCApiDir = layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+    outputDir = pythonPackageDebugDir
+    it.edition = edition
+    it.libpath = libpath
+    it.version3 = saxonVersion3
   }
 
-  tasks.register("saxon_${edition}c_pipInstall") {
-    dependsOn 'pyBuildVenv'
-    description "Install pip requirements into the current Python Venv"
-
-    inputs.files tasks.named("setup_${edition}c_pypi").map { it.outputs.files }
-    outputs.files fileTree(project.pythonEnv.venvDirPath).matching {
-      include "lib/python*/site-packages/*.dist-info"
-      exclude "lib/python*/site-packages/saxonc${edition}*.dist-info"
-    }
-
-    doFirst {
-      exec {
-        workingDir layout.buildDirectory.dir("${edition}c_pypi")
-
-        executable file(project.pythonEnv.venvPip)
-        args "install", "-r", "requirements.txt"
-      }
-    }
+  tasks.register("setup_${edition}c_pypi", PythonSetup) {
+    saxoncHomeFiles.from(tasks.named("${edition}c_build_graal_image"))
+    graalImageHeaderFiles.from(tasks.named("${edition}c_build_graal_image").map { it.headerFiles })
+    pypiDir = layout.projectDirectory.dir("src/main/c/pypi")
+    saxonCApiDir = layout.projectDirectory.dir("src/main/c/Saxon.C.API")
+    outputDir = pythonPackageDir
+    it.edition = edition
+    it.libpath = libpath
+    it.version3 = saxonVersion3
   }
 
-  tasks.register("saxon_${edition}c_local_wheel") {
-    dependsOn "saxon_${edition}c_pipInstall"
-
-    inputs.files tasks.named("setup_${edition}c_pypi").map { it.outputs.files }
-    outputs.dir layout.buildDirectory.dir("${edition}c_pypi/dist")
-
-    doLast {
-      exec {
-        workingDir layout.buildDirectory.dir("${edition}c_pypi")
-
-        executable file(project.pythonEnv.venvPython)
-        args "-m", "build", "--wheel"
-      }
-    }
+  tasks.register("${edition}c_pypi_pip_install", PipInstall) {
+    pipExe = branchVenvTask.map { it.pipExe.get() }
+    requirements = tasks.named("setup_${edition}c_pypi").map { it.requirementsTxtFile.get() }
   }
 
-  task "saxon_${edition}c_stage_wheel"(
-    dependsOn: [graalEdition, "${edition}c_graalImage", "setup_${edition}c_pypi"]
-  ) {
+  tasks.register("${edition}c_python_build_wheel", BuildWheel) {
+    outputDir = pythonBuildRootPath(edition)
+    pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    productEdition = edition
+    productVersion = saxonVersion3
+    wheelSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    sourceDir = tasks.named("setup_${edition}c_pypi").map { it.packageDir.get() }
+  }
+
+  tasks.register("${edition}c_python_repair_wheel", RepairLocalWheel) {
+    outputDir = pythonBuildRootPath(edition)
+    manylinuxTarget = project.manylinuxTarget
+    pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    pythonVenvTask = branchVenvTask
+    productEdition = edition
+    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.repairedWheelSuffix }
+    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
+    wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
+  }
+
+  tasks.register("${edition}c_python_build_debug_wheel", BuildWheel) {
+    pythonExe = branchDebugVenvTask.map { it.pythonExe.get() }
+    productEdition = edition
+    productVersion = saxonVersion3
+    wheelSuffix = wheelDebugPlatformTagTask.flatMap { it.wheelSuffix }
+    macosxDeploymentTarget = wheelDebugPlatformTagTask.flatMap { it.macosxDeploymentTarget }
+    sourceDir = tasks.named("setup_${edition}c_pypi_debug").map { it.packageDir.get() }
+    outputDir = pythonBuildRootPath(edition, true)
+    debug = true
+  }
+
+  tasks.register("${edition}c_python_repair_debug_wheel", RepairLocalWheel) {
+    outputDir = pythonBuildRootPath(edition)
+    manylinuxTarget = project.manylinuxTarget
+    pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    pythonVenvTask = branchVenvTask
+    productEdition = edition
+    repairedWheelFilePlatformSuffix = wheelDebugPlatformTagTask.flatMap { it.repairedWheelSuffix }
+    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
+    wheel = tasks.named("${edition}c_python_build_debug_wheel").map { it.wheel.get() }
+  }
+
+  tasks.register("saxon_${edition}c_stage_wheel", Copy) {
     def wheelDir = "wheels/${systemOsName}/${edition}c_pypi"
 
-    inputs.files tasks.named("saxon_${edition}c_local_wheel").map { it.outputs.files }
+    inputs.files tasks.named("setup_${edition}c_pypi")
     outputs.dir  layout.buildDirectory.dir(wheelDir)
 
-    doLast {
-      def libdir = (systemOs.isMacOsX()
-                    ? "libs/darwin"
-                    : (systemOs.isLinux()
-                       ? "libs/nix"
-                       : "libs/win"))
-      if (libdir == null) {
-        throw GradleException("Don't know how to create Python wheels on this OS.");
-      }
-     
-      copy {
-        into layout.buildDirectory.dir("${wheelDir}/${libdir}")
-        from layout.buildDirectory.dir("c")
-        include "graal*.h"
-        include "libsaxon-${edition}c-${saxonVersion3}.*"
-      }
-    }
-
-    doLast {
-      copy {
-        into layout.buildDirectory.dir(wheelDir)
-        from layout.buildDirectory.dir("${edition}c_pypi")
-      }
-    }
+    from layout.buildDirectory.dir("${edition}c/python/saxonc${edition}")
+    into layout.buildDirectory.dir(wheelDir)
   }
 }
 
@@ -1084,29 +905,26 @@ tasks.register("pyBuildVenv") {
 // saxonc_build_wheels different names, but two of the names have been in use
 // for a while, so I'm not changing them
 
-task saxonc_stage_wheels(
-  type: Tar,
-  dependsOn: ['saxon_eec_stage_wheel', 'saxon_pec_stage_wheel', 'saxon_hec_stage_wheel']
-
-) {
-  inputs.files fileTree(dir: "${buildDir}/wheels/${systemOsName}")
-  outputs.file "${buildDir}/distributions/${systemOsName}-${systemOsArch}.wheels.tar.gz"
+def saxoncStageWheels = tasks.register("saxonc_stage_wheels", Tar) {
+  inputs.files tasks.named("saxon_hec_stage_wheel")
+  inputs.files tasks.named("saxon_pec_stage_wheel")
+  inputs.files tasks.named("saxon_eec_stage_wheel")
 
   archiveFileName = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
-  from "${buildDir}/wheels"
+  from layout.buildDirectory.dir("wheels")
   include "${systemOsName}/**"
   exclude "${systemOsName}/*/build/**"
   exclude "${systemOsName}/*/*.egg-info/**"
   compression = Compression.GZIP
 
   doLast {
-    delete "${buildDir}/wheels/${systemOsName}"
+    delete layout.buildDirectory.dir("wheels/${systemOsName}")
   }
 }
 
-task saxonc_prepare_wheels(
-  dependsOn: ['saxonc_stage_wheels']
-) {
+tasks.register("saxonc_prepare_wheels") {
+  inputs.files saxoncStageWheels
+
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
   if (user == 'ndw') {
     user = 'norm' // HACK
@@ -1120,14 +938,14 @@ task saxonc_prepare_wheels(
 
   def wheels = "${systemOsName}-${systemOsArch}.wheels.tar.gz"
   if (project.findProperty("skipWheelUpload") == null
-      && project.findProperty('wheelDryRun') == null) {
+          && project.findProperty('wheelDryRun') == null) {
     doLast {
       println("Copying ${systemOsName} staging files to s3://saxonica-wheel-staging/${user}/${wheels}")
       exec {
-        workingDir "${buildDir}/distributions"
+        workingDir layout.buildDirectory.dir("distributions")
         commandLine awscli, "--profile", "saxonica",
-          "s3", "cp", "${wheels}",
-          "s3://saxonica-wheel-staging/${user}/${wheels}"
+                "s3", "cp", saxoncStageWheels.map { it.archiveFile.get().asFile.toString() }.get(),
+                "s3://saxonica-wheel-staging/${user}/${wheels}"
       }
     }
   } else {
@@ -1138,7 +956,7 @@ task saxonc_prepare_wheels(
 }
 
 task saxonc_build_wheels(
-  dependsOn: ['saxonc_prepare_wheels']
+        dependsOn: ['saxonc_prepare_wheels']
 ) {
   def user = project.findProperty('wheelUser') ?: System.getProperty('user.name')
   if (user == 'ndw') {
@@ -1260,6 +1078,8 @@ tasks.register("all_python_test_suites") {
 }
 
 ["ee", "pe", "he"].each { edition ->
+  def pythonPackageDir = pythonPackageDirPath(edition)
+
   def editionSuites = tasks.register("python_${edition}_test_suites") {
     description "Runs all Python the test suites for ${edition}"
   }
@@ -1267,62 +1087,57 @@ tasks.register("all_python_test_suites") {
     dependsOn editionSuites
   }
 
-  tasks.register("install_saxon_${edition}c_with_pip") {
-    inputs.files tasks.findByName("saxon_${edition}c_local_wheel").outputs.getFiles()
-    outputs.file layout.buildDirectory.file("wheels/${edition}c_wheel.txt")
+  tasks.register("${edition}c_python_install_wheel", InstallLocalWheel) {
+    pipExe = branchVenvTask.map { it.pipExe.get() }
+    wheel = tasks.named("${edition}c_python_repair_wheel").map { it.repairedWheel.get() }
+  }
 
-    def wheels = layout.buildDirectory.dir("${edition}c_pypi/dist")
-
-    doLast {
-      exec {
-        workingDir wheels //layout.buildDirectory.dir("${edition}c_pypi/dist")
-
-        fileTree(wheels).matching {
-          include "*.whl"
-        }.each { f ->
-          println(f.toString())
-        }
-
-        def wheel = fileTree(wheels).matching {
-          include "*.whl"
-        }.singleFile
-
-        executable file(project.pythonEnv.venvPip)
-        args "install", "--force-reinstall", wheel
-      }
-    }
-
-    doLast {
-      def output = new FileWriter(file(layout.buildDirectory.file("wheels/${edition}c_wheel.txt")))
-      output.write(fileTree(wheels).matching {
-        include "*.whl"
-      }.singleFile.toString())
-      output.close()
-    }
+  tasks.register("${edition}c_python_install_debug_wheel", InstallLocalWheel) {
+    pipExe = branchDebugVenvTask.map { it.pipExe.get() }
+    wheel = tasks.named("${edition}c_python_repair_debug_wheel").map { it.repairedWheel.get() }
   }
 
   tasks.register("${edition}c_pytest_data", Copy) {
     from layout.projectDirectory.dir("src/main/c/samples/data")
-    into layout.buildDirectory.dir("${edition}c_pypi/samples/data")
+    into pythonBuildRootPath(edition).map { it.dir("samples") }
   }
 
-  tasks.register("${edition}c_pytest") {
-    dependsOn "install_saxon_${edition}c_with_pip"
-
-    inputs.dir(tasks.named("${edition}c_pytest_data").map { it.destinationDir })
-
-    doLast {
-      exec {
-        workingDir layout.buildDirectory.dir("${edition}c_pypi")
-
-        environment SAXONC_HOME: saxonLicenseDir
-        executable file("${project.pythonEnv.venvBinPath.get()}/pytest")
-        args "--data-dir",
-          file(tasks.named("${edition}c_pytest_data").map { it.destinationDir }),
-          "./test_saxonc.py"
-      }
-    }
+  tasks.register("${edition}c_python_repair_test_wheel", RepairLocalWheel) {
+    outputDir = pythonBuildRootPath(edition)
+    pythonExe = branchVenvTask.map { it.pythonExe.get() }
+    manylinuxTarget = "linux"
+    pythonVenvTask = branchVenvTask
+    productEdition = edition
+    repairedWheelFilePlatformSuffix = wheelPlatformTagTask.flatMap { it.wheelSuffix }
+    libraryDir = tasks.named("${edition}c_build_graal_image").map { it.libraryDir.get() }
+    wheel = tasks.named("${edition}c_python_build_wheel").map { it.wheel.get() }
   }
+
+  tasks.register("${edition}c_python_install_test_wheel", InstallLocalWheel) {
+    pipExe = branchVenvTask.map { it.pipExe.get() }
+    wheel = tasks.named("${edition}c_python_repair_test_wheel").map { it.repairedWheel.get() }
+  }
+
+  tasks.register("${edition}c_pytest", PytestRunner) {
+    dependsOn "${edition}c_pypi_pip_install"
+    dependsOn "${edition}c_python_install_test_wheel"
+    dependsOn "${edition}c_pytest_data"
+
+    pytest = branchVenvTask.map { it.venvBinHostedExe("pytest").get() }
+
+    workingDir pythonPackageDir
+    environment SAXONC_HOME: saxonLicenseDir
+    //environment SAXONC_DEBUG_FLAG: "true"//, SAXONC_TESTSUITE_DEBUG: "true"
+
+    baseArgs "--import-mode=importlib", "--data-dir", file(tasks.named("${edition}c_pytest_data").map { it.destinationDir })
+    tests "test_saxonc.py", "tests"
+  }
+
+  tasks.register("${edition}c_python_test_suite_pip_install", PipInstall) {
+    pipExe = branchVenvTask.map { it.pipExe.get() }
+    requirements = tasks.named("setup_${edition}c_pypi").map { it.packageDir.map { it.file("testsuite_driver/requirements.txt") }.get() }
+  }
+
 
   ["xslt30", "qt3"].each { testsuite ->
     def langs
@@ -1347,33 +1162,21 @@ tasks.register("all_python_test_suites") {
       }
 
       tasks.register("${edition}c_python_${testsuite}_test_suite${langslug}") {
-        dependsOn "install_saxon_${edition}c_with_pip"
+        dependsOn "${edition}c_python_install_test_wheel"
+        dependsOn "${edition}c_python_test_suite_pip_install"
 
-        def output_path =
-          layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion3}/${testsuite}/${DSTAMP}")
-
-        inputs.files tasks.named("install_saxon_${edition}c_with_pip").map { it.outputs }
-        inputs.files layout.buildDirectory.dir("${edition}c_pypi/testsuite_driver")
+        def output_path = layout.buildDirectory.dir("test-results/${edition}c/${saxonVersion3}/${testsuite}/${DSTAMP}")
+        def pythonExe = branchVenvTask.map { it.pythonExe.get() }
+        def pipExe = branchVenvTask.map { it.pipExe.get() }
+        def testsuiteDriverDir = pythonPackageDir.map { it.dir("testsuite_driver") }
+        inputs.file pythonExe
+        inputs.file pipExe
+        inputs.files testsuiteDriverDir
         outputs.dir output_path
 
         doLast {
-          copy {
-            from "${projectDir}/src/main/c/pypi/testsuite_driver"
-            into "${buildDir}/${edition}c/${edition}c_testsuite_driver"
-            filter textReplacementFilter(edition)
-          }
-        }
-
-        doLast {
           exec {
-            workingDir layout.buildDirectory.dir("${edition}c_pypi/testsuite_driver")
-
-            executable file(project.pythonEnv.venvPip)
-            args "install", "-r", "requirements.txt"
-          }
-
-          exec {
-            workingDir layout.buildDirectory.dir("${edition}c_pypi/testsuite_driver")
+            workingDir testsuiteDriverDir
 
             def suitedir
             if (testsuite == "xslt30") {
@@ -1384,15 +1187,15 @@ tasks.register("all_python_test_suites") {
               throw new GradleException("Unexpected test suite: ${testsuite}")
             }
 
-            // environment SAXONC_HOME: saxonLicenseDir, SAXONC_DEBUG_FLAG: "true"
-            environment SAXONC_HOME: saxonLicenseDir
-            executable file(project.pythonEnv.venvPython)
+            executable pythonExe.get()
             args "./${testsuite}_test_suite_driver.py",
                     suitedir, "-c", "catalog.xml",
                     "-o", file(output_path)
             if (testsuite == "qt3") {
               args "-l", lang
             }
+            environment SAXONC_HOME: saxonLicenseDir
+//            environment SAXONC_DEBUG_FLAG: "true", SAXONC_TESTSUITE_DEBUG: "true"
           }
         }
       }
@@ -1403,4 +1206,3 @@ tasks.register("all_python_test_suites") {
     }
   }
 }
-

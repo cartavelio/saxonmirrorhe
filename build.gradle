@@ -26,6 +26,7 @@ apply plugin: JarSignPlugin
 apply plugin: ManageBranchesPlugin
 apply plugin: ManageTestSuitesPlugin
 apply plugin: ManagePythonEnvPlugin
+apply plugin: GraalNativeImagePathPlugin
 
 import org.gradle.internal.os.OperatingSystem;
 import com.nwalsh.gradle.docker.DockerContainer
@@ -886,6 +887,7 @@ task "pej_preprocess"(
         "/p:OPT=false", "/p:SAXONC=false",  "/p:STREAM=false", "/p:SCHEMA=false", "/p:BYTECODE=false", "/p:CSHARP=false"
     }
   }
+
   doLast {
     patchReleaseInfo("${buildDir}/src/pej/net/sf/saxon/Version.java")
   }
@@ -956,6 +958,7 @@ task "eej_preprocess"(
         "/p:STREAM=true", "/p:PACKAGES=true", "/p:SCHEMA=true", "/p:CSHARP=false"
     }
   }
+
   doLast {
     patchReleaseInfo("${buildDir}/src/eej/net/sf/saxon/Version.java")
     patchKey("${buildDir}/src/eej/com/saxonica/config/JavaVerifier.java", "dsa", dsaPublicKey)

@@ -53,7 +53,8 @@
 
   task "${release}_samples_config"(
           type: Copy,
-          dependsOn: ["gen_config_schema"]
+          dependsOn: ["gen_config_schema", "resources_userdoc_xml", "resources_saxonc_userdoc",
+                      "copy_samples"]
   ) {
     into "${buildDir}/output/${release}/resources/samples/config"
     from "${buildDir}/saxon-resources/samples/config/config.xsd"
