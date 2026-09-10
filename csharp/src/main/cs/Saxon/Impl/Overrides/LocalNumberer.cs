@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using ICU4N;
 using ICU4N.Globalization;
 using Saxon.Hej.expr.number;
@@ -17,6 +19,8 @@ namespace Saxon.Impl.Overrides {
 
         private readonly CultureInfo culture;     // Standard .NET version
         private readonly UCultureInfo uCulture;   // ICU4N version
+        
+        private readonly Dictionary<string, string> ordinalParamIndex = new ();
 
         public LocalNumberer(string language, string country) {
             try {
@@ -63,14 +67,89 @@ namespace Saxon.Impl.Overrides {
                 } else if (cardinal.Contains("ordinal", StringComparison.InvariantCulture)) {
                     ruleSetName = "%spellout-ordinal";
                 }
+                else {
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("Available formats are: ");
+                    foreach (string name in rules.RuleSetNames) {
+                        sb.Append(name).Append("; ");
+                    }
+                    Console.WriteLine(sb.ToString());
+                }
             }
             return FormatNumberRuleBased.ToString(number, NumberPresentation.SpellOut, ruleSetName, uCulture); 
         }
 
-        public override string toOrdinalWords(string ordinalParam, long number, int wordCase) {
+        public override string toOrdinalWords(string ordinalParam, long number, int wc) {
             NumberFormatRules rules = uCulture.NumberFormat.SpellOut;
-            return FormatNumberRuleBased.ToString(number, NumberPresentation.Ordinal, null, uCulture); 
+            string ruleSet = null;
+            if (ordinalParam == "" || ordinalParam == "yes" || ordinalParam == "%spellout-ordinal") {
+                ruleSet = "%spellout-ordinal";
+            }
+            else if (ordinalParam.StartsWith('%')) {
+                ruleSet = ordinalParam;
+            }
+            else {
+                if (ordinalParam.StartsWith("-") && ordinalParam.Length >= 2) {
+                    // If the ordinalParam starts with "-" we treat it as a required suffix. We
+                    // try formatting the number "2" with each possible ruleset, searching for a ruleset
+                    // where the result ends with the required suffix. This tells us which ruleset to
+                    // use. Once we've worked this out, we remember the association of suffix to ruleset
+                    // for future use.
+                    String suffix = ordinalParam.Substring(1);
+                    foreach (string rs in rules.RuleSetNames) {
+                        string two = 2.ToString(NumberPresentation.SpellOut, rs, uCulture);
+                        if (two.EndsWith(suffix)) {
+                            ruleSet = rs;
+                            break;
+                        }
+                    }
+                }
+                else if (ordinalParam.StartsWith("2=") && ordinalParam.Length >= 3) {
+                    // If the ordinalParam starts with "2=" then we treat it as containing the
+                    // desired representation of the number 2, and again we use this information
+                    // to find the appropriate ruleset which we can then use for all numbers
+                    foreach (string rs in rules.RuleSetNames) {
+                        string two = 2.ToString(NumberPresentation.SpellOut, rs, uCulture);
+                        if (two == ordinalParam.Substring(2)) {
+                            ruleSet = rs;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (ruleSet == null || !rules.RuleSetNames.Contains(ruleSet)) {
+                foreach (string rs in rules.RuleSetNames) {
+                    string two = 2.ToString(NumberPresentation.SpellOut, rs, uCulture);
+                    if (rs.Contains("ordinal")) {
+                        ruleSet = rs;
+                        break;
+                    }
+                }
+            }
+
+            if (ruleSet == null) {
+                ruleSet = rules.DefaultRuleSetName;
+            }
+            
+            if (ruleSet != null) {
+                string word = number.ToString(NumberPresentation.SpellOut, ruleSet, uCulture);
+                return wordCase(word, wc);
+            }
+            
+            return number.ToString();
         }
+  
+        private String wordCase(string s, int wc) {
+            return wc switch {
+                UPPER_CASE => s.ToUpper(),
+                LOWER_CASE => s.ToLower(),
+                TITLE_CASE when s.Length > 1 && Char.IsUpper(s[0]) && Char.IsLower(s[1]) => s,
+                TITLE_CASE => toTitleCase(s),
+                _ => s
+            };
+        }
+
 
 
         public override string toTitleCase(string s) {
