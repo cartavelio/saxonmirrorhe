@@ -275,11 +275,11 @@ public class ParseXml extends SystemFunction implements Callable {
             return node;
         } catch (XPathException err) {
             String msg = makeParsingErrorMessage(err);
-            String code = err.getErrorCodeQName().getLocalPart();
-            if (code == null || err.hasErrorCode("SXXP0003")) {
+            String code = null;
+            if (!err.hasStandardErrorCode() || err.hasErrorCode("SXXP0003")) {
                 code = "FODC0006";
             }
-            if (err instanceof ValidationException || err.hasErrorCode("FODC0007")) {
+            if (err instanceof ValidationException) {
                 code = "FODC0007";
             }
             XPathException xe = new XPathException(msg, code);

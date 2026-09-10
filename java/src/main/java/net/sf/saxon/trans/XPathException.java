@@ -535,7 +535,7 @@ public class XPathException extends TransformerException {
      */
 
     public boolean hasErrorCode(String... codes) {
-        if (errorCode != null && errorCode.hasURI(NamespaceUri.ERR)) {
+        if (hasStandardErrorCode()) {
             for (String code : codes) {
                 if (errorCode.getLocalPart().equals(code)) {
                     return true;
@@ -543,6 +543,14 @@ public class XPathException extends TransformerException {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks if the exception has an error in the standard error namespace.
+     * @return true iff the error code is in the standard error namepace
+     */
+    public boolean hasStandardErrorCode() {
+        return errorCode != null && errorCode.hasURI(NamespaceUri.ERR);
     }
 
     /**

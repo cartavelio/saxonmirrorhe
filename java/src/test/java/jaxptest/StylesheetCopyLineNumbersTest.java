@@ -53,16 +53,16 @@ public class StylesheetCopyLineNumbersTest {
         Source sourceToCache2 = new SAXSource(new InputSource(new FileInputStream(Testdata.file("runtime-error.xsl"))));
         DocumentBuilder docBuilder = new Processor(false).newDocumentBuilder();
         docBuilder.setLineNumbering(true);
-        Source cachedTree = docBuilder.build(sourceToCache2).asSource();
+        XdmNode document = docBuilder.build(sourceToCache2);
 
         // Show that tree has line numbers.
-        TinyNodeImpl rootElement = (TinyNodeImpl)((TinyDocumentImpl)cachedTree).iterateChildAxis(AnyGNode.TEST).next();
+        TinyNodeImpl rootElement = (TinyNodeImpl)(document.getUnderlyingNode()).iterateChildAxis(AnyGNode.TEST).next();
         assertEquals("xsl:stylesheet",  rootElement.getDisplayName(), "name ok?");
         assertEquals(5, rootElement.getLineNumber(), "line ok?");
         //System.err.println("Line num: " + rootElement.getLineNumber());
 
 
-        Templates stylesheetTree = factory.newTemplates(cachedTree);
+        Templates stylesheetTree = factory.newTemplates(document.asSource());
         TransformerHandler treeStylesheetHandler = factory.newTransformerHandler(stylesheetTree);
         treeStylesheetHandler.getTransformer().setErrorListener(el);
         treeStylesheetHandler.setResult(new StreamResult(new StringWriter()));
@@ -142,15 +142,15 @@ public class StylesheetCopyLineNumbersTest {
             ErrorReporter el = err -> {
                 System.err.println("error here, as expected, on line: " + err.getLocation().getLineNumber());
                 assertEquals(3, err.getLocation().getLineNumber(), "line number is ");
-                assertEquals("module is ", "http://B/", err.getModuleUri());
+                assertEquals("http://B/", err.getModuleUri(), "module is ");
             };
             t.setErrorReporter(el);
             XdmValue result = t.callTemplate(new QName("main"));
             fail("Unexpected success");
         } catch (SaxonApiException err) {
-            assertEquals("error code", "XTDE0410", err.getErrorCode().getLocalName());
+            assertEquals("XTDE0410", err.getErrorCode().getLocalName(), "error code");
             assertEquals(3, err.getLineNumber(), "line number");
-            assertEquals("uri", "http://B/", err.getSystemId());
+            assertEquals("http://B/", err.getSystemId(), "uri");
         }
     }
 
