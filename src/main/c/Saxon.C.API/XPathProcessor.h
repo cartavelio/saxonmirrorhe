@@ -226,15 +226,15 @@ public:
     //! Clear any exception thrown
     void exceptionClear();
 
-     //! Get the ith error message if there are any error
+     //! Get the first error message if there are any errors
     /**
-     * A transformation may have a number of errors reported against it.
+     * An XPath expression may have a number of errors reported against it.
      * @return char* - The message of the exception
     */
     const char * getErrorMessage();
 
 
-     //! Get the ith error code if there are any error
+     //! Get the first error code if there are any errors
     /**
      * After the execution of the XPath expression there may be  a number of errors reported against it.
      * @return char* - The error code of the exception.
