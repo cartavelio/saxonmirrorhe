@@ -21,7 +21,7 @@ class XdmValue;
 class XdmItem;
 class XdmNode;
 
-/*! An <code>Xslt30Processor</code> represents a factory to compile, load and
+/** An <code>Xslt30Processor</code> represents a factory to compile, load and
  * execute stylesheets. It is possible to cache the context and the stylesheet
  * in the <code>Xslt30Processor</code>.
  */
@@ -30,15 +30,15 @@ class Xslt30Processor {
   friend class XsltExecutable;
 
 public:
-  //! Default constructor.
-  /*!
+  /**
+   * Default constructor.
    * Creates a Saxon-HE XSLT processor
    * @throws SaxonApiException
    */
   Xslt30Processor();
 
-  //! Constructor with the SaxonProcessor supplied.
-  /*!
+  /**
+   * Constructor with the SaxonProcessor supplied.
    * @param proc - pointer to the SaxonProcessor object
    * @param cwd - the current working directory
    * @throws SaxonApiException
@@ -53,14 +53,14 @@ public:
 
   ~Xslt30Processor();
 
-  //! Get the SaxonProcessor object
   /**
+   * Get the SaxonProcessor object
    * @return Pointer to the SaxonProcessor object
    */
   SaxonProcessor *getSaxonProcessor() { return proc; }
 
-  //! Set the current working directory (cwd).
   /**
+   * Set the current working directory (cwd).
    * This method also applies to the static base URI for XSLT stylesheets when
    * supplied as lexical string. The cwd is used to set the base URI is part of
    * the static context, and is used to resolve any relative URIs appearing
@@ -70,16 +70,16 @@ public:
   void setcwd(const char *cwd);
 
 
- //! Get the current working directory (cwd). Memory deallocation is handled internally.
  /**
+  * Get the current working directory (cwd). Memory deallocation is handled internally.
   * The cwd is used to set the base URI is part of the static context, and is
   * used to resolve any relative URIs appearing within XSLT.
   * @return Current working directory
   */
  const char * getcwd();
 
-  //! Set the base output URI.
   /**
+   * Set the base output URI.
    * The base output URI is used for resolving relative URIs in the
    * <code>href</code> attribute of the <code>xsl:result-document</code>
    * instruction; it is accessible to XSLT stylesheet code using the XPath
@@ -89,8 +89,8 @@ public:
    */
   void setBaseOutputURI(const char *baseURI);
 
-  //! Say whether just-in-time compilation of template rules should be used.
   /**
+   * Say whether just-in-time compilation of template rules should be used.
    * <p><b>Recommendation:</b> disable this option unless you are confident that
    * the stylesheet you are compiling is error-free.</p>
    *
@@ -108,8 +108,8 @@ public:
    */
   void setJustInTimeCompilation(bool jit);
 
- //! Get the status of the just-in-time compilation flag.
  /**
+  * Get the status of the just-in-time compilation flag.
   * <p><b>Recommendation:</b> disable this option unless you are confident that
   * the stylesheet you are compiling is error-free.</p>
   *
@@ -117,15 +117,15 @@ public:
   */
  bool getJustInTimeCompilation();
 
-  //! Set the target edition under which the stylesheet will be executed.
   /**
+   * Set the target edition under which the stylesheet will be executed.
    * @param edition - the Saxon edition for the run-time environment. One of
    * "EE", "PE", "HE", or "JS", "JS2", or "JS3".
    */
   void setTargetEdition(const char *edition);
 
-  //! Set the XSLT (and XPath) language level to be supported by the processor
   /**
+   * Set the XSLT (and XPath) language level to be supported by the processor.
    * Set the value to "4.0"
    * to enable support for experimental features defined in the XSLT 4.0
    * proposal (which is likely to change before it stabilizes).
@@ -134,8 +134,9 @@ public:
    */
   void setXsltLanguageVersion(const char *version);
 
-  //! Request fast compilation
   /**
+   * Request fast compilation.
+   *
    * Fast compilation will generally be achieved at the expense of run-time
    * performance and quality of diagnostics. Fast compilation is a good
    * trade-off if (a) the stylesheet is known to be correct, and (b) once
@@ -151,8 +152,8 @@ public:
    */
   void setFastCompilation(bool fast);
 
-  //! Indicate that packages compiled by this processor are deployable to a different location
   /**
+   * Indicate that packages compiled by this processor are deployable to a different location.
    * Say whether any package produced by this compiler can be deployed to a
    * different location, with a different base URI.
    * @param relocatable - if true then static-base-uri() represents the deployed
@@ -160,8 +161,8 @@ public:
    */
   void setRelocatable(bool relocatable);
 
-  //! Set the value of a stylesheet parameter.
   /**
+   * Set the value of a stylesheet parameter.
    * Static (compile-time) parameters must be provided using
    * this method, prior to stylesheet compilation.
    * Non-static parameters may also be provided using this method if their
@@ -189,9 +190,8 @@ public:
    */
   bool removeParameter(const char *name);
 
-  //! Get all parameters as a std::map
   /**
-   *
+   * Get all parameters as a std::map.
    * Please note that the key name has been prefixed with 'param:', for example
    * 'param:name'
    * @return An std:map with key as string name mapped to XdmValue.
@@ -199,8 +199,8 @@ public:
    */
   std::map<std::string, XdmValue *> &getParameters();
 
-  //! Clear stylesheet parameter values set.
   /**
+   * Clear stylesheet parameter values set.
    * Default behaviour (false) is to leave XdmValues in memory.
    * Individual pointers to XdmValue objects have to be deleted in the calling
    * program.
@@ -214,8 +214,8 @@ public:
    */
   char **createCharArray(int len) { return (new char *[len]); }
 
-  //! Utility method for Python API - internal use only
   /**
+   * Utility method for Python API - internal use only.
    * This method deletes a XdmValue pointer array
    * @param arr - XdmValue pointer array
    * @param len - length of the array
@@ -224,8 +224,8 @@ public:
     delete[] arr;
   }
 
-  //! Perform a one shot transformation.
   /**
+   * Perform a one shot transformation.
    * The result is stored in the specified output file.
    *
    * @param sourcefile - the file name of the source document
@@ -236,8 +236,8 @@ public:
   void transformFileToFile(const char *sourcefile, const char *stylesheetfile,
                            const char *outputfile);
 
-  //! Perform a one shot transformation.
   /**
+   * Perform a one shot transformation.
    * The result is returned as a string.
    *
    * @param sourcefile - the file name of the source document
@@ -262,8 +262,8 @@ public:
   XdmValue *transformFileToValue(const char *sourcefile,
                                  const char *stylesheetfile);
 
-  //! Import a library package.
   /**
+   * Import a library package.
    * Calling this method makes the supplied package available for reference
    * in the <code>xsl:use-package</code> declarations of subsequent compilations
    * performed using this <code>Xslt30Processor</code>.
@@ -273,8 +273,8 @@ public:
    */
   void importPackage(const char *packageFile);
 
-  //! Compile a stylesheet file.
   /**
+   * Compile a stylesheet file.
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
@@ -287,9 +287,8 @@ public:
    */
   XsltExecutable *compileFromFile(const char *stylesheet);
 
-  //! Compile a stylesheet supplied as a string.
   /**
-   *
+   * Compile a stylesheet supplied as a string.
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
@@ -305,8 +304,8 @@ public:
   XsltExecutable *compileFromString(const char *stylesheet,
                                     const char *encoding = nullptr);
 
-  //! Compile a stylesheet as referenced in a specified XML document via the xml-stylesheet processing instruction.
   /**
+   * Compile a stylesheet as referenced in a specified XML document via the xml-stylesheet processing instruction.
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
@@ -319,10 +318,9 @@ public:
    */
   XsltExecutable *compileFromAssociatedFile(const char *sourceFile);
 
-  //! Compile a stylesheet received as a string and save to an exported file (SEF).
   /**
-   *
-   * The compiled stylesheet is saved as SEF to file store
+   * Compile a stylesheet received as a string and save to an exported file (SEF).
+   * The compiled stylesheet is saved as SEF to file store.
    * @param stylesheet - the stylesheet as a lexical string representation
    * @param filename - the file to which the compiled package should be saved
    * @param encoding - the string encoding of the filename. Defaults to JVM default
@@ -331,18 +329,17 @@ public:
   void compileFromStringAndSave(const char *stylesheet, const char *filename,
                                 const char *encoding = nullptr);
 
-  //! Compile a stylesheet received as a file and save to an exported file (SEF).
   /**
-   *
-   * The compiled stylesheet is saved as SEF to file store
+   * Compile a stylesheet received as a file and save to an exported file (SEF).
+   * The compiled stylesheet is saved as SEF to file store.
    * @param xslFilename - file name of the stylesheet
    * @param filename - the file to which the compiled package should be saved
    * @throws SaxonApiException if the compilation of the stylesheet fails
    */
   void compileFromFileAndSave(const char *xslFilename, const char *filename);
 
-  //! Compile a stylesheet received as an XdmNode.
   /**
+   * Compile a stylesheet received as an XdmNode.
    * The compiled stylesheet is cached and available for execution later.
    * @param node - the XdmNode object for the stylesheet
    * @param filename - the file to which the compiled package should be saved
@@ -350,8 +347,8 @@ public:
    */
   void compileFromXdmNodeAndSave(XdmNode *node, const char *filename);
 
-  //! Compile a stylesheet received as an XdmNode.
   /**
+   * Compile a stylesheet received as an XdmNode.
    * Note: the term "compile" here indicates that the stylesheet is converted
    * into an executable form. The compilation uses a snapshot of the properties
    * of the <code>Xslt30Processor</code> at the time this method is invoked.
@@ -371,26 +368,28 @@ public:
    */
   bool exceptionOccurred();
 
-  //! Get the SaxonApiException object created when we have an error
   /**
+   * Get the SaxonApiException object created when we have an error.
    * After use of the processor if there is an error then a
    * SaxonApiException is created.
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
   SaxonApiException *getException();
 
-  //! Clear any thrown exceptions
+  /**
+   * Clear any thrown exceptions
+   */
   void exceptionClear();
 
-  //! Get the first error message if there are any errors
   /**
+   * Get the first error message if there are any errors.
    * A transformation may have a number of errors reported against it.
    * @return The message of the exception
    */
   const char *getErrorMessage();
 
-  //! Get the first error code if there are any errors
   /**
+   * Get the first error code if there are any errors
    * A transformation may have a number of errors reported against it.
    * @return The error code of the exception. The error codes are
    * related to the specific specification
@@ -400,9 +399,8 @@ public:
 private:
   void createException(const char *message = nullptr);
 
-  //! Set a configuration property specific to the XSLT processor in use.
   /**
-   *
+   * Set a configuration property specific to the XSLT processor in use.
    * Xslt30Processor: set serialization properties (names start with '!' i.e. name
    * "!method" -> "xml"), 'o':outfile name, 'it': initial template, 'im': initial
    * mode, 's': source as file name, 'm': switch on message listener for
@@ -412,13 +410,15 @@ private:
    */
   void setProperty(const char *name, const char *value);
 
- //! Get all configuration properties specified on the processor as a std::map.
  /**
+  * Get all configuration properties specified on the processor as a std::map.
   * @return Map of (string, string) pairs
   */
  std::map<std::string, std::string> &getProperties();
 
-  //! Clear configuration property values set
+  /**
+   * Clear configuration property values set
+   */
   void clearProperties();
 
   SaxonProcessor *proc; /*!< Pointer to the SaxonProcessor object which created this Xslt30Processor */

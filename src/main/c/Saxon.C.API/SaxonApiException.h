@@ -16,9 +16,9 @@
 
 class SaxonProcessor;
 
-/*! <code>SaxonApiException</code>. An exception thrown by the Saxon s9api API
+/** <code>SaxonApiException</code>. An exception thrown by the Saxon s9api API
  * (Java). This is always a C++ wrapper for some other underlying exception in
- * Java <p/>
+ * Java.
  */
 class SaxonApiException : public std::exception {
 

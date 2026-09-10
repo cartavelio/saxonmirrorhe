@@ -184,28 +184,28 @@ public:
    */
   bool exceptionOccurred();
 
-  //! Deprecated. Clear any thrown exceptions
  /**
+  * Deprecated. Clear any thrown exceptions.
   * @deprecated
   */
   void exceptionClear();
 
-  //! Deprecated. Get the first error message if there are any errors
   /**
+   * Deprecated. Get the first error message if there are any errors.
    * @deprecated
    * @return The message of the exception
    */
   const char *getErrorMessage();
 
-  //! Deprecated. Get the first error code if there are any errors
   /**
+   * Deprecated. Get the first error code if there are any errors.
    * @deprecated
    * @return The error code of the exception
    */
   const char *getErrorCode();
 
-  //! Deprecated. Get the SaxonApiException object created when we have an error
   /**
+   * Deprecated. Get the SaxonApiException object created when we have an error.
    * @deprecated - exceptions are now thrown directly
    * @return The SaxonApiException object if there is an exception thrown, or nullptr otherwise
    */
