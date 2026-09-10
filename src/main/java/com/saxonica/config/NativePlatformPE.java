@@ -100,7 +100,7 @@ public class NativePlatformPE extends NativePlatform {
     }
 
 
-    @CEntryPoint(name = "j_run_validate", exceptionHandler = SaxonCExceptionLongHandler.class)
+    @CEntryPoint(name = "j_run_validate")
     public static long j_run_validate(IsolateThread thread, ObjectHandle processorDataRef){
 //#if EE==true
         String[] args;
