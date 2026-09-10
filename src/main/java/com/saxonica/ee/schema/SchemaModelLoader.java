@@ -195,7 +195,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         handlerStack.push(handler);
         try {
 
-            handler.processElementStart(elementName.getLocalPart(), attributes, namespaces);
+            handler.processElementStart(elemName.getLocalPart(), attributes, namespaces);
         } catch (SchemaException e) {
             throw new XPathException(e);
         }
