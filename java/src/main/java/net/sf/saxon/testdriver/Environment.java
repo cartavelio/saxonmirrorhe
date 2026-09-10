@@ -867,6 +867,7 @@ public class Environment implements ResourceResolver {
             if (!environment.validateSources && validation.equals("skip")) {
                 builder.setSchemaValidator(null);
             } else if (schema == null) {
+                System.err.println("Validation requested but no schema supplied");
                 environment.usable = false;
             } else {
                 if (!selectedTreeModel.isSchemaAware()) {
