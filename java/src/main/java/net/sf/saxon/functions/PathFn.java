@@ -25,6 +25,7 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.LocalUnionType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.*;
+import net.sf.saxon.z.IntIterator;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -267,7 +268,7 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
     private final static UnicodeChar QUOT = new UnicodeChar('"');
 
     /**
-     * Get the path to an X JNode
+     * Get the path to a JNode
      *
      * @param node       the node whose path is required
      * @return the path, as a StringValue.
@@ -309,24 +310,25 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
                 if (selector instanceof StringValue && NameChecker.isValidNCName(selectorStr.codePoints())) {
                     buffer = SLASH.concat(selectorStr).concat(buffer);
                 } else if (selector instanceof StringValue) {
-                    buffer = SLASH.concat(new Twine8("get(\"")).concat(selectorStr).concat(new Twine8("\")").concat(buffer));
+                    buffer = SLASH.concat(quote(selectorStr)).concat(buffer);
                 } else if (selector instanceof NumericValue) {
-                    buffer = SLASH.concat(new Twine8("get(")).concat(selectorStr).concat(new UnicodeChar(')').concat(buffer));
+                    buffer = SLASH.concat(selectorStr).concat(buffer);
                 } else if (selector instanceof QNameValue) {
-                    buffer = SLASH.concat(StringView.of(((QNameValue) selector).getStructuredQName().getEQName()))
+                    buffer = new Twine8("/#").concat(StringView.of(((QNameValue) selector).getStructuredQName().getEQName()))
                                    .concat(buffer);
                 } else if (selector instanceof BooleanValue) {
                     if (((BooleanValue) selector).getBooleanValue()) {
-                        buffer = new Twine8("/get(true())").concat(buffer);
+                        buffer = new Twine8("/true()").concat(buffer);
                     } else {
-                        buffer = new Twine8("/get(false())").concat(buffer);
+                        buffer = new Twine8("/false()").concat(buffer);
                     }
                 } else {
-                    buffer = new Twine8("/get(")
+                    buffer = SLASH
+                            .concat(new Twine8("child::{"))
                             .concat(StringView.of(selector.getPrimitiveType().getDisplayName()))
                             .concat(new Twine8("(\""))
                             .concat(selectorStr)
-                            .concat(new Twine8("\"))"))
+                            .concat(new Twine8("\")}"))
                             .concat(buffer);
                 }
             }
@@ -339,6 +341,21 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
         }
         return new StringValue(buffer);
 
+    }
+
+    private static UnicodeString quote(UnicodeString in) {
+        TwineBuilder builder = TwineBuilder.make(in.length32());
+        builder.append('"');
+        IntIterator iter = in.codePoints();
+        while (iter.hasNext()) {
+            int cp = iter.next();
+            if (cp == '"') {
+                builder.append('"');
+            }
+            builder.append(cp);
+        }
+        builder.append('"');
+        return builder.toUnicodeString();
     }
 
 

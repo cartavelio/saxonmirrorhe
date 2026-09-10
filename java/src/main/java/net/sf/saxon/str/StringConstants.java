@@ -24,6 +24,7 @@ public class StringConstants {
 
     public static final UnicodeString SINGLE_SPACE = new UnicodeChar(' ');
     public static final UnicodeString NEWLINE = new UnicodeChar('\n');
+    public static final UnicodeString DOUBLE_QUOTE = new UnicodeChar('"');
     public static final UnicodeString TRUE = new Twine8(bytes("true"));
     public static final UnicodeString FALSE = new Twine8(bytes("false"));
     public static final UnicodeString ONE = new UnicodeChar('1');
