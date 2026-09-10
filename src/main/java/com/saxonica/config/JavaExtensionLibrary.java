@@ -3,6 +3,7 @@ package com.saxonica.config;
 import com.saxonica.expr.JavaExtensionFunctionCall;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -1270,6 +1271,16 @@ public class JavaExtensionLibrary implements FunctionLibrary {
         @Override
         public Expression copy(RebindingMap rebindings) {
             return this;
+        }
+
+        /**
+         * Make an elaborator for this expression
+         *
+         * @return an appropriate {@link Elaborator}
+         */
+        @Override
+        public Elaborator getElaborator() {
+            throw new UnsupportedOperationException();
         }
     }
 

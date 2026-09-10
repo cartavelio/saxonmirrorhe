@@ -161,7 +161,7 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
                 LetExpressionCompiler.compileCommonExpr(
                         compiler,
                         param.getSelectExpression(),
-                        param.getEvaluationMode(),
+                        param.getEvaluator(),
                         10
                 );
                 ga.push(param.isTypeChecked());
@@ -217,7 +217,7 @@ public class ApplyTemplatesCompiler extends ToPushCompiler {
                 LetExpressionCompiler.compileCommonExpr(
                         compiler,
                         param.getSelectExpression(),
-                        param.getEvaluationMode(),
+                        param.getEvaluator(),
                         10
                 );
                 ga.push(false);

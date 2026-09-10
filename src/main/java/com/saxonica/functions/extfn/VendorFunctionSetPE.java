@@ -8,10 +8,10 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ParameterSet;
 import net.sf.saxon.expr.number.NamedTimeZone;
-import net.sf.saxon.functions.ContextItemAccessorFunction;
-import net.sf.saxon.functions.Doc_2;
-import net.sf.saxon.functions.ParcelFn;
-import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.functions.*;
+import net.sf.saxon.functions.hof.ItemsEnding;
+import net.sf.saxon.functions.hof.IndexWhere;
+import net.sf.saxon.functions.hof.ItemsStarting;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
 import net.sf.saxon.lib.FeatureKeys;
@@ -227,11 +227,11 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, AnyItemType.getInstance(), ONE, EMPTY));
 
-        register("index-where", 2, e -> e.populate( IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
+        register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, EMPTY));
 
-        register("in-scope-namespaces", 1, e -> e.populate( InScopeNamespacesFn::new, MapType.getInstance(), ONE, 0)
+        register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, MapType.getInstance(), ONE, 0)
                 .arg(0, NodeKindTest.ELEMENT, ONE | INS, null));
 
         register("in-summer-time", 2, e -> e.populate( InSummerTime::new, BuiltInAtomicType.DATE_TIME, OPT, LATE)
@@ -244,19 +244,19 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("is-NaN", 1, e -> e.populate( IsNaN::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null));
 
-        register("items-after", 2, e -> e.populate( Starting.ItemsAfter::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-after", 2, e -> e.populate(ItemsStarting.ItemsAfter::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
                 .arg(1, predicate, ONE, EMPTY));
 
-        register("items-from", 2, e -> e.populate( Starting.ItemsFrom::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-from", 2, e -> e.populate(ItemsStarting.ItemsFrom::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
                 .arg(1, predicate, ONE, EMPTY));
 
-        register("items-before", 2, e -> e.populate( Ending.ItemsBefore::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-before", 2, e -> e.populate(ItemsEnding.ItemsBefore::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
                 .arg(1, predicate, ONE, EMPTY));
 
-        register("items-until", 2, e -> e.populate( Ending.ItemsUntil::new, AnyItemType.getInstance(), STAR, 0)
+        register("items-until", 2, e -> e.populate(ItemsEnding.ItemsUntil::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, EMPTY)
                 .arg(1, predicate, ONE, EMPTY));
 

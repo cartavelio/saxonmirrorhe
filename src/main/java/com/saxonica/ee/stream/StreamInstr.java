@@ -11,6 +11,9 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.SourceDocument;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -23,9 +26,9 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.value.AtomicValue;
 
@@ -301,13 +304,41 @@ public class StreamInstr extends SourceDocument implements Pusher {
 
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        return new PushToPull(this, context).getIterator();
+        return new PushToPull(makeElaborator().elaborateForPush(), context).getIterator();
     }
 
     @Override
     public String getExportTag() {
         return "stream";
     }
+
+    public Elaborator getElaborator() {
+        return new StreamInstrElaborator();
+    }
+
+    public static class StreamInstrElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            StreamInstr expr = (StreamInstr) getExpression();
+            return (output, context) -> {
+                try {
+                    expr.push(output, context);
+                } catch (QuitParsingException q) {
+                    // no action, this is an early exit indicating success
+                    //throw q;
+                } catch (XPathException e) {
+                    e.maybeSetLocation(expr.getLocation());
+                    if (e.getErrorCodeQName() == null) {
+                        e.setErrorCode("FODC0002");
+                    }
+                    throw e;
+                }
+                return null;
+            };
+        }
+    }
+
 
 
 }

@@ -4,6 +4,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -129,6 +130,16 @@ public abstract class BasicUpdatingExpression extends Expression {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
+        throw new UnsupportedOperationException("Cannot evaluate an updating expression");
+    }
+
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
         throw new UnsupportedOperationException("Cannot evaluate an updating expression");
     }
 }

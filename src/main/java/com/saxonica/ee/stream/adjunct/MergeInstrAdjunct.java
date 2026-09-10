@@ -12,6 +12,8 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.sort.MergeInstr;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.SnapshotFn;
@@ -22,9 +24,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.style.StylesheetPackage;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.XPathException;
-
+import net.sf.saxon.trans.XmlProcessingIncident;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +134,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             options.setApplicableAccumulators(ms.accumulators);
 
             final String href = uri.getStringValue();
-            Pusher pusher = new MergePusher(ms, pd, href, options);
+            MergePusher pusher = new MergePusher(ms, pd, href, options);
 
             SequenceIterator iter = new PushToPull(pusher, c1).getIterator();
             XPathContext c2 = c1.newMinorContext();
@@ -146,7 +147,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
         return result;
     }
 
-    public static class MergePusher implements Pusher {
+    public static class MergePusher implements PushEvaluator {
         private final MergeInstr.MergeSource ms;
         private final PackageData pd;
         private final String href;
@@ -159,7 +160,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             this.options = options;
         }
 
-        public void push (Outputter output, XPathContext context) throws XPathException {
+        public TailCall processLeavingTail (Outputter output, XPathContext context) throws XPathException {
             Controller controller = context.getController();
             XPathContextMajor c2 = context.newContext();
             c2.setCurrentTemplateRule(null);
@@ -185,6 +186,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             wm.addWatch(new StreamWatch((Inversion) ms.invertedAction, wm, c2), true);
 
             DocumentFn.sendDoc(href, ms.baseURI, pd, context, ms.location, out, options);
+            return null;
         }
 
     }

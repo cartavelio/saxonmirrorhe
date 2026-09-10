@@ -2,6 +2,7 @@ package com.saxonica.ee.update;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.lib.Validation;
@@ -223,8 +224,7 @@ public class CopyModifyExpression extends Expression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        doUpdates(context);
-        return getReturnExp().iterate(context);
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
 
@@ -246,8 +246,7 @@ public class CopyModifyExpression extends Expression {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        doUpdates(context);
-        return getReturnExp().evaluateItem(context);
+        return makeElaborator().elaborateForItem().eval(context);
     }
 
 
@@ -260,8 +259,7 @@ public class CopyModifyExpression extends Expression {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        doUpdates(context);
-        getReturnExp().process(output, context);
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
     private void doUpdates(XPathContext context) throws XPathException {
@@ -281,8 +279,48 @@ public class CopyModifyExpression extends Expression {
         }
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new CopyModifyExpressionElaborator();
+    }
 
+    private static class CopyModifyExpressionElaborator extends PushElaborator {
 
+        @Override
+        public PushEvaluator elaborateForPush() {
+            CopyModifyExpression expr = (CopyModifyExpression) getExpression();
+            PushEvaluator returnEval = expr.getReturnExp().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+                expr.doUpdates(context);
+                return returnEval.processLeavingTail(output, context);
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            CopyModifyExpression expr = (CopyModifyExpression) getExpression();
+            ItemEvaluator returnEval = expr.getReturnExp().makeElaborator().elaborateForItem();
+            return context -> {
+                expr.doUpdates(context);
+                return returnEval.eval(context);
+            };
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            CopyModifyExpression expr = (CopyModifyExpression) getExpression();
+            PullEvaluator returnEval = expr.getReturnExp().makeElaborator().elaborateForPull();
+            return context -> {
+                expr.doUpdates(context);
+                return returnEval.iterate(context);
+            };
+        }
+    }
 }
 
 // Copyright (c) 2008-2022 Saxonica Limited

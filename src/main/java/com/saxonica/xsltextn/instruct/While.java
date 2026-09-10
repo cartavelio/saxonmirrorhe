@@ -2,6 +2,10 @@ package com.saxonica.xsltextn.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.BooleanEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -112,10 +116,7 @@ public class While extends Instruction {
     /*@Nullable*/
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        while (getTest().effectiveBooleanValue(context)) {
-            getAction().process(output, context);
-        }
-        return null;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
 
@@ -132,6 +133,31 @@ public class While extends Instruction {
         out.endElement();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new WhileElaborator();
+    }
+
+    public static class WhileElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            While expr = (While)getExpression();
+            BooleanEvaluator test = expr.getTest().makeElaborator().elaborateForBoolean();
+            PushEvaluator action = expr.getAction().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+                while (test.eval(context)) {
+                    Expression.dispatchTailCall(action.processLeavingTail(output, context));
+                }
+                return null;
+            };
+        }
+    }
 }
 
 // Copyright (c) 2011-2022 Saxonica Limited

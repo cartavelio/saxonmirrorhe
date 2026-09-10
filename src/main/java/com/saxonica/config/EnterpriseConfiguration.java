@@ -35,6 +35,7 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.expr.sort.GroupIterator;
@@ -1925,7 +1926,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public void processResultDocument(final ResultDocument instruction, final Expression content, final XPathContext context) throws XPathException {
+    public void processResultDocument(final ResultDocument instruction, final PushEvaluator content, final XPathContext context) throws XPathException {
         if (resultDocumentThreadsLimit <= 1 ||
                 !getBooleanProperty(Feature.ALLOW_MULTITHREADING) ||
                 !instruction.isAsynchronous() ||

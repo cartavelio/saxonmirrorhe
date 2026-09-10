@@ -5,7 +5,10 @@ import com.saxonica.ee.trans.Outcome;
 import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.SequenceWriter;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.instruct.TailCall;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.QuitParsingException;
@@ -30,12 +33,12 @@ import java.util.concurrent.BlockingQueue;
  */
 public class PushToPull {
 
-    private final Pusher expression;
+    private final PushEvaluator expression;
     private final XPathContext context;
     private final BlockingQueue<Outcome<Item>> queue = new ArrayBlockingQueue<>(50);
     private final static Item STOPPER = StringValue.bmp("finished");
 
-    public PushToPull(Pusher expression, XPathContext context) {
+    public PushToPull(PushEvaluator expression, XPathContext context) {
         this.expression = expression;
         this.context = context;
     }
@@ -93,9 +96,9 @@ public class PushToPull {
 
         private final XPathContext context;
         private final BlockingQueue<Outcome<Item>> queue;
-        private final Pusher expression;
+        private final PushEvaluator expression;
 
-        public Provider(Pusher expression, BlockingQueue<Outcome<Item>> queue, XPathContext context) {
+        public Provider(PushEvaluator expression, BlockingQueue<Outcome<Item>> queue, XPathContext context) {
             this.expression = expression;
             this.queue = queue;
             this.context = context;
@@ -107,7 +110,8 @@ public class PushToPull {
             pipe.setXPathContext(context);
             QueueWriter q = new QueueWriter(queue, pipe);
             try {
-                expression.push(new ComplexContentOutputter(q), context);
+                TailCall tc = expression.processLeavingTail(new ComplexContentOutputter(q), context);
+                Expression.dispatchTailCall(tc);
                 // On completion, write a stopper item which the consumer recognizes as representing
                 // the end of the sequence.
                 q.write(STOPPER);
