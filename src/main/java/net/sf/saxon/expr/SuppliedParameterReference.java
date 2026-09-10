@@ -18,6 +18,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AlphaCode;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.SequenceType;
@@ -33,8 +34,8 @@ import net.sf.saxon.value.SequenceType;
 
 public class SuppliedParameterReference extends Expression {
 
-    int slotNumber;
-    SequenceType type;
+    private final int slotNumber;
+    private SequenceType type;
 
     /**
      * Constructor
@@ -231,6 +232,9 @@ public class SuppliedParameterReference extends Expression {
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("supplied", this);
         destination.emitAttribute("slot", slotNumber + "");
+        if (type != null) {
+            destination.emitAttribute("sType", AlphaCode.fromSequenceType(type));
+        }
         destination.endElement();
     }
 

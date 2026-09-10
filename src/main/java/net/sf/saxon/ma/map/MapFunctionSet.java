@@ -31,8 +31,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Function signatures (and pointers to implementations) of the functions defined in XPath 2.0
+ * Function signatures (and pointers to implementations) of the functions defined in the map
+ * namespace in XPath 3.1
  */
+
+// TODO: separate out new 4.0 functions
 
 public class MapFunctionSet extends BuiltInFunctionSet {
 

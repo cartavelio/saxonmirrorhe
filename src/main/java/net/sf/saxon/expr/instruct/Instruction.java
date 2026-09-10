@@ -12,14 +12,13 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExpressionTool;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.EmptyIterator;
-import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 
@@ -330,15 +329,16 @@ public abstract class Instruction extends Expression /*implements TailCallReturn
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        int m = getImplementationMethod();
-        if ((m & EVALUATE_METHOD) != 0) {
-            throw new AssertionError(
-                    "evaluateItem() is not implemented in the subclass " + getClass());
-        } else if ((m & ITERATE_METHOD) != 0) {
-            return iterate(context).next();
-        } else {
-            return ExpressionTool.getItemFromProcessMethod(this, context);
-        }
+        return makeElaborator().elaborateForItem().eval(context);
+//        int m = getImplementationMethod();
+//        if ((m & EVALUATE_METHOD) != 0) {
+//            throw new AssertionError(
+//                    "evaluateItem() is not implemented in the subclass " + getClass());
+//        } else if ((m & ITERATE_METHOD) != 0) {
+//            return iterate(context).next();
+//        } else {
+//            return ExpressionTool.getItemFromProcessMethod(this, context);
+//        }
     }
 
     /**
@@ -358,19 +358,20 @@ public abstract class Instruction extends Expression /*implements TailCallReturn
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        int m = getImplementationMethod();
-        if ((m & EVALUATE_METHOD) != 0) {
-            Item item = evaluateItem(context);
-            if (item == null) {
-                return EmptyIterator.emptyIterator();
-            } else {
-                return SingletonIterator.makeIterator(item);
-            }
-        } else if ((m & ITERATE_METHOD) != 0) {
-            throw new AssertionError("iterate() is not implemented in the subclass " + getClass());
-        } else {
-            return ExpressionTool.getIteratorFromProcessMethod(this, context);
-        }
+        return makeElaborator().elaborateForPull().iterate(context);
+//        int m = getImplementationMethod();
+//        if ((m & EVALUATE_METHOD) != 0) {
+//            Item item = evaluateItem(context);
+//            if (item == null) {
+//                return EmptyIterator.emptyIterator();
+//            } else {
+//                return SingletonIterator.makeIterator(item);
+//            }
+//        } else if ((m & ITERATE_METHOD) != 0) {
+//            throw new AssertionError("iterate() is not implemented in the subclass " + getClass());
+//        } else {
+//            return ExpressionTool.getIteratorFromProcessMethod(this, context);
+//        }
     }
 
     /**

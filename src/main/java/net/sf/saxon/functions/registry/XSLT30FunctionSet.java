@@ -26,8 +26,12 @@ public class XSLT30FunctionSet extends BuiltInFunctionSet {
         return THE_INSTANCE;
     }
 
-    private XSLT30FunctionSet() {
+    protected XSLT30FunctionSet() {
         init();
+    }
+
+    protected BuiltInFunctionSet correspondingXPathFunctionSet() {
+        return XPath31FunctionSet.getInstance();
     }
 
     private void init() {

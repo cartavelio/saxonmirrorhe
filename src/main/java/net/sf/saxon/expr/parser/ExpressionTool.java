@@ -8,9 +8,6 @@
 package net.sf.saxon.expr.parser;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
-import net.sf.saxon.event.ComplexContentOutputter;
-import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.flwor.Clause;
 import net.sf.saxon.expr.flwor.FLWORExpression;
@@ -28,7 +25,6 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ScopedBindingElement;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
@@ -184,132 +180,6 @@ public class ExpressionTool {
     }
 
     /**
-     * Get an expression evaluator to be used when lazy evaluation of an expression is
-     * preferred. This method is called at compile time, after all optimizations have been done,
-     * to determine the preferred strategy for lazy evaluation, depending on the type of expression.
-     *
-     * @param exp        the expression to be evaluated
-     * @param repeatable true if the returned value needs to be readable more than once
-     * @return an expression evaluator
-     */
-
-    public static Evaluator lazyEvaluator(Expression exp, boolean repeatable) {
-        if (exp instanceof Literal) {
-            return Evaluator.Literal.INSTANCE;
-
-        } else if (exp instanceof VariableReference) {
-            return Evaluator.Variable.INSTANCE;
-
-        } else if (exp instanceof SuppliedParameterReference) {
-            return Evaluator.SuppliedParameter.INSTANCE;
-
-        } else if ((exp.getDependencies() &
-                            (StaticProperty.DEPENDS_ON_POSITION |
-                                     StaticProperty.DEPENDS_ON_LAST |
-                                     StaticProperty.DEPENDS_ON_CURRENT_ITEM |
-                                     StaticProperty.DEPENDS_ON_CURRENT_GROUP |
-                                     StaticProperty.DEPENDS_ON_REGEX_GROUP)) != 0) {
-            // we can't save these values in the closure, so we evaluate
-            // the expression now if they are needed
-            return eagerEvaluator(exp);
-
-        } else if (exp instanceof ErrorExpression) {
-            return Evaluator.SingleItem.INSTANCE;
-            // evaluateItem() on an error expression throws the latent exception
-
-        } else if (!Cardinality.allowsMany(exp.getCardinality())) {
-            // singleton expressions are always evaluated eagerly
-            return eagerEvaluator(exp);
-
-        } else if (exp instanceof TailExpression) {
-            // Treat tail recursion as a special case, to avoid creating a deeply-nested
-            // tree of Closures.
-            TailExpression tail = (TailExpression) exp;
-            Expression base = tail.getBaseExpression();
-            if (base instanceof VariableReference) {
-                return Evaluator.LazyTail.INSTANCE;
-            } else if (repeatable) {
-                return Evaluator.MemoClosureEvaluator.INSTANCE;
-            } else {
-                return Evaluator.LazySequence.INSTANCE;
-            }
-
-        } else if (exp instanceof Block && ((Block) exp).isCandidateForSharedAppend()) {
-            // If the expression is a Block, that is, it is appending a value to a sequence,
-            // then we have the opportunity to use a shared list underpinning the old value and
-            // the new. This takes precedence over lazy evaluation (it would be possible to do this
-            // lazily, but more difficult). We currently do this for any Block that has a variable
-            // reference as one of its subexpressions. The most common case is that the first argument is a reference
-            // to an argument of recursive function, where the recursive function returns the result of
-            // appending to the sequence.
-            return Evaluator.SharedAppend.INSTANCE;
-
-        } else if (repeatable) {
-            // create a Closure, a wrapper for the expression and its context
-            return Evaluator.MemoClosureEvaluator.INSTANCE;
-        } else {
-            return Evaluator.LazySequence.INSTANCE;
-        }
-    }
-
-
-    /**
-     * Get the evaluator to be used when eager evaluation of an expression is
-     * preferred. This method is called at compile time, after all optimizations have been done,
-     * to determine the preferred strategy for lazy evaluation, depending on the type of expression.
-     *
-     * @param exp the expression to be evaluated
-     * @return an integer constant identifying the evaluation mode
-     */
-
-    public static Evaluator eagerEvaluator(Expression exp) {
-        if (exp instanceof Literal && !(((Literal) exp).getGroundedValue() instanceof Closure)) {
-            return Evaluator.Literal.INSTANCE;
-        }
-        if (exp instanceof VariableReference) {
-            return Evaluator.Variable.INSTANCE;
-        }
-        int m = exp.getImplementationMethod();
-        if ((m & Expression.EVALUATE_METHOD) != 0 && !Cardinality.allowsMany(exp.getCardinality())) {
-            if (Cardinality.allowsZero(exp.getCardinality())) {
-                return Evaluator.OptionalItem.INSTANCE;
-            } else {
-                return Evaluator.SingleItem.INSTANCE;
-            }
-
-        } else if ((m & Expression.ITERATE_METHOD) != 0) {
-            return Evaluator.EagerSequence.INSTANCE;
-        } else {
-            return Evaluator.Process.INSTANCE;
-        }
-    }
-
-
-    /**
-     * Do lazy evaluation of an expression. This will return a value, which may optionally
-     * be a SequenceIntent, which is a wrapper around an iterator over the value of the expression.
-     *
-     * @param exp        the expression to be evaluated
-     * @param context    the run-time evaluation context for the expression. If
-     *                   the expression is not evaluated immediately, then parts of the
-     *                   context on which the expression depends need to be saved as part of
-     *                   the Closure
-     * @param repeatable an indication of how the value will be used. The value false indicates that the value
-     *                   is only expected to be used once, so that there is no need to keep it in memory. The value true
-     *                   indicates multiple references, so the value will be saved when first evaluated.
-     * @return a value: either the actual value obtained by evaluating the
-     * expression, or a Closure containing all the information needed to
-     * evaluate it later
-     * @throws XPathException if any error occurs in evaluating the
-     *                        expression
-     */
-
-    public static Sequence lazyEvaluate(Expression exp, XPathContext context, boolean repeatable) throws XPathException {
-        Evaluator evaluator = lazyEvaluator(exp, repeatable);
-        return evaluator.evaluate(exp, context);
-    }
-
-    /**
      * Evaluate an expression now; lazy evaluation is not permitted in this case
      *
      * @param exp     the expression to be evaluated
@@ -320,8 +190,7 @@ public class ExpressionTool {
      */
 
     public static GroundedValue eagerEvaluate(Expression exp, XPathContext context) throws XPathException {
-        Evaluator evaluator = eagerEvaluator(exp);
-        return evaluator.evaluate(exp, context).materialize();
+        return exp.makeElaborator().eagerly().evaluate(context);
     }
 
     /**
@@ -657,49 +526,49 @@ public class ExpressionTool {
         }
     }
 
-    /**
-     * Helper method to construct an iterator over the results of the expression when all that
-     * the expression itself offers is a process() method. This builds the entire results of the
-     * expression as a sequence in memory and then iterates over it.
-     *
-     * @param exp     the expression
-     * @param context the dynamic evaluation context
-     * @return an iterator over the results of the expression
-     * @throws XPathException if a dynamic error occurs
-     */
+//    /**
+//     * Helper method to construct an iterator over the results of the expression when all that
+//     * the expression itself offers is a process() method. This builds the entire results of the
+//     * expression as a sequence in memory and then iterates over it.
+//     *
+//     * @param exp     the expression
+//     * @param context the dynamic evaluation context
+//     * @return an iterator over the results of the expression
+//     * @throws XPathException if a dynamic error occurs
+//     */
+//
+//    public static SequenceIterator getIteratorFromProcessMethod(
+//            Expression exp, XPathContext context) throws XPathException {
+//        Controller controller = context.getController();
+//        assert controller != null;
+//        SequenceCollector seq = controller.allocateSequenceOutputter();
+//        exp.process(new ComplexContentOutputter(seq), context);
+//        seq.close();
+//        return seq.iterate();
+//    }
 
-    public static SequenceIterator getIteratorFromProcessMethod(
-            Expression exp, XPathContext context) throws XPathException {
-        Controller controller = context.getController();
-        assert controller != null;
-        SequenceCollector seq = controller.allocateSequenceOutputter();
-        exp.process(new ComplexContentOutputter(seq), context);
-        seq.close();
-        return seq.iterate();
-    }
-
-    /**
-     * Helper method to construct an item representing the results of the expression when all that
-     * the expression itself offers is a process() method.
-     *
-     * @param exp     the expression
-     * @param context the dynamic evaluation context
-     * @return an iterator over the results of the expression
-     * @throws XPathException if a dynamic error occurs
-     */
-
-    public static Item getItemFromProcessMethod(Expression exp, XPathContext context) throws XPathException {
-        Controller controller = context.getController();
-        if (controller == null) {
-            throw new NoDynamicContextException("No controller available");
-        }
-        SequenceCollector seq = controller.allocateSequenceOutputter(1);
-        exp.process(new ComplexContentOutputter(seq), context);
-        seq.close();
-        Item result = seq.getFirstItem();
-        seq.reset();
-        return result;
-    }
+//    /**
+//     * Helper method to construct an item representing the results of the expression when all that
+//     * the expression itself offers is a process() method.
+//     *
+//     * @param exp     the expression
+//     * @param context the dynamic evaluation context
+//     * @return an iterator over the results of the expression
+//     * @throws XPathException if a dynamic error occurs
+//     */
+//
+//    public static Item getItemFromProcessMethod(Expression exp, XPathContext context) throws XPathException {
+//        Controller controller = context.getController();
+//        if (controller == null) {
+//            throw new NoDynamicContextException("No controller available");
+//        }
+//        SequenceCollector seq = controller.allocateSequenceOutputter(1);
+//        exp.process(new ComplexContentOutputter(seq), context);
+//        seq.close();
+//        Item result = seq.getFirstItem();
+//        seq.reset();
+//        return result;
+//    }
 
     /**
      * Allocate slot numbers to range variables

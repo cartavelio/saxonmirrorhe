@@ -33,51 +33,7 @@ public class Evaluators {
     public static final int STREAMING_ARGUMENT = 15;
     public static final int CALL_EVALUATE_SINGLE_ITEM = 16;
 
-    /**
-     * Get an evaluator for a given evaluation mechanism
-     * @param code one of the constants identifying an evaluation mechanism
-     * @return the corresponding {@link Evaluator}
-     */
-    public static Evaluator getEvaluator(int code) {
-        switch(code) {
-            case UNDECIDED:
-                return Evaluator.EagerSequence.INSTANCE;
-            case EVALUATE_LITERAL:
-                return Evaluator.Literal.INSTANCE;
-            case EVALUATE_VARIABLE:
-                return Evaluator.Variable.INSTANCE;
-            case MAKE_CLOSURE:
-                return Evaluator.LazySequence.INSTANCE;
-            case MAKE_MEMO_CLOSURE:
-                return Evaluator.MemoClosureEvaluator.INSTANCE;
-            case RETURN_EMPTY_SEQUENCE:
-                return Evaluator.EmptySequenceEvaluator.INSTANCE;
-            case EVALUATE_AND_MATERIALIZE_VARIABLE:
-                return Evaluator.Variable.INSTANCE;
-            case CALL_EVALUATE_OPTIONAL_ITEM:
-                return Evaluator.OptionalItem.INSTANCE;
-            case ITERATE_AND_MATERIALIZE:
-                return Evaluator.EagerSequence.INSTANCE;
-            case PROCESS:
-                return Evaluator.Process.INSTANCE;
-            case LAZY_TAIL_EXPRESSION:
-                return Evaluator.LazyTail.INSTANCE;
-            case SHARED_APPEND_EXPRESSION:
-                return Evaluator.SharedAppend.INSTANCE;
-            case MAKE_INDEXED_VARIABLE:
-                return Evaluator.MakeIndexedVariable.INSTANCE;
-            case MAKE_SINGLETON_CLOSURE:
-                return Evaluator.SingletonClosure.INSTANCE;
-            case EVALUATE_SUPPLIED_PARAMETER:
-                return Evaluator.SuppliedParameter.INSTANCE;
-            case STREAMING_ARGUMENT:
-                return Evaluator.StreamingArgument.INSTANCE;
-            case CALL_EVALUATE_SINGLE_ITEM:
-                return Evaluator.SingleItem.INSTANCE;
-            default:
-                return Evaluator.EagerSequence.INSTANCE;
-        }
-    }
+
 
 }
 

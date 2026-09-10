@@ -34,7 +34,6 @@ import java.util.function.Supplier;
 
 public final class ValueComparison extends BinaryExpression implements ComparisonExpression, Negatable {
 
-    //private AtomicComparer comparer;
     /*@Nullable*/ private BooleanValue resultWhenEmpty = null;
     private boolean needsRuntimeCheck;
     private boolean compareUntypedToNumeric;
@@ -501,8 +500,16 @@ public final class ValueComparison extends BinaryExpression implements Compariso
 
     @Override
     protected void explainExtraAttributes(ExpressionPresenter out) {
+        String flags = "";
         if (resultWhenEmpty != null) {
-            out.emitAttribute("onEmpty", resultWhenEmpty.getBooleanValue() ? "1" : "0");
+            //out.emitAttribute("onEmpty", resultWhenEmpty.getBooleanValue() ? "1" : "0");
+            flags = resultWhenEmpty.getBooleanValue() ? "1" : "0";
+        }
+        if (compareUntypedToNumeric) {
+            flags += "u";
+        }
+        if (!flags.isEmpty()) {
+            out.emitAttribute("flags", flags);
         }
         //out.emitAttribute("comp", comparer.save());
     }
@@ -605,11 +612,18 @@ public final class ValueComparison extends BinaryExpression implements Compariso
                 comparer0 = (a, b, context) ->
                         UntypedNumericComparer.quickCompare((StringValue) a, (NumericValue) b, operator, rules);
             } else {
+                ItemType t0 = expr.getLhsExpression().getItemType().getPrimitiveItemType();
+                if (!(t0 instanceof BuiltInAtomicType)) {
+                    // This can happen after loading from a SEF file; the static type information is not always available
+                    t0 = BuiltInAtomicType.ANY_ATOMIC;
+                }
+                ItemType t1 = expr.getRhsExpression().getItemType().getPrimitiveItemType();
+                if (!(t1 instanceof BuiltInAtomicType)) {
+                    // This can happen after loading from a SEF file; the static type information is not always available
+                    t1 = BuiltInAtomicType.ANY_ATOMIC;
+                }
                 comparer0 = GenericAtomicComparer.makeAtomicComparisonFunction(
-                        (BuiltInAtomicType) expr.getLhsExpression().getItemType().getPrimitiveItemType(),
-                        (BuiltInAtomicType) expr.getRhsExpression().getItemType().getPrimitiveItemType(),
-                        defaultCollation,
-                        operator, true);
+                        (BuiltInAtomicType) t0, (BuiltInAtomicType) t1, defaultCollation, operator, true);
             }
             final GenericAtomicComparer.AtomicComparisonFunction comparer = comparer0;
 

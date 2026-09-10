@@ -569,15 +569,6 @@ public abstract class FunctionCall extends Expression {
         return makeElaborator().elaborateForItem().eval(context);
     }
 
-    public Sequence[] evaluateArguments(XPathContext context) throws XPathException {
-        int numArgs = getArity();
-        Sequence[] actualArgs = new Sequence[numArgs];
-        for (int i = 0; i < numArgs; i++) {
-            actualArgs[i] = ExpressionTool.lazyEvaluate(getArg(i), context, false);
-        }
-        return actualArgs;
-    }
-
     /**
      * When a call to a Java extension function appears in a context where there the required type
      * is a Java external object (typically an xsl:variable with a declared type, or as an argument
@@ -596,7 +587,7 @@ public abstract class FunctionCall extends Expression {
     }
 
     public static abstract class FunctionCallElaborator extends PullElaborator {
-        SequenceEvaluator[] argumentEvaluators;
+        protected SequenceEvaluator[] argumentEvaluators;
 
         @Override
         public void setExpression(Expression expr) {

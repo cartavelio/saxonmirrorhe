@@ -586,7 +586,7 @@ public class LetExpression extends Assignation
             assert false;
             int savedOutputState = context.getTemporaryOutputState();
             context.setTemporaryOutputState(StandardNames.XSL_VARIABLE);
-            Sequence result = Evaluator.EagerSequence.INSTANCE.evaluate(getSequence(), context);
+            Sequence result = ExpressionTool.eagerEvaluate(getSequence(), context);
             context.setTemporaryOutputState(savedOutputState);
             return result;
         }
@@ -647,18 +647,7 @@ public class LetExpression extends Assignation
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        // minimize stack consumption by evaluating nested LET expressions iteratively
-        LetExpression let = this;
-        while (true) {
-            Sequence val = let.eval(context);
-            context.setLocalVariable(let.getLocalSlotNumber(), val);
-            if (let.getAction() instanceof LetExpression) {
-                let = (LetExpression) let.getAction();
-            } else {
-                break;
-            }
-        }
-        let.getAction().process(output, context);
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
 
