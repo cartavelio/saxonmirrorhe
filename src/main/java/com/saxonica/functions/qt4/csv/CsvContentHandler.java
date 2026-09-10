@@ -28,7 +28,7 @@ public class CsvContentHandler {
     /**
      * Appends a field value to the current Record
      */
-    void appendField(String value) {
+    public void appendField(String value) {
         if (rows.isEmpty()) {
             rows.add(currentRow);
         }
