@@ -13,9 +13,31 @@ val libsaxoncReleaseArtifactsBucket by configurations.dependencyScope("libsaxonc
 val libsaxoncReleaseArtifactsDir by configurations.resolvable("libsaxoncReleaseArtifactsDir") {
   extendsFrom(libsaxoncReleaseArtifactsBucket)
 }
+val libsaxoncDebugArtifactsBucket by configurations.dependencyScope("libsaxoncDebugArtifactsBucket")
+val libsaxoncDebugArtifactsDir by configurations.resolvable("libsaxoncDebugArtifactsDir") {
+  extendsFrom(libsaxoncDebugArtifactsBucket)
+}
+val libsaxoncCoreReleaseArtifactsBucket by configurations.dependencyScope("libsaxoncCoreReleaseArtifactsBucket")
+val libsaxoncCoreReleaseArtifactsDir by configurations.resolvable("libsaxoncCoreReleaseArtifactsDir") {
+  extendsFrom(libsaxoncCoreReleaseArtifactsBucket)
+}
+val libsaxoncCoreDebugArtifactsBucket by configurations.dependencyScope("libsaxoncCoreDebugArtifactsBucket")
+val libsaxoncCoreDebugArtifactsDir by configurations.resolvable("libsaxoncCoreDebugArtifactsDir") {
+  extendsFrom(libsaxoncCoreDebugArtifactsBucket)
+}
+
 dependencies {
   libsaxoncReleaseArtifactsBucket(extension.edition.map { edition ->
     project(path = ":libsaxonc:${edition}", configuration = "releaseArtifactsDir")
+  })
+  libsaxoncDebugArtifactsBucket(extension.edition.map { edition ->
+    project(path = ":libsaxonc:${edition}", configuration = "debugArtifactsDir")
+  })
+  libsaxoncCoreReleaseArtifactsBucket(extension.edition.map { edition ->
+    project(path = ":libsaxonc-core:${edition}", configuration = "releaseCMakePackageDir")
+  })
+  libsaxoncCoreDebugArtifactsBucket(extension.edition.map { edition ->
+    project(path = ":libsaxonc-core:${edition}", configuration = "debugCMakePackageDir")
   })
 }
 
@@ -45,30 +67,38 @@ val phpizeTask = tasks.register<Exec>("phpize") {
   executable("phpize")
 }
 
-open class PhpDefaultWithExec @Inject constructor(@Internal val execOperations: ExecOperations): DefaultTask()
+abstract class PhpDefaultWithExec: DefaultTask() {
+  @get:Inject
+  abstract val ex: ExecOperations
+
+  @get:Inject
+  abstract val fs: FileSystemOperations
+}
 
 val phpConfigureTask = tasks.register<PhpDefaultWithExec>("configure") {
   inputs.files(phpizeTask)
+  inputs.files(libsaxoncReleaseArtifactsDir)
+  inputs.files(libsaxoncCoreReleaseArtifactsDir)
   outputs.files(layout.projectDirectory.files(configureOutputs))
   outputs.dir(layout.projectDirectory.dir("modules"))
 
   doLast {
-    val libsaxoncDir = libsaxoncReleaseArtifactsDir.elements.get().first().asFile.toPath()
+    val libsaxoncDir = libsaxoncReleaseArtifactsDir.elements.get().first().asFile
+    val libsaxoncCoreDir = libsaxoncCoreReleaseArtifactsDir.elements.get().first().asFile
 
-    execOperations.exec {
+    ex.exec {
       workingDir = layout.projectDirectory.asFile
       executable("./configure")
-      environment("SAXON_VERSION" to saxonBuild.version.get(),
-        "LDFLAGS" to "-L${libsaxoncDir.resolve("lib")}")
-      args("--with-saxon=${libsaxoncDir}")
+
+      environment("SAXON_VERSION" to saxonBuild.version.get())
+      args("--with-saxonc=${libsaxoncDir}", "--with-saxonc-core=${libsaxoncCoreDir}")
     }
   }
 }
 
-val makeOutputs = arrayOf("saxon.la", ".dep", ".loT")
 val makeTask = tasks.register<Exec>("make") {
   inputs.files(phpConfigureTask)
-  outputs.files(layout.projectDirectory.files(makeOutputs))
+  outputs.files(layout.projectDirectory.files("saxon.la", ".dep", ".loT"))
   outputs.dir(layout.projectDirectory.dir(".libs"))
 
   workingDir = layout.projectDirectory.asFile
@@ -82,22 +112,35 @@ val makeInstall = tasks.register<Exec>("makeInstall") {
   args("install")
 }
 
-val makeCleanTask = tasks.register<Exec>("makeClean") {
-  workingDir = layout.projectDirectory.asFile
-  executable("make")
-  args("clean")
-}
+val makeCleanTask = tasks.register<PhpDefaultWithExec>("makeClean") {
+  doLast {
+    if (layout.projectDirectory.file("Makefile").asFile.exists()) {
+      ex.exec {
+        workingDir = layout.projectDirectory.asFile
+        executable("make")
+        args("clean")
+      }
+    }
 
-if (layout.projectDirectory.file("Makefile").asFile.exists()) {
-  tasks.named("clean") {
-    dependsOn("cleanPhpize", "cleanConfigure", makeCleanTask)
-  }
-} else {
-  tasks.named("clean") {
-    doLast {
-      println("Not attempting to clean ${layout.projectDirectory}; not configured?")
+    val lotFile = layout.projectDirectory.file(".loT").asFile
+    if (lotFile.exists()) {
+      fs.delete {
+        delete(lotFile)
+      }
     }
   }
+}
+
+val phpizeCleanTask = tasks.register<Exec>("phpizeClean") {
+  workingDir = layout.projectDirectory.asFile
+  executable("phpize")
+  args("--clean")
+
+  mustRunAfter(makeCleanTask)
+}
+
+tasks.named(LifecycleBasePlugin.CLEAN_TASK_NAME) {
+  dependsOn(phpizeCleanTask, makeCleanTask)
 }
 
 val releaseFolderTask = tasks.register<Copy>("release_folder") {

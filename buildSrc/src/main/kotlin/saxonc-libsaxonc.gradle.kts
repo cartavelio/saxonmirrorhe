@@ -135,7 +135,7 @@ private fun setupConfigTasks(config: String, stagingPath: Provider<Directory>, c
         configuration = config
     }
 
-    return Triple(generator,build, stage)
+    return Triple(generator, build, stage)
 }
 
 val stagingPath = layout.buildDirectory.dir("staging/Release")
