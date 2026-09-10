@@ -241,9 +241,9 @@ def test_catalog(saxonproc, data_dir):
             assert False
 
 def testUTF8(saxonproc):
-    node = saxonproc.parse_xml(xml_text="<doc><e>تيست</e></doc>")
+    node = saxonproc.parse_xml(xml_text="<doc><e>تيست</e></doc>", encoding="UTF-8")
     trans = saxonproc.new_xslt30_processor()
-    executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='e'>UTF8-تيست: <xsl:value-of select='.'/></xsl:template></xsl:stylesheet>")
+    executable = trans.compile_stylesheet(stylesheet_text="<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='e'>UTF8-تيست: <xsl:value-of select='.'/></xsl:template></xsl:stylesheet>", encoding="UTF-8")
     assert node is not None
     assert isinstance(node, PyXdmNode)
     assert len(node.children)>0
@@ -251,6 +251,7 @@ def testUTF8(saxonproc):
     assert eNode is not None
     executable.set_global_context_item(xdm_item=node)
     executable.set_initial_match_selection(xdm_value=eNode)
+    executable.set_property("!encoding", "UTF-8")
     result = executable.apply_templates_returning_string()
     assert result is not None
     assert "UTF8-تيست: تيست" in result
@@ -509,7 +510,7 @@ def testXdmDestination1(saxonproc):
 def testXdmDestinationWithItemSeparator(saxonproc):
     trans = saxonproc.new_xslt30_processor()
     stylesheetStr = "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template name='go'><xsl:comment>A</xsl:comment><out/><xsl:comment>Z</xsl:comment></xsl:template><xsl:output method='xml' item-separator='§'/></xsl:stylesheet>"
-    executable = trans.compile_stylesheet(stylesheet_text=stylesheetStr)
+    executable = trans.compile_stylesheet(stylesheet_text=stylesheetStr, encoding="UTF-8")
     root = executable.call_template_returning_value("go")
     node  = root.head
 
