@@ -440,7 +440,7 @@ cdef class PySaxonProcessor:
         cdef PyXdmMap mvalue_
         cdef PyXdmFunctionItem fvalue_
         cdef PyXdmValue value_
-        for x in range(len(values)):
+        for x in range(len_):
           if isinstance(values[x], PyXdmValue):
             value_ = values[x]
             argumentV[x] = value_.thisvptr
@@ -4491,7 +4491,7 @@ cdef class PyXdmArray(PyXdmFunctionItem):
          count = self.derivedaaptr.arrayLength()
          cdef saxoncClasses.XdmValue **c_values
 
-         cdef PyXdmNode val = None
+         cdef PyXdmValue val = None
          if count > 0:
              c_values = self.derivedaaptr.values()
              for i in range(count):

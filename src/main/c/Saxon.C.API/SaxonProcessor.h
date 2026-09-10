@@ -23,6 +23,7 @@
 #endif
 
 //#define DEBUG //remove
+//#define MEM_DEBUG //remove
 #define CVERSION "11.1"
 #define CVERSION_API_NO 1110
 
