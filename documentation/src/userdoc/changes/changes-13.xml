@@ -220,9 +220,23 @@ TODO: rethink redefines and override
     
     <category name="dotnet" class="csonly">
         
-        <p>Spellout numbering ("one", "two", "first", "second", etc) is now implemented
+        <p>Spellout numbering ("one", "two"; "first", "second"; etc) is now implemented
         in SaxonCS, using the ICU4N library (and therefore for all languages supported
         by ICU4N). The features and interfaces are essentially the same as for SaxonJ.</p>
+        
+        <p>As with SaxonJ, there are API changes to allow multiple schemas to be compiled and
+        used for validation, rather than allowing only one schema per <code>Configuration</code> as before.</p>
+        
+        <p>New capabilities are available when an XDM document is constructed by
+            wrapping a DOM (an instance of class <code>System.Xml.XmlDocument). Provided DTD processing
+        is enabled when constructing the DOM, the XPath <code>id()</code> function will now locate
+        element based on DTD-identified ID attributes, and the XSLT <code>unparsed-entity-uri</code>
+        and <code>unparsed-entity-uri</code> functions can be used to obtain information about
+        unparsed entities declared in the DTD. However, the Microsoft DOM does not provide information
+        enabling <code>IDREF</code> or <code>IDREFS</code> attributes, so the XPath <code>idref()</code>
+        function remains inoperative. These new capabilities are not available in an XDM tree
+        built using the <code>System.Xml.XmlReader</code> parser, because this parser does not provide
+        sufficient information about the DTD to the application.</p>
         
   
         

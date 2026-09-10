@@ -5164,7 +5164,10 @@
           <in-spec>xslt40</in-spec>
         </proto>
       </signatures>
-      <status-ok/>
+      <p>Available with all versions of SaxonJ and SaxonC. With SaxonCS, implemented since Saxon 13.0,
+          but works only on documents that wrap a DOM <code>XmlDocument</code> tree.</p>
+      <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
+         declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns the public ID of an unparsed entity, given its name.</p>
@@ -5182,7 +5185,10 @@
           <in-spec>xslt40</in-spec>s
         </proto>
       </signatures>
-      <status-ok/>
+      <p>Available with all versions of SaxonJ and SaxonC. With SaxonCS, implemented since Saxon 13.0,
+          but works only on documents that wrap a DOM <code>XmlDocument</code> tree.</p>
+      <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
+         declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
       <saxon-edition>ALL</saxon-edition>
       <description>
         <p>Returns the system ID of an unparsed entity, given its name.</p>
@@ -11830,9 +11836,12 @@ xs:duration('PT0.001S')}ms &lt;/xsl:message&gt;</code></pre>
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 9.1. Not available in SaxonCS.</p>
+        <p>Available since Saxon 9.1. With SaxonCS, available since Saxon 13.0,
+          but works only on documents that wrap a DOM <code>XmlDocument</code> tree.</p>
+        <p>The <code>XmlDocument</code> implementation used in SaxonCS does not follow the rule that when two entity
+         declarations have the same name, only the first is retained; instead, it appears to retain neither.</p>
       </status>
-      <saxon-edition platform="J C">PE/EE</saxon-edition>
+      <saxon-edition platform="J CS C">PE/EE</saxon-edition>
       <details>
         <div>
           <p>This function returns a list of the names of the unparsed entities declared with the
