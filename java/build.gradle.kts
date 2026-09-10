@@ -335,6 +335,7 @@ testSuites.configure("qt3", "XQ31")
 testSuites.configure("qt3", "XQ31", mapOf("unfolded" to "on"))
 
 testSuites.configure("qt3extra", "XP31")
+testSuites.configure("qt3extra", "XP40")
 testSuites.configure("qt3extra", "XQ31")
 testSuites.configure("qt3extra", "XQ40")
 
