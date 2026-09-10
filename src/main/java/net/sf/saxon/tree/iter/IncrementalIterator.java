@@ -29,6 +29,7 @@ public class IncrementalIterator implements AxisIterator {
      *                null at the end of the sequence.
      */
     public IncrementalIterator(NodeInfo start, java.util.function.Function<NodeInfo, NodeInfo> stepper) {
+        this.stepper = stepper;
         this.nextItem = stepper.apply(start);
     }
 
@@ -39,7 +40,9 @@ public class IncrementalIterator implements AxisIterator {
      */
     public NodeInfo next() {
         NodeInfo current = nextItem;
-        nextItem = stepper.apply(current);
+        if (current != null) {
+            nextItem = stepper.apply(current);
+        }
         return current;
     }
 
