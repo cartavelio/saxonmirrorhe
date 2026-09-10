@@ -39,7 +39,7 @@ namespace Saxon.Impl.Overrides {
         {
             var algorithm = SignatureAlgorithm.Ed25519;
             var publicKeyBytes = Convert.FromBase64String(ed25519Pem);
-            var signatureBytes = decodeSignature(signature);
+            var signatureBytes = convertHexToBinary(signature);
             var dataBytes = Encoding.UTF8.GetBytes(data);
             var publicKey = PublicKey.Import(algorithm, publicKeyBytes, KeyBlobFormat.PkixPublicKey);
             var valid = algorithm.Verify(publicKey, dataBytes, signatureBytes);
