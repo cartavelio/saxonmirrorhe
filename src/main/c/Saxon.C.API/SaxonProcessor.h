@@ -26,6 +26,7 @@
 //#define DEBUG //remove
 //#define MEM_DEBUG //remove
 #define CVERSION "@@VERSION@@"
+#define SAXONC_EDITION "@@EDITION@@"
 #define CVERSION_API_NO 1210
 
 #include <iostream>

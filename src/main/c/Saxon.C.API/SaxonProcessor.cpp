@@ -412,37 +412,36 @@ bool SaxonProcessor::isLicensed() {
   return j_isLicensed(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 }
 
-void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes)
-{
-
-    XdmValue * signatureValue = parseJsonFromString(signature);
-
-    if(signatureValue == nullptr) {
-        throw new SaxonApiException("Failed to create function signature from JSON");
-    }
-
-
-    allocFn alloc = operator new;
-
-    if(getenv("SAXONC_DEBUG_FLAG") && useNativeTypes) {
-      std::cerr<<"useNativeTypes is True in C++"<<std::endl;
-    }
-
-
-    long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1,
-                                               (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
-
-
-    if(signatureValue != nullptr) {
-      delete signatureValue;
-    }
-    if (status == SXN_EXCEPTION) {
-      throw SaxonApiException();
-    }
-
 const char * SaxonProcessor::getSaxonEdition() {
-    SaxonProcessor::attachCurrentThread();
+  SaxonProcessor::attachCurrentThread();
   return SAXONC_EDITION;
+}
+
+void SaxonProcessor::registerUserFunctionWithProcessor(void * python_procPtr, const char * ns1, void * func, const char * signature, bool useNativeTypes) {
+  XdmValue * signatureValue = parseJsonFromString(signature);
+
+  if(signatureValue == nullptr) {
+    throw new SaxonApiException("Failed to create function signature from JSON");
+  }
+
+
+  allocFn alloc = operator new;
+
+  if(getenv("SAXONC_DEBUG_FLAG") && useNativeTypes) {
+    std::cerr<<"useNativeTypes is True in C++"<<std::endl;
+  }
+
+
+  long status = j_registerFunctionDefinition(SaxonProcessor::sxn_environ->thread,(void *)procRef, (char *) ns1,
+                                             (void *)signatureValue->getUnderlyingValue(), (void *)python_procPtr, (void *) func, (void *) alloc, (int)useNativeTypes);
+
+
+  if(signatureValue != nullptr) {
+    delete signatureValue;
+  }
+  if (status == SXN_EXCEPTION) {
+    throw SaxonApiException();
+  }
 }
 
 void SaxonProcessor::registerUserFunction(const char * ns1, XdmValue * (*func)(int, XdmValue **), const char * signature, bool isNativeTypes)
@@ -1261,9 +1260,7 @@ void * SaxonProcessor::makeInternalArray(void ** inputs, int length) {
 XdmArray *SaxonProcessor::makeArray(int *input, int length) {
   SaxonProcessor::attachCurrentThread();
   if (input == nullptr) {
-    std::cerr << "Error found when converting pointer array of int values to "
-                 "XdmArray";
-    return nullptr;
+    throw SaxonApiException("Error found when converting pointer array of int values to XdmArray");
   }
   int64_t xdmArrayRef =
       j_makeXdmArrayFromInt(sxn_environ->thread, input, length);
@@ -1275,9 +1272,7 @@ XdmArray *SaxonProcessor::makeArray(int *input, int length) {
 XdmArray *SaxonProcessor::makeArray(long long *input, int length) {
   SaxonProcessor::attachCurrentThread();
   if (input == nullptr) {
-    std::cerr << "Error found when converting pointer array of long values to "
-                 "XdmArray";
-    return nullptr;
+    throw new SaxonApiException("Error found when converting pointer array of long values to XdmArray");
   }
   int64_t xdmArrayRef =
       j_makeXdmArrayFromLong(sxn_environ->thread, input, length);
@@ -1289,9 +1284,7 @@ XdmArray *SaxonProcessor::makeArray(long long *input, int length) {
 XdmArray *SaxonProcessor::makeArray(bool *input, int length) {
 
   if (input == nullptr) {
-    std::cerr << "Error found when converting pointer array of bool values to "
-                 "XdmArray";
-    return nullptr;
+    throw new SaxonApiException("Error found when converting pointer array of bool values to XdmArray");
   }
   int *inputAsInts = new int[length];
 
@@ -1339,9 +1332,7 @@ SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
        iter != dataMap.end(); ++iter) {
     if ((iter->first)->getUnderlyingValue() <= SXN_UNSET ||
         (iter->second)->getUnderlyingValue() <= SXN_UNSET) {
-      std::cerr << "Error found when converting array of XdmValue to XdmArray"
-                << std::endl;
-      return nullptr;
+      throw new SaxonApiException("Error found when converting std::map of XdmValue to XdmMap");
     }
     j_addMapPair(sxn_environ->thread, (void *)mapDataRef,
                  (void *)(iter->first)->getUnderlyingValue(),
@@ -1353,11 +1344,7 @@ SaxonProcessor::makeMap(std::map<XdmAtomicValue *, XdmValue *> dataMap) {
   j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
 
   if (xdmmapRef <= 0) {
-    std::cerr << "Error found when converting std:map of pair (XdmAtomicValue, "
-                 "XdmValue) to XdmMap - Ref="
-              << ((long)xdmmapRef) << std::endl;
-    // TODO create exception
-    return nullptr;
+    throw new SaxonApiException("Error found when converting std:map of pair (XdmAtomicValue, XdmValue) to XdmMap");
   }
 
   XdmMap *newArray = new XdmMap(xdmmapRef);
@@ -1375,9 +1362,7 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
        iter != dataMap.end(); ++iter) {
     if ((iter->first).empty() ||
         (iter->second)->getUnderlyingValue() <= SXN_UNSET) {
-      std::cerr << "Error found when converting array of XdmValue to XdmArray"
-                << std::endl;
-      return nullptr;
+      throw new SaxonApiException("Error found when converting array of XdmValue to XdmArray");
     }
     int64_t stringValueRef = j_makeStringValue(
         sxn_environ->thread, (char *)(iter->first).c_str(), (char *)nullptr);
@@ -1394,11 +1379,7 @@ XdmMap *SaxonProcessor::makeMap2(std::map<std::string, XdmValue *> dataMap) {
   j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
 
   if (xdmmapRef <= 0) {
-    std::cerr << "Error found when converting std:map of pair (XdmAtomicValue, "
-                 "XdmValue) to XdmMap - Ref="
-              << ((long)xdmmapRef) << std::endl;
-    // TODO create exception
-    return nullptr;
+    throw new SaxonApiException("Error found when converting std:map of pair (XdmAtomicValue, XdmValue) to XdmMap");
   }
 
   XdmMap *newArray = new XdmMap(xdmmapRef);
@@ -1428,11 +1409,7 @@ XdmMap *SaxonProcessor::makeMap3(XdmAtomicValue **keys, XdmValue **values,
   j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)mapDataRef);
 
   if (xdmmapRef <= 0) {
-    std::cerr << "Error found when converting std:map of pair (XdmAtomicValue, "
-                 "XdmValue) to XdmMap - Ref="
-              << ((long)xdmmapRef) << std::endl;
-    // TODO create exception
-    return nullptr;
+    throw new SaxonApiException("Error found when converting std:map of pair (XdmAtomicValue, XdmValue) to XdmMap");
   }
 
   XdmMap *newArray = new XdmMap(xdmmapRef);
