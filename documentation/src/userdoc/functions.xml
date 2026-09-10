@@ -143,7 +143,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns <code>true</code> if no two items in a supplied sequence are equal.</p>
@@ -162,7 +162,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns <code>true</code> if all items in a supplied sequence (after atomization) are
@@ -230,7 +230,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Applies template rules to selected items.</p>
@@ -249,7 +249,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Determines whether two atomic items are equal, under the rules used for comparing keys in
@@ -268,7 +268,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a record containing information about the type annotation of an atomic value.</p>
@@ -414,7 +414,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Constructs a URI from the parts provided.</p>
@@ -451,7 +451,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a string containing a particular character or glyph.</p>
@@ -469,7 +469,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Delivers the content of a character map declared using <code xmlns=""
@@ -488,7 +488,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Splits the supplied string into a sequence of single-character strings.</p>
@@ -507,7 +507,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the timezone offset from UTC that is in conventional use at a given place and
@@ -571,7 +571,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Constructs a collation URI with requested properties.</p>
@@ -590,7 +590,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Asks whether a collation URI is recognized by the implementation, and whether it has
@@ -740,7 +740,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Determines whether one sequence contains another as a contiguous subsequence, using a
@@ -824,7 +824,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Reads an external resource containing CSV, and returns the results as a record containing
@@ -844,7 +844,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Parses CSV data supplied as a string, returning the results in the form of a sequence of
@@ -864,7 +864,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Parses CSV data supplied as a string, returning the results as an XML document, as
@@ -1016,7 +1016,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the merge key of the merge group currently being processed using the <code
@@ -1172,7 +1172,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Decodes URI-escaped characters in a string.</p>
@@ -1259,7 +1259,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Removes duplicate GNodes and sorts the input into document order.</p>
@@ -1303,7 +1303,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Divides one <code>xs:decimal</code> by another to a defined precision, returning both the
@@ -1324,7 +1324,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Processes a supplied value repeatedly, continuing when some condition is false, and
@@ -1518,7 +1518,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the values that appear in a sequence more than once.</p>
@@ -1571,7 +1571,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Converts an element node into a map that is suitable for JSON serialization.</p>
@@ -1589,7 +1589,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Analyzes sample data to generate a conversion plan suitable for use by the <em xmlns=""
@@ -1693,7 +1693,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Determines whether one sequence ends with another, using a supplied callback function to
@@ -1789,7 +1789,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns <code>true</code> if every item in the input sequence matches a supplied
@@ -1847,7 +1847,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a string representation of an <code>xs:QName</code> in the format
@@ -1984,7 +1984,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the last item in a sequence. </p>
@@ -2253,7 +2253,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the annotations of the function item.</p>
@@ -2315,7 +2315,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a string representing the identity of a function item.</p>
@@ -2398,7 +2398,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Splits the supplied string into a sequence of single-grapheme strings.</p>
@@ -2440,7 +2440,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the results of a specified hash, checksum, or cyclic redundancy check function
@@ -2481,7 +2481,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns those items from a supplied sequence that have the highest value of a sort key,
@@ -2563,7 +2563,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Reads an external resource containing HTML, and returns the result of parsing the
@@ -2603,7 +2603,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns its argument value.</p>
@@ -2670,7 +2670,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the in-scope namespaces of an element node, as a map.</p>
@@ -2733,7 +2733,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the positions in an input sequence of items that match a supplied predicate.</p>
@@ -2794,7 +2794,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Creates an Invisible XML parser for a grammar.</p>
@@ -2833,7 +2833,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns <code>true</code> if the argument is the <code>xs:float</code> or
@@ -2853,7 +2853,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a sequence containing the items from <code>$input</code> at positions defined by
@@ -2872,7 +2872,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the ·content· property of a JNode.</p>
@@ -2890,7 +2890,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the ·position· property of a JNode.</p>
@@ -2908,7 +2908,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the ·selector· property of a JNode.</p>
@@ -3000,7 +3000,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Delivers a root XTERMREF:DM40.dt-JNode: wrapping a map or array, enabling the use of
@@ -3165,7 +3165,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns those items from a supplied sequence that have the lowest value of a sort key,
@@ -3185,7 +3185,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Delivers the content of a key, for a specific document or subtree, as a map.</p>
@@ -3357,7 +3357,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Outputs trace information and discards the result.</p>
@@ -3645,7 +3645,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a record containing information about the type annotation of an element or
@@ -3768,7 +3768,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a function whose effect is to apply a supplied binary operator to two
@@ -3808,7 +3808,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Parses CSV data, returning the results in the form of a record containing information
@@ -3828,7 +3828,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>This function takes as input an HTML document, and returns the document node at the root
@@ -3866,7 +3866,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Converts a string to an integer, recognizing any radix in the range 2 to 36.</p>
@@ -3927,7 +3927,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns an <code>xs:QName</code> value formed by parsing an EQName.</p>
@@ -3946,7 +3946,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Parses the URI provided and returns a map of its parts.</p>
@@ -4021,7 +4021,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Performs partial application of a function item by binding values to selected
@@ -4041,7 +4041,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Partitions a sequence of items into a sequence of non-empty arrays containing the same
@@ -4183,7 +4183,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the set of captured groups associated with a matching segment during evaluation
@@ -4258,7 +4258,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Produces multiple copies of a sequence.</p>
@@ -4428,7 +4428,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Produces the sequence of successive partial results from the evaluation of <em xmlns=""
@@ -4450,7 +4450,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Produces the sequence of successive partial results from the evaluation of <em xmlns=""
@@ -4470,7 +4470,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a record containing information about a named schema type in the static
@@ -4489,7 +4489,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns an <code>xs:dayTimeDuration</code> whose length is a given number of seconds.</p>
@@ -4567,7 +4567,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Inserts a separator between adjacent items in a sequence.</p>
@@ -4618,7 +4618,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the supplied GNode together with its siblings, in document order.</p>
@@ -4639,7 +4639,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a sequence containing selected items from a supplied input sequence based on
@@ -4685,7 +4685,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns <code>true</code> if at least one item in the input sequence matches a supplied
@@ -4733,7 +4733,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Sorts a supplied sequence, based on the value of a number of sort keys supplied as
@@ -4753,7 +4753,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Sorts a supplied sequence, according to the order induced by the supplied comparator
@@ -4797,7 +4797,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Determines whether one sequence starts with another, using a supplied callback function
@@ -4965,7 +4965,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a contiguous sequence of items from <code>$input</code>, with the start and end
@@ -5151,7 +5151,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns items from the input sequence prior to the first one that fails to match a
@@ -5378,7 +5378,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns all the GNodes reachable from a given start GNode by applying a supplied function
@@ -5440,7 +5440,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns all but the last item in a sequence. </p>
@@ -5483,7 +5483,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns information about the type of a value, as a string.</p>
@@ -5501,7 +5501,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a dateTime value for a Unix time.</p>
@@ -5543,7 +5543,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>The <code>fn:unparsed-binary</code> function reads an external resource (for example, a
@@ -5729,7 +5729,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Absorbs the argument.</p>
@@ -5749,7 +5749,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Processes a supplied value repeatedly, continuing while some condition remains true, and
@@ -5791,7 +5791,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Given an XSD schema, delivers a function item that can be invoked to validate a document
@@ -6013,7 +6013,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the hyperbolic cosine of the argument.</p>
@@ -6030,7 +6030,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns an approximation to the mathematical constant <code xmlns="">e</code>.</p>
@@ -6188,7 +6188,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the hyperbolic sine of the argument.</p>
@@ -6250,7 +6250,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the hyperbolic tangent of the argument.</p>
@@ -6278,7 +6278,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a map that typically contains one entry for each item in a supplied input
@@ -6320,7 +6320,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns <code>true</code> if the supplied map contains no entries.</p>
@@ -6338,7 +6338,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a sequence containing all the key-value pairs present in a map, each represented
@@ -6383,7 +6383,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Selects entries from a map, returning a new map.</p>
@@ -6469,7 +6469,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a sequence containing all the values present in a map, in order.</p>
@@ -6509,7 +6509,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a sequence containing selected keys present in a map.</p>
@@ -6697,7 +6697,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns an array obtained by evaluating the supplied function once for each item in the
@@ -6716,7 +6716,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns <code>true</code> if the supplied array contains no members.</p>
@@ -6814,7 +6814,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the last member of an array.</p>
@@ -6918,7 +6918,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns a sequence of positive integers giving the positions within the array
@@ -6938,7 +6938,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the positions in an input array of members that match a supplied predicate.</p>
@@ -6976,7 +6976,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns the sequence concatenation of the members of an array.</p>
@@ -7012,7 +7012,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Delivers the contents of an array as a sequence of value records.</p>
@@ -7030,7 +7030,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Constructs an array from the contents of a sequence of value records.</p>
@@ -7127,7 +7127,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns an array containing selected members of a supplied input array based on their
@@ -7172,7 +7172,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Sorts a supplied array, based on the value of a number of sort keys supplied as
@@ -7192,7 +7192,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Sorts a supplied array, according to the order induced by the supplied comparator
@@ -7211,7 +7211,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Delivers the contents of an array as a sequence of single-member arrays.</p>
@@ -7266,7 +7266,7 @@
       <status>
         <p>FIXME:</p>
       </status>
-      <saxon-edition>EE_13</saxon-edition>
+      <saxon-edition>PE/EE 13</saxon-edition>
       <description>
         <p>FIXME:</p>
         <p>Returns an array containing all members except the last from a supplied array.</p>

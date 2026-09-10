@@ -1768,6 +1768,7 @@
             <status-ok/>
         </xsl-element>
     </section>
+    
     <section id="field" title="xsl:field" class="qt4">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>field</name>
@@ -2695,6 +2696,7 @@
                     Saxon 10 to 12, and are now dropped.</p>
             </status>
             <see-also name="map-entry" type="xsl-elements"/>
+            <see-also name="record" type="xsl-elements"/>
         </xsl-element>
     </section>
 
@@ -2715,6 +2717,7 @@
             <in-spec>xslt40</in-spec>
             <saxon-edition>ALL_SINCE_9.8 PE/EE_9.6</saxon-edition>
             <see-also name="map" type="xsl-elements"/>
+            <see-also name="record" type="xsl-elements"/>
         </xsl-element>
     </section>
 
@@ -3312,17 +3315,19 @@
             <see-also name="matching-substring" type="xsl-elements"/>
         </xsl-element>
     </section>
+    
     <section id="note" title="xsl:note" class="qt4">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>note</name>
             <description>
-                <p>FIXME:</p>
+                <p>New in XSLT 4.0. Ignored by the XSLT processor, this element could for instance
+                    be used for documentation.</p>
             </description>
             <attributes>
-                <attribute name="#any#">FIXME:</attribute>
+                <attribute name="#any#">The element may have any attributes and children.</attribute>
             </attributes>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>EE_13</saxon-edition>
+            <saxon-edition>PE/EE 13</saxon-edition>
             <status>
                 <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
             </status>
@@ -4142,23 +4147,24 @@
             <see-also name="use-package" type="xsl-elements"/>
         </xsl-element>
     </section>
+    
     <section id="package-location" title="xsl:package-location" class="qt4">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>package-location</name>
             <description>
-                <p>FIXME:</p>
+                <p>New in XSLT 4.0. Used to indicate where a required package may be found.</p>
             </description>
             <attributes>
-                <attribute name="href">FIXME:</attribute>
-                <attribute name="path-in-archive">FIXME:</attribute>
-                <attribute name="archive-type">FIXME:</attribute>
-                <attribute name="is-priority">FIXME:</attribute>
-                <attribute name="format">FIXME:</attribute>
+                <attribute name="href"><!--FIXME:--></attribute>
+                <attribute name="path-in-archive"><!--FIXME:--></attribute>
+                <attribute name="archive-type"><!--FIXME:--></attribute>
+                <attribute name="is-priority"><!--FIXME:--></attribute>
+                <attribute name="format"><!--FIXME:--></attribute>
             </attributes>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>EE_13</saxon-edition>
+            <saxon-edition platform="NONE">NOT_IMPLEMENTED</saxon-edition>
             <status>
-                <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
+                <p>New in XSLT 4.0. Not yet implemented in Saxon.</p>
             </status>
         </xsl-element>
     </section>
@@ -4368,6 +4374,7 @@
             <status-ok/>
         </xsl-element>
     </section>
+    
     <section id="record" title="xsl:record" class="qt4">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>record</name>
@@ -4375,17 +4382,36 @@
                 <p>New in XSLT 4.0. Used to construct a record map.</p>
             </description>
             <attributes>
-                <attribute name="xsl:as">FIXME:</attribute>
-                <attribute name="xsl:duplicates">FIXME:</attribute>
-                <attribute name="*">FIXME:</attribute>
+                <attribute name="xsl:as">Defines the required type of the record map.</attribute>
+                <attribute name="xsl:duplicates">An expression which must
+                    evaluate to either one of the strings <code>"use-first"</code>,
+                    <code>"use-last"</code>, <code>"use-any"</code>, <code>"combine"</code>, or
+                    <code>"reject"</code>, or an arity-2 function. If the attribute is present,
+                    then when a duplicate key value is encountered, the function is called supplying
+                    the old and new values for the key, and the old value for the key is replaced
+                    with the result of the function call. For example, if the function is
+                    <code>fn($old, $new){$old, $new}</code> then the new value will be the
+                    sequence-concatenation of the duplicate entries. </attribute>
+                <attribute name="*">The instruction may have any number of attributes in no
+                    namespace. Map entries for the record map can be declared using attributes - the
+                    attribute name is used as the map key, and the associated map value is the
+                    result of evaluating the XPath expression in the attribute value.</attribute>
             </attributes>
+            <details>
+                <p>The <code>xsl:record</code> instruction constructs a new map. Entries for the map
+                    can be declared using attributes on the instruction, as well as using the
+                    contained sequence constructor.</p>
+            </details>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>EE_13</saxon-edition>
+            <saxon-edition>PE/EE 13</saxon-edition>
             <status>
                 <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
             </status>
+            <see-also name="map" type="xsl-elements"/>
+            <see-also name="map-entry" type="xsl-elements"/>
         </xsl-element>
     </section>
+    
     <section id="record-type" title="xsl:record-type" class="qt4">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>record-type</name>
@@ -4395,7 +4421,7 @@
             <attributes>
                 <attribute name="name">A QName used to identify the record type uniquely within the
                     stylesheet package.</attribute>
-                <attribute name="constructor">FIXME:</attribute>
+                <attribute name="constructor"><!--FIXME:--></attribute>
                 <attribute name="extensible">Specifies whether the record type is extensible - which
                     means that a map matching the record type may contain additional entries to
                     those specified. Defaults to "no".</attribute>
@@ -4639,17 +4665,20 @@
             <see-also name="output" type="xsl-elements"/>
         </xsl-element>
     </section>
+    
     <section id="select" title="xsl:select" class="qt4">
         <xsl-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name>select</name>
             <description>
-                <p>FIXME:</p>
+                <p>New in XSLT 4.0. Used to evaluate an arbitrary XPath expression supplied in the
+                    text content of the instruction, and return its result.</p>
             </description>
             <attributes>
-                <attribute name="as">FIXME:</attribute>
+                <attribute name="as">Defines the required type of the result sequence. Defaults to
+                    <code>item()*</code>.</attribute>
             </attributes>
             <in-spec>xslt40</in-spec>
-            <saxon-edition>EE_13</saxon-edition>
+            <saxon-edition>PE/EE 13</saxon-edition>
             <status>
                 <p>New in XSLT 4.0, and implemented since Saxon 13.0.</p>
             </status>
