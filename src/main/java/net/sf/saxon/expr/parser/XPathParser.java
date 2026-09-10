@@ -7,7 +7,6 @@
 
 package net.sf.saxon.expr.parser;
 
-import com.saxonica.functions.registry.XPath40FunctionSet;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.expr.*;
@@ -20,7 +19,6 @@ import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.VendorFunctionSetHE;
-import net.sf.saxon.functions.registry.XPath20FunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -1065,9 +1063,8 @@ public class XPathParser {
                     grumble("Concatenation operator ('||') requires XPath 3.0 to be enabled");
                 }
                 RetainedStaticContext rsc = new RetainedStaticContext(env);
-                BuiltInFunctionSet lib = env.getXPathVersion() == 40
-                        ? XPath40FunctionSet.getInstance()
-                        : XPath20FunctionSet.getInstance();
+                Configuration config = env.getConfiguration();
+                BuiltInFunctionSet lib= config.getXPathFunctionSet(env.getXPathVersion());
 
                 if (lhs.isCallOn(Concat.class)) {
                     Expression[] args = ((SystemFunctionCall) lhs).getArguments();
