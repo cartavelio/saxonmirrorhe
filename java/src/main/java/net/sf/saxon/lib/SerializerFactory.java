@@ -265,6 +265,7 @@ public class SerializerFactory {
                     emitter.setPipelineConfiguration(pipe);
                     if (uWriter == null) {
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        pipe.setUnicodeWriter(uWriter);
                         emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
@@ -278,6 +279,7 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        pipe.setUnicodeWriter(uWriter);
                         emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
@@ -290,6 +292,7 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        pipe.setUnicodeWriter(uWriter);
                         emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
@@ -302,6 +305,7 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        pipe.setUnicodeWriter(uWriter);
                         emitter.setMustClose(expandedResult.isMustCloseAfterUse());
                     }
                     emitter.setUnicodeWriter(uWriter);
@@ -312,6 +316,7 @@ public class SerializerFactory {
                     props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                     if (uWriter == null) {
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        pipe.setUnicodeWriter(uWriter);
                     }
                     JSONEmitter je = new JSONEmitter(pipe, uWriter, props);
                     if (expandedResult != null) {
@@ -331,6 +336,7 @@ public class SerializerFactory {
                     if (uWriter == null) {
                         assert expandedResult != null;
                         uWriter = expandedResult.obtainUnicodeWriter();
+                        pipe.setUnicodeWriter(uWriter);
                     }
                     AdaptiveEmitter je = new AdaptiveEmitter(pipe, uWriter);
                     je.setOutputProperties(props);
@@ -362,6 +368,7 @@ public class SerializerFactory {
                             if (uWriter == null) {
                                 assert expandedResult != null;
                                 uWriter = expandedResult.obtainUnicodeWriter();
+                                pipe.setUnicodeWriter(uWriter);
                             }
                             emitter.setUnicodeWriter(uWriter);
                             target = params.makeSequenceNormalizer(emitter);
@@ -371,6 +378,10 @@ public class SerializerFactory {
                     }
                 }
                 break;
+            }
+            if (uWriter != null) {
+                // Bug 7156
+                pipe.setUnicodeWriter(uWriter);
             }
             if (emitter != null) {
                 emitter.setOutputProperties(props);
