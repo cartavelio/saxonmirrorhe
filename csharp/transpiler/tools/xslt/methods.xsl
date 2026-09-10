@@ -100,8 +100,10 @@
       <xsl:param name="rules" as="map(xs:string, xs:string)"/>
       <xsl:variable name="key" as="xs:string" 
          select="$methodCall/name/@identifier || '#' || count($methodCall/arguments/argument)"/>
+      <xsl:variable name="anyArityKey" as="xs:string" 
+         select="$methodCall/name/@identifier || '#*'"/>
       <xsl:variable name="rule" as="xs:string?" 
-         select="($rules($key), $rules('*'))[1]"/>
+         select="($rules($key), $rules($anyArityKey), $rules('*'))[1]"/>
       <xsl:if test="empty($rule)">
          <xsl:message terminate="yes">Transpiling {tokenize(base-uri($methodCall),'/')[last()]}: no rule found for {$key}</xsl:message>
       </xsl:if>
@@ -935,6 +937,7 @@
          'containsAll#1':     '(%args%).All(%scope%.Contains)',
          'isEmpty#0':         '%scope%.Count==0',
          'iterator#0':        '%scope%.GetEnumerator()',
+         'of#*':              'new System.Collections.Generic.HashSet&lt; /* guessing... */ string>(){%args%}',
          'pollFirst#0':       'Saxon.Impl.Helpers.SetUtils.PollFirst(%scope%)',
          'remove#1':          '%scope%.Remove(%args%)',
          'size#0':            '%scope%.Count',
