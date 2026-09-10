@@ -25,6 +25,7 @@ namespace Saxon.Impl.XDoc {
             this.node = node;
             this.parent = parent;
             this.index = index;
+            this.treeInfo = parent.treeInfo;
             if (node.IsNamespaceDeclaration) {
                 throw new ArgumentException("Attribute must not be a namespace declaration");
             }
@@ -64,7 +65,8 @@ namespace Saxon.Impl.XDoc {
                 return parent.compareOrder(aw.parent);
             }
 
-            return parent.compareOrder(other);
+            int c =  parent.compareOrder(other);
+            return c == 0 ? +1 : c;
         }
 
         public override Saxon.Hej.str.UnicodeString getUnicodeStringValue() {
