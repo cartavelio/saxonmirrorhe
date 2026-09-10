@@ -63,7 +63,7 @@ debug = False
 
 run_test = None
 '''"streamable"'''
-run_test_case_name = None
+run_test_case_name = 'match-240a'
 '''result-document-0206'''
 run_assertion = None
 '''serialization-matches'''
@@ -434,6 +434,43 @@ def create_local_environments(test_set_node: PyXdmNode, xpath_proc: PyXPathProce
     environmenti = Environment()
     localEnvironments.update({"default": environmenti})
 
+def get_named_parameters(proc: PySaxonProcessor, xpath_proc: PyXPathProcessor, node: PyXdmNode, get_static: bool, tunnel: bool):
+        params = {}
+        j = 1
+
+        static_test = ""
+        if get_static:
+            static_test  = "[@static]"
+
+        param_elements = xpath_proc.evaluate("param"+static_test)
+
+        for i in range(param_elements.size):
+
+            param_i = param_elements.item_at(i).get_node_value()
+
+            name = param_i.get_attribute_value("name")
+            select = param_i.get_attribute_value("select")
+            tunnelled = param_i.get_attribute_value("tunnel")
+            as_i = param_i.get_attribute_value("as")
+
+            required = tunnel == (tunnelled is not None and tunnelled == "yes")
+            value = None
+            if name is None:
+                print("*** No name for parameter " + str(j) + " in initial-template")
+                raise PySaxonApiError("*** No name for parameter " + str(j) + " in initial-template")
+            try:
+                value = xpath_proc.evaluate(select)
+                i += 1
+            except PySaxonApiError as ex:
+                print("*** Error evaluating parameter " + name + " in initial-template : " + print(ex))
+                exit()
+            if as_i is not None:
+                value = proc.make_atomic_value(str(value), str(as_i))
+            if required:
+                params[name] = value
+
+        return params
+
 
 def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     global localEnvironments
@@ -486,7 +523,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     xpath_proc.set_context(xdm_item=test_case_node)
     assertion = xpath_proc.evaluate_single("result/*[1]").get_node_value()
 
-    '''print(test_case_node)'''
+    print(test_case_node)
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print("Start memory:")
         print(start_memory)
@@ -511,6 +548,10 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     initial_mode = xpath_proc.evaluate_single("initial-mode")
     initial_template = xpath_proc.evaluate_single("initial-template")
     initial_function = xpath_proc.evaluate_single("initial-function")
+
+    global_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
+                                      False, False)
+
     if os.getenv("SAXONC_DEBUG_FLAG") is not None:
         print(test_case_node.base_uri)
     '''print(test_case_node)'''
@@ -551,6 +592,9 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             print("Environment not is a clean state")
             return
 
+        for key in global_params:
+            environment.sheet.set_parameter(key, global_params[key])
+
         environment.sheet.set_capture_result_documents(True)
         environment.sheet.set_save_xsl_message(True, None)
         if os.getenv("SAXONC_DEBUG_FLAG") is not None:
@@ -558,10 +602,16 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
         if environment.context_item is not None:
             '''print(environment.context_item)'''
             environment.sheet.set_global_context_item(xdm_item=environment.context_item)
+
+        if initial_template is not None or initial_mode_name is not None:
+            '''TODO check for params - set to tunnel'''
+            print("")
         if initial_mode_name is not None:
             environment.sheet.set_initial_mode(initial_mode_name)
         if initial_template is not None:
-
+            init_params = get_named_parameters(environment.proc, xpath_proc, test_input_node.get_node_value(),
+                                                 False, False)
+            environment.sheet.set_initial_template_parameters(False, init_params)
             result = environment.sheet.call_template_returning_value(
                 initial_template.get_node_value().get_attribute_value("name"), base_output_uri=base_output_uri)
 
@@ -576,7 +626,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                 namespaces = initial_function_node.node_axis(8)
                 for ns in namespaces:
                     uri_str = ns.string_value
-                    ns_prefix  = ns.name
+                    ns_prefix = ns.name
 
                     if ns_prefix is not None and prefix == ns_prefix:
                         initial_function_name = "{" + uri_str + "}" + initial_function_name_split[1]
@@ -595,9 +645,11 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
                         exit()
 
             result = environment.sheet.call_function_returning_value(initial_function_name, [])
-        else:
+        elif environment.context_item is not None:
             result = environment.sheet.apply_templates_returning_value(xdm_value=environment.context_item,
                                                                        base_output_uri=base_output_uri)
+        else:
+            result = environment.sheet.call_template_returning_value(base_output_uri=base_output_uri)
         outcome.result_documents = environment.sheet.get_result_documents()
         outcome.xsl_messages = environment.sheet.get_xsl_messages()
         '''print(environment.sheet.get_xsl_messages())'''
@@ -609,6 +661,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     except PySaxonApiError as ex:
         print(ex)
         errorResult = ex
+        exit()
 
     assert_xpc = environment.proc.new_xpath_processor()
     assert_xpc.set_property("sa", "true")
