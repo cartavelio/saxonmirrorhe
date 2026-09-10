@@ -7,10 +7,12 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
 import com.saxonica.ee.validate.ValidationContext;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -18,6 +20,7 @@ import net.sf.saxon.value.AtomicValue;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -40,11 +43,11 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     private int thresholdForCompilation = 100;
     private boolean uncompilable = false;
 
-    private final static Set<Class> STRING_FACETS = new HashSet<>(16);
-    private final static Set<Class> BOOLEAN_FACETS = new HashSet<>(16);
-    private final static Set<Class> ORDERED_FACETS = new HashSet<>(16);
-    private final static Set<Class> CALENDAR_FACETS = new HashSet<>(16);
-    private final static Set<Class> DECIMAL_FACETS = new HashSet<>(16);
+    private final static Set<Class<? extends Facet>> STRING_FACETS = new HashSet<>(16);
+    private final static Set<Class<? extends Facet>> BOOLEAN_FACETS = new HashSet<>(16);
+    private final static Set<Class<? extends Facet>> ORDERED_FACETS = new HashSet<>(16);
+    private final static Set<Class<? extends Facet>> CALENDAR_FACETS = new HashSet<>(16);
+    private final static Set<Class<? extends Facet>> DECIMAL_FACETS = new HashSet<>(16);
 
     static {
         STRING_FACETS.add(LengthFacet.class);
@@ -300,7 +303,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
             getBaseTypeReference().setTarget(simpleType);
         }
         AtomicType prim = getPrimitiveItemType();
-        Set<Class> allowed = null;
+        Set<Class<? extends Facet>> allowed = null;
         // See XML Schema Part 2 section 4.1.5
         switch (prim.getFingerprint()) {
             case StandardNames.XS_STRING:
@@ -663,8 +666,8 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      *         in its transitive membership
      */
     @Override
-    public Set<? extends PlainType> getPlainMemberTypes() {
-        return Collections.singleton(this);
+    public List<? extends PlainType> getPlainMemberTypes() {
+        return Collections.singletonList(this);
     }
 
     /**

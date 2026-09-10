@@ -692,7 +692,7 @@ public class UserUnionType extends UserSimpleType implements PlainType, UnionTyp
      *         in its transitive membership, in declaration order
      */
     @Override
-    public Iterable<PlainType> getPlainMemberTypes() throws MissingComponentException {
+    public List<? extends PlainType> getPlainMemberTypes() throws MissingComponentException {
         List<PlainType> s = new ArrayList<>(10);
         gatherPlainMemberTypes(s);
         return s;
