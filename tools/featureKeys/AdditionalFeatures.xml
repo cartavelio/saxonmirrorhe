@@ -63,6 +63,15 @@
         </configfiledesc>
     </feature>
     <feature>
+        <configfile>serialization/@escape-solidus</configfile>
+        <type>yes|no</type>
+        <editions>PE EE</editions>
+        <configfiledesc>
+            <p>Used only for JSON output. Determines whether or not the solidus character ("/") is
+                escaped with a backslash (as "\/").</p>
+        </configfiledesc>
+    </feature>
+    <feature>
         <configfile>serialization/@escape-uri-attributes</configfile>
         <type>yes|no</type>
         <editions>HE PE EE</editions>
