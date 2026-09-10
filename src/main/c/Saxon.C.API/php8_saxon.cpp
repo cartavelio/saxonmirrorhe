@@ -2102,7 +2102,7 @@ PHP_METHOD(XdmNode, axisNode) {
 
       if (axisValue > 0) {
 
-        XdmNode ** nodes = xdmNode->axisNode(axisNode);
+        XdmNode ** nodes = xdmNode->axisNodes(xdmNode->convertEnumXdmAxis9axisNode));
         int axisCount = xdmNode->axisNodeCount();
 
         if (axisCount > 0 && nodes != nullptr) {
@@ -2113,7 +2113,7 @@ PHP_METHOD(XdmNode, axisNode) {
           }
           zend_object *zobj = Z_OBJ_P(return_value);
           xdmValue_object *vobj =
-              (xdmNode_object *)((char *)zobj -
+              (xdmValue_object *)((char *)zobj -
                                  XtOffsetOf(xdmValue_object, std));
           assert(vobj != nullptr);
           vobj->xdmValue = resultValue;
