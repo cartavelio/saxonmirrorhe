@@ -42,8 +42,8 @@ public class Partition extends SystemFunction {
                     lastPartition.clear();
                 }
                 lastPartition.add(next);
-                pos++;
             }
+            pos++;
         }
         if (!lastPartition.isEmpty()) {
             completePartitions.add(SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(lastPartition)));
