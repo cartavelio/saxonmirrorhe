@@ -1137,7 +1137,7 @@ cdef class PyXslt30Processor:
         transform_to_file(self, **kwds)
         Execute transformation to a file. It is possible to specify the as an argument or using the set_output_file method.
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: stylesheet_file (str), output_file (str)
+            **kwds: Possible optional arguments: source_file (str), stylesheet_file (str), output_file (str)
                                                  and base_output_uri (str) which is used for for resolving relative URIs in the href attribute of the
                                                  xsl:result-document instruction.
         Example:
@@ -1178,7 +1178,7 @@ cdef class PyXslt30Processor:
         transform_to_value(self, **kwds)
         Execute transformation to an PyXdmNode object
         Args:
-            **kwds: Possible optional arguments: source_file (str) or xdm_node (PyXdmNode). Other allowed argument: stylesheet_file (str)
+            **kwds: Possible optional arguments: source_file (str), stylesheet_file (str)
                                                  and base_output_uri (str) which is used for for resolving relative URIs in the href attribute
                                                  of the xsl:result-document instruction.
         Returns:
@@ -1187,8 +1187,6 @@ cdef class PyXslt30Processor:
             1) node = xsltproc.transform_to_value(source_file="cat.xml", stylesheet_file="test1.xsl")
             2) xsltproc.set_source("cat.xml")\r
                node = xsltproc.transform_to_value(stylesheet_file="test1.xsl")
-            3) node = saxon_proc.parse_xml(xml_text="<in/>")\r
-               node = xsltproc.transform_tovalue(stylesheet_file="test1.xsl", xdm_node= node)
         """
         cdef const char * c_sourcefile = NULL
         cdef char * c_stylesheet = NULL
@@ -1768,7 +1766,18 @@ cdef class PyXsltExecutable:
                                 '''make_c_str(value)'''
                                 py_string_string = value.encode('utf-8') if value is not None else None
                                 c_outputfile = py_string_string if value is not None else ""
-        self.thisxptr.transformFileToFile(c_sourcefile, c_outputfile)
+                                self.thisxptr.setOutputFile(c_outputfile)
+
+        if "xdm_node" in kwds:
+            py_value = kwds["xdm_node"]
+            if(isinstance(py_value, PyXdmNode)):
+                node_ = py_value;
+                self.thisxptr.transformToFile(node_.derivednptr)
+            else:
+                raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
+
+        else:
+            self.thisxptr.transformFileToFile(c_sourcefile, NULL)
 
      def transform_to_value(self, **kwds):
         """
@@ -1800,6 +1809,8 @@ cdef class PyXsltExecutable:
               py_string_string = value.encode('utf-8') if value is not None else None
               c_base_output_uri = py_string_string if value is not None else ""
               self.thisxptr.setBaseOutputURI(c_base_output_uri)
+
+
         cdef PyXdmValue val = None
         cdef PyXdmAtomicValue aval = None
         cdef PyXdmNode nval = None
@@ -1807,7 +1818,18 @@ cdef class PyXsltExecutable:
         cdef PyXdmArray aaval = None
         cdef PyXdmFunctionItem fval = None
         cdef saxoncClasses.XdmValue * xdmValue = NULL
-        xdmValue = self.thisxptr.transformFileToValue(c_sourcefile)
+        cdef PyXdmNode node_ = None
+        
+        if "xdm_node" in kwds:
+            py_value = kwds["xdm_node"]
+            if(isinstance(py_value, PyXdmNode)):
+                node_ = py_value;
+                xdmValue = self.thisxptr.transformToValue(node_.derivednptr)
+            else:
+                raise Exception("Keyword argument 'xdm_node' is not of type PyXdmNode")
+
+        else:
+            xdmValue = self.thisxptr.transformFileToValue(c_sourcefile)
         if xdmValue is NULL:
             return None
         cdef type_ = xdmValue.getType()
