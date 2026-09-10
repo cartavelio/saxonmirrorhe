@@ -19,7 +19,6 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
     private final Map<String, XdmValue> globalParams = new HashMap<String, XdmValue>();
     private final List<XdmValue> initialFunctionArgs = new ArrayList<XdmValue>();
     private final String targetVersion = "JS";
-    private boolean nodeJS = false;
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0 || args[0].equals("-?")) {
@@ -29,16 +28,6 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         System.arraycopy(args, 0, argsExtra, 0, args.length);
         argsExtra[args.length] = "-js";
         new Xslt30TestSuiteDriverJS().go(argsExtra);
-    }
-
-    @Override
-    public void go(String[] args) throws Exception {
-        for (int i = 2; i < args.length; i++) {
-            if (args[i].startsWith("-nodeJS")) {
-                nodeJS = true;
-            }
-        }
-        super.go(args);
     }
 
     @Override
@@ -124,12 +113,6 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         if ("languages_for_numbering".equals(type) && !"en".equals(value)) {
             return false;
         }
-        if (!nodeJS && "year_component_values".equals(type) && "support year above 9999".equals(value)) {
-            return inverse;
-        }
-        if (!nodeJS && "year_component_values".equals(type) && "support negative year".equals(value)) {
-            return inverse;
-        }
         if ("XSD_1.1".equals(value)) {
             return !inverse;
         }
@@ -164,11 +147,7 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
             return exportLoc;
         } catch (SaxonApiException e) {
             System.err.println("*** Failed to export " + filename + " - " + e.getMessage());
-            if (nodeJS) {
-                throw e;
-            } else {
-                return null;
-            }
+            throw e;
         }
     }
 
@@ -212,12 +191,8 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
     public void runJSTransform(Environment env, TestOutcome outcome, QName initialTemplateName,
                                QName initialModeName, QName initialFunctionName, URI baseOutputURI) {
         outcome.setWarningsReported(true); // force assert-warnings to pass
-        if (nodeJS) {
-            return;
-        } else {
-            System.err.println("This test driver can only be used to export tests for SaxonJS, not run them");
-            return;
-        }
+        //System.err.println("This test driver can only be used to export tests for SaxonJS, not run them");
+        return;
     }
 
 }
