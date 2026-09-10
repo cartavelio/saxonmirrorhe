@@ -199,6 +199,19 @@ namespace Saxon.Ejava.io {
             return true;
         }
 
+        public static File[] listRoots() {
+            SysIO.DriveInfo[] info = SysIO.DriveInfo.GetDrives();
+            File[] driveNames = new File[info.Length];
+            for (int i = 0; i < info.Length; i++) {
+                if (info[i].Name == "") {
+                    driveNames[i] = new File("/");
+                } else {
+                    driveNames[i] = new File(info[i].Name);
+                }
+            }
+            return driveNames;
+        }
+
         public static File createTempFile(string prefix, string suffix) {
             return createTempFile(prefix, suffix, null);
         }
