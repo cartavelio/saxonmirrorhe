@@ -137,7 +137,7 @@ public class SchemaModelSerializer {
 
     public void emitNamespaceContext(NamespaceResolver resolver) throws XPathException {
         NamespaceMap namespaces = NamespaceMap.fromNamespaceResolver(resolver);
-        String nsDisplay = ExpressionPresenter.getNamespacesAsString(namespaces);
+        String nsDisplay = ExpressionPresenter.getNamespacesAsString(namespaces, false);
         emitAttribute("nsContext", nsDisplay);
     }
 
