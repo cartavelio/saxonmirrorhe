@@ -512,7 +512,16 @@
    </exception>
    
    
-   
+   <exception test-set="prod-ForClause.member" run="false" report="n/a"
+      test-case="for-member-057
+      for-member-058
+      for-member-059
+      for-member-060
+      for-member-061
+      for-member-062">
+      <created by="Sheila Thomson" on="2026-08-12"/>
+      <reason>Not implemented in Saxon 12</reason>
+   </exception>
  
    
 
