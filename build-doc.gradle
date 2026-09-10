@@ -1048,7 +1048,7 @@ task saxonc_api_doc(
 // These tasks assume that the build will be run in the
 // saxonica-docbuild container.
 
-task saxonc_doc_pypi(type: Copy, dependsOn: ['saxon_eec_pypi']) {
+task saxonc_doc_pypi(type: Copy, dependsOn: ['saxon_eec_local_wheel']) {
   into "${buildDir}/doc_pypi"
   from "${buildDir}/eec_pypi"
 }

@@ -2105,5 +2105,50 @@ task helloWorld() {
     }
 */
   }
+}
 
+
+task printTaskInputs {
+  doLast {
+    project.getTasks().each { task ->
+      println "--------------------------------------------------------------------------------"
+      println " Task '${project.name}:${task.name}'"
+      println "--------------------------------------------------------------------------------"
+      println ""
+      
+      println "Dependencies:"
+      task.dependsOn.each {
+	println " - ${it}"
+      }
+      println ""
+      
+
+      println "File inputs:"
+      task.inputs.files.each {
+	println " - ${it}"
+      }
+      println ""
+      
+      println "Property inputs:"
+      task.inputs.properties.each {
+	println " - ${it}"
+      }
+      println ""
+      
+      println "File outputs:"
+      task.outputs.files.each {
+	println " - ${it}"
+      }
+      println ""
+
+      println "Property outputs:"
+      task.outputs.properties.each {
+	println " - ${it}"
+      }
+      println ""
+      
+      println "--------------------------------------------------------------------------------"
+      println ""
+    }
+  }
 }
