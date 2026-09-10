@@ -2,6 +2,7 @@ using System;
 using System.IO.Compression;
 using System.Text;
 using Saxon.Ejava.lang;
+using Saxon.Hej.resource;
 
 namespace Saxon.Impl.Helpers {
     public class IOUtils {
@@ -37,6 +38,23 @@ namespace Saxon.Impl.Helpers {
             var reader = new System.IO.StreamReader(decompressor);
             return reader.ReadToEnd();
         }
+
+        public static bool CatalogFileExists(Saxon.Ejavax.xml.transform.Source sourceInput)
+        {
+            // Trying to determine if the input has successfully connected to a URI.
+            if (sourceInput.GetType() == typeof(TypedStreamSource))
+            {
+                var tsource = (TypedStreamSource) sourceInput;
+                if (tsource.getInputStream() == null)
+                {
+                    return false;
+                }
+                // We aren't going to use this stream, so close it.
+                tsource.getInputStream().Close();
+            }
+            return true;
+        }
+        
     }
 }
 

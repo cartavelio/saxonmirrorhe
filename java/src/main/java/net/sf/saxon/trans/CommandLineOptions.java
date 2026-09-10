@@ -314,28 +314,9 @@ public class CommandLineOptions {
                         // The DirectResourceResolver doesn't throw this for a simple "file not found" error
                         throw new SaxonApiException("Catalog file not found: " + acatalog, e);
                     }
-                    // So we have to work a little harder. This is a bit heuristic. If we get back
-                    // an AugmentedSource, we can find its contained source which will have an open stream.
-                    // (We're never going to read from this stream, so we'll close it if please close is true.)
-                    // If we don't get back an AugmentedSource, I think it'll always be a SAXSource.
-                    InputSource isource = null;
-                    if (sourceInput instanceof AugmentedSource asource) {
-                        Source csource = asource.getContainedSource();
-                        if (csource instanceof SAXSource) {
-                            isource = ((SAXSource) csource).getInputSource();
-                        }
-                        if (asource.isPleaseCloseAfterUse()) {
-                            asource.close();
-                        }
-                    } else if (sourceInput instanceof SAXSource) {
-                        isource = ((SAXSource) sourceInput).getInputSource();
-                    }
-
-                    // If we found a source and if it has no streams attached, raise catalog not found.
-                    if (isource != null && isource.getByteStream() == null && isource.getCharacterStream() == null) {
+                    if (!catalogFileExists(sourceInput)) {
                         throw new SaxonApiException("Catalog file not found: " + acatalog);
                     }
-
                     catalogs.add(sourceInput.getSystemId());
                 } else {
                     File catalogFile = new File(acatalog);
@@ -515,6 +496,33 @@ public class CommandLineOptions {
         if (optionValue != null) {
             invokeInitializer(processor, optionValue);
         }
+    }
+
+    @CSharpReplaceBody(code = "return Saxon.Impl.Helpers.IOUtils.CatalogFileExists(sourceInput);")
+    private boolean catalogFileExists(Source sourceInput) {
+        // So we have to work a little harder. This is a bit heuristic. If we get back
+        // an AugmentedSource, we can find its contained source which will have an open stream.
+        // (We're never going to read from this stream, so we'll close it if please close is true.)
+        // If we don't get back an AugmentedSource, I think it'll always be a SAXSource.
+        InputSource isource = null;
+        if (sourceInput instanceof AugmentedSource asource) {
+            Source csource = asource.getContainedSource();
+            if (csource instanceof SAXSource) {
+                isource = ((SAXSource) csource).getInputSource();
+            }
+            if (asource.isPleaseCloseAfterUse()) {
+                asource.close();
+            }
+        } else if (sourceInput instanceof SAXSource) {
+            isource = ((SAXSource) sourceInput).getInputSource();
+        }
+
+        // If we found a source and if it has no streams attached, report not found.
+        if (isource != null && isource.getByteStream() == null && isource.getCharacterStream() == null) {
+            return false;
+        }
+
+        return true;
     }
 
     @CSharpReplaceBody(code="Saxon.Api.Support.InitializationHandler.doInitialization(new Saxon.Api.Processor(processor), initializationClass);")
