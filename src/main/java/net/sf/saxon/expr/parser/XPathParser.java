@@ -717,11 +717,9 @@ public class XPathParser {
         this.env = env;
         language = ParsedLanguage.EXTENDED_ITEM_TYPE;
         t = new Tokenizer();
-        t.languageLevel = languageVersion = env.getXPathVersion();
+        t.languageLevel = languageVersion = 40;
         allowSaxonExtensions = t.allowSaxonExtensions = true;
-        allowXPath30Syntax = languageVersion >= 30;
-        allowXPath31Syntax = languageVersion >= 31;
-        allowXPath40Syntax = languageVersion >= 40;
+        allowXPath30Syntax = allowXPath31Syntax = allowXPath40Syntax = true;
         try {
             t.tokenize(input, 0, -1);
         } catch (XPathException err) {
