@@ -355,37 +355,7 @@ public class XdmUtils {
         }
         return null;
     }
-
-    public class MapData {
-          private Map<XdmAtomicValue, XdmValue> xdmMap;
-
-          public MapData(){
-              xdmMap = new HashMap<XdmAtomicValue, XdmValue>();
-          }
-
-          public void addMapPair(XdmAtomicValue key, XdmValue value){
-              xdmMap.put(key, value);
-          }
-    }
-
-
-    @CEntryPoint(name = "j_mapData", exceptionHandler =  SaxonCExceptionCLongPointerHandler.class)
-    public static long j_mapData(IsolateThread thread, ObjectHandle arrayRef, SaxonCAPI.AllocatorFn alloc) throws SaxonApiException {
-        if(arrayRef == WordFactory.nullPointer()) {
-            throw new SaxonApiException("Array object is null");
-        }
-         XdmArray value = SaxonCAPI.objectHandles.get(arrayRef);
-        if(value.arrayLength() == 0) {
-            return SaxonCAPI.STATUS_FAIL;
-        }
-        long[] attrRefs = value.stream().mapToLong(i -> {
-                        ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
-                        return objectHandle.rawValue();
-                    }).toArray();
-
-        CLongPointer addr = SaxonCAPI.longArrayToNative(alloc, attrRefs);
-        return addr;
-    }
+    
 
     @CEntryPoint(name = "j_convertXdmArrayToArrayObject", exceptionHandler =  SaxonCExceptionCLongPointerHandler.class)
     public static CLongPointer convertXdmArrayToArrayObject(IsolateThread thread, ObjectHandle arrayRef, SaxonCAPI.AllocatorFn alloc) throws SaxonApiException {
