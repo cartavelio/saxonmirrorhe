@@ -165,8 +165,30 @@ val bundleDependencies = tasks.register<UnjarBundleDependencies>("bundleJarDepen
         }
         jar("icu4j-${project.findProperty("icu4jVersion")}.jar")
         jar("jline-${project.findProperty("jlineVersion")}.jar")
-        jar("xmlresolver-${project.findProperty("xmlresolverVersion")}.jar")
-        jar("xmlresolver-${project.findProperty("xmlresolverVersion")}-data.jar")
+        /*jar("xmlresolver-${project.findProperty("xmlresolverVersion")}.jar")
+        jar("xmlresolver-${project.findProperty("xmlresolverVersion")}-data.jar")*/
+
+        jar("xmlresolver-${project.findProperty("xmlresolverVersion")}.jar") {
+            include("**/*.class")
+            include("**/*.properties")
+            exclude(
+                "META-INF/*.SF",
+                "META-INF/*.RSA",
+                "META-INF/*.DSA",
+                "META-INF/*.EC"
+            )
+        }
+
+        jar("xmlresolver-${project.findProperty("xmlresolverVersion")}-data.jar") {
+            include("**/*.class")
+            include("**/*.properties")
+            exclude(
+                "META-INF/*.SF",
+                "META-INF/*.RSA",
+                "META-INF/*.DSA",
+                "META-INF/*.EC"
+            )
+        }
         jar("coffeefilter-${project.findProperty("ninemlVersion")}.jar")
         jar("coffeegrinder-${project.findProperty("ninemlVersion")}.jar")
     }
