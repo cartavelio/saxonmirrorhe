@@ -838,9 +838,8 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.setBaseURI(assertion.getBaseURI());
             if (env.schemaAware) {
                 assertXpc.setSchemaAware(true);
+                copySchemaNamespaces(env, assertXpc);  // ensure environment has schema namespaces
             }
-
-            copySchemaNamespaces(env, assertXpc);  // ensure environment has schema namespaces
 
             boolean success = outcome.testAssertion(assertion, outcome, outcome.getPrincipalResultDoc(), assertXpc, xpath, debug);
             if (success) {

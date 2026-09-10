@@ -12,11 +12,11 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.dom.DOMObjectModel;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.s9api.streams.Steps;
 import net.sf.saxon.trace.Instrumentation;
+import net.sf.saxon.type.Schema;
 import org.w3c.dom.Document;
 
 import javax.xml.stream.XMLStreamException;
@@ -770,11 +770,10 @@ public abstract class TestDriver {
 
 
     protected void copySchemaNamespaces(Environment env, XPathCompiler testXpc) {
-        Configuration config = env.xpathCompiler.getProcessor().getUnderlyingConfiguration();
-        for (NamespaceUri s : config.getImportedNamespaces()) {
-            testXpc.importSchemaNamespace(s.toString());
+        Schema schema = env.xqueryCompiler.getUnderlyingStaticContext().getPreLoadedSchema();
+        if (schema != null) {
+            testXpc.getUnderlyingStaticContext().getPackageData().setImportedSchema(schema);
         }
-
     }
 
 }

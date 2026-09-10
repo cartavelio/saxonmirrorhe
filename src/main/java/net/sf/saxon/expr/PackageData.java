@@ -20,6 +20,7 @@ import net.sf.saxon.type.Schema;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Information about a unit of compilation: in XSLT, a package; in XQuery, a module. May also be a single
@@ -121,6 +122,7 @@ public class PackageData {
     }
 
     public void setImportedSchema(Schema schema) {
+        Objects.requireNonNull(schema);
         this.importedSchema = schema;
     }
 

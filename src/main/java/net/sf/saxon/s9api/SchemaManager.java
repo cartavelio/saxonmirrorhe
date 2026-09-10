@@ -20,7 +20,7 @@ import java.io.File;
 /**
  * The {@code SchemaManager} is used to load schema documents, and to set options for the way in which they are loaded.
  *
- * <p>The {@code SchemaManager} is deprecated from Saxon 13, and a {@link XsdCompiler} should be used instead.</p>
+ * <p>The {@code SchemaManager} is deprecated from Saxon 13, and an {@link XsdCompiler} should be used instead.</p>
  *
  * <p><i>A note on terminology: a <b>schema</b> is a collection of schema components, such as type definitions,
  * constructed by compiling a set of <b>schema documents</b>.</i></p>
