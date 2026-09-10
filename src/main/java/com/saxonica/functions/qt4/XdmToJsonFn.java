@@ -32,7 +32,7 @@ import java.util.*;
  */
 public class XdmToJsonFn extends SystemFunction {
 
-    @CSharpModifiers(code = {"public", "static", "new"})
+    @CSharpModifiers(code = {"public", "static"})
     public static OptionsParameter OPTION_DETAILS;
     private final static SequenceType layoutMapType =
             new SequenceType(
