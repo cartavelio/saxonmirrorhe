@@ -518,7 +518,11 @@ int main() {
   SaxonProcessor *processor = new SaxonProcessor(false);
   XPathProcessor *xpathProc = processor->newXPathProcessor();
    std::cerr<<"cppExtensionFunction cp0"<<std::endl;
+   try{
   processor->setExtensionLibrary("cppExtensionFunction");
+  } catch (SaxonApiException &e) {
+      cerr << " Exception thrown=" << e.what() << endl;
+    }
  std::cerr<<"cppExtensionFunction cp1"<<std::endl;
   xpathProc->setLanguageVersion("3.1");
   sResultCount *sresult = new sResultCount();
