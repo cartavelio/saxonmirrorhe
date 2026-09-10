@@ -6972,7 +6972,7 @@
         </proto>
       </signatures>
       <status>
-        <p>Available since Saxon 10.</p>
+        <p>Available since Saxon 10. Obsolescent, since it is equivalent to the standard 4.0 function fn:characters.</p>
       </status>
       <saxon-edition>PE/EE 10</saxon-edition>
       <details>
@@ -7110,6 +7110,36 @@
       </details>
       <see-also name="transform" namespace="http://saxon.sf.net/"/>
       <see-also name="transform" namespace="http://www.w3.org/2005/xpath-functions"/>
+    </function>
+    
+    <function xmlns="http://www.saxonica.com/ns/doc/functions">
+      <name namespace="http://saxon.sf.net/">compose</name>
+      <description>
+        <p>Returns a function item that combines the effect of several supplied functions.</p>
+      </description>
+      <signatures>
+        <proto return-type="function(item()*) as item()*">
+          <arg name="stylesheet" type="(function(item()*) as item()*)+"
+              desc="A sequence of arity-one function items"/>
+        </proto>
+      </signatures>
+      <status>
+        <p>Available since Saxon 13.</p>
+      </status>
+      <saxon-edition>PE/EE</saxon-edition>
+      <details>
+        <div>
+          <p>This function combines a number of arity-one functions into a single arity-one function.
+          The effect of the composed functions is to evaluate the first function with the supplied
+          argument value, then to evaluate the second function applied to the result of the first,a
+          and so on.</p>
+          <p>For example, <code>let $f := compose((is-NaN#1, not#1))</code> binds <code>$f</code> 
+            to a function such that <code>$f($x)</code> is true if <code>$x</code> is not NaN. It
+          is logically equivalent to <code>fn($x){ is-NaN($x) => not() }</code>.</p>
+          <p>Similarly, <code>let $f := compose((1 to 3) ! fn{..})</code> binds <code>$f</code> to a function
+          that selects the great-grandparent of a node (that is, it applies the parent axis three times).</p>
+        </div>
+      </details>
     </function>
 
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
