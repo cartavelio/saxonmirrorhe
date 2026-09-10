@@ -8,7 +8,6 @@ using Saxon.Hej;
 using Saxon.Hej.expr.sort;
 using Saxon.Hej.lib;
 using Saxon.Hej.trans;
-using SaxonCS_HE.Saxon.Impl.Helpers;
 
 namespace Saxon.Impl.Helpers {
     public static class DotNetCollationFactory {
@@ -31,7 +30,7 @@ namespace Saxon.Impl.Helpers {
 #if EE                
                 return new UcaCollatorUsingIcu(uri);
 #else
-                return new UcaCollatorUsingCSharp(uri, config);
+                return new Saxon.Impl.Helpers.UcaCollatorUsingCSharp(uri, config);
 #endif
             }
 
