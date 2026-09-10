@@ -22,6 +22,7 @@ import com.saxonica.ee.trans.*;
 import com.saxonica.ee.update.PendingUpdateListImpl;
 import com.saxonica.ee.update.XQueryParserExtensionEE;
 import com.saxonica.ee.validate.*;
+import com.saxonica.expr.DeepLookupExpression;
 import com.saxonica.expr.XQueryParserExtensionPE;
 import com.saxonica.trans.ModePE;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
@@ -1056,6 +1057,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         uut.setTypeName(name, getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, localName));
         uut.setMemberTypeReferences(memberRefs);
         return uut;
+    }
+
+    public Expression makeDeepLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs) throws XPathException {
+        return new DeepLookupExpression(lhs, modifier, rhs);
     }
 
     /**

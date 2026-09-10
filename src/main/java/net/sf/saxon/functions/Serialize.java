@@ -11,6 +11,7 @@ import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.SequenceCopier;
 import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.NamespaceConstant;
@@ -506,7 +507,7 @@ public class Serialize extends SystemFunction implements Callable {
                 AtomicIterator keyIter = ((MapItem)param).keys();
                 AtomicValue k;
                 while ((k = keyIter.next()) != null) {
-                    if (k instanceof QNameValue) {
+                    if (k instanceof QNameValue && ((QNameValue)k).getStructuredQName().hasURI(NamespaceUri.SAXON)) {
                         String s = ((QNameValue) k).getStructuredQName().getEQName();
                         paramMap = paramMap.addEntry(new StringValue(s), paramMap.get(k));
                     }
@@ -538,6 +539,8 @@ public class Serialize extends SystemFunction implements Callable {
 
             SerializerFactory sf = context.getConfiguration().getSerializerFactory();
             PipelineConfiguration pipe = context.getConfiguration().makePipelineConfiguration();
+            PackageData pack = getRetainedStaticContext().getPackageData();
+            pipe.setHostLanguage(pack.getHostLanguage(), pack.getHostLanguageVersion());
             Receiver out = sf.getReceiver(result, params, pipe);
             SequenceCopier.copySequence(iter, out);
             return new StringValue(builder.toString());

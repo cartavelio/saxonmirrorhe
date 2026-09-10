@@ -10,21 +10,29 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.UnparsedTextIterator;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.net.URI;
+import java.util.Map;
 
 
 public class UnparsedTextLines extends UnparsedTextFunction implements Callable {
+
+    public final static OptionsParameter OPTION_DETAILS;
+
+    static {
+        OptionsParameter o = new OptionsParameter(40);
+        o.addAllowedOption("encoding", SequenceType.OPTIONAL_STRING);
+        OPTION_DETAILS = o;
+    }
 
     /**
      * Evaluate the expression
@@ -38,12 +46,18 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue hrefVal = (StringValue) arguments[0].head();
-        String encoding;
+        String encoding = null;
         if (getArity() == 2) {
-            Item enc = arguments[1].head();
-            encoding = enc == null ? null : enc.getStringValue();
-        } else {
-            encoding = null;
+            Item arg1 = arguments[1].head();
+            if (arg1 instanceof StringValue) {
+                encoding = arg1.getStringValue();
+            } else if (arg1 instanceof MapItem) {
+                Map<String, GroundedValue> options = OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context);
+                GroundedValue encodingOption = options.get("encoding");
+                if (encodingOption != null) {
+                    encoding = encodingOption.getStringValue();
+                }
+            }
         }
         try {
             return SequenceTool.toLazySequence(evalUnparsedTextLines(hrefVal, encoding, context));
@@ -64,7 +78,7 @@ public class UnparsedTextLines extends UnparsedTextFunction implements Callable 
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
         if (stable) {
             // if results have to be stable, the text has to be read into memory and cached
-            StringValue content = UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context);
+            StringValue content = UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, false, context);
             assert content != null;
             URI abs = UnparsedTextFunction.getAbsoluteURI(href, getStaticBaseUriString(), context);
             LineNumberReader reader = new LineNumberReader(new StringReader(content.getStringValue()));

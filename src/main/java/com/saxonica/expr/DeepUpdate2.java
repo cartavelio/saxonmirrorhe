@@ -9,6 +9,8 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.functions.InsertBefore;
+import net.sf.saxon.functions.hof.FilterFn;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapItem;
@@ -221,12 +223,20 @@ public class DeepUpdate2 extends Instruction {
                             if (containerSubstitutions.containsKey(parent)) {
                                 latestParent = containerSubstitutions.get(parent);
                             }
+                            int position = ((IntegerValue) label.get(LabelTool.POSITION_KEY)).asSubscript();
                             if (latestParent instanceof ArrayItem) {
+                                int arrayPos = ((IntegerValue) label.get(LabelTool.KEY_KEY)).asSubscript() - 1;
+                                GroundedValue oldMember = ((ArrayItem) latestParent).get(arrayPos);
+                                GroundedValue newMember = replaceItem(oldMember, position, val);
                                 val = ((ArrayItem) latestParent).put(
-                                        ((IntegerValue)label.get(LabelTool.KEY_KEY)).asSubscript() - 1, val);
+                                            ((IntegerValue) label.get(LabelTool.KEY_KEY)).asSubscript() - 1, newMember);
+
                             } else if (latestParent instanceof MapItem) {
+                                AtomicValue keyVal = (AtomicValue) label.get(LabelTool.KEY_KEY);
+                                GroundedValue oldMember = ((MapItem) latestParent).get(keyVal);
+                                GroundedValue newMember = replaceItem(oldMember, position, val);
                                 val = ((MapItem) latestParent).addEntry(
-                                        ((AtomicValue) label.get(LabelTool.KEY_KEY)), val);
+                                        ((AtomicValue) label.get(LabelTool.KEY_KEY)), newMember);
                             } else {
                                 assert false;
                             }
@@ -246,6 +256,15 @@ public class DeepUpdate2 extends Instruction {
                 return null;
             };
         }
+    }
+
+    private static GroundedValue replaceItem(GroundedValue input, int position, GroundedValue replacement) {
+        if (input.getLength() == 1 && position == 0) {
+            return replacement;
+        }
+        SequenceIterator iter = new FilterFn.PositionalFilterIterator(input.iterate(), (it, pos) -> pos != position);
+        iter = new InsertBefore.InsertIterator(iter,replacement.iterate(), position);
+        return SequenceTool.toGroundedValue(iter);
     }
 
 }

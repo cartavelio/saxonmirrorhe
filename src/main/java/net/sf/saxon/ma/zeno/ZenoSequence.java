@@ -55,6 +55,21 @@ public class ZenoSequence implements GroundedValue {
     }
 
     /**
+     * Construct a ZenoSequence from a grounded value
+     *
+     * @param items the items to be included
+     * @return the new ZenoSequence
+     */
+
+    public static ZenoSequence fromGroundedValue(GroundedValue items) {
+        if (items instanceof ZenoSequence) {
+            return (ZenoSequence)items;
+        }
+        ZenoChain<Item> chain = new ZenoChain<Item>().addAll(items.asIterable());
+        return new ZenoSequence(chain);
+    }
+
+    /**
      * Constructor to create a ZenoSequence that wraps a supplied ZenoChain
      * @param chain the supplied ZenoChain
      */

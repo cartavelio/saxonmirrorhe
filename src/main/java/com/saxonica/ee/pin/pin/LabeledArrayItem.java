@@ -52,6 +52,20 @@ public class LabeledArrayItem extends DelegatingArrayItem implements LabeledItem
         return adaptValue(index+1, value);
     }
 
+    /**
+     * Get a member of the array at a specific offset, or an empty sequence
+     * if the supplied offset is out of range
+     *
+     * @param index the position of the member to retrieve (zero-based)
+     * @return the value at the given position, or an empty sequence
+     * if the index is out of range
+     */
+    @Override
+    public GroundedValue getIfPresent(int index) {
+        GroundedValue value = super.getIfPresent(index);
+        return adaptValue(index + 1, value);
+    }
+
     @Override
     public Iterable<GroundedValue> members() {
         List<GroundedValue> adaptedMembers = new ArrayList<>();

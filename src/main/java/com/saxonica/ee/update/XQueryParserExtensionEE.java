@@ -2,6 +2,7 @@ package com.saxonica.ee.update;
 
 import com.saxonica.expr.*;
 import com.saxonica.expr.DeepLookupExpression;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LookupExpression;
 import net.sf.saxon.expr.StringLiteral;
@@ -30,7 +31,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     }
 
 
-    public Expression makeLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep, boolean allow40) {
+    public Expression makeLookupExpression(Configuration config, Expression lhs, LookupExpression.Modifier modifier, Expression rhs, boolean deep, boolean allow40) {
         if (allow40) {
             if (deep) {
                 return new DeepLookupExpression(lhs, modifier, rhs);
@@ -64,13 +65,14 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     /**
      * Supporting code for lookup expressions (A?B) where B is an NCName
      *
-     * @param lhs  the LHS operand of the lookup expression
-     * @param rhs  the RHS operand of the lookup expression
-     * @param deep true if the operator is "??" (in 4.0)
+     * @param config
+     * @param lhs    the LHS operand of the lookup expression
+     * @param rhs    the RHS operand of the lookup expression
+     * @param deep   true if the operator is "??" (in 4.0)
      * @return the result of parsing the expression
      */
 
-    public Expression lookupName(Expression lhs, LookupExpression.Modifier modifier, String rhs, boolean deep, boolean allow40) {
+    public Expression lookupName(Configuration config, Expression lhs, LookupExpression.Modifier modifier, String rhs, boolean deep, boolean allow40) {
         if (deep) {
             return new DeepLookupExpression(lhs, modifier, new StringLiteral(rhs));
         } else {

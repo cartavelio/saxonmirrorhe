@@ -488,6 +488,9 @@ public class LabeledNode implements NodeInfo, LabeledItem {
      */
     @Override
     public boolean equals(Object obj) {
+        if (obj instanceof LabeledNode) {
+            obj = ((LabeledNode)obj).subjectNode;
+        }
         return subjectNode.equals(obj);
     }
 }

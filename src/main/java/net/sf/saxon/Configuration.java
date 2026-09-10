@@ -3287,6 +3287,10 @@ public class Configuration implements SourceResolver, NotationSet {
         return null;
     }
 
+    public Expression makeDeepLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs) throws XPathException {
+        throw new XPathException("Deep lookup expression currently requires Saxon-EE");
+    }
+
     /**
      * Ask whether a given notation has been declared in the schema
      *

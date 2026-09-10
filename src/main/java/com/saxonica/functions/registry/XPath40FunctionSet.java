@@ -633,18 +633,20 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("unparcel", 1, e -> e.populate(UnparcelFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null));
 
+        ItemType mapOrString = ChoiceItemType.of(BuiltInAtomicType.STRING, MapType.ANY_MAP_TYPE);
+
         register("unparsed-text", 2, e -> e.populate(UnparsedText::new, BuiltInAtomicType.STRING, OPT, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+                .arg(1, mapOrString, OPT, null));
 
         register("unparsed-text-available", 2, e -> e.populate(UnparsedTextAvailable::new,
                                                                BuiltInAtomicType.BOOLEAN, ONE, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, BooleanValue.FALSE)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+                .arg(1, mapOrString, OPT, null));
 
         register("unparsed-text-lines", 2, e -> e.populate(UnparsedTextLines::new, BuiltInAtomicType.STRING, STAR, BASE | LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+                .arg(1, mapOrString, OPT, null));
 
         // Result type of void() is deliberately mis-declared to prevent unwanted optimisations
         register("void", 0, 1, e -> e.populate(VoidFn::new, AnyItemType.getInstance(), STAR, 0)

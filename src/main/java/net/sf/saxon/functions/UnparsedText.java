@@ -13,6 +13,8 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceTool;
@@ -21,6 +23,8 @@ import net.sf.saxon.str.UniStringConsumer;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.io.File;
@@ -35,6 +39,15 @@ import java.util.Map;
  */
 public class UnparsedText extends UnparsedTextFunction implements PushableFunction {
 
+    public final static OptionsParameter OPTION_DETAILS;
+
+    static {
+        OptionsParameter o = new OptionsParameter(40);
+        o.addAllowedOption("encoding", SequenceType.OPTIONAL_STRING);
+        o.addAllowedOption("normalize-newlines", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        OPTION_DETAILS = o;
+    }
+
     /**
      * Evaluate the expression
      *
@@ -47,15 +60,26 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue hrefVal = (StringValue) arguments[0].head();
-        String encoding;
+        String encoding = null;
+        boolean normalizeNewlines = false;
         if (getArity() == 2) {
-            Item enc = arguments[1].head();
-            encoding = enc == null ? null : enc.getStringValue();
-        } else {
-            encoding = null;
+            Item arg1 = arguments[1].head();
+            if (arg1 instanceof StringValue) {
+                encoding = arg1.getStringValue();
+            } else if (arg1 instanceof MapItem) {
+                Map<String, GroundedValue> options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context);
+                GroundedValue encodingOption = options.get("encoding");
+                if (encodingOption != null) {
+                    encoding = encodingOption.getStringValue();
+                }
+                BooleanValue normalizeNewlinesOption = (BooleanValue)options.get("normalize-newlines");
+                if (normalizeNewlinesOption != null && normalizeNewlinesOption.getBooleanValue()) {
+                    normalizeNewlines = normalizeNewlinesOption.effectiveBooleanValue(); 
+                }
+            }
         }
         try {
-            return SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context));
+            return SequenceTool.itemOrEmpty(evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, normalizeNewlines, context));
         } catch (XPathException e) {
             e.maybeSetErrorCode("FOUT1170");
             if (getArity() == 2) {
@@ -97,15 +121,16 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
     /**
      * Evaluation of the unparsed-text function
      *
-     * @param hrefVal  the relative URI
-     * @param base     the base URI
-     * @param encoding the encoding to be used
-     * @param context  dynamic evaluation context
+     * @param hrefVal           the relative URI
+     * @param base              the base URI
+     * @param encoding          the encoding to be used
+     * @param normalizeNewlines true if line endings are to be normalized to a single newline char
+     * @param context           dynamic evaluation context
      * @return the result of the function
      * @throws XPathException if evaluation fails
      */
 
-    public static StringValue evalUnparsedText(StringValue hrefVal, String base, String encoding, XPathContext context) throws XPathException {
+    public static StringValue evalUnparsedText(StringValue hrefVal, String base, String encoding, boolean normalizeNewlines, XPathContext context) throws XPathException {
         UnicodeString content;
         StringValue result;
         boolean stable = context.getConfiguration().getBooleanProperty(Feature.STABLE_UNPARSED_TEXT);
@@ -138,6 +163,9 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                         error = e;
                         content = StringView.tidy((char)errorValue + e.getMessage());
                     }
+                    if (normalizeNewlines) {
+                        content = StringView.of(content.toString().replace("\r\n", "\n").replace("\r", "\n"));
+                    }
                     if (cache == null) {
                         cache = new HashMap<>();
                         controller.setUserData("unparsed-text-cache", "", cache);
@@ -150,7 +178,11 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
             } else {
                 UnicodeBuilder consumer = new UnicodeBuilder();
                 readFile(absoluteURI, encoding, consumer, context);
-                return new StringValue(consumer.toUnicodeString());
+                content = consumer.toUnicodeString();
+                if (normalizeNewlines) {
+                    content = StringView.of(content.toString().replace("\r\n", "\n").replace("\r", "\n"));
+                }
+                return new StringValue(content);
             }
             result = new StringValue(content);
         } catch (XPathException err) {

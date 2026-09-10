@@ -9,11 +9,15 @@ package net.sf.saxon.functions;
 
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
+
+import java.util.Map;
 
 
 public class UnparsedTextAvailable extends UnparsedTextFunction implements Callable {
@@ -33,12 +37,23 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
         if (hrefVal == null) {
             return BooleanValue.FALSE;
         }
-        String encoding;
+        String encoding = null;
+        boolean normalizeNewlines = false;
         if (getArity() == 2) {
-            Item enc = arguments[1].head();
-            encoding = enc == null ? null : enc.getStringValue();
-        } else {
-            encoding = null;
+            Item arg1 = arguments[1].head();
+            if (arg1 instanceof StringValue) {
+                encoding = arg1.getStringValue();
+            } else if (arg1 instanceof MapItem) {
+                Map<String, GroundedValue> options = UnparsedText.OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context);
+                GroundedValue encodingOption = options.get("encoding");
+                if (encodingOption != null) {
+                    encoding = encodingOption.getStringValue();
+                }
+                BooleanValue normalizeNewlinesOption = (BooleanValue) options.get("normalize-newlines");
+                if (normalizeNewlinesOption != null && normalizeNewlinesOption.getBooleanValue()) {
+                    normalizeNewlines = normalizeNewlinesOption.effectiveBooleanValue();
+                }
+            }
         }
         return BooleanValue.get(
                 evalUnparsedTextAvailable(hrefVal, encoding, context));
@@ -46,7 +61,7 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
 
     public boolean evalUnparsedTextAvailable(StringValue hrefVal, String encoding, XPathContext context) {
         try {
-            UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, context);
+            UnparsedText.evalUnparsedText(hrefVal, getStaticBaseUriString(), encoding, false, context);
             return true;
         } catch (XPathException err) {
             return false;

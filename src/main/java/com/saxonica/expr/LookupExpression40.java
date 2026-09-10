@@ -408,10 +408,10 @@ public class LookupExpression40 extends LookupExpression {
 
     @Override
     public Elaborator getElaborator() {
-        return new LookupElaborator();
+        return new LookupElaborator40();
     }
 
-    public static class LookupElaborator extends PullElaborator {
+    public static class LookupElaborator40 extends PullElaborator {
 
         public PullEvaluator elaborateForPull() {
             LookupExpression40 expr = (LookupExpression40) getExpression();
