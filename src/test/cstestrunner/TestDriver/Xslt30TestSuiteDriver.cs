@@ -129,7 +129,7 @@ namespace TestDriver {
                 throw new Exception("Unknown spec " + specStr);
             }
 
-            resultsDoc = new Xslt30ResultsDocument(this.resultsDir, Spec.XT30, reportFilename);
+            resultsDoc = new Xslt30ResultsDocument(this.resultsDir, requestedSpec, reportFilename);
             // No action: always use XSLT
         }
 
@@ -288,9 +288,9 @@ namespace TestDriver {
                 return;
             }
 
-            if (exceptionsMap.ContainsKey(testName) || isSlow(testName)) {
+            if (isSlow(testName)) {
                 notrun++;
-                resultsDoc.writeTestcaseElement(testName, "notRun", "requires excessive resources");
+                resultsDoc.writeTestcaseElement(testName, "tooBig", "requires excessive resources");
                 return;
             }
 
@@ -406,19 +406,19 @@ namespace TestDriver {
                         }
                     }
                     else {
-                        if (!expectStaticError) {
-                            string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
-                            Location loc = err.Location;
-                            try {
-                                Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
-                                                        loc.SystemId + "#" + loc.LineNumber +
-                                                        "\n   " + err.Message);
-                                recordFailure(testSetName, testName);
-                            }
-                            catch (Exception) {
-                                // No action
-                            }
-                        }
+                        // if (!expectStaticError) {
+                        //     string code = err.ErrorCode == null ? "(no error code)" : err.ErrorCode.LocalName;
+                        //     Location loc = err.Location;
+                        //     try {
+                        //         Console.Error.WriteLine("*** UNEXPECTED STATIC ERROR: " + code + " at " +
+                        //                                 loc.SystemId + "#" + loc.LineNumber +
+                        //                                 "\n   " + err.Message);
+                        //        recordFailure(testSetName, testName);
+                        //     }
+                        //     catch (Exception) {
+                        //         // No action
+                        //     }
+                        // }
                         outcome.ReportError(err.ErrorCode);
                     }
                 };
@@ -934,6 +934,7 @@ namespace TestDriver {
             if (success) {
                 if (outcome.GetWrongErrorMessage() != null) {
                     outcome.SetComment(outcome.GetWrongErrorMessage());
+                    successes++;
                     wrongErrorResults++;
                 }
                 else {

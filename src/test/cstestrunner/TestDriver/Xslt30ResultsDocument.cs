@@ -15,7 +15,7 @@ public class Xslt30ResultsDocument : ResultsDocument {
 
     public override void writeResultFilePreamble(Processor processor, XdmNode catalog) {
         createWriter(processor);
-        String today = DateTime.Now.ToString();
+        string today = Saxon.Hej.value.DateTimeValue.now().ToString();
         //XdmNode outermost = (XdmNode)catalog.EnumerateAxis(XdmAxis.Child, new QName(FOTestSuiteDriver.CNS, "catalog")).Current;
         results.WriteStartElement("test-suite-result", "http://www.w3.org/2012/11/xslt30-test-results");
         results.WriteStartElement("submission");

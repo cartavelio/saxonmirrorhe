@@ -259,8 +259,11 @@ namespace TestDriver {
                 schemaAware = edition == "EE";
                 driverSerializer.OutputStream = Console.OpenStandardError();
                 driverSerializer.SetOutputProperty(Serializer.OMIT_XML_DECLARATION, "yes");
+                DateTime start = DateTime.Now;
                 processCatalog(catalog);
-                printResults(resultsDir + "/results" + driverProc.ProductVersion + ".xml");
+                DateTime end = DateTime.Now;
+                TimeSpan duration = end - start;
+                printResults(resultsDir + "/results" + driverProc.ProductVersion + ".xml", duration);
             }
             catch (Exception e) {
                 Console.Error.WriteLine(e);
@@ -631,7 +634,7 @@ namespace TestDriver {
         }
 
         private bool SkipBecauseSlow(string testSet) {
-            return testSet == "unicode-90";
+            return false; //testSet == "unicode-90";
         }
 
         protected abstract void runTestCase(XdmNode testCase, XPathCompiler catalogXpc);
@@ -640,10 +643,7 @@ namespace TestDriver {
             feedback.Message(data, false);
         }
 
-        private void printResults(string resultsFileStr) {
-            feedback.Message(
-                successes + " successes, " + failures + " failures, " + wrongErrorResults + " incorrect ErrorCode, " +
-                notrun + " not run", false);
+        private void printResults(string resultsFileStr, TimeSpan duration) {
             if (requestedTestSet != null) {
                 feedback.Message("Failing tests:", false);
                 foreach (string t in failingTestCases) {
@@ -656,6 +656,10 @@ namespace TestDriver {
                     feedback.Message("  " + testSet + " - " + failuresPerTestSet[testSet], false);
                 }
             }
+            feedback.Message("Finished in " + (int)duration.TotalSeconds + "s", false);
+            feedback.Message(
+                successes + " successes, " + failures + " failures, " + wrongErrorResults + " incorrect ErrorCode, " +
+                notrun + " not run", false);
         }
         
         public abstract bool EnsureDependencySatisfied(XdmNode dependency, Environment env);
