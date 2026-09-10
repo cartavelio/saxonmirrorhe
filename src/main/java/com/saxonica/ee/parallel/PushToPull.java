@@ -67,7 +67,7 @@ public class PushToPull {
         public void write(Item item) throws XPathException {
             //System.err.println("In thread " + Thread.currentThread().getName() + " + Provider.write " + item);
             if (Thread.currentThread().isInterrupted()) {
-                System.err.println("Already interrupted");
+                //System.err.println("Already interrupted");
                 throw new QuitParsingException(true);
             }
             try {
