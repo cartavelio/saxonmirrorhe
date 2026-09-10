@@ -11,6 +11,7 @@ import com.saxonica.ee.stream.ManualGroupIterator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.functions.DistinctValues;
 import net.sf.saxon.lib.StringCollator;
@@ -35,7 +36,7 @@ import java.util.List;
 
 public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder, LookaheadIterator {
 
-    private final Expression select;
+    private final PullEvaluator select;
     private final FocusIterator population;
     private final Expression keyExpression;
     private final StringCollator collator;
@@ -51,7 +52,7 @@ public class GroupAdjacentIterator implements GroupIterator, LastPositionFinder,
     private int position = 0;
     private boolean composite = false;
 
-    public GroupAdjacentIterator(Expression select, Expression keyExpression,
+    public GroupAdjacentIterator(PullEvaluator select, Expression keyExpression,
                                  XPathContext baseContext, StringCollator collator, boolean composite)
             throws XPathException {
         this.select = select;

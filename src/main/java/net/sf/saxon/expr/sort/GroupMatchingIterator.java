@@ -8,10 +8,13 @@
 package net.sf.saxon.expr.sort;
 
 import com.saxonica.ee.stream.ManualGroupIterator;
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LastPositionFinder;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.om.*;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.FocusIterator;
+import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -27,7 +30,7 @@ import java.util.List;
 
 public abstract class GroupMatchingIterator implements LookaheadIterator, LastPositionFinder, GroupIterator {
 
-    protected Expression select;
+    protected PullEvaluator select;
     protected FocusIterator population;
     protected Pattern pattern;
     protected XPathContext baseContext;

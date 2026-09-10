@@ -8,8 +8,8 @@
 package net.sf.saxon.expr.sort;
 
 import com.saxonica.ee.stream.ManualGroupIterator;
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -28,7 +28,7 @@ import java.util.List;
 
 public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
 
-    private final Expression select;
+    private final PullEvaluator select;
     private final FocusIterator population;
     private final Function breakWhen;
     private final XPathContext baseContext;
@@ -39,7 +39,7 @@ public class GroupBreakingIterator implements LookaheadIterator, GroupIterator {
     private int position = 0;
 
 
-    public GroupBreakingIterator(Expression select, Function breakWhen,
+    public GroupBreakingIterator(PullEvaluator select, Function breakWhen,
                                  XPathContext baseContext)
             throws XPathException {
         this.select = select;

@@ -7,8 +7,8 @@
 
 package net.sf.saxon.expr.sort;
 
-import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.functions.Count;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 public class GroupEndingIterator extends GroupMatchingIterator implements GroupIterator, LookaheadIterator {
 
-    public GroupEndingIterator(Expression select, Pattern endPattern,
+    public GroupEndingIterator(PullEvaluator select, Pattern endPattern,
                                XPathContext context)
             throws XPathException {
         this.select = select;
