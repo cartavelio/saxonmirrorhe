@@ -35,7 +35,7 @@ public class JsonHandlerMap extends JsonHandler {
     protected Stack<UnicodeString> keys;
     private GroundedValue nullRepresentation = EmptySequence.getInstance();
     private boolean retainOrder = false;
-    private int flags;
+    private final int flags;
 
     public JsonHandlerMap(XPathContext context, JsonParser parser, int flags) {
         setContext(context);

@@ -50,6 +50,7 @@ import net.sf.saxon.style.PackageVersion;
 import net.sf.saxon.style.StylesheetFunctionLibrary;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.sxpath.IndependentContext;
+import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.packages.IPackageLoader;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
 import net.sf.saxon.trans.rules.Rule;
@@ -1501,7 +1502,7 @@ public class PackageLoaderHE implements IPackageLoader {
                 String val = eq == line.length() - 1 ? "" : line.substring(eq+1);
                 if (key.equals("item-separator") || key.equals("Q" + SaxonOutputKeys.NEWLINE)) {
                     try {
-                        val = net.sf.saxon.trace.ExpressionPresenter.jsUnescape(val);
+                        val = ExpressionPresenter.jsUnescape(val);
                     } catch (Exception ignored) {
                         // No action, leave unescaped
                     }

@@ -464,7 +464,7 @@ public class JsonReceiver implements Receiver {
         return tb.toUnicodeString();
     }
 
-    @CSharpReplaceBody(code="return Int32.ToString(\"X4\")")
+    @CSharpReplaceBody(code="return c.ToString(\"X4\");")
     public static String hex4(int c) {
         return String.format("%04x", c);
     }

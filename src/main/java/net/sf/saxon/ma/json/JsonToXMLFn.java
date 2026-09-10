@@ -104,7 +104,7 @@ public class JsonToXMLFn extends SystemFunction {
         JsonHandlerXML handler = new JsonHandlerXML(context, getStaticBaseUriString(), flags);
         if (options != null) {
             handler.setFallbackFunction(checkedOptions, context);
-            parser.setNumberParser(checkedOptions, context);
+            parser.setNumberParser(checkedOptions);
         }
         parser.parse(input.codePoints(), flags, handler, context);
         return handler.getResult();

@@ -97,7 +97,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         if (options != null) {
             handler.setFallbackFunction(options, context);
             handler.setNullRepresentation(nullRepresentation);
-            parser.setNumberParser(options, context);
+            parser.setNumberParser(options);
         }
         parser.parse(input, flags, handler, context);
         return handler.getResult().head();

@@ -25,7 +25,7 @@ public abstract class StringMap extends MapItem {
      * @param key the key
      * @return the relevant entry if present, or null if absent.
      */
-    public abstract GroundedValue get(UnicodeString key);
+    public abstract GroundedValue getU(UnicodeString key);
 
     /**
      * Ask whether a given string is present as a key in the map
@@ -41,7 +41,7 @@ public abstract class StringMap extends MapItem {
      * @param key the key being tested
      * @return true if the key is present
      */
-    public abstract boolean contains(UnicodeString key);
+    public abstract boolean containsU(UnicodeString key);
 
 }
 

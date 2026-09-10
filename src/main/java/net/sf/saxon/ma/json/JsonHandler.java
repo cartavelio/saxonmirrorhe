@@ -143,4 +143,4 @@ public class JsonHandler {
     }
 }
 
-// Copyright (c) 2018-2023 Saxonica Limited
+// Copyright (c) 2018-2024 Saxonica Limited

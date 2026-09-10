@@ -20,7 +20,7 @@ public abstract class TwineBuilder {
      */
 
     public static TwineBuilder make(int initialSize) {
-        return new T8(Integer.max(initialSize, 2));
+        return new T8(Math.max(initialSize, 2));
     }
 
     /**
@@ -116,11 +116,11 @@ public abstract class TwineBuilder {
                 buffer[used++] = (byte)codepoint;
                 return this;
             } else if (codepoint < 65536) {
-                char[] buffer16 = new char[Integer.max(used*2, buffer.length)];
+                char[] buffer16 = new char[Math.max(used*2, buffer.length)];
                 StringTool.copy8to16(buffer, 0, buffer16, 0, used);
                 return new T16(buffer16, used).append(codepoint);
             } else {
-                byte[] buffer24 = new byte[Integer.max(used * 6, buffer.length*3)];
+                byte[] buffer24 = new byte[Math.max(used * 6, buffer.length*3)];
                 StringTool.copy8to24(buffer, 0, buffer24, 0, used);
                 return new T24(buffer24, used).append(codepoint);
             }
@@ -132,7 +132,7 @@ public abstract class TwineBuilder {
                 // special-case this one to achieve a bulk move
                 int len = chars.length32();
                 if (used + len > buffer.length) {
-                    buffer = Arrays.copyOf(buffer, Integer.max(used * 2, used + len));
+                    buffer = Arrays.copyOf(buffer, Math.max(used * 2, used + len));
                 }
                 System.arraycopy(((Twine8)chars).getByteArray(), 0, buffer, used, len);
                 used += len;
@@ -181,7 +181,7 @@ public abstract class TwineBuilder {
                 buffer[used++] = (char) codepoint;
                 return this;
             } else  {
-                byte[] buffer24 = new byte[Integer.max(used * 6, buffer.length)];
+                byte[] buffer24 = new byte[Math.max(used * 6, buffer.length)];
                 StringTool.copy16to24(buffer, 0, buffer24, 0, used);
                 return new T24(buffer24, used).append(codepoint);
             }

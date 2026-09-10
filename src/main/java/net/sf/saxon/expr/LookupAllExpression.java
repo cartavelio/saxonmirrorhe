@@ -298,7 +298,7 @@ public class LookupAllExpression extends UnaryExpression {
                 });
 
                 return new MappingIterator(entries, item ->
-                        ((ShapedMap) item).get("value").iterate());
+                        ((ShapedMap) item).getU(Shape.VALUE).iterate());
 
             };
         }

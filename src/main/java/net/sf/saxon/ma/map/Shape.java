@@ -3,7 +3,6 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
@@ -21,10 +20,11 @@ public class Shape {
     private final UnicodeString[] keys;
     private final HashMap<UnicodeString, Integer> slotMap;
 
-    public final static Shape KEY_VALUE_PAIR = new Shape(new Twine8("key"), new Twine8("value"));
+    public final static UnicodeString KEY = new Twine8("key");
+    public final static UnicodeString VALUE = new Twine8("value");
+    public final static Shape KEY_VALUE_PAIR = new Shape(KEY, VALUE);
 
     public Shape(UnicodeString... keys) {
-        Instrumentation.count("Shapes");
         this.keys = keys;
         this.slotMap = new HashMap<>(keys.length);
         for (int i=0; i<keys.length; i++) {

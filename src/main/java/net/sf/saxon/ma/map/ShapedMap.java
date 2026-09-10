@@ -67,7 +67,7 @@ public class ShapedMap extends StringMap {
     @Override
     public GroundedValue get(AtomicValue key) {
         if (key instanceof StringValue) {
-            return get(key.getUnicodeStringValue());
+            return getU(key.getUnicodeStringValue());
         }
         return null;
     }
@@ -113,7 +113,7 @@ public class ShapedMap extends StringMap {
      */
     @Override
     public GroundedValue get(String key) {
-        return get(StringView.of(key));
+        return getU(StringView.of(key));
     }
 
     /**
@@ -123,7 +123,7 @@ public class ShapedMap extends StringMap {
      * @return the relevant entry if present, or null if absent.
      */
     @Override
-    public GroundedValue get(UnicodeString key) {
+    public GroundedValue getU(UnicodeString key) {
         int slot = shape.getSlot(key);
         if (slot >= 0) {
             return values[slot];
@@ -139,7 +139,7 @@ public class ShapedMap extends StringMap {
      */
     @Override
     public boolean contains(String key) {
-        return get(key) != null;
+        return getU(StringView.of(key)) != null;
     }
 
     /**
@@ -149,8 +149,8 @@ public class ShapedMap extends StringMap {
      * @return true if the key is present
      */
     @Override
-    public boolean contains(UnicodeString key) {
-        return get(key) != null;
+    public boolean containsU(UnicodeString key) {
+        return getU(key) != null;
     }
 
     /**

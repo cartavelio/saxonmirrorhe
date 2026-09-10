@@ -198,7 +198,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      * @param key the key being tested
      * @return true if the key is present
      */
-    public boolean contains(UnicodeString key) {
+    public boolean containsU(UnicodeString key) {
         return contains(key.toString());
     }
 
@@ -211,7 +211,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
     @Override
     public GroundedValue get(AtomicValue key) {
         if (key instanceof StringValue) {
-            return get(key.getUnicodeStringValue());
+            return getU(key.getUnicodeStringValue());
         } else {
             return null;
         }
@@ -223,7 +223,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      * @return the relevant entry if present, or null if absent.
      */
     public GroundedValue get(String key) {
-        return get(StringView.of(key));
+        return getU(StringView.of(key));
     }
 
     /**
@@ -233,7 +233,7 @@ public class LazyStringMap extends StringMap implements Iterable<KeyValuePair> {
      * @return the relevant entry if present, or null if absent.
      */
     @Override
-    public GroundedValue get(UnicodeString key) {
+    public GroundedValue getU(UnicodeString key) {
         prepare();
         return baseMap.get(key);
     }

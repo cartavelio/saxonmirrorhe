@@ -160,7 +160,7 @@ public class DictionaryMap extends StringMap {
      * @param key the key being tested
      * @return true if the key is present
      */
-    public boolean contains(UnicodeString key) {
+    public boolean containsU(UnicodeString key) {
         return map.containsKey(key.toString());
     }
 
@@ -195,7 +195,7 @@ public class DictionaryMap extends StringMap {
      * @return the relevant entry if present, or null if absent.
      */
     @Override
-    public GroundedValue get(UnicodeString key) {
+    public GroundedValue getU(UnicodeString key) {
         return map.get(key.toString());
     }
 
@@ -226,7 +226,7 @@ public class DictionaryMap extends StringMap {
      */
     @Override
     public AtomicIterator keys() {
-        return new KeyIterator(map);
+        return new KeyIteratorImpl(map);
     }
 
     /**
@@ -354,10 +354,10 @@ public class DictionaryMap extends StringMap {
         return (HashTrieMap)target.getCompletedMap();
     }
 
-    protected static class KeyIterator implements AtomicIterator {
+    protected static class KeyIteratorImpl implements AtomicIterator {
         Iterator<String> keyIter;
 
-        public KeyIterator(Map<String, GroundedValue> hashMap) {
+        public KeyIteratorImpl(Map<String, GroundedValue> hashMap) {
             this.keyIter = hashMap.keySet().iterator();
         }
 
