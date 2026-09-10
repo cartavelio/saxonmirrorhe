@@ -2,23 +2,7 @@
 <!-- exceptions file for the QT4 Test Suite -->
 <exceptions>
 
-   <!--<exception test-set="fn-deep-equal" 
-      test-case="  deep-equal-40-functions-004
-      deep-equal-40-unordered-004
-      deep-equal-40-unordered-005
-      deep-equal-40-unordered-011
-      deep-equal-40-unordered-012
-      deep-equal-40-unordered-013
-      deep-equal-40-unordered-014
-      deep-equal-40-unordered-018
-      deep-equal-40-unordered-021
-      deep-equal-40-unordered-022
-      deep-equal-40-unordered-024
-      deep-equal-40-unordered-error" run="false" report="n/a">
-      <created by="Michael Kay" on="2024-01-08"/>
-      <reason>change for unordered comparison not yet implemented</reason>
-   </exception>-->
-   
+ 
  
  
   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
@@ -119,10 +103,10 @@
       <reason>Placeholders currently not allowed as keyword arguments</reason>
    </exception>
    
-   <exception test-set="prod-ForClause.map"  run="false" report="n/a">
+   <!--<exception test-set="prod-ForClause.map"  run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-18"/>
       <reason>Not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="prod-FunctionDecl" test-case="
       function-decl-40-019
