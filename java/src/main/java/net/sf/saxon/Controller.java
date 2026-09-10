@@ -1162,9 +1162,9 @@ public class Controller implements ContextOriginator {
             SequenceIterator iter = gcr.getDefaultValue().iterate(newXPathContext());
             globalContextValue = SequenceExtent.from(iter);
         }
-        if (globalContextValue != null) {
+        //if (globalContextValue != null) {
             globalContextValue = executable.checkInitialContextValue(globalContextValue, newXPathContext());
-        }
+        //}
 
         if (traceListener != null) {
             preEvaluateGlobals(newXPathContext());

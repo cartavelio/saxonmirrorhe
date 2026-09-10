@@ -120,18 +120,11 @@ public class GlobalContextRequirement {
 
     public void export(ExpressionPresenter out) throws XPathException {
         out.startElement("glob");
-        String use = null;
-        switch (optionality) {
-            case PROHIBITED:
-                use = "pro";
-                break;
-            case REQUIRED:
-                use = "req";
-                break;
-            case OPTIONAL:
-                use = "opt";
-                break;
-        }
+        String use = switch (optionality) {
+            case PROHIBITED -> "pro";
+            case REQUIRED -> "req";
+            case OPTIONAL -> "opt";
+        };
         out.emitAttribute("use", use);
         if (!getRequiredItemType().equals(AnyItemType.getInstance())) {
             out.emitAttribute("type", getRequiredItemType().toExportString());
