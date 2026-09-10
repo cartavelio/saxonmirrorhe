@@ -62,7 +62,6 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    @CSharpReplaceBody(code="return Saxon.Hej.value.EmptySequence.getInstance(); // TODO: implement me!")
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         StringValue input = (StringValue) arguments[0].head();
         if (input == null) {
@@ -87,7 +86,9 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         }
     }
 
-    //#if CSHARP==false
+
+
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.ParseXmlFragment.eval(inputArg, baseUri, stripSpace, context);")
     private NodeInfo evalParseXmlFragment(
             StringValue inputArg, String baseUri, boolean stripSpace, XPathContext context)
             throws XPathException {
@@ -197,7 +198,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         }
         return node;
     }
-    //#endif
+    
 
     /**
      * Filter to remove the element wrapper added to the document to satisfy the XML parser

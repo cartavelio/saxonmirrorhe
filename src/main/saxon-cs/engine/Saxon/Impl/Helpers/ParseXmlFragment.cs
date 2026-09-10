@@ -7,16 +7,15 @@ using Saxon.Hej.pull;
 using Saxon.Hej.value;
 
 namespace Saxon.Impl.Helpers {
-    public class ParseXmlFragment : SystemFunction {
-        public override Saxon.Hej.om.Sequence call(Saxon.Hej.expr.XPathContext context, Saxon.Hej.om.Sequence[] arguments) {
+    public class ParseXmlFragment {
+        public static Saxon.Hej.om.NodeInfo eval(
+                Saxon.Hej.value.StringValue inputArg, 
+                string baseUri, 
+                bool stripSpace, 
+                Saxon.Hej.expr.XPathContext context) {
             Saxon.Hej.Controller controller = context.getController();
             Saxon.Hej.Configuration config = controller.getConfiguration();
-            AtomicValue arg = (AtomicValue)arguments[0].head();
-
-            if (arg == null) {
-                return EmptySequence.getInstance();
-            }
-            string content = arg.getStringValue();
+            string content = inputArg.getStringValue();
             
             // The Microsoft parser does inadequate checking of the text declaration (which is not quite
             // the same as an XML declaration). So we apply some extra checks ourselves.
@@ -40,12 +39,14 @@ namespace Saxon.Impl.Helpers {
             }
             
             XmlTextReader reader = new(content, XmlNodeType.Element, 
-                new XmlParserContext(null, null, null, XmlSpace.None));
+                new XmlParserContext(null, null, null, stripSpace ? XmlSpace.Preserve : XmlSpace.None));
+
             reader.Normalization = true;
             DotNetPullProvider provider = new(reader) {
                 AcceptFragment = true
             };
             PullSource source = new(provider);
+            source.setSystemId(baseUri);
             return config.buildDocumentTree(source).getRootNode();
         }
     }

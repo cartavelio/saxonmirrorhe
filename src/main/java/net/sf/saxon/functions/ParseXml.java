@@ -150,7 +150,6 @@ public class ParseXml extends SystemFunction implements Callable {
         return true;
     }
 
-    //#if CSHARP==false
     /**
      * Evaluate the function using a push parser (SAX parser, obtained using JAXP)
      * @param inputArg the string content of the XML to be parsed
@@ -158,6 +157,7 @@ public class ParseXml extends SystemFunction implements Callable {
      * @return the parsed document, as a tree
      * @throws XPathException if parsing fails
      */
+    @CSharpReplaceBody(code="return null;")
     private NodeInfo parseXmlPush(
             StringValue inputArg,
             ParseOptions options,
@@ -212,6 +212,7 @@ public class ParseXml extends SystemFunction implements Callable {
         }
     }
 
+    //#if CSHARP==false
     public static class RetentiveErrorHandler implements ErrorHandler {
 
         public List<SAXParseException> errors = new ArrayList<>();
