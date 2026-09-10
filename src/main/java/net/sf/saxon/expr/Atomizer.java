@@ -7,11 +7,11 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
-import net.sf.saxon.expr.elab.PullEvaluator;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.instruct.TerminationException;
@@ -25,6 +25,7 @@ import net.sf.saxon.pattern.NameTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -679,6 +680,18 @@ public final class Atomizer extends UnaryExpression {
                 } catch (TerminationException | Error.UserDefinedXPathException e) {
                     throw e;
                 } catch (XPathException e) {
+                    if (expr.roleSupplier == null) {
+                        throw e;
+                    } else {
+                        String message = expr.expandMessage(e.getMessage());
+                        throw new XPathException(message)
+                                .withErrorCode(e.getErrorCodeQName())
+                                .withLocation(e.getLocator())
+                                .withXPathContext(context)
+                                .maybeWithLocation(expr.getLocation());
+                    }
+                } catch (UncheckedXPathException uxe) {
+                    XPathException e = uxe.getXPathException();
                     if (expr.roleSupplier == null) {
                         throw e;
                     } else {

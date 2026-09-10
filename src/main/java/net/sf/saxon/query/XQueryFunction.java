@@ -409,7 +409,7 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
                 UserFunctionParameter[] params = getParameterDefinitions();
                 for (int i = 0; i < params.length; i++) {
                     params[i].setSlotNumber(i);
-                    map.allocateSlotNumber(params[i].getVariableQName());
+                    map.allocateSlotNumber(params[i].getVariableQName(), params[i]);
                 }
 
                 // type-check the body of the function
@@ -519,7 +519,7 @@ public class XQueryFunction implements Declaration, Location, FunctionDefinition
                     PackageData pd = staticContext.getPackageData();
                     variable.setPackageData(pd);
                     SlotManager sm = pd.getGlobalSlotManager();
-                    int slot = sm.allocateSlotNumber(variable.getVariableQName());
+                    int slot = sm.allocateSlotNumber(variable.getVariableQName(),  null);
                     variable.compile(staticContext.getExecutable(), slot);
                     pd.addGlobalVariable(variable);
                 }

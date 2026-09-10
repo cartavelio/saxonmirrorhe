@@ -254,7 +254,11 @@ public final class CardinalityChecker extends UnaryExpression {
 
         // Otherwise return an iterator that does the checking on the fly
 
-        return new CardinalityCheckingIterator(base, requiredCardinality, roleSupplier, getLocation());
+        try {
+            return new CardinalityCheckingIterator(base, requiredCardinality, roleSupplier, getLocation());
+        } catch (XPathException e) {
+            throw e.maybeWithContext(context);
+        }
 
     }
 

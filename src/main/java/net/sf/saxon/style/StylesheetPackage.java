@@ -523,7 +523,7 @@ public class StylesheetPackage extends PackageData {
     private void registerGlobalVariable(Component c, SlotManager slotManager) {
         if (c.getActor() instanceof GlobalVariable) {
             GlobalVariable var = (GlobalVariable) c.getActor();
-            int slot = slotManager.allocateSlotNumber(var.getVariableQName());
+            int slot = slotManager.allocateSlotNumber(var.getVariableQName(), null);
             var.setPackageData(this);
             var.setBinderySlotNumber(slot);
 //            if (c.getVisibility() != Visibility.HIDDEN) {

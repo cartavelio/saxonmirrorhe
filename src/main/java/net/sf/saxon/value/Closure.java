@@ -41,6 +41,7 @@ public abstract class Closure implements Sequence, ContextOriginator {
     protected int depth = 0;
     protected LearningEvaluator learningEvaluator;
     protected int serialNumber;
+    protected Expression expression; // for diagnostics only
 
     // The base iterator is used to copy items on demand from the underlying value
     // to the reservoir. It only ever has one instance (for each Closure) and each
@@ -51,25 +52,6 @@ public abstract class Closure implements Sequence, ContextOriginator {
     public Closure() {
     }
 
-//    /**
-//     * Construct a Closure by supplying the expression and the set of context variables.
-//     *
-//     * @param expression the expression to be lazily evaluated
-//     * @param context    the dynamic context of the expression including for example the variables
-//     *                   on which it depends
-//     * @param ref        the number of references to the value being lazily evaluated; this affects
-//     *                   the kind of Closure that is created
-//     * @return the Closure, a virtual value that can later be materialized when its content is required
-//     * @throws net.sf.saxon.trans.XPathException
-//     *          if a dynamic error occurs
-//     */
-//
-//    /*@NotNull*/
-//    public static Sequence make(
-//            Expression expression, XPathContext context, int ref) throws XPathException {
-//        return context.getConfiguration().makeClosure(expression, ref, context);
-//    }
-
     public void saveContext(/*@NotNull*/ Expression expression, /*@NotNull*/ XPathContext context) throws XPathException {
         // Make a copy of all local variables. If the value of any local variable is a closure
         // whose depth exceeds a certain threshold, we evaluate the closure eagerly to avoid
@@ -78,6 +60,7 @@ public abstract class Closure implements Sequence, ContextOriginator {
         // We only copy the local variables if the expression has dependencies on local variables.
         // What's more, we only copy those variables that the expression actually depends on.
         //Instrumentation.count("Closure.saveContext()");
+        this.expression = expression; // for diagnostics only
         if ((expression.getDependencies() & StaticProperty.DEPENDS_ON_LOCAL_VARIABLES) != 0) {
             StackFrame localStackFrame = context.getStackFrame();
             Sequence[] local = localStackFrame.getStackFrameValues();
@@ -178,27 +161,6 @@ public abstract class Closure implements Sequence, ContextOriginator {
     /*@NotNull*/
     @Override
     public abstract SequenceIterator iterate();
-//    {
-//
-//        if (inputIterator == null) {
-//            try {
-//                inputIterator = inputEvaluator.iterate(savedXPathContext);
-//                return inputIterator;
-//            } catch (XPathException e) {
-//                throw new UncheckedXPathException(e);
-//            }
-//        } else {
-//            // In an ideal world this shouldn't happen: if the value is needed more than once, we should
-//            // have chosen a MemoClosure.
-//
-//            // Changed Feb 2015 to throw an exception. Processing the expression more than once is not only
-//            // inefficient, it is wrong in the case where node-identity affects the outcome. See for example
-//            // test case fn-fold-left-018
-//
-//            //return inputIterator.getAnother();
-//            throw new IllegalStateException("A Closure can only be read once");
-//        }
-//    }
 
     /**
      * Reduce a value to its simplest form. If the value is a closure or some other form of deferred value
@@ -216,6 +178,10 @@ public abstract class Closure implements Sequence, ContextOriginator {
     @Override
     public Sequence makeRepeatable() throws XPathException {
         return materialize();
+    }
+
+    public Expression getExpression() {
+        return expression;
     }
 }
 

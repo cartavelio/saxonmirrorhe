@@ -453,7 +453,7 @@ public class IndependentContext extends AbstractStaticContext
             va[var.getLocalSlotNumber()] = var;
         }
         for (XPathVariable v : va) {
-            map.allocateSlotNumber(v.getVariableQName());
+            map.allocateSlotNumber(v.getVariableQName(), v);
         }
         return map;
     }
@@ -462,6 +462,22 @@ public class IndependentContext extends AbstractStaticContext
         return variables.values();
     }
 
+
+    @Override
+    public boolean isImportedSchema(NamespaceUri namespace) {
+        return importedSchemaNamespaces.contains(namespace);
+    }
+
+    /**
+     * Get the set of imported schemas
+     *
+     * @return a Set, the set of URIs representing the names of imported schemas
+     */
+
+    @Override
+    public Set<NamespaceUri> getImportedSchemaNamespaces() {
+        return importedSchemaNamespaces;
+    }
 
     /**
      * Register the set of imported schema namespaces

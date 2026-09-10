@@ -81,6 +81,5 @@ public interface Sequence {
         return this;
     }
 
-
 }
 

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.expr.LocalBinding;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.om.StructuredQName;
@@ -84,10 +85,11 @@ public class SlotManager {
      * Allocate a slot number for a variable
      *
      * @param qName the name of the variable
+     * @param binding the binding of the variable (only used in Saxon-EE)
      * @return the allocated slot number (the next one available)
      */
 
-    public int allocateSlotNumber(StructuredQName qName) {
+    public int allocateSlotNumber(StructuredQName qName, LocalBinding binding) {
         variableMap.add(qName);
         return numberOfVariables++;
     }

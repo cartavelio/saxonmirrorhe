@@ -588,7 +588,7 @@ public class ExpressionTool {
             int count = ((Assignation) exp).getRequiredSlots();
             nextFree += count;
             if (frame != null) {
-                frame.allocateSlotNumber(((Assignation) exp).getVariableQName());
+                frame.allocateSlotNumber(((Assignation) exp).getVariableQName(), (Assignation) exp);
             }
         }
         if (exp instanceof LocalParam && ((LocalParam) exp).getSlotNumber() < 0) {
@@ -598,7 +598,7 @@ public class ExpressionTool {
             for (Clause c : ((FLWORExpression) exp).getClauseList()) {
                 for (LocalVariableBinding b : c.getRangeVariables()) {
                     b.setSlotNumber(nextFree++);
-                    frame.allocateSlotNumber(b.getVariableQName());
+                    frame.allocateSlotNumber(b.getVariableQName(), b);
                 }
             }
         }

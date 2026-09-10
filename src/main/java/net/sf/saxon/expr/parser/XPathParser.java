@@ -4473,7 +4473,7 @@ public class XPathParser {
             uf.setParameterDefinitions(paramArray);
             SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
             for (int i = 0; i < expandedArity; i++) {
-                int slot = stackFrame.allocateSlotNumber(paramArray[i].getVariableQName());
+                int slot = stackFrame.allocateSlotNumber(paramArray[i].getVariableQName(), paramArray[i]);
                 paramArray[i].setSlotNumber(slot);
             }
 
@@ -4509,7 +4509,7 @@ public class XPathParser {
 
             SlotManager stackFrame = p.getStaticContext().getConfiguration().makeSlotManager();
             for (UserFunctionParameter param : paramArray) {
-                stackFrame.allocateSlotNumber(param.getVariableQName());
+                stackFrame.allocateSlotNumber(param.getVariableQName(), param);
             }
 
             ExpressionTool.allocateSlots(body, params.size(), stackFrame);

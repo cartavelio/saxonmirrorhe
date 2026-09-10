@@ -864,7 +864,7 @@ public class QueryModule implements StaticContext {
         for (Iterable<GlobalVariable> iter : iters) {
             for (GlobalVariable var : iter) {
                 if (!varDefinitions.contains(var)) {
-                    int slot = globalVariableMap.allocateSlotNumber(var.getVariableQName());
+                    int slot = globalVariableMap.allocateSlotNumber(var.getVariableQName(), null);
                     var.compile(getExecutable(), slot);
                     varDefinitions.add(var);
                 }

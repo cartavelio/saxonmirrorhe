@@ -291,8 +291,9 @@ public abstract class SequenceExtent implements GroundedValue {
         @CSharpModifiers(code = {"public", "override"})
         public String toString() {
             StringBuilder fsb = new StringBuilder(64);
+            fsb.append('(');
             for (int i = 0; i < getLength(); i++) {
-                fsb.append(i == 0 ? "(" : ", ");
+                fsb.append(i == 0 ? "" : ", ");
                 fsb.append(items.get(i).toString());
             }
             fsb.append(')');

@@ -23,11 +23,13 @@ import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.tree.AttributeLocation;
-
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.value.Closure;
+import net.sf.saxon.value.MemoClosure;
+import net.sf.saxon.value.SingletonClosure;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
 
@@ -247,8 +249,14 @@ public class StandardDiagnostics {
         if (level > 0) {
             int depth = 20;
             while (depth-- > 0 && context != null) {
+                ContextOriginator originator = context instanceof XPathContextMajor ? ((XPathContextMajor) context).getOrigin() : null;
                 Component component = context.getCurrentComponent();
-                if (component != null) {
+                if (originator instanceof Closure && ((Closure) originator).getExpression() != null) {
+                    Expression expr = ((Closure) originator).getExpression();
+                    out.error("During lazy evaluation of " +
+                                      expr.toShortString() +
+                                      " on line " + expr.getLocation().getLineNumber() + " of " + expr.getLocation().getSystemId());
+                } else if (component != null) {
                     if (component.getActor() instanceof Mode) {
                         Rule rule = context.getCurrentTemplateRule();
                         if (rule != null) {
@@ -266,7 +274,7 @@ public class StandardDiagnostics {
                             out.error(sb.toString());
                         }
                     } else {
-                        out.error(getLocationMessageText(component.getActor()).replace("$at ", "In "));
+                        out.error(getLocationMessageText(component.getActor()).replaceFirst("^at ", "In "));
                     }
                 }
                 try {
@@ -276,10 +284,9 @@ public class StandardDiagnostics {
                 }
                 context = context.getMajorContext();
 
-                ContextOriginator originator = ((XPathContextMajor) context).getOrigin();
-                if (originator == null || originator instanceof Controller) {
+                if (originator instanceof Controller) {
                     return;
-                } else {
+                } else if (originator != null && !(originator instanceof Closure)) {
                     out.error("     invoked by " + showOriginator(originator));
                 }
                 context = context.getCaller();
@@ -319,6 +326,26 @@ public class StandardDiagnostics {
             sb.append("global parameter ").append(((GlobalParam) originator).getVariableQName().getDisplayName());
         } else if (originator instanceof GlobalVariable) {
             sb.append(((GlobalVariable) originator).getDescription());
+        } else if (originator instanceof MemoClosure) {
+            Expression expr = ((MemoClosure) originator).getExpression();
+            if (expr == null) {
+                sb.append("lazy evaluation of expression");
+            } else {
+                sb.append("lazy evaluation of ")
+                        .append(expr.toShortString())
+                        .append(" on line ")
+                        .append(expr.getLocation().getLineNumber());
+            }
+        } else if (originator instanceof SingletonClosure) {
+            Expression expr = ((SingletonClosure) originator).getExpression();
+            if (expr == null) {
+                sb.append("lazy evaluation of singleton expression");
+            } else {
+                sb.append("lazy evaluation of ")
+                        .append(expr.toShortString())
+                        .append(" on line ")
+                        .append(expr.getLocation().getLineNumber());
+            }
         } else {
             sb.append("unknown caller (").append(originator.getClass()).append(")");
         }
