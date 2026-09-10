@@ -217,7 +217,7 @@ public abstract class SteppingNavigator {
         public DescendantAxisIterator(SteppingNode start, boolean includeSelf, NodePredicate predicate) {
             this.start = start;
 
-            if (!(includeSelf && predicate.test(start))) {
+            if (!(includeSelf && (predicate == null || predicate.test(start)))) {
                 // initialize currNode to the start node if and only if this is NOT a descendant-or-self scan
                 current = start;
             }

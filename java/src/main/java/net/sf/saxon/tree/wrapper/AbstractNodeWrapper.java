@@ -345,7 +345,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
     @CSharpModifiers(code={"protected", "virtual"})
     protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         SequenceIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
-        if (predicate != AnyGNode.TEST) {
+        if (predicate != null && predicate != AnyGNode.TEST) {
             iter = Navigator.filter(iter, predicate);
         }
         return iter;
