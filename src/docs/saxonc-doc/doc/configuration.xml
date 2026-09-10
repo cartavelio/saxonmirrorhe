@@ -537,7 +537,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                <code>setParameter("numParam", value1)</code>
             </td>
             <td>
-               <p>Sets the value of a Saxon extension parameter defined in the schema (see <a
+               <p>Sets the value of a Saxon extension parameter defined in the schema (see <a target="_blank"
                      href="http://www.saxonica.com/documentation12/index.html#!schema-processing/parameterizing-schemas"
                      >Parameterizing schemas</a> in the main Saxon documentation for more
                   information).</p>
@@ -548,7 +548,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       <h3 class="codeTitle">setProperty(string $name, string $propValue)</h3>
 
       <p>The properties available are a subset of those specified for running schema validation from
-         the command line (see the <a
+         the command line (see the <a target="_blank"
             href="http://www.saxonica.com/documentation12/index.html#!schema-processing/commandline"
             >Validation from the command line</a> section in the main Saxon documentation for more information).</p>
 

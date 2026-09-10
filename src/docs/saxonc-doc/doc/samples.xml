@@ -8,15 +8,15 @@
       APIs, see the relevant sections in the main Saxon documentation:</p>
   
   <ul>
-    <li><a class="bodylink"
+    <li><a target="_blank"
       href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation" >XSLT
       transformations from a C/C++, Python or PHP application</a></li>
-    <li><a class="bodylink"
+    <li><a target="_blank"
       href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query" >XQuery from a
       C/C++, Python or PHP application</a></li>
-    <li><a class="bodylink" href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath"
+    <li><a target="_blank" href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath"
       >Evaluating XPath expressions from a C/C++, Python or PHP application</a></li>
-    <li><a class="bodylink"
+    <li><a target="_blank"
       href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation"
       >Validation from C/C++, Python or PHP</a></li>
   </ul>
