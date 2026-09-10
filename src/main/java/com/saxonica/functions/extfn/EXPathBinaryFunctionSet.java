@@ -309,7 +309,10 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
                 String result = BinaryResource.decode(value.getBinaryValue(), offset, len, encoding);
                 return new StringValue(result);
             } catch (XPathException e) {
-                e.setErrorCodeQName(new StructuredQName("bin", ERROR_NAMESPACE, EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                e.setErrorCodeQName(new StructuredQName("bin", ERROR_NAMESPACE,
+                                                        e.getMessage().startsWith("Unsupported encoding")
+                                                                ? EXPathBinaryFunctionSet.ERROR_UNKNOWN_ENCODING
+                                                                : EXPathBinaryFunctionSet.ERROR_CONVERSION));
                 throw e;
             }
         }
@@ -336,7 +339,10 @@ EXPathBinaryFunctionSet extends BuiltInFunctionSet {
             try {
                 data = BinaryResource.encode(s, encoding);
             } catch (XPathException e) {
-                e.setErrorCodeQName(new StructuredQName("bin", ERROR_NAMESPACE, EXPathBinaryFunctionSet.ERROR_CONVERSION));
+                e.setErrorCodeQName(new StructuredQName("bin", ERROR_NAMESPACE,
+                                                        e.getMessage().startsWith("Unsupported encoding")
+                                                            ? EXPathBinaryFunctionSet.ERROR_UNKNOWN_ENCODING
+                                                            : EXPathBinaryFunctionSet.ERROR_CONVERSION));
                 throw e;
             }
             return one(data);
