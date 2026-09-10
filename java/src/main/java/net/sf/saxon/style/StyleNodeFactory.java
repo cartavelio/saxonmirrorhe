@@ -24,6 +24,8 @@ import net.sf.saxon.tree.linked.TextImpl;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /**
@@ -209,27 +211,31 @@ public class StyleNodeFactory implements NodeFactory {
             // Detect an unrecognized element in the Saxon namespace
 
             if (uri.equals(NamespaceUri.SAXON)) {
-                switch (elemName.getLocalPart()) {
-                    case "array":
-                    case "array-member":
-                    case "assign":
-                    case "deep-update":
-                    case "do":
-                    case "doctype":
-                    case "entity-ref":
-                    case "import-query":
-                    case "item-type":
-                    case "while":
-                        String message = elemName.getDisplayName() + " is not recognized as a Saxon instruction";
-                        if (config.getEditionCode().equals("HE")) {
-                            message += ". Saxon extensions require Saxon-PE or higher";
-                        } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                            message += ". No Saxon-PE or -EE license was found";
-                        }
-                        XmlProcessingIncident err = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9008, location.saveLocation()).asWarning();
-                        pipe.getErrorReporter().report(err);
+                // The clever way to do this in Java is with a switch statement.
+                // But C# switch statements don't allow fall-through, so that's less convenient.
+                // Trying to be clever about constructing the list also ran afoul of
+                // transpiler problems. FIXME: revisit this.
+                List<String> validNames = new ArrayList<>();
+                validNames.add("array");
+                validNames.add("array-member");
+                validNames.add("assign");
+                validNames.add("deep-update");
+                validNames.add("do");
+                validNames.add("doctype");
+                validNames.add("entity-ref");
+                validNames.add("import-query");
+                validNames.add("item-type");
+                validNames.add("while");
+                if (validNames.contains(elemName.getLocalPart())) {
+                    String message = elemName.getDisplayName() + " is not recognized as a Saxon instruction";
+                    if (config.getEditionCode().equals("HE")) {
+                        message += ". Saxon extensions require Saxon-PE or higher";
+                    } else if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
+                        message += ". No Saxon-PE or -EE license was found";
+                    }
+                    XmlProcessingIncident err = new XmlProcessingIncident(message, SaxonErrorCode.SXWN9008, location.saveLocation()).asWarning();
+                    pipe.getErrorReporter().report(err);
                 }
-
             }
 
             // We can't work out the final class of the node until we've examined its attributes
