@@ -3140,19 +3140,6 @@ public class Configuration implements SourceResolver {
     }
 
     /**
-     * Mark a schema namespace as being sealed. This is done when components from this namespace
-     * are first used for validating a source document or compiling a source document or query. Once
-     * a namespace has been sealed, it is not permitted to change the schema components in that namespace
-     * by redefining them, deriving new types by extension, or adding to their substitution groups.
-     *
-     * @param namespace the namespace URI of the components to be sealed
-     */
-
-    public void sealNamespace(NamespaceUri namespace) {
-        //
-    }
-
-    /**
      * Get the set of saxon:param schema parameters declared in the schema held by this Configuration.
      *
      * @return the set of parameters. May return null if none have been declared.

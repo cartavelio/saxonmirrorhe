@@ -76,7 +76,6 @@ public class XQueryParser extends XPathParser {
     private boolean preambleProcessed = false;
 
     public final Set<NamespaceUri> importedModules = new HashSet<>(5);
-    final List<NamespaceUri> namespacesToBeSealed = new ArrayList<>(10);
     final List<Import> schemaImports = new ArrayList<>(5);
     final List<Import> moduleImports = new ArrayList<>(5);
 
@@ -620,7 +619,6 @@ public class XQueryParser extends XPathParser {
                         // we have read "declare %"
                         processPreamble();
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         nextToken();
@@ -725,7 +723,6 @@ public class XQueryParser extends XPathParser {
                     case Token.DECLARE_VARIABLE:
                         //allowSetters = false;
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
@@ -734,7 +731,6 @@ public class XQueryParser extends XPathParser {
                     case Token.DECLARE_CONTEXT:
                         //allowSetters = false;
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
@@ -742,7 +738,6 @@ public class XQueryParser extends XPathParser {
                         break;
                     case Token.DECLARE_FUNCTION:
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
@@ -754,7 +749,6 @@ public class XQueryParser extends XPathParser {
                             grumble("expected 'function' after 'declare updating");
                         }
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         processPreamble();
@@ -762,7 +756,6 @@ public class XQueryParser extends XPathParser {
                         break;
                     case Token.DECLARE_OPTION:
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         parseOptionDeclaration();
@@ -770,7 +763,6 @@ public class XQueryParser extends XPathParser {
                     case Token.DECLARE_ITEM_TYPE:
                         checkSyntaxExtensions("declare item-type");
                         if (allowDeclarations) {
-                            sealNamespaces(namespacesToBeSealed, env.getConfiguration());
                             allowDeclarations = false;
                         }
                         parseItemTypeDeclaration(AnnotationList.EMPTY);
@@ -947,13 +939,6 @@ public class XQueryParser extends XPathParser {
             if (t.currentToken != Token.PERCENT) {
                 return new AnnotationList(annotations);
             }
-        }
-    }
-
-
-    private void sealNamespaces(/*@NotNull*/ List<NamespaceUri> namespacesToBeSealed, /*@NotNull*/ Configuration config) {
-        for (NamespaceUri ns : namespacesToBeSealed) {
-            config.sealNamespace(ns);
         }
     }
 
