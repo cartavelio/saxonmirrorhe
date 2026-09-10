@@ -5,11 +5,13 @@ import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.SingleNamespaceSchema;
 import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.functions.ResolveURI;
 import net.sf.saxon.om.AttributeMap;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaException;
 
 import javax.xml.transform.Source;
+import java.net.URISyntaxException;
 
 /**
  * An xs:include element in an XML Schema document
@@ -49,6 +51,18 @@ public class XSDInclude extends AnnotationParent {
         }
 
         SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
+        String documentBase = getBaseURI();
+        try {
+            String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
+            XSDSchema existing = manager.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
+            if (existing != null) {
+                includedSchema = existing.getSchema();
+                return;
+            }
+        } catch (URISyntaxException e) {
+            // no action
+        }
+
 
         Source source = null;
         try {
@@ -57,11 +71,6 @@ public class XSDInclude extends AnnotationParent {
             handleSchemaException(schemaLocation, e);
         }
         if (source != null) {
-            XSDSchema existing = manager.getExistingSchemaDocument(source.getSystemId(), getXSDSchema().getTargetNamespace());
-            if (existing != null) {
-                includedSchema = existing.getSchema();
-                return;
-            }
 
             //-- Has this schema location been processed?
 

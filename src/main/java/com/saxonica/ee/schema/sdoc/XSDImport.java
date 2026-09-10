@@ -70,6 +70,21 @@ public class XSDImport extends AnnotationParent {
 
         String documentBase = getBaseURI();
 
+        // Have we already completed reading this document?
+
+        if (schemaLocation != null) {
+            try {
+                String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
+                XSDSchema existing = manager.getExistingSchemaDocument(location, namespace);
+                if (existing != null) {
+                    importedSchema = existing.getSchema();
+                    return;
+                }
+            } catch (URISyntaxException e) {
+                // no action
+            }
+        }
+
         // For the XML namespace, use the built-in version if the schema location is known or if already loaded
 
         if (namespace.equals(NamespaceConstant.XML)) {
@@ -109,33 +124,9 @@ public class XSDImport extends AnnotationParent {
                 return;
             }
 
-            // Have we already completed reading this document?
-
-            XSDSchema existing = manager.getExistingSchemaDocument(source.getSystemId(), namespace);
-            if (existing != null) {
-                importedSchema = existing.getSchema();
-                return;
-            }
-        } else {
-
-            // Have we already completed reading this document?
-            // See bug 2210 problem A. If the target namespace is known, then SchemaReader.getSource() returns null,
-            // therefore the test on source.getSystemId() doesn't work, and we go on to issue a warning.
-
-            try {
-                String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
-                XSDSchema existing = manager.getExistingSchemaDocument(location, namespace);
-                if (existing != null) {
-                    importedSchema = existing.getSchema();
-                    return;
-                }
-            } catch (URISyntaxException e) {
-                // no action
-            }
         }
 
-        //-- Is another document for the same schema namespace already loaded?
-        //PreparedSchema existingSchema = config.getSchema(namespace);
+        // Is another document for the same schema namespace already loaded?
         int status = config.getNamespaceStatus(namespace);
         if (status == PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
             // This implies a cycle of imports. Alternatively, it means that a concurrent
@@ -168,7 +159,7 @@ public class XSDImport extends AnnotationParent {
             return;
         }
 
-        //-- if schemaLocation not provided, give up, unless it's the XSI or FN Namespace
+        // If schemaLocation not provided, give up, unless it's the XSI or FN Namespace
         if (schemaLocation == null) {
             if (namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
                 importedSchema = XSINamespaceSchema.buildSchema(config);
@@ -221,8 +212,6 @@ public class XSDImport extends AnnotationParent {
             return;
         }
 
-        //int errors = (importee==null ? 1 : importee.getXSDSchema().getErrorCount());
-
         boolean valid = (errors == 0);
 
         // Don't validate the imported schema yet, because it may have references to components
@@ -250,8 +239,7 @@ public class XSDImport extends AnnotationParent {
             return;
         }
 
-        //-- Add schema to list of imported schemas (if not already present)
-        //importedSchema.setSchemaLocation(schemaLocation);
+        //  Add schema to list of imported schemas (if not already present)
         config.addSchema(importedSchema);
     }
 

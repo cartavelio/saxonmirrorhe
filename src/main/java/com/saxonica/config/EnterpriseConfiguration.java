@@ -640,13 +640,31 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      *
      * @param schemaSource  the JAXP Source object identifying the schema document to be loaded. This may be either
      *                      a source schema document in XSD format, or a compiled schema in Saxon's SCM format
-     * @param errorReporter the ErrorListener to be notified of any errors in the schema. If null,
-     *                      the configuration's errorListener is used
+     * @param errorReporter the ErrorReporter to be notified of any errors in the schema. If null,
+     *                      the configuration's ErrorReporter is used
      * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
      */
 
     @Override
     public void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorReporter errorReporter) throws SchemaException {
+        addSchemaSource(schemaSource, errorReporter, newSchemaCompiler());
+    }
+
+
+    /**
+     * Load a schema, which will be available for use by all subsequent operations using
+     * this EnterpriseConfiguration.
+     *
+     * @param schemaSource  the JAXP Source object identifying the schema document to be loaded. This may be either
+     *                      a source schema document in XSD format, or a compiled schema in Saxon's SCM format
+     * @param errorReporter the ErrorListener to be notified of any errors in the schema. If null,
+     *                      the configuration's errorListener is used
+     * @param compiler      the schema compiler to be used. This allows a cache of schema documents (retained by the
+     *                      schema compiler) to be reused when compiling multiple schema documents. See bug #4982.
+     * @throws SchemaException if the schema cannot be read or parsed or if it is invalid
+     */
+
+    public void addSchemaSource(Source schemaSource, /*@Nullable*/ ErrorReporter errorReporter, SchemaCompiler compiler) throws SchemaException {
         try {
             //#if CSHARP==false
             if (schemaSource instanceof SAXSource && getBooleanProperty(Feature.IGNORE_SAX_SOURCE_PARSER)) {
@@ -655,7 +673,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 ((SAXSource) schemaSource).setXMLReader(null);
             }
             //#endif
-            SchemaCompiler compiler = newSchemaCompiler();
             if (errorReporter != null) {
                 compiler.setErrorReporter(errorReporter);
             }
@@ -700,18 +717,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
         if (pschema instanceof SingleNamespaceSchema) {
             String targetNamespace = ((SingleNamespaceSchema) pschema).getTargetNamespace();
-//            int status = getNamespaceStatus(targetNamespace);
-//            if (status != PreparedSchema.NAMESPACE_UNKNOWN && status != PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION) {
-//                String message;
-//                if (targetNamespace.isEmpty()) {
-//                    message = "No-namespace schema ignored, because already present in cache";
-//                } else {
-//                    message = "Schema for namespace " + targetNamespace + " ignored, because already present in cache";
-//                }
-//                Incident incident = new Incident(message).asWarning();
-//                makeErrorReporter().accept(incident);
-//                return;
-//            }
             setNamespaceStatus(targetNamespace, PreparedSchema.NAMESPACE_KNOWN);
         } else {
             for (String ns : pschema.getTargetNamespaces()) {

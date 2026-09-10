@@ -1,6 +1,7 @@
 package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
@@ -283,9 +284,10 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
 
     @Override
     public Schema newSchema(Source[] sources) throws SAXException {
+        SchemaCompiler compiler = config.newSchemaCompiler();
         try {
             for (Source source : sources) {
-                config.addSchemaSource(source, errorReporter);
+                config.addSchemaSource(source, errorReporter, compiler);
             }
         } catch (SchemaException e) {
             throw toSAXException(e);
