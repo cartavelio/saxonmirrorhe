@@ -14,6 +14,7 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -55,9 +56,11 @@ public class ActiveStreamSource extends StreamSource implements ActiveSource {
         is.setByteStream(getInputStream());
         boolean reuseParser = false;
         XMLReader parser = options.obtainXMLReader();
+        EntityResolver savedEntityResolver = null;
         if (parser == null) {
             parser = config.getSourceParser();
-            if (options.getEntityResolver() != null /*&& parser.getEntityResolver() == null*/) {
+            if (options.getEntityResolver() != null) {
+                savedEntityResolver = parser.getEntityResolver();
                 parser.setEntityResolver(options.getEntityResolver());
             }
             try {
@@ -72,6 +75,7 @@ public class ActiveStreamSource extends StreamSource implements ActiveSource {
         sax.setSystemId(url);
         sax.deliver(receiver, options);
         if (reuseParser) {
+            parser.setEntityResolver(savedEntityResolver);
             config.reuseSourceParser(parser);
         }
     }

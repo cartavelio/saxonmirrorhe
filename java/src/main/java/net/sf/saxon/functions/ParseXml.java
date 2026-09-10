@@ -18,6 +18,7 @@ import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
@@ -29,8 +30,7 @@ import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.ValidationException;
 import net.sf.saxon.value.*;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXParseException;
+import org.xml.sax.*;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -38,7 +38,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -46,11 +45,10 @@ public class ParseXml extends SystemFunction implements Callable {
 
     public static OptionsParameter makeOptionsParameter(int version) {
         OptionsParameter options = new OptionsParameter(version);
-        //options.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         options.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
         options.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        //options.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
         options.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        options.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
         options.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -69,14 +67,17 @@ public class ParseXml extends SystemFunction implements Callable {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
+        boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
         AtomicValue input = (AtomicValue) arguments[0].head();
-        Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
+        MapItem options = null;
         if (getArity() >= 2) {
-            MapItem options = (MapItem) arguments[1].head();
-            if (options != null) {
-                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
-            }
+            options = (MapItem) arguments[1].head();
         }
+        if (options == null) {
+            options = EmptyMap.getInstance(40);
+        }
+        Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+
         if (input == null) {
             return EmptySequence.INSTANCE;
         }
@@ -138,20 +139,21 @@ public class ParseXml extends SystemFunction implements Callable {
                 parseOptions = parseOptions.withUseXsiSchemaLocation(true);
             }
 
-//            val = checkedOptions.get("allow-external-entities");
-//            if (val != null && !val.effectiveBooleanValue()) {
-//                //#if CSHARP==false
-//                parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
-//
-//                    @Override
-//                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-//                        throw new SAXException(
-//                                new XPathException("The parse-xml input references '" + systemId +
-//                                                       "' but external entity expansion is disallowed", "FODC0006"));
-//                    }
-//                });
-//                //#endif
-//            }
+            val = checkedOptions.get("trusted");
+            if (is40 && val != null) {
+                parseOptions = parseOptions.withTrusted(val.effectiveBooleanValue());
+                //#if CSHARP==false
+                parseOptions = parseOptions.withEntityResolver(new EntityResolver() {
+
+                    @Override
+                    public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
+                        throw new SAXException(
+                                new XPathException("The parse-xml input references '" + systemId +
+                                                       "' but external entity expansion is disallowed", "FODC0016"));
+                    }
+                });
+                //#endif
+            }
 
 //            val = checkedOptions.get("entity-expansion-limit").head();
 //            if (val != null) {
@@ -176,8 +178,12 @@ public class ParseXml extends SystemFunction implements Callable {
 
             val = checkedOptions.get("xinclude");
             if (val != null && val.effectiveBooleanValue()) {
-                parseOptions = parseOptions.withXIncludeAware(true);
-                //throw new XPathException("XIncude processing in fn:parse-xml is not supported", "FODC0013");
+                try {
+                    parseOptions = parseOptions.withXIncludeAware(true);
+                } catch (Exception e) {
+                    // SaxonCS - XInclude not supported
+                    throw new XPathException(e);
+                }
             }
         }
 
@@ -264,7 +270,7 @@ public class ParseXml extends SystemFunction implements Callable {
             return node;
         } catch (XPathException err) {
             String msg = makeParsingErrorMessage(err);
-            String code = "FODC0006";
+            String code = err.getErrorCodeQName() == null ? "FODC0006" : err.getErrorCodeQName().getLocalPart();
             if (err instanceof ValidationException || err.hasErrorCode("FODC0007")) {
                 code = "FODC0007";
             }
