@@ -53,10 +53,11 @@
         
     </category>-->
     
-    <!--<category name="xslt30">
-
+    <category name="xslt30">
+       <p>The value returned from the function call <code>system-property('xsl:vendor-uri')</code> has been changed
+       from <code>"http://www.saxonica.com/"</code> to <code>"https://www.saxonica.com/"</code>.</p>
  
-    </category>-->
+    </category>
     
     <!--<category name="xpath31">
 
