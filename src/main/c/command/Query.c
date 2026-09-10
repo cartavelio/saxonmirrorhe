@@ -327,7 +327,7 @@ void checkForException(sxnc_environment environi, jclass callingClass,  jobject 
         jmethodID getName = (jmethodID)(*(environi.env))->GetMethodID(environi.env, clscls, "getName", "()Ljava/lang/String;");
         jstring name =(jstring)((*(environi.env))->CallObjectMethod(environi.env, exccls, getName));
         char const* utfName = (char const*)(*(environi.env))->GetStringUTFChars(environi.env, name, 0);
-	printf(utfName);
+        printf("%s", utfName);
 
 	 jmethodID  getMessage = (jmethodID)(*(environi.env))->GetMethodID(environi.env, exccls, "getMessage", "()Ljava/lang/String;");
 	if(getMessage) {
@@ -335,6 +335,7 @@ void checkForException(sxnc_environment environi, jclass callingClass,  jobject 
 		jstring message = (jstring)((*(environi.env))->CallObjectMethod(environi.env, exc, getMessage));
 		if(message) {        	
 			char const* utfMessage = (char const*)(*(environi.env))->GetStringUTFChars(environi.env, message, 0);
+            printf("%s", utfMessage);
 		}
 	
 	}

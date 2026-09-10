@@ -497,28 +497,28 @@ function testCallTemplate1($proc, $trans)
     echo "Test: testCallTemplate1:";
     $executable = $trans->compileFromFile("xsl/addition.xsl");
     if (!$trans->exceptionOccurred()) {
-        echo "example: cp 0";
+
         $a = $proc->createAtomicValue((int)2);
-        echo "example: cp 1";
+
         $b = $proc->createAtomicValue((int)3);
-        echo "example: cp 2";
+
         $valueArray = array("a" => $a, "b" => $b);
-        echo "example: cp 3";
+
         //$valueArray["a"] = $a;
         //$valueArray["b"] = $b;
         $executable = $trans->compileFromFile("xsl/addition.xsl");
-        echo "example: cp 4";
+
         $executable->setProperty("omit-xml-declaration", "true");
-        echo "example: cp 5";
+
         $executable->setInitialTemplateParameters($valueArray);
-        echo "example: cp 6";
+
         $v = $executable->callTemplateReturningValue("t");
-        echo "example: cp 7";
+
         if ($v != NULL) {
-            echo "example: cp 7-1 ";
+
             $item = $v->getHead();
             if ($item != NULL) {
-                echo "example: cp 7-2";
+
                 if ($item->isNode() && ($item->getStringValue() == 5)) {  //($item->getAtomicValue()->getLongValue() == 5)) {
                     echo "Result is true";
                 }
@@ -602,7 +602,7 @@ echo '<br/>';
  //testCallFunction($saxonProc, $proc);
      testCallTemplate1($saxonProc, $proc);
      exampleSimple1($saxonProc, $proc, $foo_xml, $foo_xsl);
-      echo '<br/>';
+     echo '<br/>';
        exampleSimple2($proc, "xml/foo.xml", $foo_xsl);
       echo '<br/>';
       exampleSimple3($saxonProc, $proc);

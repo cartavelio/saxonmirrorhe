@@ -89,9 +89,10 @@ void testApplyTemplatesString1(Xslt30Processor *trans, sResultCount *sresult) {
 /*
 * Test transform to String. Source and stylesheet supplied as arguments
 */
-void testTransformToStringExtensionFunc(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
+void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << endl << "Test: TransformToStringExtensionFunc:" << endl;
+
     bool nativeFound = processor->registerNativeMethods(SaxonProcessor::sxn_environ->env,
                                                         "com/saxonica/functions/extfn/cpp/NativeCall",
                                                         cppMethods, sizeof(cppMethods) / sizeof(cppMethods[0]));
@@ -107,8 +108,8 @@ void testTransformToStringExtensionFunc(SaxonProcessor *processor, Xslt30Process
         }
         return;
     }
-
-    executable->setProperty("extc", "home/ond1/work/svn/latest9.9-saxonc/samples/cppTests/cppExtensionFunction");
+    executable->setcwd(cwd);
+    executable->setProperty("extc",  "/home/ond1/work/repository/saxondev-11/src/main/c/samples/cppTests/cppExtensionFunction");
 
     if (nativeFound) {
         const char *output = executable->transformFileToString("../data/cat.xml");
@@ -2611,7 +2612,7 @@ int main(int argc, char* argv[]) {
 
 
     //Available in PE and EE
-    //testTransformToStringExtensionFunc(processor, trans);
+    testTransformToStringExtensionFunc(cwd, processor, trans, sresult);
 
 
 
