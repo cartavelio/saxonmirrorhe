@@ -191,7 +191,7 @@ public class Configuration implements SourceResolver, NotationSet {
     private final TypeChecker typeChecker = new TypeChecker();
     private final TypeChecker10 typeChecker10 = new TypeChecker10();
 
-    private transient SaxonResourceResolver catalogResolver;
+    private transient CommonResourceResolver catalogResolver;
     private transient URIResolver uriResolver;
     protected FunctionLibraryList builtInExtensionLibraryList;
     protected int xsdVersion = XSD11;
@@ -750,7 +750,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @param resolver The resolver to use.
      */
 
-    public void setSaxonResourceResolver(SaxonResourceResolver resolver) {
+    public void setSaxonResourceResolver(CommonResourceResolver resolver) {
         catalogResolver = resolver;
         defaultXsltCompilerInfo.setSaxonResourceResolver(resolver);
         setURIResolver(catalogResolver);
@@ -763,7 +763,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @return The resolver.
      */
 
-    public SaxonResourceResolver getSaxonResourceResolver() {
+    public CommonResourceResolver getSaxonResourceResolver() {
         if (catalogResolver == null) {
             setSaxonResourceResolver(new CatalogResourceResolver());
         }
@@ -2719,7 +2719,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        SaxonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         return parser;
@@ -2753,7 +2753,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        SaxonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         if (isTiming()) {
@@ -2859,7 +2859,7 @@ public class Configuration implements SourceResolver, NotationSet {
             parser = loadParser();
         }
 
-        SaxonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
+        CommonResourceResolver resolver = getSaxonResourceResolver().newInstance().chain(parser.getEntityResolver());
         parser.setEntityResolver(resolver);
 
         try {
@@ -4813,14 +4813,14 @@ public class Configuration implements SourceResolver, NotationSet {
 
                 //#if CSHARP==false
                 case FeatureCode.SAXON_RESOURCE_RESOLVER:
-                    if (!(value instanceof SaxonResourceResolver)) {
+                    if (!(value instanceof CommonResourceResolver)) {
                         throw new IllegalArgumentException(
                                 "SAXON_RESOURCE_RESOLVER value must be an instance of net.sf.saxon.lib.SaxonResourceResolver");
                     }
-                    setSaxonResourceResolver((SaxonResourceResolver) value);
+                    setSaxonResourceResolver((CommonResourceResolver) value);
                     break;
                 case FeatureCode.SAXON_RESOURCE_RESOLVER_CLASS:
-                    SaxonResourceResolver rresolver = (SaxonResourceResolver) instantiateClassName(name, value, SaxonResourceResolver.class);
+                    CommonResourceResolver rresolver = (CommonResourceResolver) instantiateClassName(name, value, CommonResourceResolver.class);
                     setSaxonResourceResolver(rresolver);
                     break;
                 //#endif

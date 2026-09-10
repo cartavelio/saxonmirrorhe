@@ -2,19 +2,16 @@ package resolvers;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.CatalogResourceResolver;
+import net.sf.saxon.lib.CommonResourceResolver;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.SaxonResourceResolver;
 import net.sf.saxon.trans.XPathException;
 import org.junit.Test;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.ext.EntityResolver2;
 import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
@@ -42,7 +39,7 @@ public class ResolverConfiguration {
     public void explicitCatalogResourceResolver() {
         Configuration config = new Configuration();
 
-        SaxonResourceResolver underlyingResolver = new CatalogResourceResolver();
+        CommonResourceResolver underlyingResolver = new CatalogResourceResolver();
 
         MyResolver resolver = new MyResolver(underlyingResolver);
 
@@ -65,15 +62,15 @@ public class ResolverConfiguration {
         }
     }
 
-    private class MyResolver extends SaxonResourceResolver {
-        private final SaxonResourceResolver resolver;
+    private class MyResolver extends CommonResourceResolver {
+        private final CommonResourceResolver resolver;
 
-        public MyResolver(SaxonResourceResolver resolver) {
+        public MyResolver(CommonResourceResolver resolver) {
             this.resolver = resolver;
         }
 
         @Override
-        public SaxonResourceResolver newInstance() {
+        public CommonResourceResolver newInstance() {
             return this;
         }
 

@@ -13,7 +13,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import java.io.IOException;
 
-public class CatalogResourceResolver extends SaxonResourceResolver {
+public class CatalogResourceResolver extends CommonResourceResolver {
     private final Resolver resolver;
 
     public CatalogResourceResolver() {
@@ -24,13 +24,13 @@ public class CatalogResourceResolver extends SaxonResourceResolver {
         this.resolver = resolver;
     }
 
-    public SaxonResourceResolver newInstance() {
-        SaxonResourceResolver newResolver = new CatalogResourceResolver(resolver);
+    public CommonResourceResolver newInstance() {
+        CommonResourceResolver newResolver = new CatalogResourceResolver(resolver);
         newResolver.copyFrom(this);
         return newResolver;
     }
 
-    public SaxonResourceResolver chain(EntityResolver resolver) {
+    public CommonResourceResolver chain(EntityResolver resolver) {
         nextEntityResolver = resolver;
         if (resolver instanceof EntityResolver2) {
             nextEntityResolver2 = (EntityResolver2) resolver;
@@ -38,13 +38,13 @@ public class CatalogResourceResolver extends SaxonResourceResolver {
         return this;
     }
 
-    public SaxonResourceResolver chain(EntityResolver2 resolver) {
+    public CommonResourceResolver chain(EntityResolver2 resolver) {
         nextEntityResolver = resolver;
         nextEntityResolver2 = resolver;
         return this;
     }
 
-    public SaxonResourceResolver chain(URIResolver resolver) {
+    public CommonResourceResolver chain(URIResolver resolver) {
         nextURIResolver = resolver;
         return this;
     }
