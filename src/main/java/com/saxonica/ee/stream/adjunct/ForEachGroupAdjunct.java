@@ -122,7 +122,7 @@ public class ForEachGroupAdjunct extends ForEachAdjunct  {
                 return PostureAndSweep.ROAMING_AND_FREE_RANGING;
             }
         }
-        if (algorithm == ForEachGroup.GROUP_BREAKING_WHEN) {
+        if (algorithm == ForEachGroup.GROUP_SPLIT_WHEN) {
             reasons.add("Streaming is not implemented for xsl:for-each-group/@break-when");
             return PostureAndSweep.ROAMING_AND_FREE_RANGING;
         }
