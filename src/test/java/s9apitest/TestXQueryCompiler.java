@@ -223,6 +223,34 @@ public class TestXQueryCompiler {
     }
 
     @Test
+    public void testSeparateCompilationMultiple() {  // Bug 6394
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.compileLibrary("module namespace m='http://www.example.com/module-one'; " +
+                                        "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b };" +
+                                        "declare variable $m:ten as xs:integer := 10;");
+            comp.compileLibrary("module namespace m='http://www.example.com/module-two'; " +
+                                        "declare function m:add($a as xs:integer, $b as xs:integer) as xs:integer { $a + $b + 1 };" +
+                                        "declare variable $m:ten as xs:integer := 11;");
+            String q1 = "import module namespace m='http://www.example.com/module-two'; m:add(2,2)";
+            XQueryEvaluator ev = comp.compile(q1).load();
+            assertEquals("5", ev.evaluate().toString(), "2+2");
+            String q2 = "import module namespace m='http://www.example.com/module-one'; m:add($m:ten,5)";
+            ev = comp.compile(q2).load();
+            assertEquals("15", ev.evaluate().toString(), "10+5");
+            String q3 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
+            ev = comp.compile(q3).load();
+            assertEquals("4", ev.evaluate().toString(), "2+2");
+            String q4 = "import module namespace m='http://www.example.com/module-two'; m:add($m:ten,5)";
+            ev = comp.compile(q4).load();
+            assertEquals("17", ev.evaluate().toString(), "10+5");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testSeparateCompilationNested() {
         try {
             Processor proc = new Processor(true);
@@ -244,6 +272,54 @@ public class TestXQueryCompiler {
             fail(e.getMessage());
         }
     }
+
+    @Test
+    public void testSeparateCompilationBug6394() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.compileLibrary("module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
+                                        + "declare variable $xmlch:xmlLetter := 'foo';");
+            comp.compileLibrary("module namespace j2x = 'urn:informatica:ae:xquery:json2xml';\n"
+                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';");
+            comp.compileLibrary("module namespace util = 'urn:activevos:spi:functions:utilities';\n"
+                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
+                                        + "import module namespace j2x = 'urn:informatica:ae:xquery:json2xml';");
+//            String q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
+//            XQueryEvaluator ev = comp.compile(q1).load();
+//            assertEquals("12", ev.evaluate().toString(), "10+2");
+//            String q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
+//            ev = comp.compile(q2).load();
+//            assertEquals("15", ev.evaluate().toString(), "10+5");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSeparateCompilationBug6394b() {
+        try {
+            Processor proc = new Processor(true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
+            comp.compileLibrary("module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
+                                        + "declare variable $xmlch:xmlLetter := 'foo';");
+            comp.compileLibrary("module namespace j2x = 'urn:informatica:ae:xquery:json2xml';\n"
+                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';");
+            comp.compileLibrary("module namespace util = 'urn:activevos:spi:functions:utilities';\n"
+                                        + "import module namespace j2x = 'urn:informatica:ae:xquery:json2xml';\n"
+                                        + "import module namespace xmlch = 'urn:activevos:avsf:xquery:utils:xmlcharutil';\n"
+                                        );
+//            String q1 = "import module namespace m2='http://www.example.com/module-two'; m2:add($m2:ten,2)";
+//            XQueryEvaluator ev = comp.compile(q1).load();
+//            assertEquals("12", ev.evaluate().toString(), "10+2");
+//            String q2 = "import module namespace m1='http://www.example.com/module-one'; m1:add($m1:ten,5)";
+//            ev = comp.compile(q2).load();
+//            assertEquals("15", ev.evaluate().toString(), "10+5");
+        } catch (SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
 
     @Test
     public void testSeparateCompilationImportFromNonSeparatelyCompiledLibraryModule() {
