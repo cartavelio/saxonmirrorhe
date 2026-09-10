@@ -2235,9 +2235,8 @@ cdef class PyXsltExecutable:
         """
         call_template_returning_string(self, str template_name, **kwds)
         Invoke a transformation by calling a named template and return the result as a string.
-        If no source file or xdm value has been supplied, then the clark name for 'xsl:initial-template' is used.
         Args:
-			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template
+			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: source_file (str) or xdm_value (PyXdmValue); and
                 base_output_uri (str) which is used for resolving relative URIs in the href attribute
                 of the xsl:result-document instruction.
@@ -2309,7 +2308,7 @@ cdef class PyXsltExecutable:
         Invoke a transformation by calling a named template with the result saved to file. It is possible to specify
         the output file as an argument or using the set_output_file method.
         Args:
-			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template
+			template_name (str): The name of the template to invoke. If None is supplied then call the initial-template.
             **kwds: Possible keyword arguments: source_file (str) or xdm_node (PyXdmNode); output_file (str), and
                 base_output_uri (str) which is used for resolving relative URIs in the href attribute
                 of the xsl:result-document instruction.
