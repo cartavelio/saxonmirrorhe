@@ -303,7 +303,8 @@ public class Doc extends SystemFunction implements Callable {
                         .withSchemaValidationMode(Validation.BY_TYPE)
                         .withTopLevelType(type);
             } else {
-                throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "FODC0008");
+                throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "XPTY0004")
+                        .asTypeError();
             }
 
 
