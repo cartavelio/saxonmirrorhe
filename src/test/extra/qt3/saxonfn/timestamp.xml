@@ -20,7 +20,7 @@
     <test-case name="s-timestamp-002">
         <description>Use saxon:timestamp in a loop (avoid optimization)</description>
         <created by="Michael Kay" on="2016-09-19"/>
-        <test>count(distinct-values(for $i in 1 to 20 return (for $j in 1 to 10000 return "Dummy"[$j lt 0], saxon:timestamp())))</test>
+        <test>count(distinct-values(for $i in 1 to 20 return (for $j in 1 to 40000 return "Dummy"[$j lt 0], saxon:timestamp())))</test>
         <result>
             <assert-eq>20</assert-eq>
         </result>
