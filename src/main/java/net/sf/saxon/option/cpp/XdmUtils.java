@@ -504,7 +504,7 @@ public class XdmUtils {
 
         List<XdmNode> children = new ArrayList<XdmNode>();
         List<Long> childrenRefs = new ArrayList<Long>();
-        XdmSequenceIterator iter = node.axisIterator(Axis.ATTRIBUTE);
+        XdmSequenceIterator<XdmNode> iter = node.axisIterator(Axis.ATTRIBUTE);
         while (iter.hasNext()) {
             //children.add((XdmNode) iter.next());
             ObjectHandle objectHandle = SaxonCAPI.objectHandles.create( iter.next());
@@ -514,7 +514,7 @@ public class XdmUtils {
             return -1;
         }   */
         long[] childRefs= iter.stream().mapToLong( i ->{
-            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create( iter.next());
+            ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
             return objectHandle.rawValue();
         }).toArray();
         //SaxonCAPI.DataWrapper wrapper = new SaxonCAPI.DataWrapper(childRefs);

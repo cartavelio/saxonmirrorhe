@@ -8,6 +8,12 @@
 package net.sf.saxon.option.cpp;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.s9api.*;
+import org.graalvm.nativeimage.IsolateThread;
+import org.graalvm.nativeimage.ObjectHandle;
+import org.graalvm.nativeimage.c.function.CEntryPoint;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CLongPointer;
+import org.graalvm.nativeimage.c.type.CTypeConversion;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
@@ -33,6 +39,21 @@ public class SaxonCMessageListener implements MessageListener2 {
             sourceFile = SaxonCAPI.resolveFileToSource(processor, cwd, messageFilename, ResourceRequest.XML_NATURE);
         }
     }
+
+    @CEntryPoint(name = "createSaxonCMessageListener")
+    public static long createSaxonCMessageListener(IsolateThread thread, ObjectHandle procRef, CCharPointer c_cwd, CCharPointer c_mode) throws SaxonApiException {
+        Processor processor = SaxonCAPI.objectHandles.get(procRef);
+
+        String  cwd = CTypeConversion.toJavaString(c_cwd);
+        String mode = CTypeConversion.toJavaString(c_mode);
+
+        SaxonCMessageListener listener = new SaxonCMessageListener(processor, cwd, mode);
+
+        ObjectHandle handle = SaxonCAPI.objectHandles.create(listener);
+
+        return handle.rawValue();
+    }
+
     @Override
     public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
         if(mode == 0 ) {
@@ -55,11 +76,17 @@ public class SaxonCMessageListener implements MessageListener2 {
      * Get the xsl:messages  as an array of XdmNode objects
      * @return array of XdmNode objects
      */
-    public XdmNode[] getXslMessages() {
+    @CEntryPoint(name = "j_getXslMessages")
+    public CLongPointer getXslMessages(IsolateThread thread, SaxonCAPI.AllocatorFn alloc) {
         if(xslMessages == null) {
             return null;
         } else {
-            return xslMessages.toArray(new XdmNode[xslMessages.size()]);
+            long[] refs= xslMessages.stream().mapToLong( i ->{
+                        ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
+                        return objectHandle.rawValue();
+                    }).toArray();
+            CLongPointer addr = SaxonCAPI.longArrayToNative(alloc,refs);
+            return addr;
         }
     }
 }
