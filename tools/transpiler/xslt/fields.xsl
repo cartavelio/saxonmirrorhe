@@ -277,8 +277,8 @@
    <xsl:template match="*[scope/name/@nodeType='SimpleName'][@RESOLVED_TYPE = 'com.ibm.icu.text.CollationElementIterator']" priority="20">
       <xsl:choose>
          <xsl:when test="name/@identifier='NULLORDER'">ICU4N.Text.CollationElementIterator.NullOrder</xsl:when>
-         <xsl:when test="name/@identifier='IGNORABLE'">ICU4N.Text.CollationElementIterator.Ingorable</xsl:when>
-         <!-- sic - it's misspelled in ICU4N. Raised as issue #35 -->
+         <xsl:when test="name/@identifier='IGNORABLE'">ICU4N.Text.CollationElementIterator.Ignorable</xsl:when>
+         <!-- note - it was misspelled in ICU4N as Ingorable. Raised as issue #35. Fixed in current version. -->
          <xsl:otherwise>
             <xsl:next-match/>
          </xsl:otherwise>
