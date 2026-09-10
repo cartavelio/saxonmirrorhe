@@ -404,6 +404,10 @@ as required; implementing-classes key correction
         <j id="{@name}" in="{substring(name(.), 1, 1)}" qy="{lower-case(@name)}"/>
     </xsl:template>
     
+    <xsl:template match="method[exists(preceding-sibling::method[@name eq current()/@name])]" mode="deeptree">
+        <!--<xsl:message>Duplicate method name <xsl:value-of select="@name"/></xsl:message>-->
+    </xsl:template>
+    
     <xsl:template match="class" mode="deeptree">
         <xsl:variable name="type" select="tokenize(@type,'\.')[last()]"/>
         <xsl:variable name="has-nonPP-implementing-classes" as="xs:boolean" 
@@ -416,19 +420,13 @@ as required; implementing-classes key correction
         <xsl:if test="@visibility ne 'package-private' or (not($has-PP-members-only) and ($has-nonPP-implementing-classes
             or $has-nonPP-subclasses))">
             <j id="{$type}" in="{substring(name(.), 1, 1)}" qy="{lower-case($type)}">
-                <xsl:variable name="methods" select="distinct-values(./methods/method[@visibility ne 'package-private']/@name)"
-                    as="xs:string*"/>
                 <xsl:apply-templates select="class|fields/field[@visibility ne'package-private']
                     |enumConstants/enumConstant[@visibility ne 'package-private']" mode="deeptree">
                     <xsl:sort select="@type"/>
                 </xsl:apply-templates>
-                <xsl:variable name="class" select="."/>
-                <xsl:for-each select="$methods">
-                    <xsl:variable name="name" select="."/>
-                    <xsl:apply-templates select="($class/methods/method[@name=$name])[1]" mode="deeptree">
-                        <xsl:sort select="@name"/>
-                    </xsl:apply-templates>
-                </xsl:for-each>
+                <xsl:apply-templates select="methods/method[@visibility ne 'package-private']" mode="deeptree">
+                    <xsl:sort select="@name"/>
+                </xsl:apply-templates>
             </j>
         </xsl:if>
     </xsl:template>

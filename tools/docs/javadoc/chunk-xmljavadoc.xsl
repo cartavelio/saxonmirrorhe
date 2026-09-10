@@ -93,8 +93,7 @@ History
         </xsl:result-document>
 
         <!-- Produce index of classes and members - used in javadoc search.
-            Group into hierarchy of packages, classes and members. 
-            Note that the method names are not sorted within a class.
+            Group into hierarchy of packages, classes and members.
         -->
         <xsl:result-document href="{$base-output}/javadoc-types.xml">
             <packages title="Search Data">
@@ -172,6 +171,10 @@ History
         <j id="{@name}" in="{$initial}" qy="{lower-case(@name)}"/>
     </xsl:template>
     
+    <xsl:template match="d:method[exists(preceding-sibling::d:method[@name eq current()/@name])]" mode="deeptree">
+        <!--<xsl:message>Duplicate method name <xsl:value-of select="@name"/></xsl:message>-->
+    </xsl:template>
+    
     <xsl:template match="d:class|d:interface|d:enum" mode="deeptree">
         <xsl:variable name="type" select="@type"/>
         
@@ -186,20 +189,14 @@ History
         <xsl:if test="@access ne 'private' or (empty(@access) and not($has-PP-members-only) and
             ($has-nonPP-implementing-classes or $has-nonPP-subclasses))">
             <j id="{$type}" in="c" qy="{lower-case($type)}">
-                <xsl:variable name="methods" select="distinct-values(./d:method[@access ne 'private']/@name)"
-                    as="xs:string*"/><!-- TODO the methods are not sorted -->
                 <xsl:apply-templates select="d:class|d:interface|d:enum|d:field[@access ne
                     'private']|d:constant[@access ne 'private']" mode="deeptree">
                     <xsl:sort select="if (self::d:class or self::d:interface or self::d:enum) then
                         upper-case(@type) else upper-case(@name)"/>
                 </xsl:apply-templates>
-                <xsl:variable name="class" select="."/>
-                <xsl:for-each select="$methods">
-                    <xsl:variable name="name" select="."/>
-                    <xsl:apply-templates select="($class/d:method[@name=$name])[1]" mode="deeptree">
-                        <xsl:sort select="upper-case(@name)"/><!-- TODO this sort does nothing -->
-                    </xsl:apply-templates>
-                </xsl:for-each>
+                <xsl:apply-templates select="d:method[@access ne 'private']" mode="deeptree">
+                    <xsl:sort select="upper-case(@name)"/>
+                </xsl:apply-templates>
             </j>
         </xsl:if>
     </xsl:template>
