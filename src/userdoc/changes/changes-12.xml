@@ -236,12 +236,14 @@
         </ul>
         
        <p>The proposed 4.0 functions fn:all-equal(), fn:all-different(), fn:contains-sequence(), fn:ends-with-sequence(), 
-           fn:expanded-QName(), fn:intersperse(), fn:parse-QName(), fn:replicate(), fn:starts-with-sequence()
-           and fn:while() are implemented.</p>
+           fn:expanded-QName(), fn:foot(), fn:intersperse(), fn:parse-QName(), fn:replicate(), fn:starts-with-sequence(),
+           fn:truncate(), and fn:while() are implemented.</p>
         
    
         
         <p>The proposed 4.0 functions map:build() and map:filter() are implemented</p>
+        
+        <p>The proposed 4.0 functions array:foot() and array:truncate() are implemented</p>
         
         <p>The  <code>@array</code> and <code>@map</code> attributes of <code>xsl:for-each</code>, 
             <code>xsl:for-each-group</code>, and <code>xsl:iterate</code> are dropped. In their place, use
