@@ -32,7 +32,6 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.Optional;
 
 /**
  * Implement the fn:doc() function - a simplified form of the Document function
@@ -45,7 +44,8 @@ public class Doc extends SystemFunction implements Callable {
         OptionsParameter docOptions = new OptionsParameter(version);
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
-        docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_STRING, StringValue.bmp("none"));
+        docOptions.setAllowedValues("strip-space", "XPTY0004", "all", "none", "conditional");
         docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
@@ -305,18 +305,17 @@ public class Doc extends SystemFunction implements Callable {
             }
 
 
-            Optional<Boolean> strip = checkedOptions.asOptionalBoolean("strip-space");
-            if (strip.isPresent()) {
-                SpaceStrippingRule rule;
-                if (xsdValidating || dtdValidating) {
-                    rule = IgnorableSpaceStrippingRule.INSTANCE;
-                } else if (strip.get()) {
-                    rule = AllElementsSpaceStrippingRule.INSTANCE;
-                } else {
-                    rule = NoElementsSpaceStrippingRule.INSTANCE;
-                }
-                parseOptions = parseOptions.withSpaceStrippingRule(rule);
+            String strip = checkedOptions.asString("strip-space");
+            SpaceStrippingRule rule;
+            if (xsdValidating || dtdValidating) {
+                rule = IgnorableSpaceStrippingRule.INSTANCE;
+            } else if (strip.equals("all")) {
+                rule = AllElementsSpaceStrippingRule.INSTANCE;
+            } else {
+                rule = NoElementsSpaceStrippingRule.INSTANCE;
             }
+            parseOptions = parseOptions.withSpaceStrippingRule(rule);
+
 
             try {
                 parseOptions = parseOptions.withXIncludeAware(
