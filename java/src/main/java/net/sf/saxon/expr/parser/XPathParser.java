@@ -2250,7 +2250,7 @@ public class XPathParser {
                 checkLanguageVersion30();
                 return parseFunctionItemType(AnnotationList.EMPTY);
             case "record":
-                return parseRecordTest(this);
+                return parseRecordTyoe(this);
             case "enum":
                 return parseEnumType();
             default:
@@ -2267,9 +2267,9 @@ public class XPathParser {
      * Syntax: "record" "(" (name (":" sequenceType)?) ("," (name (":" sequenceType)?))* ")"
      */
 
-    private ItemType parseRecordTest(XPathParser p) throws XPathException {
+    private ItemType parseRecordTyoe(XPathParser p) throws XPathException {
         // The initial "record" has been read
-        checkLanguageVersion40("a record test");
+        checkLanguageVersion40("a record type");
         Tokenizer t = p.getTokenizer();
         nextToken();
         p.readToken(Token.LPAREN);
@@ -2282,9 +2282,10 @@ public class XPathParser {
             while (true) {
                 String name;
                 if (t.currentToken == Token.STAR) {
-                    extensible = true;
-                    p.nextToken();
-                    p.expect(Token.RPAREN);
+                    p.grumble("Extensible record types have been dropped from the 4.0 specification");
+//                    extensible = true;
+//                    p.nextToken();
+//                    p.expect(Token.RPAREN);
                     break;
                 }
                 if (t.currentToken instanceof Token.NameToken) {
@@ -2318,7 +2319,7 @@ public class XPathParser {
                 } else if (t.currentToken == Token.COMMA) {
                     p.nextToken();
                 } else {
-                    p.grumble("Expected ',' or ')' after field in RecordTest, found '" +
+                    p.grumble("Expected ',' or ')' after field in RecordType, found '" +
                                       t.currentToken + '\'');
                 }
             }
@@ -4126,7 +4127,7 @@ public class XPathParser {
 
             case "record": {
                 checkLanguageVersion40("nodeTest record(...)");
-                ItemType type = parseRecordTest(this);
+                ItemType type = parseRecordTyoe(this);
                 return SpecificJNodeType.jTreeRoot(SequenceType.one(type));
             }
 
