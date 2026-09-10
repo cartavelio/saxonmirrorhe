@@ -1,3 +1,4 @@
+import com.saxonica.build.Architectures
 import com.saxonica.build.csharp.*
 import com.saxonica.build.LifecycleTasks
 import com.saxonica.build.java.JarFinder
@@ -24,14 +25,9 @@ val saxonBuild = the<SaxonBuildExtension>()
 
 val extension = project.extensions.create<SaxonCSExtension>("saxoncs")
 
-
 extension.classpath = configurations.compileClasspath
-extension.release.convention("${project.findProperty("csharpBuild") ?: "Debug"}")
 extension.targetHost = saxonBuild.targetHost
 extension.dotnet = saxonBuild.dotnet
-
-val defaultArch = extension.targetHost.map { if (it.isArm64) "arm64" else "x64" }
-val defaultPlatform = extension.targetHost.map { if (it.isMacOS) "osx" else if (it.isWindows) "win" else "linux" } as Provider<String>
 
 val javaSourcesBucket by configurations.dependencyScope("javaSourcesBucket")
 val csharpFeatureKeysBucket by configurations.dependencyScope("csharpFeatureKeysBucket")
@@ -237,178 +233,130 @@ val preprocessCS = tasks.register<Copy>("preprocessCS") {
 // to handle the complexity of CS builds. For CS, we build for x64 or arm64,
 // depending on the platform and architecture. In addition, for MacOS in a
 // Release build, we build *both* of those and make a universal binary.
-val architectures = if (findProperty("buildArch") != null) {
-  listOf(findProperty("buildArch").toString())
-} else if (saxonBuild.targetHost.get().isMacOS
-  && extension.release.get() == "Release") {
-  listOf("arm64", "x64")
-} else {
-  listOf(extension.arch.get())
-}
+val additionalArchitectures = listOf(Architectures.ARM64, Architectures.X86_64) - extension.architecture.get()
 
-val copyResources = tasks.register("copyResources") {
-  doLast {
-    copy {
-      // These are copied into build/{arch} so that ../ will be correct
-      // relative to either the build directory build/{arch}/SaxonCS or
-      // the csharp/{ee,pe,he} directories because (at least some?) relative
-      // paths in a csproj file are relative to the build location, not
-      // the csproj file. ¯\_(ツ)_/¯
-      from(layout.projectDirectory.dir(".."))
-      into(layout.buildDirectory.dir(architectures.first()))
-      include("LICENSE.txt")
-      include("README.md")
-    }
-    copy {
-      from(layout.projectDirectory.dir("../../java/src/main/resources"))
-      into(layout.buildDirectory.dir("resources"))
-      exclude("**/.DS_Store")
-    }
+val copyJavaResources = tasks.register<Copy>("copy-java-resources") {
+  into(layout.buildDirectory.dir("resources"))
+  from(layout.projectDirectory.dir("../../java/src/main/resources")) {
+    exclude("**/.DS_Store")
   }
 }
 
-val configure_task = tasks.register("dotnetConfigure") {
-  dependsOn("generateCode")
-  dependsOn("copyResources")
-}
+data class DotNetTasks(
+  val configure: TaskProvider<DotNetConfiguration>,
+  val build: TaskProvider<DotNetBuild>,
+  val publish: TaskProvider<DotNetPublish>,
+  val nupkg: TaskProvider<DotNetCreateNupkg>,
+  val makeApp: TaskProvider<DotNetMakeApp>
+)
 
-val build_task = tasks.register("dotnetBuild")
-val publish_task = tasks.register("dotnetPublish")
-val makeapp_task = tasks.register("dotnetMakeApp")
-for (buildArch in architectures) {
+private fun generateDotnetTasks(buildArch: Architectures, buildConfiguration: CSReleaseConfiguration, suffix: String): DotNetTasks {
   // These tasks run every time because the .nupkg file changes every time.
   // The DotNet tasks use the outputDir as an output directory. This should
   // probably be reworked so that only the /obj/ directory is considered,
   // or something.
-  val configure = tasks.register<DotNetConfiguration>("configure_${buildArch}") {
+
+  val configure = tasks.register<DotNetConfiguration>("dotnet-configure-${buildArch}-${suffix}") {
+    csProjXsl = layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")
+    resources.from(layout.projectDirectory.dir("..").files("README.md", "LICENSE.txt"))
     group = LifecycleBasePlugin.BUILD_GROUP
     classpath = configurations.named("transpiler").get()
     dotnetversion = saxonBuild.dotnetversion
     version = saxonBuild.version
     edition = extension.edition
-    release = extension.release
+    release = buildConfiguration
     arch = buildArch
-    platform = defaultPlatform
+    platform = extension.platform
   }
-  configure_task { dependsOn(configure) }
 
-  val csrid = defaultPlatform.map { "${it}-${buildArch}" }
-  val release = extension.release.get()
+  fun setTaskInputSources(inputSources: ConfigurableFileCollection) {
+    inputSources.from(preprocessCS)
+    inputSources.from(generateCode)
+    inputSources.from(copyJavaResources)
+    inputSources.from(csharpFeatureKeysSources)
+  }
 
-  val build = tasks.register<DotNetBuild>("dotnetBuild_${buildArch}") {
+  val build = tasks.register<DotNetBuild>("dotnet-build-${buildArch}-${suffix}") {
     group = LifecycleBasePlugin.BUILD_GROUP
-    dependsOn(configure)
     dotnet = extension.dotnet
     version = saxonBuild.version
+    dotnetversion = saxonBuild.dotnetversion
     edition = extension.edition
+    configuration = buildConfiguration
+    slnFile = configure.map { it.appSlnFile.get() }
     target = "SaxonCS"
     arch = buildArch
-    platform = defaultPlatform
+    platform = extension.platform
 
-    inputs.files(configure)
-    inputs.files(preprocessCS)
-    inputs.files(generateCode)
-    inputs.files(copyResources)
-    inputs.files(csharpFeatureKeysSources)
-    outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS/bin/${release}/net${saxonBuild.dotnetversion.get()}/${csrid.get()}"))
-    outputs.file(layout.buildDirectory.file("${buildArch}/SaxonCS/bin/${release}/SaxonCS.${saxonBuild.version.get()}.nupkg"))
+    setTaskInputSources(inputSources)
   }
-  build_task { dependsOn(build) }
 
-  val publish = tasks.register<DotNetPublish>("dotnetPublish_${buildArch}") {
+  tasks.named(LifecycleBasePlugin.BUILD_TASK_NAME) {
+    dependsOn(build)
+  }
+
+  val publish = tasks.register<DotNetPublish>("dotnet-publish-${buildArch}-${suffix}") {
+    LifecycleTasks.RELEASE_GROUP
+    dotnet = extension.dotnet
+    dotnetversion = saxonBuild.dotnetversion
+    version = saxonBuild.version
+    edition = extension.edition
+    configuration = buildConfiguration
+    arch = buildArch
+    platform = extension.platform
+    target = "SaxonCS"
+    slnFile = configure.map { it.appSlnFile.get() }
+
+    setTaskInputSources(inputSources)
+  }
+
+  tasks.named(LifecycleTasks.RELEASE_GROUP) {
+    dependsOn(publish)
+  }
+
+  val nupkg = tasks.register<DotNetCreateNupkg>("dotnet-pack-${buildArch}-${suffix}") {
+    LifecycleTasks.RELEASE_GROUP
+    dotnet = extension.dotnet
+    dotnetversion = saxonBuild.dotnetversion
+    version = saxonBuild.version
+    edition = extension.edition
+    configuration = buildConfiguration
+    arch = buildArch
+    platform = extension.platform
+    target = "SaxonCS"
+    slnFile = configure.map { it.appSlnFile.get() }
+
+    setTaskInputSources(inputSources)
+  }
+
+  val makeapp = tasks.register<DotNetMakeApp>("dotnet-makeapp-${buildArch}-${suffix}") {
     LifecycleTasks.RELEASE_GROUP
     dotnet = extension.dotnet
     version = saxonBuild.version
     edition = extension.edition
-    arch = buildArch
-    platform = defaultPlatform
-    target = "SaxonCS"
-    inputs.files(build)
-    outputs.dir(layout.buildDirectory.dir("${buildArch}/SaxonCS/bin/${release}/net${saxonBuild.dotnetversion.get()}/${csrid.get()}/publish"))
-  }
-
-  publish_task { dependsOn(publish) }
-
-  val makeapp = tasks.register<DotNetMakeApp>("dotnetMakeApp_${buildArch}") {
-    LifecycleTasks.RELEASE_GROUP
-    dotnet = extension.dotnet
-    version = saxonBuild.version
-    edition = extension.edition
+    dotnetversion = saxonBuild.dotnetversion
+    configuration = buildConfiguration
+    platform = extension.platform
     arch = buildArch
     target = "SaxonCS"
     inputs.files(build)
   }
-  makeapp_task { dependsOn(makeapp) }
+
+  return DotNetTasks(configure, build, publish, nupkg, makeapp)
 }
 
-if ((saxonBuild.targetHost.get().isMacOS
-      && extension.release.get() == "Release"
-      && architectures.size == 2)) {
-  val buildOsxApp = tasks.register<Exec>("buildOsxApp") {
-    group = LifecycleTasks.RELEASE_GROUP
-    inputs.files(makeapp_task)
-    outputs.file(layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS"))
+private fun dotnetPublishZipArtifactTaskName(lowercaseConfiguration: String): String {
+  return "dotnet-publish-${lowercaseConfiguration}-zip"
+}
 
-    val arm64 = layout.buildDirectory.dir("arm64/SaxonCS/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
-    val x64 = layout.buildDirectory.dir("x64/SaxonCS/bin/Release/net${saxonBuild.dotnetversion.get()}").get()
-
-    doFirst {
-      // If a previous build put the docs in there, delete them; they aren't
-      // allowed in a signed build
-      delete(layout.buildDirectory.dir("SaxonCS.app/doc"))
-      delete(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
-    }
-
-    doFirst {
-      copy {
-        from("${arm64}/osx-arm64/publish/SaxonCS.app")
-        into(layout.buildDirectory.dir("SaxonCS.app"))
-        exclude("Contents/MacOS/SaxonCS")
-      }
-    }
-
-    workingDir = layout.buildDirectory.get().asFile
-    commandLine("lipo", "-create", "-output",
-      "${layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS").get()}",
-      "${arm64}/osx-arm64/publish/SaxonCS.app/Contents/MacOS/SaxonCS",
-      "${x64}/osx-x64/publish/SaxonCS.app/Contents/MacOS/SaxonCS")
-  }
-
-  val osxApp = tasks.register<Exec>("osxApp") {
-    inputs.files(buildOsxApp)
-    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
-
-    // Putting documentation in the app causes the signature to fail
-    // "unsealed content is present in the bundle root"
-    commandLine("codesign", "--force", "--options", "runtime",
-      "--entitlements",
-      "${layout.projectDirectory.file("../tools/entitlements.plist")}",
-      "--deep", "--sign", "Developer ID Application: Saxonica Limited",
-      "--timestamp",
-      "${layout.buildDirectory.file("SaxonCS.app").get()}")
-  }
-  makeapp_task { finalizedBy(osxApp) }
-
-  // We can't copy the documentation into the distribution because we've
-  // signed it
-  tasks.register<Zip>("dotnetPublishZip") {
-    archiveFileName = "SaxonCS-${saxonBuild.version.get().replace(".", "-")}-MacOS.zip"
-    from(osxApp)
-    into("/SaxonCS.app/")
-  }
-} else {
-  val ziparch = if (architectures[0] == "arm64") "aarch64" else "x86_64"
+fun csZipArtifactTasks(configuration: CSReleaseConfiguration, publishTask: TaskProvider<DotNetPublish>): TaskProvider<Zip> {
+  val ziparch = if (extension.targetHost.get().isArm64) "aarch64" else "x86_64"
   val zipver = saxonBuild.version.get().replace(".", "-")
-  val zipname = if (saxonBuild.systemOs.get().isWindows()) {
-    "Windows"
-  } else if (saxonBuild.targetHost.get().isMacOS) {
-    "MacOS"
-  } else {
-    "Linux"
-  }
+  val zipname = extension.targetHost.get().platform.replaceFirstChar { it.uppercase() }
+  val lowercaseConfiguration = configuration.toString().lowercase()
 
-  val stageZip = tasks.register("stageZip") {
-    inputs.files(publish_task)
+  val stageZip = tasks.register("stage-${lowercaseConfiguration}-zip") {
+    inputs.files(publishTask)
     inputs.files(layout.projectDirectory.dir("../../src/main/zipdoc"))
     outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
 
@@ -418,7 +366,7 @@ if ((saxonBuild.targetHost.get().isMacOS
 
     doLast {
       copy {
-        from(tasks.named("dotnetPublish_${architectures[0]}").get().outputs)
+        from(publishTask.map { it.outputDir.get() })
         into(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
       }
 
@@ -429,7 +377,9 @@ if ((saxonBuild.targetHost.get().isMacOS
     }
   }
 
-  tasks.register<Zip>("dotnetPublishZip") {
+  return tasks.register<Zip>(dotnetPublishZipArtifactTaskName(lowercaseConfiguration)) {
+    destinationDirectory = layout.buildDirectory.dir("${configuration}Zip")
+
     var dirver = saxonBuild.version.get()
     if (dirver.endsWith(".0")) {
       dirver = dirver.substring(0, dirver.length - 2)
@@ -441,53 +391,98 @@ if ((saxonBuild.targetHost.get().isMacOS
   }
 }
 
-val nupkgBuildTask = tasks.named<DotNetBuild>("dotnetBuild_${architectures[0]}")
+// Generate Release tasks
+val releaseBuildArch = extension.architecture.get()
+val (configureTask, buildTask, publishTask, nupkgBuildTask, makeAppTask) = generateDotnetTasks(releaseBuildArch, CSReleaseConfiguration.Release, "release")
+val releaseZipArtifactTasks = mutableListOf<TaskProvider<Zip>>()
 
-val artifacts = tasks.register("downloadRelease") {
-  inputs.files(tasks.named("dotnetPublishZip"))
-  inputs.files(nupkgBuildTask.map { it.outputs.files.filter { it.extension == "nupkg" } })
-  outputs.dir(layout.buildDirectory.dir("releases"))
-  group = "build"
+if (!saxonBuild.targetHost.get().isMacOS) {
+  releaseZipArtifactTasks.add(csZipArtifactTasks(CSReleaseConfiguration.Release, publishTask))
+} else {
+  // Additional tasks to build a macOS universal binary
+  val dotnetTasks = additionalArchitectures.map { buildArch ->
+    buildArch to generateDotnetTasks(buildArch, CSReleaseConfiguration.Release, "release")
+  }.toMap()
 
-  doLast {
-    copy {
-      into(layout.buildDirectory.dir("releases"))
-      from(tasks.named("dotnetPublishZip"))
+  val makeAppTasks = (dotnetTasks.values.map { it.makeApp } + makeAppTask).toTypedArray()
+
+  val buildUnsignedMacOSAppTask = tasks.register<Exec>("unsigned-macos-release-app") {
+    group = LifecycleTasks.RELEASE_GROUP
+
+    inputs.files(*makeAppTasks)
+    outputs.file(layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS"))
+
+    doFirst {
+      // If a previous build put the docs in there, delete them; they aren't
+      // allowed in a signed build
+      delete(layout.buildDirectory.dir("SaxonCS.app/doc"))
+      delete(layout.buildDirectory.dir("SaxonCS.app/SaxonCS"))
     }
 
-    copy {
-      into(layout.buildDirectory.dir("releases"))
-      from(nupkgBuildTask.map { it.outputs.files.filter { it.extension == "nupkg" } })
+    doFirst {
+      copy {
+        from(makeAppTask)
+        into(layout.buildDirectory.dir("SaxonCS.app"))
+        exclude("Contents/MacOS/SaxonCS")
+      }
     }
+
+    workingDir = layout.buildDirectory.get().asFile
+    commandLine("lipo", "-create", "-output",
+      "${layout.buildDirectory.file("SaxonCS.app/Contents/MacOS/SaxonCS").get()}",
+      *makeAppTasks.map { it.map { it.outputDir.get().dir("Contents/MacOS/SaxonCS") }.get().asFile }.toTypedArray())
   }
+
+  val signedMacOSAppTask = tasks.register<Exec>("macos-release-app") {
+    inputs.files(buildUnsignedMacOSAppTask)
+    outputs.dir(layout.buildDirectory.dir("SaxonCS.app"))
+
+    // Putting documentation in the app causes the signature to fail
+    // "unsealed content is present in the bundle root"
+    commandLine("codesign", "--force", "--options", "runtime",
+      "--entitlements",
+      "${layout.projectDirectory.file("../tools/entitlements.plist")}",
+      "--deep", "--sign", "Developer ID Application: Saxonica Limited",
+      "--timestamp",
+      "${layout.buildDirectory.file("SaxonCS.app").get()}")
+  }
+
+  val zipArtifactTask = tasks.register<Zip>(dotnetPublishZipArtifactTaskName("release")) {
+    destinationDirectory = layout.buildDirectory.dir("ReleaseZip")
+    archiveFileName = "SaxonCS-${saxonBuild.version.get().replace(".", "-")}-MacOS.zip"
+
+    from(buildUnsignedMacOSAppTask)
+//    from(signedMacOSAppTask)
+    into("/SaxonCS.app/")
+  }
+
+  releaseZipArtifactTasks.add(zipArtifactTask)
 }
 
-releaseArtifacts.outgoing.artifact(artifacts)
+// Generate Debug tasks
+val debugBuildArch = extension.targetHost.get().architectureConst
+val debugTasks = generateDotnetTasks(debugBuildArch, CSReleaseConfiguration.Debug, "debug")
+csZipArtifactTasks(CSReleaseConfiguration.Debug, debugTasks.publish)
+
+// Copy Artifacts to a release dir
+val artifacts = tasks.register<Copy>("downloadRelease") {
+  group = LifecycleBasePlugin.BUILD_GROUP
+
+  into(layout.buildDirectory.dir("releases"))
+
+  from(releaseZipArtifactTasks)
+  from(nupkgBuildTask.map { it.nupkgFile.get() })
+}
+
+releaseArtifacts.outgoing.artifacts(artifacts.map { it.outputs.files })
 
 // ============================================================
 // Documentation tasks
 
-// Work out where *this* build of *this* release put the API documentation
-// and move it to a consistent location we can refer to from elsewhere.
-// If more than one architecture is being built, we only need the first one.
-val apiDocumentation = tasks.register<Copy>("apiDocumentation") {
-  val arch = architectures.first()
-  val release = extension.release.get()
-  val archdir = "${extension.platform.get()}-${arch}"
-  val dotnetver = saxonBuild.dotnetversion.get()
-  val buildtask = tasks.named("dotnetBuild_${arch}")
-  dependsOn(buildtask)
-
-  into(layout.buildDirectory.dir("apidoc"))
-  from(layout.buildDirectory.dir("${architectures.first()}/SaxonCS/bin/${release}/net${dotnetver}/${archdir}").get()) {
-    include("SaxonCS.xml")
-  }
-}
-
 val docParse = tasks.register<JavaExec>("docParse") {
   group = "Internal"
   description = "Parse dotnet cs files for docs"
-  dependsOn("dotnetBuild")
+//  dependsOn("dotnetBuild")
 
   inputs.files(layout.projectDirectory.dir("../src/main/cs/Saxon/Api"))
   inputs.files(csharpFeatureKeysSources)
@@ -503,12 +498,13 @@ val docParse = tasks.register<JavaExec>("docParse") {
     "featurekeysdir=file://${layout.projectDirectory.file("../../featurekeys/build/cs/Saxon/Api")}")
 }
 
-tasks.register<JavaExec>("docMerge") {
+val apiDocFile = buildTask.map { it.apiDocumentationFile.get() }
+
+val docMergeTask = tasks.register<JavaExec>("docMerge") {
   group = "Internal"
   description = "Merge API docs for dotnet"
 
-  dependsOn(apiDocumentation)
-  inputs.files(apiDocumentation)
+  inputs.files(apiDocFile)
   inputs.files(docParse)
   inputs.file(layout.projectDirectory.file("../tools/merge.xsl"))
   outputs.file(layout.buildDirectory.file("dotnetdoc/merged.xml"))
@@ -519,47 +515,31 @@ tasks.register<JavaExec>("docMerge") {
     "-xsl:${layout.projectDirectory.file("../tools/merge.xsl")}",
     "-o:${layout.buildDirectory.file("dotnetdoc/merged.xml").get().asFile}",
     "names-file=${docParse.get().outputs.getFiles().getSingleFile()}",
-    "api-doc-file=${layout.buildDirectory.file("apidoc/SaxonCS.xml").get().asFile}")
+    "api-doc-file=${apiDocFile.get().asFile}")
 }
 
-tasks.register<Copy>("docCss") {
-  group = "Internal"
-  description = "Copies the CSS for dotnet docs"
-
-  into(layout.buildDirectory.dir("dotnetdoc-html"))
-  from(layout.projectDirectory.dir("../tools")) {
-    include("saxon-dotnetdoc.css")
-  }
-}
-
-val dotnetDocHtml = tasks.register<JavaExec>("docHtml") {
+val dotnetDocHtml = tasks.register<DotNetHtmlDoc>("docHtml") {
   group = LifecycleTasks.DOCUMENTATION_GROUP
   description = "Create HTML output for dotnet docs"
-  dependsOn("docMerge")
-  dependsOn("docCss")
-
-  inputs.file(layout.buildDirectory.file("dotnetdoc/merged.xml"))
-  inputs.file(layout.projectDirectory.file("../tools/doctohtml.xsl"))
-  outputs.dir(layout.buildDirectory.file("dotnetdoc-html"))
 
   classpath = preprocessorClasspath
-  mainClass = "com.saxonica.Transform"
-  args("-s:${layout.buildDirectory.file("dotnetdoc/merged.xml").get().asFile}",
-    "-xsl:${layout.projectDirectory.file("../tools/doctohtml.xsl")}",
-    "-o:${layout.buildDirectory.file("dotnetdoc-html/index.html").get().asFile}")
+  merged = docMergeTask.map { it.outputs.files.singleFile }
+  xslt = layout.projectDirectory.file("../tools/doctohtml.xsl")
+  cssFiles.from(layout.projectDirectory.file("../tools/saxon-dotnetdoc.css"))
+  outputDir = layout.buildDirectory.dir("dotnetdoc-html")
 }
 
 val dotnetDocXml = tasks.register<JavaExec>("docXml") {
   group = LifecycleTasks.DOCUMENTATION_GROUP
   description = "Create XML version of dotnet docs"
-  dependsOn("docMerge")
 
-  inputs.file(layout.buildDirectory.file("dotnetdoc/merged.xml"))
+  inputs.files(docMergeTask)
   inputs.file(layout.projectDirectory.file("../tools/convert-to-jel-package.xsl"))
   outputs.dir(layout.buildDirectory.file("dotnetdoc-xml"))
+
   classpath = preprocessorClasspath
   mainClass = "com.saxonica.Transform"
-  args("-s:${layout.buildDirectory.file("dotnetdoc/merged.xml").get().asFile}",
+  args("-s:${docMergeTask.get().outputs.files.singleFile}",
     "-xsl:${layout.projectDirectory.file("../tools/convert-to-jel-package.xsl")}",
     "-o:${layout.buildDirectory.file("dotnetdoc-xml/packages/Saxon.Api.xml").get().asFile}")
 }
@@ -574,18 +554,22 @@ tasks.named(LifecycleTasks.DOCUMENTATION_TASK_NAME) {
 
 // ============================================================
 
-tasks.register<Exec>("csTest") {
-  group = "Verification"
+val test = tasks.register<DotNetRunner>("cs-test") {
+  group = LifecycleBasePlugin.VERIFICATION_GROUP
   description = "Run SaxonCS nUnit tests"
-  dependsOn("dotnetBuild")
-  dependsOn("csproj-template")
 
-  val reportDir = layout.buildDirectory.dir("reports/tests/csTest")
+  inputs.files(csprojTemplateTask)
   inputs.dir(layout.projectDirectory.dir("../src/test/nunit"))
+  val reportDir = layout.buildDirectory.dir("reports/tests/csTest")
   outputs.dir(reportDir)
 
-  commandLine("${saxonBuild.dotnet.get()}", "test", "SaxonCS.sln",
-    "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
+  dotnet = extension.dotnet
+  command = "test"
+  args("SaxonCS.sln", "--nologo", "--", "NUnit.TestOutputXml=${reportDir.get()}")
+}
+
+tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
+  dependsOn(test)
 }
 
 // ============================================================
@@ -596,26 +580,28 @@ val copySampleResources = tasks.register<Copy>("copy_sample_sources") {
 }
 
 tasks.register<Exec>("samples") {
-  dependsOn("dotnetBuild")
+  dependsOn(buildTask)
   dependsOn(copySampleResources)
 
-  val arch = extension.arch.get()
-  val rel = extension.release.get()
-  val plat = extension.platform.get()
+  val arch = extension.architecture.get().msbuild
+  val plat = extension.platform.get().msbuild
   val edition = extension.edition.get()
 
   // FIXME: should the .net 8.0 ref use saxonBuild.dotnetversion?
+  // FIXME: Should probably use a pyenv python / venv from the python subproject,
+  //        Not to mention needing a requirements.txt as this fails for me with a
+  //        missing pypi module
   commandLine = listOf("python", "../../tools/run-samples.py",
     "--edition", edition,
     "--platform", "csharp",
-    "--csexec", "build/${arch}/SaxonCS/bin/${rel}/net8.0/${plat}-${arch}/SaxonCS")
+    "--csexec", "build/${arch}/SaxonCS/bin/${CSReleaseConfiguration.Release}/net8.0/${plat}-${arch}/SaxonCS")
 }
 
 // ============================================================
 
 val templateName = project.findProperty("projectTemplateName") ?: "SaxonCS"
 
-tasks.register<JavaExec>("csproj-template") {
+val csprojTemplateTask = tasks.register<JavaExec>("csproj-template") {
   inputs.files(layout.projectDirectory.file("../tools/generateCSProjFiles.xsl"))
   outputs.file(layout.projectDirectory.file("${templateName}.csproj"))
   outputs.file(layout.projectDirectory.file("${templateName}.sln"))
@@ -624,12 +610,12 @@ tasks.register<JavaExec>("csproj-template") {
   args("-it",
     "-xsl:${layout.projectDirectory.file("../tools/generateCSProjFiles.xsl")}",
     "-o:${layout.projectDirectory.file("${templateName}.sln")}",
-    "release=${extension.release.get()}",
-    "platform=${extension.platform.get()}",
-    "arch=${extension.arch.get()}",
+    "release=${CSReleaseConfiguration.Debug}",
+    "platform=${extension.platform.get().msbuild}",
+    "arch=${extension.architecture.get().msbuild}",
     "edition=${extension.edition.get()}",
     "framework=net${saxonBuild.dotnetversion.get()}",
-    "saxonVersion=${findProperty("saxonVersion")!!}",
+    "saxonVersion=${saxonBuild.version.get()}",
     "uuid1=${UUID.randomUUID()}",
     "uuid2=${UUID.randomUUID()}",
     "uuid3=${UUID.randomUUID()}",
@@ -644,13 +630,17 @@ val copyTestDrivers = tasks.register<Copy>("copyTestDrivers") {
 }
 
 tasks.register<DotNetBuild>("dotnetBuildTestDrivers") {
-  group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
-  dependsOn("dotnetBuild")
-  target = "TestDrivers"
-  arch = extension.arch
+//  dependsOn("dotnetBuild") ?? is this (running SaxonCS build) needed?
   dotnet = extension.dotnet
   version = saxonBuild.version
+  dotnetversion = saxonBuild.dotnetversion
   edition = extension.edition
-  platform = defaultPlatform
+  configuration = CSReleaseConfiguration.Debug
+  slnFile = configureTask.map { it.testSlnFile.get() }
+
+  group = LifecycleTasks.ACCEPTANCE_TEST_GROUP
+  target = "TestDrivers"
+  arch = extension.architecture
+  platform = extension.platform
   inputs.files(copyTestDrivers)
 }

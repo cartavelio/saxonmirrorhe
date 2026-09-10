@@ -12,7 +12,20 @@ import org.gradle.internal.os.OperatingSystem
 enum class Platforms(val value: String) {
   MACOS("macos"),
   LINUX("linux"),
-  WINDOWS("windows"),
+  WINDOWS("windows");
+
+  val msbuild: String get() {
+    return when (value) {
+      "macos" -> "osx"
+      "windows" -> "win"
+      else -> value
+    }
+  }
+
+  override fun toString(): String {
+    return value
+  }
+
 }
 
 /**
@@ -21,7 +34,18 @@ enum class Platforms(val value: String) {
 @Serializable
 enum class Architectures(val value: String) {
   X86_64("x86_64"),
-  ARM64("arm64")
+  ARM64("arm64");
+
+  val msbuild: String get() {
+    return when (value) {
+      "x86_64" -> "x64"
+      else -> value
+    }
+  }
+
+  override fun toString(): String {
+    return value
+  }
 }
 
 /**

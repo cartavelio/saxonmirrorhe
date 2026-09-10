@@ -116,7 +116,6 @@ EndGlobal
         <Nullable>disable</Nullable>
         <NoWarn>2200;0414;0168;0169;0649;1591</NoWarn>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <IsTrimmable>true</IsTrimmable>
 
