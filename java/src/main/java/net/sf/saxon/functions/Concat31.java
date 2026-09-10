@@ -13,6 +13,7 @@ import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.Loc;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UniStringConsumer;
@@ -101,7 +102,12 @@ public class Concat31 extends SystemFunction implements PushableFunction {
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
         UnicodeBuilder builder = new UnicodeBuilder();
         for (Sequence arg : arguments) {
-            Item head = arg.head();
+            GroundedValue val = arg.materialize();
+            if (val.getLength() > 1) {
+                throw new XPathException(
+                        "Prior to 4.0, arguments to concat() must be single items", "XPTY0004").asTypeError();
+            }
+            Item head = val.head();
             if (head != null) {
                 builder.accept(head.getUnicodeStringValue());
             }

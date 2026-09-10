@@ -100,7 +100,7 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
 
         // Concat changes in 4.0:
         registerVariadic("concat", 1, e -> e.populate(Concat31::new, BuiltInAtomicType.STRING, ONE, SEQV)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null));
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, OPT, null));
 
         register("contains", 2, e -> e.populate(Contains::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
