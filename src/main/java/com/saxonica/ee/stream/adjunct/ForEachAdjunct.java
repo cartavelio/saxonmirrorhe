@@ -92,7 +92,7 @@ public class ForEachAdjunct extends TransmissionAdjunct implements FeedMaker {
                         return null;
                     }
                     headPredicate = new InstanceOfExpression(
-                            new ContextItemExpression(), SequenceType.makeSequenceType(check, StaticProperty.ALLOWS_ZERO_OR_MORE));
+                            new ContextItemExpression(), SequenceType.zeroOrMore(check));
                     ExpressionTool.copyLocationInfo(exp, headPredicate);
                 }
             }

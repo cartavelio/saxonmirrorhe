@@ -461,7 +461,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new RecordTest.Field("columns", SequenceType.STRING_SEQUENCE, true),
                 new RecordTest.Field("columns-index", SequenceType.optional(
                         new MapType(BuiltInAtomicType.STRING, SequenceType.SINGLE_INTEGER)), true),
-                new RecordTest.Field("rows", SequenceType.makeSequenceType(new ArrayItemType(SequenceType.SINGLE_STRING), StaticProperty.ALLOWS_ZERO_OR_MORE), true),
+                new RecordTest.Field("rows", SequenceType.zeroOrMore(new ArrayItemType(SequenceType.SINGLE_STRING)), true),
                 new RecordTest.Field("get", SequenceType.makeSequenceType(
                         new SpecificFunctionType(new SequenceType[]{
                                 BuiltInAtomicType.POSITIVE_INTEGER.one(),

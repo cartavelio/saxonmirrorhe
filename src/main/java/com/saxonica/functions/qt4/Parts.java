@@ -3,7 +3,6 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.functions.SystemFunction;
@@ -240,7 +239,7 @@ public class Parts extends SystemFunction implements Callable {
                  a -> SingletonIterator.makeIterator(((DurationValue) a).getComponent(AccessorFn.Component.SECONDS))
         );
 
-        register(BuiltInAtomicType.HEX_BINARY, "octets", SequenceType.makeSequenceType(BuiltInAtomicType.UNSIGNED_BYTE, StaticProperty.ALLOWS_ZERO_OR_MORE),
+        register(BuiltInAtomicType.HEX_BINARY, "octets", BuiltInAtomicType.UNSIGNED_BYTE.zeroOrMore(),
                  a -> {
                      List<AtomicValue> result = new ArrayList<>();
                      for (byte b : ((HexBinaryValue)a).getBinaryValue()) {
@@ -250,7 +249,7 @@ public class Parts extends SystemFunction implements Callable {
                  }
         );
 
-        register(BuiltInAtomicType.BASE64_BINARY, "octets", SequenceType.makeSequenceType(BuiltInAtomicType.UNSIGNED_BYTE, StaticProperty.ALLOWS_ZERO_OR_MORE),
+        register(BuiltInAtomicType.BASE64_BINARY, "octets", BuiltInAtomicType.UNSIGNED_BYTE.zeroOrMore(),
                  a -> {
                      List<AtomicValue> result = new ArrayList<>();
                      for (byte b : ((Base64BinaryValue) a).getBinaryValue()) {
