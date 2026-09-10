@@ -26,12 +26,23 @@ namespace Saxon.Impl.Helpers {
                 if (radix == 10) {
                     return ValueOf(s);
                 }
-                if (radix == 16) {
-                    return BigInteger.Parse(s, NumberStyles.HexNumber);
-                }
+                
 
                 BigInt result = 0;
                 s = s.ToLower();
+                if (s == "") {
+                    throw new NumberFormatException("Cannot convert zero-length string to an integer" );
+                }
+                bool negative = false;
+                if (s[0] == '-') {
+                    negative = true;
+                    s = s.Substring(1);
+                } else if (s[0] == '+') {
+                    s = s.Substring(1);
+                }
+                if (s == "") {
+                    throw new NumberFormatException("Cannot parse integer: No digits after the sign" );
+                }
                 for (int i = 0; i < s.Length; i++) {
                     int digit = "0123456789abcdefghijklmnopqrstuvwxyz".IndexOf(s[i]);
                     if (digit < 0 || digit >= radix) {
@@ -41,7 +52,8 @@ namespace Saxon.Impl.Helpers {
                     result = result * radix + digit;
                 }
 
-                return result;
+
+                return negative ? -result : result;
             }
             catch (FormatException e) {
                 throw new NumberFormatException("Invalid integer " + s);
