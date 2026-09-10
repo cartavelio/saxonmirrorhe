@@ -390,7 +390,7 @@ public class ExpressionContext implements StaticContext {
     @Override
     public boolean isImportedSchema(NamespaceUri namespace) {
         //if (Configuration.USE_PACKAGE_BINDING) {
-        return element.getPrincipalStylesheetModule().isImportedSchema(namespace);
+        return element.getPrincipalStylesheetModule().isImportedSchemaNamespace(namespace);
         //} else {
         //    return getConfiguration().
         //}

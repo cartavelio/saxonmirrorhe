@@ -55,7 +55,7 @@ public class TestInvalidityHandler {
                 }
             });
 
-            SchemaValidator validator = schema.getValidator();
+            SchemaValidator validator = schema.newValidator();
             validator.setInvalidityHandler(new CustomInvalidityHandler());
 
             validator.validate(new StreamSource(new StringReader(INVALID_INPUT)));

@@ -230,7 +230,7 @@ public class TestXQueryUpdate {
             XsdCompiler manager = proc.newXsdCompiler();
             XsdSchema schema = manager.compile(new StreamSource(new StringReader(xsd)));
             comp.useSchema(schema);
-            SchemaValidator validator = schema.getValidator();
+            SchemaValidator validator = schema.newValidator();
             XdmDestination docDest = new XdmDestination();
             docDest.setTreeModel(TreeModel.LINKED_TREE);
             validator.setDestination(docDest);

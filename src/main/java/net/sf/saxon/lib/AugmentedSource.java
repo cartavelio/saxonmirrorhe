@@ -8,6 +8,7 @@
 package net.sf.saxon.lib;
 
 import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.type.SchemaType;
@@ -46,6 +47,7 @@ public class AugmentedSource implements Source {
     private final Source source;
     private ParseOptions options = new ParseOptions();
     private String systemID;
+    private NamespaceUri requiredTargetNamespace;
 
     /**
      * Create an AugmentedSource that wraps a given Source object (which must not itself be an
@@ -476,6 +478,24 @@ public class AugmentedSource implements Source {
         return options.getErrorReporter();
     }
 
+    /**
+     * Say that the source is expected to be an XSD schema document with a particular target namespace
+     * @param targetNamespace the required target namespace
+     */
+
+    public void setRequiredTargetNamespace(NamespaceUri targetNamespace) {
+        this.requiredTargetNamespace = targetNamespace;
+    }
+
+    /**
+     * Ask whether the source is expected to be an XSD schema document with a particular target namespace;
+     * if so return the required namespace
+     * @return the required target namespace
+     */
+
+    public NamespaceUri getRequiredTargetNamespace() {
+        return requiredTargetNamespace;
+    }
 
     /**
      * Say whether the user of this Source is encouraged to close it as soon as reading is finished.

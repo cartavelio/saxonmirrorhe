@@ -220,7 +220,7 @@ public class TestXslt30Streaming {
             Xslt30Transformer transformer = exec.load30();
 
             Source books = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
-            Source validBooks = schema.getValidator().asSource(books);
+            Source validBooks = schema.newValidator().asSource(books);
 
             // Create a serializer
             //String outfile = @"C:/MyJava/users/caffo/Output.xml";
@@ -640,7 +640,7 @@ public class TestXslt30Streaming {
                     "\t\t  xmlns:my=\"http://ns.example.com/strip-type\"\n" +
                     "\t \t  specialPart=\"123-AB\" listParts=\"000-SS 000-RR\" xsi:nil=\"true\"/>";
 
-            SchemaValidator validator = schema.getValidator();
+            SchemaValidator validator = schema.newValidator();
             validator.setLax(false);
             StreamSource sDoc = new StreamSource(new ByteArrayInputStream(in.getBytes(StandardCharsets.UTF_8)), "file:///dummy/");
             Source vDoc = validator.asSource(sDoc);

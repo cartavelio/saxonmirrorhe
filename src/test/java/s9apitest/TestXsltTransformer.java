@@ -521,7 +521,7 @@ public class TestXsltTransformer {
             XsdCompiler sm = proc.newXsdCompiler();
             XsdSchema schema = sm.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
-            builder.setSchemaValidator(schema.getValidator());
+            builder.setSchemaValidator(schema.newValidator());
             XdmNode books = builder.build(new File(configTest.getDataDir() + "books.xml"));
             transformer.setInitialContextNode(books);
             // Create a serializer

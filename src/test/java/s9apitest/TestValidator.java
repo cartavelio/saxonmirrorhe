@@ -100,7 +100,7 @@ public class TestValidator {
             };
 
             XsdSchema schema = sm.compile(source_xsd);
-            SchemaValidator sv = schema.getValidator();
+            SchemaValidator sv = schema.newValidator();
             sv.setErrorListener(listener);
             StreamSource source = new StreamSource(new StringReader(source_xml));
 
@@ -146,7 +146,7 @@ public class TestValidator {
 
             XsdCompiler mgr = proc.newXsdCompiler();
             XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
-            SchemaValidator v = schema.getValidator();
+            SchemaValidator v = schema.newValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
             v.setDestinationBaseURI(doc.getBaseURI());
@@ -173,7 +173,7 @@ public class TestValidator {
 
             XsdCompiler mgr = proc.newXsdCompiler();
             XsdSchema schema = mgr.compile(new File(configTest.getDataDir() + "books.xsd"));
-            SchemaValidator v = schema.getValidator();
+            SchemaValidator v = schema.newValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
             v.setDestinationBaseURI(doc.getBaseURI());
@@ -219,7 +219,7 @@ public class TestValidator {
         try {
             Processor p = new Processor(true);
             p.setConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, on);
-            SchemaManager sm = p.getSchemaManager();
+            XsdCompiler sm = p.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" +
                     "<xs:import namespace='http://ns.example.com/' schemaLocation='file:///1'/>" +
                     "<xs:import namespace='http://ns.example.com/' schemaLocation='file:///2'/>" +
@@ -242,8 +242,8 @@ public class TestValidator {
                         }
                         return null;
                     });
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = schema.newValidator();
             final String xml0 = "<a xmlns='http://ns.example.com/'/>";
             final String xml1 = "<b xmlns='http://ns.example.com/'/>";
             sv.validate(new StreamSource(new StringReader(xml0)));
@@ -306,7 +306,7 @@ public class TestValidator {
             fail(err.getMessage());
         }
 
-        SchemaValidator sv = schema.getValidator();
+        SchemaValidator sv = schema.newValidator();
         final String xml0 = "<a xmlns='ns:a'/>";
         final String xml1 = "<b xmlns='ns:b'/>";
         final String xml2 = "<c xmlns='ns:a'/>";
@@ -364,7 +364,7 @@ public class TestValidator {
     public void testImportUsingSchemaUriResolver() {
         try {
             Processor p = new Processor(true);
-            SchemaManager sm = p.getSchemaManager();
+            XsdCompiler sm = p.newXsdCompiler();
             sm.setSchemaURIResolver(new SchemaURIResolver() {
 
                 @Override
@@ -392,8 +392,8 @@ public class TestValidator {
                     "</xs:schema>";
 
 
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = schema.newValidator();
             final String xml0 = "<a>2010-11-02</a>";        // valid
             final String xml1 = "<a>orange wednesday</a>";  // invalid
             sv.validate(new StreamSource(new StringReader(xml0)));
@@ -426,15 +426,15 @@ public class TestValidator {
                         }
                     });
 
-            SchemaManager sm = p.getSchemaManager();
+            XsdCompiler sm = p.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='http://two/'>\n" +
                     "<xs:import namespace='http://two/'/>" +
                     "<xs:element name='a' type='b:date'/>\n" +
                     "</xs:schema>";
 
 
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = schema.newValidator();
             final String xml0 = "<a>2010-11-02</a>";        // valid
             final String xml1 = "<a>orange wednesday</a>";  // invalid
             sv.validate(new StreamSource(new StringReader(xml0)));
@@ -468,15 +468,14 @@ public class TestValidator {
                             return null;
                         }
                     });
-            SchemaManager sm = p.getSchemaManager();
+            XsdCompiler sm = p.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='" + NamespaceConstant.XLINK + "'>\n" +
                     "<xs:import namespace='" + NamespaceConstant.XLINK + "'/>" +
                     "<xs:element name='a' type='b:date'/>\n" +
                     "</xs:schema>";
 
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = schema.newValidator();
             final String xml0 = "<a>2010-11-02</a>";          // valid
             final String xml1 = "<a>orange wednesday</a>";    // invalid
             sv.validate(new StreamSource(new StringReader(xml0)));
@@ -500,13 +499,13 @@ public class TestValidator {
         // which doesn't work.
         try {
             Processor p = new Processor(true);
-            SchemaManager sm = p.getSchemaManager();
+            XsdCompiler sm = p.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='" + NamespaceConstant.XLINK + "'>\n" +
                     "<xs:import namespace='" + NamespaceConstant.XLINK + "' schemaLocation='file:///does.not.exist/dummy.xml'/>" +
                     "<xs:element name='a' type='b:date'/>\n" +
                     "</xs:schema>";
 
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0), "file:///0"));
             fail("Unexpected success");
         } catch (SaxonApiException err) {
             System.err.println(err.getMessage());
@@ -521,15 +520,15 @@ public class TestValidator {
         try {
             Processor p = new Processor(true);
             p.setCatalogFiles(configTest.getDataDir() + "resolvers/xlink-catalog.xml");
-            SchemaManager sm = p.getSchemaManager();
+            XsdCompiler sm = p.newXsdCompiler();
             String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='" + NamespaceConstant.XLINK + "'>\n" +
                     "<xs:import namespace='" + NamespaceConstant.XLINK + "' schemaLocation='file:///does.not.exist/dummy.xml'/>" +
                     "<xs:element name='a' type='b:date'/>\n" +
                     "</xs:schema>";
 
 
-            sm.load(new StreamSource(new StringReader(xsd0), "file:///0"));
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd0), "file:///0"));
+            SchemaValidator sv = schema.newValidator();
             final String xml0 = "<a>2010-11-02</a>";           // valid
             final String xml1 = "<a>orange wednesday</a>";     // invalid
             sv.validate(new StreamSource(new StringReader(xml0)));
@@ -570,10 +569,10 @@ public class TestValidator {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, false);
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
-            sm.load(source_xsd);
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(source_xsd);
+            SchemaValidator sv = schema.newValidator();
             
             StreamSource source = new StreamSource(new StringReader(valid_xml));
 
@@ -624,11 +623,11 @@ public class TestValidator {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
-            SchemaValidator sv = sm.newSchemaValidator();
-            sm.load(source_xsd);
+            XsdSchema schema = sm.compile(source_xsd);
+            SchemaValidator sv = schema.newValidator();
             StreamSource source = new StreamSource(new StringReader(valid_xml));
 
             XdmDestination destination = new XdmDestination();
@@ -673,11 +672,11 @@ public class TestValidator {
             proc.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, true);
             proc.setConfigurationProperty(Feature.XSD_VERSION, "1.1");
             proc.setConfigurationProperty(Feature.XPATH_VERSION_FOR_XSD, allow ? 31 : 20);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
             try {
-                sm.load(source_xsd);
+                XsdSchema schema = sm.compile(source_xsd);
                 if (!allow) {
                     fail("unexpected success");
                 }
@@ -722,11 +721,11 @@ public class TestValidator {
 
         try {
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
 
-            SchemaValidator sv = sm.newSchemaValidator();
-            sm.load(source_xsd);
+            XsdSchema schema = sm.compile(source_xsd);
+            SchemaValidator sv = schema.newValidator();
 
             XdmDestination destination = new XdmDestination();
             sv.setDestination(destination);
@@ -834,12 +833,12 @@ public class TestValidator {
             });
             XsdSchema schema1 = sm.compile(new StreamSource(new StringReader(sch1)));
             System.err.println("Schema 1 OK");
-            schema1.getValidator().validate(new StreamSource(new StringReader(doc1)));
+            schema1.newValidator().validate(new StreamSource(new StringReader(doc1)));
             System.err.println("Doc 1 OK");
 
             XsdSchema schema2 = sm.compile(new StreamSource(new StringReader(sch1)), new StreamSource(new StringReader(sch2)));
             System.err.println("Schema 2 OK");
-            schema2.getValidator().validate(new StreamSource(new StringReader(doc2)));
+            schema2.newValidator().validate(new StreamSource(new StringReader(doc2)));
             System.err.println("Doc 2 OK");
 
         } catch (SaxonApiException sapie) {
@@ -873,7 +872,7 @@ public class TestValidator {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.IMPLICIT_SCHEMA_IMPORTS, true);
 
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             sm.setSchemaURIResolver(new SchemaURIResolver() {
                 @Override
                 public Source[] resolve(String targetNamespace, String baseURI, String[] locations) {
@@ -890,9 +889,9 @@ public class TestValidator {
                 }
             });
             sm.setErrorReporter(error -> fail(error.getMessage()));
-            sm.load(new StreamSource(new StringReader(xsd1)), new StreamSource(new StringReader(xsd2)));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd1)), new StreamSource(new StringReader(xsd2)));
 
-            SchemaValidator sv = sm.newSchemaValidator();
+            SchemaValidator sv = schema.newValidator();
 
             StreamSource source = new StreamSource(new StringReader(source_xml));
 
@@ -935,11 +934,11 @@ public class TestValidator {
                     "</xs:schema>";
 
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             sm.setXsdVersion("1.1");
-            sm.load(new StreamSource(new StringReader(sch1)));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(sch1)));
             System.err.println("Schema 1 OK");
-            validator = sm.newSchemaValidator();
+            validator = schema.newValidator();
 
             dest = proc.newSerializer(sw);
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
@@ -1005,14 +1004,14 @@ public class TestValidator {
                     "</Family>";
 
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             sm.setXsdVersion("1.1");
             StreamSource source1 = new StreamSource(new StringReader(sch1));
             source1.setSystemId("http://doc1");
-            sm.load(source1);
-            //sm.load(new StreamSource(new File("/Users/ond1/work/development/files/millicom/FafaSCript.xsd")));//new StringReader(sch1)));
+            XsdSchema schema = sm.compile(source1);
+            //XsdSchema schema = sm.compile(new StreamSource(new File("/Users/ond1/work/development/files/millicom/FafaSCript.xsd")));//new StringReader(sch1)));
             System.err.println("Schema 1 OK");
-            validator = sm.newSchemaValidator();
+            validator = schema.newValidator();
 
             dest = proc.newSerializer();
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
@@ -1071,11 +1070,11 @@ public class TestValidator {
 
 
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             sm.setXsdVersion("1.1");
-            sm.load(new StreamSource(new StringReader(sch1)));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(sch1)));
             System.err.println("Schema 1 OK");
-            validator = sm.newSchemaValidator();
+            validator = schema.newValidator();
 
             dest = proc.newSerializer(sw);
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
@@ -1145,11 +1144,11 @@ public class TestValidator {
                     "</Family>";
 
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             sm.setXsdVersion("1.1");
-            sm.load(new StreamSource(new StringReader(sch1)));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(sch1)));
             System.err.println("Schema 1 OK");
-            validator = sm.newSchemaValidator();
+            validator = schema.newValidator();
 
             dest = proc.newSerializer(sw);
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
@@ -1394,8 +1393,8 @@ public class TestValidator {
         List<TransformerException> errors = new ArrayList<>();
         try {
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new StringReader(xsd)));
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
 
             XsltCompiler xsltCompiler = proc.newXsltCompiler();
             xsltCompiler.setSchemaAware(true);
@@ -1457,8 +1456,8 @@ public class TestValidator {
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, byteCodeOn);
             //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, byteCodeOn);
             //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, configTest.getTempDir() + "Saxon-bytecode");
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new StringReader(sch1)));
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(sch1)));
             XQueryCompiler comp = proc.newXQueryCompiler();
             comp.setSchemaAware(true);
             XQueryExecutable qry = comp.compile("import schema namespace s='http://myexample/family'; sum(for $i in 1 to 100000 return s:percentage($i div 100 mod 10 + 10))");
@@ -1554,7 +1553,7 @@ public class TestValidator {
         try {
             out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xsd"));
             StreamSource source_xml = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xml"));
             ErrorListener listener = new ErrorListener() {
@@ -1574,9 +1573,9 @@ public class TestValidator {
                 }
             };
 
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(source_xsd);
+            SchemaValidator sv = schema.newValidator();
             sv.setErrorListener(listener);
-            sm.load(source_xsd);
 
 
             Serializer serializer = proc.newSerializer();
@@ -1679,7 +1678,7 @@ public class TestValidator {
         try {
             out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xsd"));
             StreamSource source_xml = new StreamSource(new File(configTest.getDataDir() + "../bugs/4744/UniqueKeyBug.xml"));
             ErrorHandler handler = new ErrorHandler() {
@@ -1699,9 +1698,9 @@ public class TestValidator {
                 }
             };
 
-            SchemaValidator sv = sm.newSchemaValidator();
+            XsdSchema schema = sm.compile(source_xsd);
+            SchemaValidator sv = schema.newValidator();
             sv.setInvalidityHandler(new ValidatorImpl.InvalidityHandlerWrappingErrorHandler(handler));
-            sm.load(source_xsd);
 
 
             Serializer serializer = proc.newSerializer();
@@ -1733,10 +1732,10 @@ public class TestValidator {
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(
                     new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/schema.xsd")));
-            SchemaValidator val = sm.newSchemaValidator();
+            SchemaValidator val = schema.newValidator();
             val.validate(new StreamSource(
                     new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/data.xml")));
             Instrumentation.report();
@@ -1752,10 +1751,10 @@ public class TestValidator {
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(
                     new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/schema.xsd")));
-            SchemaValidator val = sm.newSchemaValidator();
+            SchemaValidator val = schema.newValidator();
             val.validate(new StreamSource(
                     new File("/Users/mike/bugs/2020/4507-Carter/2000-04-03/data/data.xml")));
             Instrumentation.report();
@@ -1834,14 +1833,14 @@ public class TestValidator {
         final List<XmlProcessingError> errorList = new ArrayList<>();
         try {
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
             sm.setErrorReporter(err -> {
                 err.setTerminationMessage("Far too many errors");
                 errorList.add(err);
             });
 
-            sm.load(source_xsd);
+            XsdSchema schema = sm.compile(source_xsd);
             fail("Validation errors not detected");
 
         } catch (SaxonApiException sapie) {
@@ -1868,14 +1867,14 @@ public class TestValidator {
         final List<XmlProcessingError> errorList = new ArrayList<>();
         try {
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
+            XsdCompiler sm = proc.newXsdCompiler();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
             sm.setErrorReporter(err -> {
                 err.setTerminationMessage("Far too many errors");
                 errorList.add(err);
             });
 
-            sm.load(source_xsd);
+            XsdSchema schema = sm.compile(source_xsd);
             fail("Validation errors not detected");
 
         } catch (SaxonApiException sapie) {
@@ -1989,10 +1988,10 @@ public class TestValidator {
                 + "</xs:schema>\n";
 
         Processor proc = new Processor(true);
-        SchemaManager sm = proc.getSchemaManager();
+        XsdCompiler sm = proc.newXsdCompiler();
         sm.setErrorReporter(error -> fail(error.getMessage()));
         try {
-            sm.load(new StreamSource(new StringReader(xsd)));
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
         } catch (SaxonApiException e) {
             fail();
         }
@@ -2037,9 +2036,9 @@ public class TestValidator {
         StringWriter report = new StringWriter();
         try {
             Processor proc = new Processor(true);
-            SchemaManager sm = proc.getSchemaManager();
-            sm.load(new StreamSource(new StringReader(xsd)));
-            SchemaValidator val = sm.newSchemaValidator();
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
+            SchemaValidator val = schema.newValidator();
             val.setValidityReporting(proc.newSerializer(report));
             val.validate(new StreamSource(new StringReader(xml)));
             fail("Unexpected success");

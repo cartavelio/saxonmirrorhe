@@ -35,7 +35,7 @@ import java.io.File;
  * <p>An {@code XsdCompiler} is created using the factory method {@link Processor#newXsdCompiler}. The normal pattern
  * of usage is to set options, then call {@link #compile(File...)} or {@link #compile(Source...)} to compile
  * one or more schema documents into a schema. The schema can be used to validate instance documents using
- * the method {@link XsdSchema#getValidator()}, and it can be added to the static context of XQuery queries
+ * the method {@link XsdSchema#newValidator()}, and it can be added to the static context of XQuery queries
  * and XSLT stylesheets using the methods {@link XQueryCompiler#useSchema(XsdSchema)} and
  * {@link XsltCompiler#useSchema(XsdSchema)}.</p>
  *

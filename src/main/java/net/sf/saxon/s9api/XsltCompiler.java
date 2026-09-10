@@ -109,7 +109,7 @@ public class XsltCompiler {
 
     public void useSchema(XsdSchema schema) {
         compilerInfo.setSchemaAware(true);
-        //compilerInfo.preLoadSchema(schema.getUnderlyingSchema());
+        compilerInfo.preLoadSchema(schema.getUnderlyingSchema());
     }
 
     /**

@@ -348,7 +348,7 @@ public class ConfigTest {
                         "</configuration>";
             Processor proc = new Processor(new StreamSource(new StringReader(config)));
             XsdCompiler sm = proc.newXsdCompiler();
-            SchemaValidator v = sm.emptySchema().getValidator();
+            SchemaValidator v = sm.emptySchema().newValidator();
             v.validate(new StreamSource(new File(getDataDir() + "books.xml")));
             try {
                 v.validate(new StreamSource(new File(getDataDir() + "config.xml")));

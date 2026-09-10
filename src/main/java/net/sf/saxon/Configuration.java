@@ -3053,25 +3053,25 @@ public class Configuration implements SourceResolver {
         return new MinimalSchema(this);
     }
 
-    /**
-     * Read a schema from a given schema location
-     * <p>This method is intended for internal use.</p>
-     *
-     * @param pipe           the PipelineConfiguration
-     * @param baseURI        the base URI of the instruction requesting the reading of the schema
-     * @param schemaLocation the location of the schema to be read
-     * @param expected       The expected targetNamespace of the schema being read, or null if there is no expectation
-     * @return the target namespace of the schema; null if no schema has been read
-     * @throws UnsupportedOperationException     when called in the non-schema-aware version of the product
-     * @throws net.sf.saxon.type.SchemaException if the schema cannot be read
-     */
-
-    /*@Nullable*/
-    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ NamespaceUri expected)
-            throws SchemaException {
-        needEnterpriseEdition();
-        return null;
-    }
+//    /**
+//     * Read a schema from a given schema location
+//     * <p>This method is intended for internal use.</p>
+//     *
+//     * @param pipe           the PipelineConfiguration
+//     * @param baseURI        the base URI of the instruction requesting the reading of the schema
+//     * @param schemaLocation the location of the schema to be read
+//     * @param expected       The expected targetNamespace of the schema being read, or null if there is no expectation
+//     * @return the target namespace of the schema; null if no schema has been read
+//     * @throws UnsupportedOperationException     when called in the non-schema-aware version of the product
+//     * @throws net.sf.saxon.type.SchemaException if the schema cannot be read
+//     */
+//
+//    /*@Nullable*/
+//    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ NamespaceUri expected)
+//            throws SchemaException {
+//        needEnterpriseEdition();
+//        return null;
+//    }
 
     /**
      * Read schemas from a list of schema locations.
@@ -3090,25 +3090,25 @@ public class Configuration implements SourceResolver {
     }
 
 
-    /**
-     * Read an inline schema from a stylesheet.
-     * <p>This method is intended for internal use.</p>
-     *
-     * @param root          the xs:schema element in the stylesheet
-     * @param expected      the target namespace expected; null if there is no
-     *                      expectation.
-     * @param errorReporter The destination for error messages. May be null, in which case
-     *                      the errorListener registered with this Configuration is used.
-     * @return the actual target namespace of the schema
-     * @throws net.sf.saxon.type.SchemaException if the schema cannot be processed
-     */
-
-    /*@Nullable*/
-    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
-            throws SchemaException {
-        needEnterpriseEdition();
-        return null;
-    }
+//    /**
+//     * Read an inline schema from a stylesheet.
+//     * <p>This method is intended for internal use.</p>
+//     *
+//     * @param root          the xs:schema element in the stylesheet
+//     * @param expected      the target namespace expected; null if there is no
+//     *                      expectation.
+//     * @param errorReporter The destination for error messages. May be null, in which case
+//     *                      the errorListener registered with this Configuration is used.
+//     * @return the actual target namespace of the schema
+//     * @throws net.sf.saxon.type.SchemaException if the schema cannot be processed
+//     */
+//
+//    /*@Nullable*/
+//    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
+//            throws SchemaException {
+//        needEnterpriseEdition();
+//        return null;
+//    }
 
     /**
      * Throw an error indicating that a request cannot be satisfied because it requires

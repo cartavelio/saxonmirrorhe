@@ -754,7 +754,7 @@ public class TestXPathCompiler {
                 "  </xs:element>\n" +
                 "</xs:schema>";
         XsdSchema schema = sm.compile(new StreamSource(new StringReader(xsd)));
-        SchemaValidator sv = schema.getValidator();
+        SchemaValidator sv = schema.newValidator();
         XdmDestination xdmDest = new XdmDestination();
         sv.setDestination(xdmDest);
         String xml = "<comparables xmlns=\"http://www.xpathtest.com/test\">\n" +

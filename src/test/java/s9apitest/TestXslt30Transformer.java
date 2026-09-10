@@ -552,7 +552,7 @@ public class TestXslt30Transformer {
             XsdCompiler sm = proc.newXsdCompiler();
             XsdSchema schema = sm.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
-            builder.setSchemaValidator(schema.getValidator());
+            builder.setSchemaValidator(schema.newValidator());
             XdmNode books = builder.build(new File(configTest.getDataDir() + "books.xml"));
             // Create a serializer
             //String outfile = @"C:/MyJava/users/caffo/Output.xml";
@@ -1643,7 +1643,7 @@ public class TestXslt30Transformer {
                     "\t\t  xmlns:my=\"http://ns.example.com/strip-type\"\n" +
                     "\t \t  specialPart=\"123-AB\" listParts=\"000-SS 000-RR\" xsi:nil=\"true\"/>";
 
-            SchemaValidator validator = schema.getValidator();
+            SchemaValidator validator = schema.newValidator();
             validator.setLax(false);
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(validator);

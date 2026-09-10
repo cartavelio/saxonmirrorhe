@@ -1345,7 +1345,7 @@ public class PackageLoaderHE implements IPackageLoader {
         IndependentContext env = new IndependentContext(config);
         final NamespaceResolver resolver = element.getAllNamespaces();
         env.setNamespaceResolver(resolver);
-        env.setImportedSchemaNamespaces(pack.getSchemaNamespaces());
+        env.setImportedSchemaNamespaces(pack.getImportedSchemaNamespaces());
         env.getImportedSchemaNamespaces().add(NamespaceUri.ANONYMOUS);
         parser.setQNameParser(parser.getQNameParser().withNamespaceResolver(resolver));
         return env;

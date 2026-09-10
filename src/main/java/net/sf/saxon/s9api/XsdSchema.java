@@ -10,7 +10,7 @@ public abstract class XsdSchema {
      * @since 13.0
      */
 
-    public abstract SchemaValidator getValidator();
+    public abstract SchemaValidator newValidator();
 
     /**
      * Create an {@link ItemTypeFactory} which can be used to create {@link ItemType}

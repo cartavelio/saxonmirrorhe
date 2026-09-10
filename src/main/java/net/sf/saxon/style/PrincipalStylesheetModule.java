@@ -1510,23 +1510,34 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
 
     /**
-     * Get an imported schema with a given namespace
+     * Ask whether a schema with a given namespace has been imported
      *
      * @param targetNamespace The target namespace of the required schema.
-     *                        Supply an empty string for the default namespace
-     * @return the required Schema, or null if no such schema has been imported
+     * @return true if a a schema with this namespace has been imported.
      */
 
-    protected boolean isImportedSchema(NamespaceUri targetNamespace) {
-        return stylesheetPackage.getSchemaNamespaces().contains(targetNamespace);
+    protected boolean isImportedSchemaNamespace(NamespaceUri targetNamespace) {
+        return stylesheetPackage.getImportedSchemaNamespaces().contains(targetNamespace);
     }
 
-    protected void addImportedSchema(NamespaceUri targetNamespace) {
-        stylesheetPackage.getSchemaNamespaces().add(targetNamespace);
+    /**
+     * Register that a schema with a given namespace has been imported
+     *
+     * @param targetNamespace The target namespace of the imported schema.
+     */
+
+    protected void addImportedSchemaNamespace(NamespaceUri targetNamespace) {
+        stylesheetPackage.getImportedSchemaNamespaces().add(targetNamespace);
     }
+
+    /**
+     * Get the set of schema namespaces that have been imported
+     *
+     * @return the set of imported namespaces.
+     */
 
     protected Set<NamespaceUri> getImportedSchemaTable() {
-        return stylesheetPackage.getSchemaNamespaces();
+        return stylesheetPackage.getImportedSchemaNamespaces();
     }
 
     /**

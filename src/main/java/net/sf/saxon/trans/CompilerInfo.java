@@ -18,6 +18,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.QueryLibrary;
 import net.sf.saxon.s9api.UnprefixedElementMatchingPolicy;
 import net.sf.saxon.trans.packages.PackageLibrary;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.URIResolver;
@@ -56,6 +57,7 @@ public class CompilerInfo {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private int languageVersion = 30;
+    private Schema preLoadedSchema;
 
     //#if CSHARP==false
     private OutputURIResolver outputURIResolver = StandardOutputResolver.getInstance();
@@ -111,6 +113,7 @@ public class CompilerInfo {
         defaultNamespaceForElementsAndTypes = info.defaultNamespaceForElementsAndTypes;
         unprefixedElementMatchingPolicy = info.unprefixedElementMatchingPolicy;
         languageVersion = info.languageVersion;
+        preLoadedSchema = info.preLoadedSchema;
 
         //#if CSHARP==false
         outputURIResolver = info.outputURIResolver;
@@ -643,6 +646,15 @@ public class CompilerInfo {
     public Iterable<QueryLibrary> getQueryLibraries() {
         return queryLibraries;
     }
+
+    public void preLoadSchema(Schema schema) {
+        preLoadedSchema = schema;
+    }
+
+    public Schema getPreLoadedSchema() {
+        return preLoadedSchema;
+    }
+
 
 }
 

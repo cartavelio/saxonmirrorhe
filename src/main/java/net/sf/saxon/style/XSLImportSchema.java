@@ -7,16 +7,19 @@
 
 package net.sf.saxon.style;
 
+import com.saxonica.ee.schema.SchemaCompiler;
+import com.saxonica.ee.schema.sdoc.SchemaReader;
 import net.sf.saxon.Configuration;
-import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.LicenseException;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Schema;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.value.Whitespace;
+
+import javax.xml.transform.Source;
 
 
 /**
@@ -72,7 +75,7 @@ public class XSLImportSchema extends StyleElement {
         //
     }
 
-    public void readSchema() throws XPathException {
+    public Source asSource(SchemaCompiler schemaCompiler) throws XPathException {
         try {
             String schemaLoc = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "schema-location"));
             String namespace = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "namespace"));
@@ -83,12 +86,12 @@ public class XSLImportSchema extends StyleElement {
             }
             Configuration config = getConfiguration();
             NamespaceUri targetNamespace = NamespaceUri.of(namespace);
-            Schema schema = config.getSchemaForNamespace(targetNamespace);
-            if (schema != null) {
-                // TODO: handle multiple schema imports
-                getPackageData().setImportedSchema(schema);
-                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
-                return;
+            Schema preLoaded = getCompilation().getCompilerInfo().getPreLoadedSchema();
+            if (preLoaded != null) {
+                if (preLoaded.includesTargetNamespace(targetNamespace)) {
+                    getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
+                    return null;
+                }
             }
             try {
                 config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
@@ -115,45 +118,65 @@ public class XSLImportSchema extends StyleElement {
                     if (namespace == null) {
                         namespace = "";
                     }
+                } else {
+                    String suppliedNamespace = inlineSchema.getAttributeValue(NamespaceUri.NULL, "targetNamespace");
+                    if (!namespace.equals(suppliedNamespace)) {
+                        compileError("Target namespace of inline schema does not match "
+                                             + "the namespace attribute of xsl:import-schema", "XTSE0215");
+                    }
                 }
 
                 targetNamespace = NamespaceUri.of(namespace);
-                targetNamespace = config.readInlineSchema(inlineSchema, targetNamespace,
-                        getCompilation().getCompilerInfo().getErrorReporter());
-                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
+//                targetNamespace = config.readInlineSchema(inlineSchema, targetNamespace,
+//                                                          getCompilation().getCompilerInfo().getErrorReporter());
+                getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
             }
             if (inlineSchema != null) {
-                return;
+                return inlineSchema;
             }
             if (namespace.equals(NamespaceConstant.XML) ||
                     namespace.equals(NamespaceConstant.FN) ||
                     namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
                 targetNamespace = NamespaceUri.of(namespace);
                 config.getSchemaForBuiltInNamespace(targetNamespace);
-                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
-                return;
+                getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
+                return null;
             }
-            targetNamespace = NamespaceUri.of(namespace);
-            boolean namespaceKnown = config.isSchemaAvailable(targetNamespace);
-            if (schemaLoc == null && !namespaceKnown) {
-                issueWarning("No schema for this namespace is known, " +
-                        "and no schema-location was supplied, so no schema has been imported",
-                    SaxonErrorCode.SXWN9006);
-                return;
+
+            getPrincipalStylesheetModule().addImportedSchemaNamespace(targetNamespace);
+
+            if (schemaLoc == null) {
+                return null;
             }
-//            if (namespaceKnown && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
-//                if (schemaLoc != null) {
-//                    issueWarning("The schema document at " + schemaLoc +
-//                        " is ignored because a schema for this namespace is already loaded", SaxonErrorCode.SXWN9006);
-//                }
+            Source source = SchemaReader.getSource(getBaseURI(), schemaLoc, schemaCompiler, targetNamespace);
+            if (source == null) {
+                return null;
+            }
+            AugmentedSource as = AugmentedSource.makeAugmentedSource(source);
+            as.setRequiredTargetNamespace(targetNamespace);
+            return as;
+            
+//            targetNamespace = NamespaceUri.of(namespace);
+//            boolean namespaceKnown = config.isSchemaAvailable(targetNamespace);
+//            if (schemaLoc == null && !namespaceKnown) {
+//                issueWarning("No schema for this namespace is known, " +
+//                                     "and no schema-location was supplied, so no schema has been imported",
+//                             SaxonErrorCode.SXWN9006);
+//                return;
 //            }
-            if (!namespaceKnown) {
-                PipelineConfiguration pipe = config.makePipelineConfiguration();
-                pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
-                schema = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
-                getPrincipalStylesheetModule().getStylesheetPackage().setImportedSchema(schema);
-            }
-            getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
+////            if (namespaceKnown && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
+////                if (schemaLoc != null) {
+////                    issueWarning("The schema document at " + schemaLoc +
+////                        " is ignored because a schema for this namespace is already loaded", SaxonErrorCode.SXWN9006);
+////                }
+////            }
+//            if (!namespaceKnown) {
+//                PipelineConfiguration pipe = config.makePipelineConfiguration();
+//                pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
+//               schema = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
+//                getPrincipalStylesheetModule().getStylesheetPackage().setImportedSchema(schema);
+//            }
+//            getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
         } catch (SchemaException err) {
             if (err.getErrorCodeQName() == null) {
                 compileError(err.getMessage(), "XTSE0220");
@@ -162,9 +185,104 @@ public class XSLImportSchema extends StyleElement {
                                      .withErrorCode(err.getErrorCodeQName())
                                      .withLocation(this));
             }
+            return null;
         }
 
     }
+
+//    public void readSchema() throws XPathException {
+//        try {
+//            String schemaLoc = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "schema-location"));
+//            String namespace = Whitespace.trim(getAttributeValue(NamespaceUri.NULL, "namespace"));
+//            if (namespace == null) {
+//                namespace = "";
+//            } else {
+//                namespace = namespace.trim();
+//            }
+//            Configuration config = getConfiguration();
+//            NamespaceUri targetNamespace = NamespaceUri.of(namespace);
+//            Schema schema = config.getSchemaForNamespace(targetNamespace);
+//            if (schema != null) {
+//                // TODO: handle multiple schema imports
+//                getPackageData().setImportedSchema(schema);
+//                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
+//                return;
+//            }
+//            try {
+//                config.checkLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XSLT,
+//                                            "xsl:import-schema",
+//                                            getPackageData().getLocalLicenseId());
+//            } catch (LicenseException err) {
+//                throw new XPathException(err).withErrorCode("XTSE1650").withLocation(this);
+//            }
+//            NodeInfo inlineSchema = null;
+//            for (NodeInfo child : children()) {
+//                if (inlineSchema != null) {
+//                    compileError(getDisplayName() + " must not have more than one child element");
+//                }
+//                inlineSchema = child;
+//                if (inlineSchema.getFingerprint() != StandardNames.XS_SCHEMA) {
+//                    compileError("The only child element permitted for " + getDisplayName() + " is xs:schema");
+//                }
+//                if (schemaLoc != null) {
+//                    compileError("The schema-location attribute must be absent if an inline schema is present", "XTSE0215");
+//                }
+//
+//                if (namespace.isEmpty()) {
+//                    namespace = inlineSchema.getAttributeValue(NamespaceUri.NULL, "targetNamespace");
+//                    if (namespace == null) {
+//                        namespace = "";
+//                    }
+//                }
+//
+//                targetNamespace = NamespaceUri.of(namespace);
+//                targetNamespace = config.readInlineSchema(inlineSchema, targetNamespace,
+//                        getCompilation().getCompilerInfo().getErrorReporter());
+//                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
+//            }
+//            if (inlineSchema != null) {
+//                return;
+//            }
+//            if (namespace.equals(NamespaceConstant.XML) ||
+//                    namespace.equals(NamespaceConstant.FN) ||
+//                    namespace.equals(NamespaceConstant.SCHEMA_INSTANCE)) {
+//                targetNamespace = NamespaceUri.of(namespace);
+//                config.getSchemaForBuiltInNamespace(targetNamespace);
+//                getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
+//                return;
+//            }
+//            targetNamespace = NamespaceUri.of(namespace);
+//            boolean namespaceKnown = config.isSchemaAvailable(targetNamespace);
+//            if (schemaLoc == null && !namespaceKnown) {
+//                issueWarning("No schema for this namespace is known, " +
+//                        "and no schema-location was supplied, so no schema has been imported",
+//                    SaxonErrorCode.SXWN9006);
+//                return;
+//            }
+////            if (namespaceKnown && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS)) {
+////                if (schemaLoc != null) {
+////                    issueWarning("The schema document at " + schemaLoc +
+////                        " is ignored because a schema for this namespace is already loaded", SaxonErrorCode.SXWN9006);
+////                }
+////            }
+//            if (!namespaceKnown) {
+//                PipelineConfiguration pipe = config.makePipelineConfiguration();
+//                pipe.setErrorReporter(getCompilation().getCompilerInfo().getErrorReporter());
+//                schema = config.readSchema(pipe, getBaseURI(), schemaLoc, targetNamespace);
+//                getPrincipalStylesheetModule().getStylesheetPackage().setImportedSchema(schema);
+//            }
+//            getPrincipalStylesheetModule().addImportedSchema(targetNamespace);
+//        } catch (SchemaException err) {
+//            if (err.getErrorCodeQName() == null) {
+//                compileError(err.getMessage(), "XTSE0220");
+//            } else {
+//                compileError(new XPathException(err.getMessage())
+//                                     .withErrorCode(err.getErrorCodeQName())
+//                                     .withLocation(this));
+//            }
+//        }
+//
+//    }
 
 
     @Override

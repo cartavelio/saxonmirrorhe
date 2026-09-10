@@ -259,7 +259,7 @@ public class SchemaTests {
                 }
             });
             XsdSchema schema = mgr.compile(new StreamSource(new StringReader(over), "http://dummy/over"));
-            SchemaValidator val = schema.getValidator();
+            SchemaValidator val = schema.newValidator();
             val.validate(new StreamSource(new StringReader(data)));
         } catch (SaxonApiException e) {
             e.printStackTrace();
@@ -293,7 +293,7 @@ public class SchemaTests {
             proc.setCatalogFiles(catalog);
 
             XsdSchema schema = mgr.compile(new StreamSource(new StringReader(over), "http://dummy/over"));
-            SchemaValidator val = schema.getValidator();
+            SchemaValidator val = schema.newValidator();
             val.validate(new StreamSource(new StringReader(data)));
         } catch (SaxonApiException e) {
             // expected failure

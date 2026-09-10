@@ -67,7 +67,7 @@ public class StylesheetPackage extends PackageData {
     protected Map<StructuredQName, Properties> namedOutputProperties = new HashMap<>(4);
 
     // table of imported schemas. The members of this set are strings holding the target namespace.
-    protected Set<NamespaceUri> schemaIndex = new HashSet<>(10);
+    protected Set<NamespaceUri> importedSchemaNamespaces = new HashSet<>(10);
 
     private FunctionLibraryList functionLibrary;
     private XQueryFunctionLibrary queryFunctions;
@@ -415,8 +415,8 @@ public class StylesheetPackage extends PackageData {
      * @return the set of imported namespaces
      */
 
-    public Set<NamespaceUri> getSchemaNamespaces() {
-        return schemaIndex;
+    public Set<NamespaceUri> getImportedSchemaNamespaces() {
+        return importedSchemaNamespaces;
     }
 
     /**
@@ -977,7 +977,7 @@ public class StylesheetPackage extends PackageData {
         }
 
         pss.setTopLevelPackage(this);
-        if (isSchemaAware() || !schemaIndex.isEmpty()) {
+        if (isSchemaAware() || !importedSchemaNamespaces.isEmpty()) {
             pss.setSchemaAware(true);
         }
         pss.setHostLanguage(HostLanguage.XSLT);
