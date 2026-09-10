@@ -32,7 +32,7 @@ val documentation by configurations.creating {
   extendsFrom(configurations["implementation"])
 }
 
-val documentationx by configurations.creating {
+val documentation12 by configurations.creating {
   extendsFrom(configurations["implementation"])
 }
 
@@ -57,14 +57,13 @@ dependencies {
   saxonCBucket(project(mapOf("path" to ":libsaxonc:ee",
                               "configuration" to "doxygenOutput")))
 
-  // N.B. the gen_doc_icu_uca task depends on using the current build!
-  documentation("com.saxonica:Saxon-EE:12.9")
-
-  // We need a license to build SEFs
+  // N.B. the gen_doc_icu_uca task depends on using the current build! and needs a license
+  documentation(project(":java", "runtimeElements"))
   documentation(files(saxonBuild.saxonLicenseDir))
 
-  // The documentationx configuration doesn't have a license file
-  documentationx("net.sf.saxon:Saxon-HE:12.9")
+  // We currently need to use Saxon 12 to build SEFs for SaxonJS, which also needs a license
+  documentation12("com.saxonica:Saxon-EE:12.9")
+  documentation12(files(saxonBuild.saxonLicenseDir))
 
   implementation("xom:xom:1.3.5")
   implementation("org.jdom:jdom:1.1.3")
@@ -190,7 +189,7 @@ tasks.register<JavaExec>("viewer_app_sef") {
 
   inputs.dir(layout.projectDirectory.dir("src/viewer_appJS/xsl"))
   outputs.file(layout.buildDirectory.file("userdoc/viewer_appJS/xsl/viewer_app.sef.json"))
-  classpath = configurations.named("documentation").get()
+  classpath = configurations.named("documentation12").get()
   mainClass = "com.saxonica.Transform"
 
   args("-xsl:${layout.projectDirectory.file("src/viewer_appJS/xsl/viewer_app.xsl")}",
@@ -802,7 +801,7 @@ val saxonc_doc_sef = tasks.register<JavaExec>("saxonc_doc_sef") {
 
   inputs.files(layout.projectDirectory.dir("src/docs/saxonc-doc/xsl"))
   outputs.file(layout.buildDirectory.file(sef))
-  classpath = configurations.named("documentation").get()
+  classpath = configurations.named("documentation12").get()
   mainClass = "com.saxonica.Transform"
   args("-xsl:${layout.projectDirectory.file("src/docs/saxonc-doc/xsl/jstree.xsl")}",
        "-export:${layout.buildDirectory.file(sef).get().asFile}",
