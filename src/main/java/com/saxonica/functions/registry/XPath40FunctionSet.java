@@ -6,6 +6,7 @@ import com.saxonica.functions.qt4.csv.CsvToArrays;
 import com.saxonica.functions.qt4.csv.CsvToXml;
 import com.saxonica.functions.qt4.csv.ParseCsv;
 import com.saxonica.functions.qt4.ixml.InvisibleXmlFn;
+import net.sf.saxon.expr.ContextValueExpression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
@@ -389,6 +390,12 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                                   BuiltInAtomicType.ANY_URI.one());
         register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, inScopeNamespacesResult, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, ONE, null));
+
+        register("path", 0, 2, e -> e.populate(Path_1::new, BuiltInAtomicType.STRING, OPT, 0)
+                .arg(0, AnyNodeTest.getInstance(), OPT | NAV, null)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .withDefault(0, new ContextValueExpression())
+                .setOptionDetails(Path_1.getOptionDetails()));
 
         register("sequence-join", 2, e -> e.populate(SequenceJoin::new, AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)

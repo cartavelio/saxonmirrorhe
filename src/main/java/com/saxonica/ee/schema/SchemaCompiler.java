@@ -142,8 +142,9 @@ public class SchemaCompiler {
 
             int numberOfSources = 0;
             List<SchemaDocument> schemaDocuments = new ArrayList<>();
-            List<PreparedSchema> cachedSchemas = new ArrayList<>();
             List<XPathException> failures = new ArrayList<>();
+            // TODO: this process combines the schemas at several locations. XQuery 4.0 recommends an algorithm
+            //       in which only the first successfully dereferenced location hint is used.
             for (Source source : sources) {
                 numberOfSources++;
 
