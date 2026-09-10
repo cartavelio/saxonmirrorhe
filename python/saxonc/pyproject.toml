@@ -1,7 +1,7 @@
 [project]
 name = "saxonc"
 version = "12.6.0"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 description="Official Saxonica python package for the SaxonC-{{EDITION}} {{version}} processor: for XSLT 3.0, XQuery 3.1, XPath 3.1 and XML Schema processing."
 authors = [
     {name = "ONeil Delpratt", email = "oneil@saxonica.com"},

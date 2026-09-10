@@ -77,8 +77,8 @@ the `PySaxonProcessor`:
 ```python
 from saxonc@@edition@@ import PySaxonProcessor
 
-with PySaxonProcessor(license=False) as proc:
-	print(proc.version)
+proc = PySaxonProcessor(license=False)
+print(proc.version)
 ```
 
 It will print something like this:
@@ -97,10 +97,10 @@ on it before doing anything else:
 ```python
 from saxoncee import PySaxonProcessor
 
-with PySaxonProcessor(license=True) as proc:
-    proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
+proc = PySaxonProcessor(license=True)
+proc.set_configuration_property("http://saxon.sf.net/feature/licenseFileLocation",
                                     "/path/to/saxon-license.lic")
-    ...
+...
 ```
 
 ### Example: Running a transformation
@@ -111,7 +111,7 @@ XML document in Python using SaxonC:
 ```python 
 from saxonc@@edition@@ import *
 
-with PySaxonProcessor(license=False) as proc:
+proc = PySaxonProcessor(license=False)
  
 xsltproc = proc.new_xslt30_processor()
 document = proc.parse_xml(xml_text="<doc><item>text1</item><item>text2</item><item>text3</item></doc>")
