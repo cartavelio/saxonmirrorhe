@@ -744,7 +744,7 @@ namespace SaxonCS_NUnit {
                         else {
                             // try to load up the specific parameter type
                             // list is based on http://www.saxonica.com/documentation/#!dotnetdoc/Saxon.Api/XdmAtomicValue
-                            XdmItemType argType = matchingArgDeclaration.Value.GetDeclaredItemType();
+                            XdmItemType argType = matchingArgDeclaration.Value.DeclaredItemType;
                             var argTypeName = "";
                             if (argType != null &&
                                 argType is XdmAtomicType)
