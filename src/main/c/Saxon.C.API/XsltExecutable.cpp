@@ -125,7 +125,7 @@ void XsltExecutable::setGlobalContextFromFile(const char *ifile) {
 }
 
 void XsltExecutable::setInitialMatchSelection(XdmValue *_selection) {
-    if(selection) {
+    if(selection != nullptr) {
         SaxonProcessor::sxn_environ->env->DeleteGlobalRef(selection);
         selection = nullptr;
     }

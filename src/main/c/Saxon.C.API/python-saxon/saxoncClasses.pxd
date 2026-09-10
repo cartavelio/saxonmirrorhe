@@ -122,6 +122,9 @@ cdef extern from "../SaxonProcessor.h":
 
         void setResultAsRawValue(bool option)
 
+        # Set the base output URI.
+        void setBaseOutputURI(const char * baseURI)
+
         # Set the value of a stylesheet parameter
         void setParameter(const char* name, XdmValue*value)
 
@@ -144,6 +147,9 @@ cdef extern from "../SaxonProcessor.h":
 
         # Perform a one shot transformation. The result is returned as a string
         const char * transformFileToString(const char* sourcefile, const char* stylesheetfile)
+
+        # Perform a one shot transformation. The result are saved to file
+        void transformFileToFile(const char* sourcefile, const char* stylesheetfile, const char* outputfile)
 
         # Perform a one shot transformation. The result is returned as an XdmValue
         XdmValue * transformFileToValue(const char* sourcefile, const char* stylesheetfile)
