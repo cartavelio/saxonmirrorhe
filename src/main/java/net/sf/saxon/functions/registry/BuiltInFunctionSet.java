@@ -119,7 +119,7 @@ public abstract class BuiltInFunctionSet implements FunctionLibrary {
     /**
      * Locate the entry for a function with a given name and arity, if it exists
      * @param name the local part of the function name
-     * @param arity the arity of the function. -1 considers all possibly arities and returns an arbitrary function
+     * @param arity the arity of the function. -1 considers all possible arities and returns an arbitrary function
      *              if one exists with the right name.
      * @return the entry for the required function, or null if not found
      */

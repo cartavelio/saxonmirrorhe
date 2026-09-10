@@ -13,7 +13,6 @@ import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Int64Value;
 
 /**
@@ -57,7 +56,7 @@ public class ForClausePull extends TuplePull {
                 if (forClause.getPositionVariable() != null) {
                     context.setLocalVariable(
                             forClause.getPositionVariable().getLocalSlotNumber(),
-                            new Int64Value(currentIteration.position(), BuiltInAtomicType.POSITIVE_INTEGER));
+                            new Int64Value(currentIteration.position()));
                 }
                 return true;
             } else {

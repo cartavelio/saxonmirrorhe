@@ -28,6 +28,7 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
@@ -98,15 +99,15 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         StructuredQName functionName = function.getFunctionName();
         ImmutableMap<String, ImmutableList<XQueryFunction>> localMap = functionsByNamespace.get(functionName.getNamespaceUri());
         if (localMap == null) {
-            ImmutableList<XQueryFunction> list = ImmutableList.empty();
+            ImmutableList<XQueryFunction> list = makeEmptyList();
             list = list.prepend(function);
-            localMap = ImmutableHashTrieMap.empty();
+            localMap = makeEmptyMap();
             localMap = localMap.put(functionName.getLocalPart(),list);
         } else {
             // Test if the arity range of this function overlaps the arity range of another function
             ImmutableList<XQueryFunction> existingFunctions = localMap.get(functionName.getLocalPart());
             if (existingFunctions == null) {
-                existingFunctions = ImmutableList.empty();
+                existingFunctions = makeEmptyList();
             }
             for (XQueryFunction existing : existingFunctions) {
                 if (existing == function) {
@@ -123,6 +124,16 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             localMap = localMap.put(functionName.getLocalPart(), newList);
         }
         functionsByNamespace.put(functionName.getNamespaceUri(), localMap);
+    }
+
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableList<Saxon.Hej.query.XQueryFunction>.Empty;")
+    private static ImmutableList<XQueryFunction> makeEmptyList() {
+        return ImmutableList.empty();
+    }
+
+    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<string,System.Collections.Immutable.ImmutableList<Saxon.Hej.query.XQueryFunction>>.Empty;")
+    private static ImmutableMap<String, ImmutableList<XQueryFunction>> makeEmptyMap() {
+        return ImmutableHashTrieMap.empty();
     }
 
     private static boolean hasOverlappingArity(XQueryFunction f1, XQueryFunction f2) {

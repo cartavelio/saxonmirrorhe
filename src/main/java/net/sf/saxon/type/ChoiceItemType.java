@@ -12,7 +12,6 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
 import net.sf.saxon.type.coercion.CoercionPlan;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -24,27 +23,20 @@ import java.util.function.Predicate;
 
 public class ChoiceItemType implements ItemType, ChoiceType {
 
-    public static ItemType makeChoiceItemType(List<? extends ItemType> memberTypes) {
+    public static ItemType makeChoiceItemType(List<ItemType> memberTypes) {
         for (ItemType member : memberTypes) {
             if (member.getGenre() != Genre.ATOMIC) {
                 return new ChoiceItemType(memberTypes);
             }
-        }
-        List<AtomicType> atomicMemberTypes = new ArrayList<>();
-        for (ItemType member : memberTypes) {
-            if (member instanceof AtomicType) {
-                atomicMemberTypes.add((AtomicType) member);
-            } else if (member instanceof PlainType) {
-                for (PlainType at : ((PlainType)member).getPlainMemberTypes()) {
-                    if (at instanceof AtomicType) {
-                        atomicMemberTypes.add((AtomicType) at);
-                    } else {
+            if (member instanceof PlainType) {
+                for (PlainType at : ((PlainType) member).getPlainMemberTypes()) {
+                    if (!(at instanceof AtomicType)) {
                         return new ChoiceItemType(memberTypes);
                     }
                 }
             }
         }
-        return new LocalUnionType(atomicMemberTypes);
+        return new LocalUnionType(memberTypes);
     }
 
     public static ChoiceItemType of(ItemType... memberTypes) {

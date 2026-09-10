@@ -20,7 +20,6 @@ import net.sf.saxon.value.Int64Value;
  */
 public class ForClauseOuterPull extends ForClausePull {
 
-    final static Int64Value TYPED_ZERO = new Int64Value(0, BuiltInAtomicType.NON_NEGATIVE_INTEGER);
 
     public ForClauseOuterPull(TuplePull base, ForClause forClause) {
         super(base, forClause);
@@ -52,7 +51,7 @@ public class ForClauseOuterPull extends ForClausePull {
                     if (forClause.getPositionVariable() != null) {
                         context.setLocalVariable(
                                 forClause.getPositionVariable().getLocalSlotNumber(),
-                                TYPED_ZERO);
+                                Int64Value.ZERO);
                     }
                     currentIteration = null;
                     return true;

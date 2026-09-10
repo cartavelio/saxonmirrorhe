@@ -619,7 +619,6 @@ public class ForExpression extends Assignation {
             final int actionCardinality = expr.getAction().getCardinality();
             final int slot = expr.getLocalSlotNumber();
             final int positionSlot = expr.positionVariable == null ? -1 : expr.positionVariable.getLocalSlotNumber();
-            final AtomicType positionLabel = BuiltInAtomicType.POSITIVE_INTEGER;
 
             if (Cardinality.allowsMany(actionCardinality)) {
                 final PullEvaluator actionEval = expr.getAction().makeElaborator().elaborateForPull();
@@ -637,7 +636,7 @@ public class ForExpression extends Assignation {
                         FocusTrackingIterator fti = new FocusTrackingIterator(base);
                         return new MappingIterator(fti, item -> {
                             context.setLocalVariable(slot, item);
-                            context.setLocalVariable(positionSlot, new Int64Value(fti.position(), positionLabel));
+                            context.setLocalVariable(positionSlot, new Int64Value(fti.position()));
                             return actionEval.iterate(context);
                         });
                     };
@@ -658,7 +657,7 @@ public class ForExpression extends Assignation {
                         FocusTrackingIterator fti = new FocusTrackingIterator(base);
                         return new ItemMappingIterator(fti, item -> {
                             context.setLocalVariable(slot, item);
-                            context.setLocalVariable(positionSlot, new Int64Value(fti.position(), positionLabel));
+                            context.setLocalVariable(positionSlot, new Int64Value(fti.position()));
                             return actionEval.eval(context);
                         });
                     };

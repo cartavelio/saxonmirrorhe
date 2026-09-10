@@ -19,7 +19,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.type.Affinity;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
@@ -333,7 +332,7 @@ public class WindowClause extends Clause {
         }
         binding = clause.getVariableBinding(WindowClause.START_ITEM_POSITION);
         if (binding != null) {
-            context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(position, BuiltInAtomicType.POSITIVE_INTEGER));
+            context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(position));
         }
         binding = clause.getVariableBinding(WindowClause.START_NEXT_ITEM);
         if (binding != null) {
@@ -368,7 +367,7 @@ public class WindowClause extends Clause {
         }
         binding = clause.getVariableBinding(WindowClause.START_ITEM_POSITION);
         if (binding != null) {
-            context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(window.startPosition, BuiltInAtomicType.POSITIVE_INTEGER));
+            context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(window.startPosition));
         }
         binding = clause.getVariableBinding(WindowClause.START_NEXT_ITEM);
         if (binding != null) {
@@ -384,7 +383,7 @@ public class WindowClause extends Clause {
         }
         binding = clause.getVariableBinding(WindowClause.END_ITEM_POSITION);
         if (binding != null) {
-            context.setLocalVariable(binding.getLocalSlotNumber(), new Int64Value(position, BuiltInAtomicType.POSITIVE_INTEGER));
+            context.setLocalVariable(binding.getLocalSlotNumber(), Int64Value.makeIntegerValue(position));
         }
         binding = clause.getVariableBinding(WindowClause.END_NEXT_ITEM);
         if (binding != null) {

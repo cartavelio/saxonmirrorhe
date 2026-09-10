@@ -51,7 +51,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
         }
     }
 
-    @CSharpReplaceMethod(code="private NumericType() : base (Saxon.Ejava.util.Arrays.asList<Saxon.Hej.type.AtomicType>(Saxon.Hej.type.BuiltInAtomicType.DOUBLE, Saxon.Hej.type.BuiltInAtomicType.FLOAT, Saxon.Hej.type.BuiltInAtomicType.DECIMAL)) {}")
+    @CSharpReplaceMethod(code="private NumericType() : base (Saxon.Ejava.util.Arrays.asList<Saxon.Hej.type.ItemType>(Saxon.Hej.type.BuiltInAtomicType.DOUBLE, Saxon.Hej.type.BuiltInAtomicType.FLOAT, Saxon.Hej.type.BuiltInAtomicType.DECIMAL)) {}")
     private NumericType() {
         super(Arrays.asList(BuiltInAtomicType.DOUBLE, BuiltInAtomicType.FLOAT, BuiltInAtomicType.DECIMAL));
    }

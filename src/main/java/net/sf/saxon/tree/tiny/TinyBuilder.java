@@ -281,7 +281,7 @@ public class TinyBuilder extends Builder {
             attribute2(att.getNodeName(), att.getType(),
                       getAttValue(att), location, att.getProperties());
         }
-        textualElementEligibilityState = noNewNamespaces ? Eligibility.PRIMED : Eligibility.INELIGIBLE;
+        textualElementEligibilityState = (noNewNamespaces && !lineNumbering) ? Eligibility.PRIMED : Eligibility.INELIGIBLE;
         tree.addNamespaces(nodeNr, namespaceStack.peek());
         nodeNr++;
     }

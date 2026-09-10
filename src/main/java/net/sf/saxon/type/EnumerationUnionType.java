@@ -1,11 +1,12 @@
 package net.sf.saxon.type;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EnumerationUnionType extends LocalUnionType {
 
     public EnumerationUnionType(List<SingletonEnumType> singletonEnums) {
-        super(singletonEnums);
+        super(new ArrayList<ItemType>(singletonEnums));
     }
 
     @Override

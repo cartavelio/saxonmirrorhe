@@ -12,7 +12,6 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.Int64Value;
 
 /**
@@ -42,7 +41,7 @@ public class ForClausePush extends TuplePush {
             if (forClause.getPositionVariable() != null) {
                 context.setLocalVariable(
                         forClause.getPositionVariable().getLocalSlotNumber(),
-                        new Int64Value(++pos, BuiltInAtomicType.POSITIVE_INTEGER));
+                        Int64Value.makeIntegerValue(++pos));
             }
             destination.processTuple(context);
         }

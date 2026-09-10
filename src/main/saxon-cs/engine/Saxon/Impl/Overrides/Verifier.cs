@@ -4,6 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using NSec.Cryptography;
 using Saxon.Hej.trans;
+using PublicKey = NSec.Cryptography.PublicKey;
 
 namespace Saxon.Impl.Overrides {
     public class Verifier : Saxon.Eej.config.Verifier {
@@ -34,7 +35,7 @@ namespace Saxon.Impl.Overrides {
             return valid;
         }
 
-        protected internal bool verify2(string data, string signature)
+        protected internal override bool verify2(string data, string signature)
         {
             var algorithm = SignatureAlgorithm.Ed25519;
             var publicKeyBytes = Convert.FromBase64String(ed25519Pem);

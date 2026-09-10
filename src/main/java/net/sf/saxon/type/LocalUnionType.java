@@ -12,9 +12,8 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
-import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.ChoiceCoercionPlan;
+import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 
@@ -50,12 +49,12 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
      * @param memberTypes the atomic member types of the union
      */
 
-    public LocalUnionType(List<? extends AtomicType> memberTypes) {
+    public LocalUnionType(List<ItemType> memberTypes) {
         super(memberTypes);
     }
 
     public static LocalUnionType of(AtomicType... memberTypes) {
-        List<AtomicType> members = new ArrayList<>(memberTypes.length);
+        List<ItemType> members = new ArrayList<>(memberTypes.length);
         Collections.addAll(members, memberTypes);
         return new LocalUnionType(members);
     }
@@ -285,11 +284,10 @@ public class LocalUnionType extends ChoiceItemType implements PlainType, UnionTy
      *         in its transitive membership, in declaration order
      */
     @Override
-    @CSharpReplaceBody(code="return new System.Collections.Generic.List<Saxon.Hej.type.PlainType>(memberTypes);")
     public List<? extends PlainType> getPlainMemberTypes()  {
-        List<AtomicType> members = new ArrayList<>(memberTypes.size());
+        List<PlainType> members = new ArrayList<>(memberTypes.size());
         for (ItemType it : memberTypes) {
-            members.add((AtomicType)it);
+            members.add((PlainType)it);
         }
         return members;
     }

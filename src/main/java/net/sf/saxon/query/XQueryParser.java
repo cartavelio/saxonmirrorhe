@@ -2896,7 +2896,7 @@ public class XQueryParser extends XPathParser {
             }
             if (isKeyword("at")) {
                 nextToken();
-                LocalVariableBinding startPositionVar = new LocalVariableBinding(readVariableName(), BuiltInAtomicType.POSITIVE_INTEGER.one());
+                LocalVariableBinding startPositionVar = new LocalVariableBinding(readVariableName(), BuiltInAtomicType.INTEGER.one());
                 clause.setVariableBinding(WindowClause.START_ITEM_POSITION, startPositionVar);
                 declareRangeVariable(startPositionVar);
             }
@@ -2941,7 +2941,7 @@ public class XQueryParser extends XPathParser {
             }
             if (isKeyword("at")) {
                 nextToken();
-                LocalVariableBinding endPositionVar = new LocalVariableBinding(readVariableName(), BuiltInAtomicType.POSITIVE_INTEGER.one());
+                LocalVariableBinding endPositionVar = new LocalVariableBinding(readVariableName(), BuiltInAtomicType.INTEGER.one());
                 clause.setVariableBinding(WindowClause.END_ITEM_POSITION, endPositionVar);
                 declareRangeVariable(endPositionVar);
             }

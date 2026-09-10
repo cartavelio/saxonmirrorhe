@@ -100,7 +100,7 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
     public Expression makeFunctionCall(Expression... arguments) {
         if (arguments.length > getArity() && isSequenceVariadic()) {
             if (getArity() != 1) {
-                throw new UnsupportedOperationException("Not implemented: sequence-variadic function with arity>1");
+                throw new UnsupportedOperationException("Not implemented: sequence-variadic system function with arity>1");
             }
             arguments = new Expression[]{new Block(arguments)};
         }

@@ -110,12 +110,12 @@ public class TypeChecker {
         }
 
         // Produce a static error if coercion cannot succeed or (in 4.0) is implausible
-       
+
+        final int version = visitor.getStaticContext().getPackageData().getHostLanguageVersion();
         if (reqCardinality != StaticProperty.ALLOWS_ZERO && supplied.getCardinality() != StaticProperty.ALLOWS_ZERO
                 && !isCoercible(supplied.getItemType(), reqItemType)) {
             boolean implausibility = false;
             String message = roleSupplier.get().composeErrorMessage(reqItemType, supplied, th);
-            int version = visitor.getStaticContext().getXPathVersion();
             if (Cardinality.allowsZero(reqCardinality) && Cardinality.allowsZero(supplied.getCardinality())) {
                 message += ". The only value that could succeed is therefore the empty sequence";
                 implausibility = true;
@@ -136,7 +136,7 @@ public class TypeChecker {
 
         // Create a coercer expression wrapping the supplied expression
 
-        final int version = visitor.getStaticContext().getPackageData().getHostLanguageVersion();
+
         Expression result = new SequenceCoercer(supplied, req, roleSupplier, version >= 40);
 
         // If the supplied expression was a literal, do the coercion right now

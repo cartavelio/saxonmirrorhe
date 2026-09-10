@@ -21,7 +21,7 @@ public class DerivedAtomicCoercionPlan extends AtomicCoercionPlan {
     @Override
     protected AtomicValue promote(AtomicValue atom, ItemType requiredType, CoercionRequest request) throws XPathException {
         AtomicType req = (AtomicType) requiredType;
-        AtomicType prim = req.getPrimitiveItemType();
+        AtomicType prim = (AtomicType) req.getPrimitiveItemType();   // cast needed for C#
         ConversionRules rules = request.config.getConversionRules();
         TypeHierarchy th = request.config.getTypeHierarchy();
 

@@ -1389,7 +1389,7 @@ public class XPathParser {
             if (positionVarQName.equals(varQName)) {
                 grumble("Position variable in 'for' expression has the same name as the range variable", "XQST0089");
             }
-            positionBinding = new LocalVariableBinding(positionVarQName, BuiltInAtomicType.POSITIVE_INTEGER.one());
+            positionBinding = new LocalVariableBinding(positionVarQName, BuiltInAtomicType.INTEGER.one());
             result.setPositionVariable(positionBinding);
             nextToken();
         }
@@ -2155,7 +2155,7 @@ public class XPathParser {
     }
 
     /**
-     * Parse a union type (Saxon 9.8 extension).
+     * Parse a union type (Saxon 9.8 extension, no longer in XPath 4.0).
      * Syntax: "union" "(" qname ("," qname)* ")"
      * @return the item type
      * @throws XPathException if a syntax error is found
@@ -2165,7 +2165,7 @@ public class XPathParser {
         // The initial "union(" has been read
         checkLanguageVersion40();
         nextToken();
-        List<AtomicType> memberTypes = new ArrayList<>(6);
+        List<ItemType> memberTypes = new ArrayList<>(6);
 
         while (true) {
             if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
@@ -2182,11 +2182,11 @@ public class XPathParser {
                             t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
                     ItemType type = getPlainType(member);
                     if (type instanceof AtomicType) {
-                        memberTypes.add((AtomicType) type);
+                        memberTypes.add(type);
                     } else if (type instanceof PlainType) {
                         for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
                             if (pt instanceof AtomicType) {
-                                memberTypes.add((AtomicType) pt);
+                                memberTypes.add(pt);
                             } else {
                                 grumble("Union type " + type + " has a non-atomic member type " + pt);
                             }

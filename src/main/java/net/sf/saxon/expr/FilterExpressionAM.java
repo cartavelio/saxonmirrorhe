@@ -354,7 +354,7 @@ public class FilterExpressionAM extends BinaryExpression
         }
 
         private MapItem filteredMap(XPathContext context, MapItem input, ItemEvaluator predicate) throws XPathException {
-            HashTrieMap result = new HashTrieMap();
+            MapItem result = new HashTrieMap();
             int size = input.size();
             ManualIterator focus = new ManualIterator();
             XPathContext c2 = context.newMinorContext();

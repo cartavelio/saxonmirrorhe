@@ -301,7 +301,7 @@ public class LookupAllExpression extends UnaryExpression {
                 return (context) -> new LookupAllIterator(expr, baseEval.iterate(context));
             } else {
                 TypeHierarchy th = expr.getConfiguration().getTypeHierarchy();
-                ItemMappingFunction fn = (item) -> expr.requiredType.matches(item, th) ? item : null;
+                ItemMapper fn = ItemMapper.of((item) -> expr.requiredType.matches(item, th) ? item : null);
                 return (context) -> new ItemMappingIterator(
                         new LookupAllIterator(expr, baseEval.iterate(context)), fn);
             }

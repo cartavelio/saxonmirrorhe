@@ -22,6 +22,7 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntIterator;
 
 import javax.xml.transform.SourceLocator;
 import java.util.ArrayList;
@@ -412,7 +413,21 @@ public class TinyTextualElement extends TinyElementImpl {
 
         @Override
         public int getLineNumber() {
-            return getParent().getLineNumber();
+            // The line number is that of the END of the text node
+            // TODO (bug 6405): this calculation is only correct if using
+            //  the position data returned by a SAX parser, it will give wrong
+            //  answer if the position data comes from a different parser, for example
+            //  the Microsoft parser used in SaxonCS.
+            int line = getParent().getLineNumber();
+            UnicodeString value = getUnicodeStringValue();
+            IntIterator codepoints = value.codePoints();
+            while (codepoints.hasNext()) {
+                int cp = codepoints.next();
+                if (cp == 10) {
+                    line++;
+                }
+            }
+            return line;
         }
 
 
@@ -431,7 +446,18 @@ public class TinyTextualElement extends TinyElementImpl {
          */
         @Override
         public int getColumnNumber() {
-            return getParent().getColumnNumber();
+            // The column number is that of the END of the text node
+            // TODO: as per getLineNumber() above
+            int col = getParent().getColumnNumber() + 1; // The end of the element's start tag
+            UnicodeString value = getUnicodeStringValue();
+            IntIterator codepoints = value.codePoints();
+            while (codepoints.hasNext()) {
+                int cp = codepoints.next();
+                if (cp == 10) {
+                    col = 1;
+                }
+            }
+            return col;
         }
 
 
@@ -512,6 +538,8 @@ public class TinyTextualElement extends TinyElementImpl {
         public AtomicSequence atomize() throws XPathException {
             return StringValue.makeUntypedAtomic(getUnicodeStringValue());
         }
+
+
 
         /**
          * Return an enumeration over the nodes reached by the given axis from this node

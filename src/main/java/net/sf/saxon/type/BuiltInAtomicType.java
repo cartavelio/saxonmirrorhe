@@ -335,6 +335,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
         ANY_ATOMIC.coercionPlan31 = AtomicCoercionPlan.getInstance();
         STRING.coercionPlan31 = StringCoercionPlan.getInstance();
+        ANY_URI.coercionPlan31 = AnyURICoercionPlan.getInstance();
         LANGUAGE.coercionPlan31 = AtomicCoercionPlan.getInstance();
         NORMALIZED_STRING.coercionPlan31 = AtomicCoercionPlan.getInstance();
         TOKEN.coercionPlan31 = AtomicCoercionPlan.getInstance();
@@ -347,6 +348,8 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
         DECIMAL.coercionPlan31 = AtomicCoercionPlan.getInstance();
         INTEGER.coercionPlan31 = AtomicCoercionPlan.getInstance();
         DURATION.coercionPlan31 = AtomicCoercionPlan.getInstance();
+        G_YEAR.coercionPlan31 = AtomicCoercionPlan.getInstance();
+        G_YEAR_MONTH.coercionPlan31 = AtomicCoercionPlan.getInstance();
         G_MONTH.coercionPlan31 = AtomicCoercionPlan.getInstance();
         G_MONTH_DAY.coercionPlan31 = AtomicCoercionPlan.getInstance();
         G_DAY.coercionPlan31 = AtomicCoercionPlan.getInstance();

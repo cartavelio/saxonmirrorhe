@@ -65,9 +65,10 @@ namespace Saxon.Callbacks {
                     return tss;
                 }
 
-                
-                Stream stream = ResourceAccess.GetStream(((XmlResolver.XmlResolver) config.getResourceResolver()).Config, abs);
-                return new StreamSource(stream, abs.ToString());
+                Saxon.Hej.lib.JJ_ResourceResolver configResolver = config.getResourceResolver();
+                return configResolver.resolve(request);
+                // Stream stream = ResourceAccess.GetStream(configResolver. Config, abs);
+                // return new StreamSource(stream, abs.ToString());
             }
 
             catch (WebException) {
