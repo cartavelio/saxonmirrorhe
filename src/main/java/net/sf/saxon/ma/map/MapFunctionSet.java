@@ -48,7 +48,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Get the set of functions defined in the F&O spec in the "map" namespace
+     * Get the set of functions defined in the F&amp;O spec in the "map" namespace
      * @param version the XPath version (eg 31, 40). Currently any version less than 40
      *                is treated as 31, and any version greater than 40 is treated as 40.
      * @return the function library
