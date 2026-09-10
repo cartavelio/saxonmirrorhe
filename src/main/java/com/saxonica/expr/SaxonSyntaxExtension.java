@@ -37,34 +37,34 @@ public class SaxonSyntaxExtension extends ParserExtension {
     public SaxonSyntaxExtension() {
     }
 
-    /**
-     * Parse an ItemType within a SequenceType
-     *
-     * @return the ItemType after parsing
-     * @throws XPathException if a static error is found
-     */
-
-    @Override
-    public ItemType parseExtendedItemType(XPathParser p) throws XPathException {
-        Tokenizer t = p.getTokenizer();
-        if (t.currentToken == Token.NODEKIND && t.currentTokenValue.equals("type")) {
-            // Saxon extension: type aliases
-            p.checkSyntaxExtensions("type alias");
-            p.nextToken();
-            p.expect(Token.NAME);
-            StructuredQName typeAlias = p.getQNameParser().parse(t.currentTokenValue, "");
-            ItemType realType = p.getStaticContext().resolveTypeAlias(typeAlias);
-            if (realType == null) {
-                p.grumble("Named type(" + typeAlias.getDisplayName() + ") has not been defined");
-            }
-            p.nextToken();
-            p.expect(Token.RPAR);
-            p.nextToken();
-            return realType;
-        } else {
-            return null;
-        }
-    }
+//    /**
+//     * Parse an ItemType within a SequenceType
+//     *
+//     * @return the ItemType after parsing
+//     * @throws XPathException if a static error is found
+//     */
+//
+//    @Override
+//    public ItemType parseExtendedItemType(XPathParser p) throws XPathException {
+//        Tokenizer t = p.getTokenizer();
+//        if (t.currentToken == Token.FUNCTION && t.currentTokenValue.equals("type")) {
+//            // Saxon extension: type aliases
+//            p.checkSyntaxExtensions("type alias");
+//            p.nextToken();
+//            p.expect(Token.NAME);
+//            StructuredQName typeAlias = p.getQNameParser().parse(t.currentTokenValue, "");
+//            ItemType realType = p.getStaticContext().resolveTypeAlias(typeAlias);
+//            if (realType == null) {
+//                p.grumble("Named type(" + typeAlias.getDisplayName() + ") has not been defined");
+//            }
+//            p.nextToken();
+//            p.expect(Token.RPAR);
+//            p.nextToken();
+//            return realType;
+//        } else {
+//            return null;
+//        }
+//    }
 
     /**
      * Parse an extended XSLT pattern in the form item-type (predicate)*  (but excluding the

@@ -16,7 +16,6 @@ import com.saxonica.serialize.SerializerFactoryPE;
 import com.saxonica.trans.ModePE;
 import com.saxonica.trans.PackageLoaderPE;
 import com.saxonica.xsltextn.ExtensionElementFactory;
-import com.saxonica.xsltextn.TypeAliasManagerPE;
 import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import com.saxonica.xsltextn.style.SaxonElementFactory;
 import net.sf.saxon.Configuration;
@@ -214,20 +213,6 @@ public class ProfessionalConfiguration extends Configuration {
             typeHierarchy = new TypeHierarchy(this);
         }
         return typeHierarchy;
-    }
-
-    /**
-     * Make a TypeAliasManager appropriate to the type of Configuration
-     *
-     * @return a new TypeAliasManager
-     */
-    @Override
-    public TypeAliasManager makeTypeAliasManager() {
-        if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
-            return new TypeAliasManagerPE();
-        } else {
-            return super.makeTypeAliasManager();
-        }
     }
 
     @Override

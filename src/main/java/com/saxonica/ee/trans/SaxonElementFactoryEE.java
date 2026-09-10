@@ -3,6 +3,7 @@ package com.saxonica.ee.trans;
 import com.saxonica.ee.xtupdate.*;
 import com.saxonica.xsltextn.style.*;
 import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.XSLItemType;
 
 /**
  * A Factory for Saxon extension nodes in the stylesheet tree. <br>
@@ -58,7 +59,7 @@ public class SaxonElementFactoryEE extends SaxonElementFactory {
             return SaxonInsert.class;
         }
         if (localname.equals("item-type")) {
-            return SaxonItemType.class;
+            return XSLItemType.class;
         }
         if (localname.equals("rename")) {
             return SaxonRename.class;

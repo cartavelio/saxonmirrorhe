@@ -2,6 +2,7 @@ package com.saxonica.xsltextn.style;
 
 import com.saxonica.xsltextn.ExtensionElementFactory;
 import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.XSLItemType;
 
 /**
  * A Factory for Saxon extension nodes in the stylesheet tree. <br>
@@ -48,7 +49,7 @@ public class SaxonElementFactory implements ExtensionElementFactory {
             return SaxonImportQuery.class;
         }
         if (localname.equals("item-type")) {
-            return SaxonItemType.class;
+            return XSLItemType.class;
         }
         if (localname.equals("tabulate-maps")) {
             return SaxonTabulateMaps.class;

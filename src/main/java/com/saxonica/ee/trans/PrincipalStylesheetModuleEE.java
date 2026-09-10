@@ -4,7 +4,7 @@ package com.saxonica.ee.trans;
 import com.saxonica.ee.stream.Posture;
 import com.saxonica.ee.stream.PostureAndSweep;
 import com.saxonica.ee.stream.Streamability;
-import com.saxonica.xsltextn.style.SaxonItemType;
+import net.sf.saxon.style.XSLItemType;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
@@ -61,8 +61,8 @@ public class PrincipalStylesheetModuleEE extends PrincipalStylesheetModule {
                     if (decl.getSourceElement() instanceof XSLImportSchema) {
                         ((XSLImportSchema) decl.getSourceElement()).readSchema();
                     }
-                    if (decl.getSourceElement() instanceof SaxonItemType) {
-                        ((SaxonItemType) decl.getSourceElement()).indexTypeAlias(decl, this);
+                    if (decl.getSourceElement() instanceof XSLItemType) {
+                        ((XSLItemType) decl.getSourceElement()).indexTypeAlias(decl, this);
                     }
                 }
                 // Now seal all the schemas that have been imported to guarantee consistency with instance documents
