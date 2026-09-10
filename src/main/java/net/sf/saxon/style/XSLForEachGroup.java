@@ -119,7 +119,7 @@ public final class XSLForEachGroup extends StyleElement {
                     break;
                 case "break-when":
                     // Saxon extension
-                    requireSyntaxExtensions("break-when");
+                    requireXslt40("break-when");
                     breakWhenAtt = "function($group as item()*, $next as item()) as Q{http://www.w3.org/2001/XMLSchema}boolean " +
                             "{ Q{http://www.w3.org/2005/xpath-functions}boolean(" + value + ") }";
                     //System.err.println(breakWhenAtt);
