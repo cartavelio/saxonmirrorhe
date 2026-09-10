@@ -70,11 +70,11 @@ public class SchemaModelSerializer {
         cco.open();
         cco.startDocument(ReceiverOption.NONE);
         serialize();
-        if (receiver instanceof CheckSumFilter) {
-            int c = ((CheckSumFilter) receiver).getChecksum();
-            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
-                                      Loc.NONE, ReceiverOption.NONE);
-        }
+//        if (receiver instanceof CheckSumFilter) {
+//            int c = ((CheckSumFilter) receiver).getChecksum();
+//            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
+//                                      Loc.NONE, ReceiverOption.NONE);
+//        }
         cco.endDocument();
         cco.close();
     }
@@ -133,8 +133,6 @@ public class SchemaModelSerializer {
 
         endElement();
 
-
-
         if (receiver instanceof CheckSumFilter) {
             int c = ((CheckSumFilter) receiver).getChecksum();
             cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
@@ -143,9 +141,6 @@ public class SchemaModelSerializer {
             cco.processingInstruction(CheckSumFilter.SIGMA2, BMPString.of(digest),
                     Loc.NONE, ReceiverOption.NONE);
         }
-        cco.endDocument();
-        cco.close();
-
 
     }
 

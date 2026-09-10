@@ -772,7 +772,6 @@ public class SchemaModelLoader extends ProxyReceiver {
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
             NamespaceUri namespaceUri = NamespaceUri.of(namespace);
-            loader.targetNamespaces.add(namespaceUri);
             int fp;
             if (name == null) {
                 fp = loader.config.getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, id);
@@ -781,6 +780,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             } else {
                 fp = loader.config.getNamePool().allocateFingerprint(namespaceUri, name);
             }
+            loader.targetNamespaces.add(namespaceUri);
             String base = attributes.getValue(NamespaceUri.NULL, "base");
             String variety = attributes.getValue(NamespaceUri.NULL, "variety");
             boolean isAbstract = toBoolean(attributes.getValue(NamespaceUri.NULL, "abstract"));
@@ -878,7 +878,6 @@ public class SchemaModelLoader extends ProxyReceiver {
             String name = attributes.getValue(NamespaceUri.NULL, "name");
             String namespace = attributes.getValue(NamespaceUri.NULL, "targetNamespace");
             NamespaceUri namespaceUri = NamespaceUri.of(namespace);
-            loader.targetNamespaces.add(namespaceUri);
             int fingerprint;
             if (name == null) {
                 fingerprint = config.getNamePool().allocateFingerprint(NamespaceUri.ANONYMOUS, id);
@@ -888,6 +887,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             } else {
                 fingerprint = loader.config.getNamePool().allocateFingerprint(namespaceUri, name);
             }
+            loader.targetNamespaces.add(namespaceUri);
             String base = attributes.getValue(NamespaceUri.NULL, "base");
             String variety = attributes.getValue(NamespaceUri.NULL, "variety");
             String itemType = attributes.getValue(NamespaceUri.NULL, "itemType");
