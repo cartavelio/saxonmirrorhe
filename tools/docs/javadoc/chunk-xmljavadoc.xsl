@@ -372,7 +372,7 @@ History
                         </xsl:apply-templates>
                     </enumConstants>
                 </xsl:if>
-                <xsl:apply-templates select="d:class|d:enum">
+                <xsl:apply-templates select="d:class|d:interface|d:enum">
                     <xsl:sort select="upper-case(@type)"/>
                 </xsl:apply-templates>
                 <xsl:sequence select="$implementing-classes"/>
