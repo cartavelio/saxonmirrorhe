@@ -160,6 +160,7 @@ task eecs_setupPreprocess(
   exclude "net/sf/saxon/trans/XmlCatalogResolver.java"
   exclude "net/sf/saxon/tree/iter/NodeWrappingAxisIterator.java"
   exclude "net/sf/saxon/tree/iter/NodeWrappingFunction.java"
+  exclude "net/sf/saxon/tree/jiter/ReverseListIterable.java"
   exclude "net/sf/saxon/tree/jiter/TopDownStackIterable.java"
   exclude "net/sf/saxon/tree/jiter/MappingJavaIterator.java"
   exclude "net/sf/saxon/tree/lib/StandardEntityResolver.java"

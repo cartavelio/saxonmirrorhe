@@ -815,6 +815,15 @@
       </xsl:choose>
    </xsl:template>
    
+   <!--Handle BitSet -->
+   <xsl:template match="*[f:degenerifyWithoutEscaping(@RESOLVED_TYPE) = 'java.util.BitSet']" 
+      priority="20" mode="methods">
+      <xsl:sequence select="f:applyFormat(., map{
+         'get#1':         '%scope%[%args%]',
+         'set#1':         '%scope%.Set(%args%, true)'
+         })"/>
+   </xsl:template>
+   
    <!-- ImmutableHashTrieMap -->
    <xsl:template match="*[f:targetType(.) = ('net.sf.saxon.ma.trie.ImmutableHashTrieMap', 'net.sf.saxon.ma.trie.ImmutableMap')]" 
       priority="20" mode="methods">

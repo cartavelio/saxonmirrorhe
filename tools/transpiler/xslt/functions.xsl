@@ -132,6 +132,7 @@
       'java.nio.charset.Charset': 'System.Text.Encoding',
       'java.time.format.DateTimeParseException': 'System.FormatException',
       'java.util.ArrayList': 'System.Collections.Generic.List',
+      'java.util.BitSet': 'System.Collections.BitArray',
       'java.util.Collection': 'System.Collections.Generic.ICollection',
       'java.util.Comparator': 'System.Collections.Generic.Comparer',
       'java.util.concurrent.ConcurrentHashMap': 'System.Collections.Concurrent.ConcurrentDictionary',
