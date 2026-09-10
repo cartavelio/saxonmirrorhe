@@ -35,8 +35,8 @@ import java.util.Map;
 @CSharpModifiers(code = {"internal"})
 public class XsltExecutable {
 
-    Processor processor;
-    PreparedStylesheet preparedStylesheet;
+    private final Processor processor;
+    private final PreparedStylesheet preparedStylesheet;
 
     protected XsltExecutable(Processor processor, PreparedStylesheet preparedStylesheet) {
         this.processor = processor;
