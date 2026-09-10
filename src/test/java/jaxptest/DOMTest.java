@@ -1677,6 +1677,57 @@ public class DOMTest {
         }
     }
 
+    /**
+     * Method to be called from next test
+     */
+
+    public static NodeInfo makeBodyElement(XPathContext context) throws Exception {
+        String in = "<?xml version='1.0'?> \n" +
+                "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+                + "        <p>Dit type is in IMKAD gemodelleerd,......</p>\n"
+                + "</body>";
+
+        // Read an XML file to a DOM
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder db = factory.newDocumentBuilder();
+        InputSource is = new InputSource(new StringReader(in));
+        Document doc = db.parse(is);
+        DocumentWrapper wrapper = new DocumentWrapper(doc, "http://dummy/", context.getConfiguration());
+        return wrapper.wrap(doc.getDocumentElement());
+    }
+
+    /**
+     * Test that namespaces are copied OK by an identity transform
+     */
+
+    @Test
+    public void testNamespaceSerialization() {
+        // bug 4858
+        try {
+            // Stylesheet
+            String xslt =
+                    "<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'"
+                            + " xmlns:my='java:jaxptest.DOMTest' xmlns:xhtml='http://www.w3.org/1999/xhtml'>\n" +
+                            "  <xsl:template match='/'>\n" +
+                            "    <xsl:variable name='body' as='element(xhtml:body)' select='my:makeBodyElement()'/>\n" +
+                            "    <xsl:sequence select='$body'/>\n" +
+                            "  </xsl:template>\n" +
+                            "</xsl:stylesheet>";
+
+            // Run a transformation that invokes an extension function returning this DOM
+            TransformerFactory tFactory = new TransformerFactoryImpl();
+            Templates templates = tFactory.newTemplates(new StreamSource(new StringReader(xslt)));
+            Transformer transformer = templates.newTransformer();
+            StringWriter sw = new StringWriter();
+            transformer.transform(new StreamSource(new StringReader("<a/>")), new StreamResult(sw));
+            System.err.println(sw.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
 
 }
 
