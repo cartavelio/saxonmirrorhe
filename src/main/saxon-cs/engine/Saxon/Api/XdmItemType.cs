@@ -214,7 +214,7 @@ namespace Saxon.Api {
                 return XdmAnyArrayType.Instance;
             }
 
-            Function functionItem = (Function)it;
+            FunctionItem functionItem = (FunctionItem)it;
             FunctionItemType fit = functionItem.getFunctionItemType();
             Saxon.Hej.value.SequenceType basicReturnType = fit.getResultType();
             Saxon.Hej.value.SequenceType[] basicArgTypes = fit.getArgumentTypes();

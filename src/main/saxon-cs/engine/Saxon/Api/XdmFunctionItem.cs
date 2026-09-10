@@ -21,7 +21,7 @@ namespace Saxon.Api {
     public class XdmFunctionItem : XdmItem {
 
         // Internal constructor: create an XdmFunctionItem by wrapping an internal function object
-        internal XdmFunctionItem(Saxon.Hej.om.Function function) : base(function) {
+        internal XdmFunctionItem(Saxon.Hej.om.FunctionItem function) : base(function) {
         }
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Saxon.Api {
 
         public QName FunctionName {
             get {
-                StructuredQName sqName = ((Function) value).getFunctionName();
+                StructuredQName sqName = ((FunctionItem) value).getFunctionName();
                 return (sqName == null ? null : new QName(sqName));
             }
         }
@@ -41,7 +41,7 @@ namespace Saxon.Api {
         /// </summary>
         /// <returns>The number of arguments that the function takes</returns>
 
-        public int Arity => ((Function) value).getArity();
+        public int Arity => ((FunctionItem) value).getArity();
 
         /// <summary>
         /// Determine whether the item is an atomic value
@@ -67,7 +67,7 @@ namespace Saxon.Api {
                 args[i] = arguments[i].value;
             }
 
-            Function function = (Function) value;
+            FunctionItem function = (FunctionItem) value;
             Saxon.Hej.Configuration config = processor.Implementation;
             Saxon.Hej.Controller controller = new Saxon.Hej.Controller(config);
             XPathContext context = controller.newXPathContext();

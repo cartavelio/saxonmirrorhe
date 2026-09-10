@@ -670,7 +670,7 @@ namespace Saxon.Api {
         /// <returns>The system function if it exists, or null otherwise</returns>
         public XdmFunctionItem GetSystemFunction(QName name, int arity) {
             checkLicense();
-            Saxon.Hej.om.Function f = Implementation.getSystemFunction(name.GetStructuredQName(), arity);
+            Saxon.Hej.om.FunctionItem f = Implementation.getSystemFunction(name.GetStructuredQName(), arity);
             return f==null ? null : new XdmFunctionItem(f);
         }
     }
