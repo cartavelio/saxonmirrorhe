@@ -34,9 +34,14 @@ import net.sf.saxon.type.UType;
 
 public abstract class TinyNodeImpl implements NodeInfo {
 
-    protected TinyTree tree;
-    protected int nodeNr;
-    /*@Nullable*/ protected TinyNodeImpl parent = null;
+    protected final TinyTree tree;
+    protected final int nodeNr;
+    protected TinyNodeImpl parent = null;
+
+    protected TinyNodeImpl(TinyTree tree, int nodeNr) {
+        this.tree = tree;
+        this.nodeNr = nodeNr;
+    }
 
     /**
      * Get the genre of this item

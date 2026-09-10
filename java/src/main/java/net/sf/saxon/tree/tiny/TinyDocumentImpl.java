@@ -43,9 +43,8 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
     private String baseURI;
 
 
-    public TinyDocumentImpl(/*@NotNull*/ TinyTree tree) {
-        this.tree = tree;
-        nodeNr = 0;
+    public TinyDocumentImpl(TinyTree tree) {
+        super(tree, 0);
     }
 
     /**

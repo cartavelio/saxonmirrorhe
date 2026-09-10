@@ -26,8 +26,7 @@ import net.sf.saxon.value.StringValue;
 final class TinyProcInstImpl extends TinyNodeImpl {
 
     public TinyProcInstImpl(TinyTree tree, int nodeNr) {
-        this.tree = tree;
-        this.nodeNr = nodeNr;
+        super(tree, nodeNr);
     }
 
     @Override

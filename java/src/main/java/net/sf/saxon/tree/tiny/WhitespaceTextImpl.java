@@ -31,8 +31,7 @@ public final class WhitespaceTextImpl extends TinyNodeImpl {
      */
 
     public WhitespaceTextImpl(TinyTree tree, int nodeNr) {
-        this.tree = tree;
-        this.nodeNr = nodeNr;
+        super(tree, nodeNr);
     }
 
     /**

@@ -35,10 +35,8 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
 
     private final TinyTree tree;
     private int nextNodeNr;
-    /*@Nullable*/ private final NodeTest test;
-    private final TinyNodeImpl startNode;
+    private final NodeTest test;
     private final TinyNodeImpl parentNode;
-    private final boolean getChildren;
     private boolean needToAdvance = false;
     private final IntPredicateProxy matcher;
 
@@ -61,8 +59,6 @@ final class SiblingIterator implements AxisIterator, LookaheadIterator, Atomized
         } else {
             matcher = nodeTest.getMatcher(tree);
         }
-        startNode = node;
-        this.getChildren = getChildren;
         if (getChildren) {          // child:: axis
             parentNode = node;
             // move to first child
