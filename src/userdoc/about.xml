@@ -1631,11 +1631,11 @@ any version number.</p>
       
       <h2 class="subtitle">Open source tools</h2>
       
-      <p><a href="http://sourceforge.net/projects/kernowforsaxon/" class="bodylink">Kernow</a> is a
+      <!--<p><a href="http://sourceforge.net/projects/kernowforsaxon/" class="bodylink">Kernow</a> is a
          graphical front-end for Saxon. This is an open-source product developed by Andrew Welch. It
          provides an effective alternative to the Saxon command line interface for users who prefer
          a GUI for running ad-hoc transformations. <i>This tool was last updated in 2015: we would welcome
-            feedback as to whether it still works with current Saxon releases.</i></p>
+            feedback as to whether it still works with current Saxon releases.</i></p>-->
       
       <p>You can experiment with evaluation of XSLT stylesheets under Saxon (and other XSLT processors) at
          <a href="https://xsltfiddle.liberty-development.net/">https://xsltfiddle.liberty-development.net/</a>.
