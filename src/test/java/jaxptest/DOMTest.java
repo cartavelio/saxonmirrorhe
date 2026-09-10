@@ -12,7 +12,6 @@ import net.sf.saxon.dom.*;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.expr.sort.CodepointCollatingComparer;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
 import net.sf.saxon.lib.AugmentedSource;
 import net.sf.saxon.lib.FeatureKeys;
@@ -1077,16 +1076,10 @@ public class DOMTest {
 
             Configuration config = new EnterpriseConfiguration();
 
-            Processor proc = new Processor(config);
-            XsdCompiler compiler = proc.newXsdCompiler();
-            XsdSchema schema = compiler.compile(
-                    new StreamSource(new StringReader(fooXsd)),
-                    new StreamSource(new StringReader(barXsd)));
-
+            config.addSchemaSource(new StreamSource(new StringReader(fooXsd)));
+            config.addSchemaSource(new StreamSource(new StringReader(barXsd)));
 
             StaticQueryContext ctx = config.newStaticQueryContext();
-            ctx.preLoadSchema(schema.getUnderlyingSchema());
-
             XQueryExpression xq = ctx.compileQuery("validate{.}");
             final DynamicQueryContext dynamicContext = new DynamicQueryContext(config);
 
@@ -1205,7 +1198,7 @@ public class DOMTest {
             NodeInfo two = DOMObjectModel.getInstance().wrap(((Document) result.getNode()).getDocumentElement(), config);
             XPathContext context = config.getConversionContext();
             boolean comparison = net.sf.saxon.functions.DeepEqual.deepEqual(
-                    one.iterate(), two.iterate(), CodepointCollatingComparer.getInstance(), context, 0);
+                    one.iterate(), two.iterate(), Objects::equals, context, 0);
             assertTrue(comparison, "Copy is not deep-equal");
 
         } catch (Exception e) {

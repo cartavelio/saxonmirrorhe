@@ -1,6 +1,8 @@
 package s9apitest;
 
-import net.sf.saxon.expr.sort.CodepointCollatingComparer;
+import net.sf.saxon.expr.sort.AtomicMatcher;
+import net.sf.saxon.expr.sort.CodepointCollator;
+import net.sf.saxon.expr.sort.GenericAtomicComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
@@ -60,10 +62,13 @@ public class TestBuildingWriter {
                 String ref = "<ns0:out xmlns:ns0=\"http://outer/\" data=\"3\"><ns0:br/><ns1:br xmlns:ns1=\"http://inner/\" style=\"bold\"/></ns0:out>";
                 DocumentBuilder db = proc.newDocumentBuilder();
                 XdmNode expected = db.build(new StreamSource(new StringReader(ref)));
+
+                AtomicMatcher matcher = GenericAtomicComparer.getTransitiveAtomicMatcher(
+                        CodepointCollator.getInstance(), 0);
                 assertNull(DeepEqual.deepEqualNodes(
                         actual.getUnderlyingNode(),
                         expected.getUnderlyingNode(),
-                        CodepointCollatingComparer.getInstance(),
+                        matcher,
                         proc.getUnderlyingConfiguration().getConversionContext(),
                         0));
             } catch (SaxonApiException | XMLStreamException | XPathException e) {

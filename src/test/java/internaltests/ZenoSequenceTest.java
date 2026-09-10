@@ -11,8 +11,6 @@ package internaltests;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.sort.AtomicComparer;
-import net.sf.saxon.expr.sort.NumericComparer;
 import net.sf.saxon.functions.DeepEqual;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.GroundedValue;
@@ -26,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,10 +64,9 @@ public class ZenoSequenceTest {
             for (int i=61; i<=100; i++) {
                 chain = chain.append(new Int64Value(i));
             }
-            AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
+            assertTrue(DeepEqual.deepEqual(chain.iterate(), new AscendingRangeIterator(1, 1, 100), Objects::equals, context, 0));
             assertEquals(51, ((IntegerValue)chain.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -123,10 +121,9 @@ public class ZenoSequenceTest {
             l3.add(chain);
             l3.add(chain2);
             ZenoSequence chain3 = ZenoSequence.join(l3);
-            AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(chain3.iterate(), new AscendingRangeIterator(1, 1, 100), comparer, context, 0));
+            assertTrue(DeepEqual.deepEqual(chain3.iterate(), new AscendingRangeIterator(1, 1, 100), Objects::equals, context, 0));
             assertEquals(51, ((IntegerValue)chain3.itemAt(50)).longValue());
         } catch (XPathException e) {
             fail();
@@ -153,10 +150,9 @@ public class ZenoSequenceTest {
             ZenoSequence chain3 = ZenoSequence.join(l3);
 
             GroundedValue sub = chain3.subsequence(40, 20);
-            AtomicComparer comparer = NumericComparer.getInstance();
             Configuration config = new Configuration();
             XPathContext context = config.getConversionContext();
-            assertTrue(DeepEqual.deepEqual(sub.iterate(), new AscendingRangeIterator(41, 1, 60), comparer, context, 0));
+            assertTrue(DeepEqual.deepEqual(sub.iterate(), new AscendingRangeIterator(41, 1, 60), Objects::equals, context, 0));
         } catch (XPathException e) {
             fail();
         }
