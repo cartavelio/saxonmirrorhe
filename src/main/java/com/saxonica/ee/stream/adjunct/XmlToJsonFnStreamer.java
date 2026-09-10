@@ -104,7 +104,9 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
                 return null;
             } else {
                 foundOneNode = true;
-                receiver = new JsonReceiver(getPipelineConfiguration(), getNextOutputter().getStringReceiver(false));
+                receiver = new JsonReceiver(getPipelineConfiguration(),
+                                            getContext(),
+                                            getNextOutputter().getStringReceiver(false));
                 receiver.setIndenting(indenting);
                 receiver.open();
                 return receiver;

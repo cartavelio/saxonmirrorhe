@@ -46,7 +46,7 @@ public abstract class SchemaReader {
      *
      * @param baseURI         the base URI
      * @param relativeURI     the URI to be resolved relative to the base URI
-     * @param pipe            the pipeline configuration (which may define a URIResolver to be used)
+     * @param compiler            the pipeline configuration (which may define a URIResolver to be used)
      * @param targetNamespace the targetNamespace of the schema document required (this is set to
      *                        null when doing an include or redefine, because in those cases the targetNamespace cannot
      *                        be used to locate the schema document)
@@ -57,18 +57,18 @@ public abstract class SchemaReader {
     /*@Nullable*/
     public static Source getSource(String baseURI,
                                    String relativeURI,
-                                   PipelineConfiguration pipe,
+                                   SchemaCompiler compiler,
                                    /*@Nullable*/ String targetNamespace) throws SchemaException {
 
         try {
             String[] locations = {relativeURI};
             Source[] sources = null;
-            SchemaURIResolver r = pipe.getSchemaURIResolver();
+            SchemaURIResolver r = compiler.getSchemaURIResolver();
             if (r != null) {
                 sources = r.resolve(targetNamespace, baseURI, locations);
             }
             if (sources == null) {
-                r = new StandardSchemaResolver((EnterpriseConfiguration) pipe.getConfiguration());
+                r = new StandardSchemaResolver((EnterpriseConfiguration) compiler.getConfiguration());
                 sources = r.resolve(targetNamespace, baseURI, locations);
             }
             if (sources.length == 0) {
@@ -90,7 +90,7 @@ public abstract class SchemaReader {
      *
      * @param baseURI         the base URI
      * @param relativeURIs    the URIs (location hints) to be resolved relative to the base URI
-     * @param pipe            the pipeline configuration (which may define a URIResolver to be used)
+     * @param compiler            the pipeline configuration (which may define a URIResolver to be used)
      * @param targetNamespace the targetNamespace of the schema document required (this is set to
      *                        null when doing an include or redefine, because in those cases the targetNamespace cannot
      *                        be used to locate the schema document)
@@ -100,13 +100,13 @@ public abstract class SchemaReader {
 
     public static Source[] getSources(String baseURI,
                                       String[] relativeURIs,
-                                      PipelineConfiguration pipe,
+                                      SchemaCompiler compiler,
                                       String targetNamespace) throws SchemaException {
 
         try {
-            Source[] sources = pipe.getSchemaURIResolver().resolve(targetNamespace, baseURI, relativeURIs);
+            Source[] sources = compiler.getSchemaURIResolver().resolve(targetNamespace, baseURI, relativeURIs);
             if (sources == null) {
-                SchemaURIResolver r = new StandardSchemaResolver((EnterpriseConfiguration) pipe.getConfiguration());
+                SchemaURIResolver r = new StandardSchemaResolver((EnterpriseConfiguration) compiler.getConfiguration());
                 sources = r.resolve(targetNamespace, baseURI, relativeURIs);
             }
             return sources;

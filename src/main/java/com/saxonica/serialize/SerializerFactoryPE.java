@@ -5,6 +5,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
+import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.lib.DirectResourceResolver;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.s9api.HostLanguage;
@@ -19,6 +22,7 @@ import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -261,12 +265,19 @@ public class SerializerFactoryPE extends SerializerFactory {
         if (next == null) {
             Source source = null;
             try {
-                if (pipe.getURIResolver() != null) {
-                    source = pipe.getURIResolver().resolve(href, baseURI);
+                ResourceRequest request = new ResourceRequest();
+                request.relativeUri = href;
+                try {
+                    if (baseURI == null) {
+                        request.uri = href;
+                    } else {
+                        request.baseUri = baseURI;
+                        request.uri = ResolveURI.makeAbsolute(href, baseURI).toString();
+                    }
+                } catch (URISyntaxException e) {
+                    throw new XPathException("Cannot resolve URI supplied for next-in-chain", e);
                 }
-                if (source == null) {
-                    source = pipe.getController().getStandardURIResolver().resolve(href, baseURI);
-                }
+                source = request.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
             } catch (TransformerException e) {
                 throw XPathException.makeXPathException(e);
             }

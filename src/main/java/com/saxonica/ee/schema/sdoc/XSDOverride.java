@@ -56,13 +56,11 @@ public class XSDOverride extends SchemaElement {
         }
 
         String documentBase = getBaseURI();
-        PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-        //SchemaDocumentManager manager = getXSDSchema().getSchemaDocumentManager();
-        SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
+        SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
 
         Source source = SchemaReader.getSource(documentBase,
                                                schemaLocation,
-                                               pipe,
+                                               compiler,
                                                null);
 
         //-- Have we already imported this XML Schema file? We can't handle this at present.
@@ -78,19 +76,19 @@ public class XSDOverride extends SchemaElement {
         fsb.append(";index=");
         fsb.append(Navigator.getNumberSimple(this, null) + "");
         String key = fsb.toString();
-        if (manager.isBeingRead(key)) {
+        if (compiler.isBeingRead(key)) {
             replacementSchema = null;
             return;
         }
         //System.err.println("Processing override " + key);
-        manager.setBeingRead(key);
-        if (manager.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null) {
+        compiler.setBeingRead(key);
+        if (compiler.getExistingSchemaDocument(schemaLocation, getXSDSchema().getTargetNamespace()) != null) {
             error("Saxon can't handle overriding of a schema document that has already been loaded by a different route");
             return;
         }
 
         try {
-            SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
+            PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
             SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
             originalSchemaDocument = schemaDoc;
             originalSchema = schemaDoc.getXSDSchema().getSchema();

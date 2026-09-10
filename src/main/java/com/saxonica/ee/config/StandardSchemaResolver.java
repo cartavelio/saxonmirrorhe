@@ -3,17 +3,14 @@ package com.saxonica.ee.config;
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.NamespaceConstant;
-import net.sf.saxon.lib.SchemaURIResolver;
+import net.sf.saxon.functions.ResolveURI;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.trans.XPathException;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
@@ -26,14 +23,14 @@ public class StandardSchemaResolver implements SchemaURIResolver {
 
     private EnterpriseConfiguration config;
     private static final StreamSource[] EMPTY_SOURCE_ARRAY = new StreamSource[0];
-    private URIResolver uriResolver;
+    private ResourceResolver resourceResolver;
 
-    /**
-     * Default constructor. Must be followed by a call of setConfiguration()
-     */
-
-    public StandardSchemaResolver() {
-    }
+//    /**
+//     * Default constructor. Must be followed by a call of setConfiguration()
+//     */
+//
+//    public StandardSchemaResolver() {
+//    }
 
     /**
      * Create a StandardSchemaResolver and set the Configuration
@@ -66,12 +63,12 @@ public class StandardSchemaResolver implements SchemaURIResolver {
     }
 
     /**
-     * Set the URIResolver to be used. Defaults to the URIResolver associated with the {@link Configuration}
-     * @param resolver the URIResolver to be used
+     * Set the ResourceResolver to be used. Defaults to the ResourceResolver associated with the {@link Configuration}
+     * @param resolver the ResourceResolver to be used
      */
 
-    public void setURIResolver(URIResolver resolver) {
-        this.uriResolver = resolver;
+    public void setResourceResolver(ResourceResolver resolver) {
+        this.resourceResolver = resolver;
     }
 
     /**
@@ -127,7 +124,7 @@ public class StandardSchemaResolver implements SchemaURIResolver {
 
         //#if CSHARP==false
         if ((locations == null || locations.length == 0) && targetNamespace != null) {
-            Source source = resolvedNamespaceURI(targetNamespace, baseURI);
+            Source source = resolveNamespaceURI(targetNamespace, baseURI);
             if (source != null) {
                 return new Source[]{source};
             }
@@ -145,49 +142,37 @@ public class StandardSchemaResolver implements SchemaURIResolver {
         }
     }
 
-    private Source resolveLocationHint(String baseURI, String location) throws TransformerException {
-        Source s;
+    private Source resolveLocationHint(String baseURI, String location) throws XPathException {
 
-        if (config.getURIResolver() != null) {
-            // If the user has installed an explicit URI resolver, try using it first
-            URIResolver uresolver = config.getURIResolver();
-            s = uresolver.resolve(location, baseURI);
-            if (s != null) {
-                return s;
-            }
+        ResourceRequest rr = new ResourceRequest();
+        rr.relativeUri = location;
+        rr.baseUri = baseURI;
+        rr.nature = ResourceRequest.XSD_NATURE;
+        rr.purpose = "schema module";
+        try {
+            rr.uri = ResolveURI.makeAbsolute(location, baseURI).toString();
+        } catch (URISyntaxException err) {
+            // ignore this location hint if invalid
+            throw new XPathException("Unable to reserve schemaLocation URI " + location, err);
         }
 
-        //#if CSHARP==true
-        s = config.getURIResolver().resolve(location, baseURI);
-        //#endif
-        //#if CSHARP==false
-        s = config.getCommonResourceResolver().resolve(location, baseURI);
-        //#endif
-        // if a user URI resolver returns null, try the standard one
-        // (Note, the standard URI resolver never returns null)
-        if (s == null) {
-            s = config.getSystemURIResolver().resolve(location, baseURI);
-        }
-        return s;
+        return rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
     }
 
-    //#if CSHARP==false
-    private Source resolvedNamespaceURI(String moduleURI, String baseURI) {
-        Source source = null;
+    private Source resolveNamespaceURI(String moduleURI, String baseURI) {
+        ResourceRequest rr = new ResourceRequest();
+        rr.uri = moduleURI;
+        rr.baseUri = baseURI;
+        rr.uriIsNamespace = true;
+        rr.nature = ResourceRequest.XSD_NATURE;
+        rr.purpose = "schema module";
         try {
-            if (config != null) {
-                source = config.getCommonResourceResolver().resolveNamespace(moduleURI, SCHEMA_NATURE, VALIDATION_PURPOSE);
-                if (source == null && baseURI != null) {
-                    String resuri = new URI(baseURI).resolve(moduleURI).toString();
-                    source = config.getCommonResourceResolver().resolveNamespace(resuri, SCHEMA_NATURE, VALIDATION_PURPOSE);
-                }
-            }
-        } catch (TransformerException | URISyntaxException ex) {
+            return rr.resolve(config.getResourceResolver());
+        } catch (TransformerException ex) {
             // nevermind
         }
-        return source;
+        return null;
     }
-    //#endif
 
     public static Source fetchResource(String pathName, Configuration config) {
         InputStream inputStream = Version.platform.locateResource(pathName, new ArrayList<>());

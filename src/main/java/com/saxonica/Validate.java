@@ -5,6 +5,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.InvalidityReportGenerator;
+import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.StandardInvalidityHandler;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Instrumentation;
@@ -18,11 +19,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -301,10 +302,14 @@ public class Validate {
             for (String schemaFileName : schemaFileNames) {
                 Source schemaSource;
                 if (useURLs || CommandLineOptions.isImplicitURI(schemaFileName)) {
-                    schemaSource = config.getURIResolver().resolve(schemaFileName, null);
-                    if (schemaSource == null) {
-                        schemaSource = config.getSystemURIResolver().resolve(schemaFileName, null);
-                    }
+                    ResourceRequest request = new ResourceRequest();
+                    request.relativeUri = schemaFileName;
+                    URI cwd = new File(System.getProperty("user.dir")).toURI();
+                    request.baseUri = cwd.toString();
+                    request.uri = cwd.resolve(schemaFileName).toString();
+                    request.nature = ResourceRequest.XSD_NATURE;
+                    request.purpose = "schema validation";
+                    schemaSource = request.resolve(config.getResourceResolver());
                 } else if (schemaFileName.equals("-")) {
                     // take input from stdin
                     //#if CSHARP==false
@@ -577,14 +582,14 @@ public class Validate {
             throws XPathException {
         Source sourceInput;
         if (useURLs || CommandLineOptions.isImplicitURI(sourceFileName)) {
-            try {
-                sourceInput = config.getURIResolver().resolve(sourceFileName, null);
-            } catch (TransformerException e) {
-                throw XPathException.makeXPathException(e);
-            }
-            if (sourceInput == null) {
-                sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
-            }
+            ResourceRequest request = new ResourceRequest();
+            request.relativeUri = sourceFileName;
+            URI cwd = new File(System.getProperty("user.dir")).toURI();
+            request.baseUri = cwd.toString();
+            request.uri = cwd.resolve(sourceFileName).toString();
+            request.nature = ResourceRequest.XML_NATURE;
+            request.purpose = "source document";
+            sourceInput = request.resolve(config.getResourceResolver());
         } else if (sourceFileName.equals("-")) {
             //#if CSHARP==false
             // take input from stdin

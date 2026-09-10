@@ -35,7 +35,7 @@ public class CompileStylesheet extends SystemFunction {
         Configuration config = context.getConfiguration();
         CompilerInfo compilerInfo = new CompilerInfo(config.getDefaultXsltCompilerInfo());
         compilerInfo.setErrorReporter(context.getErrorReporter());
-        compilerInfo.setURIResolver(context.getURIResolver());
+        compilerInfo.setResourceResolver(context.getResourceResolver());
         PreparedStylesheet pss = Compilation.compileSingletonPackage(config, compilerInfo, doc.asActiveSource());
         return new ObjectValue<>(pss);
     }

@@ -62,7 +62,7 @@ public class XSDImport extends AnnotationParent {
         //DocumentInfo thisRoot = thisSchemaDocument.getDocumentRoot();
         EnterpriseConfiguration config = (EnterpriseConfiguration) getConfiguration();
 
-        SchemaCompiler manager = thisSchemaDocument.getSchemaCompiler();
+        SchemaCompiler compiler = thisSchemaDocument.getSchemaCompiler();
 
         if (namespace == null) {
             namespace = "";
@@ -75,7 +75,7 @@ public class XSDImport extends AnnotationParent {
         if (schemaLocation != null) {
             try {
                 String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
-                XSDSchema existing = manager.getExistingSchemaDocument(location, namespace);
+                XSDSchema existing = compiler.getExistingSchemaDocument(location, namespace);
                 if (existing != null) {
                     importedSchema = existing.getSchema();
                     return;
@@ -105,7 +105,7 @@ public class XSDImport extends AnnotationParent {
             try {
                 source = SchemaReader.getSource(documentBase,
                         schemaLocation,
-                        manager.getPipelineConfiguration(),
+                        compiler,
                         namespace);
             } catch (SchemaException e) {
                 processSchemaException(schemaLocation, namespace, e);
@@ -120,7 +120,7 @@ public class XSDImport extends AnnotationParent {
 
         if (source != null) {
             // Are we currently reading this schema document?
-            if (manager.isBeingRead(source.getSystemId())) {
+            if (compiler.isBeingRead(source.getSystemId())) {
                 return;
             }
 
@@ -132,7 +132,7 @@ public class XSDImport extends AnnotationParent {
             // This implies a cycle of imports. Alternatively, it means that a concurrent
             // process is loading a schema with this namespace...
             if (source == null
-                    || (!manager.isBeingRead(source.getSystemId())
+                    || (!compiler.isBeingRead(source.getSystemId())
                                 && !config.getBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
                 if (schemaLocation != null) {
                     String message = "The schema document at " + schemaLocation +
@@ -175,8 +175,7 @@ public class XSDImport extends AnnotationParent {
                     source = new StreamSource(in, "http://www.w3.org/2005/xpath-functions.scm");
                 }
             } else {
-                PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                SchemaURIResolver resolver = pipe.getSchemaURIResolver();
+                SchemaURIResolver resolver = compiler.getSchemaURIResolver();
                 if (resolver != null) {
                     try {
                         Source[] sources = resolver.resolve(namespace, getBaseURI(), new String[0]);
@@ -202,7 +201,6 @@ public class XSDImport extends AnnotationParent {
         int errors;
         try {
             PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-            SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
             importee = SchemaReader.read(source, compiler, pipe, null);
             XSDSchema s = importee.getXSDSchema();
             errors = importee.getXSDSchema().getErrorCount();

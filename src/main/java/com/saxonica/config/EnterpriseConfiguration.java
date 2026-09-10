@@ -65,7 +65,6 @@ import net.sf.saxon.tree.iter.ManualIterator;
 import net.sf.saxon.type.*;
 
 import javax.xml.transform.Source;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -1542,27 +1541,15 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Make a PipelineConfiguration from the properties of this Configuration
-     *
-     * @return a new PipelineConfiguration
-     * @since 8.4
-     */
-    @Override
-    public PipelineConfiguration makePipelineConfiguration() {
-        PipelineConfiguration pipe = super.makePipelineConfiguration();
-        pipe.setSchemaURIResolver(getSchemaURIResolver());
-        return pipe;
-    }
-
-    /**
      * Make a SchemaURIResolver that wraps a supplied URIResolver
      * @return a new SchemaURIResolver (or null if this is not an EnterpriseConfiguration)
      * @since 10.0
+     * @param resolver
      */
     @Override
-    public SchemaURIResolver makeSchemaURIResolver(URIResolver resolver) {
+    public SchemaURIResolver makeSchemaURIResolver(ResourceResolver resolver) {
         StandardSchemaResolver schemaResolver = new StandardSchemaResolver(this);
-        schemaResolver.setURIResolver(resolver);
+        schemaResolver.setResourceResolver(resolver);
         return schemaResolver;
     }
 

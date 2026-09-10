@@ -1,29 +1,32 @@
 package com.saxonica.ee.jaxp;
 
+import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.lib.ResourceRequest;
+import net.sf.saxon.lib.ResourceResolver;
+import net.sf.saxon.trans.XPathException;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
 /**
- * This class implements the JAXP URIResolver as a wrapper around
+ * This class implements the Saxon ResourceResolver interface as a wrapper around
  * a DOM Level 3 LSResourceResolver. This serves two purposes: it allows the
  * same underlying object to be used in both roles, and it allows an LSResourceResolver
  * to be passed around the system in places where a URIResolver is expected, for
  * example in the PipelineConfiguration
  */
 
-public class URIResourceResolver implements URIResolver {
+public class ResourceResolverWrappingLSResourceResolver implements ResourceResolver {
 
     private final LSResourceResolver resolver;
 
-    public URIResourceResolver(LSResourceResolver resolver) {
+    public ResourceResolverWrappingLSResourceResolver(LSResourceResolver resolver) {
         this.resolver = resolver;
     }
 
@@ -35,20 +38,26 @@ public class URIResourceResolver implements URIResolver {
      * Called by an XSLT processor when it encounters
      * an xsl:include, xsl:import, or document() function.
      *
-     * @param href An href attribute, which may be relative or absolute.
-     * @param base The base URI against which the first argument will be made
-     *             absolute if the absolute URI is required.
-     * @return A Source object, or null if the href cannot be resolved,
+     *
+     * @param request@return A Source object, or null if the href cannot be resolved,
      *         and the processor should try to resolve the URI itself.
-     * @throws javax.xml.transform.TransformerException
+     * @throws TransformerException
      *          if an error occurs when trying to
      *          resolve the URI.
      */
     /*@Nullable*/
     @Override
-    public Source resolve(String href, String base) throws TransformerException {
-        LSInput lsin = resolver.resolveResource(
-                "http://www.w3.org/TR/REC-xml", null, null, href, base);
+    public Source resolve(ResourceRequest request) throws XPathException {
+        String type = request.nature;
+        if (request.nature.equals(ResourceRequest.XML_NATURE)) {
+            type = NamespaceConstant.XML;
+        }
+
+        LSInput lsin = resolver.resolveResource(type,
+                                                request.publicId,
+                                                request.uriIsNamespace ? request.uri : null,
+                                                request.relativeUri,
+                                                request.baseUri);
         if (lsin == null) {
             return null;
         }

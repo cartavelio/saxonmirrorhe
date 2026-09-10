@@ -5,10 +5,7 @@ import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.ProtocolRestricter;
-import net.sf.saxon.lib.StandardURIResolver;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaException;
@@ -19,7 +16,6 @@ import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.URIResolver;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.util.function.Supplier;
@@ -211,7 +207,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
 
     @Override
     public void setResourceResolver(LSResourceResolver lsResourceResolver) {
-        config.setURIResolver(new URIResourceResolver(lsResourceResolver));
+        config.setResourceResolver(new ResourceResolverWrappingLSResourceResolver(lsResourceResolver));
         config.setSchemaURIResolver(new LSSchemaResolver(lsResourceResolver, config));
     }
 
@@ -225,9 +221,9 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     /*@Nullable*/
     @Override
     public LSResourceResolver getResourceResolver() {
-        URIResolver resolver = config.getURIResolver();
-        if (resolver instanceof URIResourceResolver) {
-            return ((URIResourceResolver) resolver).getLSResourceResolver();
+        ResourceResolver resolver = config.getResourceResolver();
+        if (resolver instanceof ResourceResolverWrappingLSResourceResolver) {
+            return ((ResourceResolverWrappingLSResourceResolver) resolver).getLSResourceResolver();
         } else {
             return null;
         }
@@ -373,7 +369,7 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     public void setProperty(String name, Object object) throws SAXNotRecognizedException, SAXNotSupportedException {
         switch (name) {
             case XMLConstants.ACCESS_EXTERNAL_SCHEMA:
-                URIResolver resolver = config.getURIResolver();
+                ResourceResolver resolver = config.getResourceResolver();
                 if (resolver instanceof StandardURIResolver) {
                     ((StandardURIResolver)resolver).setAllowedUriTest(ProtocolRestricter.make(object.toString()));
                 }

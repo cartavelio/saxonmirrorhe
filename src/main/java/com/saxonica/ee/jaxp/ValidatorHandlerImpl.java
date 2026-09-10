@@ -1,7 +1,6 @@
 package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.ReceivingContentHandler;
 import net.sf.saxon.lib.ErrorReporter;
@@ -9,7 +8,6 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.*;
 import org.xml.sax.ext.LexicalHandler;
 
-import javax.xml.transform.URIResolver;
 import javax.xml.validation.TypeInfoProvider;
 import javax.xml.validation.ValidatorHandler;
 
@@ -41,9 +39,10 @@ import javax.xml.validation.ValidatorHandler;
 
 public class ValidatorHandlerImpl extends ValidatorHandler
         implements ContentHandler, LexicalHandler, DTDHandler {
-    ReceivingContentHandler next;
-    TypedContentHandler finalProxy;
-    PipelineConfiguration pipe;
+    private ReceivingContentHandler next;
+    private TypedContentHandler finalProxy;
+    private PipelineConfiguration pipe;
+    private LSResourceResolver resourceResolver;
 
     /**
      * Set the pipeline configuration used by this validator handler
@@ -160,8 +159,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
      */
     @Override
     public void setResourceResolver(LSResourceResolver resourceResolver) {
-        pipe.setURIResolver(new URIResourceResolver(resourceResolver));
-        pipe.setSchemaURIResolver(new LSSchemaResolver(resourceResolver, pipe.getConfiguration()));
+        this.resourceResolver = resourceResolver;
     }
 
     /**
@@ -174,12 +172,7 @@ public class ValidatorHandlerImpl extends ValidatorHandler
     /*@Nullable*/
     @Override
     public LSResourceResolver getResourceResolver() {
-        URIResolver u = pipe.getURIResolver();
-        if (u instanceof URIResourceResolver) {
-            return ((URIResourceResolver) u).getLSResourceResolver();
-        } else {
-            return null;
-        }
+        return resourceResolver;
     }
 
     /**

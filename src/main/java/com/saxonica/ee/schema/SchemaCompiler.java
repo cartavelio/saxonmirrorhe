@@ -311,7 +311,7 @@ public class SchemaCompiler {
 
     public String readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, String expected)
             throws SchemaException {
-        Source source = SchemaReader.getSource(baseURI, schemaLocation, pipe, expected);
+        Source source = SchemaReader.getSource(baseURI, schemaLocation, this, expected);
         if (source == null) {
             throw new SchemaException(
                     "No schema could be loaded at location " + schemaLocation);
@@ -399,7 +399,7 @@ public class SchemaCompiler {
         for (String schemaLocation : schemaLocations) {
             locations[loc++] = schemaLocation;
         }
-        Source[] sources = SchemaReader.getSources(baseURI, locations, pipe, expected);
+        Source[] sources = SchemaReader.getSources(baseURI, locations, this, expected);
         if (sources.length == 0) {
             // the requested schemas were already loaded
             return;

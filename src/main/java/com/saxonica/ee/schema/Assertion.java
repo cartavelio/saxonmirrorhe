@@ -25,8 +25,6 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.ObjectValue;
 import net.sf.saxon.value.StringValue;
 
-import javax.xml.transform.Source;
-import javax.xml.transform.URIResolver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -299,11 +297,8 @@ public class Assertion extends SchemaStructure implements SchemaComponent, Seria
      */
 
     public static void setDocumentsAndCollections(final Configuration config, XPathDynamicContext context) {
-        context.setURIResolver(new URIResolver() {
-            @Override
-            public Source resolve(String href, String base) throws XPathException {
+        context.setResourceResolver(request -> {
                 throw new XPathException("Use of doc() function within an assertion is not allowed", "FODC0002");
-            }
         });
         context.getXPathContextObject().getController().setDefaultCollection(CollectionFn.EMPTY_COLLECTION_URI);
         context.setCollectionFinder((context1, collectionURI) -> {

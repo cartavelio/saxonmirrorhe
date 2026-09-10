@@ -50,11 +50,11 @@ public class XSDInclude extends AnnotationParent {
             return;
         }
 
-        SchemaCompiler manager = getXSDSchema().getSchemaCompiler();
+        SchemaCompiler compiler = getXSDSchema().getSchemaCompiler();
         String documentBase = getBaseURI();
         try {
             String location = ResolveURI.makeAbsolute(schemaLocation, documentBase).toString();
-            XSDSchema existing = manager.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
+            XSDSchema existing = compiler.getExistingSchemaDocument(location, getXSDSchema().getTargetNamespace());
             if (existing != null) {
                 includedSchema = existing.getSchema();
                 return;
@@ -66,7 +66,7 @@ public class XSDInclude extends AnnotationParent {
 
         Source source = null;
         try {
-            source = SchemaReader.getSource(getBaseURI(), schemaLocation, manager.getPipelineConfiguration(), null);
+            source = SchemaReader.getSource(getBaseURI(), schemaLocation, compiler, null);
         } catch (SchemaException e) {
             handleSchemaException(schemaLocation, e);
         }
@@ -74,19 +74,18 @@ public class XSDInclude extends AnnotationParent {
 
             //-- Has this schema location been processed?
 
-            if (manager.isBeingRead(source.getSystemId())) {
+            if (compiler.isBeingRead(source.getSystemId())) {
                 warning("Module " + source.getSystemId() + " includes itself recursively");
                 return;
             }
 
             try {
                 PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-                SchemaCompiler compiler = getSchemaNodeFactory().getSchemaCompiler();
                 SchemaDocument inc = SchemaReader.read(source, compiler, pipe, this);
                 XSDSchema includedXSDSchema = inc.getXSDSchema();
                 includedXSDSchema.setReferrer(this);
                 includedSchema = includedXSDSchema.getSchema();
-                manager.markAsRead(source.getSystemId(), includedXSDSchema);
+                compiler.markAsRead(source.getSystemId(), includedXSDSchema);
             } catch (SchemaException e) {
                 handleSchemaException(schemaLocation, e);
             }

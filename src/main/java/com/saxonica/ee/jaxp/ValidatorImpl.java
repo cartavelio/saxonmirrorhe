@@ -2,7 +2,6 @@ package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.PreparedSchema;
-import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
@@ -31,6 +30,7 @@ import java.io.IOException;
 public class ValidatorImpl extends Validator {
 
     private final PipelineConfiguration pipe;
+    private LSResourceResolver resourceResolver;
 
     /**
      * Create the Validator
@@ -231,8 +231,7 @@ public class ValidatorImpl extends Validator {
      */
     @Override
     public void setResourceResolver(LSResourceResolver resourceResolver) {
-        pipe.setURIResolver(new URIResourceResolver(resourceResolver));
-        pipe.setSchemaURIResolver(new LSSchemaResolver(resourceResolver, pipe.getConfiguration()));
+        this.resourceResolver = resourceResolver;
     }
 
     /**
@@ -245,12 +244,7 @@ public class ValidatorImpl extends Validator {
     /*@Nullable*/
     @Override
     public LSResourceResolver getResourceResolver() {
-        URIResolver u = pipe.getURIResolver();
-        if (u instanceof URIResourceResolver) {
-            return ((URIResourceResolver) u).getLSResourceResolver();
-        } else {
-            return null;
-        }
+        return resourceResolver;
     }
 
     /**
