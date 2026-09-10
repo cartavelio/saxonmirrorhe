@@ -42,7 +42,7 @@ public class ContextValueSetter extends BinaryExpression
      */
 
     public ContextValueSetter(Expression start, Expression step) {
-        super(start, OperatorSymbol.BANG, step);
+        super(start, OperatorSymbol.THIN_ARROW, step);
     }
 
     @Override
@@ -209,25 +209,7 @@ public class ContextValueSetter extends BinaryExpression
         getRhsExpression().export(destination);
         destination.endElement();
     }
-
-    /**
-     * The toString() method for an expression attempts to give a representation of the expression
-     * in an XPath-like form, but there is no guarantee that the syntax will actually be true XPath.
-     * In the case of XSLT instructions, the toString() method gives an abstracted view of the syntax
-     *
-     * @return a representation of the expression as a string
-     */
-
-    public String toString() {
-        return ExpressionTool.parenthesize(getLhsExpression())
-                + "!!" + getRhsExpression();
-    }
-
-    @Override
-    public String toShortString() {
-        return ExpressionTool.parenthesizeShort(getLhsExpression())
-                + "!!" + getRhsExpression().toShortString();
-    }
+    
 
     public Item evaluateItem(XPathContext context) throws XPathException {
         return makeElaborator().elaborateForItem().eval(context);
