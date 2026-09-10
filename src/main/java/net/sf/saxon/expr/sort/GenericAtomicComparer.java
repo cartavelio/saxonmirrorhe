@@ -194,11 +194,10 @@ public class GenericAtomicComparer implements AtomicComparer {
      * @return a comparison function for two atomic values (neither of which may be null)
      */
 
-    public static AtomicComparisonFunction makeAtomicComparisonFunction (
+    public static AtomicComparisonFunction makeAtomicComparisonFunction(
             BuiltInAtomicType type0, BuiltInAtomicType type1,
             StringCollator collator, int operator,
-            boolean allowRecursion
-    ) {
+            boolean allowRecursion) {
 
         int fp0 = applyPromotion(type0);
         int fp1 = applyPromotion(type1);
