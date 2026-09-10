@@ -34,6 +34,7 @@ import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CLongPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 import org.xml.sax.InputSource;
 
 import javax.xml.transform.Source;
@@ -115,20 +116,24 @@ public class SaxonCAPI {
            /*Properties systemProperties = System.getProperties();
            systemProperties.put ("xml.catalog.defaultLoggerLogLevel", "debug");
            System.setProperties (systemProperties); */
-        ObjectHandle handle = objectHandles.create(new Processor(CTypeConversion.toBoolean(license)));
+        boolean licensei = CTypeConversion.toBoolean(license);
+        if(debug && licensei) {
+            System.err.println("Flag is true to create SaxonProcessor with license");
+        }
+        ObjectHandle handle = objectHandles.create(new Processor(licensei));
         return handle.rawValue();
     }
 
 
     @CEntryPoint(name = "createDocumentBuilder")
     public static long createDocumentBuilder(IsolateThread thread, ObjectHandle processorRef) throws SaxonApiException {
-        Processor processor = objectHandles.get(processorRef);
+        if(processorRef != WordFactory.nullPointer()) {
+            Processor processor = objectHandles.get(processorRef);
 
-        if(processor != null) {
             ObjectHandle handle = objectHandles.create(processor.newDocumentBuilder());
             return handle.rawValue();
         }
-        return -1;
+        throw new SaxonApiException("Cannot create DocumentBuilder - Processor is null");
     }
 
     public static class DataWrapper{
@@ -153,8 +158,12 @@ public class SaxonCAPI {
 
     @CEntryPoint(name = "j_getLongArray")
      static CLongPointer getLongArray(IsolateThread thread, AllocatorFn alloc, ObjectHandle refsObj) {
-        DataWrapper obj = objectHandles.get(refsObj);
-       return longArrayToNative(alloc, obj.getDataRefs());
+        if(refsObj != WordFactory.nullPointer()) {
+            DataWrapper obj = objectHandles.get(refsObj);
+            return longArrayToNative(alloc, obj.getDataRefs());
+        } else {
+            return WordFactory.nullPointer();
+        }
      }
 
     static CLongPointer longArrayToNative(AllocatorFn alloc, long [] refs) {
@@ -173,9 +182,12 @@ public class SaxonCAPI {
      */
     @CEntryPoint(name = "j_createStringObject")
     public static long createStringObject(IsolateThread thread, CCharPointer cValue){
-        String value = CTypeConversion.toJavaString(cValue);
-        ObjectHandle handle = objectHandles.create(value);
-        return handle.rawValue();
+        if(cValue != WordFactory.nullPointer()) {
+            String value = CTypeConversion.toJavaString(cValue);
+            ObjectHandle handle = objectHandles.create(value);
+            return handle.rawValue();
+        }
+        return -1;
 
     }
 
@@ -190,6 +202,9 @@ public class SaxonCAPI {
     @CEntryPoint(name = "createSaxonProcessorWithConfigurationFile")
     public static long createSaxonProcessorWithConfigurationFile(IsolateThread thread, CCharPointer cconfigFile) throws SaxonApiException {
         Configuration config = null;
+        if(cconfigFile != WordFactory.nullPointer()) {
+            throw new SaxonApiException("Configuration file is null");
+        }
         String configFile = CTypeConversion.toJavaString(cconfigFile);
         try {
             config = Configuration.readConfiguration(new StreamSource(configFile));
@@ -254,15 +269,20 @@ public class SaxonCAPI {
     };   */
     @CEntryPoint(name = "getProductVersion")
     public static CCharPointer getProductVersion(IsolateThread thread, ObjectHandle processorRef) {
+        if(processorRef == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
         Processor processor = objectHandles.get(processorRef);
         final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(processor.getUnderlyingConfiguration().getProductTitle());
         return holder.get();
     }
 
     @CEntryPoint(name = "setCatalogFile")
-    public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) {
+    public static void setCatalog(IsolateThread thread, ObjectHandle processorRef, CCharPointer catalogFile) throws SaxonApiException {
         Processor processor = objectHandles.get(processorRef);
-
+        if(catalogFile == WordFactory.nullPointer()) {
+            throw new SaxonApiException("Catalog file name is null");
+        }
         processor.setCatalogFiles(CTypeConversion.toJavaString(catalogFile));
     }
 
@@ -284,6 +304,10 @@ public class SaxonCAPI {
         Processor processor = objectHandles.get(processorRef);
         if (debug) {
             System.err.println("New processor created, Processor: " + System.identityHashCode(processor));
+        }
+
+        if(processorDataRef == WordFactory.nullPointer()) {
+            return;
         }
 
         ProcessorDataAccumulator processorDataAccumulator = objectHandles.get(processorDataRef);
@@ -373,8 +397,8 @@ public class SaxonCAPI {
      * @param d - flag for debug mode
      */
     @CEntryPoint(name = "setDebugMode")
-    public static void setDebugMode(IsolateThread thread, boolean d) {
-        debug = d;
+    public static void setDebugMode(IsolateThread thread, int d) {
+        debug = CTypeConversion.toBoolean(d);
     }
     
 
@@ -395,7 +419,12 @@ public class SaxonCAPI {
      * @throws SaxonApiException
      */
     public static Map<String, Object> setupConfigurationAndBuildMap(ObjectHandle processorDataAccumulatorRef, Properties props, Map<QName, XdmValue> parameters, Map<QName, XdmValue> staticParameters, Map<QName, XdmValue> globals, Map<QName, XdmValue> initialTemplateParameters, boolean forXslt) throws SaxonApiException {
-        ProcessorDataAccumulator processorDataAccumulator= objectHandles.get(processorDataAccumulatorRef);
+
+        Map<String, Object> map = new HashMap();
+        ProcessorDataAccumulator processorDataAccumulator = null;
+        if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
+            processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+        }
         String[] params = null;
         Object[] values = null;
         if(processorDataAccumulator != null) {
@@ -403,7 +432,6 @@ public class SaxonCAPI {
             values = processorDataAccumulator.getValues();
         }
 
-        Map<String, Object> map = new HashMap();
         if (params == null || values == null) {
             return map;
         }
@@ -570,20 +598,32 @@ public class SaxonCAPI {
      * @return XdmNode
      */
     @CEntryPoint(name = "parseXmlFile")
-    public static long parseXmlFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer cwd, CCharPointer filename) throws SaxonApiException {
+    public static long parseXmlFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer ccwd, CCharPointer filename) throws SaxonApiException {
         Processor proc = objectHandles.get(processorRef);
-            XdmNode doc = parseXmlFile(CTypeConversion.toJavaString(cwd), null, proc, null, CTypeConversion.toJavaString(filename));
-            ObjectHandle handle = objectHandles.create(doc);
-            return handle.rawValue();
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd =   CTypeConversion.toJavaString(ccwd);
+        }
+        XdmNode doc = parseXmlFile(cwd, null, proc, null, CTypeConversion.toJavaString(filename));
+        ObjectHandle handle = objectHandles.create(doc);
+        return handle.rawValue();
 
     }
 
     @CEntryPoint(name = "parseXmlFileWithValidator")
-    public static long parseXmlFileWithValidator(IsolateThread thread, CCharPointer cwd, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer filename) throws SaxonApiException {
+    public static long parseXmlFileWithValidator(IsolateThread thread, CCharPointer ccwd, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer filename) throws SaxonApiException {
         Processor proc = objectHandles.get(processorRef);
-        SchemaValidator validator= objectHandles.get(validatorRef);
+        SchemaValidator validator = null;
+        if(validatorRef != WordFactory.nullPointer()) {
+            validator = objectHandles.get(validatorRef);
+        }
 
-        XdmNode node = parseXmlFile(CTypeConversion.toJavaString(cwd), null, proc, validator, CTypeConversion.toJavaString(filename));
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd =   CTypeConversion.toJavaString(ccwd);
+        }
+
+        XdmNode node = parseXmlFile(cwd, null, proc, validator, CTypeConversion.toJavaString(filename));
         ObjectHandle handle = objectHandles.create(node);
         return handle.rawValue();
 
@@ -612,7 +652,10 @@ public class SaxonCAPI {
     @CEntryPoint(name = "parseXmlStringWithValidator")
     public static long parseXmlString(IsolateThread thread, ObjectHandle processorRef, ObjectHandle validatorRef, CCharPointer xml) throws SaxonApiException {
         Processor proc = objectHandles.get(processorRef);
-        SchemaValidator validator = objectHandles.get(validatorRef);
+        SchemaValidator validator = null;
+        if(validatorRef != WordFactory.nullPointer()) {
+            validator = objectHandles.get(validatorRef);
+        }
 
         XdmNode node = parseXmlString(null,proc, null, validator, CTypeConversion.toJavaString(xml));
         ObjectHandle handle = objectHandles.create(node);

@@ -26,6 +26,7 @@ import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.type.CCharPointer;
 import org.graalvm.nativeimage.c.type.CTypeConversion;
+import org.graalvm.word.WordFactory;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -403,10 +404,23 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param values - the values of the parameters and properties. given as a array of Java objects
      */
     @CEntryPoint(name = "registerSchema")
-    public static void registerSchema(IsolateThread thread, ObjectHandle schemaValidatorRef, CCharPointer ccwd, CCharPointer cxsd, String[] params, Object[] values) throws SaxonApiException {
+    public static void registerSchema(IsolateThread thread, ObjectHandle schemaValidatorRef, CCharPointer ccwd, CCharPointer cxsd, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         SchemaValidatorForCpp schemaValidatorForCpp = objectHandles.get(schemaValidatorRef);
+        ProcessorDataAccumulator processorDataAccumulator = null;
+        String[] params = null;
+        Object[] values = null;
+        if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
+            processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
+   
         schemaValidatorForCpp.setProperties(params, values);
-        String cwd = CTypeConversion.toJavaString(ccwd);
+        String cwd = null;
+        if(ccwd != WordFactory.nullPointer()) {
+            cwd =   CTypeConversion.toJavaString(ccwd);
+        }
+
         String xsd = CTypeConversion.toJavaString(cxsd);
 
         if (xsd == null) {
@@ -431,11 +445,22 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      * @param values   - the values of the parameters and properties. given as a array of Java objects
      */
     @CEntryPoint(name = "registerSchemaString")
-    public static void registerSchemaString(IsolateThread thread, ObjectHandle schemaValidatorRef, CCharPointer cxsd, CCharPointer csystemId, String[] params, Object[] values) throws SaxonApiException {
+    public static void registerSchemaString(IsolateThread thread, ObjectHandle schemaValidatorRef, CCharPointer cxsd, CCharPointer csystemId, ObjectHandle processorDataAccumulatorRef) throws SaxonApiException {
         SchemaValidatorForCpp schemaValidatorForCpp = objectHandles.get(schemaValidatorRef);
+        ProcessorDataAccumulator processorDataAccumulator = null;
+        String[] params = null;
+        Object[] values = null;
+        if(processorDataAccumulatorRef != WordFactory.nullPointer()) {
+            processorDataAccumulator = objectHandles.get(processorDataAccumulatorRef);
+            params = processorDataAccumulator.getParameterNames();
+            values = processorDataAccumulator.getValues();
+        }
         schemaValidatorForCpp.setProperties(params, values);
         String xsd = CTypeConversion.toJavaString(cxsd);
-        String systemId = CTypeConversion.toJavaString(csystemId);
+        String systemId = null;
+        if(csystemId != WordFactory.nullPointer()) {
+            systemId = CTypeConversion.toJavaString(csystemId);
+        }
 
         if (xsd == null) {
             SaxonApiException ex = new SaxonApiException("Schema document not found");
@@ -460,7 +485,10 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
      */
     @CEntryPoint(name = "exportSchema")
     public static void exportSchema(IsolateThread thread, ObjectHandle schemaValidatorRef, CCharPointer ccwd, CCharPointer coutputfile) throws SaxonApiException {
-        String cwd = CTypeConversion.toJavaString(ccwd);
+        String cwd = null;
+         if(ccwd != WordFactory.nullPointer()) {
+             cwd =   CTypeConversion.toJavaString(ccwd);
+         }
         String outputfile = CTypeConversion.toJavaString(coutputfile);
         SchemaValidatorForCpp schemaValidatorForCpp = objectHandles.get(schemaValidatorRef);
         Processor processor = schemaValidatorForCpp.getProcessor();
