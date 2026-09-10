@@ -82,6 +82,8 @@
          <p>From SaxonC 12.2:</p>
          <ul>
             <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code> Python API.</li>
+            <li>The XPath 4.0 parse-html function is now supported</li>
+            <li>For the Python API on Windows the <code>PySaxonApiError</code> is now supported for exception handling. We no longer throw the <code>RuntimeError</code> if there are any failures.</li>
          </ul>
       </category>
       
