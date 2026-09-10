@@ -96,9 +96,9 @@ public class PullTest {
                         NamespaceMap namespaces = NamespaceMap.emptyMap();
                         receiver.open();
                         receiver.startDocument(ReceiverOption.NONE);
-                        receiver.startElement(new NoNamespaceName("a"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
-                        receiver.startElement(new NoNamespaceName("b"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
-                        receiver.startElement(new NoNamespaceName("c"), Untyped.getInstance(), attributes, namespaces, LOCATION, ReceiverOption.NONE);
+                        receiver.startElement(new NoNamespaceName("a"), Untyped.INSTANCE, attributes, namespaces, LOCATION, ReceiverOption.NONE);
+                        receiver.startElement(new NoNamespaceName("b"), Untyped.INSTANCE, attributes, namespaces, LOCATION, ReceiverOption.NONE);
+                        receiver.startElement(new NoNamespaceName("c"), Untyped.INSTANCE, attributes, namespaces, LOCATION, ReceiverOption.NONE);
                         receiver.characters(BMPString.of("X"), LOCATION, ReceiverOption.NONE);
                         receiver.endElement();
                         receiver.endElement();

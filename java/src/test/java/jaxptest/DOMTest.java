@@ -1405,7 +1405,7 @@ public class DOMTest {
             domWriter.startDocument(ReceiverOption.NONE);
             AttributeMap atts = EmptyAttributeMap.INSTANCE;
             atts = atts.put(new AttributeInfo(new NoNamespaceName("id"), BuiltInAtomicType.UNTYPED_ATOMIC, "iii", Loc.NONE, ReceiverOption.IS_ID));
-            domWriter.startElement(new NoNamespaceName("root"), Untyped.getInstance(),
+            domWriter.startElement(new NoNamespaceName("root"), Untyped.INSTANCE,
                                    atts, NamespaceMap.emptyMap(),
                                    Loc.NONE, ReceiverOption.NONE);
             domWriter.endElement();
