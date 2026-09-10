@@ -146,10 +146,11 @@ div.main {
 a.apilink {
    font-family: "lucida sans typewriter", courier, monospace;
    font-size: 10pt;
+   color: #B3956F;
 }
 
 a.java {
-   color: #B3956F;
+   color: #96433D;
 }
 
 a.system {
