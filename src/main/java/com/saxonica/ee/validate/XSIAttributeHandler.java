@@ -121,12 +121,11 @@ public class XSIAttributeHandler extends ValidatingFilter {
                     list.add(att);
                 }
             }
-
-            if (xsiTypeValue != null) {
-                xsiType = processXsiType(xsiTypeValue, namespaces);
-            }
             if (fullSchemaLocation.length() > 0) {
                 processXsiSchemaLocation(fullSchemaLocation.toString(), location);
+            }
+            if (xsiTypeValue != null) {
+                xsiType = processXsiType(xsiTypeValue, namespaces);
             }
             for (AttributeInfo att : attributes) {
                 NodeName attName = att.getNodeName();

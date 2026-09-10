@@ -102,20 +102,20 @@ public class SchemaTestSuiteDriver {
      *
      * @param element   the element node (a node in the catalog)
      * @param processor the processor used to build the target document (the processor under test)
-     * @param validate  true if the document is to be schema-validated
+     * @param schema  present if the document is to be schema-validated, otherwise null
      * @return the constructed document (owned by the supplied Processor)
      * @throws URISyntaxException if the xlink:href attribute is invalid
      * @throws SaxonApiException  if an error occurs building the document
      */
 
-    private XdmNode getLinkedDocument(XdmNode element, Processor processor, boolean validate)
+    private XdmNode getLinkedDocument(XdmNode element, Processor processor, XsdSchema schema)
             throws URISyntaxException, SaxonApiException {
         String href = element.getAttributeValue(QN_xlink_href);
         URI target = element.getBaseURI().resolve(href);
         Source ss = new StreamSource(target.toString());
 
-        if (validate) {
-            SchemaValidator validator = processor.getSchemaManager().newSchemaValidator();
+        if (schema != null) {
+            SchemaValidator validator = schema.newValidator();
             StandardErrorReporter reporter = new StandardErrorReporter();
             reporter.setMaximumNumberOfErrors(500);
             validator.setInvalidityHandler(new InvalidityHandlerWrappingErrorReporter(reporter));
@@ -268,7 +268,7 @@ public class SchemaTestSuiteDriver {
 
             for (XdmItem testCaseRefItem : xpath.evaluate("//testSetRef", catalog)) {
                 XdmNode testSetRef = (XdmNode) testCaseRefItem;
-                XdmNode testSetDoc = getLinkedDocument(testSetRef, catalogProcessor, false);
+                XdmNode testSetDoc = getLinkedDocument(testSetRef, catalogProcessor, null);
                 XdmNode testSetElement = (XdmNode) xpath.evaluateSingle("testSet", testSetDoc);
 
                 if (testSetElement == null) {
@@ -277,10 +277,10 @@ public class SchemaTestSuiteDriver {
                 }
 
                 String testSetName = testSetElement.getAttributeValue(QN_name);
-                println("Test set " + testSetName);
                 if (testSetPattern != null && !testSetPattern.matcher(testSetName).matches()) {
                     continue;
                 }
+                println("Test set " + testSetName);
                 String currentContributor = testSetElement.getAttributeValue(QN_contributor);
                 if (contributor != null && !contributor.equals(currentContributor)) {
                     continue;
@@ -339,18 +339,9 @@ public class SchemaTestSuiteDriver {
                     if (xml11TestSet || xml11TestGroup) {
                         testConfig.setConfigurationProperty(Feature.XML_VERSION, "1.1");
                     }
-                    if (bytecode.equals("on")) {
-                        testConfig.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-                    } else if (bytecode.equals("off")) {
-                        testConfig.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, false);
-                    } else if (bytecode.equals("debug")) {
-                        testConfig.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, true);
-                        testConfig.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, true);
-                    }
+
                     Processor testProcessor = new Processor(testConfig);
                     testProcessor.setConfigurationProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS, false);
-                    testProcessor.setConfigurationProperty(Feature.THRESHOLD_FOR_COMPILING_TYPES, 100);
-                    testProcessor.setConfigurationProperty(Feature.MAX_COMPILED_CLASSES, 100000);
                     testProcessor.setConfigurationProperty(Feature.ALLOW_UNRESOLVED_SCHEMA_COMPONENTS,allowDangling);
 
                     for (XdmItem feature : xpath.evaluate("saxon:Configuration/feature", testGroup)) {
@@ -363,9 +354,9 @@ public class SchemaTestSuiteDriver {
                     boolean schemaFailed = false;
                     String bugzillaRef = null;
                     String scm = null;
-                    for (XdmItem schemaTestItem : xpath.evaluate("schemaTest", testGroup)) {
+                    XsdSchema schema = null;
+                    for (XdmNode schemaTest : testGroup.children("schemaTest")) {
                         countTests++;
-                        XdmNode schemaTest = (XdmNode) schemaTestItem;
                         bugzillaRef = null;
                         String testName = schemaTest.getAttributeValue(QN_name);
                         if (exception != null) {
@@ -395,9 +386,18 @@ public class SchemaTestSuiteDriver {
                             schemaQueried = true;
                         }
                         println("TEST SCHEMA " + testName + (queried ? " (queried)" : ""));
-                        boolean success = true;
                         List<String> scmList = new ArrayList<String>(1); // Used as an output parameter
-                        success = loadSchemas(xpath, testProcessor, schemaTest, success, scmList);
+                        boolean success = true;
+                        try {
+                            XsdSchema localSchema = loadSchemas(xpath, testProcessor, schemaTest, true, scmList);
+                            if (schema == null) {
+                                schema = localSchema;
+                            } else {
+                                schema = schema.combine(localSchema);
+                            }
+                        } catch (SaxonApiException err) {
+                            success = false;
+                        }
                         if (!scmList.isEmpty()) {
                             scm = scmList.get(0);
                         }
@@ -501,7 +501,7 @@ public class SchemaTestSuiteDriver {
                                             xsltValidator = xsltCompiler.compile(xsltVal);
                                         }
 
-                                        XdmNode instance = getLinkedDocument(instanceDocument, testProcessor, false);
+                                        XdmNode instance = getLinkedDocument(instanceDocument, testProcessor, null);
                                         XdmNode scmTree = testProcessor.newDocumentBuilder().build(new StreamSource(new StringReader(scm)));
                                         Xslt30Transformer t = xsltValidator.load30();
                                         t.setAssertionsEnabled(true);
@@ -524,9 +524,11 @@ public class SchemaTestSuiteDriver {
                                     }
                                 }
                             } else {
-                                // Use the standard Java validator
                                 try {
-                                    getLinkedDocument(instanceDocument, testProcessor, true);
+                                    if (schema == null) {
+                                        schema = testProcessor.newXsdCompiler().emptySchema();
+                                    }
+                                    getLinkedDocument(instanceDocument, testProcessor, schema);
                                 } catch (SaxonApiException err) {
                                     System.err.println(err.getMessage());
                                     success = false;
@@ -579,7 +581,7 @@ public class SchemaTestSuiteDriver {
         }
     }
 
-    private boolean loadSchemas(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
+    private XsdSchema loadSchemas(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
             throws URISyntaxException, SaxonApiException {
         if (useSCM) {
             return loadSchemasViaSCM(xpath, testProcessor, schemaTest, success, scmList);
@@ -588,14 +590,18 @@ public class SchemaTestSuiteDriver {
         }
     }
 
-    private boolean loadSchemasDirect(XPathCompiler xpath, Processor processor, XdmNode schemaTest, boolean success)
+    private XsdSchema loadSchemasDirect(XPathCompiler xpath, Processor processor, XdmNode schemaTest, boolean success)
             throws SaxonApiException, URISyntaxException {
-        for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
-            XdmNode schemaDocumentRef = (XdmNode) schemaDocRefItem;
+        List<Source> schemaSources = new ArrayList<>();
+        for (XdmNode schemaDocumentRef : schemaTest.children("schemaDocument")) {
+            String role = schemaDocumentRef.getAttributeValue(new QName("role"));
+            if ("overridden".equals(role)) {
+                continue;
+            }
             println("Loading schema at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
-            XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, processor, false);
-            XdmSequenceIterator si = schemaDoc.axisIterator(Axis.CHILD);
-            XdmNode schemaElement = (si.hasNext() ? (XdmNode) si.next() : null);
+            XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, processor, null);
+            XdmSequenceIterator<XdmNode> si = schemaDoc.axisIterator(Axis.CHILD);
+            XdmNode schemaElement = (si.hasNext() ? si.next() : null);
             String targetNamespace = (schemaElement == null ? null : schemaElement.getAttributeValue(QN_targetNamespace));
             if (targetNamespace != null && processor.getUnderlyingConfiguration().isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
                 // do nothing
@@ -607,18 +613,17 @@ public class SchemaTestSuiteDriver {
                 // own is losing the substitution group membership that was defined in the
                 // importing document.
             } else {
-                try {
-                    processor.getSchemaManager().load(schemaDoc.asSource()); // TODO: use an ErrorListener
-                } catch (SaxonApiException err) {
-                    println(err.getMessage());
-                    success = false;
-                }
+                schemaSources.add(schemaDoc.asSource());
             }
         }
-        return success;
+        if (schemaSources.isEmpty()) {
+            return processor.newXsdCompiler().emptySchema();
+        } else {
+            return processor.newXsdCompiler().compile(schemaSources.toArray(new Source[0])); // TODO: use an ErrorListener
+        }
     }
 
-    private boolean loadSchemasViaSCM(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
+    private XsdSchema loadSchemasViaSCM(XPathCompiler xpath, Processor testProcessor, XdmNode schemaTest, boolean success, List<String> scmList)
             throws SaxonApiException, URISyntaxException {
         Processor tempProcessor = new Processor(true);
         tempProcessor.setConfigurationProperty(Feature.XSD_VERSION, versionUnderTest);
@@ -631,22 +636,22 @@ public class SchemaTestSuiteDriver {
         for (XdmItem schemaDocRefItem : xpath.evaluate("schemaDocument", schemaTest)) {
             XdmNode schemaDocumentRef = (XdmNode) schemaDocRefItem;
             println("Loading schema via SCM at " + schemaDocumentRef.getAttributeValue(QN_xlink_href));
-            XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, tempProcessor, true);
+            XdmNode schemaDoc = getLinkedDocument(schemaDocumentRef, tempProcessor, null);
             XdmNode schemaElement =
                     (XdmNode) tempXPath.evaluateSingle("*", schemaDoc);
             String targetNamespace = schemaElement.getAttributeValue(QN_targetNamespace);
             if (targetNamespace != null && tempConfig.isSchemaAvailable(NamespaceUri.of(targetNamespace))) {
-                return false;
+                return null;
             } else {
                 try {
                     tempProcessor.newXsdCompiler().compile(schemaDoc.asSource());
-                    return true;// TODO: use an ErrorListener
+                    return null;// TODO: use an ErrorListener
                 } catch (SaxonApiException err) {
-                    return false;
+                    return null;
                 }
             }
         }
-        return false;
+        return null;
     }
 
     private boolean loadSchemasViaInstanceDocument(XPathCompiler xpath, Processor testProcessor, XdmNode instanceTest, boolean success, List<String> scmList)
@@ -661,7 +666,7 @@ public class SchemaTestSuiteDriver {
         for (XdmItem schemaDocRefItem : xpath.evaluate("instanceDocument", instanceTest)) {
             XdmNode instanceDocumentRef = (XdmNode) schemaDocRefItem;
             println("Loading instance at " + instanceDocumentRef.getAttributeValue(QN_xlink_href));
-            XdmNode instanceDoc = getLinkedDocument(instanceDocumentRef, tempProcessor, false);
+            XdmNode instanceDoc = getLinkedDocument(instanceDocumentRef, tempProcessor, null);
             XdmValue schemaUris = tempXPath.evaluate(
                     "//@Q{http://www.w3.org/2001/XMLSchema-instance}noNamespaceSchemaLocation/resolve-uri(., base-uri(..)), "
                             + "//@Q{http://www.w3.org/2001/XMLSchema-instance}schemaLocation/"
