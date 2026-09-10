@@ -3,10 +3,7 @@ package com.saxonica.functions.qt4;
 import net.sf.saxon.expr.DefaultedArgumentExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.functions.OptionsParameter;
-import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.HashTrieMap;
@@ -14,15 +11,10 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +38,7 @@ public class ParseURI extends URIFunctions {
     @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
         String uristr = arguments[0].head().getStringValue();
-        HashTrieMap map = new HashTrieMap();
+        MapItem map = new HashTrieMap();
 
         map = map.addEntry(URI, new StringValue(uristr));
         uristr = uristr.replaceAll("\\\\", "/");
@@ -190,7 +182,7 @@ public class ParseURI extends URIFunctions {
         if (query != null) {
             final ArrayList<GroundedValue> querySegments = new ArrayList<>();
             for (String str : query.split(querySeparator)) {
-                HashTrieMap seg = new HashTrieMap();
+                MapItem seg = new HashTrieMap();
                 pos = str.indexOf("=");
                 if (pos >= 0) {
                     String key = str.substring(0, pos);

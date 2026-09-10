@@ -112,7 +112,7 @@ abstract public class URIFunctions extends SystemFunction {
             if ("+".equals(esc)) {
                 output.append(" ");
             } else {
-                int hex = Integer.valueOf(esc.substring(1), 16);
+                int hex = Integer.parseInt(esc.substring(1), 16);
                 output.append((char) hex);
             }
 
