@@ -191,12 +191,18 @@ public class StyleNodeFactory implements NodeFactory {
                     temp.setLocation(baseURI, lineNumber, columnNumber);
                     temp.setCompilation(compilation);
                     temp.processStandardAttributes(NamespaceUri.NULL);
-                    if (temp.getEffectiveVersion() > 20) {
-                        temp.setValidationError(new XmlProcessingIncident("Unknown XSLT instruction"),
+                    int effectiveVersion = temp.getEffectiveVersion();
+                    XmlProcessingIncident incident = new XmlProcessingIncident(
+                            "Unknown XSLT instruction xsl:" + localname, "XTSE0010", location);
+                    if (effectiveVersion > compilation.getCompilerInfo().getXsltVersion()) {
+                        temp.setValidationError(incident,
                                                 StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
-                    } else {
-                        temp.setValidationError(new XmlProcessingIncident("Unknown XSLT instruction"),
+                    } else if (effectiveVersion == 10){
+                        temp.setValidationError(incident,
                                                 StyleElement.OnFailure.REPORT_IF_INSTANTIATED);
+                    } else {
+                        temp.setValidationError(incident,
+                                                StyleElement.OnFailure.REPORT_ALWAYS);
                     }
                 }
             }
@@ -235,8 +241,8 @@ public class StyleNodeFactory implements NodeFactory {
             XmlProcessingIncident reason;
 
             if (uri.equals(NamespaceUri.XSLT)) {
-                reason = new XmlProcessingIncident("Unknown XSLT element: " + Err.wrap(localname, Err.ELEMENT), "XTSE0010");
-                temp.setValidationError(reason, StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
+                //reason = new XmlProcessingIncident("Unknown XSLT element: " + Err.wrap(localname, Err.ELEMENT), "XTSE0010");
+                //temp.setValidationError(reason, StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE);
 
             } else if (extensionElement) {
 
