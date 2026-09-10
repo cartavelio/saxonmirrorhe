@@ -4,7 +4,7 @@
 /*
  * Get the Saxon version 
  */
-const char * version(sxnc_environment *environi) {
+const char * version(sxnc_environment *environi, int64_t proc) {
 
 /*
     jmethodID MID_version;
@@ -31,27 +31,9 @@ const char * version(sxnc_environment *environi) {
 /*
  * Get the Saxon version 
  */
-const char * getProductVariantAndVersion(sxnc_environment * environi) {
+const char * getProductVariantAndVersion(sxnc_environment * environi, int64_t proc) {
 
-/*
-    jmethodID MID_version;
-    jclass  versionClass;
-     versionClass = lookForClass(environi->env, "net/sf/saxon/Version");
-    char methodName[] = "getProductVariantAndVersion";
-    char args[] = "()Ljava/lang/String;";
-    MID_version = (jmethodID)(*(environi->env))->GetStaticMethodID(environi->env, versionClass, methodName, args);
-    if (!MID_version) {
-	printf("\nError: SaxonCDll %s() not found\n",methodName);
-	fflush (stdout);
-        return NULL;
-    }
-   jstring jstr = (jstring)((*(environi->env))->CallStaticObjectMethod(environi->env, versionClass, MID_version));
-   const char * str = (*(environi->env))->GetStringUTFChars((environi->env), jstr, NULL);
-  
-    (*(environi->env))->ReleaseStringUTFChars(environi->env, jstr,str);
-    return str;
-    */
-    return 0;
+    return getProductVersion(environi->thread, proc);
 }
 
 void initSaxonc(sxnc_environment ** environi, sxnc_processor ** proc, sxnc_parameter **param, sxnc_property ** prop, int cap, int propCap){

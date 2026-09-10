@@ -6,9 +6,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef SAXONCGLUE_H 
-#define SAXONCGLUE_H
-#include "jni/jni.h"
+#ifndef SAXONCGLUE2_H
+#define SAXONCGLUE2_H
+
+
+
+#include <graalvm-ee-12.1.h>
 
 
 #if defined __linux__ || defined __APPLE__
@@ -18,12 +21,7 @@
 #include <stdio.h>
 
 
-#define HANDLE void*
-#define LoadLibrary(x) dlopen(x, RTLD_LAZY)
-#define GetProcAddress(x,y) dlsym(x,y)
-#else
-#include <windows.h>
-#endif
+
 
 #ifdef __cplusplus
 #define EXTERN_SAXONC extern "C" {
@@ -32,12 +30,13 @@
 #define EXTERN_SAXONC
 #define EXTERN_SAXONC_END
 #endif
+#endif
 
 
 #ifndef __cplusplus
 #ifndef _BOOL
 #include <stdbool.h>
-/*typedef unsigned char sxn_bool; 
+/*typedef unsigned char sxn_bool;
 static const sxn_bool sxn_false = 0;
 static const sxn_bool sxn_true = 1;*/
 
@@ -46,16 +45,16 @@ static const sxn_bool sxn_true = 1;*/
 static const bool false = 0;
 static const bool true = 1;
 #endif
-#endif 
+#endif
 
 
 
-#ifndef __cplusplus 
-	#if defined(LICENSE)
-		#define sxn_license 1
-	#else
-		#define sxn_license 0
-	#endif
+#ifndef __cplusplus
+#if defined(LICENSE)
+#define sxn_license 1
+#else
+#define sxn_license 0
+#endif
 #endif
 
 
@@ -70,18 +69,18 @@ extern char * dllname;
 extern char * resources_dir;
 
 // Static variable used to track when jvm has been created. Used to prevent creation more than once.
-extern int jvmCreated;
-
+extern int jvmCreated; //TODO this might not be required in graalvm - remove
+//graal_isolate_t *isolate;
+//graal_isolatethread_t *thread;
 
 //===============================================================================================//
-/*! <code>Environment</code>. This struct captures the jni, JVM and handler to the cross compiled SaxonC library.
+/*! <code>Environment</code>. This struct captures the Graalvm properties assocated with the cross compiled SaxonC library.
  * <p/>
  */
 typedef struct {
-		JNIEnv *env;
-		HANDLE myDllHandle;
-		JavaVM *jvm;
-	} sxnc_environment;
+    graal_isolate_t *isolate;
+    graal_isolatethread_t *thread;
+} sxnc_environment;
 
 
 //===============================================================================================//
@@ -90,10 +89,10 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-		char* name; /*!< Internal use only. The name of the parameter. */
-		jobject value; /*!< Internal use only. The value of the parameter given as a Java object. */
-		char * namespacei; /*!< Internal use only. The namespace string. Not used yet. */
-	} sxnc_parameter;
+    char* name; /*!< Internal use only. The name of the parameter. */
+    int64_t value; /*!< Internal use only. The value of the parameter given as a Java object. */
+    char * namespacei; /*!< Internal use only. The namespace string. Not used yet. */
+} sxnc_parameter;
 
 //===============================================================================================//
 
@@ -101,24 +100,20 @@ typedef struct {
  * <p/>
  */
 typedef struct {
-		char * name; /*!< Internal use only. The name of the property. */
-		char * value; /*!< Internal use only. The string value of the property. */
-	} sxnc_property;
+    char * name; /*!< Internal use only. The name of the property. */
+    char * value; /*!< Internal use only. The string value of the property. */
+} sxnc_property;
 
 
 
-extern jobject cpp;
+extern int64_t cpp;
 
 
 
 extern const char * failure;
 
 
-/*
-* Get Dll name.
-*/
-
-char * getDllname();
+//void initSaxonc(sxnc_environment ** environi);
 
 
 /*
@@ -133,122 +128,58 @@ char * getResourceDirectory();
 
 char * _getResourceDirectory();
 
-/*
-* Set Dll name. Also set the saxon resources directory. 
-* If the SAXON_HOME environmental variable is set then use that as base.
-*/
-void setDllname();
 
 /*
  * Load dll using the default setting in SaxonC
  * Recommended method to use to load library
  */
-HANDLE loadDefaultDll();
+int create_graalvm_isolate(sxnc_environment * env);
+
+
+int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 
 
 /*
- * Load dll.
- * name - The dll library
- */
-HANDLE loadDll(char* name);
-
-
-extern jint (JNICALL * JNI_GetDefaultJavaVMInitArgs_func) (void *args);
-
-extern jint (JNICALL * JNI_CreateJavaVM_func) (JavaVM **pvm, void **penv, void *args);
-
-/*
- * Initialize JET run-time with simplified method. The initJavaRT method will be called 
- * with the arguments expanded from environ
- * @param environ - the Evironment is passed
- */
-void initDefaultJavaRT(sxnc_environment * env);
-
-
-/*
- * Initialize JET run-time.
- */
-void initJavaRT(HANDLE myDllHandle, JavaVM** pjvm, JNIEnv** penv);
-
-
-/*
- * Look for class.
- */
-jclass lookForClass (JNIEnv* penv, const char* name);
-
-
-/*
- * Create an object and invoke the instance method
- */
-void invokeInstanceMethod (JNIEnv* penv, jclass myClassInDll, char * name, char * arguments);
-
-
-
-
-/*
- * Invoke the static method
- */
-void invokeStaticMethod(JNIEnv* penv, jclass myClassInDll, char* name, char* arguments);
-
-
-/*
- * Find a constructor with a set arguments
- */
-jmethodID findConstructor (JNIEnv* penv, jclass myClassInDll, char* arguments);
-
-/*
- * Create the Java SaxonProcessor
- * This can be used to pass the sub-classes of SaxonAPI, there the argument1  should can be nullptr or Processor object
- */
-jobject createSaxonProcessor (JNIEnv* penv, jclass myClassInDll, const char * arguments, jobject argument1, jboolean licensei);
-
-/*
- * Create the Java SaxonProcessor
- * This can be used to pass the sub-classes of SaxonAPI, there the argument1  should can be nullptr or Processor object
- */
-jobject createSaxonProcessor2 (JNIEnv* penv, jclass myClassInDll, const char * arguments, jobject argument1);
-
-/*
- * Callback to check for exceptions. When called it returns the exception as a string 
+ * Callback to check for exceptions. When called it returns the exception as a string
  */
 const char * checkForException(sxnc_environment *environi);
 
 /*
- * Clean up and destroy Java VM to release memory used. 
+ * Clean up and destroy GraalVM to release memory used.
  */
-void finalizeJavaRT (JavaVM* jvm);
+void graal_tear_down (graal_isolatethread_t *thread);
 
 
 /*
- * Get a parameter from list 
+ * Get a parameter from list
  */
-jobject getParameter(sxnc_parameter *parameters,  int parLen, const char* namespacei, const char * name);
+//jobject getParameter(sxnc_parameter *parameters,  int parLen, const char* namespacei, const char * name);
 
 /*
- * Get a property from list 
+ * Get a property from list
  */
 char* getProperty(sxnc_property * properties, int propLen, const char* namespacei, const char * name);
 
 
 /*
- * set a parameter 
+ * set a parameter
  */
-void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap, const char * namespacei, const char * name, jobject value);
+void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap, const char * namespacei, const char * name, int64_t value);
 
 
 /*
- * set a property 
+ * set a property
  */
 void setProperty(sxnc_property ** properties, int *propLen, int *propCap, const char* name, const char* value);
 
 /*
- * clear parameter 
+ * clear parameter
  */
 void clearSettings(sxnc_parameter **parameters, int *parLen, sxnc_property ** properties, int *propLen);
 
 
 
-const char * stringValue(sxnc_environment  *environi, jobject value);
+
 
 EXTERN_SAXONC_END
 
