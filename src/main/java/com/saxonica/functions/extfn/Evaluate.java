@@ -1,10 +1,7 @@
 package com.saxonica.functions.extfn;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.expr.ContextOriginator;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -59,17 +56,22 @@ public class Evaluate extends SystemFunction {
         }
 
         // Copy the function library list, except for XSLT-defined system functions
-        FunctionLibraryList libraryList0 = ((StylesheetPackage) getRetainedStaticContext().getPackageData()).getFunctionLibrary();
-        FunctionLibraryList libraryList1 = new FunctionLibraryList();
-        for (FunctionLibrary lib : libraryList0.getLibraryList()) {
-            if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceConstant.FN)) {
-                // Exclude XSLT-defined functions
-                libraryList1.addFunctionLibrary(XPath31FunctionSet.getInstance());
-            } else {
-                libraryList1.addFunctionLibrary(lib);
+        PackageData pack = getRetainedStaticContext().getPackageData();
+        if (pack instanceof StylesheetPackage) {
+            FunctionLibraryList libraryList0 = ((StylesheetPackage) pack).getFunctionLibrary();
+            FunctionLibraryList libraryList1 = new FunctionLibraryList();
+            for (FunctionLibrary lib : libraryList0.getLibraryList()) {
+                if (lib instanceof BuiltInFunctionSet && ((BuiltInFunctionSet) lib).getNamespace().equals(NamespaceConstant.FN)) {
+                    // Exclude XSLT-defined functions
+                    libraryList1.addFunctionLibrary(XPath31FunctionSet.getInstance());
+                } else {
+                    libraryList1.addFunctionLibrary(lib);
+                }
             }
+            env.setFunctionLibrary(libraryList1);
+        } else {
+            env.setFunctionLibrary(context.getController().getExecutable().getFunctionLibrary());
         }
-        env.setFunctionLibrary(libraryList1);
         env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
 //        if (rsc.getPackageData().isSchemaAware()) {
 //            env.setImportedSchemaNamespaces(rsc.);
