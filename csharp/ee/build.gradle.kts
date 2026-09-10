@@ -473,7 +473,7 @@ for (buildArch in architectures) {
 
   val build = tasks.register<DotNetBuild>("dotnetBuild_${buildArch}") {
     group = LifecycleBasePlugin.BUILD_GROUP
-    dependsOn("dotnetConfigure")
+    dependsOn(configure)
     target = "SaxonCS"
     arch = buildArch
     inputs.files(configure)

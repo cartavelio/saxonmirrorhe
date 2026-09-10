@@ -13,6 +13,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.Internal
 import org.gradle.internal.os.OperatingSystem;
 import org.gradle.kotlin.dsl.create
 import org.gradle.process.ExecOperations
@@ -59,6 +60,12 @@ abstract class DotNetImplementation: DefaultTask() {
   @get:Input
   abstract val configuration: Property<String>
 
+  @get:Internal
+  val saxonBuildExt = project.extensions.findByType(SaxonBuildExtension::class.java)
+
+  @get:Internal
+  val saxonCSExt = project.extensions.findByType(SaxonCSExtension::class.java)
+
   init {
     configuration.convention("${project.findProperty("csharpBuild") ?: "Debug"}")
     platform.convention(if (OperatingSystem.current().isMacOsX())
@@ -69,15 +76,35 @@ abstract class DotNetImplementation: DefaultTask() {
 }
 
 abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOperations): DotNetImplementation() {
+  @get:Internal
+  val generateAppCsProj = project.layout.projectDirectory.file("../tools/generateCSProj.xsl")
+
+  @get:Internal
+  val appCsProj = this.arch.map { project.layout.buildDirectory.file("${it}/SaxonCS/core.csproj").get() }
+
+  @get:Internal
+  val generateTestCsProj = project.layout.projectDirectory.file("../tools/generateTestDriverCSProj.xsl")
+
+  @get:Internal
+  val testCsProj = this.arch.map { project.layout.buildDirectory.file("${it}/TestDrivers/core.csproj").get() }
+
+  @get:Internal
+  val appSlnFile = this.arch.map { project.layout.buildDirectory.file("${it}/SaxonCS/SaxonCS.sln").get() }
+
+  @get:Internal
+  val testSlnFile = this.arch.map { project.layout.buildDirectory.file("${it}/TestDrivers/TestDrivers.sln").get()  }
+
   @TaskAction
   fun makeCSProj() {
-    val saxonBuild = project.extensions.findByType(SaxonBuildExtension::class.java)
-    if (saxonBuild !is SaxonBuildExtension) {
+    val saxonBuild = if (saxonBuildExt is SaxonBuildExtension) {
+      saxonBuildExt as SaxonBuildExtension
+    } else {
       throw GradleException("Could not find 'saxonbuild' extension")
     }
 
-    val saxonCS = project.extensions.findByType(SaxonCSExtension::class.java)
-    if (saxonCS !is SaxonCSExtension) {
+    val saxonCS = if (saxonCSExt is SaxonCSExtension) {
+      saxonCSExt as SaxonCSExtension
+    } else {
       throw GradleException("Could not find 'saxoncs' extension")
     }
 
@@ -90,8 +117,8 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
       classpath = saxonCS.classpath.get()
       mainClass.set("net.sf.saxon.Transform") // .set() WTF?
       args("-it",
-           "-xsl:${project.layout.projectDirectory.file("../tools/generateCSProj.xsl")}",
-           "-o:${project.layout.buildDirectory.file("${arch}/SaxonCS/core.csproj").get()}",
+           "-xsl:${generateAppCsProj}",
+           "-o:${appCsProj.get()}",
            "saxonVersion=${saxonBuild.version.get()}",
            "edition=${saxonCS.edition.get()}",
            "optimize=true",
@@ -103,8 +130,8 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
       classpath = saxonCS.classpath.get()
       mainClass.set("net.sf.saxon.Transform") // .set() WTF?
       args("-it",
-           "-xsl:${project.layout.projectDirectory.file("../tools/generateTestDriverCSProj.xsl")}",
-           "-o:${project.layout.buildDirectory.file("${arch}/TestDrivers/core.csproj").get()}",
+           "-xsl:${generateTestCsProj}",
+           "-o:${testCsProj.get()}",
            "saxonVersion=${saxonBuild.version.get()}",
            "edition=${saxonCS.edition.get()}",
            "optimize=true",
@@ -113,9 +140,8 @@ abstract class DotNetConfiguration @Inject constructor(private val ex: ExecOpera
 
     var uuid1 = UUID.randomUUID()
     var uuid2 = UUID.randomUUID()
-    var slnfile = project.layout.buildDirectory.file("${arch}/SaxonCS/SaxonCS.sln").get()
 
-    File("${slnfile}").writeText("""
+    File("${appSlnFile.get()}").writeText("""
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{${uuid1}}") = "SaxonCS", "SaxonCS.csproj", "{${uuid2}}"
 EndProject
@@ -135,9 +161,8 @@ EndGlobal
 
     uuid1 = UUID.randomUUID()
     uuid2 = UUID.randomUUID()
-    slnfile = project.layout.buildDirectory.file("${arch}/TestDrivers/TestDrivers.sln").get()
 
-    File("${slnfile}").writeText("""
+    File("${testSlnFile.get()}").writeText("""
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{${uuid1}}") = "TestDrivers", "TestDrivers.csproj", "{${uuid2}}"
 EndProject
@@ -236,24 +261,21 @@ abstract class DotNetPublish @Inject constructor(private val ex: ExecOperations)
 }
 
 abstract class DotNetMakeApp @Inject constructor(private val ex: ExecOperations): DotNetImplementation() {
+  @get:Internal
+  val execwd = this.arch.map { project.layout.buildDirectory.file("${it}/SaxonCS").get().asFile }
+
   @TaskAction
   fun build() {
-    val saxonBuild = project.extensions.findByType(SaxonBuildExtension::class.java)
-    if (saxonBuild !is SaxonBuildExtension) {
+    val saxonBuild = if (saxonBuildExt is SaxonBuildExtension) {
+      saxonBuildExt as SaxonBuildExtension
+    } else {
       throw GradleException("Could not find 'saxonbuild' extension")
     }
 
-    val saxonCS = project.extensions.findByType(SaxonCSExtension::class.java)
-    if (saxonCS !is SaxonCSExtension) {
-      throw GradleException("Could not find 'saxoncs' extension")
-    }
-
-    val arch = this.arch.get()
-    val platform = this.platform.get()
     val configuration = this.configuration.get()
 
     ex.exec {
-      workingDir = project.layout.buildDirectory.file("${arch}/SaxonCS").get().asFile
+      workingDir = execwd.get()
       commandLine("${saxonBuild.dotnet.get()}",
                   "msbuild", "-t:BundleApp",
                   "-p:Configuration=${configuration}",
