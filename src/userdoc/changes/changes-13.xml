@@ -221,6 +221,9 @@
         <p>The function <code>fn:codepoints-to-string</code> is now variadic: you can write
         <code>codepoints-to-string(13, 10)</code> instead of <code>codepoints-to-string((13, 10))</code>.</p>
         
+        <p>The functions <code>fn:parse-xml</code> and <code>fn:parse-xml-fragment</code> now accept
+        an <code>options</code> parameter.</p>
+        
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
