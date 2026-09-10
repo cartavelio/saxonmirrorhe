@@ -331,6 +331,12 @@ void XsdCompiler::setProperty(const char *name, const char *value) {
 #endif
         properties.insert(std::pair<std::string, std::string>(
             std::string(name), std::string((value == nullptr ? "" : value))));
+}
+
+
+void XsdCompiler::clearProperties() {
+        properties.clear();
+        // outputfile1.clear();
     }
 
 

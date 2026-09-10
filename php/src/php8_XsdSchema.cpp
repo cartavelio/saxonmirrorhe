@@ -1,5 +1,4 @@
 zend_object_handlers xsdSchema_object_handlers;
-zend_class_entry *xsdSchema_ce;
 
 /*     ============== PHP Interface of   xsdSchema_object =============== */
 
@@ -7,7 +6,7 @@ void xsdSchema_free_storage(zend_object *object) {
   zend_object_std_dtor(object);
 }
 
-void xsdSchema_object_destroy_storage(zend_object *object) {
+void xsdSchema_destroy_storage(zend_object *object) {
   zend_objects_destroy_object(object);
 }
 
@@ -33,9 +32,6 @@ PHP_METHOD(XsdSchema, __destruct) {
 
   XsdSchema *xsdSchema = obj->xsdSchema;
   if (xsdSchema != nullptr) {
-    _decrementRefCount(xsdSchema->getParameters());
-    xsdSchema->clearParameters();
-    xsdSchema->clearProperties();
     delete xsdSchema;
   }
 }
@@ -53,9 +49,9 @@ PHP_METHOD(XsdSchema, newValidator) {
       (xsdSchema_object *)((char *)pobj -
                                 XtOffsetOf(xsdSchema_object, std));
   assert(obj != nullptr);
-  proc = obj->xsdSchema;
-  assert(proc != nullptr);
-  if (proc != nullptr) {
+  xsdSchema = obj->xsdSchema;
+  assert(xsdSchema != nullptr);
+  if (xsdSchema != nullptr) {
     if (object_init_ex(return_value, schemaValidator_ce) != SUCCESS) {
       RETURN_NULL();
     } else {
@@ -141,16 +137,13 @@ PHP_METHOD(XsdSchema, exportComponents) {
   }
 
   zend_object *pobj = Z_OBJ_P(getThis());
-  xsdCompiler_object *obj =
-      (xsdCompiler_object *)((char *)pobj -
-                                 XtOffsetOf(xsdCompiler_object, std));
-  xsdCompiler = obj->xsdCompiler;
-  if (xsdCompiler != nullptr) {
+  xsdSchema_object *obj =
+      (xsdSchema_object *)((char *)pobj -
+                                 XtOffsetOf(xsdSchema_object, std));
+  xsdSchema = obj->xsdSchema;
+  if (xsdSchema != nullptr) {
     try {
-      xsdSchema->exportComponents(schemaStr);
-
-
-
+      xsdSchema->exportComponents(filename);
     } catch (SaxonApiException &e) {
       zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
     }
@@ -159,10 +152,9 @@ PHP_METHOD(XsdSchema, exportComponents) {
 
 
 
-zend_function_entry XsdCompiler_methods[] = {
-    PHP_ME(
-        XsdCompiler, __destruct, arginfo_saxonc_xsdSchema_destruct,ZEND_ACC_PUBLIC)
-        PHP_ME(XsdCompiler, newValidator,arginfo_saxonc_xsdSchema_newValidator,ZEND_ACC_PUBLIC)
-        PHP_ME(XsdCompiler,combine,arginfo_saxonc_xsdSchema_combine,ZEND_ACC_PUBLIC)
-        PHP_ME(XsdCompiler, exportComponents, arginfo_saxonc_xsdSchema_exportComponents,ZEND_ACC_PUBLIC)
+zend_function_entry XsdSchema_methods[] = {
+    PHP_ME(XsdSchema, __destruct, arginfo_saxonc_xsdSchema_destruct,ZEND_ACC_PUBLIC)
+    PHP_ME(XsdSchema, newValidator,arginfo_saxonc_xsdSchema_newValidator,ZEND_ACC_PUBLIC)
+    PHP_ME(XsdSchema,combine,arginfo_saxonc_xsdSchema_combine,ZEND_ACC_PUBLIC)
+    PHP_ME(XsdSchema, exportComponents, arginfo_saxonc_xsdSchema_exportComponents,ZEND_ACC_PUBLIC)
     {nullptr, nullptr, nullptr}};

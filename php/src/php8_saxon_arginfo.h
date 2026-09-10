@@ -447,6 +447,69 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_sval_clearProperties, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+
+//================== XsdCompiler
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_destruct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_setXsdVersion, 0, 0, 1)
+ZEND_ARG_INFO(0, version_string)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_getXsdVersion, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_compileFromString, 0, 0, 1)
+ZEND_ARG_INFO(0, xsd_string)
+ZEND_ARG_INFO(0, encoding_Str)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_compileFromFile, 0, 0, 1)
+ZEND_ARG_INFO(0, filename_string)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_compileFromNode, 0, 0, 1)
+ZEND_ARG_INFO(0, xml_node)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_combine, 0, 0, 1)
+ZEND_ARG_INFO(0, xsdSchemas)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_emptySchema, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_importComponents, 0, 0, 1)
+ZEND_ARG_INFO(0, xsd_source)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_importComponentsFromNode, 0, 0, 1)
+ZEND_ARG_INFO(0, xsd_source)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_setProperty, 0, 0, 2)
+ZEND_ARG_INFO(0, name)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdCompiler_clearProperties, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+
+//================== XsdSchema
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdSchema_destruct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdSchema_newValidator, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdSchema_combine, 0, 0, 1)
+ZEND_ARG_INFO(0, xsdSchema)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xsdSchema_exportComponents, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 //====================   XQueryProcessor
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_destruct, 0, 0, 0)

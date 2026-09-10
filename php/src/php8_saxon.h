@@ -58,6 +58,8 @@ extern "C" { // remove comment
 #include "saxonc/XdmNode.h"
 #include "saxonc/XdmValue.h"
 #include "saxonc/UserFunctionHandler.h"
+#include "saxonc/XsdCompiler.h"
+#include "saxonc/XsdSchema.h"
 
 #include "php8_saxon_arginfo.h"
 

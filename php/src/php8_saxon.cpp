@@ -33,6 +33,7 @@ zend_class_entry *xdmArray_ce;
 zend_class_entry *sequenceIterator_ce;
 
 zend_class_entry *xsltExecutable_ce;
+zend_class_entry *xsdSchema_ce;
 
 void _decrementRefCount(std::map<std::string, XdmValue *> parameters){
     for (std::map<std::string, XdmValue *>::iterator itr = parameters.begin();

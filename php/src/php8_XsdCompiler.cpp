@@ -7,7 +7,7 @@ void xsdCompiler_free_storage(zend_object *object) {
   zend_object_std_dtor(object);
 }
 
-void xsdCompiler_object_destroy_storage(zend_object *object) {
+void xsdCompiler_destroy_storage(zend_object *object) {
   zend_objects_destroy_object(object);
 }
 
@@ -33,8 +33,6 @@ PHP_METHOD(XsdCompiler, __destruct) {
 
   XsdCompiler *xsdCompiler = obj->xsdCompiler;
   if (xsdCompiler != nullptr) {
-    _decrementRefCount(xsdCompiler->getParameters());
-    xsdCompiler->clearParameters();
     xsdCompiler->clearProperties();
     delete xsdCompiler;
   }
@@ -56,7 +54,7 @@ PHP_METHOD(XsdCompiler, setXsdVersion){
   xsdCompiler = obj->xsdCompiler;
   if (xsdCompiler != nullptr) {
 
-    if (cwdStr != nullptr) {
+    if (verStr != nullptr) {
       xsdCompiler->setXsdVersion(verStr);
     }
   }
@@ -279,7 +277,7 @@ PHP_METHOD(XsdCompiler, combine){
 
   arguments = new XsdSchema *[argument_length];
 
-  if (saxonProc != nullptr) {
+  if (xsdCompiler != nullptr) {
     ZEND_HASH_FOREACH_KEY_VAL(arr_hash, num_key, key, val) {
       if (Z_TYPE_P(val) != IS_NULL) {
         const char *objName = ZSTR_VAL(Z_OBJCE_P(val)->name);
@@ -290,7 +288,7 @@ PHP_METHOD(XsdCompiler, combine){
               (xsdSchema_object *)((char *)ooth -
                                  XtOffsetOf(xsdSchema_object, std));
           if (nobj != nullptr) {
-            XsdSchema *value = (XdmValue *)nobj->xsdSchema;
+            XsdSchema *value = (XsdSchema *)nobj->xsdSchema;
             arguments[num_key] = value;
           }
         } else  {
@@ -302,9 +300,9 @@ PHP_METHOD(XsdCompiler, combine){
     }
     ZEND_HASH_FOREACH_END();
 
-    XsdSchema *xsdSchema = xsdCompiler>combine(arguments, argument_length);
+    XsdSchema *xsdSchema = xsdCompiler->combine(arguments, argument_length);
 
-    if (result != nullptr) {
+    if (xsdSchema != nullptr) {
 
       if (object_init_ex(return_value, xsdSchema_ce) != SUCCESS) {
         RETURN_NULL();
@@ -314,7 +312,7 @@ PHP_METHOD(XsdCompiler, combine){
             (xsdSchema_object *)((char *)vvobj -
                                 XtOffsetOf(xsdSchema_object, std));
         assert(vobj != nullptr);
-        vobj->xsdSchema = result;
+        vobj->xsdSchema = xsdSchema;
         return;
       }
     } else {
@@ -544,7 +542,6 @@ zend_function_entry XsdCompiler_methods[] = {
         PHP_ME(XsdCompiler, emptySchema,arginfo_saxonc_xsdCompiler_emptySchema,ZEND_ACC_PUBLIC)
         PHP_ME(XsdCompiler, importComponents,arginfo_saxonc_xsdCompiler_importComponents,ZEND_ACC_PUBLIC)
         PHP_ME(XsdCompiler, importComponentsFromNode,arginfo_saxonc_xsdCompiler_importComponentsFromNode,ZEND_ACC_PUBLIC)
-        PHP_ME(XsdCompiler, setParameter,arginfo_saxonc_xsdCompiler_setParameter,ZEND_ACC_PUBLIC)
         PHP_ME(XsdCompiler, setProperty,arginfo_saxonc_xsdCompiler_setProperty, ZEND_ACC_PUBLIC)
-        PHP_ME(XsdCompiler, clearParameters,arginfo_saxonc_xsdCompiler_clearParameters,ZEND_ACC_PUBLIC)
+        PHP_ME(XsdCompiler, clearProperties,arginfo_saxonc_xsdCompiler_clearProperties,ZEND_ACC_PUBLIC)
     {nullptr, nullptr, nullptr}};

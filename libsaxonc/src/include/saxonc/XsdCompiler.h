@@ -287,6 +287,11 @@ public:
 
     void setProperty(const char *name, const char *value);
 
+    /**
+     * Clear configuration property values set
+     */
+    void clearProperties();
+
 
 private:
 
