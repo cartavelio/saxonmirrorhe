@@ -1046,9 +1046,10 @@ public class TestValidator {
     @Test
     public void testValidationReporting3() {
         SchemaValidator validator = null;
-        Serializer dest = null;
+        XdmDestination dest = null;
         StringWriter sw = new StringWriter();
         try {
+            String valid_xml = "<?xml version='1.0'?><request><a/><!--comment--><b/></request>";
             String invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>";
             String sch1 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
                     "\t<xs:element name=\"request\">\n" +
@@ -1057,7 +1058,7 @@ public class TestValidator {
                     "\t\t\t\t<xs:element name=\"a\" type=\"xs:string\"/>\n" +
                     "\t\t\t\t<xs:element name=\"b\" type=\"xs:string\"/>\n" +
                     "\t\t\t</xs:sequence>\n" +
-                    "\t\t\t<xs:assert test='count(child::node()) = 3'/>\n" +
+                    "\t\t\t<xs:assert test='count(child::*) = 2'/>\n" +
                     "\t\t</xs:complexType>\n" +
                     "\t</xs:element>\n" +
                     "</xs:schema>";
@@ -1075,16 +1076,18 @@ public class TestValidator {
             System.err.println("Schema 1 OK");
             validator = schema.newValidator();
 
-            dest = proc.newSerializer(sw);
-            dest.setOutputProperty(Serializer.Property.INDENT, "yes");
-            dest.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
+            dest = new XdmDestination();
             validator.setValidityReporting(dest);
             List<Source> sources = new ArrayList<>();
-            sources.add(new StreamSource(new StringReader(invalid_xml)));
-            sources.add(new StreamSource(new StringReader(doc1)));
+            sources.add(new StreamSource(new StringReader(valid_xml), "valid.xml"));
+            sources.add(new StreamSource(new StringReader(invalid_xml), "invalid.xml"));
+            sources.add(new StreamSource(new StringReader(doc1), "family.xml"));
             validator.validateMultiple(sources);
             System.err.println("Validation completed OK");
-
+            XdmNode report = dest.getXdmNode();
+            assertEquals(new QName("http://saxon.sf.net/ns/validation", "validation-reports"),
+                         report.getOutermostElement().getNodeName());
+            assertEquals(3, report.getOutermostElement().select(Steps.child("validation-report")).count());
 
         } catch (SaxonApiException sapie) {
             fail(sapie); // Should not throw an exception on invalidity
@@ -1097,10 +1100,7 @@ public class TestValidator {
             }
 
         }
-
-
     }
-
 
     /**
      * Test validating multiple documents with reporting feature off
