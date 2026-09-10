@@ -2,7 +2,7 @@ package com.saxonica.functions.qt4.csv;
 
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.value.BooleanValue;
@@ -146,7 +146,7 @@ public class CsvParser {
      * @throws XPathException if mismatched quotes are found
      */
     private void readQuotedField() throws XPathException {
-        UnicodeBuilder field = new UnicodeBuilder();
+        TwineBuilder field = TwineBuilder.make(128);
         int startLine = lineNumber;
         int startColumn = columnNumber;
         int cp = codepoints.next(); // the first character after the quote
@@ -182,7 +182,7 @@ public class CsvParser {
                 error(message, ERR_QUOTING);
                 break;
             }
-            field.append(cp);
+            field = field.append(cp);
             cp = codepoints.next();
         }
     }
@@ -197,7 +197,7 @@ public class CsvParser {
      * @throws XPathException if the field contains a quotation mark
      */
     private int readUnquotedField(int cp) throws XPathException {
-        UnicodeBuilder field = new UnicodeBuilder();
+        TwineBuilder field = TwineBuilder.make(16);
         boolean started = false;
         while (true) {
             if (cp == '\r' && normalizeNewlines) {
@@ -227,7 +227,7 @@ public class CsvParser {
                     continue;
                 }
                 started = true;
-                field.append(cp);
+                field = field.append(cp);
                 cp = codepoints.next();
             }
         }

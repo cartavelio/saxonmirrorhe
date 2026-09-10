@@ -7,10 +7,7 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.ToUpper;
-import net.sf.saxon.str.UnicodeBuilder;
-import net.sf.saxon.str.UnicodeChar;
-import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
@@ -37,17 +34,17 @@ public class CollationFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         MapItem s = (MapItem)arguments[0].head();
-        UnicodeBuilder sb = new UnicodeBuilder();
-        sb.append("http://www.w3.org/2013/collation/UCA");
+        TwineBuilder tb = TwineBuilder.make(256);
+        tb = tb.append("http://www.w3.org/2013/collation/UCA");
         boolean first = true;
         for (KeyValuePair kvp : s.keyValuePairs()) {
             if (first) {
-                sb.append('?');
+                tb = tb.append('?');
                 first = false;
             } else {
-                sb.append(';');
+                tb = tb.append(';');
             }
-            sb.append(camelCase(kvp.key.getUnicodeStringValue()))
+            tb = tb.append(camelCase(kvp.key.getUnicodeStringValue()))
                     .append('=');
             GroundedValue value = kvp.value;
             if (!(value instanceof AtomicValue)) {
@@ -55,12 +52,12 @@ public class CollationFn extends SystemFunction {
                 value = Atomizer.atomize(value);
             }
             if (value instanceof BooleanValue) {
-                sb.append(((BooleanValue)value).getBooleanValue() ? "yes" : "no");
+                tb = tb.append(((BooleanValue)value).getBooleanValue() ? "yes" : "no");
             } else {
-                sb.append(value.getUnicodeStringValue());
+                tb = tb.append(value.getUnicodeStringValue());
             }
         }
-        return new StringValue(sb.toUnicodeString());
+        return new StringValue(tb.toUnicodeString());
     }
 
     private static UnicodeString camelCase(UnicodeString in) {
@@ -68,16 +65,16 @@ public class CollationFn extends SystemFunction {
         if (hyphen < 0) {
             return in;
         }
-        UnicodeBuilder ub = new UnicodeBuilder((int)in.length());
+        TwineBuilder tb = TwineBuilder.make((int)in.length());
         IntIterator iter = in.codePoints();
         while (iter.hasNext()) {
             int cp = iter.next();
             if (cp == '-' && iter.hasNext()) {
                 cp = ToUpper.toUpper(new UnicodeChar(iter.next())).codePointAt(0);
             }
-            ub.append(cp);
+            tb = tb.append(cp);
         }
-        return ub.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
 

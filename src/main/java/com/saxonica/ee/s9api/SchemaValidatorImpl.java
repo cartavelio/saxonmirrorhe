@@ -536,6 +536,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
                     ParseOptions options = new ParseOptions()
                             .withCheckEntityReferences(true)
+                            .withSchema(schema.getUnderlyingSchema())
                             .withValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()))
                             .withInvalidityHandler(handler)
                             .withCheckEntityReferences(true)

@@ -4,7 +4,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -35,19 +35,19 @@ public class EscapeNCName extends SystemFunction {
         if (input.isEmpty()) {
             return new StringValue("_", BuiltInAtomicType.NCNAME);
         }
-        UnicodeBuilder out = new UnicodeBuilder((int)input.estimatedLength());
+        TwineBuilder tb = TwineBuilder.make((int)input.estimatedLength());
         IntIterator iter = input.codePoints();
         if (iter.hasNext()) {
             // process first character (which always exists)
             int ch = iter.next();
             if (NameChecker.isNCNameStartChar(ch)) {
                 if (ch == '_') {
-                    out.append('_').append('_');
+                    tb = tb.append('_').append('_');
                 } else {
-                    out.append(ch);
+                    tb = tb.append(ch);
                 }
             } else {
-                escape(ch, out);
+                tb = escape(ch, tb);
             }
         }
         while (iter.hasNext()) {
@@ -55,21 +55,19 @@ public class EscapeNCName extends SystemFunction {
             int ch = iter.next();
             if (NameChecker.isNCNameChar(ch)) {
                 if (ch == '_') {
-                    out.append('_').append('_');
+                    tb = tb.append('_').append('_');
                 } else {
-                    out.append(ch);
+                    tb = tb.append(ch);
                 }
             } else {
-                escape(ch, out);
+                tb = escape(ch, tb);
             }
         }
-        return new StringValue(out.toUnicodeString(), BuiltInAtomicType.NCNAME);
+        return new StringValue(tb.toUnicodeString(), BuiltInAtomicType.NCNAME);
     }
 
-    private void escape(int codepoint, UnicodeBuilder sb) {
-        sb.append('_');
-        sb.append(Integer.toHexString(codepoint));
-        sb.append('_');
+    private TwineBuilder escape(int codepoint, TwineBuilder tb) {
+        return tb.append('_').append(Integer.toHexString(codepoint)).append('_');
     }
 
 

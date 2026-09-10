@@ -5,6 +5,7 @@ import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -43,7 +44,7 @@ public class UnescapeNCName extends SystemFunction {
         if (input.length() == 1 && input.codePointAt(0) == '_') {
             return new StringValue("");
         }
-        UnicodeBuilder out = new UnicodeBuilder((int)input.estimatedLength());
+        TwineBuilder tb = TwineBuilder.make((int)input.estimatedLength());
         IntIterator iter = input.codePoints();
         while (iter.hasNext()) {
             int ch = iter.next();
@@ -53,13 +54,13 @@ public class UnescapeNCName extends SystemFunction {
                     int digit = iter.next();
                     if (digit == '_') {
                         if (hex.length() == 0) {
-                            out.append('_');
+                            tb = tb.append('_');
                         } else {
                             int code = Integer.parseInt(hex.toString(), 16);
                             if (!XMLCharacterData.isValid11(code)) {
                                 throw new XPathException("Invalid escaped XML character: " + hex, "FORG0001");
                             }
-                            out.append(code);
+                            tb = tb.append(code);
                         }
                         break;
                     } else if (digit < 128 && "0123456789abcdefABCDEF".indexOf((char)digit) >= 0) {
@@ -69,10 +70,10 @@ public class UnescapeNCName extends SystemFunction {
                     }
                 }
             } else {
-                out.append(ch);
+                tb = tb.append(ch);
             }
         }
-        return new StringValue(out.toUnicodeString(), BuiltInAtomicType.NCNAME);
+        return new StringValue(tb.toUnicodeString(), BuiltInAtomicType.NCNAME);
     }
 
     private void escape(int codepoint, UnicodeBuilder sb) {

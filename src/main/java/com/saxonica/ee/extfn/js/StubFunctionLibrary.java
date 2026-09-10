@@ -16,7 +16,6 @@ import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.XPathException;
@@ -25,6 +24,7 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
+import net.sf.saxon.z.IntIterator;
 import net.sf.saxon.z.IntPredicateLambda;
 
 import javax.xml.transform.stream.StreamSource;
@@ -88,13 +88,13 @@ public class StubFunctionLibrary implements FunctionLibrary {
 
         XPathContext context = config.getConversionContext();
 
-        UnicodeString content;
-        try {
+        IntIterator content;
+        //try {
             Reader reader = StandardUnparsedTextResolver.getReaderFromStreamSource(input, "utf-8", config, config.isTiming());
-            content = UnparsedTextFunction.readFile(IntPredicateLambda.of((ch) -> true), reader);
-        } catch (java.io.IOException ioErr) {
-            throw new XPathException("Failed to read function signatures", ioErr);
-        }
+            content = UnparsedTextFunction.codepoints(IntPredicateLambda.of((ch) -> true), reader);
+//        } catch (java.io.IOException ioErr) {
+//            throw new XPathException("Failed to read function signatures", ioErr);
+//        }
 
         Item result = ParseJsonFn.parse(content, new HashMap<>(), context);
         if (result instanceof ArrayItem) {

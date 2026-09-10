@@ -1,8 +1,8 @@
 package com.saxonica.serialize;
 
 import net.sf.saxon.serialize.XMLEmitter;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 
 import java.io.IOException;
@@ -28,37 +28,37 @@ public class XQueryEmitter extends XMLEmitter {
     protected void writeEscape(UnicodeString chars, final boolean inAttribute) throws IOException, XPathException {
         boolean inBraces = false;
         chars = chars.tidy();
-        UnicodeBuilder buff = new UnicodeBuilder(chars.length32() + 20);
+        TwineBuilder tb = TwineBuilder.make(chars.length32() + 20);
         for (int i = 0; i < chars.length(); i++) {
             int c = chars.codePointAt(i);
             if (!inBraces && c == '{' && chars.codePointAt(i + 1) != '{') {
                 inBraces = true;
-                buff.append((char) 0);   // switch disable-output-escaping on
+                tb = tb.append((char) 0);   // switch disable-output-escaping on
             } else if (inBraces && c == '}') {
                 inBraces = false;
-                buff.append((char) 0);   // switch disable-output-escaping off
+                tb = tb.append((char) 0);   // switch disable-output-escaping off
             } else if (inBraces && c == '"') {
-                buff.append((char) 0);
+                tb = tb.append((char) 0);
                 i++;
                 do {
-                    buff.append(c);
+                    tb = tb.append(c);
                     c = chars.codePointAt(i++);
                 } while (c != '"');
-                buff.append((char) 0);
+                tb = tb.append((char) 0);
                 i--;
             } else if (inBraces && c == '\'') {
-                buff.append((char) 0);
+                tb = tb.append((char) 0);
                 i++;
                 do {
-                    buff.append(c);
+                    tb = tb.append(c);
                     c = chars.codePointAt(i++);
                 } while (c != '\'');
-                buff.append((char) 0);
+                tb = tb.append((char) 0);
                 i--;
             }
-            buff.append(c);
+            tb = tb.append(c);
         }
-        super.writeEscape(buff.toUnicodeString(), inAttribute);
+        super.writeEscape(tb.toUnicodeString(), inAttribute);
     }
 }
 

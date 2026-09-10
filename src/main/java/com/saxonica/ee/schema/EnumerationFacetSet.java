@@ -4,7 +4,7 @@ import net.sf.saxon.expr.sort.CustomMap;
 import net.sf.saxon.expr.sort.SimpleTypeIdentityComparison;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.om.*;
-import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SimpleType;
@@ -75,17 +75,17 @@ public class EnumerationFacetSet extends Facet {
 
     @Override
     public UnicodeString getValue() {
-        UnicodeBuilder sb = new UnicodeBuilder();
+        TwineBuilder tb = TwineBuilder.make(128);
         boolean first = true;
         for (String s : stringValues) {
             if (first) {
                 first = false;
             } else {
-                sb.appendLatin(", ");
+                tb = tb.append(',').append(' ');
             }
-            sb.append(s);
+            tb = tb.append(s);
         }
-        return sb.toUnicodeString();
+        return tb.toUnicodeString();
     }
 
     /**
