@@ -10,12 +10,24 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
 
+/**
+ * Abstract implementation of JNode, covering both root and non-root JNodes
+ */
 public abstract class JNode implements GNode {
 
-    public abstract GroundedValue getValue();
+    /**
+     * Get the value of the content property
+     * @return the content of the JNode
+     */
+    public abstract GroundedValue getContent();
 
+    /**
+     * Ask whether the JNode has any children
+     * @return true if there are children: that is, if the content includes
+     * an array or map
+     */
     public boolean hasChildNodes() {
-        GroundedValue value = getValue();
+        GroundedValue value = getContent();
         for (Item item : value.asIterable()) {
             if (item instanceof ArrayItem && !((ArrayItem)item).isEmpty()) {
                 return true;
@@ -27,13 +39,31 @@ public abstract class JNode implements GNode {
         return false;
     }
 
+    /**
+     * Get the value of the position property
+     * @return the position
+     */
+
     public abstract int getPosition();
+
+    /**
+     * Get the value of the selector property
+     * @return the selector
+     */
 
     public abstract AtomicValue getSelector();
 
+    /**
+     * Get the parent of this JNode
+     * @return the value of the parent property
+     */
     @Override
     public abstract JNode getParent();
 
+    /**
+     * Get the node kind
+     * @return {@link Type#JNODE}
+     */
     public int getNodeKind() {
         return Type.JNODE;
     }
@@ -64,7 +94,7 @@ public abstract class JNode implements GNode {
     @Override
     public UnicodeString getUnicodeStringValue() {
         try {
-            return getValue().getUnicodeStringValue();
+            return getContent().getUnicodeStringValue();
         } catch (XPathException e) {
             throw new UncheckedXPathException(e);
         }
@@ -79,7 +109,7 @@ public abstract class JNode implements GNode {
      */
     @Override
     public AtomicSequence atomize() throws XPathException {
-        return Atomizer.atomize(getValue());
+        return Atomizer.atomize(getContent());
     }
 
     /**
@@ -87,14 +117,18 @@ public abstract class JNode implements GNode {
      */
     @Override
     public String toString() {
-        return "jnode(" + getValue().toString() + ")";
+        return "jnode(" + getContent().toString() + ")";
     }
 
     @Override
     public String toShortString() {
-        return "jnode(" + getValue().toShortString() + ")";
+        return "jnode(" + getContent().toShortString() + ")";
     }
 
+    /**
+     * Get an iterator over all the children of this JNode
+     * @return an iterator over the children
+     */
     public abstract SequenceIterator getChildren();
 
 

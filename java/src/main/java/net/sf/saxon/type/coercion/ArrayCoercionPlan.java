@@ -40,7 +40,7 @@ public final class ArrayCoercionPlan extends CoercionPlan {
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         SequenceType requiredMemberType = ((ArrayItemType)requiredType).getMemberType();
         if (item instanceof JNode) {
-            GroundedValue gv = ((JNode)item).getValue();
+            GroundedValue gv = ((JNode)item).getContent();
             SequenceIterator coercedValue = coerceSequence(gv.iterate(), SequenceType.zeroOrMore(requiredType), request);
             return SequenceExtent.from(coercedValue);
         }

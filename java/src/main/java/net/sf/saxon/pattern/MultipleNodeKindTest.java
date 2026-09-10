@@ -8,7 +8,6 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -28,7 +27,7 @@ import java.util.function.Function;
 public final class MultipleNodeKindTest extends NodeTest {
 
     public final static MultipleNodeKindTest PARENT_NODE =
-            new MultipleNodeKindTest(UType.DOCUMENT.union(UType.ELEMENT));
+            new MultipleNodeKindTest(UType.DOCUMENT.union(UType.ELEMENT).union(UType.JNODE));
 
     public final static MultipleNodeKindTest DOC_ELEM_ATTR =
         new MultipleNodeKindTest(UType.DOCUMENT.union(UType.ELEMENT).union(UType.ATTRIBUTE));
@@ -64,6 +63,9 @@ public final class MultipleNodeKindTest extends NodeTest {
         }
         if (UType.NAMESPACE.overlaps(u)) {
             nodeKindMask |= 1 << Type.NAMESPACE;
+        }
+        if (UType.JNODE.overlaps(u)) {
+            nodeKindMask |= 1 << Type.JNODE;
         }
     }
 
@@ -125,7 +127,7 @@ public final class MultipleNodeKindTest extends NodeTest {
 
     @Override
     public boolean test(GNode node) {
-        int nodeKind = ((NodeInfo)node).getNodeKind();
+        int nodeKind = node.getNodeKind();
         return (nodeKindMask & (1<<nodeKind)) != 0;
     }
 

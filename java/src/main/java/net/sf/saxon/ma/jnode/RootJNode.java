@@ -37,7 +37,7 @@ public class RootJNode extends JNode {
      * @return the wrapped value/content
      */
     @Override
-    public MapOrArray getValue() {
+    public MapOrArray getContent() {
         return value;
     }
 
@@ -128,7 +128,7 @@ public class RootJNode extends JNode {
 
         public JNodeMapIterator(RootJNode origin) {
             this.origin = origin;
-            mapEntryIterator = ((MapItem)origin.getValue()).keyValuePairs().iterator();
+            mapEntryIterator = ((MapItem)origin.getContent()).keyValuePairs().iterator();
         }
 
         /**
@@ -153,7 +153,7 @@ public class RootJNode extends JNode {
 
         public JNodeArrayIterator(RootJNode origin) {
             this.origin = origin;
-            arrayEntryIterator = ((ArrayItem) origin.getValue()).members().iterator();
+            arrayEntryIterator = ((ArrayItem) origin.getContent()).members().iterator();
         }
 
         /**

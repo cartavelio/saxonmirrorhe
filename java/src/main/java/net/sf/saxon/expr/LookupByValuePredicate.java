@@ -364,7 +364,7 @@ public class LookupByValuePredicate extends UnaryExpression {
                                     : new ItemMappingIterator(allNodes, node -> predicate.apply(node) ? node : null);
                     if (item instanceof MapOrArray && axis == -1) {
                         // backwards compatibility case, return the node values. not the nodes
-                        return new MappingIterator(selectedNodes, node -> ((JNode)node).getValue().iterate());
+                        return new MappingIterator(selectedNodes, node -> ((JNode)node).getContent().iterate());
                     } else {
                         return selectedNodes;
                     }

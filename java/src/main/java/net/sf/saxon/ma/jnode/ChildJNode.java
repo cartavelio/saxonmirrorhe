@@ -28,7 +28,7 @@ public class ChildJNode extends JNode {
     }
 
     @Override
-    public GroundedValue getValue() {
+    public GroundedValue getContent() {
         return value;
     }
 
@@ -104,7 +104,7 @@ public class ChildJNode extends JNode {
 
         public JNodeChildIterator(ChildJNode origin) {
             this.origin = origin;
-            valueIterator = origin.getValue().iterate();
+            valueIterator = origin.getContent().iterate();
         }
 
         /**

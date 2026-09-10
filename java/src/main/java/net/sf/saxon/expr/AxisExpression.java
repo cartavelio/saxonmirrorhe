@@ -103,7 +103,7 @@ public final class AxisExpression extends Expression {
         if (e2 != this) {
             return e2;
         }
-        if ((test == null || test == AnyXNodeTest.getInstance()) &&
+        if ((test == null || test == AnyXNodeTest.getInstance() || test == AnyGNodeTest.getInstance()) &&
                 (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
             // get more precise type information for parent/ancestor nodes
             test = MultipleNodeKindTest.PARENT_NODE;
@@ -183,8 +183,6 @@ public final class AxisExpression extends Expression {
         if (!(contextType instanceof NodeTest)) {
             contextType = AnyXNodeTest.getInstance();
         }
-
-        // New code in terms of UTypes
 
         // Test whether the requested nodetest is consistent with the requested axis
         if (test != null && !AxisInfo.getTargetUType(UType.XNODE, axis).overlaps(test.getUType())) {

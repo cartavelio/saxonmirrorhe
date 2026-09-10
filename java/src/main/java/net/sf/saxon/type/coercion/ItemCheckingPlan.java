@@ -28,7 +28,7 @@ public final class ItemCheckingPlan extends CoercionPlan {
 
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         if (item instanceof JNode) {
-            return ((JNode)item).getValue();
+            return ((JNode)item).getContent();
         }
         check(item, requiredType, request);
         return item;

@@ -42,7 +42,7 @@ public final class MapCoercionPlan extends CoercionPlan {
         PlainType requiredKeyType = ((MapType) requiredType).getKeyType();
         SequenceType requiredValueType = ((MapType)requiredType).getValueType();
         if (item instanceof JNode) {
-            GroundedValue gv = ((JNode) item).getValue();
+            GroundedValue gv = ((JNode) item).getContent();
             SequenceIterator coercedValue = coerceSequence(gv.iterate(), SequenceType.zeroOrMore(requiredType), request);
             return SequenceExtent.from(coercedValue);
         }

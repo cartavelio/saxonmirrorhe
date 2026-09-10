@@ -42,7 +42,7 @@ public class XdmJNode extends XdmItem {
      */
 
     public XdmValue getValue() {
-        return new XdmValue(getUnderlyingValue().getValue());
+        return new XdmValue(getUnderlyingValue().getContent());
     }
 
     /**

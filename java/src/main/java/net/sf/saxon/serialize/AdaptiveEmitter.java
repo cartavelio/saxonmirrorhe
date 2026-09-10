@@ -375,7 +375,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
         emit("JNode(");
         serializeItem(jNode.getSelector());
         emit(":");
-        outputInternalSequence(jNode.getValue());
+        outputInternalSequence(jNode.getContent());
         afterColon = false;
         indent(--indentLevel);
         emit(")");

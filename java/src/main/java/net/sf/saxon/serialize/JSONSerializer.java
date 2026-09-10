@@ -184,7 +184,7 @@ public class JSONSerializer extends SequenceWriter implements ReceiverWithOutput
             String s = serializeNode((NodeInfo) item);
             emitter.writeAtomicValue(new StringValue(s));
         } else if (item instanceof JNode) {
-            writeSequence(((JNode) item).getValue());
+            writeSequence(((JNode) item).getContent());
         } else if (unfailing) {
             UnicodeString s = item.getUnicodeStringValue();
             emitter.writeAtomicValue(new StringValue(s));

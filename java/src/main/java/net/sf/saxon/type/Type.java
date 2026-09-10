@@ -215,7 +215,7 @@ public abstract class Type {
             return th == null ? ArrayItemType.ANY_ARRAY_TYPE : new ArrayItemType(((ArrayItem) item).getMemberType(th));
         } else if (item instanceof JNode) {
             return th == null ? JNodeType.ANY_JNODE
-                    : new JNodeType(SequenceTool.getSequenceType(((JNode)item).getValue(), th));
+                    : new JNodeType(SequenceTool.getSequenceType(((JNode)item).getContent(), th));
         } else { //if (item instanceof FunctionItem) {
             return ((FunctionItem) item).getFunctionItemType();
         }

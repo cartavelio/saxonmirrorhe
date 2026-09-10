@@ -67,7 +67,7 @@ public class JNodeType extends NodeTest {
      */
     @Override
     public boolean matches(Item item, TypeHierarchy th) {
-        return item instanceof JNode && valueType.matches(((JNode)item).getValue(), th);
+        return item instanceof JNode && valueType.matches(((JNode)item).getContent(), th);
     }
 
     /**
