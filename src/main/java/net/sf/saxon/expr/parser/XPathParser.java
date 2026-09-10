@@ -3556,7 +3556,8 @@ public class XPathParser {
                 if (empty) {
                     grumble(typeName + "schema-attribute() requires a name to be supplied");
                     return null;
-                } else if (t.currentToken == Token.NAME) {
+                } else {
+                    expect(Token.NAME);
                     String name = t.currentTokenValue;
                     fp = makeFingerprint(name, false);
                     nextToken();
@@ -3573,12 +3574,12 @@ public class XPathParser {
                         return decl.makeSchemaNodeTest();
                     }
                 }
-                break;
             case "schema-element":
                 if (empty) {
                     grumble(typeName + "schema-element() requires a name to be supplied");
                     return null;
-                } else if (t.currentToken == Token.NAME) {
+                } else {
+                    expect(Token.NAME);
                     String name = t.currentTokenValue;
                     fp = makeFingerprint(name, true);
                     nextToken();
@@ -3595,7 +3596,6 @@ public class XPathParser {
                         return decl.makeSchemaNodeTest();
                     }
                 }
-                break;
 
             case "attribute":
                 // drop through
@@ -3674,7 +3674,6 @@ public class XPathParser {
                 grumble("Unknown node kind " + typeName);
                 return null;
         }
-        return null;
     }
 
 
