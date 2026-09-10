@@ -595,6 +595,18 @@ public class Configuration implements SourceResolver, NotationSet {
     }
 
     /**
+     * Assert that a PE license is required, and fail if none is available
+     *
+     * @param featureName name of the required feature, to include in the error message
+     * @throws LicenseException if no license key is available
+     */
+
+    public void requireProfessionalLicense(String featureName) throws LicenseException {
+        if (!isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
+            throw new LicenseException("Use of " + featureName + " requires a license key for Saxon-PE or Saxon-EE", LicenseException.NOT_FOUND);
+        }
+    }
+    /**
      * Get the value of a named license feature
      *
      * @param name the name of the feature
