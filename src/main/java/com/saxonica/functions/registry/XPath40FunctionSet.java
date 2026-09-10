@@ -67,15 +67,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{BuiltInAtomicType.UNTYPED_ATOMIC.one(), BuiltInAtomicType.UNTYPED_ATOMIC.zeroOrMore()},
                 SequenceType.OPTIONAL_ITEM);
 
-        // TODO: superseded by "every"
-        register("all", 1, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE));
-
-        // TODO: superseded by "every"
-        register("all", 2, e -> e.populate(EveryFn::new, BuiltInAtomicType.BOOLEAN, ONE, LATE)
-                .arg(0, AnyItemType.getInstance(), STAR, BooleanValue.TRUE)
-                .arg(1, predicate, ONE, null));
-
         register("all-equal", 1, e -> e.populate(AllEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL | UO)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, EMPTY));
 
@@ -227,7 +218,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("index-where", 2, e -> e.populate(IndexWhere::new, BuiltInAtomicType.INTEGER, STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, predicate, ONE, null));
+                .arg(1, predicate2, ONE, null));
 
         register("in-scope-namespaces", 1, e -> e.populate(InScopeNamespacesFn::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null));
