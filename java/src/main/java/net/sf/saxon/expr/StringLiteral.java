@@ -11,6 +11,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -102,6 +103,16 @@ public class StringLiteral extends Literal {
             return false;
         }
         return req.getPrimaryType().matches(getGroundedValue(), th);
+    }
+
+    /**
+     * Produce a short string identifying the expression for use in error messages
+     *
+     * @return a short string, sufficient to identify the expression
+     */
+    @Override
+    public String toShortString() {
+        return '"' + Err.truncate30(getString()).toString() + '"';
     }
 }
 
