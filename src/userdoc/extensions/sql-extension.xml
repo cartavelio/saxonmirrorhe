@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="sql-extension" title="Saxon SQL Extension">
-   <h1>Saxon SQL Extension</h1>
+<article id="sql-extension" title="Saxon SQL extension">
+   <h1>Saxon SQL extension</h1>
    
    <p class="csonly">Not available in SaxonCS.</p>
 
@@ -26,7 +26,7 @@
       <ul/>
    </nav>
 
-   <h3 class="subtitle" id="warning-1">A Warning about Side-Effects</h3>
+   <h3 class="subtitle" id="warning-1">A warning about side-effects</h3>
 
    <p>XSLT does not guarantee the order of execution of instructions. In principle, the <a
          class="bodylink code" href="instructions/close">sql:close</a> instruction could be evaluated before the
@@ -41,7 +41,7 @@
       if you use these instructions to evaluate the content of a variable, then they will of course
       be executed before any instruction that uses the value of the variable.</p>
 
-   <h3 class="subtitle" id="warning-2">A Warning about Security (SQL injection)</h3>
+   <h3 class="subtitle" id="warning-2">A warning about security (SQL injection)</h3>
 
    <p>The instructions in the SQL extension make no attempt to verify that the SQL being executed is
       correct and benign. No checks are made against injection attacks; indeed the <a

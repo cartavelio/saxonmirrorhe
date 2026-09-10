@@ -1526,7 +1526,7 @@
       <p>This section lists some Saxon add-ons and extensions produced by third parties. Saxonica
          Limited takes no responsibility for the quality of these products.</p>
       
-      <h2 class="subtitle">Open Source tools</h2>
+      <h2 class="subtitle">Open source tools</h2>
       
       <p><a href="http://sourceforge.net/projects/kernowforsaxon/" class="bodylink">Kernow</a> is a
          graphical front-end for Saxon. This is an open-source product developed by Andrew Welch. It
@@ -1554,7 +1554,7 @@
       rely heavily on Saxon "under the hood".</p>
       
       
-      <h2 class="subtitle">Commercial Editors and Debuggers</h2>
+      <h2 class="subtitle">Commercial editors and debuggers</h2>
       
       <p>A number of commercial XML IDEs provide support for XML, XSLT, and/or XQuery editing and
          debugging, with the ability to configure Saxon as the chosen XSLT/XQuery processor. These
@@ -1587,7 +1587,7 @@
                schema validation.</p>
          </li>
       </ul>
-      <h2 class="subtitle">XQuery Documentation</h2>
+      <h2 class="subtitle">XQuery documentation</h2>
       
       <p><strong>xqDoc</strong> is a Javadoc-like documentation tool for XQuery. It works with
          Saxon, and is available either as a free-standing tool from <a href="http://xqdoc.org/"

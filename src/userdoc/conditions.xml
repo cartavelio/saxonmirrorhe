@@ -569,8 +569,8 @@
       </tr>
     </table>
   </section>
-  <section id="third-party-components" title="Third Party Source Components">
-    <h1>Third Party Source Components</h1>
+  <section id="third-party-components" title="Third party source components">
+    <h1>Third party source components</h1>
 
 
     <p>These tables list components in <i>Category B</i> as described above: open source code that
@@ -582,7 +582,7 @@
     
 
    
-    <h2 class="subtitle">B2 XPath Parser</h2>
+    <h2 class="subtitle">B2 XPath parser</h2>
 
     <table border="1">
       <tr>
@@ -675,7 +675,7 @@
       <br/>
     </aside>
 
-    <h2 class="subtitle">B3 Apache Jakarta Regexp Engine</h2>
+    <h2 class="subtitle">B3 Apache Jakarta Regexp engine</h2>
 
     <p>Saxon includes a regular expression engine derived from the <a
         href="http://jakarta.apache.org/regexp/" class="bodylink">Apache Jakarta Regexp project</a>,
@@ -753,7 +753,7 @@
       </tr>
     </table>
 
-    <h2 class="subtitle">B4 Immutable Hash Trie</h2>
+    <h2 class="subtitle">B4 Immutable hash trie</h2>
 
     <p>Saxon implements XPath maps using an immutable hash trie map. The implementation is derived
       from code published on GitHub by Michael Froh. The published GitHub code carries no licensing
@@ -834,8 +834,8 @@
 
 
   </section>
-  <section id="redistributed" title="Redistributed Components">
-    <h1>Redistributed Components</h1>
+  <section id="redistributed" title="Redistributed components">
+    <h1>Redistributed components</h1>
 
 
     <p>This page describes <i>Category C</i> components as defined above: components that are
@@ -1065,8 +1065,8 @@
     </div>
     
   </section>
-  <section id="algorithms" title="Published Algorithms and Specifications">
-    <h1>Published Algorithms and Specifications</h1>
+  <section id="algorithms" title="Published algorithms and specifications">
+    <h1>Published algorithms and specifications</h1>
 
 
     <p>The table below lists published specifications and algorithms that formed a significant

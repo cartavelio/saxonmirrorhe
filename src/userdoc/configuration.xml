@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="configuration" title="Saxon Configuration">
-   <h1>Saxon Configuration</h1>
+<article id="configuration" title="Saxon configuration">
+   <h1>Saxon configuration</h1>
 
 
    <p>There are many parameters and options that can be set to control the way in which Saxon
@@ -110,8 +110,8 @@
          <ul/>
       </nav>
 
-      <section id="jaxp-configuration" title="JAXP Factory Interfaces" class="javaonly">
-         <h1>JAXP Factory Interfaces</h1>
+      <section id="jaxp-configuration" title="JAXP factory interfaces" class="javaonly">
+         <h1>JAXP factory interfaces</h1>
 
          <p>Saxon implements a number of JAXP interfaces, notably the APIs for transformation, XPath processing, and validation.</p>
          
@@ -172,7 +172,7 @@
             that are not boolean-valued, it is necessary to navigate to the underlying <code>Configuration</code> object and use its native interfaces. Saxon's
             implementation class for the <code>XPathFactory</code> is <code>net.sf.saxon.xpath.XPathFactoryImpl</code>, regardless which Saxon edition is in use.</p>
 
-         <h2 class="subtitle">XSD (Schema processing)</h2>
+         <h2 class="subtitle">XSD (schema processing)</h2>
 
          <p>Saxon-EE also implements the JAXP <code>SchemaFactory</code> in class <a class="javalink" href="com.saxonica.ee.jaxp.SchemaFactoryImpl"
                >com.saxonica.ee.jaxp.SchemaFactoryImpl</a>. The interface offers methods <code>getProperty(name)</code> and <code>setProperty(name,
@@ -236,7 +236,7 @@
          
       </section>
 
-      <section id="config-commandline" title="Configuration from the Command Line">
+      <section id="config-commandline" title="Configuration from the command line">
          <h1>Configuration from the command line</h1>
 
          <p>The main command-line interfaces to Saxon are the <code>Transform</code> for running a
@@ -344,7 +344,7 @@
       </section>
    </section>
    <section id="configuration-file" title="Saxon configuration file">
-      <h1>Saxon Configuration File</h1>
+      <h1>Saxon configuration file</h1>
 
       <p>Configuration parameters for Saxon can be defined in a configuration file. This file is optional. It can be applied by using the option
             <code>-config:filename</code> on the <code>Transform</code>, <code>Query</code>, or <code>Validate</code> command line, or using the factory method
@@ -630,8 +630,8 @@
             localizations.</p>
       </section>
    </section>
-   <section id="config-features" title="Configuration Features">
-      <h1>Configuration Features</h1>
+   <section id="config-features" title="Configuration features">
+      <h1>Configuration features</h1>
 
 
       <p>This page provides a complete list of the configuration features available.</p>

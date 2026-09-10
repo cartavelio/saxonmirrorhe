@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- in-spec elements should be in order such that the first, $in[1], is the earliest spec, to ensure correct message in "Spec versions" note  -->
 
-<article id="functions" title="Reference: Function Library">
-  <h1>Reference: Function Library</h1>
+<article id="functions" title="Reference: Function library">
+  <h1>Reference: Function library</h1>
 
   <p>Hover over a listed function to view a brief description. For full details, select the function
     entry.</p>
@@ -8703,7 +8703,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Attribute Declaration</h3>
+          <h3>Attribute declaration</h3>
           
           <table class="setWidth">
             <thead>
@@ -8757,7 +8757,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Attribute Group Declaration</h3>
+          <h3>Attribute group declaration</h3>
           
           <table class="setWidth">
             <thead>
@@ -8801,7 +8801,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Attribute Use</h3>
+          <h3>Attribute use</h3>
           
           <table class="setWidth">
             <thead>
@@ -8840,7 +8840,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Attribute Wildcard</h3>
+          <h3>Attribute wildcard</h3>
           
           <table class="setWidth">
             <thead>
@@ -8875,7 +8875,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Complex Type</h3>
+          <h3>Complex type</h3>
           
           <table class="setWidth">
             <thead>
@@ -8961,7 +8961,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Element Declaration</h3>
+          <h3>Element declaration</h3>
           
           <table class="setWidth">
             <thead>
@@ -9045,7 +9045,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Element Wildcard</h3>
+          <h3>Element wildcard</h3>
           
           <p>Properties are the same as for <i>Attribute Wildcard</i></p>
           
@@ -9089,7 +9089,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Identity Constraint</h3>
+          <h3>Identity constraint</h3>
           
           <table class="setWidth">
             <thead>
@@ -9143,7 +9143,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Model Group</h3>
+          <h3>Model group</h3>
           
           <table class="setWidth">
             <thead>
@@ -9177,7 +9177,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Model Group Definition</h3>
+          <h3>Model group definition</h3>
           
           <table class="setWidth">
             <thead>
@@ -9301,7 +9301,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Simple Type</h3>
+          <h3>Simple type</h3>
           
           <table class="setWidth">
             <thead>
@@ -9380,7 +9380,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>Type Alternative</h3>
+          <h3>Type alternative</h3>
           
           <table class="setWidth">
             <thead>
@@ -9414,7 +9414,7 @@ let $q1 := "declare variable $x external; declare variable $y external; <z>{$x +
             </tbody>
           </table>
           
-          <h3>XPath Property Record</h3>
+          <h3>XPath property record</h3>
           
           <table class="setWidth">
             <thead>

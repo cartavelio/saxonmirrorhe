@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="xsl-elements" title="Reference: XSLT Elements">
+<article id="xsl-elements" title="Reference: XSLT elements">
 
-    <h1>Reference: XSLT Elements</h1>
+    <h1>Reference: XSLT elements</h1>
 
     <!-- Note that @use on attribute elements is now redundant - get @required info from catalog -->
 
@@ -28,7 +28,7 @@
     available only if explicitly enabled, and they are very likely to change in later versions.</p>
 
    
-    <h3 class="subtitle">XSLT Patterns</h3>
+    <h3 class="subtitle">XSLT patterns</h3>
 
     <p>This section of the documentation also contains an informal description of the syntax of <a
             class="bodylink" href="patterns">Patterns</a> in XSLT 3.0.</p>
@@ -5634,8 +5634,8 @@
         </xsl-element>
     </section>
 
-    <section id="lre" title="Literal Result Elements">
-        <h1>Literal Result Elements</h1>
+    <section id="lre" title="Literal result elements">
+        <h1>Literal result elements</h1>
 
         <p>Any elements in the stylesheet other than those listed above are assumed to be literal
             result elements, and are copied to the current output stream at the position in which
@@ -5675,8 +5675,8 @@
             document.</p>
     </section>
 
-    <section id="patterns" title="XSLT Patterns">
-        <h1>XSLT Patterns</h1>
+    <section id="patterns" title="XSLT patterns">
+        <h1>XSLT patterns</h1>
 
 
         <p>This section gives an informal description of the syntax of XSLT patterns. For a formal
@@ -5721,8 +5721,8 @@
             <ul/>
         </nav>
 
-        <section id="examples" title="Examples of XSLT 2.0 Patterns">
-            <h1>Examples of XSLT 2.0 Patterns</h1>
+        <section id="examples" title="Examples of XSLT 2.0 patterns">
+            <h1>Examples of XSLT 2.0 patterns</h1>
 
 
             <p>The table below gives some examples of patterns, and explains their meaning:</p>

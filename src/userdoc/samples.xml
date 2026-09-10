@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="samples" title="Sample Saxon Applications">
-    <h1>Sample Saxon Applications</h1>
+<article id="samples" title="Sample Saxon applications">
+    <h1>Sample Saxon applications</h1>
 
     <p>Saxonica provides an additional resources download which contains various sample XML
         resources, and several sample applications. The download file is named
@@ -60,8 +60,8 @@
         command line only: the Java code itself should work on any platform). </aside>
 
 
-    <section id="books" title="Book List Example">
-        <h1>Book List Example</h1>
+    <section id="books" title="Book list example">
+        <h1>Book list example</h1>
 
         <p>The XML file <code>books.xml</code> 
             is used for a number of demonstrations. This file, along with its DTD
@@ -150,8 +150,8 @@
         </div>
     </section>
 
-    <section id="tour" title="Knight's Tour">
-        <h1>Knight's Tour</h1>
+    <section id="tour" title="Knight's tour">
+        <h1>Knight's tour</h1>
 
         <p>This program is available in two forms: as an XSLT stylesheet <code>tour.xsl</code> and
             as an XQuery <code>tour.xq</code>.</p>
@@ -280,8 +280,8 @@
         </div>
     </section>
 
-    <section id="shakespeare" title="Shakespeare Example">
-        <h1>Shakespeare Example</h1>
+    <section id="shakespeare" title="Shakespeare example">
+        <h1>Shakespeare example</h1>
 
         <p>This example works on an input file containing a Shakespeare play. You can use any of the
             Shakespeare plays in Jon Bosak's distribution at <a
@@ -313,7 +313,7 @@
             output files.</p>
 
         <div class="javaonly">
-        <h2 class="subtitle">Shakespeare XPath Sample Application</h2>
+        <h2 class="subtitle">Shakespeare XPath sample application</h2>
         
         <p>An example application called <code>XPathExample</code> is provided,  for
             Java only (<code>samples/java/he/XPathExample.java</code>). This is designed to illustrate
@@ -335,7 +335,7 @@
         </div>
 
         <div class="javaonly">
-        <h2 class="subtitle">Other Sample Applications</h2>
+        <h2 class="subtitle">Other sample applications</h2>
 
         <p>Also see the related sample programs <code>XPathExampleDOM.java</code> - a variant of the
             XPathExample application written to use DOM interfaces, and
@@ -344,8 +344,8 @@
         </div>
     </section>
 
-    <section id="bible" title="The Bible Example">
-        <h1>The Bible Example</h1>
+    <section id="bible" title="The Bible example">
+        <h1>The Bible example</h1>
 
         <p>The stylesheet <code>styles/bible.xsl</code> takes as input an XML file containing the
             text of the Old or New Testament. These files are not included in the <code>saxon-resources</code> download
@@ -376,8 +376,8 @@
             directory for output files.</p>
     </section>
 
-    <section id="s9api" title="S9API Examples" class="javaonly">
-        <h1>S9API Examples</h1>
+    <section id="s9api" title="S9API examples" class="javaonly">
+        <h1>S9API examples</h1>
 
         <p>Saxon's s9api interface is a custom-designed interface for all XML processing. This API
             is useful when you want to write your own Java applications that invoke Saxon XSLT
@@ -405,8 +405,8 @@
             the object models.</p>
     </section>
 
-    <section id="jaxp" title="JAXP Transformation Examples" class="javaonly">
-        <h1>JAXP Transformation Examples</h1>
+    <section id="jaxp" title="JAXP transformation examples" class="javaonly">
+        <h1>JAXP transformation examples</h1>
 
         <p>As an alternative to the s9api interface, SaxonJ supports the Java JAXP Transformation API
             (package javax.xml.transform), originally known as TrAX, for invoking the XSLT
@@ -426,8 +426,8 @@
             source code for details. By default, they are all executed in turn.</p>
     </section>
 
-    <section id="jdom2" title="JDOM2 Example" class="javaonly">
-        <h1>JDOM2 Example</h1>
+    <section id="jdom2" title="JDOM2 example" class="javaonly">
+        <h1>JDOM2 example</h1>
         
         <aside>Requires SaxonJ-PE or SaxonJ-EE.</aside>
 
@@ -444,8 +444,8 @@
             stylesheet.</p>
     </section>
 
-    <section id="dotnetsamples" title="API Examples for .NET" class="csonly">
-        <h1>API Examples for .NET</h1>
+    <section id="dotnetsamples" title="API examples for .NET" class="csonly">
+        <h1>API examples for .NET</h1>
 
         <p>The <code>samples/cs</code> directory contains an example application written in C#,
             designed to illustrate use of the Saxon API available in the <code>Saxon.Api</code>
@@ -480,8 +480,8 @@
  
     </section>
 
-    <section id="servlet" title="Saxon Servlet" class="javaonly">
-        <h1>Saxon Servlet</h1>
+    <section id="servlet" title="Saxon servlet" class="javaonly">
+        <h1>Saxon servlet</h1>
 
         <p>The sample application <code>SaxonServlet.java</code> is a general-purpose servlet that
             takes the name of a source document and XSLT stylesheet as URL parameters, and uses the

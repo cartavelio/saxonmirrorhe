@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="extensibility" title="Extensibility Mechanisms">
-  <h1>Extensibility Mechanisms</h1>
+<article id="extensibility" title="Extensibility mechanisms">
+  <h1>Extensibility mechanisms</h1>
 
 
   <p>This section describes how to extend the capability of Saxon XSLT stylesheets and XQuery
@@ -30,8 +30,8 @@
   </ul>
   
  
-  <section id="extension-functions" title="Extension Functions">
-    <h1>Extension Functions</h1>
+  <section id="extension-functions" title="Extension functions">
+    <h1>Extension functions</h1>
     <aside>XSLT uses the term <i>extension functions</i>; XQuery calls them <i>external functions</i>. They are the same thing,
     and Saxon generally uses the XSLT term.</aside>
     <p>The term <i>extension function</i> refers to a function that is available for calling within a stylesheet or query, but
@@ -61,9 +61,9 @@
     
   </section>
   
-  <section id="extension-functions-J" title="Extension Functions (Java)" class="javaonly">
+  <section id="extension-functions-J" title="Extension functions (Java)" class="javaonly">
     
-      <h1>Writing Extension Functions in Java</h1>
+      <h1>Writing extension functions in Java</h1>
     
         <aside>The mechanisms described here work equally well for other JVM-based languages such as Scala.</aside>
         <p>Saxon provides three mechanisms for writing extension functions in Java:</p>
@@ -87,9 +87,9 @@
         </ul>
       
      
-      <section id="ext-simple-J" title="Simple Interface">
+      <section id="ext-simple-J" title="Simple interface">
 
-          <h1>Java Extension Functions: Simple Interface</h1>
+          <h1>Java extension functions: simple interface</h1>
           
           
           
@@ -143,7 +143,7 @@
         
       </section>
       
-    <section id="ext-full-J" title="Full Interface" class="javaonly">
+    <section id="ext-full-J" title="Full interface" class="javaonly">
       <h1>Java extension functions: full interface</h1>
 
 
@@ -453,8 +453,8 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
           <code>getConfiguration()</code>.</p>
     </section>
       
-    <section id="reflexive-functions" title="Reflexive Extension Functions" class="javaonly">
-    <h1>Writing Reflexive Extension Functions in Java</h1>
+    <section id="reflexive-functions" title="Reflexive extension functions" class="javaonly">
+    <h1>Writing reflexive extension functions in Java</h1>
 
     <aside>Requires SaxonJ-PE or SaxonJ-EE.</aside>
 
@@ -478,7 +478,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
         extensions. It gives detailed information about the methods that are examined for a possible
         match.</strong>
     </p>
-    <h2 class="subtitle">Identifying the Java Class from the Namespace URI</h2>
+    <h2 class="subtitle">Identifying the Java class from the namespace URI</h2>
 
     <p>There are various ways a mapping from URIs to Java classes can be established. The simplest
       is to use a URI that identifies the Java class explicitly. The namespace URI should be <code>java:</code>
@@ -515,6 +515,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
       However, it is not possible to test whether the arguments are of appropriate types. If the
       function name is "new" it returns true so long as the class is not an abstract class or
       interface, and so long as it has at least one constructor.</p>
+      
     <h2 class="subtitle">Identifying the Java constructor, method, or field</h2>
 
     <p>The local name used in the XPath function call determines which constructor, method, or field
@@ -569,7 +570,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
     </nav>
     
       <section id="choosing-overload" title="Choosing among overloaded methods" class="javaonly">
-      <h1>Choosing among Overloaded Methods</h1>
+      <h1>Choosing among overloaded methods</h1>
 
 
       <p>If there is no method with the required name and number of parameters, Saxon reports a
@@ -859,8 +860,8 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
       
     </section>
 
-      <section id="staticmethods" title="Calling Static Methods in a Java Class" class="javaonly">
-      <h1>Calling Static Methods in a Java Class</h1>
+      <section id="staticmethods" title="Calling static methods in a Java class" class="javaonly">
+      <h1>Calling static methods in a Java class</h1>
 
 
       <p><strong>Static methods</strong> can be called directly.</p>
@@ -916,8 +917,8 @@ public static int lineNumber(XPathContext c) {
       
     </section>
 
-      <section id="constructors" title="Calling Constructors" class="javaonly">
-      <h1>Calling Java Constructors</h1>
+      <section id="constructors" title="Calling constructors" class="javaonly">
+      <h1>Calling Java constructors</h1>
 
 
       <p><strong>Java constructors</strong> are called by using the function named
@@ -949,8 +950,8 @@ public static int lineNumber(XPathContext c) {
       
     </section>
 
-      <section id="instance-methods" title="Calling Java Instance-Level Methods" class="javaonly">
-      <h1>Calling Java Instance-Level Methods</h1>
+      <section id="instance-methods" title="Calling Java instance-level methods" class="javaonly">
+      <h1>Calling Java instance-level methods</h1>
       
       <p>There are two ways of calling <strong>instance-level methods</strong>
         (that is, non-static methods). In both cases you first need to get a value representing
@@ -1051,8 +1052,8 @@ public static int lineNumber(XPathContext c) {
       
     </section>
   
-      <section id="converting-args" title="Converting the Arguments" class="javaonly">
-    <h1>Converting Arguments to Java Extension Functions</h1>
+      <section id="converting-args" title="Converting the arguments" class="javaonly">
+    <h1>Converting arguments to Java extension functions</h1>
 
 
     <p>This section describes how XPath values supplied in a call to a Java extension function are
@@ -1080,8 +1081,8 @@ public static int lineNumber(XPathContext c) {
       <ul/>
     </nav>
     
-        <section id="converting-arguments" title="Converting Method Arguments - General Rules" class="javaonly">
-      <h1>Converting Method Arguments - General Rules</h1>
+        <section id="converting-arguments" title="Converting method arguments" class="javaonly">
+      <h1>Converting method arguments - general rules</h1>
 
 
       <p>Having decided which method to call, Saxon has to convert the supplied XPath argument
@@ -1266,8 +1267,8 @@ public static int lineNumber(XPathContext c) {
       
     </section>
 
-        <section id="converting-atomic" title="Converting Atomic Values" class="javaonly">
-      <h1>Converting Atomic Values</h1>
+        <section id="converting-atomic" title="Converting atomic values" class="javaonly">
+      <h1>Converting atomic values</h1>
 
 
       <p>This section describes the conversions that occur when calling a method that expects an
@@ -1568,8 +1569,8 @@ public static int lineNumber(XPathContext c) {
         
     </section>
 
-        <section id="converting-node" title="Converting Nodes" class="javaonly">
-      <h1>Converting Nodes</h1>
+        <section id="converting-node" title="Converting nodes" class="javaonly">
+      <h1>Converting nodes</h1>
 
 
       <p>If the expected type is a generic collection type, or an array of the Saxon class <a
@@ -1601,8 +1602,8 @@ public static int lineNumber(XPathContext c) {
       
     </section>
 
-        <section id="converting-wrapped-java" title="Converting Wrapped Java Objects" class="javaonly">
-      <h1>Converting Wrapped Java Objects</h1>
+        <section id="converting-wrapped-java" title="Converting wrapped Java objects" class="javaonly">
+      <h1>Converting wrapped Java objects</h1>
 
 
       <p>Saxon allows an extension function to return an arbitrary Java object. This will then be
@@ -1674,8 +1675,8 @@ public static int lineNumber(XPathContext c) {
       
     </section>
   </section>
-      <section id="function-result" title="Converting the Result" class="javaonly">
-      <h1>Converting the Result of a Java Extension Function</h1>
+      <section id="function-result" title="Converting the result" class="javaonly">
+      <h1>Converting the result of a Java extension function</h1>
       
       <p>The result of a Java extension function is converted to an XDM value (a value suitable for use
         in XPath expressions) using the general conversion rules described at <a class="bodylink"
@@ -1724,7 +1725,7 @@ public static int lineNumber(XPathContext c) {
       
       
     </section>
-      <section id="exceptions" title="Handling Exceptions" class="javaonly">
+      <section id="exceptions" title="Handling exceptions" class="javaonly">
     <h1>Handling exceptions in reflexive extension functions</h1>
 
 
@@ -1762,8 +1763,8 @@ public static int lineNumber(XPathContext c) {
   </section>
   </section>
   
-  <section id="extension-functions-CS" title="Extension Functions (C#)" class="csonly">
-    <h1>Writing Extension Functions in C#</h1>
+  <section id="extension-functions-CS" title="Extension functions (C#)" class="csonly">
+    <h1>Writing extension functions in C#</h1>
     
     <aside>The same mechanisms can in principle be used with other languages in the .NET environment, such as
     VB.NET and F#.</aside>
@@ -1782,8 +1783,8 @@ public static int lineNumber(XPathContext c) {
     the security risks; the complexity of dynamic loading in the .NET environment; and the complexity
     of mapping C# data types to XPath data types.</aside>
     
-    <section id="ext-simple-N" title="Simple Interface" class="csonly">
-        <h1>C# Extension Functions: Simple Interface</h1>
+    <section id="ext-simple-N" title="Simple interface" class="csonly">
+        <h1>C# extension functions: simple interface</h1>
         
         <p>A simple extension function can be registered in SaxonCS by calling the method</p>
         
@@ -1819,8 +1820,8 @@ public static int lineNumber(XPathContext c) {
       
     </section>
     
-    <section id="ext-fns-N" title="Full Interface" class="csonly">
-        <h1>C# Extension Functions: Full Interface</h1>
+    <section id="ext-fns-N" title="Full interface" class="csonly">
+        <h1>C# extension functions: full interface</h1>
         
         
         
@@ -1977,7 +1978,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       </li>
     </ul>
     
-    <h2 class="subtitle">Converting Atomic Values</h2>
+    <h2 class="subtitle">Converting atomic values</h2>
     
     <p>This section describes Java classes that are recognized as equivalents to XDM atomic types.</p>
     
@@ -2048,7 +2049,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       
     </ul>
     
-    <h2 class="subtitle">Converting Nodes</h2>
+    <h2 class="subtitle">Converting nodes</h2>
     
     <p>This section describes Java classes that are recognized as representing XDM Nodes.</p>
     
@@ -2088,7 +2089,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       </li>
     </ul>
     
-    <h2 class="subtitle">Converting Sequences</h2>
+    <h2 class="subtitle">Converting sequences</h2>
     
     <p>Java collections are converted to XDM sequences:</p>
     
@@ -2118,7 +2119,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       If you want to pass an XDM array, it's best to construct it explicitly using the static factory
       method <code>XdmArray.makeArray()</code>.</p></aside>
     
-    <h2 class="subtitle">Wrapped Java Objects</h2>
+    <h2 class="subtitle">Wrapped Java objects</h2>
     
     
     <p>If the supplied value is any other Java object, it is returned as a "wrapped
@@ -2328,15 +2329,15 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
   </section>
 
 
-  <!--  <section id="uri-resolution" title="Customizing URI Resolution">
-      <h1>Customizing URI Resolution</h1>
+  <!--  <section id="uri-resolution" title="Customizing URI resolution">
+      <h1>Customizing URI resolution</h1>
       <p>The resolution of URIs can be extended in several ways:</p>
       <nav>
         <ul/>
       </nav>
 
-      <!-\-<section id="uri-resolver" title="Writing a URI Resolver for Input Files">
-        <h1>Writing a URI Resolver for Input Files</h1>
+      <!-\-<section id="uri-resolver" title="Writing a URI resolver for input files">
+        <h1>Writing a URI resolver for input files</h1>
 
 
         <p>Saxon allows you to write your own <code>URIResolver</code> to handle the URIs of input
@@ -2377,8 +2378,8 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
 
 
 
-      <section id="output-uri-resolver" title="Resolving the URIs of Output Files">
-        <h1>Resolving the URIs of Output Files</h1>
+      <section id="output-uri-resolver" title="Resolving the URIs of output files">
+        <h1>Resolving the URIs of output files</h1>
         
         <p>Saxon 9.9 introduces a new mechanism for handling the URIs of output documents
         specified in the <code>@href</code> attribute of <a class="bodylink code"
@@ -2414,8 +2415,8 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
         
       </section>
 -->
-      <!--<section id="collection-uri-resolver" title="Writing a URI Resolver for Collections">
-        <h1>Writing a URI Resolver for Collections</h1>
+      <!--<section id="collection-uri-resolver" title="Writing a URI resolver for collections">
+        <h1>Writing a URI resolver for collections</h1>
         
         <p>Saxon 9.7 introduced a new <code>CollectionFinder</code> interface, superseding
         the older <code>CollectionURIResolver</code> (which has been dropped in Saxon 10). The new
@@ -2436,8 +2437,8 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       </section>-->
   <!--  </section>-->
 
-    <section id="output-filters" title="Customizing Serialization">
-      <h1>Customizing Serialization</h1>
+    <section id="output-filters" title="Customizing serialization">
+      <h1>Customizing serialization</h1>
       
       <p>In XSLT 3.0 there are three ways the result of a stylesheet may be delivered: it may be delivered as a raw sequence
       (any XDM value), it may be subjected to <i>sequence normalization</i> as defined in the W3C serialization specification,

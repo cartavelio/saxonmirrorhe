@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="sourcedocs" title="Handling XML Documents">
-  <h1>Handling XML Documents</h1>
+<article id="sourcedocs" title="Handling XML documents">
+  <h1>Handling XML documents</h1>
 
 
   <p>This section discusses the various options in Saxon for handling XML documents.
@@ -49,8 +49,8 @@
     </nav>
     
     
-    <section id="command-line" title="Source Documents on the Command Line">
-      <h1>Source Documents on the Command Line</h1>
+    <section id="command-line" title="Source documents on the command line">
+      <h1>Source documents on the command line</h1>
       
       
       <p>When Saxon (either XSLT or XQuery) is invoked from the command line, the primary source will
@@ -150,11 +150,11 @@
     or <code>Xslt30Transformer</code>.</p>
   </section>
     
-    <section id="xml-catalogs" title="Using XML Catalogs">
-      <h1>Using XML Catalogs</h1>
+    <section id="xml-catalogs" title="Using XML catalogs">
+      <h1>Using XML catalogs</h1>
       
       
-      <p>XML Catalogs (<a
+      <p>XML catalogs (<a
         href="https://xmlcatalogs.org/"
         class="bodylink">defined by OASIS</a>) provide a way to avoid hard-coding the locations of
         XML documents and other resources in your application. Instead, the application refers to the
@@ -240,8 +240,8 @@ using Saxon from the command line, it is possible to specify a catalog to be use
       
     </section>
     
-    <section id="resolving-entities" title="Resolving Entities">
-      <h1>Resolving Entities</h1>
+    <section id="resolving-entities" title="Resolving entities">
+      <h1>Resolving entities</h1>
       <p>XML documents may contain references to external entities, including general entities,
       DTDs, and parameter entities. Typically these references include a system identifier (URI)
       and/or a public ID. It is the responsibility of the XML parser to resolve these references,
@@ -1233,8 +1233,8 @@ using Saxon from the command line, it is possible to specify a catalog to be use
   
   
 
-    <section id="xml-parsing" title="XML Parsing">
-      <h1>XML Parsing</h1>
+    <section id="xml-parsing" title="XML parsing">
+      <h1>XML parsing</h1>
       
       <p>This section provides further information on how XML parsing is controlled
       within Saxon.</p>
@@ -1243,8 +1243,8 @@ using Saxon from the command line, it is possible to specify a catalog to be use
         <ul/>
       </nav>
  
-  <section id="builder-api" title="Building a Source Document from lexical XML">
-    <h1>Building a Source Document from lexical XML</h1>
+  <section id="builder-api" title="Building a source document from lexical XML">
+    <h1>Building a source document from lexical XML</h1>
 
     <p>The conversion of lexical XML to a tree in memory is called <i>parsing</i>, and is performed
     by a software component called an <i>XML Parser</i>. Saxon does not include its own XML parser,
@@ -1304,8 +1304,8 @@ using Saxon from the command line, it is possible to specify a catalog to be use
   </section>
   
   
-  <section id="controlling-parsing" title="Controlling Parsing of Source Documents">
-    <h1>Controlling Parsing of Source Documents</h1>
+  <section id="controlling-parsing" title="Controlling parsing of source documents">
+    <h1>Controlling parsing of source documents</h1>
 
 
     <p>Saxon does not include its own XML parser. By default:</p>
@@ -1423,7 +1423,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
       in XML 1.1.</aside>
     
     
-    <h2 class="subtitle">XML 1.1 Input Documents</h2>
+    <h2 class="subtitle">XML 1.1 input documents</h2>
 
     <p>Saxon is capable of working with XML 1.1 input documents, provided that the XML
       parser supports XML 1.1.</p>
@@ -1495,7 +1495,7 @@ using Saxon from the command line, it is possible to specify a catalog to be use
       "1.1", and an XML parser that does not support XML 1.1 when the configuration is set to "1.0".
       However, Saxon does not enforce this.</p>
     
-    <h2 class="subtitle">Data Model</h2>
+    <h2 class="subtitle">Data model</h2>
     
     <p>In the XDM data model for representation of XML documents, it is possible to have namespaces that are
     in scope for a parent element, but not in scope for its children. This is supported by the native Saxon tree
@@ -1528,8 +1528,8 @@ using Saxon from the command line, it is possible to specify a catalog to be use
     
     
   </section>
-  <section id="jaxpsources" title="JAXP Source Types" class="javaonly">
-    <h1>JAXP Source Types</h1>
+  <section id="jaxpsources" title="JAXP source types" class="javaonly">
+    <h1>JAXP source types</h1>
 
 
     <p>When a user application invokes SaxonJ via the Java API, then a source document is supplied as
@@ -1652,12 +1652,12 @@ using Saxon from the command line, it is possible to specify a catalog to be use
     
   </section>
     </section>
-  <section id="beyond-parsing" title="Beyond Parsing">
-    <h1>Beyond Parsing</h1>
+  <section id="beyond-parsing" title="Beyond parsing">
+    <h1>Beyond parsing</h1>
     
     <p>This section describes various operations that can be performed while parsing a document.
     These apply whether the result of parsing is streamed (see <a href="/streaming" class="bodylink">Streaming</a>),
-    or whether it is directed to a tree builder (see <a href="/sourcedocs/tree-models" class="bodylink">Tree Models</a>).</p>
+    or whether it is directed to a tree builder (see <a href="/sourcedocs/tree-models" class="bodylink">Tree models</a>).</p>
     
     <p>Saxon processes parsed input through a pipeline of processes that is highly configurable. The
     design concept follows the SAX push model, but Saxon has its own internal interface for event
@@ -1838,8 +1838,8 @@ documentBuilder.build(as);]]></samp>
         >http://www.sagehill.net/docbookxsl/Xinclude.html</a>.</p>
     </section>
     
-    <section id="validation" title="Schema Validation">
-      <h1>Schema Validation</h1>
+    <section id="validation" title="Schema validation">
+      <h1>Schema validation</h1>
       
       
       <p>With Saxon-EE, source documents may be validated against a schema. Not only does this perform
@@ -1895,8 +1895,8 @@ documentBuilder.build(as);]]></samp>
           code" href="/xsl-elements/source-document">xsl:source-document</a> instruction.</p>
       
     </section>
-    <section id="whitespace" title="Whitespace Stripping">
-      <h1>Whitespace Stripping</h1>
+    <section id="whitespace" title="Whitespace stripping">
+      <h1>Whitespace stripping</h1>
       
       
       <p>A number of factors combine to determine whether whitespace-only text nodes in the source
@@ -1950,8 +1950,8 @@ documentBuilder.build(as);]]></samp>
       </p>
     </section>
     
-    <section id="projection" title="Document Projection">
-      <h1>Document Projection</h1>
+    <section id="projection" title="Document projection">
+      <h1>Document projection</h1>
       
       <aside>Document projection is available only in Saxon-EE.</aside>
       
@@ -2021,8 +2021,8 @@ documentBuilder.build(as);]]></samp>
     
     
   </section>  
-  <section id="tree-models" title="XML Tree Models">
-      <h1>XML Tree Models</h1>
+  <section id="tree-models" title="XML tree models">
+      <h1>XML tree models</h1>
       
       <p>The W3C specifications for XSLT, XQuery, and XPath model an XML document as a tree.
       This data model is known as XDM, and the nodes of an XDM tree are known as XDM nodes.</p>
@@ -2044,8 +2044,8 @@ documentBuilder.build(as);]]></samp>
     
     <nav><ul/></nav>
       
-      <section id="choosingmodel" title="Choosing a Tree Model">
-        <h1>Choosing a Tree Model</h1>
+      <section id="choosingmodel" title="Choosing a tree model">
+        <h1>Choosing a tree model</h1>
         
         
         <p>Saxon provides several implementations of the internal tree data structure (or tree model).
@@ -2087,8 +2087,8 @@ documentBuilder.build(as);]]></samp>
       </section>
     
   <section id="thirdparty"
-    title="Third-party Object Models: Axiom, DOM, JDOM2, XOM, and DOM4J" >
-    <h1>Third-party Object Models: Axiom, DOM, JDOM2, XOM, and DOM4J</h1>
+    title="Third-party object models: Axiom, DOM, JDOM2, XOM, and DOM4J" >
+    <h1>Third-party object models: Axiom, DOM, JDOM2, XOM, and DOM4J</h1>
 
     <p>As well as implementing its own tree models, Saxon also allows XPath
     access to a number of third-party XML tree representations.</p>
@@ -2189,8 +2189,8 @@ documentBuilder.build(as);]]></samp>
   </section>
     
   
-  <section id="domino" title="The Domino Tree Model" class="javaonly">
-    <h1>The Domino Tree Model</h1>
+  <section id="domino" title="The Domino tree model" class="javaonly">
+    <h1>The Domino tree model</h1>
     <p>The Domino tree model was introduced in Saxon 9.8 and is available in Saxon-EE only. It is a new approach
     to the handling of DOM source trees.</p>
     <p>The Domino data structure is essentially a combination of the DOM and parts of the TinyTree. It takes the
@@ -2208,13 +2208,13 @@ documentBuilder.build(as);]]></samp>
     updates, so these will generally cause catastrophic failure.</p>
      
   </section>
-    <section id="building-programmatically" title="Building XML Trees Programmatically" class="javaonly">
-        <h1>Building XML Trees Programmatically</h1>
+    <section id="building-programmatically" title="Building XML trees programmatically" class="javaonly">
+        <h1>Building XML trees programmatically</h1>
         <p>There are various ways in Saxon to build an XDM tree programmatically 
           (that is, incrementally one node at a time).</p>
         
-          <h2 class="subtitle">The Sapling Tree API</h2>
-          <p>A new API offered from Saxon 10 is the Sapling Tree API. This provides a collection of methods to create
+          <h2 class="subtitle">The Sapling tree API</h2>
+          <p>A new API offered from Saxon 10 is the Sapling tree API. This provides a collection of methods to create
             nodes; for example, to create a document containing a <code>body</code> element with two paragraphs, the expression</p>
           <samp><![CDATA[doc(
   elem("body")
@@ -2236,7 +2236,7 @@ documentBuilder.build(as);]]></samp>
             without modifying the input objects. This means that adding a child element to a new parent can be done without an expensive
             copy operation. Nodes do not have references to their parents in the tree, so a subtree can be shared by multiple trees
             without copying.</p>
-          <p>The Sapling Tree API is described in the JavaDoc for class <code java="net.sf.saxon.sapling.SaplingNode">SaplingNode</code>.</p>
+          <p>The Sapling tree API is described in the JavaDoc for class <code java="net.sf.saxon.sapling.SaplingNode">SaplingNode</code>.</p>
         
         
         
@@ -2405,7 +2405,7 @@ documentBuilder.build(as);]]></samp>
         is used. (See <a class="bodylink" href="../ZIP-collections">ZIP collections</a>.)</p></li>
       <li><p>Otherwise, the collection URI must be the URI of an XML file which acts as a catalog, that is, it
         contains a list of the resources in the collection. (See <a class="bodylink"
-          href="../collection-catalogs">Collection Catalogs</a>.)</p></li>
+          href="../collection-catalogs">Collection catalogs</a>.)</p></li>
     </ul>
 
 
@@ -2428,7 +2428,7 @@ documentBuilder.build(as);]]></samp>
       <p>See also <a class="bodylink code"
         href="/functions/saxon/discard-document">saxon:discard-document()</a>.</p></aside>
     </section>
-    <section id="collection-catalogs" title="Collection Catalogs">
+    <section id="collection-catalogs" title="Collection catalogs">
     <h1>Defining a collection using a collection catalog</h1>
 
     <p>If the collection URI identifies a file, Saxon treats this as a collection catalog. This is a file
@@ -2459,9 +2459,9 @@ documentBuilder.build(as);]]></samp>
       document is not added to the document pool, which means that a subsequent retrieval of the
       same document will not return the same node.</p>
     </section>
-    <section id="collection-directories" title="Directories as Collections"> 
+    <section id="collection-directories" title="Directories as collections"> 
 
-      <h1>Directories as Collections</h1>
+      <h1>Directories as collections</h1>
 
     <p>If the URI passed to the <code>collection()</code> function (still assuming a default
         <code>CollectionFinder</code>) identifies a directory, then the contents of the
@@ -2682,8 +2682,8 @@ documentBuilder.build(as);]]></samp>
       from this cache. </p>
 
     </section>
-    <section id="ZIP-collections" title="ZIP Collections" class="javaonly">
-    <h1>ZIP and JAR files as Collections</h1>
+    <section id="ZIP-collections" title="ZIP collections" class="javaonly">
+    <h1>ZIP and JAR files as collections</h1>
     <p>If the collection URI identifies a ZIP or JAR file then it is processed in exactly the same
       way as a directory. URI query parameters can be used in the same way, and have much the same
       effect.</p>
@@ -2709,8 +2709,8 @@ documentBuilder.build(as);]]></samp>
       entry. Note that no items are returned in respect of directory nodes within the ZIP file; only
       leaf nodes are represented.</p>
 </section>  
-    <section id="registered-collections" title="Registered Collections">
-    <h1>Registered Collections</h1>
+    <section id="registered-collections" title="Registered collections">
+    <h1>Registered collections</h1>
     
     <p>It is possible to register a collection explicitly with the Saxon <code>Configuration</code>.</p>
     
@@ -2731,8 +2731,8 @@ documentBuilder.build(as);]]></samp>
       <code>IEnumerable&lt;IResource&gt;</code>: you can implement your own kind of <code>IEnumerable</code>
       and your own kind of <code cs="Saxon.Api.IResource">IResource</code>, or you can use an existing implementation.</p>
     </section>
-    <section id="user-collections" title="Writing your own Collection Finder">
-      <h1>Writing your own Collection Finder</h1>
+    <section id="user-collections" title="Writing your own collection finder">
+      <h1>Writing your own collection finder</h1>
       
       <p>The <code>CollectionFinder</code> interface enables you to define a mapping from a collection URI to
         a set of resources (which can be arbitrary XDM values: they are not restricted

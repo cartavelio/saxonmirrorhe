@@ -1,13 +1,13 @@
-<article id="help-system" title="Using this Documentation">
-    <h1>Using this Documentation</h1>
+<article id="help-system" title="Using this documentation">
+    <h1>Using this documentation</h1>
     <p>This documentation system runs as a single-page web application, implemented using SaxonJS 
         (XSLT 3.0 running in the browser). This section provides extra detail on how to get the most out of the documentation,
         along with some extra details on how SaxonJS is used to run the application.</p>
     <nav>
         <ul/>
     </nav>
-    <section id="guide" title="User Guide">
-        <h1>User Guide</h1>
+    <section id="guide" title="User guide">
+        <h1>User guide</h1>
         <p>This section outlines the key parts to this application - designed for rendering help
             documentation.</p>
         <h2>Breadcrumbs</h2>
@@ -28,22 +28,22 @@
             name of the search item with a '#' character, for example:
                 <code>#qualifiednamevalue</code>. The name search is not case sensitive but the
             search term must match the whole name.</p>
-        <h2>Collapse All</h2>
+        <h2>Collapse all</h2>
         <p>Pressing the "collapse all" button (adjacent to the search button) collapes the tree-view
             menu.</p>
-        <h2>Tree-View</h2>
+        <h2>Tree-view</h2>
         <p>The tree-view menu provides a collapsible hierarchical view of the Table of Contents.
             Nodes are expanded or collapsed by either selecting the node itself (which may change
             the page selection) or the adjacent arrow icon.</p>
-        <h3>Page Up/Page Down</h3>
+        <h3>Page up/page down</h3>
         <p>Buttons for page up/down are placed at the right edge of the application footer. Note that the
             keyboard <code>PgUp</code> and <code>PgDn</code> keys serve the same purpose.</p>
-        <h3>Touch Control</h3>
+        <h3>Touch control</h3>
         <p>This app should work with any touch-enabled device. The layout is optimised for desktop
             or tablet devices in landscape orientation.</p>
     </section>
-    <section id="technical" title="Technical Details">
-        <h1>Technical Details</h1>
+    <section id="technical" title="Technical details">
+        <h1>Technical details</h1>
         <p>This section provides information on the design of this application, which is implemented
             using XSLT 3.0 running in the browser under SaxonJS, plus a very small amount of 
             Javascript (mainly to do highlighting of search terms). </p>
@@ -73,8 +73,8 @@
             <ul/>
         </nav>
         
-        <section id="resources" title="Application Resources">
-            <h1>Application Resources</h1>
+        <section id="resources" title="Application resources">
+            <h1>Application resources</h1>
             <p>This application relies on a number of resource files, these are outlined below</p>
             <table border="1">
                 <tbody>
@@ -193,7 +193,7 @@
         </section>
     </section>
     <section id="authoring" title="Authoring">
-        <h1>Authoring Help</h1>
+        <h1>Authoring help</h1>
         <p>This section is a brief guide to the main elements used in this Saxon documentation which
             conforms to the HTML-5 <code>article</code> element.</p>
         <p>The <code>article</code> element is the top-level element in the XML document. It must
@@ -208,8 +208,8 @@
         <nav>
             <ul/>
         </nav>
-        <section id="links" title="Using Links">
-            <h1>Using Links</h1>
+        <section id="links" title="Using links">
+            <h1>Using links</h1>
             <p>Links are represented using <code>a</code> elements, for example: <code>&lt;a
                     href=&quot;/changes"&gt;</code> is used to reference the top-level <a
                     href="/changes"> Changes</a> topic. Specific forms include:</p>
@@ -224,17 +224,17 @@
             <p>Relative links can be used also, this can be useful because it makes the links more
                 resilient when refactoring. So, to access a sibling topic the link
                     <code>../graphics</code> can be used to access <a href="../graphics">Using
-                    Graphics</a>.</p>
+                    graphics</a>.</p>
             <p>For a child topic, just include the topic name, like <code>child</code> to access the
                     <a href="child">Child Topic</a> in this section.</p>
-            <section id="child" title="Child Topic">
-                <h1>Child Topic</h1>
+            <section id="child" title="Child topic">
+                <h1>Child topic</h1>
                 <p>The text of a child topic.</p>
             </section>
         </section>
         <!-- TODO - link checker not implemented -->
         <!--<section id="checking-links" title="Checking Links">
-            <h1>Checking Links</h1>
+            <h1>Checking links</h1>
             <p>For convenience, this help-system includes a client-side link checker. This scans all
                 internal site links, checking for referential integrity. A summary of all broken
                 links is shown in a panel displayed at the bottom of the web page. </p>
@@ -245,8 +245,8 @@
                 Broken link details are listed, including a hyperlink to the container page for
                 each link.</p>
         </section>-->
-        <section id="graphics" title="Using Graphics">
-            <h1>Using Graphics</h1>
+        <section id="graphics" title="Using graphics">
+            <h1>Using graphics</h1>
             <p>Images should be referenced using the usual </p>
             <samp><![CDATA[<img src="/docimg/graphic.jpg"/>]]></samp>
             <p>
@@ -258,8 +258,8 @@
             <p>Other resources, such as PDFs may also be referenced using links to internal
                 resources, for example <a href="/docimg/web-changes.pdf">web-changes.pdf</a></p>
         </section>
-        <section id="markup" title="Using Markup">
-            <h1>Using Markup</h1>
+        <section id="markup" title="Using markup">
+            <h1>Using markup</h1>
             <p>Code samples use the HTML <code>samp</code> element as follows:</p>
             <samp><![CDATA[<html>
     <head></head>
@@ -277,7 +277,7 @@
                 </ul>
             </aside>
             <p>The <code>hr</code> element can be used to split sections (see also <a
-                    href="subtitles">Using Sub-titles</a>).</p>
+                    href="subtitles">Using subtitles</a>).</p>
             <hr/>
             <p>The <code>code</code> element is used for inline code or
                 programming-terms. The <code>strong</code> and <code>em</code> elements are
@@ -290,8 +290,8 @@
             <nav>
                 <ul/>
             </nav>
-            <section id="tables" title="Using Tables">
-                <h1>Using Tables</h1>
+            <section id="tables" title="Using tables">
+                <h1>Using tables</h1>
                 <p>Tables are rendered as shown.</p>
                 <table>
                     <thead>
@@ -316,8 +316,8 @@
                     </tbody>
                 </table>
             </section>
-            <section id="lists" title="Using Lists">
-                <h1>Using Lists</h1>
+            <section id="lists" title="Using lists">
+                <h1>Using lists</h1>
                 <p>Ordered or Unordered lists are styled in the usual way:</p>
                 <ol>
                     <li>alpha <ol>
@@ -335,16 +335,16 @@
                     <li>bravo</li>
                 </ul>
             </section>
-            <section id="subtitles" title="Using Sub-titles">
-                <h1>Using Sub-titles</h1>
-                <p>There is no dedicated element for sub-titles in HTML-5, but a class attribute
+            <section id="subtitles" title="Using subtitles">
+                <h1>Using subtitles</h1>
+                <p>There is no dedicated element for subtitles in HTML-5, but a class attribute
                     value of <code>subtitle</code> for a header element like <code>h1</code>
                     provides the same effect:</p>
-                <h2 class="subtitle">First Sub-Title</h2>
-                <p>Text below the sub-title. Sometimes it is more helpful to refactor pages divided
+                <h2 class="subtitle">First subtitle</h2>
+                <p>Text below the subtitle. Sometimes it is more helpful to refactor pages divided
                     in such a way into sub-pages by using a child <code>section</code> element.</p>
-                <h2 class="subtitle">Second Sub-Title</h2>
-                <p>Text below the sub-title.</p>
+                <h2 class="subtitle">Second subtitle</h2>
+                <p>Text below the subtitle.</p>
             </section>
         </section>
 

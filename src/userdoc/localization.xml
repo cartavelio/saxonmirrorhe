@@ -746,7 +746,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
       </tbody>
     </table>
 
-    <h2 class="subtitle">Additional Saxon Parameters</h2>
+    <h2 class="subtitle">Additional Saxon parameters</h2>
 
     <p>In addition to the standard parameters, Saxon supports some further parameters of its own:</p>
 
@@ -898,7 +898,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
       </tbody>
     </table>
 
-    <h2 class="subtitle">UCA Fallback Behaviour</h2>
+    <h2 class="subtitle">UCA fallback behaviour</h2>
     <p>The specification supports fallback behaviour in the case that UCA is not, or only partially,
       implemented. If the query contains the parameter <code>fallback=no</code> and implementation of UCA is
       unsupported (as is the case with Saxon-HE, or when ICU features are not loaded), then the request will

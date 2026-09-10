@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <article id="streaming" title="Streaming">
-   <h1>Streaming XML Documents</h1>
+   <h1>Streaming XML documents</h1>
    
    
    
@@ -635,8 +635,8 @@ satisfies number($t/@value) lt 0
     </section>
 
 
-    <section id="streaming-templates" title="Streaming Templates">
-      <h1>Streaming Templates</h1>
+    <section id="streaming-templates" title="Streaming templates">
+      <h1>Streaming templates</h1>
 
       <aside>Requires Saxon-EE.</aside>
 

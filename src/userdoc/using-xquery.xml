@@ -45,8 +45,8 @@
       <i>For details of how to set up collation URIs for use in XQuery, see <a class="bodylink"
          href="/localization/sorting-and-collations">Sorting and Collations</a>.</i>
    </p>
-   <section id="commandline" title="From the Command Line">
-      <h1>XQuery from the Command Line</h1>
+   <section id="commandline" title="From the command line">
+      <h1>XQuery from the command line</h1>
 
 
       <p>A command is available to run a query contained in a file.</p> 
@@ -751,9 +751,9 @@
          supported by Saxon, see <a class="bodylink" href="/extensions/output-extras">Additional
             serialization parameters</a>.</p>
    </section>
-   <section id="api-query" title="From a Java Application" class="javaonly">
+   <section id="api-query" title="From a Java application" class="javaonly">
       
-      <h1>XQuery from a Java Application</h1>
+      <h1>XQuery from a Java application</h1>
 
       <p>Saxon offers two different APIs allowing queries to be run from Java:</p>
       <ul>
@@ -910,7 +910,7 @@
       </section>
    </section>
    
-   <section id="saxon-api-query" title="From a C# Application" class="csonly">
+   <section id="saxon-api-query" title="From a C# application" class="csonly">
       <h1>Using XQuery from C#</h1>
       
       <aside>The same classes and methods can be used from .NET languages other than C#, but
@@ -1048,16 +1048,16 @@
          present possible to update the Tiny Tree, nor external object models such as DOM, JDOM2, or
          XOM.</p>
    </section>
-   <section id="callingfunctions" title="Calling XQuery Functions from an Application">
+   <section id="callingfunctions" title="Calling XQuery functions from an application">
       
-      <h1>Calling XQuery Functions from an Application</h1>
+      <h1>Calling XQuery functions from an application</h1>
       
       <p>Although the usual way to invoke XQuery from a Java or C# application is to compile and execute a
          query as described above, it is also possible to invoke individual XQuery functions
          directly from Java or C# if required.</p>
       
       <div class="javaonly">
-      <h2 class="subtitle">Calling XQuery Functions from Java</h2>
+      <h2 class="subtitle">Calling XQuery functions from Java</h2>
 
 
        <p>This is achieved as follows:</p>
@@ -1104,7 +1104,7 @@ XdmValue result = ev.callFunction(new QName("http://www.w3.org/2005/xquery-local
       </div>  
  
       <div class="csonly">
-      <h2 class="subtitle">Calling XQuery Functions from C#</h2>
+      <h2 class="subtitle">Calling XQuery functions from C#</h2>
       
       
       <p>This is achieved as follows:</p>
@@ -1150,8 +1150,8 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
       </div>
       
    </section>
-   <section id="resultformat" title="Result Format">
-      <h1>Result Format</h1>
+   <section id="resultformat" title="Result format">
+      <h1>Result format</h1>
 
 
       <p>The result of a query is a sequence of nodes and atomic values - which means it is not, in
@@ -1176,8 +1176,8 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
             <code>result:element</code> or <code>result:atomic-value</code>) according to its type.
          The sequence as a whole is wrapped in a <code>result:sequence</code> element.</p>
    </section>
-   <section id="querycompilation" title="Compiling Queries to Bytecode" class="javaonly">
-      <h1>Compiling Queries to Bytecode</h1>
+   <section id="querycompilation" title="Compiling queries to bytecode" class="javaonly">
+      <h1>Compiling queries to bytecode</h1>
 
       <aside>Bytecode generation requires SaxonJ-EE.</aside>
 
@@ -1205,8 +1205,8 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          information.</p>
       
    </section>
-   <section id="performanceanalysis" title="Performance Analysis" class="javaonly">
-      <h1>Performance Analysis</h1>
+   <section id="performanceanalysis" title="Performance analysis" class="javaonly">
+      <h1>Performance analysis</h1>
       
       <p>Saxon comes with a simple tool allowing profiling of the execution time in a
          query.</p>
@@ -1270,7 +1270,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
          declaration in any other namespace is ignored silently.</p>
    </section>
    <section id="extensions" title="Extensions">
-      <h1>XQuery Extensions</h1>
+      <h1>XQuery extensions</h1>
 
 
       <p>The full library of Saxon, EXSLT and EXPath functions described in <a class="bodylink"
@@ -1504,8 +1504,8 @@ declare function time:getCurrentHourMinuteTime() as attribute(*, fpml:HourMinute
 };        
 ]]></samp>
    </section>
-   <section id="usecases" title="Use Cases">
-      <h1>Use Cases</h1>
+   <section id="usecases" title="Use cases">
+      <h1>Use cases</h1>
 
 
       <p>Saxon runs all the <a href="http://www.w3.org/TR/xquery-use-cases" class="bodylink">W3C
@@ -1522,6 +1522,6 @@ declare function time:getCurrentHourMinuteTime() as attribute(*, fpml:HourMinute
          recursive functional programming in XQuery. It requires no input document. You need to
          supply a parameter on the command line indicating the square where the knight should start,
          for example <code>start=h8</code>. The output is an HTML document. For more details, see
-         the <a class="bodylink" href="/samples/tour">Knight's Tour</a> sample information.</p>
+         the <a class="bodylink" href="/samples/tour">Knight's tour</a> sample information.</p>
    </section>
 </article>
