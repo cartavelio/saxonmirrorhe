@@ -403,6 +403,12 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "versionOfXml", FeatureCode.XML_VERSION, "J");
         applyProperty(props, "xInclude", FeatureCode.XINCLUDE, "J");
         applyProperty(props, "zipUriPattern", FeatureCode.ZIP_URI_PATTERN, "JN");
+
+        for (String name : props.stringPropertyNames()) {
+            if (!name.equals("#element")) {
+                error("global", name, props.getProperty(name), "#unrecognized");
+            }
+        }
     }
 
     private void applyProperty(Properties props, String attributeName, int featureCode, String flags) {
@@ -414,6 +420,7 @@ public class ConfigurationReader implements Receiver {
             }
             try {
                 targetConfig.setConfigurationProperty(FeatureIndex.getData(featureCode).uri, value);
+                props.setProperty(attributeName, null);
             } catch (IllegalArgumentException e) {
                 String message = e.getMessage();
                 if (message.startsWith(attributeName)) {
@@ -683,6 +690,12 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "schemaAware", FeatureCode.XQUERY_SCHEMA_AWARE, "JN");
         applyProperty(props, "staticErrorListener", FeatureCode.XQUERY_STATIC_ERROR_LISTENER_CLASS, "J");
         applyProperty(props, "version", FeatureCode.XQUERY_VERSION, "JN");
+
+        for (String name : props.stringPropertyNames()) {
+            if (!name.equals("#element")) {
+                error("xquery", name, props.getProperty(name), "#unrecognized");
+            }
+        }
     }
 
     private void readXsltElement(AttributeMap atts) {
@@ -711,6 +724,12 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "styleParser", FeatureCode.STYLE_PARSER_CLASS, "J");
         applyProperty(props, "version", FeatureCode.XSLT_VERSION, "JN");
         //applyProperty(props, "versionWarning", FeatureKeys.VERSION_WARNING);
+
+        for (String name : props.stringPropertyNames()) {
+            if (!name.equals("#element")) {
+                error("xslt", name, props.getProperty(name), "#unrecognized");
+            }
+        }
     }
 
     private void readXsdElement(AttributeMap atts) {
@@ -732,6 +751,12 @@ public class ConfigurationReader implements Receiver {
         applyProperty(props, "thresholdForCompilingTypes", FeatureCode.THRESHOLD_FOR_COMPILING_TYPES, "JN");
         applyProperty(props, "useXsiSchemaLocation", FeatureCode.USE_XSI_SCHEMA_LOCATION, "JN");
         applyProperty(props, "version", FeatureCode.XSD_VERSION, "JN");
+
+        for (String name : props.stringPropertyNames()) {
+            if (!name.equals("#element")) {
+                error("xsd", name, props.getProperty(name), "#unrecognized");
+            }
+        }
     }
 
     private void error(String element, String attribute, String actual, String required) {
@@ -741,6 +766,9 @@ public class ConfigurationReader implements Receiver {
         } else if (actual == null) {
             err = new XmlProcessingIncident("Missing configuration property " +
                                              element + "/@" + attribute);
+        } else if (required.equals("#unrecognized")) {
+            err = new XmlProcessingIncident("Unrecognized configuration property " +
+                                                    element + "/@" + attribute);
         } else if (required.contains("is not available in")) {
             err = new XmlProcessingIncident("Configuration property " +
                                                     element + "/@" + attribute + ": " + required);

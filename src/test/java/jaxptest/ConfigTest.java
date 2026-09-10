@@ -7,6 +7,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.TransformerFactoryImpl;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.UnparsedTextURIResolver;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.ConfigurationReader;
 import net.sf.saxon.trans.XPathException;
@@ -19,11 +20,16 @@ import javax.xml.transform.sax.TemplatesHandler;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -226,6 +232,62 @@ public class ConfigTest {
     }
 
     @Test
+    public void testUnparsedTextResolverInConfigFile() {
+        // Bug 6201
+        try {
+            // Approved spelling
+            String configXml = "<configuration edition=\"HE\" xmlns=\"http://saxon.sf.net/ns/configuration\">\n"
+                    + "   <global unparsedTextURIResolver=\"jaxptest.ConfigTest$LocalUnparsedTextResolver\"/>\n"
+                    + "</configuration>";
+            Configuration config = new ConfigurationReader().makeConfiguration(
+                    new StreamSource(new StringReader(configXml)));
+            Processor proc = new Processor(config);
+            XPathCompiler xp = proc.newXPathCompiler();
+            XPathSelector exp = xp.compile("unparsed-text('http://dummy/text')").load();
+            XdmValue val = exp.evaluate();
+            assertEquals("Let it be", val.toString());
+        } catch (XPathException | SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testUnparsedTextResolverInConfigFileMisspelled() {
+        // Bug 6201
+        try {
+            // Unapproved spelling retained for bug-compatibility
+            String configXml = "<configuration edition=\"HE\" xmlns=\"http://saxon.sf.net/ns/configuration\">\n"
+                    + "   <global unparsedTextUriResolver=\"jaxptest.ConfigTest$LocalUnparsedTextResolver\"/>\n"
+                    + "</configuration>";
+            Configuration config = new ConfigurationReader().makeConfiguration(
+                    new StreamSource(new StringReader(configXml)));
+            Processor proc = new Processor(config);
+            XPathCompiler xp = proc.newXPathCompiler();
+            XPathSelector exp = xp.compile("unparsed-text('http://dummy/text')").load();
+            XdmValue val = exp.evaluate();
+            assertEquals("Let it be", val.toString());
+        } catch (XPathException | SaxonApiException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testInvalidAttributeInConfigFile() {
+        // Bug 6202
+        try {
+            String configXml = "<configuration edition=\"HE\" xmlns=\"http://saxon.sf.net/ns/configuration\">\n"
+                    + "   <global poverty='a thing'/>\n"
+                    + "</configuration>";
+            Configuration config = new ConfigurationReader().makeConfiguration(
+                    new StreamSource(new StringReader(configXml)));
+            fail("Error not detected");
+        } catch (XPathException e) {
+            assertTrue(e.getMessage().contains("poverty"));
+        }
+    }
+
+
+    @Test
     public void testWhitespaceDefault() {
         Configuration config = new Configuration();
         assertEquals("ignorable", config.getConfigurationProperty(Feature.STRIP_WHITESPACE));
@@ -347,8 +409,8 @@ public class ConfigTest {
                             "</resources>\n" +
                         "</configuration>";
             Processor proc = new Processor(new StreamSource(new StringReader(config)));
-            XsdCompiler sm = proc.newXsdCompiler();
-            SchemaValidator v = sm.emptySchema().newValidator();
+            SchemaManager sm = proc.getSchemaManager();
+            SchemaValidator v = sm.newSchemaValidator();
             v.validate(new StreamSource(new File(getDataDir() + "books.xml")));
             try {
                 v.validate(new StreamSource(new File(getDataDir() + "config.xml")));
@@ -510,6 +572,16 @@ public class ConfigTest {
         String base = new File(getDataDir() + "config.xml").toURI().toASCIIString();
         testXsltSecureProcessing(new StreamSource(new StringReader(xml), base),
                                  new StreamSource(new StringReader(xsl), base), false);
+    }
+
+    public static class LocalUnparsedTextResolver implements UnparsedTextURIResolver {
+        @Override
+        public Reader resolve(URI absoluteURI, String encoding, Configuration config) throws XPathException {
+            if (absoluteURI.toString().equals("http://dummy/text")) {
+                return new StringReader("Let it be");
+            }
+            return null;
+        }
     }
 
 
