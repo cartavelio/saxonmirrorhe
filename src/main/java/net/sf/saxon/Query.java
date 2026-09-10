@@ -129,14 +129,18 @@ public class Query {
                                     "Display compiled expression tree and optimization decisions");
         options.addRecognizedOption("ext", CommandLineOptions.TYPE_BOOLEAN,
                                     "Allow calls to Java extension functions and xsl:result-document");
+        //#if CSHARP==false
         options.addRecognizedOption("init", CommandLineOptions.TYPE_CLASSNAME,
                                     "User-supplied net.sf.saxon.lib.Initializer class to initialize the Saxon Configuration");
+        //#endif
         options.addRecognizedOption("json", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Source file for primary JSON input");
         options.addRecognizedOption("l", CommandLineOptions.TYPE_BOOLEAN,
                                     "Maintain line numbers for source documents");
+        //#if CSHARP==false
         options.addRecognizedOption("mr", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named ModuleURIResolver class");
+        //#endif
         options.addRecognizedOption("now", CommandLineOptions.TYPE_DATETIME | CommandLineOptions.VALUE_REQUIRED,
                                     "Run with specified current date/time");
         options.addRecognizedOption("o", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
@@ -154,13 +158,17 @@ public class Query {
                                     "Query filename");
         options.addRecognizedOption("qs", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
                                     "Query string (usually in quotes)");
+        //#if CSHARP==false
         options.addRecognizedOption("quit", CommandLineOptions.TYPE_BOOLEAN | CommandLineOptions.VALUE_REQUIRED,
                                     "Quit JVM if query fails");
+        //#endif
         options.addRecognizedOption("qversion", CommandLineOptions.TYPE_STRING | CommandLineOptions.VALUE_REQUIRED,
                                     "XQuery language version: 3.1 or 4.0. Default is 3.1");
         options.setPermittedValues("qversion", new String[]{"3.1", "4.0"}, "3.1");
+        //#if CSHARP==false
         options.addRecognizedOption("r", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named URIResolver class");
+        //#endif
         options.addRecognizedOption("repeat", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
                                     "Run N times for performance measurement");
         options.addRecognizedOption("s", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
@@ -208,6 +216,7 @@ public class Query {
         options.setPermittedValues("val", new String[]{"strict", "lax"}, "strict");
         options.addRecognizedOption("wrap", CommandLineOptions.TYPE_BOOLEAN,
                                     "Wrap result sequence in XML elements");
+        //#if CSHARP==false
         options.addRecognizedOption("x", CommandLineOptions.TYPE_CLASSNAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use named XMLReader class for parsing source documents");
         options.addRecognizedOption("xi", CommandLineOptions.TYPE_BOOLEAN,
@@ -215,6 +224,7 @@ public class Query {
         options.addRecognizedOption("xmlversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
                                     "Indicate whether XML 1.1 is supported");
         options.setPermittedValues("xmlversion", new String[]{"1.0", "1.1"}, null);
+        //#endif
         options.addRecognizedOption("xsd", CommandLineOptions.TYPE_FILENAME_LIST | CommandLineOptions.VALUE_REQUIRED,
                                     "List of schema documents to be preloaded");
         options.addRecognizedOption("xsdversion", CommandLineOptions.TYPE_ENUMERATION | CommandLineOptions.VALUE_REQUIRED,
