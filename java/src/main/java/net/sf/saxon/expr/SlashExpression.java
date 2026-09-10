@@ -195,7 +195,7 @@ public class SlashExpression extends BinaryExpression
         // of the standard coercion rules.
 
         Supplier<RoleDiagnostic> roleSupplier =
-                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, "XPTY0019");
+                () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, version >= 40 ? "XPTY0004" : "XPTY0019");
 
         if (version >= 40) {
             ItemType lhsItemType = getLhsExpression().getItemType();

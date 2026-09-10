@@ -207,7 +207,7 @@ public class ApplyTemplates extends Instruction implements ITemplateCall, Compon
             selectOp.typeCheck(visitor, contextInfo);
         } catch (XPathException e) {
             if (implicitSelect) {
-                if (e.hasErrorCode("XPTY0020", "XPTY0019")) {
+                if (e.hasErrorCode("XPTY0020", "XPTY0019", "XPTY0004")) {
                     throw new XPathException("Cannot apply-templates to child nodes when the context item is an atomic value")
                             .withErrorCode("XTTE0510")
                             .asTypeError();

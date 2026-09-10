@@ -146,6 +146,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         Configuration config = visitor.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         ItemType contextItemType = contextInfo.getItemType();
+        int version = visitor.getStaticContext().getXPathVersion();
         boolean noWarnings = doneOptimize || (doneTypeCheck && this.staticInfo.getItemType().equals(contextItemType));
         doneTypeCheck = true;
         if (contextItemType == ErrorType.getInstance()) {
@@ -183,7 +184,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 throw new XPathException("Axis step "
                                                  + this + " cannot be used here: the context item is not a node")
                         .asTypeError()
-                        .withErrorCode("XPTY0020")
+                        .withErrorCode(version >= 40 ? "XPTY0004" : "XPTY0020")
                         .withLocation(getLocation());
             } else if (relation == Affinity.OVERLAPS || relation == Affinity.SUBSUMES) {
                 // need to insert a dynamic check of the context item type
