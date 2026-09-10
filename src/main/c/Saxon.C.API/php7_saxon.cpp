@@ -10,14 +10,14 @@
     }
 #endif
 
-JNINativeMethod phpMethods[] =
+/*JNINativeMethod phpMethods[] =
 {
     {
          "_phpCall",
          "(Ljava/lang/String;[Ljava/lang/Object;[Ljava/lang/String;)Ljava/lang/Object;",
          (void *)&phpNativeCall
     }
-};
+}; */
 
 zend_object_handlers saxonProcessor_object_handlers;
 
@@ -485,7 +485,7 @@ PHP_METHOD(SaxonProcessor, setCatalog)
     size_t len;
     bool trace = false;
     
-    if (zend_parse_parameters(ZEND_NUM_ARGS() , "sb", &catalogFile, &len, &trace) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "sb", &catalogFile, &len) == FAILURE) {
         RETURN_NULL();
     }
     
@@ -495,7 +495,7 @@ PHP_METHOD(SaxonProcessor, setCatalog)
     if (saxonProcessor != nullptr) {
        
         if(catalogFile != nullptr) {
-            saxonProcessor->setCatalog(catalogFile, trace);
+            saxonProcessor->setCatalog(catalogFile);
         }
     }
 }
@@ -736,7 +736,7 @@ PHP_METHOD(SaxonProcessor, createAtomicValue)
                 //break;
             default:
                 obj = nullptr;
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), "unknown type specified in XdmValue", 0 TSRMLS_CC); 
+                zend_throw_exception(zend_ce_exception, "unknown type specified in XdmValue", 0);
                 RETURN_NULL();
         }
     //std::cerr<<"createAtomicValue cp0 -========================="<<std::endl;
@@ -1050,13 +1050,14 @@ PHP_METHOD(SaxonProcessor, clearConfigurationProperties)
     }
 
 }
-
+/*
 PHP_METHOD(SaxonProcessor, registerPHPFunctions)
+{
 {
     SaxonProcessor *saxonProcessor;
     char * libName = nullptr;
     size_t len1;
- //std::cerr<<"checkpoint in registerPHPFunction start"<<std::endl;
+
     if (ZEND_NUM_ARGS()!= 1) {
         WRONG_PARAM_COUNT;
     }
@@ -1064,7 +1065,7 @@ PHP_METHOD(SaxonProcessor, registerPHPFunctions)
     if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &libName, &len1) == FAILURE) {
         RETURN_NULL();
     }
-//std::cerr<<"checkpoint in registerPHPFunction cp2"<<std::endl;
+
     zend_object* pobj = Z_OBJ_P(getThis()); 
     saxonProcessor_object * obj = (saxonProcessor_object *)((char *)pobj - XtOffsetOf(saxonProcessor_object, std));
 
@@ -1074,8 +1075,8 @@ PHP_METHOD(SaxonProcessor, registerPHPFunctions)
     }
 saxonProcessor->registerNativeMethods(SaxonProcessor::sxn_environ->env, "com/saxonica/functions/extfn/cpp/PHPFunctionSet$PHPFunction",
     phpMethods, sizeof(phpMethods) / sizeof(phpMethods[0]));
-   // std::cerr<<"checkpoint in registerPHPFunction end"<<std::endl;
-}
+
+} */
 
 
 /*enum saxonTypeEnum
@@ -1087,7 +1088,7 @@ saxonProcessor->registerNativeMethods(SaxonProcessor::sxn_environ->env, "com/sax
 	enumFloat,
 	enumBool,
 	enumArrXdmValue
-};*/
+};
 
 
 jobject JNICALL phpNativeCall
@@ -1278,13 +1279,13 @@ jobject JNICALL phpNativeCall
             break;
         default:
             obj = NULL;
-            zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unknown type specified in extension function", 0 TSRMLS_CC);
+            zend_throw_exception(zend_ce_exception, "Unknown type specified in extension function", 0);
     }
 
     delete nprocessor;
     zval_ptr_dtor(&retval);
     return obj;
-}
+}*/
 
 
 
@@ -1368,7 +1369,7 @@ PHP_METHOD(XdmValue, __construct)
             //break;
             default:
                 obj = nullptr;
-                zend_throw_exception(zend_exception_get_default(TSRMLS_C), "unknown type specified in XdmValue", 0 TSRMLS_CC);
+                zend_throw_exception(zend_ce_exception, "unknown type specified in XdmValue", 0 TSRMLS_CC);
         }
     }*/
 }
@@ -3252,7 +3253,7 @@ PHP_METHOD(XdmArray,  arrayLength)  {
 
 zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(SaxonProcessor,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(SaxonProcessor,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  createAtomicValue,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  parseXmlFromString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  parseXmlFromFile,      nullptr, ZEND_ACC_PUBLIC)
@@ -3265,7 +3266,7 @@ zend_function_entry SaxonProcessor_methods[] = {
     PHP_ME(SaxonProcessor,  newSchemaValidator,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  setCatalog,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor, setConfigurationProperty,      nullptr, ZEND_ACC_PUBLIC)
-    PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr, ZEND_ACC_PUBLIC)
+    //PHP_ME(SaxonProcessor,  registerPHPFunctions,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  version,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  isSchemaAware,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SaxonProcessor,  exceptionOccurred,      nullptr, ZEND_ACC_PUBLIC)
@@ -3280,7 +3281,7 @@ zend_function_entry SaxonProcessor_methods[] = {
 
 zend_function_entry xdmValue_methods[] = {
     PHP_ME(XdmValue,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmValue,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmValue,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmValue,  __toString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmValue,  getHead,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmValue,  itemAt,      nullptr, ZEND_ACC_PUBLIC)
@@ -3291,7 +3292,7 @@ zend_function_entry xdmValue_methods[] = {
 
 zend_function_entry xdmItem_methods[] = {
     PHP_ME(XdmItem,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmItem,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmItem,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmItem,  __toString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmItem,  getStringValue,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmItem,  isAtomic,      nullptr, ZEND_ACC_PUBLIC)
@@ -3303,7 +3304,7 @@ zend_function_entry xdmItem_methods[] = {
 
 zend_function_entry xdmNode_methods[] = {
     PHP_ME(XdmNode,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmNode,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmNode,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmNode,  __toString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmNode,  getBaseURI,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmNode,  getStringValue,      nullptr, ZEND_ACC_PUBLIC)
@@ -3324,7 +3325,7 @@ zend_function_entry xdmNode_methods[] = {
 
 zend_function_entry xdmAtomicValue_methods[] = {
     PHP_ME(XdmAtomicValue,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmAtomicValue,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmAtomicValue,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmAtomicValue,  __toString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmAtomicValue,  getStringValue,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmAtomicValue,  isAtomic,      nullptr, ZEND_ACC_PUBLIC)
@@ -3338,7 +3339,7 @@ zend_function_entry xdmAtomicValue_methods[] = {
 
 zend_function_entry xdmFunctionItem_methods[] = {
     PHP_ME(XdmFunctionItem,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmFunctionItem,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmFunctionItem,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmFunctionItem,  __toString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmFunctionItem,  getName,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmFunctionItem,  getArity,      nullptr, ZEND_ACC_PUBLIC)
@@ -3349,7 +3350,7 @@ zend_function_entry xdmFunctionItem_methods[] = {
 
 zend_function_entry xdmMap_methods[] = {
     PHP_ME(XdmMap,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmMap,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmMap,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmMap,  __toString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmMap,  mapSize,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmMap,  get,      nullptr, ZEND_ACC_PUBLIC)
@@ -3365,7 +3366,7 @@ zend_function_entry xdmMap_methods[] = {
 
 zend_function_entry xdmArray_methods[] = {
     PHP_ME(XdmArray,  __construct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
-    PHP_ME(XdmArray,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XdmArray,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmArray,  __toString,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmArray,  get,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XdmArray,  put,      nullptr, ZEND_ACC_PUBLIC)

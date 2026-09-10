@@ -466,7 +466,7 @@ PHP_METHOD(XQueryProcessor, exceptionClear)
 
 
 zend_function_entry XQueryProcessor_methods[] = {
-    PHP_ME(XQueryProcessor,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(XQueryProcessor,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
    // PHP_ME(XQueryProcessor,  getErrorCode,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor,  setQueryContent,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor,  setContextItem,      nullptr, ZEND_ACC_PUBLIC)

@@ -438,7 +438,7 @@ PHP_METHOD(SchemaValidator, exceptionClear)
 
 
 zend_function_entry SchemaValidator_methods[] = {
-    PHP_ME(SchemaValidator,  __destruct,     nullptr, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
+    PHP_ME(SchemaValidator,  __destruct,     nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  setSourceNode,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  setOutputFile,      nullptr, ZEND_ACC_PUBLIC)
     PHP_ME(SchemaValidator,  validate,      nullptr, ZEND_ACC_PUBLIC)
