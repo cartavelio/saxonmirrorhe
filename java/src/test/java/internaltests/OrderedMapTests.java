@@ -131,7 +131,7 @@ public class OrderedMapTests {
     private void testKeys(String expected, MapItem map) {
         StringBuilder sb = new StringBuilder();
         for (KeyValuePair kvp : map.keyValuePairs()) {
-            sb.append(kvp.key.getStringValue());
+            sb.append(kvp.key().getStringValue());
             sb.append("-");
         }
         assertEquals(expected, sb.toString());
