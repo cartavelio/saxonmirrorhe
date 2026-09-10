@@ -13,7 +13,6 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.Whitespace;
 
@@ -58,6 +57,11 @@ public class XSLAccumulatorRule extends StyleElement {
                             compileError("phase must be 'start' or 'end'", "XTSE0020");
                         }
                         break;
+                    case "capture":
+                        requireXslt40Attribute("capture");
+                        capture = processBooleanAttribute("capture", value);
+                        break;
+
                     default:
                         checkUnknownAttribute(attName);
                         break;
@@ -80,8 +84,8 @@ public class XSLAccumulatorRule extends StyleElement {
         match = makePattern(matchAtt, "match");
 
         if (capture && !postDescent) {
-            issueWarning("saxon:capture has no effect on a pre-descent accumulator rule",
-                           SaxonErrorCode.SXWN9044);
+            compileErrorInAttribute("capture='yes' is not allowed on an accumulator rule with phase='start'",
+                                    "XTSE3355", "capture");
         }
 
     }
