@@ -185,6 +185,11 @@
                href="https://www.saxonica.com/saxon-c/doc11/html/classSchemaValidator.html"
                >SchemaValidator</a>
          </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/classDocumentBuilder.html"
+               >DocumentBuilder</a>
+         </li>
       </ul>
       <p>Also, the following classes are available for a subset of the XDM data model:</p>
       <ul>
@@ -2653,6 +2658,11 @@
             <a class="bodylink code"
                href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PySchemaValidator"
                >PySchemaValidator</a>
+         </li>
+         <li>
+            <a class="bodylink code"
+               href="https://www.saxonica.com/saxon-c/doc11/html/saxonc.html#PyDocumentBuilder"
+               >PyDocumentBuilder</a>
          </li>
       </ul>
 
