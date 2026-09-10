@@ -6,9 +6,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 package net.sf.saxon.option.cpp;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.config.ProfessionalConfiguration;
-import com.saxonica.config.Verifier;
 import com.saxonica.functions.extfn.cpp.NativeCall;
 import net.sf.saxon.Configuration;
 
@@ -17,8 +14,8 @@ import net.sf.saxon.Query;
 import net.sf.saxon.Transform;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.*;
-import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.SequenceType;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.sxpath.IndependentContext;
 import net.sf.saxon.trans.CommandLineOptions;
@@ -46,14 +43,15 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -67,7 +65,6 @@ public class SaxonCAPI {
     public static boolean debug = false;
     protected boolean schemaAware = false;
     public static String RESOURCES_DIR = null;
-    protected long exceptionCheck = -1;
 
 
     public static ObjectHandles objectHandles = ObjectHandles.create();
@@ -283,41 +280,6 @@ public class SaxonCAPI {
         if(SaxonCAPI.debug) {
             System.err.println("Java DEBUG en entered setLibrary!!");
         }
-//#if EE==true || PE==true
-//        if (procRef == WordFactory.nullPointer() || libNameRef == WordFactory.nullPointer()) {
-//            return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
-//        }
-//
-//        String cwd = null;
-//        if (ccwd != WordFactory.nullPointer()) {
-//            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
-//        }
-//
-//        String libName = null;
-//        if (libNameRef != WordFactory.nullPointer()) {
-//            libName = SaxonCAPI.toJavaString(libNameRef, WordFactory.nullPointer());
-//        }
-//
-//        Processor processor = objectHandles.get(procRef);
-//        URI libURI = null;
-//        if(cwd == null) {
-//            cwd = Version.platform.getInstallationDirectory(Version.softwareEdition, null);
-//        }
-//
-//        if(SaxonCAPI.debug) {
-//            System.err.println("Java DEBUG setLibrary cwdURI= "+ cwd  + " libName= " + libName);
-//        }
-//        libName = libName + "." + NativeCall.getLibraryExtension();
-//
-//        libURI = resolveFileToURI(processor, cwd, libName);
-//
-//        if(SaxonCAPI.debug) {
-//            System.err.println("Java DEBUG setLibrary cwdURI= "+ cwd  + " libName= " + libName + "libURI = " + libURI.getPath());
-//        }
-//        //NativeCall.loadLibrary("/home/ond1/work/repository/saxondev-12/build/releases/libsaxon-EEC-linux-amd64-v12.5.0/samples/cppTests/"+libName);
-//        NativeCall.loadLibrary(libURI.getPath());
-
-//#endif
         return  SaxonCAPI.STATUS_OK;
     }
 
@@ -358,7 +320,7 @@ public class SaxonCAPI {
      *  Static method to check if the Processor object is schema aware
      * @param thread - Graalvm runtime data structure for a thread
      * @param procRef - long value pointing to a SaxonProcessor object in the ObjectHandle pool
-     * @return  byte representing boolean. true if this this processor is licensed for schema processing, false otherwise
+     * @return  byte representing boolean. true if this processor is licensed for schema processing, false otherwise
      */
     @CEntryPoint(name = "j_isSchemaAware")
     public static byte j_isSchemaAware(IsolateThread thread, ObjectHandle procRef) {
@@ -379,8 +341,8 @@ public class SaxonCAPI {
         Processor proc = objectHandles.get(procRef);
         Configuration config = proc.getUnderlyingConfiguration();
 //#if EE==true || PE==true
-        if(config instanceof ProfessionalConfiguration) {
-            ProfessionalConfiguration pc = (ProfessionalConfiguration) config;
+        if(config instanceof com.saxonica.config.ProfessionalConfiguration) {
+            com.saxonica.config.ProfessionalConfiguration pc = (com.saxonica.config.ProfessionalConfiguration) config;
             return CTypeConversion.toCBoolean(pc.isLicenseFound());
         }
 //#endif
@@ -788,9 +750,7 @@ public class SaxonCAPI {
      * @return  Pointer to the C char array held in the C/C++ memory space. It is the caller's responsibility to delete the associated memory
      */
     static CCharPointer stringToNative2(net.sf.saxon.option.cpp.SaxonCAPI.AllocatorCCharFn alloc, String string) {
-        /*if(string.isEmpty()) {
-            return WordFactory.nullPointer();
-        }*/
+
         byte[] b = string.getBytes(StandardCharsets.UTF_8);
         CCharPointer a = alloc.call(b.length + 1);
         for (int i = 0; i < b.length; i++) {
@@ -1331,31 +1291,12 @@ public class SaxonCAPI {
             }
         }
 
-        /*if (debug) {
-            System.err.println("JAVA Debug: Serializer.Properties");
-
-            Serializer.Property[] propss = Serializer.Property.values();
-            for (Serializer.Property property : propss) {
-
-                String name = property.toString();
-                Serializer.Property prop = Serializer.Property.get(name);
-                if (prop == null) {
-                    System.err.println("PropertyXXXX name " + name + " not found");
-                }
-                System.err.println(property.getQName());
-                System.err.println(property.name());
-                System.err.println("PropertyXXXX name =" + name);
-
-            }
-        } */
-
         if (params == null || values == null) {
             return map;
         }
         if (params.length != values.length) {
             throw new SaxonApiException("SaxonC internal Error: params array length does not match values length");
         }
-
         for (int i = 0; i < params.length; i++) {
             if (params[i].startsWith("!")) {
                 String name = params[i].substring(1);
