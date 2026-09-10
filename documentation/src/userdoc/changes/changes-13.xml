@@ -648,7 +648,7 @@ TODO: rethink redefines and override
             aren't fully working. TODO: is this still true?</p></li>
             <li><p>The pipeline operator <code>-></code> (partially implemented)</p></li>
             <li><p>try/catch/finally in XQuery</p></li>
-            <li><p>xsd-validator function (partially implemented)</p></li>
+            <!--<li><p>xsd-validator function (partially implemented)</p></li>-->
             <li><p>scan-left and scan-right functions</p></li>
             <li><p>PR1864, PR1877 - type specifiers in lookup expressions</p></li>
             <li><p>PR1875 - params passed implicitly through xsl:next-match</p></li>
@@ -662,6 +662,7 @@ TODO: rethink redefines and override
             <li><p>PR2051 - merge-when attribute for xsl:for-each-group</p></li>
             <li><p>PR2259 - canonical JSON output is implemented, but does not always produce the correct canonical output for numeric values</p></li>
             <li><p>PR2213 - trusted attribute for xsl:evaluate</p></li>
+            <li><p>The fn:invisible-xml function is not implemented in SaxonCS</p></li>
         </ul>
         
         <p>XInclude processing (e.g. using the xinclude option of fn:doc) is not supported in SaxonCS.</p>
@@ -679,7 +680,7 @@ TODO: rethink redefines and override
         <p>The fact that a configuration (or s9api <code>Processor</code>) may now own multiple
         schemas may well mean that any extension functions that access schema information need to
         be rewritten. An extension function can no longer assume that all the information it needs
-        about "the" schema is available directly from the configuration: it needs to be redesigned
+        about the relevant schema is available directly from the configuration: it needs to be redesigned
         to take into account that there is no longer a single schema.</p>
 
     </category>
@@ -707,6 +708,7 @@ TODO: rethink redefines and override
         imported functions. This is particularly useful when a query module holding many functions
         is separately compiled and then used repeatedly in many different main modules. It provides
         savings both in compile time and in the size of XQuery executables.</p>
+        
         
   
         
