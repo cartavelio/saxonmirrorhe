@@ -243,6 +243,7 @@ task eecs_setupPreprocess(
   //exclude "com/saxonica/functions/extfn/ReadBinaryResource.java"
   exclude "com/saxonica/functions/extfn/SendMail.java"
   exclude "com/saxonica/xqj/**"
+  exclude "com/saxonica/functions/qt4/ixml/**"
 }
 
 task eecs_preprocess(
