@@ -460,8 +460,8 @@ public class XQueryEngine extends SaxonCAPI {
 
                 if (optionsMap.containsKey("extc")) {
                     //extension function library path
-                    String libName = (String) optionsMap.get("extc");
-                    SaxonCAPI.setLibrary(cwd, libName);
+                    //String libName = (String) optionsMap.get("extc");
+                    //SaxonCAPI.setLibrary(cwd, libName);
 
 
                 }

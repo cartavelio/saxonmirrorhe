@@ -461,8 +461,8 @@ public class XsltProcessor extends SaxonCAPI {
 
                     } else if(params[i].equals("extc")){
                         //extension function library path
-                        String libName = (String) values[i];
-                        SaxonCAPI.setLibrary("",libName);
+                        //String libName = (String) values[i];
+                        //SaxonCAPI.setLibrary("",libName);
 
 
                     } else if (params[i].equals("im")) {

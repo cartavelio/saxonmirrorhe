@@ -18,11 +18,10 @@
 /*
  * Test transform to String. Source and stylesheet supplied as arguments
  */
-jobject JNICALL cppExtensionFunction::cppNativeCall(jstring funcName,
-                                                    jobjectArray arguments,
-                                                    jobjectArray argTypes) {
+void cppExtensionFunction::cppNativeCall(char * funcName, XdmValue ** arguments,
+                                                                                           int argumentLength) {
 
-  JNIEnv *senv = SaxonProcessor::sxn_environ->env;
+ /* JNIEnv *senv = SaxonProcessor::sxn_environ->env;
 
   if (funcName) {
   }
@@ -132,7 +131,7 @@ jobject JNICALL cppExtensionFunction::cppNativeCall(jstring funcName,
     senv->DeleteLocalRef(argObj);
   }
   return SaxonProcessor::sxn_environ->env->NewStringUTF(
-      "result from extension!!");
+      "result from extension!!"); */
 }
 
 string cppExtensionFunction::nativeExtensionMethod(char *param1, int number) {

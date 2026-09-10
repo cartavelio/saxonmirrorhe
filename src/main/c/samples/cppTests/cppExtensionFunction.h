@@ -20,8 +20,8 @@ using namespace std;
 
 class cppExtensionFunction {
 public:
-  static jobject JNICALL cppNativeCall(jstring funcName, jobjectArray arguments,
-                                       jobjectArray argTypes);
+  static void cppNativeCall(char * funcName, XdmValue ** arguments,
+                                       int argumentLength);
 
   static string nativeExtensionMethod(char *param1, int number);
 

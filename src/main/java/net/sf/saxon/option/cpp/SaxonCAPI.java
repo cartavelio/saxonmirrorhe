@@ -7,11 +7,8 @@
 package net.sf.saxon.option.cpp;
 
 import com.saxonica.functions.extfn.cpp.NativeCall;
-import net.sf.saxon.Configuration;
+import net.sf.saxon.*;
 
-import net.sf.saxon.Gizmo;
-import net.sf.saxon.Query;
-import net.sf.saxon.Transform;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ResourceRequest;
@@ -113,9 +110,36 @@ public class SaxonCAPI {
     }
 
 
-    public static void setLibrary(String cwd, String libName) {
+    @CEntryPoint(name = "j_setLibrary", exceptionHandler = SaxonCExceptionLongHandler.class)
+    public static long setLibrary(IsolateThread thread, ObjectHandle procRef, CCharPointer ccwd, CCharPointer libNameRef) throws SaxonApiException {
 //#if EE==true || PE==true
-        NativeCall.loadLibrary(cwd, libName);
+        if (procRef == WordFactory.nullPointer() || libNameRef == WordFactory.nullPointer()) {
+            return net.sf.saxon.option.cpp.SaxonCAPI.STATUS_FAIL;
+        }
+
+        String cwd = null;
+        if (ccwd != WordFactory.nullPointer()) {
+            cwd = SaxonCAPI.toJavaString(ccwd, WordFactory.nullPointer());
+        }
+
+        String libName = null;
+        if (libNameRef != WordFactory.nullPointer()) {
+            libName = SaxonCAPI.toJavaString(libNameRef, WordFactory.nullPointer());
+        }
+
+        Processor processor = objectHandles.get(procRef);
+        URI libURI = null;
+        if(cwd == null) {
+            cwd = Version.platform.getInstallationDirectory(Version.softwareEdition, null);
+        }
+
+        libURI = resolveFileToURI(processor, cwd, libName);
+
+        if(SaxonCAPI.debug) {
+            System.err.println("Java DEBUG setLibrary cwdURI= "+ cwd  + " libName= " + libName + "libURI = " + libURI.getPath());
+        }
+        NativeCall.loadLibrary(libURI.getPath());
+        return  SaxonCAPI.STATUS_OK;
 //#endif
     }
 

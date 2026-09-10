@@ -593,7 +593,7 @@ public class XPathProcessor extends SaxonCAPI {
             if (map.containsKey("extc")) {
                 //extension function library path
                 String libName = (String) map.get("extc");
-                SaxonCAPI.setLibrary("", libName);
+                //SaxonCAPI.setLibrary("", libName);
 
 
             }

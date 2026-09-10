@@ -1670,8 +1670,8 @@ public class Xslt30Processor extends SaxonCAPI {
 
             if (map.containsKey("extc")) {
                 //extension function library path
-                String libName = (String) map.get("extc");
-                SaxonCAPI.setLibrary("", libName);
+                //String libName = (String) map.get("extc");
+                //SaxonCAPI.setLibrary("", libName);
 
 
             }
