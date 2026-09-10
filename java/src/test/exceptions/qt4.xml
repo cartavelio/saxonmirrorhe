@@ -166,6 +166,21 @@
       <reason>Functionality not yet implemented: PR2372 - processing instructions in HTML5</reason>
    </exception>
    
+   <exception test-set="fn-element-to-map" 
+      test-case="element-to-map-017" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-02-06"/>
+      <reason>Test results anticipate a spec change not yet agreed or implemented: issue 2445</reason>
+   </exception>
+   
+   <exception test-set="fn-element-to-map" 
+      test-case="element-to-map-023" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-02-06"/>
+      <reason>Test result challenged - see spec issue #1948</reason>
+   </exception>
+   
+   
    <!--<exception test-set="prod-PathExpr.J" 
       test-case="PathExpr-J-166 PathExpr-J-168" 
       run="false" report="n/a">
