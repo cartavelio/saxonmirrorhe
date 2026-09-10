@@ -4325,10 +4325,7 @@ public class Configuration implements SourceResolver, NotationSet {
             return (Receiver) handler;
             //#if CSHARP==false
         } else if (handler instanceof ContentHandler) {
-            ContentHandlerProxy emitter = new ContentHandlerProxy();
-            emitter.setUnderlyingContentHandler((ContentHandler) handler);
-            emitter.setOutputProperties(props);
-            return emitter;
+            return ContentHandlerProxy.makeInstance((ContentHandler)handler, props);
             //#endif
         } else {
             throw new XPathException("Output method " + className +

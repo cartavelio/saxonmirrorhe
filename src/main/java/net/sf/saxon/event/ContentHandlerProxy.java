@@ -69,6 +69,28 @@ public class ContentHandlerProxy implements Receiver {
     private static final String MARKER = "##";
 
     /**
+     * Private constructor (bug 6036)
+     */
+
+    public ContentHandlerProxy(ContentHandler handler) {
+        setUnderlyingContentHandler(handler);
+    }
+
+    /**
+     * Public Factory method (bug 6036). This not only creates a ContentHandlerProxy, it also
+     * front-ends it with a NamespaceDifferencer to ensure that the namespace maps received
+     * by the ContentHandlerProxy represent the differences between the namespaces present
+     * on a child element and those present on its parent
+     * @param handler the SAX content handler to which all events will be directed
+     */
+
+    public static Receiver makeInstance(ContentHandler handler, Properties serializationProps) {
+        ContentHandlerProxy chp = new ContentHandlerProxy(handler);
+        chp.setOutputProperties(serializationProps);
+        return new NamespaceDifferencer(chp, serializationProps);
+    }
+
+    /**
      * Set the underlying content handler. This call is mandatory before using this Receiver.
      * If the content handler is an instance of {@link LexicalHandler}, then it will also receive
      * notification of lexical events such as comments.

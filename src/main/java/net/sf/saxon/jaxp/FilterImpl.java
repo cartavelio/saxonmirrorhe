@@ -9,6 +9,9 @@ package net.sf.saxon.jaxp;
 
 import net.sf.saxon.Version;
 import net.sf.saxon.event.ContentHandlerProxy;
+import net.sf.saxon.event.NamespaceDifferencer;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -61,22 +64,23 @@ public class FilterImpl extends AbstractXMLFilter {
         SAXSource source = new SAXSource();
         source.setInputSource(input);
         source.setXMLReader(parser);
-        ContentHandlerProxy result = new ContentHandlerProxy();
-        result.setPipelineConfiguration(transformer.getConfiguration().makePipelineConfiguration());
-        result.setUnderlyingContentHandler(contentHandler);
-
+        PipelineConfiguration pipe = transformer.getConfiguration().makePipelineConfiguration();
+        ContentHandlerProxy proxy = new ContentHandlerProxy(contentHandler);
+        proxy.setPipelineConfiguration(pipe);
+        proxy.setOutputProperties(transformer.getOutputProperties());
         if (lexicalHandler != null) {
-            result.setLexicalHandler(lexicalHandler);
+            proxy.setLexicalHandler(lexicalHandler);
         }
+        Receiver result = new NamespaceDifferencer(proxy, transformer.getOutputProperties());
+        result.setPipelineConfiguration(pipe);
+
         try {
-            //result.open();
-            result.setOutputProperties(transformer.getOutputProperties());
             transformer.transform(source, result);
         } catch (TransformerException err) {
             Throwable cause = err.getException();
-            if (cause != null && cause instanceof SAXException) {
+            if (cause instanceof SAXException) {
                 throw (SAXException) cause;
-            } else if (cause != null && cause instanceof IOException) {
+            } else if (cause instanceof IOException) {
                 throw (IOException) cause;
             } else {
                 throw new SAXException(err);
