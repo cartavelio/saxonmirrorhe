@@ -3182,7 +3182,7 @@ public class XPathParser {
                         checkLanguageVersion40("nodeTest get()");
                         nextToken();
                         readToken(Token.LPAREN);
-                        Expression selector = parseExpression();
+                        Expression selector = parseExprSingle();
                         readToken(Token.RPAREN);
                         AxisGetExpression getExpr = new AxisGetExpression(AxisInfo.CHILD, selector);
                         setLocation(getExpr);
@@ -3386,7 +3386,6 @@ public class XPathParser {
 
         } else if (token == Token.STAR) {
             nextToken();
-            TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
             AxisExpression ae = new AxisExpression(AxisInfo.CHILD, new NodeTestStar(Type.ELEMENT));
             setLocation(ae);
             return ae;
@@ -3487,36 +3486,7 @@ public class XPathParser {
             return new NamespaceQNameTest(test.getNamespace());
         }
     }
-
-    protected Expression getPendingDirectElementConstructor() {
-        throw new UnsupportedOperationException();
-    }
-
-
-
-//    public Expression parseNodeTestExpression(int token, boolean firstInPattern) throws XPathException{
-//        NodeTest test = parseKindTest();
-//        assert test != null;
-//        int kind = test.getPrimitiveType();
-//        byte defaultAxis = AxisInfo.CHILD;
-//        if (kind == Type.ATTRIBUTE) {
-//            defaultAxis = AxisInfo.ATTRIBUTE;
-//        } else if (kind == Type.NAMESPACE) {
-//            defaultAxis = AxisInfo.NAMESPACE;
-//        }
-//        if (test instanceof AnyNodeTest) {
-//            // handles patterns of the form match="node()"
-//            if (defaultAxis == AxisInfo.CHILD) {
-//                test = MultipleNodeKindTest.CHILD_NODE;
-//            } else {
-//                test = NodeKindTest.ATTRIBUTE;
-//            }
-//        }
-//        AxisExpression ae = new AxisExpression(defaultAxis, test);
-//        setLocation(ae);
-//        return ae;
-//    }
-
+    
     public Expression parseParenthesizedExpression() throws XPathException {
         nextToken();
         if (t.currentToken == Token.RPAREN) {
