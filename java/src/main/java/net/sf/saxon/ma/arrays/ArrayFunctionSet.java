@@ -129,14 +129,23 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, forEachFunctionType, ONE | INS, null));
 
+        SpecificFunctionType forEachPairFunctionType31 = new SpecificFunctionType(
+                SequenceType.ANY_SEQUENCE,
+                SequenceType.ANY_SEQUENCE,
+                SequenceType.ANY_SEQUENCE);
+
         SpecificFunctionType forEachPairFunctionType40 = new SpecificFunctionType(
                 SequenceType.ANY_SEQUENCE, SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER,
                 SequenceType.ANY_SEQUENCE).withAcceptReducedArity();
 
+        SpecificFunctionType forEachPairFunctionType = version >= 40
+                ? forEachPairFunctionType40
+                : forEachPairFunctionType31;
+
         register("for-each-pair", 3, e -> e.populate( ArrayForEachPair::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
                 .arg(1, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
-                .arg(2, forEachPairFunctionType40, ONE | INS, null));
+                .arg(2, forEachPairFunctionType, ONE | INS, null));
 
         register("get", 2, e -> e.populate( ArrayGet::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
