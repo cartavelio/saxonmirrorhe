@@ -306,7 +306,13 @@ public class Xslt30TestSuiteDriverHE extends TestDriver {
                 }
             });
         }
-        String xsltLanguageVersion = specAtt.contains("XSLT30") || specAtt.contains("XSLT20+") ? "3.0" : "2.0";
+        
+        String xsltLanguageVersion = "2.0"; // Default to 2.0 as the required XSLT language
+        if (specAtt.startsWith("XSLT4") || specAtt.endsWith("+")) {
+            xsltLanguageVersion = "4.0";
+        } else if (specAtt.startsWith("XSLT3")) {
+              xsltLanguageVersion = "3.0";
+        }
 
         if (postureAndSweep.isPresent()) {
             if (runPostureAndSweepTests) {
