@@ -10,12 +10,10 @@ package net.sf.saxon.query;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.ExpressionOwner;
-import net.sf.saxon.expr.PackageData;
-import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Executable;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
@@ -460,7 +458,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
 
         // Run the query
         try {
-            expression.process(dest, context);
+            processQuery(dest, context);
         } catch (XPathException err) {
             controller.reportFatalError(err);
             throw err;
@@ -477,6 +475,10 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
         if (result instanceof StreamResult) {
             closeStreamIfNecessary((StreamResult) result, mustClose);
         }
+    }
+
+    protected void processQuery(Outputter dest, XPathContext context) throws XPathException {
+        expression.process(dest, context);
     }
 
     protected void closeStreamIfNecessary(StreamResult result, boolean mustClose) throws XPathException {

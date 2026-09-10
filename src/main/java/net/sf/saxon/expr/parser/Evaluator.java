@@ -26,6 +26,11 @@ import net.sf.saxon.value.MemoClosure;
  */
 public abstract class Evaluator {
 
+    @FunctionalInterface
+    public interface ElaboratedEvaluator {
+        Sequence eval(XPathContext context) throws XPathException;
+    }
+
     //private int code;
 
     /**
@@ -58,6 +63,8 @@ public abstract class Evaluator {
 
     public abstract Sequence evaluate(Expression expr, XPathContext context) throws XPathException;
 
+    public abstract ElaboratedEvaluator elaborate(Expression expr);
+
     /**
      * An evaluator that always returns the empty sequence
      */
@@ -78,6 +85,10 @@ public abstract class Evaluator {
             return EmptySequence.getInstance();
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> EmptySequence.getInstance();
+        }
     };
 
     /**
@@ -101,6 +112,10 @@ public abstract class Evaluator {
             return ((net.sf.saxon.expr.Literal)expr).getGroundedValue();
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> ((net.sf.saxon.expr.Literal) expr).getGroundedValue();
+        }
     };
 
     /**
@@ -129,6 +144,10 @@ public abstract class Evaluator {
             }
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return ((VariableReference) expr)::evaluateVariable;
+        }
     };
 
     /**
@@ -157,6 +176,11 @@ public abstract class Evaluator {
             }
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return ((SuppliedParameterReference) expr)::evaluateVariable;
+        }
+
     };
 
     /**
@@ -177,6 +201,11 @@ public abstract class Evaluator {
         @Override
         public Item evaluate(Expression expr, XPathContext context) throws XPathException {
             return expr.evaluateItem(context);
+        }
+
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return expr::evaluateItem;
         }
 
     };
@@ -206,6 +235,18 @@ public abstract class Evaluator {
             }
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> {
+                Item item = expr.evaluateItem(context);
+                if (item == null) {
+                    return EmptySequence.getInstance();
+                } else {
+                    return item;
+                }
+            };
+        }
+
     };
 
     /**
@@ -232,6 +273,11 @@ public abstract class Evaluator {
             return new net.sf.saxon.om.LazySequence(iter);
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> new net.sf.saxon.om.LazySequence(expr.iterate(context));
+        }
+
     };
 
     /**
@@ -255,6 +301,11 @@ public abstract class Evaluator {
             return new MemoClosure(expr, context);
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> new MemoClosure(expr, context);
+        }
+
     };
 
     /**
@@ -276,6 +327,11 @@ public abstract class Evaluator {
         @Override
         public Sequence evaluate(Expression expr, XPathContext context) throws XPathException {
             return new net.sf.saxon.value.SingletonClosure(expr, context);
+        }
+
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> new net.sf.saxon.value.SingletonClosure(expr, context);
         }
 
     };
@@ -306,6 +362,18 @@ public abstract class Evaluator {
             } catch (UncheckedXPathException e) {
                 throw e.getXPathException();
             }
+        }
+
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> {
+                try {
+                    SequenceIterator iter = expr.iterate(context);
+                    return SequenceTool.toGroundedValue(iter);
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
+            };
         }
 
     };
@@ -355,6 +423,38 @@ public abstract class Evaluator {
             }
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> {
+                try {
+                    if (expr instanceof Block) {
+                        Block block = (Block) expr;
+                        Operand[] children = block.getOperanda();
+                        ZenoSequence chain = new ZenoSequence();
+                        for (Operand o : children) {
+                            Expression child = o.getChildExpression();
+                            if (child instanceof VariableReference) {
+                                GroundedValue seq = ((VariableReference) child).evaluateVariable(context).materialize();
+                                chain = chain.appendSequence(seq);
+                            } else {
+                                SequenceIterator iter = child.iterate(context);
+                                Item item;
+                                while ((item = iter.next()) != null) {
+                                    chain = chain.append(item);
+                                }
+                            }
+                        }
+                        return chain;
+                    } else {
+                        // it's not a Block: it must have been rewritten after deciding to use this evaluation mode
+                        return SequenceTool.toGroundedValue(expr.iterate(context));
+                    }
+                } catch (UncheckedXPathException e) {
+                    throw e.getXPathException();
+                }
+            };
+        }
+
     };
 
     /**
@@ -376,6 +476,11 @@ public abstract class Evaluator {
             return context.getConfiguration().obtainOptimizer().evaluateStreamingArgument(expr, context);
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            final Optimizer optimizer = expr.getConfiguration().obtainOptimizer();
+            return context ->  optimizer.evaluateStreamingArgument(expr, context);
+        }
     };
 
     /**
@@ -397,7 +502,13 @@ public abstract class Evaluator {
             return context.getConfiguration().obtainOptimizer().makeIndexedValue(expr.iterate(context));
         }
 
-    };
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            final Optimizer optimizer = expr.getConfiguration().obtainOptimizer();
+            return context -> optimizer.makeIndexedValue(expr.iterate(context));
+        }
+
+    }
 
     /**
      * A push-mode evaluator for an expression
@@ -424,6 +535,21 @@ public abstract class Evaluator {
             Sequence val = seq.getSequence();
             seq.reset();
             return val;
+        }
+
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> {
+                Controller controller = context.getController();
+                SequenceCollector seq = controller.allocateSequenceOutputter();
+                ComplexContentOutputter out = new ComplexContentOutputter(seq);
+                out.open();
+                expr.process(out, context);
+                out.close();
+                Sequence val = seq.getSequence();
+                seq.reset();
+                return val;
+            };
         }
 
     };
@@ -475,6 +601,36 @@ public abstract class Evaluator {
             return new net.sf.saxon.value.MemoClosure(tail, context);
         }
 
+        @Override
+        public ElaboratedEvaluator elaborate(Expression expr) {
+            return context -> {
+                TailExpression tail = (TailExpression) expr;
+                VariableReference vr = (VariableReference) tail.getBaseExpression();
+                Sequence base = Variable.INSTANCE.evaluate(vr, context);
+                if (base instanceof net.sf.saxon.value.MemoClosure) {
+                    SequenceIterator it = base.iterate();
+                    base = SequenceTool.toGroundedValue(it);
+                }
+                if (base instanceof IntegerRange) {
+                    long step = ((IntegerRange) base).getStep();
+                    long start = ((IntegerRange) base).getStart() + (tail.getStart() - 1) * step;
+                    long end = ((IntegerRange) base).getEnd();
+                    if (start == end) {
+                        return Int64Value.makeIntegerValue(end);
+                    } else if (start > end) {
+                        return EmptySequence.getInstance();
+                    } else {
+                        return new IntegerRange(start, step, end);
+                    }
+                }
+                if (base instanceof GroundedValue) {
+                    GroundedValue baseSeq = (GroundedValue) base;
+                    return baseSeq.subsequence(tail.getStart() - 1, baseSeq.getLength() - tail.getStart() + 1);
+                }
+
+                return new net.sf.saxon.value.MemoClosure(tail, context);
+            };
+        }
     };
 
 

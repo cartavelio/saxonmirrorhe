@@ -67,6 +67,30 @@ public class Matches extends RegexFunction {
     }
     //#endif
 
+    public boolean evalMatches(UnicodeString input, UnicodeString regex, UnicodeString flags, XPathContext context) throws XPathException {
+        RegularExpression re;
+
+        if (regex == null) {
+            return false;
+        }
+
+        try {
+            String lang = "XP30";
+            if (context.getConfiguration().getXsdVersion() == Configuration.XSD11) {
+                lang += "/XSD11";
+            }
+            re = context.getConfiguration().compileRegularExpression(
+                    regex, flags.toString(), lang, null);
+
+        } catch (XPathException err) {
+            XPathException de = new XPathException(err);
+            de.maybeSetErrorCode("FORX0002");
+            de.setXPathContext(context);
+            throw de;
+        }
+        return re.containsMatch(input);
+    }
+
     /**
      * Evaluate the expression
      *

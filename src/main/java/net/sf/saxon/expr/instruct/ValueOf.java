@@ -83,7 +83,7 @@ public final class ValueOf extends SimpleNodeConstructor {
     }
 
     /**
-     * Indicate that this is really an xsl:nunber instruction
+     * Indicate that this is really an xsl:number instruction
      */
 
     public void setIsNumberingInstruction() {

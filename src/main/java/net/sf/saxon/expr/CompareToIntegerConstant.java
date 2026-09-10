@@ -123,7 +123,7 @@ public class CompareToIntegerConstant extends CompareToConstant {
             return operator == Token.FNE;
         }
         int c = n.compareTo(comparand);
-        return interpretComparisonResult(c);
+        return interpretComparisonResult(operator, c);
     }
 
     @Override

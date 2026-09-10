@@ -159,6 +159,7 @@ public class Controller implements ContextOriginator {
         this.config = config;
         this.executable = executable;
         sourceDocumentPool = new DocumentPool();
+        elaborationService = config.makeElaborationService();
         reset();
     }
 
