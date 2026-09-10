@@ -667,7 +667,7 @@ public class StandardEntityResolver implements EntityResolver {
 
         // If it's a classpath URI, handle it here
         if (systemId.startsWith("classpath:") && systemId.length() > 10) {
-            return getResource(systemId.substring(10), config);
+            return fetch(systemId.substring(10), config);
         }
 
         // Otherwise, leave the parser to resolve the URI in the normal way

@@ -17,8 +17,8 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.BMPString;
-import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.CodePoints;
+import net.sf.saxon.str.StringView;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -190,7 +190,7 @@ public class Message extends Instruction {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        XsltController controller = (XsltController) context.getController();
+        XsltController controller = (XsltController)context.getController();
         if (isAssert && !controller.isAssertionsEnabled()) {
             return null;
         }
