@@ -114,9 +114,14 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
+
+        register("compare", 2, e -> e.populate(Compare::new, BuiltInAtomicType.INTEGER, OPT, DCOLL)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, OPT, EMPTY));
+
         register("compare", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.INTEGER, OPT, BASE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
-                .arg(1, BuiltInAtomicType.STRING, OPT, EMPTY)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, OPT, EMPTY)
+                .arg(1, BuiltInAtomicType.ANY_ATOMIC, OPT, EMPTY)
                 .arg(2, BuiltInAtomicType.STRING, OPT, null));
 
         // Concat changes in 4.0:
