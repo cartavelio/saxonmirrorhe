@@ -4614,7 +4614,14 @@ public class XPathParser {
                     args.add(arg);
                 } else {
                     if (keywordArgs != null) {
-                        grumble("In a function call, keyword arguments must not be followed by positional arguments");
+                        String msg = "In a function call, keyword arguments must not be followed by positional arguments";
+                        if (t.currentToken instanceof Token.NameToken && peek == Token.EQUALS) {
+                            msg += ". Perhaps '=' was used after the keyword instead of ':='";
+                        }
+                            if (t.currentToken instanceof Token.NameToken && peek == Token.COLON) {
+                            msg += ". Perhaps ':' was used after the keyword instead of ':='";
+                        }
+                        grumble(msg);
                     }
                     if (t.currentToken == Token.QMARK && (peek == Token.COMMA || peek == Token.RPAREN)) {
                         nextToken();
