@@ -117,6 +117,7 @@ public class ByteCodeCandidate extends UnaryExpression  {
         ExpressionTool.copyLocationInfo(this, t);
         t.namespaceResolver = namespaceResolver;
         t.setByteCodeMonitor(byteCodeMonitor);
+        t.countDown = countDown;
         return t;
     }
 

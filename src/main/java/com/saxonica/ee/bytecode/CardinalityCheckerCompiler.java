@@ -42,9 +42,14 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
 
         } else if (requiredCardinality == StaticProperty.ALLOWS_ZERO_OR_ONE) {
             LabelInfo returnFirst = methodInfo.newLabel("returnFirst01");
+            LabelInfo empty = methodInfo.newLabel("empty01");
             ga.dup();
             // assert stack: iterator iterator
             ga.invokeInstanceMethod(baseIter.iteratorClass, "next");
+            // assert stack: iterator firstItem
+            ga.dup();
+            // assert stack: iterator firstItem firstItem
+            ga.ifNull(empty.label());
             // assert stack: iterator firstItem
             ga.swap();
             // assert stack: firstItem iterator
@@ -56,6 +61,11 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
             compiler.generateGetContext();
             ga.invokeStaticMethod(Callback.class, "makeMultipleItemsException", CardinalityChecker.class, XPathContext.class);
             ga.throwException();
+            methodInfo.placeLabel(empty);
+            // assert stack: iterator firstItem(null)
+            ga.swap();
+            ga.pop();
+            // assert stack: firstItem
             methodInfo.placeLabel(returnFirst);
             // assert stack: firstItem
 
