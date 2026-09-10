@@ -10,6 +10,7 @@ package net.sf.saxon.s9api;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.lib.StandardUnparsedTextResolver;
 import net.sf.saxon.ma.json.ParseJsonFn;
@@ -92,7 +93,7 @@ public class JsonBuilder {
         Map<String, GroundedValue> options = new HashMap<>();
         options.put("liberal", BooleanValue.get(liberal));
         options.put("escape", BooleanValue.TRUE);
-        return parseJson(jsonReader, options);
+        return parseJson(jsonReader, new ProcessedOptions(options));
     }
 
     /**
@@ -110,7 +111,7 @@ public class JsonBuilder {
      * @since 11
      */
 
-    public XdmValue parseJson(Reader jsonReader, Map<String, GroundedValue> options) throws SaxonApiException {
+    public XdmValue parseJson(Reader jsonReader, ProcessedOptions options) throws SaxonApiException {
         try {
             XPathContext context = new Controller(config).newXPathContext();
             IntPredicateProxy checker = IntSetPredicate.ALWAYS_TRUE;

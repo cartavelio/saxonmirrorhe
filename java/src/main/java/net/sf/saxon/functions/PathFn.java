@@ -102,32 +102,23 @@ public class PathFn extends SystemFunction implements IContextAccessorFunction {
         boolean lexical = false;
         GNode origin = null;
         Map<NamespaceUri, String> namespaces = Collections.emptyMap();
-        if (arguments.length > 1) {
-            MapItem options = (MapItem)arguments[1].head();
-            Map<String, GroundedValue> checkedOptions = null;
-            if (options != null) {
-                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
-                if (checkedOptions.containsKey("indexes")) {
-                    withIndexes = checkedOptions.get("indexes").effectiveBooleanValue();
-                }
-                if (checkedOptions.containsKey("lexical")) {
-                    lexical = checkedOptions.get("lexical").effectiveBooleanValue();
-                }
-                if (checkedOptions.containsKey("namespaces")) {
-                    MapItem nsMap = (MapItem) checkedOptions.get("namespaces").head();
-                    if (nsMap != null) {
-                        namespaces = new HashMap<>();
-                        for (KeyValuePair kvp : nsMap.keyValuePairs()) {
-                            namespaces.put(NamespaceUri.of(kvp.value().getStringValue()), kvp.key().getStringValue());
-                        }
-                    }
-                }
-                if (checkedOptions.containsKey("origin")) {
-                    origin = (GNode)checkedOptions.get("origin").head();
-                }
-            }
 
+        ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40);
+
+        withIndexes = checkedOptions.asBoolean("indexes", true);
+        lexical = checkedOptions.asBoolean("lexical", false);
+
+        MapItem nsMap = (MapItem) checkedOptions.asItem("namespaces");
+        if (nsMap != null) {
+            namespaces = new HashMap<>();
+            for (KeyValuePair kvp : nsMap.keyValuePairs()) {
+                namespaces.put(NamespaceUri.of(kvp.value().getStringValue()), kvp.key().getStringValue());
+            }
         }
+        if (checkedOptions.containsKey("origin")) {
+            origin = (GNode)checkedOptions.asItem("origin");
+        }
+
         if (origin != null && (node instanceof NodeInfo) != (origin instanceof NodeInfo)) {
             // One is an XNode, the other is a JNode, so they can't be in the same tree
             throw new XPathException(

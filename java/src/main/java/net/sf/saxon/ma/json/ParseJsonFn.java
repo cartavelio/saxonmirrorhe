@@ -9,6 +9,7 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -21,8 +22,6 @@ import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntIterator;
-
-import java.util.Map;
 
 /**
  * Implements the parse-json function, as defined in XPath 3.1
@@ -60,7 +59,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      */
     @Override
     protected Item eval(UnicodeString input, MapItem options, XPathContext context) throws XPathException {
-        Map<String, GroundedValue> checkedOptions = null;
+        ProcessedOptions checkedOptions = null;
         if (options != null) {
             int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, version);
@@ -78,7 +77,7 @@ public class ParseJsonFn extends JsonToXMLFn {
      * @throws XPathException if the syntax of the input is incorrect
      */
 
-    public static Item parse(IntIterator input, Map<String, GroundedValue> options, XPathContext context) throws XPathException {
+    public static Item parse(IntIterator input, ProcessedOptions options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         GroundedValue nullRepresentation = EmptySequence.INSTANCE;
         int flags = 0;

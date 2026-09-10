@@ -332,7 +332,7 @@ public class Serialize extends SystemFunction implements Callable {
     }
 
     private SerializationProperties serializationParamsFromMap(
-            Map<String, GroundedValue> map, XPathContext context) throws XPathException {
+            ProcessedOptions map, XPathContext context) throws XPathException {
         Sequence seqVal;
         Properties props = new Properties();
         CharacterMapIndex charMapIndex = new CharacterMapIndex();
@@ -492,7 +492,7 @@ public class Serialize extends SystemFunction implements Callable {
                     }
                 }
                 int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-                Map<String, GroundedValue> checkedOptions =
+                ProcessedOptions checkedOptions =
                         getDetails().optionDetails.processSuppliedOptions(paramMap, context, version);
                 params = serializationParamsFromMap(checkedOptions, context);
             } else {

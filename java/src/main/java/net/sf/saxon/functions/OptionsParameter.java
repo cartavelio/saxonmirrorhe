@@ -16,6 +16,7 @@ import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -102,6 +103,30 @@ public class OptionsParameter {
     }
 
     /**
+     * Process the options supplied on a function call, if any.
+     *
+     * @param arguments the arguments to the function call
+     * @param optionsArg the zero-based index of the options argument
+     * @param context  the dynamic evaluation context
+     * @param version  the XPath language version (times 10)
+     * @return the options, after validation and expansion of defaults
+     * @throws XPathException if any supplied options are invalid
+     */
+
+    public ProcessedOptions processSuppliedOptions(
+            Sequence[] arguments, int optionsArg, XPathContext context, int version) throws XPathException {
+        MapItem options = null;
+        if (arguments.length > optionsArg) {
+            options = (MapItem) arguments[optionsArg].head();
+        }
+        if (options == null) {
+            return getDefaultOptions();
+        }
+        return processSuppliedOptions(options, context, version);
+    }
+
+
+    /**
      * Process an XPath map containing the supplied values. Options that are recognized are copied
      * into the result map, after validation and expansion of defaults. Unrecognized options are
      * ignored, in accordance with the option parameter conventions
@@ -113,7 +138,7 @@ public class OptionsParameter {
      * @throws XPathException if any supplied options are invalid
      */
 
-    public Map<String, GroundedValue> processSuppliedOptions(MapItem supplied, XPathContext context, int version) throws XPathException {
+    public ProcessedOptions processSuppliedOptions(MapItem supplied, XPathContext context, int version) throws XPathException {
         Map<String, GroundedValue> result = new HashMap<>();
         Configuration config = context.getConfiguration();
         CoercionRules coercionRules = CoercionRules.forVersion(config, languageVersion);
@@ -184,7 +209,7 @@ public class OptionsParameter {
             }
         }
 
-        return result;
+        return new ProcessedOptions(result);
 
     }
 
@@ -193,8 +218,8 @@ public class OptionsParameter {
      * @return a map containing the default values
      */
 
-    public Map<String, GroundedValue> getDefaultOptions()  {
-        return new HashMap<>(defaultValues);
+    public ProcessedOptions getDefaultOptions()  {
+        return new ProcessedOptions(new HashMap<>(defaultValues));
     }
 
     /**

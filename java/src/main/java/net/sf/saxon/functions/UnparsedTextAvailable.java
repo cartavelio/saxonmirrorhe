@@ -17,8 +17,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.StringValue;
 
-import java.util.Map;
-
 
 public class UnparsedTextAvailable extends UnparsedTextFunction implements Callable {
 
@@ -44,7 +42,7 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
             if (arg1 instanceof StringValue) {
                 encoding = arg1.getStringValue();
             } else if (arg1 instanceof MapItem) {
-                Map<String, GroundedValue> options = UnparsedText.OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context, 40);
+                ProcessedOptions options = UnparsedText.OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context, 40);
                 GroundedValue encodingOption = options.get("encoding");
                 if (encodingOption != null) {
                     encoding = encodingOption.getStringValue();

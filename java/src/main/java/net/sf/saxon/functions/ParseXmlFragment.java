@@ -38,9 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class ParseXmlFragment extends SystemFunction implements Callable {
 
@@ -66,7 +64,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         if (input == null) {
             return EmptySequence.INSTANCE;
         } else {
-            Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
+            ProcessedOptions checkedOptions = ProcessedOptions.EMPTY_OPTIONS;
             if (getArity() >= 2) {
                 MapItem options = (MapItem) arguments[1].head();
                 if (options != null) {
@@ -75,11 +73,11 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
             }
             String baseUri = getStaticBaseUriString();
             if (checkedOptions.containsKey("base-uri")) {
-                baseUri = checkedOptions.get("base-uri").getStringValue();
+                baseUri = checkedOptions.asString("base-uri");
             }
             boolean stripSpace = false;
             if (checkedOptions.containsKey("strip-space")) {
-                stripSpace = checkedOptions.get("strip-space").effectiveBooleanValue();
+                stripSpace = checkedOptions.asBoolean("strip-space", false);
             }
             return evalParseXmlFragment(input, baseUri, stripSpace, context);
         }

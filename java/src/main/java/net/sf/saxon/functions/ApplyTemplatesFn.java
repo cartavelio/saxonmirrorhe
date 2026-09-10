@@ -19,7 +19,6 @@ import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.FocusTrackingIterator;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.Mode;
@@ -30,9 +29,6 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ChoiceItemType;
 import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.value.*;
-
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Implements the XSLT 4.0 function apply-templates()
@@ -71,14 +67,8 @@ public class ApplyTemplatesFn extends SystemFunction {
         }
         RuleManager ruleManager = controller.getRuleManager();
         Mode mode;
-        Map<String, GroundedValue> checkedOptions = Collections.emptyMap();
-        if (getArity() >= 2) {
-            MapItem options = (MapItem) arguments[1].head();
-            if (options != null) {
-                checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
-            }
-        }
-        AtomicValue modeVal = (AtomicValue) checkedOptions.get("mode");
+        ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40);
+        AtomicValue modeVal = (AtomicValue) checkedOptions.asItem("mode");
         if (modeVal instanceof QNameValue) {
             StructuredQName modeName = ((QNameValue) modeVal).getStructuredQName();
             mode = ruleManager.obtainMode(modeName, false);
@@ -87,24 +77,18 @@ public class ApplyTemplatesFn extends SystemFunction {
             }
         } else if (modeVal instanceof StringValue) {
             String modeToken = modeVal.getStringValue();
-            switch (modeToken) {
-                case "#default":
-                    throw new XPathException("Mode=#default not yet implemented");
-                case "#unnamed":
-                    mode = ruleManager.obtainMode(Mode.UNNAMED_MODE_NAME, false);
-                    break;
-                case "#current":
-                    mode = context.getCurrentMode().getActor();
-                    break;
-                default:
-                    throw new XPathException("Invalid mode requested: " + modeToken);
-            }
+            mode = switch (modeToken) {
+                case "#default" -> throw new XPathException("Mode=#default not yet implemented");
+                case "#unnamed" -> ruleManager.obtainMode(Mode.UNNAMED_MODE_NAME, false);
+                case "#current" -> context.getCurrentMode().getActor();
+                default -> throw new XPathException("Invalid mode requested: " + modeToken);
+            };
         } else {
             mode = context.getCurrentMode().getActor();
             //throw new XPathException("Mode=#default not yet implemented");
         }
 
-        ParameterSet params = makeParameterSet(null, checkedOptions,"params");
+        ParameterSet params = makeParameterSet(null, checkedOptions, "params");
         ParameterSet existingTunnelParams = context.getTunnelParameters();
         ParameterSet tunnels = makeParameterSet(existingTunnelParams, checkedOptions, "tunnel-params");
 
@@ -118,12 +102,12 @@ public class ApplyTemplatesFn extends SystemFunction {
     }
 
     private ParameterSet makeParameterSet(ParameterSet existing,
-                                          Map<String, GroundedValue> checkedOptions,
+                                          ProcessedOptions checkedOptions,
                                           String optionName) {
         if (checkedOptions == null) {
             return existing;
         }
-        MapItem supplied = (MapItem)checkedOptions.get(optionName);
+        MapItem supplied = (MapItem)checkedOptions.asItem(optionName);
         if (supplied == null) {
             return existing;
         }

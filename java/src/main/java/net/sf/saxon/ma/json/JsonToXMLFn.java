@@ -9,10 +9,14 @@ package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.pattern.PortableNamedXNodeType;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
 import net.sf.saxon.resource.EncodingDetector;
@@ -24,14 +28,16 @@ import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.DocumentNodeType;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.Map;
 
 /**
  * Implements the json-to-xml function defined in XSLT 3.0.
@@ -109,7 +115,7 @@ public class JsonToXMLFn extends SystemFunction {
     protected Item eval(UnicodeString input, MapItem options, XPathContext context) throws XPathException {
         JsonParser parser = new JsonParser();
         int flags = 0;
-        Map<String, GroundedValue> checkedOptions = null;
+        ProcessedOptions checkedOptions = null;
         if (options != null) {
             int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, version);

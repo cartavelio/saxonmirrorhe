@@ -9,6 +9,7 @@ package net.sf.saxon.resource;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.lib.Resource;
 import net.sf.saxon.lib.ResourceFactory;
 import net.sf.saxon.ma.json.ParseJsonFn;
@@ -87,7 +88,7 @@ public class JSONResource implements Resource {
         options.put("liberal", BooleanValue.FALSE);
         options.put("duplicates", SV_USE_FIRST);
         options.put("escape", BooleanValue.FALSE);
-        return item = ParseJsonFn.parse(jsonStr.codePoints(), options, context);
+        return item = ParseJsonFn.parse(jsonStr.codePoints(), new ProcessedOptions(options), context);
     }
 
     private final static StringValue SV_USE_FIRST = new StringValue(Latin1.of("use-first"));

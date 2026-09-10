@@ -14,11 +14,11 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.functions.PushableFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.EmptyMap;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UniStringConsumer;
@@ -29,8 +29,6 @@ import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
-
-import java.util.Map;
 
 /**
  * Implement the XML to JSON conversion as a built-in function - fn:xml-to-json()
@@ -75,10 +73,10 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
                 suppliedOptions = EmptyMap.INSTANCE_40;
             }
             int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-            Map<String, GroundedValue> options =
+            ProcessedOptions options =
                     getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, version);
-            o.indent = ((BooleanValue) options.get("indent").head()).getBooleanValue();
-            o.escapeSolidus = ((BooleanValue) options.get("escape-solidus").head()).getBooleanValue();
+            o.indent = options.asBoolean("indent", false);
+            o.escapeSolidus = options.asBoolean("escape-solidus", true);
             return o;
         } else {
             return o;

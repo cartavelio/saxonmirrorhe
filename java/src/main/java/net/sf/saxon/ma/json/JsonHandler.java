@@ -8,8 +8,8 @@
 package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.str.UnicodeString;
@@ -17,8 +17,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.z.IntPredicateProxy;
-
-import java.util.Map;
 
 /**
  * Default handler class for accepting the result from parsing JSON strings
@@ -118,10 +116,9 @@ public class JsonHandler {
         // do nothing in this class
     }
 
-    public void setFallbackFunction(Map<String, GroundedValue> options, XPathContext context) throws XPathException {
-        GroundedValue val = options.get("fallback");
-        if (val != null) {
-            Item fn = val.head();
+    public void setFallbackFunction(ProcessedOptions options, XPathContext context) throws XPathException {
+        Item fn = options.asItem("fallback");
+        if (fn != null) {
             if (fn instanceof FunctionItem) {
                 fallbackFunction = (FunctionItem) fn;
                 if (fallbackFunction.getArity() != 1) {

@@ -14,6 +14,7 @@ import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.GlobalVariable;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ModuleURIResolver;
 import net.sf.saxon.lib.StandardModuleURIResolver;
@@ -38,7 +39,6 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class implements the function load-xquery-module(), which is a standard function in XPath 3.1.
@@ -106,37 +106,33 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             throw new XPathException(e.getMessage(), "FOQM0006");
         }
 
-        Sequence xqueryVersionOption = null;
-        Sequence locationHintsOption = null;
-        Sequence variablesOption = null;
-        Sequence contextItemOption = null;
+        int hostVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+        ProcessedOptions checkedOptions =
+                getDetails().optionDetails.processSuppliedOptions(args, 1, context, hostVersion);
+
+        //Sequence variablesOption = null;
+        //Sequence contextItemOption = null;
         Sequence vendorOptionsOption = null;
-        Sequence contentOption = null;
-        if (args.length == 2) {
-            MapItem suppliedOptions = (MapItem) args[1].head();
-            int hostVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-            if (suppliedOptions == null) {
-                suppliedOptions = EmptyMap.INSTANCE_40;
+        //Sequence contentOption = null;
+
+        Item xqueryVersionOption = checkedOptions.asItem("xquery-version");
+        if (xqueryVersionOption != null) {
+            double vn = ((DecimalValue) xqueryVersionOption.head()).getDoubleValue();
+            if (vn * 10 > 40) {
+                throw new XPathException("No XQuery version " + vn + " processor is available", "FOQM0006");
             }
-            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, hostVersion);
-            xqueryVersionOption = checkedOptions.get("xquery-version");
-            if (xqueryVersionOption != null) {
-                double vn = ((DecimalValue) xqueryVersionOption.head()).getDoubleValue();
-                if (vn * 10 > 40) {
-                    throw new XPathException("No XQuery version " + vn + " processor is available", "FOQM0006");
-                }
-            }
-            locationHintsOption = checkedOptions.get("location-hints");
-            variablesOption = checkedOptions.get("variables");
-            contextItemOption = checkedOptions.get("context-item");
-            contentOption = checkedOptions.get("content");
+        }
+        GroundedValue locationHintsOption = checkedOptions.get("location-hints");
+        MapItem variablesOption = (MapItem)checkedOptions.asItem("variables");
+        GroundedValue contextItemOption = checkedOptions.get("context-item");
+            //contentOption = checkedOptions.get("content");
             vendorOptionsOption = checkedOptions.get("vendor-options");
 
-        }
+
 
         int qv = 31;
         if (xqueryVersionOption != null) {
-            BigDecimal decimalVn = ((DecimalValue) xqueryVersionOption.head()).getDecimalValue();
+            BigDecimal decimalVn = ((DecimalValue) xqueryVersionOption).getDecimalValue();
             if (decimalVn.compareTo(new BigDecimal("1.0")) == 0
                     || decimalVn.compareTo(new BigDecimal("3.0")) == 0
                     || decimalVn.compareTo(new BigDecimal("3.1")) == 0
@@ -159,14 +155,12 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         staticQueryContext.setLanguageVersion(qv);
         staticQueryContext.preLoadSchema(getRetainedStaticContext().getImportedSchema());
 
-        String content = null;
-        if (contentOption != null) {
-            content = contentOption.head().getStringValue();
+        String content = checkedOptions.asString("content");
+        if (content != null) {
             streamSources = new StreamSource[1];
             streamSources[0] = new StreamSource(new StringReader(content), getStaticBaseUriString());
             staticQueryContext.setBaseURI(getStaticBaseUriString());
         }
-
 
         if (content == null) {
             List<String> locationHints = new ArrayList<>(); // location hints are currently ignored by QT3TestDriver?
@@ -233,8 +227,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         // Get the external variables and set parameters on DynamicQueryContext dqc
         if (variablesOption != null) {
-            MapItem extVariables = (MapItem) variablesOption.head();
-            for (KeyValuePair kvp : extVariables.keyValuePairs()) {
+            for (KeyValuePair kvp : variablesOption.keyValuePairs()) {
                 QNameValue key = (QNameValue)kvp.key();
                 dqc.setParameter(key.getStructuredQName(), kvp.value());
             }
@@ -242,15 +235,14 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         // Get the context item supplied, and set it on the new Controller
         if (contextItemOption != null) {
-            GroundedValue contextValue = contextItemOption.materialize();
             GlobalContextRequirement gcr = main.getExecutable().getGlobalContextRequirement();
             if (gcr != null) {
                 SequenceType req = gcr.getRequiredSequenceType();
-                if (req != null && !req.matches(contextValue)) {
+                if (req != null && !req.matches(contextItemOption)) {
                     throw new XPathException("Required context item type is " + req, "FOQM0005");
                 }
             }
-            dqc.setContextValue(contextValue);
+            dqc.setContextValue(contextItemOption);
         }
 
         Controller newController = xqe.newController(dqc);

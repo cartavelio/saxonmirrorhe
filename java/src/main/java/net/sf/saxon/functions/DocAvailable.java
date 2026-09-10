@@ -18,8 +18,6 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 
-import java.util.Map;
-
 /**
  * Implement the fn:doc-available() function
  */
@@ -50,7 +48,7 @@ public class DocAvailable extends SystemFunction  {
                     options = (MapItem) arguments[1].head();
                 }
                 if (options != null && !options.isEmpty()) {
-                    Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+                    ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
                     parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
 
                 } else {

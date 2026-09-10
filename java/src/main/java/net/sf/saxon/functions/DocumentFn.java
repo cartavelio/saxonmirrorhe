@@ -33,10 +33,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 
 /**
@@ -152,7 +150,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             // to ensure we get the default JDK parser implementation, rather than picking a parser
             // off the classpath.
 
-            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
             parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
             GroundedValue b = checkedOptions.get("base-uri");
             if (b != null) {

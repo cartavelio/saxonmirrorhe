@@ -32,7 +32,7 @@ import org.xml.sax.XMLReader;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * Implement the fn:doc() function - a simplified form of the Document function
@@ -173,7 +173,7 @@ public class Doc extends SystemFunction implements Callable {
             // to ensure we get the default JDK parser implementation, rather than picking a parser
             // off the classpath.
 
-            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
             parseOptions = processOptions(checkedOptions, getRetainedStaticContext());
 
         } else {
@@ -210,7 +210,7 @@ public class Doc extends SystemFunction implements Callable {
     }
 
     //@CSharpReplaceBody(code="return new Saxon.Hej.lib.ParseOptions();")
-    public static ParseOptions processOptions(Map<String, GroundedValue> checkedOptions, RetainedStaticContext retainedStaticContext) throws XPathException {
+    public static ParseOptions processOptions(ProcessedOptions checkedOptions, RetainedStaticContext retainedStaticContext) throws XPathException {
         boolean is40 = retainedStaticContext.getPackageData().getHostLanguageVersion() >= 40;
         ParseOptions parseOptions = new ParseOptions();
 
@@ -226,8 +226,7 @@ public class Doc extends SystemFunction implements Callable {
         parseOptions = parseOptions.withXMLReader(parser);
         //#endif
 
-        GroundedValue val = checkedOptions.get("dtd-validation");
-        boolean dtdValidating = val != null && val.effectiveBooleanValue();
+        boolean dtdValidating = checkedOptions.asBoolean("dtd-validation", false);
         if (dtdValidating) {
             //#if CSHARP==false
             try {
@@ -239,19 +238,18 @@ public class Doc extends SystemFunction implements Callable {
             parseOptions = parseOptions.withDTDValidationMode(Validation.STRICT);
         }
 
-        val = checkedOptions.get("stable");
-        if (val != null && !val.effectiveBooleanValue()) {
+        if (!checkedOptions.asBoolean("stable", true)) {
             parseOptions = parseOptions.withStable(false);
         }
 
-        val = checkedOptions.get("trusted");
+        boolean trusted = checkedOptions.asBoolean("trusted", false);
         try {
-            parseOptions = parseOptions.withTrusted(val.effectiveBooleanValue());
+            parseOptions = parseOptions.withTrusted(trusted);
         } catch (Exception e) {
             // Happens in SaxonCS
             throw new XPathException(e.getMessage(), "FODC0013");
         }
-        if (is40 && !val.effectiveBooleanValue()) {
+        if (is40 && !trusted) {
             //#if CSHARP==false
             parser.setEntityResolver((publicId, systemId) -> {
                 throw new SAXException(
@@ -262,14 +260,11 @@ public class Doc extends SystemFunction implements Callable {
 
         }
 
-        val = checkedOptions.get("use-xsi-schema-location");
-        if (val != null) {
-            parseOptions = parseOptions.withUseXsiSchemaLocation(val.effectiveBooleanValue());
-        }
+        parseOptions = parseOptions.withUseXsiSchemaLocation(checkedOptions.asBoolean("use-xsi-schema-location", false));
 
 
         val = checkedOptions.get("xsd-validation");
-        boolean xsdValidating = false;
+        boolean xsdValidating;
         if (val == null) {
             // In 3.1 we defaulted from the configuration values, in 4.0 it has to be explicit
             parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
@@ -310,12 +305,12 @@ public class Doc extends SystemFunction implements Callable {
             }
 
 
-            val = checkedOptions.get("strip-space");
-            if (val != null) {
+            Optional<Boolean> strip = checkedOptions.asOptionalBoolean("strip-space");
+            if (strip.isPresent()) {
                 SpaceStrippingRule rule;
                 if (xsdValidating || dtdValidating) {
                     rule = IgnorableSpaceStrippingRule.INSTANCE;
-                } else if (val.effectiveBooleanValue()) {
+                } else if (strip.get()) {
                     rule = AllElementsSpaceStrippingRule.INSTANCE;
                 } else {
                     rule = NoElementsSpaceStrippingRule.INSTANCE;
@@ -323,15 +318,12 @@ public class Doc extends SystemFunction implements Callable {
                 parseOptions = parseOptions.withSpaceStrippingRule(rule);
             }
 
-            val = checkedOptions.get("xinclude");
-            if (val != null && val.effectiveBooleanValue()) {
-
-                try {
-                    parseOptions = parseOptions.withXIncludeAware(true);
-                } catch (Exception e) {
-                    // SaxonCS path
-                    throw new XPathException(e.getMessage(), "FODC0013");
-                }
+            try {
+                parseOptions = parseOptions.withXIncludeAware(
+                        checkedOptions.asBoolean("xinclude", false));
+            } catch (Exception e) {
+                // SaxonCS path
+                throw new XPathException(e.getMessage(), "FODC0013");
             }
 
 

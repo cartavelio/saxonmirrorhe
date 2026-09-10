@@ -38,9 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ParseXml extends SystemFunction implements Callable {
 
@@ -81,8 +79,8 @@ public class ParseXml extends SystemFunction implements Callable {
             return EmptySequence.INSTANCE;
         }
 
-        Map<String, GroundedValue> checkedOptions =
-                is40 ? getDetails().optionDetails.processSuppliedOptions(options, context, 40) : new HashMap<>();
+        ProcessedOptions checkedOptions =
+                is40 ? getDetails().optionDetails.processSuppliedOptions(options, context, 40) : ProcessedOptions.EMPTY_OPTIONS;
         
         ParseOptions parseOptions = context.getConfiguration().getParseOptions();
 
@@ -93,17 +91,16 @@ public class ParseXml extends SystemFunction implements Callable {
             parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
         }
 
-        GroundedValue val = checkedOptions.get("dtd-validation");
-        if (val != null && val.effectiveBooleanValue()) {
+        if (checkedOptions.asBoolean("dtd-validation", false)) {
             parseOptions = parseOptions.withDTDValidationMode(Validation.STRICT);
         }
-        val = checkedOptions.get("xsd-validation");
+
         boolean validating = false;
-        if (val == null) {
+        if (!checkedOptions.containsKey("xsd-validation")) {
             // In 3.1 we defaulted from the configuration values, in 4.0 it has to be explicit
             parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
         } else {
-            String validationValue = Whitespace.normalize(val.getStringValue());
+            String validationValue = Whitespace.normalize(checkedOptions.asString("xsd-validation"));
             validating = !"skip".equals(validationValue);
             if (validationValue.equals("strict")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.STRICT);
@@ -136,14 +133,11 @@ public class ParseXml extends SystemFunction implements Callable {
             } else {
                 throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "FODC0008");
             }
-            val = checkedOptions.get("use-xsi-schema-location");
-            if (val.effectiveBooleanValue()) {
-                parseOptions = parseOptions.withUseXsiSchemaLocation(true);
-            }
 
-            val = checkedOptions.get("trusted");
-            if (is40 && val != null) {
-                boolean trusted = val.effectiveBooleanValue();
+            parseOptions = parseOptions.withUseXsiSchemaLocation(checkedOptions.asBoolean("use-xsi-schema-location", false));
+
+            if (is40 && checkedOptions.containsKey("trusted")) {
+                boolean trusted = checkedOptions.asBoolean("trusted", false);
                 parseOptions = parseOptions.withTrusted(trusted);
                 //#if CSHARP==false
                 if (!trusted) {
@@ -171,20 +165,18 @@ public class ParseXml extends SystemFunction implements Callable {
 //                //#endif
 //            }
 
-            val = checkedOptions.get("strip-space");
-            if (val != null) {
+            if (checkedOptions.containsKey("strip-space")) {
                 parseOptions = parseOptions.withSpaceStrippingRule(
-                        val.effectiveBooleanValue()
+                        checkedOptions.asBoolean("strip-space", false)
                                 ? validating
                                     ? IgnorableSpaceStrippingRule.INSTANCE
                                     : AllElementsSpaceStrippingRule.INSTANCE
                                 : NoElementsSpaceStrippingRule.INSTANCE);
             }
 
-            val = checkedOptions.get("xinclude");
-            if (val != null && val.effectiveBooleanValue()) {
+            if (checkedOptions.containsKey("xinclude")) {
                 try {
-                    parseOptions = parseOptions.withXIncludeAware(true);
+                    parseOptions = parseOptions.withXIncludeAware(checkedOptions.asBoolean("xinclude", false));
                 } catch (Exception e) {
                     // SaxonCS - XInclude not supported
                     throw new XPathException(e);
@@ -194,7 +186,7 @@ public class ParseXml extends SystemFunction implements Callable {
 
         String baseUri;
         if (checkedOptions.containsKey("base-uri")) {
-            baseUri = checkedOptions.get("base-uri").getStringValue();
+            baseUri = checkedOptions.asString("base-uri");
         } else {
             baseUri = getStaticBaseUriString();
         }

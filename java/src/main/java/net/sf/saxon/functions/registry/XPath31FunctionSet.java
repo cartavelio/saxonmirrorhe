@@ -105,10 +105,11 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyXNodeType.getInstance(), STAR | NAV, null));
 
         register("json-doc", 1, e -> {
-            return e.populate(JsonDoc::new, AnyItemType.getInstance(),
-                                  OPT, LATE)
-                    .arg(0, BuiltInAtomicType.STRING, OPT, null);
-        });
+                     return e.populate(JsonDoc::new, AnyItemType.getInstance(),
+                                       OPT, LATE)
+                             .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                             .setOptionDetails(ParseJsonFn.makeOptionsParameter(31));
+                 });
 
         register("json-doc", 2, e -> {
             return e.populate(JsonDoc::new, AnyItemType.getInstance(),
@@ -133,7 +134,8 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         });
 
         register("load-xquery-module", 1, e -> e.populate( LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
-                .arg(0, BuiltInAtomicType.STRING, ONE, null));
+                .arg(0, BuiltInAtomicType.STRING, ONE, null))
+                .setOptionDetails(LoadXqueryModule.makeOptionsParameter(31));
 
         register("load-xquery-module", 2, e -> e.populate( LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null) // null or EMPTY?

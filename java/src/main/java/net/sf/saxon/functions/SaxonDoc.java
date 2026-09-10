@@ -31,7 +31,6 @@ import javax.xml.transform.stream.StreamSource;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,7 +63,7 @@ public class SaxonDoc extends SystemFunction implements Callable {
 
 
     public static ParseOptions setParseOptions(
-            RetainedStaticContext rsc, Map<String, GroundedValue> checkedOptions, XPathContext context) throws XPathException {
+            RetainedStaticContext rsc, ProcessedOptions checkedOptions, XPathContext context) throws XPathException {
         ParseOptions result = context.getConfiguration().getParseOptions();
 
         Sequence value = checkedOptions.get("validation");
@@ -154,7 +153,7 @@ public class SaxonDoc extends SystemFunction implements Callable {
         }
         String href = hrefVal.getStringValue();
         Item param = arguments[1].head();
-        Map<String, GroundedValue> checkedOptions =
+        ProcessedOptions checkedOptions =
                 getDetails().optionDetails.processSuppliedOptions((MapItem) param, context, 40);
         ParseOptions parseOptions = setParseOptions(getRetainedStaticContext(), checkedOptions, context);
 

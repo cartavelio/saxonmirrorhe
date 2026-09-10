@@ -123,7 +123,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * options with recognized names and type-valid values.
      */
 
-    private void checkTransformOptions(Map<String, GroundedValue> options, XPathContext context, int languageVersion) throws XPathException {
+    private void checkTransformOptions(ProcessedOptions options, XPathContext context, int languageVersion) throws XPathException {
         if (options.isEmpty()) {
             throw new XPathException("No transformation options supplied", "FOXT0002");
         }
@@ -135,11 +135,11 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private String checkStylesheetMutualExclusion(Map<String, GroundedValue> map) throws XPathException {
-        return exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text");
-    }
+//    private String checkStylesheetMutualExclusion(Map<String, GroundedValue> map) throws XPathException {
+//        return exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text");
+//    }
 
-    private String checkStylesheetMutualExclusion30(Map<String, GroundedValue> map) throws XPathException {
+    private String checkStylesheetMutualExclusion30(ProcessedOptions map) throws XPathException {
         String styleOption = exactlyOneOf(map, "stylesheet-location", "stylesheet-node", "stylesheet-text",
                                           "package-name", "package-node", "package-location");
         if (styleOption.equals("package-location")) {
@@ -148,9 +148,9 @@ public class TransformFn extends SystemFunction implements Callable {
         return styleOption;
     }
 
-    private String checkInvocationMutualExclusion(Map<String, GroundedValue> options) throws XPathException {
-        return oneOf(options, "initial-mode", "initial-template");
-    }
+//    private String checkInvocationMutualExclusion(Map<String, GroundedValue> options) throws XPathException {
+//        return oneOf(options, "initial-mode", "initial-template");
+//    }
 
     /**
      * Check that at most one of a set of keys is present in the map, and return the one
@@ -161,7 +161,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * @throws XPathException if more than one of the keys is present
      */
 
-    private String oneOf(Map<String, GroundedValue> map, String... keys) throws XPathException {
+    private String oneOf(ProcessedOptions map, String... keys) throws XPathException {
         String found = null;
         for (String s : keys) {
             if (map.get(s) != null) {
@@ -186,7 +186,7 @@ public class TransformFn extends SystemFunction implements Callable {
      * @throws XPathException if none of the keys is present or if more than one of the keys is present
      */
 
-    private String exactlyOneOf(Map<String, GroundedValue> map, String... keys) throws XPathException {
+    private String exactlyOneOf(ProcessedOptions map, String... keys) throws XPathException {
         String found = oneOf(map, keys);
         if (found == null) {
             throw new XPathException("One of the following transform options must be present: " + enumerate(keys));
@@ -208,7 +208,7 @@ public class TransformFn extends SystemFunction implements Callable {
         return buffer.toString();
     }
 
-    private String checkInvocationMutualExclusion30(Map<String, GroundedValue> map) throws XPathException {
+    private String checkInvocationMutualExclusion30(ProcessedOptions map) throws XPathException {
         return oneOf(map, "initial-mode", "initial-template", "initial-function");
     }
 
@@ -230,7 +230,7 @@ public class TransformFn extends SystemFunction implements Callable {
         throw new XPathException("Unrecognized boolean value " + value, "FOXT0002");
     }
 
-    private void setRequestedProperties(Map<String, GroundedValue> options, Processor processor) throws XPathException {
+    private void setRequestedProperties(ProcessedOptions options, Processor processor) throws XPathException {
         MapItem requestedProps = (MapItem) options.get("requested-properties").head();
         for (KeyValuePair kvp : requestedProps.keyValuePairs()) {
             AtomicValue option = kvp.key();
@@ -347,7 +347,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private void setStaticParams(Map<String, GroundedValue> options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
+    private void setStaticParams(ProcessedOptions options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
         MapItem staticParamsMap = (MapItem) options.get("static-params").head();
         for (KeyValuePair kvp : staticParamsMap.keyValuePairs()) {
             AtomicValue param = kvp.key();
@@ -368,7 +368,7 @@ public class TransformFn extends SystemFunction implements Callable {
         }
     }
 
-    private XsltExecutable getStylesheet(Map<String, GroundedValue> options, XsltCompiler xsltCompiler, String styleOptionStr, XPathContext context) throws XPathException {
+    private XsltExecutable getStylesheet(ProcessedOptions options, XsltCompiler xsltCompiler, String styleOptionStr, XPathContext context) throws XPathException {
         Item styleOptionItem = options.get(styleOptionStr).head();
         URI stylesheetBaseUri = null;
         Sequence seq;
@@ -548,7 +548,7 @@ public class TransformFn extends SystemFunction implements Callable {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-        Map<String, GroundedValue> options =
+        ProcessedOptions options =
                 getDetails().optionDetails.processSuppliedOptions((MapItem) arguments[0].head(), context, version);
 
         Sequence vendorOptionsValue = options.get("vendor-options");
@@ -612,7 +612,7 @@ public class TransformFn extends SystemFunction implements Callable {
         if (!invocationName.equals("initial-template") && !invocationName.equals("initial-function") && principalInput == null) {
             //throw new XPathException("A transform must have at least one of the following options: source-node|initial-template|initial-function", "FOXT0002");
             invocationName = "initial-template";
-            options.put("initial-template", new QNameValue("", NamespaceUri.XSLT, "initial-template"));
+            options.getMap().put("initial-template", new QNameValue("", NamespaceUri.XSLT, "initial-template"));
         }
         // if invocation option is initial-function, then check for function-params
         if (invocationName.equals("initial-function") && options.get("function-params") == null) {

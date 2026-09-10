@@ -8,8 +8,12 @@
 package net.sf.saxon.ma.json;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.ma.map.Shape;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.FunctionItem;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NameChecker;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.str.*;
@@ -23,7 +27,6 @@ import net.sf.saxon.z.IntIterator;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 
@@ -122,31 +125,28 @@ public class JsonParser {
      * @throws XPathException if any options are invalid
      */
 
-    public static int getFlags(Map<String, GroundedValue> options, boolean allowValidate, boolean isSchemaAware) throws XPathException {
+    public static int getFlags(ProcessedOptions options, boolean allowValidate, boolean isSchemaAware) throws XPathException {
         int flags = 0;
 
-        BooleanValue escape = ((BooleanValue) options.get("escape"));
-        if (escape != null && escape.getBooleanValue()) {
+        if (options.asBoolean("escape", false)) {
             flags |= ESCAPE;
             if (options.get("fallback") != null) {
                 throw new XPathException("Cannot specify a fallback function when escape=true", "FOJS0005");
             }
         }
 
-        BooleanValue retainOrder = ((BooleanValue) options.get("retain-order"));
-        if (retainOrder != null && retainOrder.getBooleanValue()) {
+        if (options.asBoolean("retain-order", false)) {
             flags |= ORDER_RETAINED;
         }
 
-        BooleanValue liberal = ((BooleanValue) options.get("liberal"));
-        if (liberal != null && liberal.getBooleanValue()) {
+        if (options.asBoolean("liberal", false)) {
             flags |= LIBERAL;
             flags |= ALLOW_ANY_TOP_LEVEL;
         }
 
         boolean validate = false;
         if (allowValidate) {
-            validate = ((BooleanValue) options.get("validate")).getBooleanValue();
+            validate = options.asBoolean("validate", false);
             if (validate) {
                 if (!isSchemaAware) {
                     error("Requiring validation on non-schema-aware processor", ERR_SCHEMA);
@@ -156,7 +156,7 @@ public class JsonParser {
         }
 
         if (options.containsKey("duplicates")) {
-            String duplicates = ((StringValue) options.get("duplicates")).getStringValue();
+            String duplicates = options.asString("duplicates");
             switch (duplicates) {
                 case "reject":
                     flags |= DUPLICATES_REJECTED;
@@ -1012,44 +1012,28 @@ public class JsonParser {
     }
 
     public static String showToken(JsonToken token, UnicodeString currentTokenValue) {
-        switch (token) {
-            case LSQB:
-                return "[";
-            case RSQB:
-                return "]";
-            case LCURLY:
-                return "{";
-            case RCURLY:
-                return "}";
-            case STRING_LITERAL:
-                return "string (\"" + currentTokenValue + "\")";
-            case NUMERIC_LITERAL:
-                return "number (" + currentTokenValue + ")";
-            case TRUE:
-                return "true";
-            case FALSE:
-                return "false";
-            case NULL:
-                return "null";
-            case COLON:
-                return ":";
-            case COMMA:
-                return ",";
-            case EOF:
-                return "<eof>";
-            default:
-                return "<" + token + ">";
-        }
+        return switch (token) {
+            case LSQB -> "[";
+            case RSQB -> "]";
+            case LCURLY -> "{";
+            case RCURLY -> "}";
+            case STRING_LITERAL -> "string (\"" + currentTokenValue + "\")";
+            case NUMERIC_LITERAL -> "number (" + currentTokenValue + ")";
+            case TRUE -> "true";
+            case FALSE -> "false";
+            case NULL -> "null";
+            case COLON -> ":";
+            case COMMA -> ",";
+            case EOF -> "<eof>";
+            default -> "<" + token + ">";
+        };
     }
 
 
-    public void setNumberFormat(Map<String, GroundedValue> options) throws XPathException {
-        Sequence val = options.get("number-format");
+    public void setNumberFormat(ProcessedOptions options) throws XPathException {
+        String val = options.asString("number-format");
         if (val != null) {
-            Item it = val.head();
-            if (it != null) {
-                numberFormat = it.getStringValue();
-            }
+            numberFormat = val;
         }
     }
 

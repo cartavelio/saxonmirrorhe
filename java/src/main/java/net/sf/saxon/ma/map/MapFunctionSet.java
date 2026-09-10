@@ -14,6 +14,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.functions.ArityTwoFunction;
 import net.sf.saxon.functions.OptionsParameter;
+import net.sf.saxon.functions.ProcessedOptions;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.hof.FunctionLiteral;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
@@ -64,16 +65,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             field("value", SequenceType.ANY_SEQUENCE, false));
 
     public static OnDuplicatesAction getDuplicatesCombiner(
-            Map<String, GroundedValue> options, String defaultAction, String duplicatesErrorCode) throws XPathException {
-        GroundedValue duplicatesOption = options.get("duplicates");
+            ProcessedOptions options, String defaultAction, String duplicatesErrorCode) throws XPathException {
+        Item duplicatesOption = options.asItem("duplicates");
         if (duplicatesOption == null) {
             duplicatesOption = new StringValue(defaultAction);
-        } else {
-            duplicatesOption = duplicatesOption.head();
-            if (duplicatesOption == null) {
-                duplicatesOption = new StringValue(defaultAction);
-            }
-        }
+        } 
         if (duplicatesOption instanceof StringValue) {
             String action = duplicatesOption.getStringValue();
             return switch (action) {
@@ -670,12 +666,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
             GeneralMapBuilder mapBuilder = AbstractFixedMap.getBuilder(40);
             FunctionItem keyFunction = (FunctionItem) arguments[1].head();
             FunctionItem valueFunction = (FunctionItem) arguments[2].head();
-            MapItem rawOptions = (MapItem) arguments[3].head();
-            if (rawOptions == null) {
-                rawOptions = EmptyMap.INSTANCE_40;
-            }
             int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-            Map<String, GroundedValue> cookedOptions = getDetails().optionDetails.processSuppliedOptions(rawOptions, context, version);
+            ProcessedOptions cookedOptions =
+                    getDetails().optionDetails.processSuppliedOptions(arguments, 3, context, version);
             OnDuplicatesAction action = getDuplicatesCombiner(cookedOptions, "combine", "FOJS0003");
             mapBuilder.setDuplicatesAction(action);
 
@@ -770,12 +763,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     MapItem options = (MapItem) arguments[1].head();
                     if (options != null && !options.isEmpty()) {
                         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-                        Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context, version);
+                        ProcessedOptions values = getDetails().optionDetails.processSuppliedOptions(options, context, version);
                         action = getDuplicatesCombiner(values, "use-first", duplicatesErrorCode);
                     }
                 }
                 if (action == null) {
-                    Map<String, GroundedValue> values = new HashMap<>();
+                    ProcessedOptions values = new ProcessedOptions(new HashMap<>());
                     action = getDuplicatesCombiner(values, "use-first", "FOJS0003");
                 }
 
@@ -911,7 +904,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                             }
                             int version = rawOptions.getSpecVersion();
                             XPathContext context = new EarlyEvaluationContext(getConfiguration());
-                            Map<String, GroundedValue> cookedOptions = fnc.getTargetFunction().getDetails().optionDetails.processSuppliedOptions(rawOptions, context, version);
+                            ProcessedOptions cookedOptions = fnc.getTargetFunction().getDetails().optionDetails.processSuppliedOptions(rawOptions, context, version);
                             String duplicatesErrorCode = "FOJS0003";
                             final OnDuplicatesAction dupAction = getDuplicatesCombiner(cookedOptions, "use-first", duplicatesErrorCode);
                             return cxt -> {
@@ -932,7 +925,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                             if (options == null) {
                                 options = EmptyMap.INSTANCE_40;
                             }
-                            Map<String, GroundedValue> cookedOptions = details.processSuppliedOptions(options, cxt, version);
+                            ProcessedOptions cookedOptions = details.processSuppliedOptions(options, cxt, version);
                             OnDuplicatesAction action = getDuplicatesCombiner(cookedOptions, "use-first", "FOJS0003");
                             return mergeMaps(maps, cxt, action, version);
                         };

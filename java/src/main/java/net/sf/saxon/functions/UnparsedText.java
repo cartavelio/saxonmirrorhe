@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Implementation of fn:unparsed-text() - with one argument or two
@@ -68,20 +69,19 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
             if (arg1 instanceof StringValue) {
                 encoding = arg1.getStringValue();
             } else if (arg1 instanceof MapItem) {
-                Map<String, GroundedValue> options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context, 40);
-                GroundedValue encodingOption = options.get("encoding");
-                if (encodingOption != null) {
-                    encoding = encodingOption.getStringValue();
+                ProcessedOptions options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context, 40);
+                Optional<String> encodingOption = options.asOptionalString("encoding");
+                if (encodingOption.isPresent()) {
+                    encoding = encodingOption.get();
                 }
-                BooleanValue normalizeNewlinesOption = (BooleanValue) options.get("normalize-newlines");
-                if (normalizeNewlinesOption != null) {
-                    normalizeNewlines = normalizeNewlinesOption.getBooleanValue();
+                Optional<Boolean> normalizeNewlinesOption = options.asOptionalBoolean("normalize-newlines");
+                if (normalizeNewlinesOption.isPresent()) {
+                    normalizeNewlines = normalizeNewlinesOption.get();
                 }
 
-                GroundedValue fallbackOption = options.get("fallback");
-                if (fallbackOption != null) {
-                    Item fn = fallbackOption.head();
-                    fallback = fn.effectiveBooleanValue();
+                Optional<Boolean> fallbackOption = options.asOptionalBoolean("fallback");
+                if (fallbackOption.isPresent()) {
+                    fallback = fallbackOption.get();
                 }
             }
         }
@@ -118,7 +118,7 @@ public class UnparsedText extends UnparsedTextFunction implements PushableFuncti
                     if (arg1 instanceof StringValue) {
                         encoding = arg1.getStringValue();
                     } else if (arg1 instanceof MapItem) {
-                        Map<String, GroundedValue> options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context, 40);
+                        ProcessedOptions options = OPTION_DETAILS.processSuppliedOptions(((MapItem)arg1), context, 40);
                         GroundedValue encodingOption = options.get("encoding");
                         if (encodingOption != null) {
                             encoding = encodingOption.getStringValue();
