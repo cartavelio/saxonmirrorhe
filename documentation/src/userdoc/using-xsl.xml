@@ -48,6 +48,7 @@
       </div>
 
       <div class="conly">
+         <p>TODO: needs updating.</p>
          <p>For SaxonC we must first compile the <code>Transform.c</code> C
                   program in the <code>command</code> directory which builds the command line program by running the batch script <code>./build-saxonc-commands.sh</code>
                    on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
@@ -79,14 +80,20 @@
                >Installation</a> for details of how to set up the classpath.</p>
    
          <p>If you are are not using any additional Java libraries, you can use the simpler form of
-            command (this example is for Saxon-HE 12.0):</p>
-         <kbd>java  -jar <i>dir</i>/saxon-he-12.0.jar [options] [params]</kbd>
+            command (this example is for Saxon-HE 13.0):</p>
+         <kbd>java  -jar <i>dir</i>/saxon-he-13.0.jar [options] [params]</kbd>
    
          <p>
             <i>Note, however, that this does not work if you need to load user-written extension
                functions or other classes (such as the ICU localization library) from the classpath. It
                will therefore not work if your stylesheet uses extension functions or other plug-in
                components such as parsers or URI resolvers.</i>
+            
+            <i>Saxon has dependencies on other JAR files that are issued with the product, notably ICU
+            (for localization) and the XML resolver (for locating XML resources). These don't need to
+            be added to the classpath directly, because Saxon knows where to find them. This
+            means that you shouldn't attempt to move the Saxon JAR file to a different location
+            unless you move the whole library.</i>
          </p>
       </div> 
 
@@ -117,6 +124,7 @@
                   <a class="bodylink" href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML catalogs</a>.
                </p>
                <p class="conly">Also available as an option on SaxonC.</p>
+               <p>TODO: is this really javaonly?</p>
             </td>
          </tr>
          <tr>
@@ -137,12 +145,13 @@
             </td>
             <td>
                <p>Setting <code>-dtd:on</code> requests DTD-based validation of the source file and
-                  of any files read using the <code>document()</code> function. Requires an XML
-                  parser that supports validation. The setting <code>-dtd:off</code> (which is the
+                  of any files read using the <code>document()</code> or <code>doc()</code>function. 
+                  The setting <code>-dtd:off</code> (which is the
                   default) suppresses DTD validation. The setting <code>-dtd:recover</code> performs
                   DTD validation but treats the error as non-fatal if it fails. Note that any
                   external DTD is likely to be read even if not used for validation, because DTDs
                   can contain definitions of entities.</p>
+               
             </td>
          </tr>
 
