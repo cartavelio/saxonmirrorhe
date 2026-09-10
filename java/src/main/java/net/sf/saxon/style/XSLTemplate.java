@@ -956,12 +956,13 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
                     // Copy the match pattern: in the case where a template rule belongs to multiple modes,
                     // the binding vector for any references to external functions or variables belongs
                     // to the mode, and the slot numbers for these references will vary from one mode to another.
-                    rule.setMatchPattern(subPattern.copy(new RebindingMap()));
+                    Pattern subPatternCopy = subPattern.copy(new RebindingMap());
+                    rule.setMatchPattern(subPatternCopy);
                     compiledTemplateRules.add(rule);
 
                     if (mode.isDeclaredStreamable()) {
                         rule.setDeclaredStreamable(true);
-                        if (!subPattern.isMotionless()) {
+                        if (!subPatternCopy.isMotionless()) {
                             boolean fallback = getConfiguration().getBooleanProperty(Feature.STREAMING_FALLBACK);
                             String message = "Template rule is declared streamable but the match pattern is not motionless";
                             if (fallback) {
@@ -1032,7 +1033,7 @@ public final class XSLTemplate extends StyleElement implements StylesheetCompone
 //                            }
 
                             double prio = prioritySpecified ? priority : Double.NaN;
-                            mgr.registerRule(subPattern, rule, mode, module, prio, seq, part++);
+                            mgr.registerRule(subPatternCopy, rule, mode, module, prio, seq, part++);
 
 //                        }
 //                    }

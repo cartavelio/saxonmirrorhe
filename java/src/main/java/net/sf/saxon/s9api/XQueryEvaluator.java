@@ -494,16 +494,6 @@ public class XQueryEvaluator extends AbstractDestination implements Iterable<Xdm
                     throw new IllegalStateException("No destination supplied");
                 }
                 run(destination);
-//                Result receiver;
-//                if (destination instanceof Serializer) {
-//                    //receiver = ((Serializer) destination).getResult();
-//                    //context.set
-//                    receiver = ((Serializer) destination).getReceiver(expression.getExecutable());
-//                } else {
-//                    receiver = destination.getReceiver(expression.getConfiguration());
-//                }
-//                expression.run(context, receiver, null);
-//                destination.close();
             }
         } catch (TransformerException e) {
             throw new SaxonApiException(e);

@@ -79,7 +79,7 @@ public class XQueryExpression implements Location, ExpressionOwner, TraceableCom
      * @throws XPathException if an error occurs
      */
 
-    public XQueryExpression(Expression exp,  QueryModule mainModule, boolean streaming)
+    public XQueryExpression(Expression exp, QueryModule mainModule, boolean streaming)
             throws XPathException {
         Executable exec = mainModule.getExecutable();
         Configuration config = mainModule.getConfiguration();

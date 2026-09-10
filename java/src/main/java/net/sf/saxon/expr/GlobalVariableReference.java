@@ -38,7 +38,6 @@ public class GlobalVariableReference extends VariableReference implements Compon
     @Override
     public Expression copy(RebindingMap rebindings) {
         if (binding == null) {
-            //System.err.println("copy unbound variable " + this);
             throw new UnsupportedOperationException("Cannot copy a variable reference whose binding is unknown");
         }
         GlobalVariableReference ref = new GlobalVariableReference(getVariableName());

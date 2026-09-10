@@ -168,7 +168,6 @@ public abstract class Actor implements ExpressionOwner, Location {
 
     private void processComponentReference(StylesheetPackage pack, ComponentInvocation invocation, List<ComponentBinding> bindings) {
         SymbolicName name = invocation.getSymbolicName();
-        System.err.println("Invocation " + name + " at " + System.identityHashCode(invocation));
         if (name == null) {
             // there is no target component, e.g. with apply-templates mode="#current"
             return;

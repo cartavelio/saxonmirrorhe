@@ -40,8 +40,8 @@ public class JSONEmitter {
 
     //private final ExpandedStreamResult result;
 
-    private Configuration config;
-    private UnicodeWriter writer;
+    private final Configuration config;
+    private final UnicodeWriter writer;
     private boolean normalize;
     private Normalizer.Form normalizationForm;
     private CharacterMap characterMap;
