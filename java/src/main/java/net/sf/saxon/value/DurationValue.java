@@ -503,8 +503,9 @@ public class DurationValue extends AtomicValue implements AtomicMatchKey {
      * using the getXPathComparable() method. A context argument is supplied for use in cases where the comparison
      * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
      * collation.
-     *  @param collator collation used for comparing string values
-     * @param implicitTimezone  the XPath dynamic evaluation context, used in cases where the comparison is context
+     *
+     * @param collator         collation used for comparing string values
+     * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
      */
 
     /*@Nullable*/

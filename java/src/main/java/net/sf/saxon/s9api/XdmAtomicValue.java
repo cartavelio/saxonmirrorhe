@@ -622,9 +622,11 @@ public class XdmAtomicValue extends XdmItem {
     /**
      * Compare values for equality.
      * Two atomic values are considered equal if they are equal according to the
-     * rules of the {@code op:is-same-key()} operation, used when comparing keys in maps
+     * rules of the {@code fn:atomic-equal()} operation, used when comparing keys in maps.
+     * The rules applied are the XPath 4.0 rules (for example, this means that
+     * a hexBinary value can be equal to a base64Binary value).
      * @param other the value to be compared
-     * @return true if the values are deemed equal
+     * @return true if the values are deemed equal under the XPath 4.0 rules
      */
 
     public boolean equals(Object other) {
@@ -638,7 +640,7 @@ public class XdmAtomicValue extends XdmItem {
     }
 
     /**
-     * Get a hashcode that reflects the rules for equality matching
+     * Get a hashcode that reflects the rules for equality matching (under XPath 4.0)
      * @return a suitable hashcode
      */
 

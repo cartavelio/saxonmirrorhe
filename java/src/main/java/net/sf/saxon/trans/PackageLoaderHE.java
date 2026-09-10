@@ -31,9 +31,9 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
-import net.sf.saxon.ma.map.MapBuilder;
+import net.sf.saxon.ma.map.AbstractFixedMap;
+import net.sf.saxon.ma.map.GeneralMapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.SimpleMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -2722,13 +2722,13 @@ public class PackageLoaderHE implements IPackageLoader {
                 final StylesheetPackage pack = loader.getPackStack().peek();
                 type = AlphaCode.toSequenceType(typeAtt, pack.getImportedSchema(""));
             }
-            return new LookupAllExpression(select);  // TODO: add modifier and type
+            return new LookupAllExpression(select); 
         });
 
         eMap.put("map", (loader, element) -> {
             List<Expression> children = getChildExpressionList(loader, element);
             AtomicValue key = null;
-            MapBuilder map = SimpleMap.getBuilder();
+            GeneralMapBuilder map = AbstractFixedMap.getBuilder();
             for (Expression child : children) {
                 if (key == null) {
                     key = (AtomicValue)((Literal)child).getGroundedValue();

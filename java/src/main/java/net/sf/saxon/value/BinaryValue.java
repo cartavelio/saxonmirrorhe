@@ -7,8 +7,10 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.Version;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
-import net.sf.saxon.expr.sort.BinaryMatchKey;
+import net.sf.saxon.expr.sort.BinaryMatchKey31;
+import net.sf.saxon.expr.sort.BinaryMatchKey40;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.type.AtomicMetadata;
@@ -60,12 +62,12 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
     /*@Nullable*/
     @Override
     public AtomicMatchKey getXPathMatchKey(StringCollator collator, int implicitTimezone) {
-        return this;
+        return asMapKey();
     }
 
     @Override
     public AtomicMatchKey asMapKey() {
-        return new BinaryMatchKey(this);
+        return Version.MAP_SPEC_VERSION >= 40 ? new BinaryMatchKey40(this) : new BinaryMatchKey31(this);
     }
 
     /**
@@ -108,6 +110,9 @@ public abstract class BinaryValue extends AtomicValue implements AtomicMatchKey,
     @Override
     public int compareTo(XPathComparable o) {
         if (o instanceof BinaryValue) {
+            if (Version.MAP_SPEC_VERSION < 40 && this instanceof HexBinaryValue != o instanceof HexBinaryValue) {
+                throw new ClassCastException("Cannot compare base64Binary to hexBinary");
+            }
             byte[] other = ((BinaryValue) o).binaryValue;
             int len0 = binaryValue.length;
             int len1 = other.length;

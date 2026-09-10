@@ -12,16 +12,16 @@ import net.sf.saxon.value.BinaryValue;
 import net.sf.saxon.value.HexBinaryValue;
 
 /**
- * A match key used when comparing binary values as defined in XPath 4.0,
- * which makes hexBinary and base64Binary mutually comparable. This applies both
- * to comparison using "eq" and to comparison of keys in a map, which 
+ * A match key used when comparing binary values as defined in XPath 3.1,
+ * which makes hexBinary and base64Binary non-comparable. This applies both
+ * to comparison using "eq" and to comparison of keys in a map.
  */
 
 
-public class BinaryMatchKey40 implements AtomicMatchKey {
+public class BinaryMatchKey31 implements AtomicMatchKey {
 
     private final BinaryValue value;
-    public BinaryMatchKey40(BinaryValue value) {
+    public BinaryMatchKey31(BinaryValue value) {
         this.value = value;
     }
 
@@ -34,9 +34,9 @@ public class BinaryMatchKey40 implements AtomicMatchKey {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BinaryMatchKey40
-                && value.equals(((BinaryMatchKey40) obj).value)
-                && value instanceof HexBinaryValue == ((BinaryMatchKey40) obj).value instanceof HexBinaryValue;
+        return obj instanceof BinaryMatchKey31
+                && value.equals(((BinaryMatchKey31) obj).value)
+                && value instanceof HexBinaryValue == ((BinaryMatchKey31) obj).value instanceof HexBinaryValue;
     }
 
     /**

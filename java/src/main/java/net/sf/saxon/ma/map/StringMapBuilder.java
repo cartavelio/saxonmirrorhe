@@ -1,16 +1,14 @@
 package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Builder class for constructing ordered maps, where the keys are all known in advance to have
@@ -37,10 +35,6 @@ public class StringMapBuilder {
      */
 
     private XPathContext context;
-
-    private boolean ordered = true;
-
-
 
     public StringMapBuilder() {
         keys = new ArrayList<>();
@@ -75,23 +69,6 @@ public class StringMapBuilder {
     }
 
     /**
-     * Say whether the required map should retain ordering. In general the 4.0 specification
-     * requires maps to retain order. However, for maps constructed and used internally, order
-     * is often not relevant, and Saxon will provide options for user-created maps to be
-     * unordered. Maps are ordered by default
-     * @param ordered true if the map is to be ordered, false if not.
-     */
-
-    public void setOrdered(boolean ordered) {
-        this.ordered = ordered;
-    }
-
-    public StringMapBuilder unordered() {
-        setOrdered(false);
-        return this;
-    }
-
-    /**
      * Add a key-value pair
      *
      * @param key   the key
@@ -120,34 +97,50 @@ public class StringMapBuilder {
         // quick scan for possible duplicates using a bloom filter
         boolean possibleDuplicates = hasPossibleDuplicates(keys);
         if (possibleDuplicates) {
-            // If there are possible duplicates, then we build the map now, with a more thorough
+            // If there are possible duplicates, then we build the index now, with a more thorough
             // check for duplicates as we build it.
-            StringMapItem map = ordered ? new OrderedStringMap() : new DictionaryMap();
-            Iterator<GroundedValue> valueIter = values.iterator();
-            for (UnicodeString key : keys) {
-                GroundedValue value;
-                if (valueIter.hasNext()) {
-                    value = valueIter.next();
-                } else {
-                    throw new AssertionError();
+            HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keys.size());
+            if (combiner == null) {
+                UnicodeString[] keyArray = keys.toArray(new UnicodeString[0]);
+                GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
+                for (int i = 0; i < keys.size(); i++) {
+                    UnicodeString key = keyArray[i];
+                    Integer existing = index.get(key);
+                    if (existing == null) {
+                        index.put(key, i);
+                    } else {
+                        throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
+                    }
                 }
-                GroundedValue existing = map.getU(key);
-                if (existing == null) {
-                    map = (StringMapItem)map.putU(key, value);
-                } else if (combiner == null) {
-                    throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
-                } else {
-                    GroundedValue newVal = combiner.combine(existing, value, context);
-                    map = (OrderedStringMap)map.putU(key, newVal);
+                return new FixedMapWithStringKeys(keyArray, valueArray, index);
+            } else {
+                ArrayList<UnicodeString> keys2 = new ArrayList<>();
+                ArrayList<GroundedValue> values2 = new ArrayList<>();
+                int offset = 0;
+                for (int i = 0; i < keys.size(); i++) {
+                    UnicodeString key = keys.get(i);
+                    Integer existing = index.get(key);
+                    if (existing == null) {
+                        keys2.add(key);
+                        values2.add(values.get(i));
+                        index.put(key, offset++);
+                    } else {
+                        GroundedValue newVal = combiner.combine(
+                                values2.get(existing), values.get(i), context);
+                        values2.set(existing, newVal);
+                    }
                 }
+                UnicodeString[] keyArray = keys2.toArray(new UnicodeString[0]);
+                GroundedValue[] valueArray = values2.toArray(new GroundedValue[0]);
+                return new FixedMapWithStringKeys(keyArray, valueArray, index);
             }
-            return map;
         } else {
             // if we are sure there are no duplicates, then we delay indexing the map entries
             // until a map lookup operation is performed. This is because many maps are built
             // and immediately discarded or serialized without ever being queried.
 
-            return new LazyStringMap(keys, values);
+            return new FixedMapWithStringKeys(keys.toArray(new UnicodeString[0]),
+                                              values.toArray(new GroundedValue[0]), null);
         }
 
 
@@ -168,7 +161,9 @@ public class StringMapBuilder {
         } else if (keys.size() == 1) {
             return new SingleEntryMap(new StringValue(keys.get(0)), values.get(0));
         }
-        return new LazyStringMap(keys,values);
+        return new FixedMapWithStringKeys(keys.toArray(new UnicodeString[0]),
+                                          values.toArray(new GroundedValue[0]),
+                                          null);
     }
 
     private static boolean hasPossibleDuplicates(List<UnicodeString> keys) {

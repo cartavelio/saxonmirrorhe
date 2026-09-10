@@ -50,7 +50,7 @@ public class MetadataResource implements Resource {
     public Item getItem() throws XPathException {
 
         // Create a map for the result
-        StringMapBuilder builder = new StringMapBuilder(10).unordered();
+        StringMapBuilder builder = new StringMapBuilder(10);
 
         // Add the custom properties of the resource
         for (Map.Entry<String, GroundedValue> entry : properties.entrySet()) {

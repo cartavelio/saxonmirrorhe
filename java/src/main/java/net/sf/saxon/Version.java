@@ -142,6 +142,15 @@ public final class Version {
     }
 
     /**
+     * This static flag controls whether key comparisons in maps use the 3.1 semantics
+     * or the 4.0 semantics. Unlike other aspects of conformance, this cannot be controlled
+     * for an individual query, XPath expression, or stylesheet, because maps can be freely
+     * passed from one query to another, even across Configurations.
+     */
+
+    public static int MAP_SPEC_VERSION = 31;
+
+    /**
      * Invoking net.sf.saxon.Version from the command line outputs the build number
      *
      * @param args not used

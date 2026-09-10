@@ -163,8 +163,9 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
      * using the getXPathComparable() method. A context argument is supplied for use in cases where the comparison
      * semantics are context-sensitive, for example where they depend on the implicit timezone or the default
      * collation.
-     *  @param collator the collation to be used for the comparison
-     * @param implicitTimezone  the XPath dynamic evaluation context, used in cases where the comparison is context
+     *
+     * @param collator         the collation to be used for the comparison
+     * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
      */
 
     /*@Nullable*/

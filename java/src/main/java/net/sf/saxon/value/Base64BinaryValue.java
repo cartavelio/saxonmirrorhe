@@ -7,6 +7,7 @@
 
 package net.sf.saxon.value;
 
+import net.sf.saxon.Version;
 import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.str.TwineBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -262,7 +263,7 @@ public class Base64BinaryValue extends BinaryValue {
         byte[] other;
         if (o instanceof Base64BinaryValue) {
             other = ((Base64BinaryValue) o).binaryValue;
-        } else if (o instanceof HexBinaryValue) {
+        } else if (o instanceof HexBinaryValue && Version.MAP_SPEC_VERSION >= 40) {
             // allowed in 4.0
             other = ((HexBinaryValue) o).getBinaryValue();
         } else {

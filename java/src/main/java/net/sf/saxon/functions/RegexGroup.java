@@ -42,7 +42,7 @@ public class RegexGroup extends ContextAccessorFunction {
         }
         int groups = ri.getNumberOfGroups();
 
-        MapBuilder builder = SimpleMap.getBuilder();
+        GeneralMapBuilder builder = AbstractFixedMap.getBuilder();
         for (int i=0; i<=groups; i++) {
             builder.put(Int64Value.makeIntegerValue(i), new StringValue(ri.getRegexGroup(i)));
         }

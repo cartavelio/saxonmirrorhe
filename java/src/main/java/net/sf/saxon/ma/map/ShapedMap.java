@@ -29,7 +29,7 @@ import java.util.Stack;
  * expression, avoiding the cost of a hash lookup.</p>
  */
 
-public class ShapedMap extends StringMapItem {
+public class ShapedMap extends MapItem {
 
     protected static class ShapedMapPlan implements LookupPlan {
         Shape shape;
@@ -143,17 +143,6 @@ public class ShapedMap extends StringMapItem {
     }
 
     /**
-     * Ask whether a given string is present as a key in the map
-     *
-     * @param key the key being tested
-     * @return true if the key is present
-     */
-    @Override
-    public boolean containsU(UnicodeString key) {
-        return getU(key) != null;
-    }
-
-    /**
      * Get the size of the map
      *
      * @return the number of keys/entries present in this map
@@ -208,17 +197,7 @@ public class ShapedMap extends StringMapItem {
                 return new ShapedMap(shape, v2);
             }
         }
-        return OrderedMap.copy(this).put(key, value);
-    }
-
-    @Override
-    public StringMapItem putU(UnicodeString key, GroundedValue value) {
-        throw new UnsupportedOperationException();   // TODO: implement me
-    }
-
-    @Override
-    public StringMapItem removeU(UnicodeString key) {
-        throw new UnsupportedOperationException();   // TODO: implement me
+        return ExtensibleMap.copyOf(this).put(key, value);
     }
 
     /**
@@ -230,7 +209,7 @@ public class ShapedMap extends StringMapItem {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return OrderedMap.copy(this).remove(key);
+        return ExtensibleMap.copyOf(this).remove(key);
     }
 
 

@@ -1,108 +1,75 @@
 package net.sf.saxon.ma.map;
 
+import io.vavr.collection.HashMap;
+import io.vavr.control.Option;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.trans.Err;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.AtomicValue;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
  * A general-purpose XDM map implementation that is ordered, that holds any kind of key,
- * and that supports incremental modification only by copying the whole map to a different
- * structure. Any duplicates added during map construction follow "use-last" semantics -
+ * and that supports incremental modification. Any duplicates added during map construction follow "use-last" semantics -
  * the new value replaces the old. This structure is therefore unsuited to cases where
  * duplicates need custom handling.
  *
- * <p>The implementation is based on an array of keys, an array of corresponding values,
- * and a mutable Java {@code java.util.HashMap} (but encapsulated
- * so no mutation can take place after the map has been built) that maps atomic match keys
- * to integer positions in the array. If put or remove operations
- * are subsequently attempted, the map is copied to a different implementation structure
- * that supports functional modification.</p>
+ * <p>The implementation is similar to that of {@link AbstractFixedMap}, but the arrays of keys
+ * and values are replaced by {@link ZenoChain}s to allow functional modification,
+ * and the map from atomic match keys to integer offsets is replaced by an immutable
+ * map (currently from the VAVR library).</p>
  *
- * <p>The underlying implementation uses an instance of {@code HashMap<AtomicMatchKey, KeyValuePair>}
- * For many data types this means that the key is held twice, once as the key, and once as part
- * of the value. The reason for this is that the <code>keys()</code> function needs to return
- * the original keys as supplied, complete with type annotation, which would not (always) have
- * the same equality semantics. The {@code AtomicMatchKey} is computed from the actual key
- * and in some cases is simply a wrapper with a different <code>equals()</code> method.</p>
+ * <p>Because the integer offset of an entry within the ordered map is held in the index
+ * structure and must therefore remain intact, the {@link #remove(AtomicValue)} operation
+ * does not physically remove entries, but instead adds them to a list of "logically removed"
+ * entries.</p>
  */
 
-public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
+public class ExtensibleMap extends MapItem implements Iterable<KeyValuePair> {
 
-    private final AtomicValue[] keys;
-    private final GroundedValue[] values;
-    private final HashMap<AtomicMatchKey, Integer> index;
+    private final ZenoChain<AtomicValue> keys;
+    private final ZenoChain<GroundedValue> values;
+    private final io.vavr.collection.HashMap<AtomicMatchKey, Integer> index;
+    private final io.vavr.collection.HashSet<Integer> removals;
 
-    private static class FixedMapBuilder extends GeneralMapBuilder {
-
-        public FixedMapBuilder() {
-        }
-
-        @Override
-        public MapItem getCompletedMap() throws XPathException {
-            AtomicValue[] keyArray = keys.toArray(new AtomicValue[0]);
-            GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
-            HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keyArray.length);
-            for (int i = 0; i < keyArray.length; i++) {
-                Integer prev = index.put(keyArray[i].asMapKey(), i);
-                if (prev != null) {
-                    throw new XPathException("Duplicate key " + Err.depict(keyArray[i]) + " in map", "FOJS0003");
-                }
-            }
-            return new FixedMap(keyArray, valueArray, index);
-        }
-
-        /**
-         * Get the constructed map, knowing that there are no duplicate keys.
-         *
-         * @return the constructed map
-         */
-
-        @Override
-        public MapItem getCompletedMapConfidently() {
-            AtomicValue[] keyArray = keys.toArray(new AtomicValue[0]);
-            GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
-            HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keyArray.length);
-            for (int i = 0; i < keyArray.length; i++) {
-                index.put(keyArray[i].asMapKey(), i);
-            }
-            return new FixedMap(keyArray, valueArray, index);
-        }
+    public ExtensibleMap() {
+        this.keys = new ZenoChain<>();
+        this.values = new ZenoChain<>();
+        this.index = io.vavr.collection.HashMap.empty();
+        this.removals = io.vavr.collection.HashSet.empty();
     }
 
-    /**
-     * Factory method to get a MapBuilder which can be used to construct an instance
-     * of a {@link FixedMap}
-     *
-     * @return a class for building fixed maps
-     */
-    public static GeneralMapBuilder getBuilder(int version) {
-        return new FixedMap.FixedMapBuilder();
-    }
-
-
-    /**
-     * Construct a {@code FixedMap} supplying the entries as an array
-     * of keys and a corresponding array of value. The caller is responsible
-     * for ensuring that there are no duplicate keys. The two arrays (of keys and values)
-     * must have the same length. The content of the arrays must not be subsequently
-     * modified.
-     *
-     * @param keys an array of keys
-     * @param values a corresponding array of values
-     * @param index a hash map indexing the values
-     */
-
-    private FixedMap(AtomicValue[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
-        assert keys.length == values.length;
+    private ExtensibleMap(ZenoChain<AtomicValue> keys,
+                          ZenoChain<GroundedValue> values,
+                          io.vavr.collection.HashMap<AtomicMatchKey, Integer> index,
+                          io.vavr.collection.HashSet<Integer> removals
+                          ) {
         this.keys = keys;
         this.values = values;
         this.index = index;
+        this.removals = removals;
+    }
+
+    /**
+     * Construct an {@code ExtensibleMap} from the contents of an existing map
+     *
+     * @param map an existing map
+     */
+
+    public static ExtensibleMap copyOf(MapItem map) {
+        ZenoChain<AtomicValue> keys = new ZenoChain<>();
+        ZenoChain<GroundedValue> values = new ZenoChain<>();
+        io.vavr.collection.HashMap<AtomicMatchKey, Integer> index = io.vavr.collection.HashMap.empty();
+        io.vavr.collection.HashSet<Integer> removals = io.vavr.collection.HashSet.empty();
+        int offset = 0;
+        for (KeyValuePair pair : map.keyValuePairs()) {
+            keys = keys.add(pair.key);
+            values = values.add(pair.value);
+            index = index.put(pair.key.asMapKey(), offset++);
+        }
+        return new ExtensibleMap(keys, values, index, removals);
     }
 
     /**
@@ -113,19 +80,27 @@ public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        Integer position = index.get(key.asMapKey());
-        if (position == null) {
+        Option<Integer> offset = index.get(key.asMapKey());
+        if (offset.isEmpty() || removals.contains(offset.get())) {
             return null;
         }
-        return values[position];
+        return values.get(offset.get());
     }
 
-    public int getIndex(AtomicValue key) {
-        Integer position = index.get(key.asMapKey());
-        if (position == null) {
+    /**
+     * Get the offset of an entry in the map (that is, its 0-based position
+     * in the map ordering
+     * @param key the required key
+     * @return the 0-based position of the relevant entry in the map, or -1
+     * if the key is not present
+     */
+
+    public int getOffset(AtomicValue key) {
+        Option<Integer> offset = index.get(key.asMapKey());
+        if (offset.isEmpty() || removals.contains(offset.get())) {
             return -1;
         }
-        return position;
+        return offset.get();
     }
 
     /**
@@ -135,7 +110,7 @@ public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public int size() {
-        return keys.length;
+        return keys.size() - removals.size();
     }
 
     /**
@@ -157,9 +132,15 @@ public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
         return new KeyValuePairIterator();
     }
 
+    /**
+     * Private inner class for iterating key-value pairs.
+     */
+
     private class KeyValuePairIterator implements Iterator<KeyValuePair> {
 
-        int position = 0;
+        Iterator<AtomicValue> keyIter = keys.iterator();
+        Iterator<GroundedValue> valueIter = values.iterator();
+        int offset = 0;
 
         /**
          * Returns {@code true} if the iteration has more elements.
@@ -170,7 +151,16 @@ public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
          */
         @Override
         public boolean hasNext() {
-            return position < keys.length;
+            while (removals.contains(offset)) {
+                if (keyIter.hasNext()) {
+                    keyIter.next();
+                    valueIter.next();
+                    offset++;
+                } else {
+                    return false;
+                }
+            }
+            return keyIter.hasNext();
         }
 
         /**
@@ -181,12 +171,8 @@ public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
          */
         @Override
         public KeyValuePair next() {
-            if (position >= keys.length) {
-                throw new NoSuchElementException();
-            }
-            KeyValuePair kvp = new KeyValuePair(keys[position], values[position]);
-            position++;
-            return kvp;
+            offset++;
+            return new KeyValuePair(keyIter.next(), valueIter.next());
         }
     }
 
@@ -201,7 +187,21 @@ public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return OrderedMap.copy(this).put(key, value);
+        int offset = getOffset(key);
+        if (offset >= 0) {
+            // Key is already present. Modify the values array, leave the keys and the index
+            // unchanged.
+            ZenoChain<GroundedValue> values2 = values.replace(offset, value);
+            return new ExtensibleMap(keys, values2, index, removals);
+        } else {
+            // New key, add it at the end after all existing entries
+            int last = keys.size();
+            ZenoChain<AtomicValue> keys2 = keys.add(key);
+            ZenoChain<GroundedValue> values2 = values.add(value);
+            HashMap<AtomicMatchKey, Integer> index2 = index.put(key.asMapKey(), last);
+            return new ExtensibleMap(keys2, values2, index2, removals);
+        }
+
     }
 
     /**
@@ -213,7 +213,16 @@ public class FixedMap extends MapItem implements Iterable<KeyValuePair> {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return OrderedMap.copy(this).remove(key);
+        int offset = getOffset(key);
+        if (offset == -1) {
+            return this;
+        }
+        ExtensibleMap result = new ExtensibleMap(keys, values, index, removals.add(offset));
+        if (removals.size() * 4 > result.size()) {
+            // rebuild the map, thus clearing the removals list
+            return ExtensibleMap.copyOf(result);
+        }
+        return result;
     }
 
 }

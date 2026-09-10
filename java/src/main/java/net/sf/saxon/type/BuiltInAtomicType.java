@@ -13,7 +13,7 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.ma.map.StringMapItem;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -1498,7 +1498,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     }
 
     @Override
-    public StringMapItem getLabel() {
+    public MapItem getLabel() {
         return null;
     }
 

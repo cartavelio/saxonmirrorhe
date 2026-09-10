@@ -317,7 +317,8 @@ public class Predicates {
      * @param value the atomic value to be compared with
      * @return a Predicate which returns true when applied to a value that is equal to the supplied
      * value under the "is-same-key" comparison rules. (These are the rules used to compare key values
-     * in an XDM map. The rules are chosen to be context-free, error-free, and transitive.)
+     * in an XDM map. The rules are chosen to be context-free, error-free, and transitive. The
+     * rules used are the XPath 4.0 rules.)
      */
 
     public static Predicate<XdmAtomicValue> eq(XdmAtomicValue value) {

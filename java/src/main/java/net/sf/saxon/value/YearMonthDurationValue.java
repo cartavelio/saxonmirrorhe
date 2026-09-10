@@ -294,7 +294,8 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
      * Returns null if the value is not comparable according to XPath rules. The default implementation
      * returns the value itself. This is modified for types such as
      * xs:duration which allow ordering comparisons in XML Schema, but not in XPath.
-     *  @param collator for comparing strings - not used
+     *
+     * @param collator         for comparing strings - not used
      * @param implicitTimezone implicit timezone in the dynamic context - not used
      */
 

@@ -29,10 +29,7 @@ import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.NodeKindType;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.*;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -40,21 +37,17 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * Interface supported by different implementations of an XDM map item
+ * Abstract superclass for different implementations of an XDM map item
  *
  * <p>The main implementations of {@code MapItem} are as follows:</p>
  *
  * <ul>
  *     <li>{@link EmptyMap} - an empty map</li>
  *     <li>{@link SingleEntryMap} - a map with exactly one entry</li>
- *     <li>{@link OrderedMap} - a fully "functional" map implementation of ordered maps,
+ *     <li>{@link ExtensibleMap} - a fully "functional" map implementation of ordered maps,
  *     with constant-time {@code put} and {@code remove} operations, based on the
  *     CHAMP fork of the VAVR library LinkedHashMap</li>
- *     <li>{@link OrderedStringMap} - a fully "functional" map implementation of ordered maps,
- *     with constant-time {@code put} and {@code remove} operations, based on the
- *     CHAMP fork of the VAVR library LinkedHashMap; but confined to keys whose type
- *     annotation is xs:string. Useful, for example, for the output of JSON or CSV parsing.</li>
- *     <li>{@link SimpleMap} - an implementation backed by a Java {@code HashMap}. Can
+ *     <li>{@link AbstractFixedMap} - an implementation backed by a Java {@code HashMap}. Can
  *     handle any keys and values, but a {@code put} or {@code remove} operation causes
  *     the data to be bulk-copied to a more flexible structure. Useful when changes to
  *     the map (after initial building) are unlikely, and when there is no requirement
@@ -65,10 +58,6 @@ import java.util.Stack;
  *     <li>{@link com.saxonica.xsltextn.pedigree.DelegatingMapItem} - a map that
  *     augments an underlying map with additional functinolity, such as the ability
  *     to attach labels.</li>
- *     <li>{@link LazyStringMap} - a simple list of key/value pairs with no indexing.
- *     Indexing is deferred until the first call on {@code get()}. Useful for example
- *     when parsing JSON, when it's likely that many maps will either be serialized
- *     unchanged, or discarded, but never queried.</li>
  *     <li>{@link RangeKey} - a sorted map used to support Saxon extensions</li>
  * </ul>
  */
@@ -81,6 +70,20 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      */
 
     abstract public GroundedValue get(AtomicValue key);
+
+    /**
+     * Get an entry from the Map using a string-valued key. The method call
+     * <code>getU(key)</code> is guaranteed to return the same result as
+     * <code>get(new StringValue(key))</code>; it is provided for convenience
+     * and efficiency when accessing maps whose keys are known to be strings.
+     *
+     * @param key the required key
+     * @return the value associated with the given key, or null if the key is not present in the map.
+     */
+
+    public GroundedValue getU(UnicodeString key) {
+        return get(new StringValue(key));
+    }
 
 
     /**

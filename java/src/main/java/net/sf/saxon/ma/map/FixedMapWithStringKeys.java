@@ -2,17 +2,28 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.StringValue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class FixedMapWithAnyKeys extends FixedMap {
+/**
+ * A variant of the {@link FixedMap} map implementation optimized for the case where
+ * the keys are all instances of {@code xs:string}. This saves space because it avoids
+ * the need (a) to wrap the {@link UnicodeString} values in a {@link StringValue}, and (b)
+ * to store a type annotation (as this is always {@code xs:string}
+ */
+public class FixedMapWithStringKeys extends AbstractFixedMap {
 
-    private final AtomicValue[] keys;
+    private final UnicodeString[] keys;
 
     @Override
     protected AtomicValue getKey(int offset) {
-        return keys[offset];
+        return new StringValue(keys[offset]);
     }
 
     /**
@@ -27,13 +38,41 @@ public class FixedMapWithAnyKeys extends FixedMap {
      * @param index  a hash map indexing the values
      */
 
-    protected FixedMapWithAnyKeys(AtomicValue[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
+    protected FixedMapWithStringKeys(UnicodeString[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
         assert keys.length == values.length;
         this.keys = keys;
         this.values = values;
         this.index = index;
     }
 
+    public static FixedMapWithStringKeys fromJavaMap(Map<UnicodeString, GroundedValue> map) {
+        List<UnicodeString> keys = new ArrayList<>(map.size());
+        List<GroundedValue> values = new ArrayList<>(map.size());
+        for (Map.Entry<UnicodeString, GroundedValue> entry : map.entrySet()) {
+            keys.add(entry.getKey());
+            values.add(entry.getValue());
+        }
+        return new FixedMapWithStringKeys(keys.toArray(new UnicodeString[0]),
+                                          values.toArray(new GroundedValue[0]),
+                                          null);
+    }
+
+    /**
+     * Get an entry from the map, supplying a {@link UnicodeString} as the key
+     *
+     * @param key the key
+     * @return the relevant entry if present, or null if absent.
+     */
+
+    @Override
+    public GroundedValue getU(UnicodeString key) {
+        ensureIndexed();
+        Integer offset = index.get(key);
+        if (offset == null) {
+            return null;
+        }
+        return values[offset];
+    }
 
 }
 

@@ -7,8 +7,10 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.Version;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.jiter.MappingJavaIterator;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.Int64Value;
@@ -62,11 +64,11 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     private static MapItem fromJavaMap(Map<? extends XdmAtomicValue, ? extends XdmValue> map) {
-        MapBuilder val = SimpleMap.getBuilder();
+        GeneralMapBuilder val = AbstractFixedMap.getBuilder();
         for (Map.Entry<? extends XdmAtomicValue, ? extends XdmValue> entry : map.entrySet()) {
             val.put(entry.getKey().getUnderlyingValue(), entry.getValue().getUnderlyingValue());
         }
-        return val.getCompletedMap();
+        return val.getCompletedMapConfidently();
     }
 
     /**
@@ -228,7 +230,7 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     /**
-     * Removes all of the mappings from this map (optional operation).
+     * Removes all the mappings from this map (optional operation).
      * The map will be empty after this call returns.
      *
      * @throws UnsupportedOperationException if the <code>clear</code> operation
@@ -390,11 +392,14 @@ public class XdmMap extends XdmFunctionItem {
      * @param <V> the type of the values
      * @return the resulting XdmMap
      * @throws IllegalArgumentException if any value in the input map cannot be converted
-     * to a corresponding XDM value.
+     * to a corresponding XDM value; or if two keys in the input map, which are non-equal
+     * to each other as Java values, produce XDM items that are equal to each other as
+     * XDM values. The comparison semantics used depend on the setting of the static
+     * variable {@link Version#MAP_SPEC_VERSION}.
      */
 
     public static <K, V> XdmMap makeMap(Map<K, V> input) throws IllegalArgumentException {
-        MapBuilder result = SimpleMap.getBuilder();
+        GeneralMapBuilder result = AbstractFixedMap.getBuilder();
         for (Map.Entry<K, V> entry : input.entrySet()) {
             K key = entry.getKey();
             V value = entry.getValue();
@@ -402,7 +407,11 @@ public class XdmMap extends XdmFunctionItem {
             XdmValue xValue = XdmValue.makeValue(value);
             result.put(xKey.getUnderlyingValue(), xValue.getUnderlyingValue());
         }
-        return new XdmMap(result.getCompletedMap());
+        try {
+            return new XdmMap(result.getCompletedMap());
+        } catch (XPathException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     private static class XdmMapEntry implements Map.Entry<XdmAtomicValue, XdmValue> {

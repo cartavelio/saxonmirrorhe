@@ -2181,7 +2181,6 @@ public class XPathParser {
             case "map":
                 return parseMapItemType();
             case "array":
-                checkLanguageVersion40();
                 return parseArrayItemType();
             case "fn":
                 checkLanguageVersion40();
@@ -4264,6 +4263,7 @@ public class XPathParser {
     /*@NotNull*/
     protected Expression parseMapConstructor() throws XPathException {
         checkMapExtensions();
+        int version = env.getXPathVersion();
 
         // have read the "map {" or bare "{"
         int offset = t.currentTokenStartOffset;
@@ -4289,7 +4289,7 @@ public class XPathParser {
                     nextToken();
                     Expression value = parseExprSingle();
                     operands.add(
-                            MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(key, value));
+                            MapFunctionSet.getInstance(version).makeFunction("entry", 2).makeFunctionCall(key, value));
                     if (!(value instanceof Literal)) {
                         allLiteralValues = false;
                     }
@@ -4328,11 +4328,11 @@ public class XPathParser {
                             value.getGroundedValue());
                     result = Literal.makeLiteral(sem);
                 } else {
-                    MapBuilder optionsBuilder = SimpleMap.getBuilder();
+                    GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder();
                     optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
                     optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.FALSE);
                     MapItem optionsMap = optionsBuilder.getCompletedMap();
-                    result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
+                    result = MapFunctionSet.getInstance(version).makeFunction("merge", 2)
                             .makeFunctionCall(operands.get(0), Literal.makeLiteral(optionsMap));
                 }
 
@@ -4391,7 +4391,7 @@ public class XPathParser {
                     if (allLiteralKeys) {
                         optionsMap = EmptyMap.getInstance();
                     } else {
-                        MapBuilder optionsBuilder = SimpleMap.getBuilder();
+                        GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder();
                         optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
                         optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
                         optionsMap = optionsBuilder.getCompletedMap();

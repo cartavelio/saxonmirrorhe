@@ -6,7 +6,27 @@ import net.sf.saxon.value.AtomicValue;
 
 import java.util.HashMap;
 
-public class FixedMapWithAnyKeys extends FixedMap {
+/**
+ * A general-purpose XDM map implementation that is ordered, that holds any kind of key,
+ * and that supports incremental modification only by copying the whole map to a different
+ * structure.
+ *
+ * <p>The implementation is based on an array of keys, an array of corresponding values,
+ * and a mutable Java {@code java.util.HashMap} (but encapsulated
+ * so no mutation can take place after the map has been built) that maps atomic match keys
+ * to integer positions in the array. If put or remove operations
+ * are subsequently attempted, the map is copied to a different implementation structure
+ * that supports functional modification.</p>
+ *
+ * <p>The underlying implementation uses an instance of {@code HashMap<AtomicMatchKey, KeyValuePair>}
+ * For many data types this means that the key is held twice, once as the key, and once as part
+ * of the value. The reason for this is that the <code>keys()</code> function needs to return
+ * the original keys as supplied, complete with type annotation, which would not (always) have
+ * the same equality semantics. The {@code AtomicMatchKey} is computed from the actual key
+ * and in some cases is simply a wrapper with a different <code>equals()</code> method.</p>
+ */
+
+public class FixedMap extends AbstractFixedMap {
 
     private final AtomicValue[] keys;
 
@@ -27,7 +47,7 @@ public class FixedMapWithAnyKeys extends FixedMap {
      * @param index  a hash map indexing the values
      */
 
-    protected FixedMapWithAnyKeys(AtomicValue[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
+    protected FixedMap(AtomicValue[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
         assert keys.length == values.length;
         this.keys = keys;
         this.values = values;

@@ -84,14 +84,6 @@ public class XSLIterate extends StyleElement {
                 case "select":
                     select = makeExpression(value, att);
                     break;
-//                case "array":
-//                    requireXslt40("array");
-//                    select = arrayToSequence(makeExpression(value, att));
-//                    break;
-//                case "map":
-//                    requireXslt40("map");
-//                    select = mapToSequence(makeExpression(value, att));
-//                    break;
                 default:
                     checkUnknownAttribute(attName);
                     break;

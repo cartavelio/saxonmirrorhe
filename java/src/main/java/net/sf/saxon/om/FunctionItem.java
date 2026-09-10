@@ -120,6 +120,17 @@ public interface FunctionItem extends Item, Callable, GroundedValue {
 
     boolean deepEquals(FunctionItem other, XPathContext context, AtomicMatcher comparer, int flags) throws XPathException;
 
+    /**
+     * Test whether this FunctionItem is deep-equal to another function item,
+     * under the rules of the deep-equal function in XPath 4.0
+     *
+     * @param other    the other function item
+     * @param context  the dynamic evaluation context
+     * @param options  the options supplied to the deep-equal function
+     * @return true if the two function items are deep-equal
+     * @throws XPathException if the comparison cannot be performed
+     */
+
     boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual.DeepEqualOptions options) throws XPathException;
 
     /**

@@ -348,7 +348,7 @@ public class GroupByClause extends Clause {
             for (int i=0; i<groupingValues.length; i++) {
                 matchKeys[i] = groupingValues[i] == null
                         ? null
-                        : groupingValues[i].getXPathTransitiveMatchKey(collators[i], implicitTimezone);
+                        : groupingValues[i].getXPathMatchKey(collators[i], implicitTimezone);
             }
         }
 

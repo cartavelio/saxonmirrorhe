@@ -23,8 +23,8 @@ import java.util.List;
  */
 public class GeneralMapBuilder {
 
-    private final List<AtomicValue> keys = new ArrayList<>();
-    private final List<GroundedValue> values = new ArrayList<>();
+    protected final List<AtomicValue> keys = new ArrayList<>();
+    protected final List<GroundedValue> values = new ArrayList<>();
 
     /**
      * Callback function to combine two values (for duplicate keys) into one. If
@@ -118,7 +118,7 @@ public class GeneralMapBuilder {
             // If there are possible duplicates, then we build the map now, with a more thorough
             // check for duplicates as we build it.
 
-            MapItem map = new OrderedMap();
+            MapItem map = new ExtensibleMap();
             Iterator<GroundedValue> valueIter = values.iterator();
             for (AtomicValue key : keys) {
                 GroundedValue value;
@@ -171,9 +171,11 @@ public class GeneralMapBuilder {
             for (AtomicValue k : keys) {
                 stringKeys.add(k.getUnicodeStringValue());
             }
-            return new LazyStringMap(stringKeys, values);
+            return new FixedMapWithStringKeys(stringKeys.toArray(new UnicodeString[0]),
+                                              values.toArray(new GroundedValue[0]),
+                                              null);
         } else {
-            MapItem map = new OrderedMap();
+            MapItem map = new ExtensibleMap();
             Iterator<GroundedValue> valueIter = values.iterator();
             for (AtomicValue key : keys) {
                 GroundedValue value;

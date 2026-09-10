@@ -562,7 +562,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                                 if (val == null) {
                                     return EmptyIterator.getInstance();
                                 }
-                                JNode j = new ChildJNode(((JNode) origin), 1, key, val, -1);
+                                JNode j = new JNodeForMapEntry(((JNode) origin), 1, key, val, -1);
                                 return new SingletonIterator(j);
                             }
                             Set<AtomicMatchKey> matchKeys = new HashSet<>();
@@ -573,7 +573,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                             int serialNr = 0;
                             for (KeyValuePair pair : ((MapItem) content).keyValuePairs()) {
                                 if (matchKeys.contains(pair.key.asMapKey())) {
-                                    result.add(new ChildJNode((JNode) origin, 1, pair.key, pair.value, serialNr));
+                                    result.add(new JNodeForMapEntry((JNode) origin, 1, pair.key, pair.value, serialNr));
                                 }
                                 serialNr++;
                             }
@@ -583,22 +583,23 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                                 return EmptyIterator.getInstance();
                             }
                             if (selection.getLength() == 1) {
-                                AtomicValue key = (AtomicValue) selection.head();
-                                int index = -1;
-                                if (key instanceof IntegerValue) {
-                                    index = ((IntegerValue) key).asSubscript();
-                                } else if (key instanceof NumericValue) {
-                                    if (((NumericValue) key).isWholeNumber()) {
+                                AtomicValue key = (AtomicValue)selection.head();
+                                if (key instanceof NumericValue) {
+                                    int index;
+                                    if (key instanceof IntegerValue) {
+                                        index = ((IntegerValue) key).asSubscript();
+                                    } else if (((NumericValue) key).isWholeNumber()) {
                                         index = (int) ((NumericValue) key).longValue();
+                                    } else {
+                                        return EmptyIterator.getInstance();
+                                    }
+                                    if (index >= 1 && index <= ((ArrayItem) content).arrayLength()) {
+                                        GroundedValue val = ((ArrayItem) content).get(index - 1);
+                                        JNode j = new JNodeForArrayMember(((JNode) origin), 1, new Int64Value(index), val);
+                                        return new SingletonIterator(j);
                                     }
                                 }
-                                if (index >= 1 && index <= ((ArrayItem) content).arrayLength()) {
-                                    GroundedValue val = ((ArrayItem) content).get(index - 1);
-                                    JNode j = new ChildJNode(((JNode) origin), 1, key, val, index - 1);
-                                    return new SingletonIterator(j);
-                                } else {
-                                    return EmptyIterator.getInstance();
-                                }
+                                return EmptyIterator.getInstance();
                             }
                             IntSet matchKeys = new IntHashSet(selection.getLength());
                             for (Item it : selection.asIterable()) {
@@ -612,7 +613,7 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                             int index = 1;
                             for (GroundedValue member : ((ArrayItem) content).members()) {
                                 if (matchKeys.contains(index)) {
-                                    result.add(new ChildJNode((JNode) origin, 1, Int64Value.makeIntegerValue(index), member, index - 1));
+                                    result.add(new JNodeForArrayMember((JNode) origin, 1, Int64Value.makeIntegerValue(index), member));
                                 }
                                 index++;
                             }

@@ -2,56 +2,22 @@ package net.sf.saxon.ma.jnode;
 
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
 
 import java.util.Iterator;
 
-public class ChildJNode extends JNode implements SiblingCountingNode {
-    private final JNode parent;
-    private final int position;
-    private final AtomicValue selector;
-    private final GroundedValue value;
-    private int serialNr;
+public class JNodeForArrayMember extends ChildJNode implements SiblingCountingNode {
 
-    public ChildJNode(JNode parent, int position, AtomicValue selector, GroundedValue value, int serialNr) {
-        this.parent = parent;
-        this.position = position;
-        this.selector = selector;
-        this.value = value;
-        this.serialNr = serialNr;
-    }
-
-    @Override
-    public GroundedValue getContent() {
-        return value;
-    }
-
-
-    @Override
-    public int getPosition() {
-        return position;
-    }
-
-    @Override
-    public AtomicValue getSelector() {
-        return selector;
-    }
-
-    @Override
-    public JNode getParent() {
-        return parent;
+    public JNodeForArrayMember(JNode parent, int position, Int64Value selector, GroundedValue value) {
+        super(parent, position, selector, value);
     }
 
     /**
@@ -61,30 +27,7 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
      */
     @Override
     public int getSiblingPosition() {
-        if (serialNr == -1) {
-            allocateSerialNr();
-        }
-        return serialNr;
-    }
-
-    public SequenceIterator getChildren() {
-        return new JNodeChildIterator(this);
-    }
-
-    /**
-     * Get an iterator over the child axis, starting at this node; the nodes will
-     * be in document order.
-     *
-     * @param predicate a condition that the nodes must satisfy, or null
-     * @return the required iterator
-     */
-    @Override
-    public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        JNodeChildIterator iter = new JNodeChildIterator(this);
-        if (predicate != null) {
-            return Navigator.filter(iter, predicate);
-        }
-        return iter;
+        return (int) ((Int64Value) selector).longValue();
     }
 
     /**
@@ -96,31 +39,17 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        if (parent.getContent() instanceof MapItem) {
-            Iterator<KeyValuePair> iter = ((MapItem)parent.getContent()).followingKeyValuePairs(getSelector());
-            final int startPos = serialNr + 1;
-            SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
-                    iter,
-                    (kvp, position) -> new ChildJNode(parent, getPosition(),
-                                                      kvp.key,
-                                                      kvp.value,
-                                                      position + startPos));
-            return Navigator.filter(all, predicate);
-        }
-        if (parent.getContent() instanceof ArrayItem) {
-            ArrayItem wholeArray = (ArrayItem) parent.getContent();
-            ArrayItem subarray = wholeArray.subArray(((IntegerValue)getSelector()).asSubscript(), wholeArray.arrayLength());
-            Iterator<GroundedValue> iter = subarray.members().iterator();
-            final int startPos = serialNr + 1;
-            SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
-                    iter,
-                    (mem, position) -> new ChildJNode(parent, getPosition(),
-                                                      new Int64Value(position + startPos + 1),
-                                                      mem,
-                                                      position + startPos));
-            return Navigator.filter(all, predicate);
-        }
-        throw new UnsupportedOperationException();
+        ArrayItem wholeArray = (ArrayItem) parent.getContent();
+        ArrayItem subarray = wholeArray.subArray(((IntegerValue)getSelector()).asSubscript(), wholeArray.arrayLength());
+        Iterator<GroundedValue> iter = subarray.members().iterator();
+        final int startPos = getSiblingPosition() + 1;
+        SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
+                iter,
+                (mem, position) -> new JNodeForArrayMember(parent, getPosition(),
+                                                           new Int64Value(position + startPos + 1),
+                                                           mem
+                ));
+        return Navigator.filter(all, predicate);
     }
 
     /**
@@ -132,31 +61,19 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        if (parent.getContent() instanceof MapItem) {
-            Iterator<KeyValuePair> iter = ((MapItem) parent.getContent()).precedingKeyValuePairs(getSelector());
-            final int endPos = serialNr - 1;
-            SequenceIterator all = new SequenceIteratorOverJavaIterator<>(
-                    iter,
-                    (kvp, position) -> new ChildJNode(parent, getPosition(), kvp.key, kvp.value, endPos - position));
-            return Navigator.filter(all, predicate);
-        }
-        if (parent.getContent() instanceof ArrayItem) {
-            ArrayItem wholeArray = (ArrayItem) parent.getContent();
-            int thisSubscript = ((IntegerValue) getSelector()).asSubscript();
-            ArrayItem subarray = wholeArray.subArray(0, thisSubscript - 1);
-            Iterator<GroundedValue> iter = subarray.members().iterator();
-            final int startPos = thisSubscript - 1;
-            SequenceIterator forwards = new SequenceIteratorOverJavaIterator<>(
-                    iter,
-                    (mem, position) -> new ChildJNode(parent,
-                                                      getPosition(),
-                                                      new Int64Value(position + 1),
-                                                      mem,
-                                                      startPos - position));
-            SequenceIterator all = Reverse.getReverseIterator(forwards);
-            return Navigator.filter(all, predicate);
-        }
-        throw new UnsupportedOperationException();
+        ArrayItem wholeArray = (ArrayItem) parent.getContent();
+        int thisSubscript = getSiblingPosition();
+        ArrayItem subarray = wholeArray.subArray(0, thisSubscript - 1);
+        Iterator<GroundedValue> iter = subarray.members().iterator();
+        SequenceIterator forwards = new SequenceIteratorOverJavaIterator<>(
+                iter,
+                (mem, position) -> new JNodeForArrayMember(parent,
+                                                           getPosition(),
+                                                           new Int64Value(position + 1),
+                                                           mem
+                ));
+        SequenceIterator all = Reverse.getReverseIterator(forwards);
+        return Navigator.filter(all, predicate);
     }
 
     /**
@@ -181,45 +98,24 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
         if (other instanceof RootJNode) {
             return -other.compareOrder(this);
         }
-        if (getParent().getContent() == ((JNode)other.getParent()).getContent()) {
-            // Comparing two entries in the same map or array
-            if (serialNr == -1) {
-                allocateSerialNr();
-            }
-            if (((ChildJNode)other).serialNr == -1) {
-                ((ChildJNode) other).allocateSerialNr();
-            }
-            return serialNr - ((ChildJNode) other).serialNr;
+        if (getParent().equals(other.getParent())) {
+            // Comparing two members in the same array
+            return getSiblingPosition() - ((JNodeForArrayMember) other).getSiblingPosition();
         }
         return Navigator.compareOrder(this, (SiblingCountingNode)other);
     }
 
     public boolean equals(Object other) {
-        return other instanceof ChildJNode
-                && getParent().equals(((ChildJNode)other).getParent())
-                && getSelector().asMapKey().equals(((ChildJNode) other).getSelector().asMapKey())
-                && getPosition() == ((ChildJNode) other).getPosition();
+        return other instanceof JNodeForArrayMember
+                && getParent().equals(((JNodeForArrayMember)other).getParent())
+                && getSiblingPosition() == (((JNodeForArrayMember) other).getSiblingPosition())
+                && getPosition() == ((JNodeForArrayMember) other).getPosition();
     }
 
     public int hashCode() {
         return getParent().hashCode()
-                ^ getSelector().asMapKey().hashCode()
-                ^ getPosition();
-    }
-
-    private void allocateSerialNr() {
-        if (parent.getContent() instanceof MapItem) {
-            Iterator<KeyValuePair> iter = ((MapItem) parent.getContent()).precedingKeyValuePairs(getSelector());
-            int count = 0;
-            while (iter.hasNext()) {
-                count++;
-                iter.next();
-            }
-            this.serialNr = count;
-        }
-        if (parent.getContent() instanceof ArrayItem) {
-            this.serialNr = (int)((Int64Value)selector).longValue();
-        }
+                ^ getSiblingPosition() << 12
+                ^ getPosition() << 24;
     }
 
     /**
@@ -234,69 +130,7 @@ public class ChildJNode extends JNode implements SiblingCountingNode {
     @Override
     public void generateId(StringBuilder buffer) {
         getParent().generateId(buffer);
-        buffer.append("c").append(serialNr);
-    }
-
-
-    /**
-     * Iterator over the children of this JNode
-     */
-
-    private static class JNodeChildIterator implements SequenceIterator {
-
-        private final ChildJNode origin;
-        private final SequenceIterator valueIterator;
-        private Iterator<KeyValuePair> mapEntryIterator;
-        private Iterator<GroundedValue> arrayEntryIterator;
-        private int position = 0;
-        private int arrayIndex = 0;
-        private int serialNr = 0;
-
-        public JNodeChildIterator(ChildJNode origin) {
-            this.origin = origin;
-            valueIterator = origin.getContent().iterate();
-        }
-
-        /**
-         * Get the next item in the sequence.
-         */
-        @Override
-        public GNode next() {
-            if (mapEntryIterator != null) {
-                if (mapEntryIterator.hasNext()) {
-                    KeyValuePair nextItem = mapEntryIterator.next();
-                    return new ChildJNode(
-                            origin, position, nextItem.key, nextItem.value, serialNr++);
-                } else {
-                    mapEntryIterator = null;
-                }
-            }
-            if (arrayEntryIterator != null) {
-                if (arrayEntryIterator.hasNext()) {
-                    GroundedValue nextMember = arrayEntryIterator.next();
-                    return new ChildJNode(
-                            origin, position, Int64Value.makeIntegerValue(++arrayIndex), nextMember, serialNr++);
-                } else {
-                    arrayEntryIterator = null;
-                }
-            }
-            while (true) {
-                position++;
-                Item nextInValue = valueIterator.next();
-                if (nextInValue == null) {
-                    return null;
-                }
-                if (nextInValue instanceof ArrayItem) {
-                    arrayEntryIterator = ((ArrayItem) nextInValue).members().iterator();
-                    arrayIndex = 0;
-                    return next();
-                }
-                if (nextInValue instanceof MapItem) {
-                    mapEntryIterator = ((MapItem) nextInValue).keyValuePairs().iterator();
-                    return next();
-                }
-            }
-        }
+        buffer.append("m").append(getSiblingPosition());
     }
 
 

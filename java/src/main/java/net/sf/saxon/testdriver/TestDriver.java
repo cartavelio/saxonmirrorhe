@@ -163,9 +163,6 @@ public abstract class TestDriver {
             if (args[i].equals("-T")) {
                 tracing = true;
             }
-            if (args[i].startsWith("-bytecode:")) {
-                System.err.println("***WARNING*** -bytecode option is ignored") ;
-            }
             if (args[i].startsWith("-streaming:")) {
                 switch (argValue) {
                     case "off":
@@ -190,6 +187,9 @@ public abstract class TestDriver {
             }
             if (args[i].startsWith("-lang:")) {
                 lang = argValue;
+                if (argValue.endsWith("40")) {
+                    Version.MAP_SPEC_VERSION = 40;
+                }
                 processSpec(argValue);
             }
             // Temporary for controlling test processor

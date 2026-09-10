@@ -32,7 +32,7 @@ import java.util.NoSuchElementException;
  * and in some cases is simply a wrapper with a different <code>equals()</code> method.</p>
  */
 
-public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair> {
+public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyValuePair> {
 
     protected GroundedValue[] values;
     protected HashMap<AtomicMatchKey, Integer> index;
@@ -53,7 +53,7 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
                     throw new XPathException("Duplicate key " + Err.depict(keyArray[i]) + " in map", "FOJS0003");
                 }
             }
-            return new FixedMapWithAnyKeys(keyArray, valueArray, index);
+            return new FixedMap(keyArray, valueArray, index);
         }
 
         /**
@@ -70,18 +70,18 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
             for (int i = 0; i < keyArray.length; i++) {
                 index.put(keyArray[i].asMapKey(), i);
             }
-            return new FixedMapWithAnyKeys(keyArray, valueArray, index);
+            return new FixedMap(keyArray, valueArray, index);
         }
     }
 
     /**
      * Factory method to get a MapBuilder which can be used to construct an instance
-     * of a {@link FixedMap}
+     * of a {@link AbstractFixedMap}
      *
      * @return a class for building fixed maps
      */
     public static GeneralMapBuilder getBuilder() {
-        return new FixedMap.FixedMapBuilder();
+        return new AbstractFixedMap.FixedMapBuilder();
     }
 
     /**
@@ -92,7 +92,7 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        ensureIndex();
+        ensureIndexed();
         Integer offset = index.get(key.asMapKey());
         if (offset == null) {
             return null;
@@ -101,7 +101,7 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
     }
 
     public int getIndex(AtomicValue key) {
-        ensureIndex();
+        ensureIndexed();
         Integer offset = index.get(key.asMapKey());
         if (offset == null) {
             return -1;
@@ -109,7 +109,14 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
         return offset;
     }
 
-    protected void ensureIndex() {
+    /**
+     * Ensure that an index exists, creating it if necessary. In many cases an index
+     * is only created on the first call on {@link #get(AtomicValue)}. This is because
+     * in scenarios such as JSON transformation there may be many maps generated during
+     * JSON parsing that are never referenced, or that are copied directly to the serialized
+     * output without ever being accessed by key.
+     */
+    protected synchronized void ensureIndexed() {
         if (index == null) {
             index = new HashMap<>(size());
             for (int i = 0; i < size(); i++) {
@@ -128,10 +135,17 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
         return values.length;
     }
 
+    /**
+     * Get the key at a given offset. This method is provided for use by subclasses,
+     * which can store the actual key in different ways.
+     * @param offset the offset (sibling position within the ordered map) of the required key
+     * @return the key at the specified position
+     */
+
     protected abstract AtomicValue getKey(int offset);
 
     /**
-     * Get the content as an iterable collection of key value pairs
+     * Get the content of the map as an iterable collection of key value pairs
      * @return an iterable collection of key value pairs
      */
 
@@ -151,7 +165,7 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
 
     private class KeyValuePairIterator implements Iterator<KeyValuePair> {
 
-        int position = 0;
+        int offset = 0;
 
         /**
          * Returns {@code true} if the iteration has more elements.
@@ -162,7 +176,7 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
          */
         @Override
         public boolean hasNext() {
-            return position < values.length;
+            return offset < values.length;
         }
 
         /**
@@ -173,11 +187,11 @@ public abstract class FixedMap extends MapItem implements Iterable<KeyValuePair>
          */
         @Override
         public KeyValuePair next() {
-            if (position >= values.length) {
+            if (offset >= values.length) {
                 throw new NoSuchElementException();
             }
-            KeyValuePair kvp = new KeyValuePair(getKey(position), values[position]);
-            position++;
+            KeyValuePair kvp = new KeyValuePair(getKey(offset), values[offset]);
+            offset++;
             return kvp;
         }
     }

@@ -192,13 +192,8 @@ public class DeepEqual extends CollatingFunctionFixed {
             if (stringCollator == null) {
                 throw new XPathException("Unknown collation " + collationName, "FOCH0002");
             }
-            if (version >= 40) {
-                comparer = (a, b) -> a.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone())
-                        .equals(b.getXPathTransitiveMatchKey(stringCollator, context.getImplicitTimezone()));
-            } else {
-                comparer = (a, b) -> a.getXPathMatchKey(stringCollator, context.getImplicitTimezone())
+            comparer = (a, b) -> a.getXPathMatchKey(stringCollator, context.getImplicitTimezone())
                         .equals(b.getXPathMatchKey(stringCollator, context.getImplicitTimezone()));
-            }
 
             if (normalizeSpace || normalizationForm != null) {
                 final BiFunction<AtomicValue, AtomicValue, Boolean> baseComparer = comparer;
@@ -1085,7 +1080,8 @@ public class DeepEqual extends CollatingFunctionFixed {
             options = new SingleEntryMap(new StringValue("collation"),
                                          new StringValue(getRetainedStaticContext().getDefaultCollationName()));
         } else if (optionsArg instanceof StringValue) {
-            options = new SingleEntryMap(new StringValue("collation"), optionsArg);
+            options = new SingleEntryMap(new StringValue("collation"),
+                                         optionsArg);
         } else {
             options = (MapItem) optionsArg;
         }

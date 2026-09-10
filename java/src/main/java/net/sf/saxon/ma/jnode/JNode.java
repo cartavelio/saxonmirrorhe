@@ -138,11 +138,11 @@ public abstract class JNode implements GNode {
         return "jnode(" + getContent().toShortString() + ")";
     }
 
-    /**
-     * Get an iterator over all the children of this JNode
-     * @return an iterator over the children
-     */
-    public abstract SequenceIterator getChildren();
+//    /**
+//     * Get an iterator over all the children of this JNode
+//     * @return an iterator over the children
+//     */
+//    public abstract SequenceIterator getChildren();
 
 
 }

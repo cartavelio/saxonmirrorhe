@@ -30,8 +30,7 @@ public class EmptyMap extends MapItem {
         return THE_INSTANCE;
     }
 
-    public EmptyMap() {
-
+    private EmptyMap() {
     }
 
     /**

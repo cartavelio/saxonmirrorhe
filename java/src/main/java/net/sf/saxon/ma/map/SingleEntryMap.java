@@ -170,7 +170,7 @@ public class SingleEntryMap extends MapItem {
      */
 
     private MapItem toGeneralMap() {
-        return new OrderedMap().put(key, value);
+        return ExtensibleMap.copyOf(this);
     }
 
     public String toString() {

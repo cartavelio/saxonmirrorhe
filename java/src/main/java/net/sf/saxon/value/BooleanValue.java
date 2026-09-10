@@ -178,13 +178,12 @@ public final class BooleanValue extends AtomicValue implements XPathComparable, 
      * returns null. This is overridden for types that allow ordered comparisons in XPath: numeric, boolean,
      * string, date, time, dateTime, yearMonthDuration, dayTimeDuration, and anyURI.
      *
-     *
-     * @param collator the collation to be used when comparing strings
-     * @param implicitTimezone  the XPath dynamic evaluation context, used in cases where the comparison is context
-     *                 sensitive
+     * @param collator         the collation to be used when comparing strings
+     * @param implicitTimezone the XPath dynamic evaluation context, used in cases where the comparison is context
+     *                         sensitive
      * @return an Object whose equals() and hashCode() methods implement the XPath comparison semantics
-     *         with respect to this atomic value. If ordered is specified, the result will either be null if
-     *         no ordering is defined, or will be a Comparable
+     * with respect to this atomic value. If ordered is specified, the result will either be null if
+     * no ordering is defined, or will be a Comparable
      */
 
     @Override

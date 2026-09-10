@@ -35,7 +35,6 @@ public class JsonHandlerMap extends JsonHandler {
 
     protected Stack<UnicodeString> keys;
     private GroundedValue nullRepresentation = EmptySequence.getInstance();
-    private boolean retainOrder = false;
     private final int flags;
     private MapFunctionSet.OnDuplicatesAction duplicatesCombiner = null;
 
@@ -51,7 +50,6 @@ public class JsonHandlerMap extends JsonHandler {
             duplicatesCombiner = (a, b, cxt) -> b;
         }
         escape = (flags & JsonParser.ESCAPE) != 0;
-        retainOrder = (flags & JsonParser.ORDER_RETAINED) != 0;
         charChecker = context.getConfiguration().getValidCharacterChecker();
     }
 

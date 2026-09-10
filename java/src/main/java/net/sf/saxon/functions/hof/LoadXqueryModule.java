@@ -226,7 +226,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         // Evaluate the global variables, and add values to the result.
 
-        MapBuilder variablesMapBuilder = SimpleMap.getBuilder();
+        GeneralMapBuilder variablesMapBuilder = AbstractFixedMap.getBuilder();
         for (GlobalVariable var : lib.getImportedGlobalVariables()) {
             GroundedValue value;
             QNameValue qNameValue = new QNameValue(var.getVariableQName(), BuiltInAtomicType.QNAME);

@@ -15,10 +15,7 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.ma.map.MapBuilder;
-import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.SimpleMap;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -125,7 +122,7 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
             optionsExp = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(
                     new StringLiteral("duplicates"), onDuplicates);
         } else {
-            MapBuilder optionsBuilder = SimpleMap.getBuilder();
+            GeneralMapBuilder optionsBuilder = AbstractFixedMap.getBuilder();
             optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
             optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
             optionsExp = Literal.makeLiteral(optionsBuilder.getCompletedMap());

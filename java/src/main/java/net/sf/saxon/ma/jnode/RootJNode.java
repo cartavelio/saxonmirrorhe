@@ -73,7 +73,6 @@ public class RootJNode extends JNode {
      * @return a sequence of JNodes that wrap the array members or map entries
      */
 
-    @Override
     public SequenceIterator getChildren() {
         if (value instanceof MapItem) {
             return new JNodeMapIterator(this);
@@ -179,7 +178,7 @@ public class RootJNode extends JNode {
         public GNode next() {
             if (mapEntryIterator.hasNext()) {
                 KeyValuePair nextItem = mapEntryIterator.next();
-                return new ChildJNode(origin, 1, nextItem.key, nextItem.value, serialNr++);
+                return new JNodeForMapEntry(origin, 1, nextItem.key, nextItem.value, serialNr++);
             } else {
                 return null;
             }
@@ -204,7 +203,7 @@ public class RootJNode extends JNode {
         public GNode next() {
             if (arrayEntryIterator.hasNext()) {
                 GroundedValue nextItem = arrayEntryIterator.next();
-                ChildJNode j = new ChildJNode(origin, 1, Int64Value.makeIntegerValue(index), nextItem, index-1);
+                JNodeForArrayMember j = new JNodeForArrayMember(origin, 1, Int64Value.makeIntegerValue(index), nextItem);
                 index++;
                 return j;
             } else {

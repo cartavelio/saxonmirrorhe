@@ -815,8 +815,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public void exportAdditionalArguments(SystemFunctionCall call, ExpressionPresenter out) throws XPathException {
             if (call.getArity() == 1) {
-                StringMapBuilder options = new StringMapBuilder(2).unordered();
-                options.setOrdered(false);
+                StringMapBuilder options = new StringMapBuilder(2);
                 String duplicates = "use-first";
                 options.put(new Twine8("duplicates"), new StringValue(duplicates));
                 Literal.exportValue(options.getCompletedMap(), out);

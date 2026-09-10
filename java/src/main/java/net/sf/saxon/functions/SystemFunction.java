@@ -58,6 +58,21 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
     }
 
     /**
+     * Make an expression that either calls this function, or that is equivalent to a call
+     * on this function
+     *
+     * @param arguments the supplied arguments to the function call
+     * @return either a function call on this function, or an expression that delivers
+     * the same result
+     */
+
+    public Expression makeFunctionCall(Expression... arguments) {
+        Expression e = new SystemFunctionCall(this, arguments);
+        e.setRetainedStaticContext(getRetainedStaticContext());
+        return e;
+    }
+
+    /**
      * Make a system function item (one in the standard function namespace).
      *
      * @param name      The local name of the function.
@@ -86,20 +101,6 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
         }
         fn.setRetainedStaticContext(rsc);
         return fn;
-    }
-
-    /**
-     * Make an expression that either calls this function, or that is equivalent to a call
-     * on this function
-     * @param arguments the supplied arguments to the function call
-     * @return either a function call on this function, or an expression that delivers
-     * the same result
-     */
-
-    public Expression makeFunctionCall(Expression... arguments) {
-        Expression e = new SystemFunctionCall(this, arguments);
-        e.setRetainedStaticContext(getRetainedStaticContext());
-        return e;
     }
 
     /**

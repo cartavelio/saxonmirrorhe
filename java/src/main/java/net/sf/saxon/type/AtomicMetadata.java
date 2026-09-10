@@ -1,12 +1,12 @@
 package net.sf.saxon.type;
 
-import net.sf.saxon.ma.map.StringMapItem;
+import net.sf.saxon.ma.map.MapItem;
 
 public interface AtomicMetadata {
 
     AtomicType getType();
 
-    StringMapItem getLabel();
+    MapItem getLabel();
 
 }
 
