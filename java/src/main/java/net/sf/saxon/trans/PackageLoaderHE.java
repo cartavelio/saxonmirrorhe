@@ -390,7 +390,7 @@ public class PackageLoaderHE implements IPackageLoader {
             }
             ItemType requiredType = parseItemTypeAttribute(varElement, "type");
             if (requiredType != null) {
-                req.addRequiredSequenceType(SequenceType.one(requiredType));
+                req.addRequiredSequenceType(SequenceType.one(requiredType), true);
             }
         }
     }

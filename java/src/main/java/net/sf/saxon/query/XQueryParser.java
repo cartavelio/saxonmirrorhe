@@ -166,12 +166,12 @@ public class XQueryParser extends XPathParser {
             }
             GlobalContextRequirement requirement = exec.getGlobalContextRequirement();
             if (requirement != null) {
-                requirement.addRequiredSequenceType(mainModule.getRequiredContextValueType());
+                requirement.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
             } else if (mainModule.getRequiredContextItemType() != null
                     && mainModule.getRequiredContextItemType() != AnyItemType.getInstance()) {
                 GlobalContextRequirement req = new GlobalContextRequirement();
                 req.setExternal(true);
-                req.addRequiredSequenceType(mainModule.getRequiredContextValueType());
+                req.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
                 exec.setGlobalContextRequirement(req);
             }
 
@@ -1750,7 +1750,8 @@ public class XQueryParser extends XPathParser {
                 requiredSequenceType = parseSequenceType();
             }
         }
-        req.addRequiredSequenceType(requiredSequenceType);
+
+        req.addRequiredSequenceType(requiredSequenceType, ((QueryModule)env).isMainModule());
         if (t.currentToken == Token.COLON_EQUALS) {
             if (!((QueryModule) env).isMainModule()) {
                 grumble("The context item must not be initialized in a library module", "XQST0113");
@@ -1801,7 +1802,7 @@ public class XQueryParser extends XPathParser {
                     }
                 }
             }
-            gcr.addRequiredSequenceType(requiredSequenceType);
+            gcr.addRequiredSequenceType(requiredSequenceType, ((QueryModule) env).isMainModule());
         } else {
             exec.setGlobalContextRequirement(req);
         }

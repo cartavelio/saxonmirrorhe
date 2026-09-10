@@ -83,8 +83,12 @@ public class GlobalContextRequirement {
      * @param requiredType the required item type
      */
 
-    public void addRequiredSequenceType(SequenceType requiredType) {
-        requiredTypes.add(requiredType);
+    public void addRequiredSequenceType(SequenceType requiredType, boolean isMainModule) {
+        if (isMainModule) {
+            requiredTypes.add(0, requiredType);
+        } else {
+            requiredTypes.add(requiredType);
+        }
     }
 
     /**

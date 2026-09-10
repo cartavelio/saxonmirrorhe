@@ -609,8 +609,7 @@ public class Executable {
 //                }
         // Issue 2040. For the time being, in 4.0, do coercion if there is only one required item type
         if (contextValue != null) {
-            if (topLevelPackage.getHostLanguageVersion() >= 40 &&
-                    globalContextRequirement.getRequiredTypes().size() == 1) {
+            if (topLevelPackage.getHostLanguageVersion() >= 40) {
                 SequenceType type = globalContextRequirement.getRequiredTypes().get(0);
                 CoercionRules rules = CoercionRules.forVersion(config, topLevelPackage.getHostLanguageVersion());
                 Sequence converted = rules.coerce(contextValue, type, SequenceType.ANY_SEQUENCE,

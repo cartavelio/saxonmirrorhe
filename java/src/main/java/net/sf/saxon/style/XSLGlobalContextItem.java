@@ -57,7 +57,7 @@ public class XSLGlobalContextItem extends XSLContextItem {
         prepareAttributes();
         GlobalContextRequirement req = new GlobalContextRequirement();
         req.setContextValueOptionality(getContextValueOptionality());
-        req.addRequiredSequenceType(SequenceType.one(getRequiredContextItemType()));
+        req.addRequiredSequenceType(SequenceType.one(getRequiredContextItemType()), true);
         try {
             top.getStylesheetPackage().setContextItemRequirements(req);
         } catch (XPathException e) {
