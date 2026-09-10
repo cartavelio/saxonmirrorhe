@@ -130,7 +130,8 @@ public class FormatDate extends SystemFunction implements Callable {
             sb.append("[Language: en]");
         }
         if (numberer.defaultedLocale() != null) {
-            sb.append("[Language: " + numberer.defaultedLocale().getLanguage() + "]");
+            sb.append("[Language: ").append(numberer.defaultedLocale().getLanguage())
+                    .append("]");
         }
 
 
@@ -555,11 +556,12 @@ public class FormatDate extends SystemFunction implements Callable {
             while (str.length() < min) {
                 str = str.concat(STR_0);
             }
-            if (str.length() > min)
-            while (str.length() > min && str.codePointAt(str.length() - 1) == '0') {
-                str = str.prefix(str.length() - 1);
+            if (str.length() > min) {
+                while (str.length() > min && str.codePointAt(str.length() - 1) == '0') {
+                    str = str.prefix(str.length() - 1);
+                }
             }
-            // for non standard decimal digit family
+            // for non-standard decimal digit family
             int zeroDigit = Alphanumeric.getDigitFamily(format.codePointAt(0));
             if (zeroDigit >= 0 && zeroDigit != '0') {
                 int[] digits = new int[10];
