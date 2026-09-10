@@ -18,6 +18,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/**
+ * This class implements the function <code>fn:csv-to-xdm()</code>, which is a proposed function for XPath 4.0
+ *
+ * <p>Calling this function with an input of CSV-formatted data, and an optional options hash, returns an XDM record
+ * type representing the CSV data, that is, a sequence containing a single {@link MapItem}.
+ * </p>
+ */
 public class CsvToXdm extends CsvFunction {
     static SequenceType NUMBER_OF_COLUMNS_TYPE;
     static {
@@ -37,15 +44,6 @@ public class CsvToXdm extends CsvFunction {
 
     private Map<String, GroundedValue> options;
 
-    /**
-     * Execute a dynamic call to the function
-     *
-     * @param context   the dynamic evaluation context
-     * @param arguments the values of the arguments, supplied as Sequences.
-     * @return the result of the evaluation, as a Sequence. It is the responsibility
-     * of the callee to ensure that the type of result conforms to the expected result type.
-     * @throws XPathException (should not happen)
-     */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Item arg0 = arguments[0].head();
@@ -66,6 +64,13 @@ public class CsvToXdm extends CsvFunction {
         return result;
     }
 
+    /**
+     * Handle validating option parameters that can't be handled using the <code>OptionsParameter</code> machinery.
+     *
+     * <p>Specifically, ensure that mutually exclusive options are not specified together, and that all integer value
+     * options are positive (>0), which is required, but we can't use <code>xs:positiveInteger</code> to enforce it
+     * through type checking.</p>
+     */
     static class OptionsParameterValidator {
         private final Map<String, GroundedValue> options;
 
@@ -73,6 +78,13 @@ public class CsvToXdm extends CsvFunction {
             this.options = options;
         }
 
+        /**
+         * Validate the supplied, processed, options map. Does not modify the map, simply returns nothing if they're
+         * okay, or throws the appropriate XPathException if they are not.
+         *
+         * @param options  the Map of options returned from processing with {@link OptionsParameter}
+         * @throws XPathException  thrown if the options are invalid
+         */
         public static void validate(Map<String, GroundedValue> options) throws XPathException {
             (new OptionsParameterValidator(options)).validate();
         }

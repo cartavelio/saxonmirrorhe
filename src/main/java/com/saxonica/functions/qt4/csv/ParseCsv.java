@@ -12,7 +12,8 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
 /**
- * Implements XPath 4 fn:parse-csv() to parse CSV data from an xs:string into an array of sequences, with header row information optionally returned
+ * Implements XPath 4 fn:parse-csv() to parse CSV data from an xs:string into an array of sequences, with header row
+ * information optionally returned
  */
 public class ParseCsv extends CsvFunction {
     public static OptionsParameter OPTION_DETAILS = coreOptions();
@@ -23,8 +24,8 @@ public class ParseCsv extends CsvFunction {
      *
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as Sequences.
-     * @return the result of the evaluation, as a Sequence. It is the responsibility
-     * of the callee to ensure that the type of result conforms to the expected result type.
+     * @return the result of the evaluation, as a Sequence. It is the responsibility of the callee to ensure that the
+     *         type of result conforms to the expected result type.
      * @throws XPathException (should not happen)
      */
     @Override
@@ -34,7 +35,7 @@ public class ParseCsv extends CsvFunction {
             return EMPTY_CSV;
         }
         StringValue input = (StringValue) arg0;
-        MapItem options  = new DictionaryMap();
+        MapItem options = new DictionaryMap();
         if (arguments.length >= 2) {
             options = (MapItem) arguments[1].head();
         }

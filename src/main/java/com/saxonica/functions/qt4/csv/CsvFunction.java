@@ -15,7 +15,16 @@ import net.sf.saxon.value.StringValue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * This abstract class provides shared option-handling support used by the functions <code>fn:parse-csv()</code>,
+ * <code>fn:csv-to-xdm()</code>, and <code>fn:csv-to-xml()</code>.
+ */
 public abstract class CsvFunction extends SystemFunction {
+    /**
+     * Provides an OptionsParameter with all the options used by every csv-* function.
+     *
+     * @return an OptionsParameter instance with the core options already added.
+     */
     static OptionsParameter coreOptions() {
         OptionsParameter opts = new OptionsParameter();
         List<StringValue> defaultRowDelimiter = Stream.of("\r\n", "\n", "\r").map(StringValue::new).collect(Collectors.toList());

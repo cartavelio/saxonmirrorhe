@@ -22,8 +22,16 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class CsvXdmGenerator {
+/**
+ * Handles generating a <code>parsed-csv-record-structure</code> from a sequence of array items
+ * (<code>array(xs:string)*</code>).
+ */
+public class CsvXdmGenerator {
+    /**
+     * Represents an empty <code>csv-columns-record</code>, used when a CSV has no column information.
+     */
     public static MapItem EMPTY_COLUMNS_RECORD;
+
     static {
         DictionaryMap item = new DictionaryMap();
         item.initialPut("names", new HashTrieMap());
@@ -31,7 +39,11 @@ class CsvXdmGenerator {
         EMPTY_COLUMNS_RECORD = HashTrieMap.copy(item);
     }
 
+    /**
+     * Represents an entirely empty CSV - no column information, and no rows of data.
+     */
     public static MapItem EMPTY_CSV;
+
     static {
         DictionaryMap item = new DictionaryMap();
         item.initialPut("columns", EMPTY_COLUMNS_RECORD);
@@ -46,12 +58,30 @@ class CsvXdmGenerator {
     private final NumberOfColumns numberOfColumnsMode;
     private int numberOfColumns = -1;
 
+    /**
+     * Represents how the number of columns will be calculated.
+     */
     enum NumberOfColumns {
+        /**
+         * All columns should be included. (The number of columns may vary by row.)
+         */
         ALL,
+        /**
+         * Number of columns is taken from the first row. (The number of columns will not vary)
+         */
         FIRST_ROW,
+        /**
+         * Number of columns is explicitly specified by the caller. (The number of columns will not vary)
+         */
         SPECIFIED
     }
 
+    /**
+     * Construct an instance using the passed in options Map.
+     *
+     * @param options options for the conversion as a map of String : Sequence pairs
+     * @throws XPathException if there's a problem getting values from the options
+     */
     public CsvXdmGenerator(Map<String, GroundedValue> options) throws XPathException {
         this.options = options;
         shouldExtractColumns = shouldExtractColumns();
@@ -59,30 +89,18 @@ class CsvXdmGenerator {
         shouldFilterColumns = ((GroundedValue) options.getOrDefault("filter-columns", EmptySequence.getInstance())).getLength() > 0;
     }
 
-    private void verifyPositiveInteger(AtomicValue maybeNumber) throws XPathException {
-        if (maybeNumber == null) return;
-        if (maybeNumber.getPrimitiveType() != BuiltInAtomicType.INTEGER) throw new XPathException("Cannot supply non-integer value here", "FOCV0005");
-        if (maybeNumber instanceof IntegerValue && ((IntegerValue) maybeNumber).asSubscript() == -1) throw new XPathException("Cannot supply zero or non-positive integer value here", "FOCV0005");
-    }
-
-    private void verifyPositiveInteger(int number) throws XPathException {
-        if (number < 1) throw new XPathException("Cannot supply zero or non-positive integer value here", "FOCV0005");
-    }
-
-    private Long getNumberOfColumns() throws XPathException {
-        Item numberOfColumns = options.getOrDefault("number-of-columns", EmptySequence.getInstance()).head();
-        AtomicValue number = numberOfColumns.atomize().head();
-        verifyPositiveInteger(number);
-        return ((IntegerValue) number).longValue();
-    }
-
     private Optional<Item> getNumberOfColumnsOpt() throws XPathException {
         return Optional.ofNullable(options.getOrDefault("number-of-columns", EmptySequence.getInstance()).head());
     }
 
+    private int getNumberOfColumns() throws XPathException {
+        AtomicValue number = getNumberOfColumnsOpt().get().atomize().head();
+        return ((IntegerValue) number).asSubscript();
+    }
+
     private int specifiedNumberOfColumns() throws XPathException {
         if (numberOfColumns == -1) {
-            numberOfColumns = getNumberOfColumns().intValue();
+            numberOfColumns = getNumberOfColumns();
         }
         return numberOfColumns;
     }
@@ -146,6 +164,14 @@ class CsvXdmGenerator {
         return columnIndexes;
     }
 
+    /**
+     * Generate a <code>parsed-csv-structure-record</code> from the provided sequence of rows
+     * (<code>array(xs:string)*</code>.
+     *
+     * @param rows  the sequence of rows (ArrayItems)
+     * @return the <code>parsed-csv-structure-record</code> MapItem
+     * @throws XPathException
+     */
     public MapItem fromRowSequence(Sequence rows) throws XPathException {
         if (shouldExtractColumns) {
             SequenceIterator iter = rows.iterate();
@@ -182,7 +208,7 @@ class CsvXdmGenerator {
 
         int fieldsLength = Collections.max(fieldsMap.entrySet(), Comparator.comparingInt(Map.Entry::getKey)).getKey();
 
-        for (int i = 1; i <= fieldsLength; i ++) {
+        for (int i = 1; i <= fieldsLength; i++) {
             fields.add(fieldsMap.getOrDefault(i, StringValue.EMPTY_STRING));
         }
         if (numberOfColumnsMode() == NumberOfColumns.FIRST_ROW) numberOfColumns = fieldsLength;
@@ -216,11 +242,22 @@ class CsvXdmGenerator {
         return SequenceExtent.makeSequenceExtent(members);
     }
 
+    /**
+     * Allows iteration via an Iterator over an underlying ArrayItem, but with the size of the resulting iterator fixed.
+     * If the ArrayItem is bigger, the BoundedRowIterator will effectively truncate it, and if it's smaller, it will be
+     * padded with empty string values up to the correct length.
+     */
     static class BoundedRowIterator implements Iterator<GroundedValue> {
         private final Iterator<GroundedValue> rowIterator;
         private final int size;
         private int idx = 0;
 
+        /**
+         * Create an iterator of given size over the specified ArrayItem
+         *
+         * @param row  the ArrayItem to iterator over
+         * @param size the size of the iterator
+         */
         BoundedRowIterator(ArrayItem row, int size) {
             this.rowIterator = row.members().iterator();
             this.size = size;
@@ -242,10 +279,20 @@ class CsvXdmGenerator {
         }
     }
 
+    /**
+     * Represents a single row in the CSV that has been explicitly bounded at a certain size (number of columns), that
+     * can be iterated over as with any Iterable.
+     */
     class BoundedRow implements Iterable<GroundedValue> {
         private final ArrayItem row;
         private final int size;
 
+        /**
+         * Create the row
+         *
+         * @param row  The underlying source ArrayItem
+         * @param size the size (in columns) to constrain the row to
+         */
         BoundedRow(ArrayItem row, int size) {
             this.row = row;
             this.size = size;
@@ -257,6 +304,14 @@ class CsvXdmGenerator {
         }
     }
 
+    /**
+     * Generates the <code>csv-row-record</code> XDM structure for a single row.
+     *
+     * @param row         The source row.
+     * @param fieldGetter The unbound field getter for the CSV this row is part of.
+     * @return The resulting <code>csv-row-record</code>
+     * @throws XPathException
+     */
     private MapItem generateRowRecord(ArrayItem row, UnboundFieldGetter fieldGetter) throws XPathException {
         DictionaryMap rowMap = new DictionaryMap();
         Iterable<GroundedValue> filteredRow;
@@ -308,9 +363,16 @@ class CsvXdmGenerator {
             new SequenceType[]{FIELD_FN_ARG_TYPE},
             SequenceType.OPTIONAL_STRING);
 
+    /**
+     * Generates the functions that fetch fields from a specific row. Wraps all the data common to all rows in the CSV
+     * (the <code>csv-columns-record</code>, and provides a method to generate a function bound to a specific row.
+     */
     private static class UnboundFieldGetter {
         private final MapItem names;
 
+        /**
+         * @param columns The <code>csv-columns-record</code> containing column names
+         */
         public UnboundFieldGetter(MapItem columns) {
             MapItem maybeNames = null;
             Item namesItem = columns.get(new StringValue("names")).head();
@@ -318,16 +380,38 @@ class CsvXdmGenerator {
             this.names = maybeNames;
         }
 
+        /**
+         * Generate a function that is bound to a specific row for inclusion in the <code>csv-row-record</code>
+         *
+         * @param fields the fields of the row
+         * @return the new function instance
+         */
         public FieldGetter bind(Iterable<GroundedValue> fields) {
             return new FieldGetter(this, fields);
         }
 
+        /**
+         * Fetch a field value using name lookup
+         *
+         * @param key    the column name
+         * @param fields the fields to lookup within
+         * @return the field value
+         * @throws XPathException if the named column does not exist
+         */
         public Sequence get(StringValue key, List<GroundedValue> fields) throws XPathException {
             Int64Value idx = (Int64Value) names.get(key);
             if (idx == null) throw new XPathException("Named column does not exist", "FOCV0004");
             return get(idx, fields);
         }
 
+        /**
+         * Fetch a field value using name lookup
+         *
+         * @param idx    the index of the column to fetch (zero-based)
+         * @param fields the fields to lookup within
+         * @return the field value
+         * @throws XPathException if the named column does not exist
+         */
         public Sequence get(Int64Value idx, List<GroundedValue> fields) {
             // keys are 1-based indexes, while the array item here is 0-based
             // TODO: deal with asSubscript == -1, idx OOB
@@ -337,9 +421,20 @@ class CsvXdmGenerator {
         }
     }
 
+    /**
+     * Binds an {@link UnboundFieldGetter} to a specific set of fields and acts as an XPath function so it can be called
+     * by the user.
+     */
     private static class FieldGetter implements Callable {
         private final UnboundFieldGetter fieldGetter;
         private final List<GroundedValue> fields;
+
+        /**
+         * Create a new instance by binding the UnboundFieldGetter to a row.
+         *
+         * @param fieldGetter the field getter for the CSV the row is part of.
+         * @param iterable    the fields of the row.
+         */
         public FieldGetter(UnboundFieldGetter fieldGetter, Iterable<GroundedValue> iterable) {
             this.fieldGetter = fieldGetter;
             fields = new ArrayList<>();
@@ -352,21 +447,19 @@ class CsvXdmGenerator {
          * @param context   the dynamic evaluation context
          * @param arguments the values of the arguments, supplied as Sequences.
          *                  <p>Generally it is advisable, if calling iterate() to process a supplied sequence, to
-         *                  call it only once; if the value is required more than once, it should first be converted
-         *                  to a {@link net.sf.saxon.om.GroundedValue} by calling the utility methd
+         *                  call it only once; if the value is required more than once, it should first be converted to
+         *                  a {@link net.sf.saxon.om.GroundedValue} by calling the utility methd
          *                  SequenceTool.toGroundedValue().</p>
          *                  <p>If the expected value is a single item, the item should be obtained by calling
          *                  Sequence.head(): it cannot be assumed that the item will be passed as an instance of
          *                  {@link net.sf.saxon.om.Item} or {@link net.sf.saxon.value.AtomicValue}.</p>
          *                  <p>It is the caller's responsibility to perform any type conversions required
-         *                  to convert arguments to the type expected by the callee. An exception is where
-         *                  this Callable is explicitly an argument-converting wrapper around the original
-         *                  Callable.</p>
-         * @return the result of the evaluation, in the form of a Sequence. It is the responsibility
-         * of the callee to ensure that the type of result conforms to the expected result type.
+         *                  to convert arguments to the type expected by the callee. An exception is where this Callable
+         *                  is explicitly an argument-converting wrapper around the original Callable.</p>
+         * @return the result of the evaluation, in the form of a Sequence. It is the responsibility of the callee to
+         *         ensure that the type of result conforms to the expected result type.
          * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs during the evaluation of the expression
          */
-
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             AtomicValue key = arguments[0].head().atomize().head();

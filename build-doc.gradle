@@ -84,7 +84,8 @@ task filter_sources_for_javadoc(
 
 task product_javadoc(
   dependsOn: ["filter_sources_for_javadoc"],
-  description: "Generate Javadoc files"
+  description: "Generate Javadoc files",
+  group: "Documentation"
 ) {
   // If you can't do something the easy way, do it the hard way.
   // The Gradle JavaDoc plugin should be able to do this, but it doesn't

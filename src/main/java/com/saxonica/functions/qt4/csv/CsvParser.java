@@ -9,21 +9,43 @@ import net.sf.saxon.z.IntIterator;
 import java.util.Map;
 
 public class CsvParser {
+    /**
+     * Parse an input string containing CSV data into a sequence of ArrayItems (the rows) containing StringValues (the
+     * fields), controlled by the passed-in csvOptions. This form constructs a {@link CsvContentHandler} using the
+     * passed-in csvOptions.
+     *
+     * @param input      the CSV data.
+     * @param csvOptions the processed options specified by the caller.
+     * @return the CSV data represents as a sequence of arrays (<code>array(xs:string)*</code>).
+     * @throws XPathException
+     */
     public static Sequence parse(StringValue input, Map<String, GroundedValue> csvOptions) throws XPathException{
         return parse(input, csvOptions, new CsvContentHandler(csvOptions));
     }
 
+    /**
+     * Parse an input string containing CSV data into a sequence of ArrayItems (the rows) containing StringValues (the
+     * fields), controlled by the passed-in csvOptions. This form requires an existing {@link CsvContentHandler} to be
+     * used.
+     *
+     * @param input      the CSV data.
+     * @param csvOptions the processed options specified by the caller.
+     * @param handler    the content handler to receive CSV parsing events.
+     * @return the CSV data represents as a sequence of arrays (<code>array(xs:string)*</code>).
+     * @throws XPathException
+     */
     public static Sequence parse(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) throws XPathException{
         CsvParser parser = new CsvParser(input, csvOptions, handler);
         return parser.parseInput();
     }
 
     /**
-     * Primarily for handling the CRLF/CR/LF problem. The assumption in the code is that the delimiters array is
-     * ordered in descending order of length.
+     * Primarily for handling the CRLF/CR/LF problem. The assumption in the code is that the delimiters array is ordered
+     * in descending order of length.
      */
     private class RowDelimiters {
         private final RowDelimiter[] delimiters;
+
         public RowDelimiters(GroundedValue delimiters) {
             this.delimiters = new RowDelimiter[delimiters.getLength()];
             for (int i = 0; i < delimiters.getLength(); i++) {
@@ -62,6 +84,12 @@ public class CsvParser {
         }
     }
 
+    /**
+     * We are parsing through the CSV data one codepoint at a time. This class permits backtracking when a potentially
+     * multi-character token is encountered (like a quote-within-a-quoted-field). It acts mostly like an IntIterator,
+     * but provides a method to access the current codepoint without incrementing the cursor's position within the
+     * string.
+     */
     private class CodepointsRewindableIterator {
         private final IntIterator codepoints;
         private final int bufferCapacity = 8;
@@ -77,8 +105,12 @@ public class CsvParser {
             this.codepoints = codepoints;
         }
 
+        /**
+         * Does the iterator contain more unread data?
+         * @return whether it does or not.
+         */
         public boolean hasNext() {
-            if (readPosition == writtenPosition ) {
+            if (readPosition == writtenPosition) {
                 return codepoints.hasNext();
             } else if (bufferFilled && writtenPosition == 0) {
                 return readPosition > writtenPosition;
@@ -113,10 +145,18 @@ public class CsvParser {
             }
         }
 
+        /**
+         * @return the codepoint at the current read position within the string
+         */
         public int cursor() {
             return buffer[readPosition];
         }
 
+        /**
+         * Read the next character from the string, and increment the position of the cursor.
+         *
+         * @return the next character
+         */
         public int next() {
             if (readIsBehind()) {
                 incrementReadPosition();
@@ -130,6 +170,9 @@ public class CsvParser {
             }
         }
 
+        /**
+         * Move the cursor back within the string to the previous codepoint.
+         */
         public void back() {
             if (readPosition == 0) {
                 readPosition = bufferEndPosition;
@@ -147,12 +190,17 @@ public class CsvParser {
     private int quoteCharacter;
     private final CodepointsRewindableIterator codepoints;
     private final StringBuilder currentField = new StringBuilder();
-    private int currentCodePoint;
     private boolean needNewRow = false;
     private boolean processingField = false;
     private boolean inQuotedField = false;
     private boolean atFieldStart = true;
 
+    /**
+     * Create a new CSV parser
+     * @param input  the input CSV data.
+     * @param csvOptions parsing options.
+     * @param handler the content handler to receive parsing events.
+     */
     public CsvParser(StringValue input, Map<String, GroundedValue> csvOptions, CsvContentHandler handler) {
         this.codepoints = new CodepointsRewindableIterator(input.codePoints());
         this.handler = handler;
@@ -172,6 +220,11 @@ public class CsvParser {
         throw new XPathException(message, code);
     }
 
+    /**
+     * Parse the input into a sequence of arrays and return them
+     * @return the parsed input as <code>array(xs:string)*</code>
+     * @throws XPathException
+     */
     public Sequence parseInput() throws XPathException {
         while (codepoints.hasNext()) {
             codepoints.next();
@@ -194,7 +247,8 @@ public class CsvParser {
             codepoints.next();
         }
     }
-    private void addToCurrentField() throws XPathException{
+
+    private void addToCurrentField() throws XPathException {
         if (!processingField) processingField = true;
         if (atFieldStart) atFieldStart = false;
 
