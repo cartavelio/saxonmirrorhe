@@ -76,6 +76,7 @@ public class PackageVersion implements Comparable<PackageVersion> {
         if (s.equals("")) {
             throw new XPathException("No numeric component of package-version: " + original, "XTSE0020");
         }
+
         if (s.startsWith(".")) {
             throw new XPathException("The package-version cannot start with '.'", "XTSE0020");
         }
@@ -83,13 +84,18 @@ public class PackageVersion implements Comparable<PackageVersion> {
             throw new XPathException("The package-version cannot end with '.'", "XTSE0020");
         }
         for (String p : s.trim().split("\\.")) {
-            try {
-                parts.add(Integer.valueOf(p));
-            } catch (NumberFormatException e) {
-                throw new XPathException("Error in package-version: " + e.getMessage(), "XTSE0020");
-            }
+             parts.add(parseInteger(p));
         }
         trimTrailingZeroes();
+    }
+
+    @CSharpReplaceBody(code="try{return System.Int32.Parse(s);} catch (Exception e) {throw new Saxon.Hej.trans.XPathException(\"Error in package-version: \" + e.Message, \"XTSE0020\");}")
+    public static int parseInteger(String s) throws XPathException {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            throw new XPathException("Error in package-version: " + e.getMessage(), "XTSE0020");
+        }
     }
 
     @Override
