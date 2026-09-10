@@ -5,7 +5,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
@@ -143,7 +142,7 @@ public class Bug6225 {
                     throw new RuntimeException("Failed to build casevariants.xml", e);
                 }
 
-                SequenceIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
+                SequenceIterator iter = doc.iterateDescendantAxis(new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
                 while (true) {
                     NodeInfo item = (NodeInfo)iter.next();
                     if (item == null) {
@@ -256,7 +255,7 @@ public class Bug6225 {
                 throw new RuntimeException("Failed to build casevariants.xml", e);
             }
 
-            SequenceIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT, new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
+            SequenceIterator iter = doc.iterateDescendantAxis(new NameTest(Type.ELEMENT, NamespaceUri.NULL, "c", config.getNamePool()));
             while (true) {
                 NodeInfo item = (NodeInfo)iter.next();
                 if (item == null) {

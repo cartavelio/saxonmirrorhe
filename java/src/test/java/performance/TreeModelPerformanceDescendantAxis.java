@@ -37,7 +37,7 @@ public class TreeModelPerformanceDescendantAxis extends PerformanceTestCase {
         NodeInfo documentElement = null;
         try {
             tree = config.buildDocumentTree(source, options);
-            documentElement = tree.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+            documentElement = tree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT).next();
         } catch (XPathException e) {
             e.printStackTrace();
             fail(e.getMessage());

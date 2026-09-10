@@ -899,7 +899,7 @@ public class TraxTest {
 
                 Configuration config = ((TransformerFactoryImpl) tfactory).getConfiguration();
                 NodeInfo saxonDoc = config.buildDocumentTree(new SAXSource(new InputSource(foo_xml))).getRootNode();
-                NodeInfo top = saxonDoc.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+                NodeInfo top = saxonDoc.iterateChildAxis(NodeKindTest.ELEMENT).next();
 
                 Node imported = doc.importNode(NodeOverNodeInfo.wrap(top), true);
 

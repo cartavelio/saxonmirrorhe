@@ -38,8 +38,8 @@ public class UnionIteratorTest {
             for (int i = 0; i < 10; i++) {
                 listOfLists.add(new ArrayList<>());
             }
-            SequenceIterator top = root.iterateAxis(AxisInfo.CHILD);
-            SequenceIterator children = ((NodeInfo)top.next()).iterateAxis(AxisInfo.CHILD);
+            SequenceIterator top = root.iterateChildAxis(null);
+            SequenceIterator children = ((NodeInfo)top.next()).iterateChildAxis(null);
             NodeInfo node;
             while ((node = (NodeInfo)children.next()) != null) {
                 switch (node.getLocalPart()) {

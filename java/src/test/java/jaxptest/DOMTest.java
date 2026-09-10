@@ -1861,7 +1861,7 @@ public class DOMTest {
             boolean useDomino = true;
             if (useDomino) {
                 DominoTree domTree = DominoTree.makeTree(doc.getDocumentElement().getOwnerDocument(), pc, "systemID");
-                SequenceIterator next = domTree.getRootNode().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT);
+                SequenceIterator next = domTree.getRootNode().iterateChildAxis(NodeKindTest.ELEMENT);
                 GroundedValue gv = SequenceTool.toGroundedValue(next);
                 DominoNode elNode = (DominoNode) gv.itemAt(0);
 

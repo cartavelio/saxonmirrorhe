@@ -59,7 +59,7 @@ public class StylesheetCopyLineNumbersTest {
         Source cachedTree = docBuilder.build(sourceToCache2).asSource();
 
         // Show that tree has line numbers.
-        TinyNodeImpl rootElement = (TinyNodeImpl)((TinyDocumentImpl)cachedTree).iterateAxis(AxisInfo.CHILD).next();
+        TinyNodeImpl rootElement = (TinyNodeImpl)((TinyDocumentImpl)cachedTree).iterateChildAxis(null).next();
         assertEquals("xsl:stylesheet",  rootElement.getDisplayName(), "name ok?");
         assertEquals(5, rootElement.getLineNumber(), "line ok?");
         //System.err.println("Line num: " + rootElement.getLineNumber());

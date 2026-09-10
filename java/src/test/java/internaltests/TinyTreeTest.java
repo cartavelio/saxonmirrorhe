@@ -40,7 +40,7 @@ public class TinyTreeTest {
             DocumentBuilder builder = new Processor(false).newDocumentBuilder();
             XdmNode d = builder.build(source);
             TinyDocumentImpl doc = (TinyDocumentImpl)d.getUnderlyingNode();
-            SequenceIterator iter = doc.iterateAxis(AxisInfo.DESCENDANT_OR_SELF);
+            SequenceIterator iter = doc.iterateDescendantAxis(_OR_SELF);
             while (true) {
                 TinyNodeImpl desc = (TinyNodeImpl)iter.next();
                 if (desc == null) break;

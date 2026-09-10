@@ -68,7 +68,7 @@ public class TestXQueryUpdate {
             NamespaceUri fooBar = NamespaceUri.of("http://foo.bar/");
             NodeName name = new FingerprintedQName("a", fooBar, "x");
             NamespaceBinding nsCode = new NamespaceBinding("a", fooBar);
-            MutableNodeInfo elem = (MutableNodeInfo)doc.iterateAxis(AxisInfo.CHILD).next();
+            MutableNodeInfo elem = (MutableNodeInfo)doc.iterateChildAxis(null).next();
             elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", ReceiverOption.NONE, true);
             elem.addNamespace(nsCode, true);
             String s = QueryResult.serialize(elem).trim();
