@@ -707,6 +707,13 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
       
       <p>Dropped from Saxon 12.</p>
       
+      <kbd>fn:remove(
+         $input	  as item()*,	
+         $positions as xs:integer*	
+         ) as item()*</kbd>
+      
+      <p>The function is extended in 4.0 to allow several items to be removed at the same time.</p>
+      
       <kbd>fn:replicate(
          $input	as item()*,	
          $count	as xs:nonNegativeInteger	
