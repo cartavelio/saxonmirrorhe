@@ -24,77 +24,69 @@ void * userFunctionPythonNativeCall(void * proc, void * func, int useNativeTypes
 
     if(proc != nullptr && numOfArguments>0) {
 
+
         arguments = new XdmValue*[numOfArguments];
+
+        graal_isolatethread_t *thread = SaxonProcessor::getOrAttachCurrentThread(SaxonProcessor::sxn_environ);
+
+        argsList = PyList_New(numOfArguments);
+
+        PyObject * argi = nullptr;
+
+        std::cerr << "arguments count="<< numOfArguments << std::endl;
+        PyObject *pArgs;
+
+        /*if(PyCallable_Check((PyObject *)proc)) {
+             fprintf(stdout, "Processor is not callable in Python");
+             return nullptr;
+        } */
 
         for(int i =0; i< numOfArguments; i++) {
             if (getenv("SAXONC_DEBUG_FLAG")) {
                 fprintf(stdout, "Making XdmValue YYYIII ref=%ld.\n", (long)argumentsi[i]);
             }
-            arguments[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)argumentsi[i]);
 
-            if(arguments[i] == NULL) {
+            XdmValue * tempValue = SaxonProcessor::makeXdmValueFromRef((int64_t)argumentsi[i]);
+            //void * argxi = (void *)j_copy_handles(thread, (void *)argumentsi[i]);
+            //arguments[i] = SaxonProcessor::makeXdmValueFromRef((int64_t)argxi);//, (void *)argumentsi[i]));
+
+            if(tempValue == NULL) {
                         std::cerr << "Failed to construct list for arguments argument "<<i<< " is NULL" << std::endl;
                         return nullptr;
-                    }
-        }
-        fprintf(stderr, "We are in a CythonUserFunctionHandler proc is not null\n");
-        //arg = ((PyObject *)proc)->wrap_atomic_value(arguments[0]);
-        //arg = proc_wrap_atomic_value((PyObject *)proc, arguments[0]);
+            }
 
-        //Py_ssize_t size = numOfArguments;
 
-        argsList = PyList_New(numOfArguments);
-
-        if(argsList == nullptr) {
-            std::cerr << "Failed to construct list for arguments" << std::endl;
-            return nullptr;
-
-        }
-
-        std::cerr << "arguments count="<< numOfArguments << std::endl;
-
-        //args = new PyObject[numOfArguments];
-        PyObject * argi = nullptr;
-
-        for(int i = 0; i< numOfArguments; i++) {
-        std::cerr << "arguments loop cp0: "<<i<< std::endl;
-        if(arguments[i] == NULL) {
-            std::cerr << "Failed to construct list for arguments argument "<<i<< " is NULL" << std::endl;
-            return nullptr;
-        }
-
-        // Check both indices are valid
-            /*PyObject *a = (PyObject*)proc;
-            if (!a) return NULL;
-
-            PyObject *b = (PyObject*)arguments[i];
-            if (!b) return NULL;
-
-             if (PyDict_Check(a) || PyDict_Check(b)) return NULL;*/
-
-           fprintf(stdout, "user function xdm pointer[%i]= %p \n", i, (void *)arguments[i]);
+            fprintf(stdout, "user function xdm pointer[%i]= %p \n", i, (void *)arguments[i]);
 
 
            /*argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("__convert_c_obj"),
                                               (PyObject *) arguments[i]); */
-
-            argi = PyObject_CallMethodObjArgs((PyObject *) proc, PyUnicode_FromString("__convert_c_obj"),
-                                              (PyObject *) arguments[i], NULL);
+            //PyObject * xx = Py_BuildValue("O", arguments[i]);
+            /*pArgs = PyTuple_New(1);
+            PyTuple_SetItem(pArgs, i, (PyObject *) arguments[i]);
+            fprintf(stdout, "loop checkpoint :%i\n", i);
+            argi = PyObject_CallObject((PyObject *) proc, pArgs);*/
+            argi = PyObject_CallMethodOneArg((PyObject *) proc, PyUnicode_FromString("_convert_c_obj"),
+                                              (PyObject *) tempValue);
             //Py_INCREF(argi);
             std::cerr << "arguments loop cp1"<< std::endl;
-            if(argi == nullptr) {
-                return nullptr;
+            if(argi == Py_None ||  argi == nullptr) {
+            PyErr_Print();
 
+
+                std::cerr << "Null found  - argi Argument for list i="<<i << std::endl;
+                return nullptr;
             }
             err = PyList_SetItem(argsList, i, argi);
             if (err < 0) {
-                //std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
-                //std::cerr << "Error code"<<err << std::endl;
+                std::cerr << "Failed construction of Argument for list i="<<i << std::endl;
+                std::cerr << "Error code"<<err << std::endl;
                 return nullptr;
             }
-
-
         }
+        fprintf(stderr, "We are in a CythonUserFunctionHandler proc is not null\n");
+
+
     }
 
      if (getenv("SAXONC_DEBUG_FLAG")) {

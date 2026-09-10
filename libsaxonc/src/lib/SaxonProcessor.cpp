@@ -109,7 +109,7 @@ extern "C" void * c_nativeCall(void *thread, char * functionName, void * proc, v
 
     pythonExtensionFunction func1 = pythonExtensionFunction(pythonFunc);
 
-    userFuncResult = func1(pythonFunc, func, useNativeTypes, numOfArguments, arguments);
+    userFuncResult = func1(proc, func, useNativeTypes, numOfArguments, arguments);
 
   } else {
     if (getenv("SAXONC_DEBUG_FLAG")) {
