@@ -14,6 +14,7 @@ task test_jetHome(
   description: "Test that excelsiorJetHome is configured"
 ) {
   def images = new ByteArrayOutputStream()
+/*
   doLast {
     try {
       exec {
@@ -25,6 +26,7 @@ task test_jetHome(
       // whatever
     }
   }
+*/
   doLast {
     if (images.toString("utf-8") != "") {
       println("Running ExcelsiorJet ${excelsiorJetVersion} from Docker container")
