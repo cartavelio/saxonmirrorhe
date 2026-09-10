@@ -6,13 +6,15 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Version;
 import net.sf.saxon.trans.LicenseException;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 public class JavaVerifier extends Verifier {
@@ -159,26 +161,7 @@ public class JavaVerifier extends Verifier {
         }
         return null;
     }
-
-    /**
-     * Test program to verify that a license contained in a specific file is valid
-     *
-     * @param args Command line arguments. First argument is the filename of the license
-     *             file to be tested.
-     * @throws Exception if any failure occurs
-     */
-
-    public static void main(String[] args) throws Exception {
-        File licenseFile = new File(args[0]);
-        Verifier v = new JavaVerifier();
-        License license = v.readLicenseFile(new FileInputStream(licenseFile));
-        System.err.println("License OK");
-        for (Enumeration<?> en = license.features.propertyNames(); en.hasMoreElements(); ) {
-            String s = (String) en.nextElement();
-            System.err.println("Feature " + s + " = " + license.features.getProperty(s));
-        }
-    }
-
+    
 }
 
 // Copyright (c) 2010-2022 Saxonica Limited

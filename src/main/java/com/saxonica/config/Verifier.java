@@ -17,6 +17,7 @@ import net.sf.saxon.z.IntHashMap;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -438,6 +439,28 @@ public abstract class Verifier {
         }
 
     }
+
+    //#if CSHARP==false
+    /**
+     * Test program to verify that a license contained in a specific file is valid
+     *
+     * @param args Command line arguments. First argument is the filename of the license
+     *             file to be tested.
+     * @throws Exception if any failure occurs
+     */
+
+    public static void main(String[] args) throws Exception {
+        File licenseFile = new File(args[0]);
+        Verifier v = new JavaVerifier();
+        License license = v.readLicenseFile(new FileInputStream(licenseFile));
+        System.err.println("License OK");
+        for (Enumeration<?> en = license.features.propertyNames(); en.hasMoreElements(); ) {
+            String s = (String) en.nextElement();
+            System.err.println("Feature " + s + " = " + license.features.getProperty(s));
+        }
+    }
+
+    //#endif
 
 
 }
