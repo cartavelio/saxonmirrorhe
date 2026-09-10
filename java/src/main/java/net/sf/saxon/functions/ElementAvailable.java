@@ -118,7 +118,9 @@ public class ElementAvailable extends SystemFunction {
     public static boolean isXslt40Element(int fp) {
         return isXslt30Element(fp)
                 || fp == StandardNames.XSL_ARRAY
-                || fp == StandardNames.XSL_ARRAY_MEMBER;
+                || fp == StandardNames.XSL_ARRAY_MEMBER
+               // || fp == StandardNames.XSL_RECORD
+                || fp == StandardNames.XSL_SELECT;
     }
     
     /**
