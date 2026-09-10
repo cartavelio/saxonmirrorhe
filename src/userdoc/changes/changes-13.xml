@@ -206,7 +206,7 @@
         the input sequence <emph>as is</emph>, rather than converting it to <code>xs:double</code>.</p>
         
         <p>The functions <code>fn:seconds</code>, <code>fn:subsequence-where</code>, 
-            <code>fn:take-while</code> are implemented.</p>
+            <code>fn:take-while</code>, and <code>fn-unix-dateTime</code> are implemented.</p>
         
         <p>The function <code>fn:iterate-while</code> is renamed <code>fn:while-do</code>, and the function
         <code>fn:do-until</code> is implemented.</p>
