@@ -756,12 +756,7 @@
                <p>-warnings:(silent|recover|fatal)</p>
             </td>
             <td>
-               <p>Indicates the policy for handling recoverable errors in the stylesheet:
-                     <code>silent</code> means recover silently, <code>recover</code> means recover
-                  after writing a warning message to the system error output, <code>fatal</code>
-                  means signal the error and do not attempt recovery. (Note, this does not currently
-                  apply to all errors that the XSLT recommendation describes as recoverable). The
-                  default is <code>recover</code>.</p>
+               <p>No longer used.</p>
             </td>
          </tr>
          <tr class="javaonly">
