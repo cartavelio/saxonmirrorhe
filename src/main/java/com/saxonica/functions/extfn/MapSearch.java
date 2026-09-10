@@ -1,8 +1,8 @@
 package com.saxonica.functions.extfn;
 
-import com.saxonica.xsltextn.pedigree.PedigreeArrayItem;
-import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
-import com.saxonica.xsltextn.pedigree.PedigreeValue;
+import net.sf.saxon.ma.pin.LabeledArrayItem;
+import net.sf.saxon.ma.pin.LabeledMapItem;
+import net.sf.saxon.ma.pin.LabeledItem;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.arrays.ArrayItem;
@@ -39,16 +39,16 @@ public class MapSearch extends SystemFunction {
         for (Item item; (item = iter.next()) != null; ) {
             if (item instanceof ArrayItem) {
                 ArrayItem array = (ArrayItem)item;
-                if (!(array instanceof PedigreeValue)) {
-                    array = new PedigreeArrayItem(array);
+                if (!(array instanceof LabeledItem)) {
+                    array = LabeledArrayItem.makePinnedArrayItem(array);
                 }
                 for (GroundedValue member : array.members()) {
                     processSequence(member, key, tester, context, result);
                 }
             } else if (item instanceof MapItem) {
                 MapItem map = (MapItem) item;
-                if (!(map instanceof PedigreeValue)) {
-                    map = new PedigreeMapItem(map);
+                if (!(map instanceof LabeledItem)) {
+                    map = LabeledMapItem.makePinnedMapItem(map);
                 }
                 GroundedValue value = map.get(key);
                 if (value != null) {

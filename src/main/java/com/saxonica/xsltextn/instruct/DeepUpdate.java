@@ -1,9 +1,9 @@
 package com.saxonica.xsltextn.instruct;
 
 import com.saxonica.xsltextn.pedigree.Pedigree;
-import com.saxonica.xsltextn.pedigree.PedigreeArrayItem;
-import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
-import com.saxonica.xsltextn.pedigree.PedigreeValue;
+import net.sf.saxon.ma.pin.LabeledArrayItem;
+import net.sf.saxon.ma.pin.LabeledMapItem;
+import net.sf.saxon.ma.pin.LabeledItem;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
@@ -142,9 +142,9 @@ public class DeepUpdate extends Instruction {
 
     private static Item makeRootWithPedigree(Item root) {
         if (root instanceof MapItem) {
-            return new PedigreeMapItem((MapItem) root);
+            return LabeledMapItem.makePinnedMapItem((MapItem) root);
         } else if (root instanceof ArrayItem) {
-            return new PedigreeArrayItem((ArrayItem) root);
+            return LabeledArrayItem.makePinnedArrayItem((ArrayItem) root);
         } else {
             assert false;
             return null;
@@ -199,7 +199,7 @@ public class DeepUpdate extends Instruction {
                     FocusIterator selectIterator = c3.trackFocus(selectPuller.iterate(c2));
                     Item selected;
                     while ((selected = selectIterator.next()) != null) {
-                        if (!(selected instanceof PedigreeValue)) {
+                        if (!(selected instanceof LabeledItem)) {
                             if (selected instanceof MapItem) {
                                 throw new XPathException("saxon:deep-update: selected item is a map with no pedigree");
                             } else if (selected instanceof ArrayItem) {
@@ -219,8 +219,8 @@ public class DeepUpdate extends Instruction {
                         } catch (UncheckedXPathException e) {
                             throw e.getXPathException();
                         }
-                        Pedigree pedigree = ((PedigreeValue) selected).getPedigree();
-                        PedigreeValue parent = pedigree.getContainer();
+                        Pedigree pedigree =  null; // TODO ((LabeledItem) selected).getPedigree();
+                        LabeledItem parent = pedigree.getContainer();
                         GroundedValue val = actionVal;
                         while (parent != null) {
                             Item latestParent = (Item) parent;
@@ -239,7 +239,7 @@ public class DeepUpdate extends Instruction {
                             }
                             substitutions.put((Item) parent, (Item) val);
                             substitutions.put(latestParent, (Item) val);
-                            pedigree = parent.getPedigree();
+                            pedigree = null; // TDOO parent.getPedigree();
                             parent = pedigree.getContainer();
                         }
                         root1 = (Item) val;

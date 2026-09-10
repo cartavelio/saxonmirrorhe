@@ -392,8 +392,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, AnyItemType.getInstance(), OPT, null));
 
-        register("pedigree", 1, e -> e.populate( PedigreeFn::new, MapType.getInstance(), OPT, 0)
-                .arg(0, AnyFunctionType.getInstance(), ONE, null));
+//        register("pedigree", 1, e -> e.populate( PedigreeFn::new, MapType.getInstance(), OPT, 0)
+//                .arg(0, AnyFunctionType.getInstance(), ONE, null));
 
         register("print-stack", 0, e -> e.populate(PrintStack::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
@@ -499,8 +499,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("valid-character", 1, e -> e.populate( ValidCharacter::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, ONE, null));
 
-        register("with-pedigree", 1, e -> e.populate( WithPedigree::new, AnyFunctionType.getInstance(), ONE, 0)
-                .arg(0, AnyFunctionType.getInstance(), ONE, null));
+//        register("with-pedigree", 1, e -> e.populate(PinFn::new, AnyFunctionType.getInstance(), ONE, 0)
+//                .arg(0, AnyFunctionType.getInstance(), ONE, null));
 
         register("xquery", 1, e -> e.populate( XQueryFn::new, XQueryFn.functionType, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));

@@ -623,6 +623,10 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
     }
 
 
+    @Override
+    public AtomicType getType() {
+        return this;
+    }
 }
 
 // Copyright (c) 2004-2023 Saxonica Limited

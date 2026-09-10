@@ -1,9 +1,6 @@
 package com.saxonica.xsltextn.pedigree;
 
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
+import net.sf.saxon.ma.pin.LabeledItem;
 import net.sf.saxon.value.AtomicValue;
 
 /**
@@ -11,7 +8,7 @@ import net.sf.saxon.value.AtomicValue;
  * the route by which it was reached; it thus compensates for the absence of parent
  * pointers in a JSON-like tree, by allowing the steps used to reach a map or array
  * in such a structure to be retraced.
- * <p>A map or array that has a {@code Pedigree} is represented by a {@link PedigreeValue},
+ * <p>A map or array that has a {@code Pedigree} is represented by a {@link LabeledItem},
  * which is a combination of the map/array and the {@code Pedigree}. The {@code Pedigree}
  * holds a reference to the "container" {@code PedigreeValue} from which this map or
  * array was reached, and the key or index value within that container.</p>
@@ -25,7 +22,7 @@ import net.sf.saxon.value.AtomicValue;
 
 public class Pedigree {
 
-    private final PedigreeValue container;
+    private final LabeledItem container;
     private int index = -1;
     private AtomicValue key;
 
@@ -43,7 +40,7 @@ public class Pedigree {
      * @param key the key value used to select an entry in the containing map
      */
 
-    public Pedigree(PedigreeValue container, AtomicValue key) {
+    public Pedigree(LabeledItem container, AtomicValue key) {
         this.container = container;
         this.key = key;
     }
@@ -56,7 +53,7 @@ public class Pedigree {
      * @param index  the zero-based index value used to select a member of the containing array
      */
 
-    public Pedigree(PedigreeValue container, int index) {
+    public Pedigree(LabeledItem container, int index) {
         this.container = container;
         this.index = index;
     }
@@ -66,7 +63,7 @@ public class Pedigree {
      * @return the containing map or array
      */
 
-    public PedigreeValue getContainer() {
+    public LabeledItem getContainer() {
         return container;
     }
 
@@ -98,19 +95,19 @@ public class Pedigree {
      * augmented with this pedigree. Otherwise, returns the supplied value unchanged.
      */
 
-    public GroundedValue makePedigreeValue(GroundedValue value) {
-        if (value instanceof PedigreeArrayItem) {
-            return new PedigreeArrayItem(((PedigreeArrayItem)value).getBaseItem(), this);
-        } else if (value instanceof PedigreeMapItem) {
-            return new PedigreeMapItem(((PedigreeMapItem) value).getBaseItem(), this);
-        } else if (value instanceof ArrayItem) {
-            return new PedigreeArrayItem((ArrayItem) value, this);
-        } else if (value instanceof MapItem) {
-            return new PedigreeMapItem((MapItem) value, this);
-        } else {
-            return value;
-        }
-    }
+//    public GroundedValue makePedigreeValue(GroundedValue value) {
+//        if (value instanceof LabeledArrayItem) {
+//            return new LabeledArrayItem(((LabeledArrayItem)value).getBaseItem(), this);
+//        } else if (value instanceof LabeledMapItem) {
+//            return new LabeledMapItem(((LabeledMapItem) value).getBaseItem(), this);
+//        } else if (value instanceof ArrayItem) {
+//            return new LabeledArrayItem((ArrayItem) value, this);
+//        } else if (value instanceof MapItem) {
+//            return new LabeledMapItem((MapItem) value, this);
+//        } else {
+//            return value;
+//        }
+//    }
 
 }
 

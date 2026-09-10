@@ -1,9 +1,9 @@
 package com.saxonica.xsltextn.instruct;
 
-import com.saxonica.functions.extfn.WithPedigree;
+import com.saxonica.functions.extfn.PinFn;
 import com.saxonica.xsltextn.pedigree.Pedigree;
-import com.saxonica.xsltextn.pedigree.PedigreeMapItem;
-import com.saxonica.xsltextn.pedigree.PedigreeValue;
+import net.sf.saxon.ma.pin.LabeledMapItem;
+import net.sf.saxon.ma.pin.LabeledItem;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.Elaborator;
@@ -162,7 +162,7 @@ public class TabulateMaps extends Instruction {
                 getSelectExpression().iterate(c2));
         Item selected;
         while ((selected = selectIterator.next()) != null) {
-            if (!(selected instanceof PedigreeMapItem)) {
+            if (!(selected instanceof LabeledMapItem)) {
                 if (selected instanceof MapItem) {
                     throw new XPathException("saxon:tabulate: selected item is a map with no pedigree", SaxonErrorCode.SXTM0001);
                 } else {
@@ -172,8 +172,8 @@ public class TabulateMaps extends Instruction {
             }
             MapItem selectedMap = (MapItem)selected;
 
-            Pedigree pedigree = ((PedigreeValue)selected).getPedigree();
-            PedigreeValue parent = pedigree.getContainer();
+            Pedigree pedigree = null; // TODO ((LabeledItem)selected).getPedigree();
+            LabeledItem parent = pedigree.getContainer();
             int level = 0;
             LinkedList<AtomicValue> keys = new LinkedList<>();
             while (parent != null) {
@@ -205,7 +205,7 @@ public class TabulateMaps extends Instruction {
                 } else {
                     assert false;
                 }
-                pedigree = parent.getPedigree();
+                pedigree = null; // TODO parent.getPedigree();
                 parent = pedigree.getContainer();
             }
             String keysKey = "_keys";
@@ -249,7 +249,7 @@ public class TabulateMaps extends Instruction {
                 SequenceIterator rootIterator = rootPull.iterate(context);
                 SequenceIterator mappedRootIterator =
                         MappingIterator.map(rootIterator,
-                                            item -> SingletonIterator.makeIterator(WithPedigree.makeRootWithPedigree(item)));
+                                            item -> SingletonIterator.makeIterator(PinFn.makePinnedRoot(item)));
 
                 XPathContext c2 = context.newMinorContext();
                 FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);
