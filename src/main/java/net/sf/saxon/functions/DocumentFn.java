@@ -415,14 +415,21 @@ public class DocumentFn extends SystemFunction implements Callable {
         request.nature = ResourceRequest.XML_NATURE;
         request.purpose = ResourceRequest.ANY_PURPOSE;
         try {
-            return request.resolve(resolver, config.getResourceResolver(), new DirectResourceResolver(config));
+            Source source = request.resolve(resolver, config.getResourceResolver(), new DirectResourceResolver(config));
+            if (source == null) {
+                throw new XPathException("Resource resolver failed to resolve `"
+                        + href + (baseURI == null || baseURI.isEmpty() ? "" : "` with base URI `" + baseURI) + "`");
+            }
+            return source;
         } catch (XPathException err) {
             err.setErrorCode("FODC0005");
             err.maybeSetContext(context);
             throw err;
         } catch (Exception ex) {
-            XPathException de = new XPathException("Exception thrown by URIResolver resolving `"
-                                                           + href + "` against `" + baseURI + "'", ex);
+            XPathException de = new XPathException("Exception thrown by resource resolver resolving `"
+                                                           + href
+                                                           + (baseURI == null || baseURI.isEmpty() ? "" : "` with base URI `" + baseURI) + "`",
+                                                   ex);
             if (config.getBooleanProperty(Feature.TRACE_EXTERNAL_FUNCTIONS)) {
                 ex.printStackTrace();
             }

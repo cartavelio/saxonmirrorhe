@@ -580,6 +580,11 @@ public class UserFunctionReference extends Expression
             }
             return false;
         }
+
+        @Override
+        public int hashCode() {
+            return getTargetFunction().hashCode() ^ (getArity() << 13);
+        }
     }
 
 }
