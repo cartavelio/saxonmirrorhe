@@ -49,123 +49,123 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         SpecificFunctionType ft;
 
-        register("collation-key", 1, CollationKeyFn.class, BuiltInAtomicType.BASE64_BINARY,
+        register("collation-key", 1, () -> new CollationKeyFn(), BuiltInAtomicType.BASE64_BINARY,
                  OPT, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("collation-key", 2, CollatingFunctionFree.class, BuiltInAtomicType.BASE64_BINARY,
+        register("collation-key", 2, () -> new CollatingFunctionFree(), BuiltInAtomicType.BASE64_BINARY,
                  OPT, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("contains-token", 2, ContainsToken.class, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
+        register("contains-token", 2, () -> new ContainsToken(), BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
                 .arg(0, BuiltInAtomicType.STRING, STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("contains-token", 3, CollatingFunctionFree.class, BuiltInAtomicType.BOOLEAN, ONE, BASE)
+        register("contains-token", 3, () -> new CollatingFunctionFree(), BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, BuiltInAtomicType.STRING, STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null)
                 .arg(2, BuiltInAtomicType.STRING, ONE, null);
 
         // The copy-of function is defined in XSLT 3.0, but we choose to make it available also in XPath/XQuery
 
-        register("copy-of", 0, CopyOfFn.class, AnyItemType.getInstance(),
+        register("copy-of", 0, () -> new CopyOfFn(), AnyItemType.getInstance(),
                  STAR, NEW);
 
-        register("copy-of", 1, CopyOfFn.class, AnyItemType.getInstance(),
+        register("copy-of", 1, () -> new CopyOfFn(), AnyItemType.getInstance(),
                  STAR, NEW)
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY);
 
-        register("default-language", 0, DynamicContextAccessor.DefaultLanguage.class, BuiltInAtomicType.LANGUAGE, ONE, DLANG);
+        register("default-language", 0, () -> new DynamicContextAccessor.DefaultLanguage(), BuiltInAtomicType.LANGUAGE, ONE, DLANG);
 
-        register("generate-id", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.STRING, ONE, CITEM | LATE);
+        register("generate-id", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.STRING, ONE, CITEM | LATE);
 
-        register("generate-id", 1, GenerateId_1.class, BuiltInAtomicType.STRING, ONE, 0)
+        register("generate-id", 1, () -> new GenerateId_1(), BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, Type.NODE_TYPE, OPT | INS, StringValue.EMPTY_STRING);
 
-        register("has-children", 0, ContextItemAccessorFunction.class, BuiltInAtomicType.BOOLEAN,
+        register("has-children", 0, () -> new ContextItemAccessorFunction(), BuiltInAtomicType.BOOLEAN,
                  ONE, CITEM | LATE);
 
-        register("has-children", 1, HasChildren_1.class, BuiltInAtomicType.BOOLEAN,
+        register("has-children", 1, () -> new HasChildren_1(), BuiltInAtomicType.BOOLEAN,
                  OPT, 0)
                 .arg(0, AnyNodeTest.getInstance(), OPT | INS, null);
 
-        register("head", 1, HeadFn.class, AnyItemType.getInstance(),
+        register("head", 1, () -> new HeadFn(), AnyItemType.getInstance(),
                  OPT, FILTER)
                 .arg(0, AnyItemType.getInstance(), STAR | TRA, null);
 
-        register("innermost", 1, Innermost.class, AnyNodeTest.getInstance(),
+        register("innermost", 1, () -> new Innermost(), AnyNodeTest.getInstance(),
                  STAR, 0)
                 .arg(0, AnyNodeTest.getInstance(), STAR | NAV, null);
 
-        register("json-doc", 1, JsonDoc.class, AnyItemType.getInstance(),
+        register("json-doc", 1, () -> new JsonDoc(), AnyItemType.getInstance(),
                  OPT, LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
 
-        register("json-doc", 2, JsonDoc.class, AnyItemType.getInstance(),
+        register("json-doc", 2, () -> new JsonDoc(), AnyItemType.getInstance(),
                  OPT, LATE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(ParseJsonFn.OPTION_DETAILS);
 
-        register("json-to-xml", 1, JsonToXMLFn.class, AnyItemType.getInstance(),
+        register("json-to-xml", 1, () -> new JsonToXMLFn(), AnyItemType.getInstance(),
                  OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
 
-        register("json-to-xml", 2, JsonToXMLFn.class, AnyItemType.getInstance(),
+        register("json-to-xml", 2, () -> new JsonToXMLFn(), AnyItemType.getInstance(),
                  OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(JsonToXMLFn.OPTION_DETAILS);
 
-        register("load-xquery-module", 1, LoadXqueryModule.class, MapType.ANY_MAP_TYPE, ONE, LATE)
+        register("load-xquery-module", 1, () -> new LoadXqueryModule(), MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
-        register("load-xquery-module", 2, LoadXqueryModule.class, MapType.ANY_MAP_TYPE, ONE, LATE)
+        register("load-xquery-module", 2, () -> new LoadXqueryModule(), MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null) // null or EMPTY?
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, EMPTY)
                 .setOptionDetails(LoadXqueryModule.makeOptionsParameter());
 
 
-        register("parse-ietf-date", 1, ParseIetfDate.class, BuiltInAtomicType.DATE_TIME, OPT, 0)
+        register("parse-ietf-date", 1, () -> new ParseIetfDate(), BuiltInAtomicType.DATE_TIME, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
-        register("parse-json", 1, ParseJsonFn.class, AnyItemType.getInstance(), OPT, 0)
+        register("parse-json", 1, () -> new ParseJsonFn(), AnyItemType.getInstance(), OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
-        register("parse-json", 2, ParseJsonFn.class, AnyItemType.getInstance(), OPT, 0)
+        register("parse-json", 2, () -> new ParseJsonFn(), AnyItemType.getInstance(), OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
                 .setOptionDetails(ParseJsonFn.OPTION_DETAILS);
 
-        register("parse-xml", 1, ParseXml.class, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml", 1, () -> new ParseXml(), NodeKindTest.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
-        register("random-number-generator", 0, RandomNumberGenerator.class, RandomNumberGenerator.RETURN_TYPE, ONE, LATE);
+        register("random-number-generator", 0, () -> new RandomNumberGenerator(), RandomNumberGenerator.RETURN_TYPE, ONE, LATE);
 
-        register("random-number-generator", 1, RandomNumberGenerator.class, RandomNumberGenerator.RETURN_TYPE, ONE, LATE)
+        register("random-number-generator", 1, () -> new RandomNumberGenerator(), RandomNumberGenerator.RETURN_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, OPT, null);
 
-        register("parse-xml-fragment", 1, ParseXmlFragment.class, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+        register("parse-xml-fragment", 1, () -> new ParseXmlFragment(), NodeKindTest.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
-        register("serialize", 2, Serialize.class, BuiltInAtomicType.STRING, ONE, 0)
+        register("serialize", 2, () -> new Serialize(), BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, Type.ITEM_TYPE, OPT, null)
                 .setOptionDetails(Serialize.makeOptionsParameter());
 
         // The snapshot function is defined in XSLT 3.0, but we choose to make it available also in XPath/XQuery
 
-        register("snapshot", 0, ContextItemAccessorFunction.class, AnyItemType.getInstance(), STAR, CITEM | LATE | NEW);
+        register("snapshot", 0, () -> new ContextItemAccessorFunction(), AnyItemType.getInstance(), STAR, CITEM | LATE | NEW);
 
-        register("snapshot", 1, SnapshotFn.class, AnyNodeTest.getInstance(),
+        register("snapshot", 1, () -> new SnapshotFn(), AnyNodeTest.getInstance(),
                  STAR, NEW)
                 .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY);
 
-        register("sort", 1, Sort_1.class, AnyItemType.getInstance(), STAR, 0)
+        register("sort", 1, () -> new Sort_1(), AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("sort", 2, Sort_2.class, AnyItemType.getInstance(),
+        register("sort", 2, () -> new Sort_2(), AnyItemType.getInstance(),
                  STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null);
@@ -174,34 +174,34 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("sort", 3, Sort_3.class, AnyItemType.getInstance(),
+        register("sort", 3, () -> new Sort_3(), AnyItemType.getInstance(),
                  STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
 
-        register("string-join", 1, StringJoin.class, BuiltInAtomicType.STRING, ONE, 0)
+        register("string-join", 1, () -> new StringJoin(), BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING);
 
-        register("string-join", 2, StringJoin.class, BuiltInAtomicType.STRING, ONE, 0)
+        register("string-join", 2, () -> new StringJoin(), BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING)
                 .arg(1, BuiltInAtomicType.STRING, ONE, null);
 
-        register("tokenize", 1, Tokenize_1.class, BuiltInAtomicType.STRING, STAR, 0)
+        register("tokenize", 1, () -> new Tokenize_1(), BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
 
-        register("trace", 1, Trace.class, Type.ITEM_TYPE, STAR, AS_ARG0 | LATE)
+        register("trace", 1, () -> new Trace(), Type.ITEM_TYPE, STAR, AS_ARG0 | LATE)
                 .arg(0, Type.ITEM_TYPE, STAR | TRA, null);
 
-        register("transform", 1, TransformFn.class, MapType.ANY_MAP_TYPE, ONE, LATE)
+        register("transform", 1, () -> new TransformFn(), MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE, EMPTY)
                 .setOptionDetails(TransformFn.makeOptionsParameter());
 
-        register("xml-to-json", 1, XMLToJsonFn.class, BuiltInAtomicType.STRING,
+        register("xml-to-json", 1, () -> new XMLToJsonFn(), BuiltInAtomicType.STRING,
                  OPT, LATE)
                 .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY);
 
-        register("xml-to-json", 2, XMLToJsonFn.class, BuiltInAtomicType.STRING,
+        register("xml-to-json", 2, () -> new XMLToJsonFn(), BuiltInAtomicType.STRING,
                  OPT, LATE)
                 .arg(0, AnyNodeTest.getInstance(), OPT | ABS, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE | ABS, null)

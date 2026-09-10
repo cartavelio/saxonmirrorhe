@@ -56,104 +56,104 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 new SequenceType[]{SequenceType.SINGLE_ITEM},
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("all", 2, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("all", 2, () -> new SefFunction(), BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null);
 
-        register("characters", 1, CharactersFn.class, BuiltInAtomicType.STRING, STAR, 0)
+        register("characters", 1, () -> new CharactersFn(), BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
 
         // codepoints-to-string becomes variadic in 4.0:
-        register("codepoints-to-string", 1, CodepointsToString.class, BuiltInAtomicType.STRING, ONE, SEQV)
+        register("codepoints-to-string", 1, () -> new CodepointsToString(), BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.INTEGER, STAR, null);
 
         // Concat changes in 4.0:
-        register("concat", 1, Concat.class, BuiltInAtomicType.STRING, ONE, SEQV)
+        register("concat", 1, () -> new Concat(), BuiltInAtomicType.STRING, ONE, SEQV)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, null);
 
-        register("highest", 1, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 1, () -> new HighestOrLowest(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("highest", 2, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 2, () -> new HighestOrLowest(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null);
 
-        register("highest", 3, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("highest", 3, () -> new HighestOrLowest(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
 
-        register("identity", 1, SefFunction.class, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+        register("identity", 1, () -> new SefFunction(), AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("index-where", 2, SefFunction.class, BuiltInAtomicType.INTEGER, STAR, LATE)
+        register("index-where", 2, () -> new SefFunction(), BuiltInAtomicType.INTEGER, STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null);
 
-        register("in-scope-namespaces", 1, SefFunction.class, MapType.ANY_MAP_TYPE, ONE, LATE)
+        register("in-scope-namespaces", 1, () -> new SefFunction(), MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, NodeKindTest.ELEMENT, STAR, null);
 
-        register("is-NaN", 1, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, LATE)
+        register("is-NaN", 1, () -> new SefFunction(), BuiltInAtomicType.BOOLEAN, ONE, LATE)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
 
-        register("items-before", 2, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("items-before", 2, () -> new SefFunction(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null);
 
-        register("items-until", 2, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("items-until", 2, () -> new SefFunction(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null);
 
-        register("items-from", 2, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("items-from", 2, () -> new SefFunction(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null);
 
-        register("items-after", 2, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("items-after", 2, () -> new SefFunction(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, ONE, null);
 
-        register("lowest", 1, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 1, () -> new HighestOrLowest(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("lowest", 2, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 2, () -> new HighestOrLowest(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null);
 
-        register("lowest", 3, HighestOrLowest.class, AnyItemType.getInstance(), STAR, LATE)
+        register("lowest", 3, () -> new HighestOrLowest(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, BuiltInAtomicType.STRING, OPT, null)
                 .arg(2, ft, ONE, null);
 
-        register("parcel", 1, ParcelFn.class, Parcel.TYPE, ONE, 0)
+        register("parcel", 1, () -> new ParcelFn(), Parcel.TYPE, ONE, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null);
 
-        register("parts", 1, Parts.class, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
+        register("parts", 1, () -> new Parts(), new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE, null);
 
-        register("range", 2, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("range", 2, () -> new SefFunction(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, OPT, null);
 
-        register("range", 3, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("range", 3, () -> new SefFunction(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, OPT, null)
                 .arg(2, predicate, OPT, null);
 
-        register("range", 4, SefFunction.class, AnyItemType.getInstance(), STAR, LATE)
+        register("range", 4, () -> new SefFunction(), AnyItemType.getInstance(), STAR, LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, predicate, OPT, null)
                 .arg(2, predicate, OPT, null)
                 .arg(3, MapType.ANY_MAP_TYPE,ONE, null);
 
-        register("slice", 2, SefFunction.class, AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
+        register("slice", 2, () -> new SefFunction(), AnyItemType.getInstance(), STAR, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, MapType.ANY_MAP_TYPE, ONE, null);   // TODO: define a record type
 
-        register("some", 2, SefFunction.class, BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
+        register("some", 2, () -> new SefFunction(), BuiltInAtomicType.BOOLEAN, ONE, AS_ARG0 | LATE)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY)
                 .arg(1, predicate, ONE, null);
 
-        register("unparcel", 1, UnparcelFn.class, AnyItemType.getInstance(), STAR, 0)
+        register("unparcel", 1, () -> new UnparcelFn(), AnyItemType.getInstance(), STAR, 0)
                 .arg(0, Parcel.TYPE, ONE, null);
     }
 
