@@ -35,9 +35,9 @@ public class Partition extends SystemFunction {
                 // this is the first item in the sequence
                 lastPartition.add(next);
             } else {
-                Sequence val = dynamicCall(
-                        breakWhen, context, SequenceExtent.makeSequenceExtent(lastPartition), next, Int64Value.makeIntegerValue(pos));
-                if (((BooleanValue) val.head()).getBooleanValue()) {
+                BooleanValue val = (BooleanValue)dynamicCall(
+                        breakWhen, context, SequenceExtent.makeSequenceExtent(lastPartition), next, Int64Value.makeIntegerValue(pos)).head();
+                if (val != null && val.getBooleanValue()) {
                     completePartitions.add(SimpleArrayItem.makeSimpleArrayItem(new ListIterator.Of<>(lastPartition)));
                     lastPartition.clear();
                 }

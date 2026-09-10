@@ -70,22 +70,22 @@ public class IndexWhere extends SystemFunction {
                 index++;
                 try {
                     Int64Value ix = Int64Value.makeIntegerValue(index);
-                    Sequence result;
+                    BooleanValue result;
                     switch (arity) {
                         case 0:
-                            result = dynamicCall(predicate, context);
+                            result = (BooleanValue)dynamicCall(predicate, context).head();
                             break;
                         case 1:
-                            result = dynamicCall(predicate, context, baseItem);
+                            result = (BooleanValue)dynamicCall(predicate, context, baseItem).head();
                             break;
                         case 2:
-                            result = dynamicCall(predicate, context, baseItem, ix);
+                            result = (BooleanValue)dynamicCall(predicate, context, baseItem, ix).head();
                             break;
                         default:
                             result = BooleanValue.FALSE;
                             break;
                     }
-                    if (((BooleanValue)result.head()).getBooleanValue()) {
+                    if (result != null && result.getBooleanValue()) {
                         return ix;
                     }
                 } catch (XPathException e) {
