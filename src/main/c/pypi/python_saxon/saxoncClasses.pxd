@@ -101,7 +101,7 @@ cdef extern from "@@location@@Saxon.C.API/SaxonProcessor.h":
 
         void setCatalog(const char * filename)  except +raise_py_error
 
-        void setCatalogFiles(const char * filenames, int _len)  except +raise_py_error
+        void setCatalogFiles(const char ** filenames, int _len)  except +raise_py_error
 
         const char * getStringValue(XdmItem * item)
 

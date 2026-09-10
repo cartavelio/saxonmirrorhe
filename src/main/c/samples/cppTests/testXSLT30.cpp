@@ -2622,10 +2622,24 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) 
         delete executable;
     }
     executable = nullptr;
-    if (trans != nullptr) {
-        delete trans;
+
+
+  } catch (SaxonApiException &e) {
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cerr << "exception-proc=" << message << endl;
     }
-    trans = nullptr;
+    sresult->failure++;
+    sresult->failureList.push_back("testCatalog2");
+    if (executable != nullptr) {
+        delete executable;
+        executable = nullptr;
+    }
+
+
+  }
+
+  try{
 
     executable2 = trans->compileFromFile("http://example.com/books.xsl");
 
@@ -2648,6 +2662,10 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) 
     delete executable2;
     delete [] catalogFiles;
     catalogFiles = nullptr;
+    if (trans != nullptr) {
+        delete trans;
+    }
+    trans = nullptr;
 
 
   } catch (SaxonApiException &e) {
@@ -2657,9 +2675,11 @@ void testCatalog2(const char *cwd, SaxonProcessor *proc, sResultCount *sresult) 
     }
     sresult->failure++;
     sresult->failureList.push_back("testCatalog2");
-    if (executable != nullptr) {
-        delete executable;
-        executable = nullptr;
+
+
+    if (executable2 != nullptr) {
+        delete executable2;
+        executable2 = nullptr;
     }
 
     if (trans != nullptr) {
