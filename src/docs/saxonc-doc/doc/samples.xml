@@ -167,6 +167,8 @@ queryProc->setProperty("s", "cat.xml");
 queryProc->setProperty("q", "family.xq");
 queryProc->runQueryToString();
   ]]></samp>
+     
+     <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
 
    </section>
 
@@ -303,6 +305,8 @@ with PySaxonProcessor(license=False) as proc:
   result = executable.apply_templates_returning_string()
   print(result)
     ]]></samp>
+     
+     <p>For an example of exception handling, see <a href="/technical/debugging">Debugging</a>.</p>
      
    </section>
 </article>
