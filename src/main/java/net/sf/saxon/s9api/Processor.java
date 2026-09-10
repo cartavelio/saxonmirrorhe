@@ -24,12 +24,14 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.SequenceType;
+import org.xmlresolver.ResolverFeature;
 
 import javax.xml.transform.Source;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.text.RuleBasedCollator;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -506,6 +508,21 @@ public class Processor implements Configuration.ApiProvider {
         config.registerCollection(collectionURI, collection);
     }
 
+    /**
+     * Supply one or more resource catalog files to be used for URI resolution.
+     * <p>The call has no effect if the <code>CommonResourceResolver</code> registered with the
+     * <code>Configuration</code> does not use catalog files.</para>
+     * @param fileNames the files to be used. If no files are supplied, the call removes any existing catalog
+     *                  files that were previously registered.
+     */
+
+    public void setCatalogFile(String... fileNames) {
+        try {
+            config.getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Arrays.asList(fileNames));
+        } catch (XPathException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 
     /**
      * Get the underlying {@link Configuration} object that underpins this Processor. This method
