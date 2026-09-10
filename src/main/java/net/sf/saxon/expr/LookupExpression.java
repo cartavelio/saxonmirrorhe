@@ -377,7 +377,7 @@ public class LookupExpression extends BinaryExpression {
                                 return member.iterate();
                             } else {
                                 XPathException exception = new XPathException(
-                                        "An item on the LHS of the '?' operator is an array, but a value on the RHS of the operator (" +
+                                        "An item on the LHS of the '?' operator (" + getLhsExpression().toShortString() + ") is an array, but a value on the RHS of the operator (" +
                                                 baseItem.toShortString() + ") is not an integer", "XPTY0004");
                                 exception.setIsTypeError(true);
                                 exception.setLocation(getLocation());

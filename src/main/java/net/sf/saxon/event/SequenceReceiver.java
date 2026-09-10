@@ -208,8 +208,10 @@ public abstract class SequenceReceiver implements Receiver {
                         previousAtomic = false;
                         endDocument();
                     } else if (kind == Type.ATTRIBUTE || kind == Type.NAMESPACE) {
-                        String description = kind == Type.ATTRIBUTE ? "an attribute" : "a namespace";
-                        throw new XPathException("Sequence normalization: Cannot process " + description + " node", "SENR0001", locationId);
+                        String description = kind == Type.ATTRIBUTE ? "attribute" : "namespace";
+                        throw new XPathException("Sequence normalization: Cannot process free-standing "
+                                                         + description + " node (" +
+                                node.getDisplayName() + ")", "SENR0001", locationId);
 
                     } else {
                         int copyOptions = CopyOptions.TYPE_ANNOTATIONS;
