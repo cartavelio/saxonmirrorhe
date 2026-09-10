@@ -266,7 +266,7 @@ public class SnapshotNode extends VirtualCopy implements NodeInfo {
                             SequenceIterator iter = new Navigator.DescendantIterator(
                                 this, axisNumber == AxisInfo.DESCENDANT_OR_SELF, true);
                             if (!(nodeTest instanceof AnyXNodeTest)) {
-                                iter = new Navigator.AxisFilter(iter, nodeTest);
+                                iter = Navigator.filter(iter, nodeTest);
                             }
                             return iter;
                         case AxisInfo.PRECEDING_SIBLING:

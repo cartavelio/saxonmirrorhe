@@ -623,7 +623,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
     @Override
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
-        return new Navigator.AxisFilter(
+        return Navigator.filter(
                 new AttributeAxisIterator(this, nodeTest),
                 nodeTest);
     }
@@ -631,7 +631,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     @Override
     protected SequenceIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
-            return new Navigator.AxisFilter(
+            return Navigator.filter(
                     new ChildAxisIterator(this, true, true, nodeTest),
                     nodeTest);
         } else {
@@ -641,7 +641,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
     @Override
     protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
-        return new Navigator.AxisFilter(
+        return Navigator.filter(
                 new ChildAxisIterator(this, false, forwards, nodeTest),
                 nodeTest);
     }

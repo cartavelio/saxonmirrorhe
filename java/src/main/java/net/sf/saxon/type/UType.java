@@ -75,7 +75,26 @@ public class UType {
     public static final UType XNODE = CHILD_NODE_KINDS.union(DOCUMENT).union(ATTRIBUTE).union(NAMESPACE);
     public static final UType GNODE = XNODE.union(JNODE);
 
-    public static final UType ANY_ATOMIC = new UType(0x0FFFFF00);
+    public static final UType ANY_ATOMIC = UType.STRING
+            .union(UType.BOOLEAN)
+            .union(UType.DECIMAL)
+            .union(UType.FLOAT)
+            .union(UType.DOUBLE)
+            .union(UType.DURATION)
+            .union(UType.DATE_TIME)
+            .union(UType.TIME)
+            .union(UType.DATE)
+            .union(UType.G_YEAR_MONTH)
+            .union(UType.G_YEAR)
+            .union(UType.G_MONTH)
+            .union(UType.G_MONTH_DAY)
+            .union(UType.G_DAY)
+            .union(UType.HEX_BINARY)
+            .union(UType.BASE64_BINARY)
+            .union(UType.ANY_URI)
+            .union(UType.QNAME)
+            .union(UType.NOTATION)
+            .union(UType.UNTYPED_ATOMIC);
 
     public static final UType ANY = XNODE.union(JNODE).union(ANY_ATOMIC).union(FUNCTION).union(EXTENSION);
 

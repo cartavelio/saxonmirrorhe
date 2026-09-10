@@ -370,29 +370,29 @@ public class NamespaceNode implements NodeInfo {
         return element;
     }
 
-    /**
-     * Get an iterator over the ancestor axis, starting at this node; the nodes will
-     * be in reverse document order.
-     *
-     * @param predicate a condition that the nodes must satisfy, or null
-     * @return the required iterator
-     */
-    @Override
-    public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
-        return element.iterateAncestorOrSelfAxis(predicate);
-    }
+//    /**
+//     * Get an iterator over the ancestor axis, starting at this node; the nodes will
+//     * be in reverse document order.
+//     *
+//     * @param predicate a condition that the nodes must satisfy, or null
+//     * @return the required iterator
+//     */
+//    @Override
+//    public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
+//        return element.iterateAncestorOrSelfAxis(predicate);
+//    }
 
-    /**
-     * Get an iterator over the ancestor-or-self axis, starting at this node; the nodes will
-     * be in reverse document order.
-     *
-     * @param predicate a condition that the nodes must satisfy, or null
-     * @return the required iterator
-     */
-    @Override
-    public SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
-        return Navigator.orSelf(this, iterateAncestorAxis(predicate), predicate);
-    }
+//    /**
+//     * Get an iterator over the ancestor-or-self axis, starting at this node; the nodes will
+//     * be in reverse document order.
+//     *
+//     * @param predicate a condition that the nodes must satisfy, or null
+//     * @return the required iterator
+//     */
+//    @Override
+//    public SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
+//        return Navigator.orSelf(this, iterateAncestorAxis(predicate), predicate);
+//    }
 
     /**
      * Get an iterator over the descendant axis, starting at this node; the nodes will
@@ -481,7 +481,7 @@ public class NamespaceNode implements NodeInfo {
 //                return EmptyIterator.getInstance();
 //
 //            case AxisInfo.FOLLOWING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.FollowingIterator(this),
 //                        nodeTest);
 //
@@ -489,7 +489,7 @@ public class NamespaceNode implements NodeInfo {
 //                return Navigator.filteredSingleton(element, nodeTest);
 //
 //            case AxisInfo.PRECEDING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingIterator(this, false),
 //                        nodeTest);
 //
@@ -503,7 +503,7 @@ public class NamespaceNode implements NodeInfo {
 //                return Navigator.orSelfIterator(this, axisNumber, nodeTest);
 //
 //            case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingIterator(this, true),
 //                        nodeTest);
 //            default:

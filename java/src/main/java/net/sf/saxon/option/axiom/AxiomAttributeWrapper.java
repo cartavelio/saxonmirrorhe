@@ -414,20 +414,20 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
 //                return EmptyIterator.getInstance();
 //
 //            case AxisInfo.FOLLOWING:
-//                return new Navigator.AxisFilter(new Navigator.FollowingIterator(this), nodeTest);
+//                return Navigator.filter(new Navigator.FollowingIterator(this), nodeTest);
 //
 //            case AxisInfo.PARENT:
 //                return Navigator.filteredSingleton(parent, nodeTest);
 //
 //            case AxisInfo.PRECEDING:
-//                return new Navigator.AxisFilter(new Navigator.PrecedingIterator(this, false), nodeTest);
+//                return Navigator.filter(new Navigator.PrecedingIterator(this, false), nodeTest);
 //
 //            case AxisInfo.DESCENDANT_OR_SELF:
 //            case AxisInfo.SELF:
 //                return Navigator.filteredSingleton(this, nodeTest);
 //
 //            case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                return new Navigator.AxisFilter(new Navigator.PrecedingIterator(this, true), nodeTest);
+//                return Navigator.filter(new Navigator.PrecedingIterator(this, true), nodeTest);
 //
 //            case AxisInfo.FOLLOWING_OR_SELF:
 //            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:

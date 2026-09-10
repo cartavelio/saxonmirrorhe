@@ -17,6 +17,7 @@ import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -190,7 +191,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingOrSelfAxis(NodePredicate predicate) {
-        return EmptyIterator.getInstance();
+        return Navigator.filteredSingleton(this, predicate);
     }
 
     /**

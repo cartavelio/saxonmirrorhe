@@ -627,22 +627,22 @@ public class TinyTextualElement extends TinyElementImpl {
 //                    return getParent().iterateAxis(AxisInfo.ANCESTOR_OR_SELF, nodeTest);
 //
 //                case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                    return new Navigator.AxisFilter(
+//                    return Navigator.filter(
 //                            new Navigator.PrecedingIterator(this, true),
 //                            nodeTest);
 //
 //                case AxisInfo.ANCESTOR_OR_SELF:
-//                    return new Navigator.AxisFilter(
+//                    return Navigator.filter(
 //                            new PrependIterator(this, getParent().iterateAncestorOrSelfAxis(null)),
 //                            nodeTest);
 //
 //                case AxisInfo.FOLLOWING:
-//                    return new Navigator.AxisFilter(
+//                    return Navigator.filter(
 //                            new Navigator.FollowingIterator(this),
 //                            nodeTest);
 //
 //                case AxisInfo.PRECEDING:
-//                    return new Navigator.AxisFilter(
+//                    return Navigator.filter(
 //                            new Navigator.PrecedingIterator(this, false),
 //                            nodeTest);
 //

@@ -446,7 +446,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         if (nodeTest == AnyXNodeTest.getInstance()) {
             return base;
         } else {
-            return new Navigator.AxisFilter(base, nodeTest);
+            return Navigator.filter(base, nodeTest);
         }
     }
 
@@ -457,7 +457,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             if (nodeTest == AnyXNodeTest.getInstance()) {
                 return base;
             } else {
-                return new Navigator.AxisFilter(base, nodeTest);
+                return Navigator.filter(base, nodeTest);
             }
         } else {
             return EmptyIterator.getInstance();
@@ -469,7 +469,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         if (nodeTest == AnyXNodeTest.getInstance()) {
             return new ChildEnumeration(this, false, forwards);
         } else {
-            return new Navigator.AxisFilter(
+            return Navigator.filter(
                     new ChildEnumeration(this, false, forwards),
                     nodeTest);
         }
@@ -487,7 +487,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             if (nodeTest == AnyXNodeTest.getInstance()) {
                 return allDescendants;
             } else {
-                return new Navigator.AxisFilter(allDescendants, nodeTest);
+                return Navigator.filter(allDescendants, nodeTest);
             }
         }
         if (uType == UType.ELEMENT) {
@@ -510,7 +510,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         if (nodeTest instanceof AnyXNodeTest || (nodeTest instanceof NodeKindTest && ((NodeKindTest) nodeTest).getNodeKind() == Type.ELEMENT)) {
             return wrappedDescendants;
         } else {
-            return new Navigator.AxisFilter(wrappedDescendants, nodeTest);
+            return Navigator.filter(wrappedDescendants, nodeTest);
         }
     }
 

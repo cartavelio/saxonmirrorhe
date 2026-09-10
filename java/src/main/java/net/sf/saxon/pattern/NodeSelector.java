@@ -8,7 +8,6 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.SchemaType;
@@ -19,7 +18,7 @@ import java.util.function.Predicate;
 /**
  * A NodeTest that wraps a general Predicate applied to nodes.
  *
- * <p>This is needed for C#, where it is not possible for a method such as {@link NodeInfo#iterateAxis(int, NodePredicate)}
+ * <p>This is needed for C#, where it is not possible for a method
  * to accept either a NodeTest object or a Predicate supplied as a lambda expression. To supply a predicate, it is
  * therefore necessary to wrap it in a {@code NodeSelector}.</p>
  */

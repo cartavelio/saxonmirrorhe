@@ -8,6 +8,7 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.PlainType;
@@ -51,7 +52,7 @@ public final class MapCoercionPlan extends CoercionPlan {
             CoercionPlan valuePlan = requiredValueType.getPrimaryType().getCoercionPlan(40);
             for (KeyValuePair pair : ((MapItem)item).keyValuePairs()) {
                 builder.put((AtomicValue)keyPlan.coerceItem(pair.key, requiredKeyType, request),
-                            SequenceExtent.from(valuePlan.coerceSequence(
+                            SequenceTool.toGroundedValue(valuePlan.coerceSequence(
                                     pair.value.iterate(), requiredValueType, request)));
             }
             try {

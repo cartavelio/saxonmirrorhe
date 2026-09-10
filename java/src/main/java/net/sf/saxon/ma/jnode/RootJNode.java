@@ -64,7 +64,7 @@ public class RootJNode extends JNode {
         if (predicate == null) {
             return getChildren();
         }
-        return new Navigator.AxisFilter(getChildren(), predicate);
+        return Navigator.filter(getChildren(), predicate);
     }
 
     /**

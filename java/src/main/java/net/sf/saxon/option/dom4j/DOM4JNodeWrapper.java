@@ -405,7 +405,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                if (nodeKind == Type.DOCUMENT) {
 //                    return EmptyIterator.getInstance();
 //                }
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.AncestorEnumeration(this, false),
 //                        nodeTest);
 //
@@ -413,7 +413,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                if (nodeKind == Type.DOCUMENT) {
 //                    return Navigator.filteredSingleton(this, nodeTest);
 //                }
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.AncestorEnumeration(this, true),
 //                        nodeTest);
 //
@@ -421,13 +421,13 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                if (nodeKind != Type.ELEMENT) {
 //                    return EmptyIterator.getInstance();
 //                }
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new AttributeEnumeration(this),
 //                        nodeTest);
 //
 //            case AxisInfo.CHILD:
 //                if (hasChildNodes()) {
-//                    return new Navigator.AxisFilter(
+//                    return Navigator.filter(
 //                            new ChildEnumeration(this, true, true),
 //                            nodeTest);
 //                } else {
@@ -436,7 +436,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //
 //            case AxisInfo.DESCENDANT:
 //                if (hasChildNodes()) {
-//                    return new Navigator.AxisFilter(
+//                    return Navigator.filter(
 //                            (new TreeWalker()).newDescendantAxisIterator(this, false, nodeTest),//new Navigator.DescendantEnumeration(this, false, true),
 //                            nodeTest);
 //                } else {
@@ -444,12 +444,12 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                }
 //
 //            case AxisInfo.DESCENDANT_OR_SELF:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        (new TreeWalker()).newDescendantAxisIterator(this, true, nodeTest),//new Navigator.DescendantEnumeration(this, true, true),
 //                        nodeTest);
 //
 //            case AxisInfo.FOLLOWING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.FollowingEnumeration(this),
 //                        nodeTest);
 //
@@ -460,7 +460,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                    case Type.NAMESPACE:
 //                        return EmptyIterator.getInstance();
 //                    default:
-//                        return new Navigator.AxisFilter(
+//                        return Navigator.filter(
 //                                new ChildEnumeration(this, false, true),
 //                                nodeTest);
 //                }
@@ -476,7 +476,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                return Navigator.filteredSingleton(parent, nodeTest);
 //
 //            case AxisInfo.PRECEDING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingEnumeration(this, false),
 //                        nodeTest);
 //
@@ -487,7 +487,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                    case Type.NAMESPACE:
 //                        return EmptyIterator.getInstance();
 //                    default:
-//                        return new Navigator.AxisFilter(
+//                        return Navigator.filter(
 //                                new ChildEnumeration(this, false, false),
 //                                nodeTest);
 //                }
@@ -496,7 +496,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //                return Navigator.filteredSingleton(this, nodeTest);
 //
 //            case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingEnumeration(this, true),
 //                        nodeTest);
 //
@@ -506,7 +506,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //    }
     @Override
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
-        return new Navigator.AxisFilter(
+        return Navigator.filter(
                 new AttributeEnumeration(this),
                 nodeTest);
     }
@@ -514,7 +514,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     @Override
     protected SequenceIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
-            return new Navigator.AxisFilter(
+            return Navigator.filter(
                     new ChildEnumeration(this, true, true),
                     nodeTest);
         } else {
@@ -524,7 +524,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     @Override
     protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
-        return new Navigator.AxisFilter(
+        return Navigator.filter(
                 new ChildEnumeration(this, false, forwards),
                 nodeTest);
     }

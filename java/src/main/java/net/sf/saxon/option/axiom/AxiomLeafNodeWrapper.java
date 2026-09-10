@@ -288,14 +288,14 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
             if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper);
             } else {
-                return new Navigator.AxisFilter(
+                return Navigator.filter(
                         new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper), nodeTest);
             }
         } else {
             if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.PrecedingSiblingIterator(node, parent, docWrapper);
             } else {
-                return new Navigator.AxisFilter(
+                return Navigator.filter(
                         new AxiomDocument.PrecedingSiblingIterator(node, parent, docWrapper), nodeTest);
             }
         }

@@ -315,7 +315,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
     /*@NotNull*/
     @Override
     public SequenceIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
-        return new Navigator.AxisFilter(iterateAxis(axisNumber), nodeTest);
+        return Navigator.filter(iterateAxis(axisNumber), nodeTest);
     }
 
     /**

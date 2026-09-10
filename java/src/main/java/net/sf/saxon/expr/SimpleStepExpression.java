@@ -17,13 +17,12 @@ import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.ErrorType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 
@@ -147,7 +146,7 @@ public final class SimpleStepExpression extends SlashExpression {
         if (origin == null) {
             return EmptyIterator.getInstance();
         }
-        return ((AxisExpression) getStep()).iterate((NodeInfo)origin);
+        return ((AxisExpression) getStep()).iterate(origin);
     }
 
     @Override
@@ -178,23 +177,186 @@ public final class SimpleStepExpression extends SlashExpression {
             final SimpleStepExpression expr = (SimpleStepExpression) getExpression();
             final ItemEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForItem();
             final AxisExpression step = (AxisExpression) expr.getStep();
-            final boolean nullable = Cardinality.allowsZero(expr.getSelectExpression().getCardinality());
+//            final boolean nullable = Cardinality.allowsZero(expr.getSelectExpression().getCardinality());
+//            final PullEvaluator axisPull = step.getElaborator().elaborateForPull();
+            int axis = step.getAxis();
+            NodePredicate test = step.getNodeTest();
+            switch (axis) {
+                case AxisInfo.ANCESTOR:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateAncestorAxis(test);
+                    };
 
-            if (nullable) {
-                return context -> {
-                    NodeInfo origin = (NodeInfo) select.eval(context);
-                    if (origin == null) {
-                        return EmptyIterator.getInstance();
-                    }
-                    return step.iterate(origin);
-                };
-            } else {
-                return context -> {
-                    GNode start = (GNode) select.eval(context);
-                    assert start != null;
-                    return step.iterate(start);
-                };
+                case AxisInfo.ANCESTOR_OR_SELF:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateAncestorOrSelfAxis(test);
+                    };
+
+                case AxisInfo.ATTRIBUTE:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateAttributeAxis(test);
+                    };
+
+                case AxisInfo.CHILD:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateChildAxis(test);
+                    };
+
+                case AxisInfo.DESCENDANT:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateDescendantAxis(test);
+                    };
+
+                case AxisInfo.DESCENDANT_OR_SELF:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateDescendantOrSelfAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateFollowingAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING_OR_SELF:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateFollowingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING_SIBLING:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateFollowingSiblingAxis(test);
+                    };
+
+                case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateFollowingSiblingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.NAMESPACE:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateNamespaceAxis(test);
+                    };
+
+                case AxisInfo.PARENT:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateParentAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iteratePrecedingAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING_OR_SELF:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iteratePrecedingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING_SIBLING:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iteratePrecedingSiblingAxis(test);
+                    };
+
+                case AxisInfo.PRECEDING_SIBLING_OR_SELF:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iteratePrecedingSiblingOrSelfAxis(test);
+                    };
+
+                case AxisInfo.SELF:
+                    return context -> {
+                        GNode origin = (GNode) select.eval(context);
+                        if (origin == null) {
+                            return EmptyIterator.getInstance();
+                        }
+                        return origin.iterateSelfAxis(test);
+                    };
+
+                default:
+                    throw new IllegalArgumentException("Unknown axis number " + axis);
+
             }
+
+
+//            if (nullable) {
+//                return context -> {
+//                    NodeInfo origin = (NodeInfo) select.eval(context);
+//                    if (origin == null) {
+//                        return EmptyIterator.getInstance();
+//                    }
+//                    return axisPull.iterate(context);
+//                    return step.iterate(origin);
+//                };
+//            } else {
+//                return context -> {
+//                    GNode start = (GNode) select.eval(context);
+//                    assert start != null;
+//                    return step.iterate(start);
+//                };
+//            }
         }
 
     }

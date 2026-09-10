@@ -15,10 +15,10 @@ import net.sf.saxon.value.Int64Value;
 import java.util.Iterator;
 
 public class ChildJNode extends JNode {
-    private JNode parent;
-    private int position;
-    private AtomicValue selector;
-    private GroundedValue value;
+    private final JNode parent;
+    private final int position;
+    private final AtomicValue selector;
+    private final GroundedValue value;
 
     public ChildJNode(JNode parent, int position, AtomicValue selector, GroundedValue value) {
         this.parent = parent;
@@ -64,7 +64,7 @@ public class ChildJNode extends JNode {
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
         JNodeChildIterator iter = new JNodeChildIterator(this);
         if (predicate != null) {
-            return new Navigator.AxisFilter(iter, predicate);
+            return Navigator.filter(iter, predicate);
         }
         return iter;
     }

@@ -1178,8 +1178,8 @@ public final class Navigator {
     public static SequenceIterator orSelf(GNode origin, SequenceIterator iter, NodePredicate predicate) {
         if (iter == EmptyIterator.getInstance()) {
             return filteredSingleton(origin, predicate);
-        } else if (predicate != null && predicate.test(origin)) {
-            return new PrependIterator(origin,iter);
+        } else if (predicate == null || predicate.test(origin)) {
+            return new PrependIterator(origin, iter);
         } else {
             return iter;
         }
@@ -1223,7 +1223,7 @@ public final class Navigator {
                 return origin.iterateFollowingSiblingAxis(predicate);
 
             case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-                return origin.iterateFollowingSiblingAxis(predicate);
+                return origin.iterateFollowingSiblingOrSelfAxis(predicate);
 
             case AxisInfo.NAMESPACE:
                 return origin.iterateNamespaceAxis(predicate);
@@ -1301,12 +1301,19 @@ public final class Navigator {
         }
     }
 
+    public static SequenceIterator filter(SequenceIterator base, NodePredicate predicate) {
+        if (predicate == null) {
+            return base;
+        }
+        return new AxisFilter(base, predicate);
+    }
+
     /**
      * AxisFilter is an iterator that applies a NodeTest filter to
      * the nodes returned by an underlying SequenceIterator.
      */
 
-    public static class AxisFilter implements SequenceIterator {
+    private static class AxisFilter implements SequenceIterator {
         private final SequenceIterator base;
         private final NodePredicate nodeTest;
 
@@ -1595,7 +1602,11 @@ public final class Navigator {
      */
 
     public static SequenceIterator iteratePrecedingOrAncestorAxis(GNode origin, NodePredicate predicate) {
-        return new PrecedingIterator(origin, true);
+        PrecedingIterator iter = new PrecedingIterator(origin, true);
+        if (predicate != null && predicate != AnyGNodeTest.getInstance()) {
+            return new AxisFilter(iter, predicate);
+        }
+        return iter;
     }
 
     /**

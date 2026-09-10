@@ -458,10 +458,10 @@ public class VirtualCopy implements NodeInfo {
 //            // Ensure that the ancestor, ancestor-or-self, following, and preceding axes use an implementation
 //            // that relies on getParent() to escape from the subtree
 //            case AxisInfo.ANCESTOR:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.AncestorIterator(this, false), nodeTest);
 //            case AxisInfo.ANCESTOR_OR_SELF:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.AncestorIterator(this, true), nodeTest);
 //            case AxisInfo.NAMESPACE:
 //                if (getNodeKind() != Type.ELEMENT) {
@@ -471,13 +471,13 @@ public class VirtualCopy implements NodeInfo {
 //            case AxisInfo.PARENT:
 //                return Navigator.filteredSingleton(getParent(), nodeTest);
 //            case AxisInfo.PRECEDING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingIterator(this, false), nodeTest);
 //            case AxisInfo.FOLLOWING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.FollowingIterator(this), nodeTest);
 //            case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingIterator(this, true), nodeTest);
 //            case AxisInfo.FOLLOWING_OR_SELF:
 //            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:

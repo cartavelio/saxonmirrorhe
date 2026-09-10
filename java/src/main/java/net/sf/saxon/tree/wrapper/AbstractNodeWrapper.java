@@ -252,7 +252,8 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     @Override
     @CSharpModifiers(code={"public", "virtual"})
     public SequenceIterator iterateAxis(int axisNumber) {
-        return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
+//        return iterateAxis(axisNumber, AnyXNodeTest.getInstance());
+        return null;
     }
 
     /**
@@ -278,7 +279,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 //                if (nodeKind == Type.DOCUMENT) {
 //                    return EmptyIterator.getInstance();
 //                }
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.AncestorIterator(this, false),
 //                        nodeTest);
 //
@@ -286,7 +287,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 //                if (nodeKind == Type.DOCUMENT) {
 //                    return Navigator.filteredSingleton(this, nodeTest);
 //                }
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.AncestorIterator(this, true),
 //                        nodeTest);
 //
@@ -318,7 +319,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 //                }
 //
 //            case AxisInfo.FOLLOWING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.FollowingIterator(this),
 //                        nodeTest);
 //
@@ -342,7 +343,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 //                return Navigator.filteredSingleton(getParent(), nodeTest);
 //
 //            case AxisInfo.PRECEDING:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingIterator(this, false),
 //                        nodeTest);
 //
@@ -360,7 +361,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
 //                return Navigator.filteredSingleton(this, nodeTest);
 //
 //            case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                return new Navigator.AxisFilter(
+//                return Navigator.filter(
 //                        new Navigator.PrecedingIterator(this, true),
 //                        nodeTest);
 //
@@ -483,7 +484,7 @@ public abstract class AbstractNodeWrapper implements NodeInfo, VirtualNode {
     protected SequenceIterator iterateDescendants(NodeTest nodeTest, boolean includeSelf) {
         SequenceIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
         if (!(nodeTest instanceof AnyXNodeTest)) {
-            iter = new Navigator.AxisFilter(iter, nodeTest);
+            iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
     }

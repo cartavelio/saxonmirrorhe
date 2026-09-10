@@ -219,14 +219,14 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
             if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
-                return new Navigator.AxisFilter(
+                return Navigator.filter(
                         new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper), nodeTest);
             }
         } else {
             if (nodeTest instanceof AnyXNodeTest) {
                 return new AxiomDocument.PrecedingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
-                return new Navigator.AxisFilter(
+                return Navigator.filter(
                         new AxiomDocument.PrecedingSiblingIterator((OMElement) node, parent, docWrapper), nodeTest);
             }
         }

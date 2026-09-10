@@ -90,7 +90,7 @@ final class AttributeAxisIterator implements SequenceIterator, LookaheadIterator
                 } else {
                     nextNode = new AttributeImpl(element, index);
                     index++;
-                    if (nodeTest.test(nextNode)) {
+                    if (nodeTest == null || nodeTest.test(nextNode)) {
                         return;
                     }
                 }

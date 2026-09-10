@@ -591,7 +591,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         SequenceIterator iter = new AttributeEnumeration(this);
         if (nodeTest != AnyXNodeTest.getInstance()) {
-            iter = new Navigator.AxisFilter(iter, nodeTest);
+            iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
     }
@@ -606,7 +606,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
         if (nodeTest != AnyXNodeTest.getInstance()) {
-            iter = new Navigator.AxisFilter(iter, nodeTest);
+            iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
     }
@@ -617,7 +617,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));
         if (nodeTest != AnyXNodeTest.getInstance()) {
-            iter = new Navigator.AxisFilter(iter, nodeTest);
+            iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
     }

@@ -12,20 +12,18 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodePredicate;
 
 /**
- * This class enumerates the ancestor:: or ancestor-or-self:: axes,
- * starting at a given node. The start node will never be the root.
+ * This class iterates the ancestor:: or ancestor-or-self:: axes,
+ * starting at a given TinyTree node. The start node will never be the root.
  */
 
 final public class AncestorIterator implements SequenceIterator {
 
-    private final NodeInfo startNode;
     private NodeInfo current;
     private final NodePredicate test;
 
     public AncestorIterator(NodeInfo node, NodePredicate nodeTest) {
         test = nodeTest;
-        startNode = node;
-        current = startNode;
+        current = node;
     }
 
     /*@Nullable*/
@@ -35,7 +33,7 @@ final public class AncestorIterator implements SequenceIterator {
             return null;
         }
         NodeInfo node = current.getParent();
-        while (node != null && !test.test(node)) {
+        while (node != null && test != null && !test.test(node)) {
             node = node.getParent();
         }
         return current = node;

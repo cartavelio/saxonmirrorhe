@@ -30,6 +30,7 @@ import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
@@ -80,7 +81,7 @@ public class LookupByValuePredicate extends UnaryExpression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return JNodeType.ANY_JNODE;
+        return AnyItemType.getInstance();
     }
 
 

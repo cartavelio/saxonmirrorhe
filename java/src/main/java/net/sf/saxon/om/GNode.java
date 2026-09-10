@@ -60,7 +60,7 @@ public interface GNode extends Item {
      */
     default SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
         IncrementalIterator iter = new IncrementalIterator(this, GNode::getParent);
-        return predicate == null ? iter : new Navigator.AxisFilter(iter, predicate);
+        return predicate == null ? iter : Navigator.filter(iter, predicate);
     }
 
     /**
@@ -104,7 +104,7 @@ public interface GNode extends Item {
      */
     default SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
         SequenceIterator desc = new Navigator.DescendantIterator(this, false, true);
-        return predicate == null ? new Navigator.AxisFilter(desc, predicate) : desc;
+        return predicate == null ? Navigator.filter(desc, predicate) : desc;
     }
 
     /**
@@ -116,7 +116,7 @@ public interface GNode extends Item {
      */
     default SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
         SequenceIterator desc = new Navigator.DescendantIterator(this, true, true);
-        return predicate != null ? new Navigator.AxisFilter(desc, predicate) : desc;
+        return predicate != null ? Navigator.filter(desc, predicate) : desc;
     }
 
     /**
@@ -128,7 +128,7 @@ public interface GNode extends Item {
      */
     default SequenceIterator iterateFollowingAxis(NodePredicate predicate) {
         SequenceIterator foll = new Navigator.FollowingIterator(this);
-        return predicate != null ? new Navigator.AxisFilter(foll, predicate) : foll;
+        return predicate != null ? Navigator.filter(foll, predicate) : foll;
     }
 
     /**
@@ -199,7 +199,7 @@ public interface GNode extends Item {
      */
     default SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
         SequenceIterator prec = new Navigator.PrecedingIterator(this, false);
-        return predicate == null ? new Navigator.AxisFilter(prec, predicate) : prec;
+        return predicate != null ? Navigator.filter(prec, predicate) : prec;
     }
 
     /**
