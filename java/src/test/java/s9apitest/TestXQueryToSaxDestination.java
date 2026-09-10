@@ -1,6 +1,5 @@
 package s9apitest;
 
-import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
@@ -135,7 +134,7 @@ public class TestXQueryToSaxDestination {
     @Test
     public void testQueryToSaxResult() {
         try {
-            Configuration config = new EnterpriseConfiguration();
+            Configuration config = new Configuration();
 
             // Prepare for debugger
             config.setLineNumbering(true);

@@ -14,7 +14,7 @@
  */
 package s9apitest;
 
-import com.saxonica.config.EnterpriseConfiguration;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.lib.ErrorReporter;
@@ -130,7 +130,7 @@ public class TestXPathErrorCode {
 			IndependentContext ic = (IndependentContext)env;
 			//Set imported = ic.getImportedSchemaNamespaces();
 			ic.setNamespaceResolver(namespaceResolver);
-			EnterpriseConfiguration conf = (EnterpriseConfiguration)proc.getUnderlyingConfiguration();
+			Configuration conf = (Configuration) proc.getUnderlyingConfiguration();
 			@SuppressWarnings("unchecked")
 			Set<NamespaceUri> schemas = new HashSet<>(); // temporary MHK 2023-07-20 // conf.getUnnamedSchema().getTargetNamespaces();
 			ic.setImportedSchemaNamespaces(schemas);

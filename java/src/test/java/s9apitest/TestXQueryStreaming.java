@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.StandardURIResolver;
 import net.sf.saxon.s9api.*;
@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  */
 public class TestXQueryStreaming {
-    private final ConfigTest configTest = new ConfigTest();
-
     public final static int limit = 100000;
 
     @Test
@@ -196,19 +194,19 @@ public class TestXQueryStreaming {
 
     @Test
     public void testConversionFallbackOn() {
-        String uri = "file:///" + configTest.getDataDir() + "books.xml";
+        String uri = Testdata.file("books.xml").toURI().toString();
         assertTrue(runFallback(true, "saxon:stream(doc('" + uri + "')/BOOKLIST/BOOKS/ITEM[last()]/AUTHOR)"));
     }
 
     @Test
     public void testConversionFallbackOff() {
-        String uri = "file:///" + configTest.getDataDir() + "books.xml";
+        String uri = Testdata.file("books.xml").toURI().toString();
         assertFalse(runFallback(false, "saxon:stream(doc('" + uri + "')/BOOKLIST/BOOKS/ITEM[last()]/AUTHOR)"));
     }
 
     @Test
     public void testStreamabilityFallbackOn() {
-        String uri = "file:///" + configTest.getDataDir() + "books.xml";
+        String uri = Testdata.file("books.xml").toURI().toString();
         String query = "declare function local:f($element)\n" +
                 "{\n" +
                 "  element x\n" +
@@ -224,7 +222,7 @@ public class TestXQueryStreaming {
 
     @Test
     public void testStreamabilityFallbackOff() {
-        String uri = "file:///" + configTest.getDataDir() + "books.xml";
+        String uri = Testdata.file("books.xml").toURI().toString();
 
         String query = "declare function local:f($element)\n" +
                 "{\n" +
@@ -245,7 +243,7 @@ public class TestXQueryStreaming {
     @Test
     public void testMotionlessQuery() {
         try {
-            String uri = "file:///" + configTest.getDataDir() + "othello.xml";
+            String uri = Testdata.file("othello.xml").toURI().toString();
             String query = "declare variable $n external; count(saxon:stream(doc('" + uri +
                     "')/((1 to $n)!element e {.})))";
             Processor proc = new Processor(true);
@@ -264,7 +262,7 @@ public class TestXQueryStreaming {
     @Test
     public void testEarlyExit() {
         try {
-            String uri = "file:///" + configTest.getDataDir() + "othello.xml";
+            String uri = Testdata.file("othello.xml").toURI().toString();
             String query = "declare variable $name as xs:string external;\n" +
                     "    exists(//PERSONA/text()[starts-with(., $name)])";
             Processor processor = new Processor(true);
@@ -290,7 +288,7 @@ public class TestXQueryStreaming {
     @Test
     public void testStreamedSerialization() {
         try {
-            String uri = "file:///" + configTest.getDataDir() + "books.xml";
+            String uri = Testdata.file("books.xml").toURI().toString();
             String query = "/BOOKLIST/BOOKS/ITEM/string-join(*, '|')";
             Processor proc = new Processor(true);
             XQueryCompiler xQueryCompiler = proc.newXQueryCompiler();

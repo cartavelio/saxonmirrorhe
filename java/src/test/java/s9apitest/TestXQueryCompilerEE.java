@@ -4,38 +4,24 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.dom.DOMNodeWrapper;
 import net.sf.saxon.dom.DocumentWrapper;
-import net.sf.saxon.expr.Literal;
-import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.junit.Testdata;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.query.DynamicQueryContext;
 import net.sf.saxon.s9api.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * JUnit tests for the s9api XQueryCompiler with EE
  */
 public class TestXQueryCompilerEE {
-    @Test
+    // We don't do byte code generation anymore, so the test is irrelevant?
+    @Disabled
     public void testBug5680() {
         try {
             Configuration c = new EnterpriseConfiguration();

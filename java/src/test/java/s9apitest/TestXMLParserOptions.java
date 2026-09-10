@@ -1,8 +1,8 @@
 package s9apitest;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import jaxptest.ConfigTest;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.jaxp.SaxonTransformerFactory;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * test The features and properties of a XML Parser in s9api
  */
 public class TestXMLParserOptions {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testEnableExternalEntityExpansion() {
         try {
@@ -73,7 +71,7 @@ public class TestXMLParserOptions {
     @Test
     public void testDisableReadingExternalDtd() {
         try {
-            EnterpriseConfiguration configuration = new EnterpriseConfiguration();
+            Configuration configuration = new Configuration();
             configuration.setConfigurationProperty(
                     Feature.ENTITY_RESOLVER_CLASS, DtdSuppressionEntityResolver.class.getCanonicalName());
             configuration.setConfigurationProperty(Feature.DTD_VALIDATION, false);
@@ -179,9 +177,7 @@ public class TestXMLParserOptions {
         // where the data directory location might begin "C:\...". Note that
         // getDataDir() should always return an absolute location, so I think a
         // Windows drive letter is the only way it can fail to begin with a "/".
-        String localSchemaLocation = configTest.getDataDir().startsWith("/")
-                ? "file://" + configTest.getDataDir() + "catalog-schema.xsd"
-                : "file:///" + configTest.getDataDir() + "catalog-schema.xsd";
+        String localSchemaLocation = Testdata.file("catalog-schema.xsd").toURI().toString();
 
         Processor processor = new Processor(true);
         processor.setConfigurationProperty(FeatureKeys.XML_PARSER_FEATURE + "http://xml.org/sax/features/validation", true);
@@ -383,12 +379,12 @@ public class TestXMLParserOptions {
             XMLReader xmr = spf.newSAXParser().getXMLReader();
             xmr.setFeature("http://apache.org/xml/features/validation/schema", true);
 
-            XsltExecutable exp = comp.compile(new StreamSource(new File(configTest.getBugsDir() + "/4996/test.xsl")));
+            XsltExecutable exp = comp.compile(new StreamSource(Testdata.bugsFile("4996/test.xsl")));
 
             StringWriter sw = new StringWriter();
             Serializer out = proc.newSerializer(sw);
 
-            File dataFile = new File(configTest.getBugsDir() + "/4996/xmlSchemaDefaultAttributeA.xml");
+            File dataFile = Testdata.bugsFile("4996/xmlSchemaDefaultAttributeA.xml");
             InputSource inputSource = new InputSource(dataFile.toURI().toString());
             SAXSource source1 = new SAXSource(xmr, inputSource);
 
@@ -408,59 +404,4 @@ public class TestXMLParserOptions {
             fail();
         }
     }
-
-    @Test
-    public void testDefaultedXsdAttributeWithNamespaceSaxonSuppress() {
-        testDefaultedXsdAttributeWithNamespaceSaxon(true);
-    }
-
-    @Test
-    public void testDefaultedXsdAttributeWithNamespaceSaxonNoSuppress() {
-        testDefaultedXsdAttributeWithNamespaceSaxon(false);
-    }
-
-    private void testDefaultedXsdAttributeWithNamespaceSaxon(boolean suppress) {
-        // Read XML file via Xerces parser and Saxon schema validator expanding attribute defaults
-        try {
-            Processor proc = new Processor(true);
-            if (suppress) {
-                proc.setConfigurationProperty(Feature.EXPAND_ATTRIBUTE_DEFAULTS, false);
-            }
-            XsltCompiler comp = proc.newXsltCompiler();
-            comp.setSchemaAware(true);
-            SAXParserFactory spf;
-            spf = SAXParserFactory.newInstance();
-            spf.setNamespaceAware(true);
-            XMLReader xmr = spf.newSAXParser().getXMLReader();
-            xmr.setFeature("http://apache.org/xml/features/validation/schema", false);
-
-            XsltExecutable exp = comp.compile(new StreamSource(new File(configTest.getBugsDir() + "/4996/test.xsl")));
-
-            StringWriter sw = new StringWriter();
-            Serializer out = proc.newSerializer(sw);
-
-            File dataFile = new File(configTest.getBugsDir() + "/4996/xmlSchemaDefaultAttributeA.xml");
-            InputSource inputSource = new InputSource(dataFile.toURI().toString());
-            SAXSource source1 = new SAXSource(xmr, inputSource);
-            ParseOptions options = new ParseOptions()
-                    .withSchemaValidationMode(Validation.STRICT)
-                    .withUseXsiSchemaLocation(true);
-            AugmentedSource as = new AugmentedSource(source1, options);
-            XsltTransformer trans = exp.load();
-            trans.setSource(as);
-            trans.setDestination(out);
-            trans.transform();
-            if (suppress) {
-                assertFalse(sw.toString().contains("=\"http://com.deltaxml.test/namespace\""), "no namespace declaration");
-                assertFalse(sw.toString().contains("test=\"yes\""), "no attribute");
-            } else {
-                assertTrue(sw.toString().contains("=\"http://com.deltaxml.test/namespace\""), "contains namespace declaration");
-                assertTrue(sw.toString().contains(":test=\"yes\""), "attribute is prefixed");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
-
 }

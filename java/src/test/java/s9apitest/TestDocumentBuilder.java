@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Invalidity;
 import net.sf.saxon.lib.InvalidityHandler;
@@ -40,8 +40,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api DocumentBuilder
  */
 public class TestDocumentBuilder {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testSaxSourceNoSystemId() {
         try {
@@ -135,8 +133,7 @@ public class TestDocumentBuilder {
 
             Processor proc = new Processor(false);
             XsltCompiler comp = proc.newXsltCompiler();
-            XsltExecutable exec = comp.compile(new StreamSource(new
-                    File(configTest.getDataDir() + "identity.xsl")));
+            XsltExecutable exec = comp.compile(new StreamSource(Testdata.file("identity.xsl")));
             XsltTransformer xsl = exec.load();
             xsl.setSource(new DOMSource(doc.getDocumentElement()));
             StringWriter writer = new StringWriter();
@@ -211,7 +208,7 @@ public class TestDocumentBuilder {
     public void testBaseUriFromEntities() {
         try {
             Processor processor = new Processor(false);
-            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "book-wrapper.xml"));
+            StreamSource source = new StreamSource(Testdata.file("book-wrapper.xml"));
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode d = builder.build(source);
             XPathCompiler xpc = processor.newXPathCompiler();
@@ -233,7 +230,7 @@ public class TestDocumentBuilder {
     public void testBaseUriFromCopy() {
         try {
             Processor processor = new Processor(false);
-            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "book-wrapper.xml"));
+            StreamSource source = new StreamSource(Testdata.file("book-wrapper.xml"));
             DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
             XdmNode d = builder.build(source);
@@ -261,7 +258,7 @@ public class TestDocumentBuilder {
     public void testBaseUriOfAttribute() {
         try {
             Processor processor = new Processor(false);
-            StreamSource source = new StreamSource(new File(configTest.getDataDir() + "book-wrapper.xml"));
+            StreamSource source = new StreamSource(Testdata.file("book-wrapper.xml"));
             DocumentBuilder builder = processor.newDocumentBuilder();
             XdmNode d = builder.build(source);
             XPathCompiler xpc = processor.newXPathCompiler();
@@ -407,7 +404,7 @@ public class TestDocumentBuilder {
             Processor proc = new Processor(true);
 
             XsdCompiler mgr = proc.newXsdCompiler();
-            XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            XsdSchema schema = mgr.compile(new StreamSource(Testdata.file("books.xsd")));
             SchemaValidator v = schema.newValidator();
             v.setExpandAttributeDefaults(expandDefaults);
 
@@ -420,7 +417,7 @@ public class TestDocumentBuilder {
             builder.setSchemaValidator(v);
 
             builder.setWhitespaceStrippingPolicy(policy);
-            XdmNode doc = builder.build(new File(configTest.getDataDir() + "books.xml"));
+            XdmNode doc = builder.build(Testdata.file("books.xml"));
             serializer.setOutputWriter(sw);
             serializer.serializeXdmValue(doc);
             return sw.toString();
@@ -542,7 +539,7 @@ public class TestDocumentBuilder {
                 }
             });
             XsdCompiler mgr = proc.newXsdCompiler();
-            XsdSchema schema = mgr.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            XsdSchema schema = mgr.compile(new StreamSource(Testdata.file("books.xsd")));
             SchemaValidator v = schema.newValidator();
 
             v.setInvalidityHandler(new InvalidityHandler() {
@@ -565,7 +562,7 @@ public class TestDocumentBuilder {
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(v);
 
-            builder.build(new File(configTest.getDataDir() + "books-invalid.xml"));
+            builder.build(Testdata.file("books-invalid.xml"));
             fail("unexpected success");
 
         } catch (SaxonApiException e) {
@@ -596,7 +593,7 @@ public class TestDocumentBuilder {
         try {
             Processor proc = new Processor(false);
             StringWriter sw = new StringWriter();
-            File file = new File(configTest.getDataDir() + "books.xml");
+            File file = Testdata.file("books.xml");
             proc.newDocumentBuilder().parse(file, proc.newSerializer(sw));
             assertTrue(sw.toString().startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml-stylesheet"), "serialization");
         } catch (SaxonApiException e) {
@@ -610,10 +607,10 @@ public class TestDocumentBuilder {
             Processor proc = new Processor(false);
             DocumentBuilder builder1 = proc.newDocumentBuilder();
             DocumentBuilder builder2 = proc.newDocumentBuilder();
-            File file1 = new File(configTest.getDataDir() + "books-with-dtd.xml");
+            File file1 = Testdata.file("books-with-dtd.xml");
             builder1.setDTDValidation(true);
             builder1.build(file1);
-            File file2 = new File(configTest.getDataDir() + "books-invalid.xml");
+            File file2 = Testdata.file("books-invalid.xml");
             builder2.build(file2);
         } catch (SaxonApiException e) {
             fail(e.getMessage());

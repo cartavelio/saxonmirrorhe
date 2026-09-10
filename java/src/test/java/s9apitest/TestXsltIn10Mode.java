@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
@@ -16,12 +16,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XsltTransformer running stylesheets using 1.0 compatibility mode
  */
 public class TestXsltIn10Mode {
-    private ConfigTest configTest = new ConfigTest();
-
     /**
      * Simple test: 1.0 mode works in PE but not in HE
      */
-
     @Test
     public void testEffectInHE() {
         effectIn("HE");
@@ -52,7 +49,7 @@ public class TestXsltIn10Mode {
 
             // Load the source document
             XdmNode input = processor.newDocumentBuilder().build(
-                    new File(configTest.getDataDir() + "caffo/Input.xml"));
+                    Testdata.file("caffo/Input.xml"));
             // Set the root node of the source document to be the initial context node
             transformer.setInitialContextNode(input);
             transformer.transform();
@@ -100,18 +97,15 @@ public class TestXsltIn10Mode {
 
             // Load the source document
             XdmNode input = processor.newDocumentBuilder().build(
-                    new File(configTest.getDataDir() + "caffo/Input.xml"));
+                    Testdata.file("caffo/Input.xml"));
             // Set the root node of the source document to be the initial context node
             transformer.setInitialTemplate(new QName(execute10code ? "foo" : "bar"));
             transformer.transform();
 
 
         } catch (SaxonApiException e) {
-
-
             fail("Unexpected failure");
             e.printStackTrace();
-
         }
 
     }

@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
@@ -14,14 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  */
 public class TestSchematron {
-    ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testAssertXMLDocument() {
-        XmlAssertor xmlAssertor = new XmlAssertor(configTest.getDataDir() + "radu/iso_schematron_text.xsl");
+        XmlAssertor xmlAssertor = new XmlAssertor(Testdata.file("radu/iso_schematron_text.xsl").getAbsolutePath());
         String sAssertionResult = xmlAssertor.assertXMLDocument(
-                new File(configTest.getDataDir() + "radu/to_be_asserted.xml"),
-                configTest.getDataDir() + "radu/legacygcib.sch");
+                Testdata.file("radu/to_be_asserted.xml"),
+                Testdata.file("radu/legacygcib.sch").getAbsolutePath());
 
         System.out.println("sAssertionResult = " + sAssertionResult);
 

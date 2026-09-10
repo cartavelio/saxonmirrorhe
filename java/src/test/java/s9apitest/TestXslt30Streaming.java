@@ -7,10 +7,10 @@
 
 package s9apitest;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
@@ -38,8 +38,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TestXslt30Streaming {
-    private final ConfigTest configTest = new ConfigTest();
-    
     /**
      * Simple test
      */
@@ -52,7 +50,7 @@ public class TestXslt30Streaming {
 
             // Create a transformer for the stylesheet.
             Xslt30Transformer transformer = processor.newXsltCompiler().compile(
-                    new StreamSource(new File(configTest.getDataDir() + "caffo/Transform2Streamable.xslt"))).load30();
+                    new StreamSource(Testdata.file("caffo/Transform2Streamable.xslt"))).load30();
 
             // Create a destination
             XdmDestination serializer = new XdmDestination();
@@ -62,7 +60,7 @@ public class TestXslt30Streaming {
             for (int i = 0; i < 10; i++) {
                 // Load the source document
                 Source input = new StreamSource(
-                        new File(configTest.getDataDir() + "caffo/Input.xml"));
+                        Testdata.file("caffo/Input.xml"));
                 // Set the root node of the source document to be the initial context node
                 transformer.applyTemplates(input, serializer);
             }
@@ -98,7 +96,7 @@ public class TestXslt30Streaming {
             Serializer out = proc.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
             Source input = new StreamSource(
-                    new File(configTest.getDataDir() + "caffo/Input.xml"));
+                    Testdata.file("caffo/Input.xml"));
             xsl.applyTemplates(input, out);
             assertEquals("<a count=\"1634\"/>", sw.toString(), "result");
         } catch (Exception e) {
@@ -127,7 +125,7 @@ public class TestXslt30Streaming {
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer xsl = exec.load30();
             Source input = new StreamSource(
-                    new File(configTest.getDataDir() + "caffo/Input.xml"));
+                    Testdata.file("caffo/Input.xml"));
             XdmDestination out = new XdmDestination();
             xsl.applyTemplates(input, out);
             XdmNode root = out.getXdmNode();
@@ -152,12 +150,12 @@ public class TestXslt30Streaming {
 
             // Create two transformers for the stylesheet.
             XsltExecutable exec = processor.newXsltCompiler().compile(
-                    new StreamSource(new File(configTest.getDataDir() + "caffo/Transform2Streamable.xslt")));
+                    new StreamSource(Testdata.file("caffo/Transform2Streamable.xslt")));
             StringWriter sw1 = new StringWriter();
             StringWriter sw2 = new StringWriter();
             Destination d1 = exec.load30().asDocumentDestination(processor.newSerializer(sw1));
             Destination d2 = exec.load30().asDocumentDestination(processor.newSerializer(sw2));
-            processor.newDocumentBuilder().parse(new File(configTest.getDataDir() + "caffo/Input.xml"), new TeeDestination(d1, d2));
+            processor.newDocumentBuilder().parse(Testdata.file("caffo/Input.xml"), new TeeDestination(d1, d2));
             assertEquals(sw1.toString(), sw2.toString(), "equal");
 
         } catch (SaxonApiException e) {
@@ -183,7 +181,7 @@ public class TestXslt30Streaming {
                     "<xsl:template match='/'><a size='{count(//*)}'/></xsl:template>" +
                     "</xsl:stylesheet>");
             Source input = new StreamSource(
-                    new File(configTest.getDataDir() + "caffo/Input.xml"));
+                    Testdata.file("caffo/Input.xml"));
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer xsl = exec.load30();
             XdmDestination out = new XdmDestination();
@@ -206,7 +204,7 @@ public class TestXslt30Streaming {
             proc.setConfigurationProperty(Feature.TIMING, true);
 
             XsdCompiler sm = proc.newXsdCompiler();
-            XsdSchema schema = sm.compile(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            XsdSchema schema = sm.compile(new StreamSource(Testdata.file("books.xsd")));
 
             XsltCompiler comp = proc.newXsltCompiler();
             comp.useSchema(schema);
@@ -219,7 +217,7 @@ public class TestXslt30Streaming {
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer transformer = exec.load30();
 
-            Source books = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
+            Source books = new StreamSource(Testdata.file("books.xml"));
             Source validBooks = schema.newValidator().asSource(books);
 
             // Create a serializer
@@ -312,8 +310,8 @@ public class TestXslt30Streaming {
             builder.setDTDValidation(false);
             builder.setLineNumbering(true);
 
-            Source document = new StreamSource(new File(configTest.getDataDir() + "caffo/Input.xml"));
-            XdmNode stylesheet = builder.build(new File(configTest.getDataDir() + "caffo/Transform2Streamable.xslt"));
+            Source document = new StreamSource(Testdata.file("caffo/Input.xml"));
+            XdmNode stylesheet = builder.build(Testdata.file("caffo/Transform2Streamable.xslt"));
 
             XsltCompiler compiler = processor.newXsltCompiler();
             compiler.setSchemaAware(processor.isSchemaAware());
@@ -629,7 +627,7 @@ public class TestXslt30Streaming {
                     "</xslt:transform>");
 
             XsdCompiler manager = proc.newXsdCompiler();
-            XsdSchema schema = manager.compile(new StreamSource(new File(configTest.getDataDir() + "varietyOfTypes.xsd")));
+            XsdSchema schema = manager.compile(new StreamSource(Testdata.file("varietyOfTypes.xsd")));
             comp.useSchema(schema);
 
             XsltExecutable exec = comp.compile(new StreamSource(sr));

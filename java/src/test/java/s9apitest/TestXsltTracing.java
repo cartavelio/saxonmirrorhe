@@ -7,7 +7,6 @@
 
 package s9apitest;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.Feature;
@@ -33,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TestXsltTracing {
-    private final ConfigTest configTest = new ConfigTest();
-    
     /**
      * Simple test, tracing with level="normal"
      */

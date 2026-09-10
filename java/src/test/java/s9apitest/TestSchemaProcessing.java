@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
@@ -15,20 +15,17 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test XSD processing
  */
 public class TestSchemaProcessing {
-
-    private ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testBug6050() {
         try {
             Processor processor = new Processor(true);
             XsdCompiler mgr = processor.newXsdCompiler();
-            XsdSchema schema = mgr.compile(new File(configTest.getDataDir() + "bug6050/person.xsd"));
+            XsdSchema schema = mgr.compile(Testdata.file("bug6050/person.xsd"));
             //mgr.load(new File("src/test/java/bugs/bug6050/simple.xsd"));
 
             XQueryCompiler compiler = processor.newXQueryCompiler();
             compiler.useSchema(schema);
-            XQueryExecutable exec = compiler.compile(new File(configTest.getDataDir() + "bug6050/common.xq"));
+            XQueryExecutable exec = compiler.compile(Testdata.file("bug6050/common.xq"));
             XQueryEvaluator eval = exec.load();
             eval.setExternalVariable(new QName("phoneNumber"), new XdmAtomicValue("1189482766"));
             StringWriter sw = new StringWriter();

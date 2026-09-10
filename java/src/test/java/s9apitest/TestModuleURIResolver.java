@@ -1,7 +1,7 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Configuration;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.StandardModuleURIResolver;
 import net.sf.saxon.s9api.Processor;
 import net.sf.saxon.s9api.SaxonApiException;
@@ -20,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for XQuery Module URI resolver
  */
 public class TestModuleURIResolver {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testModuleResolver() {
 
@@ -32,7 +30,7 @@ public class TestModuleURIResolver {
             Processor processor = new Processor(true);
             XQueryCompiler compiler = processor.newXQueryCompiler();
             compiler.setModuleURIResolver(new CustomModuleResolver(processor.getUnderlyingConfiguration()));
-            XQueryExecutable exec = compiler.compile(new File(configTest.getDataDir() + "xq_modules_problem/Process.xquery"));
+            XQueryExecutable exec = compiler.compile(Testdata.file("xq_modules_problem/Process.xquery"));
             exec.load().evaluate();
         } catch (SaxonApiException e) {
             fail(e.getMessage());
@@ -54,7 +52,7 @@ public class TestModuleURIResolver {
         @Override
         protected StreamSource resolveLocationHint(String baseURI, String locationHint) throws XPathException {
             if (locationHint.startsWith("http://ldueck.librarytest/")) {
-                String replace = locationHint.replace("http://ldueck.librarytest/", "file:///" + configTest.getDataDir() + "xq_modules_problem/");
+                String replace = locationHint.replace("http://ldueck.librarytest/", Testdata.file("xq_modules_problem/").toURI().toString());
                 System.out.println("Load from " + replace);
                 return super.resolveLocationHint(baseURI, replace);
             }

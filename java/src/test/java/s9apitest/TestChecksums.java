@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,6 +9,7 @@ import org.xml.sax.InputSource;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -67,7 +68,6 @@ public class TestChecksums {
     @Test
     public void testExportChecksum() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -75,8 +75,8 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
-            exec.export(new FileOutputStream(exportFn), "HE");
+            File exportFile = Testdata.file("sandpit/export.sef");
+            exec.export(new FileOutputStream(exportFile), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,
             // but the values contain hashed timestamps, so there's no way to precompute
@@ -89,7 +89,7 @@ public class TestChecksums {
 
             XdmDestination destination = new XdmDestination();
 
-            Source source = new SAXSource(new InputSource(exportFn));
+            Source source = new SAXSource(new InputSource(exportFile.toURI().toString()));
             Xslt30Transformer transformer = exec.load30();
 
             Map<QName, XdmValue> params = new HashMap<>();
@@ -117,7 +117,6 @@ public class TestChecksums {
     @Test
     public void testExportDigest() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -125,8 +124,8 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
-            exec.export(new FileOutputStream(exportFn), "HE");
+            File exportFile = Testdata.file("sandpit/export.sef");
+            exec.export(new FileOutputStream(exportFile), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,
             // but the values contain hashed timestamps, so there's no way to precompute
@@ -139,7 +138,7 @@ public class TestChecksums {
 
             XdmDestination destination = new XdmDestination();
 
-            Source source = new SAXSource(new InputSource(exportFn));
+            Source source = new SAXSource(new InputSource(exportFile.toURI().toString()));
             Xslt30Transformer transformer = exec.load30();
 
             Map<QName, XdmValue> params = new HashMap<>();
@@ -167,7 +166,6 @@ public class TestChecksums {
     @Test
     public void testExportDigestRequired() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -175,8 +173,8 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
-            exec.export(new FileOutputStream(exportFn), "HE");
+            File exportFile = Testdata.file("sandpit/export.sef");
+            exec.export(new FileOutputStream(exportFile), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,
             // but the values contain hashed timestamps, so there's no way to precompute
@@ -189,7 +187,7 @@ public class TestChecksums {
 
             XdmDestination destination = new XdmDestination();
 
-            Source source = new SAXSource(new InputSource(exportFn));
+            Source source = new SAXSource(new InputSource(exportFile.toURI().toString()));
             Xslt30Transformer transformer = exec.load30();
 
             Map<QName, XdmValue> params = new HashMap<>();
@@ -216,7 +214,6 @@ public class TestChecksums {
     @Test
     public void testExportDigestReplace() {
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
 
             // Compile the stylesheet into an SEF
@@ -224,8 +221,8 @@ public class TestChecksums {
             comp.setJustInTimeCompilation(false);
             StringReader sr = new StringReader(patchPI);
             XsltExecutable exec = comp.compile(new StreamSource(sr));
-            String exportFn = ctest.getDataDir() + "sandpit/export.sef";
-            exec.export(new FileOutputStream(exportFn), "HE");
+            File exportFile = Testdata.file("sandpit/export.sef");
+            exec.export(new FileOutputStream(exportFile), "HE");
 
             // N.B. It would be nice to check if the checksum and hash are correct,
             // but the values contain hashed timestamps, so there's no way to precompute
@@ -236,7 +233,7 @@ public class TestChecksums {
             sr = new StringReader(readPI);
             exec = comp.compile(new StreamSource(sr));
             XdmDestination destination = new XdmDestination();
-            Source source = new SAXSource(new InputSource(exportFn));
+            Source source = new SAXSource(new InputSource(exportFile.toURI().toString()));
             Xslt30Transformer transformer = exec.load30();
             Map<QName, XdmValue> params = new HashMap<>();
             params.put(new QName("target"), new XdmAtomicValue("Σ2"));
@@ -250,7 +247,7 @@ public class TestChecksums {
             sr = new StringReader(patchPI);
             exec = comp.compile(new StreamSource(sr));
             destination = new XdmDestination();
-            source = new SAXSource(new InputSource(exportFn));
+            source = new SAXSource(new InputSource(exportFile.toURI().toString()));
             transformer = exec.load30();
             params = new HashMap<>();
             params.put(new QName("target"), new XdmAtomicValue("Σ2"));

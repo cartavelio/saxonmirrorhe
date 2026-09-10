@@ -1,7 +1,7 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.event.Builder;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
@@ -24,12 +24,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit tests for XQuery Update using the s9api XQueryCompiler
  */
 public class TestXQueryUpdate {
-    private final ConfigTest configTest = new ConfigTest();
-    
     public void setUp() throws IOException {
         // Copy books.xml to the temp directory so that the updates don't matter
-        String tempfn = configTest.getTempDir() + "books.xml";
-        String origfn = configTest.getDataDir() + "books.xml";
+        String tempfn = Testdata.tempFile("books.xml").getAbsolutePath();
+        String origfn = Testdata.file("books.xml").getAbsolutePath();
         InputStream instream;
         OutputStream outstream;
 
@@ -51,7 +49,7 @@ public class TestXQueryUpdate {
             proc.setConfigurationProperty(Feature.TREE_MODEL, Builder.LINKED_TREE);
             proc.setConfigurationProperty(Feature.TREE_MODEL_NAME, "linkedTree");
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + configTest.getTempDir()));
+            comp.setBaseURI(Testdata.tempPath("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                 comp.compile("for $p in doc('books.xml')//PRICE "
@@ -84,8 +82,6 @@ public class TestXQueryUpdate {
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
-        } catch (URISyntaxException e) {
-            fail(e.getMessage());
         }
     }
 
@@ -93,8 +89,8 @@ public class TestXQueryUpdate {
     public void testCopyModify() {
         try {
             try {
-                Files.copy(new File(configTest.getDataDir() + "books.xml").toPath(),
-                           new File(configTest.getTempDir() + "books.xml").toPath(),
+                Files.copy(Testdata.file("books.xml").toPath(),
+                           Testdata.tempFile("books.xml").toPath(),
                            StandardCopyOption.REPLACE_EXISTING);
             } catch (FileAlreadyExistsException e) {
                 // ignore the failure
@@ -104,9 +100,9 @@ public class TestXQueryUpdate {
             //proc.setConfigurationProperty(FeatureKeys.TREE_MODEL_NAME, "linkedTree");
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.LINKED_TREE);
-            XdmNode input = builder.build(new File(configTest.getTempDir() + "books.xml"));
+            XdmNode input = builder.build(Testdata.tempFile("books.xml"));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + configTest.getTempDir()));
+            comp.setBaseURI(Testdata.tempPath("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                 comp.compile("copy $doc := .\n" +
@@ -124,7 +120,7 @@ public class TestXQueryUpdate {
             System.err.println(writer);
             assertTrue(writer.toString().contains("NEW-PRICE"), "renamed");
 
-        } catch (SaxonApiException | IOException | URISyntaxException e) {
+        } catch (SaxonApiException | IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -134,8 +130,8 @@ public class TestXQueryUpdate {
     public void testCopyModifyDocumentFromTinyTree() {
         try {
             try {
-                Files.copy(new File(configTest.getDataDir() + "books.xml").toPath(),
-                           new File(configTest.getTempDir() + "books.xml").toPath(),
+                Files.copy(Testdata.file("books.xml").toPath(),
+                           Testdata.tempFile("books.xml").toPath(),
                            StandardCopyOption.REPLACE_EXISTING);
             } catch (FileAlreadyExistsException e) {
                 // ignore the failure
@@ -143,9 +139,9 @@ public class TestXQueryUpdate {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
-            XdmNode input = builder.build(new File(configTest.getTempDir() + "books.xml"));
+            XdmNode input = builder.build(Testdata.tempFile("books.xml"));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + configTest.getTempDir()));
+            comp.setBaseURI(Testdata.tempPath("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                     comp.compile("let $updated := copy $doc := .\n" +
@@ -160,7 +156,7 @@ public class TestXQueryUpdate {
             assertTrue(result instanceof XdmAtomicValue);
             assertTrue(((XdmAtomicValue)result) .getBooleanValue());
 
-        } catch (SaxonApiException | IOException | URISyntaxException e) {
+        } catch (SaxonApiException | IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -170,8 +166,8 @@ public class TestXQueryUpdate {
     public void testCopyModifyElementFromTinyTree() {
         try {
             try {
-                Files.copy(new File(configTest.getDataDir() + "books.xml").toPath(),
-                           new File(configTest.getTempDir() + "books.xml").toPath(),
+                Files.copy(Testdata.file("books.xml").toPath(),
+                           Testdata.tempFile("books.xml").toPath(),
                            StandardCopyOption.REPLACE_EXISTING);
             } catch (FileAlreadyExistsException e) {
                 // ignore the failure
@@ -179,9 +175,9 @@ public class TestXQueryUpdate {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
-            XdmNode input = builder.build(new File(configTest.getTempDir() + "books.xml"));
+            XdmNode input = builder.build(Testdata.tempFile("books.xml"));
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + configTest.getTempDir()));
+            comp.setBaseURI(Testdata.tempPath("").toUri());
             comp.setUpdatingEnabled(true);
             XQueryExecutable exp =
                     comp.compile("declare variable $updated as element() := "
@@ -197,7 +193,7 @@ public class TestXQueryUpdate {
             assertTrue(result instanceof XdmAtomicValue);
             assertTrue(((XdmAtomicValue) result).getBooleanValue());
 
-        } catch (SaxonApiException | IOException | URISyntaxException e) {
+        } catch (SaxonApiException | IOException e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
@@ -216,7 +212,7 @@ public class TestXQueryUpdate {
             proc.setConfigurationProperty(Feature.TREE_MODEL, Builder.LINKED_TREE);
             proc.setConfigurationProperty(Feature.TREE_MODEL_NAME, "linkedTree");
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + configTest.getDataDir()));
+            comp.setBaseURI(Testdata.path("").toUri());
             comp.setUpdatingEnabled(true);
             comp.setSchemaAware(true);
 
@@ -250,8 +246,6 @@ public class TestXQueryUpdate {
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
-        } catch (URISyntaxException e) {
-            fail(e.getMessage());
         }
     }
 
@@ -267,10 +261,10 @@ public class TestXQueryUpdate {
 
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setTreeModel(TreeModel.LINKED_TREE);
-            XdmNode doc = builder.build(new File (configTest.getTempDir() + "books.xml"));
+            XdmNode doc = builder.build(Testdata.tempFile("books.xml"));
 
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setBaseURI(new URI("file:///" + configTest.getTempDir()));
+            comp.setBaseURI(Testdata.tempPath("").toUri());
             comp.setUpdatingEnabled(true);
 
             XQueryExecutable exp1 =
@@ -296,8 +290,6 @@ public class TestXQueryUpdate {
 
 
         } catch (SaxonApiException e) {
-            fail(e.getMessage());
-        } catch (URISyntaxException e) {
             fail(e.getMessage());
         }
     }

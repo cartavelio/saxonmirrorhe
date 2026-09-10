@@ -1,6 +1,6 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.s9api.*;
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 public class TestQueryToTransform {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testQueryToTransform() throws Exception {
         Processor proc = new Processor(true);
@@ -36,7 +34,7 @@ public class TestQueryToTransform {
 
         XsltCompiler comp_xslt = proc.newXsltCompiler();
         comp_xslt.setSchemaAware(false);
-        XsltExecutable template = comp_xslt.compile(new File(configTest.getDataDir() + "identity.xsl"));
+        XsltExecutable template = comp_xslt.compile(Testdata.file("identity.xsl"));
         XsltTransformer trans1 = template.load();
 
         for (XdmItem item : result) {
@@ -62,7 +60,7 @@ public class TestQueryToTransform {
 
         XsltCompiler comp_xslt = proc.newXsltCompiler();
         comp_xslt.setSchemaAware(false);
-        XsltExecutable template = comp_xslt.compile(new File(configTest.getDataDir() + "identity.xsl"));
+        XsltExecutable template = comp_xslt.compile(Testdata.file("identity.xsl"));
         XsltTransformer trans1 = template.load();
 
         XdmDestination resultTree = new XdmDestination();

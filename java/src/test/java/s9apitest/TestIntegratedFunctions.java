@@ -1,10 +1,10 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.ExtensionFunctionCall;
 import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.om.NamespaceResolver;
@@ -109,7 +109,6 @@ public class TestIntegratedFunctions {
     private static void testOverrideFunctionXslt(String xsl, boolean override) {
         // Bug #4111
         try {
-            ConfigTest ctest = new ConfigTest();
             Processor proc = new Processor(true);
             proc.registerExtensionFunction(new SqrtFunction());
             XsltCompiler comp = proc.newXsltCompiler();
@@ -119,8 +118,8 @@ public class TestIntegratedFunctions {
             XsltExecutable exec1 = comp.compile(new StreamSource(sr));
             List<XsltExecutable> execs = new ArrayList<>();
             execs.add(exec1);
-            exec1.export(new FileOutputStream(ctest.getDataDir() + "sandpit/export.sef"));
-            XsltExecutable exec2 = comp.loadExecutablePackage(new File(ctest.getDataDir() + "sandpit/export.sef").toURI());
+            exec1.export(new FileOutputStream(Testdata.file("sandpit/export.sef")));
+            XsltExecutable exec2 = comp.loadExecutablePackage(Testdata.file("sandpit/export.sef").toURI());
             execs.add(exec2);
             for (XsltExecutable exec : execs) {
                 XsltTransformer trans = exec.load();

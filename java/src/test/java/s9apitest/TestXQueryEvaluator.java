@@ -1,6 +1,5 @@
 package s9apitest;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.flwor.*;
@@ -8,6 +7,7 @@ import net.sf.saxon.expr.instruct.FixedAttribute;
 import net.sf.saxon.expr.instruct.FixedElement;
 import net.sf.saxon.expr.instruct.TraceExpression;
 import net.sf.saxon.expr.instruct.UserFunction;
+import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
@@ -39,8 +39,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * JUnit tests for the s9api XQueryCompiler
  */
 public class TestXQueryEvaluator {
-    private final ConfigTest configTest = new ConfigTest();
-    
     @Test
     public void testReturnDocumentNode() {
         try {
@@ -74,7 +72,7 @@ public class TestXQueryEvaluator {
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setLineNumbering(true);
             builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.ALL);
-            XdmNode source = builder.build(new File(configTest.getDataDir() + "books.xml"));
+            XdmNode source = builder.build(Testdata.file("books.xml"));
 
             XQueryExecutable exp = comp.compile("saxon:line-number((//WEIGHT)[1])");
             XQueryEvaluator eval = exp.load();
@@ -292,7 +290,7 @@ public class TestXQueryEvaluator {
         try {
             Processor proc = new Processor(true);
             XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.compileLibrary(new File(configTest.getDataDir() + "module-one.xq"));
+            comp.compileLibrary(Testdata.file("module-one.xq"));
             String q1 = "import module namespace m='http://www.example.com/module-one'; m:add(2,2)";
             XQueryEvaluator ev = comp.compile(q1).load();
             assertEquals("4", ev.evaluate().toString(), "2+2");
@@ -426,12 +424,12 @@ public class TestXQueryEvaluator {
             final Processor processor = new Processor(true);
             final XQueryCompiler qc = processor.newXQueryCompiler();
             final XQueryExecutable exp1 = qc.compile("declare namespace f='f.ns';" +
-                                                             "declare variable $z := 1 + xs:integer(doc-available('file:///" + configTest.getDataDir() + "books.xml'));" +
-                                                             "declare variable $p as xs:integer external;" +
-                                                             "declare function f:t1($v1 as xs:integer) { " +
-                                                             "   $v1 div $z + $p" +
-                                                             "};" +
-                                                             "10");
+                    "declare variable $z := 1 + xs:integer(doc-available('" + Testdata.file("books.xml").toURI() + "'));" +
+                    "declare variable $p as xs:integer external;" +
+                    "declare function f:t1($v1 as xs:integer) { " +
+                    "   $v1 div $z + $p" +
+                    "};" +
+                    "10");
             final XQueryEvaluator ev = exp1.load();
             ev.setExternalVariable(new QName("p"), new XdmAtomicValue(39));
             XdmValue v1 = new XdmAtomicValue(10);
@@ -897,7 +895,7 @@ public class TestXQueryEvaluator {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
+            StreamSource in = new StreamSource(Testdata.file("books.xml"));
             eval.runStreamed(in, out);
             assertEquals("128.67", sw.toString());
         } catch (SaxonApiException e) {
@@ -916,7 +914,7 @@ public class TestXQueryEvaluator {
             StringWriter sw = new StringWriter();
             Serializer out = p.newSerializer(sw);
             out.setOutputProperty(Serializer.Property.OMIT_XML_DECLARATION, "yes");
-            StreamSource in = new StreamSource(new File(configTest.getDataDir() + "books.xml"));
+            StreamSource in = new StreamSource(Testdata.file("books.xml"));
             eval.runStreamed(in, out);
             fail("Unexpected success");
         } catch (SaxonApiException e) {
