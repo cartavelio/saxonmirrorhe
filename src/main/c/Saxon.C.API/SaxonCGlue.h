@@ -13,13 +13,15 @@
 
 #include <libsaxon-@@edition@@c-12.1.h>
 
-
+#include <stdio.h>
 #if defined __linux__ || defined __APPLE__
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-
+#else
+#include <windows.h>
+#include <stdint.h>
+#endif
 
 
 #ifdef __cplusplus
@@ -28,7 +30,7 @@
 #else
 #define EXTERN_SAXONC
 #define EXTERN_SAXONC_END
-#endif
+
 #endif
 
 
