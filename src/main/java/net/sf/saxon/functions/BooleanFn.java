@@ -34,10 +34,7 @@ public class BooleanFn extends SystemFunction {
 
     @Override
     public void supplyTypeInformation(ExpressionVisitor visitor, ContextItemStaticInfo contextItemType, Expression[] arguments) throws XPathException {
-        XPathException err = TypeChecker.ebvError(arguments[0], visitor.getConfiguration().getTypeHierarchy());
-        if (err != null) {
-            throw err;
-        }
+        TypeChecker.ebvTypeCheck(arguments[0], visitor);
     }
 
     /**

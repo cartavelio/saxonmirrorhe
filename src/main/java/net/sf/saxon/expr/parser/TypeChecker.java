@@ -461,25 +461,32 @@ public class TypeChecker {
      * @return null if the expression is OK (optimistically), an exception object if not
      */
 
-    public static XPathException ebvError(Expression exp, TypeHierarchy th) {
-        if (Cardinality.allowsZero(exp.getCardinality())) {
-            return null;
+    public static void ebvTypeCheck(Expression exp, ExpressionVisitor visitor) throws XPathException {
+        UType t = exp.getItemType().getUType();
+        if (!t.overlaps(EBV_ITEM_TYPES)) {
+            String message = "Effective boolean value is defined only for sequences containing " +
+                    "booleans, strings, numbers, URIs, or nodes. The supplied expression `" + exp.toShortString() +
+                    " delivers items of type " + exp.getItemType();
+            if (Cardinality.allowsZero(exp.getCardinality())) {
+                // Make this a warning because it can succeed on some paths
+                visitor.issueWarning(message + ". The expression will fail when evaluated, except in the case where it returns an empty sequence",
+                                     "FORG0006", exp.getLocation());
+            } else {
+                throw new XPathException(message)
+                        .withErrorCode("FORG0006")
+                        .asTypeError()
+                        .withLocation(exp.getLocation());
+            }
         }
-        ItemType t = exp.getItemType();
-        if (th.relationship(t, Type.NODE_TYPE) == DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.BOOLEAN) == DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.STRING) == DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.ANY_URI) == DISJOINT &&
-                th.relationship(t, BuiltInAtomicType.UNTYPED_ATOMIC) == DISJOINT &&
-                th.relationship(t, NumericType.getInstance()) == DISJOINT &&
-                !(t instanceof JavaExternalObjectType)) {
-            return new XPathException(
-                    "Effective boolean value is defined only for sequences containing " +
-                            "booleans, strings, numbers, URIs, or nodes")
-                    .withErrorCode("FORG0006").asTypeError();
-        }
-        return null;
     }
+
+    private final static UType EBV_ITEM_TYPES = UType.BOOLEAN
+            .union(UType.STRING)
+            .union(UType.ANY_URI)
+            .union(UType.UNTYPED_ATOMIC)
+            .union(UType.NUMERIC)
+            .union(UType.ANY_NODE)
+            .union(UType.EXTENSION);
 
     private static Expression makePromoter(Expression exp, Converter converter, BuiltInAtomicType type) {
         ConversionRules rules = exp.getConfiguration().getConversionRules();

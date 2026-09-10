@@ -303,6 +303,12 @@ public final class FilterExpression extends BinaryExpression implements ContextS
 
         filterIsIndependent = (getFilter().getDependencies() & StaticProperty.DEPENDS_ON_FOCUS) == 0;
 
+        // give a warning if the filter has a type for which EBV might fail
+
+        if (!filterIsPositional) {
+            TypeChecker.ebvTypeCheck(getFilter(), visitor);
+        }
+
         ExpressionTool.resetStaticProperties(this);
         return this;
     }

@@ -424,11 +424,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
         for (int i = 0; i < size(); i++) {
             conditionOps[i].typeCheck(visitor, contextInfo);
-            XPathException err = TypeChecker.ebvError(getCondition(i), th);
-            if (err != null) {
-                throw err.withLocation(getCondition(i).getLocation())
-                        .maybeWithFailingExpression(getCondition(i));
-            }
+            TypeChecker.ebvTypeCheck(getCondition(i), visitor);
         }
         // Check that each of the action branches satisfies the expected type. This is a stronger check than checking the
         // type of the top-level expression. It's important with tail recursion not to wrap a tail call in a type checking

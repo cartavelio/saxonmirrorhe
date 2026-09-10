@@ -657,6 +657,12 @@ public class SaxonErrorCode {
 
     public static final String SXWN9050 = "SXWN9050";
 
+    /**
+     * SXWN9051: Expression not guaranteed to have an EBV
+     */
+
+    public static final String SXWN9051 = "SXWN9051";
+
 
     /**
      * SXSD1000: unknown attribute group

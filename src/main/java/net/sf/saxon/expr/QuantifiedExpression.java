@@ -128,10 +128,7 @@ public class QuantifiedExpression extends Assignation {
                               getSequence().getSpecialProperties(), this);
 
         getActionOp().typeCheck(visitor, contextInfo);
-        XPathException err = TypeChecker.ebvError(getAction(), visitor.getConfiguration().getTypeHierarchy());
-        if (err != null) {
-            throw err.withLocation(getLocation());
-        }
+        TypeChecker.ebvTypeCheck(getAction(), visitor);
         return this;
     }
 

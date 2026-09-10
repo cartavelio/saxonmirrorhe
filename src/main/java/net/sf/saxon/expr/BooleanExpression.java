@@ -58,17 +58,9 @@ public abstract class BooleanExpression extends BinaryExpression implements Nega
         getLhs().typeCheck(visitor, contextInfo);
         getRhs().typeCheck(visitor, contextInfo);
 
-        TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        XPathException err0 = TypeChecker.ebvError(getLhsExpression(), th);
-        if (err0 != null) {
-            err0.setLocator(getLocation());
-            throw err0;
-        }
-        XPathException err1 = TypeChecker.ebvError(getRhsExpression(), th);
-        if (err1 != null) {
-            err1.setLocator(getLocation());
-            throw err1;
-        }
+        TypeChecker.ebvTypeCheck(getLhsExpression(), visitor);
+        TypeChecker.ebvTypeCheck(getRhsExpression(), visitor);
+
         // Precompute the EBV of any constant operand
         if (getLhsExpression() instanceof Literal && !(((Literal) getLhsExpression()).getGroundedValue() instanceof BooleanValue)) {
             setLhsExpression(Literal.makeLiteral(
