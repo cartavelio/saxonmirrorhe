@@ -586,6 +586,12 @@ TODO: rethink redefines and override
     </category>
     
     <category name="extensibility">
+        
+        <p>The fact that a configuration (or s9api <code>Processor</code>) may now own multiple
+        schemas may well mean that any extension functions that access schema information need to
+        be rewritten. An extension function can no longer assume that all the information it needs
+        about "the" schema is available directly from the configuration: it needs to be redesigned
+        to take into account that there is no longer a single schema.</p>
 
     </category>
     
