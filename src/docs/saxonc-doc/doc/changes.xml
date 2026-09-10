@@ -58,6 +58,11 @@
                been updated to provide more details relevant for the C/C++, PHP and Python platforms where
                this differs to Saxon on the Java and C# platforms.</p></li>
          </ul>
+         <p>From SaxonC 12.5:</p>
+         <ul>
+            <li><p>Updated to version 22.3.1 of GraalVM Native Image, used to compile SaxonC to a
+               native executable.</p></li>
+         </ul>
       </category>
 
       <category name="api">
@@ -159,7 +164,8 @@
          <ul>
             <li>The methods <code>getLineNumber()</code> and <code>getColumnNumber()</code> have been added to the
                <code>XdmNode</code> class in the C++, Python and PHP APIs.</li>
-            <li>The <code>clearXslMessages()</code> method has been added to the <code>XsltExecutable</code> class in C++, Python and PHP APIs.</li>
+            <li>The <code>clearXslMessages()</code> method has been added to the
+               <code>XsltExecutable</code> class in the C++, Python and PHP APIs.</li>
 
          </ul>
 
