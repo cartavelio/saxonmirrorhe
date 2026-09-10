@@ -82,9 +82,9 @@
     variations between the code for different Saxon editions, and it therefore cannot be compiled until
     the preprocessor has been run. The repository includes gradle build files that invoke this preprocessing.
     The build files are complex and have many dependencies. Many users will therefore find it easier
-    to build from the preprocessed source published on SourceForge.</p></li>
-    <li><p>For every release, a ZIP file containing Saxon-HE source is published on the SourceForge site
-    (project name Saxon). A typical file name is <code>saxon-source-11.0.zip</code>. The is the source
+    to build from the preprocessed source published on GitHub.</p></li>
+    <li><p>For every release, a ZIP file containing Saxon-HE source is published in the Saxonica
+      Saxon-HE repository on GitHub. A typical file name is <code>saxon-source-12.0.zip</code>. This is the source
     code after preprocessing to extract the code needed for building SaxonJ-HE, and it is possible to compile
     it simply by dropping it into the source directory structure for an IDE such as Eclipse or IntelliJ, 
     provided all the required third-party libraries are present on the classpath.</p></li>
