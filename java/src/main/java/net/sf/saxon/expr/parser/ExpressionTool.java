@@ -597,7 +597,7 @@ public class ExpressionTool {
                 try {
                     err = exp.getConfiguration().getLogger();
                 } catch (Exception ex) {
-                    err = new StandardLogger();
+                    err = StandardLogger.makeLogger();
                 }
                 String msg = "*** Internal Saxon error: local variable encountered whose binding has been deleted";
                 err.error(msg);

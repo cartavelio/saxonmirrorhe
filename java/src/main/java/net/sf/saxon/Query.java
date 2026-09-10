@@ -11,7 +11,6 @@ package net.sf.saxon;
 
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.instruct.TerminationException;
-import net.sf.saxon.expr.parser.CodeInjector;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.query.QueryReader;
@@ -76,7 +75,7 @@ public class Query {
     protected boolean writeback = false;
     protected boolean backup = true;
     protected String explainOutputFileName = null;
-    private Logger traceDestination = new StandardLogger();
+    private Logger traceDestination = StandardLogger.makeLogger();
     private boolean closeTraceDestination = false;
     private boolean allowExit = true;
     protected String languageVersion = "3.1";
@@ -668,14 +667,14 @@ public class Query {
                     // no action, this is the default
                     break;
                 case "#out":
-                    traceDestination = new StandardLogger(System.out);
+                    traceDestination = StandardLogger.makeLogger(System.out);
                     break;
                 case "#null":
                     traceDestination = null;
                     break;
                 default:
                     try {
-                        traceDestination = new StandardLogger(new File(value));
+                        traceDestination = StandardLogger.makeLogger(new File(value));
                         closeTraceDestination = true;
                     } catch (FileNotFoundException e) {
                         badUsage("Trace output file " + value + " cannot be created");
@@ -705,7 +704,7 @@ public class Query {
             if (!value.isEmpty()) {
                 try {
                     listener.setOutputDestination(
-                            new StandardLogger(new File(value)));
+                            StandardLogger.makeLogger(new File(value)));
                 } catch (FileNotFoundException e) {
                     throw new SaxonApiException(e);
                 }
@@ -730,7 +729,7 @@ public class Query {
             if (!value.isEmpty()) {
                 try {
                     traceListener.setOutputDestination(
-                            new StandardLogger(new File(value)));
+                            StandardLogger.makeLogger(new File(value)));
                 } catch (FileNotFoundException e) {
                     badUsage("Trace output file " + value + " cannot be created");
                 }
@@ -821,7 +820,7 @@ public class Query {
         String value = options.getOptionValue("Tout");
         if (value != null) {
             try {
-                listener.setOutputDestination(new StandardLogger(new PrintStream(value)));
+                listener.setOutputDestination(StandardLogger.makeLogger(new PrintStream(value)));
             } catch (FileNotFoundException e) {
                 badUsage("Cannot write to " + value);
             }

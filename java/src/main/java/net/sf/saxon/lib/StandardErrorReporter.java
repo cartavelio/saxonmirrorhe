@@ -51,7 +51,7 @@ public class StandardErrorReporter
     private int maxOrdinaryCharacter = 255;
     private int stackTraceDetail = 2;
     private final Set<String> warningsIssued = new HashSet<>();
-    protected transient Logger logger = new StandardLogger();
+    protected transient Logger logger = StandardLogger.makeLogger();
     private XmlProcessingError firstError;
     private XmlProcessingError latestError;
     private boolean outputErrorCodes = true;
@@ -258,7 +258,7 @@ public class StandardErrorReporter
 
     protected void warning(XmlProcessingError error) {
         if (logger == null) {
-            logger = new StandardLogger();
+            logger = StandardLogger.makeLogger();
         }
         String message = constructMessage(error, "", "Warning ");
         if (!warningsIssued.contains(message)) {
@@ -310,7 +310,7 @@ public class StandardErrorReporter
             err.setTerminationMessage("Too many errors reported");
         }
         if (logger == null) {
-            logger = new StandardLogger();
+            logger = StandardLogger.makeLogger();
         }
         String message;
 

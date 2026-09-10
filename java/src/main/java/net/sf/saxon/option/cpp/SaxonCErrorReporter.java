@@ -12,7 +12,7 @@ public class SaxonCErrorReporter  extends StandardErrorReporter {
     static StringWriter errors = new StringWriter();
 
     public SaxonCErrorReporter(){
-        setLogger(new StandardLogger(errors));
+        setLogger(StandardLogger.makeLogger(errors));
     }
 
     @Override
@@ -27,7 +27,7 @@ public class SaxonCErrorReporter  extends StandardErrorReporter {
     }
 
     public void setStandardErrorOutput(PrintStream out) {
-        setLogger(new StandardLogger(out));
+        setLogger(StandardLogger.makeLogger(out));
     }
 
     public StringWriter getErrors() {
@@ -36,7 +36,7 @@ public class SaxonCErrorReporter  extends StandardErrorReporter {
 
     public void reset(){
         errors = new StringWriter();
-        setLogger(new StandardLogger(errors));
+        setLogger(StandardLogger.makeLogger(errors));
     }
 
 }

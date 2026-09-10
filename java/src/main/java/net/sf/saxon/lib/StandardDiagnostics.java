@@ -22,6 +22,7 @@ import net.sf.saxon.trans.KeyDefinition;
 import net.sf.saxon.trans.Mode;
 import net.sf.saxon.trans.rules.BuiltInRuleSet;
 import net.sf.saxon.trans.rules.Rule;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.AttributeLocation;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
@@ -58,10 +59,14 @@ public class StandardDiagnostics {
 
     public static String stackTrace(XPathContext context) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1000);
-        StandardLogger logger = new StandardLogger();
-        logger.setPrintStream(new PrintStream(baos));
+        Logger logger = StandardLogger.makeLogger(new PrintStream(baos));
         new StandardDiagnostics().logStackTrace(context, logger, 2);
-        return baos.toString().replace("\r", "");
+        return getStreamContents(baos).replace("\r", "");
+    }
+
+    @CSharpReplaceBody(code = "return System.Text.Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);")
+    private static String getStreamContents(ByteArrayOutputStream stream) {
+        return stream.toString();
     }
 
     /**

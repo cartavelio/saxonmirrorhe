@@ -41,7 +41,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
     private int maxOrdinaryCharacter = 255;
     private int stackTraceDetail = 2;
     private final Set<String> warningsIssued = new HashSet<>();
-    protected transient Logger logger = new StandardLogger();
+    protected transient Logger logger = StandardLogger.makeLogger();
 
     /**
      * Create a Standard Error Listener
@@ -186,7 +186,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
 
         if (logger == null) {
             // can happen after deserialization
-            logger = new StandardLogger();
+            logger = StandardLogger.makeLogger();
         }
         XPathException xe = XPathException.makeXPathException(exception);
         String message = constructMessage(exception, xe, "", "Warning ");
@@ -239,7 +239,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
 
         if (logger == null) {
             // can happen after deserialization
-            logger = new StandardLogger();
+            logger = StandardLogger.makeLogger();
         }
         String message;
         if (exception instanceof ValidationException) {
@@ -292,7 +292,7 @@ public class StandardErrorListener extends StandardDiagnostics implements ErrorL
         }
         if (logger == null) {
             // can happen after deserialization
-            logger = new StandardLogger();
+            logger = StandardLogger.makeLogger();
         }
         String message;
 

@@ -70,7 +70,7 @@ public class Transform {
     protected boolean schemaAware = false;
     protected boolean allowExit = true;
     protected boolean run = true;
-    private Logger traceDestination = new StandardLogger();
+    private Logger traceDestination = StandardLogger.makeLogger();
     private boolean closeTraceDestination = false;
     private XsdSchema externalSchema;
 
@@ -552,7 +552,7 @@ public class Transform {
                     traceListener = new XSLTTraceListener();
                     if (out != null) {
                         try {
-                            traceListener.setOutputDestination(new StandardLogger(new PrintStream(out)));
+                            traceListener.setOutputDestination(StandardLogger.makeLogger(new PrintStream(out)));
                         } catch (FileNotFoundException e) {
                             throw new XPathException(e);
                         }
@@ -594,7 +594,7 @@ public class Transform {
                 compiler.getUnderlyingCompilerInfo().setCodeInjector(new XSLTTraceCodeInjector());
                 if (!value.isEmpty()) {
                     traceListener.setOutputDestination(
-                            new StandardLogger(new File(value)));
+                            StandardLogger.makeLogger(new File(value)));
                 }
             }
 
@@ -607,7 +607,7 @@ public class Transform {
                 compiler.getUnderlyingCompilerInfo().setCodeInjector(new TimingCodeInjector());
                 if (!value.isEmpty()) {
                     traceListener.setOutputDestination(
-                            new StandardLogger(new File(value)));
+                            StandardLogger.makeLogger(new File(value)));
                 }
                 String formatter = options.getOptionValue("TPxsl");
                 if (formatter != null) {
@@ -632,16 +632,16 @@ public class Transform {
             } else {
                 switch (value) {
                     case "#err":
-                        traceDestination = new StandardLogger();
+                        traceDestination = StandardLogger.makeLogger();
                         break;
                     case "#out":
-                        traceDestination = new StandardLogger(System.out);
+                        traceDestination = StandardLogger.makeLogger(System.out);
                         break;
                     case "#null":
                         traceDestination = null;
                         break;
                     default:
-                        traceDestination = new StandardLogger(new File(value));
+                        traceDestination = StandardLogger.makeLogger(new File(value));
                         closeTraceDestination = true;
                         break;
                 }

@@ -187,7 +187,7 @@ public class Configuration implements SourceResolver {
     //#endif
     private String sourceParserClass;
     private transient SourceResolver sourceResolver;
-    private transient Logger traceOutput = new StandardLogger();
+    private transient Logger traceOutput = StandardLogger.makeLogger();
     private ModuleURIResolver standardModuleURIResolver;
     private String styleParserClass;
     private UnparsedTextURIResolver unparsedTextURIResolver;
@@ -919,27 +919,7 @@ public class Configuration implements SourceResolver {
             err.setHasBeenReported(true);
         }
     }
-
-    /**
-     * Set the standard error output to be used in all cases where no more specific destination
-     * is defined. This defaults to System.err.
-     *
-     * <p>The method has no effect unless the {@link Configuration#getLogger()} object
-     * is an instance of {@link StandardLogger}. In that case it calls
-     * {@link StandardLogger#setPrintStream(PrintStream)}</p>
-     *
-     * @param out the stream to be used for error output where no more specific destination
-     *            has been supplied. The caller is responsible for closing this stream after use
-     *            (if necessary).
-     * @since 9.3
-     */
-
-    public void setStandardErrorOutput(PrintStream out) {
-        if (traceOutput instanceof StandardLogger) {
-            ((StandardLogger) traceOutput).setPrintStream(out);
-        }
-    }
-
+    
     /**
      * Register a new logger to be used in the Saxon event logging mechanism
      *
@@ -1377,7 +1357,7 @@ public class Configuration implements SourceResolver {
             String destination = getTraceListenerOutputFile();
             if (destination != null) {
                 try {
-                    ((TraceListener) obj).setOutputDestination(new StandardLogger(new PrintStream(destination)));
+                    ((TraceListener) obj).setOutputDestination(StandardLogger.makeLogger(new PrintStream(destination)));
                 } catch (FileNotFoundException e) {
                     throw new XPathException(e);
                 }
@@ -4461,8 +4441,9 @@ public class Configuration implements SourceResolver {
                     try {
                         boolean append = true;
                         boolean autoFlush = true;
-                        setStandardErrorOutput(
-                                new PrintStream(new FileOutputStream((String) value, append), autoFlush));
+                        setLogger(
+                                StandardLogger.makeLogger(
+                                        new PrintStream(new FileOutputStream((String) value, append), autoFlush)));
                     } catch (FileNotFoundException fnf) {
                         throw new IllegalArgumentException(fnf);
                     }
