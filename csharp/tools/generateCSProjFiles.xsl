@@ -518,10 +518,10 @@ EndGlobal
         <PackageReference Include="J2N" Version="2.1.0" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolver'">
-        <PackageReference Include="XmlResolver" Version="6.0.24" />
+        <PackageReference Include="XmlResolver" Version="6.1.1" />
       </xsl:when>
       <xsl:when test=". = 'XmlResolverData'">
-        <PackageReference Include="XmlResolverData" Version="6.0.24" />
+        <PackageReference Include="XmlResolverData" Version="6.1.1" />
       </xsl:when>
       <xsl:when test=". = 'coverlet.collector'">
         <PackageReference Include="coverlet.collector" Version="6.0.4"/>
