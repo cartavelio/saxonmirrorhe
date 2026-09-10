@@ -3053,63 +3053,6 @@ public class Configuration implements SourceResolver {
         return new MinimalSchema(this);
     }
 
-//    /**
-//     * Read a schema from a given schema location
-//     * <p>This method is intended for internal use.</p>
-//     *
-//     * @param pipe           the PipelineConfiguration
-//     * @param baseURI        the base URI of the instruction requesting the reading of the schema
-//     * @param schemaLocation the location of the schema to be read
-//     * @param expected       The expected targetNamespace of the schema being read, or null if there is no expectation
-//     * @return the target namespace of the schema; null if no schema has been read
-//     * @throws UnsupportedOperationException     when called in the non-schema-aware version of the product
-//     * @throws net.sf.saxon.type.SchemaException if the schema cannot be read
-//     */
-//
-//    /*@Nullable*/
-//    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, /*@Nullable*/ NamespaceUri expected)
-//            throws SchemaException {
-//        needEnterpriseEdition();
-//        return null;
-//    }
-
-    /**
-     * Read schemas from a list of schema locations.
-     * <p>This method is intended for internal use.</p>
-     *
-     * @param pipe            the pipeline configuration
-     * @param baseURI         the base URI against which the schema locations are to be resolved
-     * @param schemaLocations the relative URIs specified as schema locations
-     * @param expected        the namespace URI which is expected as the target namespace of the loaded schema
-     * @throws net.sf.saxon.type.SchemaException if an error occurs
-     */
-
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
-            throws SchemaException {
-        needEnterpriseEdition();
-    }
-
-
-//    /**
-//     * Read an inline schema from a stylesheet.
-//     * <p>This method is intended for internal use.</p>
-//     *
-//     * @param root          the xs:schema element in the stylesheet
-//     * @param expected      the target namespace expected; null if there is no
-//     *                      expectation.
-//     * @param errorReporter The destination for error messages. May be null, in which case
-//     *                      the errorListener registered with this Configuration is used.
-//     * @return the actual target namespace of the schema
-//     * @throws net.sf.saxon.type.SchemaException if the schema cannot be processed
-//     */
-//
-//    /*@Nullable*/
-//    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
-//            throws SchemaException {
-//        needEnterpriseEdition();
-//        return null;
-//    }
-
     /**
      * Throw an error indicating that a request cannot be satisfied because it requires
      * the schema-aware edition of Saxon

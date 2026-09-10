@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -17,25 +18,32 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 
 /**
- * The SchemaManager is used to load schema documents, and to set options for the way in which they are loaded.
+ * The {@code SchemaManager} is used to load schema documents, and to set options for the way in which they are loaded.
  *
- * <p>A Saxon {@link Processor} (and its underlying {@link net.sf.saxon.Configuration} can hold a number of
- * independent schemas. A schema is a collection of schema components, which may come from one schema document
- * or from a collection of schema documents. A {@link SchemaManager} is instantiated to create one of these
- * schemas.</p>
- * At present all the resulting schema components are held in a single pool owned by the Processor object.
- * <p>To obtain a <code>SchemaManager</code>, use the method {@link net.sf.saxon.s9api.Processor#getSchemaManager()}.</p>
- * <p>In a schema-aware Processor there is exactly one
- * <code>SchemaManager</code> (in a non-schema-aware Processor there is none).</p>
- * <p>The cache of compiled schema definitions can include only one schema
- * component (for example a type, or an element declaration) with any given name.
- * An attempt to compile two different schemas in the same namespace will usually
- * therefore fail.</p>
- * <p>As soon as a type definition or element declaration is used for the first
- * time in a validation episode, it is marked as being "sealed": this prevents subsequent
- * modifications to the component. Examples of modifications that are thereby disallowed
- * include adding to the substitution group of an existing element declaration, adding subtypes
- * to an existing type, or redefining components using &lt;xs:redefine&gt;</p>
+ * <p>The {@code SchemaManager} is deprecated from Saxon 13, and a {@link XsdCompiler} should be used instead.</p>
+ *
+ * <p><i>A note on terminology: a <b>schema</b> is a collection of schema components, such as type definitions,
+ * constructed by compiling a set of <b>schema documents</b>.</i></p>
+ *
+ * <p>The {@code SchemaManager} can be used to build a schema incrementally, by successive calls on {@link #load}.
+ * It is more efficient, however, to build it using a single call on {@link #load} supplying multiple {@link Source}
+ * objects. The schema that has been built at any point can be extracted using the method {@link #getXsdSchema()};
+ * alternatively it can be used to construct a {@link SchemaValidator} which can be used to validate source
+ * documents.</p>
+ *
+ * <p>In earlier Saxon releases the schema built using the {@code SchemaManager} was held globally at the level
+ * of the {@link Processor} or {@link Configuration}, and new schema components were also added to this schema
+ * as a side effect of other actions that load schemas, for example <code>xsl:import-schema</code> in XSLT,
+ * <code>import schema</code> declarations in XQuery, and <code>xsi:schemaLocation</code> attributes in source
+ * documents undergoing validation. This is no longer the case. The schema built using this class is not implicitly
+ * available to queries and stylesheets compiled under this {@link Processor}, and it is not modified when
+ * queries and stylesheets import additional schema documents.</p>
+ *
+ * <p>The {@code SchemaManager} is obtained using the call {@link Processor#getSaxonEdition()}. Repeated calls
+ * deliver the same {@code SchemaManager} each time. The {@code SchemaManager} is not thread-safe; in particular,
+ * calls on {@link #load(Source...)} should not be made in multiple threads concurrently.</p>
+ *
+ * @deprecated since Saxon 13.0 - use {@link XsdCompiler}
  */
 
 @CSharpModifiers(code = {"abstract", "internal"})
@@ -150,6 +158,9 @@ public abstract class SchemaManager {
         return load(new StreamSource(file));
     }
 
+    /**
+     * Reset the schema manager to its initial state, in particular, set the accumulated schema to be empty.
+     */
     public abstract void clear();
 
     public abstract XsdSchema getXsdSchema();

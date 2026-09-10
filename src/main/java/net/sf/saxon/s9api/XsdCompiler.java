@@ -11,6 +11,7 @@ import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.SchemaURIResolver;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.Schema;
 
 import javax.xml.transform.Source;
 import java.io.File;
@@ -177,6 +178,17 @@ public class XsdCompiler {
 
 
     public XsdSchema importComponents(Source source) throws SaxonApiException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Construct an {@link XsdSchema} by wrapping an internal schema object. This is intended primarily
+     * for internal use
+     *
+     * @param internalSchema the internal schema object
+     */
+
+    public XsdSchema wrapInternalSchema(Schema internalSchema) {
         throw new UnsupportedOperationException();
     }
 

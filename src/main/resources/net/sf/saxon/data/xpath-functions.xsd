@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            elementFormDefault="qualified"
+           finalDefault="#all"
     xmlns:fn="http://www.w3.org/2005/xpath-functions"
     xmlns:j="http://www.w3.org/2005/xpath-functions"
     targetNamespace="http://www.w3.org/2005/xpath-functions">
@@ -121,7 +122,7 @@
         </xs:simpleContent>
     </xs:complexType>
     
-    <xs:complexType name="arrayType">
+    <xs:complexType name="arrayType" block="extension">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="j:map"/>
             <xs:element ref="j:array"/>

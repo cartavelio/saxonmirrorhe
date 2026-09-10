@@ -16,6 +16,7 @@ import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.type.Schema;
 import net.sf.saxon.value.SequenceType;
 
 import java.io.IOException;
@@ -93,6 +94,23 @@ public class XsltExecutable {
 
     public Xslt30Transformer load30() {
         return new Xslt30Transformer(processor, preparedStylesheet.newController(), preparedStylesheet.getCompileTimeParams());
+    }
+
+    /**
+     * Get the schema used as the static context of the top-level package in the stylesheet. This will typically
+     * include schema components preloaded using {@link XsltCompiler#useSchema(XsdSchema)}, plus schema components
+     * loaded using <code>xsl:import-schema</code> declarations within the stylesheet itself.
+     *
+     * <p>This schema can usefully be used for validating source documents that are to be supplied as input to
+     * the stylesheet.</p>
+     *
+     * @return the schema used by the top-level package of the stylesheet
+     * @since 13.0
+     */
+
+    public XsdSchema getImportedSchema() {
+        Schema schema = preparedStylesheet.getTopLevelPackage().getImportedSchema();
+        return processor.newXsdCompiler().wrapInternalSchema(schema);
     }
 
     /**
