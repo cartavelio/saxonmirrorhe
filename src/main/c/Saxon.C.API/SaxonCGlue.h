@@ -70,8 +70,8 @@ extern char *resources_dir;
 extern int jvmCreated; // TODO this might not be required in graalvm - remove
 
 //===============================================================================================//
-/** <code>Environment</code>. This struct captures the Graalvm properties
- * associated with the cross compiled SaxonC library. <p/>
+/** <code>sxnc_environment</code>. This struct captures the GraalVM properties
+ * associated with the compiled SaxonC library. <p/>
  */
 typedef struct {
   graal_isolate_t *isolate;
@@ -82,7 +82,7 @@ typedef struct {
 //===============================================================================================//
 
 /** <code>sxnc_parameter</code>. This struct captures details of parameters used
- * for the transformation as (string, value) pairs. <p/>
+ * for transformations, queries, and XPath expressions, as (string, value) pairs. <p/>
  */
 typedef struct {
   char *name;
@@ -93,8 +93,8 @@ typedef struct {
 
 //===============================================================================================//
 
-/**! <code>sxnc_property</code>. This struct captures details of properties used
- * for the transformation as (string, string) pairs. <p/>
+/** <code>sxnc_property</code>. This struct captures details of properties used
+ * for transformations, queries, and XPath expressions, as (string, string) pairs. <p/>
  */
 typedef struct {
   char *name;
@@ -102,7 +102,7 @@ typedef struct {
                   Java object. */
 } sxnc_property;
 
-/**! <code>sxnc_value</code>. This struct is used to capture the xdmvalue and its
+/**! <code>sxnc_value</code>. This struct is used to capture the XdmValue and its
  * type information. <p/>
  */
 typedef struct {
@@ -110,7 +110,7 @@ typedef struct {
 } sxnc_value;
 
 /**! <code>sxnc_processor</code>. This struct is used to capture the Java
- * processor objects created in C for XSLT, XQuery and XPath <p/>
+ * processor objects created in C for XSLT, XQuery and XPath. <p/>
  */
 typedef struct {
   int64_t value;
@@ -122,44 +122,44 @@ typedef void *(*allocFn)(size_t length);
 
 extern const char *failure;
 
-/*
+/**
  * Get resources directory.
  */
 
 char *getResourceDirectory();
 
-/*
+/**
  * Get resources directory. This is to replace getResourceDirectory().
  */
 
 char *_getResourceDirectory();
 
 /**
- * Load dll using the default setting in SaxonC
- * Recommended method to use to load library
+ * Load dll using the default setting in SaxonC.
+ * Recommended method to use to load library.
  */
 int create_graalvm_isolate(sxnc_environment *env);
 
 int attach_graalvm_thread(sxnc_environment *env);
 
 /**
- * Closes down the Graalvm environment used by SaxonC
+ * Closes down the GraalVM environment used by SaxonC
  */
 int detach_graalvm_thread(sxnc_environment *env);
 
 int64_t createSaxonProcessor2(graal_isolatethread_t *thread, int license);
 
 /**
- * Create pointer to the SaxonProcessor. Here we pass in the processor pointer
+ * Create a pointer to the Saxon Processor. Here we pass in the processor pointer
  * which should have been allocated memory space in advance. Return status true
- * = success, false = failed to create SaxonProcessor
+ * = success, false = failed to create Saxon Processor.
  */
 int c_createSaxonProcessor(sxnc_environment *environi,
                            sxnc_processor *processor, int license);
 
-/*
+/**
  * Callback to check for exceptions. When called it returns the exception as a
- * string
+ * string.
  */
 const char *checkForException(sxnc_environment *environi);
 
@@ -168,30 +168,30 @@ const char *checkForException(sxnc_environment *environi);
  */
 void graal_tear_down(graal_isolatethread_t *thread);
 
-/*
- * Get a parameter from list
+/**
+ * Get a parameter from the list.
  */
 int64_t getParameter(sxnc_parameter *parameters, int parLen, const char *name);
 
-/*
- * Get a property from list
+/**
+ * Get a property from the list.
  */
 char *getProperty(sxnc_property *properties, int propLen, const char *name);
 
-/*
- * set a parameter
+/**
+ * Set a parameter.
  */
 void setParameter(sxnc_parameter **parameters, int *parLen, int *parCap,
                   const char *name, sxnc_value *value);
 
-/*
- * set a property
+/**
+ * Set a property.
  */
 void setProperty(sxnc_property **properties, int *propLen, int *propCap,
                  const char *name, const char *value);
 
-/*
- * clear parameter
+/**
+ * Clear parameters and properties.
  */
 void clearSettings(sxnc_parameter **parameters, int *parLen,
                    sxnc_property **properties, int *propLen);
