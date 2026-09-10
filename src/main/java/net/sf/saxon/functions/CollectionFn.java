@@ -297,7 +297,7 @@ public class CollectionFn extends SystemFunction implements Callable {
             });
         }
 
-        // If the collection is stable, cache the result
+        // If the collection is stable, cache the result. Take care to avoid attempting to put duplicates in the pool.
         if (collection.isStable(context) || context.getConfiguration().getBooleanProperty(Feature.STABLE_COLLECTION_URI)) {
             Controller controller = context.getController();
             DocumentPool docPool = controller.getDocumentPool();
@@ -310,15 +310,21 @@ public class CollectionFn extends SystemFunction implements Callable {
             for (Item item; (item = iter.next()) != null; ) {
                 if (item instanceof NodeInfo && ((NodeInfo) item).getNodeKind() == Type.DOCUMENT) {
                     String docUri = ((NodeInfo) item).getSystemId();
-                    DocumentKey docKey;
+                    final DocumentKey docKey;
                     if (packageData instanceof StylesheetPackage) {
                         StylesheetPackage pack = (StylesheetPackage) packageData;
                         docKey = new DocumentKey(docUri, pack.getPackageName(), pack.getPackageVersion());
                     } else {
                         docKey = new DocumentKey(docUri);
                     }
-                    TreeInfo info = item instanceof TreeInfo ? (TreeInfo) item : new GenericTreeInfo(controller.getConfiguration(), (NodeInfo) item);
-                    docPool.add(info, docKey);
+                    // Only add the document if it isn't already present
+                    if (docPool.find(docKey) == null) {
+                        if (item instanceof TreeInfo) {
+                            docPool.add((TreeInfo) item, docKey);
+                        } else {
+                            docPool.add(new GenericTreeInfo(controller.getConfiguration(), (NodeInfo) item), docKey);
+                        }
+                    }
                 }
             }
             context.getController().setUserData("saxon:collections", collectionKey, cachedCollection);
