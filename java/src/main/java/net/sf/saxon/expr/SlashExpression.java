@@ -825,6 +825,12 @@ public class SlashExpression extends BinaryExpression
             head = ((SequenceCoercer)head).getBaseExpression();
         }
         Expression tail = getLastStep();
+        if (head instanceof RootExpression) {
+            head = new AxisExpression(AxisInfo.SELF, NodeKindType.DOCUMENT);
+        }
+        if (head.getItemType().getGenre() == Genre.XNODE && tail.getItemType().getGenre() != Genre.XNODE) {
+            tail = tail.typeCheck(new ExpressionVisitor(config),new ContextItemStaticInfo(head.getItemType()));
+        }
         if (head instanceof ItemChecker checker) {
             // No need to type check the context item
             if (checker.getBaseExpression() instanceof ContextItemExpression) {
