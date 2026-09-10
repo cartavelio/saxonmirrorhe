@@ -27,10 +27,11 @@ public class ActiveSAXSource extends SAXSource implements ActiveSource  {
      * @param source the input source object, whose properties are copied. The source must
      *               include a non-null XMLReader.
      */
-    public ActiveSAXSource(SAXSource source) throws IllegalArgumentException {
+    public ActiveSAXSource(SAXSource source) throws IllegalArgumentException, XPathException {
         if (source.getXMLReader() == null) {
             throw new IllegalArgumentException("Supplied SAXSource contains no XMLReader");
         }
+        configureParser(source.getXMLReader());
         setInputSource(source.getInputSource());
         setXMLReader((source.getXMLReader()));
         setSystemId(source.getSystemId());
