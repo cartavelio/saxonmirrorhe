@@ -24,6 +24,10 @@ namespace javax.xml.transform.stream {
         public void setSystemId(string systemId) {
             this.sysId = systemId;
         }
+        
+        public void setSystemId(java.io.File file) {
+            this.sysId = file.toURI().OriginalString;
+        }
 
         public void setOutputStream(System.IO.Stream stream) {
             this._stream = stream;

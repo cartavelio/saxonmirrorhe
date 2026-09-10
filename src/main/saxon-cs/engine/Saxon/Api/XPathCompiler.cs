@@ -1,6 +1,7 @@
 using System;
 using net.sf.saxon.s9api;
 using net.sf.saxon.trans;
+using SaxonCS3.engine.Saxon.Api.Support;
 
 namespace Saxon.Api {
     /// <summary>

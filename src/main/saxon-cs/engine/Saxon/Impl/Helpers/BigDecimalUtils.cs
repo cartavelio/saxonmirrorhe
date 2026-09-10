@@ -29,4 +29,3 @@ namespace Saxon.Impl.Helpers {
         }
     }
 }
-}

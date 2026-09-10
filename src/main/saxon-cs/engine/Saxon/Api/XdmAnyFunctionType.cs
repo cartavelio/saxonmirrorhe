@@ -12,12 +12,15 @@ namespace Saxon.Api {
         /// </summary>
         public static readonly XdmAnyFunctionType Instance = new XdmAnyFunctionType();
 
-        private XdmAnyFunctionType() {
-            this.type = AnyFunctionType.ANY_FUNCTION;
+        private XdmAnyFunctionType() : base(AnyFunctionType.ANY_FUNCTION) {
         }
         
         public override bool Matches(XdmItem item) {
             return (Item) item.value is Function;
+        }
+
+        public override bool Subsumes(XdmItemType other) {
+            return other.Unwrap() is FunctionItemType;
         }
     }
 }

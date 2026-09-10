@@ -23,7 +23,7 @@ namespace Saxon.Api {
         private Configuration config;
         private XmlResolver xmlResolver;
         private SchemaValidationMode validation;
-        private SchemaValidator schemaValidator;
+        //private SchemaValidator schemaValidator;
         private Uri baseUri;
         private QName topLevelElement;
         private XQueryExecutable projectionQuery;
@@ -87,23 +87,23 @@ namespace Saxon.Api {
         /// </remarks>
 
         public SchemaValidationMode SchemaValidationMode {
-            get { return validation; }
-            set { validation = value; }
+            get => validation;
+            set => validation = value;
         }
 
 
-        /// <summary>
-        /// Property to set and get the schemaValidator to be used. This determines whether schema validation is applied
-        /// to an input document and whether type annotations in a supplied document are retained. If no schemaValidator
-        /// is supplied, then schema validation does not take place.
-        /// </summary>
-        public SchemaValidator SchemaValidator {
-            get => schemaValidator;
-            set {
-                schemaValidator = value;
-                builder.setSchemaValidator(schemaValidator == null ? null : schemaValidator.UnderlyingSchemaValidator);
-            }
-        }
+        // /// <summary>
+        // /// Property to set and get the schemaValidator to be used. This determines whether schema validation is applied
+        // /// to an input document and whether type annotations in a supplied document are retained. If no schemaValidator
+        // /// is supplied, then schema validation does not take place.
+        // /// </summary>
+        // public SchemaValidator SchemaValidator {
+        //     get => schemaValidator;
+        //     set {
+        //         schemaValidator = value;
+        //         builder.setSchemaValidator(schemaValidator == null ? null : schemaValidator.UnderlyingSchemaValidator);
+        //     }
+        // }
 
         /// <summary>
         /// The required name of the top level element in a document instance being validated
@@ -119,7 +119,7 @@ namespace Saxon.Api {
             get { return topLevelElement; }
             set {
                 topLevelElement = value;
-                schemaValidator.UnderlyingSchemaValidator.setDocumentElementName(topLevelElement);
+                //schemaValidator.UnderlyingSchemaValidator.setDocumentElementName(topLevelElement);
             }
         }
 
@@ -468,7 +468,7 @@ namespace Saxon.Api {
         /// </returns>
         public XdmNode Wrap(XmlDocument doc) {
             String baseu = (baseUri == null ? null : baseUri.ToString());
-            DotNetDocumentWrapper wrapper = new DotNetDocumentWrapper(doc, baseu, config);
+            DomDocumentWrapper wrapper = new DomDocumentWrapper(doc, baseu, config);
             return (XdmNode) XdmValue.Wrap(wrapper.getRootNode());
         }
     }

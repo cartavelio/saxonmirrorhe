@@ -1,5 +1,6 @@
 using System;
 using net.sf.saxon;
+using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.type;
 using net.sf.saxon.value;
@@ -175,7 +176,7 @@ namespace Saxon.Api {
             try {
                 net.sf.saxon.str.UnicodeString us = net.sf.saxon.str.StringView.of(lexicalForm).tidy();
                 net.sf.saxon.type.StringConverter Converter =
-                    ((AtomicType) it).getStringConverter(type.Unwrap().getConversionRules());
+                    ((AtomicType) it).getStringConverter(ConversionRules.DEFAULT);
                 this.value = Converter.convertString(us).asAtomic();
             }
             catch (Exception ex) {

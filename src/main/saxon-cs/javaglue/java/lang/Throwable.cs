@@ -17,7 +17,7 @@ namespace java.lang {
             _inner = new SysEx(cause.Message, cause);
         }
 
-        public string getMessage() {
+        public virtual string getMessage() {
             return _inner.Message;
         }
 

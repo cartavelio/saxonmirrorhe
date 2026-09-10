@@ -21,8 +21,7 @@ namespace Saxon.Api {
         public static readonly XdmAtomicType Instance =
             new XdmAtomicType(net.sf.saxon.type.BuiltInAtomicType.ANY_ATOMIC);
 
-        internal XdmAtomicType(AtomicType type) {
-            this.type = type;
+        private XdmAtomicType(AtomicType type) : base (type) {
         }
 
         /// <summary>
@@ -427,7 +426,7 @@ namespace Saxon.Api {
 
         public QName Name {
             get {
-                StructuredQName jQName = ((AtomicType) type).getTypeName();
+                StructuredQName jQName = ((AtomicType) underlyingType).getTypeName();
                 if (jQName == null) {
                     return null;
                 }
@@ -444,7 +443,7 @@ namespace Saxon.Api {
         public override bool Matches(XdmItem item) {
             Item theItem = (Item) item.value;
             return theItem is AtomicValue 
-                   && ((AtomicType)type).matches((AtomicValue)theItem, null);
+                   && ((AtomicType)underlyingType).matches((AtomicValue)theItem, null);
         }
 
 
@@ -457,7 +456,29 @@ namespace Saxon.Api {
         /// <returns>true if this ItemType subsumes the other ItemType. This includes the case where A and B
         /// represent the same ItemType.</returns>
         public override bool Subsumes(XdmItemType other) {
-            return type.subsumes(other.Unwrap());
+            net.sf.saxon.type.ItemType otherType = other.Unwrap();
+            if (!otherType.isPlainType()) {
+                return false;
+            }
+            AtomicType type = (AtomicType) otherType;
+            return subsumesUnderlyingType(type);
         }
+
+        private bool subsumesUnderlyingType(AtomicType otherType) {
+            SchemaType thisType = (AtomicType)underlyingType;
+            BuiltInAtomicType builtIn =
+                otherType is BuiltInAtomicType ? (BuiltInAtomicType) otherType : (BuiltInAtomicType) otherType.getBuiltInBaseType();
+            while (true) {
+                if (builtIn.isSameType(thisType)) {
+                    return true;
+                }
+                SchemaType baseType = builtIn.getBaseType();
+                if (!(baseType is BuiltInAtomicType)) {
+                    return false;
+                }
+                builtIn = (BuiltInAtomicType) baseType;
+            }
+        }
+        
     }
 }

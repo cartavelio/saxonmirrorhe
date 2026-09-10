@@ -197,7 +197,30 @@ namespace Saxon.Api {
         /// occurs while evaluating the expression.</exception>
         public IEnumerator GetEnumerator() {
             try {
-                return new SequenceEnumerator<XdmItem>(evaluator.iterator());
+                return evaluator.GetEnumerator();
+            }
+            catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
+                throw new DynamicError(XPathException.makeXPathException(err));
+            }
+        }
+        
+        /// <summary>
+        /// Evaluate the query, returning the result as an <c>IEnumerator</c> (that is,
+        /// an enumerator over a sequence of nodes and/or atomic values).
+        /// </summary>
+        /// <returns>
+        /// An enumerator over the sequence that represents the results of the query.
+        /// Each object in this sequence will be an instance of <c>XdmItem</c>. Note
+        /// that the query may be evaluated lazily, which means that a successful response
+        /// from this method does not imply that the query has executed successfully: failures
+        /// may be reported later while retrieving items from the iterator. 
+        /// </returns>
+        /// <exception cref="DynamicError">Throws a <c>DynamicError</c> if any run-time failure
+        /// occurs while evaluating the expression.</exception>
+
+        IEnumerator<XdmItem> IEnumerable<XdmItem>.GetEnumerator() {
+            try {
+                return evaluator.GetEnumerator();
             }
             catch (net.sf.saxon.s9api.SaxonApiUncheckedException err) {
                 throw new DynamicError(XPathException.makeXPathException(err));
@@ -236,11 +259,11 @@ namespace Saxon.Api {
         public XdmNode[] RunUpdate() {
             try {
                 evaluator.run();
-                java.util.Iterator updatedDocsIter = evaluator.getUpdatedDocuments();
+                IEnumerator<Saxon.Api.XdmNode> updatedDocsIter = evaluator.getUpdatedDocuments();
                 List<XdmNode> resultList = new List<XdmNode>();
 
-                for (; updatedDocsIter.hasNext();) {
-                    resultList.Add(updatedDocsIter.next();
+                for (; updatedDocsIter.MoveNext();) {
+                    resultList.Add(updatedDocsIter.Current);
                 }
 
                 XdmNode[] result = resultList.ToArray();

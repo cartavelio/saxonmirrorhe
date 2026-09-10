@@ -34,12 +34,12 @@ namespace Saxon.Api {
         }
 
 
-        public bool GetMeataData() {
+        public bool GetMetaData() {
             return uriQueryParameters.getMetaData().booleanValue();
         }
 
 
-        public String ContentType() {
+        public string ContentType() {
             return uriQueryParameters.getContentType();
         }
 

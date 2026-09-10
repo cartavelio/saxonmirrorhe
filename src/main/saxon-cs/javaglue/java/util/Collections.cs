@@ -43,8 +43,8 @@ namespace java.util
             }
         }
 
-        public static List<T> emptyList<T>() {
-            return new ArrayList<T>();
+        public static SysCollGen.List<T> emptyList<T>() {
+            return new SysCollGen.List<T>();
         }
         
         public static SysCollGen.List<T> singletonList<T>(T entry) {
@@ -53,22 +53,22 @@ namespace java.util
             return a;
         }
         
-        public static Set<T> emptySet<T>() {
-            return new HashSet<T>();
+        public static SysCollGen.ISet<T> emptySet<T>() {
+            return new SysCollGen.HashSet<T>();
         }
         
         public static java.util.Iterator<T> emptyIterator<T>() {
             return new EmptyIterator<T>();
         }
         
-        public static java.util.Map<K,V> emptyMap<K,V>() {
-            return new HashMap<K, V>();
+        public static SysCollGen.IDictionary<K,V> emptyMap<K,V>() {
+            return new SysCollGen.Dictionary<K, V>();
         }
 
-        public static java.util.Set<T> singleton<T>(T o) {
+        public static SysCollGen.HashSet<T> singleton<T>(T o) {
             // TODO: it should be immutable, and a custom implementation would be better
-            java.util.HashSet<T> theSet = new HashSet<T>(1);
-            theSet.add(o);
+            SysCollGen.HashSet<T> theSet = new SysCollGen.HashSet<T>(1);
+            theSet.Add(o);
             return theSet;
         }
     }

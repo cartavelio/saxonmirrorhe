@@ -1,12 +1,14 @@
 using System;
 using System.IO;
 using System.Xml;
+using Sys = System;
 using javax.xml.transform.stream;
 using net.sf.saxon;
 using net.sf.saxon.@event;
 using net.sf.saxon.lib;
 using net.sf.saxon.om;
 using net.sf.saxon.s9api;
+using Saxon.Api.Support;
 using Saxon.Impl.Helpers;
 
 namespace Saxon.Api {
@@ -28,7 +30,6 @@ namespace Saxon.Api {
     public class XsltTransformer : XmlDestination {
         private XmlDestination xmlDestination;
         private StandardLogger traceFunctionDestination;
-        private IMessageListener messageListener;
         private IMessageListener2 messageListener2;
         private IResultDocumentHandler resultDocumentHandler;
         private QName initialTemplateName;
@@ -81,9 +82,8 @@ namespace Saxon.Api {
         /// The base URI of the principal input document. This is used for example by the <c>document()</c>
         /// function if the document contains links to other documents in the form of relative URIs.</param>
         public void SetInputStream(Stream input, Uri baseUri) {
-            StreamSource streamSource =
-                    new StreamSource(input),
-                Uri.EscapeUriString(baseUri.ToString());
+            StreamSource streamSource = new StreamSource(input,
+                Uri.EscapeUriString(baseUri.ToString()));
             transformer.setSource(streamSource);
         }
 
@@ -203,7 +203,7 @@ namespace Saxon.Api {
         /// </remarks>
 
         public IResultDocumentHandler ResultDocumentHandler {
-            get { return resultDocumentHandler; }
+            get => resultDocumentHandler;
             set {
                 resultDocumentHandler = value;
                 transformer.getUnderlyingController().setResultDocumentResolver(
@@ -228,33 +228,6 @@ namespace Saxon.Api {
         /// <para>When the <c>xsl:message</c> instruction specifies <c>terminate="yes"</c>,
         /// the message is first notified using this interface, and then an exception is thrown
         /// which terminates the transformation.</para>
-        /// </remarks>
-
-        public IMessageListener MessageListener {
-            set {
-                messageListener = value;
-                transformer.setMessageListener(new MessageListenerProxy(value));
-            }
-            get { return messageListener; }
-        }
-
-
-        /// <summary>
-        /// Listener for messages output using <c>&lt;xsl:message&gt;</c>.
-        /// </summary>
-        /// <remarks> 
-        /// <para>The caller may supply a message listener before calling <c>Run</c>;
-        /// the processor will then invoke the listener once for each message generated during
-        /// the transformation. Each message will be output as an object of type <c>XdmNode</c>
-        /// representing a document node.</para>
-        /// <para>If no message listener is supplied by the caller, message information will be written to
-        /// the standard error stream.</para>
-        /// <para>Each message is presented as an XML document node. Calling <c>ToString()</c>
-        /// on the message object will usually generate an acceptable representation of the
-        /// message.</para>
-        /// <para>When the <c>xsl:message</c> instruction specifies <c>terminate="yes"</c>,
-        /// the message is first notified using this interface, and then an exception is thrown
-        /// which terminates the transformation.</para>
         /// <para>The <c>MessageListener2</c> property interface differs from the <c>MessageListener</c>
         /// in allowing the error code supplied to xsl:message to be notified</para>
         /// </remarks>
@@ -262,9 +235,11 @@ namespace Saxon.Api {
         public IMessageListener2 MessageListener2 {
             set {
                 messageListener2 = value;
-                transformer.setMessageListener(new MessageListenerProxy2(value));
+                transformer.setMessageListener(
+                    new MessageListener2Proxy(value, makePipelineConfiguration()).getMessageListener());
+
             }
-            get { return messageListener2; }
+            get => messageListener2;
         }
 
         /// <summary>
@@ -345,12 +320,16 @@ namespace Saxon.Api {
 
         internal Receiver GetDestinationReceiver(XmlDestination destination) {
             Controller controller = transformer.getUnderlyingController();
-            PipelineConfiguration pipe = controller.getConfiguration().makePipelineConfiguration();
+            PipelineConfiguration pipe = makePipelineConfiguration();
             Receiver r = destination.GetUnderlyingDestination()
                 .getReceiver(pipe, controller.getExecutable().getPrimarySerializationProperties());
             pipe.setController(controller);
             return r;
             //}
+        }
+
+        internal PipelineConfiguration makePipelineConfiguration() {
+            return transformer.getUnderlyingController().getConfiguration().makePipelineConfiguration();
         }
 
         /// <summary>

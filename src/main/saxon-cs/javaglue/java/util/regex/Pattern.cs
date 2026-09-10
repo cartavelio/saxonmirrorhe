@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 
 namespace java.util.regex {
     public class Pattern {
@@ -11,19 +12,25 @@ namespace java.util.regex {
         public const int UNICODE_CASE = 32;
         public const int LITERAL = 64;
         public const int CANON_EQ = 128;
-        public static Pattern compile(string regex) {
-            
+
+        private Regex regex;
+
+        private Pattern(Regex regex) {
+            this.regex = regex;
         }
-        public static Pattern compile(string regex, int flags) {
-            
+        public static Pattern compile(string pattern) {
+            return new Pattern(new Regex(pattern));
+        }
+        public static Pattern compile(string pattern, int flags) {
+            return new Pattern(new Regex(pattern)); // TODO: use the flags
         }
 
         public string pattern() {
-            throw new NotImplementedException();
+            return regex.ToString();
         }
 
         public Matcher matcher(string input) {
-            return new Matcher(input);
+            return new Matcher(regex, input);
         }
     }
 }

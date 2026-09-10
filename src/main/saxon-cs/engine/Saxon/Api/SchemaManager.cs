@@ -11,6 +11,8 @@ using net.sf.saxon.pull;
 using net.sf.saxon.s9api;
 using net.sf.saxon.type;
 using Saxon.Api.Support;
+using SaxonCS3.engine.Saxon.Api.Callbacks;
+using SaxonCS3.engine.Saxon.Api.Support;
 
 namespace Saxon.Api {
     /// <summary>
@@ -97,9 +99,9 @@ namespace Saxon.Api {
             get
             {
                 SchemaURIResolver r = schemaManager.getSchemaURIResolver();
-                if (r is DotNetSchemaURIResolver)
+                if (r is StandardSchemaURIResolver)
                 {
-                    return ((DotNetSchemaURIResolver)r).resolver;
+                    return ((StandardSchemaURIResolver)r).resolver;
                 }
                 else
                 {
@@ -108,7 +110,7 @@ namespace Saxon.Api {
             }
             set
             {
-                schemaManager.setSchemaURIResolver(new DotNetSchemaURIResolver(value));
+                schemaManager.setSchemaURIResolver(new StandardSchemaURIResolver(value));
             }
         }
 

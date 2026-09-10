@@ -21,10 +21,10 @@ namespace Saxon.Api {
         /// in the <c>import module</c> declaration in the query prolog.</param>
         /// <returns>A set of absolute URIs identifying the query modules to be loaded. There is no requirement
         /// that these correspond one-to-one with the URIs defined in the <c>locationHints</c>. The 
-        /// returned URIs will be dereferenced by calling the <c>GetEntity</c> method.
+        /// returned URIs will be de-referenced by calling the <c>GetEntity</c> method.
         /// </returns>
 
-        /**public**/ Uri[] GetModules(String moduleUri, Uri baseUri, String[] locationHints);
+        Uri[] GetModules(string moduleUri, Uri baseUri, string[] locationHints);
 
         /// <summary>
         /// Dereference a URI returned by <c>GetModules</c> to retrieve a <c>Stream</c> containing
@@ -34,7 +34,7 @@ namespace Saxon.Api {
         /// <returns>Either a <c>Stream</c> or a <c>String</c> containing the query text. 
         /// The supplied URI will be used as the base URI of the query module.</returns>
 
-        /**public**/ Object GetEntity(Uri absoluteUri);
+        object GetEntity(Uri absoluteUri);
 
     }
 }
