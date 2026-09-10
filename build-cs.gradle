@@ -721,26 +721,40 @@ task eecs_dll(
   }
 }
 
+task dotnetExamples(
+  dependsOn: ['dotnetRelease', 'configure_dotnetExamples']
+) {
+  def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
+  doLast {
+    exec {
+      workingDir = "${projectDir}/build/examples"
+      commandLine "echo", dotnetex, 'restore', 'Examples.sln', '--verbosity', 'Normal'
+    }
+  }
+  doLast {
+    exec {
+      workingDir = "${projectDir}/build/examples"
+      commandLine "echo", dotnetex, 'build', 'Examples.sln', '--verbosity', 'Normal',
+        '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
+        "-p:Version=${sver}", "-p:PackageVersion=${sver}"
+    }
+  }
+}
+
 task dotnetRelease(
   dependsOn: ['eecs_dll', 'configure_dotnetBuild']
 ) {
   def sver = "${saxonMajorVersion}.${saxonMinorVersion}.${saxonPatchVersion}"
   doLast {
     exec {
-      workingDir = projectDir
-      commandLine dotnetex, 'restore', 'build/cs/SaxonCS.sln', '--verbosity', 'Normal'
+      workingDir = "${projectDir}/build/cs"
+      commandLine dotnetex, 'restore', 'SaxonCS.sln', '--verbosity', 'Normal'
     }
   }
   doLast {
     exec {
-      workingDir = projectDir
-      commandLine dotnetex, '--version'
-    }
-  }
-  doLast {
-    exec {
-      workingDir = projectDir
-      commandLine dotnetex, 'build', 'build/cs/SaxonCS.sln', '--verbosity', 'Normal',
+      workingDir = "${projectDir}/build/cs"
+      commandLine dotnetex, 'build', 'SaxonCS.sln', '--verbosity', 'Normal',
         '--configuration', 'Release',  '/nodereuse:false', '--no-restore',
         "-p:Version=${sver}", "-p:PackageVersion=${sver}"
     }
@@ -763,6 +777,17 @@ task configure_dotnetBuild() {
     copy {
       from "${projectDir}/tools/saxon-cs"
       into "${buildDir}/cs"
+      include "SaxonCS.sln"
+    }
+  }
+}
+
+task configure_dotnetExamples() {
+  doLast {
+    copy {
+      from "${projectDir}/tools/saxon-cs"
+      into "${buildDir}/examples"
+      include "Examples.*"
     }
   }
 }
