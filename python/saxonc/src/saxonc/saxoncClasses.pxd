@@ -400,7 +400,7 @@ cdef extern from "saxonc/XsdCompiler.h":
 
     cdef cppclass XsdCompiler:
         XsdCompiler() except +handle_saxonc_api_exceptions
-        setcwd(const char * cwd)  except +handle_saxonc_api_exceptions
+        void setcwd(const char * cwd)  except +handle_saxonc_api_exceptions
         char * getcwd()
 
         void setXsdVersion(const char * version)  except +handle_saxonc_api_exceptions
