@@ -438,7 +438,7 @@ public class XdmUtils {
       * @param d the value of the double
       * @return a new XdmAtomicValue
       */
-     @CEntryPoint(name = "j_makeIntegerValue")
+     @CEntryPoint(name = "j_makeDoubleValue")
      public static long j_makeDoubleValue(IsolateThread thread, double d){
 
          XdmAtomicValue value = new XdmAtomicValue(d);
@@ -453,7 +453,7 @@ public class XdmUtils {
       * @param f the value of the foat
       * @return a new XdmAtomicValue
       */
-     @CEntryPoint(name = "j_makeIntegerValue")
+     @CEntryPoint(name = "j_makeFloatValue")
      public static long j_makeFloatValue(IsolateThread thread, float f){
 
          XdmAtomicValue value = new XdmAtomicValue(f);
@@ -468,7 +468,7 @@ public class XdmUtils {
       * @param l the supplied primitive long value
       * @return the value as a XdmAtomicValue which is a BigIntegerValue or Int64Value as appropriate
       */
-     @CEntryPoint(name = "j_makeIntegerValue")
+     @CEntryPoint(name = "j_makeLongValue")
      public static long makeLongValue(IsolateThread thread, long l){
          XdmAtomicValue value = new XdmAtomicValue(l);
          ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
@@ -482,7 +482,7 @@ public class XdmUtils {
       *              required
       * @return the XdmAtomicValue requested
       */
-     @CEntryPoint(name = "j_makeIntegerValue")
+     @CEntryPoint(name = "j_makeBooleanValue")
      public static long makeBooleanValue(IsolateThread thread, int b){
          boolean bvalue = CTypeConversion.toBoolean(b);
          XdmAtomicValue value = new XdmAtomicValue(bvalue);
@@ -496,7 +496,7 @@ public class XdmUtils {
       * @param str - The value given in a string form in clark notation. {uri}local
       * @return XdmAtomicValue - value
      */
-     @CEntryPoint(name = "j_makeIntegerValue")
+     @CEntryPoint(name = "j_makeQNameValue")
      public static long makeQNameValue(IsolateThread thread, CCharPointer str) throws SaxonApiException {
 
          XdmValue value = SaxonCAPI.createXdmAtomicItem("QName", CTypeConversion.toJavaString(str));
