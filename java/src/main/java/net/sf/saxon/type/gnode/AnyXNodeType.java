@@ -11,6 +11,8 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.type.ChoiceItemType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
 
 /**
@@ -35,6 +37,21 @@ public final class AnyXNodeType extends XNodeType {
      */
 
     private AnyXNodeType() {
+    }
+
+    /**
+     * Normalize this item type, returning a potentially different item type that matches the same
+     * items. For example, {@code record(*)} and {@code map(*)} match the same items. The default
+     * implementation returns the item type unchanged.
+     * <p>Item types should be normalized before comparison using equals().</p>
+     *
+     * @return the normalized item type.
+     */
+    @Override
+    public ItemType normalizeItemType() {
+        return ChoiceItemType.of(NodeKindType.DOCUMENT, NodeKindType.ELEMENT, NodeKindType.ATTRIBUTE,
+                                 NodeKindType.TEXT, NodeKindType.COMMENT, NodeKindType.PROCESSING_INSTRUCTION,
+                                 NodeKindType.NAMESPACE);
     }
 
     /**
