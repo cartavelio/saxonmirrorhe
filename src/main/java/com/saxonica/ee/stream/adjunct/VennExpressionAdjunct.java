@@ -564,7 +564,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         public void close() throws XPathException {
             //System.err.println("CombiningUnionFeed.close() ");
             // Flush out any remaining buffered nodes, using the pull-mode intersection iterator to merge them
-            IntersectionEnumeration union = new IntersectionEnumeration(
+            IntersectionIterator union = new IntersectionIterator(
                     linkedListIterator(lhsBuffer), linkedListIterator(rhsBuffer), LocalOrderComparer.getInstance());
             processItems(union, getResultFeed());
             super.close();
@@ -763,7 +763,7 @@ public class VennExpressionAdjunct extends TransmissionAdjunct {
         public void close() throws XPathException {
             //System.err.println("CombiningUnionFeed.close() ");
             // Flush out any remaining buffered nodes, using the pull-mode intersection iterator to merge them
-            DifferenceEnumeration union = new DifferenceEnumeration(
+            DifferenceIterator union = new DifferenceIterator(
                     linkedListIterator(lhsBuffer), linkedListIterator(rhsBuffer), LocalOrderComparer.getInstance());
             processItems(union, getResultFeed());
             super.close();

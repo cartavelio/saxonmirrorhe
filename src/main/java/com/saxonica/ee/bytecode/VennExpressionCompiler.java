@@ -81,25 +81,25 @@ public class VennExpressionCompiler extends ToIteratorCompiler {
                 methodInfo.releaseLocal(iter1Var);
                 return new IteratorDetails(UnionEnumeration.class, NodeInfo.class);
             case Token.INTERSECT:
-                ga.newInstance(Type.getType(IntersectionEnumeration.class));
+                ga.newInstance(Type.getType(IntersectionIterator.class));
                 ga.dup();
                 ga.loadLocal(iter0Var);
                 ga.loadLocal(iter1Var);
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
-                ga.invokeConstructor(IntersectionEnumeration.class, SequenceIterator.class, SequenceIterator.class, Comparator.class);
+                ga.invokeConstructor(IntersectionIterator.class, SequenceIterator.class, SequenceIterator.class, Comparator.class);
                 methodInfo.releaseLocal(iter0Var);
                 methodInfo.releaseLocal(iter1Var);
-                return new IteratorDetails(IntersectionEnumeration.class, NodeInfo.class);
+                return new IteratorDetails(IntersectionIterator.class, NodeInfo.class);
             case Token.EXCEPT:
-                ga.newInstance(Type.getType(DifferenceEnumeration.class));
+                ga.newInstance(Type.getType(DifferenceIterator.class));
                 ga.dup();
                 ga.loadLocal(iter0Var);
                 ga.loadLocal(iter1Var);
                 ga.invokeStaticMethod(GlobalOrderComparer.class, "getInstance");
-                ga.invokeConstructor(DifferenceEnumeration.class, SequenceIterator.class, SequenceIterator.class, Comparator.class);
+                ga.invokeConstructor(DifferenceIterator.class, SequenceIterator.class, SequenceIterator.class, Comparator.class);
                 methodInfo.releaseLocal(iter0Var);
                 methodInfo.releaseLocal(iter1Var);
-                return new IteratorDetails(DifferenceEnumeration.class, NodeInfo.class);
+                return new IteratorDetails(DifferenceIterator.class, NodeInfo.class);
             default:
                 throw new CannotCompileException("Unknown Venn operator", false);
         }
