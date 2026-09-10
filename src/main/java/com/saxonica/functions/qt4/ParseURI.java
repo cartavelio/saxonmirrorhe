@@ -45,41 +45,41 @@ public class ParseURI extends URIFunctions {
 
     @Override
     public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-        String string = arguments[0].head().getStringValue();
+        String uristr = arguments[0].head().getStringValue();
         HashTrieMap map = new HashTrieMap();
 
-        map = map.addEntry(URI, new StringValue(string));
-        string = string.replaceAll("\\\\", "/");
+        map = map.addEntry(URI, new StringValue(uristr));
+        uristr = uristr.replaceAll("\\\\", "/");
 
         checkOptions(arguments);
 
-        int pos = string.indexOf("#");
+        int pos = uristr.indexOf("#");
         if (pos >= 0) {
-            map = map.addEntry(FRAGMENT, new StringValue(string.substring(pos + 1)));
-            string = string.substring(0, pos);
+            map = map.addEntry(FRAGMENT, new StringValue(uristr.substring(pos + 1)));
+            uristr = uristr.substring(0, pos);
         }
 
         final String query;
-        pos = string.indexOf("?");
+        pos = uristr.indexOf("?");
         if (pos >= 0) {
-            query = string.substring(pos + 1);
+            query = uristr.substring(pos + 1);
             map = map.addEntry(QUERY, new StringValue(query));
-            string = string.substring(0, pos);
+            uristr = uristr.substring(0, pos);
         } else {
             query = null;
         }
 
         final String scheme;
-        if (string.matches("^[A-Za-z]:.*$")) {
+        if (uristr.matches("^[A-Za-z]:.*$")) {
             scheme = "file";
             map = map.addEntry(SCHEME, new StringValue(scheme));
-            string = "/" + string;
+            uristr = "/" + uristr;
         } else {
-            if (string.matches("^[A-Za-z]+:.*$")) {
-                pos = string.indexOf(":");
-                scheme = string.substring(0, pos);
+            if (uristr.matches("^[A-Za-z]+:.*$")) {
+                pos = uristr.indexOf(":");
+                scheme = uristr.substring(0, pos);
                 map = map.addEntry(SCHEME, new StringValue(scheme));
-                string = string.substring(pos + 1);
+                uristr = uristr.substring(pos + 1);
             } else {
                 scheme = null;
             }
@@ -92,33 +92,33 @@ public class ParseURI extends URIFunctions {
             hierarchical = false;
             map = map.addEntry(HIERARCHICAL, BooleanValue.get(hierarchical));
         } else {
-            hierarchical = string.startsWith("/");
-            if (!"".equals(string)) {
+            hierarchical = uristr.startsWith("/");
+            if (!"".equals(uristr)) {
                 map = map.addEntry(HIERARCHICAL, BooleanValue.get(hierarchical));
             }
         }
 
         final String authority;
-        if (string.matches("^//*[a-zA-Z]:.*$")) {
+        if (uristr.matches("^//*[a-zA-Z]:.*$")) {
             authority = null;
-            string = string.replaceAll("^/+", "/");
+            uristr = uristr.replaceAll("^/+", "/");
         } else {
             Pattern pattern = Pattern.compile("^(///*)([^/]+)(/.*)?$");
-            Matcher matcher = pattern.matcher(string);
+            Matcher matcher = pattern.matcher(uristr);
             if (matcher.find()) {
                 if (matcher.group(3) == null) {
                     if (matcher.group(1).length() == 2) {
                         authority = matcher.group(2);
                         map = map.addEntry(AUTHORITY, new StringValue(authority));
-                        string = "";
+                        uristr = "";
                     } else {
                         authority = null;
-                        string = "/" + matcher.group(2);
+                        uristr = "/" + matcher.group(2);
                     }
                 } else {
                     authority = matcher.group(2);
                     map = map.addEntry(AUTHORITY, new StringValue(authority));
-                    string = matcher.group(3);
+                    uristr = matcher.group(3);
                 }
             } else {
                 authority = null;
@@ -169,21 +169,21 @@ public class ParseURI extends URIFunctions {
             map = map.addEntry(PORT, new StringValue(port));
         }
 
-        if (!"".equals(string)) {
-            map = map.addEntry(PATH, new StringValue(string));
+        if (!"".equals(uristr)) {
+            map = map.addEntry(PATH, new StringValue(uristr));
             final ArrayList<GroundedValue> pathSegments = new ArrayList<>();
             // Can't use string split here because it collapses leading, trailing, and repeated delimiters
-            pos = string.indexOf(pathSeparator);
+            pos = uristr.indexOf(pathSeparator);
             while (pos >= 0) {
-                String seg = decodeString(string.substring(0,pos));
+                String seg = decodeString(uristr.substring(0,pos));
                 if (pathSegments.size() == 0 && "tel".equals(scheme) && seg.startsWith(" ")) {
                     seg = "+" + seg.substring(1);
                 }
                 pathSegments.add(new StringValue(seg));
-                string = string.substring(pos+pathSeparator.length());
-                pos = string.indexOf(pathSeparator);
+                uristr = uristr.substring(pos+pathSeparator.length());
+                pos = uristr.indexOf(pathSeparator);
             }
-            pathSegments.add(new StringValue(decodeString(string)));
+            pathSegments.add(new StringValue(decodeString(uristr)));
             map = map.addEntry(PATH_SEGMENTS, new SimpleArrayItem(pathSegments));
         }
 
