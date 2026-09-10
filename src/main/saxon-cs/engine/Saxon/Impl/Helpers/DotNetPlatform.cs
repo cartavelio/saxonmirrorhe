@@ -13,6 +13,7 @@ using Saxon.Callbacks;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text;
 using Org.XmlResolver.Features;
 using Saxon.Hej.om;
 using Saxon.Hej.trans;
@@ -26,6 +27,8 @@ namespace Saxon.Impl.Helpers {
         private string resourceLocation;
         
         public DotNetPlatform() {
+            // Allow access to all known encodings
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             // Establish the prefix to use for loading resources. There must be a better way, but this works.
             System.Reflection.Assembly ass = System.Reflection.Assembly.GetExecutingAssembly();
             var resourceNames = ass.GetManifestResourceNames();
