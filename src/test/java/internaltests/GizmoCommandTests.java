@@ -8,179 +8,261 @@
 package internaltests;
 
 import jaxptest.ConfigTest;
-import net.sf.saxon.gizmo.JLine2Talker;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import net.sf.saxon.Configuration;
+import net.sf.saxon.Gizmo;
+import net.sf.saxon.om.TreeInfo;
+import net.sf.saxon.query.QueryResult;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.tree.linked.DocumentImpl;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import javax.xml.transform.stream.StreamSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static net.sf.saxon.event.Builder.LINKED_TREE;
 
 /**
  * Test aspects of content completion in Gizmo
  */
-public class GizmoCompleterTests {
+public class GizmoCommandTests {
 
-    private static final String[] keywords = new String[]{
-            "ancestor::", "ancestor-or-self::", "array", "attribute", "cast as", "castable as", "child::",
-            "comment()", "descendant::", "descendant-or-self::", "document-node()", "element()", "else",
-            "empty-sequence()", "every", "except", "following::", "following-sibling::", "function",
-            "instance of", "intersect", "item()", "namespace::", "namespace-node()", "node()", "parent::",
-            "preceding::", "preceding-sibling::", "processing-instruction()", "return", "satisfies",
-            "schema-attribute", "schema-element", "self::", "some", "text()", "then", "treat as",
-            "union"
-    };
+    /**
+     * Execute a Gizmo command and test the result
+     * @param command the command to be executed. On entry the current document will be the "books.xml" sample document
+     * @param assertion XPath assertion to be tested. The context item is the Gizmo current document after
+     *                  executing the command; the value of variable $output is set to the console output produced
+     *                  by the command. The test fails unless the effective boolean value of the assertion is true.
+     */
 
-    private static final String[] names = new String[]{"BOOKLIST", "BOOKS", "ITEM", "TITLE", "AUTHOR", "PUBLISHER",
-            "PRICE", "DIMENSIONS", "CATEGORY", "CATEGORIES", "@CAT", "@GENRE"};
-
-    public static String cwd = null;
-
-    // Filename completion tests are tricky to make independent of the actual filestore layout...
-    // Make sure we're in the repo/tests/junit/testdata directory for these tests.
-    @BeforeAll
-    public static void setUp() {
-        cwd = System.getProperty("user.dir");
-        String root = ConfigTest.DATA_DIR;
-        // If you leave "/" on the end of "user.dir", bad happens
-        if (root.endsWith("/") && root.length() > 1) {
-            root = root.substring(0, root.length() - 1);
-        }
-        System.setProperty("user.dir", root);
-    }
-
-    @AfterAll
-    public static void tearDown() {
-        System.setProperty("user.dir", cwd);
-    }
-
-    private int go(String input, List<String> candidates) {
-        List<String> tokens = new ArrayList<>();
-        Collections.addAll(tokens, keywords);
-        Collections.addAll(tokens, names);
-        JLine2Talker.XPathCompleter completer = new JLine2Talker.XPathCompleter(tokens);
-        List<CharSequence> result = new ArrayList<>();
-        int x = completer.complete(input, input.length(), result);
-        candidates.clear();
-        result.forEach(cs -> candidates.add(cs.toString()));
-        return x;
-    }
-
-    @Test
-    public void testXPathCompletion001() {
-        List<String> options = new ArrayList<>();
-        int pos = go("list /BOOKLIST/BOOKS/IT", options);
-        assertEquals(1, options.size());
-        assertTrue(options.contains("ITEM"));
-        assertEquals(pos, "list /BOOKLIST/BOOKS/".length());
-        if (JLine2Talker.debugLog != null) {
-            System.err.println(JLine2Talker.debugLog);
+    private void runTest(String command, String assertion) {
+        try {
+            Gizmo gizmo = new Gizmo();
+            Configuration config = gizmo.getConfiguration();
+            Processor proc = new Processor(config);
+            config.setTreeModel(LINKED_TREE);
+            TreeInfo doc = config.buildDocumentTree(new StreamSource(ConfigTest.DATA_DIR + "books.xml"));
+            gizmo.setCurrentDoc((DocumentImpl)doc.getRootNode());
+            String result = gizmo.executeTestCommand(command);
+            XPathCompiler xpc = proc.newXPathCompiler();
+            xpc.declareVariable(new QName("output"));
+            XPathSelector xp = xpc.compile(assertion).load();
+            xp.setContextItem(new XdmNode(gizmo.getCurrentDoc()));
+            xp.setVariable(new QName("output"), new XdmAtomicValue(result));
+            boolean ok = xp.effectiveBooleanValue();
+            if (!ok) {
+                if (assertion.contains("$output")) {
+                    System.err.println(result);
+                } else {
+                    System.err.println(QueryResult.serialize(gizmo.getCurrentDoc()));
+                }
+            }
+            Assert.assertTrue(ok);
+        } catch (XPathException | SaxonApiException e) {
+            Assert.fail(e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    @Test
-    public void testXPathCompletion002() {
-        List<String> options = new ArrayList<>();
-        int pos = go("list /BOOKLIST/CAT", options);
-        assertEquals(2, options.size());
-        assertTrue(options.contains("CATEGORY"));
-        assertTrue(options.contains("CATEGORIES"));
-        assertEquals(pos, "list /BOOKLIST/".length());
-        if (JLine2Talker.debugLog != null) {
-            System.err.println(JLine2Talker.debugLog);
-        }
-    }
-
-    @Test
-    public void testXPathCompletion003() {
-        List<String> options = new ArrayList<>();
-        int pos = go("list ", options);
-        assertTrue(options.size() > 30, "size");
-        assertEquals(pos, "list ".length(), "length");
-        if (JLine2Talker.debugLog != null) {
-            System.err.println(JLine2Talker.debugLog);
+    private void runMultiTest(String[] commands, String assertion) {
+        try {
+            Gizmo gizmo = new Gizmo();
+            Configuration config = gizmo.getConfiguration();
+            Processor proc = new Processor(config);
+            config.setTreeModel(LINKED_TREE);
+            TreeInfo doc = config.buildDocumentTree(new StreamSource(ConfigTest.DATA_DIR + "books.xml"));
+            gizmo.setCurrentDoc((DocumentImpl) doc.getRootNode());
+            StringBuilder resultString = new StringBuilder();
+            for (String command : commands) {
+                String result = gizmo.executeTestCommand(command);
+                resultString.append(result);
+            }
+            XPathCompiler xpc = proc.newXPathCompiler();
+            xpc.declareVariable(new QName("output"));
+            xpc.setSchemaAware(true);
+            XPathSelector xp = xpc.compile(assertion).load();
+            xp.setContextItem(new XdmNode(gizmo.getCurrentDoc()));
+            xp.setVariable(new QName("output"), new XdmAtomicValue(resultString.toString()));
+            boolean ok = xp.effectiveBooleanValue();
+            if (!ok) {
+                if (assertion.contains("$output")) {
+                    System.err.println(resultString);
+                } else {
+                    System.err.println(QueryResult.serialize(gizmo.getCurrentDoc()));
+                }
+            }
+            Assert.assertTrue(ok);
+        } catch (XPathException | SaxonApiException e) {
+            Assert.fail(e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @Test
-    public void testXPathCompletion004() {
-        List<String> options = new ArrayList<>();
-        int pos = go("list /", options);
-        assertTrue(options.size() > 30);
-        assertEquals(pos, "list /".length());
-        if (JLine2Talker.debugLog != null) {
-            System.err.println(JLine2Talker.debugLog);
-        }
+    public void copy001() {
+        runTest("copy //PRICE", "count(/PRICE) eq 6");
     }
 
     @Test
-    public void testXPathCompletion005() {
-        List<String> options = new ArrayList<>();
-        int pos = go("list //ITEM/follo", options);
-        assertEquals(2, options.size());
-        assertTrue(options.contains("following::"));
-        assertTrue(options.contains("following-sibling::"));
-        assertEquals(pos, "list //ITEM/".length());
-        if (JLine2Talker.debugLog != null) {
-            System.err.println(JLine2Talker.debugLog);
-        }
+    public void copy002() {
+        runTest("copy //PRICELESS", "empty(/node())");
     }
 
     @Test
-    // Assume the repo/tests/junit/testdata directory is the current directory
-
-    public void testFileCompletion001() {
-        List<String> options = new ArrayList<>();
-        int pos = go("load trax/xml/cit", options);
-        assertEquals(1, options.size(), "a");
-        assertTrue(options.contains("cities.xml "), "b");
-        assertEquals(pos, "load trax/xml/".length(), "c");
+    public void delete001() {
+        runTest("delete //PRICE", "empty(//PRICE)");
     }
 
     @Test
-    public void testFileCompletion002() {
-        List<String> options = new ArrayList<>();
-        int pos = go("load trax/xsl/foo", options);
-        assertEquals(3, options.size(), "a");
-        assertTrue(options.contains("foo.xsl "), "b");
-        assertTrue(options.contains("foo2.xsl "), "c");
-        assertTrue(options.contains("foo3.xsl "), "d");
-        assertEquals(pos, "load trax/xsl/".length(), "e");
+    public void delete002() {
+        runTest("delete //Q{}PRICE", "empty(//PRICE)");
     }
 
     @Test
-    public void testFileCompletion003() {
-        List<String> options = new ArrayList<>();
-        int pos = go("load it", options);
-        assertEquals(1, options.size(), "a");
-        assertTrue(options.contains("items.xml "), "b");
-        assertEquals(pos, "load ".length(), "e");
+    public void delete003() {
+        runTest("delete //ITEM", "empty(//PRICE)");
     }
 
     @Test
-    public void testFileCompletion004() {
-        String home = System.getProperty("user.home");
-        System.setProperty("user.home", ConfigTest.DATA_DIR);
-        List<String> options = new ArrayList<>();
-        int pos = go("load ~/bible/com", options);    // Assumes MHK filestore layout
-        assertEquals(1, options.size(), "a");
-        assertTrue(options.contains("common/"), "b");
-        assertEquals(pos, "load ~/bible/".length(), "e");
-        System.setProperty("user.home", home);
+    public void delete004() {
+        runTest("delete //AUTHOR", "count(//PRICE) eq 6");
     }
 
     @Test
-    public void testFileCompletion005() {
-        List<String> options = new ArrayList<>();
-        int pos = go("load ./it", options);
-        assertEquals(1, options.size(), "a");
-        assertTrue(options.contains("items.xml "), "b");
-        assertEquals(pos, "load ./".length(), "e");
+    public void delete005() {
+        runTest("delete /BOOKLIST/BOOKS/ITEM/AUTHOR", "empty(//AUTHOR) and count(//PRICE) eq 6");
     }
+
+    @Test
+    public void delete006() {
+        runTest("delete //ITEM[AUTHOR='Jasper Fforde']", "count(//ITEM) eq 4");
+    }
+
+    @Test
+    public void follow001() {
+        runTest("follow //ITEM with <caption/>", "count(//caption[preceding-sibling::*[1][self::ITEM]]) eq 6");
+    }
+
+    @Test
+    public void follow002() {
+        runTest("follow //ITEM with <caption>{string(AUTHOR)}</caption>", "every $c in //caption satisfies $c eq $c/preceding-sibling::*[1]/AUTHOR");
+    }
+
+    @Test
+    public void list001() {
+        runTest("list //AUTHOR ", "contains($output, '/BOOKLIST/BOOKS[1]/ITEM[6]/AUTHOR[1]')");
+    }
+
+    @Test
+    public void list002() {
+        runTest("list distinct-values(//AUTHOR)", "contains($output, 'Jasper Fforde') and contains($output, 'Thomas Hardy') and contains($output, 'Jane Austen') ");
+    }
+
+    @Test
+    public void paths001() {
+        runTest("paths", "contains($output, '/BOOKLIST/BOOKS/ITEM/DIMENSIONS')");
+    }
+
+    @Test
+    public void precede001() {
+        runTest("precede //ITEM with <caption/>", "count(//caption[following-sibling::*[1][self::ITEM]]) eq 6");
+    }
+
+    @Test
+    public void precede002() {
+        runTest("precede //ITEM with <caption>{string(AUTHOR)}</caption>", "every $c in //caption satisfies $c eq $c/following-sibling::*[1]/AUTHOR");
+    }
+
+    @Test
+    public void prefix001() {
+        runTest("prefix //ITEM with <caption/>", "count(//ITEM/*[1][self::caption]) eq 6");
+    }
+
+    @Test
+    public void prefix002() {
+        runTest("prefix //ITEM with attribute{'author'}{string(AUTHOR)}", "count(//ITEM[@author = AUTHOR]) eq 6");
+    }
+
+    @Test
+    public void prefix003() {
+        runTest("prefix //ITEM with attribute{'id'}{count(preceding-sibling::*)+1}", "(//ITEM)[2]/@id = '2'");
+    }
+
+    @Test
+    public void rename001() {
+        runTest("rename //* as lower-case(name())", "count(//item/price) eq 6");
+    }
+
+    @Test
+    public void rename002() {
+        runTest("rename //@CAT as 'category'", "count(//ITEM/@category) eq 6 and count(//ITEM/@CAT) eq 0");
+    }
+
+    @Test
+    public void rename003() {
+        runTest("rename //Q{}ITEM as 'item'", "count(//item/PRICE) eq 6 and empty(//ITEM)");
+    }
+
+    @Test
+    public void rename004() {
+        runTest("rename //Q{}PUBLISHER as 'AUTHOR'", "count(//ITEM/AUTHOR) eq 12");
+    }
+
+
+    @Test
+    public void replace001() {
+        runTest("replace //AUTHOR/text() with 'Anon'", "count(//AUTHOR[.='Anon']) eq 6");
+    }
+
+    @Test
+    public void replace002() {
+        runTest("replace //AUTHOR with <Writer>{string(.)}</Writer>", "count(distinct-values(//Writer)) = 4");
+    }
+
+    @Test
+    public void set001() {
+        runMultiTest(new String[]{"set $x = 'Jasper Fforde'", "show count(//ITEM[AUTHOR eq $x])"}, "contains($output, '2')");
+    }
+
+    @Test
+    public void show001() {
+        runTest("show", "contains($output, '<BOOKLIST') and contains($output, '</BOOKLIST>')");
+    }
+
+    @Test
+    public void show002() {
+        runTest("show //ITEM[1]/AUTHOR", "contains($output, '>Jane Austen</AUTHOR') ");
+    }
+
+    @Test
+    public void show003() {
+        runTest("show 2+2", "contains($output, '4') ");
+    }
+
+    @Test
+    public void strip001() {
+        runTest("strip", "empty(//text()[not(normalize-space())])");
+    }
+
+    @Test
+    public void suffix001() {
+        runTest("suffix //ITEM with <caption/>", "count(//ITEM/*[last()][self::caption]) eq 6");
+    }
+
+    @Test
+    public void update001() {
+        runTest("update //ITEM[1]/AUTHOR with 'AUSTEN, JANE'", "//ITEM[1]/AUTHOR eq 'AUSTEN, JANE'");
+    }
+
+    @Test
+    public void validate001() {
+        runMultiTest(new String[]{
+                "schema " + ConfigTest.DATA_DIR + "books.xsd",
+                "validate"
+        }, "data((//PRICE)[1]) instance of xs:decimal");
+    }
+    
+
 
 }
 
