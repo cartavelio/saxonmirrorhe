@@ -470,10 +470,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                                                            BuiltInAtomicType.INTEGER, OPT, CARD0)
                 .arg(0, chronoType, OPT, EMPTY));
 
-        register("node-kind", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
+        register("type-of", 0, e -> e.populate(ContextItemAccessorFunction::new, BuiltInAtomicType.STRING, ONE, CITEM | LATE));
 
-        register("node-kind", 1, e -> e.populate(NodeKind_1::new, BuiltInAtomicType.STRING, OPT, 0)
-                .arg(0, Type.NODE_TYPE, OPT | INS, EMPTY));
+        register("type-of", 1, e -> e.populate(TypeOf_1::new, BuiltInAtomicType.STRING, ONE, 0)
+                .arg(0, AnyItemType.getInstance(), STAR, EMPTY));
 
         register("node-type-annotation", 1, e -> e.populate(NodeTypeAnnotationFn::new, schemaTypeRecord, ONE, 0)
                 .arg(0, AnyNodeTest.getInstance(), ONE, null));
