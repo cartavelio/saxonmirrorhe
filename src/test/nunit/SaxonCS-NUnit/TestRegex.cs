@@ -24,6 +24,7 @@ namespace SaxonCS_NUnit {
                 Assert.That(((XdmAtomicValue)w).AsBoolean);
             }
             catch (Exception e) {
+                Console.WriteLine(e.StackTrace);
                 Assert.Fail(e.Message);
             }
         }
@@ -39,6 +40,7 @@ namespace SaxonCS_NUnit {
                 Assert.AreEqual(v[1].StringValue, "0021");
             }
             catch (Exception e) {
+                Console.WriteLine(e.StackTrace);
                 Assert.Fail(e.Message);
             }
         }
@@ -55,6 +57,7 @@ namespace SaxonCS_NUnit {
                 Assert.AreEqual("1986/3/20$", ((XdmAtomicValue)v).StringValue);
             }
             catch (Exception e) {
+                Console.WriteLine(e.StackTrace);
                 Assert.Fail(e.Message);
             }
         }
