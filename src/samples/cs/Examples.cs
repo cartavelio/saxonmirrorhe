@@ -1442,7 +1442,7 @@ namespace SaxonEE
             }
             public Uri ResourceUri => new Uri(fileName);
             
-            public XdmItem GetXdmItem(DynamicContext context) {
+            public XdmItem GetXdmItem() {
                 return builder.Build(ResourceUri);
             }
 
@@ -1979,9 +1979,10 @@ namespace SaxonEE
             XQueryCompiler compiler = processor.NewXQueryCompiler();
             compiler.XQueryResolver = (module, queryBase, hints) => {
                 if (module == "http://www.example.com/module2") {
-                    return new[] {new XQueryModuleSource() {BaseUri = new Uri(module), Content = mod2}};
+                    return new[] {
+                        new TextResource(mod2, new Uri(module))
+                    };
                 }
-
                 return null;
             };
             XQueryExecutable exp = compiler.Compile(mod1);
