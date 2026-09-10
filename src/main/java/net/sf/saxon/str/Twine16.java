@@ -86,8 +86,8 @@ public class Twine16 extends UnicodeString {
 
     @Override
     public UnicodeString substring(long start, long end) {
-        int start32 = StringTool.requireInt(start);
-        int end32 = StringTool.requireInt(end);
+        int start32 = requireInt(start);
+        int end32 = requireInt(end);
         int len = length32();
         checkSubstringBounds(start, end);
         if (end == start) {
@@ -102,7 +102,7 @@ public class Twine16 extends UnicodeString {
 
     @Override
     public int codePointAt(long index) throws IndexOutOfBoundsException {
-        int index32 = StringTool.requireInt(index);
+        int index32 = requireInt(index);
         if (index32 < 0 || index32 >= length32()) {
             throw new IndexOutOfBoundsException();
         }
@@ -123,7 +123,7 @@ public class Twine16 extends UnicodeString {
         if (codePoint < 0 || codePoint > 65535) {
             return -1;
         }
-        int from32 = Math.max(requireInt(from), 0);
+        int from32 = requireNonNegativeInt(from);
         int last = chars.length;
         for (int i = from32; i < last; i++) {
             if (chars[i] == codePoint) {
@@ -144,7 +144,7 @@ public class Twine16 extends UnicodeString {
 
     @Override
     public long indexOf(UnicodeString other, long from) {
-        int from32 = StringTool.requireInt(from);
+        int from32 = requireInt(from);
         if (from32 < 0) {
             from32 = 0;
         } else if (from32 >= length32()) {
@@ -154,10 +154,10 @@ public class Twine16 extends UnicodeString {
             return from;
         }
         int initial = other.codePointAt(0);
-        int len = StringTool.requireInt(other.length());
+        int len = requireInt(other.length());
         int lastPossible = length32() - len;
         while (from32 <= lastPossible) {
-            int i = StringTool.requireInt(indexOf(initial, from32));
+            int i = requireInt(indexOf(initial, from32));
             if (i < 0) {
                 return -1;
             }

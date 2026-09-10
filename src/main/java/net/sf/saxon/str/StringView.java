@@ -14,7 +14,7 @@ import net.sf.saxon.z.IntIterator;
 import java.util.Objects;
 
 /**
- * An implementation of the CodePoints interface that wraps an ordinary Java string.
+ * An implementation of the UnicodeString interface that wraps an ordinary Java string.
  */
 
 public class StringView extends UnicodeString {

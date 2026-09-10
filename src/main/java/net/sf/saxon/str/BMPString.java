@@ -93,14 +93,16 @@ public class BMPString extends UnicodeString {
      * starting the search at a given position in the string
      *
      * @param predicate condition that the codepoint must satisfy
-     * @param from      the position from which the search should start (0-based)
+     * @param from      the position from which the search should start (0-based). A negative value is
+     *                  treated as zero. A position beyond the end of the string results in a return
+     *                  value of -1 (meaning not found).
      * @return the position (0-based) of the first codepoint to match the predicate, or -1 if not found
      * @throws UnsupportedOperationException if the {@code UnicodeString} has not been prepared
      *                                       for codePoint access
      */
     @Override
     public long indexWhere(IntPredicate predicate, long from) {
-        for (int i = requireInt(from); i< baseString.length(); i++) {
+        for (int i = requireNonNegativeInt(from); i < baseString.length(); i++) {
             if (predicate.test(baseString.charAt(i))) {
                 return i;
             }
@@ -110,13 +112,13 @@ public class BMPString extends UnicodeString {
 
     @Override
     public int codePointAt(long index) {
-        return baseString.charAt(StringTool.requireInt(index));
+        return baseString.charAt(requireInt(index));
     }
 
     @Override
     public UnicodeString substring(long start, long end) {
-        int start32 = StringTool.requireInt(start);
-        int end32 = StringTool.requireInt(end);
+        int start32 = requireInt(start);
+        int end32 = requireInt(end);
         return new BMPString(baseString.substring(start32, end32));
     }
 

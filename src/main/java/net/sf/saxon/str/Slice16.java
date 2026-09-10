@@ -70,7 +70,7 @@ public class Slice16 extends UnicodeString {
         }
         char b = (char)(codePoint & 0xffff);
         int limit = end;
-        for (int i = start + Math.max(requireInt(from), 0); i < limit; i++) {
+        for (int i = start + requireNonNegativeInt(from); i < limit; i++) {
             if (chars[i] == b) {
                 return i - start;
             }
@@ -80,7 +80,11 @@ public class Slice16 extends UnicodeString {
 
     @Override
     public int codePointAt(long index) {
-        return (chars[start + requireInt(index)]);
+        int index32 = requireInt(index);
+        if (index32 < 0 || index32 >= length32()) {
+            throw new IndexOutOfBoundsException();
+        }
+        return (chars[start + index32]);
     }
 
     @Override

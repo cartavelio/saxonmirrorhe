@@ -204,8 +204,9 @@ public class ZenoString extends UnicodeString {
      * starting the search at a given position in the string
      *
      * @param codePoint the sought codePoint
-     * @param from      the position from which the search should start (0-based), in the
-     *                  range 0 to length()-1
+     * @param from      the position from which the search should start (0-based). A negative value is
+     *                  treated as zero. A position beyond the end of the string results in a return
+     *                  value of -1 (meaning not found).
      * @return the position (0-based) of the first occurrence found, or -1 if not found
      * @throws IndexOutOfBoundsException if the <code>from</code> value is out of range
      */
@@ -283,6 +284,41 @@ public class ZenoString extends UnicodeString {
             return z.concat(segments.get(last).prefix(end-offsets.get(last)));
         }
     }
+
+    /**
+     * Ask whether this string has another string as its content starting at a given offset
+     *
+     * @param other  the other string
+     * @param offset the starting position in this string (counting in codepoints)
+     * @return true if the other string appears as a substring of this string starting at the
+     * given position.
+     * @throws IndexOutOfBoundsException if {@code offset} is less than zero or greater than the
+     *     length of this string. Note that there is no exception if {@code offset + other.length()}
+     *     exceeds {@code this.length()} - instead this results in a return value of {@code false}.
+     */
+
+    public boolean hasSubstring(UnicodeString other, long offset) {
+        // Override inherited implementation because codePointAt(n) is relatively expensive
+        if (offset < 0 || offset > length()) {
+            throw new IndexOutOfBoundsException();
+        }
+        long len = other.length();
+        if (len + offset > length()) {
+            return false;
+        }
+        long end = offset + len;
+        int first = segmentForOffset(offset);
+        int last = segmentForOffset(end - 1);
+        if (first == last) {
+            UnicodeString segment = segments.get(first);
+            long segmentOffset = offsets.get(first);
+            return segment.hasSubstring(other, offset - segmentOffset);
+        } else {
+            return substring(offset, end).equals(other);
+        }
+
+    }
+
 
     /**
      * Concatenate another string
