@@ -1,3 +1,5 @@
+import com.saxonica.build.doc.SaxonCReadme
+
 plugins {
     id("saxon-build")
     id("com.saxonica.build.managebranches")
@@ -7,8 +9,11 @@ plugins {
 val doxygenOutput by configurations.consumable("doxygenOutput")
 doxygenOutput.outgoing.artifact(tasks.named("doxygen"))
 
+val saxonBuild = the<SaxonBuildExtension>()
+
 libsaxonc {
     edition = "ee"
+    binaries.add("Validate")
 }
 
 val sampleSourcesBucket by configurations.dependencyScope("sampleSourcesBucket")
