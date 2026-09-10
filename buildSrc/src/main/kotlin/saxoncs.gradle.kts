@@ -479,7 +479,7 @@ val apiDocumentation = tasks.register<Copy>("apiDocumentation") {
   dependsOn(buildtask)
 
   into(layout.buildDirectory.dir("apidoc"))
-  from("${buildtask.get().outputs.getFiles().first()}/bin/${release}/net${dotnetver}/${archdir}") {
+  from(layout.buildDirectory.dir("${architectures.first()}/SaxonCS/bin/${release}/net${dotnetver}/${archdir}").get()) {
     include("SaxonCS.xml")
   }
 }
@@ -507,10 +507,7 @@ tasks.register<JavaExec>("docMerge") {
   group = "Internal"
   description = "Merge API docs for dotnet"
 
-  val arch = architectures.first()
-  val buildtask = tasks.named("dotnetBuild_${arch}")
-
-  dependsOn(buildtask)
+  dependsOn(apiDocumentation)
   inputs.files(apiDocumentation)
   inputs.files(docParse)
   inputs.file(layout.projectDirectory.file("../tools/merge.xsl"))
