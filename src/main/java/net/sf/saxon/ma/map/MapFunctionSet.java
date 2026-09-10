@@ -512,6 +512,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
+            return getMapEntries(map);
+        }
+
+        public static GroundedValue getMapEntries(MapItem map) throws XPathException {
             ZenoSequence results = new ZenoSequence();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 SingleEntryMap entry = new SingleEntryMap(pair.key, pair.value);

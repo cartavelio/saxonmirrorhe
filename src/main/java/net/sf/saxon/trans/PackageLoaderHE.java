@@ -2667,10 +2667,10 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("lookupAll", (loader, element) -> {
             Expression select = loader.getFirstChildExpression(element);
-            SequenceType type = SequenceType.ANY_SEQUENCE;
+            ItemType type = AnyItemType.getInstance();
             String typeAtt = element.getAttributeValue(NamespaceUri.NULL, "type");
             if (typeAtt != null) {
-                type = AlphaCode.toSequenceType(typeAtt, loader.getConfiguration());
+                type = AlphaCode.toItemType(typeAtt, loader.getConfiguration());
             }
             return new LookupAllExpression(select, type);
         });

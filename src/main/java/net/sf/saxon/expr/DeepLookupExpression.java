@@ -7,32 +7,25 @@
 
 package net.sf.saxon.expr;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.KeyValuePair;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.ma.map.*;
+import net.sf.saxon.ma.zeno.ZenoSequence;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomizingIterator;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.UType;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.Int64Value;
-import net.sf.saxon.value.SequenceExtent;
+import net.sf.saxon.type.*;
+import net.sf.saxon.value.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 
 /**
@@ -96,6 +89,17 @@ public class DeepLookupExpression extends BinaryExpression {
     /*@NotNull*/
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
+        resetLocalStaticProperties();
+        getLhs().typeCheck(visitor, contextInfo);
+        getRhs().typeCheck(visitor, contextInfo);
+
+        Configuration config = visitor.getConfiguration();
+        final TypeChecker tc = config.getTypeChecker(false);
+
+        SequenceType atomicType = SequenceType.ATOMIC_SEQUENCE;
+
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, Token.tokens[operator], 1);
+        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), atomicType, role1, visitor));
         return this;
     }
 
@@ -247,27 +251,75 @@ public class DeepLookupExpression extends BinaryExpression {
             PullEvaluator lhs = expr.getLhsExpression().makeElaborator().elaborateForPull();
             PullEvaluator rhs = expr.getRhsExpression().makeElaborator().elaborateForPull();
             return context -> {
-                // Initial implementation is eager for simplicity
-                SequenceIterator keyIter = new AtomizingIterator(
-                        rhs.iterate(context));
+                // Follow the spec exactly for now
+                List<Item> content = new ArrayList<>();
+                SequenceIterator lhsIter = lhs.iterate(context);
+                Item lhsItem;
+                while ((lhsItem = lhsIter.next()) != null) {
+                    gatherRecursiveContent(lhsItem, content);
+                }
                 MapItem keySet = new HashTrieMap();
+                SequenceIterator keyIter = new AtomizingIterator(rhs.iterate(context));
                 Item key;
                 while ((key = keyIter.next()) != null) {
                     keySet = keySet.addEntry((AtomicValue)key, BooleanValue.TRUE);
                 }
-                final MapItem finalKeySet = keySet;
-                List<Item> result = new ArrayList<>();
-                gatherContent(lhs.iterate(context), false, k -> finalKeySet.get(k) != null, result);
-                return SequenceExtent.makeSequenceExtent(result).iterate();
+                ZenoSequence result = new ZenoSequence();
+                for (Item it : content) {
+                    SingleEntryMap sem = (SingleEntryMap)it;
+                    if (keySet.get(sem.getKey()) != null) {
+                        result = result.appendSequence(sem.getValue());
+                    }
+                }
+                return result.iterate();
             };
+//            return context -> {
+//                // Initial implementation is eager for simplicity
+//                SequenceIterator keyIter = new AtomizingIterator(
+//                        rhs.iterate(context));
+//                MapItem keySet = new HashTrieMap();
+//                Item key;
+//                while ((key = keyIter.next()) != null) {
+//                    keySet = keySet.addEntry((AtomicValue)key, BooleanValue.TRUE);
+//                }
+//                final MapItem finalKeySet = keySet;
+//                List<Item> result = new ArrayList<>();
+//                gatherContent(lhs.iterate(context), false, k -> finalKeySet.get(k) != null, result, 0);
+//                return SequenceExtent.makeSequenceExtent(result).iterate();
+//            };
 
         }
     }
 
+    private static GroundedValue immediateContent(Item item) throws XPathException {
+        if (item instanceof MapItem) {
+            return MapFunctionSet.MapEntries.getMapEntries((MapItem)item);
+        } else if (item instanceof ArrayItem) {
+            ZenoSequence result = new ZenoSequence();
+            long pos = 1;
+            for (GroundedValue member : ((ArrayItem)item).members()) {
+                result = result.append(new SingleEntryMap(Int64Value.makeIntegerValue(pos++), member));
+            }
+            return result;
+        } else {
+            return EmptySequence.getInstance();
+        }
+    }
+
+    public static void gatherRecursiveContent(Item item, List<Item> result) throws XPathException {
+        for (Item child : immediateContent(item).asIterable()) {
+            result.add(child);
+            for (Item childItem : ((SingleEntryMap)child).getValue().asIterable()) {
+                gatherRecursiveContent(childItem, result);
+            }
+        }
+    }
+
     public static void gatherContent(SequenceIterator lhs,
-                                                  boolean selectAll,
-                                                  Predicate<AtomicValue> keys,
-                                                  List<Item> result) throws XPathException {
+                                     boolean selectAll,
+                                     Predicate<AtomicValue> keys,
+                                     List<Item> result,
+                                     int level) throws XPathException {
         Item it;
         while ((it = lhs.next()) != null) {
             if (selectAll) {
@@ -276,7 +328,7 @@ public class DeepLookupExpression extends BinaryExpression {
             if (it instanceof ArrayItem) {
                 int pos = 1;
                 for (GroundedValue val : ((ArrayItem) it).members()) {
-                    gatherContent(val.iterate(), selectAll, keys, result);
+                    gatherContent(val.iterate(), selectAll, keys, result, level+1);
                     if (keys != null && keys.test(Int64Value.makeIntegerValue(pos++))) {
                         for (Item valItem : val.asIterable()) {
                             result.add(valItem);
@@ -285,7 +337,7 @@ public class DeepLookupExpression extends BinaryExpression {
                 }
             } else if (it instanceof MapItem) {
                 for (KeyValuePair pair : ((MapItem) it).keyValuePairs()) {
-                    gatherContent(pair.value.iterate(), selectAll, keys, result);
+                    gatherContent(pair.value.iterate(), selectAll, keys, result, level+1);
                     if (keys != null && keys.test(pair.key)) {
                         for (Item valItem : pair.value.asIterable()) {
                             result.add(valItem);
@@ -293,7 +345,9 @@ public class DeepLookupExpression extends BinaryExpression {
                     }
                 }
             } else {
-                result.add(it);
+                if (level > 0) {
+                    result.add(it);
+                }
             }
         }
     }

@@ -2816,6 +2816,7 @@ public class XPathParser {
                 return parseFunctionCall(null);
 
             case Token.QMARK:
+            case Token.QMARK_QMARK:
                 return parseLookup(new ContextItemExpression());
 
             case Token.DOT:
@@ -3328,14 +3329,13 @@ public class XPathParser {
             result = makeLookupExpression(lhs, Literal.makeLiteral(number), deep);
         } else if (token == Token.MULT || token == Token.STAR) {
             nextToken();
-            SequenceType sequenceType = SequenceType.ANY_SEQUENCE;
+            ItemType itemType = AnyItemType.getInstance();
             if (t.currentToken == Token.COLONCOLON) {
                 checkLanguageVersion40();
                 nextToken();
-                ItemType it = parseItemType();  // See QT4 spec bug #859
-                sequenceType = new SequenceType(it,StaticProperty.ALLOWS_MANY);
+                itemType = parseItemType();  // See QT4 spec bug #859
             }
-            result = lookupStar(lhs, sequenceType, deep);
+            result = lookupStar(lhs, itemType, deep);
 
         } else if (token == Token.LPAR) {
             t.setState(Tokenizer.DEFAULT_STATE);
@@ -3391,7 +3391,7 @@ public class XPathParser {
      * @return the result of parsing the expression
      */
 
-    private static Expression lookupStar(Expression lhs, SequenceType type, boolean deep) {
+    private static Expression lookupStar(Expression lhs, ItemType type, boolean deep) {
         if (deep) {
             return new DeepLookupAllExpression(lhs, type);
         } else {

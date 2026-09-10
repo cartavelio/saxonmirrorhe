@@ -14,15 +14,13 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
+import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.UType;
-import net.sf.saxon.value.SequenceExtent;
-import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.type.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +32,7 @@ import java.util.List;
 
 public class DeepLookupAllExpression extends UnaryExpression {
 
-    SequenceType requiredType;
+    ItemType requiredType;
 
     /**
      * Constructor
@@ -42,8 +40,7 @@ public class DeepLookupAllExpression extends UnaryExpression {
      * @param start The left hand operand.
      */
 
-    public DeepLookupAllExpression(Expression start, SequenceType type) {
-        // TODO: type is currently ignored
+    public DeepLookupAllExpression(Expression start, ItemType type) {
         super(start);
         requiredType = type;
     }
@@ -69,7 +66,7 @@ public class DeepLookupAllExpression extends UnaryExpression {
     /*@NotNull*/
     @Override
     public ItemType getItemType() {
-        return AnyItemType.getInstance();
+        return requiredType;
     }
 
 
@@ -200,6 +197,7 @@ public class DeepLookupAllExpression extends UnaryExpression {
     @Override
     public void export(ExpressionPresenter destination) throws XPathException {
         destination.startElement("deepLookupAll", this);
+        destination.emitAttribute("type", AlphaCode.fromItemType(requiredType));
         getBaseExpression().export(destination);
         destination.endElement();
     }
@@ -227,10 +225,20 @@ public class DeepLookupAllExpression extends UnaryExpression {
             DeepLookupAllExpression expr = (DeepLookupAllExpression) getExpression();
 
             PullEvaluator lhs = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            ItemType type = expr.requiredType;
+            TypeHierarchy th = getConfiguration().getTypeHierarchy();
             return context -> {
                 List<Item> result = new ArrayList<>();
-                DeepLookupExpression.gatherContent(lhs.iterate(context), true, null, result);
-                return SequenceExtent.makeSequenceExtent(result).iterate();
+                SequenceIterator lhsIter = lhs.iterate(context);
+                Item lhsItem;
+                while ((lhsItem = lhsIter.next()) != null) {
+                    DeepLookupExpression.gatherRecursiveContent(lhsItem, result);
+                }
+                return new ItemMappingIterator(
+                        new MappingIterator(new ListIterator.Of<>(result),
+                                            item -> ((SingleEntryMap)item).getValue().iterate()),
+                        item -> type.matches(item, th) ? item : null);
+
             };
 
         }
