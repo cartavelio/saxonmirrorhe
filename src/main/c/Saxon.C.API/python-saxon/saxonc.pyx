@@ -2657,13 +2657,31 @@ cdef class PyXdmValue:
         Returns:
             PyXdmItem: The PyXdmItem or None if the sequence is empty
         """
-        cdef PyXdmItem val = PyXdmItem()
-        val.derivedptr = val.thisvptr = self.thisvptr.getHead()
-        if val.derivedptr == NULL :
+
+        cdef saxoncClasses.XdmItem * xdmItem = NULL
+        xdmItem = self.thisvptr.getHead()
+
+        if xdmItem is NULL:
             return None
+
+        cdef PyXdmItem val = PyXdmItem()
+        cdef type_ = xdmItem.getType()
+        if type_== 4:
+            aval = PyXdmAtomicValue()
+            xdmItem.incrementRefCount()
+            aval.derivedaptr = aval.derivedptr = aval.thisvptr = <saxoncClasses.XdmAtomicValue *>xdmItem
+            return aval
+        elif type_ == 3:
+            nval = PyXdmNode()
+            xdmItem.incrementRefCount()
+            nval.derivednptr = nval.derivedptr = nval.thisvptr = <saxoncClasses.XdmNode*>xdmItem
+            return nval
         else:
+            val = PyXdmItem()
+            val.derivedptr = val.thisvptr = xdmItem
             val.derivedptr.incrementRefCount()
             return val
+
      def item_at(self, index):
         """
         item_at(self, index)

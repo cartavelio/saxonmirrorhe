@@ -511,6 +511,10 @@ cdef extern from "../XdmItem.h":
         const char * getStringValue()
         bool isAtomic()
 
+        bool isFunction()
+
+        bool isNode()
+
 cdef extern from "../XdmNode.h":
     cdef cppclass XdmNode(XdmItem):
         bool isAtomic()
@@ -549,3 +553,60 @@ cdef extern from "../XdmAtomicValue.h":
 
         long getLongValue()
 
+cdef extern from "../XdmFunctionItem.h":
+    cdef cppclass XdmFunctionItem(XdmItem):
+        const char* getName();
+
+        int getArity()
+
+        XdmFunctionItem * getSystemFunction(SaxonProcessor * processor, const char * name, int arity)
+
+        XdmValue * call(XdmValue ** arguments, int argument_length);
+
+
+
+cdef extern from "../XdmMap.h":
+    cdef cppclass XdmMap(XdmFunctionItem):
+        int mapSize();
+
+        XdmValue * get(XdmAtomicValue* key)
+
+        XdmValue * get(const char * key)
+
+        XdmValue * get(int key)
+
+        XdmValue * get(double key)
+
+        XdmValue *  get(long key)
+
+        XdmMap * put(XdmAtomicValue * key, XdmValue * value)
+
+        XdmMap * remove(XdmAtomicValue* key)
+
+        list[XdmAtomicValue*] keySet()
+
+        map[string, XdmValue*]& asMap()
+
+        bool isEmpty()
+
+        bool containsKey(XdmAtomicValue* key)
+
+        list[XdmValue*] values()
+
+
+cdef extern from "../XdmArray.h":
+    cdef cppclass XdmArray(XdmFunctionItem):
+
+        int arrayLength()
+
+        XdmValue* get(int n)
+
+        XdmArray* put(int n, XdmValue * value)
+
+        XdmArray* addMember(XdmValue* value)
+
+        XdmArray* concat(XdmArray * value)
+
+        list[XdmValue *] asList()
+
+        int getArity();
