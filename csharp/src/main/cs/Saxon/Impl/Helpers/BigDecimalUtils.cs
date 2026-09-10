@@ -68,7 +68,7 @@ namespace Saxon.Impl.Helpers {
                 requiredDecimalPlaces = MAX_SCALE;
             }
             
-            BigDecimal roundedQuotient = Round(preciseQuotient, requiredDecimalPlaces);
+            BigDecimal roundedQuotient = Round(preciseQuotient, requiredDecimalPlaces, Hej.functions.Round.RoundingRule.TOWARD_ZERO);
             BigDecimal remainder = aDec - roundedQuotient * bDec;
             return new ShapedMap(quotientAndRemainder,
                 new BigDecimalValue(roundedQuotient),
