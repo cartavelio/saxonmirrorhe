@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article id="sourcedocs" title="Handling XML documents">
+  <h1>Handling XML documents in SaxonC</h1>
+
+
+  <p>The general discussion of handling XML document you can find in the main <a href="https://www.saxonica.com/documentation12/index.html#!sourcedocs">Saxon documentation</a>.
+    However, the section on `building a source document from lexical XML` is substantially different in SaxonC, for the C/C++, Python or PHP APIs.
+  Therefore, we discuss it here in the SaxonC documentation: </p>
+
+
+    <h1>Building a source document from lexical XML</h1>
+
+    <p>The conversion of lexical XML to a tree in memory is called <i>parsing</i>, and is performed
+    by a software component called an <i>XML Parser</i>. Saxon does not include its own XML parser,
+    rather it provides interfaces that invoke XML parsers supplied by third parties. SaxonC
+      includes a built-in XML parser.</p>
+
+    <p>A source document can be built using the <a
+        href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html">DocumentBuilder</a> class in C++, which is created using
+      the factory method <code>newDocumentBuilder</code> (<code>new_document_builder()</code> in Python and <code>newDocumentBuilder</code> in PHP) on the <a
+              href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html">SaxonProcessor</a> object (For Python:
+      <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"><code>PySaxonProcessor</code></a>
+      and for PHP: <a href="http://localhost:8000/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor"><code>Saxon\SaxonProcessor</code></a>). There are a varity of options for document
+      building available as methods on the <code>DocumentBuilder</code>, for example options to
+      perform schema or DTD validation, to strip whitespace, to expand XInclude directives, and also
+      to choose the tree implementation model to be used.</p>
+
+    <p>For simple parsing of the XML document it is possible to do this directly on the <code>SaxonProcessor</code> without creating a <code>DocumentBuilder</code> in the C++ interface.</p>
+
+    <p >On C++ and similarly on Python and PHP, source XML documents are parsed from file name of lexical string
+      as input to the  <code>DocumentBuilder</code>. For example:</p>
+
+    <div>
+    <ul>
+      <li>XML represented as lexical string:
+        <samp><![CDATA[
+      DocumentBuilder * builder = proc->newDocumentBuilder();
+      XdmNode *d = builder->parseXmlFromString("<doc/>");
+         ]]></samp></li>
+      <li>XMl represented in a file: <samp><![CDATA[
+            DocumentBuilder * builder = proc->newDocumentBuilder();
+            XdmNode *d = builder->parseXmlFromFile(dir+"books.xml"");
+               ]]></samp></li>
+      <li>Parsing directly using SaxonProcessor:  <samp><![CDATA[
+                  SaxonProcessor proc = new SaxonProcessor();
+                  XdmNode *inn = proc->parseXmlFromString("<z/>");
+                     ]]></samp></li>
+      <li>Python example of parsing a XML document for a file name:
+        <samp><![CDATA[
+                builder = saxonproc.new_document_builder()
+                node = builder.parse_xml(xml_file_name='books.xml')
+                             ]]></samp>
+      </li>
+      <li>PHP example fof parsing XML from a lexical string:
+
+        <samp><![CDATA[$xdmNode = $saxonProc->parseXmlFromString("<doc><b>text value of out</b></doc>");]]></samp>
+      </li>
+    </ul>
+    </div>
+
+
+
+    <p>All the documents processed in a single transformation or query must be loaded using the same
+        <code>Configuration</code>. However, it is only
+      possible to copy a document from one <code>Configuration</code> into another one by serializing the object and parsing it again. </p>
+
+
+
+  
+</article>

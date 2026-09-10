@@ -4,17 +4,8 @@
 
 
    <p>This section describes how to use Saxon as an XQuery processor, either from the command line,
-      from the Java API, C# API, or SaxonC C/C++, Python or PHP APIs:</p>
-   
-   <nav except="update callingfunctions resultformat performanceanalysis extensibility usecases">
-      <ul/>
-   </nav>
-   
-   <p>It also includes useful information on a number of other topics:</p>
-   
-   <nav except="commandline api-query saxon-api-query saxonc-query">
-      <ul/>
-   </nav>
+      or from the Java or C# API.</p>
+
  
 
    <p>Saxon 9.8 and later releases implement the <a href="https://www.w3.org/TR/xquery-31/" class="bodylink">XQuery 3.1 Recommendation</a> 
@@ -66,7 +57,8 @@
 
       <p>A command is available to run a query contained in a file.</p> 
       <div class="javaonly">
-      <p>The form of command on the Java platform is:</p>
+      <p>The form of command on the Java
+         platform is:</p>
       <kbd>java  net.sf.saxon.Query   [options]  [ <i>params...</i>] </kbd>
       </div>
       <div class="csonly">
@@ -74,12 +66,12 @@
       <kbd>dotnet SaxonCS query   [options]  [ <i>params...</i>] </kbd>
       </div>
       <div class="conly">
-         <p>For SaxonC, the <code>query</code> executable file must first be built. To do this, compile
-            the <code>Query.c</code> C command line program by running the batch script
-            <code>./build-saxonc-commands.sh</code> on Linux or MacOS, or
-            <code>build-saxonc-commands.bat</code> on Windows.</p>
-         <p>Then the command takes the form:</p>
-         <kbd>./query   [options]  [ <i>params...</i>] </kbd>
+       <p>The form of command on the SaxonC platform is:</p>
+       <kbd>./query [options] [ <i>params...</i>] </kbd>
+         <p class="conly">We must first compile the <code>Query.c</code> C
+                    program which builds the command line program by running the batch script <code>./build-saxonc-commands.sh</code>
+                     on linux or MacOS and <code>build-saxonc-commands.bat</code> for Windows:</p>
+                 <p>A command is available to run a query contained in a file.</p>
        </div>
 
       <p>The options will generally include either <code>-q:queryFile</code> which takes the query from a file,
@@ -955,7 +947,7 @@
    </section>
    
    <section id="saxon-api-query" title="From a C# application" class="csonly">
-      <h1>XQuery from a C# application</h1>
+      <h1>Using XQuery from C#</h1>
       
       <aside>The same classes and methods can be used from .NET languages other than C#, but
       all the examples here are written in C# terms.</aside>
@@ -1042,265 +1034,6 @@
          use <code>import module</code> specifying the module URI in the normal way. It is not
          necessary to supply a module location hint (<code>at "URI"</code>), and if any is
          supplied, it will be ignored.</p>
-      
-   </section>
-   
-   <section id="saxonc-query" title="From a C/C++, Python or PHP application" class="conly">
-      <h1>XQuery from a C/C++, Python or PHP application</h1>
-      
-      <p>This section describes how to use XQuery with SaxonC, from the C, C++, Python, or PHP API.</p>
-      
-      <nav>
-         <ul/>
-      </nav>
-      
-      <section id="c-api-query" title="From a C application" class="conly">
-         
-         <h1>XQuery from a C application</h1>
-         
-         <p>The SaxonC C API can be used to run queries from your own C application. Functions are
-            provided to perform XQuery queries in <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
-               >SaxonCProcessor.h</a>.</p>
-         
-         <p>For these XQuery functions, the XML document source and XQuery string or file (and other
-            properties) are supplied using the <code>sxnc_property</code> struct. The
-            <code>sxnc_parameter</code> struct can be used to supply external variables defined in the query.
-            The query results can be output to file using the <code>executeQueryToFile()</code> function, or
-            string representation using the <code>executeQueryToString()</code> function.</p>
-         
-         <p>You can perform a query using the SaxonC C interface as follows:</p>
-         
-         <ol>
-            <li>
-               <p>The first step is the memory allocation for the processor and variables required by SaxonC.
-                  To simplify the process, the utility function <code>initSaxonc()</code> can be used to alloc
-                  the following variables:</p>
-               
-               <ul>
-                  <li>environ - SaxonC environment given as the struct <code>sxnc_environment</code>.</li>
-                  <li>processor - The SaxonC processor data structure given as the struct
-                     <code>sxnc_processor</code> which is used as a reference to the Saxon
-                     <code>Processor</code> object in Java.</li>
-                  <li>parameters - The <code>sxnc_parameter</code> struct (an array) is used to represent the
-                     external variables supplied to the XQuery query. For further details see the <a
-                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
-                        class="bodylink">Configuration</a> section in the SaxonC documentation.</li>
-                  <li>properties - The <code>sxnc_property</code> struct (an array) is used to represent the
-                     required configuration properties and options for the processor. These properties are set
-                     using the <code>setProperty()</code> function. For instance, property 'q' is used to
-                     specify the file name of the query, or property 'qs' is used to pass the query as string.
-                     For a full list of the available properties see the <a class="bodylink"
-                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
-                        >Configuration</a> section in the SaxonC documentation.</li>
-               </ul>
-               
-               <p>For example:</p>
-               
-               <samp><![CDATA[   int cap = 10;
-   sxnc_parameter *parameters;
-   int parLen = 0, parCap;
-   parCap = cap;
-   sxnc_property *properties;
-   int propLen = 0;
-   parCap = cap;
-   sxnc_environment *environ;
-   sxnc_processor *processor;
-
-   initSaxonc(&environ, &processor, &parameters, &properties, parCap, parCap);]]></samp>
-            </li>
-            <li>
-               <p>Next set up the GraalVM environment to create and initialize a new independent VM instance,
-                  using the <code>create_graalvm_isolate()</code> function. This is required by the SaxonC
-                  processors.</p>
-               <samp><![CDATA[   sxnc_environment *environ;
-   create_graalvm_isolate(environi);]]></samp>
-            </li>
-            <li>
-               <p>Use the <code>c_createSaxonProcessor()</code> function to create a SaxonC processor, which
-                  is used for XSLT and XQuery processing. The last argument is used to specify whether the
-                  processor is to be run with license enabled (i.e. for Saxon-EE and Saxon-PE) or off - set
-                  using values '1' and '0' respectively.</p>
-               <samp><![CDATA[   int checkProc = c_createSaxonProcessor(environ, processor, 0);]]></samp>
-            </li>
-            <li>
-               <p>Supply properties for the query using the <code>setProperty()</code> function. The query
-                  itself can either be supplied from a file using the property 'q' to specify the file name,
-                  or as a string using the property 'qs'.</p>
-               <p>For example, set the source document, the current working directory, and the query string,
-                  as follows:</p>
-               <samp><![CDATA[   setProperty(&properties, &propLen, &propCap, "s", "../data/cat.xml");
-
-   setProperty(&properties, &propLen, &propCap, "cwd", cwd);
-
-   setProperty(&properties, &propLen, &propCap, "qs",
-      "<out>{count(/out/person)}</out>");]]></samp>
-            </li>
-            <li>
-               <p>You can now execute the XQuery, using the <code>executeQueryToFile()</code> or
-                  <code>executeQueryToString()</code> functions. For example, you could execute a query
-                  and return the results as a string representation, using:</p>
-               <samp><![CDATA[   const char *result =
-      executeQueryToString(environi, processor, cwd, 0, properties, 0, propLen);]]]></samp>
-            </li>
-            <li>
-               <p>At the end of the program it is necessary to deallocate the memory created for the Saxon
-                  processor, parameters and properties; and cleanly release resources created by GraalVM.</p>
-               <samp><![CDATA[   graal_tear_down(environi->thread);
-   freeSaxonc(&environi, &processor, &parameters, &properties);]]></samp>
-            </li>
-         </ol>
-         
-         
-      </section>
-      
-      <section id="cpp-api-query" title="From a C++ application" class="conly">
-         
-         <h1>XQuery from a C++ application</h1>
-         
-         <p>You can perform a query using the SaxonC C++ interface as follows:</p>
-         
-         <ol>
-            <li>Create a <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html" >SaxonProcessor</a>
-               and set any global configuration options on the <code>SaxonProcessor</code> object. If your
-               query uses any features that require SaxonC-PE or SaxonC-EE, be sure to use the constructor
-               <code>new SaxonProcessor(true)</code>.
-            </li>
-            <li>
-               <p>Optionally, build the source document by calling <code>newDocumentBuilder()</code> to create
-                  a document builder, setting appropriate options, and then calling the
-                  <code>parseXmlFromFile()</code> or <code>parseXmlFromString()</code> methods. This
-                  returns an <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html">XdmNode</a> which can
-                  be supplied as input to the query either as the context item, or as the value of an external
-                  variable.</p>
-            </li>
-            <li>
-               <p>Call <code>newXQueryProcessor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/classXQueryProcessor.html"
-                  >XQueryProcessor</a>. Then set any options required for the specific query execution (for
-                  example, the initial context item, the base URI, the values of external variables and the
-                  parameters of the query). The query can be supplied as a string using the
-                  <code>setQueryContent()</code> method, or from a file using the <code>setQueryFile()</code>
-                  method.</p>
-            </li>
-            <li>
-               <p>Call one of the methods <code>runQueryToString()</code>, <code>runQueryToValue()</code> or
-                  <code>runQueryToFile()</code> to compile and execute the query. As the names suggest
-                  these methods return the output of the query as a serialized string (as a char pointer
-                  array), or a pointer to an <code>XdmValue</code> object or file on disk, respectively.</p>
-            </li>
-         </ol>
-         
-         <p>Alternatively, it is also possible to run basic one shot queries using the methods
-            <code>executeQueryToString()</code>, <code>executeQueryToValue()</code> and
-            <code>executeQueryToFile()</code> directly on the <code>XQueryProcessor</code>, when other options
-            are not needed. With these methods the query is supplied as an argument, so it is not necessary to
-            first supply the query to the <code>XQueryProcessor</code> using <code>setQueryContent()</code> or
-            <code>setQueryFile()</code>.</p>
-         
-         <p>Note that the <code>XQueryProcessor</code> only provides compile-and-go methods to execute a
-            query directly without going through an explicit compilation process. This provides a simpler
-            approach if the query is only evaluated once; but means that an <code>XQueryProcessor</code> is
-            not really suitable for reuse.</p>
-         
-         
-      </section>
-      
-      <section id="python-api-query" title="From a Python application" class="conly">
-         
-         <h1>XQuery from a Python application</h1>
-         
-         <p>You can perform a query using the SaxonC Python interface as follows:</p>
-         
-         <ol>
-            <li>Create a <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor" >PySaxonProcessor</a>
-               and set any global configuration options on the <code>PySaxonProcessor</code> object. If your
-               query uses any features that require saxoncpe or saxoncee, be sure to use the constructor
-               <code>proc = PySaxonProcessor(license=True)</code>.
-            </li>
-            <li>
-               <p>Optionally, build the source document by calling <code>new_document_builder()</code> to create
-                  a document builder, setting appropriate options, and then calling the
-                  <code>parse_xml()</code> method. This returns a <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmNode">PyXdmNode</a> which can
-                  be supplied as input to the query either as the context item, or as the value of an external
-                  variable.</p>
-            </li>
-            <li>
-               <p>Call <code>new_xquery_processor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXQueryProcessor"
-                  >PyXQueryProcessor</a>. Then set any options required for the specific query execution (for
-                  example, the initial context item, the base URI, the values of external variables and the
-                  parameters of the query). The query can be supplied as a string using the
-                  <code>set_query_content()</code> method, or from a file using the <code>set_query_file()</code>
-                  method.</p>
-            </li>
-            <li>
-               <p>Call one of the methods <code>run_query_to_string()</code>, <code>run_query_to_value()</code> or
-                  <code>run_query_to_file()</code> to compile and execute the query. As the names suggest
-                  these methods return the output of the query as a serialized string (str),
-                  <code>PyXdmValue</code> object or file on disk, respectively.</p>
-            </li>
-         </ol>
-         
-         <p>Note that the <code>PyXQueryProcessor</code> only provides compile-and-go methods to execute a
-            query directly without going through an explicit compilation process. This provides a simpler
-            approach if the query is only evaluated once; but means that a <code>PyXQueryProcessor</code> is
-            not really suitable for reuse.</p>
-         
-         
-      </section>
-      
-      <section id="php-api-query" title="From a PHP application" class="conly">
-         
-         <h1>XQuery from a PHP application</h1>
-         
-         <p>You can perform a query using the SaxonC PHP interface as follows:</p>
-         
-         <ol>
-            <li>Create a <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
-               >SaxonProcessor</a> and set any global configuration options on the <code>SaxonProcessor</code>
-               object. If your query uses any features that require SaxonC-PE or SaxonC-EE, be sure to use the
-               constructor <code>new SaxonProcessor(true)</code>.
-            </li>
-            <li>
-               <p>Optionally, build the source document by calling <code>newDocumentBuilder()</code> to create
-                  a document builder, setting appropriate options, and then calling the
-                  <code>parseXmlFromFile()</code> or <code>parseXmlFromString()</code> methods. This
-                  returns an <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmnode"
-                     >XdmNode</a> which can be supplied as input to the query either as the context item, or
-                  as the value of an external variable.</p>
-            </li>
-            <li>
-               <p>Call <code>newXQueryProcessor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xqueryprocessor"
-                  >XQueryProcessor</a>. Then set any options required for the specific query execution (for
-                  example, the initial context item, the base URI, the values of external variables and the
-                  parameters of the query). The query can be supplied as a string using the
-                  <code>setQueryContent()</code> method, or from a file using the <code>setQueryFile()</code>
-                  method.</p>
-            </li>
-            <li>
-               <p>Call one of the methods <code>runQueryToString()</code>, <code>runQueryToValue()</code> or
-                  <code>runQueryToFile()</code> to compile and execute the query. As the names suggest
-                  these methods return the output of the query as a serialized string (as a char pointer
-                  array), or a pointer to an <code>XdmValue</code> object or file on disk, respectively.</p>
-            </li>
-         </ol>
-         
-         <p>Note that the <code>XQueryProcessor</code> only provides compile-and-go methods to execute a
-            query directly without going through an explicit compilation process. This provides a simpler
-            approach if the query is only evaluated once; but means that an <code>XQueryProcessor</code> is
-            not really suitable for reuse.</p>
-         
-         
-      </section>
-      
       
    </section>
    

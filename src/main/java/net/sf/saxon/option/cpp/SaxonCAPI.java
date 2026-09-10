@@ -323,7 +323,9 @@ public class SaxonCAPI {
     }
 
     static CCharPointer stringToNative2(net.sf.saxon.option.cpp.SaxonCAPI.AllocatorCCharFn alloc, String string) {
-
+        /*if(string.isEmpty()) {
+            return WordFactory.nullPointer();
+        }*/
         byte[] b = string.getBytes(StandardCharsets.UTF_8);
         CCharPointer a = alloc.call(b.length + 1);
         for (int i = 0; i < b.length; i++) {
@@ -822,93 +824,6 @@ public class SaxonCAPI {
             }
         }
         return valueForCpp;
-    }
-
-
-    /**
-     * parse JSON supplied by file
-     *
-     * @param thread     - The Graalvm IsolateThread
-     * @param processorRef - The Reference to the processor object coming from the C++ code
-     * @param cfilename - File name of the JSON document to parse
-     * @return XdmValue
-     */
-    @CEntryPoint(name = "parseJsonFile", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long parseJsonFile(IsolateThread thread, ObjectHandle processorRef, CCharPointer cfilename) throws SaxonApiException {
-
-        Processor proc = null;
-        if(processorRef == WordFactory.nullPointer()){
-            throw new SaxonApiException("Processor object is null");
-        } else {
-            proc =  objectHandles.get(processorRef);
-        }
-
-
-        String filename = null;
-        if(cfilename != WordFactory.nullPointer()) {
-            filename = CTypeConversion.toJavaString(cfilename);
-        } else {
-            throw new SaxonApiException("JSON file name is null");
-        }
-        JsonBuilder builder = proc.newJsonBuilder();
-        XdmValue result = null;
-
-        if(filename.startsWith("http:")) {
-            URL url = null;
-            try {
-                url = new URL(filename);
-
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                result = builder.parseJson(in);
-            } catch (MalformedURLException e) {
-                throw new SaxonApiException(e);
-            } catch (IOException e) {
-                throw new SaxonApiException(e);
-            }
-        } else {
-            try {
-                FileReader reader = new FileReader(new File(filename));
-                result = builder.parseJson(reader);
-            } catch (FileNotFoundException e) {
-                throw new SaxonApiException(e);
-            }
-        }
-
-        ObjectHandle handle = createHandle(result);
-        return handle.rawValue();
-
-    }
-
-    /**
-     * parse JSON supplied as a string
-     *
-     * @param thread     - The Graalvm IsolateThread
-     * @param processorRef - The Reference to the processor object coming from the C++ code
-     * @param cjson_string - String representation of the JSON
-     * @return XdmValue
-     */
-    @CEntryPoint(name = "parseJsonString", exceptionHandler = SaxonCExceptionLongHandler.class)
-    public static long parseJsonString(IsolateThread thread, ObjectHandle processorRef, CCharPointer cjson_string) throws SaxonApiException {
-
-        Processor proc;
-        if(processorRef == WordFactory.nullPointer()){
-            throw new SaxonApiException("Processor object is null");
-        } else {
-            proc =  objectHandles.get(processorRef);
-        }
-
-
-        String json = null;
-        if(cjson_string != WordFactory.nullPointer()) {
-            json = CTypeConversion.toJavaString(cjson_string);
-        } else {
-            throw new SaxonApiException("JSON file name is null");
-        }
-        JsonBuilder builder = proc.newJsonBuilder();
-        XdmValue result = builder.parseJson(json);
-
-        ObjectHandle handle = createHandle(result);
-        return handle.rawValue();
     }
 
 
