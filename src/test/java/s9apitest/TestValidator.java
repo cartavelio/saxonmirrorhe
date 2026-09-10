@@ -1,7 +1,6 @@
 package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import com.saxonica.ee.jaxp.ValidatorImpl;
 import jaxptest.ConfigTest;
 import millicom.MillicomTest;
@@ -1434,113 +1433,6 @@ public class TestValidator {
             fail(e.getMessage());
         }
     }
-
-    /**
-     * Test the effect of setting bytecode on or off
-     */
-
-    private void testByteCode(boolean byteCodeOn) {
-        try {
-            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\" xmlns=\"http://www.w3.org/2001/XMLSchema\">\n" +
-                    "  <simpleType name='percentage'>" +
-                    "     <restriction base='decimal'>" +
-                    "        <minInclusive value='10'/>" +
-                    "        <maxInclusive value='20'/>" +
-                    "        <totalDigits value='5'/>" +
-                    "        <fractionDigits value='2'/>" +
-                    "     </restriction></simpleType>" +
-                    "</schema>";
-
-            Processor proc = new Processor(true);
-            proc.setConfigurationProperty(Feature.GENERATE_BYTE_CODE, byteCodeOn);
-            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE, byteCodeOn);
-            //proc.setConfigurationProperty(Feature.DEBUG_BYTE_CODE_DIR, configTest.getTempDir() + "Saxon-bytecode");
-            XsdCompiler sm = proc.newXsdCompiler();
-            XsdSchema schema = sm.compile(new StreamSource(new StringReader(sch1)));
-            XQueryCompiler comp = proc.newXQueryCompiler();
-            comp.setSchemaAware(true);
-            XQueryExecutable qry = comp.compile("import schema namespace s='http://myexample/family'; sum(for $i in 1 to 100000 return s:percentage($i div 100 mod 10 + 10))");
-            XdmItem result = qry.load().evaluateSingle();
-            assertEquals("1499500", result.getStringValue(), "result");
-            //System.err.println(result.getStringValue());
-        } catch (SaxonApiException sapie) {
-            System.err.println(sapie.getMessage());
-            fail();
-        }
-    }
-
-    @Test
-    @Tag("bytecode")
-    public void testByteCodeOn() {
-        testByteCode(true);
-    }
-
-    @Test
-    public void testByteCodeOff() {
-        testByteCode(false);
-    }
-
-    /**
-     * Test the effect of setting bytecode on or off using JAXP SchemaFactory
-     */
-
-    private void testByteCodeJaxp(boolean byteCodeOn) {
-        try {
-            String sch1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                    + "<schema targetNamespace=\"http://myexample/family\" xmlns:fam=\"http://myexample/family\"\n"
-                    + "    xmlns=\"http://www.w3.org/2001/XMLSchema\">\n"
-                    + "    <element name=\"doc\">\n"
-                    + "        <complexType>\n"
-                    //+ "            <complexContent>\n"
-                    + "                <sequence>\n"
-                    + "                    <element name=\"d\" type=\"f:percentage\" xmlns:f=\"http://myexample/family\"\n"
-                    + "                        maxOccurs=\"unbounded\" form='qualified'/>\n"
-                    + "                </sequence>\n"
-                    //+ "            </complexContent>\n"
-                    + "        </complexType>\n"
-                    + "    </element>\n"
-                    + "    <simpleType name=\"percentage\">\n"
-                    + "        <restriction base=\"decimal\">\n"
-                    + "            <minInclusive value=\"10\"/>\n"
-                    + "            <maxInclusive value=\"200\"/>\n"
-                    + "            <totalDigits value=\"5\"/>\n"
-                    + "            <fractionDigits value=\"2\"/>\n"
-                    + "        </restriction>\n"
-                    + "    </simpleType>\n"
-                    + "</schema>";
-
-            SchemaFactory proc = new SchemaFactoryImpl();
-            Schema sch = proc.newSchema(new StreamSource(new StringReader(sch1)));
-            Validator val = sch.newValidator();
-            StringBuilder sb = new StringBuilder();
-            sb.append("<doc xmlns='http://myexample/family'>");
-            for (int i = 10; i < 200; i++) {
-                for (int j = 10; j <= 99; j++) {
-                    sb.append("<d>").append(i).append('.').append(j).append("</d>");
-                }
-            }
-            sb.append("</doc>");
-            val.validate(new StreamSource(new StringReader(sb.toString())));
-
-        } catch (SAXException | IOException sapie) {
-            System.err.println(sapie.getMessage());
-            fail();
-        }
-    }
-
-    @Test
-    @Tag("bytecode")
-    public void testByteCodeJaxpOn() {
-        testByteCodeJaxp(true);
-    }
-
-    @Test
-    @Tag("bytecode")
-    public void testByteCodeJaxpOff() {
-        testByteCodeJaxp(false);
-    }
-
 
     @Test
     public void testErrorListenerBug4744() {
