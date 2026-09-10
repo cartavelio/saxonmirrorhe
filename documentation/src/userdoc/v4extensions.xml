@@ -39,23 +39,23 @@
 	<p>Generally, Saxonica aims to avoid making incompatible changes except in major releases. But
 		since the 4.0 features are not yet entirely stable, this policy does not apply: the
 		aim instead will be to respond rapidly to changes in the developing specification.
-	   Maintenance releases in the 13.x series may therefore reflect changes in the draft specifications.</p>
+	   Maintenance releases in the 13.x series may therefore reflect changes in the draft
+	   specifications. See the <a class="bodylink" href="/changes">Changes history</a> section for
+		detailed information about changes in the Saxon implementation for 4.0 features.</p>
 
 	<p>Further information and details of the current Saxon implementation has been integrated into the
 		relevant sections of this documentation. Content is highlighted (like this page) to indicate
 		details about 4.0 features, using a yellow colored side-bar and the QT4 lightbulb image. The main
-		sections with new information are as follows:</p>
+		sections with new information are the reference sections:</p>
 	
 	<ul>
-		<li><a class="bodylink" href="/xsl-elements">XSLT elements reference</a> - for details on all new
-			4.0 XSLT instructions, and 4.0 extensions to existing elements</li>
-		<li><a class="bodylink" href="/expressions">XPath syntax reference</a> - updated to include
-			information on 4.0 extensions, including new types, new expressions, new function syntax</li>
-		<li><a class="bodylink" href="/functions">Function library reference</a> - for details on all
-			new 4.0 functions, and information about changes to existing functions</li>
-		<li><a class="bodylink" href="/conformance">Standards conformance</a> - for detailed information
-			on the conformance and restrictions of the Saxon implementation for the specific 4.0 language
-			specifications</li>
+		<li><a class="bodylink" href="/xsl-elements">XSLT elements</a> - for details on all of
+			the new 4.0 XSLT instructions, 4.0 extensions to existing elements, and information about
+			patterns in XSLT 4.0.</li>
+		<li><a class="bodylink" href="/expressions">XPath syntax</a> - updated to include
+			information on 4.0 extensions, including new types, new expressions, and new function syntax.</li>
+		<li><a class="bodylink" href="/functions">Function library</a> - for details on all of
+			the new 4.0 functions, and information about changes to existing functions.</li>
 	</ul>
 
 

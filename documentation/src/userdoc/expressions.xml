@@ -2818,8 +2818,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				href="https://qt4cg.org/specifications/xquery-40/xpath-40.html">XML Path Language
 				(XPath) 4.0</a> and <a class="bodylink"
 					href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html">XQuery and
-					XPath Data Model 4.0</a>), and for further Saxon implementation details see the <a
-						class="bodylink" href="/conformance/xpath40">Conformance</a> section.</p>
+					XPath Data Model 4.0</a>).</p>
 		<ol>
 			<li>
 				<p><a class="bodylink" href="/expressions/primary/jnodes">GNodes, JNodes and XNodes</a></p>
