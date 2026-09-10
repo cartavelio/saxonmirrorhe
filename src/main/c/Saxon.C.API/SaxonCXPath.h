@@ -66,8 +66,8 @@ int64_t longValue(sxnc_environment *environi, long l);
 int64_t getJavaStringValue(sxnc_environment *environi, const char *str);
 
 /**
- * A Constructor. Create an XdmValue based on the target type. Conversion is
- * applied if possible.
+ * A Constructor for internal use. Create an underlying representation for the XdmValue based on the target type.
+ * Conversion is applied if possible.
  * @param type - the target type of the value
  * @param val - value to convert
  */

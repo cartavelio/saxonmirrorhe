@@ -731,9 +731,47 @@ void SaxonProcessor::setCatalog(const char *catalogFile) {
         "Processor is null in SaxonProcessor.setCatalogFiles");
     return;
   }
+  int64_t processorDataRef =
+          createProcessorDataWithCapacity(sxn_environ->thread, 1);
 
-  long result = j_setCatalogFile(sxn_environ->thread, (void *)procRef,
-                                 (char *)catalogFile);
+  addProcessorProperty(sxn_environ->thread, (void *)processorDataRef,(char *) catalogFile);
+
+  long result = j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
+                                 (void *)processorDataRef);
+  if (result == SXN_UNSET) {
+    throw SaxonApiException("setCatalogFile failed");
+  }
+}
+
+
+
+void SaxonProcessor::setCatalogFiles(const char ** catalogFiles, int length) {
+  SaxonProcessor::attachCurrentThread();
+
+  if (catalogFiles == nullptr && length > 0) {
+
+    return;
+  }
+
+  if (procRef == SXN_UNSET) {
+    throw SaxonApiException(
+        "Processor is null in SaxonProcessor.setCatalogFiles");
+    return;
+  }
+
+  int64_t processorDataRef =
+          createProcessorDataWithCapacity(sxn_environ->thread, length);
+
+  for (int i= 0; i <length; i++) {
+
+    if(catalogFiles[i] != nullptr) {
+        addProcessorProperty(sxn_environ->thread, (void *) processorDataRef,(char *) catalogFiles[i]);
+    }
+  }
+
+
+  long result = j_setCatalogFiles(sxn_environ->thread, (void *)procRef,
+                                 (void *)processorDataRef);
   if (result == SXN_UNSET) {
     throw SaxonApiException("setCatalogFile failed");
   }

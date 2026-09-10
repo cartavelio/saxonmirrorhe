@@ -614,8 +614,17 @@ public:
    * set catalog to be used in Saxon
    * @param catalogFile file name to the catalog
    * @throws SaxonApiException if fail to set the catalog file
+   * @deprecated
    */
   void setCatalog(const char *catalogFile);
+
+    /**
+     * set catalog files to be used in Saxon
+     * @param catalogFiles - the catalog file names array to the catalog
+     * @param length  - number of catalog files in the array argument
+     * @throws SaxonApiException if fail to set the catalog file
+     */
+    void setCatalogFiles(const char ** catalogFiles, int length);
 
   //! Set a configuration property specific to the processor in use.
   /**

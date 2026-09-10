@@ -125,14 +125,9 @@ typedef void *(*allocFn)(size_t length);
 
 extern const char *failure;
 
+
 /**
  * Get resources directory.
- */
-
-char *getResourceDirectory();
-
-/**
- * Get resources directory. This is to replace getResourceDirectory().
  */
 
 char *_getResourceDirectory();

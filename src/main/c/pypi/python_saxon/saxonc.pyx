@@ -718,6 +718,7 @@ cdef class PySaxonProcessor:
         """
         set_catalog(self, str file_name)
         Set the XML catalog to be used in Saxon
+        This method is now deprecated. Use set_catalog_files
         Args:
             file_name (str): The file name for the XML catalog
         """
@@ -727,6 +728,31 @@ cdef class PySaxonProcessor:
         c_filename_string = py_name_string if file_name is not None else ""
         if c_filename_string is not NULL:
             self.thisptr.setCatalog(c_filename_string)
+
+    def set_catalog_files(self, list file_names):
+        """
+        set_catalog_files(self, str file_name)
+        Set the XML catalog files to be used in Saxon
+        Args:
+            file_names list: list of strings for the XML catalog file names
+        """
+        cdef const char * c_filename_string = NULL
+        '''make_c_str(file_name)'''
+
+        cdef int _len = len(file_names)
+        cdef char ** catalog_files_array = <char**>malloc(_len * sizeof(char*))
+        for x in range(_len):
+            file_name = file_names[x]
+            c_filename_string = NULL
+            py_name_string = file_name.encode('UTF-8') if file_name is not None else None
+            c_filename_string = py_name_string if file_name is not None else ""
+            if c_filename_string is not NULL:
+                catalog_files_array[x] = c_filename_string
+            else:
+                raise Exception("Found None catalog file")
+
+        self.thisptr.setCatalogFiles(c_filename_string, _len)
+        free(catalog_files_array)
 
 
     def get_string_value(self, PyXdmItem item):
@@ -2771,7 +2797,7 @@ cdef class PyXsltExecutable:
         cdef int _len = len(args)
         """ TODO handle memory when finished with XdmValues """
         cdef saxoncClasses.XdmValue ** argumentV = self.thisxptr.createXdmValueArray(_len)
-        for x in range(len(args)):
+        for x in range(_len):
           if isinstance(args[x], PyXdmValue):
             value_ = args[x]
             argumentV[x] = value_.thisvptr

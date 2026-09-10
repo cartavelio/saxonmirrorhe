@@ -23,8 +23,6 @@ char * dllPath =
 "C:\\Program Files\\Saxonica\\Saxon@@EDITION@@C @@VERSION@@";
 #endif*/
 
-char *getResourceDirectory() { return resources_dir; }
-
 char *_getResourceDirectory() { return resources_dir; }
 
 /*
