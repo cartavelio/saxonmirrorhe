@@ -1046,17 +1046,16 @@
 				</tr>
 				<tr>
 					<td>
-						<p><code>[]</code>, <code>()</code></p>
+						<p><code>[]</code></p>
 					</td>
 					<td>
-						<p>predicate, function call</p>
+						<p>predicate</p>
 					</td>
 					<td>
 						<p>2.0</p>
 					</td>
 					<td>
-						<p><a class="bodylink" href="filter">Filter expressions</a>, <a class="bodylink"
-								href="/expressions/primary/functioncalls">Function calls</a></p>
+						<p><a class="bodylink" href="filter">Filter expressions</a></p>
 					</td>
 				</tr>
 				<tr>
@@ -1073,6 +1072,20 @@
 						<p>
 							<a class="bodylink" href="lookup">Lookup expressions</a>
 						</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p><code>()</code></p>
+					</td>
+					<td>
+						<p>function call</p>
+					</td>
+					<td>
+						<p>2.0</p>
+					</td>
+					<td>
+						<p><a class="bodylink" href="/expressions/primary/functioncalls">Function calls</a></p>
 					</td>
 				</tr>
 				<tr>
@@ -1122,6 +1135,24 @@
 					<td>
 						<p>
 							<a class="bodylink" href="arithmetic">Arithmetic expressions</a>
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p class="qt4">
+							<code>=?&gt;</code>
+						</p>
+					</td>
+					<td>
+						<p>method call operator</p>
+					</td>
+					<td>
+						<p>4.0</p>
+					</td>
+					<td>
+						<p>
+							<a class="bodylink" href="lookup">Lookup expressions</a>
 						</p>
 					</td>
 				</tr>
@@ -1235,7 +1266,7 @@
 				</tr>
 				<tr>
 					<td>
-						<p><code>except</code>, <code>intersect</code></p>
+						<p><code>intersect</code>, <code>except</code></p>
 					</td>
 					<td>
 						<p>set difference and intersection</p>
@@ -1353,16 +1384,34 @@
 				</tr>
 				<tr>
 					<td>
-						<p><code>=</code>, <code>!=</code>, <code>is</code>, <code>&lt;</code>,
-								<code>&lt;=;</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>eq</code>,
+						<p><code>=</code>, <code>!=</code>, <code>&lt;</code>,
+								<code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>eq</code>,
 								<code>ne</code>, <code>lt</code>, <code>le</code>, <code>gt</code>,
-								<code>ge</code></p>
+							<code>ge</code></p>
 					</td>
 					<td>
 						<p>comparisons</p>
 					</td>
 					<td>
 						<p>2.0</p>
+					</td>
+					<td>
+						<p>
+							<a class="bodylink" href="comparisons">Comparisons</a>
+						</p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<p class="qt4"><code>is</code>, <code>is-not</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>,
+							<code>precedes-or-is</code>, <code>follows-or-is</code>, <code>precedes</code>,
+							<code>follows</code></p>
+					</td>
+					<td>
+						<p>node comparisons</p>
+					</td>
+					<td>
+						<p>4.0</p>
 					</td>
 					<td>
 						<p>
@@ -1837,6 +1886,19 @@
 
 				<p>The effect is the same as if the string literal or variable were written in
 					parentheses. (Implemented from Saxon 10.)</p>
+				
+				<h2 class="subtitle">Method call operator</h2>
+				
+				<aside>Available since Saxon 13 in XPath 4.0.</aside>
+				
+				<p>XPath 4.0 introduces the <em>method call</em> operator <code>=?&gt;</code>. In simple cases,
+					<code>$map =?&gt; method(X)</code> is essentially an abbreviation for 
+					<code>($map ? method)($map, X)</code>. Here <code>$map</code> is a map (or sequence of maps),
+					such that <code>method</code> is the key of an entry in the map, and the value of that entry is
+					a function item, which takes the map as its implicit first argument. The method call 
+					<code>$map =?&gt; method(X)</code> first performs a map lookup (<code>$map?method</code>) to
+					select the function item, and then calls the function item, supplying the containing map as the
+					first argument.</p>
 			</div>
 
 		</section>
@@ -2099,6 +2161,12 @@
 						<code>&lt;</code> and <code>&gt;</code> in the compound tokens <code>&lt;=</code>,
 						<code>>=</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>=&gt;</code>,
 						<code>-&gt;</code>, and <code>=!&gt;</code>. (Implemented from Saxon 12.3.)</p></li>
+					<li><p>New node comparison operators are introduced: <code>is-not</code> can be
+						used as a complement to the operator <code>is</code>; <code>precedes</code> and
+						<code>follows</code> can be used as synonyms for the existing operators <code>&lt;&lt;</code>
+						and <code>&gt;&gt;</code>; <code>precedes-or-is</code> and <code>follows-or-is</code> can be
+						used as synonyms for the union of operators <code>&lt;&lt;</code> and <code>is</code>, and
+						<code>&gt;&gt;</code> and <code>is</code>, respectively. (Implemented from Saxon 13.)</p></li>
 					<li><p>An ordering is defined over all instances of <code>xs:duration</code>, not
 						just the subtypes. (Implemented from Saxon 13.)</p></li>
 					<li><p>Atomic types are categorized into type families to make it clear which values

@@ -632,6 +632,12 @@
         <p>The pipeline operator <code>-></code> is implemented, but there has been limited testing
             of the case where the context value is not a single item. (PR 1686)</p>
         
+        <p>The method call operator <code>=?&gt;</code> is implemented. (PR 2143)</p>
+        
+        <p>New operators for node comparison expressions are implemented: <code>is-not</code>,
+            <code>precedes-or-is</code>, <code>follows-or-is</code>; plus <code>precedes</code> and
+            <code>follows</code> as synonyms for <code>&lt;&lt;</code> and <code>&gt;&gt;</code>.</p>
+        
         <p>The precedence of the <code>otherwise</code> operator has changed. The expression
             <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
             not as <code>(@price otherwise @cost) * 2</code>. (PR 1031)</p>
