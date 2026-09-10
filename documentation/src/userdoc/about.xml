@@ -1441,13 +1441,34 @@ any version number.</p>
          products are generated from the same source, though there are some modules that apply only
          to one platform or the other.</p>
       
-      <p class="csonly">Source code for SaxonCS is not available. (The bulk of the C# code
-         is generated from Java using proprietary tools, so it would not be useful.)</p>
+      <p class="csonly">SaxonCS is built partly from C# code transpiled from Java, and partly from
+      hand-written C# code. (The hand-written code is partly to interface Saxon to the .NET platform,
+      and partly to provide an API that follows C# conventions.) The transpiled C# code is not technically
+      "source" code, at least not in the sense of an open source license, because it is software-generated.
+      In the language of the Mozilla Public License, it falls within the definition of an "executable form"
+      of the software.</p>
+      
+      <p class="csonly">Saxonica intends to publish the C# code of SaxonCS-HE, subject to the proviso that 
+         (a) mosty of it is
+      not technically source code in the sense of an open source license, and (b) the fact that it is generated
+      by a transpiler limits its usefulness. We will publish information on this as soon as we have worked
+      out the details.</p>
+      
+      <p class="csonly">Saxonica has no plans to release the transpiler used to generate SaxonCS from SaxonJ. This is
+      essentially because it would set false expectations. The transpiler has been developed for internal
+      use: it handles the SaxonJ code, but cannot handle arbitrary Java source code, and the restrictions are
+      not well documented. Turning it into a releasable product would be a significant effort.</p>
+      
+      
       
       <p class="conly">Source code for SaxonC-HE is available as a download in the <a
             href="https://github.com/Saxonica/Saxon-HE/releases" class="bodylink">Saxon-HE GitHub
             repository</a>.</p>
 
+      <p>Note that although Saxon-HE is made available under an open source license, and everyone is welcome
+      to use the code under the terms of that license, it is not developed using an open collaborative
+      development process. Saxonica retains full design control, and will only accept third-party contributions
+      under very strict conditions.</p>
 
       <h2 class="subtitle">User documentation</h2>
 
