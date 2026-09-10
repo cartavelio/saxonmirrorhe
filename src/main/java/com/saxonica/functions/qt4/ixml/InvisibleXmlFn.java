@@ -156,8 +156,8 @@ public class InvisibleXmlFn extends SystemFunction {
                 }
             }
 
-            return new CallableFunction(1,
-                                        new InvisibleXmlParserFunction(parser, chooseAlternative, options),
+            return new CallableFunction(
+                    new InvisibleXmlParserFunction(parser, chooseAlternative, options)::call,
                                         RETURN_TYPE);
         } else {
             InvisibleXmlDocument failed = parser.getFailedParse();

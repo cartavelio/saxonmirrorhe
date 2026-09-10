@@ -13,7 +13,6 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
@@ -40,7 +39,7 @@ public class XQueryFn extends SystemFunction {
         StaticQueryContext sqc = context.getConfiguration().newStaticQueryContext();
         //sqc.setLanguageVersion(31);
         XQueryExpression exp = sqc.compileQuery(query);
-        CallableDelegate callable = new CallableDelegate((cxt, args) -> {
+        CallableDelegate.Lambda callable = (cxt, args) -> {
             DynamicQueryContext dqc = new DynamicQueryContext(cxt.getConfiguration());
             Item arg0 = args[0].head();
             if (arg0 != null) {
@@ -54,13 +53,13 @@ public class XQueryFn extends SystemFunction {
             }
             SequenceIterator iter = exp.iterator(dqc);
             return new LazySequence(iter);
-        });
-        callable.setDescription("saxon:xquery");
-        return new CallableFunction(2, callable, functionType);
+        };
+        return new CallableFunction(callable, functionType)
+                .withDescription("saxon:xquery");
     }
 
     private static final MapType paramMap = new MapType(BuiltInAtomicType.QNAME, SequenceType.ANY_SEQUENCE);
-    public static final FunctionItemType functionType = new SpecificFunctionType(
+    public static final SpecificFunctionType functionType = new SpecificFunctionType(
             SequenceType.OPTIONAL_ITEM,
             SequenceType.one(paramMap),
             SequenceType.ANY_SEQUENCE);

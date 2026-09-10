@@ -70,7 +70,7 @@ public class SchemaFn extends SystemFunction {
     }
 
     private Sequence schemaInfo(EnterpriseConfiguration config, Schema schema) {
-        CallableDelegate schemaFunction = new CallableDelegate((context, arguments) -> {
+        CallableDelegate.Lambda schemaFunction = (context, arguments) -> {
             PreparedSchema ps = (PreparedSchema)schema;
             String key = arguments[0].head().getStringValue();
             switch (key) {
@@ -134,8 +134,8 @@ public class SchemaFn extends SystemFunction {
                     return EmptySequence.getInstance();
 
             }
-        });
-        return new CallableFunction(1, schemaFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
+        };
+        return new CallableFunction(schemaFunction, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
     private Sequence schemaComponentInfo(EnterpriseConfiguration config, Schema schema, String kind, StructuredQName name)

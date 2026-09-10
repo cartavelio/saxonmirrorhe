@@ -923,7 +923,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     return EmptySequence.getInstance();
             }
         });
-        return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
+        return new CallableFunction(callable::call, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
 
     /**

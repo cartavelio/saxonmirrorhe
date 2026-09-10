@@ -153,13 +153,13 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             SpecificFunctionType ftype =
                     new SpecificFunctionType(argTypes, SequenceType.ANY_SEQUENCE);
             ((JavaExtensionFunctionCall) call).prepareForDynamicCall(config);
-            return new CallableFunction(functionName, (Callable) call, ftype);
+            return new CallableFunction(functionName, ((JavaExtensionFunctionCall)call)::call, ftype);
         } else if (call instanceof UnresolvedExtensionFunctionCall) {
             SequenceType[] argTypes = new SequenceType[arity];
             Arrays.fill(argTypes, SequenceType.ANY_SEQUENCE);
             net.sf.saxon.type.SpecificFunctionType ftype =
                     new net.sf.saxon.type.SpecificFunctionType(argTypes, SequenceType.ANY_SEQUENCE);
-            return new CallableFunction(functionName, (Callable) call, ftype);
+            return new CallableFunction(functionName, ((UnresolvedExtensionFunctionCall) call)::call, ftype);
         }
         return null;
     }
@@ -1242,7 +1242,7 @@ public class JavaExtensionLibrary implements FunctionLibrary {
             net.sf.saxon.type.SpecificFunctionType ftype =
                     new net.sf.saxon.type.SpecificFunctionType(argTypes, SequenceType.ANY_SEQUENCE);
             SymbolicName.F sName = new SymbolicName.F(getFunctionName(), getArity());
-            return new CallableFunction(sName, this, ftype);
+            return new CallableFunction(sName, this::call, ftype);
         }
 
         /**

@@ -1,6 +1,6 @@
 package com.saxonica.functions.sql;
 
-import net.sf.saxon.expr.Callable;
+import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.SystemFunction;
@@ -8,7 +8,6 @@ import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.SequenceType;
@@ -50,7 +49,7 @@ public class SQLPreparedStatementFn extends SystemFunction {
             }
 
             final PreparedStatement ps2 = ps;
-            Callable callable = (context1, arguments1) -> {
+            CallableDelegate.Lambda callable = (context1, arguments1) -> {
                 for (int i = 0; i< arguments1.length; i++) {
                     SQLFunctionSet.setSqlStatementParam(ps2, i+1, arguments1[i], context1);
                 }
@@ -66,8 +65,8 @@ public class SQLPreparedStatementFn extends SystemFunction {
             int arity = metaData.getParameterCount();
             SequenceType[] parameterTypes = new SequenceType[arity];
             SQLFunctionSet.supplyParameters(metaData, parameterTypes);
-            FunctionItemType type = new SpecificFunctionType(parameterTypes, SequenceType.OPTIONAL_ITEM);
-            return new CallableFunction(arity, callable, type);
+            SpecificFunctionType type = new SpecificFunctionType(parameterTypes, SequenceType.OPTIONAL_ITEM);
+            return new CallableFunction(callable, type);
 
         } catch (SQLException ex) {
             throw new XPathException("sql:prepared-statement() failed: " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
