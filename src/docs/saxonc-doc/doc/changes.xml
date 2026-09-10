@@ -70,20 +70,24 @@
          <p>From SaxonC 12.1:</p>
          <ul>
             <li>Exceptions that are thrown from the underlying Java code are now handled in the C++ API
-               and re-thrown as a C++ exception called SaxonApiException. Likewise these exceptions are thrown in the Python API
+               and re-thrown as a C++ exception called <code>SaxonApiException</code>. Likewise these exceptions are thrown in the Python API
                as <code>PySaxonApiError</code> and in the PHP extension as PHP exceptions. Note: For the Python API on Windows
             the <code>PySaxonApiError</code> is not available therefore we throw <code>RuntimeError</code> if there are any failures.</li>
             <li>The <code>setStreaming()</code> and <code>isStreaming()</code> methods have been added to
                <code>XQueryProcessor</code>.</li>
-            <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code> and <code>XQueryProcessor</code> on the
-               C++, PHP and Python APIs.</li>
+            <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code> and
+               <code>XQueryProcessor</code>; this can be used to enable use of the experimental 4.0 extensions
+               with SaxonC-PE and SaxonC-EE (as documented in the main <a
+                  href="https://www.saxonica.com/documentation12/index.html#!v4extensions">Saxon 12 documentation</a>).</li>
             <li>The <code>registerSchemaFromNode()</code> method has been added to <code>SchemaValidator</code>.</li>
          </ul>
          <p>From SaxonC 12.2:</p>
          <ul>
-            <li>The <code>setLanguageVersion()</code> method has been added to <code>XPathProcessor</code> Python API.</li>
-            <li>The XPath 4.0 parse-html function is now supported</li>
-            <li>For the Python API on Windows the <code>PySaxonApiError</code> is now supported for exception handling. We no longer throw the <code>RuntimeError</code> if there are any failures.</li>
+            <li><code>PySaxonApiError</code> is now supported on Windows as on other platforms (removing this
+               restriction in SaxonC 12.1).</li>
+            <li>The <code>set_language_version()</code> method has belatedly been added to the Python
+               <code>PyXPathProcessor</code> API.</li>
+            <li>The XPath 4.0 <code>fn:parse-html()</code> function is now supported.</li>
          </ul>
       </category>
       
