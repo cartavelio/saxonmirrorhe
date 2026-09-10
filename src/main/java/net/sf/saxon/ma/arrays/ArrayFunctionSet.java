@@ -69,9 +69,15 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                 .arg(1, buildFunctionType, ONE | INS, null));
         //#endif
 
-        ItemType filterFunctionType = new SpecificFunctionType(
+        SpecificFunctionType filterFunctionType31 = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE},
                 SequenceType.SINGLE_BOOLEAN);
+
+        SpecificFunctionType filterFunctionType40 = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_INTEGER},
+                SequenceType.SINGLE_BOOLEAN).withAcceptReducedArity();
+
+        final SpecificFunctionType filterFunctionType = version >= 40 ? filterFunctionType40 : filterFunctionType31;
 
         register("filter", 2, e -> e.populate( ArrayFilter::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
                 .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null)
@@ -337,17 +343,33 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
 
         @Override
         public ArrayItem call(XPathContext context, Sequence[] arguments) throws XPathException {
-
             ArrayItem array = (ArrayItem) arguments[0].head();
             assert array != null;
             FunctionItem fn = (FunctionItem) arguments[1].head();
             List<GroundedValue> list = new ArrayList<>(expectedSize());
-            for (GroundedValue gv : array.members()) {
-                if (((BooleanValue) dynamicCall(fn, context, new Sequence[]{gv}).head()).getBooleanValue()) {
-                    list.add(gv);
-                }
+            switch (fn.getArity()) {
+                case 0:
+                    boolean truth = ((BooleanValue) dynamicCall(fn, context).head()).getBooleanValue();
+                    return truth ? array : SimpleArrayItem.EMPTY_ARRAY;
+                case 1:
+                    for (GroundedValue gv : array.members()) {
+                        if (((BooleanValue) dynamicCall(fn, context, gv).head()).getBooleanValue()) {
+                            list.add(gv);
+                        }
+                    }
+                    return makeArray(list);
+                case 2:
+                    int position = 0;
+                    for (GroundedValue gv : array.members()) {
+                        if (((BooleanValue) dynamicCall(fn, context, gv, new Int64Value(++position)).head()).getBooleanValue()) {
+                            list.add(gv);
+                        }
+                    }
+                    return makeArray(list);
+                default:
+                    throw new XPathException("Wrong arity for array:filter callback function");
             }
-            return makeArray(list);
+
         }
     }
 
@@ -867,7 +889,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
     }
 
     /**
-     * Implementation of the function array:for-each-pair(array, array, function) =&gt; array
+     * Implementation of the function array:index-where(array, function) =&gt; xs:integer*
      */
     public static class ArrayIndexWhere extends SystemFunction {
 
@@ -877,9 +899,17 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
             assert array1 != null;
             FunctionItem fn = (FunctionItem) arguments[1].head();
             List<Int64Value> list = new ArrayList<>();
+            int arity = fn.getArity();
+            Sequence[] args = new Sequence[arity];
             int i;
             for (i = 0; i < array1.arrayLength(); i++) {
-                GroundedValue result = dynamicCall(fn, context, array1.get(i)).materialize();
+                if (arity > 0) {
+                    args[0] = array1.get(i);
+                    if (arity > 1) {
+                        args[1] = new Int64Value(i + 1);
+                    }
+                }
+                GroundedValue result = dynamicCall(fn, context, args).materialize();
                 if (result.effectiveBooleanValue()) {
                     list.add(new Int64Value(i+1));
                 }
