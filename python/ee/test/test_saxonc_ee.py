@@ -121,6 +121,13 @@ def user_function(values, **kwargs):
         print(err)
         return None
 
+def user_function2(value, **kwargs):
+    ''' values: PyXdmValue '''
+    print("In python user function2 value=", value)
+    n_value = int(value) + 4
+    print("In python value=",n_value)
+    return n_value
+
 def float_value_test(value, **kwargs):
 
     try:
@@ -133,10 +140,13 @@ def float_value_test(value, **kwargs):
         return None
 
 
-def list_example(value_str, **kwargs):
-    fruits = ["apple", "banana", "cherry"]
-    fruits.insert(1, str(value_str))
-    return fruits
+def merge_iterators(*iters):
+    for it in iters:
+        for item in it:
+            yield item
+
+def check_none(**kwargs):
+    return None
 
 def testUserFunction():
     proc = saxoncee.PySaxonProcessor(license=True)
@@ -192,13 +202,13 @@ def testUserFunctionWithLists():
     proc = saxoncee.PySaxonProcessor(license=True)
     try:
         proc.register_user_function("http://www.fruits.com", list_example, "{ \"list_example\": {"
-                                                                             "      \"as\": \"xs:string\","
-                                                                             "      \"param\": ["
-                                                                             "        \"xs:string\""
-                                                                             "      ],"
-                                                                             "      \"arity\": [1]"
-                                                                             "    }"
-                                                                             "}", use_python_types=False)
+                                                                           "      \"as\": \"array(*)\","
+                                                                           "      \"param\": ["
+                                                                           "        \"xs:string\""
+                                                                           "      ],"
+                                                                           "      \"arity\": [1]"
+                                                                           "    }"
+                                                                           "}", use_python_types=False)
 
         xpath_processor = proc.new_xpath_processor()
         xpath_processor.declare_namespace("fr", "http://www.fruits.com")
@@ -207,9 +217,280 @@ def testUserFunctionWithLists():
 
         assert result is not None
         assert result.is_array
-        assert result.get_array_value().as_list()[0] == 'apple'
-        assert result.get_array_value().as_list()[1] == 'strawberry'
+        assert str(result.get_array_value().as_list()[0]) == 'apple'
+        assert str(result.get_array_value().as_list()[1]) == 'strawberry'
     except Exception as err:
         print(err)
         assert False
+
+def testUserFunctionList2():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.example.com", user_function2, "{ \"myFunc2\": {"
+                                                                              "      \"as\": \"xs:integer?\","
+                                                                              "      \"param\": ["
+                                                                              "        \"xs:integer\""
+                                                                              "      ],"
+                                                                              "      \"arity\": [1]"
+                                                                              "    }"
+                                                                              "}", use_python_types=True)
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("dy", "http://www.example.com")
+        result2 = xpath_processor.evaluate_single("dy:myFunc2(4)")
+
+        assert result2 is not None
+
+        assert result2.get_atomic_value().integer_value == 8
+
+    except Exception as err:
+        print(err)
+        assert False
+
+def list_example(value_str, **kwargs):
+    fruits = ["apple", "banana", "cherry"]
+    fruits.insert(1, str(value_str))
+    return fruits
+
+def test_user_function_with_list():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.fruits.com", list_example, "{ \"list_example\": {"
+                                                                           "      \"as\": \"array(*)\","
+                                                                           "      \"param\": ["
+                                                                           "        \"xs:string\""
+                                                                           "      ],"
+                                                                           "      \"arity\": [1]"
+                                                                           "    }"
+                                                                           "}", use_python_types=False)
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("fr", "http://www.fruits.com")
+
+        result_list = xpath_processor.evaluate_single("fr:list_example('strawberry')")
+
+        assert result_list.is_array
+        assert str(result_list.get_array_value().as_list()[0]) == 'apple'
+        assert str(result_list.get_array_value().as_list()[1]) == 'strawberry'
+
+    except Exception as err:
+        print(err)
+        assert False
+
+
+def list_example2(value_str, **kwargs):
+    fruits = ["apple", "banana", "cherry"]
+    fruits.insert(1, str(value_str))
+
+def test_list2_return_none():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.fruits.com", list_example2, "{ \"list_example2\": {"
+                                                                            "      \"as\": \"xs:string?\","
+                                                                            "      \"param\": ["
+                                                                            "        \"xs:string\""
+                                                                            "      ],"
+                                                                            "      \"arity\": [1]"
+                                                                            "    }"
+                                                                            "}", use_python_types=False)
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("fr", "http://www.fruits.com")
+
+        result_list = xpath_processor.evaluate_single("fr:list_example2('strawberry')")
+
+        assert result_list is None
+
+    except Exception as err:
+        print(err)
+        assert False
+
+
+def returning_dict_example(keyi, valuei, **kwargs):
+    mymap = {"a": 1, "b": 2,"c": 3}
+    mymap[keyi] = valuei
+    return mymap
+
+def returning_set_example(fruit, **kwargs):
+
+    fruits = {"apple", "banana", "cherry"}
+    fruits.add(fruit)
+    return fruits
+
+
+def test_dict_and_set():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.example.com", returning_dict_example, "{ \"returning_dict_example\": {"
+                                                                                      "      \"as\": \"map(*)\","
+                                                                                      "      \"param\": ["
+                                                                                      "        \"xs:string\", \"xs:int\""
+                                                                                      "      ],"
+                                                                                      "      \"arity\": [2]"
+                                                                                      "    }"
+                                                                                      "}", use_python_types=True)
+
+
+        proc.register_user_function("http://www.fruits.com", returning_set_example, "{ \"returning_set_example\": {"
+                                                                                    "      \"as\": \"xs:string*\","
+                                                                                    "      \"param\": ["
+                                                                                    "        \"xs:string\""
+                                                                                    "      ],"
+                                                                                    "      \"arity\": [1]"
+                                                                                    "    }"
+                                                                                    "}", use_python_types=True)
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("dy", "http://www.example.com")
+
+        xpath_processor.declare_namespace("fr", "http://www.fruits.com")
+
+        result_map = xpath_processor.evaluate_single("dy:returning_dict_example('d', 4)")
+
+        assert result_map.is_map
+        map_item1 = result_map.get_map_value().get('b').head
+        assert map_item1.get_atomic_value().integer_value == 2
+        assert str(result_map.get_map_value().get('c')) == '3'
+
+        result_val = xpath_processor.evaluate("fr:returning_set_example('pear')")
+
+        item1 = result_val.item_at(1)
+
+        assert str(item1) == 'banana'
+
+
+
+    except Exception as err:
+        print(err)
+        assert False
+
+
+
+def tuple_example(itemi, **kwargs):
+    print("tuple_example called\n")
+    if isinstance(itemi, int):
+        t = (1, 2, 3)
+        t = t + (itemi,)
+        print(type(t))
+        return t
+    else:
+        return None
+
+def test_user_function_with_tuple():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.example.com", tuple_example, "{ \"tuple_example\": {"
+                                                                             "      \"as\": \"xs:integer*\","
+                                                                             "      \"param\": ["
+                                                                             "        \"xs:integer\""
+                                                                             "      ],"
+                                                                             "      \"arity\": [1]"
+                                                                             "    }"
+                                                                             "}", use_python_types=True)
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("dy", "http://www.example.com")
+
+        value1 = xpath_processor.evaluate("dy:tuple_example(9)")
+
+        assert value1.item_at(2).integer_value == 3
+
+    except Exception as err:
+        print(err)
+        assert False
+
+
+def sum_as_sequence(value, **kwargs):
+    print("sumASequence called\n")
+    if isinstance(value, (list, tuple)):
+        # Check that all items are numbers
+        if all(isinstance(x, (int, float)) for x in value):
+            return sum(value)
+        else:
+            raise TypeError("Array contains non-numeric values.")
+    else:
+        raise TypeError("Value is not an array (list/tuple).")
+
+def two_sequence_param2(values1, values2, **kwargs):
+    print("two_sequence_param2 called\n")
+    if(values1 is None or values2 is None):
+        return None
+    merged1 = iter(list(values1) + list(values2))
+    print(merged1)
+    return merged1
+
+def merge_iterators(*iters):
+    for it in iters:
+        for item in it:
+            yield item
+
+def two_sequence_param3(values1, values2, **kwargs):
+    print("two_sequence_param2 called\n")
+    if(values1 is None or values2 is None):
+        return set()
+    merged1 = merge_iterators(values1, values2)
+    print(type(merged1))
+    return merged1
+
+def test_sequence():
+    proc = saxoncee.PySaxonProcessor(license=True)
+    try:
+        proc.register_user_function("http://www.example.com", sum_as_sequence, "{ \"sum_as_sequence\": {"
+                                                                                    "      \"as\": \"xs:integer?\","
+                                                                                    "      \"param\": ["
+                                                                                    "        \"array(xs:integer*)\""
+                                                                                    "      ],"
+                                                                                    "      \"arity\": [1]"
+                                                                                    "    }"
+                                                                                    "}", use_python_types=True)
+
+
+        proc.register_user_function("http://www.example.com", two_sequence_param2, "{ \"two_sequence_param2\": {"
+                                                                                    "      \"as\": \"item()*\","
+                                                                                    "      \"param\": ["
+                                                                                    "        \"xs:string*\", \"xs:integer*\""
+                                                                                    "      ],"
+                                                                                    "      \"arity\": [1]"
+                                                                                    "    }"
+                                                                                    "}", use_python_types=True)
+
+        proc.register_user_function("http://www.example.com", two_sequence_param3, "{ \"two_sequence_param3\": {"
+                                                                                    "      \"as\": \"item()*\","
+                                                                                    "      \"param\": ["
+                                                                                    "        \"xs:string*\", \"xs:integer*\""
+                                                                                    "      ],"
+                                                                                    "      \"arity\": [1]"
+                                                                                    "    }"
+                                                                                    "}", use_python_types=True)
+
+        xpath_processor = proc.new_xpath_processor()
+        xpath_processor.declare_namespace("dy", "http://www.example.com")
+
+
+        result_sum = xpath_processor.evaluate_single("dy:sum_as_sequence([1,2,3,4,5])")
+
+        assert result_sum is not None
+        assert result_sum.is_atomic
+        assert result_sum.get_atomic_value().integer_value == 15
+
+        merged_seq = xpath_processor.evaluate("dy:two_sequence_param2(('a','b','c'), (1,2,3))")
+
+        assert merged_seq is not None
+
+        assert merged_seq.item_at(0).get_string_value() == 'a'
+
+        assert merged_seq.item_at(4).get_string_value() == '2'
+
+        merged_seq2 = xpath_processor.evaluate("dy:two_sequence_param3(('a','b','d'), (1,2,4))")
+
+        assert merged_seq2.item_at(0).get_string_value() == 'a'
+
+        val2 = merged_seq2.item_at(4)
+
+        assert val2.integer_value == 2
+
+
+    except Exception as err:
+        print(err)
+        assert False
+
 

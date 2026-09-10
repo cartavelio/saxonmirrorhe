@@ -495,21 +495,22 @@ PyObject *makePythonValue(void * proc, void * value){
             std::cerr<<"PHPValue: XDMValue size="<<count<<std::endl;
         }
 
+        PyObject *tuple = PyTuple_New(count);
+
         PyObject *list = PyList_New(count);
         if (!list) return NULL;
 
         for(int i=1; i <= count; i++) {
             PyObject * itemii = makePythonValue(proc, (void *)rawValues[i]);
-            PyList_SetItem(list, i-1, itemii);
-            Py_DECREF(itemii);
 
-            //TODO j_handle_destroy required on rawValues[i]
+            PyTuple_SetItem(tuple, i-1, itemii);
+            j_handles_destroy(thread1, (void *)rawValues[i]);
         }
 
-        // Get an iterator for the list
-        PyObject *iter = PyObject_GetIter(list);
-        Py_DECREF(list);
-        return iter;
+
+        operator delete(rawValues);
+
+        return tuple;
     }
     Py_RETURN_NONE;
 }
