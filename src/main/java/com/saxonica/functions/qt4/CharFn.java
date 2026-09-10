@@ -109,7 +109,7 @@ public class CharFn extends SystemFunction {
         if (in == null) {
             throw new RuntimeException("Unable to read entities.txt file");
         }
-        LineNumberReader reader = new LineNumberReader(new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8), 2048));
+        LineNumberReader reader = new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8), 2048);
         String line;
         try {
             while ((line = reader.readLine()) != null) {
