@@ -32,12 +32,18 @@ public class AnalyzeStringFn extends RegexFunction {
         public NodeName nonMatchName;
         public NodeName matchName;
         public NodeName groupName;
+        public NodeName lookaheadGroupName;
         public NodeName groupNrName;
+        public NodeName positionName;
+        public NodeName valueName;
         public SchemaType resultType = Untyped.getInstance();
         public SchemaType nonMatchType = Untyped.getInstance();
         public SchemaType matchType = Untyped.getInstance();
         public SchemaType groupType = Untyped.getInstance();
+        public SchemaType lookaheadGroupType = Untyped.getInstance();
         public SimpleType groupNrType = BuiltInAtomicType.UNTYPED_ATOMIC;
+        public SimpleType positionType = BuiltInAtomicType.UNTYPED_ATOMIC;
+        public SimpleType valueType = BuiltInAtomicType.UNTYPED_ATOMIC;
     }
 
     private final ResultNamesAndTypes vocab = new ResultNamesAndTypes();
@@ -52,7 +58,10 @@ public class AnalyzeStringFn extends RegexFunction {
         vocab.nonMatchName = new FingerprintedQName("", NamespaceUri.FN, "non-match");
         vocab.matchName = new FingerprintedQName("", NamespaceUri.FN, "match");
         vocab.groupName = new FingerprintedQName("", NamespaceUri.FN, "group");
+        vocab.lookaheadGroupName = new FingerprintedQName("", NamespaceUri.FN, "lookahead-group");
         vocab.groupNrName = new NoNamespaceName("nr");
+        vocab.positionName = new NoNamespaceName("position");
+        vocab.valueName = new NoNamespaceName("value");
 
         //#if EE==true
         if (schema != null) {
@@ -60,7 +69,10 @@ public class AnalyzeStringFn extends RegexFunction {
             vocab.nonMatchType = BuiltInAtomicType.STRING;
             vocab.matchType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "match-type"));
             vocab.groupType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "group-type"));
+            vocab.lookaheadGroupType = schema.getSchemaType(new StructuredQName("", NamespaceUri.FN, "lookahead-group-type"));
             vocab.groupNrType = BuiltInAtomicType.POSITIVE_INTEGER;
+            vocab.positionType = BuiltInAtomicType.POSITIVE_INTEGER;
+            vocab.valueType = BuiltInAtomicType.STRING;
             if (vocab.resultType == null || vocab.matchType == null || vocab.groupType == null) {
                 throw new XPathException("Schema for analyze-string has not been successfully loaded");
             }
@@ -159,6 +171,27 @@ public class AnalyzeStringFn extends RegexFunction {
 
         @Override
         public void onGroupEnd(int groupNumber) throws XPathException {
+            out.endElement();
+        }
+
+        /**
+         * Method to be called when a lookahead captured group is encountered
+         *
+         * @param groupNumber the group number of the captured group
+         * @param position    the position within the input string of the captured group
+         * @param value       the captured substring
+         */
+
+        public void onLookaheadGroup(int groupNumber, int position, UnicodeString value) throws XPathException {
+            out.startElement(vocab.lookaheadGroupName, vocab.lookaheadGroupType,
+                             Loc.NONE, ReceiverOption.NONE);
+            out.attribute(vocab.groupNrName, vocab.groupNrType, "" + groupNumber,
+                          Loc.NONE, ReceiverOption.NONE);
+            out.attribute(vocab.positionName, vocab.positionType, "" + position,
+                          Loc.NONE, ReceiverOption.NONE);
+            out.attribute(vocab.valueName, vocab.valueType, value.toString(),
+                          Loc.NONE, ReceiverOption.NONE);
+            out.startContent();
             out.endElement();
         }
 
