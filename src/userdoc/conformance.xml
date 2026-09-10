@@ -65,7 +65,8 @@
       
       <p class="csonly">SaxonCS 11.1 passes all 11475 applicable tests from the XSLT 3.0 test suite.
          (The totals are different because some tests are applicable to one product
-         but not the other, for example because they have dependencies on optional settings such as localization).</p>
+         but not the other, for example because they have dependencies on optional settings such as
+         localization.)</p>
       
       <p>These figures exclude tests that were specifically omitted because they cannot be run, even where this represents
       a non-conformance. For example, the Microsoft <code>System.Xml</code> parser does not report DTD-based attribute types
@@ -137,7 +138,7 @@
       
       <ol>
          <li class="csonly"><p>In SaxonCS, there are limitations imposed by use of the Microsoft <code>System.Xml</code>
-            parser: for details see <a class="bodylink" href="saxon-cs/xmlparsing">XML Parsing in SaxonCS</a>.</p></li>
+            parser: for details see <a class="bodylink" href="/saxon-cs/xmlparsing">XML Parsing in SaxonCS</a>.</p></li>
          <li><p>The W3C specification requires that vendor-defined extensions must only change the processor's
          behavior to the extent that the specification leaves the behavior implementation-defined. Some Saxon-defined
          extensions do not follow this rule: they explicitly change the behavior to make it non-conformant.</p>
@@ -831,7 +832,6 @@
          <li><p>Functions in the standard function library are added to the static context only if they were available in XPath 2.0</p></li>
       </ul>
       
-      15295 successes, 3 failures
       <p class="javaonly">SaxonJ-EE 11.1 passes 15338 out of 15341 applicable XPath 2.0 tests in the W3C test suite.</p>
       <p class="csonly">SaxonCS 11.1 passes 15295 out of 15298 applicable XPath 2.0 tests in the W3C test suite.</p>
          
