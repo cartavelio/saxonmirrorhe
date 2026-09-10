@@ -290,7 +290,9 @@ task eecs_transpile_to_xml(
     "-repo:${projectDir}",
     "-xml:${buildDir}/ee_xmlout",
     "-h:${projectDir}/src/main/java",
-    "-src:${projectDir}/src/main/java"
+    "-src:${projectDir}/src/main/java",
+    "-ee:${saxonVersion}",
+    "-icu4j:59.1"
   doFirst {
     mkdir("${buildDir}/ee_xmlout")
   }
