@@ -464,6 +464,22 @@ cdef class PySaxonProcessor:
             raise Exception("Error: Saxon Processor is not licensed for schema processing!")
         return val
 
+    def new_xsd_compiler(self):
+        """Create a PyXsdCompiler.
+
+        The PyXsdCompiler is used to load schema documents, and to set options for the way in
+        which they are loaded. The PyXsdCompiler is new in Saxon 13; it replaces the
+        register_schema method which is retained (but deprecated) to provide a degree of backwards compatibility.</i></p>
+
+        Returns:
+            PyXsdCompiler: a newly created PyXsdCompiler
+        """
+        cdef PyXsdCompiler compiler = PyXsdCompiler(self)
+        compiler.thiscompilerptr = self.thisptr.newXsdCompiler()
+        if compiler.thiscompilerptr is NULL:
+            raise Exception("Error: Saxon Processor is not licensed for schema processing!")
+        return compiler
+
     def eqname_to_clark_name(self, name, encoding=None):
         """Convert EQName string to clark name notation.
 
@@ -3838,6 +3854,262 @@ cdef class PyXPathProcessor:
         """
         self.thisxpptr.clearProperties()
 
+cdef class PyXsdCompiler:
+    cdef saxoncClasses.XsdCompiler *thiscompilerptr  # hold a C++ instance which we're wrapping
+    cdef PySaxonProcessor processor
+
+    def __cinit__(self):
+        self.thiscompilerptr = NULL
+
+    def __dealloc__(self):
+        if self.thiscompilerptr != NULL:
+            del self.thiscompilerptr
+
+    def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
+
+    def set_cwd(self, cwd):
+        """
+        set_cwd(self, cwd)
+        Set the current working directory
+        Args:
+            cwd (str): current working directory
+        """
+        py_cwd_string = cwd.encode('UTF-8') if cwd is not None else None
+        cdef char * c_cwd = py_cwd_string if cwd is not None else ""
+        self.thissvptr.setcwd(c_cwd)
+
+    @property
+    def cwd(self):
+        """
+        cwd(self)
+        Property represents the current working directory
+        """
+        cdef const char* c_string = self.thiscompilerptr.getcwd()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
+
+    def set_xsd_version(self, version):
+        """
+        set_xsd_version(self, version)
+        Set the XSD Version
+        Args:
+            version (str): XSD Version
+        """
+        py_version_string = version.encode('UTF-8') if version is not None else None
+        cdef char * c_version = py_version_string if version is not None else ""
+        self.thiscompilerptr.setXsdVersion(c_version)
+
+    @property
+    def xsd_version(self):
+        """
+        xsd_version(self)
+        Property represents the XSD Version
+        """
+        cdef const char* c_string = self.thiscompilerptr.getXsdVersion()
+        py_string_i = make_py_str(c_string)
+        return py_string_i
+
+
+
+    def compile(self, **kwds):
+        """
+        compile(self, **kwds)
+        Load a schema document from a given Source. Supplied as file name, schema text, or XDM node
+        Args:
+            **kwds: Possible keyword arguments: must be one of the following (xsd_text|xsd_file|xsd_node|xsd_list)
+        """
+        py_error_message = "Error: compile should contain exactly one of the following keyword arguments: (xsd_text|xsd_file|xsd_node)"
+        if len(kwds) != 1:
+            raise Exception(py_error_message)
+        cdef py_value = None
+        cdef py_value_string = None
+        cdef char * c_source
+        cdef int _len = 0
+
+        cdef PyXsdSchema schema = PyXsdSchema(self.processor)
+
+        cdef const char * c_filename_string = NULL
+        cdef const char ** file_names_array = NULL
+
+        cdef char * c_encoding_string = NULL
+        encoding = None
+        cdef PyXdmNode xsd_node = None
+
+        if "encoding" in kwds:
+            encoding = kwds["encoding"]
+            py_encoding_string = encoding.encode('UTF-8')
+            c_encoding_string = py_encoding_string if py_encoding_string is not None else ""
+
+        if "xsd_text" in kwds:
+            py_value = kwds["xsd_text"]
+            py_value_string = py_value.encode('UTF-8') if py_value is not None else None
+            c_source = py_value_string if py_value is not None else ""
+            schema.thisxsdptr =  self.thiscompilerptr.compileFromString(c_source, c_encoding_string)
+            if schema.thisxsdptr is NULL:
+                raise Exception("Error: Internal error while compiling Schema")
+            return schema
+
+        elif "xsd_file" in kwds:
+            py_value = kwds["xsd_file"]
+            py_value_string = py_value.encode('UTF-8') if py_value is not None else None
+            c_source = py_value_string if py_value is not None else ""
+
+            schema.thisxsdptr =  self.thiscompilerptr.compileFromFile(c_source)
+            if schema.thisxsdptr is NULL:
+                raise Exception("Error: Internal error while compiling Schema")
+            return schema
+
+        elif "xsd_list" in kwds:
+            py_value = kwds["xsd_list"]
+            if not isinstance(py_value, list):
+                raise PySaxonApiError("    ERROR: value for 'xsd_list' should be a list")
+
+            '''make_c_str(file_name)'''
+
+            _len = len(py_value)
+            file_names_array = <const char**> malloc(_len * sizeof(char *))
+            for x in range(_len):
+                file_name = py_value[x]
+                c_filename_string = NULL
+                py_name_string = file_name.encode('UTF-8') if file_name is not None else None
+                c_filename_string = py_name_string if file_name is not None else ""
+                if c_filename_string is not NULL:
+                    file_names_array[x] = c_filename_string
+                else:
+                    raise Exception("Noe value found in xsd_list")
+            schema.thisxsdptr = self.thiscompilerptr.compileFromFiles(file_names_array, _len)
+
+            if schema.thisxsdptr is NULL:
+                raise Exception("Error: Internal error while compiling Schema")
+            return schema
+
+        elif "xsd_node" in kwds:
+            node_value = kwds["xsd_node"]
+            if isinstance(node_value, PyXdmNode):
+                xsd_node = node_value
+                schema.thisxsdptr = self.thiscompilerptr.compileFromNode(xsd_node.derivednptr)
+                if schema.thisxsdptr is NULL:
+                    raise Exception("Error: Internal error while compiling Schema")
+                return schema
+            else:
+                raise Exception("Error: xsd_node object is not an PyXdmNode")
+        else:
+            raise Exception(py_error_message)
+
+    def empty_schema(self):
+        cdef PyXsdSchema schema = PyXsdSchema(self.processor)
+        schema.thisxsdptr = self.thiscompilerptr.emptySchema()
+        return schema
+
+    def import_components(self,  kwds):
+        """
+        import_component(self, **kwds)
+        Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
+        document are added to the cache of schema components maintained by this SchemaManager
+        """
+
+        py_error_message = "Error: import_components should contain exactly one of the following keyword arguments: (file_name|node)"
+        if len(kwds) != 1:
+            raise Exception(py_error_message)
+        cdef py_value = None
+        cdef py_value_string = None
+        cdef char * c_source
+
+        cdef PyXsdSchema schema = PyXsdSchema(self.processor)
+
+        if "file_name" in kwds:
+            py_value = kwds["file_name"]
+            py_value_string = py_value.encode('UTF-8') if py_value is not None else None
+            c_source = py_value_string if py_value is not None else ""
+            schema.thisxsdptr =  self.thiscompilerptr.importComponents(c_source)
+            if schema.thisxsdptr is NULL:
+                raise Exception("Error: Internal error while importing components")
+            return schema
+
+        elif "node" in kwds:
+            node = kwds["node"]
+
+            if isinstance(node, PyXdmNode):
+                schema.thisxsdptr = self.thiscompilerptr.importComponents(node.derivednptr)
+                if schema.thisxsdptr is NULL:
+                    raise Exception("Error: Internal error while importing Schema")
+                return schema
+            else:
+                raise Exception("Error: object is not an PyXdmNode")
+        else:
+            raise Exception(py_error_message)
+
+
+
+    def set_property(self, str name, str value):
+        """
+        set_property(self, name, str value)
+        Set a property specific to the PyXsdCompiler in use.
+        Args:
+            name (str): The name of the property
+            value (str): The value of the property
+        Example:
+            ?? TODO:
+        """
+        py_name_string = name.encode('UTF-8') if name is not None else None
+        c_name = py_name_string if name is not None else ""
+        py_value_string = value.encode('UTF-8') if value is not None else None
+        c_value = py_value_string if value is not None else ""
+        self.thiscompilerptr.setProperty(c_name, c_value)
+
+
+
+cdef class PyXsdSchema:
+    cdef saxoncClasses.XsdSchema *thisxsdptr  # hold a C++ instance which we're wrapping
+    cdef PySaxonProcessor processor
+
+    def __cinit__(self):
+        self.thisxsdptr = NULL
+
+    def __dealloc__(self):
+        if self.thisxsdptr != NULL:
+            del self.thisxsdptr
+
+    def __init__(self, processor):
+        """
+        Creates a new instance, keeping a reference to its PySaxonProcessor
+        :param processor:
+        """
+        self.processor = processor
+
+    def new_schema_validator(self):
+        """
+        new_schema_validator()
+        Create a PySchemaValidator.
+
+        This validator which can be used to validate instance documents against the schema held by
+        this processor.
+
+        Returns:
+            PySchemaValidator: a newly created PySchemaValidator
+        """
+        cdef PySchemaValidator val = PySchemaValidator(self.processor)
+        val.thissvptr= self.thisxsdptr.newValidator()
+        if val.thissvptr is NULL:
+            raise Exception("Error: Saxon Processor is not licensed for schema processing!")
+        return val
+
+    def combine(self, PyXsdSchema schema):
+        cdef PyXsdSchema new_schema = PyXsdSchema(self.processor)
+        cdef saxoncClasses.XsdSchema * c_new_schema = self.thisxsdptr.combine(schema.thisxsdptr)
+        new_schema.thisxsdptr = c_new_schema
+        return new_schema
+
+    def export_compoments(self, str filename):
+        py_filename_string = filename.encode('UTF-8') if filename is not None else None
+        cdef char * c_filename = py_filename_string if filename is not None else ""
+        self.thisxsdptr.exportComponents(c_filename)
+
 
 cdef class PySchemaValidator:
     """A PySchemaValidator represents a factory for validating instance documents against a schema."""
@@ -3888,6 +4160,7 @@ cdef class PySchemaValidator:
         Register a schema supplied as file name, schema text, or XDM node
         Args:
             **kwds: Possible keyword arguments: must be one of the following (xsd_text|xsd_file|xsd_node)
+        deprecated:
         """
         py_error_message = "Error: register_schema should contain exactly one of the following keyword arguments: (xsd_text|xsd_file|xsd_node)"
         if len(kwds) != 1:

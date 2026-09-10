@@ -396,14 +396,16 @@ cdef extern from "saxonc/SaxonProcessor.h":
     cdef cppclass SaxonApiException:
         SaxonApiException() except +handle_saxonc_api_exceptions
 
+cdef extern from "saxonc/XsdCompiler.h":
+
     cdef cppclass XsdCompiler:
         XsdCompiler() except +handle_saxonc_api_exceptions
         setcwd(const char * cwd)  except +handle_saxonc_api_exceptions
         char * getcwd()
 
-        setXsdVersion(const char * version)  except +handle_saxonc_api_exceptions
+        void setXsdVersion(const char * version)  except +handle_saxonc_api_exceptions
 
-        char * getXsdVersion()   except +handle_saxonc_api_exceptions
+        const char * getXsdVersion()   except +handle_saxonc_api_exceptions
 
         XsdSchema * compileFromString(const char * source, const char * encoding) except +handle_saxonc_api_exceptions
         XsdSchema * compileFromFiles(vector[string] filenames) except +handle_saxonc_api_exceptions
@@ -416,6 +418,8 @@ cdef extern from "saxonc/SaxonProcessor.h":
         XsdSchema * importComponents(const char * filename) except +handle_saxonc_api_exceptions
         XsdSchema * importComponentsFromNode(XdmNode * node) except +handle_saxonc_api_exceptions
         void setProperty(const char * name, const char * value) except +handle_saxonc_api_exceptions
+
+cdef extern from "saxonc/XsdSchema.h":
 
     cdef cppclass XsdSchema:
         SchemaValidator * newValidator() except +handle_saxonc_api_exceptions

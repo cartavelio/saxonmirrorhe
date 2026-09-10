@@ -235,7 +235,7 @@ public:
      * document are retained by this SchemaManager as the current schema, and are also returned
      * by the method as an <code>XsdSchema</code> object.
      *
-     * @param document node containing the schema. The getSystemId() method applied to this Source
+     * @param node  - the node containing the schema. The getSystemId() method applied to this Source
      *               must return a base URI suitable for resolving <code>xs:include</code> and <code>xs:import</code>
      *               directives. The document may be either a schema document in source XSD format, or a compiled
      *               schema in Saxon-defined SCM format (as produced using the -export option)
@@ -292,7 +292,8 @@ private:
 
     friend class XsdSchema;
 
- int64_t xsdCompilerObj, procRef;     /*!< The underlying SchemaCompiler Java object */
+ int64_t xsdCompilerObj;     /*!< The underlying SchemaCompiler Java object */
+ int64_t procRef;     /*!< The underlying Java object for the SaxonProcessor, which belongs to the XsdCompiler */
  std::string cwdV; /*!< Current working directory */
     std::string
         xsdVersion; /*!< The version of the XSD specification/language: either "1.0" or "1.1". */

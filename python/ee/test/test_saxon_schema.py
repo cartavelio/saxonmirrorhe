@@ -40,21 +40,20 @@ def testValidator2(saxonproc2):
 
 def testValdiator3(data_dir, saxonproc2):
     saxonproc2.set_configuration_property("xsdversion", "1.1")
-    val = saxonproc2.new_schema_validator()
+    compiler = saxonproc2.new_xsd_compiler()
 
     family_ext_xsd = os.path.join(data_dir, "family-ext.xsd")
     family_xsd = os.path.join(data_dir, "family.xsd")
     family_xml = os.path.join(data_dir, "family.xml")
-    
-    val.register_schema(xsd_file=family_ext_xsd)
-    val.register_schema(xsd_file=family_xsd)
+
+    filename_list = [family_ext_xsd, family_xsd]
+    schema = compiler.compile(xsd_list=filename_list)
+
 
     try:
+        val = schema.new_schema_validator()
         val.validate(file_name=family_xml)
         nodea = val.validation_report
-        if val.exception_occurred:
-            print(val.get_error_message())
-        assert not val.exception_occurred
         assert nodea is None
     except PySaxonApiError as e:
         print(e)
@@ -80,7 +79,6 @@ class TestSchemaExport:
             val = processor.new_schema_validator()
             assert val is not None
             print(type(val))
-            print(val.exception_occurred)
             val.register_schema(xsd_text=self.schema)
             val.export_schema(str(schema_path))
         except PySaxonApiError as e:

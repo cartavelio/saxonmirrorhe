@@ -900,7 +900,7 @@ def run_test_case(test_case_node: saxonc.PyXdmNode, xpath_proc: saxonc.PyXPathPr
     assert_xpc.declare_namespace("bin", "http://expath.org/ns/binary")
     assert_xpc.declare_variable("result")
 
-    if lang_version is "4.0":
+    if lang_version == "4.0":
         if os.getenv("SAXONC_TESTSUITE_DEBUG") is not None:
             print("set assert_xpc.Spec version=", lang_version)
         assert_xpc.set_language_version(lang_version)
