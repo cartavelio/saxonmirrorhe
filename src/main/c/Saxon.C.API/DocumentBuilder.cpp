@@ -81,9 +81,9 @@
     void DocumentBuilder::setDTDValidation(bool option) {
         dtdVal= option;
         int64_t  status = j_db_setDTDValidation(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject, (int)option);
-        std::cerr<<"setDTDValidation status="<<status<<std::endl;
         if(status== -2) {
             createException();
+            throw exception;
         }
 
 
@@ -104,6 +104,7 @@
         int64_t  status = j_db_setBaseURI(SaxonProcessor::sxn_environ->thread, (void *)docBuilderObject, (char *)uri);
         if(status== -2) {
             createException();
+            throw exception;
         }
     }
 
@@ -118,6 +119,7 @@
             return node;
         } else if(result == -2) {
             createException();
+            throw exception;
         }
 
 
@@ -135,6 +137,7 @@
            return node;
        } else if(result == -2) {
            createException();
+           throw exception;
        }
     return nullptr;
   }
@@ -147,6 +150,7 @@
            return node;
        } else if(result == -2) {
            createException();
+           throw exception;
        }
 
         return nullptr;

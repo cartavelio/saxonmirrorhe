@@ -126,20 +126,19 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
         SchemaValidator * getSchemaValidator()
 
 
-        void setDTDValidation(bool option)
+        void setDTDValidation(bool option)  except +
 
         bool isDTDValidation()
 
-        void setBaseUri(const char* uri)
+        void setBaseUri(const char* uri)  except +
 
         const char * getBaseUri()
 
+        XdmNode* parseXmlFromString(const char * content) except +
 
-        XdmNode* parseXmlFromString(const char * content)
+        XdmNode* parseXmlFromFile(const char * filename)  except +
 
-        XdmNode* parseXmlFromFile(const char * filename)
-
-        XdmNode * parseXmlFromUri(const char* source)
+        XdmNode * parseXmlFromUri(const char* source)  except +
 
 
 
