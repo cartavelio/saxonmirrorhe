@@ -13,7 +13,6 @@ import net.sf.saxon.functions.hof.ForEachPairFn;
 import net.sf.saxon.functions.hof.LoadXqueryModule;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.functions.registry.XPath31FunctionSet;
-import net.sf.saxon.ma.pin.LabelFn;
 import net.sf.saxon.ma.Parcel;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.json.JsonDoc;
@@ -315,9 +314,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(JsonToXMLFn.makeOptionsParameter(40)));
 
-        register("label", 1, e -> e.populate(LabelFn::new, MapType.getInstance(), ONE, 0)
-                .arg(0, AnyItemType.getInstance(), ONE, null));
-
         register("load-xquery-module", 2, e -> e.populate(LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null) // null or EMPTY?
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
@@ -410,9 +406,6 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
 
         register("parse-QName", 1, e -> e.populate(ParseQNameFn::new, BuiltInAtomicType.QNAME, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
-
-        register("pin", 1, e -> e.populate(com.saxonica.functions.extfn.PinFn::new, AnyItemType.getInstance(), ONE, 0)
-                .arg(0, AnyItemType.getInstance(), ONE, null));
 
         // remove() changes in 4.0 to allow multiple integers in the second argument
         register("remove", 2, e -> e.populate(Remove::new, Type.ITEM_TYPE, STAR, AS_ARG0 | FILTER)
@@ -534,7 +527,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(1, BuiltInAtomicType.STRING, OPT, null));
 
         // Result type of void() is deliberately mis-declared to prevent unwanted optimisations
-        register("void", 1, e -> e.populate(VoidFn::new, AnyItemType.getInstance(), STAR, 0)
+        register("void", 0, 1, e -> e.populate(VoidFn::new, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, null));
 
         register("while-do", 3, e -> e.populate(WhileDoFn::new, AnyItemType.getInstance(), STAR, 0)

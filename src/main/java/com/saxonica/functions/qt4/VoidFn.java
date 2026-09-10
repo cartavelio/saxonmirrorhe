@@ -2,7 +2,6 @@ package com.saxonica.functions.qt4;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.EmptySequence;
@@ -26,7 +25,9 @@ public class VoidFn extends SystemFunction {
      */
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-        GroundedValue arg = arguments[0].materialize();
+        if (arguments.length > 0) {
+            arguments[0].materialize();
+        }
         return EmptySequence.getInstance();
     }
 
