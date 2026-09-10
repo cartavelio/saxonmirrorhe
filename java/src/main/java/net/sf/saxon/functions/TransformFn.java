@@ -164,7 +164,7 @@ public class TransformFn extends SystemFunction implements Callable {
     private String oneOf(ProcessedOptions map, String... keys) throws XPathException {
         String found = null;
         for (String s : keys) {
-            if (map.get(s) != null) {
+            if (map.containsKey(s)) {
                 if (found != null) {
                     throw new XPathException(
                             "The following transform options are mutually exclusive: " + enumerate(keys), "FOXT0002");
@@ -231,7 +231,7 @@ public class TransformFn extends SystemFunction implements Callable {
     }
 
     private void setRequestedProperties(ProcessedOptions options, Processor processor) throws XPathException {
-        MapItem requestedProps = (MapItem) options.get("requested-properties").head();
+        MapItem requestedProps = (MapItem) options.asItem("requested-properties");
         for (KeyValuePair kvp : requestedProps.keyValuePairs()) {
             AtomicValue option = kvp.key();
             if (option != null) {
@@ -348,7 +348,7 @@ public class TransformFn extends SystemFunction implements Callable {
     }
 
     private void setStaticParams(ProcessedOptions options, XsltCompiler xsltCompiler, boolean allowTypedNodes) throws XPathException {
-        MapItem staticParamsMap = (MapItem) options.get("static-params").head();
+        MapItem staticParamsMap = (MapItem) options.asItem("static-params");
         for (KeyValuePair kvp : staticParamsMap.keyValuePairs()) {
             AtomicValue param = kvp.key();
             if (param != null) {
@@ -369,11 +369,10 @@ public class TransformFn extends SystemFunction implements Callable {
     }
 
     private XsltExecutable getStylesheet(ProcessedOptions options, XsltCompiler xsltCompiler, String styleOptionStr, XPathContext context) throws XPathException {
-        Item styleOptionItem = options.get(styleOptionStr).head();
+        Item styleOptionItem = options.asItem(styleOptionStr);
         URI stylesheetBaseUri = null;
-        Sequence seq;
-        if ((seq = options.get("stylesheet-base-uri")) != null) {
-            String styleBaseUri = seq.head().getStringValue();
+        String styleBaseUri;
+        if ((styleBaseUri = options.asString("stylesheet-base-uri")) != null) {
             stylesheetBaseUri = URI.create(styleBaseUri);
             if (!stylesheetBaseUri.isAbsolute()) {
                 URI staticBase = getRetainedStaticContext().getStaticBaseUri();
@@ -383,9 +382,9 @@ public class TransformFn extends SystemFunction implements Callable {
         final List<XmlProcessingError> compileErrors = new ArrayList<>();
         final ErrorReporter originalReporter = xsltCompiler.getErrorReporter();
         xsltCompiler.setErrorReporter(new TransformErrorReporter(compileErrors, originalReporter));
-        boolean cacheable = options.get("static-params") == null;
-        if (options.get("cache") != null) {
-            cacheable &= ((BooleanValue) options.get("cache").head()).getBooleanValue();
+        boolean cacheable = !options.containsKey("static-params");
+        if (options.containsKey("cache")) {
+            cacheable &= options.asBoolean("cache", false);
         }
 
         StylesheetCache cache = context.getController().getStylesheetCache();

@@ -12,7 +12,6 @@ import net.sf.saxon.expr.DefaultedArgumentExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.CodepointCollator;
 import net.sf.saxon.expr.sort.GenericAtomicComparer;
@@ -87,15 +86,12 @@ public class DeepEqual extends CollatingFunctionFixed {
         o.addAllowedOption("idrefs-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("ignore-empty-entries", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("in-scope-namespaces", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        o.addAllowedOption("items-equal", itemsEqualFn, BooleanValue.FALSE);
+        o.addAllowedOption("items-equal", itemsEqualFn, EmptySequence.getInstance());
         o.addAllowedOption("map-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("namespace-prefixes", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("nilled-property", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        //o.addAllowedOption("normalize-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("ordered", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
-        //o.addAllowedOption("preserve-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("processing-instructions", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        //o.addAllowedOption("text-boundaries", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("timezones", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("type-annotations", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         o.addAllowedOption("type-variety", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
@@ -107,7 +103,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.INSTANCE);
 
         o.addAllowedOption("whitespace", SequenceType.OPTIONAL_STRING, new StringValue("preserve"));
-        o.setAllowedValues("whitespace", "FOJS0005", "preserve", "strip", "normalize");
+        o.setAllowedValues("whitespace", "FOTY0004", "preserve", "strip", "normalize");
 
         OPTION_DETAILS = o;
     }
@@ -165,19 +161,17 @@ public class DeepEqual extends CollatingFunctionFixed {
 
 
         public DeepEqualOptions(MapItem map, XPathContext context, int version) throws XPathException {
-            Map<String, GroundedValue> values = OPTION_DETAILS.processSuppliedOptions(map, context, 40).getMap();
+            ProcessedOptions values = OPTION_DETAILS.processSuppliedOptions(map, context, 40);
             for (String option : DeepEqualOptions.booleanOptions) {
                 setBooleanOption(values, option);
             }
             this.version = version;
-            GroundedValue normForm = map.get(new StringValue("normalization-form"));
-            if (normForm != null) {
-                normalizationForm = normForm.getStringValue();
-            }
-            GroundedValue whitespace = map.get(new StringValue("whitespace"));
+            normalizationForm = values.asString("normalization-form");
+
+            String whitespace = values.asString("whitespace");
             if (whitespace != null) {
-                stripSpace = whitespace.getStringValue().equals("strip");
-                normalizeSpace = whitespace.getStringValue().equals("normalize");
+                stripSpace = whitespace.equals("strip");
+                normalizeSpace = whitespace.equals("normalize");
             }
             GroundedValue listedElements = map.get(new StringValue("unordered-elements"));
             if (listedElements != null) {
@@ -188,9 +182,9 @@ public class DeepEqual extends CollatingFunctionFixed {
                     }
                 }
             }
-            GroundedValue collationItem = values.get("collation");
-            if (collationItem != null) {
-                this.collationName = collationItem.getStringValue();
+            String collation = values.asString("collation");
+            if (collation != null) {
+                this.collationName = collation;
             } else {
                 this.collationName = CodepointCollator.getInstance().getCollationURI();
             }
@@ -202,7 +196,7 @@ public class DeepEqual extends CollatingFunctionFixed {
                 AtomicComparer ac = GenericAtomicComparer.makeAtomicComparer(
                         BuiltInAtomicType.ANY_ATOMIC, BuiltInAtomicType.ANY_ATOMIC,
                         stringCollator, version, context);
-                comparer = (a, b)  -> ac.comparesEqual(a, b);
+                comparer = CSharp.methodRef(ac::comparesEqual);
             } else {
                 comparer = (a, b) -> {
                     int implicitTimezone = context.getImplicitTimezone();
@@ -239,9 +233,9 @@ public class DeepEqual extends CollatingFunctionFixed {
                     }
                 };
             }
-            GroundedValue itemsEqual = map.get(new StringValue("items-equal"));
+            Item itemsEqual = values.asItem("items-equal");
             if (itemsEqual != null) {
-                itemsEqualFn = (FunctionItem)itemsEqual.head();
+                itemsEqualFn = (FunctionItem)itemsEqual;
             }
             // In 3.1, comments and processing instructions are ignored, but boundaries between
             // text nodes are not. So <a>x<?pi?>y</a> is not deep-equal to <a>xy</a>, not because
@@ -250,10 +244,10 @@ public class DeepEqual extends CollatingFunctionFixed {
             textBoundariesSignificant = version < 40;
         }
 
-        private void setBooleanOption(Map<String, GroundedValue> map, String optionName) throws XPathException {
-            Sequence value = map.get(optionName);
-            if (value != null) {
-                boolean booleanValue = ExpressionTool.effectiveBooleanValue(value.iterate());
+        private void setBooleanOption(ProcessedOptions map, String optionName) throws XPathException {
+            Optional<Boolean> value = map.asOptionalBoolean(optionName);
+            if (value.isPresent()) {
+                boolean booleanValue = value.get();
                 switch (optionName) {
                     case "base-uri":
                         baseUriSignificant = booleanValue;

@@ -158,51 +158,6 @@ public class Serialize extends SystemFunction implements Callable {
         //eqnames
     }
 
-//    /**
-//     * Check the options supplied:
-//     * 1. ignore any other options not in the specs;
-//     * 2. validate the types of the option values supplied.
-//     */
-//
-//    private MapItem checkOptions(MapItem map, XPathContext context) throws XPathException {
-//        MapItem result = new HashTrieMap();
-//        TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-//
-//        AtomicIterator keysIterator = map.keys();
-//        AtomicValue key;
-//        while ((key = keysIterator.next()) != null) {
-//            if (key instanceof StringValue) {
-//                String keyName = key.getStringValue();
-//                if (isParamName(keyName)) {
-//                    Supplier<RoleDiagnostic> role =
-//                            () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0, "XPTY0004");
-//                    //If any serialization error occurs, including the detection of an invalid value for a serialization
-//                    // parameter, this results in the fn:serialize call failing with a dynamic error.
-//                    Sequence converted = th.applyFunctionConversionRules(
-//                            map.get(key), requiredTypes.get(keyName), role, Loc.NONE);
-//                    result = result.addEntry(key, converted.materialize());
-//                }
-//            } else if (key instanceof QNameValue) {
-//                if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().isEmpty()) {
-//                    throw new XPathException("A serialization parameter supplied with a QName key must have non-absent namespace", "SEPM0017");
-//                } else if (key.getComponent(AccessorFn.Component.NAMESPACE).getUnicodeStringValue().equals(StringView.of("http://saxon.sf.net/"))) {
-//                    // Capture Saxon serialization parameters
-//                    String keyName = ((QNameValue) key).getLocalName();
-//                    if (isParamNameSaxon(keyName)) {
-//                        Supplier<RoleDiagnostic> role =
-//                                () -> new RoleDiagnostic(RoleDiagnostic.OPTION, keyName, 0);
-//                        Sequence converted = th.applyFunctionConversionRules(
-//                                map.get(key), requiredTypesSaxon.get(keyName), role, Loc.NONE);
-//                        result = result.addEntry(key, converted.materialize());
-//                    }
-//                }
-//                // Implementation-defined serialization parameters in an unrecognised namespace are ignored.
-//            } else {
-//                break;
-//            }
-//        }
-//        return result;
-//    }
 
     // Convert a boolean value to a yes-no-type string.
 

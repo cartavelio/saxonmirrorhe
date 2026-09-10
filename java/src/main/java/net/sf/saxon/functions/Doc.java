@@ -263,24 +263,24 @@ public class Doc extends SystemFunction implements Callable {
         parseOptions = parseOptions.withUseXsiSchemaLocation(checkedOptions.asBoolean("use-xsi-schema-location", false));
 
 
-        GroundedValue val = checkedOptions.get("xsd-validation");
+        String val = checkedOptions.asString("xsd-validation");
         boolean xsdValidating;
         if (val == null) {
             // In 3.1 we defaulted from the configuration values, in 4.0 it has to be explicit
             parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
         } else {
-            String validationValue = Whitespace.normalize(val.getStringValue());
-            xsdValidating = !"skip".equals(validationValue);
-            if (validationValue.equals("strict")) {
+            val = Whitespace.normalize(val);
+            xsdValidating = !"skip".equals(val);
+            if (val.equals("strict")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.STRICT);
                 parseOptions = parseOptions.withSchema(retainedStaticContext.getImportedSchema());
-            } else if (validationValue.equals("lax")) {
+            } else if (val.equals("lax")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.LAX);
                 parseOptions = parseOptions.withSchema(retainedStaticContext.getImportedSchema());
-            } else if (validationValue.equals("skip")) {
+            } else if (val.equals("skip")) {
                 parseOptions = parseOptions.withSchemaValidationMode(Validation.SKIP);
-            } else if (validationValue.startsWith("type ")) {
-                String eqName = validationValue.substring(5).trim();
+            } else if (val.startsWith("type ")) {
+                String eqName = val.substring(5).trim();
                 if (!eqName.startsWith("Q{")) {
                     throw new XPathException("Type name in xsd-validation option of fn:parse-xml must start with 'Q{'", "FODC0008");
                 }
@@ -300,7 +300,7 @@ public class Doc extends SystemFunction implements Callable {
                         .withSchemaValidationMode(Validation.BY_TYPE)
                         .withTopLevelType(type);
             } else {
-                throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + validationValue, "XPTY0004")
+                throw new XPathException("Unknown xsd-validation option of fn:parse-xml: " + val, "XPTY0004")
                         .asTypeError();
             }
 

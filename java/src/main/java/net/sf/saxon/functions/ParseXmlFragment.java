@@ -19,7 +19,6 @@ import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.resource.ActiveSAXSource;
 import net.sf.saxon.s9api.Location;
@@ -64,13 +63,7 @@ public class ParseXmlFragment extends SystemFunction implements Callable {
         if (input == null) {
             return EmptySequence.INSTANCE;
         } else {
-            ProcessedOptions checkedOptions = ProcessedOptions.EMPTY_OPTIONS;
-            if (getArity() >= 2) {
-                MapItem options = (MapItem) arguments[1].head();
-                if (options != null) {
-                    checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
-                }
-            }
+            ProcessedOptions checkedOptions = getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40);
             String baseUri = getStaticBaseUriString();
             if (checkedOptions.containsKey("base-uri")) {
                 baseUri = checkedOptions.asString("base-uri");

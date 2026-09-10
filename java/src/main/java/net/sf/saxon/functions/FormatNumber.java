@@ -101,7 +101,7 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
 
     private static SubPicture[] getSubPictures(UnicodeString picture, DecimalSymbols dfs) throws XPathException {
         SubPicture[] pics = new SubPicture[2];
-        if (picture.length() == 0) {
+        if (picture.isEmpty()) {
             throw new XPathException("format-number() picture is zero-length", "FODF1310");
         }
         int patternSeparator = dfs.getMarker(DecimalSymbols.Property.PATTERN_SEPARATOR);
@@ -111,13 +111,13 @@ public class FormatNumber extends SystemFunction implements Callable, StatefulSy
             pics[1] = null;
         } else {
             UnicodeString p0 = picture.substring(0, split);
-            if (p0.length() == 0) {
+            if (p0.isEmpty()) {
                 grumble("first sub-picture is zero-length");
             }
             pics[0] = makeSubPicture(p0, dfs);
             UnicodeString p1 = picture.substring(split+1);
 
-            if (p1.length() == 0) {
+            if (p1.isEmpty()) {
                 grumble("second sub-picture is zero-length");
             }
             if (p1.indexOf(patternSeparator) >= 0) {

@@ -36,6 +36,8 @@ import java.util.function.Supplier;
  * This class implements the rules for options parameters, as used in functions such as parse-json, serialize,
  * json-to-XML, map:merge. It provides a convenient way of ensuring that the options parameter conventions
  * are enforced.
+ *
+ * <p>An instance of this class contains information about all the options defined for one system-defined function.</p>
  */
 public class OptionsParameter {
 
@@ -241,9 +243,9 @@ public class OptionsParameter {
     }
 
     /**
-     * Ask whether it is is permissible to supply the value as a string, which is cast to the
+     * Ask whether it is permissible to supply the value as a string, which is cast to the
      * required type, rather than supplying the required type directly. Normally false.
-     * @return true if is is permitted to supply the value as a string
+     * @return true if it is permitted to supply the value as a string
      */
 
     public boolean isAllowCastFromString() {
@@ -251,9 +253,9 @@ public class OptionsParameter {
     }
 
     /**
-     * Say whether it is is permissible to supply the value as a string, which is cast to the
+     * Say whether it is permissible to supply the value as a string, which is cast to the
      * required type, rather than supplying the required type directly. Normally false.
-     * @param allowCastFromString true if is is permitted to supply the value as a string
+     * @param allowCastFromString true if it is permitted to supply the value as a string
      */
 
     public void setAllowCastFromString(boolean allowCastFromString) {

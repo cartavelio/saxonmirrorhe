@@ -18,8 +18,6 @@ import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
-import net.sf.saxon.ma.map.EmptyMap;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.XPathException;
@@ -68,19 +66,12 @@ public class ParseXml extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         boolean is40 = getRetainedStaticContext().getPackageData().getHostLanguageVersion() >= 40;
         AtomicValue input = (AtomicValue) arguments[0].head();
-        MapItem options = null;
-        if (getArity() >= 2) {
-            options = (MapItem) arguments[1].head();
-        }
-        if (options == null) {
-            options = EmptyMap.getInstance(40);
-        }
         if (input == null) {
             return EmptySequence.INSTANCE;
         }
 
         ProcessedOptions checkedOptions =
-                is40 ? getDetails().optionDetails.processSuppliedOptions(options, context, 40) : ProcessedOptions.EMPTY_OPTIONS;
+                is40 ? getDetails().optionDetails.processSuppliedOptions(arguments, 1, context, 40) : ProcessedOptions.EMPTY_OPTIONS;
         
         ParseOptions parseOptions = context.getConfiguration().getParseOptions();
 

@@ -10,7 +10,6 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
@@ -43,14 +42,12 @@ public class UnparsedTextAvailable extends UnparsedTextFunction implements Calla
                 encoding = arg1.getStringValue();
             } else if (arg1 instanceof MapItem) {
                 ProcessedOptions options = UnparsedText.OPTION_DETAILS.processSuppliedOptions(((MapItem) arg1), context, 40);
-                GroundedValue encodingOption = options.get("encoding");
+                String encodingOption = options.asString("encoding");
                 if (encodingOption != null) {
-                    encoding = encodingOption.getStringValue();
+                    encoding = encodingOption;
                 }
-                BooleanValue normalizeNewlinesOption = (BooleanValue) options.get("normalize-newlines");
-                if (normalizeNewlinesOption != null && normalizeNewlinesOption.getBooleanValue()) {
-                    normalizeNewlines = normalizeNewlinesOption.effectiveBooleanValue();
-                }
+                normalizeNewlines = options.asBoolean("normalizeNewlines", false);
+                // TODO: the option is ignored, is this OK?
             }
         }
         return BooleanValue.get(

@@ -234,7 +234,8 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         register("xml-to-json", 1, e -> e.populate( XMLToJsonFn::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
-                .arg(0, AnyXNodeType.getInstance(), OPT | ABS, EMPTY));
+                .arg(0, AnyXNodeType.getInstance(), OPT | ABS, EMPTY)
+                .setOptionDetails(XMLToJsonFn.makeOptionsParameter(31)));
 
         register("xml-to-json", 2, e -> e.populate( XMLToJsonFn::new, BuiltInAtomicType.STRING,
                  OPT, LATE)
