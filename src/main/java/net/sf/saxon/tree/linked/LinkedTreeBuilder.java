@@ -42,7 +42,6 @@ public class LinkedTreeBuilder extends Builder
     private final Stack<NamespaceMap> namespaceStack = new Stack<>();
     private boolean allocateSequenceNumbers = true;
     private int nextNodeNumber = 1;
-    private Durability durability;
 
     /**
      * Create a Builder and initialise variables

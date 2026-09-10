@@ -20,6 +20,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpInjectMembers;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -90,6 +91,7 @@ public final class DateTimeValue extends CalendarValue
         this.hasNoYearZero = hasNoYearZero;
     }
 
+    @CSharpModifiers(code={"private"})
     protected static class MutableDateTimeValue {
         public int year;       // the year as written, +1 for BC years
         public byte month;     // the month as written, range 1-12
@@ -544,7 +546,7 @@ public final class DateTimeValue extends CalendarValue
                 if (!tok.hasMoreTokens()) {
                     return badDate("Decimal point must be followed by digits", s);
                 }
-                part = (String) tok.nextToken();
+                part = tok.nextToken();
                 if (part.length() > 9 && part.matches("^[0-9]+$")) {
                     part = part.substring(0, 9);
                 }
@@ -578,7 +580,7 @@ public final class DateTimeValue extends CalendarValue
                 if (!tok.hasMoreTokens()) {
                     return badDate("Missing timezone", s);
                 }
-                part = (String) tok.nextToken();
+                part = tok.nextToken();
                 if (part.length() != 2) {
                     return badDate("Timezone hour must be two digits", s);
                 }
@@ -601,7 +603,7 @@ public final class DateTimeValue extends CalendarValue
                     return badDate("Misplaced ':'", s);
                 }
                 state = 9;
-                part = (String) tok.nextToken();
+                part = tok.nextToken();
                 value = DurationValue.simpleInteger(part);
                 if (value < 0) {
                     return badDate("Non-numeric timezone minute component", s);
@@ -973,7 +975,7 @@ public final class DateTimeValue extends CalendarValue
         calendar.setLenient(false);
         int yr = year;
         if (year <= 0) {
-            yr = hasNoYearZero ? 1 - year : 0 - year;
+            yr = hasNoYearZero ? 1 - year : -year;
             calendar.set(Calendar.ERA, GregorianCalendar.BC);
         }
         //noinspection MagicConstant
@@ -1429,7 +1431,7 @@ public final class DateTimeValue extends CalendarValue
                 case MONTH_OF_YEAR:
                     return month;
                 case PROLEPTIC_MONTH:
-                    return year*12 + month - 1;
+                    return (long)year*12 + month - 1;
                 case YEAR_OF_ERA:
                     return Math.abs(year) + (year<0 ? 1 : 0);
                 case YEAR:
@@ -1443,7 +1445,7 @@ public final class DateTimeValue extends CalendarValue
                     if (tz == NO_TIMEZONE) {
                         throw new UnsupportedTemporalTypeException("xs:dateTime value has no timezone");
                     } else {
-                        return tz * 60;
+                        return (long)tz * 60;
                     }
                 default:
                     throw new UnsupportedTemporalTypeException(field.toString());
