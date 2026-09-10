@@ -485,16 +485,18 @@ public class XMLEmitter extends Emitter {
             boolean isFirst = true;
 
             for (NamespaceBinding ns : namespaces) {
-                // Perversely, the namespace need not be a valid URI, but if it is a valid
-                // URI, it must not be relative
-                try {
-                    URI uri = new URI(ns.getNamespaceUri().toString());
-                    if (!uri.isAbsolute()) {
-                        throw new XPathException("Canonical XML does not allow namespace URIs to be relative: "
-                                                         + ns.getNamespaceUri(), "SERE0024");
+                if (canonical) {
+                    // Perversely, the namespace need not be a valid URI, but if it is a valid
+                    // URI, it must not be relative
+                    try {
+                        URI uri = new URI(ns.getNamespaceUri().toString());
+                        if (!uri.isAbsolute()) {
+                            throw new XPathException("Canonical XML does not allow namespace URIs to be relative: "
+                                                             + ns.getNamespaceUri(), "SERE0024");
+                        }
+                    } catch (URISyntaxException err) {
+                        // no action
                     }
-                } catch (URISyntaxException err) {
-                    // no action
                 }
                 namespace(ns.getPrefix(), ns.getNamespaceUri(), isFirst);
                 isFirst = false;
