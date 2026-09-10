@@ -208,7 +208,11 @@ public class CsvRecordGenerator extends CsvRepresentationGenerator {
                     AtomicValue col = (AtomicValue)args[1].head();
                     int colNum;
                     if (col instanceof StringValue) {
-                        colNum = ((IntegerValue)columnIndex.get(col)).asSubscript();
+                        IntegerValue colValue = ((IntegerValue) columnIndex.get(col));
+                        if (colValue == null) {
+                            throw new XPathException("Column '" + col.getStringValue() + "' is not present in CSV", "FOCV0004");
+                        }
+                        colNum = colValue.asSubscript();
                     } else {
                         colNum = ((IntegerValue)col).asSubscript();
                     }
