@@ -23,6 +23,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
+import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
@@ -73,6 +74,19 @@ public abstract class MapItem implements Function {
      */
 
     abstract public Iterable<KeyValuePair> keyValuePairs();
+
+    /**
+     * Get an iterator over the entries in the map, each represented as a singleton map (representing
+     * one key-value pair)
+     *
+     * @return a {@link SequenceIterator} over the entries in the map, represented as single-entry maps
+     */
+    public SequenceIterator entries() {
+        return new SequenceIteratorOverJavaIterator<KeyValuePair>(
+                keyValuePairs().iterator(),
+                entry -> new SingleEntryMap(entry.key, entry.value));
+    }
+
 
     /**
      * Create a new map containing the existing entries in the map plus an additional entry,
