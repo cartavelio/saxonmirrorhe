@@ -72,6 +72,7 @@ public class TestXdmNode {
             assertEquals("http://ns.com/", element.getNodeName().getNamespaceURI());
             assertEquals("", element.getNodeName().getPrefix());
             assertEquals(XdmNodeKind.ELEMENT, element.getNodeKind());
+            assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), element.getTypeAnnotationName());
             assertEquals("", element.getStringValue());
             assertEquals(doc, element.getParent());
             assertEquals(doc, element.getRoot());
@@ -164,11 +165,14 @@ public class TestXdmNode {
             XdmNode doc =
                     builder.build(
                             new StreamSource(new StringReader("<one foo='bar'>[<two xmlns='http://ns.com/'><three/></two>]</one>")));
+            assertEquals(XdmNodeKind.DOCUMENT, doc.getNodeKind());
             XdmNode one = doc.select(Steps.child("one")).firstItem();
             assertNotNull(one);
+            assertEquals(XdmNodeKind.ELEMENT, one.getNodeKind());
             XdmNode doc2 = one.select(Steps.parent((Predicates.isDocument()))).firstItem();
             assertNotNull(doc2);
             assertTrue(doc.equals(doc2)); // For some reason, assertEquals fails with stack overflow
+            assertNull(doc.getTypeAnnotationName());
             XdmNode doc3 = one.select(Steps.ancestor()).firstItem();
             assertNotNull(doc3);
             assertTrue(doc.equals(doc3));
@@ -178,9 +182,17 @@ public class TestXdmNode {
             XdmNode openBra = three.select(Steps.preceding(Predicates.isText())).firstItem();
             assertNotNull(openBra);
             assertEquals("[", openBra.getStringValue());
+            assertEquals(XdmNodeKind.TEXT, openBra.getNodeKind());
+            assertNull(openBra.getTypeAnnotationName());
             XdmNode closeBra = three.select(Steps.following(Predicates.isText())).firstItem();
             assertNotNull(closeBra);
             assertEquals("]", closeBra.getStringValue());
+            assertEquals(XdmNodeKind.TEXT, closeBra.getNodeKind());
+            XdmNode foo = one.select(Steps.attribute("foo")).firstItem();
+            assertEquals(XdmNodeKind.ATTRIBUTE, foo.getNodeKind());
+            assertEquals(new QName("foo"), foo.getNodeName());
+            assertEquals("bar", foo.getStringValue());
+            assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "untypedAtomic"), foo.getTypeAnnotationName());
         } catch (Exception e) {
             fail();
         }
