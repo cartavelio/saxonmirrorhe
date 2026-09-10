@@ -205,7 +205,7 @@
                 to <code>use-last</code>. If a singleton map does not match any template rule, then it is effectively skipped.</li>
         </ul>
         
-       
+       <p>The proposed 4.0 functions fn:uniform(), fn:unique(), and fn:replicate() are implemented.</p>
  
 
     
@@ -241,6 +241,16 @@
         <p>TODO: there's potentially a problem because we force lazy evaluation (using both MemoClosure and SingletonClosure)
         for variables created by loop-lifting or common subexpression elimination. The idea here is (a) to avoid the cost of evaluating
         the expression if the loop is empty, and (b) to avoid triggering a dynamic error unnecessarily.</p>
+        
+        <p>There are other places where the code no longer tries to work out everything at compile time, but learns from
+        run-time experience. For example:</p>
+        
+        <ul>
+            <li><p>In value comparisons, if the static types of the operands are not precisely known, a comparison function
+            is allocated based on the run-time types of the operands on the first occasion the expression is evaluated. If
+            (as is often the case) subsequent evaluations use the same operand types, the comparison function is re-used, 
+            rather than allocating a new one each time.</p></li>
+        </ul>
         
         <p>Internally, a number of code paths have been changed to avoid use of <code>Class.newInstance()</code>, which is
         deprecated since Java 9, and which causes operational difficulties under GraalVM. For example, system functions
