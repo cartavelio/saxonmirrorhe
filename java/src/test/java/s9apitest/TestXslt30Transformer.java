@@ -11,11 +11,9 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
 import net.sf.saxon.option.xom.XOMDocumentWrapper;
@@ -47,7 +45,11 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -538,9 +540,7 @@ public class TestXslt30Transformer {
     public static boolean isOptional(NodeInfo parent, QNameValue childName) throws Exception {
         Configuration config = parent.getConfiguration();
         SchemaType parentType = parent.getSchemaType();
-        int fp = config.getNamePool().allocateFingerprint(
-                NamespaceUri.of(childName.getComponent(AccessorFn.Component.NAMESPACE).getStringValue()),
-                                childName.getComponent(AccessorFn.Component.LOCALNAME).getStringValue());
+        int fp = config.getNamePool().allocateFingerprint(childName.getNamespaceURI(), childName.getLocalName());
         int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, null, true);
         return Cardinality.allowsZero(cardinality);
     }

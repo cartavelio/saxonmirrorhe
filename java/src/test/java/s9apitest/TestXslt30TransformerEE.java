@@ -8,45 +8,28 @@
 package s9apitest;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.Controller;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.instruct.TemplateRule;
-import net.sf.saxon.functions.AccessorFn;
 import net.sf.saxon.junit.Testdata;
-import net.sf.saxon.lib.*;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.option.jdom2.JDOM2ObjectModel;
-import net.sf.saxon.option.xom.XOMDocumentWrapper;
-import net.sf.saxon.option.xom.XOMObjectModel;
-import net.sf.saxon.resource.BinaryResource;
 import net.sf.saxon.s9api.*;
-import net.sf.saxon.trace.Traceable;
-import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.QNameValue;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
@@ -55,12 +38,54 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class TestXslt30TransformerEE {
 
+    private static class IsOptionalTest implements ExtensionFunction {
+
+        private final XsdSchema schema;
+
+        public IsOptionalTest(XsdSchema schema) {
+            this.schema = schema;
+        }
+
+        @Override
+        public QName getName() {
+            return new QName("java:s9apitest.TestXslt30Transformer", "isOptional");
+        }
+
+        @Override
+        public net.sf.saxon.s9api.SequenceType getResultType() {
+            return ItemType.BOOLEAN.one();
+        }
+
+        @Override
+        public net.sf.saxon.s9api.SequenceType[] getArgumentTypes() {
+            return new net.sf.saxon.s9api.SequenceType[]{ItemType.ANY_NODE.one(), ItemType.QNAME.one()};
+        }
+
+        @Override
+        public XdmValue call(XdmValue[] arguments) throws SaxonApiException {
+            NodeInfo parent = (NodeInfo) arguments[0].getUnderlyingValue().head();
+            QNameValue childName = (QNameValue) arguments[1].getUnderlyingValue().head();
+            Configuration config = parent.getConfiguration();
+            SchemaType parentType = parent.getSchemaType();
+            int fp = config.getNamePool().allocateFingerprint(childName.getNamespaceURI(), childName.getLocalName());
+            int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, schema.getUnderlyingSchema(), true);
+            return new XdmAtomicValue(Cardinality.allowsZero(cardinality));
+        }
+    }
+
+
+
     @Test
     public void testExtensionWithSchemaAccess() {
         // Create a Processor instance.
         try {
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.TIMING, true);
+
+            XsdCompiler sm = proc.newXsdCompiler();
+            XsdSchema schema = sm.compile(new StreamSource(Testdata.file("books.xsd")));
+
+            proc.registerExtensionFunction(new IsOptionalTest(schema));
             XsltCompiler comp = proc.newXsltCompiler();
             comp.setSchemaAware(true);
             StringReader sr = new StringReader("<xsl:stylesheet version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:my='java:s9apitest.TestXslt30Transformer' exclude-result-prefixes='my'>" +
@@ -70,8 +95,6 @@ public class TestXslt30TransformerEE {
             XsltExecutable exec = comp.compile(new StreamSource(sr));
             Xslt30Transformer transformer = exec.load30();
 
-            XsdCompiler sm = proc.newXsdCompiler();
-            XsdSchema schema = sm.compile(new StreamSource(Testdata.file("books.xsd")));
             DocumentBuilder builder = proc.newDocumentBuilder();
             builder.setSchemaValidator(schema.newValidator());
             XdmNode books = builder.build(Testdata.file("books.xml"));
@@ -176,7 +199,7 @@ public class TestXslt30TransformerEE {
         } catch (SaxonApiException e) {
             assertTrue(e.getMessage().contains("atomiz"));
             assertTrue(e.getMessage().contains("first argument of f:do()"));
-            assertEquals("XPTY0004", e.getErrorCode().getLocalName());
+            assertEquals("FOTY0013", e.getErrorCode().getLocalName());
             System.err.println(e.getMessage());
         }
     }
