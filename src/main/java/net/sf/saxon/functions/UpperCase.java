@@ -10,6 +10,7 @@ package net.sf.saxon.functions;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.str.ToUpper;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -22,7 +23,7 @@ public class UpperCase extends ScalarSystemFunction {
 
     @Override
     public AtomicValue evaluate(Item arg, XPathContext context) {
-        return StringValue.makeStringValue(arg.getStringValue().toUpperCase());
+        return StringValue.makeUStringValue(ToUpper.toUpper(arg.getUnicodeStringValue()));
     }
 
     @Override

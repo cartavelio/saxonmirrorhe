@@ -764,23 +764,16 @@ public final class Int64Value extends IntegerValue {
      */
 
     @Override
-    public IntegerValue idiv(/*@NotNull*/ IntegerValue other) throws XPathException {
+    public IntegerValue idiv(IntegerValue other) throws XPathException {
         // if either of the values is large, we use BigInteger arithmetic to be on the safe side
+        if (other.signum() == 0) {
+            throw new XPathException("Integer division by zero", "FOAR0001");
+        }
         if (other instanceof Int64Value) {
             if (isLong() || ((Int64Value) other).isLong()) {
                 return new BigIntegerValue(value).idiv(new BigIntegerValue(((Int64Value) other).value));
             }
-            try {
-                return makeIntegerValue(value / ((Int64Value) other).value);
-            } catch (ArithmeticException err) {
-                XPathException e;
-                if ("/ by zero".equals(err.getMessage())) {
-                    e = new XPathException("Integer division by zero", "FOAR0001");
-                } else {
-                    e = new XPathException("Integer division failure", err);
-                }
-                throw e;
-            }
+            return makeIntegerValue(value / ((Int64Value) other).value);
         } else {
             return new BigIntegerValue(value).idiv(other);
         }

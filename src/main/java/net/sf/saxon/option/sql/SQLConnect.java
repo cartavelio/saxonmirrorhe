@@ -19,7 +19,6 @@ import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.style.ExtensionInstruction;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.ExternalObject;
 import net.sf.saxon.value.ObjectValue;
 
 import java.io.PrintWriter;
@@ -173,7 +172,7 @@ public class SQLConnect extends ExtensionInstruction {
         }
 
         @Override
-        public ExternalObject<Connection> call(XPathContext context, Sequence[] arguments) throws XPathException {
+        public ObjectValue<Connection> call(XPathContext context, Sequence[] arguments) throws XPathException {
 
             // Establish the JDBC connection
 

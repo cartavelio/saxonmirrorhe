@@ -147,12 +147,8 @@ public class ImmutableArrayItem extends AbstractArrayItem {
      */
     @Override
     public ArrayItem remove(int index) {
-        //try {
         ImmList<GroundedValue> v2 = vector.remove(index);
-            return v2 == vector ? this : new ImmutableArrayItem(v2);
-//        } catch (IndexOutOfBoundsException e) {
-//            throw new XPathException(e.getMessage(), "FOAR0001");
-//        }
+        return v2 == vector ? this : new ImmutableArrayItem(v2);
     }
 
     /**

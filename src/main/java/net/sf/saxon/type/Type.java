@@ -204,7 +204,7 @@ public abstract class Type {
             if (th == null) {
                 throw new IllegalArgumentException("typeHierarchy is required for an external object");
             }
-            return ((ExternalObject<?>) item).getItemType(th);
+            return ((AnyExternalObject) item).getItemType(th);
         } else if (item instanceof MapItem) {
             return th == null ? MapType.ANY_MAP_TYPE : ((MapItem)item).getItemType(th);
         } else if (item instanceof ArrayItem) {
@@ -252,7 +252,7 @@ public abstract class Type {
             }
         //#if CSHARP==false
         } else if (item.getGenre() == Genre.EXTERNAL) {
-            return ObjectValue.displayTypeName(((ExternalObject) item).getObject());
+            return ObjectValue.displayTypeName(((AnyExternalObject) item).getWrappedObject());
         //#endif
         } else if (item instanceof AtomicValue) {
             return ((AtomicValue) item).getItemType().toString();

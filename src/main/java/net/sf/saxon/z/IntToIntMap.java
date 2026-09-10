@@ -34,12 +34,12 @@ public interface IntToIntMap {
     void clear();
 
     /**
-     * Finds a key in the map.
+     * Finds whether a key is present in the map.
      *
      * @param key Key
      * @return true if the key is mapped
      */
-    boolean find(int key);
+    boolean contains(int key);
 
     /**
      * Gets the value for this key.

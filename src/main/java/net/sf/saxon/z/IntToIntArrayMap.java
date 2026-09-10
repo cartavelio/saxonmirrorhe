@@ -57,7 +57,7 @@ public class IntToIntArrayMap implements IntToIntMap {
      * @return true if the key is mapped
      */
     @Override
-    public boolean find(int key) {
+    public boolean contains(int key) {
         for (int i = 0; i < used; i++) {
             if (keys[i] == key) {
                 return true;

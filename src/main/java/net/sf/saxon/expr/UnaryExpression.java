@@ -13,6 +13,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -109,7 +110,7 @@ public abstract class UnaryExpression extends Expression {
                 return Literal.makeLiteral(
                         SequenceTool.toGroundedValue(iterate(visitor.getStaticContext().makeEarlyEvaluationContext())), this);
             }
-        } catch (XPathException err) {
+        } catch (XPathException | UncheckedXPathException err) {
             // if early evaluation fails, suppress the error: the value might
             // not be needed at run-time
         }
