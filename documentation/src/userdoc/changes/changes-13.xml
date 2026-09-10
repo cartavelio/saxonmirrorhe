@@ -815,7 +815,6 @@ TODO: rethink redefines and override
             <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
             <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. This
             is due to limitations in the ICU4N library.</p></li>
-            <li><p>PR2372 - Serializing processing instructions with the HTML serialization method.</p></li>
             <li><p>PR2337 - New values for <code>xsl:mode/@typed</code>.</p></li>
             <li><p>PR2387 - Handling of NaN and Infinity by the JSON serialization method.</p></li>
             <li><p>The new EXPath <code>file:list-roots</code> function is not yet implemented.</p></li>
