@@ -45,10 +45,13 @@ public:
     */
    void setcwd(const char* cwd);
 
-    //! Register the schema from file name
+    //! Register the schema from file name.
     /**
-     *
-    * @param xsd - File name of the schema relative to the cwd
+    * The schema components derived from this schema document are added to
+     * the cache of schema components maintained by this SchemaManager
+    * @param xsd - File name of the schema relative to the cwd or full path if cwd is null. The document may be
+     * either a schema document in source XSD format, or a compiled
+ *               schema in Saxon-defined SCM format (as produced using the method exportSchema)
     */
   void registerSchemaFromFile(const char * xsd);
 
