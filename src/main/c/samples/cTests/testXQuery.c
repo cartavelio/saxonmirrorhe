@@ -1,11 +1,11 @@
 #include "../../Saxon.C.API/SaxonCProcessor.h"
 #include <stdio.h>  /* defines FILENAME_MAX */
-#ifdef WINDOWS
-#include <direct.h>
-#define GetCurrentDir _getcwd
-#else
+#if  defined (__APPLE__) || defined __linux__
 #include <unistd.h>
 #define GetCurrentDir getcwd
+#else
+#include <direct.h>
+#define GetCurrentDir _getcwd
 #endif
 
 int main()
@@ -66,7 +66,7 @@ int main()
         printf("Error message %s \n", errorMessage);
       }
     }else {
-      printf("%s",result);
+      printf("%s \n",result);
     }
     fflush(stdout);
 
