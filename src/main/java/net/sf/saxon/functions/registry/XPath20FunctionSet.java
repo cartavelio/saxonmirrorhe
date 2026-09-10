@@ -7,9 +7,12 @@
 
 package net.sf.saxon.functions.registry;
 
+import net.sf.saxon.expr.DefaultedArgumentExpression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.functions.Error;
 import net.sf.saxon.functions.*;
+import net.sf.saxon.ma.map.DictionaryMap;
+import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.NumericType;
@@ -138,14 +141,22 @@ public class XPath20FunctionSet extends BuiltInFunctionSet {
         register("days-from-duration", 1, e -> e.populate(() -> new AccessorFn.DaysFromDuration(), BuiltInAtomicType.INTEGER, OPT, CARD0)
                 .arg(0, BuiltInAtomicType.DURATION, OPT, EMPTY));
 
-        register("deep-equal", 2, e -> e.populate(DeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
-                .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
-                .arg(1, Type.ITEM_TYPE, STAR | ABS, null));
+//        register("deep-equal", 2, e -> e.populate(DeepEqual::new, BuiltInAtomicType.BOOLEAN, ONE, DCOLL)
+//                .arg(0, Type.ITEM_TYPE, STAR | ABS, null)
+//                .arg(1, Type.ITEM_TYPE, STAR | ABS, null));
+//
+//        register("deep-equal", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
+//                .arg(0, Type.ITEM_TYPE, STAR, null)
+//                .arg(1, Type.ITEM_TYPE, STAR, null)
+//                .arg(2, BuiltInAtomicType.STRING, ONE, null));
 
-        register("deep-equal", 3, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
+        register("deep-equal", 2, 4, e -> e.populate(DeepEqual40::new, BuiltInAtomicType.BOOLEAN, ONE, BASE)
                 .arg(0, Type.ITEM_TYPE, STAR, null)
                 .arg(1, Type.ITEM_TYPE, STAR, null)
-                .arg(2, BuiltInAtomicType.STRING, ONE, null));
+                .arg(2, BuiltInAtomicType.STRING, OPT, null)
+                .withDefault(2, new DefaultedArgumentExpression.DefaultCollationArgument()) // TODO: should be default collation
+                .arg(3, MapType.ANY_MAP_TYPE, OPT, null))
+                .withDefault(3, Literal.makeLiteral(new DictionaryMap()));
 
         register("default-collation", 0, e -> e.populate(() -> new StaticContextAccessor.DefaultCollation(), BuiltInAtomicType.STRING, ONE, DCOLL));
 

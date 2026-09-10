@@ -12,6 +12,7 @@ import net.sf.saxon.expr.ContextOriginator;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.functions.DeepEqual40;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
@@ -105,18 +106,6 @@ public interface FunctionItem extends Item, Callable, GroundedValue {
 
     XPathContext makeNewContext(XPathContext callingContext, ContextOriginator originator);
 
-//    /**
-//     * Invoke the function
-//     *
-//     * @param context the XPath dynamic evaluation context
-//     * @param args    the actual arguments to be supplied
-//     * @return the result of invoking the function
-//     * @throws XPathException if a dynamic error occurs within the function
-//     */
-//
-//    @Override
-//    Sequence call(XPathContext context, Sequence[] args) throws XPathException;
-
     /**
      * Test whether this FunctionItem is deep-equal to another function item,
      * under the rules of the deep-equal function
@@ -130,6 +119,8 @@ public interface FunctionItem extends Item, Callable, GroundedValue {
      */
 
     boolean deepEquals(FunctionItem other, XPathContext context, AtomicComparer comparer, int flags) throws XPathException;
+
+    boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException;
 
     /**
      * Get a description of this function for use in error messages. For named functions, the description

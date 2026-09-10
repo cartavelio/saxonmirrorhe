@@ -145,6 +145,11 @@ public abstract class AbstractFunction implements FunctionItem {
         throw new XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
     }
 
+    @Override
+    public boolean deepEqual40(FunctionItem other, XPathContext context, DeepEqual40.DeepEqualOptions options) throws XPathException {
+        throw new XPathException("Argument to deep-equal() contains a function item", "FOTY0015");
+    }
+
     /**
      * Output information about this function item to the diagnostic explain() output
      */

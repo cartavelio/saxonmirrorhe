@@ -37,10 +37,10 @@ public class NormalizeUnicode extends SystemFunction {
             return StringValue.EMPTY_STRING;
         }
         String nf = arguments.length == 1 ? "NFC" : Whitespace.trim(arguments[1].head().getStringValue());
-        return new StringValue(normalize(sv.getStringValue(), nf, context));
+        return new StringValue(normalize(sv.getStringValue(), nf));
     }
 
-    public static String normalize(String sv, String form, XPathContext c) throws XPathException {
+    public static String normalize(String sv, String form) throws XPathException {
         Normalizer.Form fb;
 
         if (form.equalsIgnoreCase("NFC")) {
@@ -55,10 +55,7 @@ public class NormalizeUnicode extends SystemFunction {
             return sv;
         } else {
             String msg = "Normalization form " + form + " is not supported";
-            XPathException err = new XPathException(msg);
-            err.setErrorCode("FOCH0003");
-            err.setXPathContext(c);
-            throw err;
+            throw new XPathException(msg, "FOCH0003");
         }
         
         return Normalizer.normalize(sv, fb);

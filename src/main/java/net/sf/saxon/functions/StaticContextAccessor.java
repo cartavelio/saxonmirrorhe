@@ -47,7 +47,7 @@ public abstract class StaticContextAccessor extends SystemFunction {
     }
 
     @Override
-    public Expression makeFunctionCall(Expression[] arguments) {
+    public Expression makeFunctionCall(Expression... arguments) {
         return Literal.makeLiteral(evaluate(getRetainedStaticContext()));
     }
 

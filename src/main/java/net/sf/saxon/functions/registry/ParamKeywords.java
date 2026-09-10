@@ -93,7 +93,7 @@ public class ParamKeywords {
         fnParamNames.put("day-from-date", "value");
         fnParamNames.put("day-from-dateTime", "value");
         fnParamNames.put("days-from-duration", "value");
-        fnParamNames.put("deep-equal", "input1|input2|collation");
+        fnParamNames.put("deep-equal", "input1|input2|collation|options");
         fnParamNames.put("default-collation", "");
         fnParamNames.put("default-language", "");
         fnParamNames.put("differences", "input1|input2|options|collation");
