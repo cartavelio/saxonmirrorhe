@@ -3154,7 +3154,12 @@ public class XPathParser {
 //                        return axisExpr;
 //                    }
                     case "function":
+                        notAllowedInPattern();
+                        return parseInlineFunction(AnnotationList.EMPTY);
                     case "fn":
+                        if (languageVersion < 40) {
+                            return parseFunctionCall(name, null);
+                        }
                         notAllowedInPattern();
                         return parseInlineFunction(AnnotationList.EMPTY);
                     default:
