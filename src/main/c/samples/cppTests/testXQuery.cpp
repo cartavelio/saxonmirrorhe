@@ -325,7 +325,7 @@ void testXQueryLineNumberError(const char *cwd, sResultCount *sresult) {
   if (cwd != nullptr) {
     queryProc->setcwd(cwd);
   }
-  queryProc->setProperty("s", "data/cat.xml");
+  queryProc->setProperty("s", "../data/cat.xml");
 
   queryProc->setProperty("qs", "saxon:line-number((//person)[1])");
   const char *result = nullptr;
