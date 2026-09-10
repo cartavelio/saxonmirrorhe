@@ -78,10 +78,5 @@
        occurrenceLimits="100,250"/>
   <resources>
     <externalObjectModel>net.sf.saxon.option.xom.XOMObjectModel</externalObjectModel>
-    <!--<extensionFunction>s9apitest.TestIntegratedFunctions$SqrtFunction</extensionFunction>-->
-    <schemaDocument>../data/books.xsd</schemaDocument>
-    <schemaComponentModel/>
-
-
   </resources>
 </configuration>

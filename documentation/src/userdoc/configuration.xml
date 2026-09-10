@@ -515,8 +515,6 @@
     <externalObjectModel>net.sf.saxon.option.xom.XOMObjectModel</externalObjectModel>
     <extensionFunction>s9apitest.TestIntegrationFunctions$SqrtFunction</extensionFunction>
     <fileExtension extension="xq" mediaType="text/plain"/>
-    <schemaDocument>file:///c:/MyJava/samples/data/books.xsd</schemaDocument>
-    <schemaComponentModel/>
   </resources>
   
   <collations>

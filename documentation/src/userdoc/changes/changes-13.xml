@@ -165,6 +165,9 @@ TODO: rethink redefines and override
         the stylesheet is included in the SEF file and is automatically incorparated in any compiled stylesheet
         reconstituted from the SEF file.</p>
         
+        <p>The <code>schemaDocument</code> and <code>schemaComponentModel</code> elements in a configuration file
+        are now deprecated and have no effect.</p>
+        
         <p>The handling of a schema referenced from a source document using <code>xsi:schemaLocation</code>
             or <code>xsi:noNamespaceSchemaLocation</code>
         has changed. Generally, such a schema is read only if the use of such schemas is explicitly enabled.

@@ -337,14 +337,16 @@
   
   <xs:element name="schemaDocument" type="xs:anyURI">
     <xs:annotation>
-      <xs:documentation> Provides the location of a schema document that will be preloaded into the
+      <xs:documentation>Deprecated from Saxon 13: this element is now ignored. 
+        Previously it provided the location of a schema document that would be preloaded into the
         configuration and made available to all queries and stylesheets. </xs:documentation>
     </xs:annotation>
   </xs:element>
   
   <xs:element name="schemaComponentModel" type="xs:anyURI">
     <xs:annotation>
-      <xs:documentation> Provides the location of a schema in Saxon's SCM format that will be
+      <xs:documentation>Deprecated from Saxon 13: this element is now ignored. 
+        Previously it provided the location of a schema in Saxon's SCM format that would be
         preloaded into the configuration and made available to all queries and stylesheets.
       </xs:documentation>
     </xs:annotation>
