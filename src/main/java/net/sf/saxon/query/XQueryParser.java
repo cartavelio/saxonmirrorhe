@@ -3089,13 +3089,14 @@ public class XQueryParser extends XPathParser {
         Expression comparand;
         boolean braced = false;
         nextToken();
-        if (t.currentToken == Token.LPAREN) {
+        readToken(Token.LPAREN);
+        if (t.currentToken == Token.RPAREN) {
             nextToken();
-            comparand = parseExpression();
-            readToken(Token.RPAREN);
-        } else {
             checkLanguageVersion40("a switch expression with no explicit operand");
             comparand = Literal.makeLiteral(BooleanValue.TRUE);
+        } else {
+            comparand = parseExpression();
+            readToken(Token.RPAREN);
         }
         if (t.currentToken == Token.LCURLY) {
             checkLanguageVersion40("a switch expression with braces");
