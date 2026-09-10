@@ -5978,8 +5978,8 @@
             <li><p><code>decimal-divide(100, 30, 0)</code> returns <code>3</code></p></li>
             <li><p><code>decimal-divide(100, 3, -1)</code> returns <code>30</code></p></li>
             <li><p><code>decimal-divide(100, 700, 6)</code> returns <code>0.142857</code></p></li>
-          </ul>For example, <code>decimal-divide(100, 30, 2)</code> returns
-              <code>0.33</code>. (The default for decimal division in Saxon using the
+          </ul>
+          <p>(The default for decimal division in Saxon using the
               <code>div</code> operator is to return <i>max(18, s1, s2)</i> decimal places in the
             result, where <i>s1</i> is the scale of the first operand and <i>s2</i> the scale of the
             second.)</p>
