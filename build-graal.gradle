@@ -618,7 +618,7 @@ task graal_eec_jar(
   def graalEdition = edition == "he" ? "graal_ce_home" : "graal_ee_home"
 
 
-  def saxoncReleaseDir = "${buildDir}/release/saxonc${edition}"
+  def saxoncReleaseDir = "${buildDir}/releases/saxonc${edition}"
 
   task "setup_${edition}c_release"(
           dependsOn: [graalEdition, "${edition}c_graalImage"]
