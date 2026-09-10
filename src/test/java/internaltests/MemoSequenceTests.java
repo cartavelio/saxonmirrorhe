@@ -3,6 +3,7 @@ package internaltests;
 import net.sf.saxon.expr.AscendingRangeIterator;
 import net.sf.saxon.om.MemoSequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.GroundedIterator;
 import org.junit.jupiter.api.Test;
@@ -37,11 +38,11 @@ public class MemoSequenceTests {
             MemoSequence ms = new MemoSequence(iter);
             SequenceIterator prog = ms.iterate();
 
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", prog.materialize().getStringValue(), "materializeA");
+            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(prog).getStringValue(), "materializeA");
             assertEquals("10", prog.next().getStringValue(), "next1");
             assertEquals("11", prog.next().getStringValue(), "next2");
             assertEquals("12", prog.next().getStringValue(), "next3");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", prog.materialize().getStringValue(), "materializeB");
+            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(prog).getStringValue(), "materializeB");
             assertEquals("13", prog.next().getStringValue(), "next4");
             assertEquals("14", prog.next().getStringValue(), "next5");
             assertEquals("15", prog.next().getStringValue(), "next6");
@@ -51,7 +52,7 @@ public class MemoSequenceTests {
             assertEquals("19", prog.next().getStringValue(), "next10");
             assertEquals("20", prog.next().getStringValue(), "next11");
             assertNull(prog.next(), "next12");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", ((GroundedIterator) prog).materialize().getStringValue(), "materializeC");
+            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(((GroundedIterator) prog)).getStringValue(), "materializeC");
 
         } catch (XPathException e) {
             e.printStackTrace();
@@ -69,7 +70,7 @@ public class MemoSequenceTests {
             assertEquals("10", prog.next().getStringValue(), "next1");
             assertEquals("11", prog.next().getStringValue(), "next2");
             assertEquals("12", prog.next().getStringValue(), "next3");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", ((GroundedIterator) prog).materialize().getStringValue(), "materializeB");
+            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(((GroundedIterator) prog)).getStringValue(), "materializeB");
             assertEquals("13", prog.next().getStringValue(), "next4");
             assertEquals("14", prog.next().getStringValue(), "next5");
             assertEquals("15", prog.next().getStringValue(), "next6");
@@ -79,7 +80,7 @@ public class MemoSequenceTests {
             assertEquals("19", prog.next().getStringValue(), "next10");
             assertEquals("20", prog.next().getStringValue(), "next11");
             assertNull(prog.next(), "next12");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", ((GroundedIterator) prog).materialize().getStringValue(), "materializeC");
+            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(((GroundedIterator) prog)).getStringValue(), "materializeC");
 
         } catch (XPathException e) {
             e.printStackTrace();
