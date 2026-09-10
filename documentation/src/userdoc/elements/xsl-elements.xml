@@ -1736,7 +1736,7 @@
                     it either statically or dynamically, by setting the configuration property <a
                         class="feature" href="DISABLE_XSL_EVALUATE"/>.</p>
                 <p class="qt4">The XSLT 4.0 attribute <code>trusted</code> is not yet implemented in
-                    Saxon.</p>
+                    Saxon 13.</p>
             </status>
         </xsl-element>
     </section>
@@ -3166,6 +3166,9 @@
                     <p>Template rules in an enclosing mode can in principle be overridden in another
                         stylesheet package (using <code>xsl:override</code>) but this has not yet
                         been tested.</p>
+                    
+                    <p>The changes in XSLT 4.0 for the <code>typed</code> attribute, to handle items
+                        other than XNodes, are not yet implemented in Saxon.</p>
                 </div>
             </details>
             <in-spec>xslt30</in-spec>
@@ -3899,8 +3902,8 @@
                 <attribute name="byte-order-mark" use="optional">Indicates whether UTF-8/UTF-16
                     output is to start with a byte order mark. The default is
                     <code>no</code>.</attribute>
-                <attribute name="canonical" class="qt4">Indicates whether output is required
-                in canonical form. Fully implemented in Saxon 13 for canoncical XML; not implemented
+                <attribute name="canonical" class="qt4">New in XSLT 4.0. Indicates whether output is required
+                in canonical form. Fully implemented in Saxon 13 for canonical XML; not implemented
                 for canonical XHTML; partially implemented for canonical JSON (on SaxonJ only, not SaxonCS).</attribute>
                 <attribute name="cdata-section-elements" use="optional">Used only for XML output.
                     The value is a whitespace-separated list of element names. Character data
@@ -4031,6 +4034,11 @@
                 <p class="qt4">The XSLT 4.0 attribute <code>escape-solidus</code> is implemented
                     since Saxon 12.3; while the attribute <code>json-lines</code> is implemented
                     since Saxon 13.</p>
+                
+                <p class="qt4">The XSLT 4.0 attribute <code>canonical</code> is partially
+                    implemented since Saxon 13: fully implemented for canonical XML; not implemented
+                    for canonical XHTML; partially implemented for canonical JSON (on SaxonJ only,
+                    not SaxonCS).</p>
             </status>
             <see-also name="character-map" type="xsl-elements"/>
             <see-also name="result-document" type="xsl-elements"/>
@@ -4594,7 +4602,7 @@
 
                 <p>The serialization attributes <code>method</code>,
                         <code>allow-duplicate-names</code>, <code>build-tree</code>,
-                        <code>byte-order-mark</code>, <code>cdata-section-elements</code>,
+                    <code>byte-order-mark</code>, <code>canonical</code>, <code>cdata-section-elements</code>,
                         <code>doctype-public</code>, <code>doctype-system</code>,
                     <code>encoding</code>, <code>escape-uri-attributes</code>, <code>escape-solidus</code>,
                         <code>html-version</code>, <code>include-content-type</code>,
@@ -4687,10 +4695,6 @@
                     more information, see <a class="bodylink"
                         href="/using-xsl/stylesheet-output/secondary-output">Secondary
                     output</a>.</p>
-                
-                <p class="qt4">The XSLT 4.0 attribute <code>escape-solidus</code> is implemented
-                    since Saxon 12.3; while the attributes <code>json-lines</code> and
-                    <code>select</code> are implemented since Saxon 13.</p>
             </status>
             <see-also name="output" type="xsl-elements"/>
         </xsl-element>
@@ -4919,6 +4923,8 @@
                     characteristics of the sort algorithm. The SaxonCS implementation uses
                         <code>System.Array.sort()</code>: see the .NET documentation for details of
                     the sort algorithm used.</p>
+                <p class="qt4">In XSLT 4.0, composite sort keys are allowed, but this is not yet
+                    implemented in Saxon 13.</p>
             </status>
             <see-also name="apply-templates" type="xsl-elements"/>
             <see-also name="for-each" type="xsl-elements"/>
