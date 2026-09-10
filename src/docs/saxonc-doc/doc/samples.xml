@@ -234,7 +234,7 @@ queryProc->runQueryToString();
       <h1>Python samples</h1>
 
       <p>The <code>Saxon.C.API/python-saxon</code> directory in the SaxonC download includes the
-         unit test files <code>test_saxonc.py</code> and <code>test_saxon_Schema.py</code>, which
+         unit test files <code>test_saxonc.py</code> and <code>test_saxon_schema.py</code>, which
          contain a collection of Python unit test cases to be run with the pytest framework. The
          pyunit tests can be run with the following command:</p>
 

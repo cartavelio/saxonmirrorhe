@@ -66,8 +66,6 @@ provide any other feedback.</p>
         
         <kbd>cd libsaxon-[EDITION]C-[VERSION]/</kbd>
         <kbd>sudo cp libsaxon[EDITION].so /usr/lib/.</kbd>
-        <kbd>sudo cp -r rt /usr/lib/.</kbd>
-        <kbd>sudo cp -r saxon-data /usr/lib/.</kbd>
       </li>
       <li>
         <p><b>Set the LD_LIBRARY_PATH environment variable</b></p>
@@ -139,7 +137,7 @@ provide any other feedback.</p>
         been installed. For instance:</p>
         <kbd>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib</kbd>
         <p>If the SaxonC files were installed to a location other than the default
-        <code>/usr/local/lib</code>, then the SAXONC_HOME variable must be set to the correct
+        <code>/usr/local/lib</code>, then the LD_LIBRARY_PATH variable must be set to the correct
         location.</p>
       </li>
     </ol>
