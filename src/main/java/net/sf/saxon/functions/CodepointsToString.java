@@ -33,12 +33,11 @@ public class CodepointsToString extends SystemFunction implements Callable {
      *          if any of the integers is not the codepoint of a valid XML character
      */
 
-    public static StringValue unicodeToString(SequenceIterator chars, IntPredicateProxy checker) throws XPathException {
-        UnicodeBuilder sb = new UnicodeBuilder();
+    private static void unicodeToString(UnicodeBuilder sb, SequenceIterator chars, IntPredicateProxy checker) throws XPathException {
         while (true) {
             NumericValue nextInt = (NumericValue) chars.next();
             if (nextInt == null) {
-                return new StringValue(sb.toUnicodeString());
+                return;
             }
             long next = nextInt.longValue();
             if (next < 0 || next > Integer.MAX_VALUE || !checker.test((int) next)) {
@@ -59,8 +58,13 @@ public class CodepointsToString extends SystemFunction implements Callable {
      */
     @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        SequenceIterator chars = arguments[0].iterate();
-        return unicodeToString(chars, context.getConfiguration().getValidCharacterChecker());
+        // Function is variadic in 4.0
+        UnicodeBuilder sb = new UnicodeBuilder();
+        for (Sequence arg : arguments) {
+            SequenceIterator chars = arg.iterate();
+            unicodeToString(sb, chars, context.getConfiguration().getValidCharacterChecker());
+        }
+        return new StringValue(sb.toUnicodeString());
     }
 
     @Override

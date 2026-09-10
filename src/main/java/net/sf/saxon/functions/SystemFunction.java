@@ -356,8 +356,12 @@ public abstract class SystemFunction extends AbstractFunction implements IFuncti
         if (details == null) {
             return SequenceType.ANY_SEQUENCE;
         }
-        return details.paramTypes[arg];
-        // this is overridden for concat()
+        if (isSequenceVariadic()) {
+            return details.paramTypes[0];
+        } else {
+            return details.paramTypes[arg];
+        }
+        // this is overridden for concat() -- but probably no longer needs to be
     }
 
     /**

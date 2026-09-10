@@ -223,13 +223,16 @@ public abstract class FunctionCall extends Expression {
         if (target instanceof FunctionDefinition) {
             fd = (FunctionDefinition)target;
         }
-        if (target.isSequenceVariadic() && getArity() == 1) {
+        if (target.isSequenceVariadic()) {
             String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
-            Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, 0);
-            setArg(0, tc.staticTypeCheck(
-                    getArg(0),
-                    new SequenceType(argTypes[0].getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE),
-                    role, visitor));
+            for (int a=0; a<getArity(); a++) {
+                final int finalA = a;
+                Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, finalA);
+                setArg(a, tc.staticTypeCheck(
+                        getArg(a),
+                        new SequenceType(argTypes[0].getPrimaryType(), StaticProperty.ALLOWS_ZERO_OR_MORE),
+                        role, visitor));
+            }
         } else {
             int n = target.getArity();
             for (int i = 0; i < n; i++) {

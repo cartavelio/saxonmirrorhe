@@ -822,7 +822,9 @@ public class QT3TestDriverHE extends TestDriver {
                 return;
             }
             XPathCompiler assertXpc = env.processor.newXPathCompiler();
-            assertXpc.setLanguageVersion("3.1");
+            if ("4.0".equals(langVersion)) {
+                assertXpc.setLanguageVersion(langVersion);
+            }
             assertXpc.declareNamespace("fn", NamespaceConstant.FN);
             assertXpc.declareNamespace("xs", NamespaceConstant.SCHEMA);
             assertXpc.declareNamespace("math", NamespaceConstant.MATH);
@@ -833,11 +835,6 @@ public class QT3TestDriverHE extends TestDriver {
             assertXpc.declareNamespace("bin", NamespaceUri.EXPATH_BINARY.toString());
             assertXpc.declareVariable(new QName("result"));
             assertXpc.setBaseURI(assertion.getBaseURI());
-            assertXpc.setLanguageVersion("4.0");
-
-            if ("4.0".equals(langVersion)) {
-                assertXpc.setLanguageVersion(langVersion);
-            }
 
             copySchemaNamespaces(env, assertXpc);  // ensure environment has schema namespaces
 

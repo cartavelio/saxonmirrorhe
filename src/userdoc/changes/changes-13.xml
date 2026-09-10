@@ -216,6 +216,11 @@
         
         <p>The new function <code>fn:collation</code> is implemented.</p>
         
+        <p>The new function <code>fn:graphemes</code> is implemented.</p>
+        
+        <p>The function <code>fn:codepoints-to-string</code> is now variadic: you can write
+        <code>codepoints-to-string(13, 10)</code> instead of <code>codepoints-to-string((13, 10))</code>.</p>
+        
         <p>The deep-lookup operator <code>??</code> is implemented.</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
