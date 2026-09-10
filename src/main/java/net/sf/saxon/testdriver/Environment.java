@@ -921,7 +921,7 @@ public class Environment implements ResourceResolver {
                             ss = new StreamSource(fileLoc.toString());
                         } else {
                             fileInputStream = new FileInputStream(file);
-                            if (driver.usePullParser) {
+                            if (driver.usePullParser && !"true".equals(xinc)) {
                                 try {
                                     System.setProperty("javax.xml.stream.XMLInputFactory", "com.ctc.wstx.stax.WstxInputFactory");
                                     XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(
