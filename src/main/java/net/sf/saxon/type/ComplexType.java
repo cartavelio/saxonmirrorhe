@@ -253,5 +253,13 @@ public interface ComplexType extends SchemaType {
      */
 
     boolean hasAssertions();
+
+    /**
+     * Decide what kind of layout to use when formatting an element of this type using the
+     * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
+     */
+    default String getPreferredJsonLayout() {
+        return "mixed";
+    }
 }
 
