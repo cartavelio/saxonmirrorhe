@@ -368,8 +368,7 @@ def testNamedTemplateDefault(saxonproc, files_dir, data_dir):
     </xsl:stylesheet>
             
              ''')
-    if executable is None and trans.exception_occurred:
-        print(trans.error_message)
+
     assert executable is not None
 
     result = executable.call_template_returning_string(None)
