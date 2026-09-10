@@ -439,7 +439,8 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
      <p>The Python extension is an interface module that allows SaxonC to be invoked from Python
        applications. The SaxonC 12 Python extension requires Python >=3.8 (64-bit).</p>
      
-     <p>SaxonC is now officially available as a wheel package available on pypi. This means that it
+     <p>SaxonC is now officially available as a wheel package available on <a target="_blank"
+       href="https://pypi.org/user/saxonica/">PyPI</a>. This means that it
        can be installed with pip, which greatly simplifies the installation process. If however you
        are not able to install with pip, then the manual install and build instructions are provided
        below.</p>
