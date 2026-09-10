@@ -104,7 +104,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         }
         for (SchemaType type : schema.getAllTypes()) {
             if (type instanceof UserComplexType) {
-                FiniteStateMachine fsm = pendingCompilations.get(type);
+                FiniteStateMachine fsm = pendingCompilations.get((UserComplexType)type);
                 schema.rebuildComplexType((UserComplexType)type, fsm);
             }
         }

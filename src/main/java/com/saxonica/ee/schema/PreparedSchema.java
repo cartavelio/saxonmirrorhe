@@ -28,7 +28,6 @@ import javax.xml.transform.SourceLocator;
 import javax.xml.transform.sax.SAXSource;
 import java.util.*;
 
-import static net.sf.saxon.Configuration.XSD11;
 
 
 /**
@@ -343,7 +342,7 @@ public class PreparedSchema implements Schema, NotationSet {
      */
 
     public NodeTest makeSchemaElementTest(int fp) throws SchemaException {
-        ElementDecl decl = getElementDecl(fp);
+        ElementDecl decl = (ElementDecl)getElementDecl(fp);
         if (decl == null) {
             throw new SchemaException("No element declaration found for the required element name");
         }
@@ -358,7 +357,7 @@ public class PreparedSchema implements Schema, NotationSet {
      */
 
     public NodeTest makeSchemaAttributeTest(int fp) throws SchemaException {
-        AttributeDecl decl = getAttributeDecl(fp);
+        AttributeDecl decl = (AttributeDecl)getAttributeDecl(fp);
         if (decl == null) {
             throw new SchemaException("No element declaration found for the required element name");
         }
@@ -622,11 +621,15 @@ public class PreparedSchema implements Schema, NotationSet {
      * @param type the type whose extensions are required
      */
 
-    @Override
-    public Set<? extends SchemaType> getExtensionsOfType(SchemaType type) {
+    public Set<UserComplexType> getExtensionsOfType(SchemaType type) {
         if (type instanceof UserDefinedType) {
             Set<UserComplexType> types = typeExtensions.get(((UserDefinedType)type));
-            return types == null ? Collections.emptySet() : types;
+            //noinspection ReplaceNullCheck
+            if (types == null) { // written this way for C#
+                return Collections.emptySet();
+            } else {
+                return types;
+            }
         } else {
             return getExtensionsOfBuiltInType(type.getFingerprint());
         }
@@ -659,7 +662,7 @@ public class PreparedSchema implements Schema, NotationSet {
      */
 
     public void registerExtensionOfUserDefinedType(UserDefinedType baseType, UserComplexType extension) {
-        Set<UserComplexType> set = typeExtensions.computeIfAbsent(baseType, k -> new HashSet<>(4));
+        Set<UserComplexType> set = typeExtensions.computeIfAbsent(baseType, k -> new HashSet<UserComplexType>(4));
         set.add(extension);
     }
 
@@ -1005,7 +1008,7 @@ public class PreparedSchema implements Schema, NotationSet {
         }
 
         for (ElementDecl el : elementsByName.values()) {
-            ElementDecl other = destination.getElementDecl(el.getFingerprint());
+            ElementDecl other = (ElementDecl)destination.getElementDecl(el.getFingerprint());
             if (other == null) {
                 destination.addElementDecl(el);
                 other = el;
@@ -1145,7 +1148,7 @@ public class PreparedSchema implements Schema, NotationSet {
         }
 
         for (ElementDecl decl : elementsByName.values()) {
-            final ElementDecl existing = destination.getElementDecl(decl.getComponentName());
+            final ElementDecl existing = (ElementDecl)destination.getElementDecl(decl.getComponentName());
             if (existing != null && existing != decl) {
                 if (decl.isSameDeclaration(existing)) {
                     duplicates.add(decl);
@@ -1159,7 +1162,7 @@ public class PreparedSchema implements Schema, NotationSet {
         }
 
         for (AttributeDecl decl : attributesByName.values()) {
-            final AttributeDecl existing = destination.getAttributeDecl(decl.getComponentName());
+            final AttributeDecl existing = (AttributeDecl)destination.getAttributeDecl(decl.getComponentName());
             if (existing != null && existing != decl) {
                 if (existing.isSameDeclaration(decl)) {
                     duplicates.add(decl);
@@ -1843,7 +1846,7 @@ public class PreparedSchema implements Schema, NotationSet {
             if (elemName == null) {
                 throw new IllegalArgumentException("When validating an element, either a type or an element name must be supplied");
             }
-            ElementDecl decl = getElementDecl(elemName);
+            ElementDecl decl = (ElementDecl)getElementDecl(elemName);
             if (decl == null || !decl.hasTypeAlternatives()) {
                 List<ValidationFailure> failures = new ArrayList<>(1);
                 contentValidator = ContentValidator.makeValidator(decl, elemName, location,
@@ -1908,7 +1911,7 @@ public class PreparedSchema implements Schema, NotationSet {
     }
 
     private Receiver allocateAssertionTreeBuilder(Receiver destination, PipelineConfiguration pipe, ValidationContext vc) {
-        if (config.getXsdVersion() == XSD11) {
+        if (config.getXsdVersion() == Configuration.XSD11) {
             // TODO: allow this to vary per schema
             boolean retainComments = config.getBooleanProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS);
             AssertionTreeBuilder atb = new AssertionTreeBuilder(destination, retainComments);
@@ -1934,7 +1937,7 @@ public class PreparedSchema implements Schema, NotationSet {
     public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
             throws ValidationException, MissingComponentException {
 
-        AttributeDecl decl = getAttributeDecl(nodeName);
+        AttributeDecl decl = (AttributeDecl)getAttributeDecl(nodeName);
         if (decl == null) {
             if (validation == Validation.STRICT) {
                 ValidationFailure ve = new ValidationFailure(

@@ -29,29 +29,7 @@ import javax.xml.transform.Source;
 
 public class XSLImportSchemaEE extends XSLImportSchema {
 
-//    @Override
-//    protected void prepareAttributes() {
-//
-//        String namespace = null;
-//
-//        for (AttributeInfo att : attributes()) {
-//            NodeName attName = att.getNodeName();
-//            String value = att.getValue();
-//            String f = attName.getDisplayName();
-//            if (f.equals("schema-location")) {
-//                //
-//            } else if (f.equals("namespace")) {
-//                namespace = Whitespace.trim(value);
-//            } else {
-//                checkUnknownAttribute(attName);
-//            }
-//        }
-//
-//        if ("".equals(namespace)) {
-//            compileError("The zero-length string is not a valid namespace URI. " +
-//                    "For a schema with no namespace, omit the namespace attribute");
-//        }
-//    }
+
 
     public Source asSource(SchemaCompiler schemaCompiler) throws XPathException {
         try {

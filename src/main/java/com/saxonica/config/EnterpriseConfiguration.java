@@ -1539,7 +1539,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     @Override
-    @CSharpModifiers(code = {"virtual", "internal"})
+    @CSharpModifiers(code = {"override", "internal"})
     public XsdCompiler makeXsdCompiler(Processor proc) {
         return new XsdCompilerEE(proc);
     }

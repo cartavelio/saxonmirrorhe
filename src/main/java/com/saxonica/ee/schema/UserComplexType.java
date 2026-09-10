@@ -1070,9 +1070,9 @@ public class UserComplexType extends UserDefinedType
         // exit. This can happen when the same schema is processed more than once.
 
         if (base instanceof UserDefinedType) {
-            Set<? extends SchemaType> existingExtensions = schema.getExtensionsOfType((UserDefinedType) base);
-            for (SchemaType ex : existingExtensions) {
-                if (((UserComplexType)ex).getTypeName().equals(getTypeName()) && ex.isSameType(this)) {
+            Set<UserComplexType> existingExtensions = schema.getExtensionsOfType(base);
+            for (UserComplexType ex : existingExtensions) {
+                if (ex.getTypeName().equals(getTypeName()) && ex.isSameType(this)) {
                     return true;
                 }
             }
@@ -2085,13 +2085,12 @@ public class UserComplexType extends UserDefinedType
      *                           model permitted by the type. If there is one extension that defines the particle, return
      */
 
-    //@Override
     public SchemaType getElementParticleType(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
         CompiledComplexType compiledType = ((PreparedSchema)schema).getCompiledComplexType(this);
         if (compiledType == null) {
             throw new IllegalStateException("Complex type " + getDescription() + " has not been compiled");
         }
-        return compiledType.getElementParticleType(elementName, schema, considerExtensions);
+        return compiledType.getElementParticleType(elementName, (PreparedSchema) schema, considerExtensions);
     }
 
     /**
@@ -2112,7 +2111,7 @@ public class UserComplexType extends UserDefinedType
     @Override
     public int getElementParticleCardinality(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
         CompiledComplexType compiledType = ((PreparedSchema) schema).getCompiledComplexType(this);
-        return compiledType.getElementParticleCardinality(elementName, schema, considerExtensions);
+        return compiledType.getElementParticleCardinality(elementName, (PreparedSchema)schema, considerExtensions);
     }
 
     /**
@@ -2131,7 +2130,7 @@ public class UserComplexType extends UserDefinedType
     @Override
     public SimpleType getAttributeUseType(StructuredQName attributeName, Schema schema) throws SchemaException {
         CompiledComplexType compiledType = ((PreparedSchema) schema).getCompiledComplexType(this);
-        return compiledType.getAttributeUseType(attributeName, schema);
+        return compiledType.getAttributeUseType(attributeName, (PreparedSchema)schema);
     }
 
     /**
@@ -2149,7 +2148,7 @@ public class UserComplexType extends UserDefinedType
     @Override
     public int getAttributeUseCardinality(StructuredQName attributeName, Schema schema) throws SchemaException {
         CompiledComplexType compiledType = ((PreparedSchema) schema).getCompiledComplexType(this);
-        return compiledType.getAttributeUseCardinality(attributeName, schema);
+        return compiledType.getAttributeUseCardinality(attributeName, (PreparedSchema)schema);
     }
 
     /**
@@ -2180,7 +2179,7 @@ public class UserComplexType extends UserDefinedType
     @Override
     public void gatherAllPermittedChildren(Schema schema, IntHashSet children, boolean ignoreWildcards) throws SchemaException {
         CompiledComplexType compiledType = ((PreparedSchema) schema).getCompiledComplexType(this);
-        compiledType.gatherAllPermittedChildren(schema, children, ignoreWildcards);
+        compiledType.gatherAllPermittedChildren(((PreparedSchema) schema), children, ignoreWildcards);
     }
 
     /**
@@ -2198,7 +2197,7 @@ public class UserComplexType extends UserDefinedType
     @Override
     public void gatherAllPermittedDescendants(Schema schema, IntHashSet descendants) throws SchemaException {
         CompiledComplexType compiledType = ((PreparedSchema) schema).getCompiledComplexType(this);
-        compiledType.gatherAllPermittedDescendants(schema, descendants);
+        compiledType.gatherAllPermittedDescendants(((PreparedSchema) schema), descendants);
     }
 
     /**
@@ -2206,7 +2205,7 @@ public class UserComplexType extends UserDefinedType
      * the type of the element when it appears as a descendant. If it appears with more than one type,
      * return xs:anyType.
      *
-     * @param schema
+     * @param schema the containing schema
      * @param fingerprint the name of the required descendant element
      * @return the type of the descendant element; null if the element cannot appear as a descendant;
      * anyType if it can appear with several different types
@@ -2214,7 +2213,7 @@ public class UserComplexType extends UserDefinedType
     @Override
     public SchemaType getDescendantElementType(Schema schema, int fingerprint) throws SchemaException {
         CompiledComplexType compiledType = ((PreparedSchema) schema).getCompiledComplexType(this);
-        return compiledType.getDescendantElementType(schema, fingerprint);
+        return compiledType.getDescendantElementType((PreparedSchema)schema, fingerprint);
     }
 
     /**
@@ -2228,7 +2227,7 @@ public class UserComplexType extends UserDefinedType
     @Override
     public int getDescendantElementCardinality(Schema schema, int elementFingerprint) throws SchemaException {
         CompiledComplexType compiledType = ((PreparedSchema) schema).getCompiledComplexType(this);
-        return compiledType.getDescendantElementCardinality(schema, elementFingerprint);
+        return compiledType.getDescendantElementCardinality((PreparedSchema)schema, elementFingerprint);
     }
 
     /**

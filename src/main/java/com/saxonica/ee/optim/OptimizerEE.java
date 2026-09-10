@@ -1,6 +1,8 @@
 package com.saxonica.ee.optim;
 
 import com.saxonica.ee.parallel.MultithreadedForEach;
+import com.saxonica.ee.schema.PreparedSchema;
+import com.saxonica.ee.schema.UserComplexType;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import com.saxonica.ee.trans.TemplateRuleEE;
@@ -26,13 +28,18 @@ import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.style.XSLFunction;
 import net.sf.saxon.style.XSLTemplate;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.Rule;
+import net.sf.saxon.transpile.CSharpSuppressWarnings;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
+import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntIterator;
 
 import java.util.*;
 
@@ -293,6 +300,391 @@ public class OptimizerEE extends Optimizer {
 
         return vc;
     }
+
+    /**
+     * Perform schema-aware type checking of an axis expression
+     * @param expr the expression
+     * @param visitor the expression visitor
+     * @param contextInfo static context information regarding the axis expression
+     * @param warnings true if warnings are to be issued
+     * @return the axis expression, perhaps modified
+     * @throws XPathException if things go wrong
+     */
+
+    @Override
+    public Expression checkAxisExprAgainstSchema(AxisExpression expr, ExpressionVisitor visitor,
+                                                         ContextItemStaticInfo contextInfo, boolean warnings) throws XPathException {
+        StaticContext env = visitor.getStaticContext();
+        Configuration config = env.getConfiguration();
+        ItemType contextType = contextInfo.getItemType();
+        PreparedSchema schema = (PreparedSchema)visitor.getSchemaForTypeChecking();
+        ItemType itemType;
+        if (schema == null) {
+            schema = (PreparedSchema)env.getPackageData().getImportedSchema();
+        }
+        SchemaType contentType = ((NodeTest) contextType).getContentType();
+        NodeTest test = expr.getNodeTest();
+        int axis = expr.getAxis();
+        UType kind = test == null ? UType.ANY_NODE : test.getUType();
+
+        if (!env.getPackageData().isSchemaAware()) {
+            SchemaType ct = test.getContentType();
+            if (!(ct == AnyType.getInstance() || ct == Untyped.getInstance() || ct == AnySimpleType.getInstance() ||
+                          ct == BuiltInAtomicType.ANY_ATOMIC || ct == BuiltInAtomicType.UNTYPED_ATOMIC ||
+                          ct == BuiltInAtomicType.STRING)) {
+                if (warnings) {
+                    visitor.issueWarning(
+                            "The " + AxisInfo.axisName[axis] + " axis will never select any typed nodes, " +
+                                    "because the expression is being compiled in an environment that is not schema-aware",
+                            SaxonErrorCode.SXWN9037, expr.getLocation());
+                }
+                return Literal.makeEmptySequence();
+            }
+        }
+
+        int origin = contextType.getPrimitiveType();
+        int targetfp = test.getFingerprint();
+        StructuredQName targetName = test.getMatchingNodeName();
+
+        if (contentType.isSimpleType()) {
+            if (warnings) {
+                if ((axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) &&
+                        UType.PARENT_NODE_KINDS.union(UType.ATTRIBUTE).subsumes(kind)) {
+                    visitor.issueWarning(
+                            "The " + AxisInfo.axisName[axis] + " axis will never select any " +
+                                    kind + " nodes when starting at " +
+                                    (origin == Type.ATTRIBUTE ? "an attribute node" : getStartingNodeDescription(contentType)),
+                            SaxonErrorCode.SXWN9037, expr.getLocation());
+                } else if (axis == AxisInfo.CHILD && kind.equals(UType.TEXT) &&
+                        (expr.getParentExpression() instanceof Atomizer)) {
+                    visitor.issueWarning(
+                            "Selecting the text nodes of an element with simple content may give the " +
+                                    "wrong answer in the presence of comments or processing instructions. It is usually " +
+                                    "better to omit the '/text()' step",
+                            SaxonErrorCode.SXWN9037, expr.getLocation());
+                } else if (axis == AxisInfo.ATTRIBUTE) {
+                    boolean found = false;
+                    if (targetfp == -1) {
+                        for (UserComplexType extension : schema.getExtensionsOfType(contentType)) {
+                            if (((ComplexType) extension).allowsAttributes(schema)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
+                            try {
+                                if (((ComplexType) extension).getAttributeUseType(targetName, schema) != null) {
+                                    found = true;
+                                    break;
+                                }
+                            } catch (SchemaException e) {
+                                // ignore the error
+                            }
+                        }
+                    }
+                    if (!found) {
+                        visitor.issueWarning(
+                                "The " + AxisInfo.axisName[axis] + " axis will never select " +
+                                        (targetName == null ?
+                                                 "any attribute nodes" :
+                                                 "an attribute node named " + getDiagnosticName(targetName, env)) +
+                                        " when starting at "
+                                        + getStartingNodeDescription(contentType), SaxonErrorCode.SXWN9037, expr.getLocation());
+                        // Despite the warning, leave the expression unchanged. This is because
+                        // we don't necessarily know about all extended types at compile time:
+                        // in particular, we don't seal the XML Schema namespace to block extensions
+                        // of built-in types
+                    }
+                }
+            }
+        } else if (((ComplexType) contentType).isSimpleContent() &&
+                (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) &&
+                UType.PARENT_NODE_KINDS.subsumes(kind)) {
+            // We don't need to consider extended types here, because a type with complex content
+            // can never be defined as an extension of a type with simple content
+            if (warnings) {
+                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select any " +
+                                             kind +
+                                             " nodes when starting at " +
+                                             getStartingNodeDescription(contentType) +
+                                             ", as this type requires simple content", SaxonErrorCode.SXWN9037, expr.getLocation());
+            }
+            return Literal.makeEmptySequence();
+        } else if (((ComplexType) contentType).isEmptyContent() &&
+                (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF)) {
+            for (SchemaType extension : schema.getExtensionsOfType(contentType)) {
+                if (!((ComplexType) extension).isEmptyContent()) {
+                    return expr;
+                }
+            }
+            if (warnings) {
+                visitor.issueWarning("The " + AxisInfo.axisName[axis] + " axis will never select any" +
+                                             " nodes when starting at " +
+                                             getStartingNodeDescription(contentType) +
+                                             ", as this type requires empty content", SaxonErrorCode.SXWN9037, expr.getLocation());
+            }
+            return Literal.makeEmptySequence();
+        } else if (axis == AxisInfo.ATTRIBUTE) {
+            if (targetfp == -1) {
+                if (warnings) {
+                    if (!((ComplexType) contentType).allowsAttributes(schema)) {
+                        visitor.issueWarning(
+                                "The complex type " + contentType.getDescription() +
+                                        " allows no attributes other than the standard attributes in the xsi namespace",
+                                SaxonErrorCode.SXWN9037, expr.getLocation());
+                    }
+                }
+            } else {
+                try {
+                    SchemaType schemaType;
+                    if (targetfp == StandardNames.XSI_TYPE) {
+                        schemaType = BuiltInAtomicType.QNAME;
+                    } else if (targetfp == StandardNames.XSI_SCHEMA_LOCATION) {
+                        schemaType = BuiltInListType.ANY_URIS;
+                    } else if (targetfp == StandardNames.XSI_NO_NAMESPACE_SCHEMA_LOCATION) {
+                        schemaType = BuiltInAtomicType.ANY_URI;
+                    } else if (targetfp == StandardNames.XSI_NIL) {
+                        schemaType = BuiltInAtomicType.BOOLEAN;
+                    } else {
+                        schemaType = ((ComplexType) contentType).getAttributeUseType(targetName, schema);
+                    }
+                    if (schemaType == null) {
+                        if (warnings) {
+                            visitor.issueWarning(
+                                    "The complex type " + contentType.getDescription() +
+                                            " does not allow an attribute named " + getDiagnosticName(targetName, env),
+                                    SaxonErrorCode.SXWN9037, expr.getLocation());
+                            return Literal.makeEmptySequence();
+                        }
+                    } else {
+                        itemType = new ContentTypeTest(Type.ATTRIBUTE, test.getQNameTest(), schemaType, false, config);
+                        expr.setItemType(itemType);
+                    }
+                } catch (SchemaException e) {
+                    // ignore the exception
+                }
+            }
+        } else if (axis == AxisInfo.CHILD && kind.equals(UType.ELEMENT)) {
+            try {
+                int childfp = targetfp;
+                if (targetName == null) {
+                    // select="child::*"
+                    if (((ComplexType) contentType).containsElementWildcard(schema)) {
+                        return expr;
+                    }
+                    IntHashSet children = new IntHashSet();
+                    ((ComplexType) contentType).gatherAllPermittedChildren(schema, children, false);
+                    if (children.isEmpty()) {
+                        if (warnings) {
+                            visitor.issueWarning(
+                                    "The complex type " + contentType.getDescription() +
+                                            " does not allow children",
+                                    SaxonErrorCode.SXWN9037, expr.getLocation());
+                        }
+                        return Literal.makeEmptySequence();
+                    }
+//                            if (children.contains(-1)) {
+//                                return this;
+//                            }
+                    if (children.size() == 1) {
+                        IntIterator iter = children.iterator();
+                        if (iter.hasNext()) {
+                            childfp = iter.next();
+                        }
+                    } else {
+                        return expr;
+                    }
+                }
+                SchemaType schemaType = ((ComplexType) contentType).getElementParticleType(childfp, schema, true);
+                if (schemaType == null) {
+                    if (warnings) {
+                        StructuredQName childElement = config.getNamePool().getStructuredQName(childfp);
+                        String message = "The complex type " + contentType.getDescription() +
+                                " does not allow a child element named " + getDiagnosticName(childElement, env);
+                        IntHashSet permitted = new IntHashSet();
+                        ((ComplexType) contentType).gatherAllPermittedChildren(schema, permitted, false);
+                        if (!permitted.contains(-1)) {
+                            IntIterator kids = permitted.iterator();
+                            while (kids.hasNext()) {
+                                int kid = kids.next();
+                                StructuredQName sq = config.getNamePool().getStructuredQName(kid);
+                                if (sq.getLocalPart().equals(childElement.getLocalPart()) && kid != childfp) {
+                                    message += ". Perhaps the namespace is " +
+                                            (childElement.hasURI(NamespaceUri.NULL) ? "missing" : "wrong") +
+                                            ", and " + sq.getEQName() + " was intended?";
+                                    break;
+                                }
+                            }
+                        }
+                        visitor.issueWarning(message, SaxonErrorCode.SXWN9037, expr.getLocation());
+                    }
+                    return Literal.makeEmptySequence();
+                } else {
+
+                    itemType = new ContentTypeTest(Type.ELEMENT, test.getQNameTest(), schemaType, true, config);
+                    expr.setItemType(itemType);
+                    int computedCardinality = ((ComplexType) contentType).getElementParticleCardinality(childfp, schema, true);
+                    ExpressionTool.resetStaticProperties(expr);
+                    if (computedCardinality == StaticProperty.ALLOWS_ZERO) {
+                        // this shouldn't happen, because we've already checked for this a different way.
+                        // but it's worth being safe (there was a bug involving an incorrect inference here)
+                        StructuredQName childElement = config.getNamePool().getStructuredQName(childfp);
+                        visitor.issueWarning(
+                                "The complex type " + contentType.getDescription() +
+                                        " appears not to allow a child element named " +
+                                        getDiagnosticName(childElement, env),
+                                SaxonErrorCode.SXWN9037, expr.getLocation());
+                        return Literal.makeEmptySequence();
+                    }
+                    if (!Cardinality.allowsMany(computedCardinality) &&
+                            !(expr.getParentExpression() instanceof FirstItemExpression) &&
+                            !visitor.isOptimizeForPatternMatching()) {
+                        // if there can be at most one child of this name, create a FirstItemExpression
+                        // to stop the search after the first one is found
+                        return FirstItemExpression.makeFirstItemExpression(expr);
+                    }
+                }
+            } catch (SchemaException e) {
+                // ignore the exception
+            }
+        } else if (axis == AxisInfo.DESCENDANT && kind.equals(UType.ELEMENT) && targetfp != -1) {
+            // when searching for a specific element on the descendant axis, try to produce a more
+            // specific path that avoids searching branches of the tree where the element cannot occur
+            try {
+                IntHashSet descendants = new IntHashSet();
+                ((ComplexType) contentType).gatherAllPermittedDescendants(schema, descendants);
+                if (descendants.contains(-1)) {
+                    return expr;
+                }
+                if (descendants.contains(targetfp)) {
+                    IntHashSet children = new IntHashSet();
+                    ((ComplexType) contentType).gatherAllPermittedChildren(schema, children, false);
+                    IntHashSet usefulChildren = new IntHashSet();
+                    boolean considerSelf = false;
+                    boolean considerDescendants = false;
+                    IntIterator kids = children.iterator();
+                    while (kids.hasNext()) {
+                        int c = kids.next();
+                        if (c == targetfp) {
+                            usefulChildren.add(c);
+                            considerSelf = true;
+                        }
+                        SchemaType st = ((ComplexType) contentType).getElementParticleType(c, schema, true);
+                        if (st == null) {
+                            throw new AssertionError("Can't find type for child element " + c);
+                        }
+                        if (st instanceof ComplexType) {
+                            IntHashSet subDescendants = new IntHashSet();
+                            ((ComplexType) st).gatherAllPermittedDescendants(schema, subDescendants);
+                            if (subDescendants.contains(targetfp)) {
+                                usefulChildren.add(c);
+                                considerDescendants = true;
+                            }
+                        }
+                    }
+                    itemType = test;
+                    expr.setItemType(itemType);
+                    if (considerDescendants) {
+                        SchemaType st = ((ComplexType) contentType).getDescendantElementType(schema, targetfp);
+                        if (st != AnyType.getInstance()) {
+                            itemType = new ContentTypeTest(Type.ELEMENT, test.getQNameTest(), st, true, config);
+                            expr.setItemType(itemType);
+                        }
+                        //return this;
+                    }
+                    if (usefulChildren.size() < children.size()) {
+                        NodeTest childTest = makeUnionNodeTest(usefulChildren, config.getNamePool());
+                        AxisExpression first = new AxisExpression(AxisInfo.CHILD, childTest);
+                        ExpressionTool.copyLocationInfo(expr, first);
+                        int nextAxis;
+                        if (considerSelf) {
+                            nextAxis = considerDescendants ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.SELF;
+                        } else {
+                            nextAxis = AxisInfo.DESCENDANT;
+                        }
+                        AxisExpression next = new AxisExpression(nextAxis, (NodeTest) itemType);
+                        ExpressionTool.copyLocationInfo(expr, next);
+                        Expression path = ExpressionTool.makePathExpression(first, next);
+                        ExpressionTool.copyLocationInfo(expr, path);
+                        return path.typeCheck(visitor, contextInfo);
+                    }
+                } else {
+                    if (warnings) {
+                        visitor.issueWarning(
+                                "The complex type " + contentType.getDescription() +
+                                        " does not allow a descendant element named " +
+                                        getDiagnosticName(targetName, env),
+                                SaxonErrorCode.SXWN9037, expr.getLocation());
+                    }
+                }
+            } catch (SchemaException e) {
+                throw new AssertionError(e);
+            }
+
+
+        }
+
+        return expr;
+    }
+
+    /*
+     * Get a string representation of a name to use in diagnostics
+     */
+
+    @CSharpSuppressWarnings("UnsafeIteratorConversion")
+    private static String getDiagnosticName(StructuredQName name, StaticContext env) {
+        NamespaceUri uri = name.getNamespaceUri();
+        if (uri.isEmpty()) {
+            return name.getLocalPart();
+        } else {
+            NamespaceResolver resolver = env.getNamespaceResolver();
+            for (Iterator<String> it = resolver.iteratePrefixes(); it.hasNext(); ) {
+                String prefix = it.next();
+                if (uri.equals(resolver.getURIForPrefix(prefix, true))) {
+                    if (prefix.isEmpty()) {
+                        return "Q{" + uri + "}" + name.getLocalPart();
+                    } else {
+                        return prefix + ":" + name.getLocalPart();
+                    }
+                }
+            }
+        }
+        return "Q{" + uri + "}" + name.getLocalPart();
+    }
+
+    private static String getStartingNodeDescription(SchemaType type) {
+        String s = type.getDescription();
+        if (s.startsWith("of element")) {
+            return "a valid element named" + s.substring("of element".length());
+        } else if (s.startsWith("of attribute")) {
+            return "a valid attribute named" + s.substring("of attribute".length());
+        } else {
+            return "a node with " + (type.isSimpleType() ? "simple" : "complex") + " type " + s;
+        }
+    }
+
+    /**
+     * Make a union node test for a set of supplied element fingerprints
+     *
+     * @param elements the set of integer element fingerprints to be tested for. Must not
+     *                 be empty.
+     * @param pool     the name pool
+     * @return a NodeTest that returns true if the node is an element whose name is one of the names
+     * in this set
+     */
+
+    private static NodeTest makeUnionNodeTest(IntHashSet elements, NamePool pool) {
+        List<QNameTest> list = new ArrayList<>(elements.size());
+        IntIterator iter = elements.iterator();
+        while (iter.hasNext()) {
+            int fp = iter.next();
+            list.add(new SpecificQNameTest(pool, fp));
+        }
+        UnionQNameTest test = new UnionQNameTest(list);
+        return new NameTestUnion(test, Type.ELEMENT);
+    }
+
 
     /**
      * Test whether an expression is constant zero

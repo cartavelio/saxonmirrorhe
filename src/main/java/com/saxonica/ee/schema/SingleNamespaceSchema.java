@@ -52,7 +52,7 @@ public class SingleNamespaceSchema extends PreparedSchema {
     @Override
     public Map<NamespaceUri, List<String>> getTargetNamespaceMap() {
         HashMap<NamespaceUri, List<String>> map = new HashMap<>();
-        map.put(getTargetNamespace(), new ArrayList<>()); // TODO - add the location
+        map.put(getTargetNamespace(), new ArrayList<String>()); // TODO - add the location
         return map;
     }
 }

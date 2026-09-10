@@ -103,8 +103,7 @@ public class CompiledComplexType {
      *                           model permitted by the type. If there is one extension that defines the particle, return
      */
 
-    //@Override
-    public SchemaType getElementParticleType(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
+    public SchemaType getElementParticleType(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException {
         Particle p = type.getParticle();
         SchemaType child = p == null ? null : p.getElementParticleType(elementName, schema);
         if (child != null) {
@@ -114,9 +113,9 @@ public class CompiledComplexType {
             if (ocw != null && ocw.matches(elementName, true, schema, type)) {
                 return AnyType.getInstance();
             }
-            for (SchemaType ext : schema.getExtensionsOfType(type)) {
+            for (UserComplexType ext : schema.getExtensionsOfType(type)) {
                 // No need to consider further extensions, as getExtensionsOfType() returns the transitive set
-                SchemaType st = ((UserComplexType)ext).getElementParticleType(elementName, schema, false);
+                SchemaType st = ext.getElementParticleType(elementName, schema, false);
                 if (st != null) {
                     if (child == null) {
                         child = st;
@@ -149,7 +148,7 @@ public class CompiledComplexType {
      */
 
     //@Override
-    public int getElementParticleCardinality(int elementName, Schema schema, boolean considerExtensions) throws MissingComponentException {
+    public int getElementParticleCardinality(int elementName, PreparedSchema schema, boolean considerExtensions) throws MissingComponentException {
         int baseCardinality;
         Particle p = type.getParticle();
         if (p == null) {
@@ -165,13 +164,13 @@ public class CompiledComplexType {
         // Now we need to look in all complex types derived from this type by extension. These might allow
         // (additional) occurrences of the sought element particle.
         if (considerExtensions) {
-            for (SchemaType ext : schema.getExtensionsOfType(type)) {
+            for (UserComplexType ext : schema.getExtensionsOfType(type)) {
                 if (baseCardinality == StaticProperty.ALLOWS_ZERO_OR_MORE) {
                     // quick exit
                     return baseCardinality;
                 }
                 // No need to consider extensions recursively, since iterateExtensionTypes() is already transitive
-                int extCardinality = ((UserComplexType)ext).getElementParticleCardinality(elementName, schema, false);
+                int extCardinality = ext.getElementParticleCardinality(elementName, schema, false);
                 baseCardinality = Cardinality.union(baseCardinality, extCardinality);
             }
         }
@@ -193,14 +192,14 @@ public class CompiledComplexType {
      */
 
     //@Override
-    public void gatherAllPermittedChildren(Schema schema, IntHashSet children, boolean ignoreWildcards) throws SchemaException {
+    public void gatherAllPermittedChildren(PreparedSchema schema, IntHashSet children, boolean ignoreWildcards) throws SchemaException {
         Particle p = type.getParticle();
         if (p == null) {
             return;
         }
         p.gatherAllPermittedElements(schema, children, ignoreWildcards);
-        for (SchemaType uct : schema.getExtensionsOfType(type)) {
-            ((UserComplexType)uct).gatherAllPermittedChildren(schema, children, ignoreWildcards);
+        for (UserComplexType uct : schema.getExtensionsOfType(type)) {
+            uct.gatherAllPermittedChildren(schema, children, ignoreWildcards);
         }
     }
 
@@ -218,7 +217,7 @@ public class CompiledComplexType {
      */
 
     //@Override
-    public void gatherAllPermittedDescendants(Schema schema, IntHashSet descendants) throws SchemaException {
+    public void gatherAllPermittedDescendants(PreparedSchema schema, IntHashSet descendants) throws SchemaException {
         Particle p = type.getParticle();
         if (p == null) {
             return;
@@ -262,8 +261,7 @@ public class CompiledComplexType {
      * anyType if it can appear with several different types
      */
 
-    //@Override
-    public SchemaType getDescendantElementType(Schema schema, int elementName) throws SchemaException {
+    public SchemaType getDescendantElementType(PreparedSchema schema, int elementName) throws SchemaException {
         Set<SchemaType> parentsConsidered = new HashSet<>();
         Set<SchemaType> foundTypes = new HashSet<>();
         getDescendantElementTypes(schema, elementName, parentsConsidered, foundTypes);
@@ -279,7 +277,7 @@ public class CompiledComplexType {
         return AnyType.getInstance();
     }
 
-    private void getDescendantElementTypes(Schema schema,
+    private void getDescendantElementTypes(PreparedSchema schema,
                                            int elementName,
                                            Set<SchemaType> parentsConsidered,
                                            Set<SchemaType> foundTypes) throws SchemaException {
@@ -334,8 +332,7 @@ public class CompiledComplexType {
      * @return the cardinality of the descendant element within this complex type
      */
 
-    //@Override
-    public int getDescendantElementCardinality(Schema schema, int elementFingerprint) throws SchemaException {
+    public int getDescendantElementCardinality(PreparedSchema schema, int elementFingerprint) throws SchemaException {
         int cardinality = StaticProperty.EMPTY;
         IntHashSet children = new IntHashSet();
         gatherAllPermittedChildren(schema, children, false);
@@ -387,15 +384,15 @@ public class CompiledComplexType {
      */
 
     //@Override
-    public SimpleType getAttributeUseType(StructuredQName attributeName, Schema schema) throws SchemaException {
+    public SimpleType getAttributeUseType(StructuredQName attributeName, PreparedSchema schema) throws SchemaException {
         AttributeGroupDecl ag = type.getCombinedAttributeGroup();
         AttributeUse use = ag.getAttributeUse(attributeName);
         if (use != null && !use.isProhibited()) {
             return ((AttributeDecl) use.getTarget()).getType();
         }
         SimpleType attType = null;
-        for (SchemaType ext : schema.getExtensionsOfType(type)) {
-            SimpleType st = ((UserComplexType)ext).getAttributeUseType(attributeName, schema);
+        for (UserComplexType ext : schema.getExtensionsOfType(type)) {
+            SimpleType st = ext.getAttributeUseType(attributeName, schema);
             if (st != null) {
                 if (attType == null) {
                     attType = st;
@@ -458,15 +455,15 @@ public class CompiledComplexType {
      */
 
     //@Override
-    public int getAttributeUseCardinality(StructuredQName attributeName, Schema schema) throws SchemaException {
+    public int getAttributeUseCardinality(StructuredQName attributeName, PreparedSchema schema) throws SchemaException {
         AttributeGroupDecl ag = type.getCombinedAttributeGroup();
         AttributeUse use = ag.getAttributeUse(attributeName);
         if (use != null) {
             return use.getCardinality();
         }
         int card = 0;
-        for (SchemaType ext : schema.getExtensionsOfType(type)) {
-            int c = ((UserComplexType)ext).getAttributeUseCardinality(attributeName, schema);
+        for (UserComplexType ext : schema.getExtensionsOfType(type)) {
+            int c = ext.getAttributeUseCardinality(attributeName, schema);
             card |= c;
         }
         if (card != 0) {
