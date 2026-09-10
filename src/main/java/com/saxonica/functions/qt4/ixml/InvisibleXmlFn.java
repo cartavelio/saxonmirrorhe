@@ -6,6 +6,7 @@ import net.sf.saxon.functions.AbstractFunction;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.OptionsParameter;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
@@ -41,10 +42,14 @@ public class InvisibleXmlFn extends SystemFunction {
 
     public static OptionsParameter getOptionDetails() {
         OptionsParameter details = new OptionsParameter(40);
-        details.addAllowedOption("format", SequenceType.SINGLE_STRING, StringValue.bmp("xml"));
         details.addAllowedOption("fail-on-error", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        details.addAllowedOption("choose-alternative", SequenceType.SINGLE_FUNCTION, null);
+        details.addAllowedOption(sx("format"), SequenceType.SINGLE_STRING, StringValue.bmp("xml"));
+        details.addAllowedOption(sx("choose-alternative"), SequenceType.SINGLE_FUNCTION, null);
         return details;
+    }
+
+    private static String sx(String s) {
+        return "Q{" + NamespaceConstant.SAXON + "}" + s;
     }
 
     /**
@@ -83,7 +88,11 @@ public class InvisibleXmlFn extends SystemFunction {
     private Sequence functionFromParser(XPathContext context,
                                         InvisibleXmlParser parser,
                                         Map<String, GroundedValue> options) throws XPathException {
-        String format = options.get("format").getStringValue().trim();
+        String format = options.get(sx("format")).getStringValue().trim();
+
+        if (!"xml".equals(format) && !"json".equals(format)) {
+            throw new XPathException("Invalid format: " + format, "XPTY0004");
+        }
 
         if (parser.constructed()) {
             SequenceType[] argTypes = new SequenceType[]{SequenceType.SINGLE_STRING};
@@ -96,8 +105,8 @@ public class InvisibleXmlFn extends SystemFunction {
             }
 
             AbstractFunction chooseAlternative = null;
-            if (options.containsKey("choose-alternative")) {
-                chooseAlternative = (AbstractFunction) options.get("choose-alternative");
+            if (options.containsKey(sx("choose-alternative"))) {
+                chooseAlternative = (AbstractFunction) options.get(sx("choose-alternative"));
             }
 
             if (chooseAlternative != null) {
@@ -163,7 +172,7 @@ public class InvisibleXmlFn extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] sequences) throws XPathException {
             String input = sequences[0].head().getStringValue();
-            String format = options.get("format").getStringValue().trim();
+            String format = options.get(sx("format")).getStringValue().trim();
 
             try {
                 Processor processor = (Processor) context.getConfiguration().getProcessor();
