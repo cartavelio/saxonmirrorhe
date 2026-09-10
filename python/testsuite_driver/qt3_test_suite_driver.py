@@ -136,8 +136,9 @@ def process_catalog(path: pathlib.Path, catalogi: pathlib.Path):
             if results_path is None:
                 results_path = path
             test_report.write_result_file_postamble(driver_proc, results_path)
-        else:
-            print(f'Failed to open {catalogi}')
+    else:
+        print(f'Failed to open {catalogi}')
+    Environment.environment_cleanup()
 
 
 def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySaxonProcessor, test_set_file: pathlib.Path):
@@ -223,8 +224,8 @@ def process_test_set(doc_builderi: saxonc.PyDocumentBuilder, proci: saxonc.PySax
                     else:
                         print("Error test_case is not a node")
 
-        else:
-            print("Cannot find test " + test_set_file)
+    else:
+        print("Cannot find test " + test_set_file)
 
 
 ''', catalog_xpath_proci'''
