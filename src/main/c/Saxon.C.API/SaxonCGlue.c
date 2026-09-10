@@ -15,15 +15,6 @@ char * tempDllname =
 "\\libsaxon@@edition@@c.dll";
 #endif
 
-char * tempResources_dir =
-#ifdef __linux__
-"/saxon-data";
-#elif  defined (__APPLE__) && defined(__MACH__)
-"/saxon-data";
-#else
-"\\saxon-data";
-#endif
-
 char * dllPath =
 #if defined (__linux__)
 "/usr/lib";
