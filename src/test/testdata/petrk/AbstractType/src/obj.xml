@@ -1,5 +1,0 @@
-<myns:doc xmlns:myns="http://myns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<myns:object xsi:type="myns:concreteTypeAttr1" attr1="attr1"/>
-	<myns:object xsi:type="myns:concreteTypeAttr1" attr1="attr1"/>
-	<myns:object xsi:type="myns:concreteType"/>
-</myns:doc>

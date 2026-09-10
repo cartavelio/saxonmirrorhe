@@ -1,7 +1,0 @@
-import schema namespace testns="http://myns" at "schema.xsd"; 
-
-declare variable $elem := <myns:object xmlns:myns="http://myns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="myns:concreteType">
-	 <myns:field>value</myns:field>
-	</myns:object>;
-
-(validate{ $elem })
