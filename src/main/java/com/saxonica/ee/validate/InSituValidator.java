@@ -78,7 +78,7 @@ public class InSituValidator {
      * used to trigger updates to the originating nodes.
      */
 
-    private class NodeCounter implements CopyInformee<Location> {
+    private class NodeCounter implements CopyInformee {
 
         int counter = 0;
 

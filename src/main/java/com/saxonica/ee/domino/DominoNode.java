@@ -4,6 +4,7 @@ import net.sf.saxon.dom.DOMNodeWrapper;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.*;
@@ -25,7 +26,6 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A node in the Domino tree (other than an attribute or namespace node)
@@ -541,7 +541,7 @@ public class DominoNode implements NodeInfo, VirtualNode {
      * @see AxisInfo
      */
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> predicate) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate predicate) {
         if (predicate instanceof NodeTest) {
             NodeTest nodeTest = (NodeTest)predicate;
             int type = getNodeKind();
@@ -591,7 +591,7 @@ public class DominoNode implements NodeInfo, VirtualNode {
                                     }
                                 }
                             }
-                            return new Navigator.AxisFilter(new ListIterator.OfNodes(list), nodeTest);
+                            return new Navigator.AxisFilter(new NodeListIterator(list), nodeTest);
                         }
                     }
 
@@ -756,10 +756,10 @@ public class DominoNode implements NodeInfo, VirtualNode {
                 UnicodeString value = emptyIfNull(getDomNode().getNodeValue());
                 if ((tree.nameCode[nodeNr] & DominoTree.HAS_CONTINUATION) != 0) {
                     UnicodeBuilder buffer = new UnicodeBuilder();
-                    buffer.append(value);
+                    buffer.accept(value);
                     Node textNode = getDomNode();
                     while ((textNode = textNode.getNextSibling()) != null) {
-                        buffer.append(emptyIfNull(textNode.getNodeValue()));
+                        buffer.accept(emptyIfNull(textNode.getNodeValue()));
                     }
                     return buffer.toUnicodeString();
                 } else {

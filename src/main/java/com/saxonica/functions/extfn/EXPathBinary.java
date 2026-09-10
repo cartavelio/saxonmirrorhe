@@ -1,5 +1,6 @@
 package com.saxonica.functions.extfn;
 
+import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -233,7 +234,7 @@ public class EXPathBinary {
         for (byte b : value.head().getBinaryValue()) {
             result.add(new Int64Value(b & 0xFF, BuiltInAtomicType.UNSIGNED_BYTE));
         }
-        return new ZeroOrMore(result);
+        return new ZeroOrMore<>(result);
     }
 
     // bin:from-octets($contents as xs:integer*)

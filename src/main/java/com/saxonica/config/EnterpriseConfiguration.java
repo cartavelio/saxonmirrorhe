@@ -1001,14 +1001,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
                 case "class":
                     return StringItem.bmp("Schema");
                 case "type definitions": {
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (SchemaType st : getSuperSchema().getAllTypes()) {
                         list.add(st.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute declarations": {
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (AttributeDecl decl : getSuperSchema().getAttributeDeclarations()) {
                         list.add(decl.getComponentAsFunction());
                     }
@@ -1016,14 +1016,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
                 }
                 case "element declarations": {
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (ElementDecl decl : getSuperSchema().getElementDeclarations()) {
                         list.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(list);
                 }
                 case "attribute group definitions": {
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (AttributeGroupDecl group : getSuperSchema().getAllAttributeGroups()) {
                         list.add(group.getComponentAsFunction());
                     }
@@ -1031,7 +1031,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
                 }
                 case "model group definitions": {
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (ModelGroupDefinition group : getSuperSchema().getAllModelGroups())  {
                         list.add(group.getComponentAsFunction());
                     }
@@ -1039,7 +1039,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
                 }
                 case "notation declarations": {
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (Notation notation : superSchema.getAllNotations()) {
                         list.add(notation.getComponentAsFunction());
                     }
@@ -1047,7 +1047,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
                 }
                 case "identity-constraint definitions": {
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (IdentityConstraint constraint : getSuperSchema().getIdentityConstraints()) {
                         list.add(constraint.getComponentAsFunction());
                     }

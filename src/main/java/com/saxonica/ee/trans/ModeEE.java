@@ -8,16 +8,17 @@ import com.saxonica.trans.ModePE;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.expr.accum.Accumulator;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trans.*;
+import net.sf.saxon.trans.CompilerInfo;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.rules.Rule;
 import net.sf.saxon.trans.rules.RuleChain;
 import net.sf.saxon.trans.rules.RuleSearchState;
 import net.sf.saxon.trans.rules.RuleTarget;
-
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 
 import java.util.*;
@@ -140,7 +141,7 @@ public class ModeEE extends ModePE {
 
     @Override
     public void computeStreamability() throws XPathException {
-        RuleAction action = r -> {
+        processRules(r -> {
             TemplateRuleEE t = (TemplateRuleEE) r.getAction();
             List<String> reasons = new ArrayList<>();
             PostureAndSweep ps = Streamability.getStreamability(t.getBody(), ContextItemStaticInfoEE.DEFAULT, reasons);
@@ -153,8 +154,7 @@ public class ModeEE extends ModePE {
                 }
                 throw new XPathException(message.toString());
             }
-        };
-        processRules(action);
+        });
     }
 
     /**
@@ -165,7 +165,7 @@ public class ModeEE extends ModePE {
     @Override
     public void invertStreamableTemplates() throws XPathException {
         if (isDeclaredStreamable()) {
-            RuleAction check = r -> {
+            processRules(r -> {
                 TemplateRuleEE t = (TemplateRuleEE) r.getAction();
                 if (t.getBody() != null) {
                     if (Streamability.getPostureAndSweepIfKnown(t.getBody()) == null) {
@@ -178,8 +178,7 @@ public class ModeEE extends ModePE {
                         setStreamable(false);
                     }
                 }
-            };
-            processRules(check);
+            });
         }
         if (isDeclaredStreamable()) {
             processRules(r -> {
@@ -193,14 +192,14 @@ public class ModeEE extends ModePE {
         }
     }
 
-    public interface RuleTypeAction extends RuleAction {
-        void setType(ItemType type);
-    }
-
-    protected RuleTypeAction setType(RuleTypeAction action, ItemType type) {
-        action.setType(type);
-        return action;
-    }
+//    public interface RuleTypeAction extends RuleAction {
+//        void setType(ItemType type);
+//    }
+//
+//    protected RuleTypeAction setType(RuleTypeAction action, ItemType type) {
+//        action.setType(type);
+//        return action;
+//    }
 
     /**
      * Perform optimization on the complete set of rules comprising this Mode. This is done by optimizing

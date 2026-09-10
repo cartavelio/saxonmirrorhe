@@ -7,6 +7,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.QName;
 import net.sf.saxon.sapling.SaplingElement;

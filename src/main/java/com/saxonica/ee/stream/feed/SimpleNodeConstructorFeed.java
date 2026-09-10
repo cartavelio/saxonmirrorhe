@@ -60,7 +60,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
                     dynamicError(e);
                 }
             } else {
-                buffer.append(item.getUnicodeStringValue());
+                buffer.accept(item.getUnicodeStringValue());
             }
         }
     }
@@ -70,7 +70,7 @@ public class SimpleNodeConstructorFeed extends ItemFeed {
         if (isSimpleText) {
             return new UniStringConsumer() {
                 @Override
-                public UniStringConsumer append(CodePoints chars) throws XPathException {
+                public UniStringConsumer accept(CodePoints chars) throws XPathException {
                     try {
                         getNextOutputter().characters(chars, Loc.NONE, ReceiverOption.NONE);
                     } catch (XPathException e) {

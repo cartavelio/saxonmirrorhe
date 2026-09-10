@@ -42,10 +42,10 @@ public class GroupStarting extends SystemFunction {
      */
 
     @Override
-    public ZeroOrMore<ArrayItem> call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         Sequence input = arguments[0];
         Function function = (Function) arguments[1].head();
-        return new ZeroOrMore<>(new GroupStartingFunctionIterator(input.iterate(), function, context));
+        return new LazySequence(new GroupStartingFunctionIterator(input.iterate(), function, context));
     }
 
     private static class GroupStartingFunctionIterator implements SequenceIterator {

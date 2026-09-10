@@ -3,6 +3,7 @@ package com.saxonica.ee.schema.sdoc;
 import com.saxonica.ee.schema.SchemaCompiler;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.PreparedStylesheet;
+import net.sf.saxon.Version;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.TreeReceiver;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
@@ -19,7 +20,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class that applies a standard transformation to a schema document: specifically, the chameleon transformation
@@ -36,9 +36,7 @@ public class SchemaDocumentTransformer {
 
     private void compileStylesheet(Configuration config, String filename) throws SchemaException {
         try {
-            List<String> messages = new ArrayList<>();
-            List<ClassLoader> classLoaders = new ArrayList<>();
-            InputStream in = Configuration.locateResource(filename, messages, classLoaders);
+            InputStream in = Version.platform.locateResource(filename, new ArrayList<>());
             StreamSource ss = new StreamSource(in, filename);
             CompilerInfo info = config.getDefaultXsltCompilerInfo();
             //config.setConfigurationProperty(FeatureKeys.DEBUG_BYTE_CODE, true);

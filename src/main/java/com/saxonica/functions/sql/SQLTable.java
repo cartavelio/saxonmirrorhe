@@ -4,9 +4,9 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.ListIterator;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -56,7 +56,7 @@ public class SQLTable implements Sequence /* of MapItem */ {
             if (!connection.getAutoCommit()) {
                 connection.commit();
             }
-            return new ListIterator(out);
+            return new ZeroOrMore<>(out).iterate();
         } catch (SQLException ex) {
             throw new XPathException("Failed to materialize sql:table(): " + ex.getMessage(), SaxonErrorCode.SXSQ0004, context);
         } finally {

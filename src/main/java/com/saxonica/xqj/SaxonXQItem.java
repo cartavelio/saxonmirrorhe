@@ -17,12 +17,12 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.instruct.ResultDocument;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pull.PullProvider;
+import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Orphan;
@@ -45,7 +45,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -229,8 +228,7 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
 
     protected static void validateSerializationProperties(/*@NotNull*/ Properties props, Configuration config) throws XQException {
         Properties validatedProps = new Properties();
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
-            String name = (String) e.nextElement();
+        for (String name : props.stringPropertyNames()) {
             String value = props.getProperty(name);
             String localName = name;
             String uri = "";

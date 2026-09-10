@@ -22,7 +22,7 @@ public class StringValueGatherer extends AbstractReceiver {
 
     @Override
     public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
-        buffer.append(chars);
+        buffer.accept(chars);
     }
 
 }

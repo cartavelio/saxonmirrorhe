@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.s9api.Location;
@@ -347,7 +348,7 @@ public abstract class SchemaStructure implements Location {
             String key = arguments[0].head().getStringValue();
             switch (key) {
                 case "namespace bindings":
-                    List<Function> bindings = new ArrayList<>();
+                    List<Item> bindings = new ArrayList<>();
                     Iterator<String> prefixes = nsResolver.iteratePrefixes();
                     while (prefixes.hasNext()) {
                         final String prefix = prefixes.next();

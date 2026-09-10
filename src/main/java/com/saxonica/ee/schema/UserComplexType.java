@@ -177,8 +177,8 @@ public class UserComplexType extends UserDefinedType
 
     /**
      * Get the variety of this complex type. This will be one of the values
-     * {@link #VARIETY_EMPTY}, {@link #VARIETY_MIXED}, {@link #VARIETY_SIMPLE}, or
-     * {@link #VARIETY_ELEMENT_ONLY}
+     * {@link ComplexVariety#EMPTY}, {@link ComplexVariety#MIXED}, {@link ComplexVariety#SIMPLE}, or
+     * {@link ComplexVariety#ELEMENT_ONLY}
      * @return
      */
 
@@ -764,8 +764,8 @@ public class UserComplexType extends UserDefinedType
      * Set the variety of this complex type
      *
      * @param variety the variety: one of of the values
-     *                {@link #VARIETY_EMPTY}, {@link #VARIETY_MIXED}, {@link #VARIETY_SIMPLE}, or
-     *                {@link #VARIETY_ELEMENT_ONLY}
+     *                {@link ComplexVariety#EMPTY}, {@link ComplexVariety#MIXED}, {@link ComplexVariety#SIMPLE}, or
+     *                {@link ComplexVariety#ELEMENT_ONLY}
      */
 
     public void setVariety(ComplexVariety variety) {
@@ -1926,7 +1926,7 @@ public class UserComplexType extends UserDefinedType
                     seq.addParticle(particle);
                 }
                 if (seq.isPointless(null)) {
-                    List contentModel = seq.getSimplifiedContentModel();
+                    List<Particle> contentModel = seq.getSimplifiedContentModel();
                     if (contentModel.isEmpty()) {
                         extendedParticle = null;
                         if (variety == ComplexVariety.ELEMENT_ONLY) {
@@ -1988,14 +1988,14 @@ public class UserComplexType extends UserDefinedType
                 }
             }
             if (p.isPointless(null) && (p instanceof ModelGroupParticle)) {
-                List contentModel = ((ModelGroupParticle) p).getGroup().getSimplifiedContentModel();
+                List<Particle> contentModel = ((ModelGroupParticle) p).getGroup().getSimplifiedContentModel();
                 if (variety == ComplexVariety.ELEMENT_ONLY && contentModel.isEmpty() &&
                     !(((ModelGroupParticle) p).getGroup() instanceof ChoiceModelGroup) /* bug 2388 */ &&
                         (openContentWildcard == null || !openContentAppliesToEmpty)) {
                     extendedParticle = null;
                     variety = ComplexVariety.EMPTY;
                 } else if (contentModel.size() == 1) {
-                    extendedParticle = (Particle) contentModel.get(0);
+                    extendedParticle = contentModel.get(0);
                 } else {
                     extendedParticle = p;
                 }
@@ -3264,7 +3264,7 @@ public class UserComplexType extends UserDefinedType
                     case "base type definition":
                         return type.getBaseType().getComponentAsFunction();
                     case "final": {
-                        List<StringItem> list = new ArrayList<StringItem>();
+                        List<AtomicValue> list = new ArrayList<>();
                         int f = type.getFinalProhibitions();
                         if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
                             list.add(StringItem.bmp("restriction"));
@@ -3272,7 +3272,7 @@ public class UserComplexType extends UserDefinedType
                         if ((f & Derivation.DERIVATION_EXTENSION) != 0) {
                             list.add(StringItem.bmp("extension"));
                         }
-                        return SequenceExtent.makeSequenceExtent(list);
+                        return new AtomicArray(list);
                     }
                     case "context":
                         if (type instanceof UserComplexType && !type.isAnonymousType()) {
@@ -3288,7 +3288,7 @@ public class UserComplexType extends UserDefinedType
                         return BooleanValue.get(type.isAbstract());
                     case "attribute uses":
                         if (type instanceof UserComplexType) {
-                            List<Function> list = new ArrayList<>();
+                            List<Item> list = new ArrayList<>();
                             for (AttributeUse use : ((UserComplexType) type).getAttributeGroup().getLocalAttributes()) {
                                 list.add(use.getComponentAsFunction());
                             }
@@ -3379,7 +3379,7 @@ public class UserComplexType extends UserDefinedType
                         };
                         return new CallableFunction(1, contentType, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
                     case "prohibited substitutions": {
-                        List<StringItem> list = new ArrayList<>();
+                        List<AtomicValue> list = new ArrayList<>();
                         int s = type.getBlock();
                         if ((s & Derivation.DERIVATION_EXTENSION) != 0) {
                             list.add(StringItem.bmp("extension"));
@@ -3387,11 +3387,11 @@ public class UserComplexType extends UserDefinedType
                         if ((s & Derivation.DERIVATION_RESTRICTION) != 0) {
                             list.add(StringItem.bmp("restriction"));
                         }
-                        return SequenceExtent.makeSequenceExtent(list);
+                        return new AtomicArray(list);
                     }
                     case "assertions":
                         if (type instanceof UserComplexType) {
-                            List<Function> list = new ArrayList<>();
+                            List<Item> list = new ArrayList<>();
                             for (Assertion assertion : ((UserComplexType) type).getAssertions()) {
                                 list.add(assertion.getComponentAsFunction());
                             }

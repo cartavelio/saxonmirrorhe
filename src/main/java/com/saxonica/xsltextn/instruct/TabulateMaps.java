@@ -158,10 +158,9 @@ public class TabulateMaps extends Instruction {
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         Item root;
         SequenceIterator rootIterator = getRootExpression().iterate(context);
-        MappingFunction mapper = SequenceMapper.of(
-                item -> SingletonIterator.makeIterator(WithPedigree.makeRootWithPedigree(item)
-        ));
-        SequenceIterator mappedRootIterator = new MappingIterator(rootIterator, mapper);
+        SequenceIterator mappedRootIterator =
+                MappingIterator.map(rootIterator,
+                                    item -> SingletonIterator.makeIterator(WithPedigree.makeRootWithPedigree(item)));
 
         XPathContext c2 = context.newMinorContext();
         FocusIterator trackingIterator = c2.trackFocus(mappedRootIterator);

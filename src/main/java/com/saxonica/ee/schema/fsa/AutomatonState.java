@@ -27,12 +27,7 @@ public abstract class AutomatonState implements State {
 
     int stateNumber;
 
-    private Object specificTransitions = null;
-    // This may be either (0) null
-    //                    (1) a single Edge object
-    //                    (2) a List of Edge objects
-    //                    (3) an IntHashMap mapping integer fingerprints to Edge objects
-
+    private Iterable<Edge> specificTransitions = null;
 
     protected Edge[] wildcardEdges;
     // It's unusual to have more than one wildcard, so we make this array the exact size required
@@ -161,22 +156,9 @@ public abstract class AutomatonState implements State {
             list.add((Edge) specificTransitions);
             list.add(edge);
             specificTransitions = list;
-        } else if (specificTransitions instanceof List) {
+        } else  {
             List<Edge> list = (List<Edge>) specificTransitions;
-            if (list.size() < 8) {
-                list.add(edge);
-            } else {
-                IntHashMap<Edge> map = new IntHashMap<Edge>(8);
-                for (Object aList : list) {
-                    Edge existingEdge = (Edge) aList;
-                    ElementDecl elem = (ElementDecl) existingEdge.getTerm();
-                    map.put(elem.getFingerprint(), existingEdge);
-                }
-                map.put(key, edge);
-                specificTransitions = map;
-            }
-        } else {
-            ((IntHashMap<Edge>) specificTransitions).put(key, edge);
+            list.add(edge);
         }
 
     }
@@ -325,21 +307,10 @@ public abstract class AutomatonState implements State {
 
     private Edge getSpecificTransition(int token) {
         if (specificTransitions != null) {
-            if (specificTransitions instanceof Edge) {
-                if (((ElementDecl) ((Edge) specificTransitions).getTerm()).getFingerprint() == token) {
-                    return (Edge) specificTransitions;
+            for (Edge edge : specificTransitions) {
+                if (((ElementDecl) edge.getTerm()).getFingerprint() == token) {
+                    return edge;
                 }
-            } else if (specificTransitions instanceof List) {
-                List list = (List) specificTransitions;
-                for (Object aList : list) {
-                    if (((ElementDecl) ((Edge) aList).getTerm()).getFingerprint() == token) {
-                        return (Edge) aList;
-                    }
-                }
-            } else {
-                Edge edge = (Edge) ((IntHashMap) specificTransitions).get(token);
-                return edge;
-                
             }
         }
         return null;

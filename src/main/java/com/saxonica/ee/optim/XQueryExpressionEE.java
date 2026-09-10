@@ -413,7 +413,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         PathMap map = getPathMap();
         Logger pw = new StandardLogger();
         pw.info("DOCUMENT PROJECTION: PATH MAP");
-        map.diagnosticDump(pw);
+        //map.diagnosticDump(pw);
     }
 
 

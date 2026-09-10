@@ -94,7 +94,7 @@ public class EntityValidator extends ValidatingFilter {
     @Override
     public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         if (currentElementChecker != null) {
-            buffer.append(chars);
+            buffer.accept(chars);
         }
         nextReceiver.characters(chars, locationId, properties);
         textLocationId = locationId.saveLocation();

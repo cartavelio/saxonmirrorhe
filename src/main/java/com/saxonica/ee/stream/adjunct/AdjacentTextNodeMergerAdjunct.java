@@ -90,7 +90,7 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
             if (AdjacentTextNodeMerger.isTextNode(item)) {
                 UnicodeString s = item.getUnicodeStringValue();
                 if (!s.isEmpty()) {
-                    buffer.append(s);
+                    buffer.accept(s);
                     prevText = true;
                 }
             } else {
@@ -102,7 +102,7 @@ public class AdjacentTextNodeMergerAdjunct extends TransmissionAdjunct implement
         @Override
         public void characters(CodePoints chars, Location location, int properties) throws XPathException {
             if (!chars.isEmpty()) {
-                buffer.append(chars);
+                buffer.accept(chars);
                 prevText = true;
             }
         }

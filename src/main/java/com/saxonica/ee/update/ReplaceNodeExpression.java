@@ -17,7 +17,6 @@ import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
-import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
@@ -298,7 +297,7 @@ public class ReplaceNodeExpression extends BasicUpdatingExpression {
 
                 NodeInfo root = builder.getCurrentRoot();
                 AxisIterator top = root.iterateAxis(AxisInfo.CHILD);
-                SequenceExtent extent = new SequenceExtent(top);
+                GroundedValue extent = top.materialize();
                 int len = extent.getLength();
                 NodeInfo[] array = new NodeInfo[len];
                 for (int i = 0; i < len; i++) {

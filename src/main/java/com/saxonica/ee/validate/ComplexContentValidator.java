@@ -525,7 +525,7 @@ public class ComplexContentValidator extends AttributeValidator {
                 if (buffer == null) {
                     buffer = new UnicodeBuilder();
                 }
-                buffer.append(chars);
+                buffer.accept(chars);
             }
             nextReceiver.characters(chars, locationId, properties);
         } else {

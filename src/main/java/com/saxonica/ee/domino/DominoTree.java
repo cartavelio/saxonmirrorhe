@@ -1,10 +1,13 @@
 package com.saxonica.ee.domino;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.GenericTreeInfo;
+import net.sf.saxon.om.NamePool;
+import net.sf.saxon.om.NamespaceMap;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AxisIterator;
-import net.sf.saxon.tree.iter.ListIterator;
+import net.sf.saxon.tree.iter.NodeListIterator;
 import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
@@ -467,7 +470,7 @@ public final class DominoTree extends GenericTreeInfo implements NodeVectorTree 
             list = makeElementList(fingerprint);
             elementsByFingerprint.put(fingerprint, list);
         }
-        return new ListIterator.OfNodes(list);
+        return new NodeListIterator(list);
     }
 
     /**

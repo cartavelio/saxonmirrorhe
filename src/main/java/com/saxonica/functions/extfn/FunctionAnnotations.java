@@ -3,10 +3,10 @@ package com.saxonica.functions.extfn;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.ma.map.DictionaryMap;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.RecordTest;
 import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
@@ -46,7 +46,7 @@ public class FunctionAnnotations extends SystemFunction {
         Function fn = (Function) arguments[0].head();
         AnnotationList annotations = fn.getAnnotations();
 
-        List<MapItem> result = new ArrayList<>();
+        List<Item> result = new ArrayList<>();
         for (Annotation ann : annotations) {
             DictionaryMap map = new DictionaryMap();
             map.initialPut("name", new QNameValue(ann.getAnnotationQName(), BuiltInAtomicType.QNAME));

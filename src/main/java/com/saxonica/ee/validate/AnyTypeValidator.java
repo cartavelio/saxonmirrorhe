@@ -109,7 +109,7 @@ public class AnyTypeValidator extends LaxValidator {
             if (buffer == null) {
                 buffer = new UnicodeBuilder();
             }
-            buffer.append(chars);
+            buffer.accept(chars);
         }
         super.characters(chars, locationId, properties);
     }

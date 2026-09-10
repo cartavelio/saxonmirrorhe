@@ -883,11 +883,11 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                             return EmptySequence.getInstance();
                                         } else {
                                             Set<String> namespaces = allowedNamespaces != null ? allowedNamespaces : disallowedNamespaces;
-                                            List<StringItem> list = new ArrayList<StringItem>(namespaces.size());
+                                            List<AtomicValue> list = new ArrayList<>(namespaces.size());
                                             for (String ns : namespaces) {
                                                 list.add(new AnyURIValue(ns));
                                             }
-                                            return SequenceExtent.makeSequenceExtent(list);
+                                            return new AtomicArray(list);
                                         }
                                     case "disallowed names":
                                         List<AtomicValue> list = new ArrayList<>();
@@ -906,7 +906,7 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
                                             QNameValue value = new QNameValue("", uri, local);
                                             list.add(value);
                                         }
-                                        return SequenceExtent.makeSequenceExtent(list);
+                                        return new AtomicArray(list);
                                     default:
                                         return EmptySequence.getInstance();
                                 }

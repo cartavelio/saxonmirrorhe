@@ -759,7 +759,7 @@ public final class AttributeGroupDecl extends SchemaStructure
                     case "target namespace":
                         return new AnyURIValue(getTargetNamespace());
                     case "attribute uses":
-                        List<Function> uses = new ArrayList<>();
+                        List<Item> uses = new ArrayList<>();
                         for (AttributeUse use : getAttributeUses()) {
                             uses.add(use.getComponentAsFunction());
                         }

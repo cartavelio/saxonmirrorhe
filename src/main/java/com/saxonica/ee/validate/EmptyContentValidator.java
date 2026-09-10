@@ -99,7 +99,7 @@ public class EmptyContentValidator extends AttributeValidator {
                 if (buffer == null) {
                     buffer = new UnicodeBuilder();
                 }
-                buffer.append(chars);
+                buffer.accept(chars);
             }
         } else {
             String message = "Character data is not allowed: " + getContainingElementName() +

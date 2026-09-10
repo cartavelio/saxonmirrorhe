@@ -3,11 +3,12 @@ package com.saxonica.ee.schema;
 import net.sf.saxon.expr.Callable;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.om.AtomicArray;
 import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SimpleType;
 import net.sf.saxon.type.SpecificFunctionType;
@@ -86,7 +87,7 @@ public class EnumerationFacetSet extends Facet {
             } else {
                 sb.appendLatin(", ");
             }
-            sb.append(v.getUnicodeStringValue());
+            sb.accept(v.getUnicodeStringValue());
         }
         return sb.toUnicodeString();
     }
@@ -196,11 +197,11 @@ public class EnumerationFacetSet extends Facet {
                 case "value":
                     // This is a set of typed values, where each typed value is potentially a list.
                     // We therefore return the string values (bug 4024)
-                    List<StringItem> list = new ArrayList<>();
+                    List<AtomicValue> list = new ArrayList<>();
                     for (String s : stringValues) {
                         list.add(new StringItem(s));
                     }
-                    return SequenceExtent.makeSequenceExtent(list);
+                    return new AtomicArray(list);
                 case "typed-value":
                     // Introduced by bug 4024
                     List<GroundedValue> members = new ArrayList<>(typedValues.values());

@@ -342,7 +342,7 @@ public abstract class IdentityConstraint extends SchemaStructure
                     return SchemaStructure.makeXPathExpressionPropertyRecord(
                             selector.getXPath(), selector.getNamespaceContext(), selector.getSchemaDocumentURI());
                 case "fields":
-                    List<Function> list = new ArrayList<>();
+                    List<Item> list = new ArrayList<>();
                     for (IdentityField field : getFields()) {
                         list.add(SchemaStructure.makeXPathExpressionPropertyRecord(
                                 field.getXPath(), field.getNamespaceContext(), field.getSchemaDocumentURI()));

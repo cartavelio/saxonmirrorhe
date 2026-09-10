@@ -10,12 +10,12 @@ import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
+import net.sf.saxon.om.ZeroOrMore;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.FunctionItemType;
 import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.NumericValue;
-import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringItem;
 
@@ -65,7 +65,7 @@ public class SQLPreparedQueryFn extends SystemFunction {
                 try {
                     ResultSet rs = ps2.executeQuery();
                     List<MapItem> out = SQLFunctionSet.sqlQueryResult(rs);
-                    return SequenceExtent.makeSequenceExtent(out);
+                    return new ZeroOrMore<>(out);
                 } catch (SQLException e) {
                     throw new XPathException("Failure executing prepared SQL query", e);
                 }

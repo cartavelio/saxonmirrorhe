@@ -754,9 +754,8 @@ public class DotNetExtensionFunctionCall extends FunctionCall {
         // Offer the object to registered external object models
 
 
-        List externalObjectModels = context.getConfiguration().getExternalObjectModels();
-        for (Object externalObjectModel : externalObjectModels) {
-            ExternalObjectModel model = (ExternalObjectModel) externalObjectModel;
+        List<ExternalObjectModel> externalObjectModels = context.getConfiguration().getExternalObjectModels();
+        for (ExternalObjectModel model : externalObjectModels) {
             if (model instanceof DotNetObjectModel) {
                 Object object = ((DotNetObjectModel) model).convertXPathValueToObject(value, targetType);
                 if (object != null) {

@@ -233,7 +233,7 @@ public class ElementDecl extends SchemaStructure
      * value of the {disallowed substitutions} property in the schema component model.
      *
      * @return the value of the block attribute, as a bit-significant integer
-     *         using constants such as {@link net.sf.saxon.type.SchemaType#DERIVE_BY_SUBSTITUTION}, indicating
+     *         using constants such as {@link Derivation#DERIVE_BY_SUBSTITUTION}, indicating
      *         which kinds of derivation from this element declaration are blocked.
      */
 
@@ -272,7 +272,7 @@ public class ElementDecl extends SchemaStructure
      * from this type is allowed, based on the "final" property (that is,
      * the {substitution group exclusions} in the component model
      *
-     * @param derivation the kind of derivation, e.g. {@link Derivatiion#DERIVATION_EXTENSION}
+     * @param derivation the kind of derivation, e.g. {@link Derivation#DERIVATION_EXTENSION}
      * @return true if this kind of derivation is allowed
      */
     public boolean allowsDerivation(int derivation) {
@@ -630,7 +630,7 @@ public class ElementDecl extends SchemaStructure
      *
      * @param block the value of the block attribute for this
      *              element definition, indicating the types of derivation that are not allowed,
-     *              as a bit-significant integer, using constants such as {@link Derivatiion#DERIVATION_EXTENSION}
+     *              as a bit-significant integer, using constants such as {@link Derivation#DERIVATION_EXTENSION}
      */
 
     public void setBlock(int block) {
@@ -643,7 +643,7 @@ public class ElementDecl extends SchemaStructure
      * For internal use only.
      *
      * @param finalValue the bit-significant code representing the final property,
-     *                   made up of values such as {@link net.sf.saxon.type.SchemaType#DERIVE_BY_SUBSTITUTION}
+     *                   made up of values such as {@link Derivation#DERIVE_BY_SUBSTITUTION}
      */
 
     public void setFinalProhibitions(int finalValue) {
@@ -1383,7 +1383,7 @@ public class ElementDecl extends SchemaStructure
                                 case "class":
                                     return StringItem.bmp("Type Table");
                                 case "alternatives":
-                                    List<Function> list = new ArrayList<>();
+                                    List<Item> list = new ArrayList<>();
                                     for (TypeAlternative ta : getTypeAlternatives()) {
                                         list.add(ta.getComponentAsFunction());
                                     }
@@ -1426,29 +1426,29 @@ public class ElementDecl extends SchemaStructure
                 case "nillable":
                     return BooleanValue.get(isNillable());
                 case "identity-constraint definitions":
-                    List<Function> constraints = new ArrayList<>();
+                    List<Item> constraints = new ArrayList<>();
                     for (IdentityConstraintReference ic : getIdentityConstraints()) {
                         constraints.add(ic.getTarget().getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(constraints);
                 case "substitution group affiliations":
-                    List<Function> groups = new ArrayList<>();
+                    List<Item> groups = new ArrayList<>();
                     for (ElementDecl decl : getSubstitutionGroupOwners()) {
                         groups.add(decl.getComponentAsFunction());
                     }
                     return SequenceExtent.makeSequenceExtent(groups);
                 case "substitution group exclusions": {
-                    List<StringItem> exclusions = new ArrayList<>();
+                    List<AtomicValue> exclusions = new ArrayList<>();
                     if ((getSubstitutionGroupExclusions() & Derivation.DERIVATION_EXTENSION) != 0) {
                         exclusions.add(StringItem.bmp("extension"));
                     }
                     if ((getSubstitutionGroupExclusions() & Derivation.DERIVATION_RESTRICTION) != 0) {
                         exclusions.add(StringItem.bmp("restriction"));
                     }
-                    return SequenceExtent.makeSequenceExtent(exclusions);
+                    return new AtomicArray(exclusions);
                 }
                 case "disallowed substitutions": {
-                    List<StringItem> exclusions = new ArrayList<>();
+                    List<AtomicValue> exclusions = new ArrayList<>();
                     if ((getBlock() & Derivation.DERIVATION_EXTENSION) != 0) {
                         exclusions.add(StringItem.bmp("extension"));
                     }
@@ -1458,7 +1458,7 @@ public class ElementDecl extends SchemaStructure
                     if ((getBlock() & Derivation.DERIVE_BY_SUBSTITUTION) != 0) {
                         exclusions.add(StringItem.bmp("substitution"));
                     }
-                    return SequenceExtent.makeSequenceExtent(exclusions);
+                    return new AtomicArray(exclusions);
                 }
                 case "abstract":
                     return BooleanValue.get(isAbstract());

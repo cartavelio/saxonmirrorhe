@@ -148,7 +148,7 @@ public class SimpleContentValidator extends AttributeValidator {
     @Override
     public void characters(CodePoints chars, Location locationId, int properties) throws XPathException {
         checkNoCharactersWhenNil(locationId);
-        buffer.append(chars);
+        buffer.accept(chars);
         if (getNillability() == Nillability.ALLOWED) {
             properties |= (ReceiverOption.NILLABLE_ELEMENT);
         }

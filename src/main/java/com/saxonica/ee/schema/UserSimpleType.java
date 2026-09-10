@@ -834,7 +834,7 @@ public abstract class UserSimpleType extends UserDefinedType
                         return new AnyURIValue((type.getTargetNamespace()));
                     }
                 case "final": {
-                    List<StringItem> list = new ArrayList<>();
+                    List<AtomicValue> list = new ArrayList<>();
                     int f = type.getFinalProhibitions();
                     if ((f & Derivation.DERIVATION_RESTRICTION) != 0) {
                         list.add(StringItem.bmp("restriction"));
@@ -848,7 +848,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     if ((f & Derivation.DERIVATION_UNION) != 0) {
                         list.add(StringItem.bmp("union"));
                     }
-                    return SequenceExtent.makeSequenceExtent(list);
+                    return new AtomicArray(list);
                 }
                 case "context":
                     if (type.isAnonymousType()) {
@@ -866,14 +866,14 @@ public abstract class UserSimpleType extends UserDefinedType
                     return type.getBaseType().getComponentAsFunction();
                 case "facets": {
                     if (type instanceof UserSimpleType) {
-                        List<Function> list = new ArrayList<>();
+                        List<Item> list = new ArrayList<>();
                         for (Facet f : ((UserSimpleType) type).getExtendedFacetList()) {
                             list.add(f.getFacetAsFunctionItem());
                         }
                         return SequenceExtent.makeSequenceExtent(list);
                     } else if (type instanceof BuiltInAtomicType) {
                         List<Facet> facetList = getExtendedFacetList((BuiltInAtomicType) type, context.getConfiguration());
-                        List<Function> list = new ArrayList<>();
+                        List<Item> list = new ArrayList<>();
                         for (Facet f : facetList) {
                             list.add(f.getFacetAsFunctionItem());
                         }
@@ -908,7 +908,7 @@ public abstract class UserSimpleType extends UserDefinedType
                     }
                 case "member type definitions":
                     if (type.isUnionType()) {
-                        List<Function> list = new ArrayList<>();
+                        List<Item> list = new ArrayList<>();
                         for (TypeReference member : ((UserUnionType) type).getMemberTypeReferences()) {
                             list.add(member.getTarget().getComponentAsFunction());
                         }

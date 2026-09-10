@@ -165,7 +165,7 @@ public class FieldChecker extends AbstractReceiver {
         // buffer the value, because it may be split by comments and PIs
         //System.err.println("FieldChecker " + this + ".characters() " + chars);
         if (active && matchElements && depth == 1) {
-            buffer.append(chars);
+            buffer.accept(chars);
         }
         nillableElement = ReceiverOption.contains(properties, ReceiverOption.NILLABLE_ELEMENT);
         textLocationId = locationId;

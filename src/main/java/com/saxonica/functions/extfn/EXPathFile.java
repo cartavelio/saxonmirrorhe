@@ -715,7 +715,7 @@ public class EXPathFile {
         if (!file.exists()) {
             error("File not found: " + file.getAbsolutePath(), ERROR_PATH_NOT_EXIST);
         }*/
-        return new ZeroOrMore<StringItem>(new TextFileLinesIterator(file, encoding.head().getStringValue()));
+        return ZeroOrMore.fromSequenceIterator(new TextFileLinesIterator(file, encoding.head().getStringValue()));
 
     }
 

@@ -6,6 +6,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -600,7 +601,7 @@ public abstract class ModelGroup extends SchemaStructure implements UserSchemaCo
                     case "compositor":
                         return new StringItem(getCompositorName());
                     case "particles":
-                        List<Function> particles = new ArrayList<>();
+                        List<Item> particles = new ArrayList<>();
                         for (Particle p : getParticles()) {
                             particles.add(p.getComponentAsFunction());
                         }

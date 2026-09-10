@@ -4,6 +4,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NameTest;
+import net.sf.saxon.pattern.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.trans.Err;
@@ -17,7 +18,6 @@ import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * Represents an element node available transiently within a streamed document
@@ -106,7 +106,7 @@ public class FleetingElementNode extends FleetingParentNode {
      */
 
     @Override
-    public AxisIterator iterateAxis(int axisNumber, Predicate<? super NodeInfo> nodeTest) {
+    public AxisIterator iterateAxis(int axisNumber, NodePredicate nodeTest) {
         switch (axisNumber) {
             case AxisInfo.ATTRIBUTE:
                 if (attributes.size() == 0) {

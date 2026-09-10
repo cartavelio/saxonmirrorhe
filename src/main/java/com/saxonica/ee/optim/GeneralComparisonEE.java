@@ -481,7 +481,7 @@ public class GeneralComparisonEE extends GeneralComparison {
     }
 
     @Override
-    public String tag() {
+    protected String tag() {
         return "gcEE";
     }
 }

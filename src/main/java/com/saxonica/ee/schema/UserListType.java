@@ -1,10 +1,12 @@
 package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
-import net.sf.saxon.expr.MappingFunction;
 import net.sf.saxon.expr.MappingIterator;
 import net.sf.saxon.lib.ConversionRules;
-import net.sf.saxon.om.*;
+import net.sf.saxon.om.AtomicArray;
+import net.sf.saxon.om.AtomicSequence;
+import net.sf.saxon.om.EmptyAtomicSequence;
+import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
@@ -361,16 +363,10 @@ public class UserListType extends UserSimpleType implements ListType {
             return EmptyAtomicSequence.getInstance();
         }
         AtomicIterator iter = tokenizerFactory.apply(value);
-        UserListMappingFunction map = new UserListMappingFunction();
-        map.resolver = resolver;
+        SimpleType theItemType = getItemType();
         try {
-            map.itemType = getItemType();
-        } catch (MissingComponentException e) {
-            throw new ValidationException(e);
-        }
-        map.rules = rules;
-        try {
-            return new AtomicArray(new MappingIterator(iter, map));
+            return new AtomicArray(MappingIterator.map(iter,
+                item -> theItemType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate()));
         } catch (XPathException err) {
             // should not occur
             throw new ValidationException(err);
@@ -391,29 +387,6 @@ public class UserListType extends UserSimpleType implements ListType {
             return getItemType().isNamespaceSensitive();
         } catch (MissingComponentException e) {
             return true;
-        }
-    }
-
-    private static class UserListMappingFunction implements MappingFunction {
-
-        public NamespaceResolver resolver;
-        public SimpleType itemType;
-        public ConversionRules rules;
-
-        /**
-         * The typed value of a list-valued node is obtained by tokenizing the string value and
-         * applying a mapping function to the sequence of tokens.
-         * This method implements the mapping function. It is for internal use only.
-         * For details see {@link MappingFunction}
-         */
-
-        @Override
-        public AtomicIterator map(Item item) throws XPathException {
-            try {
-                return itemType.getTypedValue(item.getUnicodeStringValue(), resolver, rules).iterate();
-            } catch (ValidationException err) {
-                throw new XPathException(err);
-            }
         }
     }
 

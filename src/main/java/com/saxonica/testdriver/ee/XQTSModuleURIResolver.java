@@ -62,7 +62,7 @@ public class XQTSModuleURIResolver implements ModuleURIResolver {
         NamePool pool = testCase.getConfiguration().getNamePool();
         int moduleNC = pool.allocateFingerprint("http://www.w3.org/2005/02/query-test-XQTSCatalog", "module");
         AxisIterator iter = testCase.iterateAxis(AxisInfo.CHILD, new NameTest(Type.ELEMENT, moduleNC, pool));
-        List catalogLocations = new ArrayList(5);
+        List<String> catalogLocations = new ArrayList<>(5);
         while (true) {
             NodeInfo m = iter.next();
             if (m == null) break;

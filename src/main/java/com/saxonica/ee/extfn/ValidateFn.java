@@ -58,7 +58,7 @@ public class ValidateFn extends SystemFunction {
 
         /*@Nullable*/
         @Override
-        public ZeroOrOne call(XPathContext context, Sequence[] arguments) throws XPathException {
+        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             final List<Invalidity> errorList = new ArrayList<>(5);
             boolean returnTreeOnFailure = false;
             NodeInfo resultNode = null;
@@ -171,7 +171,7 @@ public class ValidateFn extends SystemFunction {
             pipe.setXPathContext(context);
             //pipe.getParseOptions().setContinueAfterValidationErrors(true);
 
-            pipe.setComponent(CopyInformee.class.getName(), (CopyInformee<Object>) element -> {
+            pipe.setComponent(CopyInformee.class.getName(), (CopyInformee) element -> {
                 currentErrorNode.clear();
                 currentErrorNode.add(element);
                 return null;
@@ -303,7 +303,7 @@ public class ValidateFn extends SystemFunction {
                 if (returnTreeOnFailure) {
                     result.initialPut("node", resultNode);
                 }
-                List<MapItem> errors = new ArrayList<>(errorList.size());
+                List<Item> errors = new ArrayList<>(errorList.size());
                 for (Invalidity te : errorList) {
 
                     ValidationFailure v = (ValidationFailure) te;
@@ -344,7 +344,7 @@ public class ValidateFn extends SystemFunction {
                     errors.add(im);
                 }
                 result.initialPut("errors", SequenceExtent.makeSequenceExtent(errors));
-                return new ZeroOrOne(result);
+                return result;
 
 
             }

@@ -135,7 +135,7 @@ public class ObjectLookupExpression extends LookupExpression {
 
         SequenceIterator baseIterator = getLhsExpression().iterate(context);
         if (reflexiveFunction != null) {
-            return new ItemMappingIterator(baseIterator, item -> {
+            return ItemMappingIterator.map(baseIterator, item -> {
                 Sequence[] boundArgs = new Sequence[reflexiveFunction.getArity()];
                 boundArgs[0] = item;
                 return new CurriedFunction(reflexiveFunction, boundArgs);
@@ -143,7 +143,7 @@ public class ObjectLookupExpression extends LookupExpression {
         } else {
             GroundedValue rhs = getRhsExpression().iterate(context).materialize();
             String key = rhs.getUnicodeStringValue().toString();
-            return new ItemMappingIterator(baseIterator,
+            return ItemMappingIterator.map(baseIterator,
                     item -> (Item) config.externalObjectAsMap((ObjectValue) item, key).get((StringItem) rhs));
         }
 

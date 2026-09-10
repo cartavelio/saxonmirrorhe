@@ -231,7 +231,7 @@ public class PendingUpdateListImpl implements PendingUpdateList {
 
     private XPathException conflict(String action, String errorCode, NodeInfo node) {
         int kind = node.getNodeKind();
-        String kindStr = NodeKindTest.toString(kind);
+        String kindStr = NodeKindTest.describe(kind);
         if (kind == Type.ELEMENT) {
             kindStr = Err.wrap(node.getDisplayName(), Err.ELEMENT) + " " + kindStr;
         } else if (kind == Type.ATTRIBUTE) {

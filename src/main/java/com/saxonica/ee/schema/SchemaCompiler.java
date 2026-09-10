@@ -18,6 +18,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.trans.XmlProcessingIncident;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.type.SchemaException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.value.AnyURIValue;
@@ -34,6 +35,11 @@ import java.util.*;
  * @since 8.9
  */
 
+@CSharpInjectMembers(code = {
+        "    public void setErrorReporter(System.Action<net.sf.saxon.s9api.XmlProcessingError> reporter) {"
+                + "        setErrorReporter(new com.saxonica.glue.ErrorReportingAction(reporter));"
+                + "    }"
+})
 public class SchemaCompiler {
 
     private final EnterpriseConfiguration config;
