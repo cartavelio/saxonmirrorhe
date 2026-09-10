@@ -71,7 +71,6 @@ import javax.xml.transform.*;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -4341,7 +4340,11 @@ public class Configuration implements SourceResolver, NotationSet {
             defaultParseOptions = defaultParseOptions.withParserFeature(uri, requireBoolean(name, value));
         } else if (name.startsWith(FeatureKeys.XML_PARSER_PROPERTY)) {
             String uri = name.substring(FeatureKeys.XML_PARSER_PROPERTY.length());
-            uri = URLDecoder.decode(uri, StandardCharsets.UTF_8);
+            try {
+                uri = URLDecoder.decode(uri, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException(e);
+            }
             defaultParseOptions = defaultParseOptions.withParserProperty(uri, value);
         //#endif
             
@@ -5542,7 +5545,7 @@ public class Configuration implements SourceResolver, NotationSet {
     //#if CSHARP==false
     private CleanerProxy getCleaner() {
         if (cleaner == null) {
-            cleaner = new CleanerProxy();
+            cleaner = CleanerProxy.makeCleanerProxy(this);
         }
         return cleaner;
     }
