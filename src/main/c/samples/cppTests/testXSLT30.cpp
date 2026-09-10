@@ -141,31 +141,30 @@ void testTransformToStringExtensionFunc(const char * cwd,SaxonProcessor *process
 void testApplyTemplatesString2(SaxonProcessor *processor, Xslt30Processor *trans, sResultCount *sresult) {
 
     cout << "Test: testApplyTemplatesString2:" << endl;
-
-
-    XdmNode *input = processor->parseXmlFromFile("../data/cat.xml");
-
-    if (input== nullptr) {
+    XdmNode * input = nullptr;
+    try{
+        input = processor->parseXmlFromFile("../data/cat.xml");
+    }catch(SaxonApiException &e){
         cout << "Source document is null." << endl;
-        if(processor->exceptionOccurred()) {
-            cerr<<processor->getErrorMessage()<<endl;
-        }
+        cerr<<" Exception thrown="<<e.what()<<endl;
+
         sresult->failure++;
         sresult->failureList.push_back("testApplyTemplatesString2");
         return;
 
     }
-    XsltExecutable * executable = trans->compileFromFile("../data/test.xsl");
-    if(executable == nullptr) {
+
+
+    XsltExecutable * executable = nullptr;
+    try {
+        executable = trans->compileFromFile("../data/test.xsl");
+    } catch (SaxonApiException &e){
+        cerr<<" Exception thrown="<<e.what()<<endl;
         sresult->failure++;
         sresult->failureList.push_back("testApplyTemplatesString2");
-        if (trans->exceptionOccurred()) {
-            cerr <<"testApplyTemplatesString2 error: "<< trans->getErrorMessage() << endl;
-        }
-        delete input;
-        return;
     }
 
+    try {
     executable->setInitialMatchSelection((XdmValue *) input);
 
     const char *output = executable->applyTemplatesReturningString();
@@ -179,9 +178,16 @@ void testApplyTemplatesString2(SaxonProcessor *processor, Xslt30Processor *trans
         printf("result is OK \n");
         delete output;
     }
+    } catch (SaxonApiException &e){
+        cerr<<" Exception thrown="<<e.what()<<endl;
+        sresult->failure++;
+        sresult->failureList.push_back("testApplyTemplatesString2");
+    }
     fflush(stdout);
     delete input;
     delete executable;
+
+
 }
 
 /*
