@@ -401,21 +401,20 @@ public abstract class FunctionCall extends Expression {
      * @throws net.sf.saxon.trans.XPathException if the number of arguments is out of range
      */
 
-    protected int checkArgumentCount(int min, int max) throws XPathException {
+    protected void checkArgumentCount(int min, int max) throws XPathException {
         int numArgs = getArity();
         String msg = null;
         if (min == max && numArgs != min) {
-            msg = "Function " + getDisplayName() + " must have " + pluralArguments(min);
+            msg = "Function call to " + getDisplayName() + " must supply " + plural(min, "argument");
         } else if (numArgs < min) {
-            msg = "Function " + getDisplayName() + " must have at least " + pluralArguments(min);
+            msg = "Function call to " + getDisplayName() + " must supply at least " + plural(min, "argument");
         } else if (numArgs > max) {
-            msg = "Function " + getDisplayName() + " must have no more than " + pluralArguments(max);
+            msg = "Function call to " + getDisplayName() + " must supply no more than " + plural(max, "argument");
         }
         if (msg != null) {
             throw new XPathException(msg, "XPST0017")
                     .asStaticError().withLocation(getLocation());
         }
-        return numArgs;
     }
 
     /**
@@ -435,11 +434,19 @@ public abstract class FunctionCall extends Expression {
      * Utility routine used in constructing error messages: get the word "argument" or "arguments"
      *
      * @param num the number of arguments
-     * @return the singular or plural word
+     * @param thing the string "argument" or "parameter"
+     * @return the singular or plural phrase for N arguments or parameters.
      */
 
-    public static String pluralArguments(int num) {
-        return num == 1 ? "one argument" : (num + " arguments");
+    public static String plural(int num, String thing) {
+        switch (num) {
+            case 0:
+                return "no " + thing + "s";
+            case 1:
+                return "one " + thing;
+            default:
+                return num + " " + thing + "s";
+        }
     }
 
 
