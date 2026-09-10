@@ -28,7 +28,8 @@ public class StringFnCompiler extends ToStringCompiler {
         methodInfo.placeLabel(L0);
         Class<? extends Item> argClass = compiler.compileToItem(fnc.getArg(0));
         argClass = ga.downCast(argClass, Item.class, true);
-        treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, stringReturn, 0, onEmpty);
+        treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, stringReturn, 0,
+                                           requiredClass == UnicodeString.class ? OnEmpty.RETURN_EMPTY_UNICODE_STRING : OnEmpty.RETURN_EMPTY_STRING);
 
         ga.invokeInstanceMethod(argClass, requiredClass == UnicodeString.class ? "getUnicodeStringValue" : "getStringValue");
         methodInfo.placeLabel(stringReturn);
