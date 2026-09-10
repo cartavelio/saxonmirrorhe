@@ -270,7 +270,7 @@ def ensure_dependency_satisfied(dependency: PyXdmNode, env: Environment):
 def process_environment(xpc: PyXPathProcessor, env: PyXdmNode, spec: str, environments_i: dict,
                         default_environment: Environment):
     environment = Environment()
-    environment.createProcessors()
+    environment.create_processors()
     xpc.set_context(xdm_item=env)
     name = env.get_attribute_value("name")
     if name is not None:
@@ -458,7 +458,7 @@ def create_global_environment(catalog: PyXdmNode, xpath_proc: PyXPathProcessor):
 def create_local_environments(test_set_node: PyXdmNode, xpath_proc: PyXPathProcessor):
     localEnvironments.clear()
     environmenti = Environment()
-    environmenti.createProcessors()
+    environmenti.create_processors()
     localEnvironments.update({"default": environmenti})
 
 
@@ -554,7 +554,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
 
     else:
         environment = Environment()
-        environment.createProcessors()
+        environment.create_processors()
 
     xpath_proc.set_context(xdm_item=test_case_node)
     assertion = xpath_proc.evaluate_single("result/*[1]").get_node_value()
