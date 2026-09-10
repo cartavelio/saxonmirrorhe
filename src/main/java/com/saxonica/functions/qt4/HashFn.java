@@ -15,6 +15,7 @@ import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.value.*;
 
@@ -82,6 +83,7 @@ public class HashFn extends SystemFunction {
         }
     }
 
+    @CSharpReplaceBody(code="return System.BitConverter.GetBytes(l);")
     public static byte[] longToBytes(long l) {
         // https://stackoverflow.com/a/29132118/415448
         byte[] result = new byte[Long.BYTES];
