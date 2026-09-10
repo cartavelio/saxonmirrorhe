@@ -29,12 +29,12 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
      * Generate bytecode to evaluate the SingletonAtomizer as an Item
      * Precondition: none.
      * Postcondition: the stack contains an Item representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, final Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, final Expression expression)
             throws CannotCompileException {
 
         Expression arg = ((SingletonAtomizer) expression).getBaseExpression();
@@ -195,6 +195,7 @@ public class SingletonAtomizerCompiler extends ToItemCompiler {
             methodInfo.releaseLocal(itemVar);
 
         }
+        return AtomicValue.class;
     }
 
     /**

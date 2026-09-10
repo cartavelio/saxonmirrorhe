@@ -36,9 +36,10 @@ public abstract class ExpressionCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
+     * @return the class of item that will be on the stack after executing the generated code
      */
 
-    public abstract void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException;
+    public abstract Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException;
 
     /**
      * Generate bytecode to evaluate the expression as a {@link net.sf.saxon.om.SequenceIterator}

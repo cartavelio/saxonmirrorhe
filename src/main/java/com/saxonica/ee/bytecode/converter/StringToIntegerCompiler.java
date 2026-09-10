@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
@@ -13,7 +14,7 @@ import net.sf.saxon.value.IntegerValue;
  */
 public class StringToIntegerCompiler extends ConverterCompiler.GenericConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final Generator ga = compiler.getCurrentGenerator();
@@ -37,6 +38,7 @@ public class StringToIntegerCompiler extends ConverterCompiler.GenericConverterC
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
             ga.checkClass(IntegerValue.class);
         }
+        return IntegerValue.class;
     }
 
 

@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.StringConstants;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Cardinality;
@@ -16,7 +17,7 @@ import java.util.Stack;
  */
 public class BooleanToUntypedAtomicCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final Generator ga = compiler.getCurrentGenerator();
@@ -42,6 +43,7 @@ public class BooleanToUntypedAtomicCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(StringValue.class, "makeUntypedAtomic", UnicodeString.class);
         }
+        return StringValue.class;
     }
 
     @Override

@@ -134,16 +134,17 @@ public class VariableReferenceCompiler extends ToIteratorCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
+     * @return the class of item generated
      */
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
-        GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "VariableReferenceCompiler-Item");
         genEvaluateVariable(compiler, ga, (VariableReference) expression);
         ga.invokeInstanceMethod(Sequence.class, "head");
+        return Item.class;
     }
 
 

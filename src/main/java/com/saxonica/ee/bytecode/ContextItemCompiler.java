@@ -8,6 +8,7 @@ import net.sf.saxon.expr.ContextItemExpression;
 import net.sf.saxon.expr.CurrentItemExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 
 /**
  * Generate code for a context item expression (that is, "."), and also for an XSLT
@@ -16,7 +17,7 @@ import net.sf.saxon.expr.XPathContext;
 public class ContextItemCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, final Expression expression) {
+    public Class<? extends Item> compileToItem(CompilerService compiler, final Expression expression) {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitLineNumber(compiler, ga, expression);
@@ -33,6 +34,7 @@ public class ContextItemCompiler extends ToItemCompiler {
             }
             methodInfo.placeLabel(lab);
         }
+        return Item.class;
     }
 
 }

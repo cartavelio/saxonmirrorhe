@@ -1,5 +1,6 @@
 package com.saxonica.ee.bytecode.util;
 
+import net.sf.saxon.om.Item;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
@@ -567,6 +568,26 @@ public class Generator extends GeneratorAdapter {
                 invokeInstanceMethod(Object.class, "toString");
         }
 
+    }
+
+    /**
+     * Generate a checkClass instruction if required
+     * @param supplied the class of the current value
+     * @param required the class required by the context in which the value is used
+     * @return supplied or required, whichever is more specific
+     */
+    public Class<? extends Item> downCast(Class<? extends Item> supplied, Class<? extends Item> required) throws CannotCompileException {
+        if (!required.isAssignableFrom(supplied)) {
+            if (!supplied.isAssignableFrom(required)) {
+                // Treat as recoverable error (test -s:misc-CombinedErrorCodes -t:XPTY0004_28)
+                throw new CannotCompileException("Unrelated types: " + supplied + " / " + required, true);
+            }
+            checkClass(required);
+            return required;
+        } else {
+            checkClass(supplied);
+            return supplied;
+        }
     }
 
 }

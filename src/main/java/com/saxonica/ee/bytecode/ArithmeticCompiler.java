@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
@@ -29,12 +30,12 @@ public class ArithmeticCompiler extends ToItemCompiler {
      * Generate bytecode to evaluate the ArithmeticExpression
      * Precondition: none.
      * Postcondition: the stack contains an item representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -43,8 +44,9 @@ public class ArithmeticCompiler extends ToItemCompiler {
         visitAnnotation(compiler, "ArithmeticCompiler");
         LabelInfo end = methodInfo.newLabel("endArith");
 
-        compiler.compileToItem(exp.getLhsExpression());
-        ga.checkClass(AtomicValue.class);
+        Class<? extends Item> lhsClass = compiler.compileToItem(exp.getLhsExpression());
+        lhsClass = ga.downCast(lhsClass, AtomicValue.class);
+
         visitAnnotation(compiler, "ArithmeticCompiler-doneArg-0");
 
         if (Cardinality.allowsZero(exp.getLhsExpression().getCardinality())) {
@@ -56,8 +58,9 @@ public class ArithmeticCompiler extends ToItemCompiler {
             ga.goTo(end);
             methodInfo.placeLabel(notNull0);
         }
-        compiler.compileToItem(exp.getRhsExpression());
-        ga.checkClass(AtomicValue.class);
+        Class<? extends Item> rhsClass = compiler.compileToItem(exp.getRhsExpression());
+        rhsClass = ga.downCast(rhsClass, AtomicValue.class);
+
         visitAnnotation(compiler, "ArithmeticCompiler-doneArg-1");
 
         if (Cardinality.allowsZero(exp.getRhsExpression().getCardinality())) {
@@ -99,6 +102,7 @@ public class ArithmeticCompiler extends ToItemCompiler {
             ga.invokeInstanceMethod(Calculator.class, "compute", AtomicValue.class, AtomicValue.class, XPathContext.class);
         }
         methodInfo.placeLabel(end);
+        return AtomicValue.class; // TODO: return a more specific class
         //methodInfo.releaseLocal(oper0Var);
         //methodInfo.releaseLocal(oper1Var);
     }

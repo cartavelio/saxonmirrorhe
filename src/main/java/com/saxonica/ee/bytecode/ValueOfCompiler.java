@@ -26,12 +26,12 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
      * Generate bytecode to get the ValueOf text from the instruction
      * Precondition: none.
      * Postcondition: the stack contains an item from evaluating this instruction
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         Configuration config = compiler.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
@@ -89,6 +89,8 @@ public class ValueOfCompiler extends SimpleNodeConstructorCompiler {
 
         methodInfo.releaseLocal(valVar);
         methodInfo.releaseLocal(oVar);
+
+        return Orphan.class;
     }
 
     /**

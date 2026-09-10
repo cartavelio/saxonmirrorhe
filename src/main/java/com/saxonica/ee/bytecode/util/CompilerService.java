@@ -761,14 +761,15 @@ public class CompilerService implements ICompilerService {
      *
      * @param expr the expression to be evaluated
      * @throws CannotCompileException if the expression cannot be compiled
+     * @returns the class of Item that will be left on the stack after execution of the generated code
      */
 
-    public void compileToItem(Expression expr) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(Expression expr) throws CannotCompileException {
         ExpressionCompiler comp = getExpressionCompiler(expr);
         if (expr instanceof ByteCodeCandidate) {
             expr = ((ByteCodeCandidate) expr).getBaseExpression();
         }
-        comp.compileToItem(this, expr);
+        return comp.compileToItem(this, expr);
     }
 
     /**

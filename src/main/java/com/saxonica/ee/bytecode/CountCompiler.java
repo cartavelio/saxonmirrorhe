@@ -1,11 +1,16 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.*;
+import com.saxonica.ee.bytecode.util.CannotCompileException;
+import com.saxonica.ee.bytecode.util.CompilerService;
+import com.saxonica.ee.bytecode.util.Generator;
+import com.saxonica.ee.bytecode.util.OnEmpty;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.functions.Count;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.value.Int64Value;
 import org.objectweb.asm.Type;
 
 /**
@@ -44,13 +49,14 @@ public class CountCompiler extends ToItemCompiler {
      * Precondition: none.
      * Postcondition: the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileItemFromInt(compiler, expression);
+        return Int64Value.class;
     }
 
     public static boolean maybeLastPositionFinder(Expression expression) {

@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
@@ -19,15 +20,10 @@ import java.util.Stack;
 
 public class FloatToDoubleCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
-        final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "FloatToDoubleConverter-Item");
         ga.newInstance(DoubleValue.class);
@@ -53,6 +49,7 @@ public class FloatToDoubleCompiler extends ConverterCompiler {
             //  ga.cast(Type.FLOAT_TYPE, Type.DOUBLE_TYPE);
             ga.invokeConstructor(DoubleValue.class, Double.TYPE);
         }
+        return DoubleValue.class;
     }
 
     @Override

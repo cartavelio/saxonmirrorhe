@@ -8,6 +8,7 @@ import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
@@ -23,8 +24,9 @@ import java.util.Map;
 public class SwitchExpressionCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileGeneric(compiler, expression, Expression.EVALUATE_METHOD);
+        return Item.class;
     }
 
     @Override

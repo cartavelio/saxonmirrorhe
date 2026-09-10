@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
@@ -13,7 +14,7 @@ import net.sf.saxon.value.IntegerValue;
  */
 public class DoubleToIntegerCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final Generator ga = compiler.getCurrentGenerator();
@@ -35,6 +36,7 @@ public class DoubleToIntegerCompiler extends ConverterCompiler {
             ga.invokeStaticMethod(IntegerValue.class, "fromDouble", Double.TYPE);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
         }
+        return IntegerValue.class;
     }
 
     @Override

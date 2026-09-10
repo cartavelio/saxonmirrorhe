@@ -7,6 +7,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.StringLength_1;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.value.Int64Value;
 
 /**
  * Generate bytecode for a call to the StringLength Function
@@ -46,13 +47,14 @@ public class StringLengthCompiler extends ToItemCompiler {
      * Precondition: none.
      * Postcondition: at execution time, the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileItemFromInt(compiler, expression);
+        return Int64Value.class;
     }
 }
 

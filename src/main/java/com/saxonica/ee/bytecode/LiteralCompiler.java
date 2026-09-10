@@ -22,7 +22,7 @@ import org.objectweb.asm.Type;
 public class LiteralCompiler extends ExpressionCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "LiteralCompiler-item");
         visitLineNumber(compiler, ga, expression);
@@ -34,29 +34,30 @@ public class LiteralCompiler extends ExpressionCompiler {
         }
         if (item == null) {
             ga.pushNull();
-            return;
+            return Item.class;
         } else if (item instanceof AtomicValue) {
             int type = ((AtomicValue) item).getItemType().getFingerprint();
             switch (type) {
                 case StandardNames.XS_BOOLEAN:
                     ga.push(((BooleanValue) item).getBooleanValue());
                     ga.invokeStaticMethod(BooleanValue.class, "get", Boolean.TYPE);
-                    return;
+                    return BooleanValue.class;
                 case StandardNames.XS_DOUBLE:
                     ga.newInstance(Type.getType(DoubleValue.class));
                     ga.dup();
                     ga.push(((DoubleValue) item).getDoubleValue());
                     ga.invokeConstructor(DoubleValue.class, Double.TYPE);
-                    return;
+                    return DoubleValue.class;
                 case StandardNames.XS_FLOAT:
                     ga.newInstance(Type.getType(FloatValue.class));
                     ga.dup();
                     ga.push(((FloatValue) item).getFloatValue());
                     ga.invokeConstructor(FloatValue.class, Float.TYPE);
-                    return;
+                    return FloatValue.class;
                 case StandardNames.XS_INTEGER:
                     allocateStatic(compiler, item);
-                    return;
+                    ga.checkClass(IntegerValue.class);
+                    return IntegerValue.class;
                 case StandardNames.XS_STRING:
                     String s = item.getUnicodeStringValue().toString();
                     if (s.isEmpty()) {
@@ -71,11 +72,12 @@ public class LiteralCompiler extends ExpressionCompiler {
                         allocateStatic(compiler, new StringValue(s));
                         //ga.invokeStaticMethod(StringValue.class, "makeStringValue", CharSequence.class);
                     }
-                    return;
+                    return StringValue.class;
             }
         }
         // All other values
         allocateStatic(compiler, item);
+        return item.getClass();
     }
 
     /**

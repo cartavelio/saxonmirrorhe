@@ -32,8 +32,8 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
          return converter.convert((AtomicValue) item).asAtomic();
       */
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
         Expression operand = ((AtomicSequenceConverter) expression).getBaseExpression();
         Converter converter = ((AtomicSequenceConverter) expression).getConverter();
         if (converter == null) {
@@ -46,7 +46,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
 
         LabelInfo end = methodInfo.newLabel("endASC");
 
-        compiler.compileToItem(operand);
+        Class<? extends Item> operandClass = compiler.compileToItem(operand);
         visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Item-Returned");
         if (Cardinality.allowsZero(operand.getCardinality())) {
             LabelInfo notNull = methodInfo.newLabel("notNullASC");
@@ -58,16 +58,21 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
             methodInfo.placeLabel(notNull);
         }
         if (converter instanceof Converter.ToStringConverter) {
-            ga.invokeInstanceMethod(Item.class, "getUnicodeStringValue");
+            ga.checkClass(AtomicValue.class);
+            ga.invokeInstanceMethod(AtomicValue.class, "getUnicodeStringValue");
             ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
+            methodInfo.placeLabel(end);
+            return StringValue.class;
         } else {
             allocateStatic(compiler, converter);
             ga.swap();
             ga.checkClass(AtomicValue.class);
             ga.invokeInstanceMethod(Converter.class, "convert", AtomicValue.class);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
+            methodInfo.placeLabel(end);
+            return AtomicValue.class;
         }
-        methodInfo.placeLabel(end);
+
     }
 
     @Override
@@ -123,7 +128,8 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
 
                 LabelInfo end = methodInfo.newLabel("endASC");
 
-                compiler.compileToItem(operand);
+                Class<? extends Item> operandClass = compiler.compileToItem(operand);
+                ga.downCast(operandClass, AtomicValue.class);
                 visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Primitive-Returned");
                 if (Cardinality.allowsZero(operand.getCardinality())) {
                     LabelInfo notNull = methodInfo.newLabel("notNullASC");
@@ -132,7 +138,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
                     handleEmptyStringResult(onEmpty, ga, methodInfo, end);
                     methodInfo.placeLabel(notNull);
                 }
-                ga.invokeInstanceMethod(Item.class, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
+                ga.invokeInstanceMethod(operandClass, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
                 methodInfo.placeLabel(end);
             }
         } else {

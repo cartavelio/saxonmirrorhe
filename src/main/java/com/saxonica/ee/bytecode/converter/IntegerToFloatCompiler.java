@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
@@ -20,15 +21,11 @@ import java.util.Stack;
 
 public class IntegerToFloatCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "IntegerToFloatConverter-Item");
         ga.newInstance(Type.getType(FloatValue.class));
@@ -52,6 +49,7 @@ public class IntegerToFloatCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, Long.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeConstructor(FloatValue.class, Float.TYPE);
         }
+        return FloatValue.class;
     }
 
     @Override
@@ -73,9 +71,9 @@ public class IntegerToFloatCompiler extends ConverterCompiler {
             compiler.compileToPrimitive(base, Long.TYPE, onEmpty);
             ga.cast(Type.LONG_TYPE, Type.FLOAT_TYPE);
         } else {
-            compiler.compileToItem(base);
-            ga.checkClass(IntegerValue.class);
-            ga.invokeInstanceMethod(IntegerValue.class, "getDoubleValue");
+            Class<? extends Item> baseClass = compiler.compileToItem(base);
+            baseClass = ga.downCast(baseClass, IntegerValue.class);
+            ga.invokeInstanceMethod(baseClass, "getDoubleValue");
             ga.cast(Type.DOUBLE_TYPE, Type.FLOAT_TYPE);
         }
 

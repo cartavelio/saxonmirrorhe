@@ -4,7 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.*;
-import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.IntegerValue;
 import net.sf.saxon.value.NumericValue;
 import org.objectweb.asm.Type;
@@ -17,7 +17,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class RoundingCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         SystemFunction rounding = fnc.getTargetFunction();
@@ -25,8 +25,9 @@ public class RoundingCompiler extends ToItemCompiler {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo notNull = methodInfo.newLabel("roundNotNull");
         LabelInfo end = methodInfo.newLabel("endRound");
-        compiler.compileToItem(fnc.getArg(0));
-        ga.checkClass(AtomicValue.class);
+        Class<? extends Item> operandClass = compiler.compileToItem(fnc.getArg(0));
+        operandClass = ga.downCast(operandClass, NumericValue.class);
+        //ga.checkClass(AtomicValue.class);
         ga.dup();
         ga.ifNonNull(notNull.label());
         ga.pop();
@@ -34,40 +35,41 @@ public class RoundingCompiler extends ToItemCompiler {
         ga.goTo(end);
 
         methodInfo.placeLabel(notNull);
-        ga.checkClass(NumericValue.class);
-        int valVar = methodInfo.allocateLocal(NumericValue.class);
+        //ga.checkClass(NumericValue.class);
+        int valVar = methodInfo.allocateLocal(operandClass);
         ga.storeLocal(valVar);
         if (rounding instanceof Floor) {
             ga.loadLocal(valVar);
-            ga.invokeInstanceMethod(NumericValue.class, "floor");
+            ga.invokeInstanceMethod(operandClass, "floor");
         } else if (rounding instanceof Ceiling) {
             ga.loadLocal(valVar);
-            ga.invokeInstanceMethod(NumericValue.class, "ceiling");
+            ga.invokeInstanceMethod(operandClass, "ceiling");
         } else if (rounding instanceof Round) {
             // TODO: need to check for out-of-range values of second argument, as with round-half-to-even.
             ga.loadLocal(valVar);
             if (rounding.getArity() == 2) {
-                compiler.compileToItem(fnc.getArg(1));
-                ga.checkClass(NumericValue.class);
-                ga.invokeInstanceMethod(NumericValue.class, "longValue");
+                Class<? extends Item> secondOperandClass = compiler.compileToItem(fnc.getArg(1));
+                secondOperandClass = ga.downCast(secondOperandClass, NumericValue.class);
+                //ga.checkClass(NumericValue.class);
+                ga.invokeInstanceMethod(secondOperandClass, "longValue");
                 ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
             } else {
                 ga.push(0);
             }
-            ga.invokeInstanceMethod(NumericValue.class, "round", Integer.TYPE);
+            ga.invokeInstanceMethod(operandClass, "round", Integer.TYPE);
 
         } else if (rounding instanceof RoundHalfToEven) {
             ga.loadLocal(valVar);
             LabelInfo doRounding = null;
             if (rounding.getArity() == 2) {
-                compiler.compileToItem(fnc.getArg(1));
-                ga.checkClass(NumericValue.class);
+                Class<? extends Item> secondOperandClass = compiler.compileToItem(fnc.getArg(1));
+                secondOperandClass = ga.downCast(secondOperandClass, NumericValue.class);
                 IntegerValue[] bounds = fnc.getArg(1).getIntegerBounds();
                 if (bounds == null || bounds[0].compareTo(Integer.MAX_VALUE) > 0) {
                     LabelInfo notTooBig = methodInfo.newLabel("notTooBig");
                     ga.dup();
                     ga.push((long) Integer.MAX_VALUE);
-                    ga.invokeInstanceMethod(NumericValue.class, "compareTo", Long.TYPE);
+                    ga.invokeInstanceMethod(secondOperandClass, "compareTo", Long.TYPE);
                     ga.ifZCmp(GeneratorAdapter.LE, notTooBig.label());
                     ga.pop();
                     ga.goTo(end);
@@ -93,17 +95,17 @@ public class RoundingCompiler extends ToItemCompiler {
             if (doRounding != null) {
                 methodInfo.placeLabel(doRounding);
             }
-            ga.invokeInstanceMethod(NumericValue.class, "roundHalfToEven", Integer.TYPE);
+            ga.invokeInstanceMethod(operandClass, "roundHalfToEven", Integer.TYPE);
         } else if (rounding instanceof Abs) {
             ga.loadLocal(valVar);
-            ga.invokeInstanceMethod(NumericValue.class, "abs");
+            ga.invokeInstanceMethod(operandClass, "abs");
         } else {
             throw new UnsupportedOperationException("Unknown rounding function");
         }
         methodInfo.placeLabel(end);
 
         methodInfo.releaseLocal(valVar);
-
+        return NumericValue.class;
     }
 
 }

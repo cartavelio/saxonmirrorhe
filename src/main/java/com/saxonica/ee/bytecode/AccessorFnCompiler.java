@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.AccessorFn;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
@@ -18,27 +19,29 @@ public class AccessorFnCompiler extends ToItemCompiler {
      * Precondition: none.
      * Postcondition: at execution time, the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         AccessorFn fn = (AccessorFn)fnc.getTargetFunction();
         visitAnnotation(compiler, "AccessorFn Expr:" + fn.getFunctionName().getDisplayName());
         LabelInfo accessorReturn = methodInfo.newLabel("accessorReturn");
-        compiler.compileToItem(fnc.getArg(0));
+        Class<? extends Item> operandClass = compiler.compileToItem(fnc.getArg(0));
+        operandClass = ga.downCast(operandClass, AtomicValue.class);
+        //ga.checkClass(operandClass);    // MHK 2022-05-30 - not sure why this is necessary, but it is.
         if (Cardinality.allowsZero(fnc.getArg(0).getCardinality())) {
             ga.dup();
             ga.ifNull(accessorReturn.label());
         }
-        ga.checkClass(AtomicValue.class);
         allocateStatic(compiler, fn.getComponentId());
-        ga.invokeInstanceMethod(AtomicValue.class, "getComponent", AccessorFn.Component.class);
+        ga.invokeInstanceMethod(operandClass, "getComponent", AccessorFn.Component.class);
         methodInfo.placeLabel(accessorReturn);
+        return AtomicValue.class;
     }
 }
 

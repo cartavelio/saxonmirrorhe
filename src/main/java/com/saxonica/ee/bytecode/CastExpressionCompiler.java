@@ -6,6 +6,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.OnEmpty;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.PlainType;
@@ -20,12 +21,12 @@ public class CastExpressionCompiler extends ToItemCompiler {
      * Generate bytecode to evaluate the CastExpression as an Item
      * Precondition: none.
      * Postcondition: the stack contains an Item representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return the class of item generated
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         final Expression base = ((CastExpression) expression).getBaseExpression();
@@ -33,8 +34,7 @@ public class CastExpressionCompiler extends ToItemCompiler {
         visitAnnotation(compiler, "CastExpression-Item");
         PlainType sourceType = (PlainType) base.getItemType();
         ConverterCompiler converterCompiler = getConverterCompiler(sourceType, targetType);
-        converterCompiler.compileToItem(compiler, expression);
-
+        return converterCompiler.compileToItem(compiler, expression);
     }
 
     /**

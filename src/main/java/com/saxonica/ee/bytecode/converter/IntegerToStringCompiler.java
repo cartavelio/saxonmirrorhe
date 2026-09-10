@@ -4,10 +4,9 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
@@ -18,15 +17,11 @@ import net.sf.saxon.value.StringValue;
  */
 public class IntegerToStringCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "IntegerToStringConverter-Item");
 
@@ -43,6 +38,7 @@ public class IntegerToStringCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
         }
+        return StringValue.class;
     }
 
     @Override
@@ -64,7 +60,8 @@ public class IntegerToStringCompiler extends ConverterCompiler {
                 ga.invokeStaticMethod(BMPString.class, "of", String.class);
             }
         } else {
-            compiler.compileToItem(base);
+            Class<? extends Item> baseClass = compiler.compileToItem(base);
+            baseClass = ga.downCast(baseClass, IntegerValue.class);
             if (allowsEmpty) {
                 ga.dup();
                 ga.ifNonNull(notNull.label());
@@ -72,11 +69,10 @@ public class IntegerToStringCompiler extends ConverterCompiler {
                 methodInfo.placeLabel(notNull);
             }
 
-            ga.checkClass(IntegerValue.class);
             if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(IntegerValue.class, "getStringValue");
+                ga.invokeInstanceMethod(baseClass, "getStringValue");
             } else {
-                ga.invokeInstanceMethod(IntegerValue.class, "getUnicodeStringValue");
+                ga.invokeInstanceMethod(baseClass, "getUnicodeStringValue");
             }
         }
         methodInfo.placeLabel(end);

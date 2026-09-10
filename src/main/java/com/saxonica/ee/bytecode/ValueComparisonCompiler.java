@@ -34,15 +34,16 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
      * Precondition: none.
      * Postcondition: the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         ValueComparison expr = (ValueComparison) expression;
         compile(compiler, expression, expr.getLhsExpression(), expr.getRhsExpression(), expr.getOperator(), expr.getAtomicComparer(), true);
+        return BooleanValue.class;
     }
 
     /**
@@ -201,9 +202,9 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
         }
 
         if (!finished) {
-            compiler.compileToItem(lhs);
-            ga.checkClass(AtomicValue.class);
-            final int op0Var = methodInfo.allocateLocal(AtomicValue.class);
+            Class<? extends Item> lhsClass = compiler.compileToItem(lhs);
+            lhsClass = ga.downCast(lhsClass, AtomicValue.class);
+            final int op0Var = methodInfo.allocateLocal(lhsClass);
             ga.storeLocal(op0Var);
 
             if (maybeEmpty0) {
@@ -220,9 +221,9 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                 }
             }
 
-            compiler.compileToItem(rhs);
-            ga.checkClass(AtomicValue.class);
-            final int op1Var = methodInfo.allocateLocal(AtomicValue.class);
+            Class<? extends Item> rhsClass = compiler.compileToItem(rhs);
+            rhsClass = ga.downCast(rhsClass, AtomicValue.class);
+            final int op1Var = methodInfo.allocateLocal(rhsClass);
             ga.storeLocal(op1Var);
 
             if (maybeEmpty1) {
@@ -245,19 +246,19 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
                 visitLineNumber(compiler, ga, expression);
                 LabelInfo isCompLab = methodInfo.newLabel("isCompLab");
                 ga.loadLocal(op0Var);
-                ga.checkClass(AtomicValue.class);
-                ga.invokeInstanceMethod(AtomicValue.class, "getPrimitiveType");
+                //ga.checkClass(AtomicValue.class);
+                ga.invokeInstanceMethod(lhsClass, "getPrimitiveType");
                 ga.loadLocal(op1Var);
-                ga.checkClass(AtomicValue.class);
-                ga.invokeInstanceMethod(AtomicValue.class, "getPrimitiveType");
+                //ga.checkClass(AtomicValue.class);
+                ga.invokeInstanceMethod(rhsClass, "getPrimitiveType");
                 ga.push(Token.isOrderedOperator(op));
                 ga.invokeStaticMethod(net.sf.saxon.type.Type.class, "isGuaranteedComparable", BuiltInAtomicType.class, BuiltInAtomicType.class, Boolean.TYPE);
                 ga.ifZCmp(GeneratorAdapter.NE, isCompLab.label());
                 // Throw error - types not comparable
                 ga.loadLocal(op0Var);
-                ga.checkClass(AtomicValue.class);
+                //ga.checkClass(AtomicValue.class);
                 ga.loadLocal(op1Var);
-                ga.checkClass(AtomicValue.class);
+                //ga.checkClass(AtomicValue.class);
                 ga.push(expression.getLocation().getSystemId());
                 ga.push(expression.getLocation().getLineNumber());
                 ga.invokeStaticMethod(Callback.class, "makeNonComparableException", AtomicValue.class, AtomicValue.class, String.class, Integer.TYPE);

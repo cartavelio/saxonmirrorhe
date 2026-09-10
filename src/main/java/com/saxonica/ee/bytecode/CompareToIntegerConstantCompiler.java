@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CompareToIntegerConstant;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Token;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -62,14 +63,14 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
 
         } else {
 
-            compiler.compileToItem(exp);
-            ga.checkClass(NumericValue.class);
-            int numericVar = methodInfo.allocateLocal(NumericValue.class);
+            Class<? extends Item> operandClass = compiler.compileToItem(exp);
+            operandClass = ga.downCast(operandClass, NumericValue.class);
+            int numericVar = methodInfo.allocateLocal(operandClass);
             ga.storeLocal(numericVar);
 
             if (isUnknownNumeric || isDouble || isFloat) {
                 ga.loadLocal(numericVar);
-                ga.invokeInstanceMethod(NumericValue.class, "isNaN");
+                ga.invokeInstanceMethod(operandClass, "isNaN");
                 ga.ifTrue((operator == Token.FNE ? returnTrue : returnFalse));
                 //ga.ifZCmp((operator == Token.FNE ? GeneratorAdapter.EQ : GeneratorAdapter.NE), returnFalse.label());
             }

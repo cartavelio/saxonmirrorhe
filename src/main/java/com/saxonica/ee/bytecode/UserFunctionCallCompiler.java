@@ -5,6 +5,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.Evaluator;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.value.EmptySequence;
 import org.objectweb.asm.Type;
@@ -25,12 +26,13 @@ public class UserFunctionCallCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
         visitAnnotation(compiler, "UserFunctionCallCompiler-Item");
         compileFunctionCall(compiler, expression, true);
         Generator ga = compiler.getCurrentGenerator();
         ga.invokeInstanceMethod(Sequence.class, "head");
+        return Item.class;
     }
 
     @Override          // new for bug 3443

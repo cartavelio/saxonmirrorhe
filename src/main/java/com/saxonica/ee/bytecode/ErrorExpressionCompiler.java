@@ -5,6 +5,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.OnEmpty;
 import net.sf.saxon.expr.ErrorExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 
 /**
  * Generate bytecode for an error expression (an expression that throws a dynamic error if evaluated)
@@ -16,14 +17,15 @@ public class ErrorExpressionCompiler extends ExpressionCompiler {
      * Precondition: none.
      * Postcondition: at execution time, the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         ErrorExpression exp = (ErrorExpression) expression;
         compiler.generateDynamicError(exp.getMessage(), exp.getErrorCodeLocalPart(), exp.getLocation(), exp.isTypeError());
+        return Item.class;
     }
 
     /**

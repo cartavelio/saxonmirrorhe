@@ -49,8 +49,8 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
 
 
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo mi = compiler.getCurrentMethod();
         LabelInfo end = mi.newLabel("endCoercer");
@@ -113,6 +113,7 @@ public class FunctionSequenceCoercerCompiler extends ToIteratorCompiler {
 //        ga.invokeStaticMethod(CoercedFunction.class, "coerce", Function.class,
 //                SpecificFunctionType.class, RoleDiagnostic.class, Container.class);
         mi.placeLabel(end);
+        return CoercedFunction.class;
     }
 
 

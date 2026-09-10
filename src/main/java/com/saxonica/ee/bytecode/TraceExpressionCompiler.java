@@ -58,8 +58,8 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -70,8 +70,8 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
         ga.storeLocal(controllerVar);
         enterTrace(compiler, ga, controllerVar, expression);
         Expression expr0 = getTracedExpression(expression);
-        compiler.compileToItem(expr0);
-        int itemVar = methodInfo.allocateLocal(Item.class);
+        Class<? extends Item> operandClass = compiler.compileToItem(expr0);
+        int itemVar = methodInfo.allocateLocal(operandClass);
         ga.storeLocal(itemVar);
         visitLineNumber(compiler, ga, expression);
         leaveTrace(compiler, ga, controllerVar, expression);
@@ -80,6 +80,7 @@ public class TraceExpressionCompiler extends ToIteratorCompiler {
 
         methodInfo.releaseLocal(itemVar);
         methodInfo.releaseLocal(controllerVar);
+        return operandClass;
     }
 
     @Override

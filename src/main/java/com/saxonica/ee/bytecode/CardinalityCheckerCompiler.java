@@ -5,6 +5,7 @@ import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.TypeCheckingFilter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.s9api.Location;
@@ -16,8 +17,8 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
 
 
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
 
         Expression operand = ((CardinalityChecker) expression).getBaseExpression();
         int requiredCardinality = ((CardinalityChecker) expression).getRequiredCardinality();
@@ -27,7 +28,7 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         visitAnnotation(compiler, "CardinalityCheckerCompiler-Item");
 
         compiler.compileToIterator(operand);
-        ga.checkClass(SequenceIterator.class);
+        //ga.checkClass(SequenceIterator.class);
         if (requiredCardinality == StaticProperty.EMPTY) {
             LabelInfo returnNull = methodInfo.newLabel("returnNull00");
             ga.invokeInstanceMethod(SequenceIterator.class, "next");
@@ -86,6 +87,7 @@ public class CardinalityCheckerCompiler extends ToIteratorCompiler {
         } else {
             throw new IllegalStateException("CardinalityChecker: compileToItem called when multiple items allowed");
         }
+        return Item.class;
 
     }
 

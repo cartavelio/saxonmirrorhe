@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.IntegerRangeTest;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
@@ -54,18 +55,18 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
         LabelInfo intRangeLoop = methodInfo.newLabel("intRange_loop");
         LabelInfo falseLabel = methodInfo.newLabel("intRange_FalseLabel");
 
-        compiler.compileToItem(minExp);
-        int minVar = methodInfo.allocateLocal(IntegerValue.class);
-        ga.checkClass(IntegerValue.class);
+        Class<? extends Item> minClass = compiler.compileToItem(minExp);
+        minClass = ga.downCast(minClass, IntegerValue.class);
+        int minVar = methodInfo.allocateLocal(minClass);
         if (Cardinality.allowsZero(minExp.getCardinality())) {
             ga.dup();
             ga.ifNull(falseLabel.label());
         }
         ga.storeLocal(minVar);
 
-        compiler.compileToItem(maxExp);
-        int maxVar = methodInfo.allocateLocal(IntegerValue.class);
-        ga.checkClass(IntegerValue.class);
+        Class<? extends Item> maxClass = compiler.compileToItem(maxExp);
+        maxClass = ga.downCast(maxClass, IntegerValue.class);
+        int maxVar = methodInfo.allocateLocal(maxClass);
         if (Cardinality.allowsZero(maxExp.getCardinality())) {
             ga.dup();
             ga.ifNull(falseLabel.label());
@@ -142,7 +143,7 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
         methodInfo.placeLabel(geMin);
 
         ga.loadLocal(valueVar);
-        compiler.compileToItem(maxExp);
+        ga.loadLocal(maxVar);
         ga.invokeInstanceMethod(NumericValue.class, "compareTo", Object.class);
         LabelInfo leMax = methodInfo.newLabel("IRTleMax");
         ga.ifZCmp(GeneratorAdapter.LE, leMax.label());

@@ -6,6 +6,7 @@ import com.saxonica.ee.bytecode.util.Generator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 
 /**
  * Compiler for a CompiledExpression. This arises when we need to compile an expression such as
@@ -26,12 +27,13 @@ public class CompiledExpressionCompiler extends ExpressionCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CompiledExpression ce = (CompiledExpression) expression;
         Generator ga = compiler.getCurrentGenerator();
         allocateStatic(compiler, ce.getGeneratedCode());
         compiler.generateGetContext();
         ga.invokeInstanceMethod(GeneratedCode.class, "evaluateItem", XPathContext.class);
+        return Item.class;
     }
 
     @Override

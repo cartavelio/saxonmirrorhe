@@ -3,12 +3,13 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 
 public class RootFunctionCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         /*
@@ -39,6 +40,7 @@ public class RootFunctionCompiler extends ToItemCompiler {
         ga.invokeInstanceMethod(NodeInfo.class, "getRoot");
 
         methodInfo.placeLabel(end);
+        return NodeInfo.class;
 
     }
 

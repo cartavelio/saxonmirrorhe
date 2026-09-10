@@ -24,13 +24,14 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public abstract class ToIteratorCompiler extends ExpressionCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         // This will only be called if type checking has established that the result will be a singleton.
         // Therefore this method does not need to insert any type-checking code; it simply returns the first
         // item (or null if there is no first item)
         Generator ga = compiler.getCurrentGenerator();
         compiler.compileToIterator(expression);
         ga.invokeInstanceMethod(SequenceIterator.class, "next");
+        return Item.class;
     }
 
     @Override

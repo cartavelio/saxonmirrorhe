@@ -3,6 +3,7 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
@@ -20,9 +21,9 @@ public class GenerateIdCompiler extends ToStringCompiler {
         final SystemFunctionCall fnc = (SystemFunctionCall) expression;
         visitAnnotation(compiler, "GenerateId-String");
         LabelInfo generateIdReturn = methodInfo.newLabel("generateIdReturn");
-        compiler.compileToItem(fnc.getArg(0));
+        Class<? extends Item> argClass = compiler.compileToItem(fnc.getArg(0));
         treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, generateIdReturn, 0, onEmpty);
-        ga.checkClass(NodeInfo.class);
+        argClass = ga.downCast(argClass, NodeInfo.class);
         ga.newInstance(Type.getType(StringBuilder.class));
         ga.dup();
         ga.push(16);
@@ -30,12 +31,12 @@ public class GenerateIdCompiler extends ToStringCompiler {
         int bufferVar = methodInfo.allocateLocal(StringBuilder.class);
         ga.dup();
         ga.storeLocal(bufferVar);
-        ga.invokeInstanceMethod(NodeInfo.class, "generateId", StringBuilder.class);
+        ga.invokeInstanceMethod(argClass, "generateId", StringBuilder.class);
         ga.loadLocal(bufferVar);
         ga.invokeInstanceMethod(StringBuilder.class, "trimToSize");
         ga.loadLocal(bufferVar);
         methodInfo.releaseLocal(bufferVar);
-        ga.invokeInstanceMethod(Object.class, "toString");
+        ga.invokeInstanceMethod(StringBuilder.class, "toString");
         if (requiredClass == UnicodeString.class) {
             ga.invokeStaticMethod(BMPString.class, "of", String.class);
         }

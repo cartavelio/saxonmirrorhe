@@ -5,6 +5,8 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.PositionAndLast;
+import net.sf.saxon.om.Item;
+import net.sf.saxon.value.Int64Value;
 import org.objectweb.asm.Type;
 
 /**
@@ -41,13 +43,14 @@ public class LastCompiler extends ToItemCompiler {
      * Precondition: none.
      * Postcondition: the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileItemFromInt(compiler, expression);
+        return Int64Value.class;
     }
 }
 

@@ -9,6 +9,7 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 
 
@@ -22,12 +23,12 @@ public class AtomizerCompiler extends ToIteratorCompiler {
      * Generate bytecode to evaluate the Atomizer as an Item
      * Precondition: none.
      * Postcondition: the stack contains an Item representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return the class of item generated
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         Atomizer atomizer = (Atomizer) expression;
         Expression arg = ((Atomizer) expression).getBaseExpression();
@@ -36,7 +37,7 @@ public class AtomizerCompiler extends ToIteratorCompiler {
         visitAnnotation(compiler, "AtomizerCompiler-Item");
         visitLineNumber(compiler, ga, expression);
 
-        compiler.compileToItem(arg);
+        Class<? extends Item> operandClass = compiler.compileToItem(arg);
 
         // assert stack : item
 
@@ -51,9 +52,10 @@ public class AtomizerCompiler extends ToIteratorCompiler {
 
         // assert stack : item
 
-        ga.invokeInstanceMethod(Item.class, "atomize");
+        ga.invokeInstanceMethod(operandClass, "atomize");
         ga.invokeInstanceMethod(AtomicSequence.class, "head");
         methodInfo.placeLabel(end);
+        return AtomicValue.class;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class AtomizerCompiler extends ToIteratorCompiler {
 
             boolean allowEmpty = Cardinality.allowsZero(atomizer.getCardinality());
 
-            compiler.compileToItem(arg);
+            Class<? extends Item> operandClass = compiler.compileToItem(arg);
 
             LabelInfo exit = null;
             if (allowEmpty) {
@@ -80,7 +82,7 @@ public class AtomizerCompiler extends ToIteratorCompiler {
                 methodInfo.placeLabel(notNull);
             }
 
-            ga.invokeInstanceMethod(Item.class, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
+            ga.invokeInstanceMethod(operandClass, requiredClass == String.class ? "getStringValue" : "getUnicodeStringValue");
 
             if (exit != null) {
                 methodInfo.placeLabel(exit);

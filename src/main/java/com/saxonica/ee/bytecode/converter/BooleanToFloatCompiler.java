@@ -3,6 +3,7 @@ package com.saxonica.ee.bytecode.converter;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
@@ -15,7 +16,7 @@ import net.sf.saxon.value.FloatValue;
 
 public class BooleanToFloatCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final AtomicType targetType = cast.getTargetType();
@@ -39,6 +40,7 @@ public class BooleanToFloatCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, Boolean.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
         }
+        return FloatValue.class;
     }
 
     @Override

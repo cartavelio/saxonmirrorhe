@@ -78,7 +78,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
 
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -118,6 +118,7 @@ public class ComputedAttributeCompiler extends ToPushCompiler {
         }
         methodInfo.releaseLocal(contentVar);
         methodInfo.releaseLocal(oVar);
+        return Orphan.class;
     }
 
     /**

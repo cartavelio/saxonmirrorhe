@@ -30,12 +30,12 @@ import javax.xml.transform.SourceLocator;
 public class ItemCheckerCompiler extends ToIteratorCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         ItemChecker itemChecker = (ItemChecker) expression;
         Expression operand = itemChecker.getBaseExpression();
-        compiler.compileToItem(operand);
+        Class<? extends Item> operandClass = compiler.compileToItem(operand);
         visitLineNumber(compiler, ga, expression);
         boolean allowEmpty = Cardinality.allowsZero(operand.getCardinality());
         LabelInfo ok = null;
@@ -51,6 +51,7 @@ public class ItemCheckerCompiler extends ToIteratorCompiler {
         if (ok != null) {
             methodInfo.placeLabel(ok);
         }
+        return operandClass;
     }
 
     @Override

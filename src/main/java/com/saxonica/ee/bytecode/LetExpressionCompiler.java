@@ -39,9 +39,10 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      * @param compiler   the compiler service
      * @param expression the expression to be compiled
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "LetExpressionCompiler - compileToItem");
@@ -69,8 +70,9 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         ga.loadLocal(valueRepVar);
         ga.invokeInstanceMethod(XPathContext.class, "setLocalVariable", Integer.TYPE, Sequence.class);
         //compileCommonLetExpr(compiler, expression);
-        compiler.compileToItem(action);
+        Class<? extends Item> actionClass = compiler.compileToItem(action);
         methodInfo.releaseLocal(valueRepVar);
+        return actionClass;
     }
 
     /**

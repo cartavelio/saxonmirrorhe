@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.DoubleValue;
 
@@ -12,7 +13,7 @@ import net.sf.saxon.value.DoubleValue;
  */
 public class BooleanToDoubleCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -31,6 +32,7 @@ public class BooleanToDoubleCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, Double.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(DoubleValue.class, "makeDoubleValue", Double.TYPE);
         }
+        return DoubleValue.class;
     }
 
     @Override

@@ -6,6 +6,7 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.SubscriptExpression;
 import net.sf.saxon.expr.TailIterator;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.MemoSequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
@@ -23,7 +24,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class SubscriptExpressionCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
 
         Expression sequence = ((SubscriptExpression) expression).getBaseExpression();
         Expression index = ((SubscriptExpression) expression).getSubscriptExpression();
@@ -96,7 +97,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
                 ga.invokeInstanceMethod(GroundedValue.class, "itemAt", Integer.TYPE);
 
                 methodInfo.placeLabel(end);
-                return;
+                return Item.class;
             }
         }
 
@@ -108,7 +109,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
         if (bounds != null && bounds[1].compareTo(Integer.MAX_VALUE) <= 0) {
             compiler.compileToPrimitive(index, Integer.TYPE, new OnEmpty.UnwindAndJump(returnEmpty));
         } else {
-            compiler.compileToItem(index);
+            Class<? extends Item> subscriptClass = compiler.compileToItem(index);
             // Stack: Item
             if (Cardinality.allowsZero(index.getCardinality())) {
                 ga.dup();
@@ -116,9 +117,9 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
                 ga.ifNull(end.label());
             }
             // Stack: Item
-            ga.checkClass(NumericValue.class);
-            // Stack: NumericValue
-            ga.invokeInstanceMethod(NumericValue.class, "asSubscript");
+            subscriptClass = ga.downCast(subscriptClass, NumericValue.class);
+            // Stack: subscriptClass
+            ga.invokeInstanceMethod(subscriptClass, "asSubscript");
             // Stack: int
             ga.dup();
             // Stack: int int
@@ -213,6 +214,8 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
 
         methodInfo.placeLabel(end);
         methodInfo.releaseLocal(indexVar);
+
+        return Item.class;
     }
 }
 

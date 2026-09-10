@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.AtomicType;
@@ -19,7 +20,7 @@ import java.util.Stack;
  */
 public class IntegerToUntypedAtomicCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
         final AtomicType targetType = cast.getTargetType();
@@ -47,6 +48,7 @@ public class IntegerToUntypedAtomicCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(StringValue.class, "makeUntypedAtomic", UnicodeString.class);
         }
+        return StringValue.class;
     }
 
     @Override
@@ -66,12 +68,12 @@ public class IntegerToUntypedAtomicCompiler extends ConverterCompiler {
                 ga.invokeStaticMethod(BMPString.class, "of", String.class);
             }
         } else {
-            compiler.compileToItem(base);
-            ga.checkClass(IntegerValue.class);
+            Class<? extends Item> baseClass = compiler.compileToItem(base);
+            baseClass = ga.downCast(baseClass, IntegerValue.class);
             if (requiredClass == String.class) {
-                ga.invokeInstanceMethod(IntegerValue.class, "getStringValue");
+                ga.invokeInstanceMethod(baseClass, "getStringValue");
             } else {
-                ga.invokeInstanceMethod(IntegerValue.class, "getUnicodeStringValue");
+                ga.invokeInstanceMethod(baseClass, "getUnicodeStringValue");
             }
         }
 

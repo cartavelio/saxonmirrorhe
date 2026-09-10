@@ -5,6 +5,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.IdentityComparison;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.value.BooleanValue;
@@ -17,7 +18,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class IdentityComparisonCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         Expression operand0 = ((IdentityComparison) expression).getLhsExpression();
@@ -120,6 +121,7 @@ public class IdentityComparisonCompiler extends ToItemCompiler {
 
         methodInfo.releaseLocal(operand0Var);
         methodInfo.releaseLocal(operand1Var);
+        return BooleanValue.class;
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
@@ -17,15 +18,11 @@ import org.objectweb.asm.Type;
  */
 public class IntegerToBooleanCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "IntegerToBooleanConverter-Item");
         if (allowsEmpty) {
@@ -41,6 +38,7 @@ public class IntegerToBooleanCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, Float.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(BooleanValue.class, "get", Boolean.TYPE);
         }
+        return BooleanValue.class;
     }
 
     @Override
@@ -61,9 +59,9 @@ public class IntegerToBooleanCompiler extends ConverterCompiler {
         if (compiler.isInRangeForLong(base)) {
             compiler.compileToPrimitive(base, Long.TYPE, onEmpty);
         } else {
-            compiler.compileToItem(base);
-            ga.checkClass(IntegerValue.class);
-            ga.invokeInstanceMethod(IntegerValue.class, "longValue");
+            Class<? extends Item> baseClass = compiler.compileToItem(base);
+            baseClass = ga.downCast(baseClass, IntegerValue.class);
+            ga.invokeInstanceMethod(baseClass, "longValue");
         }
         LabelInfo isTrue = methodInfo.newLabel("isTrue");
         LabelInfo end = methodInfo.newLabel("castBooleanEnd");

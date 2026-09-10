@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.FloatValue;
@@ -14,9 +15,8 @@ import org.objectweb.asm.Type;
  */
 public class StringToFloatCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
-        final Expression base = cast.getBaseExpression();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
@@ -34,6 +34,7 @@ public class StringToFloatCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, Float.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(FloatValue.class, "makeFloatValue", Float.TYPE);
         }
+        return FloatValue.class;
     }
 
     @Override

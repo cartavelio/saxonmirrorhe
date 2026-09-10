@@ -2,6 +2,7 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.StringValue;
@@ -16,13 +17,14 @@ public abstract class ToStringCompiler extends ToItemCompiler {
      * Precondition: none.
      * Postcondition: at execution time, the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public final void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public final Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileItemFromString(compiler, expression);
+        return StringValue.class;
     }
 
     /**

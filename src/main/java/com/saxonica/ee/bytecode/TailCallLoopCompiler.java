@@ -6,6 +6,7 @@ import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
 import com.saxonica.ee.bytecode.util.LabelInfo;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.TailCallLoop;
+import net.sf.saxon.om.Item;
 
 /**
  *
@@ -31,12 +32,12 @@ public class TailCallLoopCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo tailCallLabel = methodInfo.newLabel("tailCallLabel");
         methodInfo.placeLabel(tailCallLabel);
         methodInfo.setTailCallLabel(tailCallLabel);
-        compiler.compileToItem(((TailCallLoop) expression).getBaseExpression());
+        return compiler.compileToItem(((TailCallLoop) expression).getBaseExpression());
     }
 
     // TODO: we're not currently optimizing stack usage for non-recursive tail calls

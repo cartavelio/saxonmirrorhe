@@ -5,6 +5,7 @@ import net.sf.saxon.expr.AttributeGetter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.FingerprintedQName;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -97,7 +98,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         final FingerprintedQName attributeName = ((AttributeGetter)expression).getAttributeName();
         final Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -185,6 +186,7 @@ public class AttributeGetterCompiler extends ToItemCompiler {
         ga.goTo(end);
 
         methodInfo.placeLabel(end);
+        return StringValue.class;
     }
 
 

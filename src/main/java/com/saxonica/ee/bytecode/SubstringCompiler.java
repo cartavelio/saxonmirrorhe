@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.Substring;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.value.StringValue;
@@ -50,7 +51,7 @@ public class SubstringCompiler extends ToItemCompiler {
 //    }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
         final Substring fn = (Substring) fnc.getTargetFunction();
@@ -87,7 +88,7 @@ public class SubstringCompiler extends ToItemCompiler {
         }
 
         methodInfo.placeLabel(substringReturn);
-
+        return StringValue.class;
     }
 
 

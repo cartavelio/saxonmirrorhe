@@ -5,6 +5,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.FirstItemExpression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 
 
@@ -18,12 +19,12 @@ public class FirstItemExpressionCompiler extends ToItemCompiler {
      * Generate bytecode to evaluate the expression as a Item
      * Precondition: none.
      * Postcondition: the stack contains a Item representing the result of the expression
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
@@ -35,6 +36,7 @@ public class FirstItemExpressionCompiler extends ToItemCompiler {
         ga.invokeInstanceMethod(SequenceIterator.class, "next");
         ga.swap();
         ga.invokeInstanceMethod(SequenceIterator.class, "close");
+        return Item.class;
     }
 
 }

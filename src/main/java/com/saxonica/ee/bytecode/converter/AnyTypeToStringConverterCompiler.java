@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
@@ -15,7 +16,7 @@ import net.sf.saxon.value.StringValue;
 public class AnyTypeToStringConverterCompiler extends ConverterCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         final Generator ga = compiler.getCurrentGenerator();
         ExpressionCompiler.visitAnnotation(compiler, "AnyTypeToStringConverter-Item");
         compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
@@ -29,6 +30,7 @@ public class AnyTypeToStringConverterCompiler extends ConverterCompiler {
         } else {
             ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
         }
+        return StringValue.class;
     }
 
     @Override

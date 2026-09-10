@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
 import net.sf.saxon.type.TypeHierarchy;
@@ -16,15 +17,11 @@ import org.objectweb.asm.Type;
  */
 public class FloatToBooleanCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "FloatToBooleanConverter-Item");
         if (allowsEmpty) {
@@ -40,6 +37,7 @@ public class FloatToBooleanCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, Float.TYPE, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(BooleanValue.class, "get", Boolean.TYPE);
         }
+        return BooleanValue.class;
     }
 
     @Override

@@ -9,10 +9,14 @@ import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.sort.*;
 import net.sf.saxon.lib.ConversionRules;
 import net.sf.saxon.lib.StringCollator;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.type.*;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Stack;
 
@@ -109,7 +113,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             //            return false;
             //        }
 
-            compiler.compileToItem(arg0);
+            Class<? extends Item> class0 = compiler.compileToItem(arg0);
             if (Cardinality.allowsZero(arg0.getCardinality())) {
                 LabelInfo nonNullArg0 = methodInfo.newLabel("nonNullArg0");
                 ga.dup();
@@ -124,7 +128,7 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
             //            return false;
             //        }
 
-            compiler.compileToItem(arg1);
+            Class<? extends Item> class1 = compiler.compileToItem(arg1);
             if (Cardinality.allowsZero(arg1.getCardinality())) {
                 LabelInfo nonNullArg1 = methodInfo.newLabel("nonNullArg1");
                 ga.dup();
@@ -136,11 +140,12 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
             // assert stack: item0 item1
 
-            final int item0Var = methodInfo.allocateLocal(AtomicValue.class);
-            final int item1Var = methodInfo.allocateLocal(AtomicValue.class);
-            ga.checkClass(AtomicValue.class);
+            class1 = ga.downCast(class1, AtomicValue.class);
+            final int item1Var = methodInfo.allocateLocal(class1);
             ga.storeLocal(item1Var);
-            ga.checkClass(AtomicValue.class);
+
+            class0 = ga.downCast(class0, AtomicValue.class);
+            final int item0Var = methodInfo.allocateLocal(class0);
             ga.storeLocal(item0Var);
 
             boolean checkTypes = comparison.needsRuntimeCheck();

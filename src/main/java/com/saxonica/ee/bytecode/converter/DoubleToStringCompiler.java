@@ -4,10 +4,9 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.str.UnicodeString;
-import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.DoubleValue;
 import net.sf.saxon.value.StringValue;
@@ -17,15 +16,10 @@ import net.sf.saxon.value.StringValue;
  */
 public class DoubleToStringCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
-        final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "DoubleToStringConverter-Item");
         if (allowsEmpty) {
@@ -41,6 +35,7 @@ public class DoubleToStringCompiler extends ConverterCompiler {
             compileToPrimitive(compiler, expression, UnicodeString.class, OnEmpty.RETURN_NULL);
             ga.invokeStaticMethod(StringValue.class, "makeUStringValue", UnicodeString.class);
         }
+        return StringValue.class;
     }
 
     @Override

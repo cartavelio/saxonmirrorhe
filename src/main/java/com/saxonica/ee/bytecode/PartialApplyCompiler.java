@@ -5,10 +5,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.functions.hof.PartialApply;
-import net.sf.saxon.om.Function;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import org.objectweb.asm.Type;
@@ -19,7 +16,7 @@ import org.objectweb.asm.Type;
 public class PartialApplyCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -91,6 +88,7 @@ public class PartialApplyCompiler extends ToItemCompiler {
         ga.throwException();
         methodInfo.placeLabel(end);
         methodInfo.releaseLocal(valuesVar);
+        return Function.class;
     }
 }
 

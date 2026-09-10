@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.RootExpression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.type.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
@@ -14,7 +15,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 public class RootExpressionCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
@@ -62,6 +63,7 @@ public class RootExpressionCompiler extends ToItemCompiler {
         methodInfo.placeLabel(end);
 
         //methodInfo.releaseLocal(contextItemVar);
+        return NodeInfo.class;
     }
 }
 

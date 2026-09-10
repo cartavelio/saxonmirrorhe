@@ -5,6 +5,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.functions.NodeName_1;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.type.AtomicType;
@@ -25,12 +26,12 @@ public class NodeNameFnCompiler extends ToItemCompiler {
      * Precondition: none.
      * Postcondition: at execution time, the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return the class of item generated
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Configuration config = compiler.getConfiguration();
         TypeHierarchy th = config.getTypeHierarchy();
         Generator ga = compiler.getCurrentGenerator();
@@ -41,7 +42,7 @@ public class NodeNameFnCompiler extends ToItemCompiler {
         ItemType argType = fnc.getArg(0).getItemType();
         boolean alwaysNamed = th.isSubType(argType, NodeKindTest.ELEMENT) ||
                 th.isSubType(argType, NodeKindTest.ATTRIBUTE);
-        compiler.compileToItem(fnc.getArg(0));
+        Class<? extends Item> argClass = compiler.compileToItem(fnc.getArg(0));
         if (Cardinality.allowsZero(fnc.getArg(0).getCardinality())) {
             LabelInfo nodeNotNull = methodInfo.newLabel("nodeNotNull");
             ga.dup();
@@ -49,8 +50,8 @@ public class NodeNameFnCompiler extends ToItemCompiler {
             ga.goTo(nodeNameReturn);
             methodInfo.placeLabel(nodeNotNull);
         }
-        ga.checkClass(NodeInfo.class);
-        int nodeVar = ga.newLocal(NodeInfo.class);
+        argClass = ga.downCast(argClass, NodeInfo.class);
+        int nodeVar = ga.newLocal(argClass);
         ga.storeLocal(nodeVar);
 
 //        if (node.getLocalPart().isEmpty()) {
@@ -61,7 +62,7 @@ public class NodeNameFnCompiler extends ToItemCompiler {
 
         int lnameVar = ga.newLocal(String.class);
         ga.loadLocal(nodeVar);
-        ga.invokeInstanceMethod(NodeInfo.class, "getLocalPart");
+        ga.invokeInstanceMethod(argClass, "getLocalPart");
         ga.storeLocal(lnameVar);
         if (!alwaysNamed) {
             LabelInfo nodeIsNamed = methodInfo.newLabel("nodeIsNamed");
@@ -76,9 +77,9 @@ public class NodeNameFnCompiler extends ToItemCompiler {
         ga.newInstance(Type.getType(QNameValue.class));
         ga.dup();
         ga.loadLocal(nodeVar);
-        ga.invokeInstanceMethod(NodeInfo.class, "getPrefix");
+        ga.invokeInstanceMethod(argClass, "getPrefix");
         ga.loadLocal(nodeVar);
-        ga.invokeInstanceMethod(NodeInfo.class, "getURI");
+        ga.invokeInstanceMethod(argClass, "getURI");
         ga.loadLocal(lnameVar);
         allocateStatic(compiler, BuiltInAtomicType.QNAME);
 
@@ -88,6 +89,7 @@ public class NodeNameFnCompiler extends ToItemCompiler {
 
         methodInfo.releaseLocal(nodeVar);
         methodInfo.releaseLocal(lnameVar);
+        return QNameValue.class;
     }
 }
 

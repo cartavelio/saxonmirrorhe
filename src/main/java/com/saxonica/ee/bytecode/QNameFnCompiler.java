@@ -3,6 +3,7 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.trans.XPathException;
@@ -19,7 +20,7 @@ import org.objectweb.asm.Type;
 public class QNameFnCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         final Generator ga = compiler.getCurrentGenerator();
@@ -115,6 +116,8 @@ public class QNameFnCompiler extends ToItemCompiler {
         ga.throwException();
 
         mi.placeLabel(end);
+
+        return QNameValue.class;
 
 
     }

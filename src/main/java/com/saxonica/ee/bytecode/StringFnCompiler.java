@@ -26,10 +26,11 @@ public class StringFnCompiler extends ToStringCompiler {
         ga.visitTryCatchBlock(L0, L1, L2, "java/lang/UnsupportedOperationException");
         /* try block*/
         methodInfo.placeLabel(L0);
-        compiler.compileToItem(fnc.getArg(0));
+        Class<? extends Item> argClass = compiler.compileToItem(fnc.getArg(0));
+        argClass = ga.downCast(argClass, Item.class);
         treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, stringReturn, 0, onEmpty);
 
-        ga.invokeInstanceMethod(Item.class, requiredClass == UnicodeString.class ? "getUnicodeStringValue" : "getStringValue");
+        ga.invokeInstanceMethod(argClass, requiredClass == UnicodeString.class ? "getUnicodeStringValue" : "getStringValue");
         methodInfo.placeLabel(stringReturn);
         methodInfo.placeLabel(L1);
         ga.goTo(end.label());

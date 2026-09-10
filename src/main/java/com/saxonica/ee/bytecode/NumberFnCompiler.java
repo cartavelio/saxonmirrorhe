@@ -74,7 +74,7 @@ public class NumberFnCompiler extends ToItemCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -84,7 +84,7 @@ public class NumberFnCompiler extends ToItemCompiler {
         boolean compiled = compileFromPrimitive(compiler, arg);
         if (compiled) {
             ga.invokeStaticMethod(DoubleValue.class, "makeDoubleValue", Double.TYPE);
-            return;
+            return DoubleValue.class;
         }
 
 
@@ -170,6 +170,7 @@ public class NumberFnCompiler extends ToItemCompiler {
         methodInfo.placeLabel(numberFnReturn);
 
         methodInfo.releaseLocal(valueVar);
+        return DoubleValue.class;
     }
 
 }

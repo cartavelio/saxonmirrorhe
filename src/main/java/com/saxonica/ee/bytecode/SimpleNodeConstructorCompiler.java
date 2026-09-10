@@ -5,6 +5,7 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.instruct.SimpleNodeConstructor;
 import net.sf.saxon.om.FingerprintedQName;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
@@ -122,7 +123,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "SimpleNodeConstructorCompiler-Push");
@@ -171,6 +172,7 @@ public abstract class SimpleNodeConstructorCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
 
         // return with the Orphan node on the top of stack
+        return Orphan.class;
 
     }
 }

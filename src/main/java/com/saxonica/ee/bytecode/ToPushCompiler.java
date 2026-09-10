@@ -11,6 +11,7 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.HostLanguage;
 
 public class ToPushCompiler extends ToIteratorCompiler {
@@ -60,12 +61,12 @@ public class ToPushCompiler extends ToIteratorCompiler {
 
 
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
 
         Generator ga = compilePushToSequenceCollector(compiler, expression);
         ga.invokeInstanceMethod(SequenceCollector.class, "getFirstItem");
-
+        return Item.class;
     }
 
 }

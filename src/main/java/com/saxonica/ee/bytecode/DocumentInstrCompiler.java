@@ -9,6 +9,7 @@ import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.DocumentInstr;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
@@ -65,8 +66,7 @@ public class DocumentInstrCompiler extends ToPushCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
-        Configuration config = compiler.getConfiguration();
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "DocumentInstrCompiler-Item");
@@ -243,7 +243,7 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 //            root = (DocumentInfo)builder.getCurrentRoot();
             ga.invokeInstanceMethod(Builder.class, "getCurrentRoot");
         }
-
+        return NodeInfo.class;
 
     }
 

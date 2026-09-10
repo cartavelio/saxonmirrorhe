@@ -6,10 +6,7 @@ import net.sf.saxon.expr.StringLiteral;
 import net.sf.saxon.expr.instruct.ComputedElement;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardURIChecker;
-import net.sf.saxon.om.FingerprintedQName;
-import net.sf.saxon.om.NameChecker;
-import net.sf.saxon.om.NamespaceResolver;
-import net.sf.saxon.om.StructuredQName;
+import net.sf.saxon.om.*;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.StringValue;
@@ -58,8 +55,8 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         final int prefixVar = methodInfo.allocateLocal(String.class);
         final int rawNameVar = methodInfo.allocateLocal(String.class);
 
-        compiler.compileToItem(nameExpr);
-        ga.checkClass(AtomicValue.class);
+        Class<? extends Item> operandClass = compiler.compileToItem(nameExpr);
+        operandClass = ga.downCast(operandClass, AtomicValue.class);
         ga.dup();
         ga.ifNonNull(notNull.label());
         ga.pop();

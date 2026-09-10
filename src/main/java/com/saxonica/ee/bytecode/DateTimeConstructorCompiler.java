@@ -5,6 +5,7 @@ import com.saxonica.ee.bytecode.util.CompilerService;
 import com.saxonica.ee.bytecode.util.Generator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.DateTimeValue;
 import net.sf.saxon.value.DateValue;
 import net.sf.saxon.value.TimeValue;
@@ -15,7 +16,7 @@ import net.sf.saxon.value.TimeValue;
 public class DateTimeConstructorCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         SystemFunctionCall fnc = (SystemFunctionCall)expression;
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "DateTimeConstructor-Item");
@@ -24,12 +25,12 @@ public class DateTimeConstructorCompiler extends ToItemCompiler {
 //        AtomicValue arg1 = (AtomicValue)argument[1].evaluateItem(context);
 //        return DateTimeValue.makeDateTimeValue((DateValue)arg0, (TimeValue)arg1);
 
-        compiler.compileToItem(fnc.getArg(0));
-        ga.checkClass(DateValue.class);
-        compiler.compileToItem(fnc.getArg(1));
-        ga.checkClass(TimeValue.class);
+        Class<? extends Item> op0class = compiler.compileToItem(fnc.getArg(0));
+        ga.downCast(op0class, DateValue.class);
+        Class<? extends Item> op1class = compiler.compileToItem(fnc.getArg(1));
+        ga.downCast(op1class, TimeValue.class);
         ga.invokeStaticMethod(DateTimeValue.class, "makeDateTimeValue", DateValue.class, TimeValue.class);
-
+        return DateTimeValue.class;
     }
 
 }

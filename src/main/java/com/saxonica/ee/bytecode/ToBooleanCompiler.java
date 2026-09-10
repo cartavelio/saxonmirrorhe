@@ -18,10 +18,11 @@ import net.sf.saxon.value.BooleanValue;
 public abstract class ToBooleanCompiler extends ExpressionCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         compileToBoolean(compiler, expression);
         Generator ga = compiler.getCurrentGenerator();
         ga.invokeStaticMethod(BooleanValue.class, "get", Boolean.TYPE);
+        return BooleanValue.class;
     }
 
     @Override

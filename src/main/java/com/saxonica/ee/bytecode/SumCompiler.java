@@ -4,9 +4,11 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.functions.Sum;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Int64Value;
 
 
@@ -16,7 +18,7 @@ import net.sf.saxon.value.Int64Value;
 public class SumCompiler extends ToItemCompiler {
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
@@ -40,6 +42,7 @@ public class SumCompiler extends ToItemCompiler {
             ga.getStaticField(Int64Value.class, "ZERO", Int64Value.class);
         }
         methodInfo.placeLabel(end);
+        return AtomicValue.class;
     }
 
 

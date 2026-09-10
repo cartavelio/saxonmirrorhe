@@ -5,6 +5,7 @@ import net.sf.saxon.expr.EquivalenceComparison;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.value.AtomicValue;
@@ -37,16 +38,14 @@ public class EquivalenceComparisonCompiler extends ToBooleanCompiler {
         LabelInfo returnFalse = methodInfo.newLabel("EqFalse");
         LabelInfo returnTrue = methodInfo.newLabel("EqTrue");
 
-
-        int op0Var = methodInfo.allocateLocal(AtomicValue.class);
-        int op1Var = methodInfo.allocateLocal(AtomicValue.class);
-
-        compiler.compileToItem(test.getLhsExpression());
-        ga.checkClass(AtomicValue.class);
+        Class<? extends Item> op0class = compiler.compileToItem(test.getLhsExpression());
+        op0class = ga.downCast(op0class, AtomicValue.class);
+        int op0Var = methodInfo.allocateLocal(op0class);
         ga.storeLocal(op0Var);
 
-        compiler.compileToItem(test.getRhsExpression());
-        ga.checkClass(AtomicValue.class);
+        Class<? extends Item> op1class = compiler.compileToItem(test.getRhsExpression());
+        op1class = ga.downCast(op1class, AtomicValue.class);
+        int op1Var = methodInfo.allocateLocal(op1class);
         ga.storeLocal(op1Var);
 
         if (Cardinality.allowsZero(test.getLhsExpression().getCardinality()) || Cardinality.allowsZero(test.getLhsExpression().getCardinality())) {
@@ -67,9 +66,9 @@ public class EquivalenceComparisonCompiler extends ToBooleanCompiler {
         if (!test.isKnownToBeComparable()) {
             // Type.isComparable(v0.getPrimitiveType(), v1.getPrimitiveType(), false)
             ga.loadLocal(op0Var);
-            ga.invokeInstanceMethod(AtomicValue.class, "getPrimitiveType");
+            ga.invokeInstanceMethod(op0class, "getPrimitiveType");
             ga.loadLocal(op1Var);
-            ga.invokeInstanceMethod(AtomicValue.class, "getPrimitiveType");
+            ga.invokeInstanceMethod(op1class, "getPrimitiveType");
             ga.push(false);
             ga.invokeStaticMethod(Type.class, "isGuaranteedComparable", BuiltInAtomicType.class, BuiltInAtomicType.class, Boolean.TYPE);
             ga.ifFalse(returnFalse);

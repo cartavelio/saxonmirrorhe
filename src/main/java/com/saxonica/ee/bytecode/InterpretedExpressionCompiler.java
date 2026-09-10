@@ -7,6 +7,7 @@ import com.saxonica.ee.bytecode.util.Generator;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 
 /**
  * Bytecode generator for instructions that calls back to the interpreter. This generates code which simply invokes the
@@ -19,15 +20,16 @@ public class InterpretedExpressionCompiler extends ToIteratorCompiler {
      * Precondition: none.
      * Postcondition: at execution time, the stack contains either an item (the result of the expression), or null
      * (representing an empty sequence).
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         allocateStatic(compiler, expression);
         compiler.generateGetContext();
         compiler.getCurrentGenerator().invokeInstanceMethod(Expression.class, "evaluateItem", XPathContext.class);
+        return Item.class;
     }
 
     /**

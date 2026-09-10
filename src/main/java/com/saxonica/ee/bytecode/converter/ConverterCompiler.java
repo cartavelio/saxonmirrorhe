@@ -5,18 +5,19 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.Converter;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.AtomicValue;
 
 /**
  * This class generates code to implement a casting conversion.
  */
 public abstract class ConverterCompiler {
 
-    public abstract void compileToItem(CompilerService compiler, Expression expression)
+    public abstract Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException;
 
     public void compileToPrimitive(CompilerService compiler, Expression expression, Class<?> requiredClass, OnEmpty onEmpty) throws CannotCompileException {
@@ -32,7 +33,7 @@ public abstract class ConverterCompiler {
         }
 
         @Override
-        public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+        public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
             CastExpression cast = (CastExpression) expression;
             final Expression base = cast.getBaseExpression();
             final AtomicType targetType = cast.getTargetType();
@@ -95,6 +96,7 @@ public abstract class ConverterCompiler {
             }
             methodInfo.placeLabel(end);
             methodInfo.releaseLocal(valueVar);
+            return AtomicValue.class;
         }
 
     }

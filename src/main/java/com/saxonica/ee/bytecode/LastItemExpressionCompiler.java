@@ -3,6 +3,7 @@ package com.saxonica.ee.bytecode;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.LastItemExpression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.tree.iter.ReversibleIterator;
 import org.objectweb.asm.Type;
@@ -19,12 +20,12 @@ public class LastItemExpressionCompiler extends ToItemCompiler {
      * Generate bytecode to evaluate the LastItemExpression as an item
      * Precondition: none.
      * Postcondition: the stack is empty
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return the class of item generated
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
 
         Expression expr = ((LastItemExpression) expression).getBaseExpression();
@@ -66,6 +67,7 @@ public class LastItemExpressionCompiler extends ToItemCompiler {
         methodInfo.placeLabel(end);
 
         methodInfo.releaseLocal(forwardsVar);
+        return Item.class;
     }
 }
 

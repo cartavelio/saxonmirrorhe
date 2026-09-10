@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.Choose;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -54,13 +55,15 @@ public class ChooseCompiler extends ToIteratorCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         Choose choose = (Choose) expression;
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitAnnotation(compiler, "ChooseCompiler-Item");
         LabelInfo end = methodInfo.newLabel("endChoose");
         boolean needOtherwise = true;
+        Class<? extends Item> commonClass = null;
+        boolean allBranchesCommon = true;
         for (int i = 0; i < choose.size(); i++) {
             Expression condition = choose.getCondition(i);
             LabelInfo notTrue = null;
@@ -71,7 +74,12 @@ public class ChooseCompiler extends ToIteratorCompiler {
                 compiler.compileToBoolean(condition);
                 ga.ifFalse(notTrue);
             }
-            compiler.compileToItem(choose.getAction(i));
+            Class<? extends Item> branchClass = compiler.compileToItem(choose.getAction(i));
+            if (commonClass == null) {
+                commonClass = branchClass;
+            } else if (allBranchesCommon && commonClass != branchClass) {
+                allBranchesCommon = false;
+            }
             if (i != choose.size() - 1 || needOtherwise) {
                 ga.goTo(end);
             }
@@ -83,6 +91,11 @@ public class ChooseCompiler extends ToIteratorCompiler {
             ga.pushNull();
         }
         methodInfo.placeLabel(end);
+        if (allBranchesCommon && commonClass != null) {
+            return commonClass;
+        } else {
+            return Item.class;
+        }
     }
 
     @Override

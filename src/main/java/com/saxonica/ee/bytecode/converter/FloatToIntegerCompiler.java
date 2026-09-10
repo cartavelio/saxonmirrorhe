@@ -4,10 +4,8 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
-import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.IntegerValue;
 import org.objectweb.asm.Type;
@@ -17,15 +15,11 @@ import org.objectweb.asm.Type;
  */
 public class FloatToIntegerCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
         final Expression base = cast.getBaseExpression();
-        final AtomicType targetType = cast.getTargetType();
-        final Converter converter = cast.getConverter();
         final Generator ga = compiler.getCurrentGenerator();
         final GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        TypeHierarchy th = compiler.getConfiguration().getTypeHierarchy();
-        AtomicType sourceType = (AtomicType) base.getItemType();
         boolean allowsEmpty = Cardinality.allowsZero(cast.getCardinality());
         ExpressionCompiler.visitAnnotation(compiler, "FloatToIntegerConverter-Item");
         if (allowsEmpty) {
@@ -45,6 +39,7 @@ public class FloatToIntegerCompiler extends ConverterCompiler {
             ga.invokeStaticMethod(IntegerValue.class, "fromDouble", Double.TYPE);
             ga.invokeInstanceMethod(ConversionResult.class, "asAtomic");
         }
+        return IntegerValue.class;
     }
 
     @Override

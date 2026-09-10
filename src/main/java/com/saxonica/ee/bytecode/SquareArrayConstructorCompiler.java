@@ -11,6 +11,7 @@ import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.SequenceTool;
 
@@ -29,14 +30,14 @@ public class SquareArrayConstructorCompiler extends ToItemCompiler {
      * Generate bytecode to evaluate the ArrayBlockExpression as an (array) item
      * Precondition: none.
      * Postcondition: the stack contains an item representing the constructed array
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return the class of item generated
      */
     //@Override
     @Override
-    public void compileToItem(CompilerService compiler,
-                              Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler,
+                                               Expression expression) throws CannotCompileException {
 
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -70,6 +71,7 @@ public class SquareArrayConstructorCompiler extends ToItemCompiler {
             ga.loadLocal(listVar);
             ga.invokeConstructor(SimpleArrayItem.class, List.class);
         }
+        return SimpleArrayItem.class;
     }
 
 

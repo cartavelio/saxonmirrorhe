@@ -22,12 +22,12 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
      * Generate bytecode to get the LocalVariable from the Context as a ValueRepresentation
      * Precondition: none.
      * Postcondition: the stack contains an ValueRepresentation representing the LocalVariable
-     *
-     * @param compiler   the compiler service
+     *  @param compiler   the compiler service
      * @param expression the expression to be compiled
+     * @return
      */
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         LocalVariableReference varRef = (LocalVariableReference) expression;
 
         Generator ga = compiler.getCurrentGenerator();
@@ -42,6 +42,7 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
         ga.arrayLoad(Type.getType(Sequence.class));
         ga.invokeInstanceMethod(Sequence.class, "head");
         visitAnnotation(compiler, "LocalVariableReferenceCompiler, localSlotNumber: " + localSlot);
+        return Item.class;
     }
 
 

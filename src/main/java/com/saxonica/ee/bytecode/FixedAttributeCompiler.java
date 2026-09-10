@@ -207,7 +207,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
     }
 
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression)
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
@@ -243,7 +243,7 @@ public class FixedAttributeCompiler extends ToPushCompiler {
         ga.invokeInstanceMethod(Orphan.class, "setStringValue", UnicodeString.class);
 
         validateOrphanAttribute(compiler, instr);
-
+        return Orphan.class;
 
     }
 

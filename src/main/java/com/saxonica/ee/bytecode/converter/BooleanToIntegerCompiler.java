@@ -4,6 +4,7 @@ import com.saxonica.ee.bytecode.ExpressionCompiler;
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.CastExpression;
 import net.sf.saxon.expr.Expression;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
 import org.objectweb.asm.Type;
@@ -15,7 +16,7 @@ import java.util.Stack;
  */
 public class BooleanToIntegerCompiler extends ConverterCompiler {
     @Override
-    public void compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
+    public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
         CastExpression cast = (CastExpression) expression;
 //        final Expression base = cast.getBaseExpression();
 //        final AtomicType targetType = cast.getTargetType();
@@ -41,6 +42,7 @@ public class BooleanToIntegerCompiler extends ConverterCompiler {
             ga.cast(Type.INT_TYPE, Type.LONG_TYPE);
             ga.invokeStaticMethod(Int64Value.class, "makeIntegerValue", Long.TYPE);
         }
+        return Int64Value.class;
     }
 
     @Override
