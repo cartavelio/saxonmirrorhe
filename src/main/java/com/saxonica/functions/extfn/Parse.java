@@ -11,6 +11,7 @@ import net.sf.saxon.functions.Doc_2;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.IgnorableSpaceStrippingRule;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
@@ -60,7 +61,7 @@ public class Parse extends SystemFunction {
         AtomicValue content = (AtomicValue) arguments[0].head();
         StringReader sr = new StringReader(content.getStringValue());
         Source source = new StreamSource(sr, getStaticBaseUriString());
-        Map<String, Sequence> checkedOptions;
+        Map<String, GroundedValue> checkedOptions;
         ParseOptions parseOptions;
         if (arguments.length == 1) {
             checkedOptions = new HashMap<>();

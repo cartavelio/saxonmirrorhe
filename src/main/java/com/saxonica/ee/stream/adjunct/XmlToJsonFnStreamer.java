@@ -13,13 +13,13 @@ import net.sf.saxon.expr.CardinalityChecker;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.Location;
 import net.sf.saxon.ma.json.JsonReceiver;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.BooleanValue;
 
@@ -77,7 +77,7 @@ public class XmlToJsonFnStreamer extends StreamingAdjunct implements FeedMaker {
 
             if (exp.getArity() > 1) {
                 MapItem suppliedOptions = (MapItem) exp.getArg(1).evaluateItem(getContext());
-                Map<String, Sequence> options = target.getDetails().optionDetails.processSuppliedOptions(suppliedOptions, getContext());
+                Map<String, GroundedValue> options = target.getDetails().optionDetails.processSuppliedOptions(suppliedOptions, getContext());
                 indenting = ((BooleanValue) options.get("indent").head()).getBooleanValue();
             }
         }

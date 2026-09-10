@@ -18,6 +18,7 @@ import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.serialize.JSONEmitter;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
@@ -34,6 +35,7 @@ import java.util.*;
  */
 public class XdmToJsonFn extends SystemFunction {
 
+    @CSharpModifiers(code = {"public", "static", "new"})
     public static OptionsParameter OPTION_DETAILS;
     private final static SequenceType layoutMapType =
             new SequenceType(
@@ -56,7 +58,6 @@ public class XdmToJsonFn extends SystemFunction {
     private static class JsonConversionContext {
         public Configuration config;
         public JSONEmitter emitter;
-        public Schema schema;
         public IntToIntHashMap uniformityData = null;
         public IntHashMap<String> layoutMap = new IntHashMap<>();
         public Stack<StructuredQName> elementNameStack = new Stack<>();
@@ -78,11 +79,10 @@ public class XdmToJsonFn extends SystemFunction {
         GroundedValue val = arguments[0].materialize();
         JsonConversionContext jcc = new JsonConversionContext();
         jcc.config = context.getConfiguration();
-        jcc.schema = getRetainedStaticContext().getPackageData().getImportedSchema();
         // Initialise the element name stack with a dummy no-namespace name
         jcc.elementNameStack.push(new StructuredQName("", NamespaceUri.NULL, "dummy"));
         // Process the supplied options
-        Map<String, Sequence> checkedOptions = new HashMap<>();
+        Map<String, GroundedValue> checkedOptions = new HashMap<>();
         boolean indent = false;
         boolean escapeSolidus = false;
         boolean uniform = false;
@@ -117,7 +117,7 @@ public class XdmToJsonFn extends SystemFunction {
      * @param checkedOptions the supplied options to the function, after validation and expansion of defaults
      * @param config the Saxon configuration
      */
-    private void initLayoutMap(JsonConversionContext jcc, Map<String, Sequence> checkedOptions, Configuration config)
+    private void initLayoutMap(JsonConversionContext jcc, Map<String, GroundedValue> checkedOptions, Configuration config)
             throws XPathException {
         MapItem val = (MapItem)checkedOptions.get("layouts").materialize();
         for (KeyValuePair pair : val.keyValuePairs()) {
@@ -505,7 +505,7 @@ public class XdmToJsonFn extends SystemFunction {
                     emitSimpleElementContent(element, jcc);
                 } else {
                     ComplexType cType = (ComplexType) type;
-                    String layout = cType.getPreferredJsonLayout(jcc.schema);
+                    String layout = cType.getPreferredJsonLayout();
                     String suffix = "";
                     int sep = layout.indexOf("/");
                     if (sep > 0) {

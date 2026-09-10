@@ -241,7 +241,7 @@ public class SendMail extends SystemFunction {
         //Retrieve email configuration from map
 
         emailConfigMap = (MapItem) arguments[0].head();
-        Map<String, Sequence> options =
+        Map<String, GroundedValue> options =
                 OPTION_DETAILS.processSuppliedOptions(emailConfigMap, context);
 
         int port;
