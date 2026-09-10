@@ -38,6 +38,7 @@ import java.util.Map;
 
 public class Trace extends SystemFunction implements Traceable {
 
+
     Location location = Loc.NONE;
 
     /**

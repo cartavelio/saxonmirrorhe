@@ -50,7 +50,7 @@ public class SortExpression extends Expression
 
     public SortExpression(Expression select, SortKeyDefinitionList sortKeys) {
         selectOp = new Operand(this, select, OperandRole.FOCUS_CONTROLLING_SELECT);
-        sortOp = new Operand(this, sortKeys, OperandRole.ATOMIC_SEQUENCE);
+        sortOp = new Operand(this, sortKeys, OperandRole.CONSTRAINED_ATOMIC_SEQUENCE);
         adoptChildExpression(select);
         adoptChildExpression(sortKeys);
     }

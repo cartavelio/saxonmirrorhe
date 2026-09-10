@@ -86,7 +86,7 @@ public class ForEachGroup extends Instruction
             collationOp = new Operand(this, collationNameExpression, OperandRole.SINGLE_ATOMIC);
         }
         if (sortKeys != null) {
-            sortKeysOp = new Operand(this, sortKeys, OperandRole.SINGLE_ATOMIC);
+            sortKeysOp = new Operand(this, sortKeys, OperandRole.CONSTRAINED_SINGLE_ATOMIC);
         }
         this.algorithm = algorithm;
         this.collator = collator;

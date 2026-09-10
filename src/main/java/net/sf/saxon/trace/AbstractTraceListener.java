@@ -9,9 +9,9 @@ package net.sf.saxon.trace;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.Version;
+import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.instruct.ApplyTemplates;
-import net.sf.saxon.expr.instruct.Instruction;
 import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.lib.StandardLogger;
@@ -35,13 +35,14 @@ import java.util.Map;
 
 public abstract class AbstractTraceListener extends StandardDiagnostics implements TraceListener {
     protected int indent = 0;
-    private int detail = 2; // none=0; low=1; normal=2; high=3
+    protected int detail = TraceLevel.NORMAL;
     protected Logger out = new StandardLogger();
     /*@NotNull*/ private static final StringBuilder spaceBuffer = new StringBuilder("                ");
 
     /**
      * Set the level of detail required
-     * @param level 0=none, 1=low (function and template calls), 2=normal (instructions), 3=high (expressions)
+     * @param level One of {@link TraceLevel#NONE},  {@link TraceLevel#LOW} (function and template calls),
+     *              {@link TraceLevel#NORMAL} (instructions), {@link TraceLevel#HIGH} (expressions)
      */
 
     public void setLevelOfDetail(int level) {
@@ -81,7 +82,13 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
         if (isApplicable(info)) {
             Location loc = info.getLocation();
             String file = abbreviateLocationURI(loc.getSystemId());
-            StringBuilder msg = new StringBuilder(AbstractTraceListener.spaces(indent) + '<' + tag(info));
+            String elementTag = tag(info);
+
+            StringBuilder msg = new StringBuilder(AbstractTraceListener.spaces(indent) + '<' + elementTag);
+
+            if (info instanceof Expression && !((Expression) info).isInstruction() && !properties.containsKey("expr")) {
+                properties.put("expr", ((Expression) info).toShortString());
+            }
             for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 Object val = entry.getValue();
                 if (val instanceof StructuredQName) {
@@ -90,7 +97,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                     val = ((StringValue)val).getUnicodeStringValue();
                 }
                 if (val != null) {
-                    msg.append(' ').append(entry.getKey()).append("=\"").append(escape(val.toString())).append('"');
+                    msg.append(' ').append(entry.getKey()).append("=").append(escape(val.toString()));
                 }
             }
 
@@ -101,7 +108,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                 msg.append(" column=\"").append(loc.getColumnNumber()).append('"');
             }
 
-            msg.append(" module=\"").append(escape(file)).append('"');
+            msg.append(" module=").append(escape(file));
             msg.append(">");
             out.info(msg.toString());
             indent++;
@@ -118,10 +125,11 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
 
     public String escape(/*@Nullable*/ String in) {
         if (in == null) {
-            return "";
+            return "\"\"";
         }
+        char quot = in.contains("\"") ? '\'' : '"';
         String collapsed = Whitespace.collapseWhitespace(in);
-        StringBuilder sb = new StringBuilder(collapsed.length() + 10);
+        StringBuilder sb = new StringBuilder(collapsed.length() + 10).append(quot);
         for (int i = 0; i < collapsed.length(); i++) {
             char c = collapsed.charAt(i);
             if (c == '<') {
@@ -130,8 +138,8 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                 sb.append("&gt;");
             } else if (c == '&') {
                 sb.append("&amp;");
-            } else if (c == '\"') {
-                sb.append("&#34;");
+            } else if (c == quot) {
+                sb.append(quot == '"' ? "&quot;" : "&apos;");
             } else if (c == '\n') {
                 sb.append("&#xA;");
             } else if (c == '\r') {
@@ -142,7 +150,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
                 sb.append(c);
             }
         }
-        return sb.toString();
+        return sb.append(quot).toString();
     }
 
     /**
@@ -167,7 +175,7 @@ public abstract class AbstractTraceListener extends StandardDiagnostics implemen
     protected int level(Traceable info) {
         if (info instanceof TraceableComponent || info instanceof ApplyTemplates) {
             return 1;
-        } if (info instanceof Instruction) {
+        } if (info instanceof Expression && ((Expression)info).isInstruction()) {
             return 2;
         } else {
             return 3;

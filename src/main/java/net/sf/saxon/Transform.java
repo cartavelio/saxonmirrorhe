@@ -7,7 +7,6 @@
 
 package net.sf.saxon;
 
-//import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.expr.instruct.GlobalContextRequirement;
 import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.lib.*;
@@ -26,7 +25,6 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.DateTimeValue;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -524,30 +522,28 @@ public class Transform {
 
                 value = options.getOptionValue("Tlevel");
                 if (value != null && traceListener instanceof AbstractTraceListener) {
+                    CompilerInfo info = compiler.getUnderlyingCompilerInfo();
+                    TraceCodeInjector injector = (TraceCodeInjector)info.getCodeInjector();
                     switch (value) {
                         case "none":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(0);
+                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.NONE);
+                            injector.setTraceLevel(TraceLevel.NONE);
                             break;
                         case "low":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(1);
+                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.LOW);
+                            injector.setTraceLevel(TraceLevel.LOW);
                             break;
                         case "normal":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(2);
+                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.NORMAL);
+                            injector.setTraceLevel(TraceLevel.NORMAL);
                             break;
                         case "high":
-                            ((AbstractTraceListener) traceListener).setLevelOfDetail(3);
+                            ((AbstractTraceListener) traceListener).setLevelOfDetail(TraceLevel.HIGH);
+                            injector.setTraceLevel(TraceLevel.HIGH);
                             break;
                     }
                 }
             }
-
-            //#if CSHARP==false
-            value = options.getOptionValue("TB");
-            if (value != null) {
-                // Trace hotspot byte code generation and produce a report.
-                config.setBooleanProperty(Feature.MONITOR_HOT_SPOT_BYTE_CODE, true);
-            }
-            //#endif
 
             //#if CSHARP==false
             value = options.getOptionValue("TP");
@@ -694,9 +690,7 @@ public class Transform {
 
             value = options.getOptionValue("scmin");
             if (value != null) {
-//                PreparedSchema ps = PreparedSchema.fromScm(config, new StreamSource(value));
-//                compiler.useSchema(null);
-                throw new UnsupportedOperationException();   // TODO: implement me
+                config.importComponents(new StreamSource(value));
             }
 
             if (additionalSchemas != null) {
