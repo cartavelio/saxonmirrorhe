@@ -19,6 +19,7 @@ namespace Saxon.Api.Support {
         }
         public Source resolve(string relativeUri, string baseUri) {
             IResource resource = null;
+            ResourceRequest request;
             if (baseUri == null) {
                 Uri href;
                 try {
@@ -27,7 +28,7 @@ namespace Saxon.Api.Support {
                 catch (UriFormatException e) {
                     throw new XPathException("Invalid relative URI: " + relativeUri + " (" + e.Message + ")");
                 }
-                ResourceRequest request = new() {
+                request = new() {
                     Uri = href,
                     RelativeUri = relativeUri
                 };
@@ -48,7 +49,7 @@ namespace Saxon.Api.Support {
                 catch (UriFormatException e) {
                     throw new XPathException("Unable to resolve relative URI (" + relativeUri + ") against base URI (" + baseUri + "): " + e.Message);
                 }
-                ResourceRequest request = new() {
+                request = new() {
                     Uri = abs,
                     BaseUri = baseUriUri,
                     RelativeUri = relativeUri
@@ -57,7 +58,7 @@ namespace Saxon.Api.Support {
             }
 
             if (resource is null) {
-                return null;
+                resource = config.getCommonResourceResolver().chain(new DirectResourceResolver()).Resolve(request);
             }
 
             if (resource is XmlReaderResource readerResource) {

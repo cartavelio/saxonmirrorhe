@@ -86,17 +86,14 @@ namespace Saxon.Api {
         public Processor Processor => processor;
 
         /// <summary>
-        /// An <c>XmlResolver</c>, which will be used to resolve URI references while compiling
-        /// a stylesheet.
+        /// A <c>ResourceResolver</c>, which will be used to resolve URI references appearing
+        /// in <c>xsl:include</c> and <c>xsl:import</c> declarations within a stylesheet.
         /// </summary>
         /// <remarks>
-        /// <para>If no <c>XmlResolver</c> is set for the <c>XsltCompiler</c>, the <c>XmlResolver</c>
-        /// that is used is the one that was set on the <c>Processor</c> at the time <c>NewXsltCompiler</c>
-        /// was called.
-        /// </para>
-        /// <para>Note the existence of the class <c>SimpleUriResolver</c>, which allows an <c>XmlResolver</c>
-        /// to be implemented as a simple lambda expression in the form <c>compiler.XmlResolver =
-        /// new SimpleUriResolver(uri => stream)</c>.
+        /// <para>If no <c>StylesheetModuleResolver</c> is set for the <c>XsltCompiler</c>, or if the
+        /// supplied <c>ResourceResolver</c> returns null, then the relevant URIs will be resolved using
+        /// the common resolver defined at the Saxon Configuration level; failing this, the system falls
+        /// back to default mechanisms for URI resolution. 
         /// </para>
         /// </remarks>
 

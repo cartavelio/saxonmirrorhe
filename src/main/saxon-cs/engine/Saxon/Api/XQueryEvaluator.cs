@@ -26,7 +26,7 @@ namespace Saxon.Api {
     public class XQueryEvaluator : IEnumerable<XdmItem> {
         private Saxon.Hej.s9api.XQueryEvaluator evaluator;
         private TextWriter traceFunctionDestination;
-        private TextResolver textResolver;
+        private ResourceResolver textResolver;
         private ResourceResolver xmlDocumentResolver;
         private System.Action closeAction;
 
@@ -148,7 +148,7 @@ namespace Saxon.Api {
         /// <c>unparsed-text-available()</c>, and <c>json-doc()</c> functions.
         /// </summary>
 
-        public TextResolver TextResolver {
+        public ResourceResolver TextResolver {
             get => textResolver;
             set {
                 textResolver = value;

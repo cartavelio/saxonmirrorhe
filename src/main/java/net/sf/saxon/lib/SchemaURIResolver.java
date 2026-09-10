@@ -34,8 +34,8 @@ public interface SchemaURIResolver {
      * Resolve a URI identifying a schema document, given the target namespace URI and
      * a set of associated location hints.
      *
-     * @param targetNamespace the target namespaces of the schema to be imported. The "null namesapce"
-     *                        is identified by a zero-length string. In the case of an xsd:include directive, where no
+     * @param targetNamespace the target namespace of the schema to be imported. The "null namesapce"
+     *                        is identified by a zero-length string. In the case of an xs:include directive, where no
      *                        target namespace is specified, the parameter is null.
      * @param baseURI         The base URI of the module containing the "import schema" declaration;
      *                        null if no base URI is known
