@@ -46,11 +46,11 @@ public class SaxonCAPI {
 
     //Properties props = new Properties();
     protected Processor processor = null;
-    //protected List<SaxonCException> saxonExceptions = new ArrayList<SaxonCException>();
-    //protected List<SaxonCException> saxonWarnings = new ArrayList<SaxonCException>();
+    //protected List<SaxonApiException> saxonExceptions = new ArrayList<SaxonApiException>();
+    //protected List<SaxonApiException> saxonWarnings = new ArrayList<SaxonApiException>();
     public static boolean debug = false;
     protected boolean schemaAware = false;
-    //public static String RESOURCES_DIR = null;
+    public static String RESOURCES_DIR = null;
 
 
 
@@ -148,7 +148,7 @@ public class SaxonCAPI {
                 // do nothing
                 return;
             }
-            saxonExceptions.add(new SaxonCException(exception));
+            saxonExceptions.add(new SaxonApiException(exception));
             try {
                 super.error(exception);
             } catch (Exception ex) {
@@ -161,7 +161,7 @@ public class SaxonCAPI {
                 // don't report the same error twice
                 return;
             }
-            saxonExceptions.add(new SaxonCException(exception));
+            saxonExceptions.add(new SaxonApiException(exception));
             try {
                 super.fatalError(exception);
             } catch (Exception ex) {
@@ -371,7 +371,22 @@ public class SaxonCAPI {
                         System.err.println("Error Java property option found but Java Property object is null: Probably XPathProcessor in use");
                     }
                 }
-            }  else if (initialTemplateParameters != null && params[i].startsWith("itparam:")) {
+            }  else if (params[i].equals("resources")) {
+                char separatorChar = '/';
+                if (SaxonCAPI.RESOURCES_DIR == null && values[i] instanceof String) {
+                    String dir1 = (String) values[i];
+                    if (!dir1.endsWith("/")) {
+                        dir1 = dir1.concat("/");
+                    }
+                    if (File.separatorChar != '/') {
+                        dir1.replace(separatorChar, File.separatorChar);
+                        separatorChar = '\\';
+                        dir1.replace('/', '\\');
+                    }
+                    SaxonCAPI.RESOURCES_DIR = dir1;
+                }
+
+            }else if (initialTemplateParameters != null && params[i].startsWith("itparam:")) {
                 //initial template parameters
                 String paramName = params[i].substring(8);
                 Object value = values[i];
@@ -495,7 +510,7 @@ public class SaxonCAPI {
      */
     public XdmNode parseXmlFile(String cwd, String filename) throws SaxonApiException {
         try {
-            XdmNode doc = parseXmlFile(processor, cwd, null, filename);
+            XdmNode doc = parseXmlFile(cwd, null, filename);
             return doc;
         } catch (SaxonApiException ex) {
             //saxonExceptions.add(new SaxonCException(ex.getCause()));
@@ -514,7 +529,7 @@ public class SaxonCAPI {
      */
     public XdmNode parseXmlFile(String cwd, SchemaValidator validator, String filename) throws SaxonApiException {
         try {
-            XdmNode doc = parseXmlFile(processor, cwd, validator, filename);
+            XdmNode doc = parseXmlFile(processor, cwd, null, validator, filename);
             return doc;
         } catch (SaxonApiException ex) {
             //saxonExceptions.add(new SaxonCException(ex.getCause()));
@@ -541,15 +556,12 @@ public class SaxonCAPI {
      * @return XdmNode
      */
     public XdmNode parseXmlString(SchemaValidator validator, String xml) throws SaxonApiException {
-        try {
-            XdmNode doc = parseXmlString(null, processor, validator, xml);
-            if (debug) {
-                System.err.println("xmlParseString, Processor: " + System.identityHashCode(processor));
-            }
-            return doc;
-        } catch (SaxonApiException ex) {
-            throw ex;
+
+        XdmNode doc = parseXmlString(null, processor, null, validator, xml);
+        if (debug) {
+            System.err.println("xmlParseString, Processor: " + System.identityHashCode(processor));
         }
+        return doc;
     }
 
 
@@ -612,10 +624,22 @@ public class SaxonCAPI {
         return valueForCpp;
     }
 
-    public static XdmNode parseXmlString(String cwd, Processor processor, SchemaValidator validator, String xml) throws SaxonApiException {
+    public static XdmNode parseXmlString(String cwd, Processor proci, DocumentBuilder builder, SchemaValidator validator, String xml) throws SaxonApiException {
         try {
+            if(proci == null) {
+                return null;
+            }
             StringReader reader = new StringReader(xml);
-            DocumentBuilder builder = processor.newDocumentBuilder();
+            if(builder == null) {
+                builder = proci.newDocumentBuilder();
+                if (debug) {
+
+                    System.err.println("New documentBuilder obj: " + System.identityHashCode(builder));
+                }
+            } else if (debug) {
+
+                System.err.println("documentBuilder obj passed as argument: " + System.identityHashCode(builder));
+            }
             if (validator != null) {
                 builder.setSchemaValidator(validator);
             }
@@ -629,10 +653,13 @@ public class SaxonCAPI {
             
             XdmNode doc = builder.build(source);
             if (debug) {
-                System.err.println("xmlParseString, Processor: " + System.identityHashCode(processor));
-                System.err.println("XdmNode: " + System.identityHashCode(doc));
-                net.sf.saxon.type.ItemType suppliedItemType = SequenceTool.getItemType(doc.getUnderlyingValue(), processor.getUnderlyingConfiguration().getTypeHierarchy());
-                System.err.println("xmlParserString, ItemType: " + suppliedItemType.toString());
+                System.err.println("xmlParseString, Processor: " + System.identityHashCode(proci));
+                System.err.println("documentBuilder obj: " + System.identityHashCode(builder));
+                if(doc != null) {
+                    System.err.println("XdmNode: " + System.identityHashCode(doc));
+                    net.sf.saxon.type.ItemType suppliedItemType = SequenceTool.getItemType(doc.getUnderlyingValue(), proci.getUnderlyingConfiguration().getTypeHierarchy());
+                    System.err.println("xmlParserString, ItemType: " + suppliedItemType.toString());
+                }
             }
             return doc;
         } catch (SaxonApiException ex) {
@@ -667,17 +694,19 @@ public class SaxonCAPI {
 
 
     /**
-     * Receies file name of XML document and parse to XdmNode object. It is possible to validate with a SchemaValidator
-     * @param processor
+     * Receives file name of XML document and parse to XdmNode object. It is possible to validate with a SchemaValidator
+     * @param proci   Processor object
      * @param cwd - The current working directory for parsing the XML file
      * @param validator - Schema Validator
      * @param filename
      * @return  XdmNode object for the XML file
      * @throws SaxonApiException
      */
-    public static XdmNode parseXmlFile(Processor processor, String cwd, SchemaValidator validator, String filename) throws SaxonApiException {
+    public static XdmNode parseXmlFile(Processor proci, String cwd, DocumentBuilder builder, SchemaValidator validator, String filename) throws SaxonApiException {
         try {
-            DocumentBuilder builder = processor.newDocumentBuilder();
+            if(builder == null) {
+                builder = proci.newDocumentBuilder();
+            }
             Source source = null;
             if (cwd != null && cwd.length() > 0) {
                 if (!cwd.endsWith("/")) {
@@ -697,6 +726,10 @@ public class SaxonCAPI {
             throw ex;
         }
     }
+
+
+
+
 
     /**
      * Create a File object given the filename and the cwd used fix-up the location of the file.

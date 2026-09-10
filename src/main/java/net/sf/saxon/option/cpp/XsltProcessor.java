@@ -114,11 +114,11 @@ public class XsltProcessor extends SaxonCAPI {
         return null;//xslMessages.toArray(new XdmNode[xslMessages.size()]);
     }
 
-    public MessageListener2 newMessageListener(String cwd, String mode)  throws SaxonApiException {
+    public MessageListener newMessageListener(String cwd, String mode)  throws SaxonApiException {
         return new MyMessageListener(cwd, mode);
     }
 
-    public class MyMessageListener implements MessageListener2 {
+    public class MyMessageListener implements MessageListener {
 
         int mode = 0;
         String messageFilename = null;
@@ -145,7 +145,7 @@ public class XsltProcessor extends SaxonCAPI {
             }
         }
 
-        public void message(XdmNode content, QName errorCode, boolean terminate, SourceLocator locator) {
+        public void message(XdmNode content, boolean terminate, SourceLocator locator) {
             if(mode == 1) {
                 System.err.println(content.getStringValue());
             }  else if( mode == 2) {
@@ -515,7 +515,21 @@ public class XsltProcessor extends SaxonCAPI {
                         String value = (String) values[i];
                         transformer.setMessageListener(((XsltProcessor) api).newMessageListener(cwd, value));
 
-                    }  else if (params[i].startsWith("param:")) {
+                    }   else if (params[i].equals("resources")) {
+                        char separatorChar = '/';
+                        if (SaxonCAPI.RESOURCES_DIR == null && values[i] instanceof String) {
+                            String dir1 = (String) values[i];
+                            if (!dir1.endsWith("/")) {
+                                dir1 = dir1.concat("/");
+                            }
+                            if (File.separatorChar != '/') {
+                                dir1.replace(separatorChar, File.separatorChar);
+                                separatorChar = '\\';
+                                dir1.replace('/', '\\');
+                            }
+                            SaxonCAPI.RESOURCES_DIR = dir1;
+                        }
+                    }else if (params[i].startsWith("param:")) {
                         String paramName = params[i].substring(6);
                         Object value = values[i];
                         XdmValue valueForCpp = null;
