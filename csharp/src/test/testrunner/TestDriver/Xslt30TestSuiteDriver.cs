@@ -67,7 +67,7 @@ namespace TestDriver {
             alwaysOn.Add("feature/disabling_output_escaping");
             alwaysOn.Add("feature/serialization");
             alwaysOn.Add("feature/namespace_axis");
-            alwaysOff.Add("feature/dtd"); // Microsoft parser does not report ID attributes
+            //alwaysOff.Add("feature/dtd"); // Microsoft parser does not report ID attributes
             alwaysOn.Add("feature/built_in_derived_types");
             alwaysOn.Add("feature/remote_http");
             alwaysOn.Add("feature/xsl-stylesheet-processing-instruction");
@@ -1190,6 +1190,10 @@ namespace TestDriver {
             if (tv == "feature/schema_aware") {
                 env.xsltCompiler.SchemaAware = needed;
             }
+            
+            if (tv == "feature/dtd") {
+                env.forceDom = needed;
+            }
 
             if (needsEE.Contains(type) || needsEE.Contains(tv)) {
                 return edition.Equals("EE") == needed;
@@ -1249,9 +1253,11 @@ namespace TestDriver {
 
                             return true;
                         case "ICU_spellout":
-                            return inverse;
+                            return !inverse;
 
-
+                        case "dtd":
+                            return !inverse;
+        
                         default:
                             Console.WriteLine("*** Unknown feature in HE: " + value);
                             return env.processor.Edition.Equals("HE")

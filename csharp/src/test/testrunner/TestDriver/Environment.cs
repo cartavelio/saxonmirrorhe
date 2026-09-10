@@ -5,6 +5,7 @@ using Saxon.Api;
 using System.Xml;
 using System.IO;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
@@ -76,6 +77,8 @@ namespace TestDriver {
         public bool outputTree = true;
         public bool outputSerialize = false;
         public string streamedInputValidation = "skip";
+        public string name = "";
+        public bool forceDom = false;
         internal bool failedToBuild = false;
         internal string initialWorkingDirectory = null;
         internal string sandpit = null;
@@ -146,6 +149,7 @@ namespace TestDriver {
             string name = env.GetAttributeValue(new QName("name"));
             if (name != null) {
                 System.Console.WriteLine("Loading environment " + name);
+                environment.name = name;
             }
 
             environment.processor = new Processor(true);
@@ -946,9 +950,9 @@ namespace TestDriver {
         //     return base.ResolveUri(basei, href);
         // }
 
-        private static void LoadSourceDocuments(Driver driver, XPathCompiler xpc, XdmItem env,
+        private static void LoadSourceDocuments(Driver driver, XPathCompiler xpc, XdmNode env,
             Environment environment, DocumentBuilder builder, bool validateSources) {
-            XmlUrlResolver res = new XmlUrlResolver();
+            XmlUrlResolver resolver = new XmlUrlResolver();
             
             foreach (XdmItem source in xpc.Evaluate("source", env)) {
                 XdmNode doc = null;
@@ -975,6 +979,19 @@ namespace TestDriver {
 
                 if (mutable) {
                     useTreeModel = "linked";
+                }
+
+                if (environment.forceDom || environment.name.Contains("unparsed-entity") || environment.name.StartsWith("id")) {
+                    useTreeModel = "dom";
+                }
+
+                if (environment.name == null) {
+                    XdmNode dep = env.Select(
+                        Steps.FollowingSibling("dependencies")
+                            .Then(Steps.Child().Where(Predicates.AttributeEq("feature", "dtd")))).First();
+                    if (dep != null) {
+                        useTreeModel = "dom";
+                    }
                 }
                 string streaming = ((XdmNode)source).GetAttributeValue(new QName("", "streaming"));
                 if (!validateSources && validation.Equals("skip")) {
@@ -1011,18 +1028,18 @@ namespace TestDriver {
                             environment.streamedContent = xpc.Evaluate("string(content)", source).ToString();
                         }
                         else {
-                            environment.streamedPath = res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath;
+                            environment.streamedPath = resolver.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath;
                         }
 
                         environment.streamedInputValidation = validation;
                     }
                     else {
                         try {
-                            System.Console.WriteLine(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath);
-                            System.Console.WriteLine(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsoluteUri);
-                            System.Console.WriteLine(res.ResolveUri(((XdmNode)env).BaseUri, href).ToString());
+                            System.Console.WriteLine(resolver.ResolveUri(env.BaseUri, href).AbsolutePath);
+                            System.Console.WriteLine(resolver.ResolveUri(env.BaseUri, href).AbsoluteUri);
+                            System.Console.WriteLine(resolver.ResolveUri(env.BaseUri, href).ToString());
                             environment.streamedSecondaryDocs.Add(
-                                res.ResolveUri(((XdmNode)env).BaseUri, href).AbsoluteUri, validation);
+                                resolver.ResolveUri(env.BaseUri, href).AbsoluteUri, validation);
                         }
                         catch (Exception) {
                         }
@@ -1031,10 +1048,10 @@ namespace TestDriver {
                 else {
                     if (href != null) {
                         try {
-                            Uri fileLoc = res.ResolveUri(((XdmNode)env).BaseUri, href);
+                            Uri fileLoc = resolver.ResolveUri(env.BaseUri, href);
                             FileStream file = null;
                             if (fileLoc.Scheme.Equals("file")) {
-                                file = new FileStream(res.ResolveUri(((XdmNode)env).BaseUri, href).AbsolutePath,
+                                file = new FileStream(resolver.ResolveUri(env.BaseUri, href).AbsolutePath,
                                     FileMode.Open, FileAccess.Read);
                                 if (uri == null) {
                                     uri = fileLoc.AbsoluteUri;
@@ -1046,7 +1063,7 @@ namespace TestDriver {
                                 : file);
 
                             Uri absUri = builder.BaseUri =
-                                new Uri(res.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
+                                new Uri(resolver.ResolveUri(env.BaseUri, uri).AbsoluteUri);
                             try {
                                 switch (useTreeModel) {
                                     case "condensed":
@@ -1058,9 +1075,16 @@ namespace TestDriver {
                                         doc = builder.Build(ss);
                                         break;
                                     case "dom":
+                                        // Create the validating reader and specify DTD validation.
+                                        XmlReaderSettings settings = new XmlReaderSettings();
+                                        settings.DtdProcessing = DtdProcessing.Parse;
+                                        settings.XmlResolver = resolver;
+                                        //settings.ValidationType = ValidationType.DTD;
+                                        
+                                        XmlReader reader = XmlReader.Create(ss, settings, builder.BaseUri.ToString());
                                         XmlDocument dom = new();
                                         dom.PreserveWhitespace = true;
-                                        dom.Load(ss);
+                                        dom.Load(reader);
                                         doc = builder.Wrap(dom);
                                         break;
 #if EE                                    
@@ -1095,9 +1119,24 @@ namespace TestDriver {
                         }
 
                         string content = xpc.Evaluate("string(content)", source).ToString();
-                        Uri absUri = builder.BaseUri = new Uri(res.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
+                        Uri absUri = builder.BaseUri = new Uri(resolver.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
                         try {
-                            doc = builder.Build(new StringReader(content));
+                            if (useTreeModel == "dom") {
+                                // Create the validating reader and specify DTD validation.
+                                XmlReaderSettings settings = new ();
+                                settings.DtdProcessing = DtdProcessing.Parse;
+                                settings.XmlResolver = resolver;
+                                        
+                                XmlReader reader = XmlReader.Create(new StringReader(content), settings, builder.BaseUri.ToString());
+                                XmlDocument dom = new();
+                                dom.PreserveWhitespace = true;
+                                dom.Load(reader);
+                                doc = builder.Wrap(dom);
+                            }
+                            else {
+                                doc = builder.Build(new StringReader(content));
+                            }
+
                             environment.sourceDocs.Add(absUri.OriginalString, doc);
                         }
                         catch (Exception e) {
