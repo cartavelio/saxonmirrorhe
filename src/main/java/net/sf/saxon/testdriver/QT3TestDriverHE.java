@@ -507,7 +507,7 @@ public class QT3TestDriverHE extends TestDriver {
                 } catch (SaxonApiException err) {
                     println("*** Failed to read query: " + err.getMessage());
                     if (err.getErrorCode().getLocalName().equals("FOUT1190")) {
-                        outcome.setException(new QName("XPST0003"));
+                        outcome.setException(new QName("", NamespaceConstant.ERR, "XPST0003"));
                     } else {
                         outcome.setException(err.getErrorCode());
                     }
