@@ -66,6 +66,10 @@ public class TinyBuilder extends Builder {
         //System.err.println("TinyBuilder " + this);
     }
 
+    protected String getTreeKind() {
+        return "tiny";
+    }
+
     /**
      * Set the size parameters for the tree
      *

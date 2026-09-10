@@ -42,6 +42,11 @@ public class JDOM2Writer extends net.sf.saxon.event.Builder {
         nsStack.push(NamespaceMap.emptyMap());
     }
 
+    @Override
+    protected String getTreeKind() {
+        return "JDOM2";
+    }
+
     /**
      * Notify an unparsed entity URI.
      *

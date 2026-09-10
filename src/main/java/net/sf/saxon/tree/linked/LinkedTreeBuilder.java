@@ -49,6 +49,11 @@ public class LinkedTreeBuilder extends Builder {
         nodeFactory = DefaultNodeFactory.THE_INSTANCE;
     }
 
+    @Override
+    protected String getTreeKind() {
+        return "linked";
+    }
+
     /**
      * Create a Builder and initialise variables
      *

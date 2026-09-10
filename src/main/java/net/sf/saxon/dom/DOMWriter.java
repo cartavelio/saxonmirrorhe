@@ -44,6 +44,11 @@ public class DOMWriter extends Builder {
         nsStack.push(NamespaceMap.emptyMap());
     }
 
+    @Override
+    protected String getTreeKind() {
+        return "DOM";
+    }
+
     /**
      * Set the pipelineConfiguration
      */

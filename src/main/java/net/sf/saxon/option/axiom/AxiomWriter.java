@@ -43,6 +43,11 @@ public class AxiomWriter extends net.sf.saxon.event.Builder {
         nsStack.push(NamespaceMap.emptyMap());
     }
 
+    @Override
+    protected String getTreeKind() {
+        return "AXIOM";
+    }
+
     /**
      * Notify an unparsed entity URI.
      *

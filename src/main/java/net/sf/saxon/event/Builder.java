@@ -49,10 +49,6 @@ public abstract class Builder implements Receiver {
     public static final int AXIOM_TREE = 5;
     public static final int DOMINO_TREE = 6;
 
-    /**
-     * Constant denoting the "mutable linked tree" in which each node is represented as an object
-     */
-    public static final int MUTABLE_LINKED_TREE = 7;
 
     protected PipelineConfiguration pipe;
     protected Configuration config;
@@ -259,10 +255,14 @@ public abstract class Builder implements Receiver {
                 sysId = "(unknown systemId)";
             }
             getConfiguration().getLogger().info(
-                    "Building tree for " + sysId + " using " + getClass());
+                    "Building " + getTreeKind() + " tree for " + sysId);
             startTime = System.nanoTime();
         }
         opened = true;
+    }
+
+    protected String getTreeKind() {
+        return getClass().getSimpleName();
     }
 
     @Override

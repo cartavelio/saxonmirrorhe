@@ -22,6 +22,11 @@ public class TinyBuilderCondensed extends TinyBuilder {
         super(pipe);
     }
 
+    @Override
+    protected String getTreeKind() {
+        return "condensed tiny";
+    }
+
     // Keep a map from the hashcode of the string (calculated within this class) to the list
     // of node numbers of text nodes having that hashcode
 

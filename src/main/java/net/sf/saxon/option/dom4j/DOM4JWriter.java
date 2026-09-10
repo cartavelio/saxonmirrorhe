@@ -46,6 +46,11 @@ public class DOM4JWriter extends net.sf.saxon.event.Builder {
         nsStack.push(NamespaceMap.emptyMap());
     }
 
+    @Override
+    protected String getTreeKind() {
+        return "DOM4J";
+    }
+
     /**
      * Notify an unparsed entity URI.
      *
