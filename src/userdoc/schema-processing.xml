@@ -1318,8 +1318,8 @@
             be context-sensitive.</p>
 
          <p>The XPath expression may make calls on Java extension functions in the normal way: see
-               <a class="bodylink" href="/extensibility/functions">Writing extension functions
-               (Java)</a>. Allowing call-out to procedural programming languages means that you can
+            <a class="bodylink" href="/extensibility/extension-functions-J">Writing extension functions
+               in Java</a>. Allowing call-out to procedural programming languages means that you can
             perform arbitrary procedural validation of element and attribute values. Take care to
             disable use of extension functions if validating against a schema that is untrusted.</p>
 

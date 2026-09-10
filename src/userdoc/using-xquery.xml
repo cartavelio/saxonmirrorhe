@@ -43,7 +43,7 @@
 
    <p>
       <i>For details of how to set up collation URIs for use in XQuery, see <a class="bodylink"
-            href="/extensibility/config-extend/collation">Collations</a>.</i>
+            href="/extensibility/collation">Collations</a>.</i>
    </p>
    <section id="commandline" title="Running XQuery from the Command Line">
       <h1>Running XQuery from the Command Line</h1>
@@ -1221,7 +1221,7 @@ XdmValue result = ev.CallFunction(new QName("http://www.w3.org/2005/xquery-local
             <code>math:sqrt(2)</code>.</p>
 
       <p class="javaonly">More details of this mechanism are found in <a class="bodylink"
-            href="/extensibility/functions">Writing Extension Functions</a>.</p>
+         href="/extensibility/extension-functions-J/reflexive-functions">Extension Functions</a>.</p>
 
       <p>Saxon recognizes the XQuery pragma syntax, but it currently defines only one pragma of its
          own, the <code>saxon:validate-type</code> pragma (see <a class="bodylink"

@@ -258,7 +258,7 @@
     or absent, the implementation will make best-effort.</p>
   <p>For Saxon-HE, or in the absence of ICU, this involves building a tailored collation based on
     the Java library/Unicode implementation as described in <a class="bodylink"
-      href="/extensibility/config-extend/collation">Implementing a collating sequence</a>, with the following
+      href="/extensibility/collation">Implementing a collating sequence</a>, with the following
     re-mapping of parameters:</p>
   <table>
     <thead class="params">

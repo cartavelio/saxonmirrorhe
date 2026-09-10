@@ -1693,10 +1693,10 @@
                         <code>group-by</code> or <code>group-adjacent</code>. If present it must be
                     a collation URI that uses the scheme and path
                         <code>http://www.w3.org/2013/collation/UCA</code>, in which case it requests
-                    use of the <a class="bodylink" href="/extensibility/config-extend/collation/UCA"
+                    use of the <a class="bodylink" href="/extensibility/collation/UCA"
                         >Unicode Collation Algorithm</a>, or is a collation otherwise recognized by
                     Saxon: see <a class="bodylink"
-                        href="/extensibility/config-extend/collation"
+                        href="/extensibility/collation"
                         >Collation</a>.</attribute>
             </attributes>
             <details>
@@ -2225,7 +2225,7 @@
                 <attribute name="collation" use="optional">The name of a collating sequence, used
                     when comparing strings. If present it must be a collation URI recognized by Saxon: see <a
                         class="bodylink"
-                        href="/extensibility/config-extend/collation"
+                        href="/extensibility/collation"
                         >Collation</a>.</attribute>
             </attributes>
             <details>
@@ -3048,11 +3048,11 @@
                     support is provided using facilities from <a
                         href="http://site.icu-project.org/">ICU - International Components for
                         Unicode</a> as described in <a class="bodylink"
-                            href="/extensibility/config-extend/localizing/ICU-numbering-dates">Numbers
+                            href="/extensibility/localizing/ICU-numbering-dates">Numbers
                             and Dates from ICU</a>. Otherwise, a selection of languages are
                     supported directly, and it is possible to add support for others, using
                     <code>Numberer</code> classes as described in <a
-                        href="/extensibility/config-extend/localizing">Localizing numbers and
+                        href="/extensibility/localizing">Localizing numbers and
                         dates</a>.</attribute>
                 <attribute name="letter-value" use="optional">Disambiguates between numbering
                     sequences that use letters, since in many languages there are two commonly used
@@ -3899,7 +3899,7 @@
 
                 <p>The destination of the result document can be altered programmatically as
                     described in <a class="bodylink"
-                        href="/extensibility/config-extend/uri-resolution/output-uri-resolver">Resolving
+                        href="/extensibility/uri-resolution/output-uri-resolver">Resolving
                         the URIs of Output Files</a>. In other cases the document is serialized and written to
                     the file identified by the URI in the <code>href</code> attribute, resolved if
                     it is relative against the base output URI for the transformation (which
@@ -3998,7 +3998,7 @@
                     failure. It also means that when a user written result document resolver is in
                     use, it will be called to handle this case with the base output URI supplied as
                     the URI argument. For more information, see <a class="bodylink"
-                        href="/extensibility/config-extend/uri-resolution/output-uri-resolver">Resolving the URIs of
+                        href="/extensibility/uri-resolution/output-uri-resolver">Resolving the URIs of
                         Output Files</a>.</p>
             </status>
             <see-also name="output" type="xsl-elements"/>
@@ -4120,7 +4120,7 @@
                 <attribute name="collation" use="optional">The name of a collating sequence. If
                     present it must be a collation URI recognized by
                     Saxon: see <a class="bodylink"
-                        href="/extensibility/config-extend/collation"
+                        href="/extensibility/collation"
                         >Collation</a>.</attribute>
                 <attribute name="stable" use="optional">Permitted only on the first
                         <code>xsl:sort</code> element within a sort key. Determines the ordering
@@ -4486,10 +4486,10 @@
                     descendant); and used by certain XSLT constructs within its scope. If present it
                     must be a whitespace-separated list of collation URIs, that use the scheme and
                     path <code>http://www.w3.org/2013/collation/UCA</code> (to request use of the <a
-                        class="bodylink" href="/extensibility/config-extend/collation/UCA">Unicode
+                        class="bodylink" href="/extensibility/collation/UCA">Unicode
                         Collation Algorithm</a>), or collations otherwise recognized by Saxon (see
                         <a class="bodylink"
-                        href="/extensibility/config-extend/collation"
+                        href="/extensibility/collation"
                             >Collation</a>).</attribute>
                 <attribute name="extension-element-prefixes" use="optional">Standard attribute that
                     may appear on any XSLT element. Used to declare the use of extension
