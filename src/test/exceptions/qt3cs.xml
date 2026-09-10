@@ -14,6 +14,11 @@
     <reason>Known bug in ICU</reason>
   </exception>
   
+  <exception test-set="fn-collection" test-case="cbcl-collection-002" run="false" report="test queried">
+    <created by="Michael Kay" on="2021-08-23"/>
+    <reason>Saxon-CS delivers collection results in wrong order due to multithreading. Should this be allowed? See bug 5067.</reason>
+  </exception>
+  
   <exception test-set="fn-string-join" test-case="fn-string-join-27" run="false" report="known restriction">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>Pre-3.1 semantics of fn:string-join no longer supported</reason>
@@ -34,7 +39,7 @@
     <reason>format-number() is allowed under XPath 2.0 though it should not be</reason>
   </exception>
   
-  <exception test-set="app-spec-examples" test-case="
+  <!--<exception test-set="app-spec-examples" test-case="
     fo-test-fn-contains-004
     fo-test-fn-contains-005
     fo-test-fn-contains-006
@@ -60,9 +65,9 @@
     " run="false" report="known restriction">
     <created by="Michael Kay" on="2019-03-11"/>
     <reason>alternate=blanked not supported by ICU4N (apparently?)</reason>
-  </exception>
+  </exception>-->
   
-  <exception test-set="fn-contains" test-case="
+  <!--<exception test-set="fn-contains" test-case="
     fn-contains-34
     fn-contains-35
     fn-contains-36
@@ -71,7 +76,7 @@
     " run="false" report="known restriction">
     <created by="Michael Kay" on="2021-08-08"/>
     <reason>alternate=blanked not supported by ICU4N (apparently?)</reason>
-  </exception>
+  </exception>-->
   
   
  
