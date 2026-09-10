@@ -300,17 +300,46 @@ public class XdmValue implements Iterable<XdmItem> {
 
     /**
      * Create a string representation of the value. The is the result of serializing
-     * the value using the adaptive serialization method.
+     * the value using the adaptive serialization method, with the options
+     * <code>indent="yes"</code> and <code>omit-xml-declaration="yes"</code>.
+     * The <code>item-separator</code> if there are multiple items is a newline.
+     * Any trailing newline in the result is removed.
+     * <p>Note that this method does not return the same result as the XPath <code>fn:string()</code>
+     * function: it corresponds more closely to the <code>fn:serialize()</code> function.</p>
+     * <p>If the <code>XdmValue</code> is an element node, the result will be a well-formed
+     * XML document serialized as defined in the W3C XSLT/XQuery serialization specification,
+     * using options method="xml", indent="yes", omit-xml-declaration="yes".</p>
+     * <p>In the case of a document node, the result will be a well-formed
+     * XML document provided that the document node contains exactly one element child,
+     * and no text node children. </p>
+     * <p>In the case of an attribute node, the output is a string in the form
+     * <code>name="value"</code>. The name will use the original namespace prefix.</p>
+     * <p>In the case of a namespace node, the output is a string in the form of a namespace
+     * declaration, that is <code>xmlns="uri"</code> or <code>xmlns:pre="uri"</code>.</p>
+     * <p>Other nodes, such as text nodes, comments, and processing instructions, are
+     * represented as they would appear in lexical XML. Note: this means that in the case
+     * of text nodes, special characters such as <code>&amp;</code> and <code>&lt;</code>
+     * are output in escaped form. To get the unescaped string value of a text node, use
+     * {@link XdmNode#getStringValue()} instead.</p>
+     * <p>Atomic values are serialized according to the rules of the adaptive output method,
+     * for example <code>true()</code>, <code>"blue"</code>, <code>42</code>, or
+     * <code>xs:date("2023-01-31")</code>.</p>
+     * <p>A sequence of items is formatted by serializing the individual items, separated
+     * by newlines.</p>
      * @return a string representation of the value
      */
 
     public String toString() {
         try {
+            // To get a serializer we need a Configuration. If the sequence contains any nodes,
+            // we can get the associated configuration from the node. If not, we create a brand
+            // new configuration for the purpose.
             Configuration config = null;
             SequenceIterator iter = value.iterate();
             for (Item item; (item = iter.next()) != null; ) {
                 if (item instanceof NodeInfo) {
                     config = ((NodeInfo)item).getConfiguration();
+                    iter.close();
                     break;
                 }
             }
@@ -321,11 +350,15 @@ public class XdmValue implements Iterable<XdmItem> {
             StreamResult result = new StreamResult(writer);
             SerializationProperties properties = new SerializationProperties();
             properties.setProperty(OutputKeys.METHOD, "adaptive");
-            properties.setProperty(OutputKeys.INDENT, "true");
-            properties.setProperty(OutputKeys.OMIT_XML_DECLARATION, "true");
+            properties.setProperty(OutputKeys.INDENT, "yes");
+            properties.setProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             Receiver r = config.getSerializerFactory().getReceiver(result, properties);
             SequenceCopier.copySequence(value.iterate(), r);
-            return writer.toString();
+            String output = writer.toString();
+            while (output.endsWith("\n")) {
+                output = output.substring(0, output.length()-1);
+            }
+            return output;
         } catch (XPathException e) {
             return super.toString();
         }

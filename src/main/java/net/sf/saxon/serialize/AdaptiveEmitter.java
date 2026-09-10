@@ -227,7 +227,7 @@ public class AdaptiveEmitter extends SequenceWriter implements ReceiverWithOutpu
                 StringWriter sw = new StringWriter();
                 Properties props = new Properties(outputProperties);
                 props.setProperty("method", "xml");
-                props.setProperty("indent", "no");
+                //props.setProperty("indent", "no");
                 if (props.getProperty("omit-xml-declaration") == null) {
                     props.setProperty("omit-xml-declaration", "no");
                 }
