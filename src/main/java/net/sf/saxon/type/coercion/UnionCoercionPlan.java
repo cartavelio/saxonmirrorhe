@@ -26,7 +26,7 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
     public final static UnionCoercionPlan INSTANCE31 = new UnionCoercionPlan(31);
     public final static UnionCoercionPlan INSTANCE40 = new UnionCoercionPlan(40);
 
-    private UnionCoercionPlan(int version) {
+    protected UnionCoercionPlan(int version) {
         this.version = version;
     }
 

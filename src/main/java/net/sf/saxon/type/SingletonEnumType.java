@@ -33,6 +33,7 @@ import java.util.List;
 public class SingletonEnumType implements AtomicType {
 
     private final UnicodeString value;
+    private final StringValue theInstance;
 
     /**
      * Create an enumeration type permitting a defined value
@@ -40,10 +41,15 @@ public class SingletonEnumType implements AtomicType {
      */
     public SingletonEnumType(UnicodeString value) {
         this.value = value;
+        this.theInstance = new StringValue(value, this);
     }
 
     public UnicodeString getValue() {
         return value;
+    }
+
+    public StringValue getInstance() {
+        return theInstance;
     }
 
     public boolean allowsValue(UnicodeString value) {

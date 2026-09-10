@@ -2233,62 +2233,62 @@ public class XPathParser {
         return recordTest;
     }
 
-    /**
-     * Parse a union type (Saxon 9.8 extension, no longer in XPath 4.0).
-     * Syntax: "union" "(" qname ("," qname)* ")"
-     * @return the item type
-     * @throws XPathException if a syntax error is found
-     */
-
-    public ItemType parseUnionType() throws XPathException {
-        // The initial "union(" has been read
-        checkLanguageVersion40();
-        nextToken();
-        List<ItemType> memberTypes = new ArrayList<>(6);
-
-        while (true) {
-            if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
-                EnumerationUnionType type = parseEnumType();
-                for (ItemType it : type.getAlternatives()) {
-                    memberTypes.add((SingletonEnumType) it);
-                }
-            } else {
-                expect(Token.NAME);
-                if (scanOnly) {
-                    memberTypes.add(BuiltInAtomicType.STRING);
-                } else {
-                    StructuredQName member = getQNameParser().parse(
-                            t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
-                    ItemType type = getPlainType(member);
-                    if (type instanceof AtomicType) {
-                        memberTypes.add(type);
-                    } else if (type instanceof PlainType) {
-                        for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
-                            if (pt instanceof AtomicType) {
-                                memberTypes.add(pt);
-                            } else {
-                                grumble("Union type " + type + " has a non-atomic member type " + pt);
-                            }
-                        }
-                    } else {
-                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
-                    }
-                }
-                nextToken();
-            }
-            if (t.currentToken == Token.RPAREN) {
-                break;
-            } else if (t.currentToken == Token.COMMA) {
-                nextToken();
-            } else {
-                grumble("Expected ',' or ')' after member name in union type, found '" +
-                                  Token.tokens[t.currentToken] + '\'');
-            }
-        }
-        nextToken();
-        return new LocalUnionType(memberTypes);
-
-    }
+//    /**
+//     * Parse a union type (Saxon 9.8 extension, no longer in XPath 4.0).
+//     * Syntax: "union" "(" qname ("," qname)* ")"
+//     * @return the item type
+//     * @throws XPathException if a syntax error is found
+//     */
+//
+//    public ItemType parseUnionType() throws XPathException {
+//        // The initial "union(" has been read
+//        checkLanguageVersion40();
+//        nextToken();
+//        List<ItemType> memberTypes = new ArrayList<>(6);
+//
+//        while (true) {
+//            if (t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("enum")) {
+//                EnumerationUnionType type = parseEnumType();
+//                for (ItemType it : type.getAlternatives()) {
+//                    memberTypes.add((SingletonEnumType) it);
+//                }
+//            } else {
+//                expect(Token.NAME);
+//                if (scanOnly) {
+//                    memberTypes.add(BuiltInAtomicType.STRING);
+//                } else {
+//                    StructuredQName member = getQNameParser().parse(
+//                            t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
+//                    ItemType type = getPlainType(member);
+//                    if (type instanceof AtomicType) {
+//                        memberTypes.add(type);
+//                    } else if (type instanceof PlainType) {
+//                        for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
+//                            if (pt instanceof AtomicType) {
+//                                memberTypes.add(pt);
+//                            } else {
+//                                grumble("Union type " + type + " has a non-atomic member type " + pt);
+//                            }
+//                        }
+//                    } else {
+//                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+//                    }
+//                }
+//                nextToken();
+//            }
+//            if (t.currentToken == Token.RPAREN) {
+//                break;
+//            } else if (t.currentToken == Token.COMMA) {
+//                nextToken();
+//            } else {
+//                grumble("Expected ',' or ')' after member name in union type, found '" +
+//                                  Token.tokens[t.currentToken] + '\'');
+//            }
+//        }
+//        nextToken();
+//        return new LocalUnionType(memberTypes);
+//
+//    }
 
     /**
      * Parse a type pattern (XSLT 4.0 extension).

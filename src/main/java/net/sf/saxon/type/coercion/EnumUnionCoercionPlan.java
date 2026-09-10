@@ -1,33 +1,27 @@
 package net.sf.saxon.type.coercion;
 
-import net.sf.saxon.functions.hof.CoercedFunction;
+import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.type.UnionType;
+import net.sf.saxon.type.ValidationFailure;
 import net.sf.saxon.value.AtomicValue;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.sf.saxon.value.StringValue;
 
 /**
- * Coercion plan for use with 4.0 when the required item type is a choice item type or a union type
+ * Coercion plan for use with 4.0 when the required item type is an enum type
  */
-public class UnionCoercionPlan extends AtomicCoercionPlan {
+public class EnumUnionCoercionPlan extends UnionCoercionPlan {
 
-    private final int version;
 
-    public final static UnionCoercionPlan INSTANCE31 = new UnionCoercionPlan(31);
-    public final static UnionCoercionPlan INSTANCE40 = new UnionCoercionPlan(40);
-
-    private UnionCoercionPlan(int version) {
-        this.version = version;
+    public final static EnumUnionCoercionPlan INSTANCE = new EnumUnionCoercionPlan();
+    protected EnumUnionCoercionPlan() {
+        super(40);
     }
 
     /**
@@ -41,7 +35,7 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
      */
     @Override
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
-        UnionType reqType = (UnionType)requiredType;
+        EnumerationUnionType reqType = (EnumerationUnionType)requiredType;
         TypeHierarchy th = request.config.getTypeHierarchy();
         if (!(item instanceof AtomicValue)) {
             AtomicSequence atomizedValue = item.atomize();
@@ -51,35 +45,18 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
             }
             return result;
         }
+
         if (requiredType.matches(item, th)) {
-            // Generally we can return the item as is if it matches the required type. But
-            // function coercion is needed even if the supplied item matches the required type
-            for (ItemType it : reqType.getAlternatives()) {
-                if (it.matches(item, th)) {
-                    if (it instanceof SpecificFunctionType) {
-                        boolean is40 = version >= 40;
-                        return new CoercedFunction((FunctionItem) item, ((SpecificFunctionType) it), is40, is40);
-                    } else {
-                        return item;
-                    }
-                }
-            }
-            throw new AssertionError("Item matches the choice type but doesn't match any of the alternatives");
+            return item;
         }
-        List<XPathException> errors = null;
-        for (ItemType it : reqType.getAlternatives()) {
-            CoercionPlan plan = it.getCoercionPlan(version);
-            try {
-                return plan.coerceItem(item, it, request);
-            } catch (XPathException error) {
-                if (errors == null) {
-                    errors = new ArrayList<>();
-                    errors.add(error);
-                }
-            }
+        if (item instanceof StringValue) {
+            return reqType.getTypedValue(item.getUnicodeStringValue(), null, null);
         }
-        assert errors != null;
-        throw errors.get(0);
+        RoleDiagnostic role = request.roleSupplier.get();
+        ValidationFailure vf = new ValidationFailure(
+                "Cannot convert the " + role.getMessage() + " to " + reqType.getDescription());
+        vf.setErrorCode("XPTY0004");
+        throw vf.makeException().asTypeError();
     }
 
 
