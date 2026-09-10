@@ -1321,11 +1321,6 @@ int main(int argc, char *argv[]) {
        << endl
        << endl;
 
-  cout << endl
-       << "============================================================="
-       << endl
-       << endl;
-
   testNullSetBaseURI(processor, sresult);
 
   cout << endl

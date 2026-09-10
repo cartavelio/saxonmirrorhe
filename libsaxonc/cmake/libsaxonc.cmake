@@ -32,6 +32,7 @@ find_package(Threads REQUIRED)
 configure_file(../src/lib/saxonc_version.c.in saxonc_version.c @ONLY)
 add_library(${saxonc} SHARED
     ${CMAKE_CURRENT_BINARY_DIR}/saxonc_version.c
+    ../src/lib/CPPUserFunctionHandler.cpp
     ../src/lib/DocumentBuilder.cpp
     ../src/lib/SaxonApiException.cpp
     ../src/lib/SaxonCGlue.c
