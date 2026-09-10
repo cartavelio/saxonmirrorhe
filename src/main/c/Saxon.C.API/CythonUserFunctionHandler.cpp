@@ -12,7 +12,7 @@ void * python_nativeFunctionCall(char * functionName, void * proc, void * func, 
 
 
     if(proc != nullptr && numOfArguments>0) {
-        //fprintf(stderr, "We are in a CythonUserFunctionHandler proc is not null\n");
+        fprintf(stderr, "We are in a CythonUserFunctionHandler proc is not null\n");
         //arg = ((PyObject *)proc)->wrap_atomic_value(arguments[0]);
         //arg = proc_wrap_atomic_value((PyObject *)proc, arguments[0]);
 
@@ -66,29 +66,36 @@ void * python_nativeFunctionCall(char * functionName, void * proc, void * func, 
         Py_DECREF(argsList);
     }
 
-
-    if(Py_IsNone(result) || result == nullptr) {
+    fprintf(stderr, "We are in a CythonUserFunctionHandler cp0\n");
+    if(result == Py_None ||  result == nullptr) {
+        fprintf(stderr, "We are in a CythonUserFunctionHandler cp0a\n");
         return nullptr;
     }
+
+    fprintf(stderr, "We are in a CythonUserFunctionHandler cp1\n");
 
     PyTypeObject * typeObj = Py_TYPE(result);
 
     if(typeObj != nullptr) {
-        PyObject * typeObji = PyType_GetName(typeObj);
-        const char* c_typeObjStr = PyUnicode_AsUTF8(typeObji);
+        //PyObject * typeObji = PyType_GetName(typeObj);
+        const char* c_typeObjStr = Py_TYPE(result)->tp_name; //PyUnicode_AsUTF8(typeObji);
 
         std::string typeObjStr = std::string(c_typeObjStr);
 
         std::string prefix("PyXdm");
+        fprintf(stderr, "We are in a CythonUserFunctionHandler type= %s\n", c_typeObjStr);
+        fflush(stdout);
 
-        if(typeObjStr.compare(0,prefix.size(),prefix)) {
+        if(typeObjStr.find(prefix) == std::string::npos) {
             //TODO try to handle Python primitive types
             return nullptr;
         }
 
+
         //std::cerr<< "Type of userFunction result = "<<c_typeObjStr<<std::endl;
 
     }
+    fprintf(stderr, "We are in a CythonUserFunctionHandler cp2\n");
 
     long resulti = PyLong_AsLong(PyObject_CallMethodNoArgs(result, PyUnicode_FromString("__get_underlying_int_value")));
 

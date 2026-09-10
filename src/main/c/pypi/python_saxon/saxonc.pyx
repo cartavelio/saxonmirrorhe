@@ -606,9 +606,6 @@ cdef class PySaxonProcessor:
         cdef PyXdmAtomicValue atomic_value = PyXdmAtomicValue(self)
         atomic_value.derivedaptr = atomic_value.derivedptr = atomic_value.thisvptr = value_ptr
         value_ptr.incrementRefCount()
-
-        print("wrap_atomic_value called!!")
-
         return atomic_value
 
     def make_string_value(self, value, encoding = None):
