@@ -281,7 +281,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(3, BuiltInAtomicType.INTEGER, OPT, null));
 
             register("sort-by", 2, 2, e -> e.populate(ArraySortBy::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, STAR, null)
+                    .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null)
                     .arg(1, ArraySortBy.sortKeyRecord, STAR, null));
 
             SpecificFunctionType comparator = new SpecificFunctionType(
