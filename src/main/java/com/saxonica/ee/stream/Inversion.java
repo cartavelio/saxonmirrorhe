@@ -120,11 +120,11 @@ public class Inversion {
         Expression firstStreamingChild = null;
         for (Operand info : parent.operands()) {
             Expression child = info.getChildExpression();
-            //#ifdef CSHARP==false
+            //#if CSHARP==false
             if (child instanceof ByteCodeCandidate) {
                 child = ((ByteCodeCandidate)child).getBaseExpression();
             }
-            //#ifdef
+            //#endif
             if (info.hasSameFocus()) {
                 Sweep sweep = Streamability.getSweep(child);
                 if (sweep == Sweep.CONSUMING) {
