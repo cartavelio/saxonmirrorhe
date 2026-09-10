@@ -2727,20 +2727,20 @@ public class XPathParser {
             case Token.DOLLAR:
                 int offset = t.currentTokenStartOffset;
                 StructuredQName variableName = parseVariableName();
-                if (allowXPath40Syntax && t.currentToken == Token.THIN_ARROW) {
-                    // This is a single-argument lambda expression, $x -> {EXPR}
-                    List<UserFunctionParameter> params = new ArrayList<>(1);
-                    UserFunctionParameter arg = new UserFunctionParameter();
-                    arg.setRequiredType(SequenceType.ANY_SEQUENCE);
-                    arg.setVariableQName(variableName);
-                    arg.setSlotNumber(0);
-                    params.add(arg);
-                    nextToken();
-                    return parseInlineFunctionBody(AnnotationList.EMPTY, params, SequenceType.ANY_SEQUENCE);
-                } else {
+//                if (allowXPath40Syntax && t.currentToken == Token.THIN_ARROW) {
+//                    // This is a single-argument lambda expression, $x -> {EXPR}
+//                    List<UserFunctionParameter> params = new ArrayList<>(1);
+//                    UserFunctionParameter arg = new UserFunctionParameter();
+//                    arg.setRequiredType(SequenceType.ANY_SEQUENCE);
+//                    arg.setVariableQName(variableName);
+//                    arg.setSlotNumber(0);
+//                    params.add(arg);
+//                    nextToken();
+//                    return parseInlineFunctionBody(AnnotationList.EMPTY, params, SequenceType.ANY_SEQUENCE);
+//                } else {
                     // This is a variable reference
                     return resolveVariableReference(offset, variableName);
-                }
+//                }
 
             case Token.LPAR:
                 if (allowXPath40Syntax
