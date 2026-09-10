@@ -33,7 +33,15 @@ To install, open a shell window and navigate to the `php` directory inside
 the location where you unpacked the zip file. Run these commands:
 
 - phpize
-- ./configure --enable-saxon
+  
+User should install the SaxonC libraries (i.e. directory 'SaxonC[EDITION]') in a suitable location. 
+The search paths are '/opt/saxonica' '/usr/local' '/usr'. Then run the command
+
+- ./configure --with-saxon
+
+Alternatively:
+- ./configure --with-saxon=path/SaxonC[EDITION]
+
 - make
 - sudo make install
 
