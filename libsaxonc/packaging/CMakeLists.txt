@@ -28,34 +28,3 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/SaxonC${SAXON_EDITION}ConfigVersion.cmake
         DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
 )
-
-# Files from saxonc-core
-install(FILES
-        ${SaxonCCore_PackageDir}/include/graal_isolate.h
-        ${SaxonCCore_PackageDir}/include/saxonc-core-${SaxonC_EDITION}.h
-        TYPE INCLUDE
-)
-
-install(DIRECTORY ${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN cmake EXCLUDE
-        PATTERN *.dylib
-        PATTERN *.lib
-        PATTERN *.so
-        PATTERN *.so.*
-)
-install(DIRECTORY ${SaxonCCore_PackageDir}/bin/
-        TYPE BIN
-        USE_SOURCE_PERMISSIONS
-        FILES_MATCHING
-        PATTERN cmake EXCLUDE
-        PATTERN *.dll
-)
-
-install(DIRECTORY ${SaxonCCore_PackageDir}/${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonCCore${SAXON_EDITION}/
-        DESTINATION ${SAXON_CMAKE_INSTALL_LIBDIR}/cmake/SaxonC${SAXON_EDITION}
-        PATTERN *Config.cmake EXCLUDE
-        PATTERN *ConfigVersion.cmake EXCLUDE
-)
