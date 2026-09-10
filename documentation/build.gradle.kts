@@ -262,7 +262,7 @@ tasks.register<Copy>("dotnet_doc_html") {
   description = "Copy the HTML .NET documentation"
 
   from(csharpHtmlDocumentation)
-  into(layout.buildDirectory.dir("dotnetdoc_html"))
+  into(layout.buildDirectory.dir("dotnetdoc-html"))
 }
 
 tasks.register<Copy>("dotnet_doc_xml") {
@@ -270,7 +270,7 @@ tasks.register<Copy>("dotnet_doc_xml") {
   description = "Copy the XML .NET documentation"
 
   from(csharpXmlDocumentation)
-  into(layout.buildDirectory.dir("dotnetdoc_xml"))
+  into(layout.buildDirectory.dir("dotnetdoc-xml"))
 }
 
 tasks.register<Copy>("dotnet_doc") {
