@@ -1016,27 +1016,20 @@ cdef class PyXslt30Processor:
      def compile_stylesheet(self, **kwds):
         """
         compile_stylesheet(self, **kwds)
-        Compile a stylesheet received as text, uri or as a node object. The term "compile" here indicates
-        that the stylesheet is converted into an executable
-        form. The compilation uses a snapshot of the properties of the PyXslt30Processor at the
-        time this method is invoked. It is also possible to save the compiled
-        stylesheet (SEF file) given the option 'save' and 'output_file'.
-        Get the stylesheet associated via the xml-stylesheet processing instruction (see
-        http://www.w3.org/TR/xml-stylesheet/) with the
-        document specified in the source parameter, and that match
-        the given criteria.  If there are several suitable xml-stylesheet
-        processing instructions, then the returned Source will identify
-        a synthesized stylesheet module that imports all the referenced
-        stylesheet modules.
+        Compile a stylesheet received as text, uri, as a node object, or as referenced in a specified XML document
+        via the xml-stylesheet processing instruction. The term "compile" here indicates that the stylesheet is
+        converted into an executable form. The compilation uses a snapshot of the properties of the PyXslt30Processor
+        at the time this method is invoked. It is also possible to save the compiled stylesheet (SEF file) given the
+        options 'save' and 'output_file'.
         Args:
             **kwds: Possible keyword arguments: one of stylesheet_text (str), stylesheet_file (str),
-                associated_file (str) or stylesheet_node (PyXdmNode). It is also possible to add the options
-                save (bool) and output_file (str), which creates an exported stylesheet to file (SEF).
-                The following keywards are related to `save`: target (str), which sets the target edition under
-                which the stylesheet will be executed, and relocate(bool) which say whether any package produced
-                by this compiler can be deployed to a different location, with a different base URI. The other availables keywords are lang (str),
-                which sets the XSLT (and XPath) language level to be supported by the processor. Possible values: '3.0' and '4.0'
-                and fast_compile (bool), which request fast compilation.
+                associated_file (str) or stylesheet_node (PyXdmNode); save (bool) and output_file (str) can be used
+                to save the exported stylesheet (SEF) to file; lang (str) can be used to set the XSLT (and XPath)
+                language level to be supported by the processor (possible values: '3.0' and '4.0');
+                fast_compile (bool) which requests fast compilation.
+                The following additional keywords can be used with `save`: target (str) which sets the target edition
+                under which the compiled stylesheet will be executed; and relocate (bool) which says whether the
+                compiled stylesheet can be deployed to a different location, with a different base URI.
         Returns:
             PyXsltExecutable: which represents the compiled stylesheet. The PyXsltExecutable is immutable
             and thread-safe; it may be used to run multiple transformations, in series or concurrently.
