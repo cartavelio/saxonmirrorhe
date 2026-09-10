@@ -182,7 +182,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             Function fn = (Function) arguments[1].head();
-            HashTrieMap result = new HashTrieMap();
+            MapItem result = new HashTrieMap();
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue match = (BooleanValue)dynamicCall(fn, context, new Sequence[]{pair.key, pair.value}).head();
                 if (match.getBooleanValue()) {
