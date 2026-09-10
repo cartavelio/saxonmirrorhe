@@ -130,6 +130,7 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
 
         Expression exp = MapFunctionSet.getInstance(40).makeFunction("merge", 2)
                 .makeFunctionCall(select, optionsExp);
+        exp.setRetainedStaticContext(makeRetainedStaticContext());
         if (getConfiguration().getBooleanProperty(Feature.STRICT_STREAMABILITY)) {
             exp = new SequenceInstr(exp);
         }
