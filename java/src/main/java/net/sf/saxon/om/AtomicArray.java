@@ -12,7 +12,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.tree.iter.EmptyAtomicIterator;
+import net.sf.saxon.tree.iter.ListIterator;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.EmptySequence;
 
@@ -66,7 +66,7 @@ public class AtomicArray implements AtomicSequence {
 
     @Override
     public AtomicIterator iterate() {
-        return EmptyAtomicIterator.INSTANCE;
+        return new ListIterator.OfAtomic<>(content);
     }
 
     /**
