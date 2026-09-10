@@ -27,7 +27,7 @@
         
         <p>This section provides a guide to memory management with the SaxonC C++ API.</p>
         
-        <p>The <a href="https://www.saxonica.com/saxon-c/doc12/html/index.html">SaxonC
+        <p>The <a href="https://www.saxonica.com/saxon-c/doc13/html/index.html">SaxonC
             C++ API documentation</a> is a good place to start, as this provides information about the
             input arguments and output from each of the methods. Some API methods return pointers which
             require manual deallocation of memory. For many of these the responsibility is on the
@@ -35,28 +35,28 @@
             XDM object on the heap memory; the caller must deallocate the memory used by calling
             <code>delete</code>, otherwise memory will be leaked. For instance:</p>
         <ul>
-            <li>The <a href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html"
+            <li>The <a href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html"
                 class="bodylink code">SaxonProcessor</a> parse functions
                 (<code>parseXmlFromString()</code>, <code>parseXmlFromFile()</code>, etc.) return a
                 pointer to the created <code>XdmNode</code> object on the heap memory. The caller must
                 deallocate the memory used by calling <code>delete</code>.</li>
             <li>The caller is responsible for deallocating memory for the pointer to the
                 <code>XdmValue</code> object returned by the <a
-                        href="https://www.saxonica.com/saxon-c/doc12/html/classXPathProcessor.html"
+                        href="https://www.saxonica.com/saxon-c/doc13/html/classXPathProcessor.html"
                         class="bodylink code">XPathProcessor</a> methods <code>evaluate()</code> and
                 <code>evaluateSingle()</code>.</li>
             <li>The caller is responsible for deallocating memory for the pointers to the
                 <code>XdmValue</code> objects returned by various <a
-                        href="https://www.saxonica.com/saxon-c/doc12/html/classXsltExecutable.html"
+                        href="https://www.saxonica.com/saxon-c/doc13/html/classXsltExecutable.html"
                         class="bodylink code">XsltExecutable</a> and
-                <a href="https://www.saxonica.com/saxon-c/doc12/html/classXQueryProcessor.html"
+                <a href="https://www.saxonica.com/saxon-c/doc13/html/classXQueryProcessor.html"
                     class="bodylink code">XQueryProcessor</a> methods.</li>
         </ul>
         
         
         <h2 class="subtitle">Handling XDM Objects</h2>
         
-        <p>The <a href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html"
+        <p>The <a href="https://www.saxonica.com/saxon-c/doc13/html/classXdmNode.html"
             class="bodylink code">XdmNode</a> object represents a node in an XDM tree. As a tree is navigated, the
             child object pointers are created lazily. So when one of the <code>XdmNode</code> methods
             <code>getChildren()</code>, <code>axisNodes()</code>, <code>getChild()</code> or
@@ -83,7 +83,7 @@ delete node;
         
         <p>An <code>XdmItem</code> represents an XDM item (a node, function, or atomic value), and an
             <code>XdmValue</code> represents an XDM sequence of items. For each <a
-                href="https://www.saxonica.com/saxon-c/doc12/html/classXdmValue.html"
+                href="https://www.saxonica.com/saxon-c/doc13/html/classXdmValue.html"
                 class="bodylink code">XdmValue</a>,
             the <code>XdmItem</code> objects it contains are cached. Whenever an item is retrieved from
             an <code>XdmValue</code> using <code>itemAt()</code> or <code>getHead()</code>, the caller
@@ -121,7 +121,7 @@ delete itemi;
         
         <p>Note that there are exceptions to this, where the API method creates a string on the
             stack, and the memory management is internally handled. For instance the <a
-            href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html"
+            href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html"
             class="bodylink code">SaxonProcessor</a> method <code>version()</code>.</p>
         
     </section>
@@ -134,9 +134,9 @@ delete itemi;
 
        <p>From SaxonC 12.1, exceptions that are thrown from the underlying Java code are handled in the C++
            API and re-thrown as a C++ exception called <a class="bodylink code"
-              href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonApiException.html">SaxonApiException</a>.
+              href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonApiException.html">SaxonApiException</a>.
           Likewise these exceptions are thrown in the Python API as <a class="bodylink code"
-              href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonApiError"
+              href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySaxonApiError"
               >PySaxonApiError</a>, and in the PHP extension as a PHP exception.</p>
 
        <p>C++ Example: handling exceptions</p>

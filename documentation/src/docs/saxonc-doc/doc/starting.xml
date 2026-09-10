@@ -481,22 +481,22 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
     <ul>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation"
+          href="https://www.saxonica.com/documentation13/index.html#!using-xsl/saxonc-transformation"
           >XSLT transformations from a C/C++, Python or PHP application</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query"
+          href="https://www.saxonica.com/documentation13/index.html#!using-xquery/saxonc-query"
           >XQuery from a C/C++, Python or PHP application</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath"
+          href="https://www.saxonica.com/documentation13/index.html#!xpath-api/saxonc-xpath"
           >Evaluating XPath expressions from a C/C++, Python or PHP application</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation"
+          href="https://www.saxonica.com/documentation13/index.html#!schema-processing/saxonc_validation"
           >Validation from C/C++, Python or PHP</a>
       </li>
     </ul>
@@ -553,17 +553,17 @@ $saxonProc->setConfigurationProperty("http://saxon.sf.net/feature/licenseFileLoc
     <ul>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/commandline">XSLT
+          href="https://www.saxonica.com/documentation13/index.html#!using-xsl/commandline">XSLT
           from the command line</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xquery/commandline"
+          href="https://www.saxonica.com/documentation13/index.html#!using-xquery/commandline"
           >XQuery from the command line</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!schema-processing/commandline"
+          href="https://www.saxonica.com/documentation13/index.html#!schema-processing/commandline"
           >Validation from the command line</a>
       </li>
     </ul>

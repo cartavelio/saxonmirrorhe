@@ -9,15 +9,15 @@
 
   <ul>
     <li><a target="_blank"
-      href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation" >XSLT
+      href="https://www.saxonica.com/documentation13/index.html#!using-xsl/saxonc-transformation" >XSLT
       transformations from a C/C++, Python or PHP application</a></li>
     <li><a target="_blank"
-      href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query" >XQuery from a
+      href="https://www.saxonica.com/documentation13/index.html#!using-xquery/saxonc-query" >XQuery from a
       C/C++, Python or PHP application</a></li>
-    <li><a target="_blank" href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath"
+    <li><a target="_blank" href="https://www.saxonica.com/documentation13/index.html#!xpath-api/saxonc-xpath"
       >Evaluating XPath expressions from a C/C++, Python or PHP application</a></li>
     <li><a target="_blank"
-      href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation"
+      href="https://www.saxonica.com/documentation13/index.html#!schema-processing/saxonc_validation"
       >Validation from C/C++, Python or PHP</a></li>
   </ul>
 
@@ -48,13 +48,13 @@
 
       <ul>
         <li><a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/c-api-transformation"
+          href="https://www.saxonica.com/documentation13/index.html#!using-xsl/saxonc-transformation/c-api-transformation"
           >XSLT transformations from a C application</a></li>
         <li><a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/c-api-query"
+          href="https://www.saxonica.com/documentation13/index.html#!using-xquery/saxonc-query/c-api-query"
           >XQuery from a C application</a></li>
         <li><a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/c-api-xpath"
+          href="https://www.saxonica.com/documentation13/index.html#!xpath-api/saxonc-xpath/c-api-xpath"
           >XPath from a C application</a></li>
       </ul>
 
@@ -122,16 +122,16 @@
 
      <ul>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/cpp-api-transformation"
+         href="https://www.saxonica.com/documentation13/index.html#!using-xsl/saxonc-transformation/cpp-api-transformation"
          >XSLT transformations from a C++ application</a></li>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/cpp-api-query"
+         href="https://www.saxonica.com/documentation13/index.html#!using-xquery/saxonc-query/cpp-api-query"
          >XQuery from a C++ application</a></li>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/cpp-api-xpath"
+         href="https://www.saxonica.com/documentation13/index.html#!xpath-api/saxonc-xpath/cpp-api-xpath"
          >XPath from a C++ application</a></li>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/cpp-api-validation"
+         href="https://www.saxonica.com/documentation13/index.html#!schema-processing/saxonc_validation/cpp-api-validation"
          >Validation from C++</a></li>
      </ul>
 
@@ -325,16 +325,16 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
      
      <ul>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/php-api-transformation"
+         href="https://www.saxonica.com/documentation13/index.html#!using-xsl/saxonc-transformation/php-api-transformation"
          >XSLT transformations from a PHP application</a></li>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/php-api-query"
+         href="https://www.saxonica.com/documentation13/index.html#!using-xquery/saxonc-query/php-api-query"
          >XQuery from a PHP application</a></li>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/php-api-xpath"
+         href="https://www.saxonica.com/documentation13/index.html#!xpath-api/saxonc-xpath/php-api-xpath"
          >XPath from a PHP application</a></li>
        <li><a target="_blank"
-         href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/php-api-validation"
+         href="https://www.saxonica.com/documentation13/index.html#!schema-processing/saxonc_validation/php-api-validation"
          >Validation from PHP</a></li>
      </ul>
      
@@ -421,22 +421,22 @@ XdmNode *input = proc->parseXmlFromString("<z/>");
     <ul>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xsl/saxonc-transformation/python-api-transformation"
+          href="https://www.saxonica.com/documentation13/index.html#!using-xsl/saxonc-transformation/python-api-transformation"
           >XSLT transformations from a Python application</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!using-xquery/saxonc-query/python-api-query"
+          href="https://www.saxonica.com/documentation13/index.html#!using-xquery/saxonc-query/python-api-query"
           >XQuery from a Python application</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!xpath-api/saxonc-xpath/python-api-xpath"
+          href="https://www.saxonica.com/documentation13/index.html#!xpath-api/saxonc-xpath/python-api-xpath"
           >XPath from a Python application</a>
       </li>
       <li>
         <a target="_blank"
-          href="https://www.saxonica.com/documentation12/index.html#!schema-processing/saxonc_validation/python-api-validation"
+          href="https://www.saxonica.com/documentation13/index.html#!schema-processing/saxonc_validation/python-api-validation"
           >Validation from Python</a>
       </li>
     </ul>

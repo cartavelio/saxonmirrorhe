@@ -8,7 +8,7 @@
       <code>SaxonProcessor</code>, or on the specific XSLT, XQuery, XPath and Schema processors.</p>
    
    <p>For a complete list of the available Saxon configuration features see the <a target="_blank"
-      href="https://www.saxonica.com/documentation12/index.html#!configuration/config-features"
+      href="https://www.saxonica.com/documentation13/index.html#!configuration/config-features"
       >Configuration features</a> section in the main Saxon documentation.</p>
    
    <p>Note that a small number of the features are not available with SaxonC. Please see the <a
@@ -98,7 +98,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
 
       <p>The properties available are a subset of those specified for running XSLT from the command
          line (see the <a target="_blank"
-            href="https://www.saxonica.com/documentation12/index.html#!using-xsl/commandline">Using XSLT from
+            href="https://www.saxonica.com/documentation13/index.html#!using-xsl/commandline">Using XSLT from
             the command line</a> section in the main Saxon documentation for more information).</p>
 
       <table>
@@ -126,7 +126,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                   parameters in a non-null namespace, supply the name in Clark format i.e.
                   <code>{uri}local</code>. For more details about the serialization parameters
                   available, see the <a target="_blank"
-                     href="https://www.saxonica.com/documentation12/index.html#!extensions/output-extras">Additional 
+                     href="https://www.saxonica.com/documentation13/index.html#!extensions/output-extras">Additional 
                      serialization parameters</a> section in the main Saxon documentation.</p>
             </td>
          </tr>
@@ -277,7 +277,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
       
       <p>The properties available are a subset of those specified for running XQuery from the command
          line (see the <a target="_blank"
-            href="https://www.saxonica.com/documentation12/index.html#!using-xquery/commandline">Using XQuery
+            href="https://www.saxonica.com/documentation13/index.html#!using-xquery/commandline">Using XQuery
             from the command line</a> section in the main Saxon documentation for more information).</p>
 
       <table>
@@ -303,7 +303,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                   parameters in a non-null namespace, supply the name in Clark format i.e.
                   <code>{uri}local</code>. For more details about the serialization parameters
                   available, see the <a target="_blank"
-                     href="https://www.saxonica.com/documentation12/index.html#!extensions/output-extras">Additional 
+                     href="https://www.saxonica.com/documentation13/index.html#!extensions/output-extras">Additional 
                      serialization parameters</a> section in the main Saxon documentation.</p>
             </td>
          </tr>
@@ -530,7 +530,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
             </td>
             <td>
                <p>Sets the value of a Saxon extension parameter defined in the schema (see <a target="_blank"
-                     href="https://www.saxonica.com/documentation12/index.html#!schema-processing/parameterizing-schemas"
+                     href="https://www.saxonica.com/documentation13/index.html#!schema-processing/parameterizing-schemas"
                      >Parameterizing schemas</a> in the main Saxon documentation for more
                   information).</p>
             </td>
@@ -541,7 +541,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
 
       <p>The properties available are a subset of those specified for running schema validation from
          the command line (see the <a target="_blank"
-            href="https://www.saxonica.com/documentation12/index.html#!schema-processing/commandline"
+            href="https://www.saxonica.com/documentation13/index.html#!schema-processing/commandline"
             >Validation from the command line</a> section in the main Saxon documentation for more information).</p>
 
       <table>
@@ -564,7 +564,7 @@ saxonProcessor->setConfigurationProperty("http://saxon.sf.net/feature/multipleSc
                   declaration in a stylesheet, or the corresponding output declaration in a query
                   prolog. For more details about the serialization parameters
                   available, see the <a target="_blank"
-                                        href="https://www.saxonica.com/documentation12/index.html#!extensions/output-extras">Additional
+                                        href="https://www.saxonica.com/documentation13/index.html#!extensions/output-extras">Additional
                      serialization parameters</a> section in the main Saxon documentation.</p>
             </td>
          </tr>
