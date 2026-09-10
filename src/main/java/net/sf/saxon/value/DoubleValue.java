@@ -10,6 +10,7 @@ package net.sf.saxon.value;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
+import net.sf.saxon.functions.Round;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
@@ -329,49 +330,28 @@ public final class DoubleValue extends NumericValue {
      */
 
     @Override
-    public NumericValue roundHalfToEven(int scale) {
-        if (Double.isNaN(value)) return this;
-        if (Double.isInfinite(value)) return this;
-        if (value == 0.0) return this;    // handles the negative zero case
-
-        // Convert to a scaled integer, by multiplying by 10^scale
-
-        double factor = Math.pow(10, scale + 1);
-        double d = Math.abs(value * factor);
-
-        if (Double.isInfinite(d)) {
-            // double arithmetic has overflowed - do it in decimal
-            BigDecimal dec = BigDecimal.valueOf(value);
-            //#if CSHARP==false
-            dec = dec.setScale(scale, RoundingMode.HALF_EVEN);
-            //#endif
-            return new DoubleValue(dec.doubleValue());
+    public NumericValue round(int scale, Round.RoundingRule roundingRule) {
+        if (value == 0.0 || Double.isNaN(value) || Double.isInfinite(value)) {
+            return this;
         }
 
-        // Now apply any rounding needed, using the "round half to even" rule
-
-        double rem = d % 10;
-        if (rem > 5) {
-            d += 10 - rem;
-        } else if (rem < 5) {
-            d -= rem;
-        } else {
-            // round half to even - check the last bit
-            if ((d % 20) == 15) {
-                d += 5;
-            } else {
-                d -= 5;
+        // Handle some simple special cases
+        
+        if (scale == 0) {
+            if (roundingRule == Round.RoundingRule.CEILING) {
+                return ceiling();
+            } else if (roundingRule == Round.RoundingRule.FLOOR) {
+                return floor();
+            } else if (roundingRule == Round.RoundingRule.HALF_TO_CEILING) {
+                return new DoubleValue(Math.round(value));
             }
         }
 
-        // Now convert back to the original magnitude
+        // In the general case, go via xs:decimal
 
-        d /= factor;
-        if (value < 0) {
-            d = -d;
-        }
-        return new DoubleValue(d);
-
+        BigDecimalValue decimalValue = new BigDecimalValue(BigDecimal.valueOf(value));
+        NumericValue rounded = decimalValue.round(scale, roundingRule);
+        return new DoubleValue(rounded.getDoubleValue());
     }
 
     /**

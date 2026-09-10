@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
+import net.sf.saxon.functions.Round;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
@@ -173,16 +174,16 @@ public abstract class NumericValue extends AtomicValue
     public abstract NumericValue round(int scale);
 
     /**
-     * Implement the XPath 2.0 round-half-to-even() function
+     * Implement the XPath 2.0 round-half-to-even() and XPath 4.0 round#3 functions
      *
-     * @param scale the decimal position for rounding: e.g. 2 rounds to a
-     *              multiple of 0.01, while -2 rounds to a multiple of 100
-     * @return a value, of the same type as the original, rounded towards the
-     *         nearest multiple of 10**(-scale), with rounding towards the nearest
-     *         even number if two values are equally near
+     * @param scale        the decimal position for rounding: e.g. 2 rounds to a
+     *                     multiple of 0.01, while -2 rounds to a multiple of 100
+     * @param roundingRule the rule to be used for rounding (up, down, towards zero, etc)
+     * @return a value, of the same type as the original, rounded to
+     * a multiple of 10^(-scale), according to the rounding rules requested
      */
 
-    public abstract NumericValue roundHalfToEven(int scale);
+    public abstract NumericValue round(int scale, Round.RoundingRule roundingRule);
 
     /**
      * Ask whether the value is negative, zero, or positive

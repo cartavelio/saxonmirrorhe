@@ -11,6 +11,7 @@ import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
 import net.sf.saxon.expr.sort.DoubleSortComparer;
 import net.sf.saxon.expr.sort.XPathComparable;
+import net.sf.saxon.functions.Round;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -300,9 +301,9 @@ public final class FloatValue extends NumericValue {
      */
 
     @Override
-    public NumericValue roundHalfToEven(int scale) {
+    public NumericValue round(int scale, Round.RoundingRule roundingRule) {
         DoubleValue d = new DoubleValue(getDoubleValue());
-        d = (DoubleValue) d.roundHalfToEven(scale);
+        d = (DoubleValue) d.round(scale, roundingRule);
         return new FloatValue(d.getFloatValue());
     }
 

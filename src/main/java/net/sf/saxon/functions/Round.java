@@ -15,9 +15,7 @@ import net.sf.saxon.expr.SystemFunctionCall;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.Cardinality;
-import net.sf.saxon.value.EmptySequence;
-import net.sf.saxon.value.NumericValue;
+import net.sf.saxon.value.*;
 
 /**
  * This class implements the fn:round() function
@@ -51,13 +49,23 @@ public final class Round extends SystemFunction {
         }
 
         int scaleRnd = 0;
-        if (arguments.length == 2) {
+        RoundingRule roundingRule = RoundingRule.HALF_TO_CEILING;
+        if (arguments.length >= 2) {
             NumericValue scaleVal = (NumericValue) arguments[1].head();
-            if (scaleVal != null) {
-                scaleRnd = (int) scaleVal.longValue();
-            }
+            scaleRnd = scaleVal == null ? 0 : (int) scaleVal.longValue();
         }
-        return val0.round(scaleRnd);
+        if (arguments.length >= 3) {
+            StringValue rounding = (StringValue) arguments[2].head();
+            roundingRule = rounding == null
+                    ? RoundingRule.HALF_TO_CEILING
+                    : roundingRule(rounding.getStringValue());
+        }
+        if (roundingRule == RoundingRule.HALF_TO_CEILING) {
+            return val0.round(scaleRnd);
+        } else {
+            return val0.round(scaleRnd, roundingRule);
+        }
+
 
     }
 
@@ -92,22 +100,77 @@ public final class Round extends SystemFunction {
                 } else {
                     return context -> ((NumericValue) argEval.eval(context)).round(0);
                 }
-            } else {
+            } else if (fnc.getArity() == 2) {
                 final ItemEvaluator scaleArg = fnc.getArg(1).makeElaborator().elaborateForItem();
                 return context -> {
                     NumericValue result = (NumericValue) argEval.eval(context);
                     if (result == null) {
                         return null;
                     }
-                    NumericValue scaleVal = (NumericValue) scaleArg.eval(context);
-                    int scale = scaleVal == null ? 0 : (int) scaleVal.longValue();
+                    IntegerValue scaleArgVal = ((IntegerValue) scaleArg.eval(context));
+                    if (scaleArgVal == null) {
+                        return result.round(0);
+                    }
+                    int scale = (int) scaleArgVal.longValue();
                     return result.round(scale);
+                };
+            } else {
+                final ItemEvaluator scaleArg = fnc.getArg(1).makeElaborator().elaborateForItem();
+                final ItemEvaluator modeArg = fnc.getArg(2).makeElaborator().elaborateForItem();
+                return context -> {
+                    NumericValue result = (NumericValue) argEval.eval(context);
+                    if (result == null) {
+                        return null;
+                    }
+                    IntegerValue scaleArgVal = ((IntegerValue) scaleArg.eval(context));
+                    int scale = scaleArgVal == null ? 0 : (int) scaleArgVal.longValue();
+                    StringValue midpointModeVal = ((StringValue) modeArg.eval(context));
+                    RoundingRule mode = midpointModeVal == null
+                            ? RoundingRule.HALF_TO_CEILING
+                            : roundingRule(midpointModeVal.getStringValue());
+                    if (mode == RoundingRule.HALF_TO_CEILING) {
+                        return result.round(scale);
+                    } else {
+                        return result.round(scale, mode);
+                    }
                 };
             }
 
         }
 
 
+    }
+
+    public static RoundingRule roundingRule(String s) {
+        switch (s) {
+            case "toward-zero":
+                return RoundingRule.TOWARD_ZERO;
+            case "away-from-zero":
+                return RoundingRule.AWAY_FROM_ZERO;
+            case "ceiling":
+                return RoundingRule.CEILING;
+            case "floor":
+                return RoundingRule.FLOOR;
+            case "half-toward-zero":
+                return RoundingRule.HALF_TOWARD_ZERO;
+            case "half-away-from-zero":
+                return RoundingRule.HALF_AWAY_FROM_ZERO;
+            case "half-to-ceiling":
+                return RoundingRule.HALF_TO_CEILING;
+            case "half-to-floor":
+                return RoundingRule.HALF_TO_FLOOR;
+            case "half-to-even":
+                return RoundingRule.HALF_TO_EVEN;
+            default:
+                // Should have been checked by now
+                throw new IllegalArgumentException("Invalid rounding mode " + s);
+
+        }
+    }
+
+    public enum RoundingRule {
+        FLOOR, CEILING, TOWARD_ZERO, AWAY_FROM_ZERO,
+        HALF_TO_FLOOR, HALF_TO_CEILING, HALF_TOWARD_ZERO, HALF_AWAY_FROM_ZERO, HALF_TO_EVEN
     }
 }
 

@@ -36,6 +36,8 @@ public class SingletonEnumerationCoercionPlan extends AtomicCoercionPlan {
         }
     }
 
+    // TODO: when coercing a string to an enumeration type, we're throwing exceptions for every value not matched.
+
 
 
 }

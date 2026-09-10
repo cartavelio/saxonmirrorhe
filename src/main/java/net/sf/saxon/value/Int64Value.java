@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.expr.sort.XPathComparable;
+import net.sf.saxon.functions.Round;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -423,46 +424,64 @@ public final class Int64Value extends IntegerValue {
     }
 
     /**
-     * Implement the XPath round-to-half-even() function
+     * Implement the XPath round-to-half-even() and round#3 functions
      *
-     * @param scale number of digits required after the decimal point; the
-     *              value -2 (for example) means round to a multiple of 100
-     * @return if the scale is &gt;=0, return this value unchanged. Otherwise
-     *         round it to a multiple of 10**-scale
+     * @param scale        number of digits required after the decimal point; the
+     *                     value -2 (for example) means round to a multiple of 100
+     * @param roundingRule indicates how the rounding should be done
+     * @return if the scale is &gt;=0, return this value unchanged. Otherwise,
+     * round it to a multiple of 10**-scale
      */
 
     @Override
-    public NumericValue roundHalfToEven(int scale) {
-        if (scale >= 0) {
+    public NumericValue round(int scale, Round.RoundingRule roundingRule) {
+        if (scale >= 0 || value == 0) {
             return this;
         } else {
             if (scale < -15) {
-                return new BigIntegerValue(value).roundHalfToEven(scale);
+                return new BigIntegerValue(value).round(scale, roundingRule);
             }
-            long absolute = Math.abs(value);
+            boolean negative = value < 0;
+
+            // factor is 1 for scale=0, 10 for scale=-1, 100 for scale=-2, etc
             long factor = 1;
             for (long i = 1; i <= -scale; i++) {
                 factor *= 10;
             }
-            long modulus = absolute % factor;
-            long rval = absolute - modulus;
-            long d = modulus * 2;
-            if (d > factor) {
-                rval += factor;
-            } else if (d < factor) {
-                // no-op
-            } else {
-                // round to even
-                if (rval % (2 * factor) == 0) {
-                    // no-op
-                } else {
-                    rval += factor;
-                }
+
+            long towardsZero = (value / factor) * factor;
+            if (towardsZero == value) {
+                return this;
             }
-            if (value < 0) {
-                rval = -rval;
+            long awayFromZero = negative ? towardsZero - factor : towardsZero + factor;
+            long floor = negative ? awayFromZero : towardsZero;
+            long ceiling = negative ? towardsZero : awayFromZero;
+            long midpoint = floor + (ceiling - floor)/2;
+            boolean midway = value == midpoint;
+            long nearest = value > midpoint ? ceiling : floor;
+            switch (roundingRule) {
+                case FLOOR:
+                    return Int64Value.makeIntegerValue(floor);
+                case TOWARD_ZERO:
+                    return Int64Value.makeIntegerValue(towardsZero);
+                case CEILING:
+                    return Int64Value.makeIntegerValue(ceiling);
+                case AWAY_FROM_ZERO:
+                    return Int64Value.makeIntegerValue(awayFromZero);
+                case HALF_TO_FLOOR:
+                    return Int64Value.makeIntegerValue(midway ? floor : nearest);
+                case HALF_TO_CEILING:
+                default:
+                    return Int64Value.makeIntegerValue(midway ? ceiling : nearest);
+                case HALF_TOWARD_ZERO:
+                    return Int64Value.makeIntegerValue(midway ? towardsZero : nearest);
+                case HALF_AWAY_FROM_ZERO:
+                    return Int64Value.makeIntegerValue(midway ? awayFromZero : nearest);
+                case HALF_TO_EVEN:
+                    return Int64Value.makeIntegerValue(midway ? (floor/factor % 2 == 0 ? floor : ceiling) : nearest);
             }
-            return new Int64Value(rval);
+
+
         }
     }
 

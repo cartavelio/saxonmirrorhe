@@ -9,6 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.expr.sort.XPathComparable;
+import net.sf.saxon.functions.Round;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringConstants;
@@ -23,6 +24,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.regex.Pattern;
+
+import static net.sf.saxon.functions.Round.RoundingRule.HALF_AWAY_FROM_ZERO;
+import static net.sf.saxon.functions.Round.RoundingRule.HALF_TOWARD_ZERO;
+import static net.sf.saxon.functions.Round.RoundingRule.HALF_TO_EVEN;
 
 /**
  * An implementation class for decimal values other than integers
@@ -559,16 +564,55 @@ public final class BigDecimalValue extends DecimalValue {
     }
 
     /**
-     * Implement the XPath round-half-to-even() function
+     * Implement the XPath round-half-to-even() and round#3 functions
      */
 
     @Override
     @CSharpReplaceBody(code = "return new BigDecimalValue(Singulink.Numerics.BigDecimal.Round(value, scale, Singulink.Numerics.RoundingMode.MidpointToEven));")
-    public NumericValue roundHalfToEven(int scale) {
+    public NumericValue round(int scale, Round.RoundingRule roundingRule) {
         if (scale >= value.scale()) {
             return this;
         }
-        BigDecimal scaledValue = value.setScale(scale, RoundingMode.HALF_EVEN);
+
+        BigDecimal scaledValue;
+        switch (roundingRule) {
+            case FLOOR:
+                scaledValue = value.setScale(scale, java.math.RoundingMode.FLOOR);
+                break;
+            case CEILING:
+                scaledValue = value.setScale(scale, java.math.RoundingMode.CEILING);
+                break;
+            case AWAY_FROM_ZERO:
+                scaledValue = value.setScale(scale, java.math.RoundingMode.UP);
+                break;
+            case TOWARD_ZERO:
+                scaledValue = value.setScale(scale, java.math.RoundingMode.DOWN);
+                break;
+            case HALF_TO_FLOOR:
+                if (signum() >= 0) {
+                    scaledValue = value.setScale(scale, java.math.RoundingMode.HALF_DOWN);
+                } else {
+                    scaledValue = value.setScale(scale, java.math.RoundingMode.HALF_UP);
+                }
+                break;
+            case HALF_TO_CEILING:
+            default:
+                if (signum() >= 0) {
+                    scaledValue = value.setScale(scale, java.math.RoundingMode.HALF_UP);
+                } else {
+                    scaledValue = value.setScale(scale, java.math.RoundingMode.HALF_DOWN);
+                }
+                break;
+            case HALF_TOWARD_ZERO:
+                scaledValue = value.setScale(scale, java.math.RoundingMode.HALF_DOWN);
+                break;
+            case HALF_AWAY_FROM_ZERO:
+                scaledValue = value.setScale(scale, java.math.RoundingMode.HALF_UP);
+                break;
+            case HALF_TO_EVEN:
+                scaledValue = value.setScale(scale, RoundingMode.HALF_EVEN);
+                break;
+        }
         return new BigDecimalValue(scaledValue.stripTrailingZeros());
     }
 
