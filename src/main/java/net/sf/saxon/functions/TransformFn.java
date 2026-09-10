@@ -579,12 +579,15 @@ public class TransformFn extends SystemFunction implements Callable {
         processor.setConfigurationProperty(Feature.CONFIGURATION, targetConfig);
         int languageVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
         checkTransformOptions(options, context, languageVersion);
+        boolean request40 = false;
         if (options.get("xslt-version") != null) {
-            double targetVersion = ((BigDecimalValue) options.get("xslt-version").head()).getDoubleValue();
-            if (targetVersion * 10 > languageVersion) {
-                throw new XPathException("The transform option xslt-version is higher than the language version supported by this processor", "FOXT0002");
+            BigDecimalValue requestedVersion = ((BigDecimalValue) options.get("xslt-version").head());
+            if (requestedVersion.getDoubleValue() * 10 > languageVersion) {
+                throw new XPathException("The transform option xslt-version is higher than the language version supported by the calling transformation", "FOXT0002");
             }
-
+            if (requestedVersion.getDoubleValue() == 4) {
+                 request40 = true;
+            }
         }
         String principalInput = oneOf(options, "source-node", "source-location", "initial-match-selection");
 
@@ -622,6 +625,9 @@ public class TransformFn extends SystemFunction implements Callable {
         xsltCompiler.setResourceResolver(context.getResourceResolver());
         xsltCompiler.setJustInTimeCompilation(false);
         xsltCompiler.setErrorReporter(context.getErrorReporter());
+        if (request40) {
+            xsltCompiler.setXsltLanguageVersion("4.0");
+        }
 
         // Set static params on XsltCompiler before compiling stylesheet (XSLT 3.0 processing only)
         if (options.get("static-params") != null) {

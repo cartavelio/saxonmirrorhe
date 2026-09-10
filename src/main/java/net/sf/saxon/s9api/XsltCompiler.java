@@ -423,14 +423,16 @@ public class XsltCompiler {
      *
      * @param version the language level to be supported. The values "3.0" and "4.0" are recognized
      * @throws IllegalArgumentException if the value is not equal to 3.0 or 4.0
-     * @since 9.3. From 11.0, accepts the values "3.0" and "4.0"
+     * @since 9.3. From 11.0, accepts the values "3.0" and "4.0". From 12.2, also accepts "3" or "4".
      */
 
     public void setXsltLanguageVersion(String version) {
         switch (version) {
+            case "3":
             case "3.0":
                 compilerInfo.setXsltVersion(30);
                 break;
+            case "4":
             case "4.0":
                 compilerInfo.setXsltVersion(40);
                 break;
