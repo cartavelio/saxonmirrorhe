@@ -1,10 +1,12 @@
 package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.CardinalityCheckingIterator;
+import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.ma.Parcel;
+import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.SequenceType;
@@ -59,6 +61,19 @@ public class CoercionRules {
             throws XPathException {
         CoercionPlan plan = requiredType.getPrimaryType().getCoercionPlan(version);
         CoercionRequest request = new CoercionRequest(knownType, config, roleSupplier, locator);
+
+        if (value instanceof Item it) {
+            if (!(it instanceof Parcel) && requiredType != SequenceType.EMPTY_SEQUENCE) {
+                GroundedValue result = plan.coerceItem(it, requiredType.getPrimaryType(), request);
+                if (result instanceof Item || requiredType.getCardinality() == StaticProperty.ALLOWS_ZERO_OR_MORE) {
+                    return result;
+                }
+                SequenceIterator checker = new CardinalityCheckingIterator(
+                        result.iterate(), requiredType.getCardinality(), request.roleSupplier, request.locator);
+                return SequenceTool.toLazySequence(checker);
+            }
+        }
+
         return SequenceTool.toLazySequence(
                 plan.coerceSequence(value.iterate(), requiredType, request));
     }
