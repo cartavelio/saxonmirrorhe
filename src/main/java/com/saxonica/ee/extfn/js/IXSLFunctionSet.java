@@ -186,9 +186,9 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
                 String baseURI = getRetainedStaticContext().getStaticBaseUriString();
                 PackageData pd = getRetainedStaticContext().getPackageData();
                 ParseOptions options = context.getConfiguration().getParseOptions();
-                ItemMappingFunction mapper = token -> DocumentFn.makeDoc(
-                        token.getStringValue(), baseURI, pd,
-                        options, context, location, false);
+                ItemMappingFunction mapper = ItemMapper.of(token -> DocumentFn.makeDoc(
+                                    token.getStringValue(), baseURI, pd,
+                                    options, context, location, false));
                 SequenceIterator mapped = context.getConfiguration().getMultithreadedItemMappingIterator(
                         tokenIter, mapper);
                 mapped.materialize();  // discard the result; the aim was to put the documents in the document pool

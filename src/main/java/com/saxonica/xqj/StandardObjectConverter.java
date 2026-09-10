@@ -274,15 +274,11 @@ public class StandardObjectConverter implements ObjectConverter {
         }
         if (((SaxonXQItemType) type).getSaxonItemType() instanceof JavaExternalObjectType) {
             Item result = new ObjectValue<>(value);
-            try {
-                if (((SaxonXQItemType) type).getSaxonItemType().matches(result, config.getTypeHierarchy())) {
-                    return result;
-                } else {
-                    throw new XQException("The result of wrapping an object of class " + value.getClass().getName() +
-                            " does not match the required type " + type);
-                }
-            } catch (XPathException e) {
-                // Fall through
+            if (((SaxonXQItemType) type).getSaxonItemType().matches(result, config.getTypeHierarchy())) {
+                return result;
+            } else {
+                throw new XQException("The result of wrapping an object of class " + value.getClass().getName() +
+                        " does not match the required type " + type);
             }
         }
         throw new XQException("Supplied Java object cannot be converted to an XQItem");

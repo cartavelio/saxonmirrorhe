@@ -323,15 +323,9 @@ public class SaxonXQItem extends Closable implements XQResultItem, SaxonXQItemAc
 
     @Override
     public boolean instanceOf(/*@NotNull*/ XQItemType type) throws XQException {
-        try {
-            checkNotClosed();
-            checkNotNull(type);
-            return ((SaxonXQItemType) type).getSaxonItemType().matches(item, config.getTypeHierarchy());
-        } catch (XPathException e) {
-            XQException xqe = new XQException(e.getMessage());
-            xqe.initCause(e);
-            throw xqe;
-        }
+        checkNotClosed();
+        checkNotNull(type);
+        return ((SaxonXQItemType) type).getSaxonItemType().matches(item, config.getTypeHierarchy());
     }
 
     @Override

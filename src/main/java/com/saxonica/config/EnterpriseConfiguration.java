@@ -289,7 +289,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public <T> T getConfigurationProperty(Feature<T> feature) {
         if (booleanFeatures.contains(feature)) {
-            return (T) Boolean.valueOf(getBooleanProperty(feature));
+            return (T) Boolean.valueOf(getBooleanProperty((Feature<Boolean>)feature));
         }
         switch (feature.code) {
 
@@ -2130,8 +2130,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (context.getCurrentIterator() != null) {
             ManualIterator manualIterator =
                     new ManualIterator(context.getContextItem(), context.getCurrentIterator().position());
-            LastPositionFinder positionFinder = context::getLast;
-            manualIterator.setLastPositionFinder(positionFinder);
+            manualIterator.setLengthFinder(context::getLast);
             c3.setCurrentIterator(manualIterator);
         }
 

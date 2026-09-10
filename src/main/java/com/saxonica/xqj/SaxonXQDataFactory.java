@@ -566,12 +566,7 @@ public abstract class SaxonXQDataFactory extends Closable implements XQDataFacto
     private void checkDocumentType(TreeInfo doc, /*@Nullable*/ SaxonXQItemType required) throws XQException {
         checkNotClosed();
         if (required != null) {
-            boolean b;
-            try {
-                b = required.getSaxonItemType().matches(doc.getRootNode(), getConfiguration().getTypeHierarchy());
-            } catch (XPathException e) {
-                b = false;
-            }
+            boolean b = required.getSaxonItemType().matches(doc.getRootNode(), getConfiguration().getTypeHierarchy());
             if (!b){
                 throw new XQException("Document was successfully built but has the wrong type");
             }

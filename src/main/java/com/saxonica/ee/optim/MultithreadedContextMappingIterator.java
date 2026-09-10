@@ -2,15 +2,20 @@ package com.saxonica.ee.optim;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.Expression;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.XPathContextMinor;
 import net.sf.saxon.om.FocusIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.ManualIterator;
 
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 
 /**
@@ -29,7 +34,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     private final Expression action;
     private final XPathContextMinor context;
     private SequenceIterator stepIterator = null;
-    private final LastPositionFinder lastPositionFinder;
+    private final Supplier<Integer> lastPositionFinder;
     private final ExecutorService service;
     private final BlockingQueue<Future<Sequence>> resultQueue = new LinkedBlockingQueue<>();
 
@@ -132,7 +137,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         FocusIterator base = context.getCurrentIterator();
         ManualIterator manualIterator =
                 new ManualIterator(base.current(), base.position());
-        manualIterator.setLastPositionFinder(lastPositionFinder);
+        manualIterator.setLengthFinder(lastPositionFinder);
         c3.setCurrentIterator(manualIterator);
 
         PipelineConfiguration pipe = context.getController().makePipelineConfiguration();

@@ -113,6 +113,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
                 case Token.RENAME_NODE:
                     return UpdateParser.parseRenameExpression(p);
                 default:
+                    break;
                     // fall through;
             }
         }
