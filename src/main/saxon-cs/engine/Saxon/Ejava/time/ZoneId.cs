@@ -524,12 +524,7 @@ namespace Saxon.Ejava.time {
         }
 
         private static System.DateTime JavaTimeStampToDateTime(long secondsSinceEpoch) {
-            Console.WriteLine("JavaTimeStampToDateTime " + secondsSinceEpoch);
             return DateTimeOffset.FromUnixTimeSeconds(secondsSinceEpoch).LocalDateTime;
-            // System.DateTime dtDateTime = DateTime.UnixEpoch;
-            // dtDateTime = dtDateTime.AddSeconds(secondsSinceEpoch).ToLocalTime();
-            // //dtDateTime = dtDateTime.AddMilliseconds(javaTimeStamp).ToLocalTime();
-            // return dtDateTime;
         }
 
         public string getDisplayName(bool summerTime) {
@@ -543,7 +538,7 @@ namespace Saxon.Ejava.time {
         }
 
         public bool inDaylightTime(long secondsSinceEpoch) {
-            Console.WriteLine("inDaylightTime " + secondsSinceEpoch);
+            //Console.WriteLine("inDaylightTime " + secondsSinceEpoch);
             return timeZoneInfo.SupportsDaylightSavingTime &&
                    timeZoneInfo.IsDaylightSavingTime(JavaTimeStampToDateTime(secondsSinceEpoch));
         }

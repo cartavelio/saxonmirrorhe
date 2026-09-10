@@ -1,4 +1,5 @@
 using System;
+using Saxon.Hej.expr.parser;
 
 namespace Saxon.Api {
     /// <summary>
@@ -11,7 +12,10 @@ namespace Saxon.Api {
     public class Location
     {
         internal Location(Saxon.Hej.s9api.Location loc) {
-            SystemId = loc.getSystemId() == null ? null : new Uri(loc.getSystemId());
+            if (loc == null) {
+                loc = Loc.NONE;
+            }
+            SystemId = loc.getSystemId() == null || loc.getSystemId() == ""  ? null : new Uri(loc.getSystemId());
             LineNumber = loc.getLineNumber();
             ColumnNumber = loc.getColumnNumber();
         }
