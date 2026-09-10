@@ -1243,6 +1243,8 @@ namespace TestDriver {
                             }
 
                             return true;
+                        case "ICU_spellout":
+                            return inverse;
 
 
                         default:
