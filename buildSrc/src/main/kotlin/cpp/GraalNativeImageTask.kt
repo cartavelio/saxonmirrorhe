@@ -112,6 +112,9 @@ abstract class GraalNativeImageTask
     abstract val specifiedArgs: ListProperty<String>
 
     @get:Input
+    abstract val _graalExperimentalArgs: ListProperty<String>
+
+    @get:Input
     abstract val libName: Property<String>
 
     @get:Input
@@ -199,17 +202,33 @@ abstract class GraalNativeImageTask
         }
     }
 
+    fun experimentalArgs(vararg args: String): GraalNativeImageTask {
+        _graalExperimentalArgs.addAll(args.toList())
+        return this
+    }
+
+    private fun graalExperimentalArgs(): Array<String> {
+        val experimentalArgs = mutableListOf<String>(
+            "-H:Path=${outputDir.get().asFile}",
+            "-H:+ReportExceptionStackTraces",
+            "-H:+GenerateBuildArtifactsFile",
+            "-H:+GenerateEmbeddedResourcesFile",
+        )
+        experimentalArgs.addAll(_graalExperimentalArgs.get())
+        if (experimentalArgs.isNotEmpty()) {
+//            experimentalArgs.addFirst("-H:+UnlockExperimentalVMOptions")
+        }
+        return experimentalArgs.toTypedArray()
+    }
+
     private fun generatedArgs(): List<Any> {
         var nativeArgs = arrayListOf<String>("-cp", sourceJar.get().toString(),
             // we need the header generated as saxonc-core-{edition}.h, or the headers for the debug build
             // don't match the release headers.
             "-o", headerLibName.get(),
-            "--no-fallback", "-H:Path=${outputDir.get().asFile}",
-            "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
-            "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
-            "-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.XMLMessages",
+            "--no-fallback",
+            *graalExperimentalArgs(),
             "-H:+ReportExceptionStackTraces",
-            "-H:Log=registerResource:3",
             "-H:+AddAllCharsets",
             "-Dfile.encoding=UTF-8",
             "-Dlibsaxonc-core.include_path=${layout.projectDirectory.dir("../src/main/c/include").asFile.absolutePath}",

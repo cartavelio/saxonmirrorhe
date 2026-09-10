@@ -1,0 +1,220 @@
+{
+  "reflection":[
+    {
+      "type":"com.ibm.icu.impl.ICUCurrencyDisplayInfoProvider",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.ibm.icu.impl.ICUCurrencyMetaInfo",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.ibm.icu.text.RuleBasedCollator",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.ibm.icu.text.RuleBasedNumberFormat",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.saxonica.config.EnterpriseConfiguration",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.saxonica.config.ProfessionalConfiguration",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.ibm.icu.text.RuleBasedCollator",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.ibm.icu.text.RuleBasedNumberFormat",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.ibm.icu.impl.number.CurrencySpacingEnabledModifier",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.ibm.icu.text.CollatorServiceShim",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type": "com.ibm.icu.text.BreakIteratorFactory",
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "com.ibm.icu.text.RuleBasedBreakIterator",
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "javax.xml.parsers.DocumentBuilderFactory",
+      "allPublicMethods": true
+    },
+    {
+      "type": "javax.xml.parsers.SAXParserFactory",
+      "allPublicMethods": true
+    },
+    {
+      "type":"net.sf.saxon.Configuration",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.saxonica.ee.domino.DominoNode",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"java.lang.Enum",
+      "methods":[{"name":"name","parameterTypes":[] }]
+    },
+    {
+      "type":"java.security.AlgorithmParametersSpi"
+    },
+    {
+      "type":"java.security.MessageDigestSpi"
+    },
+    {
+      "type":"java.security.interfaces.DSAPrivateKey"
+    },
+    {
+      "type":"java.security.interfaces.DSAPublicKey"
+    },
+    {
+      "type":"java.security.spec.DSAParameterSpec"
+    },
+    {
+      "type":"java.util.Locale",
+      "allDeclaredClasses":true,
+      "methods":[
+        {"name":"getDefault","parameterTypes":["java.util.Locale$Category"] },
+        {"name":"getExtensionKeys","parameterTypes":[] },
+        {"name":"getScript","parameterTypes":[] }
+      ],
+      "queriedMethods":[
+        {"name":"forLanguageTag","parameterTypes":["java.lang.String"] },
+        {"name":"getExtension","parameterTypes":["char"] },
+        {"name":"getUnicodeLocaleAttributes","parameterTypes":[] },
+        {"name":"getUnicodeLocaleKeys","parameterTypes":[] },
+        {"name":"getUnicodeLocaleType","parameterTypes":["java.lang.String"] },
+        {"name":"setDefault","parameterTypes":["java.util.Locale$Category","java.util.Locale"] }
+      ]
+    },
+    {
+      "type":"java.util.Locale$Category"
+    },
+    {
+      "type":"org.w3c.dom.Document"
+    },
+    {
+      "type":"org.xmlresolver.loaders.XmlLoader",
+      "methods":[{"name":"<init>","parameterTypes":["org.xmlresolver.ResolverConfiguration"] }]
+    },
+    {
+      "type":"sun.security.provider.DSA$SHA1withDSA",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"sun.security.provider.DSAKeyFactory",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"sun.security.provider.DSAParameters",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    },
+    {
+      "type":"sun.security.provider.SHA",
+      "methods":[{"name":"<init>","parameterTypes":[] }]
+    }
+  ],
+  "resources":[
+    {
+      "bundle": "com.sun.org.apache.xerces.internal.impl.msg.SAXMessages"
+    },
+    {
+      "bundle": "com.sun.org.apache.xerces.internal.impl.msg.XMLMessages"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.brk"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.cfu"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.dict"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.html"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.icu"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.lst"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.nrm"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.res"
+    },
+    {
+      "glob": "com/ibm/icu/impl/data/**/*.spp"
+    },
+    {
+      "glob": "com/ibm/icu/impl/duration/impl/data/**/*.escaped"
+    },
+    {
+      "glob": "com/ibm/icu/impl/duration/impl/data/**/*.txt"
+    },
+    {
+      "glob": "com/ibm/icu/impl/duration/impl/data/**/*.xml"
+    },
+    {
+      "glob": "net/sf/saxon/data/*"
+    },
+    {
+      "glob": "org/xmlresolver/cat*.xml"
+    },
+    {
+      "glob": "org/xmlresolver/schemas/*"
+    },
+    {
+      "glob": "org/xmlresolver/www.rddl.org/**/*"
+    },
+    {
+      "glob": "org/xmlresolver/www.w3.org/**/*"
+    },
+    {
+      "glob": "org/xmlresolver/xmlcatalogs.org/**/*"
+    },
+    {
+      "glob": "org/xmlresolver/xmlresolver.org/**/*"
+    },
+    {
+      "glob": "org/nineml/coffeefilter/*.txt"
+    },
+    {
+      "glob": "org/nineml/coffeefilter/*.ixml"
+    },
+    {
+      "glob": "org/nineml/coffeefilter/*.xml"
+    },
+    {
+      "glob": "org/nineml/coffeefilter/*.rnc"
+    },
+    {
+      "glob": "org/nineml/coffeefilter/*.xsl"
+    },
+    {
+      "glob": "org/nineml/coffeegrinder/*.xsl"
+    },
+    {
+      "glob": "org/nineml/coffeegrinder/*.txt"
+    }
+  ]
+}
