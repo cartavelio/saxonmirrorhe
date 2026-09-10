@@ -112,7 +112,7 @@ public class SnapshotFn extends SystemFunction {
 
         SchemaType ancestorType;
         if (context.getController().getExecutable().isSchemaAware()) {
-            ancestorType = AnyType.getInstance();
+            ancestorType = AnyType.INSTANCE;
         } else {
             ancestorType = Untyped.getInstance();
         }

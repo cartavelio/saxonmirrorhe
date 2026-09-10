@@ -89,7 +89,7 @@ public abstract class SequenceExtent implements GroundedValue {
     public static <T extends Item> GroundedValue makeSequenceExtent(/*@NotNull*/ List<T> input) {
         int len = input.size();
         if (len == 0) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         } else if (len == 1) {
             return input.get(0);
         } else {
@@ -281,7 +281,7 @@ public abstract class SequenceExtent implements GroundedValue {
             }
             int size = getLength();
             if (start > size) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             }
             int limit =  ((long)start + (long)length > size) ? size : start + length;
             return new SequenceExtent.Of<T>(items.subList(start, limit)).reduce();
@@ -313,7 +313,7 @@ public abstract class SequenceExtent implements GroundedValue {
         public GroundedValue reduce() {
             int len = getLength();
             if (len == 0) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             } else if (len == 1) {
                 return this.itemAt(0);
             } else {

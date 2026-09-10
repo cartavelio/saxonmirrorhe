@@ -101,10 +101,10 @@ public class DeepEqual extends CollatingFunctionFixed {
         o.addAllowedOption("type-variety", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         o.addAllowedOption("typed-values", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
 
-        o.addAllowedOption("normalization-form", SequenceType.OPTIONAL_STRING, EmptySequence.getInstance());
+        o.addAllowedOption("normalization-form", SequenceType.OPTIONAL_STRING, EmptySequence.INSTANCE);
         o.setAllowedValues("normalization-form", "FOJS0005", "NFC", "NFD", "NFKC", "NFKD");
 
-        o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.getInstance());
+        o.addAllowedOption("unordered-elements", BuiltInAtomicType.QNAME.zeroOrMore(), EmptySequence.INSTANCE);
 
         o.addAllowedOption("whitespace", SequenceType.OPTIONAL_STRING, new StringValue("preserve"));
         o.setAllowedValues("whitespace", "FOJS0005", "preserve", "strip", "normalize");

@@ -241,7 +241,7 @@ public final class Atomizer extends UnaryExpression {
             }
         }
         if (st.isComplexType()) {
-            if (st == AnyType.getInstance()) {
+            if (st == AnyType.INSTANCE) {
                 return false;
             }
             if (((ComplexType)st).isSimpleContent()) {

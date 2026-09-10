@@ -907,7 +907,7 @@ public class TransformFn extends SystemFunction implements Callable {
 
         // Build map of secondary results
 
-        MapItem resultMap = EmptyMap.getInstance(40);
+        MapItem resultMap = EmptyMap.INSTANCE_40;
         resultMap = deliverer.populateResultMap(resultMap);
 
         // Add primary result

@@ -37,22 +37,31 @@ public final class SequenceType {
      * A type that allows any sequence of items
      */
 
-    public static final SequenceType ANY_SEQUENCE =
-            AnyItemType.getInstance().zeroOrMore();
+    public static final SequenceType ANY_SEQUENCE;
+
+    static {
+        ANY_SEQUENCE = AnyItemType.getInstance().zeroOrMore();
+    }
 
     /**
      * A type that allows exactly one item, of any kind
      */
 
-    public static final SequenceType SINGLE_ITEM =
-            AnyItemType.getInstance().one();
+    public static final SequenceType SINGLE_ITEM;
+
+    static {
+        SINGLE_ITEM = AnyItemType.getInstance().one();
+    }
 
     /**
      * A type that allows zero or one items, of any kind
      */
 
-    public static final SequenceType OPTIONAL_ITEM =
-            AnyItemType.getInstance().zeroOrOne();
+    public static final SequenceType OPTIONAL_ITEM;
+
+    static {
+        OPTIONAL_ITEM = AnyItemType.getInstance().zeroOrOne();
+    }
 
     /**
      * A type that allows exactly one atomic value
@@ -401,17 +410,25 @@ public final class SequenceType {
      * A type that allows a single function item
      */
 
-    public static final SequenceType SINGLE_FUNCTION = one(AnyFunctionType.ANY_FUNCTION);
+    public static final SequenceType SINGLE_FUNCTION = one(AnyFunctionType.INSTANCE);
 
     /**
      * A type that allows a sequence of zero or one function items
      */
-    public static final SequenceType OPTIONAL_FUNCTION_ITEM = optional(AnyFunctionType.getInstance());
+    public static final SequenceType OPTIONAL_FUNCTION_ITEM;
+
+    static {
+        OPTIONAL_FUNCTION_ITEM = optional(AnyFunctionType.INSTANCE);
+    }
 
     /**
      * A type that allows a sequence of zero or mode function items
      */
-    public static final SequenceType FUNCTION_ITEM_SEQUENCE = zeroOrMore(AnyFunctionType.getInstance());
+    public static final SequenceType FUNCTION_ITEM_SEQUENCE;
+
+    static {
+        FUNCTION_ITEM_SEQUENCE = zeroOrMore(AnyFunctionType.INSTANCE);
+    }
 
     /**
      * A type that allows a single map item
@@ -432,8 +449,11 @@ public final class SequenceType {
      * A type that only permits a non-empty sequence
      */
 
-    public static final SequenceType NON_EMPTY_SEQUENCE =
-            makeSequenceType(AnyItemType.getInstance(), StaticProperty.ALLOWS_ONE_OR_MORE);
+    public static final SequenceType NON_EMPTY_SEQUENCE;
+
+    static {
+        NON_EMPTY_SEQUENCE = makeSequenceType(AnyItemType.INSTANCE, StaticProperty.ALLOWS_ONE_OR_MORE);
+    }
 
     /**
      * A type that has no instances

@@ -275,7 +275,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      */
     @Override
     public SchemaType getBuiltInBaseType() {
-        return AnySimpleType.getInstance();
+        return AnySimpleType.INSTANCE;
     }
 
     /**
@@ -509,7 +509,7 @@ public class NumericType extends LocalUnionType implements SimpleType {
      */
     @Override
     public SchemaType getBaseType() {
-        return AnySimpleType.getInstance();
+        return AnySimpleType.INSTANCE;
     }
 
     /**

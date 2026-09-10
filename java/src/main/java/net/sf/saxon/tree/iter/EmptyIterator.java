@@ -99,12 +99,12 @@ public class EmptyIterator implements SequenceIterator,
 
     @Override
     public GroundedValue materialize() {
-        return EmptySequence.getInstance();
+        return EmptySequence.INSTANCE;
     }
 
     @Override
     public GroundedValue getResidue() {
-        return EmptySequence.getInstance();
+        return EmptySequence.INSTANCE;
     }
 
     @Override

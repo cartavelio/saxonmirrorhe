@@ -91,7 +91,7 @@ public class ShallowCopyRuleSet implements BuiltInRuleSet {
                         out.setSystemId(node.getBaseURI());
                     }
                     NodeName fqn = NameOfNode.makeName(node);
-                    out.startElement(fqn, schemaAware ? AnyType.getInstance() : Untyped.getInstance(), locationId, ReceiverOption.NONE);
+                    out.startElement(fqn, schemaAware ? AnyType.INSTANCE : Untyped.getInstance(), locationId, ReceiverOption.NONE);
                     if (copyNamespaces) {
                         for (NamespaceBinding ns : node.getAllNamespaces()) {
                             out.namespace(ns.getPrefix(), ns.getNamespaceUri(), ReceiverOption.NONE);

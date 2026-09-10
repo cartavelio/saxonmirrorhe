@@ -28,7 +28,12 @@ import net.sf.saxon.value.AtomicValue;
 public class CurrentGroupCall extends Expression implements Callable {
 
     private boolean inHigherOrderOperand = false;
-    private ItemType itemType = AnyItemType.getInstance();
+    private ItemType itemType;
+
+    {
+        itemType = AnyItemType.getInstance();
+    }
+
     private ForEachGroup controllingInstruction = null; // may be unknown, when current group has dynamic scope
 
     /**

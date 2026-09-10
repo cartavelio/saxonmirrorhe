@@ -57,7 +57,12 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     protected Pattern matchPattern;
     private SequenceType requiredType;
     private boolean declaredStreamable;
-    private ItemType requiredContextItemType = AnyItemType.getInstance();
+    private ItemType requiredContextItemType;
+
+    {
+        requiredContextItemType = AnyItemType.getInstance();
+    }
+
     private boolean absentFocus;
     private SlotManager stackFrameMap;
     private PackageData packageData;
@@ -361,7 +366,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         //initialize();
         TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
         Item contextItem = context.getContextItem();
-        if (requiredContextItemType != AnyItemType.getInstance() &&
+        if (requiredContextItemType != AnyItemType.INSTANCE &&
                 !requiredContextItemType.matches(contextItem, th)) {
             RoleDiagnostic role = new RoleDiagnostic(
                     RoleDiagnostic.MISC, "context item for the template rule", 0);
@@ -436,7 +441,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     }
 
     public void explainProperties(ExpressionPresenter presenter) {
-        if (getRequiredContextItemType() != AnyItemType.getInstance()) {
+        if (getRequiredContextItemType() != AnyItemType.INSTANCE) {
             SequenceType st = SequenceType.one(getRequiredContextItemType());
             presenter.emitAttribute("cxt", st.toAlphaCode());
         }

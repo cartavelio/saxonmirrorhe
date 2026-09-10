@@ -518,7 +518,7 @@ public class ForExpression extends Assignation {
         explainSpecializedAttributes(out);
         out.emitAttribute("var", getVariableQName());
         ItemType varType = getSequence().getItemType();
-        if (varType != AnyItemType.getInstance()) {
+        if (varType != AnyItemType.INSTANCE) {
             out.emitAttribute("as", AlphaCode.fromItemType(varType));
         }
         out.emitAttribute("slot", "" + getLocalSlotNumber());

@@ -54,7 +54,7 @@ public class JsonHandlerXML extends JsonHandler {
     private FingerprintedQName escapedQN;
     private FingerprintedQName escapedKeyQN;
 
-    private static final SimpleType SIMPLE_TYPE = AnySimpleType.getInstance();
+    private static final SimpleType SIMPLE_TYPE = AnySimpleType.INSTANCE;
     private static final SimpleType BOOLEAN_TYPE = BuiltInAtomicType.BOOLEAN;
     private static final SimpleType STRING_TYPE = BuiltInAtomicType.STRING;
 

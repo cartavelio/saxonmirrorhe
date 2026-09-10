@@ -11,6 +11,7 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.*;
+import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
@@ -27,6 +28,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static net.sf.saxon.type.AnyFunctionType.INSTANCE;
+
 /**
  * An instance of this class represents a specific record item type, for example
  * record(x as xs:double, y as element(employee)).
@@ -40,7 +43,7 @@ import java.util.function.Supplier;
  * types permit fields other than those listed to appear; non-extensible record types do not.
  * An extensible record type is denoted by record(... ,*).
  */
-public class RecordTest extends AnyFunctionType implements RecordType {
+public class RecordTest implements RecordType {
 
     private final Map<String, SequenceType> fieldTypes = new HashMap<>();
     private final List<String> fieldNamesInOrder = new ArrayList<>();
@@ -492,7 +495,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
 
     @Override
     public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
-        if (other == AnyFunctionType.getInstance()) {
+        if (other == AnyFunctionType.INSTANCE) {
             return Affinity.SUBSUMED_BY;
         } else if (other instanceof RecordTest) {
             return recordTypeRelationship((RecordTest)other, th);
@@ -516,7 +519,7 @@ public class RecordTest extends AnyFunctionType implements RecordType {
             return Affinity.DISJOINT;
         }
         // Handle map(xxx, item()*)
-        if (other.getValueType().getPrimaryType().equals(AnyItemType.getInstance()) && other.getValueType().getCardinality() == StaticProperty.ALLOWS_ZERO_OR_MORE) {
+        if (other.getValueType().getPrimaryType().equals(AnyItemType.INSTANCE) && other.getValueType().getCardinality() == StaticProperty.ALLOWS_ZERO_OR_MORE) {
             if (keyRel == Affinity.SUBSUMED_BY || keyRel == Affinity.SAME_TYPE) {
                 return Affinity.SUBSUMED_BY;
             } else {
@@ -672,6 +675,105 @@ public class RecordTest extends AnyFunctionType implements RecordType {
     @Override
     public CoercionPlan getCoercionPlan(int version) {
         return RecordCoercionPlan.INSTANCE;
+    }
+
+    /**
+     * Get the list of Annotation Assertions associated with this function item type
+     *
+     * @return the list of annotation assertions
+     */
+    @Override
+    public AnnotationList getAnnotationAssertions() {
+        return null;
+    }
+
+    /**
+     * Determine whether this item type is an atomic type
+     *
+     * @return true if this is ANY_ATOMIC_TYPE or a subtype thereof
+     */
+    @Override
+    public boolean isAtomicType() {
+        return false;
+    }
+
+    /**
+     * Determine whether this item type is a plain type (that is, whether it can ONLY match
+     * atomic values)
+     *
+     * @return true if this is ANY_ATOMIC_TYPE or a subtype thereof, or a
+     * "plain" union type (that is, unions of atomic types that impose no further restrictions).
+     * Return false if this is a union type whose member types are not all known.
+     */
+    @Override
+    public boolean isPlainType() {
+        return false;
+    }
+
+    /**
+     * Get the primitive item type corresponding to this item type. For item(),
+     * this is Type.ITEM. For node(), it is Type.NODE. For specific node kinds,
+     * it is the value representing the node kind, for example Type.ELEMENT.
+     * For anyAtomicValue and union types it is Type.ATOMIC_VALUE. For numeric it is Type.NUMBER.
+     * For other atomic types it is the primitive type as defined in XML Schema,
+     * except that integer, xs:dayTimeDuration, and xs:yearMonthDuration
+     * are considered to be primitive types.
+     *
+     * @return the corresponding primitive type
+     */
+    @Override
+    public ItemType getPrimitiveItemType() {
+        return null;
+    }
+
+    /**
+     * Get the primitive type corresponding to this item type. For item(),
+     * this is Type.ITEM. For node(), it is Type.NODE. For specific node kinds,
+     * it is the value representing the node kind, for example Type.ELEMENT.
+     * For anyAtomicValue it is BuiltInAtomicType.ANY_ATOMIC. For numeric it is Type.NUMBER.
+     * For other atomic types it is the primitive type as defined in XML Schema,
+     * except that INTEGER is considered to be a primitive type.
+     *
+     * @return the integer fingerprint of the corresponding primitive type
+     */
+    @Override
+    public int getPrimitiveType() {
+        return 0;
+    }
+
+    /**
+     * Get the corresponding {@link UType}. A UType is a union of primitive item
+     * types.
+     *
+     * @return the smallest UType that subsumes this item type
+     */
+    @Override
+    public UType getUType() {
+        return null;
+    }
+
+    /**
+     * Get the item type of the atomic values that will be produced when an item
+     * of this type is atomized
+     *
+     * @return the best available item type of the atomic values that will be produced when an item
+     * of this type is atomized, or null if it is known that atomization will throw an error.
+     */
+    @Override
+    public PlainType getAtomizedItemType() {
+        return null;
+    }
+
+    /**
+     * Ask whether values of this type are atomizable
+     *
+     * @param th the type hierarchy cache
+     * @return true if some or all instances of this type can be successfully atomized; false
+     * if no instances of this type can be atomized
+     */
+    @Override
+    public boolean isAtomizable(TypeHierarchy th) {
+        return false;
     }
 }
 

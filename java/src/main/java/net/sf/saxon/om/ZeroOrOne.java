@@ -130,7 +130,7 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
         if (item != null && start <= 0 && start + length > 0) {
             return this;
         } else {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
     }
 
@@ -172,7 +172,7 @@ public class ZeroOrOne<T extends Item> implements GroundedValue {
     @Override
     public GroundedValue reduce() {
         if (item == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         } else {
             return item;
         }

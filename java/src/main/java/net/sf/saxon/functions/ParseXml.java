@@ -50,7 +50,7 @@ public class ParseXml extends SystemFunction implements Callable {
         options.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         options.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
         options.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        options.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.getInstance());
+        options.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
         options.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         options.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
@@ -79,7 +79,7 @@ public class ParseXml extends SystemFunction implements Callable {
             }
         }
         if (input == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
 
         ParseOptions parseOptions = context.getConfiguration().getParseOptions();
@@ -88,7 +88,7 @@ public class ParseXml extends SystemFunction implements Callable {
         if (pd instanceof StylesheetPackage) {
             parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
         } else {
-            parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+            parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
         }
 
         GroundedValue val = checkedOptions.get("dtd-validation");
@@ -170,9 +170,9 @@ public class ParseXml extends SystemFunction implements Callable {
                 parseOptions = parseOptions.withSpaceStrippingRule(
                         val.effectiveBooleanValue()
                                 ? validating
-                                    ? IgnorableSpaceStrippingRule.getInstance()
-                                    : AllElementsSpaceStrippingRule.getInstance()
-                                : NoElementsSpaceStrippingRule.getInstance());
+                                    ? IgnorableSpaceStrippingRule.INSTANCE
+                                    : AllElementsSpaceStrippingRule.INSTANCE
+                                : NoElementsSpaceStrippingRule.INSTANCE);
             }
 
             val = checkedOptions.get("xinclude");

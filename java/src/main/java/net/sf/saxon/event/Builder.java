@@ -272,8 +272,8 @@ public abstract class Builder implements Receiver {
             long endTime = System.nanoTime();
             Logger logger = getConfiguration().getLogger();
             logger.info("Tree built in " + Timer.showExecutionTimeNano(endTime - startTime));
-            if (currentRoot instanceof TinyDocumentImpl) {
-                ((TinyDocumentImpl) currentRoot).showSize(logger);
+            if (currentRoot instanceof TinyDocumentImpl tinyDoc) {
+                tinyDoc.showSize(logger);
             }
             startTime = endTime;
         }

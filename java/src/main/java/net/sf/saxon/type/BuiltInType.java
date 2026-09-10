@@ -42,8 +42,8 @@ public abstract class BuiltInType {
     }
 
     static {
-        register(StandardNames.XS_ANY_SIMPLE_TYPE, AnySimpleType.getInstance());
-        register(StandardNames.XS_ANY_TYPE, AnyType.getInstance());
+        register(StandardNames.XS_ANY_SIMPLE_TYPE, AnySimpleType.INSTANCE);
+        register(StandardNames.XS_ANY_TYPE, AnyType.INSTANCE);
         register(StandardNames.XS_UNTYPED, Untyped.getInstance());
         register(StandardNames.XS_ERROR, ErrorType.getInstance());
 

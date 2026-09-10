@@ -284,7 +284,7 @@ public abstract class FunctionCall extends Expression {
                                                      "XPST0141");
                         }
 
-                        arg = new Literal(EmptySequence.getInstance());
+                        arg = new Literal(EmptySequence.INSTANCE);
                         adoptChildExpression(arg);
                     } else {
                         throw new UnsupportedOperationException();

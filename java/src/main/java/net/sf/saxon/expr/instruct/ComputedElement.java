@@ -616,9 +616,8 @@ public class ComputedElement extends ElementCreator {
                 return new QNameValue(prefix, uri, localName);
             };
 
-            SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
-                    ? AnyType.getInstance()
-                    : Untyped.getInstance();
+            SchemaType typeCode;
+            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.getInstance();
             Schema schema = expr.getRetainedStaticContext().getImportedSchema();
             return (out, context) -> {
                 try {

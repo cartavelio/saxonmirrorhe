@@ -49,7 +49,7 @@ public class Doc extends SystemFunction implements Callable {
         OptionsParameter docOptions = new OptionsParameter(version);
         docOptions.addAllowedOption("allow-external-entities", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
-        docOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.getInstance());
+        docOptions.addAllowedOption("entity-expansion-limit", SequenceType.OPTIONAL_INTEGER, EmptySequence.INSTANCE);
         docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
         docOptions.addAllowedOption("strip-space", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
@@ -160,7 +160,7 @@ public class Doc extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue hrefVal = (AtomicValue) arguments[0].head();
         if (hrefVal == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         String href = hrefVal.getStringValue();
         PackageData packageData = getRetainedStaticContext().getPackageData();
@@ -187,7 +187,7 @@ public class Doc extends SystemFunction implements Callable {
             if (pd instanceof StylesheetPackage) {
                 parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
             } else {
-                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
             }
 
 
@@ -312,11 +312,11 @@ public class Doc extends SystemFunction implements Callable {
             if (val != null) {
                 SpaceStrippingRule rule;
                 if (xsdValidating || dtdValidating) {
-                    rule = IgnorableSpaceStrippingRule.getInstance();
+                    rule = IgnorableSpaceStrippingRule.INSTANCE;
                 } else if (val.effectiveBooleanValue()) {
-                    rule = AllElementsSpaceStrippingRule.getInstance();
+                    rule = AllElementsSpaceStrippingRule.INSTANCE;
                 } else {
-                    rule = NoElementsSpaceStrippingRule.getInstance();
+                    rule = NoElementsSpaceStrippingRule.INSTANCE;
                 }
                 parseOptions = parseOptions.withSpaceStrippingRule(rule);
             }

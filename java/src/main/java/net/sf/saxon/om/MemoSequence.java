@@ -320,7 +320,7 @@ public class MemoSequence implements Sequence {
             if (container.state == State.ALL_READ) {
                 return makeExtent();
             } else if (container.state == State.EMPTY) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             } else {
                 // save the current position
                 int savePos = position;
@@ -337,7 +337,7 @@ public class MemoSequence implements Sequence {
         private GroundedValue makeExtent() {
             if (container.used == container.reservoir.length) {
                 if (container.used == 0) {
-                    return EmptySequence.getInstance();
+                    return EmptySequence.INSTANCE;
                 } else if (container.used == 1) {
                     return container.reservoir[0];
                 } else {
@@ -352,7 +352,7 @@ public class MemoSequence implements Sequence {
         @Override
         public GroundedValue getResidue() {
             if (container.state == State.EMPTY || position >= container.used || position == -2) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             } else if (container.state == State.ALL_READ) {
                 return SequenceExtent.makeSequenceExtent(
                         Arrays.asList(container.reservoir).subList(position + 1, container.used));

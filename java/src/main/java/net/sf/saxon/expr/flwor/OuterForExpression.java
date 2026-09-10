@@ -159,7 +159,7 @@ public class OuterForExpression extends ForExpression {
                         return actionEval.iterate(context);
                     });
                 } else {
-                    context.setLocalVariable(slot, EmptySequence.getInstance());
+                    context.setLocalVariable(slot, EmptySequence.INSTANCE);
                     return actionEval.iterate(context);
                 }
             };
@@ -182,7 +182,7 @@ public class OuterForExpression extends ForExpression {
                         dispatchTailCall(actionEval.processLeavingTail(output, context));
                     }
                 } else {
-                    context.setLocalVariable(slot, EmptySequence.getInstance());
+                    context.setLocalVariable(slot, EmptySequence.INSTANCE);
                     dispatchTailCall(actionEval.processLeavingTail(output, context));
                 }
                 return null;
@@ -208,7 +208,7 @@ public class OuterForExpression extends ForExpression {
                         actionEval.registerUpdates(context, pul);
                     }
                 } else {
-                    context.setLocalVariable(slot, EmptySequence.getInstance());
+                    context.setLocalVariable(slot, EmptySequence.INSTANCE);
                     actionEval.registerUpdates(context, pul);
                 }
             };

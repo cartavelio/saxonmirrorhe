@@ -21,7 +21,9 @@ import java.util.Optional;
  * An implementation of ItemType that matches any item (node or atomic value)
  */
 
-public class AnyItemType implements ItemTypeWithSequenceTypeCache {
+public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
+
+    INSTANCE;
 
     private SequenceType _one;
     private SequenceType _oneOrMore;
@@ -31,7 +33,7 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
     private AnyItemType() {
     }
 
-    /*@NotNull*/ private static final AnyItemType theInstance = new AnyItemType();
+
 
     /**
      * Factory method to get the singleton instance
@@ -40,7 +42,7 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     /*@NotNull*/
     public static AnyItemType getInstance() {
-        return theInstance;
+        return INSTANCE;
     }
 
     /**
@@ -159,14 +161,6 @@ public class AnyItemType implements ItemTypeWithSequenceTypeCache {
     /*@NotNull*/
     public String toString() {
         return "item()";
-    }
-
-    /**
-     * Returns a hash code value for the object.
-     */
-
-    public int hashCode() {
-        return "AnyItemType".hashCode();
     }
 
     /**

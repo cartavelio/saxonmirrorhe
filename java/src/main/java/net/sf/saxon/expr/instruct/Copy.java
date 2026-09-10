@@ -47,7 +47,12 @@ import java.util.Iterator;
 public class Copy extends ElementCreator {
 
     private boolean copyNamespaces;
-    private ItemType selectItemType = AnyItemType.getInstance();
+    private ItemType selectItemType;
+
+    {
+        selectItemType = AnyItemType.getInstance();
+    }
+
     private ItemType resultItemType;
 
     /**
@@ -296,11 +301,11 @@ public class Copy extends ElementCreator {
                                     try {
                                         return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), elem.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
                                     }
                                 } else {
                                     // No element declaration now, but there might be one at run-time
-                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
                                 }
                             }
                             Affinity a = th.relationship(selectItemType, NodeKindType.ATTRIBUTE);
@@ -311,11 +316,11 @@ public class Copy extends ElementCreator {
                                     try {
                                         return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), attr.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
                                     }
                                 } else {
                                     // No attribute declaration now, but there might be one at run-time
-                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
                                 }
                             }
                         } else {
@@ -332,7 +337,7 @@ public class Copy extends ElementCreator {
                     } else if (selectItemType instanceof AtomicType) {
                         return selectItemType;
                     } else {
-                        return AnyItemType.getInstance();
+                        return AnyItemType.INSTANCE;
                     }
                 default:
                     throw new IllegalStateException();
@@ -526,9 +531,8 @@ public class Copy extends ElementCreator {
             Schema schema = expr.getRetainedStaticContext().getImportedSchema();
             PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
 
-            SchemaType typeCode = expr.getValidationAction() == Validation.PRESERVE
-                    ? AnyType.getInstance()
-                    : Untyped.getInstance();
+            SchemaType typeCode;
+            typeCode = expr.getValidationAction() == Validation.PRESERVE ? AnyType.INSTANCE : Untyped.getInstance();
 
             int properties = ReceiverOption.NONE;
             if (!expr.bequeathNamespacesToChildren) {
@@ -641,7 +645,7 @@ public class Copy extends ElementCreator {
                     case Type.DOCUMENT:
                         if (!expr.preservingTypes) {
                             ParseOptions options = expr.getValidationOptions()
-                                    .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                                    .withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE);
                             config.prepareValidationReporting(context, options);
                             Receiver val = schema.getDocumentValidator(output, source.getBaseURI(), options, expr.getLocation());
                             output = new ComplexContentOutputter(val);

@@ -66,7 +66,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     public NamedXNodeType(int nodeKind, QNameTest nameTest, Configuration config) {
         this.kind = nodeKind;
         this.nameTest = nameTest;
-        this.schemaType = AnyType.getInstance();
+        this.schemaType = AnyType.INSTANCE;
         this.config = config;
         this.nillable = true;
     }
@@ -81,7 +81,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     public NamedXNodeType(int nodeKind, StructuredQName nameTest, Configuration config) {
         this.kind = nodeKind;
         this.nameTest = new SpecificQNameTest(nameTest, config.getNamePool());
-        this.schemaType = AnyType.getInstance();
+        this.schemaType = AnyType.INSTANCE;
         this.config = config;
         this.nillable = true;
     }
@@ -176,7 +176,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
     @Override
     public boolean isFingerprintSufficient() {
         if (kind == Type.ELEMENT) {
-            return (nillable && schemaType.equals(AnyType.getInstance()));
+            return nillable && (schemaType.equals(AnyType.INSTANCE));
         }
         if (kind == Type.ATTRIBUTE) {
             return schemaType.equals(BuiltInAtomicType.ANY_ATOMIC);
@@ -250,10 +250,12 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
      */
     @Override
     public IntPredicateProxy getMatcher(NodeVectorTree tree) {
-        if (nameTest instanceof SpecificQNameTest && schemaType == AnyType.getInstance() && nillable) {
-            int requiredFingerprint = ((SpecificQNameTest) nameTest).getFingerprint();
-            return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
-                                      && tree.getFingerprint(nodeNr) == requiredFingerprint;
+        if (nameTest instanceof SpecificQNameTest) {
+            if (schemaType == AnyType.INSTANCE && nillable) {
+                int requiredFingerprint = ((SpecificQNameTest) nameTest).getFingerprint();
+                return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
+                        && tree.getFingerprint(nodeNr) == requiredFingerprint;
+            }
         }
         return nodeNr -> (tree.getNodeKind(nodeNr) & 0x0f) == kind
                                       && matches(tree.getNode(nodeNr));
@@ -264,7 +266,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
         if (annotation == null) {
             return true;
         }
-        if (schemaType == AnyType.getInstance()) {
+        if (schemaType == AnyType.INSTANCE) {
             return true;
         }
 
@@ -283,7 +285,7 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate, No
 
     @Override
     public final double getDefaultPriority() {
-        if (schemaType == null || schemaType == AnyType.getInstance()) {
+        if (schemaType == null || schemaType == AnyType.INSTANCE) {
             if (nameTest instanceof AnyQNameTest) {
                 return -0.5;
             } else if (nameTest instanceof SpecificQNameTest) {

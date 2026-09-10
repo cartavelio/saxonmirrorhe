@@ -20,23 +20,9 @@ import java.util.Iterator;
  * of the value, and we defer prefix checks until later.
  */
 
-public final class DummyNamespaceResolver implements NamespaceResolver {
+public enum DummyNamespaceResolver implements NamespaceResolver {
 
-    private final static DummyNamespaceResolver THE_INSTANCE = new DummyNamespaceResolver();
-
-    /**
-     * Return the singular instance of this class
-     *
-     * @return the singular instance
-     */
-
-    public static DummyNamespaceResolver getInstance() {
-        return THE_INSTANCE;
-    }
-
-    private DummyNamespaceResolver() {
-    }
-
+    INSTANCE;
 
     /**
      * Get the namespace URI corresponding to a given prefix.

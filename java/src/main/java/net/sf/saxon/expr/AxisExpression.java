@@ -962,6 +962,10 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         public PullEvaluator elaborateForPull() {
             AxisExpression axisExpression = (AxisExpression) getExpression();
             NodeTest test = axisExpression.getNodeTest();
+            NodePredicate predicate =
+                    (test == AnyXNodeType.getInstance()
+                    || test == AnyGNodeType.getInstance()
+                    || test == AnyJNodeType.getInstance()) ? null : test;
             int axis = axisExpression.getAxis();
             // These variables are computed in the hope that the optimizer will remove runtime error tests
             // that aren't needed because the condition cannot occur
@@ -979,87 +983,87 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
                 case AxisInfo.ANCESTOR -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateAncestorAxis(test);
+                    return ((GNode) origin).iterateAncestorAxis(predicate);
                 };
                 case AxisInfo.ANCESTOR_OR_SELF -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateAncestorOrSelfAxis(test);
+                    return ((GNode) origin).iterateAncestorOrSelfAxis(predicate);
                 };
                 case AxisInfo.ATTRIBUTE -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateAttributeAxis(test);
+                    return ((GNode) origin).iterateAttributeAxis(predicate);
                 };
                 case AxisInfo.CHILD -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateChildAxis(test);
+                    return ((GNode) origin).iterateChildAxis(predicate);
                 };
                 case AxisInfo.DESCENDANT -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateDescendantAxis(test);
+                    return ((GNode) origin).iterateDescendantAxis(predicate);
                 };
                 case AxisInfo.DESCENDANT_OR_SELF -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateDescendantOrSelfAxis(test);
+                    return ((GNode) origin).iterateDescendantOrSelfAxis(predicate);
                 };
                 case AxisInfo.FOLLOWING -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateFollowingAxis(test);
+                    return ((GNode) origin).iterateFollowingAxis(predicate);
                 };
                 case AxisInfo.FOLLOWING_OR_SELF -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateFollowingOrSelfAxis(test);
+                    return ((GNode) origin).iterateFollowingOrSelfAxis(predicate);
                 };
                 case AxisInfo.FOLLOWING_SIBLING -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateFollowingSiblingAxis(test);
+                    return ((GNode) origin).iterateFollowingSiblingAxis(predicate);
                 };
                 case AxisInfo.FOLLOWING_SIBLING_OR_SELF -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateFollowingSiblingOrSelfAxis(test);
+                    return ((GNode) origin).iterateFollowingSiblingOrSelfAxis(predicate);
                 };
                 case AxisInfo.NAMESPACE -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateNamespaceAxis(test);
+                    return ((GNode) origin).iterateNamespaceAxis(predicate);
                 };
                 case AxisInfo.PARENT -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateParentAxis(test);
+                    return ((GNode) origin).iterateParentAxis(predicate);
                 };
                 case AxisInfo.PRECEDING -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iteratePrecedingAxis(test);
+                    return ((GNode) origin).iteratePrecedingAxis(predicate);
                 };
                 case AxisInfo.PRECEDING_OR_SELF -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iteratePrecedingOrSelfAxis(test);
+                    return ((GNode) origin).iteratePrecedingOrSelfAxis(predicate);
                 };
                 case AxisInfo.PRECEDING_SIBLING -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iteratePrecedingSiblingAxis(test);
+                    return ((GNode) origin).iteratePrecedingSiblingAxis(predicate);
                 };
                 case AxisInfo.PRECEDING_SIBLING_OR_SELF -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iteratePrecedingSiblingOrSelfAxis(test);
+                    return ((GNode) origin).iteratePrecedingSiblingOrSelfAxis(predicate);
                 };
                 case AxisInfo.SELF -> context -> {
                     Item origin = context.getContextItem();
                     checkOrigin.accept(origin, context);
-                    return ((GNode) origin).iterateSelfAxis(test);
+                    return ((GNode) origin).iterateSelfAxis(predicate);
                 };
                 default -> throw new IllegalArgumentException("Unknown axis number " + axis);
             };

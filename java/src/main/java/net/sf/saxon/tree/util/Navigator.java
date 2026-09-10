@@ -1248,7 +1248,7 @@ public final class Navigator {
     /*@NotNull*/
     public static SequenceIterator filteredSingleton(GNode node, NodePredicate nodeTest) {
         if (node != null && (nodeTest == null || nodeTest.test(node))) {
-            return SingletonIterator.makeIterator(node);
+            return new SingletonIterator(node);
         } else {
             return EmptyIterator.getInstance();
         }

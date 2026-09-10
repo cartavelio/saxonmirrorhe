@@ -1961,7 +1961,7 @@ public class XPathParser {
                 theClass = config.getClass(className, false);
             } catch (XPathException err) {
                 grumble("Unknown Java class " + local, "XPST0051");
-                return AnyItemType.getInstance();
+                return AnyItemType.INSTANCE;
             }
             //noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized(config) {
@@ -2192,7 +2192,7 @@ public class XPathParser {
                 nextToken();
                 readToken(Token.LPAREN);
                 readToken(Token.RPAREN);
-                return AnyItemType.getInstance();
+                return AnyItemType.INSTANCE;
             case "gnode":
                 checkLanguageVersion40("gnode() item type");
                 nextToken();
@@ -2471,7 +2471,7 @@ public class XPathParser {
             nextToken();
             readToken(Token.RPAREN);
             if (annotations.isEmpty()) {
-                return AnyFunctionType.getInstance();
+                return AnyFunctionType.INSTANCE;
             } else {
                 return new AnyFunctionTypeWithAssertions(annotations, getStaticContext().getConfiguration());
             }

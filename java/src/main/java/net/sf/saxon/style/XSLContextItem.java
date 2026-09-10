@@ -25,7 +25,12 @@ import net.sf.saxon.value.Whitespace;
 
 public class XSLContextItem extends StyleElement {
 
-    private ItemType requiredType = AnyItemType.getInstance();
+    private ItemType requiredType;
+
+    {
+        requiredType = AnyItemType.getInstance();
+    }
+
     private Optionality optionality = Optionality.OPTIONAL;
 
 

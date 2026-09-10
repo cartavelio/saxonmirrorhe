@@ -92,11 +92,9 @@ public class PullPushTee extends PullFilter {
         }
         Receiver out = branch;
         switch (event) {
-            case START_DOCUMENT:
-                out.startDocument(ReceiverOption.NONE);
-                break;
-
-            case START_ELEMENT:
+            case START_DOCUMENT ->
+                    out.startDocument(ReceiverOption.NONE);
+            case START_ELEMENT -> {
                 NamespaceBinding[] bindings = in.getNamespaceDeclarations();
                 NamespaceMap nsMap = nsStack.isEmpty() ? NamespaceMap.emptyMap() : nsStack.peek();
                 for (NamespaceBinding binding : bindings) {
@@ -115,49 +113,33 @@ public class PullPushTee extends PullFilter {
                 out.startElement(in.getNodeName(), in.getSchemaType(),
                                  in.getAttributes(), nsMap,
                                  loc, options);
-
                 systemIdStack.push(loc.getSystemId());
-                break;
-
-            case TEXT:
-                out.characters(in.getStringValue(), loc, ReceiverOption.WHOLE_TEXT_NODE);
-                break;
-
-            case COMMENT:
-
-                out.comment(in.getStringValue(), loc, ReceiverOption.NONE);
-                break;
-
-            case PROCESSING_INSTRUCTION:
-
-                out.processingInstruction(
-                        in.getNodeName().getLocalPart(),
-                        in.getStringValue(), loc, ReceiverOption.NONE);
-                break;
-
-            case END_ELEMENT:
-
+            }
+            case TEXT ->
+                    out.characters(in.getStringValue(), loc, ReceiverOption.WHOLE_TEXT_NODE);
+            case COMMENT ->
+                    out.comment(in.getStringValue(), loc, ReceiverOption.NONE);
+            case PROCESSING_INSTRUCTION ->
+                    out.processingInstruction(
+                            in.getNodeName().getLocalPart(),
+                            in.getStringValue(), loc, ReceiverOption.NONE);
+            case END_ELEMENT -> {
                 out.endElement();
                 nsStack.pop();
                 systemIdStack.pop();
-                break;
-
-            case END_DOCUMENT:
+            }
+            case END_DOCUMENT -> {
                 List<UnparsedEntity> entities = in.getUnparsedEntities();
                 if (entities != null) {
-                    for (Object entity : entities) {
-                        UnparsedEntity ue = (UnparsedEntity) entity;
+                    for (UnparsedEntity ue : entities) {
                         out.setUnparsedEntity(ue.getName(), ue.getSystemId(), ue.getPublicId());
                     }
                 }
                 out.endDocument();
-                break;
-
-            case END_OF_INPUT:
-                in.close();
-                break;
-
-            case ATOMIC_VALUE:
+            }
+            case END_OF_INPUT ->
+                    in.close();
+            case ATOMIC_VALUE -> {
                 if (out instanceof SequenceReceiver) {
                     out.append(super.getAtomicValue(), loc, ReceiverOption.NONE);
                 } else {
@@ -166,9 +148,8 @@ public class PullPushTee extends PullFilter {
                     }
                     out.characters(in.getStringValue(), loc, ReceiverOption.NONE);
                 }
-                break;
-
-            case ATTRIBUTE:
+            }
+            case ATTRIBUTE -> {
                 if (out instanceof SequenceReceiver) {
                     Orphan o = new Orphan(in.getPipelineConfiguration().getConfiguration());
                     o.setNodeName(getNodeName());
@@ -176,9 +157,8 @@ public class PullPushTee extends PullFilter {
                     o.setStringValue(getStringValue().tidy());
                     out.append(o, loc, ReceiverOption.NONE);
                 }
-                break;
-
-            case NAMESPACE:
+            }
+            case NAMESPACE -> {
                 if (out instanceof SequenceReceiver) {
                     Orphan o = new Orphan(in.getPipelineConfiguration().getConfiguration());
                     o.setNodeName(getNodeName());
@@ -186,11 +166,8 @@ public class PullPushTee extends PullFilter {
                     o.setStringValue(getStringValue().tidy());
                     out.append(o, loc, ReceiverOption.NONE);
                 }
-                break;
-
-            default:
-                throw new UnsupportedOperationException("" + event);
-
+            }
+            default -> throw new UnsupportedOperationException("" + event);
         }
         previousAtomic = event == PullEvent.ATOMIC_VALUE;
     }

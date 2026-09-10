@@ -282,7 +282,7 @@ public class SpecificFunctionType extends AnyFunctionType {
 
     @Override
     public Affinity relationship(FunctionItemType other, TypeHierarchy th) {
-        if (other == AnyFunctionType.getInstance() || other instanceof AnyFunctionTypeWithAssertions) {
+        if (other == INSTANCE || other instanceof AnyFunctionTypeWithAssertions) {
             return Affinity.SUBSUMED_BY;
         } else if (equals(other)) {
             return Affinity.SAME_TYPE;

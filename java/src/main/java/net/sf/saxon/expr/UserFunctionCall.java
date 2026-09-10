@@ -324,7 +324,7 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
     public ItemType getItemType() {
         if (staticType == null) {
             // the actual type is not known yet, so we return an approximation
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         } else {
             return staticType.getPrimaryType();
         }

@@ -186,7 +186,7 @@ public class StringJoin extends FoldingFunction implements PushableFunction {
         @Override
         public Sequence result()  {
             if (position == 0 && returnEmptyIfEmpty) {
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             } else {
                 return new StringValue(data.toUnicodeString());
             }

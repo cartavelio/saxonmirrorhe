@@ -130,9 +130,9 @@ public abstract class JPConverter {
         itemTypeMap.put(Base64BinaryValue.class, BuiltInAtomicType.BASE64_BINARY);
         itemTypeMap.put(NodeInfo.class, AnyXNodeType.getInstance());
         itemTypeMap.put(TreeInfo.class, NodeKindType.DOCUMENT);
-        itemTypeMap.put(MapItem.class, MapType.getInstance());
-        itemTypeMap.put(ArrayItem.class, ArrayItemType.getInstance());
-        itemTypeMap.put(FunctionItem.class, AnyFunctionType.getInstance());
+        itemTypeMap.put(MapItem.class, AnyFunctionType.INSTANCE);
+        itemTypeMap.put(ArrayItem.class, AnyFunctionType.INSTANCE);
+        itemTypeMap.put(FunctionItem.class, AnyFunctionType.INSTANCE);
         itemTypeMap.put(AtomicValue.class, BuiltInAtomicType.ANY_ATOMIC);
         //itemTypeMap.put(UntypedAtomicValue.class, BuiltInAtomicType.UNTYPED_ATOMIC);
     }
@@ -283,7 +283,7 @@ public abstract class JPConverter {
 
         @Override
         public ItemType getItemType() {
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         }
 
         @Override
@@ -306,7 +306,7 @@ public abstract class JPConverter {
 
         @Override
         public ItemType getItemType() {
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         }
 
         @Override
@@ -344,8 +344,11 @@ public abstract class JPConverter {
 
     public static class FromSequence extends JPConverter {
 
-        public static final FromSequence INSTANCE =
-                new FromSequence(AnyItemType.getInstance(), StaticProperty.ALLOWS_ZERO_OR_MORE);
+        public static final FromSequence INSTANCE;
+
+        static {
+            INSTANCE = new FromSequence(AnyItemType.INSTANCE, StaticProperty.ALLOWS_ZERO_OR_MORE);
+        }
 
         private final ItemType resultType;
         private final int cardinality;
@@ -695,7 +698,7 @@ public abstract class JPConverter {
 
         @Override
         public GroundedValue convert(Object object, XPathContext context) throws XPathException {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
 
         /**
@@ -703,7 +706,7 @@ public abstract class JPConverter {
          */
         @Override
         public ItemType getItemType() {
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         }
     }
 
@@ -734,7 +737,7 @@ public abstract class JPConverter {
 
         @Override
         public ItemType getItemType() {
-            return AnyItemType.getInstance();
+            return AnyItemType.INSTANCE;
         }
 
         /**

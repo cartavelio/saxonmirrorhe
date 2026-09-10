@@ -93,7 +93,7 @@ public abstract class Math {
                 }
                 double x = converter.stringToNumber(it.getUnicodeStringValue());
                 if (Double.isNaN(x)) {
-                    return EmptySequence.getInstance();
+                    return EmptySequence.INSTANCE;
                 }
                 if (x == max) {
                     highest.add(it);
@@ -105,7 +105,7 @@ public abstract class Math {
             }
             return new SequenceExtent.Of<>(highest);
         } catch (NumberFormatException e) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
     }
 
@@ -129,7 +129,7 @@ public abstract class Math {
                 }
                 double x = converter.stringToNumber(it.getUnicodeStringValue());
                 if (Double.isNaN(x)) {
-                    return EmptySequence.getInstance();
+                    return EmptySequence.INSTANCE;
                 }
                 if (x == min) {
                     lowest.add(it);
@@ -141,7 +141,7 @@ public abstract class Math {
             }
             return new SequenceExtent.Of<>(lowest);
         } catch (NumberFormatException e) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
     }
 

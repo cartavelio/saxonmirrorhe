@@ -48,9 +48,9 @@ public class TinyBuilder extends Builder {
     private boolean ended = false;
     private boolean noNewNamespaces = true;
     private Statistics statistics;
-    private boolean markDefaultedAttributes = false;
+    private final boolean markDefaultedAttributes;
     private Eligibility textualElementEligibilityState = Eligibility.INELIGIBLE;
-    private UnicodeBuilder commentBuilder = new UnicodeBuilder();
+    private final UnicodeBuilder commentBuilder = new UnicodeBuilder();
 
     /**
      * Create a TinyTree builder
@@ -283,9 +283,16 @@ public class TinyBuilder extends Builder {
 //            tree.markTopWithinEntity(nodeNr);
 //        }
 //        //#endif
-        for (AttributeInfo att : attributes) {
-            attribute2(att.getNodeName(), att.getType(),
-                      getAttValue(att), location, att.getProperties());
+        if (attributes instanceof SingletonAttributeMap) {
+            // Common enough to handle specially
+            AttributeInfo att = (AttributeInfo)attributes;
+            addAttributeToTree(att.getNodeName(), att.getType(),
+                               getAttValue(att), att.getProperties());
+        } else {
+            for (AttributeInfo att : attributes) {
+                addAttributeToTree(att.getNodeName(), att.getType(),
+                                   getAttValue(att), att.getProperties());
+            }
         }
         textualElementEligibilityState = (noNewNamespaces && !lineNumbering) ? Eligibility.PRIMED : Eligibility.INELIGIBLE;
         tree.addNamespaces(nodeNr, namespaceStack.peek());
@@ -379,8 +386,7 @@ public class TinyBuilder extends Builder {
     }
 
 
-    private void attribute2(/*@NotNull*/ NodeName attName, SimpleType type, String value, Location locationId, int properties)
-            throws XPathException {
+    private void addAttributeToTree(NodeName attName, SimpleType type, String value, int properties) {
         // System.err.println("attribute " + nameCode + "=" + value);
         int fp = attName.obtainFingerprint(namePool);
         String prefix = attName.getPrefix();

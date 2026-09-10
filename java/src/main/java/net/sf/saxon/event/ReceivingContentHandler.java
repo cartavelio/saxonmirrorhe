@@ -170,7 +170,7 @@ public class ReceivingContentHandler
     public void setPipelineConfiguration(PipelineConfiguration pipe) {
         this.pipe = pipe;
         Configuration config = pipe.getConfiguration();
-        ignoreIgnorable = pipe.getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.getInstance();
+        ignoreIgnorable = pipe.getParseOptions().getSpaceStrippingRule() != NoElementsSpaceStrippingRule.INSTANCE;
         retainDTDAttributeTypes = config.getBooleanProperty(Feature.RETAIN_DTD_ATTRIBUTE_TYPES);
         if (!pipe.getParseOptions().isExpandAttributeDefaults()) {
             defaultedAttributesAction = -1;

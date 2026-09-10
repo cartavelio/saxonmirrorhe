@@ -459,7 +459,7 @@ public abstract class AbstractStaticContext implements StaticContext {
 
     @Override
     public ItemType getRequiredContextItemType() {
-        return AnyItemType.getInstance();
+        return AnyItemType.INSTANCE;
     }
 
     /**

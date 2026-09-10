@@ -103,7 +103,7 @@ public class AtomicConstructorFunction extends AbstractFunction {
     public Sequence call(XPathContext context, Sequence[] args) throws XPathException {
         AtomicValue val = (AtomicValue) args[0].head();
         if (val == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         Configuration config = context.getConfiguration();
         Converter converter = config.getConversionRules().getConverter(val.getItemType(), targetType);

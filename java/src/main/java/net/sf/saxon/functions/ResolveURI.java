@@ -43,7 +43,7 @@ public class ResolveURI extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue arg0 = (AtomicValue) arguments[0].head();
         if (arg0 == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         String relative = arg0.getStringValue();
         String base;

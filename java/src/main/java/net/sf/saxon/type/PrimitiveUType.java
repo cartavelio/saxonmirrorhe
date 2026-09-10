@@ -208,7 +208,7 @@ public enum PrimitiveUType {
 
             case EXTENSION:
                 //return JavaExternalObjectType.EXTERNAL_OBJECT_TYPE;
-                return AnyItemType.getInstance();
+                return AnyItemType.INSTANCE;
             default:
                 throw new IllegalArgumentException();
 

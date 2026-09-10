@@ -195,7 +195,7 @@ public class AtomicArray implements AtomicSequence {
     public GroundedValue reduce() {
         int len = getLength();
         if (len == 0) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         } else if (len == 1) {
             return itemAt(0);
         } else {

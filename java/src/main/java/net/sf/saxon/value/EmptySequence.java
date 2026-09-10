@@ -20,28 +20,11 @@ import net.sf.saxon.tree.iter.EmptyIterator;
  */
 
 
-public final class EmptySequence implements GroundedValue {
+public enum EmptySequence implements GroundedValue {
 
     // This class has a single instance
-    private static final EmptySequence THE_INSTANCE = new EmptySequence();
+    INSTANCE;
 
-
-    /**
-     * Private constructor: only the predefined instances of this class can be used
-     */
-
-    private EmptySequence() {
-    }
-
-    /**
-     * Get the implicit instance of this class
-     *
-     * @return the singular instances of this class: an empty sequence
-     */
-
-    public static EmptySequence getInstance() {
-        return THE_INSTANCE;
-    }
 
     @Override
     public UnicodeString getUnicodeStringValue() {
@@ -84,23 +67,6 @@ public final class EmptySequence implements GroundedValue {
     @Override
     public final int getLength() {
         return 0;
-    }
-
-    /**
-     * Is this expression the same as another expression?
-     *
-     * @throws ClassCastException if the values are not comparable
-     */
-
-    public boolean equals(/*@NotNull*/ Object other) {
-        if (!(other instanceof GroundedValue && ((GroundedValue)other).getLength() == 0)) {
-            throw new ClassCastException("Cannot compare " + other.getClass() + " to empty sequence");
-        }
-        return true;
-    }
-
-    public int hashCode() {
-        return 42;
     }
 
     /**

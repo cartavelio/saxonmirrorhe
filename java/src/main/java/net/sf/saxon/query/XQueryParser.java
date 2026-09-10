@@ -165,12 +165,15 @@ public class XQueryParser extends XPathParser {
             GlobalContextRequirement requirement = exec.getGlobalContextRequirement();
             if (requirement != null) {
                 requirement.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
-            } else if (mainModule.getRequiredContextItemType() != null
-                    && mainModule.getRequiredContextItemType() != AnyItemType.getInstance()) {
-                GlobalContextRequirement req = new GlobalContextRequirement();
-                req.setExternal(true);
-                req.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
-                exec.setGlobalContextRequirement(req);
+            } else {
+                if (mainModule.getRequiredContextItemType() != null) {
+                    if (mainModule.getRequiredContextItemType() != AnyItemType.INSTANCE) {
+                        GlobalContextRequirement req = new GlobalContextRequirement();
+                        req.setExternal(true);
+                        req.addRequiredSequenceType(mainModule.getRequiredContextValueType(), true);
+                        exec.setGlobalContextRequirement(req);
+                    }
+                }
             }
 
 //            setDefaultContainer(new SimpleContainer(mainModule.getPackageData()));

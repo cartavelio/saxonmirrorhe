@@ -91,7 +91,7 @@ public class SQLClose extends ExtensionInstruction {
             } catch (SQLException ex) {
                 dynamicError("(SQL) Failed to close connection: " + ex.getMessage(), SaxonErrorCode.SXSQ0002, context);
             }
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
 
 

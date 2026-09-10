@@ -25,6 +25,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.ItemTypePattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.query.QueryResult;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -777,7 +778,7 @@ public class Literal extends Expression {
      */
 
     public static Literal makeEmptySequence() {
-        return new Literal(EmptySequence.getInstance());
+        return new Literal(EmptySequence.INSTANCE);
     }
 
 
@@ -869,15 +870,16 @@ public class Literal extends Expression {
         public PushEvaluator elaborateForPush() {
             Literal expr = (Literal)getExpression();
             GroundedValue value = ((Literal) getExpression()).getGroundedValue();
-            if (value instanceof Item) {
+            Location loc = expr.getLocation();
+            if (value instanceof Item it) {
                 return (out, context) -> {
-                    out.append((Item)value, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
+                    out.append(it, loc, ReceiverOption.ALL_NAMESPACES);
                     return null;
                 };
             } else {
                 return (out, context) -> {
                     for (Item item : value.asIterable()) {
-                         out.append(item, expr.getLocation(), ReceiverOption.ALL_NAMESPACES);
+                         out.append(item, loc, ReceiverOption.ALL_NAMESPACES);
                     }
                     return null;
                 };

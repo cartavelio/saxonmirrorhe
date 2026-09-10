@@ -1219,7 +1219,7 @@ public class Choose extends Instruction implements ConditionalInstruction {
                     return actions[i].evaluate(context);
                 }
             }
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
 
     }

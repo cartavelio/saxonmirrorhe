@@ -730,7 +730,7 @@ public class AlphaCode {
         String principal = tree.principal;
         ItemType itemType = null;
         if (principal.isEmpty()) {
-            itemType = AnyItemType.getInstance();
+            itemType = AnyItemType.INSTANCE;
         } else if (principal.startsWith("A")) {
             BuiltInAtomicType builtIn = BuiltInAtomicType.fromAlphaCode(principal);
             if (builtIn == null) {
@@ -977,7 +977,7 @@ public class AlphaCode {
                 AlphaCodeTree returnType = tree.resultType;
                 List<AlphaCodeTree> argTypes = tree.argTypes;
                 if (argTypes == null) {
-                    itemType = AnyFunctionType.getInstance();
+                    itemType = AnyFunctionType.INSTANCE;
                 } else {
                     SequenceType r;
                     if (returnType == null) {

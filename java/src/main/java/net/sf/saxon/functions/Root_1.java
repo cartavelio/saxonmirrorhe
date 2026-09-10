@@ -60,7 +60,7 @@ public class Root_1 extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         GNode node = (GNode) arguments[0].head();
         if (node == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         if (node instanceof NodeInfo) {
             return ((NodeInfo) node).getRoot();

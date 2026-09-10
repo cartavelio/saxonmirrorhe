@@ -74,7 +74,7 @@ public final class SequenceCollector extends SequenceWriter {
     public GroundedValue getSequence() {
         switch (list.size()) {
             case 0:
-                return EmptySequence.getInstance();
+                return EmptySequence.INSTANCE;
             case 1:
                 return list.get(0);
             default:

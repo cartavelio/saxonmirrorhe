@@ -60,8 +60,8 @@ public class Exists extends Aggregate {
 
     private static boolean exists(SequenceIterator iter) {
         boolean result;
-        if (iter instanceof LookaheadIterator && ((LookaheadIterator) iter).supportsHasNext()) {
-            result = ((LookaheadIterator) iter).hasNext();
+        if (iter instanceof LookaheadIterator lit && lit.supportsHasNext()) {
+            result = lit.hasNext();
         } else {
             result = iter.next() != null;
         }

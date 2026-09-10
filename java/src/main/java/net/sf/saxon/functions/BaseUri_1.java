@@ -28,11 +28,11 @@ public class BaseUri_1 extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         NodeInfo node = (NodeInfo)arguments[0].head();
         if (node == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         String s = node.getBaseURI();
         if (s == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         return new AnyURIValue(s);
 

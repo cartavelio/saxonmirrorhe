@@ -48,7 +48,12 @@ public class NamedTemplate extends Actor implements TraceableComponent {
 
     private StructuredQName templateName;
     private SequenceType requiredType;
-    private ItemType requiredContextItemType = AnyItemType.getInstance();
+    private ItemType requiredContextItemType;
+
+    {
+        requiredContextItemType = AnyItemType.getInstance();
+    }
+
     private Optionality contextItemOptionality = Optionality.OPTIONAL;
 //    private boolean mayOmitContextItem = true;
 //    private boolean absentFocus = false;
@@ -219,7 +224,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
             }
         } else {
             TypeHierarchy th = context.getConfiguration().getTypeHierarchy();
-            if (requiredContextItemType != AnyItemType.getInstance() &&
+            if (requiredContextItemType != AnyItemType.INSTANCE &&
                     !requiredContextItemType.matches(contextItem, th)) {
                 RoleDiagnostic role = new RoleDiagnostic(
                         RoleDiagnostic.MISC, "context item for the named template", 0);
@@ -257,7 +262,7 @@ public class NamedTemplate extends Actor implements TraceableComponent {
     }
 
     public void explainProperties(ExpressionPresenter presenter) {
-        if (getRequiredContextItemType() != AnyItemType.getInstance()) {
+        if (getRequiredContextItemType() != AnyItemType.INSTANCE) {
             SequenceType st = SequenceType.one(getRequiredContextItemType());
             presenter.emitAttribute("cxt", st.toAlphaCode());
         }

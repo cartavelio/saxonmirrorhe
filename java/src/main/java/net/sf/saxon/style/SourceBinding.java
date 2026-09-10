@@ -636,7 +636,7 @@ public class SourceBinding {
                                 atype = atype == null
                                         ? instructionType
                                         : ChoiceItemType.of(atype, instructionType);
-                                if (atype == AnyItemType.getInstance()) {
+                                if (atype == AnyItemType.INSTANCE) {
                                     break;
                                 }
                             }

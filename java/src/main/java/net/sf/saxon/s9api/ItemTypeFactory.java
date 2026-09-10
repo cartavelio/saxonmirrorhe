@@ -450,7 +450,7 @@ public class ItemTypeFactory {
     private ItemType getElementOrAttributeTest(int nodeKind, QName name, QName schemaType, boolean nillable)
             throws SaxonApiException{
         QNameTest namePredicate = AnyQNameTest.getInstance();
-        SchemaType contentType = AnyType.getInstance();
+        SchemaType contentType = AnyType.INSTANCE;
         if (schemaType != null) {
             requireSchema();
             contentType = schema.getSchemaType(schemaType.getStructuredQName());

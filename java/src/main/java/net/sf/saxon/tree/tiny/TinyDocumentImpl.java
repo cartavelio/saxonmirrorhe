@@ -317,7 +317,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
         if (node == null || node.getSchemaType() == Untyped.getInstance()) {
             return Untyped.getInstance();
         } else {
-            return AnyType.getInstance();
+            return AnyType.INSTANCE;
         }
     }
 

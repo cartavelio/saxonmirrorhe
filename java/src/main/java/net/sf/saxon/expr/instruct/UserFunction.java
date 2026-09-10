@@ -268,7 +268,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     public boolean acceptsNodesWithoutAtomization() {
         for (int i = 0; i < getArity(); i++) {
             ItemType type = getArgumentType(i).getPrimaryType();
-            if (type instanceof NodeTest || type == AnyItemType.getInstance()) {
+            if (type instanceof NodeTest || type == AnyItemType.INSTANCE) {
                 return true;
             }
         }
@@ -970,7 +970,7 @@ public class UserFunction extends Actor implements FunctionItem, FunctionDefinit
     @Override
     public GroundedValue subsequence(int start, int length) {
         //noinspection RedundantCast
-        return start <= 0 && (start + length) > 0 ? (GroundedValue) this : (GroundedValue) EmptySequence.getInstance();
+        return start <= 0 && (start + length) > 0 ? (GroundedValue) this : (GroundedValue) EmptySequence.INSTANCE;
     }
 
     /**

@@ -232,11 +232,11 @@ public class CollectionFn extends SystemFunction implements Callable {
         // See if the collection has been cached
 
         PackageData packageData = getRetainedStaticContext().getPackageData();
-        SpaceStrippingRule whitespaceRule = NoElementsSpaceStrippingRule.getInstance();
+        SpaceStrippingRule whitespaceRule = NoElementsSpaceStrippingRule.INSTANCE;
         String collectionKey = absoluteURI;
         if (packageData.isXSLT()) {
             whitespaceRule = ((StylesheetPackage) packageData).getSpaceStrippingRule();
-            if (whitespaceRule != NoElementsSpaceStrippingRule.getInstance()) {
+            if (whitespaceRule != NoElementsSpaceStrippingRule.INSTANCE) {
                 collectionKey = ((StylesheetPackage) packageData).getPackageName() +
                         ((StylesheetPackage) packageData).getPackageVersion() +
                         " " +
@@ -268,11 +268,13 @@ public class CollectionFn extends SystemFunction implements Callable {
 
         // In XSLT, worry about whitespace stripping
 
-        if (packageData instanceof StylesheetPackage && whitespaceRule != NoElementsSpaceStrippingRule.getInstance()) {
-            if (collection instanceof AbstractResourceCollection) {
-                boolean alreadyStripped = ((AbstractResourceCollection)collection).stripWhitespace(whitespaceRule);
-                if (alreadyStripped) {
-                    whitespaceRule = null;
+        if (packageData instanceof StylesheetPackage) {
+            if (whitespaceRule != NoElementsSpaceStrippingRule.INSTANCE) {
+                if (collection instanceof AbstractResourceCollection) {
+                    boolean alreadyStripped = ((AbstractResourceCollection) collection).stripWhitespace(whitespaceRule);
+                    if (alreadyStripped) {
+                        whitespaceRule = null;
+                    }
                 }
             }
         }

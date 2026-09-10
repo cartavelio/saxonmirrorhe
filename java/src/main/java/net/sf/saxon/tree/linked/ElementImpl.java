@@ -677,7 +677,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
     @Override
     public void removeTypeAnnotation() {
         if (getSchemaType() != Untyped.getInstance()) {
-            type = AnyType.getInstance();
+            type = AnyType.INSTANCE;
             getRawParent().removeTypeAnnotation();
         }
     }

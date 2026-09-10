@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  */
 public class AnyFunctionType implements FunctionItemType {
 
-    /*@NotNull*/ public final static AnyFunctionType ANY_FUNCTION = new AnyFunctionType();
+    /*@NotNull*/ public final static AnyFunctionType INSTANCE = new AnyFunctionType();
 
     /**
      * Get the singular instance of this type (Note however that subtypes of this type
@@ -40,7 +40,7 @@ public class AnyFunctionType implements FunctionItemType {
 
     /*@NotNull*/
     public static AnyFunctionType getInstance() {
-        return ANY_FUNCTION;
+        return INSTANCE;
     }
 
     /**
@@ -181,7 +181,7 @@ public class AnyFunctionType implements FunctionItemType {
     /*@NotNull*/
     @Override
     public final ItemType getPrimitiveItemType() {
-        return ANY_FUNCTION;
+        return this;
     }
 
     /**

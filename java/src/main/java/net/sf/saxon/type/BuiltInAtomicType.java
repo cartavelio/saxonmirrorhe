@@ -50,9 +50,9 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     private static final Map<String, BuiltInAtomicType> byAlphaCode = new HashMap<>(60);
 
-    public final static BuiltInAtomicType ANY_ATOMIC =
-            makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.getInstance(),
-                           "A", true);
+    public final static BuiltInAtomicType ANY_ATOMIC
+            = makeAtomicType(StandardNames.XS_ANY_ATOMIC_TYPE, AnySimpleType.INSTANCE,
+                             "A", true);
 
     public final static BuiltInAtomicType STRING =
             makeAtomicType(StandardNames.XS_STRING, ANY_ATOMIC,
@@ -928,7 +928,7 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     @Override
     public void checkTypeDerivationIsOK(SchemaType type, int block) throws SchemaException {
-        if (type == AnySimpleType.getInstance()) {
+        if (type == AnySimpleType.INSTANCE) {
             // OK
         } else if (isSameType(type)) {
             // OK

@@ -29,7 +29,7 @@ public class CodepointEqual extends SystemFunction implements Callable {
         StringValue op1 = (StringValue) arguments[0].head();
         StringValue op2 = (StringValue) arguments[1].head();
         if (op1 == null || op2 == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         return BooleanValue.get(op1.getUnicodeStringValue().equals(op2.getUnicodeStringValue()));
     }

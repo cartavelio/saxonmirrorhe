@@ -314,7 +314,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                         if (in instanceof NodeTest) {
                             return AnyXNodeType.getInstance();
                         } else {
-                            return AnyItemType.getInstance();
+                            return AnyItemType.INSTANCE;
                         }
                     } else {
                         // it can't be an element or attribute, so stripping type annotations can't affect it
@@ -336,11 +336,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                     try {
                                         return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), elem.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
                                     }
                                 } else {
                                     // Although there is no element declaration now, there might be one at run-time
-                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ELEMENT, AnyQNameTest.getInstance(), AnyType.INSTANCE, false, config);
                                 }
                             }
                             Affinity a = th.relationship(in, NodeKindType.ATTRIBUTE);
@@ -351,11 +351,11 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                                     try {
                                         return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), attr.getType(), false, config);
                                     } catch (MissingComponentException e1) {
-                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                        return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
                                     }
                                 } else {
                                     // Although there is no attribute declaration now, there might be one at run-time
-                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.getInstance(), false, config);
+                                    return new NamedXNodeType(Type.ATTRIBUTE, AnyQNameTest.getInstance(), AnySimpleType.INSTANCE, false, config);
                                 }
                             }
                         } else {
@@ -372,7 +372,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
                     } else if (in instanceof AtomicType) {
                         return in;
                     } else {
-                        return AnyItemType.getInstance();
+                        return AnyItemType.INSTANCE;
                     }
             }
         }
@@ -627,7 +627,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             case Type.DOCUMENT: {
                 ParseOptions options = new ParseOptions()
                         .withSchemaValidationMode(validation)
-                        .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
+                        .withSpaceStrippingRule(NoElementsSpaceStrippingRule.INSTANCE)
                         .withTopLevelType(schemaType)
                         .withErrorReporter(context.getErrorReporter());
                 config.prepareValidationReporting(context, options);
@@ -743,7 +743,7 @@ public class CopyOf extends Instruction implements ValidatingInstruction {
             }
             UnicodeString value = source.getUnicodeStringValue();
             ValidationFailure valErr = schemaType.validateContent(
-                    value, DummyNamespaceResolver.getInstance(), context.getConfiguration().getConversionRules());
+                    value, DummyNamespaceResolver.INSTANCE, context.getConfiguration().getConversionRules());
             if (valErr != null) {
                 valErr.setMessage("Attribute being copied does not match the required type. " +
                                        valErr.getMessage());

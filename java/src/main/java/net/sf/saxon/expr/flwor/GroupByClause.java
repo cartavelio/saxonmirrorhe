@@ -298,7 +298,7 @@ public class GroupByClause extends Clause {
         for (int j = 0; j < groupingValues.length; j++) {
             Sequence v = groupingValues[j];
             if (v == null) {
-                v = EmptySequence.getInstance();
+                v = EmptySequence.INSTANCE;
             }
             context.setLocalVariable(bindings[j].getLocalSlotNumber(), v);
         }

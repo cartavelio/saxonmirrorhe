@@ -39,7 +39,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap() {
-        this(EmptyMap.getInstance(40));
+        this(EmptyMap.INSTANCE_40);
     }
 
     /**

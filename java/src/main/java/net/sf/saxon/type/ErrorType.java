@@ -194,7 +194,7 @@ public final class ErrorType extends GNodeType implements AtomicType, UnionType,
     /*@NotNull*/
     @Override
     public SchemaType getBaseType() {
-        return AnySimpleType.getInstance();
+        return AnySimpleType.INSTANCE;
     }
 
     /**
@@ -322,7 +322,7 @@ public final class ErrorType extends GNodeType implements AtomicType, UnionType,
 
     @Override
     public void checkTypeDerivationIsOK(/*@NotNull*/ SchemaType type, int block) throws SchemaException {
-        if (type == this || type == AnySimpleType.getInstance()) {
+        if (type == this || type == AnySimpleType.INSTANCE) {
             return;
         }
         throw new SchemaException("Type xs:error is not validly derived from " + type.getDescription());

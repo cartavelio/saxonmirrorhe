@@ -405,7 +405,7 @@ public class ForClause extends Clause {
     public void refineVariableType(ExpressionVisitor visitor, List<VariableReference> references, Expression returnExpr) {
         ItemType actualItemType = getSequence().getItemType();
         if (actualItemType instanceof ErrorType) {
-            actualItemType = AnyItemType.getInstance();
+            actualItemType = AnyItemType.INSTANCE;
         }
         for (VariableReference ref : references) {
             ref.refineVariableType(actualItemType,

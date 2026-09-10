@@ -134,7 +134,7 @@ public class JAXPVariableReference extends Expression implements Callable {
         Configuration config = context.getConfiguration();
         Object value = resolver.resolveVariable(name.toJaxpQName());
         if (value == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         JPConverter converter = JPConverter.allocate(value.getClass(), null, config);
         return converter.convert(value, context);

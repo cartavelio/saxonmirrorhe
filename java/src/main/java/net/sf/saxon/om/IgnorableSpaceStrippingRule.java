@@ -22,13 +22,9 @@ import net.sf.saxon.type.Untyped;
  * model, regardless of the value of the xml:space attribute
  */
 
-public class IgnorableSpaceStrippingRule implements SpaceStrippingRule {
+public enum IgnorableSpaceStrippingRule implements SpaceStrippingRule {
 
-    private final static IgnorableSpaceStrippingRule THE_INSTANCE = new IgnorableSpaceStrippingRule();
-
-    public static IgnorableSpaceStrippingRule getInstance() {
-        return THE_INSTANCE;
-    }
+    INSTANCE;
 
     /**
      * Decide whether an element is in the set of white-space preserving element types

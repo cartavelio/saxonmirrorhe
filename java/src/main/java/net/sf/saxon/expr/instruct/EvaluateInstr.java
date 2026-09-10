@@ -489,7 +489,7 @@ public final class EvaluateInstr extends Expression {
 //                    if (version == 30) {
 //                        version = 31;
 //                    }
-                    MapItem options = (optionsEval == null ? EmptyMap.getInstance(40) : (MapItem) optionsEval.eval(context));
+                    MapItem options = (optionsEval == null ? EmptyMap.INSTANCE_40 : (MapItem) optionsEval.eval(context));
 
                     IndependentContext env = new IndependentContext(config);
                     env.setWarningHandler((str, loc) -> {

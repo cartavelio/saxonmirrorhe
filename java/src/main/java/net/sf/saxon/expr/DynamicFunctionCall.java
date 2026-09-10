@@ -347,7 +347,7 @@ DynamicFunctionCall extends Expression {
 
                     Sequence[] argValues = new Sequence[argEvaluators.length];
 
-                    if (fit == AnyFunctionType.ANY_FUNCTION) {
+                    if (fit == AnyFunctionType.INSTANCE) {
                         for (int i = 0; i < argEvaluators.length; i++) {
                             argValues[i] = argEvaluators[i].evaluate(context);
                         }

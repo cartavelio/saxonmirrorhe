@@ -810,7 +810,7 @@ public class FormatDate extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         CalendarValue value = (CalendarValue) arguments[0].head();
         if (value == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         String format = arguments[1].head().getStringValue();
 

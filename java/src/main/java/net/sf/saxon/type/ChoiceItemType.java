@@ -244,7 +244,7 @@ public class ChoiceItemType implements ItemType, ChoiceType {
         if (allXNodes) {
             return AnyXNodeType.getInstance();
         }
-        return AnyItemType.getInstance();
+        return AnyItemType.INSTANCE;
     }
 
     /**

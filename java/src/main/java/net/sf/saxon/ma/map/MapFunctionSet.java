@@ -26,7 +26,6 @@ import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
 import net.sf.saxon.trace.ExpressionPresenter;
-import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -146,10 +145,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 .arg(1, MapType.ANY_MAP_TYPE, version>=40 ? OPT : ONE, null)
                 .setOptionDetails(mergeOptionDetails));
 
-        register("put", 3, e -> e.populate(MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                .arg(2, AnyItemType.getInstance(), STAR | NAV, null));
+        register("put", 3, e -> {
+            return e.populate(MapPut::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
+                    .arg(2, AnyItemType.INSTANCE, STAR | NAV, null);
+        });
 
         register("contains", 2, e -> e.populate(MapContains::new, BuiltInAtomicType.BOOLEAN, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
@@ -165,25 +166,33 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         register("size", 1, e -> e.populate(MapSize::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
-        register("entry", 2, e -> e.populate( () -> new MapEntry(version), MapType.ANY_MAP_TYPE, ONE, 0)
-                .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
+        register("entry", 2, e -> {
+            return e.populate( () -> new MapEntry(version), MapType.ANY_MAP_TYPE, ONE, 0)
+                    .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
+                    .arg(1, AnyItemType.INSTANCE, STAR | NAV, null);
+        });
 
-        register("find", 2, e -> e.populate( MapFind::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
+        register("find", 2, e -> {
+            return e.populate( MapFind::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
+                    .arg(0, AnyItemType.INSTANCE, STAR | INS, null)
+                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
+        });
 
         ItemType actionType = new SpecificFunctionType(
                 SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
                 SequenceType.ANY_SEQUENCE);
 
-        register("for-each", 2, e -> e.populate(MapForEach::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, actionType, ONE | INS, null));
+        register("for-each", 2, e -> {
+            return e.populate(MapForEach::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, actionType, ONE | INS, null);
+        });
 
-        register("get", 2, e -> e.populate( MapGet::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
+        register("get", 2, e -> {
+            return e.populate(MapGet::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null);
+        });
 
 
 
@@ -194,10 +203,12 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.SINGLE_ATOMIC,
                     SequenceType.ANY_SEQUENCE);
 
-            register("get", 3, e -> e.populate(MapGet::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
-                    .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
-                    .arg(2, AnyItemType.getInstance(), STAR | INS, null));
+            register("get", 3, e -> {
+                return e.populate(MapGet::new, AnyItemType.INSTANCE, STAR, 0)
+                        .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
+                        .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
+                        .arg(2, AnyItemType.INSTANCE, STAR | INS, null);
+            });
 
             SpecificFunctionType mapBuildKeyArg = new SpecificFunctionType(
                     SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
@@ -207,19 +218,23 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER,
                     SequenceType.ANY_SEQUENCE);
 
-            register("build", 1, 4, e -> e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
-                    .arg(0, AnyItemType.getInstance(), STAR, null)
-                    .arg(1, mapBuildKeyArg, OPT, null)
-                    .arg(2, mapBuildValueArg, OPT, null)
-                    .arg(3, MapType.ANY_MAP_TYPE, OPT, null)
-                    .setOptionDetails(mergeOptionDetails));
+            register("build", 1, 4, e -> {
+                return e.populate(MapBuild::new, MapType.ANY_MAP_TYPE, ONE, 0)
+                        .arg(0, AnyItemType.INSTANCE, STAR, null)
+                        .arg(1, mapBuildKeyArg, OPT, null)
+                        .arg(2, mapBuildValueArg, OPT, null)
+                        .arg(3, MapType.ANY_MAP_TYPE, OPT, null)
+                        .setOptionDetails(mergeOptionDetails);
+            });
 
             ItemType filterFunctionType = new SpecificFunctionType(
                     SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
                     SequenceType.OPTIONAL_BOOLEAN);
 
-            register("items", 1, e -> e.populate(MapItems::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+            register("items", 1, e -> {
+                return e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
+                        .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
+            });
 
             register("keys-where", 2, e -> e.populate(MapKeysWhere::new, BuiltInAtomicType.ANY_ATOMIC, STAR, 0)
                     .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null)
@@ -251,8 +266,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     .arg(1, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null));
 
             // TODO: drop this, renamed map:items
-            register("values", 1, e -> e.populate(MapItems::new, AnyItemType.getInstance(), STAR, 0)
-                    .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
+            register("values", 1, e -> {
+                return e.populate(MapItems::new, AnyItemType.INSTANCE, STAR, 0)
+                        .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null);
+            });
 
             SpecificFunctionType FILTER_TYPE = new SpecificFunctionType(
                     SequenceType.SINGLE_ATOMIC, SequenceType.ANY_SEQUENCE,
@@ -374,7 +391,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     SequenceType valueType = tit.getFieldType(key);
                     if (valueType == null) {
                         warning("Field " + key + " is not defined in record type");
-                        return AnyItemType.getInstance();
+                        return AnyItemType.INSTANCE;
                     } else {
                         return valueType.getPrimaryType();
                     }
@@ -449,7 +466,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 if (arguments.length > 2) {
                     return arguments[2];
                 } else {
-                    return EmptySequence.getInstance();
+                    return EmptySequence.INSTANCE;
                 }
             } else {
                 return value;
@@ -623,7 +640,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 newArgs[2] = arguments[2];
             }
             if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
-                newArgs[3] = Literal.makeLiteral(EmptyMap.getInstance(40));
+                newArgs[3] = Literal.makeLiteral(EmptyMap.INSTANCE_40);
             } else {
                 newArgs[3] = arguments[3];
             }
@@ -641,7 +658,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 getDetails().optionDetails.processSuppliedOptions(options, context, version);
             } else {
-                options = EmptyMap.getInstance(40);
+                options = EmptyMap.INSTANCE_40;
             }
             OnDuplicatesAction action = getDuplicatesCombiner(options, "combine", "FOJS0003");
             mapBuilder.setDuplicatesAction(action);
@@ -759,7 +776,6 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     MapItem options = (MapItem) arguments[1].head();
                     if (options != null && !options.isEmpty()) {
                         int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
-                        Instrumentation.count("MapMerge options");
                         Map<String, GroundedValue> values = getDetails().optionDetails.processSuppliedOptions(options, context, version);
                         action = getDuplicatesCombiner(options, "use-first", duplicatesErrorCode);
                     }

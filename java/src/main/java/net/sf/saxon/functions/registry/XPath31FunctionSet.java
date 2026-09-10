@@ -71,12 +71,16 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
 
         // The copy-of function is defined in XSLT 3.0, but we choose to make it available also in XPath/XQuery
 
-        register("copy-of", 0, e -> e.populate( CopyOfFn::new, AnyItemType.getInstance(),
-                 STAR, NEW));
+        register("copy-of", 0, e -> {
+            return e.populate(CopyOfFn::new, AnyItemType.getInstance(),
+                                  STAR, NEW);
+        });
 
-        register("copy-of", 1, e -> e.populate( CopyOfFn::new, AnyItemType.getInstance(),
-                 STAR, NEW)
-                .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY));
+        register("copy-of", 1, e -> {
+            return e.populate(CopyOfFn::new, AnyItemType.getInstance(),
+                                  STAR, NEW)
+                    .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY);
+        });
 
         register("default-language", 0, e -> e.populate(DynamicContextAccessor.DefaultLanguage::new, BuiltInAtomicType.LANGUAGE, ONE, DLANG));
 
@@ -92,29 +96,39 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
                  ONE, 0)
                 .arg(0, AnyGNodeType.getInstance(), OPT | INS, null));
 
-        register("head", 1, e -> e.populate( HeadFn::new, AnyItemType.getInstance(),
-                 OPT, FILTER)
-                .arg(0, AnyItemType.getInstance(), STAR | TRA, null));
+        register("head", 1, e -> {
+            return e.populate(HeadFn::new, AnyItemType.getInstance(),
+                                  OPT, FILTER)
+                    .arg(0, AnyItemType.getInstance(), STAR | TRA, null);
+        });
 
-        register("json-doc", 1, e -> e.populate( JsonDoc::new, AnyItemType.getInstance(),
-                 OPT, LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null));
+        register("json-doc", 1, e -> {
+            return e.populate(JsonDoc::new, AnyItemType.getInstance(),
+                                  OPT, LATE)
+                    .arg(0, BuiltInAtomicType.STRING, OPT, null);
+        });
 
-        register("json-doc", 2, e -> e.populate( JsonDoc::new, AnyItemType.getInstance(),
-                 OPT, LATE)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(ParseJsonFn.makeOptionsParameter(31)));
+        register("json-doc", 2, e -> {
+            return e.populate(JsonDoc::new, AnyItemType.getInstance(),
+                                  OPT, LATE)
+                    .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                    .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                    .setOptionDetails(ParseJsonFn.makeOptionsParameter(31));
+        });
 
-        register("json-to-xml", 1, e -> e.populate( JsonToXMLFn::new, AnyItemType.getInstance(),
-                 OPT, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null));
+        register("json-to-xml", 1, e -> {
+            return e.populate(JsonToXMLFn::new, AnyItemType.getInstance(),
+                                  OPT, LATE | NEW)
+                    .arg(0, BuiltInAtomicType.STRING, OPT, null);
+        });
 
-        register("json-to-xml", 2, e -> e.populate( JsonToXMLFn::new, AnyItemType.getInstance(),
-                 OPT, LATE | NEW)
-                .arg(0, BuiltInAtomicType.STRING, OPT, null)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(JsonToXMLFn.makeOptionsParameter(31)));
+        register("json-to-xml", 2, e -> {
+            return e.populate(JsonToXMLFn::new, AnyItemType.INSTANCE,
+                              OPT, LATE | NEW)
+                    .arg(0, BuiltInAtomicType.STRING, OPT, null)
+                    .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                    .setOptionDetails(JsonToXMLFn.makeOptionsParameter(31));
+        });
 
         register("load-xquery-module", 1, e -> e.populate( LoadXqueryModule::new, MapType.ANY_MAP_TYPE, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
@@ -128,13 +142,17 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("parse-ietf-date", 1, e -> e.populate( ParseIetfDate::new, BuiltInAtomicType.DATE_TIME, OPT, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
-        register("parse-json", 1, e -> e.populate( ParseJsonFn::new, AnyItemType.getInstance(), OPT, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
+        register("parse-json", 1, e -> {
+            return e.populate(ParseJsonFn::new, AnyItemType.INSTANCE, OPT, 0)
+                    .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
+        });
 
-        register("parse-json", 2, e -> e.populate( ParseJsonFn::new, AnyItemType.getInstance(), OPT, 0)
-                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
-                .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
-                .setOptionDetails(ParseJsonFn.makeOptionsParameter(31)));
+        register("parse-json", 2, e -> {
+            return e.populate(ParseJsonFn::new, AnyItemType.INSTANCE, OPT, 0)
+                    .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
+                    .arg(1, MapType.ANY_MAP_TYPE, ONE, null)
+                    .setOptionDetails(ParseJsonFn.makeOptionsParameter(31));
+        });
 
         register("parse-xml", 1, e -> e.populate(ParseXml::new, new DocumentNodeType(NodeKindType.ELEMENT), OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
@@ -147,36 +165,48 @@ public class XPath31FunctionSet extends BuiltInFunctionSet {
         register("parse-xml-fragment", 1, e -> e.populate(ParseXmlFragment::new, NodeKindType.DOCUMENT, OPT, LATE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY));
 
-        register("serialize", 2, e -> e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, Type.ITEM_TYPE, OPT, null)
-                .setOptionDetails(Serialize.makeOptionsParameter(31)));
+        register("serialize", 2, e -> {
+            return e.populate( Serialize::new, BuiltInAtomicType.STRING, ONE, 0)
+                    .arg(0, AnyItemType.INSTANCE, STAR, null)
+                    .arg(1, Type.ITEM_TYPE, OPT, null)
+                    .setOptionDetails(Serialize.makeOptionsParameter(31));
+        });
 
         // The snapshot function is defined in XSLT 3.0, but we choose to make it available also in XPath/XQuery
 
-        register("snapshot", 0, e -> e.populate( ContextItemAccessorFunction::new, AnyItemType.getInstance(), STAR, CITEM | LATE | NEW));
+        register("snapshot", 0, e -> {
+            return e.populate(ContextItemAccessorFunction::new, AnyItemType.INSTANCE, STAR, CITEM | LATE | NEW);
+        });
 
-        register("snapshot", 1, e -> e.populate(SnapshotFn::new, AnyXNodeType.getInstance(),
-                                                STAR, NEW)
-                .arg(0, AnyItemType.getInstance(), STAR | ABS, EMPTY));
+        register("snapshot", 1, e -> {
+            return e.populate(SnapshotFn::new, AnyXNodeType.getInstance(),
+                                                    STAR, NEW)
+                    .arg(0, AnyItemType.INSTANCE, STAR | ABS, EMPTY);
+        });
 
-        register("sort", 1, e -> e.populate(Sort::new, AnyItemType.getInstance(), STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null));
+        register("sort", 1, e -> {
+            return e.populate(Sort::new, AnyItemType.INSTANCE, STAR, 0)
+                    .arg(0, AnyItemType.INSTANCE, STAR, null);
+        });
 
-        register("sort", 2, e -> e.populate(Sort::new, AnyItemType.getInstance(),
-                                            STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null));
+        register("sort", 2, e -> {
+            return e.populate(Sort::new, AnyItemType.INSTANCE,
+                              STAR, 0)
+                    .arg(0, AnyItemType.INSTANCE, STAR, null)
+                    .arg(1, BuiltInAtomicType.STRING, OPT, null);
+        });
 
         ft = new SpecificFunctionType(
                 SequenceType.SINGLE_ITEM,
                 SequenceType.ATOMIC_SEQUENCE);
 
-        register("sort", 3, e -> e.populate(Sort::new, AnyItemType.getInstance(),
-                                            STAR, 0)
-                .arg(0, AnyItemType.getInstance(), STAR, null)
-                .arg(1, BuiltInAtomicType.STRING, OPT, null)
-                .arg(2, ft, ONE, null));
+        register("sort", 3, e -> {
+            return e.populate(Sort::new, AnyItemType.INSTANCE,
+                              STAR, 0)
+                    .arg(0, AnyItemType.INSTANCE, STAR, null)
+                    .arg(1, BuiltInAtomicType.STRING, OPT, null)
+                    .arg(2, ft, ONE, null);
+        });
 
         register("string-join", 1, e -> e.populate( StringJoin::new, BuiltInAtomicType.STRING, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, STAR, StringValue.EMPTY_STRING));

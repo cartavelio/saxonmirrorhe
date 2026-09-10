@@ -47,7 +47,7 @@ public class JsonDoc extends SystemFunction  {
 
         Item arg0 = arguments[0].head();
         if (arg0 == null) {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
         String href = arg0.getStringValue();
 

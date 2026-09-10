@@ -134,7 +134,7 @@ public class SingletonIterator implements SequenceIterator, FocusIterator,
 
     @Override
     public GroundedValue getResidue() {
-        return currentPosition < 0 ? item : EmptySequence.getInstance();
+        return currentPosition < 0 ? item : EmptySequence.INSTANCE;
     }
 
 }

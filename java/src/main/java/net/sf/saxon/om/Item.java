@@ -130,7 +130,7 @@ public interface Item extends GroundedValue {
         if (start <= 0 && (start + length) > 0) {
             return this;
         } else {
-            return EmptySequence.getInstance();
+            return EmptySequence.INSTANCE;
         }
     }
 

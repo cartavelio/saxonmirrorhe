@@ -57,7 +57,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
     private SystemIdMap systemIdMap = new SystemIdMap();
     private boolean imaginary;
     private Durability durability;
-    private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
+    private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.INSTANCE;
 
 
     /**
@@ -714,7 +714,7 @@ public final class DocumentImpl extends ParentNodeImpl implements TreeInfo, Muta
         if (documentElement == null || documentElement.getSchemaType() == Untyped.getInstance()) {
             return Untyped.getInstance();
         } else {
-            return AnyType.getInstance();
+            return AnyType.INSTANCE;
         }
     }
 
