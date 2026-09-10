@@ -269,7 +269,7 @@ public class XPathProcessor extends SaxonCAPI {
             selector.setContextItem(contextItem);
         } */
         XdmValue value = selector.evaluate();
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+        ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
 
     }
@@ -353,7 +353,7 @@ public class XPathProcessor extends SaxonCAPI {
 
 
         XdmItem item = selector.evaluateSingle();
-        ObjectHandle handle = objectHandles.create(item);
+        ObjectHandle handle = SaxonCAPI.createHandle(item);
         return handle.rawValue();
 
     }

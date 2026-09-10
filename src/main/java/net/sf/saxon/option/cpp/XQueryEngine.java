@@ -82,7 +82,7 @@ public class XQueryEngine extends SaxonCAPI {
 
     @CEntryPoint(name = "j_createXQueryEngine", exceptionHandler = SaxonCExceptionLongHandler.class)
     public static long createXQueryEngine(IsolateThread thread) throws SaxonApiException{
-            ObjectHandle handle = objectHandles.create(new net.sf.saxon.option.cpp.XQueryEngine(false));
+            ObjectHandle handle = SaxonCAPI.createHandle(new net.sf.saxon.option.cpp.XQueryEngine(false));
             return handle.rawValue();
     }
 
@@ -95,7 +95,7 @@ public class XQueryEngine extends SaxonCAPI {
             if(processor == null) {
                 throw new SaxonApiException("Processor object is null");
             }
-            ObjectHandle handle = objectHandles.create(XQueryEngine.newInstance(processor));
+            ObjectHandle handle = SaxonCAPI.createHandle(XQueryEngine.newInstance(processor));
             return handle.rawValue();
     }
 
@@ -317,7 +317,7 @@ public class XQueryEngine extends SaxonCAPI {
         }
         XQueryEvaluator eval = xqueryEvaluator(processor, cwd, params, values, null);
         XdmValue value = eval.evaluate();
-        ObjectHandle handle = objectHandles.create(value);
+        ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
     }
 

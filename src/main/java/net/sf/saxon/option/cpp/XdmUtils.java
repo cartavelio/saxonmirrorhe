@@ -83,7 +83,7 @@ public class XdmUtils {
         XdmNode node = SaxonCAPI.objectHandles.get(value);
         XdmNode parent = node.getParent();
 
-        ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(parent);
+        ObjectHandle objectHandle = SaxonCAPI.createHandle(parent);
         return objectHandle.rawValue();
     }
 
@@ -207,7 +207,7 @@ public class XdmUtils {
              array = new XdmArray(xdmValues);
          }
 
-         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
 
          return arrayHandle.rawValue();
 
@@ -230,7 +230,7 @@ public class XdmUtils {
              }
              array = XdmArray.makeArray(shortValues);
          }
-         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
          return arrayHandle.rawValue();
     }
 
@@ -251,7 +251,7 @@ public class XdmUtils {
              }
              array = XdmArray.makeArray(values);      
          }
-         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
          return arrayHandle.rawValue();
     }
 
@@ -271,7 +271,7 @@ public class XdmUtils {
              }
              array = XdmArray.makeArray(intValues);
          }
-         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
          return arrayHandle.rawValue();
     }
 
@@ -293,7 +293,7 @@ public class XdmUtils {
              }
              array = XdmArray.makeArray(values);
          }
-         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
          return arrayHandle.rawValue();
     }
 
@@ -313,7 +313,7 @@ public class XdmUtils {
              }
              array = XdmArray.makeArray(values);
          }
-         ObjectHandle arrayHandle = SaxonCAPI.objectHandles.create(array);
+         ObjectHandle arrayHandle = SaxonCAPI.createHandle(array);
          return arrayHandle.rawValue();
     }
 
@@ -529,7 +529,7 @@ public class XdmUtils {
         long[] attrRefs = null;
         if(iter.hasNext()) {
             attrRefs = iter.stream().mapToLong(i -> {
-                ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
+                ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
                 return objectHandle.rawValue();
             }).toArray();
         }else {
@@ -548,7 +548,7 @@ public class XdmUtils {
         long[] childRefs = null;
         if(iter.hasNext()) {
             childRefs = iter.stream().mapToLong(i -> {
-                ObjectHandle objectHandle = SaxonCAPI.objectHandles.create(i);
+                ObjectHandle objectHandle = SaxonCAPI.createHandle(i);
                 return objectHandle.rawValue();
             }).toArray();
         }else {
@@ -592,7 +592,7 @@ public class XdmUtils {
         while (iter.hasNext()) {
             if(pos == i) {
                  XdmNode childi = (XdmNode) iter.next();
-                 ObjectHandle handle = SaxonCAPI.objectHandles.create(childi);
+                 ObjectHandle handle = SaxonCAPI.createHandle(childi);
                  return handle.rawValue();
             }
             pos++ ;
@@ -649,7 +649,7 @@ public class XdmUtils {
         String valueStr = CTypeConversion.toJavaString(str);
 
         XdmAtomicValue value = new XdmAtomicValue(valueStr);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+        ObjectHandle handle = SaxonCAPI.createHandle(value);
         return handle.rawValue();
 
     }
@@ -666,7 +666,7 @@ public class XdmUtils {
      public static long makeIntegerValue(IsolateThread thread, int i){
 
          XdmAtomicValue value = new XdmAtomicValue(i);
-         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         ObjectHandle handle = SaxonCAPI.createHandle(value);
          return handle.rawValue();
 
      }
@@ -682,7 +682,7 @@ public class XdmUtils {
      public static long j_makeDoubleValue(IsolateThread thread, double d){
 
          XdmAtomicValue value = new XdmAtomicValue(d);
-         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         ObjectHandle handle = SaxonCAPI.createHandle(value);
          return handle.rawValue();
      }
 
@@ -697,7 +697,7 @@ public class XdmUtils {
      public static long j_makeFloatValue(IsolateThread thread, float f){
 
          XdmAtomicValue value = new XdmAtomicValue(f);
-         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         ObjectHandle handle = SaxonCAPI.createHandle(value);
          return handle.rawValue();
      }
 
@@ -711,7 +711,7 @@ public class XdmUtils {
      @CEntryPoint(name = "j_makeLongValue")
      public static long makeLongValue(IsolateThread thread, long l){
          XdmAtomicValue value = new XdmAtomicValue(l);
-         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         ObjectHandle handle = SaxonCAPI.createHandle(value);
          return handle.rawValue();
      }
 
@@ -726,7 +726,7 @@ public class XdmUtils {
      public static long makeBooleanValue(IsolateThread thread, int b){
          boolean bvalue = CTypeConversion.toBoolean(b);
          XdmAtomicValue value = new XdmAtomicValue(bvalue);
-         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         ObjectHandle handle = SaxonCAPI.createHandle(value);
          return handle.rawValue();
      }
 
@@ -740,7 +740,7 @@ public class XdmUtils {
      public static long makeQNameValue(IsolateThread thread, CCharPointer str) throws SaxonApiException {
 
          XdmValue value = SaxonCAPI.createXdmAtomicItem("QName", CTypeConversion.toJavaString(str));
-         ObjectHandle handle = SaxonCAPI.objectHandles.create(value);
+         ObjectHandle handle = SaxonCAPI.createHandle(value);
          return handle.rawValue();
      }
 

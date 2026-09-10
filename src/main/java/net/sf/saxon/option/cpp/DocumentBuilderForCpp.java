@@ -20,7 +20,7 @@ public class DocumentBuilderForCpp extends SaxonCAPI {
         if(processorRef != WordFactory.nullPointer()) {
             Processor processor = SaxonCAPI.objectHandles.get(processorRef);
 
-            ObjectHandle handle = SaxonCAPI.objectHandles.create(processor.newDocumentBuilder());
+            ObjectHandle handle = SaxonCAPI.createHandle(processor.newDocumentBuilder());
             return handle.rawValue();
         }
         throw new SaxonApiException("Cannot create DocumentBuilder - Processor is null");

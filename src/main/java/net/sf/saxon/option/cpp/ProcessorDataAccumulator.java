@@ -36,7 +36,7 @@ public class ProcessorDataAccumulator {
 
         
         ProcessorDataAccumulator processorData = new ProcessorDataAccumulator();
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(processorData);
+        ObjectHandle handle = SaxonCAPI.createHandle(processorData);
         return handle.rawValue();
     }
 
@@ -44,7 +44,7 @@ public class ProcessorDataAccumulator {
     @CEntryPoint(name = "createProcessorData")
     public static long createProcessorData(IsolateThread thread){
         ProcessorDataAccumulator processorData = new ProcessorDataAccumulator();
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(processorData);
+        ObjectHandle handle = SaxonCAPI.createHandle(processorData);
         return handle.rawValue();
     }
 
@@ -52,7 +52,7 @@ public class ProcessorDataAccumulator {
     @CEntryPoint(name = "createProcessorDataWithCapacity")
     public static long createProcessorDataWithCapacity(IsolateThread thread, int cap){
         ProcessorDataAccumulator processorData = new ProcessorDataAccumulator(cap);
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(processorData);
+        ObjectHandle handle = SaxonCAPI.createHandle(processorData);
         return handle.rawValue();
     }
 

@@ -62,7 +62,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             throw new SaxonApiException("Processor is not licensed for schema processing!");
         }
 
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(validatorForCpp);
+        ObjectHandle handle = SaxonCAPI.createHandle(validatorForCpp);
         return handle.rawValue();
 
 
@@ -85,7 +85,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             throw new SaxonApiException("Processor is not licensed for schema processing!");
         }
 
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(validatorForCpp);
+        ObjectHandle handle = SaxonCAPI.createHandle(validatorForCpp);
         return handle.rawValue();
 
     }
@@ -109,7 +109,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     public static long j_getSchemaManager(IsolateThread thread, ObjectHandle processorRef) {
         Processor processor = objectHandles.get(processorRef);
         SchemaManager manager = processor.getSchemaManager();
-        ObjectHandle handle = objectHandles.create(manager);
+        ObjectHandle handle = SaxonCAPI.createHandle(manager);
         return handle.rawValue();
     }
 
@@ -135,7 +135,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
     public static long j_getValidationReport(IsolateThread thread, ObjectHandle schemaValidatorForCpp) throws SaxonApiException {
         SchemaValidatorForCpp schemaValidatorForCpp1 = SaxonCAPI.objectHandles.get(schemaValidatorForCpp);
         XdmNode node = schemaValidatorForCpp1.getValidationReport();
-        ObjectHandle handle = SaxonCAPI.objectHandles.create(node);
+        ObjectHandle handle = SaxonCAPI.createHandle(node);
         return handle.rawValue();
     }
 
@@ -426,7 +426,7 @@ public class SchemaValidatorForCpp extends SaxonCAPI {
             XdmDestination destination = new XdmDestination();
             validator.setDestination(destination);
             validator.validate(source);
-            ObjectHandle handle = SaxonCAPI.objectHandles.create(destination.getXdmNode());
+            ObjectHandle handle = SaxonCAPI.createHandle(destination.getXdmNode());
             return handle.rawValue();
         }  else {
             throw new SaxonApiException("Source document is null");
