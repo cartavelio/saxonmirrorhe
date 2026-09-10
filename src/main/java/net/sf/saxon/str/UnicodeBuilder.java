@@ -53,7 +53,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
     }
 
     /**
-     * Append a character (which must not be a surrogate. (Method needed for C#, because implicit
+     * Append a character, which must not be a surrogate. (Method needed for C#, because implicit
      * conversion of char to int isn't supported)
      * @param ch the character
      * @return this builder, with the new character added
@@ -81,7 +81,7 @@ public final class UnicodeBuilder implements UniStringConsumer, UnicodeWriter {
      * Append multiple unicode characters to the content
      *
      * @param codePoints an iterator delivering the codepoints to be added.
-     * @return this builder, with the new character added
+     * @return this builder, with the new characters added
      */
 
     public UnicodeBuilder append(IntIterator codePoints) {
