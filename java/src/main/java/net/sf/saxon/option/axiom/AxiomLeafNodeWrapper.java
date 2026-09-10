@@ -9,7 +9,6 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.NamespaceNode;
@@ -271,17 +270,17 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     }
 
     @Override
-    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         return EmptyIterator.getInstance();
     }
 
     @Override
-    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodePredicate nodeTest) {
         return EmptyIterator.getInstance();
     }
 
     @Override
-    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards) {
         if (forwards) {
             if (nodeTest == AnyGNodeType.getInstance()) {
                 return new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper);

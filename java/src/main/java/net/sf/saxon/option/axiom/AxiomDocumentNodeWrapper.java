@@ -9,7 +9,7 @@ package net.sf.saxon.option.axiom;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.type.Type;
 import org.apache.axiom.om.OMDocument;
@@ -245,12 +245,12 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
     }
 
     @Override
-    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         return EmptyIterator.getInstance();
     }
 
     @Override
-    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards) {
         return EmptyIterator.getInstance();
     }
 

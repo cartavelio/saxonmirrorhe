@@ -3147,9 +3147,9 @@ public class XPathParser {
                         readToken(Token.LPAREN);
                         Expression selector = parseExpression();
                         readToken(Token.RPAREN);
-                        AxisGetExpression ae = new AxisGetExpression(AxisInfo.CHILD, selector);
-                        setLocation(ae);
-                        return ae;
+                        AxisGetExpression getExpr = new AxisGetExpression(AxisInfo.CHILD, selector);
+                        setLocation(getExpr);
+                        return getExpr;
                     }
                     case "type": {
                         checkLanguageVersion40("nodeTest type()");
@@ -3157,21 +3157,21 @@ public class XPathParser {
                         readToken(Token.LPAREN);
                         SequenceType type = parseSequenceType();
                         readToken(Token.RPAREN);
-                        AxisExpression ae = new AxisExpression(
+                        AxisExpression typeExpr = new AxisExpression(
                                 AxisInfo.CHILD,
                                 new SpecificJNodeType(type, env.getConfiguration().getTypeHierarchy()));
-                        setLocation(ae);
-                        return ae;
+                        setLocation(typeExpr);
+                        return typeExpr;
                     }
                     case "record": {
                         checkLanguageVersion40("nodeTest record(...)");
                         ItemType type = parseRecordTest(this);
-                        AxisExpression ae = new AxisExpression(
+                        AxisExpression recordExpr = new AxisExpression(
                                 AxisInfo.CHILD,
                                 new SpecificJNodeType(SequenceType.one(type),
                                                       env.getConfiguration().getTypeHierarchy()));
-                        setLocation(ae);
-                        return ae;
+                        setLocation(recordExpr);
+                        return recordExpr;
                     }
                     case "array":
                     case "map":
@@ -3179,12 +3179,12 @@ public class XPathParser {
                     case "item": {
                         checkLanguageVersion40("nodeTest " + name + "()");
                         ItemType type = parseItemType();
-                        AxisExpression ae = new AxisExpression(
+                        AxisExpression axisExpr = new AxisExpression(
                                 AxisInfo.CHILD,
                                 new SpecificJNodeType(SequenceType.one(type),
                                                       env.getConfiguration().getTypeHierarchy()));
-                        setLocation(ae);
-                        return ae;
+                        setLocation(axisExpr);
+                        return axisExpr;
                     }
                     case "function":
                     case "fn":
@@ -3262,9 +3262,9 @@ public class XPathParser {
                     readToken(Token.LPAREN);
                     Expression selector = parseExpression();
                     readToken(Token.RPAREN);
-                    AxisGetExpression ae = new AxisGetExpression(axis, selector);
-                    setLocation(ae);
-                    return ae;
+                    AxisGetExpression axisGetExpr = new AxisGetExpression(axis, selector);
+                    setLocation(axisGetExpr);
+                    return axisGetExpr;
                 }
                 NodeTest nodeTest = parseNodeTest(principalNodeType);
                 AxisExpression ae = new AxisExpression(axis, nodeTest);
@@ -4029,7 +4029,7 @@ public class XPathParser {
 
             case "processing-instruction":
                 int fp = -1;
-                StructuredQName qName = null;
+                StructuredQName piQName = null;
                 if (empty) {
                     return NodeKindType.PROCESSING_INSTRUCTION;
                 } else if (t.currentToken instanceof Token.StringLiteral) {
@@ -4038,14 +4038,14 @@ public class XPathParser {
                         // Became an error as a result of XPath erratum XP.E7
                         grumble("Processing instruction name must be a valid NCName", "XPTY0004");
                     } else {
-                        qName = new StructuredQName("", NamespaceUri.NULL, piName);
+                        piQName = new StructuredQName("", NamespaceUri.NULL, piName);
                         fp = pool.allocateFingerprint(NamespaceUri.NULL, piName);
                     }
                 } else if (t.currentToken instanceof Token.NameToken) {
                     try {
                         String[] parts = NameChecker.getQNameParts(t.currentName());
                         if (parts[0].isEmpty()) {
-                            qName = new StructuredQName("", NamespaceUri.NULL, parts[1]);
+                            piQName = new StructuredQName("", NamespaceUri.NULL, parts[1]);
                         } else {
                             grumble("Processing instruction name must not contain a colon");
                         }
@@ -4057,8 +4057,8 @@ public class XPathParser {
                 }
                 nextToken();
                 readToken(Token.RPAREN);
-                assert(qName != null);
-                return new NamedXNodeType(Type.PROCESSING_INSTRUCTION, qName, config);
+                assert(piQName != null);
+                return new NamedXNodeType(Type.PROCESSING_INSTRUCTION, piQName, config);
 
             case "schema-attribute":
                 if (empty) {
@@ -4103,19 +4103,19 @@ public class XPathParser {
                 if (empty) {
                     return isElementTest ? NodeKindType.ELEMENT : NodeKindType.ATTRIBUTE;
                 }
-                QNameTest qNameTest = parseNameTestUnion(nodeKind);
+                QNameTest qNameTest2 = parseNameTestUnion(nodeKind);
 
                 if (!allowXPath40Syntax) {
-                    if (qNameTest instanceof NamespaceQNameTest || qNameTest instanceof LocalQNameTest) {
+                    if (qNameTest2 instanceof NamespaceQNameTest || qNameTest2 instanceof LocalQNameTest) {
                         grumble("Wildcard syntax in item types requires 4.0 to be enabled");
-                    } else if (qNameTest instanceof UnionQNameTest) {
+                    } else if (qNameTest2 instanceof UnionQNameTest) {
                         grumble("Union syntax in item types requires 4.0 to be enabled");
                     }
                 }
 
                 if (t.currentToken == Token.RPAREN) {
                     nextToken();
-                    return new NamedXNodeType(nodeKind, qNameTest, config);
+                    return new NamedXNodeType(nodeKind, qNameTest2, config);
                 } else if (t.currentToken == Token.COMMA) {
                     nextToken();
                     GNodeType result;
@@ -4141,7 +4141,7 @@ public class XPathParser {
                             nextToken();
                         }
                         result = new NamedXNodeType(
-                                    nodeKind, qNameTest, schemaType, nillable, env.getConfiguration());
+                                    nodeKind, qNameTest2, schemaType, nillable, env.getConfiguration());
                     } else {
                         grumble("Unexpected " + t.currentToken + " after ',' in SequenceType");
                         return null;

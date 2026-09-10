@@ -8,11 +8,9 @@
 package net.sf.saxon.om;
 
 
-import net.sf.saxon.ma.map.Vavr;
-import net.sf.saxon.transpile.CSharpReplaceBody;
-
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -24,27 +22,21 @@ import java.util.List;
 public class LargeAttributeMap implements AttributeMap {
 
 
-    private final io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> attributes;
+    private final LinkedHashMap<NodeName, AttributeInfo> attributes;
 
 
     public LargeAttributeMap(List<AttributeInfo> atts) {
-        io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> map = emptyMap();
+        LinkedHashMap<NodeName, AttributeInfo> map = new LinkedHashMap<>();
         for (AttributeInfo att : atts) {
             if (map.containsKey(att.getNodeName())) {
                 throw new IllegalArgumentException("Attribute map contains duplicates");
             }
-            map = map.put(att.getNodeName(), att);
+            map.put(att.getNodeName(), att);
         }
         this.attributes = map;
     }
 
-    @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.om.NodeName,Saxon.Hej.om.AttributeInfo>.Empty;")
-    private static io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> emptyMap() {
-        return io.vavr.collection.LinkedHashMap.empty();
-    }
-
-
-    private LargeAttributeMap(io.vavr.collection.LinkedHashMap<NodeName, AttributeInfo> attributes) {
+    private LargeAttributeMap(LinkedHashMap<NodeName, AttributeInfo> attributes) {
         this.attributes = attributes;
     }
 
@@ -61,7 +53,7 @@ public class LargeAttributeMap implements AttributeMap {
 
     @Override
     public AttributeInfo get(NodeName name) {
-        return Vavr.get(attributes, name);
+        return attributes.get(name);
     }
 
     @Override
@@ -78,14 +70,19 @@ public class LargeAttributeMap implements AttributeMap {
 
     @Override
     public AttributeMap put(AttributeInfo att) {
-        return new LargeAttributeMap(attributes.put(att.getNodeName(), att));
+        // This is inefficient; we copy the existing attribute map. The assumption is that this isn't done often.
+        LinkedHashMap<NodeName, AttributeInfo> atts2 = new LinkedHashMap<>(attributes);
+        atts2.put(att.getNodeName(), att);
+        return new LargeAttributeMap(atts2);
     }
 
     @Override
     public AttributeMap remove(NodeName name) {
         // Not actually used (or tested)
         if (attributes.containsKey(name)) {
-            return new LargeAttributeMap(attributes.remove(name));
+            LinkedHashMap<NodeName, AttributeInfo> atts2 = new LinkedHashMap<>(attributes);
+            atts2.remove(name);
+            return new LargeAttributeMap(atts2);
         } else {
             return this;
         }
@@ -93,7 +90,7 @@ public class LargeAttributeMap implements AttributeMap {
 
     @Override
     public Iterator<AttributeInfo> iterator() {
-        return Vavr.valuesIterator(attributes);
+        return attributes.values().iterator();
     }
 
     @Override

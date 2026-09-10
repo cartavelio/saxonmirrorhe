@@ -590,7 +590,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         SequenceIterator iter = new AttributeEnumeration(this);
         if (nodeTest != null && nodeTest != AnyGNodeType.getInstance()) {
             iter = Navigator.filter(iter, nodeTest);
@@ -598,12 +598,12 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         return iter;
     }
 
-    private boolean isElementOnly(NodeTest nodeTest) {
-        return nodeTest.getUType() == UType.ELEMENT;
+    private boolean isElementOnly(NodePredicate predicate) {
+        return Navigator.getPotentialNodeKinds(predicate) == UType.ELEMENT;
     }
 
     @Override
-    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodePredicate nodeTest) {
         boolean elementOnly = nodeTest != null && isElementOnly(nodeTest);
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
@@ -614,7 +614,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards) {
         boolean elementOnly = isElementOnly(nodeTest);
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));

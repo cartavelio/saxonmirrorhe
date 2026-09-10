@@ -15,13 +15,14 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodePredicateTest;
 import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.PortableNamedType;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
+import net.sf.saxon.pattern.qname.PortableQNameTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -37,10 +38,7 @@ import net.sf.saxon.tree.tiny.TinyTextualElement;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.gnode.AnyGNodeType;
-import net.sf.saxon.type.gnode.AnyXNodeType;
-import net.sf.saxon.type.gnode.NodeKindType;
-import net.sf.saxon.type.gnode.XNodeType;
+import net.sf.saxon.type.gnode.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -357,10 +355,10 @@ public final class Navigator {
 
         int kind = node.getNodeKind();
         if (node.getLocalPart().isEmpty()) {
-            same = n -> n.getNodeKind() == kind;
+            same = NodeKindType.of(kind);
         } else {
             StructuredQName requiredName = node.getQName();
-            same = n -> n.getNodeKind() == kind && ((NodeInfo)n).getQName().equals(requiredName);
+            same = new PortableNamedType(kind, new PortableQNameTest(requiredName));
         }
 
         Controller controller = context == null ? null : context.getController();
@@ -1170,24 +1168,6 @@ public final class Navigator {
     ///////////////////////////////////////////////////////////////////////////////
     // Helper classes to support axis iteration
     ///////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Convert a {@code Predicate<NodeInfo>} (if necessary) to a NodeTest
-     *
-     * @param predicate a Node predicate
-     * @return a NodeTest
-     */
-
-    public static NodeTest nodeTestFromPredicate(NodePredicate predicate) {
-        if (predicate == null) {
-            return AnyGNodeType.getInstance();
-        }
-        if (predicate instanceof NodeTest) {
-            return (NodeTest) predicate;
-        } else {
-            return NodePredicateTest.of(predicate);
-        }
-    }
 
     /**
      * For a tree that implements the {@link NodeVectorTree} interface, get a predicate

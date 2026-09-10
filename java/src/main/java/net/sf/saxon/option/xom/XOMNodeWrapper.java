@@ -10,7 +10,6 @@ package net.sf.saxon.option.xom;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -623,14 +622,14 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         return Navigator.filter(
                 new AttributeAxisIterator(this, nodeTest),
                 nodeTest);
     }
 
     @Override
-    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodePredicate nodeTest) {
         if (hasChildNodes()) {
             return Navigator.filter(
                     new ChildAxisIterator(this, true, true, nodeTest),
@@ -641,7 +640,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     }
 
     @Override
-    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards) {
         return Navigator.filter(
                 new ChildAxisIterator(this, false, forwards, nodeTest),
                 nodeTest);
@@ -839,9 +838,9 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
         private int cursor;
 
-        private final NodeTest nodeTest;
+        private final NodePredicate nodeTest;
 
-        AttributeAxisIterator(XOMNodeWrapper start, NodeTest test) {
+        AttributeAxisIterator(XOMNodeWrapper start, NodePredicate test) {
             // use lazy instead of eager materialization (performance)
             this.start = start;
             if (test == AnyGNodeType.getInstance()) {
@@ -890,9 +889,9 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         private final ParentNode par;
         private int cursor;
 
-        private final NodeTest nodeTest;
+        private final NodePredicate nodeTest;
 
-        private ChildAxisIterator(XOMNodeWrapper start, boolean downwards, boolean forwards, NodeTest test) {
+        private ChildAxisIterator(XOMNodeWrapper start, boolean downwards, boolean forwards, NodePredicate test) {
             this.forwards = forwards;
             if (test == AnyGNodeType.getInstance()) {
                 test = null;

@@ -14,11 +14,14 @@ import net.sf.saxon.transpile.CSharpReplaceBody;
 import java.util.function.Predicate;
 
 /**
- * A NodeTest that wraps a general Predicate applied to nodes.
+ * A {@link NodePredicate} that wraps a general predicate applied to nodes.
  *
  * <p>This is needed for C#, where it is not possible for a method
  * to accept either a NodeTest object or a Predicate supplied as a lambda expression. To supply a predicate, it is
- * therefore necessary to wrap it in a {@code NodeSelector}.</p>
+ * therefore necessary to wrap it in a {@code NodePredicateLambda}.</p>
+ *
+ * <p>In SaxonJ the class is never instantiated, because the factory method {@link NodePredicateLambda#of(Predicate)}
+ * returns a {@code NodePredicate}</p>
  */
 
 public class NodePredicateLambda implements NodePredicate {

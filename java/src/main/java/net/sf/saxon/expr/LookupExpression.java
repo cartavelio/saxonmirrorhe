@@ -154,12 +154,12 @@ public class LookupExpression extends BinaryExpression {
                     th.relationship(containerType, AnyExternalObjectType.THE_INSTANCE) == Affinity.DISJOINT) {
                 if (visitor.getStaticContext().getXPathVersion() >= 40 &&
                         th.relationship(containerType, AnyJNodeType.getInstance()) != Affinity.DISJOINT) {
-                    Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
+                    Supplier<RoleDiagnostic> role0 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 0);
                     setLhsExpression(SequenceCoercer.makeSequenceCoercer(
                             getLhsExpression(),
                             SequenceType.zeroOrMore(
                                     ChoiceItemType.of(MapType.ANY_MAP_TYPE, ArrayItemType.getInstance())),
-                            role,
+                            role0,
                             true));
                 } else if (Cardinality.allowsZero(getLhsExpression().getCardinality())) {
                     visitor.issueWarning("The left-hand operand of '?' must be a map or an array; the expression can succeed only if the operand is an empty sequence " +
@@ -177,13 +177,13 @@ public class LookupExpression extends BinaryExpression {
         // Now check the second operand
 
         getRhs().typeCheck(visitor, contextInfo);
-        Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
+        Supplier<RoleDiagnostic> role1 = () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "?", 1);
         TypeChecker tc = config.getTypeChecker(false);
         SequenceType req = BuiltInAtomicType.ANY_ATOMIC.zeroOrMore();
         if (isArrayLookup) {
             req = BuiltInAtomicType.INTEGER.zeroOrMore();
         }
-        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role, visitor));
+        setRhsExpression(tc.staticTypeCheck(getRhsExpression(), req, role1, visitor));
         isSingleEntry = getRhsExpression().getCardinality() == StaticProperty.EXACTLY_ONE;
 
         isClassified = true;

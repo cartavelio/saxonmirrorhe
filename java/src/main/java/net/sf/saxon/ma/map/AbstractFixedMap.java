@@ -225,12 +225,17 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
      */
     @Override
     public Iterator<KeyValuePair> iterator() {
-        return new KeyValuePairIterator();
+        return new KeyValuePairIterator(this);
     }
 
-    private class KeyValuePairIterator implements Iterator<KeyValuePair> {
+    private static class KeyValuePairIterator implements Iterator<KeyValuePair> {
 
-        int offset = 0;
+        private int offset = 0;
+        private final AbstractFixedMap map;
+
+        public KeyValuePairIterator(AbstractFixedMap map) {
+            this.map = map;
+        }
 
         /**
          * Returns {@code true} if the iteration has more elements.
@@ -241,7 +246,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
          */
         @Override
         public boolean hasNext() {
-            return offset < values.length;
+            return offset < map.values.length;
         }
 
         /**
@@ -252,10 +257,10 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
          */
         @Override
         public KeyValuePair next() {
-            if (offset >= values.length) {
+            if (offset >= map.values.length) {
                 throw new NoSuchElementException();
             }
-            KeyValuePair kvp = new KeyValuePair(getKey(offset), values[offset]);
+            KeyValuePair kvp = new KeyValuePair(map.getKey(offset), map.values[offset]);
             offset++;
             return kvp;
         }

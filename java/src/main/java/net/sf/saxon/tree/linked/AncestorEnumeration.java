@@ -7,12 +7,12 @@
 
 package net.sf.saxon.tree.linked;
 
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 
 final class AncestorEnumeration extends TreeEnumeration {
 
     public AncestorEnumeration(NodeImpl node,
-                               NodeTest nodeTest, boolean includeSelf) {
+                               NodePredicate nodeTest, boolean includeSelf) {
         super(node, nodeTest);
         if (!includeSelf || !conforms(node)) {
             advance();

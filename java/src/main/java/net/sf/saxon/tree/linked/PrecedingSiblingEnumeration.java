@@ -7,11 +7,11 @@
 
 package net.sf.saxon.tree.linked;
 
-import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
 
 final class PrecedingSiblingEnumeration extends TreeEnumeration {
 
-    public PrecedingSiblingEnumeration(NodeImpl node, NodeTest nodeTest) {
+    public PrecedingSiblingEnumeration(NodeImpl node, NodePredicate nodeTest) {
         super(node, nodeTest);
         advance();
     }

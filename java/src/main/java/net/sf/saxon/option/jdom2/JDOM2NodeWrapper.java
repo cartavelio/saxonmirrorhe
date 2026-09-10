@@ -10,7 +10,6 @@ package net.sf.saxon.option.jdom2;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -445,7 +444,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         SequenceIterator base = new AttributeEnumeration(this);
         if (nodeTest == AnyGNodeType.getInstance()) {
             return base;
@@ -455,7 +454,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodePredicate nodeTest) {
         if (hasChildNodes()) {
             SequenceIterator base = new ChildEnumeration(this, true, true);
             if (nodeTest == AnyGNodeType.getInstance()) {
@@ -469,7 +468,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards) {
         if (nodeTest == AnyGNodeType.getInstance()) {
             return new ChildEnumeration(this, false, forwards);
         } else {
@@ -482,8 +481,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     @Override
     protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         Iterator<? extends Content> descendants;
-        NodeTest test = Navigator.nodeTestFromPredicate(predicate);
-        final UType uType= test.getUType();
+        final UType uType= Navigator.getPotentialNodeKinds(predicate);
         if (uType.overlaps(UType.TEXT)) {
             // if selecting text nodes, we have to handle adjacent sibling text nodes. The best way
             // to achieve this is by using the recursive implementation of the descendant axis available

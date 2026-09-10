@@ -11,7 +11,6 @@ import net.sf.saxon.om.AtomicSequence;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.util.Navigator;
@@ -100,7 +99,7 @@ public abstract class AxiomParentNodeWrapper extends AbstractNodeWrapper
     }
 
     @Override
-    protected final SequenceIterator iterateChildren(NodeTest nodeTest) {
+    protected final SequenceIterator iterateChildren(NodePredicate nodeTest) {
         return new ChildWrappingIterator(this, nodeTest);
     }
 

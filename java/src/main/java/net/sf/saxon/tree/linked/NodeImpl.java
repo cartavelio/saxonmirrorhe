@@ -22,8 +22,6 @@ import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.StringValue;
 
-import static net.sf.saxon.tree.util.Navigator.nodeTestFromPredicate;
-
 
 /**
  * A node in the "linked" tree representing any kind of node except a namespace node.
@@ -506,7 +504,7 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iterateAncestorAxis(NodePredicate predicate) {
-        return new AncestorEnumeration(this, nodeTestFromPredicate(predicate), false);
+        return new AncestorEnumeration(this, predicate, false);
     }
 
     /**
@@ -518,7 +516,7 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iterateAncestorOrSelfAxis(NodePredicate predicate) {
-        return new AncestorEnumeration(this, nodeTestFromPredicate(predicate), true);
+        return new AncestorEnumeration(this, predicate, true);
     }
 
     /**
@@ -531,7 +529,7 @@ public abstract class NodeImpl
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
         if (this instanceof ParentNodeImpl) {
-            return ((ParentNodeImpl) this).iterateChildren(nodeTestFromPredicate(predicate));
+            return ((ParentNodeImpl) this).iterateChildren(predicate);
         } else {
             return EmptyIterator.getInstance();
         }
@@ -586,7 +584,7 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iterateFollowingSiblingAxis(NodePredicate predicate) {
-        return new FollowingSiblingEnumeration(this, nodeTestFromPredicate(predicate));
+        return new FollowingSiblingEnumeration(this, predicate);
     }
 
     /**
@@ -598,7 +596,7 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iteratePrecedingAxis(NodePredicate predicate) {
-        return new PrecedingEnumeration(this, nodeTestFromPredicate(predicate));
+        return new PrecedingEnumeration(this, predicate);
     }
 
     /**
@@ -610,7 +608,7 @@ public abstract class NodeImpl
      */
     @Override
     public SequenceIterator iteratePrecedingSiblingAxis(NodePredicate predicate) {
-        return new PrecedingSiblingEnumeration(this, nodeTestFromPredicate(predicate));
+        return new PrecedingSiblingEnumeration(this, predicate);
     }
 
     /**

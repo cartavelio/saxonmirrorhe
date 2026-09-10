@@ -11,14 +11,12 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
-import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -250,7 +248,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      *         although arbitrary, must be consistent with document order.
      */
 
-    protected abstract SequenceIterator iterateAttributes(NodeTest nodeTest);
+    protected abstract SequenceIterator iterateAttributes(NodePredicate nodeTest);
 
     /**
      * Get an iterator over the attribute axis, starting at this node; the nodes will
@@ -261,7 +259,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      */
     @Override
     public SequenceIterator iterateAttributeAxis(NodePredicate predicate) {
-        return iterateAttributes(Navigator.nodeTestFromPredicate(predicate));
+        return iterateAttributes(predicate);
     }
 
     /**
@@ -272,7 +270,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      * @return an iterator over the child nodes, in document order.
      */
 
-    protected abstract SequenceIterator iterateChildren(NodeTest nodeTest);
+    protected abstract SequenceIterator iterateChildren(NodePredicate nodeTest);
 
     /**
      * Get an iterator over the child axis, starting at this node; the nodes will
@@ -283,7 +281,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      */
     @Override
     public SequenceIterator iterateChildAxis(NodePredicate predicate) {
-        return iterateChildren(Navigator.nodeTestFromPredicate(predicate));
+        return iterateChildren(predicate);
     }
 
     /**
@@ -295,7 +293,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      * @return an iterator over the sibling nodes, in axis order.
      */
 
-    protected abstract SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards);
+    protected abstract SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards);
 
     /**
      * Get an iterator over the following-sibling axis, starting at this node; the nodes will
@@ -312,7 +310,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
             case Type.NAMESPACE:
                 return EmptyIterator.getInstance();
             default:
-                return iterateSiblings(Navigator.nodeTestFromPredicate(predicate), true);
+                return iterateSiblings(predicate, true);
         }
     }
 
@@ -331,7 +329,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
             case Type.NAMESPACE:
                 return EmptyIterator.getInstance();
             default:
-                return iterateSiblings(Navigator.nodeTestFromPredicate(predicate), false);
+                return iterateSiblings(predicate, false);
         }
     }
 
@@ -347,7 +345,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
     @CSharpModifiers(code={"protected", "virtual"})
     protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         SequenceIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
-        if (predicate != AnyGNodeType.getInstance()) {
+        if (predicate != AnyGNode.TEST) {
             iter = Navigator.filter(iter, predicate);
         }
         return iter;
@@ -362,7 +360,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      */
     @Override
     public SequenceIterator iterateDescendantAxis(NodePredicate predicate) {
-        return iterateDescendants(Navigator.nodeTestFromPredicate(predicate), false);
+        return iterateDescendants(predicate, false);
     }
 
     /**
@@ -374,7 +372,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
      */
     @Override
     public SequenceIterator iterateDescendantOrSelfAxis(NodePredicate predicate) {
-        return iterateDescendants(Navigator.nodeTestFromPredicate(predicate), true);
+        return iterateDescendants(predicate, true);
     }
 
     /**

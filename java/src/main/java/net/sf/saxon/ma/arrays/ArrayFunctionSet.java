@@ -16,10 +16,7 @@ import net.sf.saxon.functions.FoldingFunction;
 import net.sf.saxon.functions.SystemFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
 import net.sf.saxon.ma.Parcel;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.Shape;
-import net.sf.saxon.ma.map.ShapedMap;
-import net.sf.saxon.ma.map.SingleEntryMap;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.Twine8;
@@ -38,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static net.sf.saxon.ma.map.RecordTest.VALUE_RECORD;
 
 /**
  * Function signatures (and pointers to implementations) of the functions defined in XPath 3.1
@@ -266,9 +262,9 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE | INS, null));
 
             register("of-members", 1, e -> e.populate(ArrayOfMembers::new, ArrayItemType.ANY_ARRAY_TYPE, ONE, 0)
-                    .arg(0, VALUE_RECORD, STAR, null));
+                    .arg(0, RecordTest.VALUE_RECORD, STAR, null));
 
-            register("members", 1, e -> e.populate(ArrayMembers::new, VALUE_RECORD, STAR, 0)
+            register("members", 1, e -> e.populate(ArrayMembers::new, RecordTest.VALUE_RECORD, STAR, 0)
                     .arg(0, ArrayItemType.ANY_ARRAY_TYPE, ONE, null));
 
             // TODO: drop this, renamed array:items

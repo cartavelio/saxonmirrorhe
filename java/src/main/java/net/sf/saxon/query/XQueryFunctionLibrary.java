@@ -16,7 +16,8 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.ma.map.Vavr;
+import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
+import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.ma.zeno.ZenoChain;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
@@ -57,7 +58,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
     // same library module. For each namespace / local-name() there is an immutable list of
     // functions, these will have different arity ranges.
 
-    private java.util.HashMap<NamespaceUri, io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>>>
+    private java.util.HashMap<NamespaceUri, ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>>>
             functionsByNamespace = new java.util.HashMap<>(20);
 
     /**
@@ -100,7 +101,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
 
     public void declareFunction(/*@NotNull*/ XQueryFunction function) throws XPathException {
         StructuredQName functionName = function.getFunctionName();
-        io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>> localMap =
+        ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>> localMap =
                 functionsByNamespace.get(functionName.getNamespaceUri());
         if (localMap == null) {
             ZenoChain<XQueryFunction> list = makeEmptyList();
@@ -110,7 +111,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         } else {
             // Test if the arity range of this function overlaps the arity range of another function
             ZenoChain<XQueryFunction> existingFunctions =
-                    Vavr.get(localMap, functionName.getLocalPart());
+                    localMap.get(functionName.getLocalPart());
             if (existingFunctions == null) {
                 existingFunctions = makeEmptyList();
             }
@@ -137,8 +138,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
     }
 
     @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<string,Saxon.Hej.ma.zeno.ZenoChain<Saxon.Hej.query.XQueryFunction>>.Empty;")
-    private static io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>> makeEmptyMap() {
-        return io.vavr.collection.HashMap.empty();
+    private static ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>> makeEmptyMap() {
+        return ImmutableHashTrieMap.empty();
     }
 
     private static boolean hasOverlappingArity(XQueryFunction f1, XQueryFunction f2) {
@@ -236,19 +237,19 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         return functionsByNamespace.keySet();
     }
 
-    public io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>> getFunctionsForNamespace(NamespaceUri ns) {
+    public ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>> getFunctionsForNamespace(NamespaceUri ns) {
         return functionsByNamespace.get(ns);
     }
 
     public void addFunctions(NamespaceUri ns,
-                             io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>> functions)
+                             ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>> functions)
     throws XPathException {
-        io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>> localMap = functionsByNamespace.get(ns);
+        ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>> localMap = functionsByNamespace.get(ns);
         if (localMap == null) {
             functionsByNamespace.put(ns, functions);
         } else {
-            for (ZenoChain<XQueryFunction> list : localMap.values()) {
-                for (XQueryFunction fn : list) {
+            for (TrieKVP<String, ZenoChain<XQueryFunction>> kvp : localMap) {
+                for (XQueryFunction fn : kvp.value) {
                     declareFunction(fn);
                 }
             }
@@ -374,12 +375,12 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
 
     @Override
     public XQueryFunction getDeclaration(StructuredQName functionName, int staticArgs) {
-        io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>> localMap =
+        ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>> localMap =
                 functionsByNamespace.get(functionName.getNamespaceUri());
         if (localMap == null) {
             return null;
         }
-        ZenoChain<XQueryFunction> homonyms = Vavr.get(localMap, functionName.getLocalPart());
+        ZenoChain<XQueryFunction> homonyms = localMap.get(functionName.getLocalPart());
         if (homonyms != null) {
             for (XQueryFunction f : homonyms) {
                 if (f.getMinimumArity() <= staticArgs && f.getNumberOfParameters() >= staticArgs) {
@@ -483,9 +484,9 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
      */
 
     public void processAllFunctions(Consumer<XQueryFunction> action) throws XPathException {
-        for (io.vavr.collection.HashMap<String, ZenoChain<XQueryFunction>> localMap : functionsByNamespace.values()) {
-            for (ZenoChain<XQueryFunction> list : localMap.values()) {
-                for (XQueryFunction fn : list) {
+        for (ImmutableHashTrieMap<String, ZenoChain<XQueryFunction>> localMap : functionsByNamespace.values()) {
+            for (TrieKVP<String, ZenoChain<XQueryFunction>> kvp : localMap) {
+                for (XQueryFunction fn : kvp.value) {
                     try {
                         action.accept(fn);
                     } catch (UncheckedXPathException e) {

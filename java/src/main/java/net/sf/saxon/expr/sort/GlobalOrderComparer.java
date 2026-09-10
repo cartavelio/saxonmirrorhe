@@ -11,7 +11,6 @@ import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
-import org.nineml.coffeefilter.model.XNode;
 
 import java.util.Comparator;
 
@@ -56,7 +55,7 @@ public final class GlobalOrderComparer implements Comparator<GNode> {
             } else {
                 return System.identityHashCode(a) - System.identityHashCode(b);
             }
-        } else return a instanceof XNode ? -1 : +1;
+        } else return a instanceof NodeInfo ? -1 : +1;
     }
 }
 

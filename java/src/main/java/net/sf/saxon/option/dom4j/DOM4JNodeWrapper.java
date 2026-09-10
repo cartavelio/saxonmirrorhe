@@ -10,7 +10,6 @@ package net.sf.saxon.option.dom4j;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
@@ -507,14 +506,14 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 //        }
 //    }
     @Override
-    protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
+    protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
         return Navigator.filter(
                 new AttributeEnumeration(this),
                 nodeTest);
     }
 
     @Override
-    protected SequenceIterator iterateChildren(NodeTest nodeTest) {
+    protected SequenceIterator iterateChildren(NodePredicate nodeTest) {
         if (hasChildNodes()) {
             return Navigator.filter(
                     new ChildEnumeration(this, true, true),
@@ -525,7 +524,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     }
 
     @Override
-    protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
+    protected SequenceIterator iterateSiblings(NodePredicate nodeTest, boolean forwards) {
         return Navigator.filter(
                 new ChildEnumeration(this, false, forwards),
                 nodeTest);
