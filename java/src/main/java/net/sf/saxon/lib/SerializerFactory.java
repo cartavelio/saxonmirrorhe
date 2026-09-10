@@ -21,6 +21,7 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BigDecimalValue;
 import net.sf.saxon.value.StringValue;
@@ -217,9 +218,9 @@ public class SerializerFactory {
 
             Source source = rr.resolve(config.getResourceResolver(), new DirectResourceResolver(config));
 
-            ParseOptions options = new ParseOptions()
-                    .withSchemaValidationMode(Validation.LAX)
-                    .withDTDValidationMode(Validation.SKIP);
+//            ParseOptions options = new ParseOptions()
+//                    .withSchemaValidationMode(Validation.LAX)
+//                    .withDTDValidationMode(Validation.SKIP);
             TreeInfo doc = config.buildDocumentTree(source);
             SerializationParamsHandler ph = new SerializationParamsHandler();
             ph.setSerializationParams(doc.getRootNode());
@@ -320,6 +321,9 @@ public class SerializerFactory {
                     JSONSerializer js = new JSONSerializer(pipe, je, props);
                     String canonical = props.getProperty(SaxonOutputKeys.CANONICAL);
                     if ("yes".equals(canonical)) {
+                        if (!canonicalJsonIsSupported()) {
+                            throw new XPathException("Canonical JSON Serialization is not supported in SaxonCS");
+                        }
                         js.setCanonicalPropertySorter();
                     } else {
                         String sortOrder = props.getProperty(SaxonOutputKeys.PROPERTY_ORDER);
@@ -388,6 +392,13 @@ public class SerializerFactory {
             return getReceiverForNonSerializedResult(result, props, pipe);
 
         }
+    }
+
+    @CSharpReplaceBody(code="return false;")
+    public static boolean canonicalJsonIsSupported() {
+        // For the time being, canonical JSON output is not supported on SaxonCS, because the transpiled version
+        // of the code for serializing xs:double values produces results that are way out of line.
+        return true;
     }
 
     private ProxyReceiver makeUnicodeNormalizer(PipelineConfiguration pipe, Properties props) throws XPathException {

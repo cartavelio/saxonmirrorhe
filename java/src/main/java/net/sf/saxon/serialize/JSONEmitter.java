@@ -10,6 +10,7 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.SaxonOutputKeys;
+import net.sf.saxon.lib.SerializerFactory;
 import net.sf.saxon.ma.json.JsonReceiver;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
@@ -224,10 +225,12 @@ public class JSONEmitter {
                 // Avoid exponential notation except in extremis
                 if (abs == 0.0) {
                     emit("0");
-                } else /*if (abs >= 1e21 || abs < 1e-21)*/ {
-//                    String s = FloatingPointConverter.convertDouble(val, true).toString();
-//                    s = s.replaceFirst("E", "e").replaceFirst("e(?!-)", "e+");
-//                    emit(s);
+                } else if (!SerializerFactory.canonicalJsonIsSupported()) {
+                    // This path currently used on SaxonCS
+                    String s = FloatingPointConverter.convertDouble(val, val != 0 && (val >= 1000000 || val < 0.000001)).toString();
+                    s = s.replaceFirst("E", "e").replaceFirst("e(?!-)", "e+");
+                    emit(s);
+                } else {
                     try {
                         String s = NumberToJSON.serializeNumber(val);
                         emit(s);
