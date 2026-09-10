@@ -114,10 +114,10 @@
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
    </exception>
    
-   <!--<exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
+   <exception test-set="prod-FunctionCall" test-case="FunctionCall-414 FunctionCall-415" run="false" report="n/a">
       <created by="Michael Kay" on="2023-03-14"/>
       <reason>Placeholders currently not allowed as keyword arguments</reason>
-   </exception>-->
+   </exception>
    
    <exception test-set="prod-ForClause.map"  run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-18"/>
