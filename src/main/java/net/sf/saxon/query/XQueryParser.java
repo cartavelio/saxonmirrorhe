@@ -3062,7 +3062,14 @@ public class XQueryParser extends XPathParser {
         outerLet.setVariableQName(new StructuredQName("zz", NamespaceUri.SAXON, "zz_typeswitchVar"));
         outerLet.setSequence(operand);
 
-        while (t.currentToken == Token.CASE) {
+        boolean braced = false;
+        if (t.currentToken == Token.LCURLY) {
+            checkLanguageVersion40();
+            braced = true;
+            nextToken();
+        }
+
+        while (t.currentToken == Token.CASE || isKeyword("case")) {
             List<SequenceType> typeList;
             Expression action;
             nextToken();
@@ -3132,6 +3139,11 @@ public class XQueryParser extends XPathParser {
             lastAction = ife;
         }
         outerLet.setAction(lastAction);
+        if (braced) {
+            expect(Token.RCURLY);
+            t.lookAhead();
+            nextToken();
+        }
         return makeTracer(outerLet, null);
     }
 
@@ -3200,6 +3212,16 @@ public class XQueryParser extends XPathParser {
         expect(Token.RPAR);
         nextToken();
 
+        boolean braced = false;
+        if (t.currentToken == Token.LCURLY) {
+            checkLanguageVersion40();
+            braced = true;
+            nextToken();
+            if (isKeyword("case")) {
+                t.currentToken = Token.CASE;
+            }
+        }
+
         List<Expression> conditions = new ArrayList<>(10);
         List<Expression> actions = new ArrayList<>(10);
 
@@ -3262,6 +3284,12 @@ public class XQueryParser extends XPathParser {
                 conditions.toArray(new Expression[0]),
                 actions.toArray(new Expression[conditions.size()]));
         outerLet.setAction(choice);
+
+        if (braced) {
+            expect(Token.RCURLY);
+            t.lookAhead();
+            nextToken();
+        }
         return makeTracer(outerLet, null);
     }
 

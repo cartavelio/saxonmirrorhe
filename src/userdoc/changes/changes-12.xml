@@ -483,6 +483,9 @@
         <p>The implementation of "for member" expressions has changed in 12.3: as a result of this, any
         SEF files using the construct will need to be recompiled.</p>
         
+        <p>From 12.3, Switch and Typeswitch expressions in XQuery allow curly braces, for example:
+        <code>switch($x){case 1: return "a" case 2: return "b" default: return "?"}</code></p>
+        
         
         <h2>XQuery 4.0 extensions</h2>
         
