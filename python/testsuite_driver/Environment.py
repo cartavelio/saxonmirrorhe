@@ -144,7 +144,6 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
     environment.xquery_proc.set_query_base_uri(base_uri)
     '''TODO There is a bug with the DocumentBuilder base_uri and cwd for the processor'''
 
-    xsd_compiler = environment.proc.new_xsd_compiler()
     base = xpc.evaluate("static-base-uri")
     if base is not None:
         for i in range(base.size):
@@ -273,61 +272,68 @@ def process_environment(cwd_from_base_uri, xpc: saxonc.PyXPathProcessor, env: sa
     validate_sources = False
     source_arr = []
 
-    if schemas is not None:
-        print("schema found count=" + str(schemas.size))
-        for i in range(schemas.size):
-            schema = schemas.item_at(i).get_node_value()
-            role = schema.get_attribute_value("role")
-            xsd_version = schema.get_attribute_value("xsd-version")
+    xsd_compiler = None
 
-            if xsd_version is not None:
-                #schema_validator.set_property("xsdversion", xsd_version)
-                xsd_compiler.set_xsd_version(xsd_version)
-            else:
-                #schema_validator.set_property("xsdversion", "1.0")
-                xsd_compiler.set_xsd_version("1.0")
+    try:
+        xsd_compiler = environment.proc.new_xsd_compiler()
 
-            if role != "secondary":
-                href = schema.get_attribute_value("file")
-                ns = schema.get_attribute_value("uri")
+        if schemas is not None:
+            print("schema found count=" + str(schemas.size))
+            for i in range(schemas.size):
+                schema = schemas.item_at(i).get_node_value()
+                role = schema.get_attribute_value("role")
+                xsd_version = schema.get_attribute_value("xsd-version")
 
-                if ns == "http://www.w3.org/2005/xpath-functions":
-                    #schema_validator.set_property("xsdversion", "1.1")
-                    xsd_compiler.set_xsd_version("1.1")
-
-                if href is None:
-                    try:
-                        '''schema_validator.register_schema(xsd_file=ns)'''
-                        source_arr.append(str(ns))
-                    except saxonc.PySaxonApiError as ex:
-                        print("*** Failed to load schema by URI: " + ns + " - " + str(ex))
-
-
+                if xsd_version is not None:
+                    # schema_validator.set_property("xsdversion", xsd_version)
+                    xsd_compiler.set_xsd_version(xsd_version)
                 else:
-                    try:
-                        '''schema_validator.register_schema(xsd_file=href)'''
-                        full_uri = urljoin(base_uri, href)
-                        pathi = pathlib.Path(full_uri.replace("file://", ""))
-                        source_arr.append(str(pathi))
-                    except saxonc.PySaxonApiError as ex:
-                        print("*** Failed to load schema by URI: " + href + " - " + str(ex))
+                    # schema_validator.set_property("xsdversion", "1.0")
+                    xsd_compiler.set_xsd_version("1.0")
 
-                xpc.import_schema_namespace(str(ns))
-                '''TODO create bug issue byte type require str for import_schema_namespace'''
-                environment.xpath_proc.import_schema_namespace(str(ns))
+                if role != "secondary":
+                    href = schema.get_attribute_value("file")
+                    ns = schema.get_attribute_value("uri")
 
-                if role == "source-reference":
-                    validate_sources = True
-                '''if role == "stylesheet-import": '''
-        try:
-            environment.xsd_schema = xsd_compiler.compile(xsd_list=source_arr)
-            if environment.xsd_schema is not None:
-                environment.xquery_proc.set_schema_aware(True)
-                environment.xpath_proc.use_schema(environment.xsd_schema)
-                environment.xslt_proc.use_schema(environment.xsd_schema)
-                environment.xquery_proc.use_schema(environment.xsd_schema)
-        except saxonc.PySaxonApiError as ex:
-            print("*** Failed to load schema by URI: " + ns + " - " + str(ex))
+                    if ns == "http://www.w3.org/2005/xpath-functions":
+                        # schema_validator.set_property("xsdversion", "1.1")
+                        xsd_compiler.set_xsd_version("1.1")
+
+                    if href is None:
+                        try:
+                            '''schema_validator.register_schema(xsd_file=ns)'''
+                            source_arr.append(str(ns))
+                        except saxonc.PySaxonApiError as ex:
+                            print("*** Failed to load schema by URI: " + ns + " - " + str(ex))
+
+
+                    else:
+                        try:
+                            '''schema_validator.register_schema(xsd_file=href)'''
+                            full_uri = urljoin(base_uri, href)
+                            pathi = pathlib.Path(full_uri.replace("file://", ""))
+                            source_arr.append(str(pathi))
+                        except saxonc.PySaxonApiError as ex:
+                            print("*** Failed to load schema by URI: " + href + " - " + str(ex))
+
+                    xpc.import_schema_namespace(str(ns))
+
+                    environment.xpath_proc.import_schema_namespace(str(ns))
+
+                    if role == "source-reference":
+                        validate_sources = True
+                    '''if role == "stylesheet-import": '''
+
+                environment.xsd_schema = xsd_compiler.compile(xsd_list=source_arr)
+                if environment.xsd_schema is not None:
+                    environment.xquery_proc.set_schema_aware(True)
+                    environment.xpath_proc.use_schema(environment.xsd_schema)
+                    environment.xslt_proc.use_schema(environment.xsd_schema)
+                    environment.xquery_proc.use_schema(environment.xsd_schema)
+    except saxonc.PySaxonApiError as ex:
+        print("*** Failed to load schema by URI: " + str(ex))
+        environment.usable = False
+        return environment
 
     stylesheets = xpc.evaluate("stylesheet[not(@role='secondary')]")
     if stylesheets is not None:
@@ -379,9 +385,10 @@ def load_source_documents(xpc: saxonc.PyXPathProcessor, env: saxonc.PyXdmNode, e
                 TODO this is a bug cannot set validator to None'''
             else:
                 try:
-                    schema_validatori = xsd_schema.new_schema_validator()
-                    schema_validatori.set_lax(validation == "lax")
-                    builder.set_schema_validator(schema_validatori)
+                    if xsd_schema is not None:
+                        schema_validatori = xsd_schema.new_schema_validator()
+                        schema_validatori.set_lax(validation == "lax")
+                        builder.set_schema_validator(schema_validatori)
                     '''environment.xpath_proc.use_schema(xsd_schema)'''
                 except saxonc.PySaxonApiError as ex:
                     print("*** Failed to create PySchemaValidator :" + str(ex))
