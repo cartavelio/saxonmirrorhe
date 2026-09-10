@@ -46,9 +46,14 @@ public class SchemaModelLoader extends ProxyReceiver {
     private SchemaCompiler compiler;
     private final HashMap<String, SchemaComponent> components = new HashMap<>(100);
     private final HashSet<SchemaComponent> anonComponents = new HashSet<>(100);
+    private final IdentityHashMap<UserComplexType, FiniteStateMachine> pendingCompilations = new IdentityHashMap<>();
     private final List<Fixup> fixups = new ArrayList<>();
     private final Stack<SCMNodeHandler> handlerStack = new Stack<>();
+
+    //private NamespaceResolver namespaceResolver;
+
     private NodeName elementName;
+
     private final List<PendingEdge> pendingEdges = new ArrayList<>();
     private String dmk = null;
 
@@ -66,7 +71,6 @@ public class SchemaModelLoader extends ProxyReceiver {
         ParseOptions options = config.getParseOptions()
                         .withSchemaValidationMode(Validation.SKIP);
         getPipelineConfiguration().setParseOptions(options);
-        //config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
         this.config = (EnterpriseConfiguration) config;
         schema = new PreparedSchema((EnterpriseConfiguration) config);
     }
@@ -93,6 +97,14 @@ public class SchemaModelLoader extends ProxyReceiver {
                 throw new XPathException("Invalid checksum in compiled schema file");
             }
         }
+
+        for (SchemaType type : schema.getAllTypes()) {
+            if (type instanceof UserComplexType) {
+                FiniteStateMachine fsm = pendingCompilations.get(type);
+                schema.rebuildComplexType((UserComplexType)type, fsm);
+            }
+        }
+
         try {
             for (Fixup fixup : fixups) {
                 fixup.apply(this);
@@ -144,9 +156,19 @@ public class SchemaModelLoader extends ProxyReceiver {
                     ((UserSchemaComponent) o).elaborate(compiler);
                 }
             }
+
+            for (CompiledComplexType cct : schema.getCompiledComplexTypes()) {
+                cct.makeContextDeterminedTypeMapForAttributes(schema);
+                cct.makeContextDeterminedTypeMapForElements(schema);
+            }
+            
         } catch (SchemaException err) {
             throw new XPathException(err);
         }
+        return schema;
+    }
+
+    public PreparedSchema getSchema() {
         return schema;
     }
 
@@ -159,20 +181,20 @@ public class SchemaModelLoader extends ProxyReceiver {
                              AttributeMap attributes, NamespaceMap namespaces,
                              Location location, int properties) throws XPathException {
 //        System.err.println("start " + config.getNamePool().getDisplayName(nameCode));
-        elementName = elemName;
         SCMNodeHandler handler;
         if (handlerStack.isEmpty()) {
             handler = new SchemaHandler();
         } else {
-            handler = handlerStack.peek().handleChildElement(elementName.getLocalPart());
+            handler = handlerStack.peek().handleChildElement(elemName.getLocalPart());
             if (handler == null) {
-                throw new XPathException("No handler defined for element " + elementName.getLocalPart() +
+                throw new XPathException("No handler defined for element " + elemName.getLocalPart() +
                         " in " + handlerStack.peek().getClass().getName());
             }
         }
         handler.setSchemaModelLoader(this);
         handlerStack.push(handler);
         try {
+
             handler.processElementStart(elementName.getLocalPart(), attributes, namespaces);
         } catch (SchemaException e) {
             throw new XPathException(e);
@@ -368,6 +390,7 @@ public class SchemaModelLoader extends ProxyReceiver {
             if (isGlobal) {
                 loader.schema.addElementDecl(elementDecl);
             }
+            loader.schema.addSubstitutionGroupMember(elementDecl, elementDecl);
 
         }
 
@@ -725,7 +748,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                 case "modelGroupParticle":
                     return new ParticleHandler(complexType);
                 case "finiteStateMachine":
-                    return new FiniteStateMachineHandler(complexType);
+                    return new FiniteStateMachineHandler(complexType, loader);
                 case "assertion":
                     return new AssertionHandler(complexType);
                 default:
@@ -766,7 +789,7 @@ public class SchemaModelLoader extends ProxyReceiver {
                     loader.fixups.add(new Fixup(complexType, base, FIXUP_COMPLEX_TYPE_BASE_TYPE));
                 }
             }
-            ComplexVariety varietyCode = ComplexVariety.ELEMENT_ONLY;
+            ComplexVariety varietyCode;
             switch (variety) {
                 case "mixed":
                     varietyCode = ComplexVariety.MIXED;
@@ -774,11 +797,12 @@ public class SchemaModelLoader extends ProxyReceiver {
                 case "empty":
                     varietyCode = ComplexVariety.EMPTY;
                     break;
-                case "element-only":
-                    varietyCode = ComplexVariety.ELEMENT_ONLY;
-                    break;
                 case "simple":
                     varietyCode = ComplexVariety.SIMPLE;
+                    break;
+                case "element-only":
+                default:
+                    varietyCode = ComplexVariety.ELEMENT_ONLY;
                     break;
             }
             complexType.setVariety(varietyCode);
@@ -1134,11 +1158,9 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     private static class PreprocessHandler extends SCMNodeHandler {
 
-        private final UserSimpleType simpleType;
         private final PreprocessFacet facet;
 
         public PreprocessHandler(UserSimpleType simpleType) {
-            this.simpleType = simpleType;
             facet = new PreprocessFacet();
             simpleType.addFacet(facet);
         }
@@ -1219,12 +1241,10 @@ public class SchemaModelLoader extends ProxyReceiver {
             }
             particle.setMinOccurs(minOccurs);
             String maxOccursAtt = attributes.getValue(NamespaceUri.NULL, "maxOccurs");
-            int maxOccurs = -1;
+            int maxOccurs = -1; // meaning "unbounded"
             if (maxOccursAtt != null) {
                 maxOccursAtt = maxOccursAtt.trim();
-                if (maxOccursAtt.equals("unbounded")) {
-                    maxOccurs = -1;
-                } else {
+                if (!maxOccursAtt.equals("unbounded")) {
                     maxOccurs = Integer.parseInt(maxOccursAtt);
                 }
             }
@@ -1541,8 +1561,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
             String type = attributes.getValue(NamespaceUri.NULL, "type");
-            BuiltInAtomicType t = (BuiltInAtomicType) loader.config.getSchemaType(
-                new StructuredQName("", NamespaceUri.SCHEMA, type.substring(1)));
+            BuiltInAtomicType t = (BuiltInAtomicType) loader.getSchema().getSchemaType(new StructuredQName("", NamespaceUri.SCHEMA, type.substring(1)));
             String value = attributes.getValue(NamespaceUri.NULL, "value");
             String namespaceAtt = attributes.getValue(NamespaceUri.NULL, "namespace");
             AtomicValue typedValue;
@@ -1589,8 +1608,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         @Override
         public void processElementStart(String localName, AttributeMap attributes, NamespaceMap namespaces) throws SchemaException {
 
-            Wildcard wildcard = new Wildcard();
-            wildcard.setConfiguration((EnterpriseConfiguration) loader.getConfiguration());
+            Wildcard wildcard = new Wildcard((EnterpriseConfiguration) loader.getConfiguration());
             String id = attributes.getValue(NamespaceUri.NULL, "id");
             if (id != null) {
                 loader.components.put(id, wildcard);
@@ -1655,15 +1673,10 @@ public class SchemaModelLoader extends ProxyReceiver {
     private static class FiniteStateMachineHandler extends SCMNodeHandler {
 
         private final FiniteStateMachine fsm;
-        //private IntHashMap forwardReferences = new IntHashMap();
 
-        public FiniteStateMachineHandler(UserComplexType complexType) {
+        public FiniteStateMachineHandler(UserComplexType complexType, SchemaModelLoader loader) {
             fsm = new FiniteStateMachine(complexType, true);
-            complexType.setFiniteStateMachine(fsm);
-//            if (complexType.getOpenContentWildcard() != null) {
-//                fsm.setOpenContentWildcard(complexType.getOpenContentWildcard(),
-//                        complexType.getOpenContentMode() == UserComplexType.OPEN_CONTENT_INTERLEAVE);
-//            }
+            loader.pendingCompilations.put(complexType, fsm);
         }
 
         @Override
@@ -1939,8 +1952,10 @@ public class SchemaModelLoader extends ProxyReceiver {
                 }
                 case FIXUP_COMPLEX_TYPE_OPEN_CONTENT_SUFFIX: {
                     Wildcard wildcard = (Wildcard) loader.components.get(targetId);
-                    ((UserComplexType) source).setOpenContentWildcard(wildcard, "suffix", true);
-                    FiniteStateMachine fsm = ((UserComplexType) source).getFiniteStateMachine();
+                    UserComplexType type = ((UserComplexType) source);
+                    type.setOpenContentWildcard(wildcard, "suffix", true);
+                    CompiledComplexType cct = loader.getSchema().getCompiledComplexType(type);
+                    FiniteStateMachine fsm = cct.getFiniteStateMachine();
                     if (fsm != null) {
                         fsm.setOpenContentWildcard(wildcard, false);
                     }
@@ -1948,8 +1963,10 @@ public class SchemaModelLoader extends ProxyReceiver {
                 }
                 case FIXUP_COMPLEX_TYPE_OPEN_CONTENT_INTERLEAVE: {
                     Wildcard wildcard = (Wildcard) loader.components.get(targetId);
-                    ((UserComplexType) source).setOpenContentWildcard(wildcard, "interleave", true);
-                    FiniteStateMachine fsm = ((UserComplexType) source).getFiniteStateMachine();
+                    UserComplexType type = ((UserComplexType) source);
+                    type.setOpenContentWildcard(wildcard, "interleave", true);
+                    CompiledComplexType cct = loader.getSchema().getCompiledComplexType(type);
+                    FiniteStateMachine fsm = cct.getFiniteStateMachine();
                     if (fsm != null) {
                         fsm.setOpenContentWildcard(wildcard, true);
                     }

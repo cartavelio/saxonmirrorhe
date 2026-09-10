@@ -149,14 +149,14 @@ public class ExperimentalXPathCompiler {
         return new FunctionLibrary() {
 
             @Override
-            public boolean isAvailable(SymbolicName.F functionName, int languageLevel) {
+            public boolean isAvailable(SymbolicName.F functionName, Schema schema, int languageLevel) {
                 return library.containsKey(functionName);
             }
 
 
             @Override
             public Expression bind(SymbolicName.F functionName, Expression[] staticArgs, Map<StructuredQName, Integer> keywords, StaticContext env, List<String> reasons) {
-                if (isAvailable(functionName, env.getXPathVersion())) {
+                if (isAvailable(functionName, env.getPackageData().getImportedSchema(), env.getXPathVersion())) {
                     UserFunction fn = library.get(functionName);
                     fn.setFunctionName(functionName.getComponentName());
                     //lib.put(functionName, fn);
@@ -428,16 +428,6 @@ public class ExperimentalXPathCompiler {
         @Override
         public boolean isInBackwardsCompatibleMode() {
             return sefElement.getAttributeValue(NamespaceUri.NULL, "BC") != null;
-        }
-
-        @Override
-        public boolean isImportedSchema(NamespaceUri namespace) {
-            return false;
-        }
-
-        @Override
-        public Set<NamespaceUri> getImportedSchemaNamespaces() {
-            return Collections.emptySet();
         }
 
         @Override

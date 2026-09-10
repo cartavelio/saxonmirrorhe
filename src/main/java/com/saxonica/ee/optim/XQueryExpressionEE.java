@@ -253,7 +253,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         Controller controller = newController(dynamicEnv);
         XPathContextMajor context = initialContext(dynamicEnv, controller);
         try {
-            PendingUpdateList pul = config.newPendingUpdateList();
+            PendingUpdateList pul = config.newPendingUpdateList(getPackageData().getImportedSchema());
             context.openStackFrame(stackFrameMap);
             expression.makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
             pul.apply(context, mainModule.getRevalidationMode());
@@ -298,7 +298,7 @@ public class XQueryExpressionEE extends XQueryExpression {
         Controller controller = newController(dynamicEnv);
         XPathContextMajor context = initialContext(dynamicEnv, controller);
         try {
-            PendingUpdateList pul = config.newPendingUpdateList();
+            PendingUpdateList pul = config.newPendingUpdateList(getPackageData().getImportedSchema());
             context.openStackFrame(stackFrameMap);
             expression.makeElaborator().elaborateForUpdate().registerUpdates(context, pul);
             pul.apply(context, mainModule.getRevalidationMode());

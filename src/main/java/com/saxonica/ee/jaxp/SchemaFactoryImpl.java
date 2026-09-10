@@ -1,11 +1,15 @@
 package com.saxonica.ee.jaxp;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.ee.schema.sdoc.LSSchemaResolver;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.ErrorReporter;
+import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.FeatureKeys;
+import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.s9api.XmlProcessingError;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
@@ -19,6 +23,7 @@ import javax.xml.transform.SourceLocator;
 import javax.xml.transform.TransformerException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 /**
@@ -281,37 +286,26 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
     @Override
     public Schema newSchema(Source[] sources) throws SAXException {
         SchemaCompiler compiler = config.newSchemaCompiler();
+        PreparedSchema ps;
         try {
-            for (Source source : sources) {
-                config.addSchemaSource(source, errorReporter, compiler);
-            }
+            ps = compiler.loadSources(Arrays.asList(sources));
         } catch (SchemaException e) {
             throw toSAXException(e);
         }
-        return new SchemaReference(config.getSuperSchema());
+        return new SaxonJaxpSchema(ps);
     }
 
     /**
-     * Returns the {@link Schema} object containing all the schema components
-     * that have been loaded using the {@link #newSchema} method. If no schema
-     * components have been loaded, the schema can still be used to validate
-     * source documents provided that they specify the location of the required
-     * schema components using the xsi:schemaLocation attribute.
-     * <p>The returned {@link Schema} object assumes that if documents
-     * refer to the same URL in the schema location hints,
-     * they will always resolve to the same schema document. This
-     * assumption allows implementations to reuse parsed results of
-     * schema documents so that multiple validations against the same
-     * schema will run faster.</p>
-     * <p>Note that the use of schema location hints introduces a
-     * vulnerability to denial-of-service attacks.</p>
+     * Returns an empty schema.
      *
      * @return Always return a non-null valid {@link Schema} object.
+     * @since 13.0 - changed to return an empty schema. Previously the method returned the global
+     * schema held by the Saxon {@link Configuration}.
      */
 
     @Override
     public Schema newSchema() {
-        return new SchemaReference(config.getSuperSchema());
+        return new SaxonJaxpSchema(new PreparedSchema(config));
     }
 
     /**
@@ -459,15 +453,6 @@ public class SchemaFactoryImpl extends SchemaFactory implements Configuration.Ap
             return new SAXParseException(err.getMessage(), (Locator) loc, err);
         }
     }
-
-    private static TransformerException toTransformerException(SAXException err) {
-        if (err.getException() instanceof TransformerException) {
-            return (TransformerException) err.getException();
-        } else {
-            return new TransformerException(err);
-        }
-    }
-
 
     /**
      * A JAXP ErrorReporter that wraps a SAX ErrorHandler

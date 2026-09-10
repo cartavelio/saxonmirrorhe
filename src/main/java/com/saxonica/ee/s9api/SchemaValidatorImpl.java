@@ -1,6 +1,7 @@
 package com.saxonica.ee.s9api;
 
 import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
 import com.saxonica.ee.trans.Outcome;
 import com.saxonica.ee.validate.InvalidityReportGeneratorEE;
 import net.sf.saxon.Configuration;
@@ -30,6 +31,7 @@ import javax.xml.transform.Source;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -56,6 +58,7 @@ import java.util.concurrent.*;
 public class SchemaValidatorImpl extends SchemaValidator {
 
     private final Processor processor;
+    private final XsdSchema schema;
     private boolean lax;
     private InvalidityHandler invalidityHandler;
     private Destination destination;
@@ -71,11 +74,22 @@ public class SchemaValidatorImpl extends SchemaValidator {
     private int threadCount = Runtime.getRuntime().availableProcessors();
 
     @CSharpModifiers(code = {"internal"})
-    public SchemaValidatorImpl(Processor processor) {
-        this.processor = processor;
+    public SchemaValidatorImpl(Processor processor, XsdSchema schema) {
+        this.processor = Objects.requireNonNull(processor);
+        this.schema = Objects.requireNonNull(schema);
         this.useXsiSchemaLocation = processor.getConfigurationProperty(Feature.USE_XSI_SCHEMA_LOCATION);
         this.invalidityHandler = new InvalidityHandlerWrappingErrorReporter(
                 processor.getUnderlyingConfiguration().makeErrorReporter());
+    }
+
+    /**
+     * Get the schema used by this schema validator
+     *
+     * @return the relevant schema
+     */
+    @Override
+    public XsdSchema getSchema() {
+        return schema;
     }
 
     /**
@@ -308,8 +322,8 @@ public class SchemaValidatorImpl extends SchemaValidator {
 
     @Override
     public void setDocumentElementTypeName(QName name) throws SaxonApiException {
-        Configuration config = processor.getUnderlyingConfiguration();
-        documentElementType = config.getSchemaType(name.getStructuredQName());
+        StructuredQName name1 = name.getStructuredQName();
+        documentElementType = schema.getUnderlyingSchema().getSchemaType(name1);
         if (documentElementType == null) {
             throw new SaxonApiException("Unknown type " + name.getClarkName());
         }
@@ -537,7 +551,8 @@ public class SchemaValidatorImpl extends SchemaValidator {
                     Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
                     output.setPipelineConfiguration(pipe);
 
-                    Receiver receiver = config.getDocumentValidator(output, source.getSystemId(), options, null);
+                    Receiver receiver = schema.getUnderlyingSchema().getDocumentValidator(
+                            output, source.getSystemId(), options, null);
                     Sender.send(source, receiver, options);
                 } catch (XPathException | SaxonApiException e1) {
                     //e1.printStackTrace();
@@ -684,7 +699,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         Controller controller = new Controller(config);
         Executable exec = controller.getExecutable();
         PackageData pack = new PackageData(config);
-        pack.setLocalLicenseId(((EnterpriseConfiguration)config).getSuperSchema().getLocalLicenseId());
+        pack.setLocalLicenseId(((PreparedSchema)schema.getUnderlyingSchema()).getLocalLicenseId());
         pack.setSchemaAware(true);
         exec.setTopLevelPackage(pack);
         exec.setSchemaAware(true);
@@ -719,7 +734,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());
         output.setPipelineConfiguration(pipe);
 
-        return config.getDocumentValidator(output, systemId, options, null);
+        return schema.getUnderlyingSchema().getDocumentValidator(output, systemId, options, null);
     }
 
     /**

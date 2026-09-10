@@ -1,6 +1,7 @@
 package com.saxonica.ee.validate;
 
 import com.saxonica.ee.schema.ElementDecl;
+import com.saxonica.ee.schema.PreparedSchema;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.pattern.SchemaNodeTest;
@@ -27,6 +28,7 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
     // a ContentTypeTest. This was changed as a consequence of the change to the specification introduced
     // by the resolution of specification bug 10065
 
+    private final PreparedSchema schema;
     private final ElementDecl head;
     private final IntHashMap<ElementDecl> groupByFingerprint;
     private final HashMap<NodeName, ElementDecl> groupByName;
@@ -39,9 +41,10 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
      * @param element The element declaration of the named element
      */
 
-    public SchemaElementTest(ElementDecl element) throws MissingComponentException {
+    public SchemaElementTest(PreparedSchema schema, ElementDecl element) throws MissingComponentException {
         head = element;
-        Collection<ElementDecl> subsGroup = element.getSubstitutionGroupMembers();
+        this.schema = schema;
+        Collection<ElementDecl> subsGroup = schema.getSubstitutionGroupMembers(element);
         groupByFingerprint = new IntHashMap<>(subsGroup.size());
         groupByName = new HashMap<>(subsGroup.size());
         for (ElementDecl decl : subsGroup) {
@@ -79,6 +82,15 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
 
     public ElementDecl getElementDeclaration() {
         return head;
+    }
+
+    /**
+     * Get the schema from the static context of this type designation
+     * @return the in-scope schema
+     */
+
+    public Schema getSchema() {
+        return schema;
     }
 
     @Override
@@ -145,8 +157,10 @@ public class SchemaElementTest extends NodeTest implements SchemaNodeTest {
             }
             ElementDecl decl = groupByFingerprint.get(nameCodeArray[nodeNr] & 0xfffff);
             try {
-                return decl != null && !(((TinyTree) tree).isNilled(nodeNr) && !decl.isNillable()) /*&& !decl.isAbstract()*/ &&
+                boolean ok = decl != null && !(((TinyTree) tree).isNilled(nodeNr) && !decl.isNillable()) /*&& !decl.isAbstract()*/ &&
                         matchesAnnotation(decl.getType(), ((TinyTree) tree).getSchemaType(nodeNr), decl.getConfiguration().getTypeHierarchy());
+                //System.err.println(((TinyTree)tree).getConfiguration().getNamePool().getDisplayName(nameCodeArray[nodeNr] & 0xfffff) + " = " + ok);
+                return ok;
             } catch (MissingComponentException e) {
                 return false;
             }

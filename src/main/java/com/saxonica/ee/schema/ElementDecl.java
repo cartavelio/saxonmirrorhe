@@ -2,12 +2,10 @@ package com.saxonica.ee.schema;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.schema.sdoc.SimpleTypeDefinition;
-import com.saxonica.ee.validate.SchemaElementTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeTest;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.trans.Err;
@@ -25,7 +23,7 @@ import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
 import static net.sf.saxon.type.SchemaValidationStatus.VALIDATING;
 
 /**
- * The object represents an element declaration in the schema. It may be a global element
+ * The object represents an element declaration. It may be a global element
  * declaration, or a local element declaration.
  */
 public class ElementDecl extends SchemaStructure
@@ -105,13 +103,13 @@ public class ElementDecl extends SchemaStructure
 
     private List<SimpleComponentReference> substitutionGroupOwners = null;
 
-    /**
-     * The elements that are known to be members of the substitution group
-     * of this element. This is the transitive closure of the tree. The set
-     * holds the actual element declarations
-     */
-
-    private Collection<ElementDecl> substitutionGroupMembers = new ArrayList<>();
+//    /**
+//     * The elements that are known to be members of the substitution group
+//     * of this element. This is the transitive closure of the tree. The set
+//     * holds the actual element declarations
+//     */
+//
+//    private Collection<ElementDecl> substitutionGroupMembers = new ArrayList<>();
 
     /**
      * The target namespace of the element declaration. Set to "" for no-namespace names.
@@ -445,104 +443,6 @@ public class ElementDecl extends SchemaStructure
     }
 
     /**
-     * Get the known members of the substitution group of this element, as a Set
-     * containing the ElementDecl objects. This includes all applicable element declarations
-     * in schemas compiled within the same Configuration as this schema.
-     *
-     * @return a set containing all the substitution group members, expanded transtively
-     */
-
-    public Collection<ElementDecl> getSubstitutionGroupMembers() {
-        return substitutionGroupMembers;
-    }
-
-    /**
-     * Add a member of the substitution group that has this element as its head.
-     * For internal use only.
-     * <p>This method may be called at any time, for example when a new schema is loaded as a result
-     * of validating an instance document. The method is therefore synchronized, since the
-     * schema may be used in several threads concurrently. Adding a new member to a substitution group
-     * means that all complex type definitions that include this element in their content model
-     * must be recompiled.</p>
-     * <p>It is not possible to add to a substitution group once the element declaration has been used,
-     * either for validating a source document or for compiling stylesheets or schemas.</p>
-     *
-     * @param member   The element declaration to be added to the substitution group of which this
-     *                 element declaration is the head. Elements are added to each ancestor in the substitution
-     *                 group hierarchy.
-     * @param compiler used for error reporting
-     * @throws net.sf.saxon.type.SchemaException
-     *          if a fatal error occurs
-     */
-
-    public synchronized void addSubstitutionGroupMember(ElementDecl member, SchemaCompiler compiler)
-            throws SchemaException {
-        if (!substitutionGroupMembers.contains(member)) {
-            EnterpriseConfiguration config = getConfiguration();
-            if (member != this) {
-                member.fixup(compiler);
-                String reason = member.isValidlySubstitutable(this);
-                // If the member is not validly substitutable, this is not in general an error,
-                // but we report it as a warning.
-                if (reason != null) {
-                    boolean isError = false;
-                    // In XSD 1.1 this becomes an error if the reason it's not validly substitutable
-                    // is to do with the element's type.
-                    if (compiler.getConfiguration().getXsdVersion() == Configuration.XSD11 &&
-                            reason.startsWith("required type derivation method")) {
-                        isError = true;
-                    }
-                    String memberName = member.getDisplayName();
-                    String msg = "Element " + Err.wrap(memberName, Err.ELEMENT) +
-                            " cannot participate in the substitution group of element " +
-                            Err.wrap(getName(), Err.ELEMENT) + ": " + reason;
-                    try {
-                        Set<ElementDecl> grandFathers = getSubstitutionGroupOwners();
-                        for (ElementDecl grandFather : grandFathers) {
-                            if (member.isValidlySubstitutable(grandFather) == null) {
-                                msg += ". However, element " + Err.wrap(memberName, Err.ELEMENT) +
-                                        " can substitute for element " +
-                                        Err.wrap(grandFather.getDisplayName(), Err.ELEMENT);
-                                break;
-                            }
-                        }
-                    } catch (MissingComponentException err) {
-                        // ignore
-                    }
-
-                    if (isError) {
-                        compiler.error(msg, member);
-                        throw new SchemaException("Disallowed substitution group membership");
-                    } else {
-                        compiler.warning(msg, SaxonErrorCode.SXSD1002, member);
-                    }
-                    return;
-                }
-            }
-
-            if (member != this && config.isSealedNamespace(getTargetNamespace())) {
-                String msg = "It is not possible to add to the substitution group of element " + getName() +
-                        " in namespace '" + getTargetNamespace() +
-                        "', because the schema for that namespace has already been used for validating instance documents," +
-                        " or for compiling queries or stylesheets";
-                SchemaException err = new SchemaException(msg);
-                err.setLocator(member);
-                throw err;
-            }
-            substitutionGroupMembers.add(member);
-            if (substitutionGroupMembers.size() > 10) {
-                substitutionGroupMembers = new HashSet<>(substitutionGroupMembers);
-            }
-            // This invalidates the compiled form of all complex types using this element
-            if (member != this) {
-                for (UserComplexType type : complexTypesUsingThisElement) {
-                    type.recompile(compiler);
-                }
-            }
-        }
-    }
-
-    /**
      * Register a complex type that contains this element as a particle. If new elements are added
      * to the substitution group headed by this element, these complex types will need to be
      * recompiled to permit the new substititution group members. For internal use only.
@@ -657,24 +557,11 @@ public class ElementDecl extends SchemaStructure
         this.nillable = nillable;
     }
 
-    /**
-     * Set the name of this element declaration
-     *
-     * @param elementName the element name
-     */
-
-    public void setElementName(StructuredQName elementName, int fingerprint) {
-        this.elementName = elementName;
-        this.fingerprint = fingerprint;
-        this.targetNamespace = elementName.getNamespaceUri();
-        substitutionGroupMembers.add(this);
-    }
-
     public void setElementName(StructuredQName elementName) {
         this.elementName = elementName;
         this.fingerprint = getConfiguration().getNamePool().allocateFingerprint(elementName.getNamespaceUri(), elementName.getLocalPart());
         this.targetNamespace = elementName.getNamespaceUri();
-        substitutionGroupMembers.add(this);
+        //substitutionGroupMembers.add(this);
     }
 
     @Override
@@ -782,7 +669,8 @@ public class ElementDecl extends SchemaStructure
                         " participates in a substitution group whose definition is circular", this);
                 throw new SchemaException("Circular definition found");
             }
-            addSubstitutionGroupMember(member, compiler);
+            compiler.addSubstitutionGroupMember(this, member);
+            //addSubstitutionGroupMember(member, compiler);
         }
         if (substitutionGroupOwners != null) {
             references.push(this);
@@ -851,17 +739,6 @@ public class ElementDecl extends SchemaStructure
     }
 
     /**
-     * Create a NodeTest that implements the semantics of schema-element(name) or
-     * schema-attribute(name) applied to this element or attribute declaration.
-     * @throws MissingComponentException if the type of the declaration is not present in the schema.
-     */
-
-    @Override
-    public NodeTest makeSchemaNodeTest() throws MissingComponentException {
-        return new SchemaElementTest(this);
-    }
-
-    /**
      * Check the validity (consistency) of this element definition.
      *
      * @param compiler used for error reporting
@@ -872,7 +749,7 @@ public class ElementDecl extends SchemaStructure
 
     @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {
-        // System.err.println("Validate " + getName());
+        //System.err.println("Validate " + getName());
         // check for circularities and for previous validation
 
         // check for previous validation
@@ -1038,7 +915,7 @@ public class ElementDecl extends SchemaStructure
      * @return null if substitution is possible, or a string explaining why not
      */
 
-    private String isValidlySubstitutable(ElementDecl other) throws MissingComponentException {
+    String isValidlySubstitutable(ElementDecl other) throws MissingComponentException {
         int block = other.getBlock();
         // rule 1
         if (this == other) {

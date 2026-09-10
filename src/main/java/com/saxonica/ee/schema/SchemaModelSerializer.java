@@ -26,6 +26,7 @@ import java.util.LinkedList;
 public class SchemaModelSerializer {
 
     private final EnterpriseConfiguration config;
+    private final PreparedSchema schema;
     private final Receiver receiver;
     private final ComplexContentOutputter cco;
     private final LinkedList<SchemaComponent> pendingComponents = new LinkedList<>();
@@ -39,17 +40,43 @@ public class SchemaModelSerializer {
     /**
      * Create a SchemaModelSerializer
      *
-     * @param config the Saxon Configuration. This must be a schema-aware configuration
+     * @param schema the schema to be serialized
      * @param out    the receiver to which the compiled schema document will be written
      * @throws IllegalArgumentException if the configuration is not schema-aware
      */
 
-    public SchemaModelSerializer(Configuration config, Receiver out) {
+    public SchemaModelSerializer(PreparedSchema schema, Receiver out) {
+        this.schema = schema;
+        config = schema.getConfiguration();
         config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
-        this.config = (EnterpriseConfiguration) config;
         NamespaceReducer reducer = new NamespaceReducer(out);
         this.receiver = new CheckSumFilter(reducer);
         this.cco = new ComplexContentOutputter(this.receiver);
+    }
+
+    public SchemaModelSerializer(PreparedSchema schema, ExpressionPresenter presenter) {
+        this.schema = schema;
+        config = schema.getConfiguration();
+        config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
+        this.receiver = presenter.getReceiver();
+        this.cco = presenter.getComplexContentOutputter();
+    }
+
+    public PreparedSchema getSchema() {
+        return schema;
+    }
+
+    public void serializeAsDocument() throws XPathException {
+        cco.open();
+        cco.startDocument(ReceiverOption.NONE);
+        serialize();
+        if (receiver instanceof CheckSumFilter) {
+            int c = ((CheckSumFilter) receiver).getChecksum();
+            cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
+                                      Loc.NONE, ReceiverOption.NONE);
+        }
+        cco.endDocument();
+        cco.close();
     }
 
     /**
@@ -59,8 +86,7 @@ public class SchemaModelSerializer {
      */
 
     public void serialize() throws XPathException {
-        cco.open();
-        cco.startDocument(ReceiverOption.NONE);
+
         startElement("schema");
         emitAttribute("generatedAt", DateTimeValue.getCurrentDateTime(null).getStringValue());
         emitAttribute("xsdVersion", config.getConfigurationProperty(Feature.XSD_VERSION));
@@ -68,7 +94,6 @@ public class SchemaModelSerializer {
         if (dmk != null) {
             emitAttribute("dmk", dmk);
         }
-        PreparedSchema schema = config.getSuperSchema();
         // System.err.println("Serializing schema " + schema);
         for (SchemaType type : schema.getAllTypes()) {
             SchemaType sType = type;
@@ -107,6 +132,9 @@ public class SchemaModelSerializer {
         }
 
         endElement();
+
+
+
         if (receiver instanceof CheckSumFilter) {
             int c = ((CheckSumFilter) receiver).getChecksum();
             cco.processingInstruction(CheckSumFilter.SIGMA, BMPString.of(Integer.toHexString(c)),
@@ -117,6 +145,7 @@ public class SchemaModelSerializer {
         }
         cco.endDocument();
         cco.close();
+
 
     }
 
@@ -135,7 +164,7 @@ public class SchemaModelSerializer {
             cco.startContent();
             inStartTag = false;
         }
-        receiver.endElement();
+        cco.endElement();
     }
 
     public void emitNamespaceContext(NamespaceResolver resolver) throws XPathException {

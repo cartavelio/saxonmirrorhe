@@ -684,6 +684,7 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
     /**
+
      * Make a function in the "fn" namespace
      *
      * @param localName the local name of the function
@@ -708,6 +709,7 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
     /**
+
      * Set the FunctionLibrary used to bind calls on extension functions. This allows the
      * rules for identifying extension functions to be customized (in principle, it would
      * allow support for extension functions in other languages to be provided).

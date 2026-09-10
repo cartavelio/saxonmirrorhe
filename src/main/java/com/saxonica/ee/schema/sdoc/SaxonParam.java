@@ -97,7 +97,7 @@ public class SaxonParam extends AnnotationParent {
         param.setVariableQName(qName);
         param.setRequiredType(requiredType);
         param.setBody(Literal.makeLiteral(defaultValue));
-        getXSDSchema().addGlobalParam(param);
+        getXSDSchemaElement().addGlobalParam(param);
 
 
     }

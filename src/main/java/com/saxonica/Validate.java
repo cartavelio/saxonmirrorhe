@@ -303,8 +303,9 @@ public class Validate {
 
             long startTime = now();
 
-            SchemaManager manager = processor.getSchemaManager();
+            XsdCompiler compiler = processor.newXsdCompiler();
 
+            List<Source> schemaSources = new ArrayList<>();
             for (String schemaFileName : schemaFileNames) {
                 Source schemaSource;
                 if (useURLs || CommandLineOptions.isImplicitURI(schemaFileName)) {
@@ -350,21 +351,25 @@ public class Validate {
                     return quit("URIResolver for schema file must return a Source", 2);
                 }
 
-                try {
-                    manager.load(schemaSource);
-                } catch (SaxonApiException e) {
-                    if (e.getCause() instanceof SchemaException) {
-                        // bug 2351
-                        throw (SchemaException) e.getCause();
-                    } else {
-                        throw e;
-                    }
+                schemaSources.add(schemaSource);
+            }
+
+            XsdSchema schema;
+            try {
+                schema = compiler.compile(schemaSources.toArray(new Source[0]));
+            } catch (SaxonApiException e) {
+                if (e.getCause() instanceof SchemaException) {
+                    // bug 2351
+                    throw (SchemaException) e.getCause();
+                } else {
+                    throw e;
                 }
             }
 
+
             if (scmInput != null) {
                 Source scm = new StreamSource(new File(scmInput));
-                manager.importComponents(scm);
+                schema = compiler.importComponents(scm);
             }
 
             if (showTime && !schemaFileNames.isEmpty()) {
@@ -376,7 +381,7 @@ public class Validate {
 
             // Validate the document instances
 
-            final SchemaValidator validator = manager.newSchemaValidator();
+            final SchemaValidator validator = schema.newValidator();
             validator.setLax("lax".equals(validationMode));
             if (topLevelElementName != null) {
                 validator.setDocumentElementName(QName.fromClarkName(topLevelElementName));
@@ -488,7 +493,7 @@ public class Validate {
                 Serializer scmSerializer = processor.newSerializer(scmOutputFile);
                 scmSerializer.setOutputProperty(Serializer.Property.METHOD, "xml");
                 scmSerializer.setOutputProperty(Serializer.Property.INDENT, "yes");
-                manager.exportComponents(scmSerializer);
+                schema.exportComponents(scmSerializer);
                 if (showTime) {
                     config.getLogger().info("Schema component model written to " + scmOutputFile.getAbsolutePath());
                 }

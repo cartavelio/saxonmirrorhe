@@ -38,6 +38,49 @@ public class TypeHierarchyEE extends TypeHierarchy {
     protected Affinity computeContentRelationship(ItemType t1, ItemType t2) {
 
 
+        if (t1 instanceof DocumentNodeTest) {
+            if (t2 instanceof DocumentNodeTest) {
+                contentRelationship = relationship(((DocumentNodeTest) t1).getElementTest(),
+                        ((DocumentNodeTest) t2).getElementTest());
+            } else {
+                contentRelationship = SUBSUMED_BY;
+            }
+        } else if (t2 instanceof DocumentNodeTest) {
+            contentRelationship = SUBSUMES;
+        } else {
+            // This is changed as a result of spec bug 10065. If t2 is schema-element(e2), it is
+            // no longer sufficient to check the content type of t1 against the declared type of e2
+            // (which might be xs:anyType, as in test schvalid010). Instead it must be checked against
+            // the declared type of the element declaration corresponding to the actual name N of
+            // the element being tested.
+            SchemaType s1 = ((NodeTest) t1).getContentType();
+            SchemaType s2 = ((NodeTest) t2).getContentType();
+            try {
+                if (t1 instanceof SchemaElementTest && on2.isPresent() && on2.get().size() == 1) {
+                    IntIterator ii2 = on2.get().iterator();
+                    int name2 = ii2.hasNext() ? ii2.next() : -1;
+                    SchemaDeclaration decl2 = ((SchemaElementTest)t1).getSchema().getElementDecl(name2);
+                    if (decl2 != null) {
+                        s1 = decl2.getType();
+                    }
+                }
+            } catch (MissingComponentException e) {
+                return OVERLAPS;
+            }
+            try {
+                if (t2 instanceof SchemaElementTest && on1.isPresent() && on1.get().size() == 1) {
+                    IntIterator ii1 = on1.get().iterator();
+                    int name1 = ii1.hasNext() ? ii1.next() : -1;
+                    SchemaDeclaration decl1 = ((SchemaElementTest) t2).getSchema().getElementDecl(name1);
+                    if (decl1 != null) {
+                        s2 = decl1.getType();
+                    }
+                }
+            } catch (MissingComponentException e) {
+                return OVERLAPS;
+            }
+
+
         if (t1 instanceof DocumentNodeTest || t2 instanceof DocumentNodeTest) {
             return super.computeContentRelationship(t1,t2);
         }

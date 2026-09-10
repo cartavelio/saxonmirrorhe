@@ -6,11 +6,11 @@ import com.saxonica.ee.extfn.js.IXSLElementFactory;
 import com.saxonica.ee.extfn.js.StubFunctionLibrary;
 import com.saxonica.ee.optim.*;
 import com.saxonica.ee.parallel.ThreadManagerEE;
+import com.saxonica.ee.s9api.XsdCompilerEE;
 import com.saxonica.ee.schema.*;
 import com.saxonica.ee.schema.sdoc.SchemaDocument;
 import com.saxonica.ee.schema.sdoc.SchemaReader;
 import com.saxonica.ee.schema.sdoc.XMLNamespaceSchema;
-import com.saxonica.ee.schema.sdoc.XSINamespaceSchema;
 import com.saxonica.ee.stream.*;
 import com.saxonica.ee.stream.feed.DecomposingFeed;
 import com.saxonica.ee.stream.om.FleetingNode;
@@ -21,6 +21,7 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.*;
 import com.saxonica.ee.update.PendingUpdateListImpl;
 import com.saxonica.ee.update.XQueryParserExtensionEE;
+
 import com.saxonica.ee.validate.*;
 import com.saxonica.expr.DeepLookupExpression;
 import com.saxonica.expr.XQueryParserExtensionPE;
@@ -29,8 +30,10 @@ import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
-import net.sf.saxon.Version;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.FilterFactory;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.PipelineConfiguration;
+import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.Accumulator;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
@@ -52,6 +55,8 @@ import net.sf.saxon.regex.RegexIterator;
 import net.sf.saxon.regex.RegularExpression;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XsdCompiler;
 import net.sf.saxon.serialize.JSONEmitter;
 import net.sf.saxon.serialize.UTF8Writer;
 import net.sf.saxon.str.UnicodeString;
@@ -70,7 +75,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import java.io.*;
+import java.io.OutputStream;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,10 +94,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     private int licensedFeatures = 0;
     private HashMap<NamespaceUri, Integer> namespaceStatus = new HashMap<>();
+    private ConcurrentHashMap<NamespaceUri, PreparedSchema> schemaCache = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Schema> namedSchemaCache = new ConcurrentHashMap<>();
     private int[] occurrenceLimits = {100, 250};
     private SchemaURIResolver schemaURIResolver = null;
     private final SchemaURIResolver standardSchemaResolver;
-    private transient PreparedSchema superSchema;
     private int resultDocumentThreadsLimit = Runtime.getRuntime().availableProcessors();
     private int thresholdForCompilingTypes = 100;
     private int thresholdForInliningFunctions = 100;
@@ -120,7 +126,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         optimizerOptions = OptimizerOptions.FULL_EE_OPTIMIZATION;
         defaultXsltCompilerInfo.setOptimizerOptions(optimizerOptions);
         standardSchemaResolver = new StandardSchemaResolver(this);
-        superSchema = new PreparedSchema(this);
     }
 
     @Override
@@ -452,7 +457,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     /**
      * Set a user-defined SchemaURIResolver for resolving URIs used in "import schema"
-     * declarations.
+     * declarations. This acts as a default for any {@link XsdCompiler} created from
+     * this point on.
      *
      * @param resolver the URI resolver used for import schema declarations
      */
@@ -520,6 +526,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     /**
      * Get the user-defined SchemaURIResolver for resolving URIs used in "import schema"
      * declarations; if none has been explicitly set, returns the standard schema URI resolver.
+     * This returns the default setting used when creating a new {@link XsdCompiler}; it is not
+     * affected by subsequent calls to {@link XsdCompiler#setSchemaURIResolver(SchemaURIResolver)}.
      *
      * @return the user-defined SchemaURIResolver if there is one; otherwise the standard
      * schema URI resolver.
@@ -534,68 +542,77 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Read a schema from a given schema location
+     * Simple interface to load a schema document
      *
-     * @param pipe           the PipelineConfiguration
-     * @param baseURI        the base URI for resolving relative URIs
-     * @param schemaLocation the location "hint" where to find the schema document. Must not be null.
-     *                       The document located may be either an XSD schema document or an SCM compiled schema.
-     * @param expected       the target namespace expected; null if there is no
-     *                       expectation
-     * @return the actual target namespace of the schema
+     * @param absoluteURI the absolute URI of the location of the schema document
+     * @throws net.sf.saxon.type.SchemaException if the schema document at the given location cannot be read or is invalid
      */
 
-    @Override
-    public NamespaceUri readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
-            throws SchemaException {
-        //noinspection SynchronizeOnNonFinalField
-        synchronized(superSchema) {
-            int status = getNamespaceStatus(expected);
-            if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
-                SchemaCompiler schemaCompiler = newSchemaCompiler();
-                if (pipe.getErrorReporter() != null) {
-                    schemaCompiler.setErrorReporter(pipe.getErrorReporter());
-                }
-                NamespaceUri ns = schemaCompiler.readSchema(pipe, baseURI, schemaLocation, expected);
-                schemaCompiler.makeAllAutomata();
-                schemaCompiler.checkAllAutomata();
-                return ns;
-            } else {
-                return expected;
-            }
-        }
+    public Schema loadSchema(String absoluteURI) throws SchemaException {
+        SchemaCompiler compiler = new SchemaCompiler(this);
+        List<Source> sources = new ArrayList<>(1);
+        sources.add(new StreamSource(absoluteURI));
+        return compiler.loadSources(sources);
     }
 
     /**
-     * Read schema documents from a list of schema locations
-     * @param pipe            the pipeline configuration
-     * @param baseURI         the base URI for resolving relative URIs
-     * @param schemaLocations the list of location "hints" where to find the schema document. Must not be null.
-     * @param expected        the target namespace expected in each of the schema documents; null if there is no
-     */
-
-    @Override
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
-            throws SchemaException {
-        newSchemaCompiler().readMultipleSchemas(pipe, baseURI, schemaLocations, expected);
-    }
-
-    /**
-     * Read an inline schema from a stylesheet
+     * Create an empty schema. This may be useful as a basis for validating a document using a schema loaded
+     * using xsi:schemaLocation and xsi:noNamespaceSchemaLocation attributes.
      *
-     * @param root          the xs:schema element in the stylesheet
-     * @param expected      the target namespace expected; "" if there is no
-     *                      expectation
-     * @param errorReporter The destination for error messages. May be null, in which case
-     *                      the errorListener registered with this Configuration is used.
-     * @return the actual target namespace of the schema
+     * @return an empty schema containing only the built-in components.
      */
-
-    @Override
-    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
-            throws SchemaException {
-        return newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
+    public Schema emptySchema() {
+        return new PreparedSchema(this);
     }
+
+//    /**
+//     * Read a schema from a given schema location
+//     *
+//     * @param pipe           the PipelineConfiguration
+//     * @param baseURI        the base URI for resolving relative URIs
+//     * @param schemaLocation the location "hint" where to find the schema document. Must not be null.
+//     *                       The document located may be either an XSD schema document or an SCM compiled schema.
+//     * @param expected       the target namespace expected; null if there is no
+//     *                       expectation
+//     * @return the actual target namespace of the schema
+//     */
+//
+//    @Override
+//    public Schema readSchema(PipelineConfiguration pipe, String baseURI, String schemaLocation, NamespaceUri expected)
+//            throws SchemaException {
+//        int status = getNamespaceStatus(expected);
+//        if (status == PreparedSchema.NAMESPACE_UNKNOWN || (status == PreparedSchema.NAMESPACE_KNOWN && getConfigurationProperty(Feature.MULTIPLE_SCHEMA_IMPORTS))) {
+//            SchemaCompiler schemaCompiler = newSchemaCompiler();
+//            if (pipe.getErrorReporter() != null) {
+//                schemaCompiler.setErrorReporter(pipe.getErrorReporter());
+//            }
+//            PreparedSchema schema = schemaCompiler.readSchema(baseURI, schemaLocation, expected);
+//            schemaCompiler.setPreparedSchema(schema);
+//            schemaCompiler.makeAllAutomata();
+//            schemaCompiler.checkAllAutomata();
+//            return schema;
+//        } else {
+//            return null;
+//        }
+//    }
+
+//    /**
+//     * Read an inline schema from a stylesheet
+//     *
+//     * @param root          the xs:schema element in the stylesheet
+//     * @param expected      the target namespace expected; "" if there is no
+//     *                      expectation
+//     * @param errorReporter The destination for error messages. May be null, in which case
+//     *                      the errorListener registered with this Configuration is used.
+//     * @return the actual target namespace of the schema
+//     */
+//
+//    @Override
+//    public NamespaceUri readInlineSchema(NodeInfo root, NamespaceUri expected, ErrorReporter errorReporter)
+//            throws SchemaException {
+//        Schema schema = newSchemaCompiler().readInlineSchema(root, expected, errorReporter);
+//        return NamespaceUri.NULL; // TODO
+//    }
 
     /**
      * Load a schema, which will be available for use by all subsequent operations using
@@ -642,17 +659,17 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             final PipelineConfiguration pipe = makePipelineConfiguration();
             pipe.setErrorReporter(errorReporter == null ? makeErrorReporter() : errorReporter);
             pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
-            if (schemadoc.isCompiledSchemaDocument()) {
-                try {
-                    importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
-                } catch (XPathException e) {
-                    throw new SchemaException(e);
-                }
-            } else {
+            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, null);
+//            if (schemadoc.isCompiledSchemaDocument()) {
+//                try {
+//                    importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
+//                } catch (XPathException e) {
+//                    throw new SchemaException(e);
+//                }
+//            } else {
                 compiler.validate(schemadoc);
-                setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
-            }
+//                setNamespaceStatus(schemadoc.getTargetNamespace(), PreparedSchema.NAMESPACE_KNOWN);
+//            }
 
         } catch (UncheckedXPathException e) {
             // indicates that the error reporter asked for termination
@@ -666,103 +683,11 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Add a schema (a collection of schema components) to the cache
-     *
-     * @param pschema The schema to be added
-     * @throws net.sf.saxon.type.SchemaException if the schema cannot be added because components in the schema
-     *                                           are incompatible with components already in the cache
-     */
-
-    public synchronized void addSchema(PreparedSchema pschema) throws SchemaException {
-        checkLicensedFeature(LicenseFeature.SCHEMA_VALIDATION, "schema processing", pschema.getLocalLicenseId());
-        if (pschema == superSchema) {
-            return;
-        }
-        if (pschema instanceof SingleNamespaceSchema) {
-            NamespaceUri targetNamespace = ((SingleNamespaceSchema) pschema).getTargetNamespace();
-            setNamespaceStatus(targetNamespace, PreparedSchema.NAMESPACE_KNOWN);
-        } else {
-            for (NamespaceUri ns : pschema.getTargetNamespaces()) {
-                setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
-            }
-        }
-        pschema.copyTo(superSchema, newSchemaCompiler());
-        superSchema.setLocalLicenseId(pschema.getLocalLicenseId());
-
-    }
-
-    /**
-     * Put a temporary schema marker in the cache, to indicate that a schema for a given
-     * namespace is being processed. Used to detect circularities.
-     * <p>This method is intended for internal use</p>
-     *
-     * @param namespace the target namespace of the schema
-     */
-
-    public synchronized void addSurrogateSchema(NamespaceUri namespace) {
-        checkLicensedFeature(LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
-        setNamespaceStatus(namespace, PreparedSchema.NAMESPACE_UNDER_CONSTRUCTION);
-    }
-
-    /**
-     * Add a built-in schema for a given namespace. This is a no-op if the configuration is not schema-aware
-     *
-     * @param namespace the namespace. Currently built-in schemas are available for the XML, XSI, and FN namespaces
-     */
-
-    @Override
-    public void addSchemaForBuiltInNamespace(NamespaceUri namespace) {
-        if (getNamespaceStatus(namespace) != PreparedSchema.NAMESPACE_UNKNOWN) {
-            return;
-        }
-        if (namespace == NamespaceUri.XML) {
-            addSchemaForXmlNamespace();
-        } else if (namespace == NamespaceUri.SCHEMA_INSTANCE) {
-            addSchemaForXsiNamespace();
-        } else if (namespace == NamespaceUri.FN) {
-            InputStream in = Version.platform.locateResource("xpath-functions.scm", new ArrayList<String>());
-            if (isTiming()) {
-                getLogger().info("Loading schema from resources for: " + NamespaceConstant.FN);
-            }
-            try {
-                addSchemaSource(new StreamSource(in), makeErrorReporter());
-                in.close();
-            } catch (SchemaException|IOException e) {
-                throw new IllegalStateException("Failed to load internal copy of xpath-functions.scm");
-            }
-        } else {
-            throw new IllegalArgumentException(namespace.toString());
-        }
-    }
-
-    private synchronized void addSchemaForXmlNamespace() {
-        if (getNamespaceStatus(NamespaceUri.XML) == PreparedSchema.NAMESPACE_UNKNOWN) {
-            try {
-                addSchema(XMLNamespaceSchema.buildSchema(this));
-            } catch (SchemaException err) {
-                throw new AssertionError(err);
-            }
-            setNamespaceStatus(NamespaceUri.XML, PreparedSchema.NAMESPACE_KNOWN);
-        }
-    }
-
-    private synchronized void addSchemaForXsiNamespace() {
-        if (getNamespaceStatus(NamespaceUri.SCHEMA_INSTANCE) == PreparedSchema.NAMESPACE_UNKNOWN) {
-            try {
-                addSchema(XSINamespaceSchema.buildSchema(this));
-            } catch (SchemaException err) {
-                throw new AssertionError(err);
-            }
-            setNamespaceStatus(NamespaceUri.SCHEMA_INSTANCE, PreparedSchema.NAMESPACE_KNOWN);
-        }
-    }
-
-    /**
      * Get the status of a particular schema namespace.
      *
      * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
      * @return one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
-     * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     * {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}
      */
 
     public synchronized int getNamespaceStatus(NamespaceUri namespace) {
@@ -774,7 +699,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      *
      * @param namespace the Namespace URI whose status is required (supply "" for the non-namespace)
      * @param status    one of {@link PreparedSchema#NAMESPACE_KNOWN}, {@link PreparedSchema#NAMESPACE_UNKNOWN},
-     *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}, {@link PreparedSchema#NAMESPACE_SEALED}
+     *                  {@link PreparedSchema#NAMESPACE_UNDER_CONSTRUCTION}
+     *
      */
 
     public synchronized void setNamespaceStatus(NamespaceUri namespace, int status) {
@@ -783,6 +709,21 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         } else {
             namespaceStatus.put(namespace, status);
         }
+    }
+
+    /**
+     * Add a built-in schema for a given namespace. This is a no-op if the configuration is not schema-aware
+     *
+     * @param namespace the namespace. Currently built-in schemas are available for the XML and FN namespaces
+     */
+
+    public Schema getSchemaForBuiltInNamespace(NamespaceUri namespace) {
+        PreparedSchema ps = getCachedSchema(namespace);
+        if (ps != null) {
+            return ps;
+        }
+        SchemaCompiler compiler = new SchemaCompiler(this);
+        return compiler.getSchemaForBuiltInNamespace(namespace);
     }
 
     /**
@@ -799,19 +740,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Remove the schema for a given namespace. This is done if it is found to be invalid.
-     * Note that this does not actually remove the schema components in this namespace; all it
-     * does is to mark the namespace as removed, which means that a new attempt to load a schema
-     * for this namespace is able to succeed.
-     *
-     * @param namespace the namespace of the schema to be removed
-     */
-
-    public synchronized void removeSchema(NamespaceUri namespace) {
-        namespaceStatus.remove(namespace);
-    }
-
-    /**
      * Get the set of namespaces of imported schemas
      * @return the set of namespaces of imported schemas
      */
@@ -821,44 +749,12 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         return namespaceStatus.keySet();
     }
 
-    /**
-     * Get the SuperSchema, containing references to all names defined in all
-     * known schemas
-     *
-     * @return the PreparedSchema containing the schema components for all loaded target namespaces
-     */
-
-    public PreparedSchema getSuperSchema() {
-        return superSchema;
+    public PreparedSchema getCachedSchema(NamespaceUri namespace) {
+        return schemaCache.get(namespace);
     }
 
-    /**
-     * Mark a schema namespace as being sealed. This is done when components from this namespace
-     * are first used for validating a source document or compiling a source document or query. Once
-     * a namespace has been sealed, it is not permitted to change the schema components in that namespace
-     * by redefining them, deriving new types by extension, or adding to their substitution groups.
-     *
-     * @param namespace the namespace URI of the components to be sealed
-     */
-
-    @Override
-    public void sealNamespace(NamespaceUri namespace) {
-        if (!namespace.equals(NamespaceUri.ANONYMOUS)) {
-            setNamespaceStatus(namespace, PreparedSchema.NAMESPACE_SEALED);
-        }
-    }
-
-    /**
-     * Test whether a schema namespace is sealed. Once
-     * a namespace has been sealed, it is not permitted to change the schema components in that namespace
-     * by redefining them, deriving new types by extension, or adding to their substitution groups.
-     *
-     * @param namespace the namespace URI of the components to be tested. Supply "" for the no-namespace.
-     * @return true if this namespace has been sealed, otherwise false
-     */
-
-    public boolean isSealedNamespace(NamespaceUri namespace) {
-        return getNamespaceStatus(namespace) == PreparedSchema.NAMESPACE_SEALED;
+    public void setCachedSchema(NamespaceUri namespace, PreparedSchema schema) {
+        schemaCache.put(namespace, schema);
     }
 
     /**
@@ -869,166 +765,34 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     @Override
     public Collection<GlobalParam> getDeclaredSchemaParameters() {
-        return getSuperSchema().getGlobalParams();
+        return Collections.emptySet();  // TODO: reinstate schema paramters
     }
 
-    /**
-     * Get the set of complex types that have been defined as extensions of a given type.
-     * Note that we do not seal the schema namespace, so this list is not necessarily final; we must
-     * assume that new extensions of built-in simple types can be added at any time
-     *
-     * @param type the type whose extensions are required
-     */
-
-    @Override
-    public Iterable<? extends SchemaType> getExtensionsOfType(SchemaType type) {
-        if (type instanceof UserDefinedType) {
-            return ((UserDefinedType) type).getExtensionTypes();
-        } else {
-            return getSuperSchema().getExtensionsOfBuiltInType(type.getFingerprint());
-        }
+    public Schema getSchemaForNamespace(NamespaceUri uri) {
+        return schemaCache.get(uri);
     }
 
-    /**
-     * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
-     * document are added to the cache of schema components maintained by this SchemaManager
-     *
-     * @param source the XML file containing the schema component model, as generated by a previous call on
-     *               {@link Configuration#exportComponents}
-     */
+    public void registerSchemaForNamespace(NamespaceUri uri, PreparedSchema schema) {
+        schemaCache.put(uri, schema);
+    }
 
-    @Override
-    public void importComponents(Source source) throws XPathException {
-        try {
-            SchemaModelLoader loader = new SchemaModelLoader(this);
-            PreparedSchema schema = loader.load(source);
-            addSchema(schema);
-            schema.copyTo(superSchema, newSchemaCompiler());
-            for (NamespaceUri ns : schema.getTargetNamespaces()) {
-                setNamespaceStatus(ns, PreparedSchema.NAMESPACE_KNOWN);
+    public void registerNamedSchema(String name, Schema schema) {
+        namedSchemaCache.put(name, schema);
+    }
+
+    public PreparedSchema getBuiltInSchema(NamespaceUri uri) {
+        PreparedSchema schema = schemaCache.get(uri);
+        if (schema == null) {
+            if (uri.equals(NamespaceUri.XML)) {
+                schema = XMLNamespaceSchema.buildSchema(this);
+                schemaCache.put(uri, schema);
             }
-        } catch (SchemaException e) {
-            throw new XPathException(e);
         }
+        return schema;
     }
 
 
-    @Override
-    public FunctionLibrary loadStubFunctionLibrary(StreamSource jsonSignatures) throws XPathException {
-        StubFunctionLibrary lib = new StubFunctionLibrary(this);
-        lib.loadSignatures(jsonSignatures);
-        return lib;
-    }
 
-    /**
-     * Export a precompiled Schema Component Model containing all the components (except built-in components)
-     * that have been loaded into this Processor.
-     *
-     * @param out the destination to recieve the precompiled Schema Component Model in the form of an
-     *            XML document
-     */
-
-    @Override
-    public void exportComponents(Receiver out) throws XPathException {
-        SchemaModelSerializer serializer = new SchemaModelSerializer(this, out);
-        serializer.serialize();
-    }
-
-    /**
-     * Remove all schema components that have been loaded into this Configuration.
-     * This method must not be used if any processes (such as stylesheet or query compilations
-     * or executions) are currently active. In a multi-threaded environment, it is the user's
-     * responsibility to ensure that this method is not called unless it is safe to do so.
-     */
-
-    @Override
-    public void clearSchemaCache() {
-        superSchema = new PreparedSchema(this);
-        namespaceStatus = new HashMap<>();
-    }
-
-
-    /**
-     * Get a global element declaration by fingerprint
-     *
-     * @param fingerprint the NamePool fingerprint of the element name
-     * @return the element declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    @Override
-    public SchemaDeclaration getElementDeclaration(int fingerprint) {
-        return superSchema.getElementDecl(fingerprint);
-    }
-
-    /**
-     * Get a global element declaration by name.
-     *
-     * @param qName the name of the required
-     *              element declaration
-     * @return the element declaration whose name matches the given
-     * name, or null if no element declaration with this name has
-     * been registered.
-     */
-
-
-    @Override
-    public SchemaDeclaration getElementDeclaration(StructuredQName qName) {
-        return superSchema.getElementDecl(qName);
-    }
-
-    /**
-     * Get a global attribute declaration by fingerprint
-     *
-     * @param fingerprint the NamePool fingerprint of the element name
-     * @return the attribute declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    @Override
-    public SchemaDeclaration getAttributeDeclaration(int fingerprint) {
-        return superSchema.getAttributeDecl(fingerprint);
-    }
-
-    /**
-     * Get a global attribute declaration by name
-     *
-     * @param attributeName the name of the required attribute declaration
-     * @return the attribute declaration whose name matches the given
-     * fingerprint, or null if no element declaration with this name has
-     * been registered.
-     */
-
-    @Override
-    public SchemaDeclaration getAttributeDeclaration(StructuredQName attributeName) {
-        return superSchema.getAttributeDecl(attributeName);
-    }
-
-    /**
-     * Get the top-level schema type definition with a given QName.
-     *
-     * @param name the name of the required schema type
-     * @return the schema type , or null if there is none
-     * with this name.
-     * @since 9.7
-     */
-
-    /*@Nullable*/
-    @Override
-    public SchemaType getSchemaType(StructuredQName name) {
-        if (name.hasURI(NamespaceUri.SCHEMA)) {
-            SchemaType t = BuiltInType.getSchemaTypeByLocalName(name.getLocalPart());
-            if (t != null) {
-                return t;
-            }
-            // Otherwise fall through. This can happen when validating against the schema for schemas:
-            // there are types such as xs:attribute whose names are built-in names with codes < 1024,
-            // but which are not built-in types.
-        }
-        return superSchema.getType(name);
-    }
 
     /**
      * Make a union type with a given list of member types
@@ -1061,20 +825,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     public Expression makeDeepLookupExpression(Expression lhs, LookupExpression.Modifier modifier, Expression rhs) throws XPathException {
         return new DeepLookupExpression(lhs, modifier, rhs);
-    }
-
-    /**
-     * Ask whether a given notation has been declared in the schema
-     *
-     * @param uri   the targetNamespace of the notation
-     * @param local the local part of the notation name
-     * @return true if the notation has been declared, false if not
-     * @since 9.3
-     */
-
-    @Override
-    public boolean isDeclaredNotation(NamespaceUri uri, String local) {
-        return superSchema.getNotation(new StructuredQName("", uri, local)) != null;
     }
 
     /**
@@ -1118,128 +868,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 //        }
     }
 
-    /**
-     * Get a document-level validator to add to a Receiver pipeline
-     *
-     * @param receiver           The receiver to which events should be sent after validation
-     * @param systemId           the base URI of the document being validated
-     * @param validationOptions  Supplies options relevant to XSD validation
-     * @param initiatingLocation (optional) Location in query or stylesheet of instruction
-     *                           that requested validation
-     * @return A Receiver to which events can be sent for validation
-     */
-
-    @Override
-    public Receiver getDocumentValidator(Receiver receiver,
-                                         String systemId,
-                                         ParseOptions validationOptions,
-                                         Location initiatingLocation) {
-//        if (isLicenseNotFound()) {
-//            return receiver;
-//        }
-        int validationMode = validationOptions.getSchemaValidationMode();
-        SpaceStrippingRule stripRules = validationOptions.getSpaceStrippingRule();
-        SchemaType schemaType = validationOptions.getTopLevelType();
-        StructuredQName topLevelElementName = validationOptions.getTopLevelElement();
-        ValidationParams params = validationOptions.getValidationParams();
-
-        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
-        if (validationMode == Validation.STRICT || validationMode == Validation.LAX || schemaType != null) {
-            Receiver destination = receiver;
-            if (stripRules == null) {
-                stripRules = getParseOptions().getSpaceStrippingRule();
-            }
-            if (stripRules == IgnorableSpaceStrippingRule.getInstance()) {
-                destination = stripRules.makeStripper(destination);
-            }
-
-            ValidationContext vc = new ValidationContext(getConversionRules());
-            vc.setInitiatingLocation(initiatingLocation);
-            vc.setErrorLimit(validationOptions.getValidationErrorLimit());
-            if (pipe.getController() == null) {
-                pipe.setController(new Controller(this));
-                pipe.getController().getExecutable().setSchemaAware(true);
-            }
-            vc.setController(pipe.getController());
-            vc.setValidationParams(params);
-
-            pipe.setComponent("com.saxonica.ee.validate.ValidationContext", vc);
-
-            if (validationOptions.isCheckEntityReferences()) {
-                EntityValidator ev = new EntityValidator(destination);
-                ev.setValidationContext(vc);
-                destination = ev;
-            }
-
-            allocateInvalidityHandler(validationOptions, vc);
-
-            IdValidator idval = new IdValidator(destination);
-            idval.setValidationContext(vc);
-            ConstraintChecker checker = new ConstraintChecker(pipe /*idval*/);
-            checker.setValidationContext(vc);
-
-            destination = new TeeOutputter(idval, checker);
-
-            // If running XSD 1.1, add an assertion tree builder before the constraint checker
-            destination = allocateAssertionTreeBuilder(destination, pipe, vc);
-
-
-            ValidationStack val = new ValidationStack(destination, validationMode, schemaType);
-            val.setPipelineConfiguration(pipe);
-            val.setValidationContext(vc);
-
-            vc.setConstraintChecker(checker);
-            if (topLevelElementName != null) {
-                val.setTopLevelElement(new FingerprintedQName(
-                        topLevelElementName.getPrefix(),
-                        topLevelElementName.getNamespaceUri(),
-                        topLevelElementName.getLocalPart()));
-            }
-            HostLanguage hostLanguage = pipe.getHostLanguage();
-            if (hostLanguage == HostLanguage.XSLT) {
-                if (schemaType != null) {
-                    vc.setErrorCode("XTTE1540");
-                } else if (validationMode == Validation.STRICT) {
-                    vc.setErrorCode("XTTE1510");
-                } else {
-                    vc.setErrorCode("XTTE1515");
-                }
-            } else if (hostLanguage == HostLanguage.XQUERY) {
-                vc.setErrorCode("XQDY0027");
-            } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
-                vc.setErrorCode(null);
-            }
-
-            XSIAttributeHandler xsi = new XSIAttributeHandler(val);
-            xsi.setSystemId(systemId);
-
-            AttributeInheritor stb = new AttributeInheritor(xsi);
-            vc.setAttributeInheritor(stb);
-            xsi.setValidationContext(vc);
-
-            PathMaintainer pathMaintainer = new PathMaintainer(stb);
-            pipe.setComponent("net.sf.saxon.event.PathMaintainer", pathMaintainer);
-
-            DocumentValidator dv = new DocumentValidator(pathMaintainer, hostLanguage == HostLanguage.XSLT ? "XTTE1550" : "XQDY0061");
-
-            LocationCopier copier = new LocationCopier(true, systemId);
-            pipe.setCopyInformee(CSharp.methodRef(copier::notifyElementNode));
-
-            vc.startValidation(systemId);
-
-            return dv;
-
-        } else if (validationMode == Validation.STRIP) {
-            SkipValidator a = new SkipValidator(receiver);
-            ValidationContext vc = new ValidationContext(getConversionRules());
-            a.setValidationContext(vc);
-            a.setSystemId(systemId);
-            return a;
-        } else {
-            return receiver;
-        }
-    }
-
     private void allocateInvalidityHandler(ParseOptions validationOptions, ValidationContext vc) {
         if (validationOptions.getInvalidityHandler() == null) {
             ErrorReporter reporter = validationOptions.getErrorReporter();
@@ -1257,127 +885,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
     }
 
-    /**
-     * Get a Receiver that can be used to validate an element, and that passes the validated
-     * element on to a target receiver. If validation is not supported, the returned receiver
-     * will be the target receiver.
-     *
-     * @param receiver the target receiver to receive the validated element; its pipelineConfiguration
-     *                 must be initialized.
-     * @param options  options affecting the way schema validation is done
-     * @param location identifies the location of the element within its source document (or, if
-     *                 preferred, the location of the instruction requesting validation), relative to the LocationProvider
-     *                 in the PipelineConfiguration of the receiver
-     * @return The newly created receiver, which performs the validation and passes the validated
-     * elements on to the target receiver.
-     */
-
-    @Override
-    public Receiver getElementValidator(Receiver receiver,
-                                        ParseOptions options,
-                                        Location location) throws XPathException {
-
-//        if (isLicenseNotFound()) {
-//            return receiver;
-//        }
-
-        int validation = options.getSchemaValidationMode();
-        SchemaType schemaType = options.getTopLevelType();
-        StructuredQName elemName = options.getTopLevelElement();
-
-        if (validation == Validation.STRIP) {
-            if (receiver.usesTypeAnnotations()) {
-                return new SkipValidator(receiver);
-            } else {
-                return receiver;
-            }
-        }
-
-        Receiver destination = receiver;
-
-        PipelineConfiguration pipe = receiver.getPipelineConfiguration();
-        pipe.setRecoverFromValidationErrors(isValidationWarnings() || options.isContinueAfterValidationErrors());
-
-        ValidationContext vc = new ValidationContext(getConversionRules());
-        vc.setErrorLimit(options.getValidationErrorLimit());
-        vc.setController(pipe.getController());
-        vc.setValidationParams(options.getValidationParams());
-        vc.setInitiatingLocation(location);
-        allocateInvalidityHandler(options, vc);
-
-        // Checker for uniqueness constraints added in Saxon 9.3: see bug 4353
-        ConstraintChecker checker = new ConstraintChecker(pipe /*destination*/);
-        checker.setValidationContext(vc);
-        destination = new TeeOutputter(destination, checker);
-        vc.setConstraintChecker(checker);
-        //destination = new TracingFilter(destination);
-
-        // If running XSD 1.1, add an assertion tree builder before the constraint checker
-        destination = allocateAssertionTreeBuilder(destination, pipe, vc);
-
-        // Add a validator to the output pipeline if required
-
-        ContentValidator contentValidator = null;
-        if (validation == Validation.BY_TYPE) {
-            List<ValidationFailure> failures = new ArrayList<>(1);
-            contentValidator = ContentValidator.makeValidatorForType(null, schemaType, pipe, destination, failures);
-            if (!failures.isEmpty()) {
-                throw failures.get(0).makeException();
-            }
-            assert contentValidator != null;
-            contentValidator.setContainingElement(options.getTopLevelElement(), location);
-            contentValidator.setValidationContext(vc);
-
-        } else if (validation != Validation.PRESERVE) {
-            if (elemName == null) {
-                throw new IllegalArgumentException("When validating an element, either a type or an element name must be supplied");
-            }
-            ElementDecl decl = (ElementDecl) getElementDeclaration(elemName);
-            if (decl == null || !decl.hasTypeAlternatives()) {
-                List<ValidationFailure> failures = new ArrayList<>(1);
-                contentValidator = ContentValidator.makeValidator(decl, elemName, location,
-                                                                  vc, schemaType,
-                                                                  validation,
-                                                                  pipe, destination, failures);
-                if (!failures.isEmpty()) {
-                    throw failures.get(0).makeException();
-                }
-            }
-        }
-
-        ValidationStack vs = new ValidationStack(destination, Validation.STRICT, null);
-        vs.setValidationContext(vc);
-        vs.setPipelineConfiguration(pipe);
-        HostLanguage hostLanguage = pipe.getHostLanguage();
-        if (hostLanguage == HostLanguage.XSLT) {
-            if (validation == Validation.BY_TYPE) {
-                vc.setErrorCode("XTTE1540");
-            } else if (validation == Validation.STRICT) {
-                vc.setErrorCode("XTTE1510");
-            } else {
-                vc.setErrorCode("XTTE1515");
-            }
-        } else if (hostLanguage == HostLanguage.XQUERY) {
-            vc.setErrorCode("XQDY0027");
-        } else if (hostLanguage == HostLanguage.XML_SCHEMA) {
-            vc.setErrorCode(null);
-        }
-
-        if (contentValidator != null) {
-            vs.setInitialValidator(contentValidator);
-        }
-
-        XSIAttributeHandler xsi = new XSIAttributeHandler(vs);
-        AttributeInheritor inheritor = new AttributeInheritor(xsi);
-
-        vc.setAttributeInheritor(inheritor);
-        xsi.setValidationContext(vc);
-
-        destination = inheritor;
-        vc.startValidation(location.getSystemId());
-        return destination;
-    }
-
     private Receiver allocateAssertionTreeBuilder(Receiver destination, PipelineConfiguration pipe, ValidationContext vc) {
         if (xsdVersion == XSD11) {
             boolean retainComments = getBooleanProperty(Feature.ASSERTIONS_CAN_SEE_COMMENTS);
@@ -1388,52 +895,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             destination = atb;
         }
         return destination;
-    }
-
-    /**
-     * Validate an attribute value (XSLT only)
-     *
-     * @param nodeName   the name of the attribute
-     * @param value      the value of the attribute as a string
-     * @param validation STRICT or LAX
-     * @return an int, containing the type annotation to apply to the attribute node
-     * @throws ValidationException if the value is invalid
-     */
-
-    @Override
-    public SimpleType validateAttribute(StructuredQName nodeName, UnicodeString value, int validation)
-            throws ValidationException, MissingComponentException {
-        if (isLicenseNotFound()) {
-            return BuiltInAtomicType.UNTYPED_ATOMIC;
-        }
-        AttributeDecl decl = (AttributeDecl) getAttributeDeclaration(nodeName);
-        if (decl == null) {
-            if (validation == Validation.STRICT) {
-                ValidationFailure ve = new ValidationFailure(
-                        "No global attribute declaration found for attribute " +
-                                nodeName.getDisplayName());
-                ve.setErrorCode("XTTE1512");
-                throw ve.makeException();
-            } else {
-                // lax validation
-                return BuiltInAtomicType.UNTYPED_ATOMIC;
-            }
-        }
-        SimpleType type = decl.getSimpleType();
-        if (type.isNamespaceSensitive()) {
-            ValidationFailure nsErr = new ValidationFailure("Cannot create a parentless attribute whose " +
-                                                                  "type is namespace-sensitive (such as xs:QName)");
-            nsErr.setSchemaType(type);
-            nsErr.setErrorCode("XTTE1545");
-            throw nsErr.makeException();
-        }
-        ValidationFailure contentErr = type.validateContent(value, DummyNamespaceResolver.getInstance(), getConversionRules());
-        if (contentErr != null) {
-            contentErr.setSchemaType(type);
-            contentErr.setErrorCode(validation == Validation.STRICT ? "XTTE1510" : "XTTE1515");
-            throw contentErr.makeException();
-        }
-        return type;
     }
 
     /**
@@ -1469,7 +930,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if ("XQ".equals(language)) {
             XQueryParser parser = new XQueryParser(env);
             if (isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
-                parser.setParserExtension(new XQueryParserExtensionEE(updating));
+                SchemaCompiler schemaCompiler = env.getPackageData().isSchemaAware() ? new SchemaCompiler(this) : null;
+                parser.setParserExtension(new XQueryParserExtensionEE(parser, updating, schemaCompiler));
             } else if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new XQueryParserExtensionPE());
             }
@@ -1529,8 +991,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
      */
 
     @Override
-    public PendingUpdateList newPendingUpdateList() {
-        return new PendingUpdateListImpl();
+    public PendingUpdateList newPendingUpdateList(Schema schema) {
+        return new PendingUpdateListImpl(schema);
     }
 
     /**
@@ -2142,22 +1604,10 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         }
     }
 
-    /**
-     * Make an XSLT CompilerInfo object - can be overridden in a subclass to produce variants
-     * capable of optimization
-     *
-     * @return a new CompilerInfo object
-     */
     @Override
-    public CompilerInfo makeCompilerInfo() {
-        //PatternOptimizationEE optimization = new PatternOptimizationEE();
-//        optimization.setOptimize();
-//        optimization.setIndexRules();
-//        optimization.setIndexComparisonPredicates(true);
-        //info.setPatternOptimization(optimization);
-        return super.makeCompilerInfo();
+    public XsdCompiler makeXsdCompiler(Processor proc) {
+        return new XsdCompilerEE(proc);
     }
-
 
 
 }
