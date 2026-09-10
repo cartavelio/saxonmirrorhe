@@ -169,16 +169,16 @@ public class CopyOfFeed extends AbsorptionFeed {
                 }
                 if (validation != Validation.PRESERVE || type != null) {
                     NodeInfo node = (NodeInfo) item;
-                    ParseOptions validationOptions = new ParseOptions();
-                    validationOptions.setSchemaValidationMode(validation);
-                    validationOptions.setTopLevelType(type);
+                    ParseOptions validationOptions = new ParseOptions()
+                            .withSchemaValidationMode(validation)
+                            .withTopLevelType(type);
                     Configuration config = getPipelineConfiguration().getConfiguration();
                     SequenceCollector writer = new SequenceCollector(getPipelineConfiguration());
                     Receiver copier;
                     if (kind == Type.DOCUMENT) {
                         copier = config.getDocumentValidator(writer, node.getBaseURI(), validationOptions, loc);
                     } else {
-                        validationOptions.setTopLevelElement(NameOfNode.makeName(node).getStructuredQName());
+                        validationOptions = validationOptions.withTopLevelElement(NameOfNode.makeName(node).getStructuredQName());
                         copier = config.getElementValidator(writer, validationOptions, loc);
                     }
                     node.copy(copier, CopyOptions.ALL_NAMESPACES, loc);
@@ -349,16 +349,17 @@ public class CopyOfFeed extends AbsorptionFeed {
                 };
             }
             if (feed.validation != Validation.PRESERVE || feed.type != null) {
-                ParseOptions validationOptions = new ParseOptions();
-                validationOptions.setSchemaValidationMode(feed.validation);
-                validationOptions.setTopLevelType(feed.type);
+                ParseOptions validationOptions = new ParseOptions()
+                        .withSchemaValidationMode(feed.validation)
+                        .withTopLevelType(feed.type);
                 Configuration config = feed.getPipelineConfiguration().getConfiguration();
                 Location loc = feed.getExpression() == null ? Loc.NONE : feed.getExpression().getLocation();
                 if (rootOfCopy.getNodeKind() == Type.DOCUMENT) {
                     copier = new ComplexContentOutputter(
                             config.getDocumentValidator(copier, rootOfCopy.getBaseURI(), validationOptions, loc));
                 } else {
-                    validationOptions.setTopLevelElement(NameOfNode.makeName(rootOfCopy).getStructuredQName());
+                    validationOptions = validationOptions
+                            .withTopLevelElement(NameOfNode.makeName(rootOfCopy).getStructuredQName());
                     try {
                         copier = new ComplexContentOutputter(
                                 config.getElementValidator(copier, validationOptions, loc));

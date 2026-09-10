@@ -85,16 +85,16 @@ public class Parse extends SystemFunction {
         PackageData pd = getRetainedStaticContext().getPackageData();
         if (checkedOptions.get("strip-space") == null) {
             if (pd instanceof StylesheetPackage) {
-                parseOptions.setSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+                parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
                 if (((StylesheetPackage) pd).isStripsTypeAnnotations()) {
                     s = config.getAnnotationStripper(s);
                 }
             } else {
-                parseOptions.setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
             }
         }
-        parseOptions.setErrorReporter(context.getController().getErrorReporter());
-        setXMLReader(config, parseOptions);
+        parseOptions = parseOptions.withErrorReporter(context.getController().getErrorReporter());
+        parseOptions = setXMLReader(config, parseOptions);
         s.setPipelineConfiguration(b.getPipelineConfiguration());
         Sender.send(source, s, parseOptions);
         NodeInfo node = b.getCurrentRoot();
@@ -110,7 +110,8 @@ public class Parse extends SystemFunction {
      * @throws XPathException if the selected parser cannot be loaded
      */
 
-    protected void setXMLReader(Configuration config, ParseOptions source) throws XPathException {
+    protected ParseOptions setXMLReader(Configuration config, ParseOptions source) throws XPathException {
+        return source;
         // no-op; overridden in subclass
     }
 

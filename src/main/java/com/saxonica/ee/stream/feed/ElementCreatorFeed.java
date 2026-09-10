@@ -47,8 +47,8 @@ public class ElementCreatorFeed extends ComplexNodeEventFeed {
             if (!instr.isPreservingTypes()) {
 //                Controller controller = context.getController();
 //                assert controller != null;
-                ParseOptions options = new ParseOptions(instr.getValidationOptions());
-                options.setTopLevelElement(elemName.getStructuredQName());
+                ParseOptions options = instr.getValidationOptions()
+                        .withTopLevelElement(elemName.getStructuredQName());
                 Receiver validator = context.getConfiguration().getElementValidator(
                         next, options, instr.getLocation());
                 next = new ComplexContentOutputter(validator);

@@ -8,10 +8,7 @@
 package com.saxonica.xqj;
 
 import net.sf.saxon.Configuration;
-import net.sf.saxon.lib.ExtensionFunctionDefinition;
-import net.sf.saxon.lib.Feature;
-import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.lib.Validation;
+import net.sf.saxon.lib.*;
 import net.sf.saxon.om.AllElementsSpaceStrippingRule;
 import net.sf.saxon.om.IgnorableSpaceStrippingRule;
 import net.sf.saxon.om.NoElementsSpaceStrippingRule;
@@ -459,15 +456,17 @@ public class SaxonXQDataSource implements XQDataSource, Configuration.ApiProvide
      */
 
     public void setStripWhitespace(String value) {
+        SpaceStrippingRule rule;
         if ("all".equals(value)) {
-            config.getParseOptions().setSpaceStrippingRule(AllElementsSpaceStrippingRule.getInstance());
+            rule = AllElementsSpaceStrippingRule.getInstance();
         } else if ("ignorable".equals(value)) {
-            config.getParseOptions().setSpaceStrippingRule(IgnorableSpaceStrippingRule.getInstance());
+            rule = IgnorableSpaceStrippingRule.getInstance();
         } else if ("none".equals(value)) {
-            config.getParseOptions().setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+            rule = NoElementsSpaceStrippingRule.getInstance();
         } else {
             throw new IllegalArgumentException("stripWhitespace");
         }
+        config.setParseOptions(config.getParseOptions().withSpaceStrippingRule(rule));
     }
 
     /**

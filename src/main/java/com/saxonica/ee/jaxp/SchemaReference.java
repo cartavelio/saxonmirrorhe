@@ -75,10 +75,10 @@ public class SchemaReference extends Schema {
         // create a sink destination until such time as the user supplies his own
         proxy.setUnderlyingContentHandler(new XMLFilterImpl());
 
-        ParseOptions options = new ParseOptions();
-        options.setSchemaValidationMode(Validation.STRICT);
-        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-        options.setCheckEntityReferences(true);
+        ParseOptions options = new ParseOptions()
+                .withSchemaValidationMode(Validation.STRICT)
+                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
+                .withCheckEntityReferences(true);
         pipe.setParseOptions(options);
 
         Receiver realValidator = config.getDocumentValidator(proxy, proxy.getSystemId(), options, null);

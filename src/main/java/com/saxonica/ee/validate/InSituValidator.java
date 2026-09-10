@@ -57,14 +57,14 @@ public class InSituValidator {
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         SequenceReceiver endPoint = new NodeUpdater(nodeBuffer, pipe);
         // Create the validation pipeline
-        ParseOptions options = new ParseOptions();
-        options.setSchemaValidationMode(validationMode);
-        options.setSpaceStrippingRule(null);
+        ParseOptions options = new ParseOptions()
+                .withSchemaValidationMode(validationMode)
+                .withSpaceStrippingRule(null);
         Receiver validator;
         if (root.getNodeKind() == Type.DOCUMENT) {
             validator = config.getDocumentValidator(endPoint, root.getSystemId(), options, null);
         } else {
-            options.setTopLevelElement(NameOfNode.makeName(root).getStructuredQName());
+            options = options.withTopLevelElement(NameOfNode.makeName(root).getStructuredQName());
             validator = config.getElementValidator(endPoint, options, Loc.NONE);
         }
         NodeCounter nodeCounter = new NodeCounter(nodeBuffer);

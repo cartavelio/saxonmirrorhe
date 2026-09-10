@@ -129,10 +129,10 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
         SequenceIterator uriIter = ms.getForEachSource().iterate(c1);
         Item uri;
         while ((uri = uriIter.next()) != null) {
-            final ParseOptions options = new ParseOptions(c1.getConfiguration().getParseOptions());
-            options.setSchemaValidationMode(ms.validation);
-            options.setTopLevelType(ms.schemaType);
-            options.setApplicableAccumulators(ms.accumulators);
+            final ParseOptions options = c1.getConfiguration().getParseOptions()
+                    .withSchemaValidationMode(ms.validation)
+                    .withTopLevelType(ms.schemaType)
+                    .withApplicableAccumulators(ms.accumulators);
 
             final String href = uri.getStringValue();
             MergePusher pusher = new MergePusher(ms, pd, href, options);

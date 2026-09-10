@@ -6,7 +6,6 @@ import com.saxonica.ee.config.*;
 import com.saxonica.ee.extfn.VendorFunctionSetEE;
 import com.saxonica.ee.extfn.js.IXSLElementFactory;
 import com.saxonica.ee.optim.*;
-import com.saxonica.ee.parallel.MultithreadedFocusTrackingIterator;
 import com.saxonica.ee.parallel.ThreadManagerEE;
 import com.saxonica.ee.schema.*;
 import com.saxonica.ee.schema.sdoc.SchemaDocument;
@@ -1149,7 +1148,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 //            return receiver;
 //        }
         int validationMode = validationOptions.getSchemaValidationMode();
-        //int stripSpace = validationOptions.getStripSpace();
         SpaceStrippingRule stripRules = validationOptions.getSpaceStrippingRule();
         SchemaType schemaType = validationOptions.getTopLevelType();
         StructuredQName topLevelElementName = validationOptions.getTopLevelElement();
@@ -1238,7 +1236,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             vc.startValidation(systemId);
 
             return dv;
-            //return new TracingFilter(dv);
 
         } else if (validationMode == Validation.STRIP) {
             SkipValidator a = new SkipValidator(receiver);

@@ -731,7 +731,7 @@ public class UpdateTestSuiteDriver {
         Source ss = new StreamSource(new File(testSuiteDir + "/" + fileName));
         ParseOptions options = new ParseOptions();
         if (schema != null) {
-            options.setSchemaValidationMode(Validation.STRICT);
+            options = options.withSchemaValidationMode(Validation.STRICT);
         }
         TreeInfo doc = saConfig.buildDocumentTree(ss, options);
         uriMap.put(id, doc.getRootNode().getSystemId());

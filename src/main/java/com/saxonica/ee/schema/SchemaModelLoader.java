@@ -10,6 +10,7 @@ import com.saxonica.ee.stream.Sweep;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.Pattern;
@@ -62,7 +63,9 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     public SchemaModelLoader(Configuration config) {
         super(new Sink(config.makePipelineConfiguration()));
-        getPipelineConfiguration().getParseOptions().setSchemaValidationMode(Validation.SKIP);
+        ParseOptions options = config.getParseOptions()
+                        .withSchemaValidationMode(Validation.SKIP);
+        getPipelineConfiguration().setParseOptions(options);
         //config.checkLicensedFeature(Configuration.LicenseFeature.SCHEMA_VALIDATION, "schema processing", -1);
         this.config = (EnterpriseConfiguration) config;
         schema = new PreparedSchema((EnterpriseConfiguration) config);
@@ -78,7 +81,7 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     public PreparedSchema load(Source source) throws XPathException {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
-        pipe.getParseOptions().setSchemaValidationMode(Validation.SKIP);
+        pipe.setParseOptions(config.getParseOptions().withSchemaValidationMode(Validation.SKIP));
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
         NamespaceReducer reducer = new NamespaceReducer(this);
         namespaceResolver = reducer;

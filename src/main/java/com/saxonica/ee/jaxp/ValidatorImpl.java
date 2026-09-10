@@ -66,9 +66,9 @@ public class ValidatorImpl extends Validator {
                 SerializerFactory sf = pipe.getConfiguration().getSerializerFactory();
                 out = sf.getReceiver(result, new SerializationProperties(), pipe);
             }
-            ParseOptions options = pipe.getParseOptions();
-            options.setSchemaValidationMode(Validation.STRICT);
-            options.setContinueAfterValidationErrors(true);
+            ParseOptions options = pipe.getParseOptions()
+                    .withSchemaValidationMode(Validation.STRICT)
+                    .withContinueAfterValidationErrors(true);
             pipe.setErrorReporter(new SchemaFactoryImpl.ErrorReporterWrappingErrorHandler(getErrorHandler()));
             Sender.send(source, out, options);
 
@@ -140,7 +140,7 @@ public class ValidatorImpl extends Validator {
             errorHandler = SchemaFactoryImpl.DRACONIAN_ERROR_HANDLER;
         }
         InvalidityHandler handler = new InvalidityHandlerWrappingErrorHandler(errorHandler);
-        pipe.getParseOptions().setInvalidityHandler(handler);
+        pipe.setParseOptions(pipe.getParseOptions().withInvalidityHandler(handler));
     }
 
 
@@ -339,7 +339,7 @@ public class ValidatorImpl extends Validator {
         switch (name) {
             case XMLConstants.FEATURE_SECURE_PROCESSING:
             case XMLConstants.ACCESS_EXTERNAL_DTD:
-                pipe.getParseOptions().addParserProperties(name, object);
+                pipe.setParseOptions(pipe.getParseOptions().withAdditionalParserProperties(name, object));
                 break;
             case XMLConstants.ACCESS_EXTERNAL_SCHEMA:
                 throw new SAXNotSupportedException();

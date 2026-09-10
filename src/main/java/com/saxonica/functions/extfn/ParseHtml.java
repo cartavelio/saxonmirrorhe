@@ -24,7 +24,7 @@ public class ParseHtml extends Parse {
      */
 
     @Override
-    protected void setXMLReader(Configuration config, ParseOptions options) throws XPathException {
+    protected ParseOptions setXMLReader(Configuration config, ParseOptions options) throws XPathException {
         Object parser = config.getInstance("org.ccil.cowan.tagsoup.Parser");
         if (!(parser instanceof XMLReader)) {
             throw new XPathException("Loaded org.ccil.cowan.tagsoup.Parser, but it is not an XMLReader");
@@ -34,10 +34,10 @@ public class ParseHtml extends Parse {
         // so we inject a filter that supplies the missing startPrefixMapping() call
         XMLFilter filter = new RepairingContentHandler();
         filter.setParent((XMLReader) parser);
-        options.setXMLReader(filter);
-        options.setDTDValidationMode(Validation.SKIP);
-        options.setSchemaValidationMode(Validation.SKIP);
-        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+        return options.withXMLReader(filter)
+                .withDTDValidationMode(Validation.SKIP)
+                .withSchemaValidationMode(Validation.SKIP)
+                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
     }
 
 }

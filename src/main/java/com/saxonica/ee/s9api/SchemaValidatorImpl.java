@@ -601,20 +601,17 @@ public class SchemaValidatorImpl extends SchemaValidator {
                     pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
                     pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
 
-                    ParseOptions options = new ParseOptions();
-
-                    options.setCheckEntityReferences(true);
-                    options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
-                    options.setInvalidityHandler(handler);
-
-
-                    options.setCheckEntityReferences(true);
-                    options.setExpandAttributeDefaults(expandAttributeDefaults);
-                    options.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
-                    options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                    options.setTopLevelType(documentElementType);
+                    ParseOptions options = new ParseOptions()
+                            .withCheckEntityReferences(true)
+                            .withValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()))
+                            .withInvalidityHandler(handler)
+                            .withCheckEntityReferences(true)
+                            .withExpandAttributeDefaults(expandAttributeDefaults)
+                            .withSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT)
+                            .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
+                            .withTopLevelType(documentElementType);
                     if (documentElementName != null) {
-                        options.setTopLevelElement(new StructuredQName(
+                        options = options.withTopLevelElement(new StructuredQName(
                                 documentElementName.getPrefix(), documentElementName.getNamespaceUri(), documentElementName.getLocalName()));
                     }
 
@@ -775,27 +772,27 @@ public class SchemaValidatorImpl extends SchemaValidator {
         pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
 
-        ParseOptions options = pipe.getParseOptions();
-        options.setCheckEntityReferences(true);
-        options.setExpandAttributeDefaults(expandAttributeDefaults);
-        options.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
-        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-        options.setTopLevelType(documentElementType);
-        options.setInvalidityHandler(invalidityHandler);
+        ParseOptions options = pipe.getParseOptions()
+                .withCheckEntityReferences(true)
+                .withExpandAttributeDefaults(expandAttributeDefaults)
+                .withSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT)
+                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance())
+                .withTopLevelType(documentElementType)
+                .withInvalidityHandler(invalidityHandler);
         if (documentElementName != null) {
-            options.setTopLevelElement(new StructuredQName(
+            options = options.withTopLevelElement(new StructuredQName(
                     documentElementName.getPrefix(), documentElementName.getNamespaceUri(), documentElementName.getLocalName()));
         }
         try {
-            options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
+            options = options.withValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
         } catch (XPathException e) {
             throw new SaxonApiException(e);
         }
-        options.setCheckEntityReferences(true);
+        options = options.withCheckEntityReferences(true);
         //#if CSHARP==false
         if (keepStatistics) {
             latestStatistics = new ValidationStatistics();
-            options.setValidationStatisticsRecipient(latestStatistics.getRecipient());
+            options = options.withValidationStatisticsRecipient(latestStatistics.getRecipient());
         }
         //#endif
         Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, config.obtainDefaultSerializationProperties());

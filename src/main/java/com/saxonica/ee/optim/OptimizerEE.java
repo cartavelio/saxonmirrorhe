@@ -585,10 +585,10 @@ public class OptimizerEE extends Optimizer {
         Expression rest = pexp.getRemainingSteps();
         Expression snap = SystemFunction.makeCall("snapshot", select.getRetainedStaticContext(), rest);
         Set<? extends Accumulator> accList = Collections.emptySet();
-        ParseOptions options = new ParseOptions(config.getParseOptions());
-        options.setSchemaValidationMode(Validation.STRIP);
-        options.setTopLevelType(null);
-        options.setApplicableAccumulators(accList);
+        ParseOptions options = config.getParseOptions()
+                .withSchemaValidationMode(Validation.STRIP)
+                .withTopLevelType(null)
+                .withApplicableAccumulators(accList);
         StreamInstr stream = new StreamInstr(new ContextItemExpression(), snap, options);
         trace("Using streaming for saxon:stream", stream);
         ForEach each = new ForEach(documentExp.getArg(0), stream);

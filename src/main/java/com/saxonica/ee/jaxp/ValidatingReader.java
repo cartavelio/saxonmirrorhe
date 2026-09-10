@@ -408,12 +408,12 @@ public class ValidatingReader implements XMLReader {
             output = chp;
         }
 
-        ParseOptions options = pipe.getParseOptions();
-        options.setCheckEntityReferences(true);
-        options.setSchemaValidationMode(config.getSchemaValidationMode() == Validation.LAX ? Validation.LAX : Validation.STRICT);
-        options.setTopLevelElement(config.getParseOptions().getTopLevelElement());
-        options.setTopLevelType(config.getParseOptions().getTopLevelType());
-        options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+        ParseOptions options = pipe.getParseOptions()
+                .withCheckEntityReferences(true)
+                .withSchemaValidationMode(config.getSchemaValidationMode() == Validation.LAX ? Validation.LAX : Validation.STRICT)
+                .withTopLevelElement(config.getParseOptions().getTopLevelElement())
+                .withTopLevelType(config.getParseOptions().getTopLevelType())
+                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
 
         Receiver receiver = config.getDocumentValidator(output, systemId, options, null);
 

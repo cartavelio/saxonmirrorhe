@@ -156,12 +156,12 @@ public class ValidateFn extends SystemFunction {
             params = new ValidationParams();
         }
 
-        ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setValidationParams(params);
-        parseOptions.setSchemaValidationMode(validation);
-        parseOptions.setTopLevelType(schemaType);
-        parseOptions.setExpandAttributeDefaults(expand);
-        parseOptions.setContinueAfterValidationErrors(true);
+        ParseOptions parseOptions = new ParseOptions()
+                .withValidationParams(params)
+                .withSchemaValidationMode(validation)
+                .withTopLevelType(schemaType)
+                .withExpandAttributeDefaults(expand)
+                .withContinueAfterValidationErrors(true);
 
 
         final List<NodeInfo> currentErrorNode = new ArrayList<>(1);
@@ -176,7 +176,8 @@ public class ValidateFn extends SystemFunction {
             currentErrorNode.add(element);
             return null;
         });
-        parseOptions.setInvalidityHandler(new LocalInvalidityHandler(config, currentErrorNode, errorList));
+        parseOptions = parseOptions.withInvalidityHandler(
+                new LocalInvalidityHandler(config, currentErrorNode, errorList));
 
 
         int kind = input.getNodeKind();
@@ -193,7 +194,7 @@ public class ValidateFn extends SystemFunction {
             }
             case Type.ELEMENT: {
                 SequenceReceiver out = buildTree ? new SequenceCollector(pipe) : new Sink(pipe);
-                parseOptions.setTopLevelElement(NameOfNode.makeName(input).getStructuredQName());
+                parseOptions = parseOptions.withTopLevelElement(NameOfNode.makeName(input).getStructuredQName());
                 Receiver val = config.getElementValidator(out, parseOptions, Loc.NONE);
                 val.setPipelineConfiguration(out.getPipelineConfiguration());
                 val.setSystemId(input.getBaseURI());

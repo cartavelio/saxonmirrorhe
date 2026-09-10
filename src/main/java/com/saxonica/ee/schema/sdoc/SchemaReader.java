@@ -235,9 +235,9 @@ public abstract class SchemaReader {
         TreeInfo tree;
         Configuration config = pipe.getConfiguration();
         //AugmentedSource aug = AugmentedSource.makeAugmentedSource(source);
-        ParseOptions options = new ParseOptions(config.getParseOptions());
-        options.setSchemaValidationMode(Validation.PRESERVE);
-        options.setErrorReporter(compiler.getErrorReporter());
+        ParseOptions options = config.getParseOptions()
+                .withSchemaValidationMode(Validation.PRESERVE)
+                .withErrorReporter(compiler.getErrorReporter());
         try {
             commentStripper.setPipelineConfiguration(pipe);
             sendSchemaSource(source, compiler, pipe, valve, config, options);
@@ -323,7 +323,9 @@ public abstract class SchemaReader {
 //#if CSHARP==false
     public static void setupSourceWithReader(Source source, SchemaCompiler compiler, Valve valve, Configuration config, ParseOptions options) throws XPathException {
         XMLReader parser = config.getStyleParser();
-        options.setXMLReader(parser);
+        options = options
+                .withXMLReader(parser)
+                .withDTDValidationMode(Validation.SKIP);
         if (options.getEntityResolver() != null && parser.getEntityResolver() == null) {
             parser.setEntityResolver(options.getEntityResolver());
         }
@@ -331,7 +333,6 @@ public abstract class SchemaReader {
             parser.setErrorHandler(
                     ((SchemaFactoryImpl.ErrorReporterWrappingErrorHandler)compiler.getErrorReporter()).getErrorHandler());
         }
-        options.setDTDValidationMode(Validation.SKIP);
         Sender.send(source, valve, options);
         config.reuseStyleParser(parser);
     }

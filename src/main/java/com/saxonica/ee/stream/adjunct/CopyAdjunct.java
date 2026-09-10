@@ -54,8 +54,8 @@ public class CopyAdjunct extends StreamingAdjunct implements FeedMaker {
                         if (!expression.isPreservingTypes()) {
                             Controller controller = context.getController();
                             Configuration config = controller.getConfiguration();
-                            ParseOptions options = new ParseOptions(expression.getValidationOptions());
-                            options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                            ParseOptions options = expression.getValidationOptions()
+                                .withSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
                             Receiver val = config.getDocumentValidator(
                                     next, node.getBaseURI(), options, expression.getLocation());
                             next = new ComplexContentOutputter(val);
@@ -75,8 +75,8 @@ public class CopyAdjunct extends StreamingAdjunct implements FeedMaker {
                         if (!expression.isPreservingTypes()) {
                             Controller controller = context.getController();
                             assert controller != null;
-                            ParseOptions options = new ParseOptions(expression.getValidationOptions());
-                            options.setTopLevelElement(elemName.getStructuredQName());
+                            ParseOptions options = expression.getValidationOptions()
+                                    .withTopLevelElement(elemName.getStructuredQName());
                             try {
                                 Receiver val = context.getConfiguration().getElementValidator(
                                         next, options, expression.getLocation());

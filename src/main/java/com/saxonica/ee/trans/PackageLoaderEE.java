@@ -127,13 +127,13 @@ public class PackageLoaderEE extends PackageLoaderPE {
                 schemaType = loader.getConfiguration().getSchemaType(typeAtt);
                 validation = Validation.BY_TYPE;
             }
-            final ParseOptions options = new ParseOptions(loader.getConfiguration().getParseOptions());
-            options.setSchemaValidationMode(validation);
-            options.setTopLevelType(schemaType);
+            final ParseOptions options = loader.getConfiguration().getParseOptions()
+                .withSchemaValidationMode(validation)
+                .withTopLevelType(schemaType);
             String flags = element.getAttributeValue(NamespaceUri.NULL, "flags");
-            if (flags != null && flags.contains("s")) {
-                loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
-            }
+//            if (flags != null && flags.contains("s")) {
+//                loader.addCompletionAction(() -> options.setSpaceStrippingRule(loader.getTopLevelPackage().getSpaceStrippingRule()));
+//            }
             Expression body = loader.getExpressionWithRole(element, "body");
             Expression href = loader.getExpressionWithRole(element, "href");
 

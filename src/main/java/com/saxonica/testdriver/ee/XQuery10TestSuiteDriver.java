@@ -311,7 +311,7 @@ public class XQuery10TestSuiteDriver {
                 ss.setSystemId(sFile.toURI().toString());
                 ParseOptions options = new ParseOptions();
                 if (schema != null) {
-                    options.setSchemaValidationMode(Validation.STRICT);
+                    options = options.withSchemaValidationMode(Validation.STRICT);
                 }
                 try {
                     TreeInfo doc = eeConfig.buildDocumentTree(ss, options);
