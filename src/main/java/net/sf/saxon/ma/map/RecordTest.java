@@ -128,6 +128,21 @@ public class RecordTest extends AnyFunctionType implements RecordType {
      * Supply the details of the RecordTest. This method is only to be used during initialisation,
      * it is needed so that a RecordTest can refer to itself. Apart from this, the RecordTest
      * is immutable.
+     */
+    public void setDetails(boolean extensible, Field... fields) {
+        this._extensible = extensible;
+        for (Field field : fields) {
+            fieldTypes.put(field.name, field.type);
+            if (field.optional) {
+                optionalFields.add(field.name);
+            }
+        }
+    }
+
+    /**
+     * Supply the details of the RecordTest. This method is only to be used during initialisation,
+     * it is needed so that a RecordTest can refer to itself. Apart from this, the RecordTest
+     * is immutable.
      * @param names the names of the fields
      * @param types the types of the fields
      * @param optionalFieldNames a list of the names of the fields that are declared optional
