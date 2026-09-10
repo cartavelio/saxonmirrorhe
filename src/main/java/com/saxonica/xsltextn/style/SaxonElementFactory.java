@@ -2,6 +2,8 @@ package com.saxonica.xsltextn.style;
 
 import com.saxonica.xsltextn.ExtensionElementFactory;
 import net.sf.saxon.style.StyleElement;
+import net.sf.saxon.style.XSLArray;
+import net.sf.saxon.style.XSLArrayMember;
 import net.sf.saxon.style.XSLItemType;
 
 /**
@@ -22,10 +24,10 @@ public class SaxonElementFactory implements ExtensionElementFactory {
     @Override
     public Class<? extends StyleElement> getExtensionClass(String localname) {
         if (localname.equals("array")) {
-            return SaxonArray.class;
+            return XSLArray.class;
         }
         if (localname.equals("array-member")) {
-            return SaxonArrayMemberInst.class;
+            return XSLArrayMember.class;
         }
         if (localname.equals("assign")) {
             return SaxonAssign.class;
