@@ -73,6 +73,7 @@ listOf(Pair("XT30", "xslt30"),
             suiteDir = layout.projectDirectory.dir("../../submodules/${xslt}")
             outputDir = layout.buildDirectory.dir("test-results/${xslt}/${saxonBuild.dateStamp.get()}")
             language = lang
+            edition = saxonC.edition
             wheelInstaller(testsuiteInstallWheel)
             driverRequirements(testsuitesPipInstall)
         }
