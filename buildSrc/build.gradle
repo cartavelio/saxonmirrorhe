@@ -1,0 +1,15 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+}
+
+plugins {
+  id 'java'
+}
+
+apply plugin: 'java'
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

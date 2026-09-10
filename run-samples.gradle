@@ -85,7 +85,7 @@ task run_config_samples(
     classpath = configurations.samples \
         + files("${buildDir}/libs/saxon-ee-${saxonVersion}.jar") \
         + files(saxonLicenseDir)
-    main = "com.saxonica.Validate"
+    mainClass = "com.saxonica.Validate"
     args "-t",
             "-s:${buildDir}/saxon-resources/samples/config/${configFile}.xml",
             "-xsd:${buildDir}/saxon-resources/samples/config/config.xsd"
@@ -140,7 +140,7 @@ task run_cmd_books_sample_tests(
       classpath = configurations.samples \
         + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
         + files(saxonLicenseDir)
-      main = jclass
+      mainClass = jclass
       def testargs = booksSampleArgs[test]
       if ((test == "Transform_1") || (test == "Transform_2")) {
         testargs += ["-o:${resdir}/${outputfile}"]
@@ -189,7 +189,7 @@ task run_cmd_tour_sample_tests(
       classpath = configurations.samples \
         + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
         + files(saxonLicenseDir)
-      main = jclass
+      mainClass = jclass
       def testargs = tourSampleArgs[test]
       testargs += ["-o:${resdir}/${outputfile}"]
       //println (testargs)
@@ -219,7 +219,7 @@ task run_cmd_shakespeare_sample_tests(
     classpath = configurations.samples \
         + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
         + files(saxonLicenseDir)
-    main = "net.sf.saxon.Transform"
+    mainClass = "net.sf.saxon.Transform"
     args "-s:data/othello.xml", "-xsl:styles/play.xsl", "dir=file:///${resdir}/playhtml"
 
   }
@@ -245,7 +245,7 @@ task run_cmd_bible_sample_tests(
     classpath = configurations.samples \
         + files("${buildDir}/libs/saxon-${edition}-${saxonVersion}.jar") \
         + files(saxonLicenseDir)
-    main = "net.sf.saxon.Transform"
+    mainClass = "net.sf.saxon.Transform"
     args "-s:${projectDir}/src/test/testdata/bible/nt/nt.xml", "-xsl:styles/bible.xsl", "dir=${resdir}/biblehtml"
 
   }
@@ -415,7 +415,7 @@ def heSampleArgs = ["JAXPExamples": ["all"],
 
           systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
 
-          main = sampleClass
+          mainClass = sampleClass
           args sampleArgs
         }
 
@@ -553,7 +553,7 @@ def eeSampleArgs = ["JDOM2Example": ["data/books.xml", "styles/books.xsl"],
 
       systemProperties = ["javax.xml.transform.TransformerFactory": "net.sf.saxon.TransformerFactoryImpl"]
 
-      main = sampleClass
+      mainClass = sampleClass
       args sampleArgs
     }
 

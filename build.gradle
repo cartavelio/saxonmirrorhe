@@ -29,7 +29,7 @@ import java.util.zip.ZipInputStream
 sourceCompatibility = "11"
 targetCompatibility = "11"
 
-project.extensions.create("testSuite", TestSuite, project)
+project.extensions.create("testSuite", SaxonTestSuite, project)
 
 repositories {
   mavenLocal()
@@ -550,7 +550,7 @@ task hej_featureKeys(
   outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/FeatureData.java"
   outputs.file "${projectDir}/src/main/java/net/sf/saxon/lib/FeatureKeys.java"
   classpath = configurations.preprocessor
-  main = "net.sf.saxon.Transform"
+  mainClass = "net.sf.saxon.Transform"
   args "${projectDir}/tools/featureKeys/FeatureKeys.xml",
     "-xsl:${projectDir}/tools/featureKeys/FeatureKeysToJava.xsl",
     "-o:${projectDir}/src/main/java/net/sf/saxon/lib/establish-an-output-base-uri"
@@ -606,7 +606,7 @@ task "hej_preprocess"(
   doLast {
     javaexec {
       classpath = configurations.preprocessor
-      main = "com.igormaznitsa.jcp.JcpPreprocessor"
+      mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/hej", "/o:${buildDir}/src/hej",
         "/p:EE=false", "/p:PE=false",
@@ -689,7 +689,7 @@ task "pej_preprocess"(
   doLast {
     javaexec {
       classpath = configurations.preprocessor
-      main = "com.igormaznitsa.jcp.JcpPreprocessor"
+      mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/pej", "/o:${buildDir}/src/pej",
         "/p:EE=false", "/p:PE=true",
@@ -757,7 +757,7 @@ task "eej_preprocess"(
   doLast {
     javaexec {
       classpath = configurations.preprocessor
-      main = "com.igormaznitsa.jcp.JcpPreprocessor"
+      mainClass = "com.igormaznitsa.jcp.JcpPreprocessor"
       args "/c",
         "/i:${buildDir}/filtered/eej", "/o:${buildDir}/src/eej",
         "/p:EE=true", "/p:PE=false", "/p:HOF=true",
@@ -976,7 +976,7 @@ task compile_function_library(dependsOn: ["eejCompile", "processResources"]) {
   doLast {
     javaexec {
       classpath = configurations.productTests + project.files(file("${buildDir}/classes/eej"))
-      main = "com.saxonica.Transform"
+      mainClass = "com.saxonica.Transform"
       args "-xsl:src/main/xslt/function-library.xsl",
         "-export:${buildDir}/resources/main/net/sf/saxon/data/sef/function-library.sef.xml",
         "-target:HE", "-nogo", "--allowSyntaxExtensions:on"
@@ -1430,7 +1430,7 @@ task eejTests(
   //println(largs)
 
   classpath = configurations.productTests + files("${buildDir}/classes/eej") + files("${buildDir}/test_classes/eej")
-  main = "org.junit.platform.console.ConsoleLauncher"
+  mainClass = "org.junit.platform.console.ConsoleLauncher"
 
   args largs
 }
@@ -1475,7 +1475,7 @@ task pejRelease(
 
 task eejRelease(
   type: Copy,
-  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras", , "eejJarXqj"],
+  dependsOn: ["eejJar", "eejJarSql", "eejJarTests", "eej_extras", "eejJarXqj"],
   description: "Build the EE release for Java"
 ) {
   from "${buildDir}/libs"
