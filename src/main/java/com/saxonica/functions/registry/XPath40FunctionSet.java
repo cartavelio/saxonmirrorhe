@@ -18,6 +18,7 @@ import net.sf.saxon.ma.json.ParseJsonFn;
 import net.sf.saxon.ma.json.XMLToJsonFn;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.pattern.AnyNodeTest;
+import net.sf.saxon.pattern.DocumentNodeTest;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
@@ -317,7 +318,7 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(3, BuiltInAtomicType.STRING, OPT, null)
                 .arg(4, BuiltInAtomicType.STRING, OPT, null));
 
-        //#if SaxonCS==false
+        //#if CSHARP==false
         register("graphemes", 1, e -> e.populate(GraphemesFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
         //#endif
@@ -473,6 +474,21 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null));
         //#endif
+
+        register("parse-xml", 1, 2, e -> e.populate(ParseXml::new, new DocumentNodeTest(NodeKindTest.ELEMENT), OPT, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(ParseXml.makeOptionsParameter(40)));
+
+        register("random-number-generator", 0, e -> e.populate(RandomNumberGenerator::new, RandomNumberGenerator.RETURN_TYPE, ONE, LATE));
+
+        register("random-number-generator", 1, e -> e.populate(RandomNumberGenerator::new, RandomNumberGenerator.RETURN_TYPE, ONE, LATE)
+                .arg(0, BuiltInAtomicType.ANY_ATOMIC, OPT, null));
+
+        register("parse-xml-fragment", 1, 2, e -> e.populate(ParseXmlFragment::new, NodeKindTest.DOCUMENT, OPT, LATE | NEW)
+                .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY)
+                .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
+                .setOptionDetails(ParseXmlFragment.makeOptionsParameter(40)));
 
         ItemType partitionFunctionType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.ANY_SEQUENCE, SequenceType.SINGLE_ITEM, SequenceType.SINGLE_INTEGER},
