@@ -4,15 +4,25 @@ package jstests;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.ProfessionalConfiguration;
+import com.saxonica.ee.extfn.js.IXSLElementFactory;
 import com.saxonica.ee.extfn.js.IXSLFunctionSet;
+import net.sf.saxon.Configuration;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.FunctionLibraryList;
 import net.sf.saxon.lib.NamespaceConstant;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.*;
+import net.sf.saxon.trans.XPathException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.InputSource;
 
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 import static net.sf.saxon.s9api.streams.Steps.child;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +48,40 @@ public class IxslExtensionTest {
             XdmItem result = exec.load().evaluateSingle();
             assertEquals("4", result.getStringValue());
         } catch (SaxonApiException err) {
+            err.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void testBug6140() {
+        try {
+            Processor p = new Processor(true);
+            Configuration configuration = p.getUnderlyingConfiguration();
+            if (configuration instanceof ProfessionalConfiguration) {
+                ProfessionalConfiguration pConfiguration = (ProfessionalConfiguration) configuration;
+                // Add SaxonJS 3.1 extension functions
+                pConfiguration.getBuiltInExtensionLibraryList(31).addFunctionLibrary(IXSLFunctionSet.getInstance());
+
+                //Register extension instructions
+                pConfiguration.setExtensionElementCreator(
+                        NamespaceUri.of("http://saxonica.com/ns/interactiveXSLT"), IXSLElementFactory.FACTORY);
+            }
+
+            XsltCompiler comp = p.newXsltCompiler();
+            String xslt = "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n" +
+                    "                xmlns:ixsl=\"http://saxonica.com/ns/interactiveXSLT\"\n" +
+                    "                version=\"3.0\">\n" +
+                    "<xsl:template name=\"xsl:initial-template\">\n" +
+                    "  <xsl:sequence select=\"ixsl:eval('2+2')\"/>\n" +
+                    "</xsl:template>\n" +
+                    "</xsl:stylesheet>\n";
+            ByteArrayInputStream bais = new ByteArrayInputStream(xslt.getBytes(StandardCharsets.UTF_8));
+            Source source = new SAXSource(new InputSource(bais));
+
+            XsltExecutable exec = comp.compile(source);
+            Assertions.assertNotNull(exec);
+        } catch (SaxonApiException | XPathException err) {
             err.printStackTrace();
             fail();
         }
