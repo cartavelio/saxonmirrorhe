@@ -122,10 +122,17 @@ abstract class DotNetImplementation: MSBuildConventions() {
   // SaxonCS -> .../saxondev/csharp/ee/build/arm64/SaxonCS/artifacts/publish/SaxonCS/release_osx-arm64/
 
   @get:Internal
-  val buildDir: Provider<Directory> = msbuildArch.map { it -> projectLayout.buildDirectory.dir("${it}/${target.get()}/artifacts").get() }
+  val buildArtifactsDir: Provider<Directory> = msbuildArch.map { it -> projectLayout.buildDirectory.dir("${it}/${target.get()}/artifacts").get() }
+
+  private fun artifactsDir(prefix: String): String {
+    return "${prefix}/${target.get()}/${configuration.get().value.lowercase()}_${csrid.get()}"
+  }
 
   @get:Internal
-  val buildProductsDir: Provider<Directory> = buildDir.map { it.dir("publish/${target.get()}/${configuration.get().value.lowercase()}_${csrid.get()}") }
+  val buildBinArtifactsDir: Provider<Directory> = buildArtifactsDir.map { it.dir(artifactsDir("bin")) }
+
+  @get:Internal
+  val buildPublishArtifactsDir: Provider<Directory> = buildArtifactsDir.map { it.dir(artifactsDir("publish")) }
 
   public fun dotnetExec(command: String, execBlock: Action<ExecSpec>) {
     ex.exec {
@@ -237,10 +244,10 @@ abstract class DotNetBuild : DotNetImplementation() {
   abstract val inputSources: ConfigurableFileCollection
 
   @get:OutputFile
-  val apiDocumentationFile: Provider<RegularFile> = buildProductsDir.map { it.file("${target.get()}.xml") }
+  val apiDocumentationFile: Provider<RegularFile> = buildBinArtifactsDir.map { it.file("${target.get()}.xml") }
 
   @get:OutputDirectory
-  val outputDir = buildProductsDir
+  val outputDir = buildPublishArtifactsDir
 
   @TaskAction
   fun build() {
@@ -327,7 +334,7 @@ abstract class DotNetCreateNupkg : DotNetImplementation() {
 
 abstract class DotNetMakeApp : DotNetImplementation() {
   @get:OutputDirectory
-  val outputDir = buildProductsDir.map { it.dir("SaxonCS.app") }
+  val outputDir = buildPublishArtifactsDir.map { it.dir("SaxonCS.app") }
 
   @TaskAction
   fun build() {
