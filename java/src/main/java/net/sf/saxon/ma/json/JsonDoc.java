@@ -58,7 +58,7 @@ public class JsonDoc extends SystemFunction  {
 
         URI absoluteURI = UnparsedTextFunction.getAbsoluteURI(href, getStaticBaseUriString(), context);
 
-        String encoding = "UTF-8"; // for now
+        String encoding = null; //"UTF-8"; // for now
 
         Reader reader;
         try {
