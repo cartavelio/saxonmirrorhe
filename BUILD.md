@@ -107,27 +107,66 @@ test suite options.
 If you want to see all of the test suites, try
 
 ```
-./gradlew tasks --all | grep TestSuite_
+./gradlew tasks --all | grep TestSuite
 ```
 
 If you want to run just a single test suite, for example, the XSLT 3.0
 test suite against EE with bytecode and jit enabled, you can run just
-that task (e.g., `ee_runXslt30TestSuite_XT30_bcon_jit`).
+that task (e.g., `eeXslt30TestSuite_XT30_bcon_jit`).
 (The names get a little clunky.)
 
-If you’re running an individual test suite, there are Gradle
-properties that you can use to control additional test suite options:
+Every test suite task has two versions, one with the plain name and
+one with `debug_` prepended to the name. (For example,
+`debug_eeXslt30TestSuite_XT30_bcon_jit`)
 
-* `tdOutput` specifies the output filename (`-o:`)
-* `tdTree` specifies the tree model (`-tree:`)
-* `tdTestSet` specifies the test set (`-s:`)
-* `tdTestName` specifies the test name (`-t:`)
+The distinction is this: the task with `debug_` prepended runs against
+the source code compiled without any preprocessing. This is the
+version that you will want to run in the debugger, for example. The
+version without `debug_` in the front runs against the production
+version of the release.
 
-More options can easily be added if they would be useful.
+### The testSuite closures
 
-(In fact, you can use these properties when you run more than one test
-suite, but I think they’re going to be most useful against single test
-suites.)
+Tests are now configured with a set of methods on the `testSuite` extension.
+For example:
+
+```
+testSuite.qt3 {
+  debug true
+  taskName "adHocTest"
+  release "ee"
+  language "XP31"
+  directory "${projectDir}/src/test/extra/qt3"
+  bytecode true
+  option "-s:saxon-doc"
+  option "-t:s-doc-001"
+}
+```
+
+That creates two tasks that run the W3C QT3 test suite on the
+specified directory using the EE release, the XP31 language, with
+bytecode enabled. The additional options `-s:saxon-doc` and
+`-t:s-doc-001` will be passed to the test suite.
+
+The tasks are named `adHocTest` and `debug_adHocTest`. If you don’t
+specify at task name, you’ll probably get a conflict with existing
+tests because the default names are computed from the options.
+
+Enabling `debug` will cause Gradle to print out the properties that
+will be used to run the test suite. Most can be changed with methods
+in the closure.
+
+It would be tedious if you had to edit the Gradle build file and
+create a new test for every set of options you might want to run, so
+you can pass arbitrary options by encoding them in Gradle parameters.
+The equivalent task using this method would be this one:
+
+`./gradlew -Ptd_s=saxon-doc -Ptd_t=s-doc-001 debug_eeQT3ExtraTestSuite_XP31_bcoff`
+
+Any Gradle parameter of the form `td_x=y` will be passed to the test suite driver as `-x:y`.
+
+There’s one other option recognized by the driver configuration,
+`tdReport`. This changes the output reporting directory.
 
 ## Viewing task dependencies
 
