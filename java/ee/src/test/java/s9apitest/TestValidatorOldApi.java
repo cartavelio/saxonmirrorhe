@@ -2,7 +2,6 @@ package s9apitest;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.jaxp.ValidatorImpl;
-import jaxptest.ConfigTest;
 import millicom.MillicomTest;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.junit.Testdata;
@@ -38,6 +37,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,8 +56,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  * still supported.
  */
 public class TestValidatorOldApi {
-    private final ConfigTest configTest = new ConfigTest();
-
     @Test
     public void testReportMultipleErrors() {
 
@@ -80,7 +78,7 @@ public class TestValidatorOldApi {
         final List<TransformerException> errorList = new ArrayList<>();
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
+            out = new FileOutputStream(Testdata.file("sandpit/validation.out"));
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
             StreamSource source_xsd = new StreamSource(new StringReader(xsd));
@@ -145,12 +143,12 @@ public class TestValidatorOldApi {
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
-            XdmNode doc = builder.build(new File(configTest.getDataDir() + "book-wrapper.xml"));
+            XdmNode doc = builder.build(Testdata.file("book-wrapper.xml"));
             assertEquals(3, getAllBaseUris(doc).size(), "3 distinct base URIs in input");
             assertTrue(doc.getBaseURI().toString().endsWith("book-wrapper.xml"), "input doc base URI");
 
             SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            mgr.load(new StreamSource(Testdata.file("books.xsd")));
             SchemaValidator v = mgr.newSchemaValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
@@ -173,11 +171,11 @@ public class TestValidatorOldApi {
         try {
             Processor proc = new Processor(true);
             DocumentBuilder builder = proc.newDocumentBuilder();
-            XdmNode doc = builder.build(new File(configTest.getDataDir() + "books.xml"));
+            XdmNode doc = builder.build(Testdata.file("books.xml"));
             assertEquals(new QName("xs", NamespaceConstant.SCHEMA, "untyped"), doc.getTypeAnnotationName());
 
             SchemaManager mgr = proc.getSchemaManager();
-            mgr.load(new StreamSource(new File(configTest.getDataDir() + "books.xsd")));
+            mgr.load(new StreamSource(Testdata.file("books.xsd")));
             SchemaValidator v = mgr.newSchemaValidator();
             XdmDestination dest = new XdmDestination();
             v.setDestination(dest);
@@ -342,10 +340,10 @@ public class TestValidatorOldApi {
         try {
             Processor proc = new Processor(true);
             SchemaManager sm = proc.getSchemaManager();
-            sm.importComponents(new StreamSource(new File(configTest.getDataDir() + "dita/concept.scm")));
+            sm.importComponents(new StreamSource(Testdata.file("dita/concept.scm")));
             // define a ns prefix to be associated with a default attribute added to the instance during validation
             proc.getUnderlyingConfiguration().getNamePool().suggestPrefix("dita", NamespaceUri.of("http://dita.oasis-open.org/architecture/2005/"));
-            XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(new File(configTest.getDataDir() + "dita/concept.xml")));
+            XdmNode doc = proc.newDocumentBuilder().build(new StreamSource(Testdata.file("dita/concept.xml")));
             XQueryCompiler c = proc.newXQueryCompiler();
             c.setSchemaAware(true);
             c.useSchema(sm.getXsdSchema());
@@ -524,7 +522,7 @@ public class TestValidatorOldApi {
         // built-in version of the schema. This test uses a catalog to pick it up.
         try {
             Processor p = new Processor(true);
-            p.setCatalogFiles(configTest.getDataDir() + "resolvers/xlink-catalog.xml");
+            p.setCatalogFiles(Testdata.pathString("resolvers/xlink-catalog.xml"));
             SchemaManager sm = p.getSchemaManager();
             String xsd0 = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:b='" + NamespaceConstant.XLINK + "'>\n" +
                     "<xs:import namespace='" + NamespaceConstant.XLINK + "' schemaLocation='file:///does.not.exist/dummy.xml'/>" +
@@ -777,7 +775,7 @@ public class TestValidatorOldApi {
 
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream(configTest.getDataDir() + "sandpit/validation.out");
+            out = new FileOutputStream(Testdata.file("sandpit/validation.out"));
             Processor proc = new Processor(true);
             proc.setConfigurationProperty(Feature.IMPLICIT_SCHEMA_IMPORTS, true);
 
@@ -923,7 +921,7 @@ public class TestValidatorOldApi {
 
             dest = proc.newSerializer();
             dest.setOutputProperty(Serializer.Property.INDENT, "yes");
-            dest.setOutputFile(new File(configTest.getTempDir() + "/validationReport.xml"));
+            dest.setOutputFile(Testdata.temp().file("/validationReport.xml"));
 
             // dest.setOutputWriter(writer);
             validator.setValidityReporting(dest);//configTest.getDataDir()+"/validationReort.xml");
@@ -932,7 +930,7 @@ public class TestValidatorOldApi {
             source2.setSystemId("http://doc2");
             validator.validate(source2);
             System.err.println("Doc 1 OK");
-            File file = new File(configTest.getTempDir() + "/validationReport.xml");
+            File file = Testdata.temp().file("/validationReport.xml");
             XdmNode resultdoc = proc.newDocumentBuilder().build(file);
             System.out.println(resultdoc.getStringValue());
             assertTrue(file.exists(), "File exists: ");
@@ -1129,8 +1127,8 @@ public class TestValidatorOldApi {
 
     public void runSchemaListener(SchemaFactory schemaFactory) throws SAXException, IOException {
         try {
-            File schemaFile = new File(configTest.getDataDir() + "personal.xsd");
-            File xmlFile = new File(configTest.getDataDir() + "personal-schema.xml");
+            File schemaFile = Testdata.file("personal.xsd");
+            File xmlFile = Testdata.file("personal-schema.xml");
             MyErrorHandler errorHandler = new MyErrorHandler();
 
             // Set error handler
@@ -1158,8 +1156,8 @@ public class TestValidatorOldApi {
     // Documents are not in the repository
     public void testMillicomErrorListener() {
         String[] args = {
-                "-xsd:" + configTest.getDataDir() + "SubsidyTrackingFactXSD11.xsd",
-                "-s:" + configTest.getDataDir() + "id2278_HN201506_SubsidyTrackingFact.xml",
+                "-xsd:" + Testdata.file("SubsidyTrackingFactXSD11.xsd"),
+                "-s:" + Testdata.file("id2278_HN201506_SubsidyTrackingFact.xml"),
                 "-verbose",
                 "-xsdversion:1.1"};
 
@@ -1179,19 +1177,19 @@ public class TestValidatorOldApi {
         try {
             final Processor processor = new Processor(true);
             processor.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, "lax");
-            processor.getSchemaManager().load(new StreamSource(new File(configTest.getDataDir() + "leak/schema.xsd")));
+            processor.getSchemaManager().load(new StreamSource(Testdata.file("leak/schema.xsd")));
 
             final DocumentBuilder builder = processor.newDocumentBuilder();
             builder.setTreeModel(TreeModel.TINY_TREE);
 
-            XdmNode node = builder.build(new StreamSource(new File(configTest.getDataDir() + "leak/instance.xml")));
+            XdmNode node = builder.build(new StreamSource(Testdata.file("leak/instance.xml")));
             WeakReference<TinyTree> tinyTree = new WeakReference<>(((TinyDocumentImpl) node.getUnderlyingNode()).getTree());
 
             final XPathCompiler compiler = processor.newXPathCompiler();
             compiler.useSchema(processor.getSchemaManager().getXsdSchema());
             //compiler.importSchemaNamespace("http://example.org");
             compiler.evaluate("namespace-uri-from-QName(//*/foo)", node);
-            node = builder.build(new StreamSource(new File(configTest.getDataDir() + "leak/instance.xml")));
+            node = builder.build(new StreamSource(Testdata.file("leak/instance.xml")));
             System.gc();
             assertNull(tinyTree.get());
         } catch (SaxonApiException e) {
@@ -1226,18 +1224,18 @@ public class TestValidatorOldApi {
 
             config.setBooleanProperty(Feature.MULTIPLE_SCHEMA_IMPORTS, multiple);
 
-            String dir = configTest.getDataDir() + "/petrk/AbstractType-2/";
+            Path dir = Testdata.path("petrk/AbstractType-2");
 
             System.err.println("Loading from file:");
 
             if (fromNode) {
-                loadSchemaFromNode(config, new File(dir + "src/schema.xsd"));
-                loadSchemaFromNode(config, new File(dir + "src/schema1.xsd"));
-                loadSchemaFromNode(config, new File(dir + "src/schema2.xsd"));
+                loadSchemaFromNode(config, dir.resolve("src/schema.xsd").toFile());
+                loadSchemaFromNode(config, dir.resolve("src/schema1.xsd").toFile());
+                loadSchemaFromNode(config, dir.resolve("src/schema2.xsd").toFile());
             } else {
-                loadSchemaOK(config, new File(dir + "src/schema.xsd"));
-                loadSchemaOK(config, new File(dir + "src/schema1.xsd"));
-                loadSchemaOK(config, new File(dir + "src/schema2.xsd"));
+                loadSchemaOK(config, dir.resolve("src/schema.xsd").toFile());
+                loadSchemaOK(config, dir.resolve("src/schema1.xsd").toFile());
+                loadSchemaOK(config, dir.resolve("src/schema2.xsd").toFile());
             }
 
             System.err.println("Loading successful");
@@ -1446,7 +1444,7 @@ public class TestValidatorOldApi {
         try {
             Processor processor = new Processor(true);
             DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+            XdmNode source = builder.build(Testdata.file((withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
             SchemaManager manager = processor.getSchemaManager();
             manager.load();
@@ -1477,7 +1475,7 @@ public class TestValidatorOldApi {
         try {
             Processor processor = new Processor(true);
             DocumentBuilder builder = processor.newDocumentBuilder();
-            XdmNode source = builder.build(new File(configTest.getDataDir() + (withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
+            XdmNode source = builder.build(Testdata.file((withNS ? "xsdhints/documentNS.xml" : "xsdhints/document.xml")));
 
             SchemaManager manager = processor.getSchemaManager();
             manager.load();
@@ -1614,7 +1612,7 @@ public class TestValidatorOldApi {
             schemaManager.load(new StreamSource("https://www.w3.org/TR/xslt-30/schema-for-xslt30.xsd"));
 
             SchemaValidator validator = schemaManager.newSchemaValidator();
-            validator.validate(new StreamSource(new File(configTest.getDataDir(), "caffo/Transform2.xslt")));
+            validator.validate(new StreamSource(Testdata.file("caffo/Transform2.xslt")));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             fail();
@@ -1634,7 +1632,7 @@ public class TestValidatorOldApi {
 
             schemaManager.load(schema.asSource());
             SchemaValidator validator = schemaManager.newSchemaValidator();
-            validator.validate(new StreamSource(new File(configTest.getDataDir(), "caffo/Transform2.xslt")));
+            validator.validate(new StreamSource(Testdata.file("caffo/Transform2.xslt")));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             fail();
@@ -1653,7 +1651,7 @@ public class TestValidatorOldApi {
             schemaManager.load(schema.asSource());
 
             SchemaValidator validator = schemaManager.newSchemaValidator();
-            validator.validate(new StreamSource(new File(configTest.getDataDir(), "caffo/Transform2.xslt")));
+            validator.validate(new StreamSource(Testdata.file("caffo/Transform2.xslt")));
         } catch (Exception e) {
             System.err.println(e.getMessage());
             fail();
@@ -1777,7 +1775,7 @@ public class TestValidatorOldApi {
                     @Override
                     public void run() {
                         try {
-                            manager.load(new File(configTest.getDataDir() + "../../../java/src/test/bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
+                            manager.load(Testdata.file("../../../java/src/test/bugs/5978-Rose/schema/ACSJournal-layout.xsd"));
                         } catch (Throwable ex) {
                             System.err.println("thread-# " + Thread.currentThread().getId() + " ERROR");
                             ex.printStackTrace();
