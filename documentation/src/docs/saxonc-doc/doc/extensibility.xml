@@ -288,7 +288,7 @@ XdmItem *result = xpath->evaluateSingle("dy:myFunc(3)");]]></code></pre>
        <p>User extension functions in Python can both handle arguments of XDM and native PHP types. The same for the
            return type from the function. The boolean flag <code>use_python_types=True</code> on <code>register_user_function</code>
            is used to switch on native type conversion option.
-           This means that users can use native PHP types within the function
+           Users can use native PHP types within the function
            they have written and return them too. The default option is <code>use_python_types=False</code>.
            which means we are only handling XDM types in the user function.
            <code>XdmNode</code> types does not have a native type mapping. Therefore, we just
@@ -350,16 +350,29 @@ XdmItem *result = xpath->evaluateSingle("dy:myFunc(3)");]]></code></pre>
 
        <p>In the example above the Python "myFunc" extension function is called from XPath, but can be called
            from an XSLT stylesheet or from XQuery. The implementation of the python function <Code>my_func</Code> is given
-           below. In this example we set <code>use_python_types=False</code> there there is no conversion from XDM types to native python types:
+           below. Here you specify the arguments required by the function and a keyword argument at the end where which supports.
+           The keyword argument is used to pass SaxonC specific configurations such as the used PySaxonProcessor. The keyword for
+           this is 'processor'.  In this example we set <code>use_python_types=False</code> there is no conversion from
+           XDM types to native python types. We carry out a number of task in the user function:
+           Firstly, we get the PyXdmValue from the XPath and convert it to a Python integer value.
+           Secondly, we compute a simple calculation and return the value.
+           Finally, we return the value we have made as a new integer value. In the return type SaxonC can handle Xdm and most Python types.
+           For Python primitive types there is a implicit conversion to a XDM type. We can do the conversion in the function.
+           The PySaxonProcessor object is required. We use the keyword argument to get hold of the currently enabled
+           PySaxonProcessor. This is important to maintain compatibility in the host language (i.e. XPath/XSLT/XQuery).
 
            <samp>
-               def my_func(values):
-               saxonproc = PySaxonProcessor()
-               try:
-                    valuex= saxonproc.make_integer_value(n_value)
-                    return valuex
-               except Exception as err:
-               return None
+               def user_function(values, **kwargs):
+                    ''' values: PyXdmValue '''
+
+                    saxonproc = kwargs['processor']
+                    n_value  = values[0].head.integer_value + 2
+
+                    try:
+                        valuex= saxonproc.make_integer_value(n_value)
+                        return valuex
+                    except Exception as err:
+                        return None
            </samp>
        </p>
 
