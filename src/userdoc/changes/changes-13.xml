@@ -96,6 +96,9 @@
         
         <h2>New features from the 4.0 specifications</h2>
         
+        <p>Filter expressions accept a sequence of integer positions, for example <code>$in[3 to 5]</code>
+        or <code>$in[1, 4, 7]</code>.</p>
+        
         <p>The second <code>$position</code> argument is available on function callbacks made by the functions
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-of</code>, <code>some</code>.</p>
         
