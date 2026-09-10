@@ -2289,14 +2289,14 @@ cdef class PyXsltExecutable:
             value (str): The value of the property
 
         Example:
-            PyXsltExecutable: set serialization properties (names start with '!' e.g. name "!method" -> "xml")\r
-            'o': output file name,\r
-            'it': initial template,\r
-            'im': initial mode,\r
-            's': source as file name\r
-            'm': switch on message listener for xsl:message instructions,\r
-            'item'| 'node': source supplied as a PyXdmNode object,\r
-            'extc': Set the native library to use with Saxon for extension functions written in C/C++/PHP\r
+            PyXsltExecutable: set serialization properties (names start with '!' e.g. name "!method" -> "xml")
+            'o': output file name,
+            'it': initial template,
+            'im': initial mode,
+            's': source as file name
+            'm': switch on message listener for xsl:message instructions,
+            'item'| 'node': source supplied as a PyXdmNode object,
+            'extc': Set the native library to use with Saxon for extension functions written in C/C++/PHP
         """
         cdef char * c_name = NULL
         py_string_string = name.encode('utf-8') if name is not None else None
@@ -2443,7 +2443,7 @@ cdef class PyXsltExecutable:
 
             3)::
 
-                node = saxon_proc.parse_xml(xml_text="<in/>")\r
+                node = saxon_proc.parse_xml(xml_text="<in/>")
                 result = executable.transform_to_string(xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
@@ -2517,13 +2517,13 @@ cdef class PyXsltExecutable:
 
             2)::
 
-                executable.set_initial_match_selection("cat.xml")\r
-                executable.set_output_file("result.xml")\r
+                executable.set_initial_match_selection("cat.xml")
+                executable.set_output_file("result.xml")
                 executable.transform_to_file()
 
             3)::
 
-                node = saxon_proc.parse_xml(xml_text="<in/>")\r
+                node = saxon_proc.parse_xml(xml_text="<in/>")
                 executable.transform_to_file(output_file="result.xml", xdm_node= node)
         """
         cdef char * c_sourcefile = NULL
@@ -2589,12 +2589,12 @@ cdef class PyXsltExecutable:
 
             2)::
 
-                executable.set_initial_match_selection("cat.xml")\r
+                executable.set_initial_match_selection("cat.xml")
                 result = executable.transform_to_value()
 
             3)::
 
-                node = saxon_proc.parse_xml(xml_text="<in/>")\r
+                node = saxon_proc.parse_xml(xml_text="<in/>")
                 result = executable.transform_to_value(xdm_node= node)
         """
         cdef const char * c_sourcefile = NULL
@@ -2654,7 +2654,7 @@ cdef class PyXsltExecutable:
 
             1)::
 
-                executable.set_initial_match_selection(file_name="cat.xml")\r
+                executable.set_initial_match_selection(file_name="cat.xml")
                 result = executable.apply_templates_returning_value()
 
             2)::
@@ -2829,7 +2829,7 @@ cdef class PyXsltExecutable:
 
             2)::
 
-                executable.set_global_context_item(file_name="cat.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
                 result = executable.call_template_returning_value("main")
         """
         cdef const char * c_templateName = NULL
@@ -2876,12 +2876,12 @@ cdef class PyXsltExecutable:
 
             2)::
 
-                executable.set_global_context_item(file_name="cat.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
                 result = executable.call_template_returning_string("main")
 
             3)::
 
-                executable.set_global_context_item(file_name="cat.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
                 result = executable.call_template_returning_string()
                 print(result)
         """
@@ -2933,13 +2933,13 @@ cdef class PyXsltExecutable:
 
             2)::
 
-                executable.set_global_context_item(file_name="cat.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
                 executable.call_template_returning_file("main", output_file="result.xml")
 
             3)::
 
-                executable.set_global_context_item(file_name="cat.xml")\r
-                executable.set_output_file("result.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
+                executable.set_output_file("result.xml")
                 executable.call_template_returning_file()
                 print(result)
         """
@@ -2989,7 +2989,7 @@ cdef class PyXsltExecutable:
 
             2)::
 
-                executable.set_global_context_item(file_name="cat.xml")\r
+                executable.set_global_context_item(file_name="cat.xml")
                 result = executable.call_function_returning_value("{http://localhost/test}add", [saxonproc.make_integer_value(2)])
         """
         cdef const char * c_functionName = NULL
@@ -3311,11 +3311,11 @@ cdef class PyXQueryProcessor:
             name (str): The name of the property
             value (str): The value of the property
         Example:
-            PyXQueryProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
-            'o': output file name,\r
-            'dtd': Possible values 'on' or 'off' to set DTD validation,\r
-            'resources': directory to find Saxon data files,\r
-            's': source as file name,\r
+            PyXQueryProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")
+            'o': output file name,
+            'dtd': Possible values 'on' or 'off' to set DTD validation,
+            'resources': directory to find Saxon data files,
+            's': source as file name,
         """
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_name = py_name_string if name is not None else ""
@@ -3873,9 +3873,9 @@ cdef class PyXPathProcessor:
             name (str): The name of the property
             value (str): The value of the property
         Example:
-            PyXPathProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
-            'resources': directory to find Saxon data files,\r
-            's': source as file name,\r
+            PyXPathProcessor: set serialization properties (names start with '!' i.e. name "!method" -> "xml")
+            'resources': directory to find Saxon data files,
+            's': source as file name,
             'extc': Register native library to be used with extension functions
         """
         py_name_string = name.encode('UTF-8') if name is not None else None
@@ -4340,19 +4340,19 @@ cdef class PySchemaValidator:
             encoding (str): The encoding of the name argument. Argument can be omitted or None.
                 If not specified then the platform default encoding is used.
         Example:
-            PySchemaValidator: set serialization properties (names start with '!' i.e. name "!method" -> "xml")\r
-            'o': output file name,\r
-            'dtd': Possible values 'on' or 'off' to set DTD validation,\r
-            'resources': directory to find Saxon data files,\r
-            's': source as file name,\r
-            'string': Set the source as xml string for validation. Parsing will take place in the validate method\r
+            PySchemaValidator: set serialization properties (names start with '!' i.e. name "!method" -> "xml")
+            'o': output file name,
+            'dtd': Possible values 'on' or 'off' to set DTD validation,
+            'resources': directory to find Saxon data files,
+            's': source as file name,
+            'string': Set the source as xml string for validation. Parsing will take place in the validate method
             'report-node': Boolean flag for validation reporting feature. Error validation failures are represented
-                in an XML document and returned as a PyXdmNode object\r
+                in an XML document and returned as a PyXdmNode object
             'report-file': Specify value as a file name string. This will switch on the validation reporting feature,
-                which will be saved to the file in an XML format\r
+                which will be saved to the file in an XML format
             'verbose': boolean value which sets the verbose mode to the output in the terminal. Default is 'on'
             'element-type': Set the name of the required type of the top-level element of the document to be validated.
-                The string should be in clark notation {uri}local\r
+                The string should be in clark notation {uri}local
             'lax': Boolean to set the validation mode to strict (False) or lax ('True')
         """
         cdef const char * c_name = NULL
