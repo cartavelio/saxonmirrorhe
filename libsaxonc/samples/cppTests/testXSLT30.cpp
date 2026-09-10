@@ -2030,6 +2030,59 @@ void testResolveUri(SaxonProcessor *proc, Xslt30Processor *trans,
   delete executable;
 }
 
+
+void testApplyTemplateReturningFile(SaxonProcessor *proc, Xslt30Processor *trans,
+                    sResultCount *sresult) {
+  cout << endl << "Test: testApplyTemplateReturningFile:" << endl;
+
+  XsltExecutable *executable = nullptr;
+
+  try {
+    XdmNode *inputDoc = proc->parseXmlFromString("<a>b</a>");
+
+    executable = trans->compileFromString(
+        "<xsl:stylesheet version='3.0' "
+        "xmlns:xsl='http://www.w3.org/1999/XSL/Transform' "
+        "xmlns:xs='http://www.w3.org/2001/XMLSchema' "
+        "xmlns:err='http://www.w3.org/2005/xqt-errors'><xsl:template "
+        "match='*'><out><test><xsl:value-of select='.'/>Result file</test></out></xsl:template></xsl:stylesheet>");
+
+    executable->setInitialMatchSelection(inputDoc);
+
+    executable->applyTemplatesReturningFile("resultFileTest.xml");
+
+    if (CppTestUtils::exists("resultFileTest.xml")) {
+      cout << "The file resultFileTest.xml exists" << endl;
+      if(CppTestUtils::CheckWord("resultFileTest.xml", "Result file")) {
+        sresult->success++;
+        remove("resultFileTest.xml");
+      } else {
+        sresult->failure++;
+        sresult->failureList.push_back("testCallTemplateReturningFile");
+
+      }
+
+
+    } else {
+      cout << "The file resultFileTest.xml does not exist" << endl;
+
+      sresult->failure++;
+      sresult->failureList.push_back("testApplyTemplateReturningFile");
+    }
+
+  } catch (SaxonApiException &e) {
+    sresult->failure++;
+    sresult->failureList.push_back("testApplyTemplateReturningFile");
+    const char *message = e.getMessage();
+    if (message != nullptr) {
+      cout << "Error: " << message << endl;
+    }
+  }
+  delete executable;
+}
+
+
+
 void testContextNotRoot(SaxonProcessor *proc, Xslt30Processor *trans,
                         sResultCount *sresult) {
   cout << endl << "Test: testContextNotRoot" << endl;
@@ -3352,7 +3405,7 @@ int main(int argc, char *argv[]) {
   }
   // testValidation(trans,sresult);
 
- /* testInitialTemplate(processor, trans, sresult);
+  testInitialTemplate(processor, trans, sresult);
 
   cout << endl
        << "============================================================="
@@ -3607,6 +3660,8 @@ int main(int argc, char *argv[]) {
 
   testResolveUri(processor, trans, sresult);
 
+  testApplyTemplateReturningFile(processor, trans, sresult);
+
   cout << endl
        << "============================================================="
        << endl
@@ -3687,7 +3742,7 @@ int main(int argc, char *argv[]) {
      << endl
      << endl;
 
-  testCallSystemFunction(processor, sresult); */
+  testCallSystemFunction(processor, sresult);
   cout << endl
      << "============================================================="
      << endl
