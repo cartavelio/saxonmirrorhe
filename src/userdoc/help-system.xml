@@ -24,7 +24,7 @@
             scrollable list of links to all page hits, referenced by section name. All matching
             words will be highlighted in the rendered document until the pop-up is closed (by
             pressing the <code>close</code> button).</p>
-        <p>To perform a <strong>Java API search</strong> for a class or class-member, prefix the
+        <p>To perform a Java and C# <strong>API search</strong> for a class or class-member, prefix the
             name of the search item with a '#' character, for example:
                 <code>#qualifiednamevalue</code>. The name search is not case sensitive but the
             search term must match the whole name.</p>
@@ -79,7 +79,7 @@
             <table border="1">
                 <tbody>
                     <tr>
-                        <td><p>xsl/viewer_app.sef.xml</p></td>
+                        <td><p>xsl/viewer_app.sef.json</p></td>
                         <td>
                             <p>Stylesheet Export File (SEF) generated from the viewer_app.xsl stylesheet using
                                 Saxon-EE, for use with Saxon-JS.</p>
