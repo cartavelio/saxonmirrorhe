@@ -2,7 +2,7 @@
 <!-- exceptions file for the QT4 Test Suite -->
 <exceptions>
 
-   <exception test-set="fn-deep-equal" 
+   <!--<exception test-set="fn-deep-equal" 
       test-case="deep-equal-40-functions-001
       deep-equal-40-functions-002
       deep-equal-40-functions-003
@@ -12,7 +12,7 @@
       deep-equal-40-functions-007" run="false" report="n/a">
       <created by="Michael Kay" on="2023-11-24"/>
       <reason>change for comparing function items not yet implemented</reason>
-   </exception>
+   </exception>-->
    
    <exception test-set="fn-deep-equal" 
       test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="n/a">
