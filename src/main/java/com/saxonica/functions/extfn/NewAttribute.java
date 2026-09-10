@@ -35,7 +35,7 @@ public class NewAttribute extends SystemFunction {
         AtomicValue nameArg = (AtomicValue) arguments[0].head();
         StructuredQName name;
         if (nameArg instanceof QNameValue) {
-            name = ((QNameValue) arguments[0].head()).getStructuredQName();
+            name = ((QNameValue)nameArg).getStructuredQName();
         } else {
             String s = nameArg.getStringValue();
             name = StructuredQName.fromLexicalQName(s, false, true, getRetainedStaticContext());

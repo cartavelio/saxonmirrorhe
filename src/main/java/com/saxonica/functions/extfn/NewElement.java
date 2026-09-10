@@ -41,7 +41,7 @@ public class NewElement extends SystemFunction {
         AtomicValue nameArg = (AtomicValue)arguments[0].head();
         QNameValue name;
         if (nameArg instanceof QNameValue) {
-            name = (QNameValue) arguments[0].head();
+            name = (QNameValue)nameArg;
         } else {
             String s = nameArg.getStringValue();
             StructuredQName q = StructuredQName.fromLexicalQName(s, false, true, getRetainedStaticContext());
