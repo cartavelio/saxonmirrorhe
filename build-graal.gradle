@@ -118,6 +118,26 @@ task buildCWrappers (
   dependsOn: ['buildTransform', 'buildQuery', 'buildValidate']){
 }
 
+task check_codesign_dylib(
+  type: Exec,
+  description: "Check to see if we can and should sign the .dylib file"
+) {
+  def identities = new ByteArrayOutputStream();
+
+  if (systemOs.isMacOsX()) {
+    commandLine "security", "find-identity", "-p", "codesigning", "-v"
+  } else {
+    commandLine "echo", "Code signing only applies to macOS"
+  }
+
+  standardOutput = identities
+
+  doLast {
+    // 2RW84ZZ739 is the ID of the Saxonica Limited signing certificate
+    codesign_dylib = identities.toString("utf-8").contains('2RW84ZZ739')
+  }
+}
+
 ["he", "pe", "ee"].each { edition ->
   //def graalEdition = edition == "he" ? "ce" : "ee"
   def graalEdition = "ce"
@@ -170,11 +190,11 @@ task buildCWrappers (
   }
 
   task "${edition}c_graalImage"(
-    dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home"],
+    dependsOn: ["${edition}c_graalJar", "graal_${graalEdition}_home", "check_codesign_dylib"],
     description: "Builds the GraalVM native image, add '-g' and \"-H:Log=registerResource:3\" option for debugging add :${icu4jJar} for icu"
   ) {
     inputs.file "${buildDir}/libs/libsaxon-${edition}c-${saxonVersion}.jar"
-    outputs.file "libsaxon-${edition}c-${saxonVersion}.o"
+    outputs.file "${buildDir}/c/libsaxon-${edition}c-${saxonVersion}.o"
 
     doLast {
       def image = nativeImage(graalEdition)
@@ -193,6 +213,22 @@ task buildCWrappers (
           "--enable-url-protocols=https",
           "--enable-url-protocols=http",
           "--shared"
+      }
+    }
+
+    if (systemOs.isMacOsX()) {
+      doLast {
+        exec {
+          workingDir 'build/c'
+          if (codesign_dylib) {
+            commandLine 'codesign', '--force', '--options', 'runtime',
+              '--entitlements', '../../tools/saxon-cs/entitlements.plist',
+              '--deep', '--sign', 'Developer ID Application: Saxonica Limited',
+              '--timestamp', "libsaxon-${edition}c-${saxonVersion}.dylib"
+          } else {
+            commandLine 'echo', 'Code signing is not available'
+          }
+        }
       }
     }
   }
