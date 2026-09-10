@@ -176,7 +176,7 @@ public class SchemaCompiler {
                             throw new SchemaException("An SCM input file must be loaded as a single unit");
                         }
                         try {
-                            scmSchema = new PreparedSchema();
+                            scmSchema = new PreparedSchema(config);
                             scmSchema.importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
                         } catch (XPathException e) {
                             throw new SchemaException(e);
