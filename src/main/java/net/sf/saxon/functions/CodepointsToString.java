@@ -24,11 +24,11 @@ import net.sf.saxon.z.IntPredicateProxy;
 public class CodepointsToString extends SystemFunction implements Callable {
 
     /**
-     * Return a StringItem corresponding to a given sequence of Unicode code values
+     * Construct a UnicodeString corresponding to a given sequence of Unicode code values
      *
+     * @param sb builder object to contain the constructed string
      * @param chars   iterator delivering the characters as integer values
      * @param checker used to test whether a character is valid in the appropriate XML version
-     * @return the sequence of characters as a StringItem
      * @throws net.sf.saxon.trans.XPathException
      *          if any of the integers is not the codepoint of a valid XML character
      */
@@ -58,12 +58,9 @@ public class CodepointsToString extends SystemFunction implements Callable {
      */
     @Override
     public StringValue call(XPathContext context, Sequence[] arguments) throws XPathException {
-        // Function is variadic in 4.0
         UnicodeBuilder sb = new UnicodeBuilder();
-        for (Sequence arg : arguments) {
-            SequenceIterator chars = arg.iterate();
-            unicodeToString(sb, chars, context.getConfiguration().getValidCharacterChecker());
-        }
+        SequenceIterator chars = arguments[0].iterate();
+        unicodeToString(sb, chars, context.getConfiguration().getValidCharacterChecker());
         return new StringValue(sb.toUnicodeString());
     }
 
