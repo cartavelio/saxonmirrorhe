@@ -225,6 +225,7 @@ void XdmValue::addUnderlyingValue(int64_t val) {
       new_relinquish_val[i] = relinquished_values[i];
     }
     delete values;
+    delete [] relinquished_values;
     values = newValues;
     relinquished_values = new_relinquish_val;
     values_cap *= 2;
@@ -243,7 +244,7 @@ void XdmValue::incrementRefCount() {
 }
 
 void XdmValue::incrementRefCountForRelinquishedValue(int i){
-  if (xdmSize > 0 && relinquished_values[i] == (char)0){
+  if (values!= nullptr && xdmSize > 0 && relinquished_values[i] == (char)0){
     values[i]->incrementRefCount();
     if (getenv("SAXONC_DEBUG_FLAG")) {
       std::cerr << "refCount-inc-relinquished-xdmVal=" << refCount << " ob ref=" << (this)
@@ -310,7 +311,7 @@ void XdmValue::releaseXdmValue() {
 }
 
 XdmItem *XdmValue::itemAt(int n) {
-  if (n >= 0 && (unsigned int)n < xdmSize) {
+  if (values!= nullptr && n >= 0 && (unsigned int)n < xdmSize) {
     relinquished_values[n] = (char)1;
     return values[n];
   }

@@ -3555,6 +3555,7 @@ cdef class PyXPathProcessor:
         else:
             val = PyXdmValue()
             val.thisvptr = xdmValue
+            val.thisvptr.incrementRefCount()
             return val
 
      def evaluate_single(self, xpath_str, encoding = None):
@@ -4642,6 +4643,20 @@ cdef class PyXdmItem(PyXdmValue):
         of length one, this returns the PyXdmItem itself.
         Returns:
             PyXdmItem: The PyXdmItem or None if the sequence is empty
+        """
+        return self
+
+     def item_at(self, index):
+        """
+        item_at(self, index)
+        Get the n'th item in the sequence, counting from zero.
+        Args:
+            index (int): the index of the item required, counting from zero
+        Returns:
+            PyXdmItem: The item at the specified index. This could be a PyXdmItem or any of its subclasses:
+            PyXdmAtomicValue, PyXdmNode, PyXdmFunctionItem, PyXdmMap or PyXdmArray.
+            If the item does not exist returns None.
+
         """
         return self
      def get_atomic_value(self):
