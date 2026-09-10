@@ -100,9 +100,9 @@ public class QT3TestDriverPE extends QT3TestDriverHE {
      */
 
     private static class LazyLiteralInjector implements CodeInjector {
-
+        
         @Override
-        public Expression inject(Expression exp) {
+        public Expression injectDuringParsing(Expression exp) {
             if (exp instanceof Literal) {
                 if (exp instanceof StringLiteral && ((StringLiteral)exp).stringify().startsWith("http://www.w3.org/")) {
                     // This is to avoid dynamic computation of Collation uris, which affects optimization paths

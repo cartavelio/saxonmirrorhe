@@ -167,6 +167,7 @@ public abstract class TestDriver {
             }
             if (args[i].equals("-unfolded")) {
                 unfolded = true;
+                exceptionPredicates.add("unfolded");
             }
             if (args[i].equals("-save")) {
                 saveResults = true;
@@ -424,7 +425,7 @@ public abstract class TestDriver {
                 XdmNode entry = iter.next();
 
                 // If a test claims to apply only "when" certain conditions apply, skip the test
-                // unless one of the current predicates matches one of the when conditions.
+                // unless one of the current predicates matches one of the 'when' conditions.
                 // For example: <exception ... when="axiom js"> will only apply if either the js
                 // or axiom (tree model) predicates is present.
                 if (entry.getAttributeValue(when) != null) {
