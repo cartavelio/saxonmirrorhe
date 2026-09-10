@@ -83,7 +83,7 @@ public class GroupByClause extends Clause {
         for (int i = 0; i < bindings.length; i++) {
             g2.bindings[i] = bindings[i].copy();
         }
-        //g2.comparers = comparers;
+        g2.stringCollators = stringCollators;
         g2.initRetainedTupleExpression(flwor, (TupleExpression)getRetainedTupleExpression().copy(rebindings));
         g2.initGroupingTupleExpression(flwor, (TupleExpression)getGroupingTupleExpression().copy(rebindings));
         return g2;
