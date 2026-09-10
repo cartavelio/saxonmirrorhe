@@ -901,6 +901,15 @@
          <code>Q{uri}prefix:local</code>, where the prefix has no effect on the functionality.
         </p>
       
+      <p>Saxon implements the tokenization rules in the 4.0 specification, which are much clearer
+      and less ambiguous than the 3.1 rules. Notably, the 3.1 rule <i>When tokenizing, the longest 
+         possible match that is consistent with the EBNF is used."</i> has always proved problematic,
+      and has been clarified in 4.0. An example of an affected expression is <code>map{$m?a:x}</code>;
+      it is possible to read the 3.1 rule as requiring <code>"a"</code> to be treated as a token,
+      because although <code>"a:x"</code> is longer, it is not consistent with the EBNF. Saxon does
+      not accept this expression, whether running in 3.1 or 4.0 mode. A space is needed before or 
+      after the colon.</p>
+      
  
       
       
