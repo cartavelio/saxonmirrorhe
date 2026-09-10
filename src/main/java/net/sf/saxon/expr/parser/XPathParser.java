@@ -920,26 +920,30 @@ public class XPathParser {
                     CastingTarget at;
                     if (allowXPath40Syntax && t.currentToken == Token.KEYWORD_LBRA && t.currentTokenValue.equals("union")) {
                         // Saxon 9.8 / XPath 4.0 proposed extension
-                        at = (CastingTarget)parseItemType();
+                        at = (CastingTarget) parseItemType();
                     } else {
                         expect(Token.NAME);
-                        StructuredQName sq = null;
-                        try {
-                            sq = qNameParser.parse(t.currentTokenValue, env.getDefaultElementNamespace());
-                        } catch (XPathException e) {
-                            grumble(e.getMessage(), e.getErrorCodeQName());
-                            assert false;
-                        }
-                        ItemType alias = env.resolveTypeAlias(sq);
-                        if (alias != null) {
-                            if (alias instanceof CastingTarget) {
-                                at = (CastingTarget) alias;
-                            } else {
-                                grumble("The type " + t.currentTokenValue + " cannot be used as the target of a cast");
-                                at = null;
-                            }
+                        if (scanOnly) {
+                            at = BuiltInAtomicType.STRING;
                         } else {
-                            at = getSimpleType(t.currentTokenValue);
+                            StructuredQName sq = null;
+                            try {
+                                sq = qNameParser.parse(t.currentTokenValue, env.getDefaultElementNamespace());
+                            } catch (XPathException e) {
+                                grumble(e.getMessage(), e.getErrorCodeQName());
+                                assert false;
+                            }
+                            ItemType alias = env.resolveTypeAlias(sq);
+                            if (alias != null) {
+                                if (alias instanceof CastingTarget) {
+                                    at = (CastingTarget) alias;
+                                } else {
+                                    grumble("The type " + t.currentTokenValue + " cannot be used as the target of a cast");
+                                    at = null;
+                                }
+                            } else {
+                                at = getSimpleType(t.currentTokenValue);
+                            }
                         }
                         nextToken();
                     }
@@ -2030,21 +2034,25 @@ public class XPathParser {
                 memberTypes.add(type);
             } else {
                 expect(Token.NAME);
-                StructuredQName member = getQNameParser().parse(
-                        t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
-                ItemType type = getPlainType(member);
-                if (type instanceof AtomicType) {
-                    memberTypes.add((AtomicType) type);
-                } else if (type instanceof PlainType) {
-                    for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
-                        if (pt instanceof AtomicType) {
-                            memberTypes.add((AtomicType) pt);
-                        } else {
-                            grumble("Union type " + type + " has a non-atomic member type " + pt);
-                        }
-                    }
+                if (scanOnly) {
+                    memberTypes.add(BuiltInAtomicType.STRING);
                 } else {
-                    grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                    StructuredQName member = getQNameParser().parse(
+                            t.currentTokenValue, getStaticContext().getDefaultElementNamespace());
+                    ItemType type = getPlainType(member);
+                    if (type instanceof AtomicType) {
+                        memberTypes.add((AtomicType) type);
+                    } else if (type instanceof PlainType) {
+                        for (PlainType pt : ((UnionType) type).getPlainMemberTypes()) {
+                            if (pt instanceof AtomicType) {
+                                memberTypes.add((AtomicType) pt);
+                            } else {
+                                grumble("Union type " + type + " has a non-atomic member type " + pt);
+                            }
+                        }
+                    } else {
+                        grumble("Type " + t.currentTokenValue + " exists, but is not atomic");
+                    }
                 }
                 nextToken();
             }
