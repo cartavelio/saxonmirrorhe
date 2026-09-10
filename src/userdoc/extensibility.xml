@@ -22,10 +22,10 @@
   <p>For other extensibility mechanisms, see the following sections:</p>
   
   <ul>
-    <li><p class="javaonly"><a class="bodylink" href="instructions">Writing XSLT Extension Instructions</a></p></li>
-    <li><p class="javaonly"><a class="bodylink" href="output-filters">Customizing Serialization</a></p></li>
+    <li class="javaonly"><p><a class="bodylink" href="instructions">Writing XSLT Extension Instructions</a></p></li>
+    <li class="javaonly"><p><a class="bodylink" href="output-filters">Customizing Serialization</a></p></li>
     <li><p><a class="bodylink" href="collation">Collations</a></p></li>
-    <li><p class="javaonly"><a class="bodylink" href="localizing">Localizing Numbers and Dates</a></p></li>
+    <li class="javaonly"><p><a class="bodylink" href="localizing">Localizing Numbers and Dates</a></p></li>
     <li><p><a class="bodylink" href="uri-resolution">Resolving URIs</a></p></li>
   </ul>
   
@@ -61,10 +61,10 @@
     
   </section>
   
-  <section id="extension-functions-J" title="Extension Functions (Java)">
+  <section id="extension-functions-J" title="Extension Functions (Java)" class="javaonly">
     
       <h1>Writing Extension Functions in Java</h1>
-      <div class="javaonly">
+    
         <aside>The mechanisms described here work equally well for other JVM-based languages such as Scala.</aside>
         <p>Saxon provides three mechanisms for writing extension functions in Java:</p>
         <ul>
@@ -85,7 +85,7 @@
           in filestore). Unless the stylesheet or query is trusted, they should therefore be disabled: 
           see <a class="feature" href="ALLOW_EXTERNAL_FUNCTIONS">ALLOW_EXTERNAL_FUNCTIONS</a>.</p></li>
         </ul>
-      </div>
+      
      
       <section id="ext-simple-J" title="Simple Interface">
 
@@ -453,8 +453,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
           <code>getConfiguration()</code>.</p>
     </section>
       
-     <section id="reflexive-functions" title="Reflexive Extension Functions">
-    <div class="javaonly">
+    <section id="reflexive-functions" title="Reflexive Extension Functions" class="javaonly">
     <h1>Writing Reflexive Extension Functions in Java</h1>
 
     <aside>This section applies to Saxon-PE and Saxon-EE only</aside>
@@ -568,9 +567,8 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
     <nav>
       <ul/>
     </nav>
-    </div>
-    <section id="choosing-overload" title="Choosing among overloaded methods">
-      <div class="javaonly">
+    
+      <section id="choosing-overload" title="Choosing among overloaded methods" class="javaonly">
       <h1>Choosing among Overloaded Methods</h1>
 
 
@@ -858,11 +856,10 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></samp>
       <p>The fact that a particular method is chosen as the target does not give a guarantee that
         conversion of the arguments will succeed at run-time. This is particularly true with methods
         that expect a node in an external object model such as DOM or XOM.</p>
-      </div>
+      
     </section>
 
-    <section id="staticmethods" title="Calling Static Methods in a Java Class">
-      <div class="javaonly">
+      <section id="staticmethods" title="Calling Static Methods in a Java Class" class="javaonly">
       <h1>Calling Static Methods in a Java Class</h1>
 
 
@@ -917,11 +914,10 @@ public static int lineNumber(XPathContext c) {
       <samp><![CDATA[<line xmlns:nd="java:com.example.code.NodeData">
     { nd:line-number() }
 </line>]]></samp>
-      </div>
+      
     </section>
 
-    <section id="constructors" title="Calling Constructors">
-      <div class="javaonly">
+      <section id="constructors" title="Calling Constructors" class="javaonly">
       <h1>Calling Java Constructors</h1>
 
 
@@ -951,11 +947,10 @@ public static int lineNumber(XPathContext c) {
       <p>In the XPath type hierarchy, external object types are a fourth kind of item, alongside
         nodes, atomic values, and functions. (In earlier Saxon releases, external object types were
         considered subtypes of <code>xs:anyAtomicType</code>, but this is no longer the case.)</p>
-      </div>
+      
     </section>
 
-    <section id="instance-methods" title="Calling Java Instance-Level Methods">
-      <div class="javaonly">
+      <section id="instance-methods" title="Calling Java Instance-Level Methods" class="javaonly">
       <h1>Calling Java Instance-Level Methods</h1>
       
       <p>There are two ways of calling <strong>instance-level methods</strong>
@@ -1054,11 +1049,10 @@ public static int lineNumber(XPathContext c) {
         example) is implemented internally as an instance of the class defined in the namespace used
         to invoke the method. Using this mechanism successfully therefore requires some knowledge of
         the Saxon internals.</p>
-      </div>
+      
     </section>
   
-  <section id="converting-args" title="Converting the Arguments">
-    <div class="javaonly">
+      <section id="converting-args" title="Converting the Arguments" class="javaonly">
     <h1>Converting Arguments to Java Extension Functions</h1>
 
 
@@ -1086,9 +1080,8 @@ public static int lineNumber(XPathContext c) {
     <nav>
       <ul/>
     </nav>
-    </div>
-    <section id="converting-arguments" title="Converting Method Arguments - General Rules">
-      <div class="javaonly">
+    
+        <section id="converting-arguments" title="Converting Method Arguments - General Rules" class="javaonly">
       <h1>Converting Method Arguments - General Rules</h1>
 
 
@@ -1271,11 +1264,10 @@ public static int lineNumber(XPathContext c) {
         </ul>
       </li>
       </ol>
-      </div>
+      
     </section>
 
-    <section id="converting-atomic" title="Converting Atomic Values">
-      <div class="javaonly">
+        <section id="converting-atomic" title="Converting Atomic Values" class="javaonly">
       <h1>Converting Atomic Values</h1>
 
 
@@ -1574,11 +1566,10 @@ public static int lineNumber(XPathContext c) {
           (<code>Integer</code> or <code>Boolean</code>), except that with the boxed types, an empty
         sequence can be supplied in the function call and is translated to a Java null value as the
         actual argument.</p>
-        </div>
+        
     </section>
 
-    <section id="converting-node" title="Converting Nodes">
-      <div class="javaonly">
+        <section id="converting-node" title="Converting Nodes" class="javaonly">
       <h1>Converting Nodes</h1>
 
 
@@ -1608,11 +1599,10 @@ public static int lineNumber(XPathContext c) {
         going to have odd behaviour in edge cases. The only real reason for using it is to interface
         existing code that already uses the DOM. In general it is better to write extension functions
         to use the <code>NodeInfo</code> interface.</p>
-      </div>
+      
     </section>
 
-    <section id="converting-wrapped-java" title="Converting Wrapped Java Objects">
-      <div class="javaonly">
+        <section id="converting-wrapped-java" title="Converting Wrapped Java Objects" class="javaonly">
       <h1>Converting Wrapped Java Objects</h1>
 
 
@@ -1682,11 +1672,10 @@ public static int lineNumber(XPathContext c) {
         the same level in the type hierarchy as nodes, atomic values, and function items. Atomizing
         a wrapped Java object produces an instance of <code>xs:string</code> containing the
         result of the <code>toString()</code> method applied to the underlying object.</p>
-      </div>
+      
     </section>
   </section>
-    <section id="function-result" title="Converting the Result">
-      <div class="javaonly">
+      <section id="function-result" title="Converting the Result" class="javaonly">
       <h1>Converting the Result of a Java Extension Function</h1>
       
       <p>The result of a Java extension function is converted to an XDM value (a value suitable for use
@@ -1734,10 +1723,9 @@ public static int lineNumber(XPathContext c) {
         </li>
       </ul>
       
-      </div>
+      
     </section>
-  <section id="exceptions" title="Handling Exceptions">
-    <div class="javaonly">
+      <section id="exceptions" title="Handling Exceptions" class="javaonly">
     <h1>Handling exceptions in reflexive extension functions</h1>
 
 
@@ -1769,15 +1757,14 @@ public static int lineNumber(XPathContext c) {
     <p>Note that this applies to cases where the extension function is successfully called, and the
       called function throws an exception. Failures to invoke the extension function are mapped to
       Saxon error codes and the original Java exception is not directly available.</p>
-    </div>
+    
   </section> 
     
   </section>
   </section>
   
-  <section id="extension-functions-CS" title="Extension Functions (C#)">
+  <section id="extension-functions-CS" title="Extension Functions (C#)" class="csonly">
     <h1>Writing Extension Functions in C#</h1>
-    <div class="csonly">
     
     <aside>The same mechanisms can in principle be used with other languages in the .NET environment, such as
     VB.NET and F#.</aside>
@@ -1795,9 +1782,8 @@ public static int lineNumber(XPathContext c) {
     <aside>Reflexive extension functions are not available in Saxon-CS. There are several reasons for this:
     the security risks; the complexity of dynamic loading in the .NET environment; and the complexity
     of mapping C# data types to XPath data types.</aside>
-    </div>
-    <section id="ext-simple-N" title="Simple Interface">
-      <div class="csonly">
+    
+    <section id="ext-simple-N" title="Simple Interface" class="csonly">
         <h1>C# Extension Functions: Simple Interface</h1>
         
         <p>A simple extension function can be registered in Saxon-CS by calling the method</p>
@@ -1824,11 +1810,10 @@ public static int lineNumber(XPathContext c) {
         <p>The main restrictions of the simple interface are that the extension function has no
           access to static or dynamic context information. To avoid these restrictions, use the <a
             class="bodylink" href="../ext-fns-N">full interface</a> described on the next page.</p>
-      </div>
+      
     </section>
     
-    <section id="ext-fns-N" title="Full Interface">
-      <div class="csonly">
+    <section id="ext-fns-N" title="Full Interface" class="csonly">
         <h1>C# Extension Functions: Full Interface</h1>
         
         
@@ -1890,13 +1875,12 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
         
         
         <p>Full details of the interface are defined in the <a class="apilink" href="/dotnetdoc">.NET API documentation</a>.</p>
-      </div>
+      
     </section>
 
   </section>
  
-  <section id="java-to-xdm-conversion" title="Converting Java values to XDM values">
-    <div class="javaonly">
+  <section id="java-to-xdm-conversion" title="Converting Java values to XDM values" class="javaonly">
     <h1>Converting Java values to XDM values</h1>
     
     <p>This section describes the general rules applied by Saxon for converting Java values to
@@ -2134,7 +2118,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       Java object". The required type for a wrapped object of Java class <code>java.util.Map</code>
       is written using the QName <code>jt:java.util.Map</code>, where the namespace prefix
       <code>jt</code> represents the namespace <code>http://saxon.sf.net/java-type</code>.</p>
-    </div>
+    
     
   </section>
  
@@ -2142,8 +2126,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
 
     
  
-  <section id="instructions" title="Writing XSLT extension instructions">
-    <div class="javaonly">
+  <section id="instructions" title="Writing XSLT extension instructions" class="javaonly">
     <h1>Writing XSLT extension instructions</h1>
 
 
@@ -2334,7 +2317,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
     Saxon also supplies an <code>XPathContext</code> object which contains details of the dynamic context.
     This should not be modified, but can be used as the basis for creating a new dynamic context if required.</p>
     
-    </div>
+    
   </section>
  
 
@@ -2590,8 +2573,7 @@ Console.WriteLine("Square root of 2 is " + result);]]></samp>
       <xi:include href="extensibility/UCA.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
     </section>
 
-    <section id="localizing" title="Localizing numbers and dates">
-      <div class="javaonly">
+  <section id="localizing" title="Localizing numbers and dates" class="javaonly">
       <h1>Localizing numbers and dates</h1>
 
       <p>It is possible to define a <dfn>localized numbering</dfn> sequence for use by
@@ -2724,7 +2706,7 @@ config.setLocalizerFactory(new LocalizerFactory() {
           under any other recognized open source license that Saxon might adopt in the future.</i>
       </p>-->
         
-      </div>
+      
 
       <xi:include href="extensibility/locales-ICU-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
       <xi:include href="extensibility/other-numbering.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>

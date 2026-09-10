@@ -435,13 +435,17 @@
         <xsl:for-each select="$maindiv//*[@class='csonly']">
             <ixsl:set-style name="display" 
                 select="if (ixsl:get($csswitch,'checked')) 
-                then if (self::tr) then 'table-row' else 'block' 
+                then if (self::tr) then 'table-row' 
+                else if (self::li) then 'list-item'
+                else 'block' 
                 else 'none'"/>
         </xsl:for-each>
         <xsl:for-each select="$maindiv//*[@class='javaonly']">
             <ixsl:set-style name="display" 
                 select="if (ixsl:get($javaswitch,'checked')) 
-                then if (self::tr) then 'table-row' else 'block' 
+                then if (self::tr) then 'table-row' 
+                else if (self::li) then 'list-item'
+                else 'block' 
                 else 'none'"/>
         </xsl:for-each>
         

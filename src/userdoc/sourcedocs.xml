@@ -34,11 +34,11 @@
       as follows:</p>
       
       <ul>
-        <li><p class="javaonly">On Java, the <code>URIResolver</code> is called, and returns
+        <li class="javaonly"><p>On Java, the <code>URIResolver</code> is called, and returns
           a JAXP <code>Source</code> object; if a user-written
           <code>URIResolver</code> is nominated (using the <code>-r</code> option) then this may
           translate the file name into a <code>Source</code> object any way that it wishes.</p></li>
-        <li><p class="csonly">On .NET, it is not currently possible to nominate an <code>XmlResolver</code>
+        <li class="csonly"><p>On .NET, it is not currently possible to nominate an <code>XmlResolver</code>
           when running from the command line; the default Saxon-supplied <code>XmlResolver</code> is used.</p></li>
       </ul>
 
@@ -82,7 +82,7 @@
       <li><p>If the collection URI
         corresponds to a directory name, then a directory-based collection is used: the collection contains
       selected files from the named directory.</p></li>
-      <li><p class="javaonly">If the collection URI identifies a
+      <li class="javaonly"><p>If the collection URI identifies a
         ZIP or JAR file (for details see below) then a zip-based collection is used.</p>
         
       </li>
@@ -362,8 +362,8 @@
         <code>collection()</code> with the same absolute URI return this saved collection retrieved
       from this cache. </p>
 
-    <h2 class="subtitle">Processing ZIP and JAR files</h2>
 <div class="javaonly">
+    <h2 class="subtitle">Processing ZIP and JAR files</h2>
     <p>If the collection URI identifies a ZIP or JAR file then it is processed in exactly the same
       way as a directory. URI query parameters can be used in the same way, and have much the same
       effect.</p>
@@ -421,11 +421,11 @@
       <p>The details differ between Java and .NET:</p>
       
       <ul>
-        <li><p class="javaonly">On Java, the <code>CollectionFinder</code> is a functional
+        <li class="javaonly"><p>On Java, the <code>CollectionFinder</code> is a functional
         interface, so you can either write a class that implements the interface, or you can
         supply an implementation directly as a lambda expression. It accepts a URI as input
         (supplied as a string), and returns an instance of <code>ResourceCollection</code>.</p>
-          <p class="javaonly">You can either reuse the existing implementations of <a class="javalink"
+          <p>You can either reuse the existing implementations of <a class="javalink"
             href="net.sf.saxon.lib.ResourceCollection">ResourceCollection</a>, such as
             <code>CatalogCollection</code>, <code>DirectoryCollection</code>, 
             <code>JarCollection</code>, and <code>ExplicitCollection</code>
@@ -436,7 +436,7 @@
             returns a sequence of URIs. These are invoked by the <a class="bodylink code"
               href="/functions/fn/collection" >fn:collection()</a> and <a class="bodylink code"
                 href="/functions/fn/uri-collection" >fn:uri-collection()</a> functions respectively.</p>
-          <p class="javaonly">Again, you can either reuse existing implementations of <a class="javalink"
+          <p>Again, you can either reuse existing implementations of <a class="javalink"
             href="net.sf.saxon.lib.Resource">Resource</a> (such as <code>XmlResource</code>,
             <code>JSONResource</code>, <code>UnparsedTextResource</code>,
             <code>BinaryResource</code>, and <code>MetadataResource</code>), or you can create your
@@ -445,35 +445,35 @@
             It is good practice to delay any extensive work such as parsing until the
             <code>getItem()</code> method is called: this reduces the memory footprint, and enables
             parallel evaluation of multiple threads (Saxon-EE only).</p>
-          <p class="javaonly">For example, a <code>CollectionFinder</code> written to handle collection URIs using the
+          <p>For example, a <code>CollectionFinder</code> written to handle collection URIs using the
             scheme name "sql" might be supplied as:</p>
           <samp><![CDATA[config.setCollectionFinder((context, uri) -> 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
       : config.getStandardCollectionFinder().findCollection(context, uri)
 )]]></samp>
-          <p class="javaonly">where <code>sqlCollection(uri)</code> returns some user-defined implementation
+          <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
             of <code>ResourceCollection</code>, perhaps one that retrieves XML documents from
             a relational database.</p>
         </li>
-        <li>
-          <p class="csonly">On .NET, the <code>CollectionFinder</code> is a delegate
+        <li class="csonly">
+          <p>On .NET, the <code>CollectionFinder</code> is a delegate
             so you will typically implement it directly as a lambda expression. It accepts a URI as input
             (supplied as a string), and returns an instance of <code>IEnumerable&lt;IResource&gt;</code>.</p>
-            <p class="csonly">You can either reuse the existing implementations of <code>IResource</code>,
+            <p>You can either reuse the existing implementations of <code>IResource</code>,
               or you can write your own. The key method that the <code>IResource</code> object must
               provide is <code>GetItem()</code> which returns the resource in the form of an XDM item.
               It is good practice to delay any extensive work such as parsing until the
               <code>GetItem()</code> method is called: this reduces the memory footprint, and enables
               parallel evaluation of multiple threads.</p>
-            <p class="csonly">For example, a <code>CollectionFinder</code> written to handle collection URIs using the
+            <p>For example, a <code>CollectionFinder</code> written to handle collection URIs using the
               scheme name "sql" might be supplied as:</p>
             <samp><![CDATA[processor.CollectionFinder = uri => 
    uri.startsWith('sql:') 
       ? sqlCollection(uri) 
       : config.getStandardCollectionFinder().findCollection(context, uri)
 )]]></samp>
-            <p class="javaonly">where <code>sqlCollection(uri)</code> returns some user-defined implementation
+            <p>where <code>sqlCollection(uri)</code> returns some user-defined implementation
               of <code>IEnumerable&lt;IResource</code>, perhaps one that retrieves XML documents from
               a relational database.</p>
         </li>
@@ -503,7 +503,8 @@
       are represented using the JAXP <code>Source</code> object. This is a JAXP interface designed
     as an abstraction of various kinds of XML source, including:</p>
       
-    <ul class="javaonly">
+    <div class="javaonly">
+    <ul>
       <li><code>StreamSource</code>, which represents lexical XML
         held in a file or input stream</li>
       <li><code>SAXSource</code>, which represents a source of SAX events</li>
@@ -515,6 +516,7 @@
       <code>deliver()</code>, which delivers the contents of the resource to a Saxon <code>Receiver</code></li>
       <li><code>NodeInfo</code>, representing a node in an XDM tree, implements <code>ActiveSource</code>.</li>
     </ul>
+    </div>
      <p>In addition, the s9api <a class="javalink"
         href="net.sf.saxon.s9api.XdmNode">XdmNode</a> class has an <code>asSource()</code> method,
       so it is always possible to supply an existing Saxon tree as the source for any of these interfaces.</p>
@@ -522,14 +524,15 @@
     <p class="csonly">On .NET, the <code>DocumentBuilder</code> has an overloaded <code>Build</code> method
     allowing input to be supplied from:</p>
     
-    <ul class="csonly">
+    <div class="csonly">
+    <ul>
       <li>A <code>Stream</code> (containing lexical XML as a stream of bytes)</li>
       <li>A <code>TextReader</code> (containing lexical XML as a stream of characters)</li>
       <li>A <code>Uri</code> (which can be dereferenced to fetch a stream of bytes)</li>
       <li>An <code>XmlNode</code> (Microsoft's DOM implementation)</li>
       <li>An <code>XmlReader</code> (An XML parser, primed with a source of input)</li>
     </ul>
-    
+    </div>
     
 
     <p>All the documents processed in a single transformation or query must be loaded using the same
@@ -567,8 +570,8 @@
     without modifying the input objects. This means that adding a child element to a new parent can be done without an expensive
     copy operation. Nodes do not have references to their parents in the tree, so a subtree can be shared by multiple trees
     without copying.</p>
-    </div>
     <p>The Sapling Tree API is described in the JavaDoc for class <code java="net.sf.saxon.sapling.SaplingNode">SaplingNode</code>.</p>
+    </div>
     
     <div class="javaonly">
     <h2 class="subtitle">Event APIs</h2>
@@ -823,10 +826,9 @@
   
 </div>
   </section>
-  <section id="input-filters" title="Writing input filters">
+  <section id="input-filters" title="Writing input filters" class="javaonly">
     <h1>Writing input filters</h1>
 
-<div class="javaonly">
     <p>Saxon can take its input from a JAXP <code>SAXSource</code> object, which essentially
       represents a sequence of SAX events representing the output of an XML parser. A very useful
       technique is to interpose a <i>filter</i> between the parser and Saxon. The filter will
@@ -867,12 +869,12 @@
       of source file, so long as it presents it in the form of a stream of SAX events. When using
       the JAXP API, the equivalent to the <code>-x</code> option is to set the configuration property 
       <a class="feature" href="SOURCE_PARSER_CLASS"/>.</p>
-</div>
+
   </section>
   <section id="XInclude" title="XInclude processing">
     <h1>XInclude processing</h1>
 
-    <div  class="javaonly">
+    <div class="javaonly">
     <p>If you are using Xerces as your XML parser, you can have Xerces expand any XInclude
       directives.</p>
 
@@ -942,8 +944,8 @@
         <p>On the Java platform, the default SAX parser provided as part of the JDK is used. With
           the Sun/Oracle JDK, this is a variant of the Apache Xerces parser customized by Sun.</p>
       </li>
-      <li>
-        <p class="csonly">On the .NET platform, Saxon uses the <code>System.Xml.XmlReader</code>
+      <li class="csonly">
+        <p>On the .NET platform, Saxon uses the <code>System.Xml.XmlReader</code>
         parser family.</p>
       </li>
     </ul>
@@ -1156,8 +1158,7 @@
     
     
   </section>
-  <section id="jaxpsources" title="JAXP Source Types">
-    <div class="javaonly">
+  <section id="jaxpsources" title="JAXP Source Types" class="javaonly">
     <h1>JAXP Source Types</h1>
 
 
@@ -1282,11 +1283,10 @@
       recognize into a <code>Source</code> that it does recognize. For example, this may be done by
       building the document tree in memory and returning the <a class="javalink"
         href="net.sf.saxon.om.NodeInfo">NodeInfo</a> object representing the root of the tree.</p>
-    </div>
+    
   </section>
   <section id="thirdparty"
-    title="Third-party Object Models: Axiom, DOM, JDOM2, XOM, and DOM4J">
-    <div class="javaonly">
+    title="Third-party Object Models: Axiom, DOM, JDOM2, XOM, and DOM4J" class="javaonly">
     <h1>Third-party Object Models: Axiom, DOM, JDOM2, XOM, and DOM4J</h1>
 
 
@@ -1379,7 +1379,7 @@
       None of the external object models support typed
       (schema-validated) data, and none support in-situ update using XQuery updates.</p>
       
-    </div>
+    
   </section>
   <section id="choosingmodel" title="Choosing a Tree Model">
     <h1>Choosing a Tree Model</h1>
@@ -1422,8 +1422,7 @@
       <i>If in doubt, stick with the default.</i>
     </p>
   </section>
-  <section id="domino" title="The Domino Tree Model">
-    <div class="javaonly">
+  <section id="domino" title="The Domino Tree Model" class="javaonly">
     <h1>The Domino Tree Model</h1>
     <p>The Domino tree model was introduced in Saxon 9.8 and is available in Saxon-EE only. It is a new approach
     to the handling of DOM source trees.</p>
@@ -1440,7 +1439,7 @@
     <p>The Domino model must not be used with a DOM tree that is subject to update, other than changes to the values of
     attribute or text nodes, which might work (but are still best avoided). Saxon has no way of preventing or detecting
     updates, so these will generally cause catastrophic failure.</p>
-    </div> 
+     
   </section>
 
   <section id="validation" title="Validation of Source Documents">

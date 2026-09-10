@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<article id="sql-extension" title="Saxon SQL Extension" class="javaonly">
+<article id="sql-extension" title="Saxon SQL Extension">
    <h1>Saxon SQL Extension</h1>
    
    <p class="csonly">Not available in Saxon-CS.</p>
@@ -53,8 +53,7 @@
       trusted.</p>
    </div>
 
-   <section id="instructions" title="SQL extension instructions">
-      <div class="javaonly">
+   <section id="instructions" title="SQL extension instructions" class="javaonly">
       <h1>SQL extension instructions</h1>
       <p>To use the SQL extension in a stylesheet, you need to define a namespace prefix (for
          example <code>sql</code>) in the <code>extension-element-prefixes</code> attribute of the
@@ -85,9 +84,8 @@
       <p>See the <a class="bodylink" href="example">Example</a> for an example of the use of these
          SQL extension elements. </p>
 
-      </div>
-      <section id="connect" title="sql:connect">
-         <div class="javaonly">
+      
+      <section id="connect" title="sql:connect" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">connect</name>
             <element-syntax name="connect">
@@ -150,10 +148,9 @@
                   attribute is an expression that returns a database connection object.</p>
             </details>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="query" title="sql:query">
-         <div class="javaonly">
+      <section id="query" title="sql:query" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">query</name>
             <element-syntax name="query">
@@ -233,10 +230,9 @@
                   the column names in the database where available).</p>
             </details>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="insert" title="sql:insert">
-         <div class="javaonly">
+      <section id="insert" title="sql:insert" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">insert</name>
             <element-syntax name="insert">
@@ -269,10 +265,9 @@
                   the required data type if possible. </p>
             </details>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="update" title="sql:update">
-         <div class="javaonly">
+      <section id="update" title="sql:update" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">update</name>
             <element-syntax name="update">
@@ -313,10 +308,9 @@
                   the required data type (the declared type of the column) if possible. </p>
             </details>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="column" title="sql:column">
-         <div class="javaonly">
+      <section id="column" title="sql:column" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">column</name>
             <element-syntax name="column">
@@ -339,10 +333,9 @@
             <see-also name="insert" type="sql-extension" subtype="instructions"/>
             <see-also name="update" type="sql-extension" subtype="instructions"/>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="delete" title="sql:delete">
-         <div class="javaonly">
+      <section id="delete" title="sql:delete" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">delete</name>
             <element-syntax name="delete">
@@ -372,10 +365,9 @@
                   selected from a given table and deleted. </p>
             </description>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="close" title="sql:close">
-         <div class="javaonly">
+      <section id="close" title="sql:close" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">close</name>
             <element-syntax name="close">
@@ -399,10 +391,9 @@
                   database query might not be finished until the contents of the variable have actually been read.</p>
             </details>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="execute" title="sql:execute">
-         <div class="javaonly">
+      <section id="execute" title="sql:execute" class="javaonly">
          <saxon-element xmlns="http://www.saxonica.com/ns/doc/elements">
             <name namespace="http://saxon.sf.net/sql">execute</name>
             <element-syntax name="execute">
@@ -426,10 +417,9 @@
                <p>Allows arbitrary SQL statements to be executed. No result is returned.</p>
             </description>
          </saxon-element>
-         </div>
+         
       </section>
-      <section id="example" title="Example">
-         <div class="javaonly">
+      <section id="example" title="Example" class="javaonly">
          <h1>SQL extension instructions example</h1>
 
 
@@ -591,7 +581,7 @@
                </ul>
             </li>
          </ol>
-         </div>
+         
       </section>
    </section>
 </article>

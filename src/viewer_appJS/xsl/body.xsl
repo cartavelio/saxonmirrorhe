@@ -12,7 +12,7 @@
         <xsl:if test="exists($title)">
             <ixsl:set-property name="document.title" select="concat('Saxon ', $title)"/>
         </xsl:if>
-        <xsl:apply-templates mode="secondary"/>
+        <xsl:apply-templates select="." mode="post-primary"/>
     </xsl:template>
 
     <xsl:template match="node()|@*" mode="secondary">
@@ -20,8 +20,19 @@
             <xsl:apply-templates select="node()|@*" mode="secondary"/>
         </xsl:copy>
     </xsl:template>
+    
+    <xsl:template match="section[@class]|article[@class]" mode="post-primary">
+        <div class="{@class}">
+            <xsl:apply-templates mode="secondary"/>
+        </div>
+    </xsl:template>
 
+    <xsl:template match="section|article" mode="post-primary">
+        <xsl:apply-templates mode="secondary"/>
+    </xsl:template>
+    
     <xsl:template match="section|article" mode="secondary"/>
+    
     
     <xsl:template match="article[@id='functions']|article[@id='functions']/section" mode="primary" priority="10">
         <xsl:apply-templates select="." mode="function-list"/>

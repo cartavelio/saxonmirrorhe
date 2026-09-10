@@ -19,7 +19,7 @@
 
     <xsl:template match="article|section[h1]">
         <xsl:copy>
-            <xsl:sequence select="@id|@title"/>
+            <xsl:sequence select="@id|@title|@class"/>
             <xsl:comment>Generated - <xsl:value-of select="current-dateTime()"/> 
                 <xsl:if test="$id='xsl-elements'"> from src/elements/xsl-elements-expanded.xml, which is itself generated from src/userdoc/elements/xsl-elements.xml (the editable version)</xsl:if>
                 <xsl:if test="$id='instructions'"> from src/userdoc/extensions/instructions.xml (the editable version)</xsl:if>    

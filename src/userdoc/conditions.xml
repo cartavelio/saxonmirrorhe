@@ -56,10 +56,9 @@
   </ul>
 
   
-
+  <div class="javaonly">
   <h2 class="subtitle">Saxon-HE</h2>
   
-  <div class="javaonly">
   <p>The open-source Saxon-HE product is made available under the <dfn>Mozilla Public License</dfn>
     (the "License"). Prior to Saxon 9.5 MPL Version 1.0 was used; from 9.5 onwards, MPL Version 2.0
     is used. You may not use the software except as permitted by the License. You may obtain a copy
@@ -112,8 +111,8 @@
     reinforced by the decision on Google LLC v. Oracle America, Inc.)</p></aside>
   </div>
 
+  <div class="javaonly">
   <h2 class="subtitle">Saxon-EE and Saxon-PE on Java</h2>
-    <div class="javaonly">
       <p>The Enterprise and Professional editions of Saxon are commercial products released under the
         terms and conditions published at <a href="http://www.saxonica.com/license/paid-license.pdf"
           class="bodylink">http://www.saxonica.com/license/paid-license.pdf</a>.</p>
@@ -124,9 +123,9 @@
         Although your contract with Saxonica is
         entirely defined by the commercial license, the existence of an open source license for these
         components gives you additional rights, which are described above.</p>
-    </div>
+  </div>
+  <div class="csonly">
   <h2 class="subtitle">Saxon-CS</h2>
-    <div class="csonly">
     <p>Saxon-CS is a commercial Saxonica product built from the following components:</p>
     
     <ol>
@@ -156,9 +155,9 @@
     </ol>
   </div>
   
-  <h2 class="subtitle">The Saxon SQL extension</h2>
 
   <div class="javaonly">
+  <h2 class="subtitle">The Saxon SQL extension</h2>
     <p>The <a href="/sql-extension" class="bodylink">Saxon SQL extension</a> is available as an
     open-source plug-in to Saxon-PE or Saxon-EE (on the Java platform only, not available on the
     .NET platform). It will not run with Saxon-HE because it relies on XSLT element extensibility, a

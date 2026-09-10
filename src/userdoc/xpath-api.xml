@@ -38,7 +38,6 @@
    </div>
    
    <div class="csonly">
-      
    <ul>
       <li>
          <p>On .NET, XPath processing is available via classes in the Saxon.Api namespace,
@@ -52,9 +51,9 @@
       XML (the tiny tree and linked tree), and also against trees built using external third-party libraries:</p>
    
    <ul>
-      <li><p class="javaonly">On the Java platform, the supported tree models are DOM, JDOM, JDOM2,
+      <li class="javaonly"><p>On the Java platform, the supported tree models are DOM, JDOM, JDOM2,
          DOM4J, XOM, or AXIOM.</p></li>
-      <li><p class="csonly">On .NET, the DOM implementation provided by the System.Xml.XmlDocument class
+      <li class="csonly"><p>On .NET, the DOM implementation provided by the System.Xml.XmlDocument class
          is supported.</p></li>
    </ul>
    
@@ -193,10 +192,10 @@
       
       <p>A variety of methods are provided to convert between these classes and "ordinary" Java or C# equivalents. For example:</p>
       <ul>
-         <li><p class="javaonly">In Java, an <code>XdmAtomicValue</code> can be constructed directly from a Java C# <code>boolean</code>, <code>String</code>, <code>long</code>, 
+         <li class="javaonly"><p>In Java, an <code>XdmAtomicValue</code> can be constructed directly from a Java C# <code>boolean</code>, <code>String</code>, <code>long</code>, 
             <code>BigDecimal</code>, or <code>Instant</code> (inter alia), and methods such as <code>getBooleanValue()</code>
             and <code>getStringValue()</code> are available to convert in the other direction.</p></li>
-         <li><p class="csonly">In C#, an <code>XdmAtomicValue</code> can be constructed directly from a C# <code>bool</code>, <code>string</code>, <code>long</code>, 
+         <li class="csonly"><p>In C#, an <code>XdmAtomicValue</code> can be constructed directly from a C# <code>bool</code>, <code>string</code>, <code>long</code>, 
             <code>decimal</code>, or <code>DateTime</code> (inter alia), and methods such as <code>AsBoolean()</code>
             and <code>AsDouble()</code> are available to convert in the other direction.</p></li>
       </ul>
@@ -224,8 +223,7 @@
          is designed primarily for internal use within Saxon, whereas <code>XdmNode</code> is designed for application use.</p>
    </section>
    
-   <section id="s9api-xpath" title="Evaluating XPath Expressions using s9api">
-      <div class="javaonly">
+   <section id="s9api-xpath" title="Evaluating XPath Expressions using s9api" class="javaonly">
       <h1>Evaluating XPath Expressions using s9api</h1>
       
 
@@ -305,11 +303,10 @@
          to find a specific element within a document, it is possible to use the Java expression
          <code>node.select(descendant("chapter").where(eq(attribute("title"),"Introduction)")).asNode()</code>.</p>
       </aside>
-      </div>
+      
    </section>
    
-   <section id="jaxp-xpath" title="JAXP XPath API">
-      <div class="javaonly">
+   <section id="jaxp-xpath" title="JAXP XPath API" class="javaonly">
       <h1>JAXP XPath API</h1>
 
 
@@ -353,9 +350,8 @@
       <nav>
          <ul/>
       </nav>
-      </div>
-      <section id="factory" title="Selecting the XPath implementation">
-         <div class="javaonly">
+      
+      <section id="factory" title="Selecting the XPath implementation" class="javaonly">
          <h1>Selecting the XPath implementation</h1>
          
          <aside><p>The JAXP API is designed on the basis that when your application invokes
@@ -409,13 +405,12 @@ XPath xpath = xpathFactory.newXPath();
             further details, see the Javadoc specifications and the supplied example applications
             (as described in <a class="bodylink" href="/xpath-api/jaxp-xpath">JAXP XPath
             API</a>).</p>
-         </div>
+         
       </section>
       
 
 
-      <section id="context-node" title="Setting the context item">
-         <div class="javaonly">
+      <section id="context-node" title="Setting the context item" class="javaonly">
          <h1>Setting the JAXP context item</h1>
 
 
@@ -435,11 +430,10 @@ XPath xpath = xpathFactory.newXPath();
             to create, given that Saxon supports multiple object models. Instead, if null is
             supplied, the expression is evaluated with the context item undefined (which will cause
             a dynamic error if the expression actually refers to the context item).</p>
-         </div>
+         
       </section>
       
-      <section id="setting-xpath-variables" title="Setting XPath Variables">
-         <div class="javaonly">
+      <section id="setting-xpath-variables" title="Setting XPath Variables" class="javaonly">
          <h1>Setting XPath Variables</h1>
          
          <p>An XPath expression supplied to the JAXP XPath API can contain undeclared variables, for 
@@ -453,11 +447,10 @@ XPath xpath = xpathFactory.newXPath();
          <p>The Java value returned by the <code>VariableResolver</code> is converted to an XDM
             value using the rules described at <a class="bodylink"
                href="/extensibility/java-to-xdm-conversion">Converting Java values to XDM values</a>.</p>
-         </div>
+         
       </section>
 
-      <section id="return-types" title="Return types">
-         <div class="javaonly">
+      <section id="return-types" title="Return types" class="javaonly">
          <h1>Return types</h1>
 
 
@@ -512,11 +505,10 @@ XPath xpath = xpathFactory.newXPath();
             are necessary, do them within the XPath expression itself, using casts or constructor
             functions. The Java object that is returned will be a representation of the XPath value,
             converted in the same way as arguments to a extension functions.</p>
-         </div>
+         
       </section>
 
-      <section id="saxon-additions" title="Additional Saxon methods">
-         <div class="javaonly">
+      <section id="saxon-additions" title="Additional Saxon methods" class="javaonly">
          <h1>Additional Saxon methods</h1>
 
 
@@ -539,11 +531,10 @@ XPath xpath = xpathFactory.newXPath();
             display, and <code>getStringValue()</code> gets the string value of the node, as defined
             in the XPath data model. You can also use the node as the context node for evaluation of
             subsequent expressions.</p>
-         </div>
+         
       </section>
 
-      <section id="jaxp-xpath-extension-functions" title="Calling JAXP XPath extension functions">
-         <div class="javaonly">
+      <section id="jaxp-xpath-extension-functions" title="Calling JAXP XPath extension functions" class="javaonly">
          <h1>Calling JAXP XPath extension functions</h1>
 
 
@@ -569,12 +560,11 @@ XPath xpath = xpathFactory.newXPath();
             using the rules given at <a class="bodylink" href="/extensibility/java-to-xdm-conversion">Converting Java values to
                XDM values</a>.</p>
          
-         </div>
+         
       </section>
    </section>
    
-   <section id="dotnet-xpath" title="Evaluating XPath Expressions from C#">
-      <div class="csonly">
+   <section id="dotnet-xpath" title="Evaluating XPath Expressions from C#" class="csonly">
          <h1>Evaluating XPath Expressions from C#</h1>
          
          
@@ -647,7 +637,7 @@ XPath xpath = xpathFactory.newXPath();
             <code>saxon-resources</code> file, see module <code>Examples.cs</code>.</p>
          
          
-      </div>
+      
    </section>
    
    

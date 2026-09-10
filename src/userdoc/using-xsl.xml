@@ -44,7 +44,7 @@
          stylesheet, and the output file respectively.</p>
 
       <p>For a schema-aware transformation, specify the option <code>-sa</code>. For more
-         details see <a class="bodylink" href="/schema-processing/satransformcmd">Schema-Aware
+         details see <a class="bodylink" href="/schema-processing/schema-aware-qt/satransformcmd">Schema-Aware
             Transformations</a>.</p>
 
       <p>For backwards compatibility with previous releases, the prefixes <code>-s:</code> and
@@ -1006,10 +1006,9 @@
       </section>
    </section>
 
-   <section id="embedding" title="From a Java Application" >
+   <section id="embedding" title="From a Java Application" class="javaonly">
       <h1>Running XSLT Transformations from a Java Application</h1>
 
-      <div class="javaonly">
       <p>Rather than running XSLT transformations from the command line, you may want to invoke
          transformations from your own application, perhaps one that runs within a web-based
          application server. If you use Saxon repeatedly to perform multiple transformations, this
@@ -1082,12 +1081,11 @@
       <p>For more information on using this API to invoke the Saxon XSLT processor, see <a
             href="s9api-transformation" class="bodylink">Using s9api for Transformations</a>.</p>
 
-      </div>
+      
 
-      <section id="s9api-transformation" title="Using s9api for Transformations">
+      <section id="s9api-transformation" title="Using s9api for Transformations" class="javaonly">
          <h1>Using s9api for Transformations</h1>
 
-         <div class="javaonly">
          <p>You can perform a transformation using the s9api interface as follows:</p>
          <ol>
             <li>
@@ -1210,13 +1208,12 @@
    out.setOutputProperty(Serializer.Property.INDENT, "yes");
    Xslt30Transformer transformer = stylesheet.load30();
    transformer.transform(new StreamSource(new File("data/books.xml")), out);]]></samp>
-         </div>  
+           
       </section>
 
-      <section id="jaxp-transformation" title="Using JAXP for Transformations">
+      <section id="jaxp-transformation" title="Using JAXP for Transformations" class="javaonly">
          <h1>Using JAXP for Transformations</h1>
 
-         <div class="javaonly">
          <p>This API is described in the documentation provided with JDK 1.5 and later. It is
             available online at <a href="http://download.oracle.com/javase/6/docs/api/"
                class="bodylink">http://download.oracle.com/javase/6/docs/api/</a>. Look for the <a
@@ -1373,12 +1370,11 @@
                >net.sf.saxon.lib.SaxonOutputKeys</a>. The values of the properties are exactly as
             you would specify them in the <code>xsl:output</code> declaration, except that QNames
             are written in Clark notation (<code>{uri}local</code>).</p>
-         </div>
+         
       </section>
    </section>
    
    <section id="Saxon-Api-transformation" title="From a C# Application" class="csonly">
-      <div class="csonly">
       <h1>Running XSLT Transformations from C#</h1>
       
       
@@ -1580,14 +1576,13 @@
    transformer.ApplyTemplates(input, serializer);
 
    Console.WriteLine("\nOutput written to " + outfile + "\n");]]></samp>
-      </div>   
+         
    </section>
    
-   <section id="xsltfromant" title="From Ant">
+   <section id="xsltfromant" title="From Ant" class="javaonly">
 
       <h1>Running Saxon XSLT Transformations from Ant</h1>
       
-      <div class="javaonly">
       <p>It is possible to run a Saxon transformation from Ant using the standard <a
          href="http://ant.apache.org/manual/Tasks/style.html" class="bodylink">xslt task</a>, by
          using the <code>trax</code> processor and with an appropriate <code>classpath</code> that
@@ -1661,7 +1656,7 @@
          that the Jar files needed to run Saxon are present on the externally-specified classpath
          (the classpath at the point where Ant is invoked), rather than relying on the task-specific
          classpath.</p>
-      </div>
+      
    </section>
    
 
