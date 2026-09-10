@@ -8306,7 +8306,7 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
                  return map:entry($key, $item) ) 
 };</code></pre>
 
-          <p>For further information about maps see <a class="bodylink" href="/expressions/types/xpath30maps">Maps in XPath</a>.</p>
+          <p>For further information about maps see <a class="bodylink" href="/expressions/primary/maps">Maps</a>.</p>
         </div>
       </details>
     </function>

@@ -15,7 +15,7 @@
   <section ref="localization">Localization</section>
   <section ref="extensibility">Extensibility mechanisms</section>
   <section ref="extensions">Saxon extensions</section>
-  <section ref="v4extensions">Experimental 4.0 extensions</section>
+  <section ref="v4extensions">QT4 extensions</section>
   <section ref="samples">Sample Saxon applications</section>
   <section ref="sql-extension">Saxon SQL extension</section>
   <section ref="xsl-elements">Reference: XSLT elements</section>

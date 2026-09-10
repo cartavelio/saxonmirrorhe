@@ -695,11 +695,11 @@ TODO: rethink redefines and override
             <li><p>The ternary conditional expression <code>test ?? A !! B</code>.</p></li>
             <li><p>Record tests using the keyword "tuple" rather than "record".</p></li>
             <li><p>Item types of the form "atomic(X)"</p></li>
-            <li><p>Lambda expressions of the form <code>($a, $b) -> {$a + $b}</code></p></li>
             <li><p>The syntax <code>type(T)</code> is dropped. A type alias <code>T</code> is now referenced simply
                     as <code>T</code>, not <code>type(T)</code>. In XSLT patterns, a match for items
-                    of type <code>T</code> is written <code>match="~T</code> rather than
-                    <code>match="type(T)"</code>.</p></li>
+                    of type <code>T</code> is written <code>match="~T"</code> rather than
+                <code>match="type(T)"</code>.</p></li>
+            <li><p>Lambda expressions of the form <code>($a, $b) -> {$a + $b}</code></p></li>
             <li><p>The "thin arrow" notation for inline functions (<code>->{.+1}</code> or
             <code>->($x){$x+1}</code>). These are now written <code>fn{.+1}</code> or
             <code>fn($x){$x+1}</code> respectively.</p></li>

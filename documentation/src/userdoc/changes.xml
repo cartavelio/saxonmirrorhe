@@ -799,7 +799,7 @@
         <aside>XSLT 3.0 features are available only if XSLT 3.0 support is explicitly requested, for example by specifying
         <code>-xsltversion:3.0</code> on the command line.</aside>
              
-        <p xmlns="">Maps, as defined in the draft XSLT 3.0 specification, are implemented as an extension to XPath 3.0. For details see <a href="/expressions/types/xpath30maps">Maps in XPath 3.0</a>.</p>     
+        <p xmlns="">Maps, as defined in the draft XSLT 3.0 specification, are implemented as an extension to XPath 3.0.</p>     
         
         <p xmlns="">The <code>xsl:merge</code> instruction is implemented.</p>
         

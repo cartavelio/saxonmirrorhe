@@ -638,9 +638,33 @@
                     in the sequence that do not match the item type <code>record(value, *)</code>
                     (that is, a map having an entry whose key is the string "value"). Any other
                     entries in the map are ignored.</p>
-                <p>For more information, see <a class="bodylink"
-                        href="/v4extensions/xslt-syntax-extensions/creating-arrays">Creating
-                        arrays</a>.</p>
+                
+                <p>TODO FIXME: the following is to be integrated here. It moved from
+                    /v4extensions/xslt-syntax-extensions/creating-arrays </p>
+                <p>There are two forms of the instruction.</p>
+                
+                <ul>
+                    <li>
+                        <p>To create a simple array in which every member is a singleton item, use
+                            <code>&lt;xsl:array composite="no"></code> (this is the default so the
+                            attribute can be omitted). Every item delivered by the sequence constructor then
+                            becomes an individual member of the array.</p>
+                    </li>
+                    <li>
+                        <p>To create an array in which some members might be non-singleton sequences, use
+                            <code>&lt;xsl:array composite="yes"></code>. In this case every item delivered
+                            by the sequence constructor must be a <i>parcel</i>. A parcel is an item of type
+                            <code>record(value, *)</code>, that is, a map containing an entry whose key is
+                            the string "value", and whose corresponding value is an arbitrary sequence. This
+                            sequence is used as the value of the array member.</p>
+                        <p>It's often convenient to construct a parcel using the <a class="bodylink code"
+                            href="/xsl-elements/array-member">xsl:array-member</a> instruction, but that's
+                            not the only way to do it. You could also do it, for example, by calling
+                            <code>fn:parcel()</code>. Or you could decompose an existing array into parcels
+                            using the function <code>array:members</code>, and use some of those parcels to
+                            form the new array.</p>
+                    </li>
+                </ul>
 
             </details>
             <in-spec>xslt40</in-spec>
@@ -682,9 +706,6 @@
                 <p>The intended usage is to deliver a single member of an array being constructed
                     using <code>&lt;xsl:array composite="yes"&gt;</code>. However, the result of the
                     instruction is well-defined whether or not it is used in this way.</p>
-                <p>For more information, see <a class="bodylink"
-                        href="/v4extensions/xslt-syntax-extensions/creating-arrays">Creating
-                        arrays</a>.</p>
 
             </details>
             <in-spec>xslt40</in-spec>
