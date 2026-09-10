@@ -204,7 +204,7 @@ public class UncommittedSerializer extends ProxyReceiver {
     @Override
     public void append(Item item, Location locationId, int copyNamespaces) throws XPathException {
         if (item instanceof NodeInfo) {
-            ((NodeInfo) item).copy(this, CopyOptions.ALL_NAMESPACES, locationId);
+            ((NodeInfo) item).copy(this, CopyOptions.ALL_NAMESPACES | CopyOptions.TYPE_ANNOTATIONS, locationId);
         } else {
             if (!committed) {
                 switchToMethod("xml");

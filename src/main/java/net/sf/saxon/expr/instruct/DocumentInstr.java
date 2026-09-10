@@ -8,10 +8,7 @@
 package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.Builder;
-import net.sf.saxon.event.ComplexContentOutputter;
-import net.sf.saxon.event.PipelineConfiguration;
-import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.ExpressionTool;
@@ -320,17 +317,33 @@ public class DocumentInstr extends ParentNodeConstructor {
 
         public PushEvaluator elaborateForPush() {
             DocumentInstr expr = (DocumentInstr) getExpression();
-//            PushEvaluator content = expr.getContentExpression().makeElaborator().elaborateForPush();
-//            if (expr.preservingTypes && !expr.textOnly) {
-//                return (output, context) -> {
-//                    output.setSystemId(expr.getStaticBaseURIString());
-//                    output.startDocument(ReceiverOption.NONE);
-//                    TailCall tc = content.processLeavingTail(output, context);
-//                    dispatchTailCall(tc);
-//                    output.endDocument();
-//                    return null;
-//                };
-//            } else {
+            PushEvaluator content = expr.getContentExpression().makeElaborator().elaborateForPush();
+            if (!expr.textOnly) {
+                if (expr.preservingTypes) {
+                    return (output, context) -> {
+                        output.setSystemId(expr.getStaticBaseURIString());
+                        output.startDocument(ReceiverOption.NONE);
+                        TailCall tc = content.processLeavingTail(output, context);
+                        dispatchTailCall(tc);
+                        output.endDocument();
+                        return null;
+                    };
+                } else {
+                    Schema schema = expr.getRetainedStaticContext().getPackageData().getImportedSchema();
+                    ParseOptions options = expr.getValidationOptions();
+                    return (output, context) -> {
+                        context.getConfiguration().prepareValidationReporting(context, options);
+                        Receiver validator = schema.getDocumentValidator(
+                                output, expr.getStaticBaseURIString(), options, expr.getLocation());
+                        ComplexContentOutputter outputter = new ComplexContentOutputter(validator);
+                        outputter.startDocument(ReceiverOption.NONE);
+                        TailCall tc = content.processLeavingTail(outputter, context);
+                        dispatchTailCall(tc);
+                        outputter.endDocument();
+                        return null;
+                    };
+                }
+            } else {
                 ItemEvaluator evalAsItem = elaborateForItem();
                 Location loc = expr.getLocation();
                 return (output, context) -> {
@@ -340,7 +353,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                     }
                     return null;
                 };
-//            }
+            }
         }
 
         @Override
