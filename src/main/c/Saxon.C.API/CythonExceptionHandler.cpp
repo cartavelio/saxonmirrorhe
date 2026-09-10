@@ -13,6 +13,7 @@ void raise_py_error()
   } 
   catch (SaxonApiException* e) {
           const char * errorCode = e->getErrorCode();
+          string errorMessage = NULL;
           if(errorCode != NULL) {
                 errorMessage = errorCode  ": " +  e->getMessage();
           } else {
