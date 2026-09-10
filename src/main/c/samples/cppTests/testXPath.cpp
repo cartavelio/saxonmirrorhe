@@ -24,7 +24,7 @@ void testXPathSingle(SaxonProcessor *processor, XPathProcessor *xpath,
     cout << "Number of items=" << result->size() << endl;
     cout << "String Value of result=" << messagei << endl;
     sresult->success++;
-    // delete result;
+    operator delete ((char *)messagei);
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
     sresult->failure++;
@@ -51,17 +51,18 @@ void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
   try {
 
     XdmItem *result = xpath->evaluateSingle("//*:person[1]");
-    if (result == nullptr ||
-        strcmp(result->getStringValue(), "incorrect") == 0) {
-      if (result != nullptr) {
-        const char *resultStr = result->getStringValue();
+    if (result == nullptr ) {
+          sresult->failure++;
+          sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
+    } else {
+      const char * resultStr = result->getStringValue();
+      if (strcmp(resultStr, "incorrect") == 0) {
         cout << "Failed to find  //f:person[1] without prefix. See result "
                 "found: "
              << resultStr << endl;
         delete result;
-      } else {
-        cout << "Failed to find  //person[1]" << endl;
-      }
+        operator delete ((char *) resultStr);
+
       sresult->failure++;
       sresult->failureList.push_back("testUnprefixedElementMatchingPolicy");
 
@@ -70,6 +71,7 @@ void testUnprefixedElementMatchingPolicy(SaxonProcessor *processor,
       cout << "String Value of result=" << resultStr << endl;
       sresult->success++;
       delete result;
+    }
     }
   } catch (SaxonApiException &e) {
     cout << "Error Message = " << e.what() << endl;
@@ -112,7 +114,9 @@ void testNodeAxis(SaxonProcessor *processor, XPathProcessor *xpath,
       if (namespaces[i]->getNodeName() != nullptr) {
         cout << "namespace name =" << (namespaces[i]->getNodeName()) << endl;
       }
-      cout << "namespace value =" << (namespaces[i]->getStringValue()) << endl;
+      const char * namespaceStr = namespaces[i]->getStringValue();
+      cout << "namespace value =" << (namespaceStr) << endl;
+      operator delete ((char *) namespaceStr);
     }
     delete child;
     for (int i = 0; i < childCount; i++) {
@@ -200,7 +204,9 @@ void testXPathValues(SaxonProcessor *processor, XPathProcessor *xpath,
           nullFound = true;
           break;
         }
-        cout << "Item at " << i << " =" << itemi->getStringValue() << endl;
+        const char * itemiStr =  itemi->getStringValue();
+        cout << "Item at " << i << " =" << itemiStr << endl;
+        operator delete ((char *) itemiStr);
       }
       delete resultValues;
       if (!nullFound) {
@@ -305,8 +311,8 @@ void testXPathValues2(SaxonProcessor *processor, XPathProcessor *xpath,
       cout << "Number of items=" << resultValues->size() << endl;
       const char *resultStr = resultValues->toString();
       if (resultStr != nullptr) {
-        cout << "toString()=" << resultValues->toString() << endl;
-        delete resultStr;
+        cout << "toString()=" << resultStr << endl;
+        operator delete ((char *)resultStr);
       }
     }
   } catch (SaxonApiException &e) {
@@ -344,7 +350,9 @@ void testXPathOnFile(SaxonProcessor *processor, XPathProcessor *xpath,
           cout << "Item at position " << i << " should not be null" << endl;
           break;
         }
-        cout << "Item at " << i << " =" << itemi->getStringValue() << endl;
+        const char * itemiStr =  itemi->getStringValue();
+        cout << "Item at " << i << " =" << itemiStr << endl;
+        operator delete ((char *)itemiStr);
       }
     }
     delete resultValues;
@@ -442,9 +450,11 @@ void runTest(const char *testName, const char *expr, const char *expectedResult,
              XPathProcessor *xpath, sResultCount *sresult, XdmNode *document) {
   cout << endl << "Test " << testName << endl;
   XdmValue *result = good(xpath, sresult, document, expr);
+  const char * resultStr = result->toString();
   if (result != nullptr &&
-      CppTestUtils::assertEquals(expectedResult, result->toString())) {
+      CppTestUtils::assertEquals(expectedResult, resultStr)) {
     sresult->success++;
+    operator delete ((char *) resultStr);
     delete result;
   } else {
     if (result != nullptr) {

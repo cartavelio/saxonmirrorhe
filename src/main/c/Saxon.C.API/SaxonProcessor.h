@@ -707,7 +707,7 @@ public:
     if (data != nullptr) {
       // std::cerr<<"static method SaxonProcessor.deleteString - deleting string
       // data"<<std::endl;
-      delete[] data;
+      operator delete ((char *)data);
       data = nullptr;
     }
   }

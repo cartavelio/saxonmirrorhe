@@ -799,6 +799,7 @@ def run_test_case(test_case_node: PyXdmNode, xpath_proc: PyXPathProcessor):
             if exp is not None:
                 if "XP" == spec.short_spec_name or "XT" == spec.short_spec_name:
                     testxpc = environment.xpath_proc
+                    testxpc.set_property("sa", "true")
                     testxpc.set_language_version(spec.version)
                     testxpc.declare_namespace("fn", "http://www.w3.org/2005/xpath-functions")
                     testxpc.declare_namespace("xs", "http://www.w3.org/2001/XMLSchema")

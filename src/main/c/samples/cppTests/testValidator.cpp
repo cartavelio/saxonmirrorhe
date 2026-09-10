@@ -235,7 +235,7 @@ void testValidator4a(sResultCount *sresult) {
     const char *valueStr = node->toString();
     if (valueStr != nullptr) {
       cout << endl << "Doc1 is OK:" << valueStr << endl;
-      delete valueStr;
+      operator delete ((char *)valueStr);
     } else {
       cout << endl << "Error: Doc reported as valid!" << endl;
     }
@@ -316,6 +316,7 @@ void testValidator5(SaxonProcessor *processor, SchemaValidator *val,
     if (value != nullptr) {
       cout << endl << "Validation Report: " << value << endl;
       sresult->success++;
+      operator delete ((char *)value);
     } else {
       cout << endl << "Validation Report value is NULL" << endl;
       sresult->failure++;
