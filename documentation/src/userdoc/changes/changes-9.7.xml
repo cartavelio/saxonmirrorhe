@@ -440,11 +440,6 @@
             and returns true if the attribute node results from expansion of defaults added in the
             course of schema validation. This is useful when there is a desire to avoid adding such
             attributes to the result tree.</p>
-        <p>A new extension function <a class="bodylink code"
-                href="/functions/saxon/read-binary-resource">saxon:read-binary-resource</a> is
-            introduced. Given a URI, this function fetches the contents of the resource identified
-            by the URI and returns it as a binary value. The result can be used by functions in the
-            EXPath binary module.</p>
         <p>The <a class="bodylink code" href="/functions/saxon/stream">saxon:stream()</a> extension
             function is now converted at compile time into a call on <code>xsl:stream</code>. As a 
             result, the streamability rules may

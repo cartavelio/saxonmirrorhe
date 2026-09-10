@@ -10436,36 +10436,6 @@ let $q1 := "declare variable $x external; declare variable $y external; &lt;z&gt
       <see-also name="compile-query" namespace="http://saxon.sf.net/"/>
       <see-also name="xquery" namespace="http://saxon.sf.net/"/>
     </function>
-
-
-    <function xmlns="http://www.saxonica.com/ns/doc/functions">
-      <name namespace="http://saxon.sf.net/">read-binary-resource</name>
-      <description>
-        <p>Given a URI, this function fetches the contents of the resource identified by the URI and
-          returns it as a binary value.</p>
-      </description>
-      <signatures>
-        <proto return-type="xs:base64Binary">
-          <arg name="uri" type="xs:string" desc="The URI to be dereferenced"/>
-        </proto>
-      </signatures>
-      <status>
-        <p>Available since Saxon 9.7.</p>
-      </status>
-      <saxon-edition>PE/EE 9.7</saxon-edition>
-      <details>
-        <div>
-          <p>This function takes as input a string containing a URI. It fetches the resource at that
-            URI as a binary object, and returns the binary object represented as an instance of
-              <code>xs:base64binary</code>.</p>
-
-          <p>The result can be used by functions in the EXPath binary module.</p>
-
-        </div>
-      </details>
-    </function>
-
-
     <function xmlns="http://www.saxonica.com/ns/doc/functions">
       <name namespace="http://saxon.sf.net/">replace-with</name>
       <description>
