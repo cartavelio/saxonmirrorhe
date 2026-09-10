@@ -247,7 +247,7 @@ public class Query {
      */
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    protected void doQuery(String[] args, String command) {
+    public void doQuery(String[] args, String command) {
 
         CommandLineOptions options = new CommandLineOptions();
         setPermittedOptions(options);
