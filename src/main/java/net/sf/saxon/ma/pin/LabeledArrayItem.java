@@ -1,37 +1,39 @@
-package com.saxonica.xsltextn.pedigree;
+package net.sf.saxon.ma.pin;
 
+import com.saxonica.xsltextn.pedigree.DelegatingArrayItem;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.value.Int64Value;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A <code>PedigreeArrayItem</code> represents an XDM array together with a {@link Pedigree}:
- * that is, retained information about how the array was selected with a JSON-like tree.
+ * A <code>LabeledArrayItem</code> represents an XDM array together with a label, which is a map:
+ * generally containing retained information about how the array was selected within a JSON-like tree.
  */
-public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeValue {
+public class LabeledArrayItem extends DelegatingArrayItem implements LabeledItem {
 
-    Pedigree pedigree;
+    MapItem label;
 
     /**
      * Create a PedigreeArrayItem with an empty pedigree
      * @param base the underlying array item
      */
 
-    public PedigreeArrayItem(ArrayItem base) {
-        this(base, Pedigree.PEDIGREE_ROOT);
+    public LabeledArrayItem(ArrayItem base, MapItem label) {
+        super(base);
+        this.label = label;
     }
 
-    /**
-     * Create a PedigreeArrayItem with a known pedigree
-     * @param base the underlying array item
-     */
+    public ArrayItem getSubject() {
+        return getBaseItem();
+    }
 
-    public PedigreeArrayItem(ArrayItem base, Pedigree pedigree) {
-        super(base);
-        this.pedigree = pedigree;
+    public static LabeledArrayItem makePinnedArrayItem(ArrayItem base) {
+        return new LabeledArrayItem(base, LabeledMapItem.PIN_LABEL);
     }
 
     /**
@@ -46,8 +48,22 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
     @Override
     public GroundedValue get(int index) {
         GroundedValue value = super.get(index);
-        Pedigree ped = new Pedigree(this, index);
-        return ped.makePedigreeValue(value);
+        return adaptValue(index+1, value);
+    }
+
+    @Override
+    public Iterable<GroundedValue> members() {
+        List<GroundedValue> adaptedMembers = new ArrayList<>();
+        int index = 0;
+        for (GroundedValue value : getBaseItem().members()) {
+            adaptedMembers.add(LabeledMapItem.adaptValue(this, Int64Value.makeIntegerValue(++index), value));
+        }
+        return adaptedMembers;
+    }
+
+
+    private GroundedValue adaptValue(int index, GroundedValue value) {
+        return LabeledMapItem.adaptValue(this, Int64Value.makeIntegerValue(index),value);
     }
 
     /**
@@ -65,12 +81,12 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
     public ArrayItem remove(int index) {
         List<GroundedValue> list = new ArrayList<>(arrayLength()-1);
         int i = 0;
-        for (GroundedValue seq : super.remove(index).members()) {
+        for (GroundedValue value : getBaseItem().members()) {
+            i++;
             if (i==index) {
                 i++;
             }
-            Pedigree ped = new Pedigree(this, i++);
-            list.add(ped.makePedigreeValue(seq));
+            list.add(adaptValue(i, value));
         }
         return new SimpleArrayItem(list);
     }
@@ -79,29 +95,11 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
     public ArrayItem subArray(int start, int end) {
         List<GroundedValue> list = new ArrayList<>(end-start);
         int index = start;
-        for (GroundedValue seq : super.subArray(start, end).members()) {
-            Pedigree ped = new Pedigree(this, index++);
-            list.add(ped.makePedigreeValue(seq));
+        for (GroundedValue value : super.subArray(start, end).members()) {
+            // TODO: adjust index
+            list.add(adaptValue(index, value));
         }
         return new SimpleArrayItem(list);
-    }
-
-    /**
-     * Return the members of the array as an iterable collection
-     * @return the members of the array as an iterable collection. Any members
-     * that are singleton maps or arrays will have a pedigree indicating
-     * how they were selected.
-     */
-
-    @Override
-    public Iterable<GroundedValue> members() {
-        List<GroundedValue> memberValues = new ArrayList<>();
-        int index = 0;
-        for (GroundedValue val : super.members()) {
-            Pedigree ped = new Pedigree(PedigreeArrayItem.this, index++);
-            memberValues.add(ped.makePedigreeValue(val));
-        }
-        return memberValues;
     }
 
     /**
@@ -110,13 +108,17 @@ public class PedigreeArrayItem extends DelegatingArrayItem implements PedigreeVa
      */
 
     @Override
-    public Pedigree getPedigree() {
-        return pedigree;
+    public MapItem getLabel() {
+        return label;
     }
 
     @Override
     public ArrayItem getBaseItem() {
         return super.getBaseItem();
+    }
+
+    public String toString() {
+        return "¶" + getBaseItem().toString();
     }
 }
 

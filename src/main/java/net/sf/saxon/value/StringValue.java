@@ -14,7 +14,7 @@ import net.sf.saxon.str.*;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.transpile.CSharpInnerClass;
 import net.sf.saxon.tree.iter.AtomicIterator;
-import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.z.IntIterator;
 
@@ -59,7 +59,7 @@ public class StringValue extends AtomicValue {
      * Protected constructor for use by subtypes
      */
 
-    protected StringValue(AtomicType typeLabel) {
+    protected StringValue(AtomicMetadata typeLabel) {
         super(typeLabel);
         content = EmptyUnicodeString.getInstance();
     }
@@ -80,7 +80,7 @@ public class StringValue extends AtomicValue {
      * @param type    the requested atomic type
      */
 
-    public StringValue(UnicodeString content, AtomicType type) {
+    public StringValue(UnicodeString content, AtomicMetadata type) {
         super(type);
         this.content = content;
     }
@@ -104,7 +104,7 @@ public class StringValue extends AtomicValue {
      *                  a type derived from xs:string and that the string is valid against this type.
      */
 
-    public StringValue(String value, AtomicType typeLabel) {
+    public StringValue(String value, AtomicMetadata typeLabel) {
         super(typeLabel);
         this.content = StringTool.fromCharSequence(value);
     }
@@ -122,16 +122,16 @@ public class StringValue extends AtomicValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
+     * @param metadata the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     @Override
-    public StringValue copyAsSubType(AtomicType typeLabel) {
-        if (typeLabel == this.typeLabel) {
+    public StringValue withMetadata(AtomicMetadata metadata) {
+        if (metadata == this.metadata) {
             return this;
         } else {
-            return new StringValue(this.content, typeLabel);
+            return new StringValue(this.content, metadata);
         }
     }
 
@@ -156,7 +156,7 @@ public class StringValue extends AtomicValue {
 
     @Override
     public BuiltInAtomicType getPrimitiveType() {
-        return typeLabel == BuiltInAtomicType.UNTYPED_ATOMIC ? BuiltInAtomicType.UNTYPED_ATOMIC : BuiltInAtomicType.STRING;
+        return getItemType() == BuiltInAtomicType.UNTYPED_ATOMIC ? BuiltInAtomicType.UNTYPED_ATOMIC : BuiltInAtomicType.STRING;
     }
 
     /**
@@ -356,7 +356,7 @@ public class StringValue extends AtomicValue {
             s = s.substring(0,20) + " ... " + s.substring(s.length()-20);
         }
         s = "\"" + s + '\"';
-        if (typeLabel == BuiltInAtomicType.UNTYPED_ATOMIC) {
+        if (getItemType() == BuiltInAtomicType.UNTYPED_ATOMIC) {
             s = "u" + s;
         }
         return s;

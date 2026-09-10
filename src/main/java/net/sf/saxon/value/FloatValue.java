@@ -15,10 +15,7 @@ import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.Converter;
-import net.sf.saxon.type.ValidationException;
+import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
 
@@ -68,7 +65,7 @@ public final class FloatValue extends NumericValue {
      *              value must conform to this type. The method does not check these conditions.
      */
 
-    public FloatValue(float value, AtomicType typeLabel) {
+    public FloatValue(float value, AtomicMetadata typeLabel) {
         super(typeLabel);
         this.value = value;
     }
@@ -76,13 +73,13 @@ public final class FloatValue extends NumericValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
+     * @param metadata the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     @Override
-    public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        return new FloatValue(value, typeLabel);
+    public AtomicValue withMetadata(AtomicMetadata metadata) {
+        return new FloatValue(value, metadata);
     }
 
     /**

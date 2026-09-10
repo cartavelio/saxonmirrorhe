@@ -66,7 +66,7 @@ public abstract class GDateValue extends CalendarValue {
         m.day = day;
         m.hasNoYearZero = hasNoYearZero;
         m.tzMinutes = getTimezoneInMinutes();
-        m.typeLabel = typeLabel;
+        m.typeLabel = getItemType();
         return m;
     }
 

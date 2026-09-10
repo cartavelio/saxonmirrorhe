@@ -16,10 +16,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.type.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -465,13 +462,13 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
      * Make a copy of this time value,
      * but with a different type label
      *
-     * @param typeLabel the new type label. This must be a subtype of xs:time.
+     * @param metadata the new type label. This must be a subtype of xs:time.
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        return new TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), typeLabel);
+    public AtomicValue withMetadata(AtomicMetadata metadata) {
+        return new TimeValue(hour, minute, second, nanosecond, getTimezoneInMinutes(), metadata.getType());
     }
 
     /**

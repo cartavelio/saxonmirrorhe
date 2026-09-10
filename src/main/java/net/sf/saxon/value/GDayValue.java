@@ -9,10 +9,7 @@ package net.sf.saxon.value;
 
 import net.sf.saxon.str.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.AtomicType;
-import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.type.ConversionResult;
-import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.type.*;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,15 +53,15 @@ public class GDayValue extends GDateValue {
     /**
      * Make a copy of this date, time, or dateTime value
      *
-     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
+     * @param metadata the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      * @return the copied value
      */
 
     @Override
-    public AtomicValue copyAsSubType(AtomicType typeLabel) {
+    public AtomicValue withMetadata(AtomicMetadata metadata) {
         MutableGDateValue m = makeMutableCopy();
-        m.typeLabel = typeLabel;
+        m.typeLabel = metadata.getType();
         return new GDayValue(m);
     }
 

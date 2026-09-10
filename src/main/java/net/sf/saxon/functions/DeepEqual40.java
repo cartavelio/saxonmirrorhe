@@ -369,7 +369,6 @@ public class DeepEqual40 extends CollatingFunctionFixed {
         ErrorReporter reporter = context.getErrorReporter();
 
         try {
-
             if (!options.textBoundariesSignificant) {
                 op1 = mergeAdjacentTextNodes(op1);
                 op2 = mergeAdjacentTextNodes(op2);

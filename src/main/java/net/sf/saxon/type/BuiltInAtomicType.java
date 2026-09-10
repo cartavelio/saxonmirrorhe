@@ -13,6 +13,7 @@ import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StaticProperty;
 import net.sf.saxon.expr.instruct.ValueOf;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
@@ -31,7 +32,7 @@ import static net.sf.saxon.type.SchemaValidationStatus.VALIDATED;
  * (such as xs:decimal or xs:anyURI) or a derived type (such as xs:ID or xs:dayTimeDuration).
  */
 
-public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCache {
+public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCache, AtomicMetadata {
 
     private final int fingerprint;
     private int baseFingerprint;
@@ -1476,6 +1477,16 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
 
     public boolean isDurationType() {
         return this == DURATION || this == DAY_TIME_DURATION || this == YEAR_MONTH_DURATION;
+    }
+
+    @Override
+    public AtomicType getType() {
+        return this;
+    }
+
+    @Override
+    public MapItem getLabel() {
+        return null;
     }
 
     //#ifdefined SCHEMA

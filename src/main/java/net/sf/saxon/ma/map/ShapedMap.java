@@ -41,6 +41,10 @@ public class ShapedMap extends MapItem {
         this.values = values;
     }
 
+    public void initialPut(int slot, GroundedValue value) {
+        values[slot] = value;
+    }
+
     /**
      * Get an entry from the Map
      *

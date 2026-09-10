@@ -187,6 +187,10 @@ public class SingleEntryMap extends MapItem {
         target.initialPut(key, value);
         return target;
     }
+
+    public String toString() {
+        return "map{" + key.toString() + ":" + value.toString() + "}";
+    }
 }
 
 // Copyright (c) 2010-2023 Saxonica Limited

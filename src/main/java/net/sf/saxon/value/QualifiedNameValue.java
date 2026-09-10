@@ -16,6 +16,7 @@ import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ValidationFailure;
@@ -33,8 +34,8 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
 
     /*@NotNull*/ protected final StructuredQName qName;
 
-    public QualifiedNameValue(StructuredQName qName, AtomicType typeLabel) {
-        super(typeLabel);
+    public QualifiedNameValue(StructuredQName qName, AtomicMetadata metadata) {
+        super(metadata);
         Objects.requireNonNull(qName);
         this.qName = qName;
     }

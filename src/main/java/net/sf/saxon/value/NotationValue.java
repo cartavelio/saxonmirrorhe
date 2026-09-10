@@ -14,6 +14,7 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.AtomicMetadata;
 import net.sf.saxon.type.AtomicType;
 import net.sf.saxon.type.BuiltInAtomicType;
 
@@ -84,7 +85,7 @@ public final class NotationValue extends QualifiedNameValue {
      * @param typeLabel idenfies a subtype of xs:QName
      */
 
-    public NotationValue(/*@Nullable*/ StructuredQName qName, /*@Nullable*/ AtomicType typeLabel) {
+    public NotationValue(StructuredQName qName, AtomicMetadata typeLabel) {
         super(qName, typeLabel);
     }
 
@@ -92,14 +93,14 @@ public final class NotationValue extends QualifiedNameValue {
     /**
      * Create a copy of this atomic value, with a different type label
      *
-     * @param typeLabel the type label of the new copy. The caller is responsible for checking that
+     * @param metadata the type label of the new copy. The caller is responsible for checking that
      *                  the value actually conforms to this type.
      */
 
     /*@NotNull*/
     @Override
-    public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        return new NotationValue(getStructuredQName(), typeLabel);
+    public AtomicValue withMetadata(AtomicMetadata metadata) {
+        return new NotationValue(getStructuredQName(), metadata);
     }
 
     /**
