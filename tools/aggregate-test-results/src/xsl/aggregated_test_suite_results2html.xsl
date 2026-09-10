@@ -216,6 +216,7 @@
 															<xsl:call-template name="list-languages">
 																<xsl:with-param name="current-group" select="current-group()" />
 															</xsl:call-template>
+															<xsl:if test="position() != last()">; </xsl:if>
 														</xsl:for-each-group>
 													</td>
 												</tr>
