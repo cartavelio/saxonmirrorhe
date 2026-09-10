@@ -28,7 +28,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -295,7 +294,7 @@ public class SchemaTests {
             Processor proc = new Processor(true);
             SchemaManager mgr = proc.getSchemaManager();
             mgr.setXsdVersion("1.1");
-            proc.getUnderlyingConfiguration().getSaxonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Collections.singletonList(catalog));
+            proc.getUnderlyingConfiguration().getCommonResourceResolver().setFeature(ResolverFeature.CATALOG_FILES, Collections.singletonList(catalog));
 
             mgr.load(new StreamSource(new StringReader(over), "http://dummy/over"));
             SchemaValidator val = mgr.newSchemaValidator();

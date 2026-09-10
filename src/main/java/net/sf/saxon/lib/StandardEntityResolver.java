@@ -81,7 +81,7 @@ public class StandardEntityResolver implements EntityResolver {
      */
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        return config.getSaxonResourceResolver().resolveEntity(publicId, systemId);
+        return config.getCommonResourceResolver().resolveEntity(publicId, systemId);
     }
 
     /**

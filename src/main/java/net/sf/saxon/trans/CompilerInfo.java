@@ -176,7 +176,7 @@ public class CompilerInfo {
      * @since 11.0
      */
 
-    public void setSaxonResourceResolver(CommonResourceResolver resolver) {
+    public void setCommonResourceResolver(CommonResourceResolver resolver) {
         commonResourceResolver = resolver;
     }
 
@@ -385,7 +385,7 @@ public class CompilerInfo {
      * @return resolver The {@link CommonResourceResolver} in use.
      * @since 11.0
      */
-    public CommonResourceResolver getSaxonResourceResolver() {
+    public CommonResourceResolver getCommonResourceResolver() {
         return commonResourceResolver;
     }
 
