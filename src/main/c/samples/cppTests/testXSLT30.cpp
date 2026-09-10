@@ -3031,6 +3031,7 @@ void testUTF8StringTemplate(SaxonProcessor *proc, Xslt30Processor *trans,
   parameterValues.clear();
 }
 
+
 static int NUM_THREADS = 10;
 
 void RunThread(XsltExecutable *executable, int tid,
@@ -3452,9 +3453,9 @@ int main(int argc, char *argv[]) {
   testContext2NotRootNamedTemplate(processor, trans, sresult);
 
   cout << endl
-       << "============================================================="
-       << endl
-       << endl;
+     << "============================================================="
+     << endl
+     << endl;
 
   testCallSystemFunction(processor, sresult);
 

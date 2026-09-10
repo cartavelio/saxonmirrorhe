@@ -8,26 +8,20 @@
 #define new new (__FILE__, __LINE__)
 #endif
 
-const char *SaxonApiException::what() {
-  if (message.empty() && !cppException) {
-    allocFn fn = operator new;
-    char *tempm = nullptr;
-    if (isStaticError) {
-      tempm = j_getCombinedStaticErrorMessages(
-          SaxonProcessor::sxn_environ->thread, (void *)fn);
-
-    } else {
-      tempm =
-          j_getErrorMessage(SaxonProcessor::sxn_environ->thread, (void *)fn);
-    }
-    if (tempm == nullptr) {
-      return nullptr;
-    }
-    message = std::string(tempm);
-    operator delete(tempm);
-  }
-  return message.c_str();
+#ifdef _LIBCPP___EXCEPTION_EXCEPTION_H
+char const* SaxonApiException::what() const _NOEXCEPT
+{
+  // need cast to remove const flag
+  SaxonApiException *s = const_cast<SaxonApiException*>(this);
+  return s->getMessageWithErrorCode();
 }
+#else
+
+const char *SaxonApiException::what() {
+  return this->getMessageWithErrorCode();
+}
+#endif
+
 
 SaxonApiException::SaxonApiException(bool staticError) {
   message = "";
@@ -36,6 +30,9 @@ SaxonApiException::SaxonApiException(bool staticError) {
   systemId = "";
   cppException = false;
   isStaticError = staticError;
+  
+  // preload the error message
+  getMessageWithErrorCode();
 }
 
 SaxonApiException::SaxonApiException(const SaxonApiException &ex) {
