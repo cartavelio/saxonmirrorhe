@@ -15,7 +15,6 @@
           treeModel="tinyTreeCondensed"
           stripSpace="all"
           expandAttributeDefaults="true"
-          generateByteCode="true"
           versionOfXml="1.0"
           sourceResolver=""
           uriResolver="net.sf.saxon.lib.StandardURIResolver"
