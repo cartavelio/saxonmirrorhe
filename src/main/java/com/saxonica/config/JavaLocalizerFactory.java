@@ -66,6 +66,23 @@ public class JavaLocalizerFactory extends LocalizerFactory {
     }
 
     /**
+     * Set the names of all the system-supplied localization classes
+     */
+
+    public void setBuiltInLocalizationClasses() {
+        setLocalizationClass("da", "net.sf.saxon.option.local.Numberer_da");
+        setLocalizationClass("de", "net.sf.saxon.option.local.Numberer_de");
+        setLocalizationClass("de", "net.sf.saxon.option.local.Numberer_de");
+        setLocalizationClass("en", "net.sf.saxon.expr.number.Numberer_en");
+        setLocalizationClass("fr", "net.sf.saxon.option.local.Numberer_fr");
+        setLocalizationClass("fr-BE", "net.sf.saxon.option.local.Numberer_frBE");
+        setLocalizationClass("it", "net.sf.saxon.option.local.Numberer_it");
+        setLocalizationClass("nl", "net.sf.saxon.option.local.Numberer_nl");
+        setLocalizationClass("nl-BE", "net.sf.saxon.option.local.Numberer_nlBE");
+        setLocalizationClass("sv", "net.sf.saxon.option.local.Numberer_sv");
+    }
+
+    /**
      * Get the numberer for a given language
      *
      * @param language the language code (for example "de" or "en-GB"

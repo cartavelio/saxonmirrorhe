@@ -219,7 +219,7 @@ public class IdValidator extends ValidatingFilter {
             } else {
                 Numberer_en num = new Numberer_en();
                 num.setTensUnitsSeparatorCardinal("-");
-                howMany = " are " + num.toWords(count, AbstractNumberer.LOWER_CASE);
+                howMany = " are " + num.toWords("", count, AbstractNumberer.LOWER_CASE);
                 value = "values";
             }
             StringBuilder err =

@@ -198,7 +198,7 @@ public class ValidatingFilter extends ProxyReceiver {
             if (validationContext.getErrorCount() == 1) {
                 message = "One validation error was reported: ";
             } else {
-                message = new Numberer_en().toWords(validationContext.getErrorCount()) + " validation errors were reported. First error: ";
+                message = new Numberer_en().toWords("", validationContext.getErrorCount()) + " validation errors were reported. First error: ";
             }
             message += validationContext.getFirstFailure().getMessage();
             ValidationFailure err = new ValidationFailure(message);

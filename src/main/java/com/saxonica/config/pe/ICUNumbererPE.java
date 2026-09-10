@@ -28,9 +28,9 @@ public class ICUNumbererPE extends AbstractNumberer {
     private final static String spelloutOrdinalPattern = "%spellout-ordinal";
     private final static String spelloutNumberingPattern = "%spellout-numbering";
     private final static String numberOrdinalPattern = "%digits-ordinal";
-    private String useCardinal;
-    private String useOrdinal;
-    private String useNumberOrdinal;
+    private String defaultCardinalRule;
+    private String defaultOrdinalRule;
+    private String defaultNumericOrdinalRule;
     private final Map<String, String> ordinalParamIndex = new ConcurrentHashMap<>();
     private final ArrayList<String> spelloutCardinalRulesets = new ArrayList<>();
     private final ArrayList<String> spelloutOrdinalRulesets = new ArrayList<>();
@@ -189,38 +189,38 @@ public class ICUNumbererPE extends AbstractNumberer {
         for (String p : preferences) {
             String n = spelloutOrdinalPattern + p;
             if (spelloutOrdinalRulesets.contains(n)) {
-                useOrdinal = n;
+                defaultOrdinalRule = n;
                 break;
             }
         }
-        if (useOrdinal == null && spelloutOrdinalRulesets.size() > 0) {
-            useOrdinal = spelloutOrdinalRulesets.get(0);
+        if (defaultOrdinalRule == null && spelloutOrdinalRulesets.size() > 0) {
+            defaultOrdinalRule = spelloutOrdinalRulesets.get(0);
         }
         for (String p : preferences) {
             String n = spelloutCardinalPattern + p;
             if (spelloutCardinalRulesets.contains(n)) {
-                useCardinal = n;
+                defaultCardinalRule = n;
                 break;
             }
         }
-        if (useCardinal == null && spelloutCardinalRulesets.size() > 0) {
-            useCardinal = spelloutCardinalRulesets.get(0);
+        if (defaultCardinalRule == null && spelloutCardinalRulesets.size() > 0) {
+            defaultCardinalRule = spelloutCardinalRulesets.get(0);
         }
         for (String p : preferences) {
             String n = numberOrdinalPattern + p;
             if (numberOrdinalRulesets.contains(n)) {
-                useNumberOrdinal = n;
+                defaultNumericOrdinalRule = n;
                 break;
             }
         }
-        if (useNumberOrdinal == null && numberOrdinalRulesets.size() > 0) {
-            useNumberOrdinal = numberOrdinalRulesets.get(0);
+        if (defaultNumericOrdinalRule == null && numberOrdinalRulesets.size() > 0) {
+            defaultNumericOrdinalRule = numberOrdinalRulesets.get(0);
         }
         // If there is no ordinal at all, then use the default cardinal
-        if (useOrdinal == null) {
-            useOrdinal = useCardinal;
+        if (defaultOrdinalRule == null) {
+            defaultOrdinalRule = defaultCardinalRule;
         }
-        if (!spelloutOrdinalPattern.equals(useOrdinal)) {
+        if (!spelloutOrdinalPattern.equals(defaultOrdinalRule)) {
 //            if (config.isTiming()) {
 //                config.getLogger().info("No plain ordinal:" + locale.getDisplayLanguage() + " using:" + useOrdinal);
 //            }
@@ -259,8 +259,8 @@ public class ICUNumbererPE extends AbstractNumberer {
      * @param s the scheme name, e.g. '%spellout-cardinal'
      */
     private void setScheme(String s) {
-        useCardinal = s;
-        useOrdinal = s;
+        defaultCardinalRule = s;
+        defaultOrdinalRule = s;
     }
 
     /**
@@ -331,24 +331,30 @@ public class ICUNumbererPE extends AbstractNumberer {
         The approach is to remove the leading digit/',' sequence, ending in a digit from the ICU result
          */
         if (rbnfNumber != null) {
-            String r = useNumberOrdinal != null ? rbnfNumber.format(number, useNumberOrdinal) : "";
+            String r = defaultNumericOrdinalRule != null ? rbnfNumber.format(number, defaultNumericOrdinalRule) : "";
             return r.replaceAll("^[,\\d]*\\d", "");
         }
         return "UNKNOWN";
     }
 
     @Override
-    public String toWords(long number) {
+    public String toWords(String cardinal, long number) {
         if (rbnf != null) {
-            String s = useCardinal != null ? rbnf.format(number, useCardinal) : rbnf.format(number);
+            String rule = cardinal.startsWith("%") ? cardinal : defaultCardinalRule;
+            String s;
+            try {
+                s = rule != null ? rbnf.format(number, rule) : rbnf.format(number);
+            } catch (IllegalArgumentException e) {
+                s = rbnf.format(number, defaultCardinalRule);
+            }
             return postProcess(s);
         }
         return null;
     }
 
     @Override
-    public String toWords(long number, int wordCase) {
-        return postProcess(wordCase(toWords(number), wordCase));
+    public String toWords(String cardinal, long number, int wordCase) {
+        return postProcess(wordCase(toWords(cardinal, number), wordCase));
     }
 
     @Override
@@ -389,13 +395,19 @@ public class ICUNumbererPE extends AbstractNumberer {
                                     break;
                                 }
                             }
+                        } else if (ordinalParam.startsWith("%")) {
+                            rule = ordinalParam;
                         }
                     }
                 }
                 if (rule == null) {
-                    rule = useOrdinal;
+                    rule = defaultOrdinalRule;
                 }
-                word = rbnf.format(number, rule);
+                try {
+                    word = rbnf.format(number, rule);
+                } catch (IllegalArgumentException e) {
+                    word = rbnf.format(number, defaultOrdinalRule);
+                }
             }
             return postProcessOrdinal(postProcess(wordCase(word, wordCase)), ordinalParam);
         }
