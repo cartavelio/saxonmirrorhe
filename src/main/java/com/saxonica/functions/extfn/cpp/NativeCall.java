@@ -48,6 +48,7 @@ public class NativeCall implements ExtensionFunction {
         this.func = func;
         this.alloc = alloc;
         this.pythonProc = pythonProc;
+        this.useNativeTypes = useNativeTypes;
 
     }
 
@@ -191,7 +192,8 @@ public class NativeCall implements ExtensionFunction {
             System.err.println("Java SaxonC Debug: in the call method");
         }
 
-        String nameStr = name.getEQName();
+        String nameStr = name.getLocalName();
+System.err.println("Java SaxonC function name="+nameStr);
         try(CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(nameStr)) {
 
 
@@ -208,6 +210,14 @@ public class NativeCall implements ExtensionFunction {
             }
 
             System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
+
+            if(useNativeTypes) {
+                System.err.println("Java SaxonC Debug NativeCall.call useNativeType is True ");
+
+            } else {
+                System.err.println("Java SaxonC Debug NativeCall.call useNativeType is False ");
+
+            }
 
 
             ObjectHandle valueRef = c_nativeCall(holder.get(), pythonProc, func, (useNativeTypes? 1 : 0), arguments.length, addr); // pass arguments as an array
