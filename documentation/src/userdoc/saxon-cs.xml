@@ -447,7 +447,7 @@ need to mix use of the .NET API with the internal classes converted from the ori
       <h1>Restrictions</h1>
       
       <p>Absolute URIs with single-character scheme names (for example, <code>a:/x/y/z</code>) are not handled correctly. 
-         (This is a limitation of the .NET <code>System.Uri</code> class - it treates such names as DOS filenames).</p>
+         (This is a limitation of the .NET <code>System.Uri</code> class - it treats such names as DOS filenames).</p>
       
       <h2>Restrictions relative to Saxon-EE 11 on Java</h2>
       

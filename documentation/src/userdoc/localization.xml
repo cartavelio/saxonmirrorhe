@@ -106,7 +106,7 @@
           java="net.sf.saxon.Configuration#setLocalizerFactory">Configuration.setLocalizerFactory()</code>
         mechanism</li>
       <li class="javaonly">In SaxonJ-PE and -EE, month and day names are obtained using the ICU4J library. If the full name
-        delivered by ICU exceeds the requested maximum lengh, the short name is requested from ICU.</li>
+        delivered by ICU exceeds the requested maximum length, the short name is requested from ICU.</li>
       <li class="csonly">In SaxonCS, month and day names are obtained using the .NET <code>CultureInfo</code> class. If the
         full name (for example <code>CultureInfo.DateTimeFormat.GetMonthName(m)</code>) exceeds the requested
         maximum length, then the abbreviated form is used

@@ -1570,7 +1570,7 @@
 
       <p>Saxon Enterprise Edition (Saxon-EE) includes a complete implementation of the XSD 1.1
          Recommendation of 5 April 2012. There is a test suite that is believed to cover all new
-         features of the specification, and Saxon achieves 100% pass rate againts these tests.</p>
+         features of the specification, and Saxon achieves 100% pass rate against these tests.</p>
 
       <p>From Saxon 9.8, XSD 1.1 processing is the default; if XSD 1.0 is required, it must be explicitly requested by using the
             <code>-xsdversion:1.0</code> option on the command line, or equivalent options in the
@@ -2166,7 +2166,7 @@
          or XSD processors, this is difficult to achieve in practice while taking full advantage of
          Saxon's capabilities. For example, Saxon operates much more efficiently using its own
          internal tree model than when using the DOM (sometimes by a factor of ten). Therefore
-         Saxon's <b>s9api</b> interface is recommended in preferance to JAXP.</aside>
+         Saxon's <b>s9api</b> interface is recommended in preference to JAXP.</aside>
    </section>
    <section id="xqj" title="XQJ conformance" class="javaonly">
       <h1>XQJ conformance</h1>

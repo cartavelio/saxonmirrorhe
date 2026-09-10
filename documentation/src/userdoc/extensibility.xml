@@ -257,7 +257,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
         </tr>
         <tr>
           <td>
-            <p>getMinumumNumberOfArguments</p>
+            <p>getMinimumNumberOfArguments</p>
           </td>
           <td>
             <p>Indicates the minimum number of arguments that must be supplied in a call to the
@@ -333,7 +333,7 @@ for $i in 1 to 10 return eg:shift-left(2, $i)]]></code></pre>
           <td>
             <p>This method should be implemented, and return true, if the function has side-effects
               of any kind, including constructing new nodes if the identity of the nodes is
-              signficant. When this method returns true, Saxon will try to avoid moving the function
+              significant. When this method returns true, Saxon will try to avoid moving the function
               call out of loops or otherwise rearranging the sequence of calls. However, functions
               with side-effects are still discouraged, because the optimizer cannot always detect
               their presence if they are deeply nested within other calls.</p>
@@ -1759,7 +1759,7 @@ public static int lineNumber(XPathContext c) {
           
           <p>
             <i>Note that calling <code>ArrayList.new()</code> will result in a wrapped
-              <code>ArrayList</code> object. By constrast, calling a method that returns an
+              <code>ArrayList</code> object. By contrast, calling a method that returns an
               <code>ArrayList</code> will result in an XPath sequence whose items are constructed
               by converting the members of the returned <code>ArrayList</code>.</i>
           </p>

@@ -1366,7 +1366,7 @@
           <p>The W3C specification requires that if <code>document-uri(D) = U</code>, then
               <code>doc(U) is D</code>. A consequence of this rule is that two different documents
             cannot have the same document URI. This realisation led to a significant change in the
-            implementation of the function beween Saxon 10 and 11, with the effect that many
+            implementation of the function between Saxon 10 and 11, with the effect that many
             documents no longer have a document URI. For example, at one time a document built from
             a JAXP <code>Source</code> object would automatically have a <code>document-uri()</code>
             based on the <code>systemID</code> property of the <code>Source</code>. This is no
@@ -1981,7 +1981,7 @@
           daylight savings time (summer time) changeover dates to work out the most likely timezone
           applicable to the date in question.</p>
 
-        <p>If the timezone is formatted as <code>[ZN,6]</code> (specifically, with a minumum length
+        <p>If the timezone is formatted as <code>[ZN,6]</code> (specifically, with a minimum length
           of 6 or more) then the Olsen timezone name is output (again, this requires the country to
           be supplied). The Olsen timezone name generally takes the form
           <code>Continent/City</code>, for example <code>Europe/London</code> or
@@ -7150,9 +7150,11 @@
           <p>Note that the value returned is dependent on information supplied by the XML parser.
             For an element node, SAX parsers generally report the line and column position of the
             "&gt;" character at the end of the start tag. StAX parsers by contrast report the
-            position of the "&lt;" character at the start of the start tag. SAX parsers report line
-            and column numbers only for element nodes, so for any other kind of node, the returned
-            value will be -1.</p>
+            position of the "&lt;" character at the start of the start tag.</p>
+          
+          <p>From Saxon 13, Saxon maintains location information for text, comment, and processing
+          instruction nodes as well as for element nodes. A SAX parser reports the location of the
+          end of the node, not the location at the start.</p>
         </div>
       </details>
       <see-also name="system-id" namespace="http://saxon.sf.net/"/>
@@ -8824,11 +8826,13 @@ declare variable $indexedTowns as map(*) := saxon:index(//town, function($t){$t/
           <p>Note that the value returned is dependent on information supplied by the XML parser.
             For an element node, SAX parsers generally report the line and column position of the
             "&gt;" character at the end of the start tag. StAX parsers by contrast report the
-            position of the "&lt;" character at the start of the start tag. SAX parsers report line
-            and column numbers only for element nodes, so for any other kind of node, the returned
-            value will be -1.</p>
+            position of the "&lt;" character at the start of the start tag.</p>
+          
+          <p>From Saxon 13, Saxon maintains location information for text, comment, and processing
+          instruction nodes as well as for element nodes. A SAX parser reports the location of the
+          end of the node, not the location at the start.</p>
 
-          <p>From release 9.0, the <code>-l</code> option also causes line numbers to be copied from
+          <p>The <code>-l</code> option also causes line numbers to be copied from
             a source document to a result document when the <a class="bodylink code"
               href="/xsl-elements/copy-of">xsl:copy-of</a> instruction is applied to a document or
             element node. For elements created using other instructions, the line number will

@@ -318,7 +318,7 @@
           taken from the base language, with no regional variation - i.e. <code>es-PT</code> and
             <code>es-419</code> would produce the same results.</p>
         <h3>Explicitly named numbering schemes</h3>
-        <p>The simplest way to invoke a specific ICU numbering scheme (or spellout ruleset) is to name it explictly.
+        <p>The simplest way to invoke a specific ICU numbering scheme (or spellout ruleset) is to name it explicitly.
           In <a class="bodylink code" href="/functions/fn/format-integer">format-integer()</a> this can be
           done within the parentheses in the format 
           picture, for example:</p> 

@@ -194,7 +194,7 @@
                 href="/functions/fn/parse-json">fn:parse-json()</a> updated in line with the XPath
             3.1 specification. The implementation of <a class="bodylink code"
                 href="/functions/fn/serialize">fn:serialize()</a> has been updated, which includes
-            using the JSON ouput method.</p>
+            using the JSON output method.</p>
         <p>A number of other new functions have been implemented:</p>
         <ul>
             <li>

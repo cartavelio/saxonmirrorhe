@@ -850,13 +850,13 @@
         
         <p>A new constraining facet <a href="/schema-processing/extensions11/distinct" class="bodylink code">saxon:distinct</a> is
             available for list types; if present (with the value "true"), the list must not contain
-            duplicate values. If a list type has this property, then any types derived by retriction must also have the property.</p>
+            duplicate values. If a list type has this property, then any types derived by restriction must also have the property.</p>
         
         <p>A new constraining facet <a href="/schema-processing/extensions11/order" class="bodylink code">saxon:order</a> is
             available for list types. The value may be <code>ascending</code>
             or <code>descending</code>. If present, the items in the list must be
             in ascending or descending order (which implies that they must all be comparable). If a list type has this property, 
-            then any types derived by retriction must have the same property.</p>
+            then any types derived by restriction must have the same property.</p>
         
         <p>A new attribute <a href="/schema-processing/extensions11/saxon-order-unique" class="bodylink
             code">xs:unique/xs:field/@saxon:order="ascending|descending"</a> is available for use with uniqueness constraints.

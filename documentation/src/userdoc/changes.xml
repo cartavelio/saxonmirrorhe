@@ -234,7 +234,7 @@
    		noticeably to speed up navigation of the descendant axis.</p>
       
          <p>A number of helper classes have been introduced to achieve greater commonality between the support modules
-         for different object models. This should hopefully make it easier to add support modules for user-specific data mdodels.</p>
+         for different object models. This should hopefully make it easier to add support modules for user-specific data models.</p>
    		
          <p xmlns="" incompatible="true">The class <code>DocumentBuilderFactoryImpl</code>, which constructed a DOM wrapper around a
    		<code>TinyTree</code>, and which has been deprecated since 9.3, has now been removed.</p>
@@ -955,7 +955,7 @@
             
             <p xmlns="">It is now possible to set an extension function library at the level of an individual query
                      (via the <code java="net.sf.saxon.query.StaticQueryContext">StaticQueryContext</code> object), 
-                     or an individudual stylesheet (via the <code java="net.sf.saxon.trans.CompilerInfo">CompilerInfo</code> object. 
+                     or an individual stylesheet (via the <code java="net.sf.saxon.trans.CompilerInfo">CompilerInfo</code> object. 
                      Previously an extension
                      function library could only be defined at the <code java="net.sf.saxon.Configuration">Configuration</code> level.</p>
             
@@ -1622,7 +1622,7 @@ expression.</p>
                and extensibility features</li>
             <li content="para">Professional Edition (PE) includes everything that was in Saxon-B, plus some additional features
                previously only available in Saxon-SA, such as XQuery 1.1 support and higher-order functions</li>
-            <li content="para">Enteprise Edition (EE) is the successor to Saxon-SA, and includes all the capability of Saxon-SA
+            <li content="para">Enterprise Edition (EE) is the successor to Saxon-SA, and includes all the capability of Saxon-SA
                plus new features introduced in Saxon 9.2.</li>
          </ul>
  
@@ -2814,7 +2814,7 @@ this causes unnecessary failed attempts to locate corresponding classes on the c
 is that of an imported module. Two changes have been made to solve this problem: firstly, imported modules are now searched before
 attempting to dynamically load a Java class. Secondly, when running XQuery or XPath, the only URI format now recognized for Java
 extension functions is the recommended form <code>java:com.package.name.ClassName</code>. Other formats remain available in XSLT to
-allow a level of compability with other Java-based XSLT processors.</p>
+allow a level of compatibility with other Java-based XSLT processors.</p>
 
          <p xmlns="">The rules for type conversions when calling extension functions have been aligned more closely with the XPath 2.0
 rules, rather than the more flexible XPath 1.0 rules. For example it is no longer possible to supply a string as an
@@ -3548,7 +3548,7 @@ descendants that do not allow mixed content.</p>
 
          <p xmlns="">A new serialization parameter <code>saxon:suppress-indentation</code> is introduced for the XML output method.
 (It does not affect the HTML or XHTML output methods.) 
-The value of the attribute is a whitespace-aeparated list of element names,
+The value of the attribute is a whitespace-separated list of element names,
 and it works in the same way as <code>cdata-section-elements</code> (for example, values in <code>xsl:output</code>
 and <code>xsl:result-document</code> are cumulative). Its effect is that no indentation takes place for the
 children or descendants of any of the named elements (just as if they specified <code>xml:space="preserve"</code>.
@@ -4467,7 +4467,7 @@ without requiring that the attribute is typed as an ID in the DTD.</p>
 Thanks to Wolfgang Hoschek for providing these.</p>
 
          <p xmlns="">The ability to define user-written functions as memo functions is now available in XQuery as well as XSLT.
-In XQuery this is achieved by preceding the function decilaration with <code>declare option saxon:memo-function 'true'</code>.
+In XQuery this is achieved by preceding the function declaration with <code>declare option saxon:memo-function 'true'</code>.
 The effect is that the function caches its results, so if it is called again with the same arguments it returns the remembered
 result.</p>
          
@@ -4776,7 +4776,7 @@ instruction can therefore invoke the same template more than once. To implement 
 currentTemplate maintained in the context is now a Rule object rather than a Template object.</p>
 
       <p xmlns="">In schema-aware processing, improvements have been made to the type inferencing. The type
-of a path expresssion starting with a variable whose static type is <code>document-node(schema-element(x))</code>
+of a path expression starting with a variable whose static type is <code>document-node(schema-element(x))</code>
 is now inferred more precisely, and the cardinality of an expression using the child axis is also
 now inferred more precisely. This enables better compile-time detection of type errors, and in some cases
 better optimization.</p>
@@ -4968,7 +4968,7 @@ is set up to request schema-validation of source documents.</p>
 identifier, this is now stripped from the URI before calling the <code>URIResolver</code>.
 The <code>URIResolver</code> is now responsible
 for locating the document containing the referenced stylesheet module, while Saxon itself then locates the
-<code>xsl:stylesheet</code> element within that document using the fragment identifer as an ID value. There
+<code>xsl:stylesheet</code> element within that document using the fragment identifier as an ID value. There
 should be no change in behaviour if the default <code>URIResolver</code> is used.</p>
       </category>
       <category name="xquery10">
@@ -5939,7 +5939,7 @@ modified to remove its dependence on routines in the ICU product from IBM: these
 routines for handling UTF-16 encoding which already had equivalents in Saxon, and it seemed desirable
 to avoid introducing additional complexity into the software license. The Saxon version of the code has been used
 to run the conformance tests published by the Unicode consortium (with the exception of those tests
-that use chararacters not permitted in XML), using a test driver written in XSLT. The same code is
+that use characters not permitted in XML), using a test driver written in XSLT. The same code is
 also used to support the <code>normalization-form</code> serialization property. The normalization
 forms supported are NFC, NFD, NFKC, and NFKD (as well as the keyword "none"). The "fully-normalized"
 option is not implemented.</p>
@@ -6154,7 +6154,7 @@ namespace-sensitive values (xs:QName and xs:NOTATION).</p>
 may now be a list or union type. (Previously list types were allowed under restricted circumstances.)</p>
 
          <p xmlns="">The fixed value of an element or attribute may now be a namespace-sensitive value such as an xs:QName
-or xs:NOTATION. The default value may alse be namespace-sensitive; however, the default value
+or xs:NOTATION. The default value may also be namespace-sensitive; however, the default value
 will be rejected unless the namespace prefix it uses is in scope in the source document,
 and bound to the correct URI. (The schema
 specification is unclear on this point, but this seems to be the only reasonable interpretation.)</p>
@@ -7617,7 +7617,7 @@ applying this function to each group in turn. The groups are processed in order 
          <p xmlns="" test="qschema035 qschema036">A new higher-order extension function <code>saxon:analyze-string</code> is
 available (in Saxon-SA only). This is intended primarily
 for use in XQuery, which lacks XSLT's <code>xsl:analyze-string</code> construct. The function takes four or five parameters:
-the string to be analyzed, a regular expresion (regex), a function to process matching substrings,
+the string to be analyzed, a regular expression (regex), a function to process matching substrings,
  a function to process non-matching substrings, and optionally, a set of flags corresponding to those available
  on the <code>matches()</code> function. The function splits the string into a sequence of substrings, each of which
  either matches the regex or does not match it, and then calls one of the two functions as appropriate, with
@@ -7974,7 +7974,7 @@ serializes it as an empty file containing no XML declaration.</p>
 
 <p xmlns="">The <code>href</code> attribute of <code>xsl:result-document</code> can now be omitted. Generally this is done
 when writing the principal result tree, if you want to set the <code>validation</code> or <code>type</code>
-attributes. Don't do this if the stylesheet also writes output nodes before callling <code>xsl:result-document</code>
+attributes. Don't do this if the stylesheet also writes output nodes before calling <code>xsl:result-document</code>
 (it's an error to write two result trees to the same URI).</p>
 
 <p xmlns="">To achieve this, opening of the output file is delayed until the first attempt to write to it. A side-effect
@@ -8144,7 +8144,7 @@ the effective boolean value of a sequence.</p>
 user-defined types. A new class (actually an Interface) <code>ItemType</code> has been introduced; this
 and the occurrence indicator form the two parts of a <code>SequenceType</code>. The method <code>getItemType</code>
 on an expression now returns an object that implements this interface. For atomic values, this is an
-<code>AtomicType</code> object, which is also used in the heirarchy of schema types. In the case of user-defined
+<code>AtomicType</code> object, which is also used in the hierarchy of schema types. In the case of user-defined
 atomic types, this object contains a reference to the SimpleType object held in the schema data model
 (which will be available only in the schema-aware version of the product). 
 For nodes, the <code>ItemType</code> interface is implemented by a <code>NodeTest</code>,
@@ -8926,7 +8926,7 @@ as <code>E[c1 or c2]</code>. This avoids the need to evaluate E twice, and may a
 and third arguments are integers - it no longer does everything using double arithmetic.</p>
 
 <p xmlns="">The <code>StringValue</code> class can now encapsulate any <code>CharSequence</code>, not
-necessarily always a <code>String</code>. This avoids some unnnecessary conversions, though
+necessarily always a <code>String</code>. This avoids some unnecessary conversions, though
 for full effect the <code>Item#getStringValue()</code> method will also have to be changed to
 return a <code>CharSequence</code>.</p>
 
@@ -9374,7 +9374,7 @@ The Saxon implementation outputs the value of each item in a sequence as it is e
 a single function called <code>deep-equal</code>. {expr81, expr82}</p>
 
 <p xmlns="">The <code>round-half-to-even</code> function is implemented. Note that for doubles and floats,
-numbers ending in .5 do not always round as expected, because the true value may be slighly above
+numbers ending in .5 do not always round as expected, because the true value may be slightly above
 or below the decimal equivalent. {math-two 10-14}</p>
 
 <p xmlns="">The <code>substring</code> function no longer accepts an empty sequence for its second or third
@@ -9624,7 +9624,7 @@ conversion of anything to a string or number, or extraction of the first item of
 under XPath 2.0. With this mode off, these conversions must be done explicitly in the function call. The only
 conversions that happen automatically under 2.0 are extraction of the value from a node: if the node is untyped
 (which with Saxon 7.4 will almost invariably be the case), the untyped value is then cast to the type required
-by the function signature. This means you can supply an untyped attribute as an operand to the "+" oeprator or
+by the function signature. This means you can supply an untyped attribute as an operand to the "+" operator or
 the <code>round()</code> function, for example, but you cannot supply a string.</p>
 
 <p xmlns="">Division of two decimals (and also the <code>mod</code> operator) now produces a decimal. Previously it produced
@@ -9632,7 +9632,7 @@ a double. The scale of the resulting decimal (the number of digits after the dec
 the sum of the scales of the two decimals, plus 6. So, for example, 10.0 div 3 is 3.333333. There have
 been some other refinements to the <code>xs:decimal</code> implementation. Insignificant trailing zeros are always
 discarded. Conversion of a decimal to a string uses an integer representation if there is no fractional
-part, for example the result of <code>10.0 div 5.0</code> is diplayed as <code>2</code> (which doesn't
+part, for example the result of <code>10.0 div 5.0</code> is displayed as <code>2</code> (which doesn't
 match the current XPath specification).</p>
 
 <p xmlns="">Conversion of an empty sequence to a double now produces an empty sequence (not NaN as in XPath 1.0);
@@ -9872,7 +9872,7 @@ as appropriate.</p></li>
  the code in previous releases handled comparisons such as <code>(U, U, U) = (1, 2, '3')</code> correctly, where U
  is an untyped value. The problem here is that a mixture of string and numeric comparisons is required.
  I fixed this for the time being by changing the code so it always does a naive nested-loop comparison. This doesn't
- appear to have a noticable effect on performance in most cases: there will be some cases where
+ appear to have a noticeable effect on performance in most cases: there will be some cases where
  it is very inefficient, but these don't arise very often.</i></p></li>
 
 <li><p xmlns="">Other classes, notably the code for arithmetic expressions, also
@@ -10386,7 +10386,7 @@ variables or parameters for the value of the id or key.</p>
 may now appear on any element in the XSLT namespace. Note that these attributes are prefixed <code>xsl:</code>
 when used on a literal result element, but have no prefix when used on an XSLT element.</p>
 
-<p xmlns="">The attribute <code>[xsl:]default-xpath-namespace</code> is now available on all elements. It defines the defualt
+<p xmlns="">The attribute <code>[xsl:]default-xpath-namespace</code> is now available on all elements. It defines the default
 namespace to be used for unprefixed element names in path expressions and patterns.</p>
 
 <p xmlns="">The <code>xsl:apply-templates</code> element now allows <code>mode="#current"</code> and
@@ -10814,7 +10814,7 @@ would damage performance, so I have simply documented this as a dependency on th
 </ul>
 
 <p xmlns="">I have changed the implementation of temporary trees (result tree fragments). The FragmentValue class
-has disapeared. This delayed the construction of an actual tree until it the tree was actually used as
+has disappeared. This delayed the construction of an actual tree until it the tree was actually used as
 a node-set: the effect was to optimize simple uses of temporary trees but at considerable cost to the more
 general usage which is now permitted in XSLT 2.0. Also, the introduction of tinytrees has reduced the
 value of this optimization. Therefore, a temporary tree is now constructed immediately as a real tree.</p>

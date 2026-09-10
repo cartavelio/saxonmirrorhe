@@ -631,7 +631,7 @@
                <p>-stublib:filename</p>
             </td>
             <td>
-               <p>Import a set of stub functions (names and signatures) from the specifed JSON file.
+               <p>Import a set of stub functions (names and signatures) from the specified JSON file.
                   These functions will be added to the static context of the stylesheet, but any
                   attempt to call the functions will fail with a dynamic error. The main purpose is
                   to allow SaxonJS stylesheets to be compiled that at run-time will invoke external
@@ -2666,7 +2666,7 @@ result_documents = xslt_executable.get_result_documents()]]></code></pre>
                   filename = nullptr)</code> method (<code>set_save_xsl_message()</code> in Python) on the
                <code>XsltExecutable</code>. The first argument to the method is a boolean which indicates
                whether <code>xsl:message</code> output is sent to the standard error listener (the default is
-               true). The second argument can be used to send the <code>xsl:message</code> ouput to a
+               true). The second argument can be used to send the <code>xsl:message</code> output to a
                specified file: each message is appended at the end of the file. After executing the
                transformation, the <code>xsl:message</code> output can be retrieved using the
                <code>getXslMessages()</code> method (<code>get_xsl_messages()</code> in Python), which returns

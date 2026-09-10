@@ -1463,7 +1463,7 @@
         <setter class="net.sf.saxon.Configuration">setStandardErrorOutput</setter>
         <configfile>global/@standardErrorOutputFile</configfile>
         <configfiledesc>
-            <p>Redirects output which would otherwise go to the stardard error output stream
+            <p>Redirects output which would otherwise go to the standard error output stream
                     <code>System.err</code>, to this file.</p>
         </configfiledesc>
         <typedesc>A file name</typedesc>
@@ -1563,7 +1563,7 @@
         <platforms>J CS</platforms>
         <configfile>global/@streamingFallback</configfile>
         <configfiledesc>
-            <p>If true, then constructs for which streaming is requested will be exectued in
+            <p>If true, then constructs for which streaming is requested will be executed in
                 non-streaming mode if the code is not actually streamable.</p>
         </configfiledesc>
         <desc>
@@ -1902,7 +1902,7 @@
                 <link>net.sf.saxon.lib.UnparsedTextURIResolver</link> interface</typedesc>
         <desc>
             <p>The supplied <code>UnparsedTextURIResolver</code> will be used to resolve
-                (dereference) all URIs specifed in calls to the <code>unparsed-text()</code>,
+                (dereference) all URIs specified in calls to the <code>unparsed-text()</code>,
                     <code>unparsed-text-lines()</code>, and <code>unparsed-text-available()</code>
                 functions.</p>
         </desc>
@@ -1924,7 +1924,7 @@
                 <link>net.sf.saxon.lib.UnparsedTextURIResolver</link> interface</typedesc>
         <desc>
             <p>An instance of the specified <code>UnparsedTextURIResolver</code> class will be
-                created, and used to resolve (dereference) all URIs specifed in calls to the
+                created, and used to resolve (dereference) all URIs specified in calls to the
                     <code>unparsed-text()</code>, <code>unparsed-text-lines()</code>, and
                     <code>unparsed-text-available()</code> functions.</p>
         </desc>
@@ -1951,7 +1951,7 @@
         <commandline for="TQ">-r:classname</commandline>
         <desc>
             <p>An instance of the specified <code>URIResolver</code> class will be created, and used
-                to resolve (dereference) all URIs specifed in calls to the <code>doc()</code> and
+                to resolve (dereference) all URIs specified in calls to the <code>doc()</code> and
                     <code>document()</code> functions, as well as URIs used in
                     <code>xsl:include</code> and <code>xsl:import</code> and location hints for
                 XQuery modules and XSD schema documents.</p>
