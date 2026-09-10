@@ -410,7 +410,7 @@ public class SaxonDeepEqual extends SystemFunction {
                 a1 = n1.iterateAttributeAxis(AnyGNode.TEST);
                 while ((att1 = (NodeInfo)a1.next()) != null) {
                     StructuredQName required = att1.getQName();
-                    SequenceIterator a2iter = n2.iterateAttributeAxis(new NamedXNodeType(Type.ATTRIBUTE, required,context.getConfiguration()));
+                    SequenceIterator a2iter = n2.iterateAttributeAxis(new NamedXNodeType(Type.ATTRIBUTE, required, context.getConfiguration()));
                     NodeInfo att2 = (NodeInfo)a2iter.next();
 
                     if (att2 == null) {
