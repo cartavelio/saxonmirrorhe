@@ -500,7 +500,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             // says that the uri is absolute...
             try {
                 request.uri = new URI(baseURI).resolve(href).toString();
-            } catch (URISyntaxException ex) {
+            } catch (Exception ex) {
                 // Nevermind, just leave it relative
             }
         }
