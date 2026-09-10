@@ -1872,6 +1872,9 @@ public class XPathParser {
                     break;
                 case "type":
                     checkLanguageVersion40();
+                    if (language != ParsedLanguage.XSLT_PATTERN) {
+                        grumble("The syntax type(N) is allowed only in XSLT patterns, not in XPath expressions");
+                    }
                     nextToken();
                     if (t.currentToken == Token.NAME) {
                         StructuredQName qName = getQNameParser().parse(t.currentTokenValue, NamespaceUri.NULL);
@@ -1883,9 +1886,7 @@ public class XPathParser {
                             return realType;
                         }
                     }
-                    if (language != ParsedLanguage.XSLT_PATTERN) {
-                        grumble("In an XPath expression (as distinct from an XSLT pattern), type(N) must refer to a named item type");
-                    }
+
                     ItemType it = parseItemType();
                     expect(Token.RPAR);
                     nextToken();
@@ -2766,19 +2767,7 @@ public class XPathParser {
 
             case Token.PERCENT: {
                 AnnotationList annotations = parseAnnotationsList();
-                if (t.currentToken == Token.THIN_ARROW) {
-                    checkLanguageVersion40();
-                    nextToken();
-                    annotations.check(env.getConfiguration(), "IF");
-                    if (t.currentToken == Token.LPAR) {
-                        return parseInlineFunction(annotations);
-                    } else if (t.currentToken == Token.LCURLY) {
-                        return parseFocusFunction(annotations);
-                    } else {
-                        grumble("Expected '(' or '{' after '->'");
-                    }
-                }
-                if (!t.currentTokenValue.equals("function")) {
+                if (!(t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
                     grumble("Expected 'function' to follow the annotation assertion");
                 }
                 annotations.check(env.getConfiguration(), "IF");
@@ -2787,20 +2776,6 @@ public class XPathParser {
                 } else {
                     return parseInlineFunction(annotations);
                 }
-            }
-            case Token.THIN_ARROW: {
-                checkLanguageVersion40();
-                nextToken();
-                if (t.currentToken == Token.LPAR) {
-                    AnnotationList annotations = AnnotationList.EMPTY;
-                    return parseInlineFunction(annotations);
-                } else if (t.currentToken == Token.LCURLY) {
-                    AnnotationList annotations = AnnotationList.EMPTY;
-                    return parseFocusFunction(annotations);
-                } else {
-                    grumble("Expected '(' or '{' after '->'");
-                }
-                break;
             }
             case Token.KEYWORD_LBRA:
                 if (t.currentTokenValue.equals("function") || (t.currentTokenValue.equals("fn"))) {

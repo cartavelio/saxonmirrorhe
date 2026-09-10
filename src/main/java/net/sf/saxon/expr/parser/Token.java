@@ -724,7 +724,7 @@ public abstract class Token {
         tokens[COLON] = ":";
         tokens[FAT_ARROW] = "=>";
         tokens[MAPPING_ARROW] = "=!>";
-        tokens[THIN_ARROW] = "->";
+        tokens[THIN_ARROW] = "->";    // no longer used
         tokens[AND_ALSO] = "andAlso";
         tokens[OR_ELSE] = "orElse";
         tokens[STRING_CONSTRUCTOR_INITIAL] = "``[<string>`{";

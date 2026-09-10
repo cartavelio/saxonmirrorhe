@@ -91,13 +91,19 @@
         
         <h2>Dropped experimental features</h2>
         
-        <p>Some enhancements that didn't survive in the 4.0 draft specifications
+        <p>Some proposed enhancements that didn't survive into the current 4.0 draft specifications
         have been dropped:</p>
         
         <ul>
-            <li><p>The ternary conditional expression <code>test ?? A !! B</code></p></li>
-            <li><p></p></li>
-            <li><p></p></li>
+            <li><p>The ternary conditional expression <code>test ?? A !! B</code>.</p></li>
+            <li><p>Record tests using the keyword "tuple" rather than "record".</p></li>
+            <!--<li><p>Item types of the form "atomic(X)"</p></li>-->
+            <li><p>Lambda expressions of the form <code>($a, $b) -> {$a + $b}</code></p></li>
+            <li><p>The syntax <code>type(T)</code> is now allowed only in XSLT patterns, not
+            as an item type in XPath expressions. T may be any item type, including the
+            name of a type alias.</p></li>
+            <li><p>The "thin arrow" notation for inline functions (<code>->{.+1}</code> or
+            <code>->($x){$x+1}</code>).</p></li>
             <li><p></p></li>
             <li><p></p></li>
         </ul>

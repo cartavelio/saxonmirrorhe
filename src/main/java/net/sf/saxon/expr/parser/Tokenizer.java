@@ -651,7 +651,7 @@ public final class Tokenizer {
                 case '-':
                     if (inputOffset < inputLength && isGreaterThanChar(input.charAt(inputOffset))) {
                         inputOffset++;
-                        nextToken = Token.THIN_ARROW;
+                        nextToken = Token.THIN_ARROW;   // no longer used
                         return;
                     }
                     nextToken = Token.MINUS;   // not detected if part of a name
@@ -720,6 +720,7 @@ public final class Tokenizer {
                     return;
                 case FULL_WIDTH_LT:
                 case '<':
+                    // TODO: disallow mixing symbols in '<<'
                     if (c == FULL_WIDTH_LT && languageLevel < 40) {
                         throw new XPathException("Operator character FULL_WIDTH_LESS_THAN (xFF1C) requires XPath 4.0 to be enabled");
                     }
@@ -750,6 +751,7 @@ public final class Tokenizer {
                     return;
                 case '>':
                 case FULL_WIDTH_GT:
+                    // TODO: disallow mixing symbols in '>>'
                     if (c == FULL_WIDTH_GT && languageLevel < 40) {
                         throw new XPathException("Operator character FULL_WIDTH_GREATER_THAN (xFF1E) requires XPath 4.0 to be enabled");
                     }
