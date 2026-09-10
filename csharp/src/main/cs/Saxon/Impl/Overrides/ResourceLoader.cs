@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Text;
 using System.Xml.XPath;
 using Saxon.Ejava.io;
 using Saxon.Ejava.net;
@@ -132,13 +133,18 @@ namespace Saxon.Impl.Overrides {
 
             return getReaderFromStream(inputStream, resourceEncoding);
         }
-        
+
         public static TextReader getReaderFromStream(Stream input, string encoding) {
-            return new StreamReader(input, System.Text.Encoding.GetEncoding(encoding));
+            if (encoding.ToLowerInvariant() == "utf-16") {
+                encoding = "utf-16be";
+            }
+
+            return new StreamReader(input,
+                System.Text.Encoding.GetEncoding(encoding,
+                    new EncoderExceptionFallback(),
+                    new DecoderExceptionFallback()));
         }
     }
-    
-    
 }
 
 // Copyright (c) 2021 - 2023 Saxonica Limited
