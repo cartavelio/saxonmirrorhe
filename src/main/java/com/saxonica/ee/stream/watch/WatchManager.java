@@ -495,7 +495,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
     @Override
     public void endElement() throws XPathException {
-        //trace("endElement " + elementStack[elementStackTop - 1].getDisplayName());
+        trace("endElement " + elementStack[elementStackTop - 1].getDisplayName());
         for (Receiver out : activeReceiverStack) {
             out.endElement();
         }
