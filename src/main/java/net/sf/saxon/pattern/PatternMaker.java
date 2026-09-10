@@ -44,10 +44,6 @@ public class PatternMaker {
     public static Pattern fromExpression(Expression expression, Configuration config, boolean is30) throws XPathException {
         Pattern result = expression.toPattern(config);
         ExpressionTool.copyLocationInfo(expression, result);
-//        result.setOriginalText(expression.toString());
-//        result.setSystemId(expression.getSystemId());
-//        result.setLineNumber(expression.getLineNumber());
-        //result.setExecutable(expression.getExecutable());
         return result;
     }
 
