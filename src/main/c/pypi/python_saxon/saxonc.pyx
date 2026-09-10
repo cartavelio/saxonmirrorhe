@@ -3046,7 +3046,7 @@ cdef class PyXQueryProcessor:
         '''make_c_str(name)'''
         py_s_string = name.encode('UTF-8') if name is not None else None
         c_str = py_s_string if name is not None else ""
-        if c_str is not NULL:
+        if name is not None and value is not None:
             value.thisvptr.incrementRefCount()
             self.thisxqptr.setParameter(c_str, value.thisvptr)
      def remove_parameter(self, name):
