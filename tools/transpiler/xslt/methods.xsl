@@ -99,8 +99,11 @@
       <xsl:param name="rules" as="map(xs:string, xs:string)"/>
       <xsl:variable name="key" as="xs:string" 
          select="$methodCall/name/@identifier || '#' || count($methodCall/arguments/argument)"/>
-      <xsl:variable name="rule" as="xs:string" 
+      <xsl:variable name="rule" as="xs:string?" 
          select="($rules($key), $rules('*'))[1]"/>
+      <xsl:if test="empty($rule)">
+         <xsl:message terminate="yes">Transpiling {tokenize(base-uri($methodCall),'/')[last()]}: no rule found for {$key}</xsl:message>
+      </xsl:if>
       <xsl:sequence select="f:formatCall($methodCall, $rule)"/>
    </xsl:function>
    
@@ -820,7 +823,8 @@
       priority="20" mode="methods">
       <xsl:sequence select="f:applyFormat(., map{
          'get#1':         '%scope%[%args%]',
-         'set#1':         '%scope%.Set(%args%, true)'
+         'set#1':         '%scope%.Set(%args%, true)',
+         'clone#0':       '%scope%.Clone()'
          })"/>
    </xsl:template>
    
