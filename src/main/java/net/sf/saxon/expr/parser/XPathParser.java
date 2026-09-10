@@ -3571,7 +3571,7 @@ public class XPathParser {
                             }
                             nextToken();
                         }
-                        if (schemaType == AnyType.getInstance() ||
+                        if ((schemaType == AnyType.getInstance() && nillable) ||
                                 (nodeKind == Type.ATTRIBUTE && schemaType == AnySimpleType.getInstance())) {
                             result = nodeTest;
                         } else {
