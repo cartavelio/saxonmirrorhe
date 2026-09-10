@@ -31,8 +31,7 @@ public class Evaluate extends SystemFunction {
 
     protected IndependentContext makeStaticContext(XPathContext context, NodeInfo namespaceOrigin, String baseUri) {
         RetainedStaticContext rsc = getRetainedStaticContext();
-        Configuration config = context.getConfiguration();
-        IndependentContext env = new IndependentContext(config);
+        IndependentContext env = rsc.reinstate();
         env.setBaseURI(baseUri);
         env.setExecutable(context.getController().getExecutable());
         env.setXPathLanguageLevel(31);
@@ -51,11 +50,6 @@ public class Evaluate extends SystemFunction {
         } else {
             env.setFunctionLibrary(context.getController().getExecutable().getFunctionLibrary());
         }
-        env.setDecimalFormatManager(getRetainedStaticContext().getDecimalFormatManager());
-//        if (rsc.getPackageData().isSchemaAware()) {
-//            env.setImportedSchemaNamespaces(rsc.);
-//        }
-
         return env;
     }
 
