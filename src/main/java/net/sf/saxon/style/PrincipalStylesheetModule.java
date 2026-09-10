@@ -1508,38 +1508,6 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
         }
     }
 
-
-    /**
-     * Ask whether a schema with a given namespace has been imported
-     *
-     * @param targetNamespace The target namespace of the required schema.
-     * @return true if a a schema with this namespace has been imported.
-     */
-
-    protected boolean isImportedSchemaNamespace(NamespaceUri targetNamespace) {
-        return stylesheetPackage.getImportedSchemaNamespaces().contains(targetNamespace);
-    }
-
-    /**
-     * Register that a schema with a given namespace has been imported
-     *
-     * @param targetNamespace The target namespace of the imported schema.
-     */
-
-    public void addImportedSchemaNamespace(NamespaceUri targetNamespace) {
-        stylesheetPackage.getImportedSchemaNamespaces().add(targetNamespace);
-    }
-
-    /**
-     * Get the set of schema namespaces that have been imported
-     *
-     * @return the set of imported namespaces.
-     */
-
-    protected Set<NamespaceUri> getImportedSchemaTable() {
-        return stylesheetPackage.getImportedSchemaNamespaces();
-    }
-
     /**
      * Get a character map, identified by the fingerprint of its name.
      * Search backwards through the stylesheet.

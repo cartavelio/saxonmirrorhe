@@ -330,6 +330,10 @@ public class PackageLoaderHE implements IPackageLoader {
 
         readGlobalContext(packageElement);
         readSchemaNamespaces(packageElement);
+        importedSchema = readSchema(packageElement);
+        if (importedSchema != null) {
+            pack.setImportedSchema(importedSchema);
+        }
         readKeys(packageElement);
         readComponents(packageElement, false);
         NodeInfo overridden = packageElement.iterateAxis(AxisInfo.CHILD,
@@ -384,6 +388,11 @@ public class PackageLoaderHE implements IPackageLoader {
 
     protected void readSchemaNamespaces(NodeInfo packageElement) throws XPathException {
         // No action in Saxon-HE
+    }
+
+    protected Schema readSchema(NodeInfo packageElement) throws XPathException {
+        // No action in Saxon-HE
+        return null;
     }
 
     private void readKeys(NodeInfo packageElement) throws XPathException {
