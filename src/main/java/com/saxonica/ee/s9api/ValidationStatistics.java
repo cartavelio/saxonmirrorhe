@@ -32,6 +32,7 @@ public class ValidationStatistics {
         return recipient;
     }
 
+    //#if CSHARP==false
     public void report(Processor processor, Destination destination) throws SaxonApiException {
         if (collectedStats.size() > 0) {
             StatisticsReporter reporter = new StatisticsReporter();
@@ -39,6 +40,7 @@ public class ValidationStatistics {
             reporter.notifyValidationStatistics(collectedStats.get(collectedStats.size() - 1));
         }
     }
+    //#endif
 }
 
 // Copyright (c) 2018-2020 Saxonica Limited

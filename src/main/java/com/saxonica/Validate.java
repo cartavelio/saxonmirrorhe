@@ -9,6 +9,7 @@ import net.sf.saxon.lib.StandardInvalidityHandler;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.CommandLineOptions;
+import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.SchemaException;
@@ -348,7 +349,7 @@ public class Validate {
             if (showTime && !schemaFileNames.isEmpty()) {
                 long endTime = now();
                 config.getLogger().info("Schema checking successful. Time: " + (endTime - startTime)/1000000 + "ms.");
-                CommandLineOptions.showMemoryUsed();
+                config.getLogger().info(Timer.showMemoryUsed());
                 //TimeUnit.MINUTES.sleep(1); // Useful for getting a heap dump
             }
 
@@ -631,7 +632,7 @@ public class Validate {
         if (showTime) {
             long endTime = now();
             config.getLogger().info("Validation time: " + (endTime - startTime)/1000000 + "ms.");
-            CommandLineOptions.showMemoryUsed();
+            config.getLogger().info(Timer.showMemoryUsed());
         }
     }
 
