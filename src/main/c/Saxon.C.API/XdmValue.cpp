@@ -113,6 +113,8 @@ XdmValue::XdmValue(int64_t val, bool arr) {
     }
   }
   operator delete(results);
+  j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)val);
+  val = SXN_UNSET;
 }
 
 void XdmValue::resetRelinquishedItems(){
@@ -136,7 +138,7 @@ void XdmValue::resetRelinquishedItems(){
 XdmValue::~XdmValue() {
   if (getenv("SAXONC_DEBUG_FLAG")) {
     std::cerr << "~XdmValue destructor called:" << refCount
-              << " ob ref=" << (this)  << std::endl;
+              << " ob ref=" << (this)  << " j_object ref="<<((long)jValues)<< std::endl;
   }
 
   if (xdmSize > 0 && values != nullptr) {
@@ -346,8 +348,11 @@ XDM_TYPE XdmValue::getType() { return XDM_VALUE; }
 
 
  void XdmValue::resetValue(int64_t newValue){
+	if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr << "XdmValue resetValue called ref="<<((long)jValues) << std::endl;
+    }
    jValues = SXN_UNSET;
-   for(int i =0; i < xdmSize; i++){
+   /*for(int i =0; i < xdmSize; i++){
    		values[i]->resetValue(newValue);
-   }
+   }*/
  }

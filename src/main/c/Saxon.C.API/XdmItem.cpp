@@ -129,6 +129,9 @@ void XdmItem::incrementRefCount() {
 
 
 void XdmItem::resetValue(int64_t newValue) {
+	if (getenv("SAXONC_DEBUG_FLAG")) {
+          std::cerr << "XdmItem resetItem called ref="<<((long)value) << std::endl;
+    }
   value = newValue;
 }
 

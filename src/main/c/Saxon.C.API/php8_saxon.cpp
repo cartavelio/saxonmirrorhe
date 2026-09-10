@@ -1837,7 +1837,9 @@ void * makeXdmValueFromPHPZVal(SaxonProcessor * nprocessor, zval * retval){
       if(resultValue == nullptr){
         zend_throw_exception(zend_ce_exception, "Error in converting PHP return type to XdmValue from user extension function", 0);
       }
-      std::cerr<<"makeXdmValueFromPHP return.underlying ref= "<<resultValue->getUnderlyingValue()<<std::endl;
+      if (getenv("SAXONC_DEBUG_FLAG")) {
+      	std::cerr<<"makeXdmValueFromPHP return.underlying ref= "<<resultValue->getUnderlyingValue()<<std::endl;
+      }
 
       resultVoidValue = (void *)resultValue->getUnderlyingValue();
       resultValue->resetValue(SXN_UNSET);
@@ -2024,7 +2026,7 @@ void * phpNativeCall(char * functionName, void * proc, int useNativeTypes, int n
 
             zend_throw_exception(zend_ce_exception, "Error found in converting user function argument to XdmValue", 0);
           }
-
+		  valuei->incrementRefCount();
           zend_vvobj = Z_OBJ_P(&params[i]);
           vvobj = (xdmValue_object *)((char *)zend_vvobj - XtOffsetOf(xdmValue_object, std));
           assert (vvobj != NULL);

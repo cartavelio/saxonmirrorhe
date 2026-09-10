@@ -304,9 +304,12 @@ function testTwoSequence($saxonProc) {
              $result3 = $xpath->evaluate("ms:twoSequenceParam3(['a','b','c'], [1,2,3])");
              if($result3 != null) {
                 $size = $result3->size();
-                $value = $result3->itemAt(0)->getStringValue();
-                echo 'Output size='.$size." Result for 1st item = ".$value;
-                echo "\n";
+                $value = $result3->itemAt(0);
+                if($value->isArray()) {
+                    $arrValue1 = $value->getArray();
+                    echo 'Output size='.$size." Result for 1st item = ".$arrValue1->get(0)->toString();
+                    echo "\n";
+                }
              }
          } catch (Exception $e) {
              echo 'Caught exception: ', $e->getMessage(), "\n";
