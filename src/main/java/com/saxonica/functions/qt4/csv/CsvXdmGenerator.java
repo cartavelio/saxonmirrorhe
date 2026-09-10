@@ -129,23 +129,6 @@ class CsvXdmGenerator {
         return columnFilter;
     }
 
-    public MapItem fromRowSequence(Sequence rows) throws XPathException {
-        if (shouldExtractColumns) {
-            SequenceIterator iter = rows.iterate();
-            MapItem columnsRecord = generateColumnsRecord(iter);
-            return generateCsvRecord(columnsRecord, iter);
-        } else {
-            return generateCsvRecord(EMPTY_COLUMNS_RECORD, rows.iterate());
-        }
-    }
-
-    private MapItem generateCsvRecord(MapItem columns, SequenceIterator iter) throws XPathException {
-        DictionaryMap csvRecord = new DictionaryMap();
-        csvRecord.initialPut("columns", columns);
-        csvRecord.initialPut("rows", generateRows(iter, columns));
-        return csvRecord;
-    }
-
     private List<Integer> getColumnIndexes(ArrayItem rowArray) throws XPathException {
         if (columnIndexes != null) return columnIndexes;
         if (shouldFilterColumns) {
@@ -167,6 +150,23 @@ class CsvXdmGenerator {
                     .collect(Collectors.toList());
         }
         return columnIndexes;
+    }
+
+    public MapItem fromRowSequence(Sequence rows) throws XPathException {
+        if (shouldExtractColumns) {
+            SequenceIterator iter = rows.iterate();
+            MapItem columnsRecord = generateColumnsRecord(iter);
+            return generateCsvRecord(columnsRecord, iter);
+        } else {
+            return generateCsvRecord(EMPTY_COLUMNS_RECORD, rows.iterate());
+        }
+    }
+
+    private MapItem generateCsvRecord(MapItem columns, SequenceIterator iter) throws XPathException {
+        DictionaryMap csvRecord = new DictionaryMap();
+        csvRecord.initialPut("columns", columns);
+        csvRecord.initialPut("rows", generateRows(iter, columns));
+        return csvRecord;
     }
 
     private MapItem generateColumnsRecord(SequenceIterator rowsIter) throws XPathException {
@@ -198,7 +198,6 @@ class CsvXdmGenerator {
         columns.initialPut("fields", rowAsSequence(fields));
         return HashTrieMap.copy(columns);
     }
-
 
     private MapItem generateColumnsRecord(ArrayItem rowArray) throws XPathException {
         if (rowArray == null) return EMPTY_COLUMNS_RECORD;
@@ -250,6 +249,7 @@ class CsvXdmGenerator {
             }
         }
     }
+
     class BoundedRow implements Iterable<GroundedValue> {
         private final ArrayItem row;
         private final int size;
@@ -303,10 +303,8 @@ class CsvXdmGenerator {
 
     private GroundedValue generateRows(SequenceIterator rows, MapItem columns) throws XPathException {
         UnboundFieldGetter fieldGetter = new UnboundFieldGetter(columns);
-//        Spliterator<ArrayItem> rowsSpliterator = Spliterators.spliteratorUnknownSize(new WrappingJavaIterator<>(rows), Spliterator.ORDERED);
         try {
             return SequenceExtent.from(ItemMappingIterator.map(rows, row -> generateRowRecord((ArrayItem) row, fieldGetter)));
-//            return SequenceExtent.from(new IteratorWrapper(StreamSupport.stream(rowsSpliterator, false).map(row -> generateRowRecord(row, fieldGetter)).iterator()));
         } catch (UncheckedXPathException ex) {
             throw ex.getXPathException();
         }
