@@ -16,8 +16,8 @@
   <p>For further information about localizing the formatting of numbers and dates see:</p>
   
   <ul>
-    <li><a class="bodylink" href="localizing-numbers-and-dates">Localizing numbers and dates</a></li>
     <li><a class="bodylink" href="ICU-numbers-and-dates">Numbers and dates from ICU</a></li>
+    <li><a class="bodylink" href="localizing-numbers-and-dates">Writing a localization plug-in</a></li>   
   </ul>
   
   <p>For further information about using collations see:</p>
@@ -64,7 +64,7 @@
         providing plug-ins for some common European languages.</li>
       <li class="javaonly">In SaxonJ-PE and -EE, spellout numbering is available via the ICU4J library, which
         supports a large variety of languages. This does not require any special configuration.</li>
-      <li class="csonly">In SaxonCS, spellout numbering is similarly available via the ICU4N library.</li>
+      <li class="csonly">In SaxonCS, spellout numbering is available via the ICU4N library.</li>
     </ul>
 
     <p>As well as spellout numbering, the choice of language also affects ordinal numbering, for example 10 is
@@ -74,7 +74,7 @@
       href="../ICU-numbers-and-dates">Numbers and dates from ICU</a>.</p>
 
     <p>For more details on writing a plug-in for localizing numbers and dates, see <a class="bodylink"
-        href="../localizing-numbers-and-dates">Localizing numbers and dates</a>.</p>
+        href="../localizing-numbers-and-dates">Writing a localization plug-in</a>.</p>
 
   </section>
 
