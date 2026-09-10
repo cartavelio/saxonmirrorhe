@@ -3,13 +3,13 @@
 <exceptions>
 
    <exception test-set="fn-deep-equal" 
-      test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="not implemented">
+      test-case="fn-deep-equal-mix-args-017a fn-deep-equal-mix-args-018a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
    
    <exception test-set="op-same-key" 
-      test-case="same-key-006a" run="false" report="not implemented">
+      test-case="same-key-006a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-12-13"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
@@ -17,7 +17,7 @@
    <exception test-set="fn-distinct-values" 
       test-case="cbcl-distinct-values-002c
                  fn-distinct-values-mixed-args-012a
-                 fn-distinct-values-mixed-args-013a" run="false" report="not implemented">
+                 fn-distinct-values-mixed-args-013a" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
@@ -32,17 +32,17 @@
       <reason>Bug #30 raised against test case</reason>
    </exception>-->
    
-   <exception test-set="fn-range"  run="false" report="spec not agreed">
+   <exception test-set="fn-range"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Function neither specified nor implemented</reason>
    </exception>
    
-   <exception test-set="fn-range-from"  run="false" report="spec not agreed">
+   <exception test-set="fn-range-from"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Function neither specified nor implemented</reason>
    </exception>
    
-   <exception test-set="fn-range-to"  run="false" report="spec not agreed">
+   <exception test-set="fn-range-to"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Function neither specified nor implemented</reason>
    </exception>
@@ -61,14 +61,14 @@
       fn-replace-110
       fn-replace-111
       fn-replace-112
-      fn-replace-113" run="false" report="spec not agreed">
+      fn-replace-113" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Spec for fn:replace#4 not yet agreed and not implemented</reason>
    </exception>
    
    <exception test-set="fn-tokenize" test-case="  
       fn-tokenize-40-001
-      fn-tokenize-40-002" run="false" report="not implemented">
+      fn-tokenize-40-002" run="false" report="n/a">
       <created by="Michael Kay" on="2023-01-17"/>
       <reason>Tokenize#2 does not currently allow second argument to be an empty sequence</reason>
    </exception>
@@ -80,7 +80,7 @@
       fn-remove-40-004
       fn-remove-40-005
       fn-remove-40-006
-      fn-remove-40-008" run="false" report="not implemented">
+      fn-remove-40-008" run="false" report="n/a">
       <created by="Michael Kay" on="2023-01-17"/>
       <reason>Remove does not currently allow second argument to be a sequence</reason>
    </exception>
@@ -89,39 +89,39 @@
    
    
  
-   <exception test-set="fn-slice"  run="false" report="not implemented">
+   <exception test-set="fn-slice"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-08-09"/>
       <reason>Spec unclear; depends on keyword arguments</reason>
    </exception>
    
    
    
-   <exception test-set="array-partition"  run="false" report="not implemented">
+   <exception test-set="array-partition"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Spec unclear; depends on keyword arguments</reason>
    </exception>
    
-   <exception test-set="array-slice"  run="false" report="not implemented">
+   <exception test-set="array-slice"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Spec unclear; depends on keyword arguments</reason>
    </exception>
    
-   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="known bug in ICU">
+   <exception test-set="misc-UCACollation" test-case="UCA-reorder-codes-009 UCA-reorder-codes-010" run="false" report="notRun">
       <created by="Michael Kay" on="2018-02-01"/>
       <reason>Known bug in ICU</reason>
    </exception>
    
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-build-uri-1" run="false" report="not yet implemented">
+   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-build-uri-1" run="false" report="n/a">
       <created by="Michael Kay" on="2022-12-02"/>
       <reason>Function fn-build-uri not yet implemented</reason>
    </exception>
    
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-parse-uri-1" run="false" report="not yet implemented">
+   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-parse-uri-1" run="false" report="n/a">
       <created by="Michael Kay" on="2022-12-02"/>
       <reason>Function fn-parse-uri not yet implemented</reason>
    </exception>
    
-   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-iterate-while-1" run="false" report="bug in test">
+   <exception test-set="misc-BuiltInKeywords" test-case="Keywords-fn-iterate-while-1" run="false" report="disputed">
       <created by="Michael Kay" on="2022-12-02"/>
       <reason>Generated test appears to be incorrect</reason>
    </exception>
@@ -148,30 +148,30 @@
    
    
    
-   <exception test-set="prod-ByExpr"  run="false" report="not implemented">
+   <exception test-set="prod-ByExpr"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Not yet implemented (spec not agreed)</reason>
    </exception>
    
    <exception test-set="prod-CastExpr" test-case=" K-SeqExprCast-76a
-      K-SeqExprCast-81a"  run="false" report="not implemented">
+      K-SeqExprCast-81a"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>4.0 change in numeric comparison semantics not yet implemented</reason>
    </exception>
    
   
    
-   <exception test-set="prod-ThinArrow"  run="false" report="not implemented">
+   <exception test-set="prod-ThinArrow"  run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Not yet implemented</reason>
    </exception>
    
-   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="not implemented">
+   <exception test-set="prod-IfExpr" test-case="reject-proposed-ternary-operator" run="false" report="n/a">
       <created by="Michael Kay" on="2022-11-23"/>
       <reason>Ternary conditionals implemented in Saxon 12, but now dropped from spec.</reason>
    </exception>
    
-   <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="insufficient tests">
+   <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
    </exception>
