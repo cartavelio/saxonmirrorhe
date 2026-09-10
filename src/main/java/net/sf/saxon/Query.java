@@ -39,8 +39,10 @@ import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,6 +203,8 @@ public class Query {
         //#if CSHARP==false
         options.addRecognizedOption("TP", CommandLineOptions.TYPE_FILENAME,
                                     "Use profiling trace listener, with specified output file");
+        options.addRecognizedOption("TPxsl", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "Stylesheet for formatting -TP output");
         //#endif
         options.addRecognizedOption("traceout", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "File for output of trace() messages");
@@ -648,16 +652,28 @@ public class Query {
         //#if CSHARP==false
         value = options.getOptionValue("TP");
         if (value != null) {
-            TimingTraceListener listener = new TimingTraceListener();
-            config.setTraceListener(listener);
+            TimingTraceListener traceListener = new TimingTraceListener();
+            config.setTraceListener(traceListener);
             config.setLineNumbering(true);
             config.getDefaultStaticQueryContext().setCodeInjector(new TimingCodeInjector());
             if (!value.isEmpty()) {
                 try {
-                    listener.setOutputDestination(
+                    traceListener.setOutputDestination(
                             new StandardLogger(new File(value)));
                 } catch (FileNotFoundException e) {
                     badUsage("Trace output file " + value + " cannot be created");
+                }
+            }
+            String formatter = options.getOptionValue("TPxsl");
+            if (formatter != null) {
+                try {
+                    if (useURLs) {
+                        traceListener.setStylesheet(new URL(formatter));
+                    } else {
+                        traceListener.setStylesheet(new File(formatter).toURI().toURL());
+                    }
+                } catch (MalformedURLException e) {
+                    System.err.println("Invalid URL " + formatter + " - ignored");
                 }
             }
         }

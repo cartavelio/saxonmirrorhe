@@ -38,6 +38,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +70,7 @@ public class TimingTraceListener implements TraceListener {
 
     private final Map<Traceable, Integer> recursionDepth = new HashMap<>();
     private HostLanguage lang = HostLanguage.XSLT;
+    private URL stylesheet = null;
 
     /**
      * Set the PrintStream to which the output will be written.
@@ -80,6 +82,15 @@ public class TimingTraceListener implements TraceListener {
     @Override
     public void setOutputDestination(Logger stream) {
         out = stream;
+    }
+
+    /**
+     * Set the URI of the stylesheet to be used for formatting the results
+     * @param stylesheet the URI of the stylesheet
+     */
+
+    public void setStylesheet(URL stylesheet) {
+        this.stylesheet = stylesheet;
     }
 
     /**
@@ -264,7 +275,16 @@ public class TimingTraceListener implements TraceListener {
      */
 
     protected InputStream getStylesheetInputStream() {
-        return Version.platform.locateResource("profile.xsl", new ArrayList<>());
+        if (stylesheet == null) {
+            return Version.platform.locateResource("profile.xsl", new ArrayList<>());
+        } else {
+            try {
+                return stylesheet.openConnection().getInputStream();
+            } catch (IOException e) {
+                System.err.println("Unable to read " + stylesheet + "; using default stylesheet for -TP output");
+                return Version.platform.locateResource("profile.xsl", new ArrayList<>());
+            }
+        }
     }
 
 }

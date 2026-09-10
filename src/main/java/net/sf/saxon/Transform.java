@@ -33,8 +33,10 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -197,6 +199,8 @@ public class Transform {
         //#if CSHARP==false
         options.addRecognizedOption("TP", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use profiling trace listener, with specified output file");
+        options.addRecognizedOption("TPxsl", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "Stylesheet for formatting -TP output");
         options.addRecognizedOption("threads", CommandLineOptions.TYPE_INTEGER | CommandLineOptions.VALUE_REQUIRED,
                                     "Run stylesheet on directory of files divided in N threads");
         //#endif
@@ -555,6 +559,18 @@ public class Transform {
                 if (!value.isEmpty()) {
                     traceListener.setOutputDestination(
                             new StandardLogger(new File(value)));
+                }
+                String formatter = options.getOptionValue("TPxsl");
+                if (formatter != null) {
+                    try {
+                        if (useURLs) {
+                            ((TimingTraceListener) traceListener).setStylesheet(new URL(formatter));
+                        } else {
+                            ((TimingTraceListener) traceListener).setStylesheet(new File(formatter).toURI().toURL());
+                        }
+                    } catch (MalformedURLException e) {
+                        System.err.println("Invalid URL " + formatter + " - ignored");
+                    }
                 }
             }
             //#endif
