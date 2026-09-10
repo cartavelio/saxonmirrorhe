@@ -65,8 +65,9 @@ public class TestXQueryUpdate {
             config.setTreeModel(Builder.LINKED_TREE);
             String source = "<foo/>";
             NodeInfo doc = config.buildDocumentTree(new StreamSource(new StringReader(source))).getRootNode();
-            NodeName name = new FingerprintedQName("a", "http://foo.bar/", "x");
-            NamespaceBinding nsCode = new NamespaceBinding("a", "http://foo.bar/");
+            NamespaceUri fooBar = NamespaceUri.of("http://foo.bar/");
+            NodeName name = new FingerprintedQName("a", fooBar, "x");
+            NamespaceBinding nsCode = new NamespaceBinding("a", fooBar);
             MutableNodeInfo elem = (MutableNodeInfo)doc.iterateAxis(AxisInfo.CHILD).next();
             elem.addAttribute(name, BuiltInAtomicType.UNTYPED_ATOMIC, "xxxx", ReceiverOption.NONE, true);
             elem.addNamespace(nsCode, true);

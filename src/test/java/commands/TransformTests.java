@@ -57,6 +57,7 @@ public class TransformTests {
                 System.setOut(new PrintStream(baos));
                 super.doTransform(args);
                 // Revert change to System.out
+                baos.close();
                 System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
                 return baos.toString("utf-8");
             } catch (Exception e) {
@@ -102,7 +103,7 @@ public class TransformTests {
         try {
             VerifyingTransform vt = new VerifyingTransform();
             String result = vt.transform(args);
-            assertTrue(vt.outputMatches(s -> s.startsWith("SaxonJ-EE 11")), "SaxonVersion");
+            assertTrue(vt.outputMatches(s -> s.startsWith("SaxonJ-EE 12")), "SaxonVersion");
             assertTrue(vt.outputMatches(s -> s.startsWith("Java version")), "JavaVersion");
             assertTrue(vt.outputMatches(s -> s.startsWith("Using license serial number")), "License");
             assertTrue(vt.outputMatches(s -> s.matches("Processing.*othello.xml")), "SourceFile");

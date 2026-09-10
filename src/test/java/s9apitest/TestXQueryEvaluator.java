@@ -13,6 +13,7 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.TraceListener;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.XQueryExpression;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trace.Traceable;
@@ -584,8 +585,9 @@ public class TestXQueryEvaluator {
                             case 5:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof ForClause, "isForClause" + i);
-                                assertTrue(properties.get("var").equals("$i"), "varName" + i);
-                                assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix0");
+                                assertEquals("$i", properties.get("var"), "varName" + i);
+                                assertEquals(NamespaceUri.of("http://a/"),
+                                             ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix0");
                                 assertEquals(2, instruction.getLocation().getLineNumber(), "lineNumber" + i);
                                 break;
                             case 3:
@@ -593,13 +595,15 @@ public class TestXQueryEvaluator {
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof WhereClause, "isWhereClause" + i);
                                 assertTrue(properties.containsKey("condition"), "condition" + i);
-                                assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix1");
+                                assertEquals(NamespaceUri.of("http://a/"),
+                                             ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix1");
                                 assertEquals(3, instruction.getLocation().getLineNumber(), "lineNumber" + i);
                                 break;
                             case 7:
                             case 8:
                                 assertTrue(instruction instanceof ClauseInfo, "isClauseInfo" + i);
-                                assertEquals("http://a/", ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix4");
+                                assertEquals(NamespaceUri.of("http://a/"),
+                                             ((ClauseInfo) instruction).getNamespaceResolver().getURIForPrefix("p", false), "rightPrefix4");
                                 assertTrue(((ClauseInfo) instruction).getClause() instanceof OrderByClause, "isOrderBy" + i);
                                 assertEquals(4, instruction.getLocation().getLineNumber(), "lineNumber" + i);
                                 break;

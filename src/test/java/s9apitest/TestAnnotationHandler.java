@@ -23,7 +23,7 @@ public class TestAnnotationHandler {
 
         @Override
         public NamespaceUri getAssertionNamespace () {
-            return "http://s.com";
+            return NamespaceUri.of("http://s.com");
         }
 
         /**

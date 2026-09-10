@@ -5,14 +5,17 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.StaticContext;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.*;
-import net.sf.saxon.lib.*;
+import net.sf.saxon.lib.ExtensionFunctionCall;
+import net.sf.saxon.lib.ExtensionFunctionDefinition;
 import net.sf.saxon.om.NamespaceResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.StructuredQName;
-import net.sf.saxon.s9api.SequenceType;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.DoubleValue;
+import net.sf.saxon.value.EmptySequence;
+import net.sf.saxon.value.StringValue;
 import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.stream.StreamSource;
@@ -694,11 +697,11 @@ public class TestIntegratedFunctions {
             if (val == null) {
                 return EmptySequence.getInstance();
             }
-            String ns = nsContext.getURIForPrefix(val.getStringValue(), false);
+            NamespaceUri ns = nsContext.getURIForPrefix(val.getStringValue(), false);
             if (ns == null) {
                 return EmptySequence.getInstance();
             }
-            return new StringValue(ns);
+            return new StringValue(ns.toUnicodeString());
         }
     }
 

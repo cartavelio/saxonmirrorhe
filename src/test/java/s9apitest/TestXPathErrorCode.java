@@ -130,7 +130,7 @@ public class TestXPathErrorCode {
 			ic.setNamespaceResolver(namespaceResolver);
 			EnterpriseConfiguration conf = (EnterpriseConfiguration)proc.getUnderlyingConfiguration();
 			@SuppressWarnings("unchecked")
-			Set<String> schemas = conf.getSuperSchema().getTargetNamespaces();
+			Set<NamespaceUri> schemas = conf.getSuperSchema().getTargetNamespaces();
 			ic.setImportedSchemaNamespaces(schemas);
 		}
 

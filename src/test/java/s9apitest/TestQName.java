@@ -1,5 +1,6 @@
 package s9apitest;
 
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.s9api.QName;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ public class TestQName {
     public void testQName3() {
         QName q = new QName("prefix", "http://some/uri", "local");
         assertEquals("prefix", q.getPrefix());
-        assertEquals("http://some/uri", q.getNamespaceURI());
+        assertEquals("http://some/uri", q.getURI());
         assertEquals("local", q.getLocalName());
     }
 
@@ -31,7 +32,7 @@ public class TestQName {
     public void testQName3b() {
         QName q = new QName("", "", "local");
         assertEquals("", q.getPrefix());
-        assertEquals("", q.getNamespaceURI());
+        assertEquals("", q.getURI());
         assertEquals("local", q.getLocalName());
     }
 
@@ -43,7 +44,7 @@ public class TestQName {
     public void testQName2() {
         QName q = new QName("http://some/uri", "prefix:local");
         assertEquals("prefix", q.getPrefix());
-        assertEquals("http://some/uri", q.getNamespaceURI());
+        assertEquals(NamespaceUri.of("http://some/uri"), q.getNamespaceURI());
         assertEquals("local", q.getLocalName());
     }
 
@@ -55,7 +56,7 @@ public class TestQName {
     public void testQName2b() {
         QName q = new QName("", "local");
         assertEquals("", q.getPrefix());
-        assertEquals("", q.getNamespaceURI());
+        assertEquals(NamespaceUri.NULL, q.getNamespaceURI());
         assertEquals("local", q.getLocalName());
     }
 
@@ -67,7 +68,7 @@ public class TestQName {
     public void testQName1() {
         QName q = new QName("local");
         assertEquals("", q.getPrefix());
-        assertEquals("", q.getNamespaceURI());
+        assertEquals("", q.getURI());
         assertEquals("local", q.getLocalName());
     }
 
@@ -79,7 +80,7 @@ public class TestQName {
     public void testQNameFromClarkName() {
         QName q = QName.fromClarkName("{http://some/uri}local");
         assertEquals("", q.getPrefix());
-        assertEquals("http://some/uri", q.getNamespaceURI());
+        assertEquals(NamespaceUri.of("http://some/uri"), q.getNamespaceURI());
         assertEquals("local", q.getLocalName());
     }
 
@@ -91,7 +92,7 @@ public class TestQName {
     public void testQNameFromClarkNameB() {
         QName q = QName.fromClarkName("{}local");
         assertEquals("", q.getPrefix());
-        assertEquals("", q.getNamespaceURI());
+        assertEquals(NamespaceUri.NULL, q.getNamespaceURI());
         assertEquals("local", q.getLocalName());
     }
 

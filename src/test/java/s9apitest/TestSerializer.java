@@ -8,6 +8,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.FeatureKeys;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.OutputURIResolver;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.CharacterMap;
@@ -175,8 +176,8 @@ public class TestSerializer {
             CharacterMapIndex mapIndex = new CharacterMapIndex();
             IntHashMap<String> map = new IntHashMap<>();
             map.put('e', "f");
-            CharacterMap namedMap = new CharacterMap(new StructuredQName("", "", "m"), map);
-            mapIndex.putCharacterMap(new StructuredQName("", "", "m"), namedMap);
+            CharacterMap namedMap = new CharacterMap(new StructuredQName("", NamespaceUri.NULL, "m"), map);
+            mapIndex.putCharacterMap(new StructuredQName("", NamespaceUri.NULL, "m"), namedMap);
             serializer.setCharacterMap(mapIndex);
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             serializer.setOutputStream(os);

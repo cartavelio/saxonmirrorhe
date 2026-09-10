@@ -32,10 +32,10 @@ public class NamespaceMapTest {
             map = map.put("xml", NamespaceUri.XML);
             map = map.put("xsl", NamespaceUri.XSLT);
             map = map.put("saxon", NamespaceUri.SAXON);
-            assertEquals(NamespaceUri.SAXON, map.getURI("saxon"));
-            assertEquals(NamespaceUri.XSLT, map.getURI("xsl"));
+            assertEquals(NamespaceUri.SAXON, map.getNamespaceUri("saxon"));
+            assertEquals(NamespaceUri.XSLT, map.getNamespaceUri("xsl"));
             map = map.put("xsl", NamespaceUri.MAP_FUNCTIONS);
-            assertEquals(NamespaceUri.MAP_FUNCTIONS, map.getURI("xsl"));
+            assertEquals(NamespaceUri.MAP_FUNCTIONS, map.getNamespaceUri("xsl"));
         } catch (Exception err) {
             err.printStackTrace();
             fail(err.getMessage());
@@ -49,13 +49,13 @@ public class NamespaceMapTest {
             map = map.put("xsl", NamespaceUri.XSLT);
             map = map.put("xml", NamespaceUri.XML);
             map = map.put("saxon", NamespaceUri.SAXON);
-            assertEquals(NamespaceUri.SAXON, map.getURI("saxon"));
-            assertEquals(NamespaceUri.XSLT, map.getURI("xsl"));
+            assertEquals(NamespaceUri.SAXON, map.getNamespaceUri("saxon"));
+            assertEquals(NamespaceUri.XSLT, map.getNamespaceUri("xsl"));
             map = map.put("xsl", NamespaceUri.NULL);
-            assertNull(map.getURI("xsl"));
-            assertEquals(NamespaceUri.SAXON, map.getURI("saxon"));
+            assertNull(map.getNamespaceUri("xsl"));
+            assertEquals(NamespaceUri.SAXON, map.getNamespaceUri("saxon"));
             map = map.put("saxon", null);
-            assertNull(map.getURI("saxon"));
+            assertNull(map.getNamespaceUri("saxon"));
         } catch (Exception err) {
             err.printStackTrace();
             fail(err.getMessage());
@@ -76,11 +76,11 @@ public class NamespaceMapTest {
 
         NamespaceMap map3 = map1.putAll(map2);
         assertEquals(3, map3.size());
-        assertEquals(NamespaceUri.XML, map3.getURI("xml"));
-        assertEquals(NamespaceUri.XSLT, map3.getURI("xsl"));
-        assertEquals(NamespaceUri.IXSL, map3.getURI("saxon"));
-        assertEquals(NamespaceUri.ARRAY_FUNCTIONS, map3.getURI("array"));
-        assertNull(map3.getURI(""));
+        assertEquals(NamespaceUri.XML, map3.getNamespaceUri("xml"));
+        assertEquals(NamespaceUri.XSLT, map3.getNamespaceUri("xsl"));
+        assertEquals(NamespaceUri.IXSL, map3.getNamespaceUri("saxon"));
+        assertEquals(NamespaceUri.ARRAY_FUNCTIONS, map3.getNamespaceUri("array"));
+        assertNull(map3.getNamespaceUri(""));
     }
 
     @Test
