@@ -1,7 +1,6 @@
 package com.saxonica.expr;
 
 import net.sf.saxon.expr.parser.Token;
-import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.query.XQueryParser;
@@ -16,25 +15,6 @@ public class XQueryParserExtensionPE extends SaxonSyntaxExtension {
 
 
     public XQueryParserExtensionPE() {
-    }
-
-    /**
-     * Get the permitted set of standard functions in this environment
-     */
-
-//    public int getPermittedFunctions() {
-//        int allowed = BuiltInFunctionSet.CORE;
-//        if (allowXPath30Syntax) {
-//            allowed |= BuiltInFunctionSet.XPATH30;
-//        }
-//        if (allowXPath31Syntax) {
-//            allowed |= BuiltInFunctionSet.XPATH31;
-//        }
-//        return allowed;
-//    }
-
-    protected boolean isReservedInQuery(String uri) {
-        return NamespaceConstant.isReservedInQuery31(uri);
     }
 
     /**
