@@ -3,7 +3,7 @@ package net.sf.saxon.functions.registry;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.om.StructuredQName;
 
-public interface DeclaredFunction {
+public interface FunctionDefinition {
 
     /**
      * Get the name of the function

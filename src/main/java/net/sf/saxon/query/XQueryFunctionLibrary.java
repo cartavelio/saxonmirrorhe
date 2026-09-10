@@ -15,7 +15,6 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.functions.registry.DeclaredFunction;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SymbolicName;
@@ -275,7 +274,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
             if (arguments.length == maxArity && (keywords == null || keywords.isEmpty())) {
                 ufc.setArguments(arguments);
             } else {
-                Expression[] expandedArgs = DeclaredFunction.makeExpandedArgumentArray(arguments, keywords, fd);
+                Expression[] expandedArgs = UserFunction.makeExpandedArgumentArray(arguments, keywords, fd);
                 ufc.setArguments(expandedArgs);
             }
             ufc.setStaticType(fd.getResultType());

@@ -47,7 +47,8 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     private boolean memoFunction = false;
     private String overrideExtensionFunctionAtt = null;
     private boolean overrideExtensionFunction = true;
-    private int numberOfArguments = -1;  // -1 means not yet known
+    private int numberOfParameters = -1;  // -1 means not yet known
+    private int numberOfOptionalParameters = -1;  // -1 means not yet known
     private UserFunction compiledFunction;
     private Visibility visibility = Visibility.UNDEFINED;
     private FunctionStreamability streamability;
@@ -311,7 +312,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
     @Override
     public SymbolicName.F getSymbolicName() {
-        return new SymbolicName.F(getObjectName(), getNumberOfArguments());
+        return new SymbolicName.F(getObjectName(), getNumberOfParameters());
     }
 
     @Override
@@ -340,7 +341,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                     "the new-each-time attribute does not match", "XTSE3070");
         }
 
-        for (int i = 0; i < getNumberOfArguments(); i++) {
+        for (int i = 0; i < getNumberOfParameters(); i++) {
             if (!compiledFunction.getArgumentType(i).isSameType(other.getArgumentType(i), th)) {
                 compileError("The overriding xsl:function " + nameAtt + " does not match the overridden function: " +
                         "the type of the " + RoleDiagnostic.ordinal(i + 1) + " argument does not match", "XTSE3070");
@@ -377,7 +378,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
         // check the element is at the top level of the stylesheet
 
         checkTopLevel("XTSE0010", true);
-        int arity = getNumberOfArguments();
+        int arity = getNumberOfParameters();
         if (arity == 0 && streamability != FunctionStreamability.UNCLASSIFIED) {
             compileError("A function with no arguments must have streamability=unclassified", "XTSE3155");
         }
@@ -453,7 +454,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
 
         OptimizerOptions options = getCompilation().getCompilerInfo().getOptimizerOptions();
         if (options.isSet(OptimizerOptions.TAIL_CALLS) && !streamability.isStreaming()) {
-            int tailCalls = ExpressionTool.markTailFunctionCalls(exp2, getObjectName(), getNumberOfArguments());
+            int tailCalls = ExpressionTool.markTailFunctionCalls(exp2, getObjectName(), getNumberOfParameters());
             if (tailCalls != 0) {
                 compiledFunction.setTailRecursive(tailCalls > 0, tailCalls > 1);
                 exp2 = compiledFunction.getBody();
@@ -539,23 +540,46 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
     }
 
     /**
-     * Get the number of arguments declared by this function (that is, its arity).
+     * Get the number of parameters declared by this function (that is, its arity).
      *
      * @return the arity of the function
      */
 
-    public int getNumberOfArguments() {
-        if (numberOfArguments == -1) {
-            numberOfArguments = 0;
+    public int getNumberOfParameters() {
+        if (numberOfParameters == -1) {
+            numberOfParameters = 0;
             for (NodeInfo child : children()) {
                 if (child instanceof XSLLocalParam) {
-                    numberOfArguments++;
+                    numberOfParameters++;
                 } else {
-                    return numberOfArguments;
+                    return numberOfParameters;
                 }
             }
         }
-        return numberOfArguments;
+        return numberOfParameters;
+    }
+
+    /**
+     * Get the number of optional parameters declared by this function
+     *
+     * @return the arity of the function
+     */
+
+    public int getNumberOfOptionalParameters() {
+        if (numberOfOptionalParameters == -1) {
+            numberOfOptionalParameters = 0;
+            for (NodeInfo child : children()) {
+                if (child instanceof XSLLocalParam) {
+                    String requiredAtt = ((XSLLocalParam) child).getAttributeValue("required");
+                    if (requiredAtt != null && isNo(Whitespace.trim(requiredAtt))) {
+                        numberOfOptionalParameters++;
+                    }
+                } else {
+                    return numberOfOptionalParameters;
+                }
+            }
+        }
+        return numberOfOptionalParameters;
     }
 
     /**
@@ -565,8 +589,9 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      */
 
     public void setParameterDefinitions(UserFunction fn) {
-        UserFunctionParameter[] params = new UserFunctionParameter[getNumberOfArguments()];
+        UserFunctionParameter[] params = new UserFunctionParameter[getNumberOfParameters()];
         int count = 0;
+        int optional = 0;
         for (NodeInfo node : children()) {
             if (node instanceof XSLLocalParam) {
                 UserFunctionParameter param = new UserFunctionParameter();
@@ -574,8 +599,9 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
                 param.setRequiredType(((XSLLocalParam) node).getRequiredType());
                 param.setVariableQName(((XSLLocalParam) node).getVariableQName());
                 param.setSlotNumber(((XSLLocalParam) node).getSlotNumber());
-                if (!((XSLLocalParam) node).isRequiredParam()) {
-                    param.setDefaultValueExpression(((XSLLocalParam) node).getSourceBinding().getSelectExpression());
+                if (XSLLocalParam.isNo(Whitespace.trim(((XSLLocalParam) node).getAttributeValue("required")))) {
+                    optional++;
+                    param.setRequired(false);
                 }
                 if (count == 0 && streamability != FunctionStreamability.UNCLASSIFIED) {
                     param.setFunctionStreamability(streamability);
@@ -586,6 +612,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             }
         }
         fn.setParameterDefinitions(params);
+        fn.setMinimumArity(count - optional);
     }
 
     /**
@@ -612,7 +639,7 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
      */
 
     public SequenceType[] getArgumentTypes() {
-        SequenceType[] types = new SequenceType[getNumberOfArguments()];
+        SequenceType[] types = new SequenceType[getNumberOfParameters()];
         int count = 0;
         for (NodeInfo node : children(XSLLocalParam.class::isInstance)) {
             types[count++] = ((XSLLocalParam) node).getRequiredType();
@@ -632,6 +659,9 @@ public class XSLFunction extends StyleElement implements StylesheetComponent {
             UserFunction fn = getConfiguration().newUserFunction(memoFunction, streamability);
             fn.setPackageData(getCompilation().getPackageData());
             fn.setFunctionName(getObjectName());
+            int maxArity = getNumberOfParameters();
+            int minArity = maxArity - getNumberOfOptionalParameters();
+            fn.setArityRange(minArity, maxArity);
             setParameterDefinitions(fn);
             fn.setResultType(getResultType());
             fn.setLineNumber(getLineNumber());

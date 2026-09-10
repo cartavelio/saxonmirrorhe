@@ -9,6 +9,7 @@ package net.sf.saxon.expr;
 
 import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.SequenceEvaluator;
+import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.oper.OperandArray;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.*;
@@ -228,8 +229,15 @@ public abstract class FunctionCall extends Expression {
                     String name = getFunctionName() == null ? "" : getFunctionName().getDisplayName();
                     return new RoleDiagnostic(RoleDiagnostic.FUNCTION, name, pos);
                 };
+                Expression arg = getArg(i);
+                // Substitute default value expression for an argument marked for replacement. This is necessary
+                // because the default value expression was not necessarily available when the function call
+                // was first parsed, in the case where it is a forwards reference
+                if (arg instanceof ErrorExpression && ((ErrorExpression)arg).getErrorCodeLocalPart().equals("UseDefault")) {
+                    arg = ((UserFunction)target).getParameterDefinitions()[i].getDefaultValueExpression();
+                }
                 setArg(i, tc.staticTypeCheck(
-                        getArg(i),
+                        arg,
                         argTypes[i],
                         role, visitor));
             }

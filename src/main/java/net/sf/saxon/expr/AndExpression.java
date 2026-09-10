@@ -13,6 +13,7 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.instruct.Choose;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.SystemFunction;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.TypeHierarchy;
@@ -193,7 +194,30 @@ public class AndExpression extends BooleanExpression {
             AndExpression expr = (AndExpression) getExpression();
             BooleanEvaluator eval0 = expr.getLhsExpression().makeElaborator().elaborateForBoolean();
             BooleanEvaluator eval1 = expr.getRhsExpression().makeElaborator().elaborateForBoolean();
-            return context -> eval0.eval(context) && eval1.eval(context);
+            // Don't throw an error if either branch returns false.
+            // See bug 5721. This allows reordering of predicates without generating
+            // spurious errors.
+            return context -> {
+                XPathException saved = null;
+                try {
+                    boolean b0 = eval0.eval(context);
+                    if (!b0) {
+                        return false;
+                    }
+                } catch (UncheckedXPathException err) {
+                    saved = err.getXPathException();
+                } catch (XPathException err) {
+                    saved = err;
+                }
+                boolean b1 = eval1.eval(context);
+                if (!b1) {
+                    return false;
+                }
+                if (saved != null) {
+                    throw saved;
+                }
+                return true;
+            };
         }
 
 

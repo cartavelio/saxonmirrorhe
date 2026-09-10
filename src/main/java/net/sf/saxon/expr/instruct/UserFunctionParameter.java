@@ -29,6 +29,7 @@ public class UserFunctionParameter implements LocalBinding {
     // The initial value is deliberately set to indicate "many" so that it will be assumed a parameter
     // is referenced repeatedly until proved otherwise
     private boolean isIndexed = false;
+    private boolean isRequiredParam = true;
     private FunctionStreamability functionStreamability = FunctionStreamability.UNCLASSIFIED;
     private Expression defaultValue;   // In 4.0, function parameters can have a default value
 
@@ -62,6 +63,24 @@ public class UserFunctionParameter implements LocalBinding {
     @Override
     public final boolean isAssignable() {
         return false;
+    }
+
+    /**
+     * Say whether the parameter is a required parameter
+     * @param required true of the parameter is required, false if optional
+     */
+
+    public void setRequired(boolean required) {
+        isRequiredParam = required;
+    }
+
+    /**
+     * Ask whether the parameter is a required parameters
+     * @return true of the parameter is required, false if optional
+     */
+
+    public final boolean isRequired() {
+        return isRequiredParam;
     }
 
     /**

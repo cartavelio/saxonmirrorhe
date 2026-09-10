@@ -14,7 +14,7 @@ import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.instruct.UserFunctionParameter;
 import net.sf.saxon.expr.parser.*;
-import net.sf.saxon.functions.registry.DeclaredFunction;
+import net.sf.saxon.functions.registry.FunctionDefinition;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.s9api.HostLanguage;
@@ -33,7 +33,7 @@ import java.util.function.Supplier;
  * A user-defined function in an XQuery module
  */
 
-public class XQueryFunction extends DeclaredFunction implements Declaration, Location {
+public class XQueryFunction implements Declaration, Location, FunctionDefinition {
     private StructuredQName functionName;
     private final List<UserFunctionParameter> parameters;
     private SequenceType resultType;

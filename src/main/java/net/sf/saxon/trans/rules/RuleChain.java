@@ -65,5 +65,15 @@ public class RuleChain {
         }
         return i;
     }
+
+    /**
+     * Ask whether the rule chain has optimization data, requiring allocation of
+     * a PreconditionMatcher when searching the rule chain
+     * @return true if there is optimization data associated with the rule chain.
+     */
+
+    public boolean hasOptimizationData() {
+        return optimizationData != null;
+    }
 }
 

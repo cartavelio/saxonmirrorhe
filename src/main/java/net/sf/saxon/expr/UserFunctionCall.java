@@ -247,6 +247,10 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         int i = 0;
         for (Operand o : operands()) {
             Expression arg = o.getChildExpression();
+            if (arg instanceof ErrorExpression && ((ErrorExpression)arg).getErrorCodeLocalPart().equals("UseDefault")) {
+                arg = target.getDefaultValueExpression(i);
+                o.setChildExpression(arg);
+            }
             if (i == 0 && target.getDeclaredStreamability().isConsuming()) {
                 argumentEvaluators[i] = new StreamingArgumentEvaluator(arg);
             } else if (target.getParameterDefinitions()[i].isIndexedVariable()) {
@@ -748,7 +752,6 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
         @Override
         public PullEvaluator elaborateForPull() {
             final UserFunctionCall expr = (UserFunctionCall) getExpression();
-
             if (expr.bindingSlot >= 0) {
                 // XSLT packages in general need dynamic binding
                 return context -> {
