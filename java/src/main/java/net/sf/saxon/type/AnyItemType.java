@@ -12,6 +12,7 @@ import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.ItemCheckingPlan;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
@@ -61,6 +62,8 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
         return UType.ANY;
     }
 
+
+
     /**
      * Determine whether this item type is an atomic type
      *
@@ -95,8 +98,9 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
 
     @Override
     public ItemType normalizeItemType() {
-        // implementation needed for SaxonCS
-        return this;
+        return ChoiceItemType.of(AnyGNodeType.getInstance().normalizeItemType(),
+                                 BuiltInAtomicType.ANY_ATOMIC.normalizeItemType(),
+                                 AnyFunctionType.INSTANCE.normalizeItemType());
     }
 
     /**

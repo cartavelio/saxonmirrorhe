@@ -85,7 +85,7 @@ public enum PrimitiveUType {
             case G_YEAR -> "gYear";
             case G_MONTH_DAY -> "gMonthDay";
             case G_DAY -> "gDay";
-            case G_MONTH -> "gMoonth";
+            case G_MONTH -> "gMonth";
             case HEX_BINARY -> "hexBinary";
             case BASE64_BINARY -> "base64Binary";
             case ANY_URI -> "anyURI";

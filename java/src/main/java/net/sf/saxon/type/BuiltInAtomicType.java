@@ -1421,6 +1421,22 @@ public class BuiltInAtomicType implements AtomicType, ItemTypeWithSequenceTypeCa
     }
 
     /**
+     * Normalize this item type, returning a potentially different item type that matches the same
+     * items. For example, {@code record(*)} and {@code map(*)} match the same items. The default
+     * implementation returns the item type unchanged.
+     * <p>Item types should be normalized before comparison using equals().</p>
+     *
+     * @return the normalized item type.
+     */
+    @Override
+    public ItemType normalizeItemType() {
+        if (this == BuiltInAtomicType.ANY_ATOMIC) {
+            return getUType().toItemType();
+        }
+        return this;
+    }
+
+    /**
      * Apply any pre-lexical facets, other than whitespace. At the moment the only such
      * facet is saxon:preprocess
      *

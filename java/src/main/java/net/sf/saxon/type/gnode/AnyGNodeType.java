@@ -7,8 +7,11 @@
 
 package net.sf.saxon.type.gnode;
 
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.type.ChoiceItemType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.type.coercion.CoercionPlan;
@@ -65,6 +68,19 @@ public final class AnyGNodeType extends GNodeType {
 //            return GNodeCoercionPlan.getInstance();
 //        }
         return null;
+    }
+
+    /**
+     * Normalize this item type, returning a potentially different item type that matches the same
+     * items. For example, {@code record(*)} and {@code map(*)} match the same items. The default
+     * implementation returns the item type unchanged.
+     * <p>Item types should be normalized before comparison using equals().</p>
+     *
+     * @return the normalized item type.
+     */
+    @Override
+    public ItemType normalizeItemType() {
+        return ChoiceItemType.of(AnyXNodeType.getInstance().normalizeItemType(), AnyJNodeType.getInstance().normalizeItemType());
     }
 
     /**
