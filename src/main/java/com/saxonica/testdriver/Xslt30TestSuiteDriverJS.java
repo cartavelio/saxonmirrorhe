@@ -19,6 +19,7 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
     private final Map<String, XdmValue> globalParams = new HashMap<String, XdmValue>();
     private final List<XdmValue> initialFunctionArgs = new ArrayList<XdmValue>();
     private String targetVersion = "JS";
+    private int targetVersionNo = 2;
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0 || args[0].equals("-?")) {
@@ -35,6 +36,8 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
             String argValue = colon < 0 ? "" : args[i].substring(colon + 1);
             if (args[i].startsWith("-js:")) {
                 targetVersion = argValue;
+                String targetV = argValue.replace("JS", "");
+                targetVersionNo = targetV.equals("") ? 2: Integer.parseInt(targetV);
                 jsOptionIncluded = true;
             }
         }
@@ -136,6 +139,17 @@ public class Xslt30TestSuiteDriverJS extends Xslt30TestSuiteDriverEE {
         }
         if ("default_HTML_version".equals(type) && !"5".equals(value)) {
             return false;
+        }
+        if ("js-version".equals(type)) {
+            for (String p : value.split(" ")) {
+                if (p.equals(targetVersionNo + "")) {
+                    return !inverse;
+                }
+                if (p.endsWith("+") && Integer.parseInt(p.replace("+", "")) <= targetVersionNo) {
+                    return !inverse;
+                }
+            }
+            return inverse;
         }
         return super.ensureDependencySatisfied(dependency, env);
     }
