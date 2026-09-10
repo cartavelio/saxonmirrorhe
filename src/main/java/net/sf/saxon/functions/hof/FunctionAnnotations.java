@@ -9,19 +9,18 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.SystemFunction;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceExtent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -41,17 +40,18 @@ public class FunctionAnnotations extends SystemFunction {
      *          if a dynamic error occurs during the evaluation of the expression
      */
     @Override
-    public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
+    public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         FunctionItem f = (FunctionItem) arguments[0].head();
         AnnotationList annotationList = f.getAnnotations();
-        HashTrieMap map = new HashTrieMap();
+        List<Item> result = new ArrayList<>();
         for (Annotation a : annotationList) {
-            // TODO: need spec clarification on handling duplicate keys
-            List<AtomicValue> val = a.getAnnotationParameters();
-            GroundedValue gv = SequenceExtent.makeSequenceExtent(val);
-            map.initialPut(new QNameValue(a.getAnnotationQName(), BuiltInAtomicType.QNAME), gv);
+            result.add(
+                Shape.KEY_VALUE_PAIR.make(
+                    new QNameValue(a.getAnnotationQName(), BuiltInAtomicType.QNAME),
+                    SequenceExtent.makeSequenceExtent(a.getAnnotationParameters())
+            ));
         }
-        return map;
+        return SequenceExtent.makeSequenceExtent(result);
     }
 }
 
