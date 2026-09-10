@@ -71,7 +71,7 @@ public class AtomizerCompiler extends ToIteratorCompiler {
             boolean allowEmpty = Cardinality.allowsZero(atomizer.getCardinality());
 
             Class<? extends Item> operandClass = compiler.compileToItem(arg);
-
+            operandClass = ga.downCast(operandClass, Item.class, true);
             LabelInfo exit = null;
             if (allowEmpty) {
                 LabelInfo notNull = methodInfo.newLabel("ACstrNotNull");

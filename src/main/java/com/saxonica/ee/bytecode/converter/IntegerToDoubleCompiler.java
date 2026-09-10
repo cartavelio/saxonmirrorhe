@@ -71,7 +71,7 @@ public class IntegerToDoubleCompiler extends ConverterCompiler {
             ga.cast(Type.LONG_TYPE, Type.DOUBLE_TYPE);
         } else {
             Class<? extends Item> baseClass = compiler.compileToItem(base);
-            baseClass = ga.downCast(baseClass, IntegerValue.class);
+            baseClass = ga.downCast(baseClass, IntegerValue.class, true);
             ga.invokeInstanceMethod(baseClass, "getDoubleValue");
         }
 

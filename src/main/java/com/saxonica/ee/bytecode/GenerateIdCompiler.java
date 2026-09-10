@@ -23,7 +23,7 @@ public class GenerateIdCompiler extends ToStringCompiler {
         LabelInfo generateIdReturn = methodInfo.newLabel("generateIdReturn");
         Class<? extends Item> argClass = compiler.compileToItem(fnc.getArg(0));
         treatAsEmptyIfFirstArgumentIsEmpty(fnc.getArg(0), ga, methodInfo, generateIdReturn, 0, onEmpty);
-        argClass = ga.downCast(argClass, NodeInfo.class);
+        argClass = ga.downCast(argClass, NodeInfo.class, true);
         ga.newInstance(Type.getType(StringBuilder.class));
         ga.dup();
         ga.push(16);

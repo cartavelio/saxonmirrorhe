@@ -50,7 +50,7 @@ public class NodeNameFnCompiler extends ToItemCompiler {
             ga.goTo(nodeNameReturn);
             methodInfo.placeLabel(nodeNotNull);
         }
-        argClass = ga.downCast(argClass, NodeInfo.class);
+        argClass = ga.downCast(argClass, NodeInfo.class, true);
         int nodeVar = ga.newLocal(argClass);
         ga.storeLocal(nodeVar);
 

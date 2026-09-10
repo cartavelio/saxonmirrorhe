@@ -64,7 +64,7 @@ public class CompareToIntegerConstantCompiler extends ToBooleanCompiler {
         } else {
 
             Class<? extends Item> operandClass = compiler.compileToItem(exp);
-            operandClass = ga.downCast(operandClass, NumericValue.class);
+            operandClass = ga.downCast(operandClass, NumericValue.class, true);
             int numericVar = methodInfo.allocateLocal(operandClass);
             ga.storeLocal(numericVar);
 

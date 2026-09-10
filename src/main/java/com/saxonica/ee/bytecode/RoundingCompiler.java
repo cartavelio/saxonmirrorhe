@@ -26,7 +26,7 @@ public class RoundingCompiler extends ToItemCompiler {
         LabelInfo notNull = methodInfo.newLabel("roundNotNull");
         LabelInfo end = methodInfo.newLabel("endRound");
         Class<? extends Item> operandClass = compiler.compileToItem(fnc.getArg(0));
-        operandClass = ga.downCast(operandClass, NumericValue.class);
+        operandClass = ga.downCast(operandClass, NumericValue.class, true);
         //ga.checkClass(AtomicValue.class);
         ga.dup();
         ga.ifNonNull(notNull.label());
@@ -49,7 +49,7 @@ public class RoundingCompiler extends ToItemCompiler {
             ga.loadLocal(valVar);
             if (rounding.getArity() == 2) {
                 Class<? extends Item> secondOperandClass = compiler.compileToItem(fnc.getArg(1));
-                secondOperandClass = ga.downCast(secondOperandClass, NumericValue.class);
+                secondOperandClass = ga.downCast(secondOperandClass, NumericValue.class, true);
                 //ga.checkClass(NumericValue.class);
                 ga.invokeInstanceMethod(secondOperandClass, "longValue");
                 ga.cast(Type.LONG_TYPE, Type.INT_TYPE);
@@ -63,7 +63,7 @@ public class RoundingCompiler extends ToItemCompiler {
             LabelInfo doRounding = null;
             if (rounding.getArity() == 2) {
                 Class<? extends Item> secondOperandClass = compiler.compileToItem(fnc.getArg(1));
-                secondOperandClass = ga.downCast(secondOperandClass, NumericValue.class);
+                secondOperandClass = ga.downCast(secondOperandClass, NumericValue.class, true);
                 IntegerValue[] bounds = fnc.getArg(1).getIntegerBounds();
                 if (bounds == null || bounds[0].compareTo(Integer.MAX_VALUE) > 0) {
                     LabelInfo notTooBig = methodInfo.newLabel("notTooBig");

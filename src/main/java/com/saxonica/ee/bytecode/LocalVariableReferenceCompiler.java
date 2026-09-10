@@ -2,12 +2,11 @@ package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.expr.Expression;
-import net.sf.saxon.expr.LocalVariableReference;
-import net.sf.saxon.expr.StackFrame;
-import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.expr.*;
 import net.sf.saxon.om.*;
+import net.sf.saxon.s9api.Location;
+import net.sf.saxon.type.ItemType;
+import net.sf.saxon.value.SequenceType;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
@@ -24,7 +23,7 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
      * Postcondition: the stack contains an ValueRepresentation representing the LocalVariable
      *  @param compiler   the compiler service
      * @param expression the expression to be compiled
-     * @return
+     * @return the class of item generated
      */
     @Override
     public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
@@ -41,8 +40,15 @@ public class LocalVariableReferenceCompiler extends ToIteratorCompiler {
         ga.push(localSlot);
         ga.arrayLoad(Type.getType(Sequence.class));
         ga.invokeInstanceMethod(Sequence.class, "head");
+        Binding binding = ((VariableReference) expression).getBinding();
+        SequenceType declaredType = binding.getRequiredType();
+        ItemType itemType = declaredType.getPrimaryType();;
+        if (declaredType.equals(SequenceType.SINGLE_ITEM) && binding instanceof Assignation) {
+            itemType = ((Assignation) binding).getSequence().getItemType();
+        }
+        Class<? extends Item> returnClass = VariableReferenceCompiler.classForItemType(itemType);
         visitAnnotation(compiler, "LocalVariableReferenceCompiler, localSlotNumber: " + localSlot);
-        return Item.class;
+        return returnClass;
     }
 
 

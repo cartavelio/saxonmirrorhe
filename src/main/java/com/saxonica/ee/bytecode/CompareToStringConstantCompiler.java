@@ -34,7 +34,7 @@ public class CompareToStringConstantCompiler extends ToBooleanCompiler {
 
         ga.invokeStaticMethod(CodepointCollator.class, "getInstance");
         Class<? extends Item> operandClass = compiler.compileToItem(exp);
-        operandClass = ga.downCast(operandClass, StringValue.class);
+        operandClass = ga.downCast(operandClass, StringValue.class, true);
         ga.invokeInstanceMethod(operandClass, "getUnicodeStringValue");
         allocateStatic(compiler, comparand);
         ga.invokeInstanceMethod(CodepointCollator.class, "compareStrings", UnicodeString.class, UnicodeString.class);

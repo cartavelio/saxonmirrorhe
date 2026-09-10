@@ -574,9 +574,10 @@ public class Generator extends GeneratorAdapter {
      * Generate a checkClass instruction if required
      * @param supplied the class of the current value
      * @param required the class required by the context in which the value is used
+     * @param forceCast true if a checkClass is to be generated in the case where the supplied type is used
      * @return supplied or required, whichever is more specific
      */
-    public Class<? extends Item> downCast(Class<? extends Item> supplied, Class<? extends Item> required) throws CannotCompileException {
+    public Class<? extends Item> downCast(Class<? extends Item> supplied, Class<? extends Item> required, boolean forceCast) throws CannotCompileException {
         if (!required.isAssignableFrom(supplied)) {
             if (!supplied.isAssignableFrom(required)) {
                 // Treat as recoverable error (test -s:misc-CombinedErrorCodes -t:XPTY0004_28)
@@ -585,7 +586,9 @@ public class Generator extends GeneratorAdapter {
             checkClass(required);
             return required;
         } else {
-            checkClass(supplied);
+            if (forceCast) {
+                checkClass(supplied);
+            }
             return supplied;
         }
     }

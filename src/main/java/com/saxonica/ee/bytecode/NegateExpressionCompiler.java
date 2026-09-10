@@ -20,7 +20,7 @@ public class NegateExpressionCompiler extends ToItemCompiler {
      * (representing an empty sequence).
      *  @param compiler   the compiler service
      * @param expression the expression to be compiled
-     * @return
+     * @return the class of item generated
      */
     @Override
     public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression) throws CannotCompileException {
@@ -45,7 +45,7 @@ public class NegateExpressionCompiler extends ToItemCompiler {
             ga.goTo(negateReturn);
             methodInfo.placeLabel(notNull);
         }
-        operandClass = ga.downCast(operandClass, NumericValue.class);
+        operandClass = ga.downCast(operandClass, NumericValue.class, true);
 
         //ga.checkClass(NumericValue.class);
         ga.invokeInstanceMethod(operandClass, "negate");

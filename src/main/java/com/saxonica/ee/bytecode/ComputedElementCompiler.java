@@ -56,7 +56,7 @@ public class ComputedElementCompiler extends ElementCreatorCompiler {
         final int rawNameVar = methodInfo.allocateLocal(String.class);
 
         Class<? extends Item> operandClass = compiler.compileToItem(nameExpr);
-        operandClass = ga.downCast(operandClass, AtomicValue.class);
+        operandClass = ga.downCast(operandClass, AtomicValue.class, true);
         ga.dup();
         ga.ifNonNull(notNull.label());
         ga.pop();

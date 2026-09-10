@@ -140,11 +140,11 @@ public class GeneralComparisonCompiler extends ToBooleanCompiler {
 
             // assert stack: item0 item1
 
-            class1 = ga.downCast(class1, AtomicValue.class);
+            class1 = ga.downCast(class1, AtomicValue.class, true);
             final int item1Var = methodInfo.allocateLocal(class1);
             ga.storeLocal(item1Var);
 
-            class0 = ga.downCast(class0, AtomicValue.class);
+            class0 = ga.downCast(class0, AtomicValue.class, true);
             final int item0Var = methodInfo.allocateLocal(class0);
             ga.storeLocal(item0Var);
 

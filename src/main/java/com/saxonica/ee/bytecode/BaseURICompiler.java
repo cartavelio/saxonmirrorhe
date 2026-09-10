@@ -20,7 +20,7 @@ public class BaseURICompiler extends ToItemCompiler {
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         LabelInfo nullLab = methodInfo.newLabel("notnull_BaseURI");
         LabelInfo end = methodInfo.newLabel("end_BaseURI");
-        operandClass = ga.downCast(operandClass, NodeInfo.class);
+        operandClass = ga.downCast(operandClass, NodeInfo.class, true);
         ga.dup();
         ga.ifNull(nullLab.label());
         ga.invokeInstanceMethod(operandClass, "getBaseURI");

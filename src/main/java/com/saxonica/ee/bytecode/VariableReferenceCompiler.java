@@ -4,18 +4,13 @@ import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.GlobalVariable;
-import net.sf.saxon.om.Item;
-import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.AnyNodeTest;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
-import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.value.BooleanValue;
-import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.*;
 import org.objectweb.asm.Type;
 
 /**
@@ -143,9 +138,74 @@ public class VariableReferenceCompiler extends ToIteratorCompiler {
         Generator ga = compiler.getCurrentGenerator();
         visitAnnotation(compiler, "VariableReferenceCompiler-Item");
         genEvaluateVariable(compiler, ga, (VariableReference) expression);
+        SequenceType declaredType = ((VariableReference)expression).getBinding().getRequiredType();
+        ItemType itemType = declaredType.getPrimaryType();
+        Class<? extends Item> returnClass = classForItemType(itemType);
         ga.invokeInstanceMethod(Sequence.class, "head");
-        return Item.class;
+        ga.checkClass(returnClass);
+        return returnClass;
     }
+    
+    public static Class<? extends Item> classForItemType(ItemType type) {
+        switch (type.getGenre()) {
+            case NODE:
+                return NodeInfo.class;
+            case FUNCTION:
+                return Function.class;
+            case ATOMIC:
+                switch (type.getPrimitiveType()) {
+                    case StandardNames.XS_STRING:
+                    case StandardNames.XS_UNTYPED_ATOMIC:
+                        return StringValue.class;
+                    case StandardNames.XS_BOOLEAN:
+                        return BooleanValue.class;
+                    case StandardNames.XS_DECIMAL:
+                        return DecimalValue.class;
+                    case StandardNames.XS_FLOAT:
+                        return FloatValue.class;
+                    case StandardNames.XS_DOUBLE:
+                        return DoubleValue.class;
+                    case StandardNames.XS_DURATION:
+                        return DurationValue.class;
+                    case StandardNames.XS_DATE_TIME:
+                        return DateTimeValue.class;
+                    case StandardNames.XS_TIME:
+                        return TimeValue.class;
+                    case StandardNames.XS_DATE:
+                        return DateValue.class;
+                    case StandardNames.XS_G_YEAR_MONTH:
+                        return GYearMonthValue.class;
+                    case StandardNames.XS_G_YEAR:
+                        return GYearValue.class;
+                    case StandardNames.XS_G_MONTH_DAY:
+                        return GMonthDayValue.class;
+                    case StandardNames.XS_G_DAY:
+                        return GDayValue.class;
+                    case StandardNames.XS_G_MONTH:
+                        return GMonthValue.class;
+                    case StandardNames.XS_HEX_BINARY:
+                        return HexBinaryValue.class;
+                    case StandardNames.XS_BASE64_BINARY:
+                        return Base64BinaryValue.class;
+                    case StandardNames.XS_ANY_URI:
+                        return AnyURIValue.class;
+                    case StandardNames.XS_QNAME:
+                        return QNameValue.class;
+                    case StandardNames.XS_NOTATION:
+                        return NotationValue.class;
+                    case StandardNames.XS_INTEGER:
+                        return IntegerValue.class;
+                    default:
+                        return AtomicValue.class;
+                }
+            case EXTERNAL:
+                return ObjectValue.class;
+            default:
+                return Item.class;
+        }
+    }
+
+
 
 
     /**

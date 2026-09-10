@@ -1,12 +1,10 @@
 package com.saxonica.ee.bytecode;
 
-import com.saxonica.ee.bytecode.util.CompilerService;
-import com.saxonica.ee.bytecode.util.GeneratedMethodInfo;
-import com.saxonica.ee.bytecode.util.Generator;
-import com.saxonica.ee.bytecode.util.LabelInfo;
+import com.saxonica.ee.bytecode.util.*;
 import net.sf.saxon.expr.Calculator;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.Converter;
@@ -31,96 +29,119 @@ public abstract class CalculatorCompiler {
 
     Expression oper0;
     Expression oper1;
+    Class<? extends Item> class0;
+    Class<? extends Item> class1;
 
     public void setCompilerService(CompilerService compiler) {
         this.compiler = compiler;
     }
 
-    public void setExpressions(Expression oper0, Expression oper1) {
+    public void setExpressions(Expression oper0, Class<? extends Item> class0,
+                               Expression oper1, Class<? extends Item> class1) {
         this.oper0 = oper0;
         this.oper1 = oper1;
+        this.class0 = class0;
+        this.class1 = class1;
+    }
+
+    protected void forceIntegerOperands(Generator ga) {
+        if (!IntegerValue.class.isAssignableFrom(class0)) {
+            class0 = IntegerValue.class;
+            ga.checkClass(IntegerValue.class);
+        }
+        if (!IntegerValue.class.isAssignableFrom(class0)) {
+            class0 = IntegerValue.class;
+            ga.checkClass(IntegerValue.class);
+        }
     }
 
     /**
      * Generate bytecode to compute the result of the arithmetic expression
      * @param ga the code generator
      * @param locator the location of the arithmetic expression
+     * @return the class of Item returned by the computation
      */
 
-    public abstract void compute(Generator ga, SourceLocator locator);
+    public abstract Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException;
 
 
     public static class IntegerPlusInteger extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "IntPlusCalculator-0");
-            ga.checkClass(IntegerValue.class);
+            class1 = ga.downCast(class1, IntegerValue.class, false);
             ga.swap();
-            ga.checkClass(IntegerValue.class);
-            ga.invokeInstanceMethod(IntegerValue.class, "plus", IntegerValue.class);
+            class0 = ga.downCast(class0, IntegerValue.class, false);
+            ga.invokeInstanceMethod(class1, "plus", IntegerValue.class);
+            return IntegerValue.class;
         }
 
     }
 
     public static class IntegerMinusInteger extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "IntMinusCalculator-0");
-            ga.checkClass(IntegerValue.class);
+            class1 = ga.downCast(class1, IntegerValue.class, false);
             ga.swap();
-            ga.checkClass(IntegerValue.class);
+            class0 = ga.downCast(class0, IntegerValue.class, false);
             ga.swap();
-            ga.invokeInstanceMethod(IntegerValue.class, "minus", IntegerValue.class);
+            ga.invokeInstanceMethod(class0, "minus", IntegerValue.class);
+            return IntegerValue.class;
         }
     }
 
     public static class IntegerTimesInteger extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "IntTimesCalculator-0");
-            ga.checkClass(IntegerValue.class);
+            class1 = ga.downCast(class1, IntegerValue.class, false);
             ga.swap();
-            ga.checkClass(IntegerValue.class);
-            ga.invokeInstanceMethod(IntegerValue.class, "times", IntegerValue.class);
+            class0 = ga.downCast(class0, IntegerValue.class, false);
+            ga.invokeInstanceMethod(class1, "times", IntegerValue.class);
+            return IntegerValue.class;
         }
     }
 
     public static class IntegerDivInteger extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "IntDivCalculator-0");
-            ga.checkClass(IntegerValue.class);
+            class1 = ga.downCast(class1, IntegerValue.class, false);
             ga.swap();
-            ga.checkClass(IntegerValue.class);
+            class0 = ga.downCast(class0, IntegerValue.class, false);
             ga.swap();
             ExpressionCompiler.allocateStatic(compiler, locator);
-            ga.invokeInstanceMethod(IntegerValue.class, "div", IntegerValue.class, Location.class);
+            ga.invokeInstanceMethod(class0, "div", IntegerValue.class, Location.class);
+            return NumericValue.class;
         }
     }
 
     public static class IntegerModInteger extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "IntModCalculator-0");
-            ga.checkClass(IntegerValue.class);
+            class1 = ga.downCast(class1, IntegerValue.class, false);
             ga.swap();
-            ga.checkClass(IntegerValue.class);
+            class0 = ga.downCast(class0, IntegerValue.class, false);
             ga.swap();
             ExpressionCompiler.allocateStatic(compiler, locator);
-            ga.invokeInstanceMethod(IntegerValue.class, "mod", IntegerValue.class, Location.class);
+            ga.invokeInstanceMethod(class0, "mod", IntegerValue.class, Location.class);
+            return IntegerValue.class;
         }
     }
 
     public static class IntegerIdivInteger extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "IntIdivCalculator-0");
-            ga.checkClass(IntegerValue.class);
+            class1 = ga.downCast(class1, IntegerValue.class, false);
             ga.swap();
-            ga.checkClass(IntegerValue.class);
+            class0 = ga.downCast(class0, IntegerValue.class, false);
             ga.swap();
             ExpressionCompiler.allocateStatic(compiler, locator);
-            ga.invokeInstanceMethod(IntegerValue.class, "idiv", IntegerValue.class, Location.class);
+            ga.invokeInstanceMethod(class0, "idiv", IntegerValue.class, Location.class);
+            return IntegerValue.class;
         }
     }
 
@@ -131,33 +152,27 @@ public abstract class CalculatorCompiler {
      * @param operator the operator, as a constant in the GeneratorAdapter class
      */
 
-    private static void doubleArithmetic(Generator ga, int operator) {
+    protected void doubleArithmetic(Generator ga, int operator) throws CannotCompileException {
         // assert stack DoubleValue0 DoubleValue1
-        ga.checkClass(NumericValue.class);
-        ga.invokeInstanceMethod(NumericValue.class, "getDoubleValue");
-        // assert stack DoubleValue double1A double1B (a double occupies two slots on the stack)
+        class1 = ga.downCast(class1, NumericValue.class, false);
+        ga.invokeInstanceMethod(class1, "getDoubleValue");
+        // assert stack DoubleValue0 double1A double1B (a double occupies two slots on the stack)
         ga.dup2X1();
-        // assert stack double1A double1B DoubleValue double1A double1B
+        // assert stack double1A double1B DoubleValue0 double1A double1B
         ga.pop2();
-        // assert stack double1A double1B DoubleValue
-        ga.checkClass(NumericValue.class);
-        ga.invokeInstanceMethod(NumericValue.class, "getDoubleValue");
+        // assert stack double1A double1B DoubleValue0
+        class0 = ga.downCast(class0, NumericValue.class, false);
+        ga.invokeInstanceMethod(class0, "getDoubleValue");
         // assert stack double1A double1B double0A double0B
-        ga.dup2X2();
-        // assert stack double0A double0B double1A double1B double0A double0B
-        ga.pop2();
-        // assert stack double0A double0B double1A double1B
+        if (!isCommutative(operator)) {
+            ga.dup2X2();
+            // assert stack double0A double0B double1A double1B double0A double0B
+            ga.pop2();
+            // assert stack double0A double0B double1A double1B
+        }
         ga.math(operator, Type.DOUBLE_TYPE);
         // assert stack double2A double2B
-        ga.newInstance(Type.getType(DoubleValue.class));
-        // assert stack double2A double2B DoubleValue
-        ga.dupX2();
-        // assert stack DoubleValue double2A double2B DoubleValue
-        ga.dupX2();
-        // assert stack DoubleValue DoubleValue double2A double2B DoubleValue
-        ga.pop();
-        // assert stack DoubleValue DoubleValue double2A double2B
-        ga.invokeConstructor(DoubleValue.class, Double.TYPE);
+        ga.invokeStaticMethod(DoubleValue.class, "makeDoubleValue", Double.TYPE);
         // assert stack DoubleValue
     }
 
@@ -166,9 +181,10 @@ public abstract class CalculatorCompiler {
      */
     public static class DoublePlusDouble extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "DoublePlusDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.ADD);
+            return DoubleValue.class;
         }
     }
 
@@ -177,9 +193,10 @@ public abstract class CalculatorCompiler {
      */
     public static class DoubleMinusDouble extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleMinusDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.SUB);
+            return DoubleValue.class;
         }
     }
 
@@ -188,9 +205,10 @@ public abstract class CalculatorCompiler {
      */
     public static class DoubleTimesDouble extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleTimesDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.MUL);
+            return DoubleValue.class;
         }
     }
 
@@ -199,9 +217,10 @@ public abstract class CalculatorCompiler {
      */
     public static class DoubleDivDouble extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleDivDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.DIV);
+            return DoubleValue.class;
         }
     }
 
@@ -210,9 +229,10 @@ public abstract class CalculatorCompiler {
      */
     public static class DoubleModDouble extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "DoubleModDoubleCalculator-0");
             doubleArithmetic(ga, GeneratorAdapter.REM);
+            return DoubleValue.class;
         }
     }
 
@@ -223,13 +243,13 @@ public abstract class CalculatorCompiler {
      * @param operator the arithmetic operator in ASM terms, for example {@link GeneratorAdapter#DIV}
      */
 
-    private static void floatArithmetic(Generator ga, int operator) {
+    protected void floatArithmetic(Generator ga, int operator) throws CannotCompileException {
         // see doubleArithmetic for the logic
-        ga.checkClass(NumericValue.class);
-        ga.invokeInstanceMethod(NumericValue.class, "getFloatValue");
+        class1 = ga.downCast(class1, NumericValue.class, false);
+        ga.invokeInstanceMethod(class1, "getFloatValue");
         ga.swap();
-        ga.checkClass(NumericValue.class);
-        ga.invokeInstanceMethod(NumericValue.class, "getFloatValue");
+        class0 = ga.downCast(class0, NumericValue.class, false);
+        ga.invokeInstanceMethod(class0, "getFloatValue");
         ga.swap();
         ga.math(operator, Type.FLOAT_TYPE);
         ga.newInstance(Type.getType(FloatValue.class));
@@ -243,8 +263,9 @@ public abstract class CalculatorCompiler {
      */
     public static class FloatPlusFloat extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             floatArithmetic(ga, GeneratorAdapter.ADD);
+            return FloatValue.class;
         }
     }
 
@@ -253,8 +274,9 @@ public abstract class CalculatorCompiler {
      */
     public static class FloatMinusFloat extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             floatArithmetic(ga, GeneratorAdapter.SUB);
+            return FloatValue.class;
         }
     }
 
@@ -263,8 +285,9 @@ public abstract class CalculatorCompiler {
      */
     public static class FloatTimesFloat extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             floatArithmetic(ga, GeneratorAdapter.MUL);
+            return FloatValue.class;
         }
     }
 
@@ -273,8 +296,9 @@ public abstract class CalculatorCompiler {
      */
     public static class FloatDivFloat extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             floatArithmetic(ga, GeneratorAdapter.DIV);
+            return FloatValue.class;
         }
     }
 
@@ -283,8 +307,9 @@ public abstract class CalculatorCompiler {
      */
     public static class FloatModFloat extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             floatArithmetic(ga, GeneratorAdapter.REM);
+            return FloatValue.class;
         }
     }
 
@@ -295,7 +320,7 @@ public abstract class CalculatorCompiler {
     public static class FloatIdivFloat extends CalculatorCompiler {
 
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
 
             GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
             ExpressionCompiler.visitAnnotation(compiler, "FloatIdivFloatCalculator");
@@ -365,6 +390,7 @@ public abstract class CalculatorCompiler {
             methodInfo.releaseLocal(floatB);
             methodInfo.releaseLocal(oper0Var);
             methodInfo.releaseLocal(oper1Var);
+            return IntegerValue.class;
         }
     }
 
@@ -419,8 +445,9 @@ public abstract class CalculatorCompiler {
     public static class DecimalPlusDecimal extends CalculatorCompiler {
 
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             decimalArithmetic(compiler, ga, "plus", "add");
+            return DecimalValue.class;
 
         }
     }
@@ -433,8 +460,9 @@ public abstract class CalculatorCompiler {
     public static class DecimalMinusDecimal extends CalculatorCompiler {
 
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             decimalArithmetic(compiler, ga, "minus", "subtract");
+            return DecimalValue.class;
         }
     }
 
@@ -446,8 +474,9 @@ public abstract class CalculatorCompiler {
     public static class DecimalTimesDecimal extends CalculatorCompiler {
 
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             decimalArithmetic(compiler, ga, "times", "multiply");
+            return DecimalValue.class;
         }
     }
 
@@ -459,13 +488,14 @@ public abstract class CalculatorCompiler {
     public static class DecimalDivDecimal extends CalculatorCompiler {
 
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ga.checkClass(NumericValue.class);
             ga.swap();
             ga.checkClass(NumericValue.class);
             ga.swap();
             //TODO: check - might need to expand the decimalDivide method
             ga.invokeStaticMethod(Calculator.class, "decimalDivide", NumericValue.class, NumericValue.class);
+            return DecimalValue.class;
         }
 
     }
@@ -478,7 +508,7 @@ public abstract class CalculatorCompiler {
     public static class DecimalModDecimal extends CalculatorCompiler {
 
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
 
             GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
             int oper0Var = methodInfo.allocateLocal(NumericValue.class);
@@ -536,6 +566,7 @@ public abstract class CalculatorCompiler {
             ga.throwException();
 
             methodInfo.placeLabel(end);
+            return DecimalValue.class;
         }
     }
 
@@ -547,7 +578,7 @@ public abstract class CalculatorCompiler {
     public static class DecimalIdivDecimal extends CalculatorCompiler {
 
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
 
             GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
             int oper0Var = methodInfo.allocateLocal(NumericValue.class);
@@ -592,6 +623,7 @@ public abstract class CalculatorCompiler {
             ga.invokeStaticMethod(BigIntegerValue.class, "makeIntegerValue", BigInteger.class);
 
             methodInfo.placeLabel(end);
+            return IntegerValue.class;
         }
     }
 
@@ -648,9 +680,10 @@ public abstract class CalculatorCompiler {
 
     public static class AnyPlusAny extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "AnyPlusCalculator-0");
             anyAnyArithmetic(compiler, ga, Calculator.PLUS, "plus (+)", locator);
+            return AtomicValue.class;
         }
     }
 
@@ -660,9 +693,10 @@ public abstract class CalculatorCompiler {
 
     public static class AnyMinusAny extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "AnyMinusCalculator-0");
             anyAnyArithmetic(compiler, ga, Calculator.MINUS, "minus (-)", locator);
+            return AtomicValue.class;
         }
     }
 
@@ -672,9 +706,10 @@ public abstract class CalculatorCompiler {
 
     public static class AnyTimesAny extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "AnyTimesCalculator-0");
             anyAnyArithmetic(compiler, ga, Calculator.TIMES, "multiply (*)", locator);
+            return AtomicValue.class;
         }
     }
 
@@ -684,9 +719,10 @@ public abstract class CalculatorCompiler {
 
     public static class AnyIdivAny extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "AnyIdivAnyCalculator");
             anyAnyArithmetic(compiler, ga, Calculator.IDIV, "idiv", locator);
+            return AtomicValue.class;
         }
     }
 
@@ -696,19 +732,25 @@ public abstract class CalculatorCompiler {
 
     public static class AnyDivAny extends CalculatorCompiler {
         @Override
-        public void compute(Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "AnyDivAnyCalculator");
             anyAnyArithmetic(compiler, ga, Calculator.DIV, "div", locator);
+            return AtomicValue.class;
         }
     }
 
 
     public static class AnyModAny extends CalculatorCompiler {
         @Override
-        public void compute(/*@NotNull*/ Generator ga, SourceLocator locator) {
+        public Class<? extends AtomicValue> compute(/*@NotNull*/ Generator ga, SourceLocator locator) throws CannotCompileException {
             ExpressionCompiler.visitAnnotation(compiler, "AnyModAnyCalculator");
             anyAnyArithmetic(compiler, ga, Calculator.MOD, "mod", locator);
+            return AtomicValue.class;
         }
+    }
+
+    protected static boolean isCommutative(int operator) {
+        return operator == GeneratorAdapter.ADD || operator == GeneratorAdapter.MUL;
     }
 }
 

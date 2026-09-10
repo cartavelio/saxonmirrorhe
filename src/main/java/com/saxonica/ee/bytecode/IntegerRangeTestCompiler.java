@@ -56,7 +56,7 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
         LabelInfo falseLabel = methodInfo.newLabel("intRange_FalseLabel");
 
         Class<? extends Item> minClass = compiler.compileToItem(minExp);
-        minClass = ga.downCast(minClass, IntegerValue.class);
+        minClass = ga.downCast(minClass, IntegerValue.class, true);
         int minVar = methodInfo.allocateLocal(minClass);
         if (Cardinality.allowsZero(minExp.getCardinality())) {
             ga.dup();
@@ -65,7 +65,7 @@ public class IntegerRangeTestCompiler extends ToBooleanCompiler {
         ga.storeLocal(minVar);
 
         Class<? extends Item> maxClass = compiler.compileToItem(maxExp);
-        maxClass = ga.downCast(maxClass, IntegerValue.class);
+        maxClass = ga.downCast(maxClass, IntegerValue.class, true);
         int maxVar = methodInfo.allocateLocal(maxClass);
         if (Cardinality.allowsZero(maxExp.getCardinality())) {
             ga.dup();

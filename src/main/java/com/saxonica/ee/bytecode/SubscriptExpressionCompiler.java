@@ -117,7 +117,7 @@ public class SubscriptExpressionCompiler extends ToItemCompiler {
                 ga.ifNull(end.label());
             }
             // Stack: Item
-            subscriptClass = ga.downCast(subscriptClass, NumericValue.class);
+            subscriptClass = ga.downCast(subscriptClass, NumericValue.class, true);
             // Stack: subscriptClass
             ga.invokeInstanceMethod(subscriptClass, "asSubscript");
             // Stack: int

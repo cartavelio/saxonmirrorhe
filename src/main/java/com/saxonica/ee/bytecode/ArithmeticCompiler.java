@@ -32,7 +32,7 @@ public class ArithmeticCompiler extends ToItemCompiler {
      * Postcondition: the stack contains an item representing the result of the expression
      *  @param compiler   the compiler service
      * @param expression the expression to be compiled
-     * @return
+     * @return the class of item generated
      */
     @Override
     public Class<? extends Item> compileToItem(CompilerService compiler, Expression expression)
@@ -45,7 +45,7 @@ public class ArithmeticCompiler extends ToItemCompiler {
         LabelInfo end = methodInfo.newLabel("endArith");
 
         Class<? extends Item> lhsClass = compiler.compileToItem(exp.getLhsExpression());
-        lhsClass = ga.downCast(lhsClass, AtomicValue.class);
+        lhsClass = ga.downCast(lhsClass, AtomicValue.class, true);
 
         visitAnnotation(compiler, "ArithmeticCompiler-doneArg-0");
 
@@ -59,7 +59,7 @@ public class ArithmeticCompiler extends ToItemCompiler {
             methodInfo.placeLabel(notNull0);
         }
         Class<? extends Item> rhsClass = compiler.compileToItem(exp.getRhsExpression());
-        rhsClass = ga.downCast(rhsClass, AtomicValue.class);
+        rhsClass = ga.downCast(rhsClass, AtomicValue.class, true);
 
         visitAnnotation(compiler, "ArithmeticCompiler-doneArg-1");
 
@@ -78,6 +78,7 @@ public class ArithmeticCompiler extends ToItemCompiler {
         Calculator calc = exp.getCalculator();
         Class<? extends CalculatorCompiler> myCalcCompiler = map(calc);
 
+        Class<? extends AtomicValue> returnClass;
         if (myCalcCompiler != null) {
             CalculatorCompiler myCalc;
             try {
@@ -86,8 +87,8 @@ public class ArithmeticCompiler extends ToItemCompiler {
                 throw new CannotCompileException(expression, e.getMessage());
             }
             myCalc.setCompilerService(compiler);
-            myCalc.setExpressions(exp.getLhsExpression(), exp.getRhsExpression());
-            myCalc.compute(ga, expression.getLocation());
+            myCalc.setExpressions(exp.getLhsExpression(), lhsClass, exp.getRhsExpression(), rhsClass);
+            returnClass = myCalc.compute(ga, expression.getLocation());
         } else {
             // Fallback implementation invokes the relevant Calculator object
             // assert stack oper0 oper1
@@ -100,9 +101,10 @@ public class ArithmeticCompiler extends ToItemCompiler {
             compiler.generateGetContext();
             // assert stack calc oper0 oper1 context
             ga.invokeInstanceMethod(Calculator.class, "compute", AtomicValue.class, AtomicValue.class, XPathContext.class);
+            returnClass = AtomicValue.class;
         }
         methodInfo.placeLabel(end);
-        return AtomicValue.class; // TODO: return a more specific class
+        return returnClass;
         //methodInfo.releaseLocal(oper0Var);
         //methodInfo.releaseLocal(oper1Var);
     }

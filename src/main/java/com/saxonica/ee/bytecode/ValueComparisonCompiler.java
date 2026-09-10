@@ -203,7 +203,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
 
         if (!finished) {
             Class<? extends Item> lhsClass = compiler.compileToItem(lhs);
-            lhsClass = ga.downCast(lhsClass, AtomicValue.class);
+            lhsClass = ga.downCast(lhsClass, AtomicValue.class, true);
             final int op0Var = methodInfo.allocateLocal(lhsClass);
             ga.storeLocal(op0Var);
 
@@ -222,7 +222,7 @@ public class ValueComparisonCompiler extends ToBooleanCompiler {
             }
 
             Class<? extends Item> rhsClass = compiler.compileToItem(rhs);
-            rhsClass = ga.downCast(rhsClass, AtomicValue.class);
+            rhsClass = ga.downCast(rhsClass, AtomicValue.class, true);
             final int op1Var = methodInfo.allocateLocal(rhsClass);
             ga.storeLocal(op1Var);
 

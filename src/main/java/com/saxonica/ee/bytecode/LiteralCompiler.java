@@ -57,7 +57,7 @@ public class LiteralCompiler extends ExpressionCompiler {
                 case StandardNames.XS_INTEGER:
                     allocateStatic(compiler, item);
                     ga.checkClass(IntegerValue.class);
-                    return IntegerValue.class;
+                    return item.getClass();
                 case StandardNames.XS_STRING:
                     String s = item.getUnicodeStringValue().toString();
                     if (s.isEmpty()) {

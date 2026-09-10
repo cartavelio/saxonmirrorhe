@@ -61,7 +61,7 @@ public class IntegerToStringCompiler extends ConverterCompiler {
             }
         } else {
             Class<? extends Item> baseClass = compiler.compileToItem(base);
-            baseClass = ga.downCast(baseClass, IntegerValue.class);
+            baseClass = ga.downCast(baseClass, IntegerValue.class, true);
             if (allowsEmpty) {
                 ga.dup();
                 ga.ifNonNull(notNull.label());

@@ -129,7 +129,7 @@ public class AtomicSequenceConverterCompiler extends ToIteratorCompiler {
                 LabelInfo end = methodInfo.newLabel("endASC");
 
                 Class<? extends Item> operandClass = compiler.compileToItem(operand);
-                ga.downCast(operandClass, AtomicValue.class);
+                ga.downCast(operandClass, AtomicValue.class, true);
                 visitAnnotation(compiler, "AtomicSequenceConverterCompiler-Primitive-Returned");
                 if (Cardinality.allowsZero(operand.getCardinality())) {
                     LabelInfo notNull = methodInfo.newLabel("notNullASC");

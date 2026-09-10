@@ -39,12 +39,12 @@ public class EquivalenceComparisonCompiler extends ToBooleanCompiler {
         LabelInfo returnTrue = methodInfo.newLabel("EqTrue");
 
         Class<? extends Item> op0class = compiler.compileToItem(test.getLhsExpression());
-        op0class = ga.downCast(op0class, AtomicValue.class);
+        op0class = ga.downCast(op0class, AtomicValue.class, true);
         int op0Var = methodInfo.allocateLocal(op0class);
         ga.storeLocal(op0Var);
 
         Class<? extends Item> op1class = compiler.compileToItem(test.getRhsExpression());
-        op1class = ga.downCast(op1class, AtomicValue.class);
+        op1class = ga.downCast(op1class, AtomicValue.class, true);
         int op1Var = methodInfo.allocateLocal(op1class);
         ga.storeLocal(op1Var);
 

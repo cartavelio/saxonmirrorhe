@@ -69,7 +69,7 @@ public class IntegerToUntypedAtomicCompiler extends ConverterCompiler {
             }
         } else {
             Class<? extends Item> baseClass = compiler.compileToItem(base);
-            baseClass = ga.downCast(baseClass, IntegerValue.class);
+            baseClass = ga.downCast(baseClass, IntegerValue.class, true);
             if (requiredClass == String.class) {
                 ga.invokeInstanceMethod(baseClass, "getStringValue");
             } else {

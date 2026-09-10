@@ -60,7 +60,7 @@ public class IntegerToBooleanCompiler extends ConverterCompiler {
             compiler.compileToPrimitive(base, Long.TYPE, onEmpty);
         } else {
             Class<? extends Item> baseClass = compiler.compileToItem(base);
-            baseClass = ga.downCast(baseClass, IntegerValue.class);
+            baseClass = ga.downCast(baseClass, IntegerValue.class, true);
             ga.invokeInstanceMethod(baseClass, "longValue");
         }
         LabelInfo isTrue = methodInfo.newLabel("isTrue");

@@ -26,9 +26,9 @@ public class DateTimeConstructorCompiler extends ToItemCompiler {
 //        return DateTimeValue.makeDateTimeValue((DateValue)arg0, (TimeValue)arg1);
 
         Class<? extends Item> op0class = compiler.compileToItem(fnc.getArg(0));
-        ga.downCast(op0class, DateValue.class);
+        ga.downCast(op0class, DateValue.class, true);
         Class<? extends Item> op1class = compiler.compileToItem(fnc.getArg(1));
-        ga.downCast(op1class, TimeValue.class);
+        ga.downCast(op1class, TimeValue.class, true);
         ga.invokeStaticMethod(DateTimeValue.class, "makeDateTimeValue", DateValue.class, TimeValue.class);
         return DateTimeValue.class;
     }

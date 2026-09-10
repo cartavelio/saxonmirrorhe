@@ -24,7 +24,7 @@ public class NamespaceUriFnCompiler extends ToItemCompiler {
         LabelInfo namespaceUriReturn = methodInfo.newLabel("namespaceUriReturn");
         final NamespaceUri_1 fn = (NamespaceUri_1) fnc.getTargetFunction();
         Class<? extends Item> argClass = compiler.compileToItem(fnc.getArg(0));
-        argClass = ga.downCast(argClass, NodeInfo.class);
+        argClass = ga.downCast(argClass, NodeInfo.class, true);
         if (Cardinality.allowsZero(fnc.getArg(0).getCardinality())) {
             LabelInfo namespaceNotNull = methodInfo.newLabel("namespaceNotNull");
             ga.dup();

@@ -32,7 +32,7 @@ public class AccessorFnCompiler extends ToItemCompiler {
         visitAnnotation(compiler, "AccessorFn Expr:" + fn.getFunctionName().getDisplayName());
         LabelInfo accessorReturn = methodInfo.newLabel("accessorReturn");
         Class<? extends Item> operandClass = compiler.compileToItem(fnc.getArg(0));
-        operandClass = ga.downCast(operandClass, AtomicValue.class);
+        operandClass = ga.downCast(operandClass, AtomicValue.class, true);
         //ga.checkClass(operandClass);    // MHK 2022-05-30 - not sure why this is necessary, but it is.
         if (Cardinality.allowsZero(fnc.getArg(0).getCardinality())) {
             ga.dup();
