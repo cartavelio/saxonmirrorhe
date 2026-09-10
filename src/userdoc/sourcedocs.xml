@@ -205,13 +205,25 @@ using Saxon from the command line, it is possible to specify a catalog to be use
         
         <p>See the documentation for the relevant library for options on how the catalog resolver
         can be configured, for example using system properties or a properties file. Remember
-        that such settings are typically global (they may affect more than one Saxon Configuration).
-        Settings local to a configuration can be made by getting the <code>ResourceResolver</code>
+        that such settings are typically global (they may affect more than one Saxon Configuration).</p>
+
+        <p>Settings local to a configuration can be made by getting the <code>ResourceResolver</code>
           from the <code>Configuration</code>, casting it to class <code
             java="net.sf.saxon.lib.ConfigurableResourceResolver">ConfigurableResourceResolver</code>,
         and calling its <code>setFeature()</code> method.</p>
-      
-    
+
+        <p>Note: Saxon configures the resolver with an explicitly
+        empty list of catalog files and does not use catalog files
+        configured with properties or property files. This is a
+        compromise for backwards compatibility because, historically,
+        Saxon only used a catalog resolver if an explicit
+        <code>-catalog</code> option was specified on the command
+        line. If Saxon configured the resolver to use the global configuration, then
+        it would always attempt to load <code>./catalog.xml</code> as a catalog
+        file and that could change the behavior of existing applications.
+        You must use the <code>-catalog</code> option or settings
+        local to the Saxon <code>Configuration</code> to specify the catalogs
+        used by Saxon.</p>
         
         <p>Here is an example of a very simple catalog file. The <code>publicId</code> and
           <code>systemId</code> attributes give the public or system identifier as used in the source
