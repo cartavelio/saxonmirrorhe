@@ -16,10 +16,14 @@
 
    <div>
    <p>SaxonC supports APIs for XPath processing on C/C++, Python and PHP.</p>
-      <p>For a general overview on using XPath see details in the main <a href="https://www.saxonica.com/documentation12/index.html#!xpath-api">Saxon documentation</a>. Also
-      see the section <a href="https://www.saxonica.com/documentation12/index.html#!xpath-api/xdm-values">Representation of XDM values</a>.</p>
+      <p>For a general overview on using XPath see details in the main <a href="https://www.saxonica.com/documentation12/index.html#!xpath-api">Saxon documentation</a>. A good starting
+         place is the section <a href="https://www.saxonica.com/documentation12/index.html#!xpath-api/xdm-values">Representation of XDM values</a>.</p>
 
    </div>
+
+   <nav>
+      <ul/>
+   </nav>
 
    
 

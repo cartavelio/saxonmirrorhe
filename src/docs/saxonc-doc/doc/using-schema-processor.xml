@@ -16,7 +16,7 @@
       <ul/>
    </nav>
 
-   <p>Also see the section <a href="https://www.saxonica.com/documentation12/index.html#!schema-processing/scm">Exporting schema component</a> in the main Saxon documentation.</p>
+   <p>See also the section <a href="https://www.saxonica.com/documentation12/index.html#!schema-processing/scm">Exporting schema component</a> in the main Saxon documentation.</p>
 
    
    <section id="commandline" title="Validation from the command line">
@@ -206,86 +206,6 @@
 
    </section>
    
-   
-   
-   
-   <section id="scm" title="Exporting schema component models">
-      <h1>Exporting schema component models</h1>
-      
-      
-      <p>SaxonC provides the ability to export or import a compiled schema. The export format is an
-         XML file, known as an <strong>SCM file</strong> (for schema component model). Using SCM files has three benefits:</p>
-      
-      <ul>
-         <li><p>An SCM file is faster to load than the corresponding source schema documents.</p></li>
-         <li><p>An SCM file is much easier for applications to process than the corresponding source documents:
-            whether written in Java, XSLT, or XQuery, applications that need access to schema information can find
-            it much more readily in an SCM document than in the source schema.</p></li>
-         <li><p>An SCM file may contain an embedded license key, enabling it to be used for validating source documents on
-            a Saxon-EE configuration that does not have its own license.</p></li>
-      </ul>
-      
-      <p>The simplest way to create an SCM file is from the command line, as
-         described in <a class="bodylink" href="../commandline">Validation from the command
-            line</a>: use the <code>-export</code> option. 
-         Alternatively, an SCM file can be generated programmatically:</p>
-      
-      <ul>
-         <li>From the C++, Python and PHP APIs, use the <code>exportSchema()</code> method of the <code>SchemaValidator</code> class.</li>
-      </ul>
-      <p>The export is unselective: it will output an SCM file containing all the schema
-         components that have been loaded into the <code>Configuration</code>, other than built-in
-         schema components.</p>
-      
-      <p>An SCM file is accepted by most interfaces that allow a source XSD file
-         to be supplied, for example:</p>
-      
-      <ul>
-         <li><p>The <code>-xsd</code> option of the command-line <code>validate</code> command</p></li>
-         <li class="javaonly"><p>The <code>registerSchemaFromFile()</code> method of <code>SchemaValidator</code>.</p></li>
-         
-         <li><p>The <code>xsi:schemaLocation</code> and <code>xsi:noNamespaceSchemaLocation</code> attributes in
-            an instance document (the SCM file contains components for multiple namespaces, and it should only
-            be loaded once).</p></li>
-         <li><p>An <code>xsl:import-schema</code> declaration in XSLT, or an <code>import schema</code> declaration in XQuery.</p></li>
-      </ul>
-      
-      <p>A schema loaded in this way is then available for all tasks performed using the same
-         <code>Configuration</code>, including validation of source documents and compiling of
-         schema-aware queries and stylesheets.</p>
-      
-      
-      
-      <p>An SCM file cannot be used as the target of <code>xs:include</code>, <code>xs:import</code>,
-         <code>xs:redefine</code>, or <code>xs:override</code> declarations within a schema document. An 
-         SCM file represents a complete schema, not an individual module.</p>
-      
-      <p>The schema components within an SCM file are <i>sealed</i>. This means it is not possible to
-         change their effective meaning by adding new members to substitution groups, or deriving new types
-         by extension. The components within an SCM file may be referenced from other components (loaded from a normal
-         XSD document): for example types within an SCM file may be referred to from new element declarations.
-         However, an SCM file will always be self-contained: it cannot contain external references to components
-         loaded from elsewhere. It is possible to load two SCM files only if their components are non-overlapping, and 
-         neither refers to components in the other.</p>
-      
-      <p>If the configuration used to generate an SCM file is licensed with a <i>developer master key</i>,
-         then any exported SCM file will include an embedded license allowing it to be loaded and used for validation
-         on a SaxonC-EE configuration that does not have its own license. An SCM file containing an embedded license
-         is protected from modification by checksums and digital signatures.</p>
-      
-      <p>The structure of an SCM file is defined in the schema <code>scmschema.xsd</code> which is
-         available in the directory <code>samples/scm/</code> in the <code>saxon-resources</code>
-         download file. This is annotated to explain the mappings between elements and attributes in
-         the SCM file and components and properties as defined in the W3C XML Schema Specification.
-         The same directory contains a file <code>scmschema.scm</code> which contains the schema for
-         SCM in SCM format.</p>
-      <aside>The SCM file includes a representation of the finite state machines used to validate
-         instances against a complex type. This means that the FSM does not need to be regenerated
-         when a schema is loaded from an SCM file, which saves a lot of time. However, it also means
-         that the SCM format is not currently suitable as a target format for software-generated
-         schemas. A variant of SCM in which the finite state machines can be omitted may be provided
-         in a future release.</aside>
-   </section>
   
 
 </article>
