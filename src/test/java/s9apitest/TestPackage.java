@@ -571,4 +571,65 @@ public class TestPackage {
             fail("Unexpected exception attempting to use unavailable package");
         }
     }
+
+    @Test
+    public void testBug6186() {
+        // The essence of this bug was the dependency graph (TOP->WIF, TOP->IR, IR->WIF), where TOP overrides
+        // components in both WIF and IR, including overriding a mode in WIF that is not directly referenced
+        // in IR, but exists implicitly in IR as a hidden component.
+        String pack_wif = "<xsl:package name=\"my:pack-wif\" version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+                + "   <xsl:variable name=\"data\" visibility=\"public\">\n"
+                + "      <data/>\n"
+                + "   </xsl:variable>\n"
+                + "   <xsl:param name=\"size\" select='42'/>\n"
+                + "   <xsl:mode name=\"m\" on-no-match=\"fail\" visibility='public'/>\n"
+                + "   <xsl:template match=\"data\" mode=\"m\">\n"
+                + "      <p1data size='{$size}'/>\n"
+                + "   </xsl:template>\n"
+                + "</xsl:package>";
+        String pack_ir = "<xsl:package name=\"my:pack-ir\" version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+                + "   <xsl:use-package name=\"my:pack-wif\">\n"
+                + "      <xsl:override>\n"
+                + "         <xsl:variable name=\"data\" visibility=\"public\">\n"
+                + "            <data>d2</data>\n"
+                + "         </xsl:variable>\n"
+                + "      </xsl:override>\n"
+                + "   </xsl:use-package>\n"
+                + "   <xsl:variable name=\"thing\" select=\"'thang'\"/>\n"
+                + "</xsl:package>";
+        String xsl = "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+                + "   <xsl:use-package name=\"my:pack-wif\">\n"
+                + "      <xsl:override>\n"
+                + "         <xsl:template match=\"data\" mode=\"m\">\n"
+                + "            <top><xsl:next-match/></top>\n"
+                + "         </xsl:template>\n"
+                + "      </xsl:override>\n"
+                + "   </xsl:use-package>\n"
+                + "   <xsl:use-package name=\"my:pack-ir\">\n"
+                + "      <xsl:override>\n"
+                + "         <xsl:variable name=\"data\" visibility=\"private\">\n"
+                + "            <data>d2</data>\n"
+                + "         </xsl:variable>\n"
+                + "      </xsl:override>\n"
+                + "   </xsl:use-package>\n"
+                + "   <xsl:template name=\"xsl:initial-template\" visibility='public'>\n"
+                + "      <xsl:apply-templates select=\"$data/data\" mode=\"m\"/>\n"
+                + "   </xsl:template>\n"
+                + "</xsl:stylesheet>";
+        try {
+            Processor processor = new Processor(true);
+            XsltCompiler xsltCompiler = processor.newXsltCompiler();
+            XsltPackage p1 = xsltCompiler.compilePackage(new StreamSource(new StringReader(pack_wif), "pack_wif"));
+            xsltCompiler.importPackage(p1);
+            XsltPackage p2 = xsltCompiler.compilePackage(new StreamSource(new StringReader(pack_ir), "p2ack_ir"));
+            xsltCompiler.importPackage(p2);
+            XsltExecutable exec = xsltCompiler.compile(new StreamSource(new StringReader(xsl), "top-xsl"));
+            Xslt30Transformer trans = exec.load30();
+            StringWriter sw = new StringWriter();
+            trans.callTemplate(null, processor.newSerializer(sw));
+            assert(sw.toString().contains("<p1data size=\"42\"/>"));
+        } catch (SaxonApiException e) {
+            fail(e);
+        }
+    }
 }
