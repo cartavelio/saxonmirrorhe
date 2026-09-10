@@ -9,7 +9,6 @@ package net.sf.saxon.s9api;
 
 
 import net.sf.saxon.lib.ErrorReporter;
-import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * The <b>XmlProcessingError</b> class contains information about an error detected during
@@ -18,7 +17,6 @@ import net.sf.saxon.transpile.CSharpModifiers;
  * become misleading.
  */
 
-@CSharpModifiers(code={"internal"})
 public interface XmlProcessingError  {
 
 
