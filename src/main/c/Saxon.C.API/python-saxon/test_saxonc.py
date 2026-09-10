@@ -167,8 +167,8 @@ def test_icu_lib():
     xqc = saxonproc.new_xquery_processor()
     xqc.set_query_content("format-date(current-date(),'[FNn]','de',(),())")
     result = xqc.run_query_to_value()
-    print("format-date(current-date(),'[FNn]','de',(),()) => " + str(result))
-    assert str(result) in "Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag"
+    print("format-date(current-date(),'[FNn]','de',(),()) => " + str(result.head))
+    assert str(result.head) in "Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag"
 
     xqc.set_query_content("format-integer(33,'[Ww]')")
     result2 = xqc.run_query_to_value()
@@ -398,7 +398,7 @@ def testNamedTemplateDefault(saxonproc, files_dir, data_dir):
 
 def testNamedTemplateToFileDefault(saxonproc):
     trans = saxonproc.new_xslt30_processor()
-
+    trans.set_cwd(os.getcwd())
     input_ = saxonproc.parse_xml(xml_text="<doc><e>text</e></doc>")
     executable = trans.compile_stylesheet(stylesheet_text = '''
      <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -667,13 +667,14 @@ def testItemAtDownCast(saxonproc):
     assert isinstance(second, PyXdmAtomicValue)
     assert second.double_value == 17.0
 
-def testResultDocument(saxonproc):
+def testResultDocument1(saxonproc):
     inputDoc = saxonproc.parse_xml(xml_text="<a>b</a>")
     assert inputDoc is not None
     xsl = "<xsl:stylesheet version='3.0'  xmlns:xsl='http://www.w3.org/1999/XSL/Transform'> <xsl:template match='a'>   <c>d</c> </xsl:template> <xsl:template match='whatever'>   <xsl:result-document href='out.xml'>     <e>f</e>   </xsl:result-document> </xsl:template></xsl:stylesheet>"
     trans = saxonproc.new_xslt30_processor()
     executable = trans.compile_stylesheet(stylesheet_text=xsl)
     assert executable is not None
+    assert not trans.exception_occurred
 
     executable.set_initial_match_selection(xdm_value=inputDoc)
     xdmValue = executable.apply_templates_returning_value()

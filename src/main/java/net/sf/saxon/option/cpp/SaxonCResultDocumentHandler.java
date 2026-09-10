@@ -7,10 +7,7 @@
 
 package net.sf.saxon.option.cpp;
 
-import net.sf.saxon.s9api.Destination;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XdmDestination;
-import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,26 +20,62 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
 
     final Map<String, XdmDestination> results = new HashMap<>();
 
-    public SaxonCResultDocumentHandler() { }
+    final Map<String, RawDestination> rawResults = new HashMap<>();
+
+    private boolean rawResultsFlag;
+
+    public SaxonCResultDocumentHandler() {
+        rawResultsFlag = false;
+    }
+
+    public SaxonCResultDocumentHandler(boolean r) {
+        rawResultsFlag = r;
+    }
 
 
 
     @Override
     public Destination apply(URI uri) {
 
-        XdmDestination dest = new XdmDestination();
-        dest.setDestinationBaseURI(uri);
         String href = uri.toASCIIString();
-        results.put(href, dest);
-        if(SaxonCAPI.debug) {
-            System.err.println("SaxonC Debug - ResultDocumentHandler: href="+ href + "added");
-            System.err.println("SaxonC Debug - ResultDocumentHandler: size="+ results.size());
+
+        if(rawResultsFlag) {
+            RawDestination dest = null;
+            dest = new RawDestination();
+            dest.setDestinationBaseURI(uri);
+            rawResults.put(href, dest);
+            if(SaxonCAPI.debug) {
+                System.err.println("SaxonC Debug - ResultDocumentHandler: href="+ href + "added");
+                System.err.println("SaxonC Debug - ResultDocumentHandler: size="+ rawResults.size());
+            }
+
+            return dest;
+        } else {
+            XdmDestination dest = null;
+            dest = new XdmDestination();
+            dest.setDestinationBaseURI(uri);
+            results.put(href, dest);
+            if(SaxonCAPI.debug) {
+                System.err.println("SaxonC Debug - ResultDocumentHandler: href="+ href + "added");
+                System.err.println("SaxonC Debug - ResultDocumentHandler: size="+ results.size());
+            }
+            return dest;
         }
-        return dest;
+
+
     }
 
 
-    public XdmNode [] getResultDocuments() {
+    public XdmValue [] getResultDocuments() {
+        if(rawResultsFlag) {
+              return getResultDocuments();
+        }   else {
+            return getXdmResultDocuments();
+        }
+    }
+
+
+    public XdmNode [] getXdmResultDocuments() {
         XdmNode [] resultDocArr = new XdmNode[results.size()];
         Collection<XdmDestination> resultDocCollection = results.values();
         int i=0;
@@ -60,6 +93,28 @@ public class SaxonCResultDocumentHandler implements java.util.function.Function<
             System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument.length"+ resultDocArr.length);
         }
         return resultDocArr;
+    }
+
+
+
+    public XdmValue [] getRawResults() {
+        XdmValue [] resultsArr = new XdmValue[rawResults.size()];
+        Collection<RawDestination> resultDocCollection = rawResults.values();
+        int i=0;
+        if(resultDocCollection.size() == 0) {
+            if(SaxonCAPI.debug) {
+                System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument is empty");
+            }
+            return null;
+        }
+        for(RawDestination dest : resultDocCollection) {
+            resultsArr[i] = dest.getXdmValue();
+            i++;
+        }
+        if(SaxonCAPI.debug) {
+            System.err.println("SaxonC Debug - ResultDocumentHandler: getResultDocument.length"+ resultsArr.length);
+        }
+        return resultsArr;
     }
 
     public String [] getResultDocumentURIs() {

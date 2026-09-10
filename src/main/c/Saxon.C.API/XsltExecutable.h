@@ -137,7 +137,7 @@ public:
     *   @return std::map - the map is indexed by the absolute URI of the result document, and the corresponding
     *   value is an XdmNode containing the result document (as an in-memory tree, without serialization)
     */
-    std::map<std::string,XdmNode*>& getResultDocuments();
+    std::map<std::string,XdmValue*>& getResultDocuments();
 
 
 
@@ -286,8 +286,10 @@ public:
      * a call on the <code>getResultDocuments()</code> method is required to get access to the result-documents in the map.
      * @param flag - true causes secondary result documents from the transformation to be saved in a map; false disables
      * this option.
+     * @param rawResults - true enables the handling of raw destination for resultsDocuments. If not supplied this can also be set on the setResultAsRawValue method.
+     * The setResultAsRawValue method has higher priority to this flag
     */
-    void setCaptureResultDocuments(bool flag);
+    void setCaptureResultDocuments(bool flag, bool rawResults=false);
 
 
     //! Produce a representation of the compiled stylesheet
@@ -504,10 +506,10 @@ private:
 	XdmValue * selectionV;
     std::string cwdXE; /*!< current working directory */
     std::string resources_dir; /*!< current Saxon resources directory */
-	bool tunnel, jitCompilation;
+	bool tunnel, jitCompilation, rawResultsFlag;
 	std::map<std::string,XdmValue*> parameters; /*!< map of parameters used for the transformation as (string, value) pairs */
 	std::map<std::string,std::string> properties; /*!< map of properties used for the transformation as (string, string) pairs */
-    std::map<std::string,XdmNode*> resultDocumentMap;
+    std::map<std::string,XdmValue*> resultDocumentMap;
 };
 
 

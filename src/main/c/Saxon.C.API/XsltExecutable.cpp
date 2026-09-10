@@ -40,6 +40,7 @@ XsltExecutable::XsltExecutable(jobject exObject, std::string curr, std::string r
 
 #endif
     tunnel = false;
+    rawResultsFlag = false;
     selection = nullptr;
     selectionV = nullptr;
     saxonMessageListenerObj = nullptr;
@@ -84,6 +85,7 @@ XsltExecutable::XsltExecutable(const XsltExecutable &other) {
         }
     }
     tunnel = other.tunnel;
+    rawResultsFlag = other.rawResultsFlag;
 
     std::map<std::string, XdmValue *>::const_iterator paramIter = other.parameters.begin();
     while (paramIter != other.parameters.end()) {
@@ -213,7 +215,7 @@ void XsltExecutable::setInitialTemplateParameters(std::map<std::string, XdmValue
     }
 }
 
-void XsltExecutable::setCaptureResultDocuments(bool flag) {
+void XsltExecutable::setCaptureResultDocuments(bool flag, bool rawResults) {
     if(flag) {
         resultDocumentMap.clear();
         if(saxonResultDocObj != nullptr) {
@@ -223,15 +225,19 @@ void XsltExecutable::setCaptureResultDocuments(bool flag) {
         static jmethodID resultDocID =   nullptr;
         if(resultDocID == nullptr) {
             resultDocID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
-                                                                                  "<init>", "()V");
+                                                                                  "<init>", "(Z)V");
         }
         if (!resultDocID) {
             std::cerr << "Error: SaxonCResultDocumentHandler" << " in " <<getDllname() << " not found\n"
                       << std::endl;
             SaxonProcessor::sxn_environ->env->ExceptionClear();
+            return;
         }
 
-        jobject tempResultDocObj = (jobject)SaxonProcessor::sxn_environ->env->NewObject(resultDocumentClass, resultDocID);
+        rawResultsFlag = rawResults || rawResultsFlag;
+
+
+        jobject tempResultDocObj = (jobject)SaxonProcessor::sxn_environ->env->NewObject(resultDocumentClass, resultDocID, rawResultsFlag);
 
         if(tempResultDocObj) {
             saxonResultDocObj = SaxonProcessor::sxn_environ->env->NewGlobalRef(tempResultDocObj);
@@ -260,13 +266,13 @@ void XsltExecutable::setCaptureResultDocuments(bool flag) {
 
 
 
-std::map<std::string,XdmNode*>& XsltExecutable::getResultDocuments(){
+std::map<std::string,XdmValue*>& XsltExecutable::getResultDocuments(){
 
 
         if(saxonResultDocObj) {
             static jmethodID getresultID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
                                                                                                       "getResultDocuments",
-                                                                                                      "()[Lnet/sf/saxon/s9api/XdmNode;");
+                                                                                                      "()[Lnet/sf/saxon/s9api/XdmValue;");
 
             static jmethodID getresult_uriID = (jmethodID) SaxonProcessor::sxn_environ->env->GetMethodID(resultDocumentClass,
                                                                                                       "getResultDocumentURIs",
@@ -287,7 +293,13 @@ std::map<std::string,XdmNode*>& XsltExecutable::getResultDocuments(){
                 }
 
                 int sizex = SaxonProcessor::sxn_environ->env->GetArrayLength(results);
-
+                jclass atomicValueClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmAtomicValue");
+                jclass nodeClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmNode");
+                jclass functionItemClass = lookForClass(SaxonProcessor::sxn_environ->env, "net/sf/saxon/s9api/XdmFunctionItem");
+                jclass mapItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
+                                                   "net/sf/saxon/s9api/XdmMap");
+                jclass arrayItemClass = lookForClass(SaxonProcessor::sxn_environ->env,
+                                                     "net/sf/saxon/s9api/XdmArray");
 
                 if (sizex > 0) {
 
@@ -299,9 +311,49 @@ std::map<std::string,XdmNode*>& XsltExecutable::getResultDocuments(){
                                         NULL);
 
 
+                        XdmValue * value= nullptr;
+                        XdmItem * xdmItem = nullptr;
+                        if(rawResultsFlag) {
 
-                        XdmNode *node= new XdmNode(resulti);
-                        resultDocumentMap[str] = node;
+                            value = new XdmValue();
+
+                            if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, atomicValueClass)           == JNI_TRUE) {
+                                xdmItem = new XdmAtomicValue(resulti);
+                                value->addXdmItem(xdmItem);
+
+
+                            } else if(SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, nodeClass)           == JNI_TRUE) {
+                                xdmItem = new XdmNode(resulti);
+                                value->addXdmItem(xdmItem);
+
+
+                            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, mapItemClass) == JNI_TRUE) {
+                                xdmItem = new XdmMap(resulti);
+                                value->addXdmItem(xdmItem);
+
+                            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, arrayItemClass) == JNI_TRUE) {
+                                xdmItem = new XdmArray(resulti);
+                                value->addXdmItem(xdmItem);
+
+                            } else if (SaxonProcessor::sxn_environ->env->IsInstanceOf(resulti, functionItemClass)           == JNI_TRUE) {
+                                xdmItem = new XdmFunctionItem(resulti);
+                                value->addXdmItem(xdmItem);
+
+                            } else {
+                                value = new XdmValue(resulti, true);
+
+                            }
+
+
+
+                        } else {
+                            value = new XdmValue();
+                            value->addXdmItem(new XdmNode(resulti));
+                            SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
+
+                        }
+
+                        resultDocumentMap[str] = value;
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(resulti);
                         SaxonProcessor::sxn_environ->env->DeleteLocalRef(resultURIsi);
 
@@ -336,6 +388,10 @@ bool XsltExecutable::removeParameter(const char *name) {
 void XsltExecutable::setResultAsRawValue(bool option) {
     if (option) {
         setProperty("outvalue", "yes");
+        rawResultsFlag = true;
+    } else {
+        removeProperty("outvalue");
+        rawResultsFlag = false;
     }
 }
 
@@ -603,7 +659,7 @@ XdmValue *XsltExecutable::applyTemplatesReturningValue() {
                                                                                  "(Ljava/lang/String;Lnet/sf/saxon/s9api/XsltExecutable;Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Object;)Lnet/sf/saxon/s9api/XdmValue;");
     }
     if (!atsvmID) {
-        std::cerr << "Error: " << getDllname() << "applyTemplatesAsValue" << " not found\n"
+        std::cerr << "Error: " << getDllname() << "applyTemplatesReturningValue" << " not found\n"
                   << std::endl;
         SaxonProcessor::sxn_environ->env->ExceptionClear();
     } else {
