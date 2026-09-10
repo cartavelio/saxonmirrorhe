@@ -163,18 +163,18 @@ public class Concat31 extends SystemFunction implements PushableFunction {
             SystemFunctionCall fnc = (SystemFunctionCall) getExpression();
             int arity = fnc.getArity();
             switch (arity) {
-                case 2: {
+                case 2 -> {
                     UnicodeStringEvaluator e0 = fnc.getArg(0).makeElaborator().elaborateForUnicodeString(true);
                     UnicodeStringEvaluator e1 = fnc.getArg(1).makeElaborator().elaborateForUnicodeString(true);
                     return cxt -> e0.eval(cxt).concat(e1.eval(cxt));
                 }
-                case 3: {
+                case 3 -> {
                     UnicodeStringEvaluator e0 = fnc.getArg(0).makeElaborator().elaborateForUnicodeString(true);
                     UnicodeStringEvaluator e1 = fnc.getArg(1).makeElaborator().elaborateForUnicodeString(true);
                     UnicodeStringEvaluator e2 = fnc.getArg(2).makeElaborator().elaborateForUnicodeString(true);
                     return cxt -> e0.eval(cxt).concat(e1.eval(cxt)).concat(e2.eval(cxt));
                 }
-                default:
+                default -> {
                     UnicodeStringEvaluator[] evaluators = new UnicodeStringEvaluator[arity];
                     for (int i = 0; i < arity; i++) {
                         evaluators[i] = fnc.getArg(i).makeElaborator().elaborateForUnicodeString(true);
@@ -187,6 +187,7 @@ public class Concat31 extends SystemFunction implements PushableFunction {
                         }
                         return builder.toUnicodeString();
                     };
+                }
             }
         }
 
