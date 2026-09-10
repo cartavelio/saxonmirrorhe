@@ -75,5 +75,24 @@ namespace Saxon.Api {
         {
             return typei.Matches(this);
         }
+        
+        /// <summary>
+        /// Create an <c>XdmItem</c> from an underlying Saxon <c>net.sf.saxon.om.Item</c> object.
+        /// The result is the same as applying the <c>XdmValue.Wrap</c> method, but
+        /// it is returned more conveniently as an instance of <c>XdmItem</c>
+        /// </summary>
+        /// <param name="value">An object representing an XDM value in the
+        /// underlying Saxon implementation. Must not be null.</param>
+        /// <returns>An <c>XdmItem</c> that wraps the underlying Saxon XDM item
+        /// representation.</returns>
+        public static XdmItem WrapItem(net.sf.saxon.om.Item value) {
+            return (XdmItem) Wrap(value);
+        }
+        public static XdmNode WrapItem(net.sf.saxon.om.NodeInfo value) {
+            return (XdmNode) Wrap(value);
+        }
+        public static XdmAtomicValue WrapItem(net.sf.saxon.value.AtomicValue value) {
+            return (XdmAtomicValue) Wrap(value);
+        }
     }
 }

@@ -168,16 +168,15 @@ namespace Saxon.Api {
         /// if the <c>Processor</c> is not schema-aware.
         /// </summary>
 
-        public SchemaManager SchemaManager {
-            get {
-                if (schemaManager == null) {
-                    schemaManager = new SchemaManager(this);
-                }
+        public SchemaManager SchemaManager => null; // pro tem
 
-                return schemaManager;
-            }
-        }
-
+        // get {
+        //     if (schemaManager == null) {
+        //         schemaManager = new SchemaManager(this);
+        //     }
+        //
+        //     return schemaManager;
+        // }
         /// <summary>
         /// An <c>XmlResolver</c>, which will be used while compiling and running queries, 
         /// XPath expressions, and stylesheets, if no other <c>XmlResolver</c> is nominated

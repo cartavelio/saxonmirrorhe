@@ -158,7 +158,6 @@ namespace Saxon.Api {
             }
         }
 
-
         /// <summary>
         /// Unwraps the underlying <c>XmlNode</c> object from the <c>XdmValue</c>.
         /// If the method does not wrap a <c>XmlNode</c> then a null is returned

@@ -398,7 +398,7 @@ namespace Saxon.Api {
         /// <remarks>since 9.8</remarks>
         public void SerializeXdmNode(XdmNode node)
         {
-            jSerializer.serializeNode((net.sf.saxon.s9api.XdmNode)XdmValue.FromGroundedValueToJXdmValue(node.value));
+            jSerializer.serializeNode(node);
         }
 
 
@@ -477,8 +477,8 @@ namespace Saxon.Api {
 
         public Uri BaseUri
         {
-            get => new Uri(jSerializer.getDestinationBaseURI().toASCIIString());
-            set => jSerializer.setDestinationBaseURI(new Uri(value.ToString()));
+            get => new Uri(jSerializer.getDestinationBaseURI().OriginalString);
+            set => jSerializer.setDestinationBaseURI(new Uri(value.OriginalString));
         }
 
 

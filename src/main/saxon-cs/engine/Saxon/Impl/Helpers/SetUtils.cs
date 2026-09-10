@@ -13,6 +13,12 @@ namespace Saxon.Impl.Helpers {
             return extra.Count > 0;
         }
         
+        public static bool ContainsAll<T>(
+                System.Collections.Generic.ISet<T> input, 
+                System.Collections.Generic.ISet<T> subset) {
+            return subset.All(input.Contains);
+        }
+        
         public static T PollFirst<T>(System.Collections.Generic.SortedSet<T> input) {
             System.Collections.Generic.IEnumerator<T> iter = input.GetEnumerator();
             if (iter.MoveNext()) {

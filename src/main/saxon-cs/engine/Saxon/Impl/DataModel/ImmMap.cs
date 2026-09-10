@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using java.lang;
-using java.util;
 using net.sf.saxon.expr.sort;
 using net.sf.saxon.ma.map;
-using net.sf.saxon.ma.trie;
 using net.sf.saxon.om;
 using net.sf.saxon.tree.iter;
 using net.sf.saxon.type;
 using net.sf.saxon.value;
+using KeyValuePair = net.sf.saxon.ma.map.KeyValuePair;
 using Type = net.sf.saxon.type.Type;
 
 namespace Saxon.Impl.DataModel {
@@ -55,8 +53,8 @@ namespace Saxon.Impl.DataModel {
         private int entries = -1;
 
         /**
-     * Create an empty map
-     */
+         * Create an empty map
+         */
         public ImmMap() {
             this.imap = ImmutableDictionary.Create<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair>();
             this.entries = 0;
@@ -64,30 +62,30 @@ namespace Saxon.Impl.DataModel {
 
 
         /**
-     * Create a singleton map with a single key and value
-     * @param key the key value
-     * @param value the associated value
-     * @return a singleton map
-     */
+         * Create a singleton map with a single key and value
+         * @param key the key value
+         * @param value the associated value
+         * @return a singleton map
+         */
         public static ImmMap singleton(AtomicValue key, GroundedValue value) {
             return (ImmMap) new ImmMap().addEntry(key, value);
         }
 
         /**
-     * Create a map whose contents are a copy of an existing immutable map
-     * @param imap the map to be copied
-     */
+         * Create a map whose contents are a copy of an existing immutable map
+         * @param imap the map to be copied
+         */
         public ImmMap(ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> imap) {
             this.imap = imap;
             entries = -1;
         }
 
         /**
-     * Create a map whose entries are copies of the entries in an existing MapItem
-     *
-     * @param map       the existing map to be copied
-     * @return the new map
-     */
+         * Create a map whose entries are copies of the entries in an existing MapItem
+         *
+         * @param map       the existing map to be copied
+         * @return the new map
+         */
         public static ImmMap copy(MapItem map) {
             if (map is ImmMap) {
                 return (ImmMap) map;
@@ -102,11 +100,11 @@ namespace Saxon.Impl.DataModel {
         }
 
         /**
-     * After adding an entry to the map, update the cached type information
-     * @param key the new key
-     * @param val the new associated value
-     * @param wasEmpty true if the map was empty before adding these values
-     */
+         * After adding an entry to the map, update the cached type information
+         * @param key the new key
+         * @param val the new associated value
+         * @param wasEmpty true if the map was empty before adding these values
+         */
         private void updateTypeInformation(AtomicValue key, Sequence val, bool wasEmpty) {
             if (wasEmpty) {
                 keyUType = key.getUType();
@@ -130,8 +128,8 @@ namespace Saxon.Impl.DataModel {
         }
 
         /**
-     * Get the size of the map
-     */
+         * Get the size of the map
+         */
         public override int size() {
             if (entries >= 0) {
                 return entries;
@@ -147,22 +145,22 @@ namespace Saxon.Impl.DataModel {
         }
 
         /**
-     * Ask whether the map is empty
-     *
-     * @return true if and only if the size of the map is zero
-     */
+         * Ask whether the map is empty
+         *
+         * @return true if and only if the size of the map is zero
+         */
         public override bool isEmpty() {
             return entries == 0 || !imap.GetEnumerator().MoveNext();
         }
 
         /**
-     * Ask whether the map conforms to a given map type
-     *
-     * @param requiredKeyType   the required keyType
-     * @param requiredValueType the required valueType
-     * @param th        the type hierarchy cache for the configuration
-     * @return true if the map conforms to the required type
-     */
+         * Ask whether the map conforms to a given map type
+         *
+         * @param requiredKeyType   the required keyType
+         * @param requiredValueType the required valueType
+         * @param th        the type hierarchy cache for the configuration
+         * @return true if the map conforms to the required type
+         */
         public override bool conforms(AtomicType requiredKeyType, SequenceType requiredValueType, TypeHierarchy th) {
             if (isEmpty()) {
                 return true;
@@ -227,13 +225,13 @@ namespace Saxon.Impl.DataModel {
         }
 
         /**
-     * Get the type of the map. This method is used largely for diagnostics, to report
-     * the type of a map when it differs from the required type. This method has the side-effect
-     * of updating the internal type information held within the map.
-     *
-     * @param th The type hierarchy cache for the configuration
-     * @return the type of this map
-     */
+         * Get the type of the map. This method is used largely for diagnostics, to report
+         * the type of a map when it differs from the required type. This method has the side-effect
+         * of updating the internal type information held within the map.
+         *
+         * @param th The type hierarchy cache for the configuration
+         * @return the type of this map
+         */
         public override ItemType getItemType(TypeHierarchy th) {
             AtomicType keyType = null;
             ItemType valueType = null;
@@ -271,24 +269,24 @@ namespace Saxon.Impl.DataModel {
         }
 
         /**
-     * Get the lowest common item type of the keys in the map
-     *
-     * @return the most specific type to which all the keys belong. If the map is
-     *         empty, return UType.VOID (the type with no instances)
-     */
+         * Get the lowest common item type of the keys in the map
+         *
+         * @return the most specific type to which all the keys belong. If the map is
+         *         empty, return UType.VOID (the type with no instances)
+         */
         public override UType getKeyUType() {
             return keyUType;
         }
 
         /**
-     * Create a new map containing the existing entries in the map plus an additional entry,
-     * without modifying the original. If there is already an entry with the specified key,
-     * this entry is replaced by the new entry.
-     *
-     * @param key     the key of the new entry
-     * @param value   the value associated with the new entry
-     * @return the new map containing the additional entry
-     */
+         * Create a new map containing the existing entries in the map plus an additional entry,
+         * without modifying the original. If there is already an entry with the specified key,
+         * this entry is replaced by the new entry.
+         *
+         * @param key     the key of the new entry
+         * @param value   the value associated with the new entry
+         * @return the new map containing the additional entry
+         */
         public override MapItem addEntry(AtomicValue key, GroundedValue value) {
             AtomicMatchKey amk = makeKey(key);
 
@@ -312,14 +310,14 @@ namespace Saxon.Impl.DataModel {
         }
 
         /**
-     * Add a new entry to this map. Since the map is supposed to be immutable, this method
-     * must only be called while initially populating the map, and must not be called if
-     * anyone else might already be using the map.
-     *
-     * @param key     the key of the new entry. Any existing entry with this key is replaced.
-     * @param value   the value associated with the new entry
-     * @return true if an existing entry with the same key was replaced
-     */
+         * Add a new entry to this map. Since the map is supposed to be immutable, this method
+         * must only be called while initially populating the map, and must not be called if
+         * anyone else might already be using the map.
+         *
+         * @param key     the key of the new entry. Any existing entry with this key is replaced.
+         * @param value   the value associated with the new entry
+         * @return true if an existing entry with the same key was replaced
+         */
         public bool initialPut(AtomicValue key, GroundedValue value) {
             AtomicMatchKey amk = makeKey(key);
             bool empty = isEmpty();
@@ -336,12 +334,12 @@ namespace Saxon.Impl.DataModel {
 
 
         /**
-     * Remove an entry from the map
-     *
-     * @param key     the key of the entry to be removed
-     * @return a new map in which the requested entry has been removed; or this map
-     *         unchanged if the specified key was not present
-     */
+         * Remove an entry from the map
+         *
+         * @param key     the key of the entry to be removed
+         * @return a new map in which the requested entry has been removed; or this map
+         *         unchanged if the specified key was not present
+         */
         public override MapItem remove(AtomicValue key) {
             ImmutableDictionary<AtomicMatchKey, net.sf.saxon.ma.map.KeyValuePair> m2
                 = imap.Remove(makeKey(key));
@@ -360,11 +358,11 @@ namespace Saxon.Impl.DataModel {
         }
 
         /**
-     * Get an entry from the Map
-     *
-     * @param key     the value of the key
-     * @return the value associated with the given key, or null if the key is not present in the map
-     */
+         * Get an entry from the Map
+         *
+         * @param key     the value of the key
+         * @return the value associated with the given key, or null if the key is not present in the map
+         */
         public override GroundedValue get(AtomicValue key) {
             AtomicMatchKey matchKey = makeKey(key);
             if (imap.ContainsKey(matchKey)) {
@@ -397,6 +395,10 @@ namespace Saxon.Impl.DataModel {
             return new KeyIterator(imap);
         }
 
+        public override IEnumerable<KeyValuePair> keyValuePairs() {
+            return imap.Values;
+        }
+
         public class KeyIterator : AtomicIterator {
             private IEnumerator<net.sf.saxon.ma.map.KeyValuePair> _enumerator;
             private net.sf.saxon.ma.map.KeyValuePair _current;
@@ -418,10 +420,7 @@ namespace Saxon.Impl.DataModel {
             public void close() {
                 // no action
             }
-
-            public SequenceIteratorProperty getProperties() {
-                return SequenceIteratorProperty.NONE;
-            }
+            
         }
 
         /**

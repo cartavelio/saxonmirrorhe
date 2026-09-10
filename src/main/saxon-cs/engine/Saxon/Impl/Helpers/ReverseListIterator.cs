@@ -3,16 +3,25 @@ using net.sf.saxon.expr;
 using net.sf.saxon.om;
 using net.sf.saxon.tree.iter;
 
-namespace SaxonCS3.Saxon.Impl.Helpers {
-    public class ReverseListIterator<T> : AbstractSequenceIterator, 
-        UnfailingIterator, LastPositionFinder, ReversibleIterator
-        where T : Item {
+namespace Saxon.Impl.Helpers {
+    public class ReverseListIterator<T> : SequenceIterator, 
+            LastPositionFinder, LookaheadIterator, ReversibleIterator
+            where T : Item {
+        
         private readonly IList<T> list;
         private int position;
 
         public ReverseListIterator(IList<T> list) {
             this.list = list;
             this.position = list.Count - 1;
+        }
+
+        public bool supportsHasNext() {
+            return true;
+        }
+
+        public bool hasNext() {
+            return position >= 0;
         }
 
         public Item next() {
@@ -23,16 +32,16 @@ namespace SaxonCS3.Saxon.Impl.Helpers {
             }
         }
 
+        public bool supportsGetLength() {
+            return true;
+        }
+
         public int getLength() {
             return list.Count;
         }
 
-        public SequenceIteratorProperty getProperties() {
-            return SequenceIteratorProperty.LAST_POSITION_FINDER
-        }
-
         public void close() {
-            throw new System.NotImplementedException();
+            // no action
         }
 
         public SequenceIterator getReverseIterator() {
