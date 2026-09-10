@@ -21,9 +21,10 @@ import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
+import net.sf.saxon.transpile.CSharpReplaceException;
 import net.sf.saxon.tree.iter.TextLinesIterator;
 import net.sf.saxon.type.AnyItemType;
-import net.sf.saxon.type.BuiltInAtomicType;        
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntPredicateLambda;
 
@@ -323,8 +324,10 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         return new FileOutputStream(file, true);
     }
 
+
     public static class FileAppendText extends SystemFunction {
         @Override
+        @CSharpReplaceException(from = "java.io.UnsupportedEncodingException", to = "System.ArgumentException")
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             String path = arguments[0].head().getStringValue();
             String contents = arguments[1].head().getStringValue();
@@ -353,7 +356,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         }
     }
 
-    @CSharpReplaceBody(code="return new System.IO.StreamWriter(stream, System.Text.Encoding.GetEncoding(encoding));")
+    @CSharpReplaceBody(code="return Saxon.Impl.Helpers.IOUtils.newOutputStreamWriter(stream, encoding);")
     private static Writer newOutputStreamWriter(OutputStream stream, String encoding) throws XPathException {
         // Separate method to allow C# conversion
         try {

@@ -55,8 +55,7 @@ public abstract class Verifier {
      *
      * @param config the Configuration
      */
-
-    @CSharpModifiers(code={"internal"})
+    
     void displayLicenseMessage(Configuration config) {
         loadPrimaryLicense(config);
         if (config.isTiming()) {

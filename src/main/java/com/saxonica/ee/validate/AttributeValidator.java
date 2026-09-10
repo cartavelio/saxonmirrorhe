@@ -104,6 +104,7 @@ public abstract class AttributeValidator extends ContentValidator {
                 if (getNillability() == Nillability.DISALLOWED) {
                     reportNotNillable(attName, location);
                 }
+                // TODO: following code is probably redundant; we've already made the checks in XSIAttributeHandler
                 String b = Whitespace.trim(value);
                 if (getNillability() != Nillability.IGNORED && (b.equals("true") || b.equals("1"))) {
                     nilled = true;

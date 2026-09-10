@@ -398,11 +398,9 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(0, config.getJavaExternalObjectType(XQueryExpression.class), OPT, EMPTY)
                 .arg(1, AnyItemType.getInstance(), ONE, null)
                 .arg(2, AnyNodeTest.getInstance(), STAR, null);
-
-        //#if CSHARP==false
+        
         register("read-binary-resource", 1, ReadBinaryResource.class, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-        //#endif
         
         FunctionItemType stringReplacer = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING},

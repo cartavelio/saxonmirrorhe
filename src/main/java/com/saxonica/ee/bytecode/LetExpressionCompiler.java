@@ -10,6 +10,7 @@ import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.Evaluator;
+import net.sf.saxon.expr.parser.Evaluators;
 import net.sf.saxon.ma.zeno.ZenoSequence;
 import net.sf.saxon.om.*;
 import net.sf.saxon.value.*;
@@ -19,19 +20,17 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.sf.saxon.expr.EvaluationMode.EVALUATE_VARIABLE;
-
 /**
  * Generate bytecode for evaluation of an LetExpression
  */
 public class LetExpressionCompiler extends ToIteratorCompiler {
 
-    private EvaluationMode getEvaluationMode(LetExpression expr) {
+    private Evaluator getEvaluator(LetExpression expr) {
         Evaluator eval = expr.getEvaluator();
         if (eval == null) {
-            return EvaluationMode.ITERATE_AND_MATERIALIZE;
+            return Evaluator.EagerSequence.INSTANCE;
         } else {
-            return eval.getEvaluationMode();
+            return eval;
         }
     }
 
@@ -61,7 +60,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluationMode(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr), letExpr.getNominalReferenceCount());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
 
@@ -105,7 +104,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluationMode(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr), letExpr.getNominalReferenceCount());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
         ga.invokeInstanceMethod(XPathContext.class,"setTemporaryOutputState", Integer.TYPE);
@@ -147,7 +146,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
         //Stack: XPathContext Integer XPathContext
         ga.push(StandardNames.XSL_VARIABLE);
         ga.invokeInstanceMethod(XPathContext.class, "setTemporaryOutputState", Integer.TYPE);
-        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluationMode(letExpr), letExpr.getNominalReferenceCount());
+        compileCommonExpr(compiler, letExpr.getSequence(), getEvaluator(letExpr), letExpr.getNominalReferenceCount());
         int valueRepVar = methodInfo.allocateLocal(Sequence.class);
         ga.storeLocal(valueRepVar);
         ga.invokeInstanceMethod(XPathContext.class,"setTemporaryOutputState", Integer.TYPE);
@@ -172,33 +171,33 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
     public static void compileCommonExpr(CompilerService compiler,
-                                         Expression exp, EvaluationMode evaluationMode, int refCount) throws CannotCompileException {
+                                         Expression exp, Evaluator evaluationMode, int refCount) throws CannotCompileException {
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
         visitLineNumber(compiler, ga, exp);
-        switch (evaluationMode) {
+        switch (evaluationMode.getCode()) {
 
-            case EVALUATE_LITERAL:
+            case Evaluators.EVALUATE_LITERAL:
                 //return ((Literal)exp).getValue();
                 compiler.compileToSequence(exp);
                 break;
 
-            case EVALUATE_VARIABLE:
+            case Evaluators.EVALUATE_VARIABLE:
                 compiler.compileToSequence(exp);
                 //was: VariableReferenceCompiler.genEvaluateVariable(compiler, ga, (VariableReference)exp);
                 // but the new code is more robust. QT3 Axes-089 was failing with a ClassCastException here.
                 break;
 
-            case MAKE_CLOSURE:
+            case Evaluators.MAKE_CLOSURE:
                 makeClosure(compiler, exp, refCount, ga, methodInfo);
                 break;
-            case MAKE_MEMO_CLOSURE:
+            case Evaluators.MAKE_MEMO_CLOSURE:
                 makeClosure(compiler, exp, refCount == 1 ? 10 : refCount, ga, methodInfo);
                 break;
-            case LAZY_TAIL_EXPRESSION:
+            case Evaluators.LAZY_TAIL_EXPRESSION:
                 TailExpression tail = (TailExpression) exp;
                 VariableReference vr = (VariableReference) tail.getBaseExpression();
-                compileCommonExpr(compiler,  vr, EVALUATE_VARIABLE, refCount);
+                compileCommonExpr(compiler, vr, Evaluator.Variable.INSTANCE, refCount);
                 ga.dup();
                 int baseVar = methodInfo.allocateLocal(Sequence.class);
                 ga.storeLocal(baseVar);
@@ -340,7 +339,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 methodInfo.releaseLocal(baseVar);
                 break;
 
-            case MAKE_SINGLETON_CLOSURE:
+            case Evaluators.MAKE_SINGLETON_CLOSURE:
                 //            // return new SingletonClosure(exp, context);
                 compiledExpr = compiler.compileToByteCode(exp, "", Expression.ITERATE_METHOD);
                 if (compiledExpr == null) {
@@ -352,12 +351,12 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 compiler.generateGetContext();
                 ga.invokeConstructor(SingletonClosure.class, Expression.class, XPathContext.class);
                 break;
-            case RETURN_EMPTY_SEQUENCE:
+            case Evaluators.RETURN_EMPTY_SEQUENCE:
                 ga.invokeStaticMethod(EmptySequence.class, "getInstance");
                 ga.checkClass(Sequence.class);
                 break;
             //
-            case EVALUATE_AND_MATERIALIZE_VARIABLE:
+            case Evaluators.EVALUATE_AND_MATERIALIZE_VARIABLE:
                 LabelInfo doneEvalMaterialize = methodInfo.newLabel("doneEvalMaterialize");
 
                 VariableReferenceCompiler.genEvaluateVariable(compiler, ga, (VariableReference)exp);
@@ -369,7 +368,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 ga.invokeStaticMethod(SequenceTool.class, "toGroundedValue", SequenceIterator.class);
                 methodInfo.placeLabel(doneEvalMaterialize);
                 break;
-            case CALL_EVALUATE_OPTIONAL_ITEM:
+            case Evaluators.CALL_EVALUATE_OPTIONAL_ITEM:
                 visitLineNumber(compiler, ga, exp);
                 compiler.compileToItem(exp);
                 LabelInfo notNullLab = methodInfo.newLabel("notNullLab");
@@ -380,13 +379,13 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 ga.checkClass(Sequence.class);
                 methodInfo.placeLabel(notNullLab);
                 break;
-            case CALL_EVALUATE_SINGLE_ITEM:
+            case Evaluators.CALL_EVALUATE_SINGLE_ITEM:
                 visitLineNumber(compiler, ga, exp);
                 compiler.compileToItem(exp);
                 break;
 
-            case UNDECIDED:
-            case ITERATE_AND_MATERIALIZE:
+            case Evaluators.UNDECIDED:
+            case Evaluators.ITERATE_AND_MATERIALIZE:
                 if (refCount == FilterExpression.FILTERED) {
                     // WAS: return new IndexedValue(expression.iterate(context));
                     // 9.9: return SearchableValue.makeSearchable(expression.iterate(context));
@@ -401,12 +400,12 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 }
                 break;
 
-            case PROCESS:
+            case Evaluators.PROCESS:
                 ToPushCompiler.compilePushToSequenceCollector(compiler, exp);
                 ga.invokeInstanceMethod(SequenceCollector.class, "getSequence");
                 break;
 
-            case SHARED_APPEND_EXPRESSION:
+            case Evaluators.SHARED_APPEND_EXPRESSION:
                 if (exp instanceof Block) {
 //                    Block block = (Block) exp;
 //                    Expression[] children = block.getChildren();
@@ -524,12 +523,12 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
                 break;
 
 
-            case MAKE_INDEXED_VARIABLE:
+            case Evaluators.MAKE_INDEXED_VARIABLE:
                 compiler.compileToIterator(exp);
                 ga.invokeStaticMethod(SearchableValue.class, "makeSearchableValue", SequenceIterator.class);
                 break;
 
-            case STREAMING_ARGUMENT:
+            case Evaluators.STREAMING_ARGUMENT:
                 PostureAndSweep ps = Streamability.getPostureAndSweepIfKnown(exp);
                 if (ps == null || ps.getPosture() == Posture.GROUNDED) {
                     visitLineNumber(compiler, ga, exp);

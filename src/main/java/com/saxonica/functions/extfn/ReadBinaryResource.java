@@ -6,6 +6,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.resource.Loader;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.value.Base64BinaryValue;
 
 import java.io.IOException;
@@ -23,20 +24,19 @@ public class ReadBinaryResource extends SystemFunction {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         try {
             String arg = arguments[0].head().getStringValue();
-            URL url = new URL(arg);
             InputStream stream;
             try {
+                URL url = new URL(arg);
                 stream = Loader.urlStream(url);
             } catch (RuntimeException e) {
-                // Not well documented, but this happens when given an invalid URL
-                throw new XPathException("saxon:read-binary-resource - invalid URL " + arg, SaxonErrorCode.SXJE0053);
+                throw new XPathException("saxon:read-binary-resource - invalid or inaccessible URL " + arg, SaxonErrorCode.SXJE0053);
             }
-            List<byte[]> buffers = new ArrayList<>();
+            List<byte[]> buffers = new ArrayList<byte[]>();
             int len = 0;
             while (true) {
                 byte[] buffer = new byte[4096];
                 int b = stream.read(buffer);
-                if (b < 0) {
+                if (isFinished(b)) {
                     break;
                 }
                 if (b < 4096) {
@@ -55,6 +55,11 @@ public class ReadBinaryResource extends SystemFunction {
         } catch (IOException e) {
             throw new XPathException("saxon:read-binary-resource: I/O error: " + e.getMessage(), SaxonErrorCode.SXJE0053);
         }
+    }
+
+    @CSharpReplaceBody(code="return indicator == 0;")
+    private boolean isFinished(int indicator) {
+        return indicator < 0;
     }
 }
 

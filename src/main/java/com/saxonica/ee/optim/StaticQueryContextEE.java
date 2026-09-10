@@ -14,6 +14,7 @@ import net.sf.saxon.query.StaticQueryContext;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -194,13 +195,18 @@ public class StaticQueryContextEE extends StaticQueryContextPE {
         StringBuilder sb = new StringBuilder(4096);
         while (true) {
             int n = source.read(buffer);
-            if (n > 0) {
-                sb.append(buffer, 0, n);
-            } else {
+            if (isFinished(n)) {
                 break;
+            } else {
+                sb.append(buffer, 0, n);
             }
         }
         compileLibrary(sb.toString());
+    }
+
+    @CSharpReplaceBody(code = "return indicator == 0;")
+    private boolean isFinished(int indicator) {
+        return indicator < 0;
     }
 
     /**

@@ -319,7 +319,7 @@ public class SchemaCompiler {
         SchemaDocument schemadoc = SchemaReader.read(source, this, pipe, null);
         if (schemadoc.isCompiledSchemaDocument()) {
             try {
-                getConfiguration().importComponents(schemadoc.getDocument().getRootNode());
+                getConfiguration().importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
                 return expected;
             } catch (XPathException e) {
                 throw new SchemaException(e);
@@ -476,7 +476,7 @@ public class SchemaCompiler {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setErrorReporter(listener);
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-        SchemaDocument schemadoc = SchemaReader.read(root, this, pipe, null);
+        SchemaDocument schemadoc = SchemaReader.read(root.asActiveSource(), this, pipe, null);
         return processSchemaDocument(schemadoc, null, expected);
     }
 

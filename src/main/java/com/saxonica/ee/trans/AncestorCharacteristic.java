@@ -5,6 +5,7 @@ import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.BooleanValue;
 
 /**
  * Given an expression, this characteristic returns a boolean indicating whether
@@ -32,27 +33,29 @@ public class AncestorCharacteristic extends Characteristic {
     /**
      * Evaluate the characteristic as applied to the context item
      * @param context the dynamic evaluation context; the context item is the item being matched
-     * @return true if there is an ancestor/parent satisfying the characteristic pattern
+     * @return true if there is an ancestor/parent satisfying the characteristic pattern. (We
+     * wrap this in a BooleanValue because the superclass expects Object, and using Boolean
+     * causes problems with C# translation.)
      * @throws XPathException if pattern matching fails with a dynamic error
      */
 
     @Override
-    public Boolean evaluate(XPathContext context) throws XPathException {
+    public BooleanValue evaluate(XPathContext context) throws XPathException {
         Item item = context.getContextItem();
         if (!(item instanceof NodeInfo)) {
-            return false;
+            return BooleanValue.FALSE;
         }
         if (isParent) {
-            return pattern.matches(((NodeInfo)item).getParent(), context);
+            return BooleanValue.get(pattern.matches(((NodeInfo)item).getParent(), context));
         } else {
             NodeInfo a = (NodeInfo)item;
             while (a != null) {
                 if (pattern.matches(a, context)) {
-                    return true;
+                    return BooleanValue.TRUE;
                 }
                 a = a.getParent();
             }
-            return false;
+            return BooleanValue.FALSE;
         }
     }
 

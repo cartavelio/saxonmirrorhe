@@ -320,7 +320,7 @@ public abstract class SchemaReader {
             Sender.send(source, temp, options);
             temp.endDocument();
             temp.close();
-            Sender.send(temp.getCurrentRoot(), valve, options);
+            Sender.send(temp.getCurrentRoot().asActiveSource(), valve, options);
         } else {
             Sender.send(source, valve, options);
         }

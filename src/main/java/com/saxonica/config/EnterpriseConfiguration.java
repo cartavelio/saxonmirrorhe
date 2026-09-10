@@ -28,6 +28,7 @@ import com.saxonica.expr.XQueryParserExtensionPE;
 import com.saxonica.functions.extfn.EXPathBinaryFunctionSet;
 import com.saxonica.functions.extfn.EXPathFileFunctionSet;
 import com.saxonica.trans.ModePE;
+import com.saxonica.xsltextn.style.Saxon6ElementFactory;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
 import net.sf.saxon.PreparedStylesheet;
@@ -664,7 +665,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
             if (schemadoc.isCompiledSchemaDocument()) {
                 try {
-                    importComponents(schemadoc.getDocument());
+                    importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
                 } catch (XPathException e) {
                     throw new SchemaException(e);
                 }
@@ -2104,9 +2105,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     @Override
     public void declareBuiltInExtensionElementNamespaces() {
         try {
-            super.declareBuiltInExtensionElementNamespaces();
+            setExtensionElementNamespace(NamespaceConstant.SAXON, new SaxonElementFactoryEE());
+            setExtensionElementNamespace(NamespaceConstant.SAXON6, new Saxon6ElementFactory());
             setExtensionElementNamespace("http://saxonica.com/ns/interactiveXSLT", new IXSLElementFactory());
-            //setExtensionElementNamespace(NamespaceConstant.SQL, "net.sf.saxon.option.sql.SQLElementFactory");
         } catch (XPathException e) {
             throw new IllegalStateException(e.getMessage());
         }

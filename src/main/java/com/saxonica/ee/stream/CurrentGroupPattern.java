@@ -5,7 +5,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.AnchorPattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 
 /**
  * This is a special pattern that matches the "anchor node". It is used for the selectors
@@ -22,8 +21,7 @@ import net.sf.saxon.transpile.CSharpModifiers;
 public class CurrentGroupPattern extends AnchorPattern {
 
     private static final CurrentGroupPattern THE_INSTANCE = new CurrentGroupPattern();
-
-    @CSharpModifiers(code = {"public", "static", "new"})
+    
     public static CurrentGroupPattern getInstance() {
         return THE_INSTANCE;
     }

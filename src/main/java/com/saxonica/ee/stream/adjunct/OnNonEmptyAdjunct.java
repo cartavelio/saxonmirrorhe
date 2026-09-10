@@ -5,6 +5,7 @@ import com.saxonica.ee.stream.watch.Terminator;
 import com.saxonica.ee.stream.watch.WatchManager;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 
 /**
@@ -22,6 +23,7 @@ public class OnNonEmptyAdjunct extends TransmissionAdjunct {
              * @throws XPathException if a dynamic error occurs
              */
             @Override
+            @CSharpModifiers(code={"public", "override"})
             public void open(Terminator terminator) throws XPathException {
                 super.open(terminator);
             }

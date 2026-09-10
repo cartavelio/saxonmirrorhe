@@ -3,6 +3,7 @@ package com.saxonica.ee.trans;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.NumericValue;
 import net.sf.saxon.z.IntSet;
 
@@ -217,7 +218,7 @@ public abstract class Precondition {
 
         @Override
         protected boolean testPrecondition(PreconditionMatcher matcher) throws XPathException {
-            return (boolean)matcher.obtainCharacteristic(characteristic);
+            return ((BooleanValue)matcher.obtainCharacteristic(characteristic)).getBooleanValue();
         }
 
         @Override

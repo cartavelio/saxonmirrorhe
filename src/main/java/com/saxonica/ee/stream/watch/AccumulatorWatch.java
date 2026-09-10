@@ -204,7 +204,7 @@ public class AccumulatorWatch extends PatternWatch {
         c2.setCurrentComponent(accumulator.getDeclaringComponent());
         c2.setTemporaryOutputState(StandardNames.XSL_ACCUMULATOR_RULE);
         try {
-            return Evaluator.EAGER_SEQUENCE.INSTANCE.evaluate(delta, c2);
+            return Evaluator.EagerSequence.INSTANCE.evaluate(delta, c2);
         } catch (XPathException e) {
             // Save the error until the accumulator value is read
             return new ObjectValue<>(e);

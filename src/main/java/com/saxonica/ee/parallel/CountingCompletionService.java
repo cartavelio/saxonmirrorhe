@@ -1,6 +1,7 @@
 package com.saxonica.ee.parallel;
 
 import net.sf.saxon.om.AtomicCounter;
+import net.sf.saxon.transpile.CSharpModifiers;
 
 import java.util.concurrent.*;
 
@@ -27,6 +28,7 @@ public class CountingCompletionService<V> extends ExecutorCompletionService<V> {
     }
 
     @Override
+    @CSharpModifiers(code={"public", "override"})
     public Future<V> submit(Callable<V> task) {
         Future<V> future = super.submit(task);
         submittedTasks.incrementAndGet();
@@ -34,6 +36,7 @@ public class CountingCompletionService<V> extends ExecutorCompletionService<V> {
     }
 
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Future<V> submit(Runnable task, V result) {
         Future<V> future = super.submit(task, result);
         submittedTasks.incrementAndGet();
@@ -41,6 +44,7 @@ public class CountingCompletionService<V> extends ExecutorCompletionService<V> {
     }
 
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Future<V> take() throws InterruptedException {
         Future<V> future = super.take();
         //System.err.println("Successful take()");
@@ -49,6 +53,7 @@ public class CountingCompletionService<V> extends ExecutorCompletionService<V> {
     }
 
     @Override
+    @CSharpModifiers(code = {"public", "override"})
     public Future<V> poll() {
         Future<V> future = super.poll();
         if (future != null) {

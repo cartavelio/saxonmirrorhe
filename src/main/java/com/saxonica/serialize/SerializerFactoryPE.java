@@ -22,8 +22,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import java.util.*;
 
-//import net.sf.saxon.TransformerFactoryImpl;
-
 /**
  * Saxon-PE extensions to the serializer factory
  */

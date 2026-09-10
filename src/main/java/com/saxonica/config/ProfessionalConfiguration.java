@@ -459,6 +459,7 @@ public class ProfessionalConfiguration extends Configuration {
             SerializerFactoryPE sf = new SerializerFactoryPE(this) {
 
                 @Override
+                @CSharpModifiers(code={"public", "override"})
                 public Receiver getReceiver(Result result, SerializationProperties parameters, PipelineConfiguration pipe) throws XPathException {
                     Receiver r = super.getReceiver(result, parameters, pipe);
                     if (r instanceof EvaluationNuisance) {
@@ -827,7 +828,7 @@ public class ProfessionalConfiguration extends Configuration {
      * Set a namespace used to refer to a library of XSLT extension elements
      *
      * @param namespace the namespace used for the extension elements
-     * @param factory   the name of the class implementing the ExtensionElementFactory
+     * @param className   the name of the class implementing the ExtensionElementFactory
      *                  that instantiates extension elements in this namespace
      * @throws net.sf.saxon.trans.XPathException if (for example) the supplied class does not implement
      *                                           the ExtensionElementFactory interface

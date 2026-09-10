@@ -4,6 +4,7 @@ import com.saxonica.ee.stream.StreamInstr;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.instruct.LocalParam;
+import net.sf.saxon.expr.parser.Evaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.StructuredQName;
@@ -77,7 +78,7 @@ public class CommonSubexpressionPromoter {
             let.setVariableQName(new StructuredQName("vv", NamespaceConstant.SAXON_GENERATED_VARIABLE, "cc" + topCandidate.hashCode()));
             let.setRequiredType(type);
             let.setNeedsLazyEvaluation(true);
-            let.setEvaluationMode(Cardinality.allowsMany(topCandidate.getCardinality()) ? EvaluationMode.MAKE_MEMO_CLOSURE : EvaluationMode.MAKE_SINGLETON_CLOSURE);
+            let.setEvaluator(Cardinality.allowsMany(topCandidate.getCardinality()) ? Evaluator.MemoClosure.INSTANCE : Evaluator.SingletonClosure.INSTANCE);
             for (Operand o : equivalents) {
                 o.setChildExpression(new LocalVariableReference(let));
             }
