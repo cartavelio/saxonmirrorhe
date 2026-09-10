@@ -46,9 +46,9 @@ public final class BigDecimalValue extends DecimalValue {
     public static final BigDecimal ONE_MILLION = BigDecimal.valueOf(1_000_000);
     public static final BigDecimal ONE_BILLION = BigDecimal.valueOf(1_000_000_000);
 
-    public static final BigDecimalValue ZERO = new BigDecimalValue(BigDecimal.ZERO);
-    public static final BigDecimalValue ONE = new BigDecimalValue(BigDecimal.ONE);
-    public static final BigDecimalValue TWO = new BigDecimalValue(BigDecimal.valueOf(2));
+    public static final DecimalValue ZERO = new Int64Value(0, BuiltInAtomicType.DECIMAL);
+    public static final DecimalValue ONE = new Int64Value(1, BuiltInAtomicType.DECIMAL);
+    public static final DecimalValue TWO = new Int64Value(2, BuiltInAtomicType.DECIMAL);
     public static final BigDecimal MIN_INT = BigDecimal.valueOf(Integer.MIN_VALUE);
     public static final BigDecimal MAX_INT = BigDecimal.valueOf(Integer.MAX_VALUE);
 
@@ -199,12 +199,13 @@ public final class BigDecimalValue extends DecimalValue {
                 break;
             }
         }
-        if (digits.length() == 0 || (digits.length() == 1 && digits.charAt(0) == '-')) {
+        if (digits.isEmpty() || (digits.length() == 1 && digits.charAt(0) == '-')) {
             return BigDecimalValue.ZERO;
         }
         if (!foundDot && digits.length() < 16) {
             // For simple constructs like xs:decimal('2'), return an Int64Value. Altova MapForce generates this a lot.
-            return new Int64Value(Long.parseLong(digits.toString()));
+            // See Saxon bug 7129, changing this to an Int64Value labelled as xs:decimal
+            return new Int64Value(Long.parseLong(digits.toString()), BuiltInAtomicType.DECIMAL);
         }
         BigInteger bigInt = new BigInteger(digits.toString());
         BigDecimal bigDec = new BigDecimal(bigInt, scale);

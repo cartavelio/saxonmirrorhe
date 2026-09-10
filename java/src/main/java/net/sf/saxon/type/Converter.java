@@ -459,7 +459,7 @@ public abstract class Converter {
     public static class BooleanToDecimal extends UnfailingConverter {
         public final static BooleanToDecimal INSTANCE = new BooleanToDecimal();
         @Override
-        public BigDecimalValue convert(AtomicValue input) {
+        public DecimalValue convert(AtomicValue input) {
             return ((BooleanValue) input).getBooleanValue() ? BigDecimalValue.ONE : BigDecimalValue.ZERO;
         }
     }

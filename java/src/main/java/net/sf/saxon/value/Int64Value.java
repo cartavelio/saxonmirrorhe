@@ -28,7 +28,9 @@ import java.math.BigInteger;
 /**
  * An integer value: note this is a subtype of decimal in XML Schema, not a primitive type.
  * This class supports integer values in the range permitted by a Java "long",
- * and also supports the built-in subtypes of xs:integer.
+ * and also supports the built-in subtypes of xs:integer. It is also used to hold values
+ * whose type annotation is xs:decimal, provided that the datum is in the value space
+ * of xs:integer
  */
 
 public final class Int64Value extends IntegerValue {
