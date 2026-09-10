@@ -121,6 +121,12 @@
                   fo-test-fn-system-properties-001
                   fo-test-fn-system-properties-002
                   fo-test-fn-system-properties-003
+                  fo-test-fn-matching-segments-001
+                  fo-test-fn-matching-segments-002
+                  fo-test-fn-matching-segments-003
+                  fo-test-fn-matching-segments-004
+                  fo-test-fn-matching-segments-005
+                  fo-test-fn-parse-json-008
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-01"/>
@@ -132,6 +138,13 @@
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-01"/>
       <reason>Error in example (see issue 2408, search for jvalue)</reason>
+   </exception>
+   
+   <exception test-set="app-spec-examples" 
+      test-case="fo-test-map-build-013" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-01"/>
+      <reason>Error in example (optional fields in records have been dropped)</reason>
    </exception>
    
    <exception test-set="app-spec-examples" 
@@ -191,10 +204,18 @@
                   Keywords-fn-system-properties-1
                   Keywords-fn-build-dateTime-1
                   Keywords-fn-parts-of-dateTime-1
+                  Keywords-fn-matching-segments-1
                   " 
       run="false" report="n/a">
       <created by="Michael Kay" on="2026-01-05"/>
       <reason>Functionality not yet implemented</reason>
+   </exception>
+   
+   <exception test-set="misc-BuiltInKeywords" 
+      test-case=" Keywords-fn-error-1" 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-05"/>
+      <reason>Change in signature of fn:error not yet implemented</reason>
    </exception>
    
    <exception test-set="misc-BuiltInKeywords" 

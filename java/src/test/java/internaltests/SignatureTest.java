@@ -36,24 +36,13 @@ public class SignatureTest {
     // Functions not yet implemented
 
     private final static Set<String> notImplemented = setOf(
-            //"fn:analyze-string",
-            //"fn:csv-to-simple-rows",
-            //"fn:csv-to-xml",
-            //"fn:log",
-            //"fn:format-number#3",
-            //"fn:parse-html",
             "fn:scan-left",
             "fn:scan-right",
-            //"fn:stack-trace",
-            //"fn:json",
-            //"fn:parse-csv",
-            //"fn:transitive-closure",
-            //"map:deep-update",
+            "fn:matching-segments",
+            "fn:system-properties",
             "map:replace",
-            //"map:substitute",
             "map:values",
             "array:values"
-            //"array:deep-update"
     );
 
     // Function arguments where Saxon knowingly declares the type differently from the language spec.
@@ -62,14 +51,14 @@ public class SignatureTest {
             //"fn:namespace-uri-for-prefix#1",
             //"fn:subsequence#2",
             //"fn:subsequence#3",
-            //"fn:substring#2",
-            //"fn:substring#3",
-            //"math:pow#2"
+            "fn:substring#2", // PR pending...
+            "fn:substring#3"  // PR pending...
     );
 
     private final static Set<String> resultExceptions = setOf(
             "fn:in-scope-namespaces",
-            "fn:void"
+            "fn:void",
+            "fn:error"
 
     );
 
