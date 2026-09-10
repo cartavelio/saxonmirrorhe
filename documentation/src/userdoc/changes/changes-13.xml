@@ -354,10 +354,13 @@
     <category name="serialization">
         
         <p>When 4.0 processing is enabled, the new serialization option 
-            <code>json-lines="yes"</code> is implemented. (PR 1497, PR 1596)</p>
+            <code>json-lines="yes"</code> is implemented. (<a class="bodylink"
+                href="https://github.com/qt4cg/qtspecs/pull/1497">PR 1497</a>,
+            <a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1596">PR 1596</a>)</p>
         
         <p>The JSON serializer recognises the <code>xs:QName</code> value <code>fn:null</code>
-            as a representation of the JSON null value. (PR 1028) Since QName literals are supported, this can
+            as a representation of the JSON null value. (<a class="bodylink"
+                href="https://github.com/qt4cg/qtspecs/pull/1028">PR 1028</a>) Since QName literals are supported, this can
             be generated using, for example, <code>&lt;xsl:sequence select="#fn:null"/></code>.</p>
         
         <p>The adaptive output method now does (fairly crude) indentation of maps and arrays
@@ -393,10 +396,12 @@
         <h2>4.0 Features not yet implemented</h2>
         
         <ul>
-            <li><p>PR2259 - canonical JSON output is implemented in SaxonJ, but does not always 
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2259">PR 2259</a>
+                - canonical JSON output is implemented in SaxonJ, but does not always 
                     produce the correct canonical output for numeric values.
                    Canonical JSON output is not implemented in SaxonCS.</p></li>
-            <li><p>PR2259 - Canonical XHTML serialization (<code>method="xhtml"</code> with <code>canonical="yes"</code>)</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2259">PR 2259</a>
+                - canonical XHTML serialization (<code>method="xhtml"</code> with <code>canonical="yes"</code>)</p></li>
         </ul>
   
     </category>
@@ -494,18 +499,28 @@
             Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
-            <li><p>PR1355, PR1708 - named record types in XSLT (<code>xsl:record-type</code>)</p></li>
-            <li><p>PR1888 - <code>xsl:package-location</code></p></li>
-            <li><p>PR1875 - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
-            <li><p>PR1773 - intersect and except in patterns (especially across different kinds of
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1355">PR
+                1355</a>, <a class="bodylink"
+                    href="https://github.com/qt4cg/qtspecs/pull/1708">PR 1708</a> - named record types in XSLT (<code>xsl:record-type</code>)</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1888">PR
+                1888</a> - <code>xsl:package-location</code></p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1875">PR
+                1875</a> - params passed implicitly through <code>xsl:next-match</code> and <code>xsl:apply-imports</code></p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1773">PR
+                1773</a> - intersect and except in patterns (especially across different kinds of
                 pattern, e.g. <code>(node() | jnode())</code>)</p></li>
             <li><p>JNode patterns in XSLT (syntax <code>jnode(key, type)</code>) -- syntax now recognized, but not well tested</p></li>
-            <li><p>PR1674 - composite sort keys in <code>xsl:sort</code></p></li>
-            <li><p>PR1622 - XSLT <code>fn:map-for-key</code> function</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1674">PR
+                1674</a> - composite sort keys in <code>xsl:sort</code></p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1622">PR
+                1622</a> - XSLT <code>fn:map-for-key</code> function</p></li>
             <li><p>XSLT <code>fn:regex-groups</code> function</p></li>
-            <li><p>PR2051 - <code>merge-when</code> attribute for <code>xsl:for-each-group</code></p></li>
-            <li><p>PR2213 - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
-            <li><p>PR2337 - changes for <code>xsl:mode/@typed</code> for handling items other than XNodes</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2051">PR
+                2051</a> - <code>merge-when</code> attribute for <code>xsl:for-each-group</code></p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2213">PR
+                2213</a> - <code>trusted</code> attribute for <code>xsl:evaluate</code></p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2337">PR
+                2337</a> - changes for <code>xsl:mode/@typed</code> for handling items other than XNodes</p></li>
         </ul>
 
  
@@ -541,9 +556,14 @@
                         is an approximation to the type defined in the specification.</p></li>
                 </ul>
             </li>
-            <li><p>PR1355, PR1708 - named record types in XQuery (<code>declare record type</code>)</p></li>
-            <li><p>PR1817, PR1853 - methods</p></li>
-            <li><p>PR1914 - try/catch/finally in XQuery</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1355">PR
+                1355</a>, <a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1708">PR
+                    1708</a> - named record types in XQuery (<code>declare record type</code>)</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1817">PR
+                1817</a>, <a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1853">PR
+                    1853</a> - methods</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1914">PR
+                1914</a> - try/catch/finally in XQuery</p></li>
         </ul>
         
     </category>
@@ -619,20 +639,24 @@
         
         <p>In decimal format properties, it is now possible to set composite values for some properties,
             for example <code>percent="%:pc"</code> indicates that the single character "%" will be used
-            in the picture string, but the value "pc" will appear in the output. (PR 1250)</p>
+            in the picture string, but the value "pc" will appear in the output. (<a
+                class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1250">PR 1250</a>)</p>
         
         <h3>Changes to XPath Expressions</h3>
         
         <p>Four new axes are implemented: <code>following-or-self</code>, <code>preceding-or-self</code>,
-            <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>. (PR 1532)</p>
+            <code>following-sibling-or-self</code>, and <code>preceding-sibling-or-self</code>. (<a
+                class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1532">PR 1532</a>)</p>
         
         <p>Filter expressions accept a sequence of integer positions, for example <code>$in[3 to 5]</code>
             or <code>$in[1, 4, 7]</code>.</p>
         
         <p>The pipeline operator <code>-></code> is implemented, but there has been limited testing
-            of the case where the context value is not a single item. (PR 1686)</p>
+            of the case where the context value is not a single item. (<a
+                class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1686">PR 1686</a>)</p>
         
-        <p>The method call operator <code>=?&gt;</code> is implemented. (PR 2143)</p>
+        <p>The method call operator <code>=?&gt;</code> is implemented. (<a
+            class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2143">PR 2143</a>)</p>
         
         <p>New operators for node comparison expressions are implemented: <code>is-not</code>,
             <code>precedes-or-is</code>, <code>follows-or-is</code>; plus <code>precedes</code> and
@@ -640,7 +664,8 @@
         
         <p>The precedence of the <code>otherwise</code> operator has changed. The expression
             <code>@price otherwise @cost * 2</code> now parses as <code>@price otherwise (@cost * 2)</code>,
-            not as <code>(@price otherwise @cost) * 2</code>. (PR 1031)</p>
+            not as <code>(@price otherwise @cost) * 2</code>. (<a
+                class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1031">PR 1031</a>)</p>
         
         <p>The <code>for</code> and <code>let</code> expressions now accept a larger subset
             of XQuery <code>FLWOR</code> syntax. Specifically:</p>
@@ -669,7 +694,8 @@
             <code>union(xs:integer, xs:string)</code> (which only allowed unions of atomic types)
             is dropped.</p>
         
-        <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (PR 1501)</p>
+        <p>Arrays and maps are coerced to the required type using the 4.0 coercion rules. (<a
+            class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1501">PR 1501</a>)</p>
         
         <p>The implementation of enumeration types has been aligned with the current specification.
             Most practical use cases are unaffected, but:</p>
@@ -682,7 +708,8 @@
         <h3>XPath 4.0 features not yet implemented</h3>
         
         <ul>
-           <li><p>PR2541 - JNodes in a map constructor</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2541">PR
+                2541</a> - JNodes in a map constructor</p></li>
         </ul>
         
         
@@ -701,7 +728,8 @@
             <code>every</code>, <code>filter</code>, <code>for-each</code>, <code>index-where</code>, <code>some</code>.</p>
         
         <p>Comments (between '#' characters) are allowed in regular expressions if the 'c'
-            flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (PR 1022)</p>
+            flag is set. A '#' character can be escaped as <code>\#</code> or <code>[#]</code>. (<a
+                class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1022">PR 1022</a>)</p>
         
         
         <p>The following functions are new in 4.0 (some of these were already implemented in Saxon 12):</p>
@@ -906,10 +934,14 @@
             Pull Requests are labeled "In Saxon13" when they have been implemented.</p>
         
         <ul>
-            <li><p>PR957 - <code>scan-left</code> and <code>scan-right</code> functions</p></li>
-            <li><p>PR2552 - <code>system-properties</code> function</p></li>
-            <li><p>PR791 - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
-            <li><p>PR1068 - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. 
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/957">PR
+                957</a> - <code>scan-left</code> and <code>scan-right</code> functions</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/2552">PR
+                2552</a> - <code>system-properties</code> function</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/791">PR
+                791</a> - The <code>fn:invisible-xml</code> function is not implemented in SaxonCS</p></li>
+            <li><p><a class="bodylink" href="https://github.com/qt4cg/qtspecs/pull/1068">PR
+                1068</a> - The SaxonCS implementation of <code>fn:graphemes</code> does not handle all strings correctly. 
                     This is due to limitations in the ICU4N library.</p></li>
         </ul>
         
@@ -922,7 +954,11 @@
         <p>The implementations of the EXPath binary and file module functions have been updated
             to conform to the new 4.0 specifications. Changes apply whether or not 4.0 is enabled.</p>
     	<ul>
-    		<li><p>The handling of byte order marks in <code>bin:encode-string</code> and <code>bin:decode-string</code> has been clarified in the specification, and this has resulted in changes to the Saxon implementation. The changed behaviour applies whether or not 4.0 is enabled. (PR 1765)</p></li>
+    	    <li><p>The handling of byte order marks in <code>bin:encode-string</code> and
+    	        <code>bin:decode-string</code> has been clarified in the specification, and this has
+    	        resulted in changes to the Saxon implementation. The changed behaviour applies whether
+    	        or not 4.0 is enabled. (<a class="bodylink"
+    	            href="https://github.com/qt4cg/qtspecs/pull/1765">PR 1765</a>)</p></li>
     		<li><p>The non-standard function <code>bin:version</code> is dropped.</p></li>
     		<li><p>The new EXPath function <code>bin:infer-encoding</code> is implemented.</p></li>
     		<li><p>The new EXPath functions <code>file:is-absolute</code>, <code>file:list-roots</code> and <code>file:descendants</code> are not yet implemented.</p></li>
