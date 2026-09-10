@@ -96,7 +96,7 @@ public abstract class PatternWatch extends AbstractWatch {
     /**
      * Open the watch. This is done at the point where it first starts watching for nodes
      * that match the selection.
-     * @param terminator
+     * @param terminator action to be taken on failure
      */
 
     @Override

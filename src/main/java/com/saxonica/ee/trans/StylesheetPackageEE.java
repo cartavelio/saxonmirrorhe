@@ -83,7 +83,7 @@ public class StylesheetPackageEE extends StylesheetPackage {
      * Mark the package as non-exportable, supplying an error message to be reported if export is attempted
      *
      * @param message   the error message to report indicating why export is not possible
-     * @param errorCode
+     * @param errorCode the error code to be used if export is attempted and fails
      */
 
     public void markNonExportable(String message, String errorCode) {

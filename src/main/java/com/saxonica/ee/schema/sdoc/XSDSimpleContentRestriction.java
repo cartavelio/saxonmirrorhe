@@ -105,7 +105,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
     /**
      * Validate this schema element, checking all document-level constraints
      *
-     * @param compiler
+     * @param compiler the schema compiler
      * @throws SchemaException if any XML representation constraints are violated
      */
 
@@ -203,7 +203,7 @@ public class XSDSimpleContentRestriction extends SchemaElement {
     /**
      * Process child elements after validation.
      *
-     * @param compiler
+     * @param compiler the schema compiler
      */
     @Override
     public void postValidate(SchemaCompiler compiler)

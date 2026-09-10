@@ -98,7 +98,7 @@ public interface Watch /*extends Feed*/ {
      * Open the watch. This is done at the point where it first starts watching for nodes
      * that match the selection.
      * @throws XPathException May be raised if a dynamic error occurs
-     * @param terminator
+     * @param terminator action to be taken on failure
      */
 
     void open(Terminator terminator) throws XPathException;

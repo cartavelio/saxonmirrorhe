@@ -361,7 +361,7 @@ public class UserAtomicType extends UserSimpleType implements AtomicType {
      *
      *
      * @param item    The item to be tested
-     * @param th
+     * @param th  the type hierarchy cache
      * @return true if the item is an instance of this type; false otherwise
      */
     @Override

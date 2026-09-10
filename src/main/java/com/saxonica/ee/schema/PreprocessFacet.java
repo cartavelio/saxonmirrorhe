@@ -1,6 +1,5 @@
 package com.saxonica.ee.schema;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.om.Function;
@@ -24,7 +23,6 @@ import net.sf.saxon.value.*;
  */
 public class PreprocessFacet extends Facet {
 
-    Configuration config;
     Assertion action;
     Assertion reverseAction;
 
@@ -104,7 +102,7 @@ public class PreprocessFacet extends Facet {
      * Check that this facet is legal when used on a type derived by restriction
      *
      * @param base     the type from which the restricted type is derived
-     * @param compiler
+     * @param compiler the schema compiler
      * @throws net.sf.saxon.type.SchemaException
      *          if the facet is not legal
      */

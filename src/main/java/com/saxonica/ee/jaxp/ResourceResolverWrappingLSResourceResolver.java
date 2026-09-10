@@ -38,7 +38,7 @@ public class ResourceResolverWrappingLSResourceResolver implements ResourceResol
      * an xsl:include, xsl:import, or document() function.
      *
      *
-     * @param request
+     * @param request the resource request
      * @return A Source object, or null if the href cannot be resolved,
      *         and the processor should try to resolve the URI itself.
      * @throws XPathException

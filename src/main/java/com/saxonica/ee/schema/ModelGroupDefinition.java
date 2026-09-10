@@ -126,7 +126,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
      * @param references A list of objects that contain direct or indirect references
      *                   to this object, and that must therefore not be referred to from this object.
      * @param compiler   used for error reporting
-     * @throws SchemaException
+     * @throws SchemaException if cycles are found
      */
 
     @Override
@@ -147,7 +147,7 @@ public class ModelGroupDefinition extends ModelGroup implements SerializableSche
     /**
      * Checks the validity of this Model Group Definition.
      *
-     * @throws SchemaException
+     * @throws SchemaException if the declaration is invalid
      */
     @Override
     public boolean validate(SchemaCompiler compiler) throws SchemaException {

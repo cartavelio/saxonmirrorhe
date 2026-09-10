@@ -222,7 +222,7 @@ public final class AttributeGroupReference extends SchemaStructure
      * component (where possible). If not, the method throws an exception
      *
      * @param compiler The compiler being used to compile the referring component.
-     * @param fatal
+     * @param fatal true if a failure to resolve is to be treated as fatal
      * @throws SchemaException if the reference cannot be resolved or repaired.
      */
 

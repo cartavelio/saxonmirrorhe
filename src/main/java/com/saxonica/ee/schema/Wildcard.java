@@ -383,11 +383,10 @@ public class Wildcard extends SchemaStructure implements UserSchemaComponent, Se
 
     /**
      * Perform validation on this wildcard (this implementation of the method is a no-op)
-     *
-     * @throws SchemaException
+     * @param compiler the schema compiler
      */
     @Override
-    public boolean validate(SchemaCompiler compiler) throws SchemaException {
+    public boolean validate(SchemaCompiler compiler)  {
         //only do the validation on the namespace
         return true;
     }

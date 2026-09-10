@@ -49,7 +49,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
      * Parse the "declare revalidation" declaration (XQuery Update).
      * Syntax: &lt;"declare" "revalidation"&gt; ("strict" | "lax" | "skip")
      *
-     * @throws XPathException
+     * @throws XPathException if the declaration is invalid or duplicated
      *
      */
     @Override

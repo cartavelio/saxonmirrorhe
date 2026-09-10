@@ -961,7 +961,7 @@ public abstract class SchemaElement extends ElementImpl {
      *                       of elements allowed to appear in that state
      * @param stateTargets   an array of states, and for each state, an array containing the destinations
      *                       of transitions when the corresponding term from stateTerms is encountered
-     * @param allowWildcards
+     * @param allowWildcards  true if wildcard transitions are allowed
      * @throws SchemaException if the schema being processed does not conform to the required content model
      */
 

@@ -737,7 +737,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
      * to which events can be sent; the effect is that the SchemaValidator validates the document
      * represented by this sequence of events
      * @param pipe the Saxon Configuration
-     * @param params
+     * @param params the serialization properties (typically unused)
      * @return a Receiver to which events can be sent
      * @throws SaxonApiException if a failure occurs
      */

@@ -279,7 +279,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
     /**
      * Create metedata element which contains summary information in the output XML document
      *
-     * @throws XPathException
+     * @throws XPathException if creating the metadata element fails
      */
 
     @Override

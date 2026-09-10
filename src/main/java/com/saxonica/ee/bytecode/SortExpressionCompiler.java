@@ -61,7 +61,7 @@ public class SortExpressionCompiler extends ToIteratorCompiler {
     /**
      * Generate code to evaluate variable parts of the sort key definitions
      *
-     * @param compiler
+     * @param compiler the bytecode compiler
      * @param definitions the array of sort key definitions
      * @return the identifier of a variable which will contain the run-time atomic comparers
      */

@@ -32,7 +32,7 @@ public class DecomposingFeed extends ItemFeed {
      *
      * @throws net.sf.saxon.trans.XPathException
      *          to report any failure
-     * @param terminator
+     * @param terminator action to be taken on failure
      */
 
     @Override

@@ -1547,9 +1547,9 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
     /**
      * Make a SchemaURIResolver that wraps a supplied URIResolver
+     * @param resolver the resolver to be used
      * @return a new SchemaURIResolver (or null if this is not an EnterpriseConfiguration)
      * @since 10.0
-     * @param resolver
      */
     @Override
     public SchemaURIResolver makeSchemaURIResolver(ResourceResolver resolver) {

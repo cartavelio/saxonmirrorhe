@@ -81,7 +81,7 @@ public class WhitespaceFacet extends Facet {
      * Check that this facet is legal when used on a type derived by restriction
      *
      * @param base     the type from which the restricted type is derived
-     * @param compiler
+     * @param compiler  the schema compiler
      * @throws net.sf.saxon.type.SchemaException
      *          if the facet is not legal
      */

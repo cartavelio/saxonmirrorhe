@@ -96,7 +96,7 @@ public class KeyRef extends IdentityConstraint implements ComponentReference {
      *
      * @param compiler The schema containing the candidate target components for the reference. If
      *                 null, the schema containing the reference is used.
-     * @param fatal
+     * @param fatal true if a failure to resolve is to be treated as fatal
      */
 
     @Override

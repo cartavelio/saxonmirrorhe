@@ -164,7 +164,7 @@ public class LetExpressionCompiler extends ToIteratorCompiler {
      * @param compiler the compiler service
      * @param exp      the expression to be compiled
      * @param evaluationMode the evaluation mode
-     * @param refCount
+     * @param refCount the nominal count of references to this variable
      * @throws CannotCompileException if the expression cannot be compiled to bytecode
      */
     public static void compileCommonExpr(CompilerService compiler,

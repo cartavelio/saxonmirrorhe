@@ -159,7 +159,7 @@ public class CopyModifyExpression extends Expression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables to be rebound
      */
 
     /*@NotNull*/

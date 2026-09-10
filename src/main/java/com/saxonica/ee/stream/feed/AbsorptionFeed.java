@@ -41,7 +41,8 @@ public abstract class AbsorptionFeed extends GroundedItemFeed {
      * Signal that an element has been found that matches the selection that this
      * Watch is looking for.
      * @param node the node that matches the selection
-     * @param locationId @throws net.sf.saxon.type.ValidationException
+     * @param locationId the location of the instruction
+     * @throws XPathException  if a dynamic error occurs
      * @return a receiver that collects the contents of the selected node
      */
 

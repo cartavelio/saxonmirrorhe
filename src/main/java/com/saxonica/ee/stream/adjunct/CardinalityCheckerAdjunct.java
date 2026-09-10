@@ -30,7 +30,7 @@ public class CardinalityCheckerAdjunct extends TransmissionAdjunct implements Fe
      * streamability, and is implemented to allow these criteria to be tested. It is not the
      * case that all expression that emerge as streamable from this analysis are currently
      * capable of being streamed by Saxon
-     * @param contextInfo
+     * @param contextInfo  static information about the context item
      * @param reasons          the caller may supply a list, in which case the implementation may add to this
      */
     @Override

@@ -67,7 +67,7 @@ public class RootExpressionAdjunct extends StreamingAdjunct {
      *
      * @return a Watchmaker to evaluate the expression, or null if it is not streamable with respect
      *         to the specificed argument.
-     * @param forGrouping
+     * @param forGrouping true if this is for for-each-group grouping
      */
     @Override
     public WatchMaker getWatchMaker(boolean forGrouping) throws XPathException {

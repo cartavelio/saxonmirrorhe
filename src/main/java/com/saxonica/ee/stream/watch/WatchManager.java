@@ -159,7 +159,7 @@ public class WatchManager extends SequenceReceiver implements NamespaceResolver 
 
     /**
      * Start of a document node.
-     * @param properties
+     * @param properties properties of the document node
      */
 
     @Override

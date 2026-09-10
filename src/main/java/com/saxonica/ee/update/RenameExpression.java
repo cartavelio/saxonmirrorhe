@@ -90,7 +90,7 @@ public class RenameExpression extends BasicUpdatingExpression {
      *
      *
      * @param visitor         an expression visitor
-     * @param contextInfo
+     * @param contextInfo   static information about the context item
      * @return the original expression, rewritten to perform necessary run-time type checks,
      *         and to perform other type-related optimizations
      * @throws net.sf.saxon.trans.XPathException
@@ -140,7 +140,7 @@ public class RenameExpression extends BasicUpdatingExpression {
      * Copy an expression. This makes a deep copy.
      *
      * @return the copy of the original expression
-     * @param rebindings
+     * @param rebindings variables to be re-bound
      */
 
     /*@NotNull*/

@@ -112,8 +112,8 @@ public class NamespaceConstructorCompiler extends SimpleNodeConstructorCompiler 
      * current receiver, the node name (for named node kinds only) and the content (for all nodes),
      * as a UnicodeString
      *
-     * @param compiler
-     * @param expression
+     * @param compiler  the bytecode compiler
+     * @param expression the expression to be compiled
      */
     @Override
     protected void pushNode(CompilerService compiler, Expression expression) {

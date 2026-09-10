@@ -68,7 +68,8 @@ public class VersionControlFilter extends ProxyReceiver {
      * Notify the start of an element.
      * @param elemName   the name of the element.
      * @param type   integer code identifying the element's type within the name pool.
-     * @param attributes
+     * @param attributes the attributes of the element
+     * @param namespaces the in-scope namespaces of the element
      * @param location   the location of the element in the source document
      * @param properties bit-significant properties of the element node
      */

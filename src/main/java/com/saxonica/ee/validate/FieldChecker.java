@@ -73,7 +73,8 @@ public class FieldChecker extends AbstractReceiver {
      * @param nameCode   integer code identifying the name of the element within the name pool.
      * @param typeCode   integer code identifying the element's type within the name pool. The value -1
      *                   indicates the default type, xs:untyped.
-     * @param attributes
+     * @param attributes the attributes of the element
+     * @param namespaces the in-scope namespaces of the element
      * @param location  location of the start tag
      * @param properties bit-significant properties of the element node. If there are no relevant
      *                   properties, zero is supplied. The definitions of the bits are in class {@link ReceiverOption}

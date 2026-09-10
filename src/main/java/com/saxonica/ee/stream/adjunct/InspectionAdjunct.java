@@ -46,7 +46,7 @@ public abstract class InspectionAdjunct extends StreamingAdjunct {
      * @param parent the expression, typically one of the above function calls
      * @param select the argument to the inspection construct, typically the first argument of one of the above
      * function calls
-     * @param forGrouping
+     * @param forGrouping true if this is for for-each-group grouping
      * @return a WatchMaker that feeds the selected nodes (as FleetingNode instances) to the Feed provided
      * by this construct. Because this is an inspection construct, it is assumed able to compute the result
      * by looking at the FleetingNode objects alone.

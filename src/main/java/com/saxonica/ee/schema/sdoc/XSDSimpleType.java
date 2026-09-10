@@ -120,7 +120,7 @@ public class XSDSimpleType extends SchemaElement {
     /**
      * Validate this schema element, checking all document-level constraints
      *
-     * @param compiler
+     * @param compiler the schema compiler
      * @throws SchemaException if any XML representation constraints are violated
      */
 
@@ -173,7 +173,7 @@ public class XSDSimpleType extends SchemaElement {
      * Hook to allow additional validation of a parent element immediately after its
      * children have been validated.
      *
-     * @param compiler
+     * @param compiler the schema compiler
      */
 
     @Override
