@@ -16,8 +16,12 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpReplaceBody;
-import net.sf.saxon.type.*;
+import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
+import net.sf.saxon.type.ConversionResult;
+import net.sf.saxon.type.ValidationException;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
 import java.util.Calendar;
@@ -339,13 +343,21 @@ public class DateValue extends GDateValue implements XPathComparable {
     @Override
     public DateValue add(DurationValue duration) throws XPathException {
         if (duration instanceof DayTimeDurationValue) {
-            long microseconds = ((DayTimeDurationValue) duration).getLengthInMicroseconds();
-            boolean negative = microseconds < 0;
-            microseconds = Math.abs(microseconds);
-            int days = (int) Math.floor((double) microseconds / (1000000L * 60L * 60L * 24L));
-            boolean partDay = (microseconds % (1000000L * 60L * 60L * 24L)) > 0;
+            BigDecimal seconds = duration.getTotalSeconds();
+            BigDecimal[] daysAndPartDays = seconds.divideAndRemainder(DayTimeDurationValue.SECONDS_PER_DAY);
+            boolean partDay = daysAndPartDays[1].signum() != 0;
+            long days = daysAndPartDays[0].longValue();
+            if (Math.abs(days) >= Integer.MAX_VALUE) {
+                throw new XPathException("Saxon limit: cannot add/subtract more than 2^31 days to a date");
+            }
+            boolean negative = duration.signum() < 0;
+//            long microseconds = ((DayTimeDurationValue) duration).getLengthInMicroseconds();
+//            boolean negative = microseconds < 0;
+//            microseconds = Math.abs(microseconds);
+//            int days = (int) Math.floor((double) microseconds / (1000000L * 60L * 60L * 24L));
+//            boolean partDay = (microseconds % (1000000L * 60L * 60L * 24L)) > 0;
             int julian = getJulianDayNumber();
-            MutableGDateValue d = mutableDateFromJulianDayNumber(julian + (negative ? -days : days));
+            MutableGDateValue d = mutableDateFromJulianDayNumber(julian + (int)days);
             if (partDay) {
                 if (negative) {
                     d = yesterday(d.year, d.month, d.day).makeMutableCopy();

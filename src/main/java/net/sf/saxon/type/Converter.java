@@ -531,11 +531,7 @@ public abstract class Converter {
         @Override
         public DayTimeDurationValue convert(AtomicValue duration) {
             DurationValue d = (DurationValue)duration;
-            if (d.signum() < 0) {
-                return new DayTimeDurationValue(-d.getDays(), -d.getHours(), -d.getMinutes(), -d.getSeconds(), -d.getNanoseconds());
-            } else {
-                return new DayTimeDurationValue(d.getDays(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getNanoseconds());
-            }
+            return new DayTimeDurationValue(d.getTotalSeconds());
         }
     }
 

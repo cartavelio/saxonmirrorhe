@@ -234,9 +234,9 @@ public final class DateTimeValue extends CalendarValue
 
     /*@NotNull*/
     public static DateTimeValue fromJavaInstant(long seconds, int nano) throws XPathException {
-        return EPOCH
-                .add(DayTimeDurationValue.fromSeconds(BigDecimal.valueOf(seconds))
-                             .add(DayTimeDurationValue.fromNanoseconds(nano)));
+        BigDecimal totalSeconds = BigDecimal.valueOf(seconds).add(
+                BigDecimal.valueOf(nano).divide(DayTimeDurationValue.ONE_BILLION, RoundingMode.DOWN));
+        return EPOCH.add(new DayTimeDurationValue(totalSeconds));
     }
 
     //#if CSHARP==false
@@ -388,15 +388,15 @@ public final class DateTimeValue extends CalendarValue
             }
             part = tok.nextToken();
         }
-        int value = DurationValue.simpleInteger(part);
-        if (value < 0) {
+        long value = DurationValue.simpleInteger(part);
+        if (value < 0 || value > Integer.MAX_VALUE) {
             if (value == -1) {
                 return badDate("Non-numeric year component", s);
             } else {
                 return badDate("Year is outside the range that Saxon can handle", s, "FODT0001");
             }
         }
-        dt.year = value * era;
+        dt.year = (int)value * era;
         if (part.length() < 4) {
             return badDate("Year is less than four digits", s);
         }
@@ -586,11 +586,10 @@ public final class DateTimeValue extends CalendarValue
                 if (value < 0) {
                     return badDate("Non-numeric timezone hour component", s);
                 }
-                tz = value;
-                if (tz > 14) {
+                if (value > 14) {
                     return badDate("Timezone is out of range (-14:00 to +14:00)", s);
                 }
-                tz *= 60;
+                tz = (int)value * 60;
 
                 if ("-".equals(delim)) {
                     negativeTz = true;
@@ -606,13 +605,13 @@ public final class DateTimeValue extends CalendarValue
                 if (value < 0) {
                     return badDate("Non-numeric timezone minute component", s);
                 }
-                int tzminute = value;
                 if (part.length() != 2) {
                     return badDate("Timezone minute must be two digits", s);
                 }
-                if (tzminute > 59) {
+                if (value > 59) {
                     return badDate("Timezone minute is out of range", s);
                 }
+                int tzminute = (int)value;
                 if (Math.abs(tz) == 14 * 60 && tzminute != 0) {
                     return badDate("Timezone is out of range (-14:00 to +14:00)", s);
                 }

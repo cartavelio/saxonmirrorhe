@@ -137,14 +137,14 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (part.length() != 2) {
             return badTime("hour must be two digits", s);
         }
-        int value = DurationValue.simpleInteger(part);
+        long value = DurationValue.simpleInteger(part);
         if (value < 0) {
             return badTime("Non-numeric hour component", s);
         }
-        byte hour = (byte) value;
-        if (hour > 24) {
+        if (value > 24) {
             return badTime("hour is out of range", s);
         }
+        byte hour = (byte) value;
         if (!tok.hasMoreTokens()) {
             return badTime("too short", s);
         }
@@ -163,10 +163,10 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value < 0) {
             return badTime("Non-numeric minute component", s);
         }
-        byte minute = (byte) value;
-        if (minute > 59) {
+        if (value > 59) {
             return badTime("minute is out of range", s);
         }
+        byte minute = (byte) value;
         if (hour == 24 && minute != 0) {
             return badTime("If hour is 24, minute must be 00", s);
         }
@@ -188,10 +188,10 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
         if (value < 0) {
             return badTime("Non-numeric second component", s);
         }
-        byte second = (byte) value;
-        if (second > 59) {
+        if (value > 59) {
             return badTime("second is out of range", s);
         }
+        byte second = (byte) value;
         if (hour == 24 && second != 0) {
             return badTime("If hour is 24, second must be 00", s);
         }
@@ -248,10 +248,10 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 if (value < 0) {
                     return badTime("Non-numeric timezone hour component", s);
                 }
-                tz = value * 60;
-                if (tz > 14 * 60) {
+                if (value > 14) {
                     return badTime("timezone hour is out of range", s);
                 }
+                tz = (int)value * 60;
                 if ("-".equals(delim)) {
                     negativeTz = true;
                 }
@@ -265,14 +265,14 @@ public final class TimeValue extends CalendarValue implements XPathComparable {
                 if (value < 0) {
                     return badTime("Non-numeric timezone minute component", s);
                 }
-                int tzminute = value;
+
                 if (part.length() != 2) {
                     return badTime("timezone minute must be two digits", s);
                 }
-                if (tzminute > 59) {
+                if (value > 59) {
                     return badTime("timezone minute is out of range", s);
                 }
-
+                int tzminute = (int)value;
                 tz += tzminute;
                 if (negativeTz) {
                     tz = -tz;

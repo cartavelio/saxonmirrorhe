@@ -17,6 +17,7 @@ import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.NoDynamicContextException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.AtomicType;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.ConversionResult;
 import net.sf.saxon.type.ValidationFailure;
 
@@ -49,6 +50,8 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      */
 
     public static final int MISSING_TIMEZONE = Integer.MAX_VALUE;
+
+    public static final BigDecimal SIXTY = BigDecimal.valueOf(60);
 
     /**
      * Parse a string to create a CalendarValue whose actual type will depend on the format of the string
@@ -193,7 +196,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
         BigDecimal d1 = dt1.toJulianInstant();
         BigDecimal d2 = dt2.toJulianInstant();
         BigDecimal difference = d1.subtract(d2);
-        return DayTimeDurationValue.fromSeconds(difference);
+        return new DayTimeDurationValue(difference, BuiltInAtomicType.DAY_TIME_DURATION);
     }
 
     /**
@@ -228,16 +231,22 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * @throws XPathException if an error is detected
      */
 
-    public final CalendarValue adjustTimezone(/*@NotNull*/ DayTimeDurationValue tz) throws XPathException {
-        long microseconds = tz.getLengthInMicroseconds();
-        if (microseconds % 60000000 != 0) {
+    public final CalendarValue adjustTimezone(DayTimeDurationValue tz) throws XPathException {
+        BigDecimal seconds = tz.getTotalSeconds();
+        BigDecimal[] divRem = seconds.divideAndRemainder(SIXTY);
+        if (divRem[1].signum() != 0) {
             throw new XPathException("Timezone is not an integral number of minutes", "FODT0003");
         }
-        int tzminutes = (int) (microseconds / 60000000);
-        if (Math.abs(tzminutes) > 14 * 60) {
+        long tzMinutes;
+        try {
+            tzMinutes = divRem[0].longValueExact();
+        } catch (ArithmeticException e) {
+            tzMinutes = Integer.MAX_VALUE;
+        }
+        if (Math.abs(tzMinutes) > 14 * 60) {
             throw new XPathException("Timezone out of range (-14:00 to +14:00)", "FODT0003");
         }
-        return adjustTimezone(tzminutes);
+        return adjustTimezone((int)tzMinutes);
     }
 
 

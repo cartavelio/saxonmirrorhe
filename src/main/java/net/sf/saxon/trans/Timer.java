@@ -18,7 +18,7 @@ import java.math.BigDecimal;
  */
 public class Timer {
 
-    private static final DayTimeDurationValue milliSecond = new DayTimeDurationValue(1, 0, 0, 0, 0, 1000);
+    private static final DayTimeDurationValue milliSecond = new DayTimeDurationValue(new BigDecimal("0.001"));
     private final long start;
     private long prev;
 

@@ -1174,8 +1174,16 @@ public abstract class Calculator {
     private static class DurationDivNumeric extends Calculator {
         @Override
         public AtomicValue compute(AtomicValue a, AtomicValue b, XPathContext c) throws XPathException {
-            double d = 1.0 / ((NumericValue) b).getDoubleValue();
-            return ((DurationValue) a).multiply(d);
+            if (((NumericValue)b).signum() == 0) {
+                throw new XPathException("Duration cannot be divided by zero", "FOAR0001");
+            }
+            if (b instanceof DoubleValue || b instanceof FloatValue) {
+                double divisor = ((NumericValue) b).getDoubleValue();
+                return ((DurationValue) a).multiply(1.0 / divisor);
+            } else {
+                BigDecimal divisor = ((NumericValue) b).getDecimalValue();
+                return ((DurationValue) a).multiply(BigDecimal.ONE.divide(divisor, 20, RoundingMode.HALF_DOWN));
+            }
         }
 
         @Override

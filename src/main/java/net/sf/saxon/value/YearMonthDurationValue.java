@@ -32,7 +32,7 @@ import java.math.RoundingMode;
 public final class YearMonthDurationValue extends DurationValue implements XPathComparable, ContextFreeAtomicValue {
 
     public YearMonthDurationValue(int months, AtomicType typeLabel) {
-        super(0, months, 0, 0, 0, 0, 0, typeLabel);
+        super(months, BigDecimal.ZERO, typeLabel);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
     /*@NotNull*/
     @Override
     public AtomicValue copyAsSubType(AtomicType typeLabel) {
-        return new YearMonthDurationValue(getLengthInMonths(), typeLabel);
+        return new YearMonthDurationValue(_months, typeLabel);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
         int m = getMonths();
 
         UnicodeBuilder sb = new UnicodeBuilder(16);
-        if (_negative) {
+        if (signum() < 0) {
             sb.append('-');
         }
         sb.append('P');
@@ -110,11 +110,11 @@ public final class YearMonthDurationValue extends DurationValue implements XPath
     /**
      * Get the number of months in the duration
      *
-     * @return the number of months in the duration
+     * @return the total number of months in the duration (years*12 + months); negative if the duration is negative
      */
 
     public int getLengthInMonths() {
-        return _months * (_negative ? -1 : +1);
+        return _months;
     }
 
     /**

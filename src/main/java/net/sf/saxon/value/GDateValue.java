@@ -184,8 +184,8 @@ public abstract class GDateValue extends CalendarValue {
                 m.error = badDate("When year exceeds 4 digits, leading zeroes are not allowed", s);
                 return;
             }
-            int value = DurationValue.simpleInteger(part);
-            if (value < 0) {
+            long value = DurationValue.simpleInteger(part);
+            if (value < 0 || value > Integer.MAX_VALUE) {
                 if (value == -1) {
                     m.error = badDate("Non-numeric year component", s);
                 } else {
@@ -193,7 +193,7 @@ public abstract class GDateValue extends CalendarValue {
                 }
                 return;
             }
-            m.year = value * era;
+            m.year = (int)value * era;
             if (m.year == 0 && !allowYearZero) {
                 m.error = badDate("Year zero is not allowed", s);
                 return;
@@ -285,15 +285,16 @@ public abstract class GDateValue extends CalendarValue {
                         m.error = badDate("Non-numeric timezone hour component", s);
                         return;
                     }
-                    int tzhour = value;
+                    if (value > 14) {
+                        m.error = badDate("Timezone hour is out of range", s);
+                        return;
+                    }
+                    int tzhour = (int)value;
                     if (part.length() != 2) {
                         m.error = badDate("Timezone hour must be two digits", s);
                         return;
                     }
-                    if (tzhour > 14) {
-                        m.error = badDate("Timezone hour is out of range", s);
-                        return;
-                    }
+
                     if (!tok.hasMoreTokens()) {
                         m.error = badDate("No minutes in timezone", s);
                         return;
@@ -313,15 +314,16 @@ public abstract class GDateValue extends CalendarValue {
                         m.error = badDate("Non-numeric timezone minute component", s);
                         return;
                     }
-                    int tzminute = value;
+                    if (value > 59) {
+                        m.error = badDate("Timezone minute is out of range", s);
+                        return;
+                    }
+                    int tzminute = (int)value;
                     if (part.length() != 2) {
                         m.error = badDate("Timezone minute must be two digits", s);
                         return;
                     }
-                    if (tzminute > 59) {
-                        m.error = badDate("Timezone minute is out of range", s);
-                        return;
-                    }
+
                     if (tok.hasMoreTokens()) {
                         m.error = badDate("Continues after timezone", s);
                         return;

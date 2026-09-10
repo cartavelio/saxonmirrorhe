@@ -875,22 +875,11 @@ public final class Date {
 
     /*@Nullable*/
     private static DurationValue addDurationValues(DurationValue dv0, DurationValue dv1) {
-        YearMonthDurationValue dv0m = Converter.DurationToYearMonthDuration.INSTANCE.convert(dv0);
-        DayTimeDurationValue dv0s = Converter.DurationToDayTimeDuration.INSTANCE.convert(dv0);
-        YearMonthDurationValue dv1m = Converter.DurationToYearMonthDuration.INSTANCE.convert(dv1);
-        DayTimeDurationValue dv1s = Converter.DurationToDayTimeDuration.INSTANCE.convert(dv1);
-        int months = dv0m.getLengthInMonths() + dv1m.getLengthInMonths();
-        long micros = dv0s.getLengthInMicroseconds() + dv1s.getLengthInMicroseconds();
-        if (Integer.signum(months) * Long.signum(micros) < 0) {
+        try {
+            return dv0.add(dv1);
+        } catch (XPathException e) {
             return null;
         }
-        boolean positive = months >= 0 && micros >= 0;
-        if (!positive) {
-            months = -months;
-            micros = -micros;
-        }
-        return new DurationValue(positive, 0, months,
-                0, 0, 0, (int) (micros / 1000000), (int) (micros % 1000000), BuiltInAtomicType.DURATION);
     }
 
     /**
@@ -1008,7 +997,7 @@ public final class Date {
      */
 
     public static String duration(double seconds) {
-        DayTimeDurationValue v = DayTimeDurationValue.fromSeconds(new BigDecimal(seconds));
+        DayTimeDurationValue v = new DayTimeDurationValue(new BigDecimal(seconds), BuiltInAtomicType.DAY_TIME_DURATION);
         return v.getStringValue();
     }
 
@@ -1021,8 +1010,8 @@ public final class Date {
      */
     public static double seconds(XPathContext context) throws XPathException {
         DateTimeValue now = context.getCurrentDateTime();
-        DurationValue diff = now.subtract(DateTimeValue.EPOCH, context);
-        return diff.getLengthInSeconds();
+        DayTimeDurationValue diff = now.subtract(DateTimeValue.EPOCH, context);
+        return diff.getTotalSeconds().doubleValue();
     }
 
     /**
@@ -1085,7 +1074,7 @@ public final class Date {
                 if (duration.getYears() != 0 || duration.getMonths() != 0) {
                     return Double.NaN;
                 } else {
-                    return duration.getLengthInSeconds();
+                    return duration.getTotalSeconds().doubleValue();
                 }
             } else {
                 return Double.NaN;

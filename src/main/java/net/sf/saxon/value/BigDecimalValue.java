@@ -11,6 +11,7 @@ import net.sf.saxon.expr.sort.XPathComparable;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringConstants;
+import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -385,6 +386,54 @@ public final class BigDecimalValue extends DecimalValue {
 
     @CSharpReplaceBody(code="return fsb.append(value.ToString(\"G\", System.Globalization.CultureInfo.InvariantCulture));")
     public static StringBuilder decimalToString(BigDecimal value, StringBuilder fsb) {
+        // Can't use BigDecimal#toString() under JDK 1.5 because this produces values like "1E-5".
+        // Can't use BigDecimal#toPlainString() because it retains trailing zeroes to represent the scale
+        int scale = value.scale();
+        if (scale == 0) {
+            fsb.append(value.toString());
+            return fsb;
+        } else if (scale < 0) {
+            String s = value.abs().unscaledValue().toString();
+            if (s.equals("0")) {
+                fsb.append('0');
+                return fsb;
+            }
+            //StringBuilder sb = new StringBuilder(s.length() + (-scale) + 2);
+            if (value.signum() < 0) {
+                fsb.append('-');
+            }
+            fsb.append(s);
+            for (int i = 0; i < -scale; i++) {
+                fsb.append('0');
+            }
+            return fsb;
+        } else {
+            String s = value.abs().unscaledValue().toString();
+            if (s.equals("0")) {
+                fsb.append('0');
+                return fsb;
+            }
+            int len = s.length();
+            //StringBuilder sb = new StringBuilder(len+1);
+            if (value.signum() < 0) {
+                fsb.append('-');
+            }
+            if (scale >= len) {
+                fsb.append("0.");
+                for (int i = len; i < scale; i++) {
+                    fsb.append('0');
+                }
+                fsb.append(s);
+            } else {
+                fsb.append(s.substring(0, len - scale));
+                fsb.append('.');
+                fsb.append(s.substring(len - scale));
+            }
+            return fsb;
+        }
+    }
+
+    public static UnicodeBuilder decimalToUnicodeString(BigDecimal value, UnicodeBuilder fsb) {
         // Can't use BigDecimal#toString() under JDK 1.5 because this produces values like "1E-5".
         // Can't use BigDecimal#toPlainString() because it retains trailing zeroes to represent the scale
         int scale = value.scale();
