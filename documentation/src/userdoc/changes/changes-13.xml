@@ -611,7 +611,8 @@ TODO: rethink redefines and override
             <li><code>fn:parse-csv</code></li> 
             <li><code>fn:parse-html</code></li> 
             <li><code>fn:parse-integer</code></li> 
-            <li><code>fn:parse-uri</code></li> 
+            <li><code>fn:parse-uri</code></li>
+        	<li><code>fn:parts-of-dateTime</code></li> 
             <li><code>fn:partial-apply</code></li> 
             <li><code>fn:partition</code></li> 
             <li><code>fn:replicate</code></li> 
