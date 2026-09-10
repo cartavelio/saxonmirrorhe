@@ -238,19 +238,7 @@ public class DocumentInstr extends ParentNodeConstructor {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        if (preservingTypes && !textOnly) {
-            output.startDocument(ReceiverOption.NONE);
-            TailCall tc = getContentOperand().getOperandEvaluator(context).processLeavingTail(output, context);
-            dispatchTailCall(tc);
-            output.endDocument();
-            return null;
-        } else {
-            Item item = evaluateItem(context);
-            if (item != null) {
-                output.append(item, getLocation(), ReceiverOption.ALL_NAMESPACES);
-            }
-            return null;
-        }
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**
@@ -261,63 +249,6 @@ public class DocumentInstr extends ParentNodeConstructor {
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         return (NodeInfo) makeElaborator().elaborateForItem().eval(context);
     }
-//        Controller controller = context.getController();
-//        Configuration config = controller.getConfiguration();
-//
-//        NodeInfo root;
-//        if (textOnly) {
-//            UnicodeString textValue;
-//            if (constantText != null) {
-//                textValue = constantText;
-//            } else {
-//                UnicodeBuilder sb = new UnicodeBuilder();
-//                SequenceIterator iter = getContentOperand().getOperandEvaluator(context).iterate(context);
-//                Item item;
-//                while ((item = iter.next()) != null) {
-//                    sb.accept(item.getUnicodeStringValue());
-//                }
-//                textValue = sb.toUnicodeString();
-//            }
-//            root = TextFragmentValue.makeTextFragment(config, textValue, getStaticBaseURIString());
-//        } else {
-//            try {
-//                PipelineConfiguration pipe = controller.makePipelineConfiguration();
-//                pipe.setXPathContext(context);
-//
-//                Builder builder;
-//                builder = controller.makeBuilder();
-//                builder.setUseEventLocation(false);
-//                builder.setDurability(Durability.TEMPORARY);
-//
-//                if (builder instanceof TinyBuilder) {
-//                    ((TinyBuilder) builder).setStatistics(config.getTreeStatistics().SOURCE_DOCUMENT_STATISTICS);
-//                }
-//
-//                builder.setBaseURI(getStaticBaseURIString());
-//                builder.setTiming(false);
-//
-//                pipe.setHostLanguage(getPackageData().getHostLanguage());
-//                builder.setPipelineConfiguration(pipe);
-//
-//                ComplexContentOutputter out =
-//                        ComplexContentOutputter.makeComplexContentReceiver(builder, getValidationOptions());
-//                out.open();
-//                out.startDocument(ReceiverOption.NONE);
-//
-//                TailCall tc = getContentOperand().getOperandEvaluator(context).processLeavingTail(out, context);
-//                dispatchTailCall(tc);
-//                out.endDocument();
-//                out.close();
-//                root = builder.getCurrentRoot();
-//            } catch (XPathException e) {
-//                e.maybeSetLocation(getLocation());
-//                e.maybeSetContext(context);
-//                throw e;
-//            }
-//        }
-//        return root;
-//    }
-
 
     /**
      * Get the name of this instruction for diagnostic and tracing purposes

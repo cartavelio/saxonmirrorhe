@@ -41,11 +41,6 @@ import java.util.Properties;
 // or parameters, in which case the same AtomicComparer can be used for the duration of a
 // transformation.
 
-// TODO: at present the SortKeyDefinition is evaluated to obtain a AtomicComparer, which can
-// be used to compare two sort keys. It would be more efficient to use a Collator to
-// obtain collation keys for all the items to be sorted, as these can be compared more
-// efficiently.
-
 
 public class SortKeyDefinition extends PseudoExpression {
 

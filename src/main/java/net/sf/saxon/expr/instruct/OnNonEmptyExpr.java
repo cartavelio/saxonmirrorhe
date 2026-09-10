@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -145,7 +146,7 @@ public class OnNonEmptyExpr extends UnaryExpression {
      */
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        getBaseExpression().process(output, context);
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
     /**
@@ -196,5 +197,9 @@ public class OnNonEmptyExpr extends UnaryExpression {
     @Override
     public String getStreamerName() {
         return "OnNonEmpty";
+    }
+
+    public Elaborator getElaborator() {
+        return new SequenceInstr.SequenceInstrElaborator();
     }
 }

@@ -7,9 +7,10 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.StringEvaluator;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
@@ -213,7 +214,7 @@ public final class AttributeGetter extends Expression {
     public static class AttributeGetterElaborator extends ItemElaborator {
 
         public ItemEvaluator elaborateForItem() {
-            final AttributeGetter exp = (AttributeGetter)getExpression();
+            final AttributeGetter exp = (AttributeGetter) getExpression();
             final int fingerprint = exp.getAttributeName().getFingerprint();
             final NamespaceUri uri = exp.getAttributeName().getNamespaceUri();
             final String local = exp.getAttributeName().getLocalPart();
@@ -236,7 +237,45 @@ public final class AttributeGetter extends Expression {
             };
         }
 
-
+        /**
+         * Get a function that evaluates the underlying expression in the form of
+         * a Java string, this being the result of applying fn:string() to the result
+         * of the expression; except that if the result of the expression is an empty
+         * sequence, the result is "" if {@code zeroLengthWhenAbsent} is set, or null
+         * otherwise.
+         *
+         * @param zeroLengthWhenAbsent if true, then when the result of the expression
+         *                             is an empty sequence, the result of the StringEvaluator
+         *                             should be a zero-length string. If false, the return value
+         *                             should be null.
+         * @return an evaluator for the expression that returns a string.
+         */
+        @Override
+        public StringEvaluator elaborateForString(boolean zeroLengthWhenAbsent) {
+            final AttributeGetter expr = (AttributeGetter) getExpression();
+            final int fingerprint = expr.getAttributeName().getFingerprint();
+            final NamespaceUri uri = expr.getAttributeName().getNamespaceUri();
+            final String local = expr.getAttributeName().getLocalPart();
+            return context -> {
+                Item item = context.getContextItem();
+                if (item instanceof TinyElementImpl) {
+                    // fast path
+                    String val = ((TinyElementImpl) item).getAttributeValue(fingerprint);
+                    return handlePossiblyNullString(val, zeroLengthWhenAbsent);
+                }
+                if (!(item instanceof NodeInfo)) {
+                    expr.typeError("The context item for @" + expr.getAttributeName().getDisplayName() +
+                                           " is not a node", "XPDY0002", context);
+                }
+                assert item instanceof NodeInfo;
+                NodeInfo node = (NodeInfo) item;
+                if (node.getNodeKind() == Type.ELEMENT) {
+                    String val = node.getAttributeValue(uri, local);
+                    return handlePossiblyNullString(val, zeroLengthWhenAbsent);
+                }
+                return zeroLengthWhenAbsent ? "" : null;
+            };
+        }
     }
 }
 

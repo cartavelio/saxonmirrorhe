@@ -11,6 +11,7 @@ import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.accum.AccumulatorRegistry;
 import net.sf.saxon.expr.compat.TypeChecker10;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.instruct.*;
 import net.sf.saxon.expr.number.Numberer_en;
 import net.sf.saxon.expr.parser.*;
@@ -2287,7 +2288,7 @@ public class Configuration implements SourceResolver, NotationSet {
      * @throws XPathException if any dynamic error occurs
      */
 
-    public void processResultDocument(ResultDocument instruction, Expression content, XPathContext context) throws XPathException {
+    public void processResultDocument(ResultDocument instruction, PushEvaluator content, XPathContext context) throws XPathException {
         instruction.processInstruction(content, context);
     }
 

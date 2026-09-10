@@ -9,6 +9,10 @@ package net.sf.saxon.xpath;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.EagerEvaluator;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
@@ -171,5 +175,29 @@ public class JAXPVariableReference extends Expression implements Callable {
         destination.endElement();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new CallableElaborator();
+    }
+
+    public static class CallableElaborator extends PullElaborator {
+
+        @Override
+        public EagerEvaluator eagerly() {
+            Callable expr = (Callable)getExpression();
+            return context -> expr.call(context, null).materialize();
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            Callable expr = (Callable) getExpression();
+            return context -> expr.call(context, null).iterate();
+        }
+    }
 }
 

@@ -535,6 +535,9 @@ public final class TinyTree extends GenericTreeInfo implements NodeVectorTree {
     /*@Nullable*/
     public AtomicSequence getTypedValueOfElement(/*@NotNull*/ TinyElementImpl element) throws XPathException {
         int nodeNr = element.nodeNr;
+        if (typeArray == null) {
+            return StringValue.makeUntypedAtomic(TinyParentNodeImpl.getStringValue(this, nodeNr));
+        }
         if (typedValueArray == null || typedValueArray[nodeNr] == null) {
             SchemaType stype = getSchemaType(nodeNr);
             int annotation = stype.getFingerprint();

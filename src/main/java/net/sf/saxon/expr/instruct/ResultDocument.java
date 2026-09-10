@@ -14,6 +14,10 @@ import net.sf.saxon.event.NamespaceReducer;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.UnicodeStringEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.IriToUri;
 import net.sf.saxon.functions.ResolveURI;
@@ -377,11 +381,10 @@ public class ResultDocument extends Instruction
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        process(getContentExpression(), context);
-        return null;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
-    public void process(Expression content, XPathContext context) throws XPathException {
+    public void process(PushEvaluator content, XPathContext context) throws XPathException {
         checkNotTemporaryOutputState(context);
         context.getConfiguration().processResultDocument(this, content, context);
     }
@@ -395,7 +398,7 @@ public class ResultDocument extends Instruction
      * @throws XPathException if a dynamic error occurs
      */
 
-    public void processInstruction(Expression content, XPathContext context) throws XPathException {
+    public void processInstruction(PushEvaluator content, XPathContext context) throws XPathException {
         final XsltController controller = (XsltController) context.getController();
         assert controller != null;
 
@@ -403,7 +406,8 @@ public class ResultDocument extends Instruction
         ComplexContentOutputter out = processLeft(context);
         boolean failed = false;
         try {
-            content.process(out, context);
+            TailCall tc = content.processLeavingTail(out, context);
+            dispatchTailCall(tc);
         } catch (XPathException err) {
             failed = true;
             err.maybeSetContext(context);
@@ -461,7 +465,8 @@ public class ResultDocument extends Instruction
         ResultDocumentResolver resolver;
         String hrefValue = "";
         if (getHref() != null) {
-            hrefValue = IriToUri.iriToUri(getHref().evaluateAsString(context)).toString();
+            UnicodeStringEvaluator hrefEval = getHref().makeElaborator().elaborateForUnicodeString(true);
+            hrefValue = IriToUri.iriToUri(hrefEval.eval(context)).toString();
         }
         if (hrefValue.isEmpty() || hrefValue.equals(controller.getBaseOutputURI())) {
             PrincipalOutputGatekeeper gateKeeper = controller.getGatekeeper();
@@ -956,5 +961,28 @@ public class ResultDocument extends Instruction
         return contentOp.getChildExpression();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new ResultDocumentElaborator();
+    }
+
+    private static class ResultDocumentElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ResultDocument expr = (ResultDocument) getExpression();
+            PushEvaluator contentPush = expr.getContentExpression().makeElaborator().elaborateForPush();
+            return (output, context) -> {
+                expr.checkNotTemporaryOutputState(context);
+                context.getConfiguration().processResultDocument(expr, contentPush, context);
+                return null;
+            };
+        }
+    }
 }
 

@@ -9,6 +9,9 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -425,6 +428,46 @@ public class UseAttributeSet extends Instruction implements ComponentInvocation,
     @Override
     public String getStreamerName() {
         return "UseAttributeSet";
+    }
+
+    public Elaborator getElaborator() {
+        return new UseAttributeSetElaborator();
+    }
+
+    public static class UseAttributeSetElaborator extends PushElaborator {
+        @Override
+        public PushEvaluator elaborateForPush() {
+            UseAttributeSet expr = (UseAttributeSet) getExpression();
+            return (output, context) -> {
+                Component target;
+                if (expr.bindingSlot < 0) {
+                    target = expr.getFixedTarget();
+                } else {
+                    target = context.getTargetComponent(expr.bindingSlot);
+                    if (target.isHiddenAbstractComponent()) {
+                        XPathException err = new XPathException("Cannot expand an abstract attribute set ("
+                                                                        + expr.targetName.getDisplayName()
+                                                                        + ") with no implementation", "XTDE3052");
+                        err.setLocation(expr.getLocation());
+                        throw err;
+                    }
+                }
+                if (target == null) {
+                    throw new AssertionError("Failed to locate attribute set " + expr.getTargetAttributeSetName().getEQName());
+                }
+                AttributeSet as = (AttributeSet) target.getActor();
+                XPathContextMajor c2 = context.newContext();
+                c2.setCurrentComponent(target);
+                c2.setOrigin(expr);
+                SlotManager sm = as.getStackFrameMap();
+                if (sm == null) {
+                    sm = SlotManager.EMPTY;
+                }
+                c2.openStackFrame(sm);
+                as.expand(output, c2);
+                return null;
+            };
+        }
     }
 }
 

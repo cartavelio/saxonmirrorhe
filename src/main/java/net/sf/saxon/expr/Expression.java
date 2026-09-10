@@ -13,7 +13,6 @@ import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.FallbackElaborator;
 import net.sf.saxon.expr.instruct.TailCall;
-import net.sf.saxon.expr.oper.OperandEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.functions.SuperId;
@@ -69,7 +68,7 @@ import java.util.function.Supplier;
  * no subexpressions.</p>
  */
 
-public abstract class Expression implements OperandEvaluator, IdentityComparable, ExportAgent, Locatable, Traceable {
+public abstract class Expression implements IdentityComparable, ExportAgent, Locatable, Traceable {
 
     public static final int EVALUATE_METHOD = 1;
     public static final int ITERATE_METHOD = 2;
@@ -89,6 +88,7 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
     private Map<String, Object> extraProperties;
     private double cost = -1;
     private int cachedHashCode = -1;
+    private Elaborator elaborator;
 
 //    public int serial;  // used to identify expressions for internal diagnostics
 //    private static int nextSerial = 0;
@@ -964,7 +964,6 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
         }
     }
 
-    @Override
     public TailCall processLeavingTail(Outputter outputter, XPathContext context) throws XPathException {
         process(outputter, context);
         return null;
@@ -1768,12 +1767,10 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
      */
 
     public Elaborator getElaborator() {
-        if (operands().iterator().hasNext()) {
-            // FallbackElaborator is only supposed to be used for expressions with no operands
-            System.err.println("Using FallbackElaborator for " + this.getClass().getName());
-        }
         return new FallbackElaborator();
     }
+
+    //public abstract Elaborator getElaborator();
 
     /**
      * Factory method to construct an {@code Elaborator} for this expression
@@ -1781,9 +1778,13 @@ public abstract class Expression implements OperandEvaluator, IdentityComparable
      */
 
     public final Elaborator makeElaborator() {
-        Elaborator elab = getElaborator();
-        elab.setExpression(this);
-        return elab;
+        if (elaborator == null) {
+            Elaborator elab = getElaborator();
+            elab.setExpression(this);
+            return elaborator = elab;
+        } else {
+            return elaborator;
+        }
     }
 
 

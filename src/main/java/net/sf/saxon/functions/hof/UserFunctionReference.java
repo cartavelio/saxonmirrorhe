@@ -9,6 +9,9 @@ package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.Controller;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UserFunction;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
@@ -128,7 +131,7 @@ public class UserFunctionReference extends Expression
             o = nominalTarget.getBody().optimize(visitor, ContextItemStaticInfo.ABSENT);
             nominalTarget.setBody(o);
             SlotManager slotManager = visitor.getConfiguration().makeSlotManager();
-            for (int i=0; i<getArity(); i++) {
+            for (int i = 0; i < getArity(); i++) {
                 slotManager.allocateSlotNumber(nominalTarget.getParameterDefinitions()[i].getVariableQName());
             }
             ExpressionTool.allocateSlots(o, getArity(), slotManager);
@@ -272,8 +275,8 @@ public class UserFunctionReference extends Expression
     /**
      * Copy an expression. This makes a deep copy.
      *
-     * @return the copy of the original expression
      * @param rebindings variables that need to be re-bound
+     * @return the copy of the original expression
      */
     @Override
     public Expression copy(RebindingMap rebindings) {
@@ -299,13 +302,7 @@ public class UserFunctionReference extends Expression
      */
     @Override
     public Function evaluateItem(XPathContext context) throws XPathException {
-        if (bindingSlot == -1) {
-            return new BoundUserFunction(this, nominalTarget, nominalTarget.getDeclaringComponent(), context.getController());
-
-        } else {
-            Component targetComponent = context.getTargetComponent(bindingSlot);
-            return new BoundUserFunction(this, (UserFunction) targetComponent.getActor(), targetComponent, context.getController());
-        }
+        return (Function) makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -350,9 +347,9 @@ public class UserFunctionReference extends Expression
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         ExpressionPresenter.ExportOptions options = (ExpressionPresenter.ExportOptions) out.getOptions();
-        if ("JS".equals(options.target) && options.targetVersion == 1){
+        if ("JS".equals(options.target) && options.targetVersion == 1) {
             throw new XPathException("Higher-order functions are not available in SaxonJS v1.*",
-                    "XTSE3540", getLocation());
+                                     "XTSE3540", getLocation());
         }
         if (nominalTarget.getDeclaringComponent() == null) {
             // This happens for an inline function declared within a static expression, e.g. one
@@ -378,6 +375,35 @@ public class UserFunctionReference extends Expression
     }
 
     /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new UserFunctionReferenceElaborator();
+    }
+
+    private static class UserFunctionReferenceElaborator extends ItemElaborator {
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            UserFunctionReference expr = (UserFunctionReference) getExpression();
+            if (expr.bindingSlot == -1) {
+                return context -> new BoundUserFunction(
+                        expr, expr.nominalTarget, expr.nominalTarget.getDeclaringComponent(), context.getController());
+
+            } else {
+                return context -> {
+                    Component targetComponent = context.getTargetComponent(expr.bindingSlot);
+                    return new BoundUserFunction(
+                            expr, (UserFunction) targetComponent.getActor(), targetComponent, context.getController());
+                };
+            }
+        }
+    }
+
+    /**
      * A BoundUserFunction represents a user-defined function seen as a component. A single source-level
      * XSLT function may be the actor in several different components (in different stylesheet packages).
      * Although the code of the function is identical in each case, the bindings to other stylesheet components
@@ -392,7 +418,7 @@ public class UserFunctionReference extends Expression
         private final Controller controller; // retained in case a function is returned from a query or stylesheet
 
 
-        public BoundUserFunction(ExportAgent agent, Function function, Component component, Controller controller)  {
+        public BoundUserFunction(ExportAgent agent, Function function, Component component, Controller controller) {
             this.agent = agent;
             this.function = function;
             this.component = component;

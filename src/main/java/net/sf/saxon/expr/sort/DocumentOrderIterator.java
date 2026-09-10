@@ -34,7 +34,7 @@ public final class DocumentOrderIterator implements SequenceIterator {
      * @param comparer the comparer used for comparing node positions
      */
 
-    public DocumentOrderIterator(SequenceIterator base, Comparator<? super NodeInfo> comparer)  {
+    public DocumentOrderIterator(SequenceIterator base, Comparator<? super NodeInfo> comparer) {
 
         int len = SequenceTool.supportsGetLength(base) ? SequenceTool.getLength(base) : 50;
         sequence = new ArrayList<>(len);

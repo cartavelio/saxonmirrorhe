@@ -125,7 +125,7 @@ public final class SimpleStepExpression extends SlashExpression {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        NodeInfo origin = null;
+        NodeInfo origin;
         try {
             origin = (NodeInfo) getStart().evaluateItem(context);
         } catch (XPathException e) {
@@ -166,19 +166,23 @@ public final class SimpleStepExpression extends SlashExpression {
 
         @Override
         public PullEvaluator elaborateForPull() {
+            // TODO: do we need to catch exceptions as in the iterate() method?
+            final SimpleStepExpression expr = (SimpleStepExpression) getExpression();
+            final ItemEvaluator select = expr.getSelectExpression().makeElaborator().elaborateForItem();
+            final AxisExpression step = (AxisExpression) expr.getStep();
+            final boolean nullable = Cardinality.allowsZero(expr.getSelectExpression().getCardinality());
 
-            final SimpleStepExpression forEach = (SimpleStepExpression) getExpression();
-            final ItemEvaluator select = forEach.getSelectExpression().makeElaborator().elaborateForItem();
-            final AxisExpression step = (AxisExpression) forEach.getStep();
-            final boolean nullable = Cardinality.allowsZero(forEach.getSelectExpression().getCardinality());
-
-            return context -> {
-                NodeInfo origin = (NodeInfo) select.eval(context);
-                if (nullable && origin == null) {
-                    return EmptyIterator.getInstance();
-                }
-                return step.iterate(origin);
-            };
+            if (nullable) {
+                return context -> {
+                    NodeInfo origin = (NodeInfo) select.eval(context);
+                    if (origin == null) {
+                        return EmptyIterator.getInstance();
+                    }
+                    return step.iterate(origin);
+                };
+            } else {
+                return context -> step.iterate((NodeInfo) select.eval(context));
+            }
         }
 
     }

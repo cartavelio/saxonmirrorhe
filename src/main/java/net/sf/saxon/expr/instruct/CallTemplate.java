@@ -389,9 +389,7 @@ public class CallTemplate extends Instruction implements ITemplateCall, Componen
 
         try {
             TailCall tc = t.expand(output, c2);
-            while (tc != null) {
-                tc = tc.processLeavingTail();
-            }
+            dispatchTailCall(tc);
         } catch (StackOverflowError e) {
             XPathException err = new XPathException.StackOverflow(
                     "Too many nested template or function calls. The stylesheet may be looping.",

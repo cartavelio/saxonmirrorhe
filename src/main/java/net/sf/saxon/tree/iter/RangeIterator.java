@@ -67,7 +67,7 @@ public abstract class RangeIterator implements GroundedIterator {
 
     public boolean containsEq(NumericValue val) {
         IntegerValue intVal;
-        assert false; // See bug #5625 - I suspect this code is unreachable, and have put a trap here to verify this. MHK 2022-08-03
+        // See bug #5625 - I thought this code was unreachable, but qt4 test ByExpr441c hits it. MHK 2022-08-03
         if (val instanceof IntegerValue) {
             intVal = (IntegerValue)val;
         } else {

@@ -13,16 +13,20 @@ import net.sf.saxon.expr.Component;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.XPathContextMajor;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.StandardNames;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trace.TemplateRuleTraceListener;
 import net.sf.saxon.trans.Mode;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.trans.rules.Rule;
-import net.sf.saxon.trans.XPathException;
 
 
 /**
@@ -62,57 +66,7 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-
-        Controller controller = context.getController();
-        assert controller != null;
-
-        // handle parameters if any
-        ParameterSet params = assembleParams(context, getActualParams());
-        ParameterSet tunnels = assembleTunnelParams(context, getTunnelParams());
-
-        Rule currentTemplateRule = context.getCurrentTemplateRule();
-        if (currentTemplateRule == null) {
-            XPathException e = new XPathException("There is no current template rule");
-            e.setXPathContext(context);
-            e.setErrorCode("XTDE0560");
-            e.setLocation(getLocation());
-            throw e;
-        }
-
-        int min = currentTemplateRule.getMinImportPrecedence();
-        int max = currentTemplateRule.getPrecedence() - 1;
-        Component.M modeComponent = context.getCurrentMode();
-        if (modeComponent == null) {
-            throw new AssertionError("Current mode is null");
-        }
-        Item currentItem = context.getCurrentIterator().current();
-
-        Mode mode = modeComponent.getActor();
-        Rule rule = mode.getRule(currentItem, min, max, context);
-        if (rule == null) {             // use the default action for the node
-            mode.getBuiltInRuleSet().process(currentItem, params, tunnels, output, context, getLocation());
-        } else {
-            XPathContextMajor c2 = context.newContext();
-            TemplateRule nh = (TemplateRule) rule.getAction();
-            nh.initialize();
-            c2.setOrigin(this);
-            c2.setLocalParameters(params);
-            c2.setTunnelParameters(tunnels);
-            c2.openStackFrame(nh.getStackFrameMap());
-            c2.setCurrentTemplateRule(rule);
-            c2.setCurrentComponent(modeComponent);
-            c2.setCurrentMergeGroupIterator(null);
-            if (mode.isModeTracing()) {
-                TemplateRuleTraceListener tracer = ((XsltController) controller).getTemplateRuleTraceListener();
-                tracer.enter("apply-imports", getLocation(), currentItem, nh);
-                nh.apply(output, c2);
-                tracer.leave();
-            } else {
-                nh.apply(output, c2);
-            }
-        }
-        return null;
-        // We never treat apply-imports as a tail call, though we could
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**
@@ -143,6 +97,70 @@ public class ApplyImports extends ApplyNextMatchingTemplate implements ITemplate
     @Override
     public String getStreamerName() {
         return "ApplyImports";
+    }
+
+    public Elaborator getElaborator() {
+        return new ApplyImportsElaborator();
+    }
+
+    private static class ApplyImportsElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ApplyImports expr = (ApplyImports) getExpression();
+            Location loc = expr.getLocation();
+            return (output, context) -> {
+                Controller controller = context.getController();
+                assert controller != null;
+
+                // handle parameters if any
+                ParameterSet params = assembleParams(context, expr.getActualParams());
+                ParameterSet tunnels = assembleTunnelParams(context, expr.getTunnelParams());
+
+                Rule currentTemplateRule = context.getCurrentTemplateRule();
+                if (currentTemplateRule == null) {
+                    XPathException e = new XPathException("There is no current template rule");
+                    e.setXPathContext(context);
+                    e.setErrorCode("XTDE0560");
+                    e.setLocation(loc);
+                    throw e;
+                }
+
+                int min = currentTemplateRule.getMinImportPrecedence();
+                int max = currentTemplateRule.getPrecedence() - 1;
+                Component.M modeComponent = context.getCurrentMode();
+                if (modeComponent == null) {
+                    throw new AssertionError("Current mode is null");
+                }
+                Item currentItem = context.getCurrentIterator().current();
+
+                Mode mode = modeComponent.getActor();
+                Rule rule = mode.getRule(currentItem, min, max, context);
+                if (rule == null) {             // use the default action for the node
+                    mode.getBuiltInRuleSet().process(currentItem, params, tunnels, output, context, loc);
+                } else {
+                    XPathContextMajor c2 = context.newContext();
+                    TemplateRule nh = (TemplateRule) rule.getAction();
+                    nh.initialize();
+                    c2.setOrigin(expr);
+                    c2.setLocalParameters(params);
+                    c2.setTunnelParameters(tunnels);
+                    c2.openStackFrame(nh.getStackFrameMap());
+                    c2.setCurrentTemplateRule(rule);
+                    c2.setCurrentComponent(modeComponent);
+                    c2.setCurrentMergeGroupIterator(null);
+                    if (mode.isModeTracing()) {
+                        TemplateRuleTraceListener tracer = ((XsltController) controller).getTemplateRuleTraceListener();
+                        tracer.enter("apply-imports", loc, currentItem, nh);
+                        nh.apply(output, c2);
+                        tracer.leave();
+                    } else {
+                        nh.apply(output, c2);
+                    }
+                }
+                return null; // we could use tail recursion, but we don't
+            };
+        }
     }
 
 

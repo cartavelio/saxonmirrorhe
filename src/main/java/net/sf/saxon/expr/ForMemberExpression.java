@@ -169,15 +169,7 @@ public class ForMemberExpression extends Assignation {
     /*@NotNull*/
     @Override
     public SequenceIterator iterate(XPathContext context) throws XPathException {
-        int slot = getLocalSlotNumber();
-        ArrayItem theArray = ((ArrayItem)getSequence().evaluateItem(context));
-        int length = theArray.arrayLength();
-        AscendingRangeIterator base = new AscendingRangeIterator(0, 1, length-1);
-        return MappingIterator.map(base, index -> {
-            Sequence member = theArray.get((int)((IntegerValue)index).longValue());
-            context.setLocalVariable(slot, member);
-            return getAction().iterate(context);
-        });
+        return makeElaborator().elaborateForPull().iterate(context);
     }
 
     /**
@@ -187,12 +179,7 @@ public class ForMemberExpression extends Assignation {
 
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        int slot = getLocalSlotNumber();
-        ArrayItem theArray = ((ArrayItem) getSequence().evaluateItem(context));
-        for (GroundedValue member : theArray.members()) {
-            context.setLocalVariable(slot, member);
-            getAction().process(output, context);
-        }
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
     /**

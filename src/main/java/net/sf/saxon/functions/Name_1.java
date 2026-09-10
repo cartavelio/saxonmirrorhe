@@ -65,13 +65,17 @@ public class Name_1 extends ScalarSystemFunction {
             final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
             final ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
-            return context -> {
-                NodeInfo node = (NodeInfo) argEval.eval(context);
-                if (nullable && node == null) {
-                    return EmptyUnicodeString.getInstance();
-                }
-                return StringView.of(node.getDisplayName());
-            };
+            if (nullable) {
+                return context -> {
+                    NodeInfo node = (NodeInfo) argEval.eval(context);
+                    if (node == null) {
+                        return EmptyUnicodeString.getInstance();
+                    }
+                    return StringView.of(node.getDisplayName());
+                };
+            } else {
+                return context -> StringView.of(((NodeInfo) argEval.eval(context)).getDisplayName());
+            }
 
         }
 
@@ -81,13 +85,17 @@ public class Name_1 extends ScalarSystemFunction {
             final boolean nullable = Cardinality.allowsZero(arg.getCardinality());
             final ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
 
-            return context -> {
-                NodeInfo node = (NodeInfo) argEval.eval(context);
-                if (nullable && node == null) {
-                    return "";
-                }
-                return node.getDisplayName();
-            };
+            if (nullable) {
+                return context -> {
+                    NodeInfo node = (NodeInfo) argEval.eval(context);
+                    if (node == null) {
+                        return "";
+                    }
+                    return node.getDisplayName();
+                };
+            } else {
+                return context -> ((NodeInfo) argEval.eval(context)).getDisplayName();
+            }
 
         }
     }

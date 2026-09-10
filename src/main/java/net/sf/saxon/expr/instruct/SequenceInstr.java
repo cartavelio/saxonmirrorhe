@@ -9,6 +9,10 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
@@ -145,7 +149,7 @@ public class SequenceInstr extends UnaryExpression {
      */
     @Override
     public void process(Outputter output, XPathContext context) throws XPathException {
-        getBaseExpression().process(output, context);
+        dispatchTailCall(makeElaborator().elaborateForPush().processLeavingTail(output, context));
     }
 
     /**
@@ -183,6 +187,27 @@ public class SequenceInstr extends UnaryExpression {
     public String getStreamerName() {
 
         return "SequenceInstr";
+    }
+
+    public Elaborator getElaborator() {
+        return new SequenceInstrElaborator();
+    }
+
+    public static class SequenceInstrElaborator extends PushElaborator {
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            UnaryExpression expr = (UnaryExpression) getExpression();
+            PullEvaluator basePull = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            return context -> basePull.iterate(context);
+        }
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            UnaryExpression expr = (UnaryExpression) getExpression();
+            PushEvaluator basePush = expr.getBaseExpression().makeElaborator().elaborateForPush();
+            return (output, context) -> basePush.processLeavingTail(output, context);
+        }
     }
 }
 

@@ -12,6 +12,9 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Operand;
 import net.sf.saxon.expr.OperandRole;
 import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.StandardNames;
@@ -151,10 +154,7 @@ public class Fork extends Instruction {
      */
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        for (Operand o : operands()) {
-            o.getChildExpression().process(output, context);
-        }
-        return null;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**
@@ -173,5 +173,27 @@ public class Fork extends Instruction {
         out.endElement();
     }
 
+    @Override
+    public Elaborator getElaborator() {
+        return new ForkElaborator();
+    }
 
+    private static class ForkElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            Fork expr = (Fork)getExpression();
+            PushEvaluator[] prongs = new PushEvaluator[expr.getSize()];
+            for (int i=0; i<prongs.length; i++) {
+                prongs[i] = expr.getProng(i).makeElaborator().elaborateForPush();
+            }
+            return (output, context) -> {
+                // non-streamed evaluation
+                for (PushEvaluator prong : prongs) {
+                    dispatchTailCall(prong.processLeavingTail(output, context));
+                }
+                return null;
+            };
+        }
+    }
 }

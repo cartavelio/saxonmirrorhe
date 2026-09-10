@@ -10,6 +10,9 @@ package net.sf.saxon.expr.instruct;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.SignificantItemDetector;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.PushElaborator;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -411,5 +414,81 @@ public class ConditionalBlock extends Instruction {
     @Override
     public String getStreamerName() {
         return "ConditionalBlock";
+    }
+
+    public Elaborator getElaborator() {
+        return new ConditionalBlockElaborator();
+    }
+
+    private static class ConditionalBlockElaborator extends PushElaborator {
+
+        private final static int ON_EMPTY = 0;
+        private final static int ON_NON_EMPTY = 1;
+        private final static int ALWAYS = 2;
+
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            ConditionalBlock expr = (ConditionalBlock) getExpression();
+            PushEvaluator[] pushers = new PushEvaluator[expr.operanda.length];
+            int[] instruction = new int[expr.operanda.length];
+            for (int i=0; i< pushers.length; i++) {
+                Expression child = expr.operanda[i].getChildExpression();
+                pushers[i] = child.makeElaborator().elaborateForPush();
+                if (child instanceof OnEmptyExpr) {
+                    instruction[i] = ON_EMPTY;
+                } else if (child instanceof OnNonEmptyExpr) {
+                    instruction[i] = ON_NON_EMPTY;
+                } else {
+                    instruction[i] = ALWAYS;
+                }
+            }
+            return (output, context) -> {
+
+                final List<PushEvaluator> onNonEmptyPending = new ArrayList<>();
+
+                Action action = () -> {
+                    for (PushEvaluator e : onNonEmptyPending) {
+                        dispatchTailCall(e.processLeavingTail(output, context));
+                    }
+                };
+
+                SignificantItemDetector significantItemDetector = new SignificantItemDetector(output, action);
+
+                for (int i=0; i<instruction.length; i++) {
+                    try {
+                        switch (instruction[i]) {
+                            case ON_EMPTY:
+                                // Ignore on-empty instructions until the end
+                                break;
+                            case ON_NON_EMPTY:
+                                if (significantItemDetector.isEmpty()) {
+                                    onNonEmptyPending.add(pushers[i]);
+                                } else {
+                                    dispatchTailCall(pushers[i].processLeavingTail(output, context));
+                                }
+                                break;
+                            case ALWAYS:
+                                dispatchTailCall(pushers[i].processLeavingTail(significantItemDetector, context));
+                                break;
+                        }
+                    } catch (XPathException e) {
+                        e.maybeSetLocation(expr.operanda[i].getChildExpression().getLocation());
+                        e.maybeSetContext(context);
+                        throw e;
+                    }
+                }
+
+                // At the end, if the content produced until now is empty, process the on-empty instructions
+                if (significantItemDetector.isEmpty()) {
+                    for (int i=0; i<instruction.length; i++) {
+                        if (instruction[i] == ON_EMPTY) {
+                            dispatchTailCall(pushers[i].processLeavingTail(output, context));
+                        }
+                    }
+                }
+                return null;
+            };
+        }
     }
 }

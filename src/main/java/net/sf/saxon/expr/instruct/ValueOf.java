@@ -317,26 +317,7 @@ public final class ValueOf extends SimpleNodeConstructor {
     @Override
     @CSharpInnerClass(outer = true, extra = {"Saxon.Hej.s9api.Location instructionLoc"})
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        if (noNodeIfEmpty) {
-            Item value = getSelectOp().getOperandEvaluator(context).evaluateItem(context);
-            if (value != null) {
-                processValue(value.getUnicodeStringValue(), output, context);
-            }
-            return null;
-        } else if (getSelect().getItemType() == BuiltInAtomicType.STRING &&
-                !isDisableOutputEscaping()
-                && !Cardinality.allowsZero(getCardinality())) {
-            // Try to stream the value direct to the serializer where possible
-            // Note: see bug 4944, which is why we don't use this path if the select
-            //       expression might return an empty sequence.
-            Location instructionLoc = getLocation();
-            Outputter toText = new TextNodeOutputStreamer(output, instructionLoc, options);
-            TailCall tc = getSelectOp().getOperandEvaluator(context).processLeavingTail(toText, context);
-            dispatchTailCall(tc);
-        } else {
-            return super.processLeavingTail(output, context);
-        }
-        return null;
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     /**
@@ -366,7 +347,7 @@ public final class ValueOf extends SimpleNodeConstructor {
     @Override
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         try {
-            Item content = getSelectOp().getOperandEvaluator(context).evaluateItem(context);
+            Item content = getSelect().makeElaborator().elaborateForItem().eval(context);
             return makeTextNode(content, noNodeIfEmpty, isDisableOutputEscaping(), context);
         } catch (XPathException err) {
             err.maybeSetLocation(getLocation());

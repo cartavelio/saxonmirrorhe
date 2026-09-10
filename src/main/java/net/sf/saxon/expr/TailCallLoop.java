@@ -15,6 +15,7 @@ import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.*;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 
@@ -205,20 +206,27 @@ public final class TailCallLoop extends UnaryExpression {
             TailCallLoop expr = (TailCallLoop)getExpression();
             PullEvaluator contentEval = expr.getBaseExpression().makeElaborator().elaborateForPull();
             return context -> {
-                final XPathContextMajor cm = (XPathContextMajor) context;
-                while (true) {
-                    SequenceIterator iter = contentEval.iterate(context);
-                    GroundedValue extent = SequenceTool.toGroundedValue(iter);
-                    TailCallInfo tail = cm.getTailCallInfo();
-                    if (tail == null) {
-                        return extent.iterate();
-                    } else {
-                        UserFunction target = expr.establishTargetFunction(tail, cm);
-                        if (target != expr.containingFunction) {
-                            return expr.tailCallDifferentFunction(target, cm).iterate();
+                try {
+                    final XPathContextMajor cm = (XPathContextMajor) context;
+                    while (true) {
+                        SequenceIterator iter = contentEval.iterate(context);
+                        GroundedValue extent = SequenceTool.toGroundedValue(iter);
+                        TailCallInfo tail = cm.getTailCallInfo();
+                        if (tail == null) {
+                            return extent.iterate();
+                        } else {
+                            UserFunction target = expr.establishTargetFunction(tail, cm);
+                            if (target != expr.containingFunction) {
+                                return expr.tailCallDifferentFunction(target, cm).iterate();
+                            }
+                            // otherwise, loop round to execute the tail call
                         }
-                        // otherwise, loop round to execute the tail call
                     }
+                } catch (UncheckedXPathException e) {
+                    XPathException xpe = e.getXPathException();
+                    xpe.maybeSetContext(context);
+                    xpe.maybeSetLocation(expr.getLocation());
+                    throw xpe;
                 }
             };
         }

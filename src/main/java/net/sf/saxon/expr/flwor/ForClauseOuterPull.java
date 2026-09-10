@@ -41,7 +41,7 @@ public class ForClauseOuterPull extends ForClausePull {
                     return false;
                 }
                 currentIteration = SequenceTool.focusTracker(
-                        forClause.getSequenceOp().getOperandEvaluator(context).iterate(context));
+                        forClause.getSequence().makeElaborator().elaborateForPull().iterate(context));
                 next = currentIteration.next();
                 if (next == null) {
                     context.setLocalVariable(forClause.getRangeVariable().getLocalSlotNumber(),

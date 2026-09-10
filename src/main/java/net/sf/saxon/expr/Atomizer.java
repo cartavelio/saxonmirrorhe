@@ -663,13 +663,17 @@ public final class Atomizer extends UnaryExpression {
             final Atomizer expr = (Atomizer) getExpression();
             final ItemEvaluator baseEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
             final boolean nullable = Cardinality.allowsZero(expr.getBaseExpression().getCardinality());
-            return context -> {
-                Item it = baseEval.eval(context);
-                if (nullable && it == null) {
-                    return null;
-                }
-                return it.atomize().head();
-            };
+            if (nullable) {
+                return context -> {
+                    Item it = baseEval.eval(context);
+                    if (it == null) {
+                        return null;
+                    }
+                    return it.atomize().head();
+                };
+            } else {
+                return context -> baseEval.eval(context).atomize().head();
+            }
         }
     }
 }

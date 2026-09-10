@@ -8,10 +8,13 @@
 package net.sf.saxon.functions.hof;
 
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
+import net.sf.saxon.expr.elab.ItemElaborator;
+import net.sf.saxon.expr.elab.ItemEvaluator;
+import net.sf.saxon.expr.elab.SequenceEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.Function;
 import net.sf.saxon.om.Sequence;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpSuppressWarnings;
@@ -295,17 +298,7 @@ public class PartialApply extends Expression {
 
     @Override
     public Function evaluateItem(XPathContext context) throws XPathException {
-        Function f = (Function) getBaseExpression().evaluateItem(context);
-        assert f != null;
-        Sequence[] values = new Sequence[boundArgumentsOp.length];
-        for (int i = 0; i < boundArgumentsOp.length; i++) {
-            if (boundArgumentsOp[i] == null) {
-                values[i] = null;
-            } else {
-                values[i] = SequenceTool.toGroundedValue(boundArgumentsOp[i].getChildExpression().iterate(context));
-            }
-        }
-        return new CurriedFunction(f, values);
+        return (Function)makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -320,7 +313,45 @@ public class PartialApply extends Expression {
         return "partialApply";
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new PartialApplyElaborator();
+    }
 
+    private static class PartialApplyElaborator extends ItemElaborator {
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            PartialApply expr = (PartialApply)getExpression();
+            ItemEvaluator functionEval = expr.getBaseExpression().makeElaborator().elaborateForItem();
+            final int len = expr.boundArgumentsOp.length;
+            SequenceEvaluator[] boundArgumentsPullers = new SequenceEvaluator[len];
+            for (int i = 0; i < len; i++) {
+                if (expr.boundArgumentsOp[i] == null) {
+                    boundArgumentsPullers[i] = null;
+                } else {
+                    boundArgumentsPullers[i] = expr.boundArgumentsOp[i].getChildExpression().makeElaborator().eagerly();
+                }
+            }
+
+            return context -> {
+                Function f = (Function) functionEval.eval(context);
+                assert f != null;
+                Sequence[] values = new Sequence[len];
+                for (int i = 0; i < boundArgumentsPullers.length; i++) {
+                    if (boundArgumentsPullers[i] != null) {
+                        values[i] = boundArgumentsPullers[i].evaluate(context);
+                    }
+                }
+                return new CurriedFunction(f, values);
+            };
+        }
+    }
 }
 
 // Copyright (c) 2011-2022 Saxonica Limited

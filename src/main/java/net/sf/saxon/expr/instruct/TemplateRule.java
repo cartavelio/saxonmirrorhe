@@ -9,14 +9,13 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.*;
-import net.sf.saxon.expr.elab.OperandElaborator;
-import net.sf.saxon.expr.oper.OperandEvaluator;
-import net.sf.saxon.s9api.Location;
+import net.sf.saxon.expr.elab.PushEvaluator;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.StandardNames;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.Compilation;
 import net.sf.saxon.style.ComponentDeclaration;
 import net.sf.saxon.trace.ExpressionPresenter;
@@ -50,7 +49,7 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
     // which is responsible for any type checking that's needed.
 
     protected Expression body;
-    protected OperandEvaluator bodyEvaluator;
+    protected PushEvaluator bodyEvaluator;
     protected Pattern matchPattern;
     private boolean _hasRequiredParams;
     private boolean bodyIsTailCallReturner;
@@ -391,9 +390,10 @@ public class TemplateRule implements RuleTarget, Location, ExpressionOwner, Trac
         }
 
         try {
-            if (bodyEvaluator == null) {
-                context.getConfiguration();
-                bodyEvaluator = new OperandElaborator(body);
+            synchronized(this) {
+                if (bodyEvaluator == null) {
+                    bodyEvaluator = body.makeElaborator().elaborateForPush();
+                }
             }
             return bodyEvaluator.processLeavingTail(output, context);
         } catch (UncheckedXPathException e) {

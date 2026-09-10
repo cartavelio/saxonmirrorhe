@@ -9,6 +9,7 @@ package net.sf.saxon.expr.instruct;
 
 import net.sf.saxon.event.*;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.lib.StandardDiagnostics;
@@ -20,7 +21,6 @@ import net.sf.saxon.s9api.QName;
 import net.sf.saxon.s9api.XdmNode;
 import net.sf.saxon.str.BMPString;
 import net.sf.saxon.str.StringView;
-import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
@@ -183,106 +183,12 @@ public class MessageInstr extends Instruction {
      */
     @Override
     public Expression optimize(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
-        Expression e = super.optimize(visitor, contextInfo);
-        if (e != this) {
-            return e;
-        }
-//        if (visitor.isOptimizeForStreaming()) {
-//            DocumentInstr doc = new DocumentInstr(false, null);
-//            doc.setContentExpression(getSelect());
-//            setSelect(doc);
-//        }
-        return this;
+        return super.optimize(visitor, contextInfo);
     }
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        if (!(context.getController() instanceof XsltController)) {
-            // fallback code allowing xsl:message to do something useful when called from
-            // the XSLT function library within free-standing XPath or XQuery, typically when debugging
-            SequenceIterator iter = getSelect().iterate(context);
-            QueryResult.serializeSequence(iter, context.getConfiguration(), standardErrorResult(), new Properties());
-            return null;
-        }
-        XsltController controller = (XsltController)context.getController();
-        if (isAssert && !controller.isAssertionsEnabled()) {
-            return null;
-        }
-
-        boolean abort = false;
-        String term = Whitespace.trim(getTerminate().evaluateAsString(context)).toString();
-        switch (term) {
-            case "no":
-            case "false":
-            case "0":
-                // no action
-                break;
-            case "yes":
-            case "true":
-            case "1":
-                abort = true;
-                break;
-            default:
-                XPathException e = new XPathException("The terminate attribute of xsl:message must be yes|true|1 or no|false|0");
-                e.setXPathContext(context);
-                e.setErrorCode("XTDE0030");
-                throw e;
-        }
-
-        String code;
-        try {
-            code = getErrorCode().evaluateAsString(context).toString();
-        } catch (XPathException err) {
-            // use the error code of the failure in place of the intended error code
-            code = err.getErrorCodeQName().getEQName();
-        }
-
-        StructuredQName errorCode = null;
-        try {
-            errorCode = StructuredQName.fromLexicalQName(
-                    code, false, true, getRetainedStaticContext());
-        } catch (XPathException err) {
-            // The spec says we fall back to XTMM9000
-            errorCode = new StructuredQName("err", NamespaceUri.ERR, "XTMM9000");
-        }
-
-        controller.incrementMessageCounter(errorCode);
-
-        Builder builder = controller.makeBuilder();
-        builder.setDurability(Durability.TEMPORARY);
-        Receiver rec = new MessageAdapter(new TreeReceiver(builder), errorCode.getEQName(), getLocation());
-        rec.open();
-
-        ComplexContentOutputter cco = new ComplexContentOutputter(rec);
-        cco.startDocument(abort ? ReceiverOption.TERMINATE : ReceiverOption.NONE);
-
-        try {
-            getSelect().process(cco, context);
-        } catch (XPathException e) {
-            cco.append(StringValue.bmp("Error " + e.getErrorCodeLocalPart() +
-                                               " while evaluating xsl:message at line "
-                                               + getLocation().getLineNumber() + " of " + getLocation().getSystemId() +
-                                               ": " + e.getMessage()));
-        }
-
-        cco.endDocument();
-        cco.close();
-        builder.close();
-        NodeInfo content = builder.getCurrentRoot();
-        Message message = makeMessage(abort, errorCode, content);
-        controller.getMessageHandler().accept(message);
-        if (abort) {
-            TerminationException te = new TerminationException(
-                    "Processing terminated by " + StandardDiagnostics.getInstructionNameDefault(this) +
-                            " at line " + getLocation().getLineNumber() +
-                            " in " + StandardDiagnostics.abbreviateLocationURIDefault(getLocation().getSystemId()));
-            te.setLocation(getLocation());
-            te.setErrorCodeQName(errorCode);
-            te.setErrorObject(content);
-            throw te;
-        }
-        return null;
-
+        return makeElaborator().elaborateForPush().processLeavingTail(output, context);
     }
 
     @CSharpReplaceBody(code="return new Saxon.Api.Message((Saxon.Api.XdmNode) Saxon.Api.XdmValue.Wrap(content), new Saxon.Api.QName(errorCode), abort, new Saxon.Api.Location(getLocation()));")
@@ -320,13 +226,9 @@ public class MessageInstr extends Instruction {
      */
 
     private static class MessageAdapter extends ProxyReceiver {
-        private final UnicodeString errorCode;
-        private final Location location;
 
-        public MessageAdapter(SequenceReceiver next, String errorCode, Location location) {
+        public MessageAdapter(SequenceReceiver next) {
             super(next);
-            this.errorCode = StringView.of(errorCode);
-            this.location = location;
         }
 
         @Override
@@ -361,6 +263,110 @@ public class MessageInstr extends Instruction {
                 return;
             }
             nextReceiver.append(item, locationId, copyNamespaces);
+        }
+    }
+
+    public Elaborator getElaborator() {
+        return new MessageInstrElaborator();
+    }
+
+    private static class MessageInstrElaborator extends PushElaborator {
+
+        @Override
+        public PushEvaluator elaborateForPush() {
+            MessageInstr expr = (MessageInstr) getExpression();
+            PushEvaluator select = expr.getSelect().makeElaborator().elaborateForPush();
+            StringEvaluator terminate = expr.getTerminate().makeElaborator().elaborateForString(true);
+            StringEvaluator errorCodeEval = expr.getErrorCode().makeElaborator().elaborateForString(true);
+            return (out, context) -> {
+                if (!(context.getController() instanceof XsltController)) {
+                    // fallback code allowing xsl:message to do something useful when called from
+                    // the XSLT function library within free-standing XPath or XQuery, typically when debugging
+                    SequenceIterator iter = expr.getSelect().iterate(context);
+                    QueryResult.serializeSequence(iter, context.getConfiguration(), standardErrorResult(), new Properties());
+                    return null;
+                }
+                XsltController controller = (XsltController) context.getController();
+                if (expr.isAssert && !controller.isAssertionsEnabled()) {
+                    return null;
+                }
+
+                boolean abort = false;
+                String term = Whitespace.trim(terminate.eval(context));
+                switch (term) {
+                    case "no":
+                    case "false":
+                    case "0":
+                        // no action
+                        break;
+                    case "yes":
+                    case "true":
+                    case "1":
+                        abort = true;
+                        break;
+                    default:
+                        XPathException e = new XPathException("The terminate attribute of xsl:message must be yes|true|1 or no|false|0");
+                        e.setXPathContext(context);
+                        e.setErrorCode("XTDE0030");
+                        throw e;
+                }
+
+                String code;
+                try {
+                    code = errorCodeEval.eval(context);
+                } catch (XPathException err) {
+                    // use the error code of the failure in place of the intended error code
+                    code = err.getErrorCodeQName().getEQName();
+                }
+
+                StructuredQName errorCode;
+                try {
+                    errorCode = StructuredQName.fromLexicalQName(
+                            code, false, true, expr.getRetainedStaticContext());
+                } catch (XPathException err) {
+                    // The spec says we fall back to XTMM9000
+                    errorCode = new StructuredQName("err", NamespaceUri.ERR, "XTMM9000");
+                }
+
+                controller.incrementMessageCounter(errorCode);
+
+                Builder builder = controller.makeBuilder();
+                builder.setDurability(Durability.TEMPORARY);
+                Receiver rec = new MessageAdapter(new TreeReceiver(builder));
+                rec.open();
+
+                ComplexContentOutputter cco = new ComplexContentOutputter(rec);
+                cco.startDocument(abort ? ReceiverOption.TERMINATE : ReceiverOption.NONE);
+
+                try {
+                    TailCall tc = select.processLeavingTail(cco, context);
+                    dispatchTailCall(tc);
+                } catch (XPathException e) {
+                    cco.append(StringValue.bmp("Error " + e.getErrorCodeLocalPart() +
+                                                       " while evaluating xsl:message at line "
+                                                       + expr.getLocation().getLineNumber() + " of " + expr.getLocation().getSystemId() +
+                                                       ": " + e.getMessage()));
+                }
+
+                cco.endDocument();
+                cco.close();
+                builder.close();
+                NodeInfo content = builder.getCurrentRoot();
+                Message message = expr.makeMessage(abort, errorCode, content);
+                controller.getMessageHandler().accept(message);
+                if (abort) {
+                    TerminationException te = new TerminationException(
+                            "Processing terminated by " + StandardDiagnostics.getInstructionNameDefault(expr) +
+                                    " at line " + expr.getLocation().getLineNumber() +
+                                    " in " + StandardDiagnostics.abbreviateLocationURIDefault(expr.getLocation().getSystemId()));
+                    te.setLocation(expr.getLocation());
+                    te.setErrorCodeQName(errorCode);
+                    te.setErrorObject(content);
+                    throw te;
+                }
+                return null;
+
+            };
         }
     }
 

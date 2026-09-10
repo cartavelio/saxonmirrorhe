@@ -8,6 +8,7 @@
 package net.sf.saxon.expr;
 
 import net.sf.saxon.Configuration;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.om.*;
@@ -177,40 +178,7 @@ public final class CastableExpression extends CastingExpression {
 
     @Override
     public boolean effectiveBooleanValue(XPathContext context) throws XPathException {
-        // This method does its own atomization so that it can distinguish between atomization
-        // failures and casting failures
-        int count = 0;
-        SequenceIterator iter = getBaseExpression().iterate(context);
-        for (Item item; (item = iter.next()) != null; ) {
-            if (item instanceof NodeInfo) {
-                AtomicSequence atomizedValue = item.atomize();
-                int length = SequenceTool.getLength(atomizedValue);
-                count += length;
-                if (count > 1) {
-                    return false;
-                }
-                if (length != 0) {
-                    AtomicValue av = atomizedValue.head();
-                    if (!isCastable(av, getTargetType(), context)) {
-                        return false;
-                    }
-                }
-            } else if (item instanceof AtomicValue) {
-                AtomicValue av = (AtomicValue) item;
-                count++;
-                if (count > 1) {
-                    return false;
-                }
-                if (!isCastable(av, getTargetType(), context)) {
-                    return false;
-                }
-            } else if (item instanceof ArrayItem) {
-                return false;
-            } else {
-                throw new XPathException("Input to cast cannot be atomized", "XPTY0004");
-            }
-        }
-        return count != 0 || allowsEmpty();
+        return makeElaborator().elaborateForBoolean().eval(context);
     }
 
     /**
@@ -263,13 +231,62 @@ public final class CastableExpression extends CastingExpression {
     @Override
     public void export(ExpressionPresenter out) throws XPathException {
         export(out, "castable");
-//        out.startElement("castable", this);
-//        out.emitAttribute("as", getTargetType().toExportString());
-//        out.emitAttribute("code", getTargetType().getBasicAlphaCode());
-//        out.emitAttribute("emptiable", allowsEmpty() ? "1" : "0");
-//        getBaseExpression().export(out);
-//        out.endElement();
     }
 
+    /**
+     * Make an elaborator for this expression
+     *
+     * @return an appropriate {@link Elaborator}
+     */
+    @Override
+    public Elaborator getElaborator() {
+        return new CastableExpressionElaborator();
+    }
+
+    private static class CastableExpressionElaborator extends BooleanElaborator {
+
+        @Override
+        public BooleanEvaluator elaborateForBoolean() {
+            CastableExpression expr = (CastableExpression) getExpression();
+            PullEvaluator argPull = expr.getBaseExpression().makeElaborator().elaborateForPull();
+            return context -> {
+                // This method does its own atomization so that it can distinguish between atomization
+                // failures and casting failures
+                int count = 0;
+                SequenceIterator iter = argPull.iterate(context);
+                for (Item item; (item = iter.next()) != null; ) {
+                    if (item instanceof NodeInfo) {
+                        AtomicSequence atomizedValue = item.atomize();
+                        int length = SequenceTool.getLength(atomizedValue);
+                        count += length;
+                        if (count > 1) {
+                            return false;
+                        }
+                        if (length != 0) {
+                            AtomicValue av = atomizedValue.head();
+                            if (!expr.isCastable(av, expr.getTargetType(), context)) {
+                                return false;
+                            }
+                        }
+                    } else if (item instanceof AtomicValue) {
+                        AtomicValue av = (AtomicValue) item;
+                        count++;
+                        if (count > 1) {
+                            return false;
+                        }
+                        if (!expr.isCastable(av, expr.getTargetType(), context)) {
+                            return false;
+                        }
+                    } else if (item instanceof ArrayItem) {
+                        return false;
+                    } else {
+                        throw new XPathException("Input to cast cannot be atomized", "XPTY0004");
+                    }
+                }
+                return count != 0 || expr.allowsEmpty();
+            };
+        }
+
+    }
 }
 

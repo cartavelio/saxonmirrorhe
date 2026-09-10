@@ -839,7 +839,16 @@ public class UserFunctionCall extends FunctionCall implements UserFunctionResolv
             } else {
                 // Non-package case (XQuery)
                 UserFunction targetFunction = expr.getFunction();
-                return context -> callTargetFunction(expr, targetFunction, context).iterate();
+                return context -> {
+                    try {
+                        return callTargetFunction(expr, targetFunction, context).iterate();
+                    } catch (UncheckedXPathException e) {
+                        XPathException xpe = e.getXPathException();
+                        xpe.maybeSetContext(context);
+                        xpe.maybeSetLocation(expr.getLocation());
+                        throw xpe;
+                    }
+                };
             }
 
         }
