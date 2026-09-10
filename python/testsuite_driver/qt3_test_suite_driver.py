@@ -725,7 +725,6 @@ def main(argv):
             print('qt3_test_suite_driver.py <testsuitedir> -t <testpattern> -s <testset> -o <resultdir> -l <processor language> -reportfilename <report file name>')
             sys.exit(2)
         print(opts)
-        print(args)
         for opt, arg in opts:
             if opt == '-h':
                 print('HELP: qt3_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> -l <language>')

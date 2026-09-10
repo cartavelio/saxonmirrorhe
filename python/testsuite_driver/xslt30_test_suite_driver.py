@@ -882,7 +882,7 @@ def main(argv):
         except getopt.GetoptError:
             print('xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off -l <processor language> -reportfilename <report file name>')
             sys.exit(2)
-
+        print(opts)
         for opt, arg in opts:
             if opt == '-h':
                 print('HELP: xslt30_test_suite_driver.py -t <testpattern> -s <testset> -o <resultdir> --jit on/off -l <language>')
@@ -909,7 +909,7 @@ def main(argv):
             elif opt in ("-l", "--lang"):
                 spec = Spec.process_spec(arg)
 
-        test_report = PyTestReport(spec.testsuite, "http://www.w3.org/2012/11/xslt30-test-results", spec.spec_and_version,driver_proc.version[:8], saxon_version, report_file_name if report_file_name is not None else None)
+        test_report = PyTestReport(spec.testsuite, "http://www.w3.org/2012/11/xslt30-test-results", spec.spec_and_version,driver_proc.version[:9], saxon_version, report_file_name if report_file_name is not None else None)
 
 
 
