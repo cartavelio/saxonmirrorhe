@@ -234,7 +234,7 @@ public class XMarkBenchmark {
         XQueryCompiler compiler = processor.newXQueryCompiler();
         if (schemaAware) {
             SchemaManager schemaManager = processor.getSchemaManager();
-            schemaManager.load(new StreamSource(new File(dir + "schema.xsd")));
+            schemaManager.load(new File(dir + "schema.xsd"));
             builder.setSchemaValidator(schemaManager.newSchemaValidator());
             compiler.setSchemaAware(true);
         }
