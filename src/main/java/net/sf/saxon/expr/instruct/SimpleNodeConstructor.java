@@ -65,6 +65,10 @@ public abstract class SimpleNodeConstructor extends Instruction {
         return selectOp.getChildExpression();
     }
 
+    public Operand getSelectOp() {
+        return selectOp;
+    }
+
     @Override
     public Iterable<Operand> operands() {
         return selectOp;
@@ -223,7 +227,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
 
     @Override
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
-        UnicodeString value = getSelect().evaluateAsString(context);
+        UnicodeString value = getSelectOp().evaluateAsString(context); // getSelect().evaluateAsString(context);
         try {
             processValue(value, output, context);
         } catch (XPathException e) {
@@ -251,7 +255,7 @@ public abstract class SimpleNodeConstructor extends Instruction {
 
     @Override
     public Item evaluateItem(XPathContext context) throws XPathException {
-        Item contentItem = getSelect().evaluateItem(context);
+        Item contentItem = getSelectOp().evaluateItem(context); // getSelect().evaluateItem(context);
         UnicodeString content;
         if (contentItem == null) {
             content = EmptyUnicodeString.getInstance();

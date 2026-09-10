@@ -138,7 +138,8 @@ public abstract class UnicodeString implements AtomicMatchKey, Comparable<Unicod
      *
      * @param other the other (sought) string
      * @param from  the position (0-based) where searching is to start (counting in codepoints)
-     * @return the first position where the substring is found, or -1 if it is not found
+     * @return the first position where the substring is found, or -1 if it is not found. Also returns
+     * -1 if {@code from} is negative, or beyond the length of the string.
      */
 
     public long indexOf(UnicodeString other, long from) {

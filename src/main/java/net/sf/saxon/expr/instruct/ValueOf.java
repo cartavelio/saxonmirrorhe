@@ -310,7 +310,7 @@ public final class ValueOf extends SimpleNodeConstructor {
     @CSharpInnerClass(outer = true, extra = {"Saxon.Hej.s9api.Location instructionLoc"})
     public TailCall processLeavingTail(Outputter output, XPathContext context) throws XPathException {
         if (noNodeIfEmpty) {
-            Item value = getSelect().evaluateItem(context);
+            Item value = getSelectOp().evaluateItem(context);
             if (value != null) {
                 processValue(value.getUnicodeStringValue(), output, context);
             }
@@ -342,7 +342,7 @@ public final class ValueOf extends SimpleNodeConstructor {
                 }
 
             };
-            getSelect().process(toText, context);
+            getSelectOp().process(toText, context);
             return null;
         } else {
             return super.processLeavingTail(output, context);
@@ -377,7 +377,7 @@ public final class ValueOf extends SimpleNodeConstructor {
     public NodeInfo evaluateItem(XPathContext context) throws XPathException {
         try {
             UnicodeString val;
-            Item item = getSelect().evaluateItem(context);
+            Item item = getSelectOp().evaluateItem(context);
             if (item == null) {
                 if (noNodeIfEmpty) {
                     return null;
