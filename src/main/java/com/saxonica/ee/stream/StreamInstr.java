@@ -280,6 +280,8 @@ public class StreamInstr extends SourceDocument implements Pusher {
                                    context, getLocation(), stream, parseOptions);
             } catch (QuitParsingException q) {
                 // This is an early exit indicating success
+                q.maybeSetLocation(getLocation());
+                q.maybeSetContext(context);
                 if (verbose) {
                     controller.getConfiguration().getLogger().info("Streaming " + href + " : early exit ");
                 }
@@ -327,7 +329,7 @@ public class StreamInstr extends SourceDocument implements Pusher {
                     expr.push(output, context);
                 } catch (QuitParsingException q) {
                     // no action, this is an early exit indicating success
-                    //throw q;
+                    throw q;
                 } catch (XPathException e) {
                     e.maybeSetLocation(expr.getLocation());
                     if (e.getErrorCodeQName() == null) {
