@@ -456,6 +456,38 @@ TODO: rethink redefines and override
         <p>The extension functions <code>saxon:line-number</code> and <code>saxon:column-number</code>
         now return an empty sequence if the argument value is an empty sequence.</p>
 
+        <h2>4.0 Features not yet implemented</h2>
+        
+        <p>Here is a list of some of the features in the 4.0 specifications that have not yet been implemented.
+        Please check the QT4 GitHub project for the latest status: Pull Requests are labeled "In Saxon13" when
+        they have been implemented.</p>
+        
+        <ul>
+            <li><p>Item type declarations in XSLT and XQuery</p></li>
+            <li><p>PR1355, PR1708 - Named record types in XSLT and XQuery</p></li>
+            <li><p>PR1817, PR1853 - Methods</p></li>
+            <li><p>The pipeline operator <code>-></code></p></li>
+            <li><p>try/catch/finally in XQuery</p></li>
+            <li><p>xsd-validator function (partially implemented)</p></li>
+            <li><p>scan-left and scan-right functions</p></li>
+            <li><p>PR1864, PR1877 - type specifiers in lookup expressions</p></li>
+            <li><p>PR1875 - params passed implicitly through xsl:next-match</p></li>
+            <li><p>PR1858 - xsl:record</p></li>
+            <li><p>PR1819 - multiple schemas</p></li>
+            <li><p>PR1773 - intersect and except in patterns</p></li>
+            <li><p>PR1676 - collation-available</p></li>
+            <li><p>PR1674 - composite sort keys in xsl:sort</p></li>
+            <li><p>PR1622 - XSLT map-for-key function</p></li>
+            <li><p></p></li>
+            <li><p></p></li>
+            <li><p></p></li>
+            <li><p></p></li>
+            <li><p></p></li>
+        </ul>
+        
+        <p>TODO: Note in documentation that we have included the Blake3 hashing algorithm 
+            Adapted from the ISC-licensed O(1) Cryptography library by Matt Sicker and ported from the reference public domain
+            implementation by Jack O'Connor. (See Blake3 java module for details)</p>
     
     </category>
     
