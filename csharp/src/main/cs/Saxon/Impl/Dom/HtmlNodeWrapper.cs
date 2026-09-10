@@ -183,7 +183,7 @@ namespace Saxon.Impl.Dom {
             foreach (AngleSharp.Dom.IAttr att in ((AngleSharp.Dom.IElement)node).Attributes) {
                 if (att.Name != "xmlns" && !att.Name.StartsWith("xmlns:")) {
                     HtmlAttributeWrapper wrapper = HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++);
-                    if (nodeTest.test(wrapper)) {
+                    if (nodeTest == null || nodeTest.test(wrapper)) {
                         attList.Add(HtmlAttributeWrapper.makeWrapper(att, this, indexPosition++));
                     }
                 }
@@ -199,7 +199,7 @@ namespace Saxon.Impl.Dom {
             int indexPosition = 0;
             foreach (AngleSharp.Dom.INode child in node.ChildNodes) {
                 HtmlNodeWrapper wrapper = makeWrapper(child, docWrapper, this, indexPosition++);
-                if (nodeTest.test(wrapper)) {
+                if (nodeTest == null || nodeTest.test(wrapper)) {
                     childList.Add(wrapper);
                 }
             }
@@ -220,7 +220,7 @@ namespace Saxon.Impl.Dom {
                     continue;
                 }
                 HtmlNodeWrapper wrapper = makeWrapper(next, docWrapper, parent, ix++);
-                if (nodeTest.test(wrapper)) {
+                if (nodeTest == null || nodeTest.test(wrapper)) {
                     siblingList.Add(wrapper);
                 }
             }

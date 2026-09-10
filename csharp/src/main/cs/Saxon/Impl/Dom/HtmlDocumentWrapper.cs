@@ -115,7 +115,7 @@ namespace Saxon.Impl.Dom {
             foreach (AngleSharp.Dom.INode child in htmlDocument.ChildNodes) {
                 if (child.NodeType != NodeType.DocumentType) {
                     HtmlNodeWrapper wrapper = HtmlNodeWrapper.makeWrapper(child, this, this, indexPosition++);
-                    if (nodeTest.test(wrapper)) {
+                    if (nodeTest == null || nodeTest.test(wrapper)) {
                         childList.Add(wrapper);
                     }
                 }
