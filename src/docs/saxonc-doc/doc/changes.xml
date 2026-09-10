@@ -53,6 +53,10 @@
          <p>From SaxonC 12.4:</p>
          <ul>
             <li><p>Localization using ICU4J is now available.</p></li>
+            <li><p>The main <a target="_blank"
+               href="https://www.saxonica.com/documentation12/index.html">Saxon 12 documentation</a> has
+               been updated to provide more details relevant for the C/C++, PHP and Python platforms where
+               this differs to Saxon on the Java and C# platforms.</p></li>
          </ul>
       </category>
 
@@ -124,6 +128,7 @@
                j'th child node of <code>n[i]</code>, and so on. For a <code>PyXdmValue</code> object,
                <code>n[i]</code> returns the i'th item in the sequence.</li>
             <li>Added ICU localization support for SaxonC-EE and SaxonC-PE.</li>
+            <li>The C API is now documented: see <a href="/api/saxonc_c_api">SaxonC C API</a>.</li>
          </ul>
       </category>
       
