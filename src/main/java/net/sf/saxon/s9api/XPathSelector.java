@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.Configuration;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.lib.ResourceResolver;
 import net.sf.saxon.lib.ResourceResolverWrappingURIResolver;
@@ -202,8 +203,9 @@ public class XPathSelector implements Iterable<XdmItem> {
      * Set a callback to be used for reporting of run-time errors and warnings.
      * Note that fatal run-time errors are always reported by throwing an exception,
      * so this is primarily useful for controlling the way that warnings are reported.
-     * By default, warnings are reported to the {@link ErrorReporter} associated with the
-     * Saxon Configuration.
+     * <p>By default, errors are reported to a default error reporter which writes to
+     * the logging destination associated with the Saxon {@link Configuration}, which
+     * in turn defaults to the system error stream.</p>
      * @param reporter the user-supplied error reporter to be called when dynamic errors and warnings
      *                 arise
      * @since 10.0

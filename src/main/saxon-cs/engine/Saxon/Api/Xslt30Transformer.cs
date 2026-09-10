@@ -76,6 +76,7 @@ namespace Saxon.Api {
         private readonly StandardMessageHandler _standardMessageHandler;
         private ResourceResolver textResolver;
         private ResourceResolver xmlDocumentResolver;
+        private ErrorReporter errorReporter;
 
         // internal constructor
 
@@ -342,15 +343,18 @@ namespace Saxon.Api {
             get => msg => s9Transformer.controller.getMessageHandler().Invoke(msg);
             set => s9Transformer.controller.setMessageHandler(value.Invoke);
         }
-
+        
         /// <summary>
-        /// Destination for reporting warnings and non-fatal errors (including validation errors
-        /// that occur when validating constructed nodes, which will eventually cause the transformation
-        /// to fail)
+        /// The <code>ErrorReporter</code> to be used at run-time to notify any dynamic
+        /// errors that occur.
         /// </summary>
-        ///
+
         public ErrorReporter ErrorReporter {
-            set => s9Transformer.setErrorReporter(new ErrorReporterWrapper(value));
+            get => errorReporter;
+            set {
+                errorReporter = value;
+                s9Transformer.setErrorReporter(new ErrorReporterWrapper(value));
+            }
         }
 
         /// <summary>

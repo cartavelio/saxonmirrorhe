@@ -220,7 +220,10 @@ public abstract class AbstractXsltTransformer {
 
     /**
      * Set a callback that will be used when reporting a dynamic error or warning. This is relevant primarily
-     * for non-fatal errors
+     * for non-fatal errors.
+     * <p>By default, errors are reported to a default error reporter which writes to
+     * the logging destination associated with the Saxon {@link Configuration}, which
+     * in turn defaults to the system error stream.</p>
      * @param reporter the callback
      */
 

@@ -28,6 +28,7 @@ namespace Saxon.Api {
         private TextWriter traceFunctionDestination;
         private ResourceResolver textResolver;
         private ResourceResolver xmlDocumentResolver;
+        private ErrorReporter errorReporter;
         private System.Action closeAction;
 
 
@@ -152,6 +153,19 @@ namespace Saxon.Api {
             set {
                 textResolver = value;
                 evaluator.setUnparsedTextResolver(Xslt30Transformer.WrapTextResolver(value));
+            }
+        }
+        
+        /// <summary>
+        /// The <code>ErrorReporter</code> to be used at run-time to notify any dynamic
+        /// errors that occur.
+        /// </summary>
+
+        public ErrorReporter ErrorReporter {
+            get => errorReporter;
+            set {
+                errorReporter = value;
+                evaluator.setErrorReporter(new ErrorReporterWrapper(value));
             }
         }
 
