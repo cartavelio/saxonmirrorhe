@@ -93,6 +93,12 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
         return toString();
     }
 
+    @Override
+    public ItemType normalizeItemType() {
+        // implementation needed for SaxonCS
+        return this;
+    }
+
     /**
      * Determine whether this item type is atomic (that is, whether it can ONLY match
      * atomic values)
@@ -245,6 +251,8 @@ public enum AnyItemType implements ItemTypeWithSequenceTypeCache {
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
     }
+
+
 
 
 

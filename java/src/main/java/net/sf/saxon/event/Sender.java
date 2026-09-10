@@ -163,7 +163,7 @@ public abstract class Sender {
         PipelineConfiguration pipe = receiver.getPipelineConfiguration();
         Configuration config = pipe.getConfiguration();
         int sv = options.getSchemaValidationMode();
-        if (sv != Validation.PRESERVE && sv != Validation.DEFAULT && config instanceof EnterpriseConfiguration) {
+        if (sv != Validation.PRESERVE && sv != Validation.DEFAULT && config.getEditionCode().equals("EE")) {
             Controller controller = pipe.getController();
             if (controller != null && !controller.getExecutable().isSchemaAware() && sv != Validation.STRIP) {
                 throw new XPathException("Cannot use schema-validated input documents when the query/stylesheet is not schema-aware");

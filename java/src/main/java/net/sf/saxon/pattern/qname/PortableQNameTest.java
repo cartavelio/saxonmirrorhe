@@ -65,8 +65,8 @@ public class PortableQNameTest implements QNameTest {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof PortableQNameTest t2) {
-            return t2.qName.equals(qName);
+        if (obj instanceof PortableQNameTest p2) {
+            return p2.qName.equals(qName);
         }
         if (obj instanceof SpecificQNameTest t2) {
             return t2.getStructuredQName().equals(qName);

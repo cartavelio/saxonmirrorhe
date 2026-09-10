@@ -89,8 +89,8 @@ public class SpecificQNameTest implements QNameTest {
         if (obj instanceof SpecificQNameTest t2) {
             return t2.fingerprint == fingerprint;
         }
-        if (obj instanceof PortableQNameTest t2) {
-            return getStructuredQName().equals(t2.getStructuredQName());
+        if (obj instanceof PortableQNameTest p2) {
+            return getStructuredQName().equals(p2.getStructuredQName());
         }
         return false;
     }
