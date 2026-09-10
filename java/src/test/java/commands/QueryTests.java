@@ -28,17 +28,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class QueryTests {
     private final ConfigTest configTest = new ConfigTest();
 
+    final Query query = new Query();
     /**
      * Run a query using the command line interface capturing the result as a string
      * @param args the command line arguments
      * @return the contents of System.out
      */
 
-    private static String runQuery(String[] args) {
+    private String runQuery(String[] args) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             System.setOut(new PrintStream(baos));
-            Query.main(args);
+            query.doQuery(args);
             return baos.toString("utf-8");
         } catch (Exception e) {
             fail(e);
@@ -152,7 +153,7 @@ public class QueryTests {
                     "-t",
                     "-update:on"};
 
-            Query.main(args);
+            query.doQuery(args);
             // TODO: If this is an update test, shouldn't we check if it updated?
         } catch (Exception e) {
             e.printStackTrace();
@@ -168,7 +169,7 @@ public class QueryTests {
                 "x=3",
                 "y=4"};
         try {
-            Query.main(args);
+            query.doQuery(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -181,7 +182,7 @@ public class QueryTests {
                 "-qs:import module namespace h = \"http://example.org/ns/hello\"; h:new-hello('world')",
                 "-init:commands.QueryTests$MyInitializer"};
         try {
-            Query.main(args);
+            query.doQuery(args);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

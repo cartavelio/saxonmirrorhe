@@ -84,11 +84,22 @@ public class Transform {
      *
      * @param args List of arguments supplied on operating system command line
      */
-
     public static void main(String[] args) {
         // the real work is delegated to another routine so that it can be used in a subclass
         new Transform().execute(args);
     }
+
+    /**
+     * Main entry point for running the program from the command line via the
+     * static {@link #main} method.
+     *
+     * <p>This method runs the program, catches any {@link
+     * CommandExitException}s, and calling {@link System#exit} with the
+     * {@code CommandExitException}'s exit code.</p>
+     *
+     * @param args List of arguments supplied on operating system command line
+     * @since 12.10
+     */
 
     public void execute(String[] args) {
         try {
@@ -298,8 +309,15 @@ public class Transform {
     //#endif
 
     /**
-     * Support method for main program. This support method can also be invoked from subclasses
-     * that support the same command line interface
+     * Support method for main program. This support method can also be
+     * invoked from subclasses that support the same command line interface.
+     *
+     * <p>In previous Saxon versions (12.9 and earlier) this method could call
+     * {@link System#exit} unless the argument {@code "-quit:off"} was passed.
+     * Now it throws a {@link CommandExitException} in this case.
+     * {@code CommandExitException} extends {@link RuntimeException}, so
+     * behaviour with and without {@code "-quit:off"} is functionally identical
+     * for API clients now.</p>
      *
      * @param args    the command-line arguments
      */

@@ -321,6 +321,7 @@ tasks.named<Test>("test") {
 val editionJavadoc = tasks.register<Exec>("editionJavadoc") {
   group =  LifecycleTasks.DOCUMENTATION_GROUP
   inputs.files(editionSourceSet.output)
+  inputs.files(preprocessJava)
   dependsOn(preprocessJava)
 
   outputs.dir(layout.buildDirectory.dir("javadoc"))
