@@ -17,6 +17,7 @@ import net.sf.saxon.value.SequenceExtent;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,19 +27,10 @@ import java.util.List;
 
 public class FunctionAnnotations extends SystemFunction {
 
-
-    private static final List<String> returnTypeNames = new ArrayList<>();
-    private static final List<SequenceType> returnTypeTypes = new ArrayList<>();
-
-
-    static {
-        returnTypeNames.add("name");
-        returnTypeTypes.add(SequenceType.SINGLE_QNAME);
-        returnTypeNames.add("params");
-        returnTypeTypes.add(SequenceType.ATOMIC_SEQUENCE);
-    }
-
-    public final static RecordTest RETURN_TYPE = new RecordTest(returnTypeNames, returnTypeTypes, new ArrayList<>(), false);
+    public final static RecordTest RETURN_TYPE = new RecordTest(
+            Arrays.asList("name", "params"),
+            Arrays.asList(SequenceType.SINGLE_QNAME, SequenceType.ATOMIC_SEQUENCE),
+            new ArrayList<>(), false);
 
 
     @Override
