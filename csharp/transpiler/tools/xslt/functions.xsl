@@ -318,10 +318,10 @@
    
    <xsl:function name="f:fullClassName" as="xs:string">
       <xsl:param name="classElement" as="element()*"/>
-      <xsl:assert test="$classElement/@nodeType = 'ClassOrInterfaceDeclaration'"/>
+      <xsl:assert test="$classElement/@nodeType = ('ClassOrInterfaceDeclaration', 'RecordDeclaration')"/>
       <xsl:sequence
          select="$classElement!string-join((f:qualifiedName(ancestor::root/packageDeclaration/name), 
-         ancestor-or-self::*[@nodeType='ClassOrInterfaceDeclaration']/name/@identifier), '.')"/>
+         ancestor-or-self::*[@nodeType=('ClassOrInterfaceDeclaration','RecordDeclaration')]/name/@identifier), '.')"/>
    </xsl:function>
    
    <xsl:function name="f:isExceptionType" as="xs:boolean">
@@ -343,8 +343,8 @@
         directly or indirectly; and if it does; return the class over which it iterates -->
    <xsl:function name="f:typeThatThisIteratesOver" as="xs:string?">
       <xsl:param name="type" as="element()"/>
-      <xsl:assert test="$type[self::class|self::interface]">Wrong element type in f:iteratesOver: {name($type)}</xsl:assert>
-      <xsl:variable name="superTypes" as="element(*)*" select="$type/implements | $type/extends"/>
+      <!--<xsl:assert test="$type[self::class|self::interface]">Wrong element type in f:typeThatThisIteratesOver: {name($type)}</xsl:assert>
+      --><xsl:variable name="superTypes" as="element(*)*" select="$type/implements | $type/extends"/>
       <xsl:variable name="iteratorSuperType" select="$superTypes[@name = 'java.util.Iterator']"/>
       <xsl:choose>
          <xsl:when test="$iteratorSuperType">
@@ -379,15 +379,15 @@
       <xsl:choose>
          <xsl:when test="exists($specialTypes($degen))">
             <xsl:sequence select="$specialTypes($degen)"/>
-            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
+<!--            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
                <xsl:message>Mapped {$degen} to {$specialTypes($degen)}</xsl:message>
-            </xsl:if>
+            </xsl:if>-->
          </xsl:when>
          <xsl:otherwise>
             <xsl:sequence select="f:adjustTypeNamespace($degen)"/>
-            <xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
+            <!--<xsl:if test="contains($degen, 'OrderedMap') or contains($degen, 'HashTrieMap')">
                <xsl:message>Mapped {$degen} to {f:adjustTypeNamespace($degen)}</xsl:message>
-            </xsl:if>
+            </xsl:if>-->
          </xsl:otherwise>
       </xsl:choose>
    </xsl:function>

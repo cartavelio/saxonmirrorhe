@@ -111,7 +111,7 @@
       <xsl:variable name="fieldDecl" 
          select="ancestor::members/*[@nodeType='FieldDeclaration'][variables/variable/name/@identifier = $fieldRef/name/@identifier]"/>
       <xsl:variable name="type" select="f:extract-type-arguments(../../@RESOLVED_TYPE)"/>
-      <xsl:message>Method Argument: Resolved type {$type} ==> |{f:extract-type-arguments($type)}|</xsl:message>
+      <!--<xsl:message>Method Argument: Resolved type {$type} ==> |{f:extract-type-arguments($type)}|</xsl:message>-->
       <xsl:value-of select="f:extract-type-arguments($type)"/>
    </xsl:template> 
    
