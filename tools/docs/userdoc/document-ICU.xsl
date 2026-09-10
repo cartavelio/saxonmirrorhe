@@ -179,7 +179,8 @@
         <h1>UCA-supported locales</h1>
         <p xsl:use-when="$add.diagnostics">{$audit}</p>
         <aside>Since Saxon 9.8, the ICU library is updated from version 57.1 to 59.1; which brings
-          Unicode 9.0 support. Since Saxon 10.7, the library is updated to version 59.2.</aside>
+          Unicode 9.0 support. From Saxon 10.7, the library is updated to version 59.2. From Saxon 12.1,
+          the library is updated to version 72.1, which supports Unicode 14.</aside>
         <p>These are the locales ({count(map:keys($langs.uca))} base languages,
           {count(map:keys($langs.uca.all)) - count(map:keys($langs.uca))} variants) supported for
           collation in Saxon-PE/EE, from the library of <a href="http://site.icu-project.org/">ICU -
@@ -481,7 +482,8 @@
         <section id="ICU-numbering" title="Supported ICU numbering schemes">
           <h1>Supported ICU numbering schemes</h1>
           <aside>Since Saxon 9.8, the ICU library is updated from version 57.1 to 59.1; which brings
-            Unicode 9.0 support. Since Saxon 10.7, the library is updated to version 59.2.</aside>
+            Unicode 9.0 support. From Saxon 10.7, the library is updated to version 59.2. From Saxon
+            12.1, the library is updated to version 72.1, which supports Unicode 14.</aside>
           <p>The names of the numbering schemes and the codes to be used for them (ICU
             version:{icuN:getICUVersion()}) are shown in the following table, with those whose
             derivation differs from the standard rule (first-letter of each word) marked '*':</p>
