@@ -1118,7 +1118,7 @@ public class DOMTest {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
 
         // Create an appropriate Builder
-        Builder b = new LinkedTreeBuilder(pipe);
+        Builder b = new LinkedTreeBuilder(pipe, Durability.LASTING);
 
         Sender.send(source, b, null);
 
