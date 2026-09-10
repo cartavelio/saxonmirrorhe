@@ -25,6 +25,12 @@ public class NamespaceUri {
 
     private final static ConcurrentHashMap<String, NamespaceUri> stringToNamespaceUri = new ConcurrentHashMap<>(20);
 
+    /**
+     * Return the {@code NamespaceUri} object corresponding to a given namespace name supplied as a string
+     * @param content the namespace name, supplied as a string
+     * @return the corresponding {@code NamespaceUri} object
+     */
+
     @CSharpReplaceBody(code="content ??= \"\";\n"
             + "return Saxon.Impl.Helpers.MapUtils.ComputeIfAbsent(stringToNamespaceUri, Saxon.Hej.value.Whitespace.trim(content), str => new Saxon.Hej.om.NamespaceUri(str));\n"
             )
@@ -35,10 +41,6 @@ public class NamespaceUri {
         return stringToNamespaceUri.computeIfAbsent(Whitespace.trim(content), NamespaceUri::new);
     }
 
-    public static void diag() {
-        System.err.println("Namespace pool size " + stringToNamespaceUri.size());
-    }
-
     private final String stringContent;
     private final UnicodeString unicodeStringContent;
 
@@ -47,23 +49,32 @@ public class NamespaceUri {
         this.unicodeStringContent = StringTool.fromCharSequence(content);
     }
 
-//    private NamespaceUri(UnicodeString content) {
-//        this.stringContent = content.toString();
-//        this.unicodeStringContent = content;
-//    }
+    /**
+     * Return the namespace URI as a string
+     * @return the namespace URI as a string
+     */
 
     public String toString() {
         return stringContent;
     }
 
+    /**
+     * Return the namespace URI as an instance of {@link UnicodeString}
+     * @return the namespace URI as a {@code UnicodeString}
+     */
+
     public UnicodeString toUnicodeString() {
         return unicodeStringContent;
     }
 
+    /**
+     * Ask whether this URI represents the "null namespace" (internally, a zero-length string)
+     * @return true if this is the null namespace
+     */
+
     public boolean isEmpty() {
         return this == NamespaceUri.NULL;
     }
-    
 
     /**
      * A URI representing the null namespace (actually, an empty string)
@@ -178,8 +189,14 @@ public class NamespaceUri {
      */
     public final static NamespaceUri ARRAY_FUNCTIONS = NamespaceUri.of("http://www.w3.org/2005/xpath-functions/array");
 
+    /**
+     * Namespace URI for the EXPath Binary module
+     */
     public final static NamespaceUri EXPATH_BINARY = NamespaceUri.of("http://expath.org/ns/binary");
 
+    /**
+     * Namespace URI for the EXPath File module
+     */
     public final static NamespaceUri EXPATH_FILE = NamespaceUri.of("http://expath.org/ns/file");
 
     /**
@@ -189,37 +206,37 @@ public class NamespaceUri {
     public static final NamespaceUri XHTML = NamespaceUri.of("http://www.w3.org/1999/xhtml");
 
     /**
-     * The SVG namespace
+     * The SVG namespace http://www.w3.org/2000/svg
      */
 
     public static final NamespaceUri SVG = NamespaceUri.of("http://www.w3.org/2000/svg");
 
     /**
-     * The MathML namespace
+     * The MathML namespace http://www.w3.org/1998/Math/MathML
      */
 
     public static final NamespaceUri MATHML = NamespaceUri.of("http://www.w3.org/1998/Math/MathML");
 
     /**
-     * The XMLNS namespace (used in DOM)
+     * The XMLNS namespace http://www.w3.org/2000/xmlns/ (used in DOM)
      */
 
     public static final NamespaceUri XMLNS = NamespaceUri.of("http://www.w3.org/2000/xmlns/");
 
     /**
-     * The XLink namespace
+     * The XLink namespace http://www.w3.org/1999/xlink
      */
 
     public static final NamespaceUri XLINK = NamespaceUri.of("http://www.w3.org/1999/xlink");
 
     /**
-     * The xquery namespace for the XQuery 3.0 declare option
+     * The xquery namespace http://www.w3.org/2012/xquery for the XQuery 3.0 declare option
      */
 
     public static final NamespaceUri XQUERY = NamespaceUri.of("http://www.w3.org/2012/xquery");
 
     /**
-     * Namespace for types representing external Java objects
+     * Namespace for types representing external Java objects: http://saxon.sf.net/java-type
      */
 
     public static final NamespaceUri JAVA_TYPE = NamespaceUri.of("http://saxon.sf.net/java-type");
@@ -287,19 +304,6 @@ public class NamespaceUri {
 
     public static final NamespaceUri OBJECT_MODEL_DOMINO = NamespaceUri.of("http://saxon.sf.net/object-model/domino");
 
-    /**
-     * URI identifying the Unicode codepoint collation
-     */
-
-    public static final NamespaceUri CODEPOINT_COLLATION_URI = NamespaceUri.of("http://www.w3.org/2005/xpath-functions/collation/codepoint");
-
-    /**
-     * URI identifying the HTML5 ascii-case-blind collation
-     */
-
-    public static final NamespaceUri HTML5_CASE_BLIND_COLLATION_URI = 
-            NamespaceUri.of("http://www.w3.org/2005/xpath-functions/collation/html-ascii-case-insensitive");
-    
     /**
      * URI for the names of generated variables
      */
@@ -376,10 +380,10 @@ public class NamespaceUri {
     }
 
     /**
-     * Determine whether a namespace is a reserved namespace
+     * Determine whether a namespace is a reserved namespace in XSLT
      *
      * @param uri the namespace URI to be tested
-     * @return true if this namespace URI is a reserved namespace
+     * @return true if this namespace URI is a reserved namespace in XSLT
      */
 
     public static boolean isReserved(/*@Nullable*/ NamespaceUri uri) {
