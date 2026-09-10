@@ -77,17 +77,11 @@ public class RegexGroup extends ContextAccessorFunction {
             UnicodeString s = ((ARegexIterator)iter).getRegexGroup(arg.getUnicodeStringValue());
             return StringValue.makeUStringValue(s);
         } else {
-            NumericValue gp0 = (NumericValue) arguments[0].head();
+            NumericValue gp0 = (NumericValue) arg;
             UnicodeString s = iter.getRegexGroup((int) gp0.longValue());
             return StringValue.makeUStringValue(s);
         }
     }
-
-//    private static class AlwaysEmpty implements Callable {
-//        public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-//            return StringValue.EMPTY_STRING;
-//        }
-//
-//    }
+    
 }
 
