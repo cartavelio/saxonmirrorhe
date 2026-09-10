@@ -78,7 +78,7 @@ public class SameNameTest extends NodeTest {
         if (origin.hasFingerprint()) {
             return new SpecificQNameTest(pool, origin.getFingerprint());
         }
-        return new SpecificQNameTest(new StructuredQName("", origin.getNamespaceUri(), origin.getLocalPart()), pool);
+        return new SpecificQNameTest(origin.getQName(), pool);
     }
 
 

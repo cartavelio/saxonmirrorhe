@@ -2607,7 +2607,7 @@ public abstract class StyleElement extends ElementImpl {
         // Now check for a global variable
         // we rely on the search following the order of decreasing import precedence.
         SourceBinding binding = getPrincipalStylesheetModule().getGlobalVariableBinding(variableName);
-        if (binding == null || Navigator.isAncestorOrSelf(binding.getSourceElement(), this)) {
+        if (binding == null || (Navigator.isAncestorOrSelf(binding.getSourceElement(), this) && getPackageData().getHostLanguageVersion() < 40)) {
             // test case variable-0118
             return null;
         } else {

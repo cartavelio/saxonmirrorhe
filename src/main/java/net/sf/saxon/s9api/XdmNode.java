@@ -150,11 +150,11 @@ public class XdmNode extends XdmItem {
                 if (n.getLocalPart().isEmpty()) {
                     return null;
                 } else {
-                    return new QName(new StructuredQName("", NamespaceUri.NULL, n.getLocalPart()));
+                    return new QName(n.getQName());
                 }
             case Type.ELEMENT:
             case Type.ATTRIBUTE:
-                return new QName(new StructuredQName(n.getPrefix(), n.getNamespaceUri(), n.getLocalPart()));
+                return new QName(n.getQName());
             default:
                 return null;
         }

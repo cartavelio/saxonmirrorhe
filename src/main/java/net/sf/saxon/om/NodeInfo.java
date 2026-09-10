@@ -296,6 +296,18 @@ public interface NodeInfo extends Item, Location
 
     int getFingerprint();
 
+
+    /**
+     * Get the name of the node as a {@link StructuredQName}.
+     *
+     * @return the name of the node. The default implementation constructs this from
+     * calls on {@link #getPrefix()}, {@link #getNamespaceUri}, and {@link #getLocalPart()}.
+     */
+
+    default StructuredQName getQName() {
+        return new StructuredQName(getPrefix(), getNamespaceUri(), getLocalPart());
+    }
+
     /**
      * Get the local part of the name of this node. This is the name after the ":" if any.
      *

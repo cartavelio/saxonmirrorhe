@@ -501,7 +501,7 @@ public class LiteralResultElement extends StyleElement {
 
     @Override
     public StructuredQName getObjectName() {
-        return new StructuredQName(getPrefix(), getNamespaceUri(), getLocalPart());
+        return getQName();
     }
 
 }

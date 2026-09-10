@@ -11,12 +11,15 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.ma.json.JsonReceiver;
+import net.sf.saxon.om.NamespaceUri;
+import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.serialize.charcode.CharacterSet;
 import net.sf.saxon.serialize.charcode.UTF8CharacterSet;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.str.UnicodeWriter;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.*;
 
 import javax.xml.transform.OutputKeys;
@@ -208,7 +211,7 @@ public class JSONEmitter {
             }
         } else if (item instanceof BooleanValue) {
             emit(item.getStringValue());
-        } else if (item instanceof QNameValue && ((QNameValue)item).getEQName().equals("Q{http://www.w3.org/2005/xpath-functions}null")) {
+        } else if (item instanceof QNameValue && item.equals(JSON_NULL)) {
             emit("null");
         } else {
             emit('"');
@@ -216,6 +219,8 @@ public class JSONEmitter {
             emit('"');
         }
     }
+
+    public final static QNameValue JSON_NULL = new QNameValue(new StructuredQName("", NamespaceUri.FN, "null"), BuiltInAtomicType.QNAME);
 
     /**
      * Append a singleton string value to the output

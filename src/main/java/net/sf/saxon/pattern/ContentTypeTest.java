@@ -162,7 +162,7 @@ public class ContentTypeTest extends NodeTest {
                     matchesAnnotation(node.getSchemaType())
                     && (nillable || !Nilled_1.isNilled(node));
         } else {
-            return nameTest.matches(new StructuredQName("", node.getURI(),node.getLocalPart())) &&
+            return nameTest.matches(node.getQName()) &&
                     matchesAnnotation(node.getSchemaType())
                     && (nillable || !Nilled_1.isNilled(node));
         }

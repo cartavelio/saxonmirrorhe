@@ -242,7 +242,7 @@ public class ExpressionContext implements StaticContext {
             // it might have been declared in an imported package or query
             SymbolicName sn = new SymbolicName(StandardNames.XSL_VARIABLE, qName);
             Component comp = element.getCompilation().getPrincipalStylesheetModule().getComponent(sn);
-            if (comp != null) { // test variable-0118
+            if (comp != null && getPackageData().getHostLanguageVersion() < 40) { // test variable-0118
                 // See tests variable-0118 and variable-0120
                 SequenceTool.supply(element.iterateAxis(AxisInfo.ANCESTOR_OR_SELF), (ItemConsumer<? super Item>) parent -> {
                     if (parent instanceof XSLGlobalVariable && ((XSLGlobalVariable) parent).getVariableQName().equals(qName)) {

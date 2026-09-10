@@ -35,7 +35,7 @@ public class NameOfNode implements NodeName {
 
     public static NodeName makeName(NodeInfo node) {
         if (node instanceof MutableNodeInfo) {
-            return new FingerprintedQName(node.getPrefix(), node.getNamespaceUri(), node.getLocalPart());
+            return new FingerprintedQName(node.getQName());
         } else if (node instanceof AbstractVirtualNode) {
             return new NameOfNode(((AbstractVirtualNode)node).getUnderlyingNode());
         } else {

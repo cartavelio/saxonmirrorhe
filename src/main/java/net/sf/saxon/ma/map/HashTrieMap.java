@@ -466,34 +466,6 @@ public class HashTrieMap extends MapItem {
         }
     }
 
-//    public String toShortString() {
-//        int size = size();
-//        if (size == 0) {
-//            return "map{}";
-//        } else if (size > 5) {
-//            return "map{(:size " + size + ":)}";
-//        } else {
-//            StringBuilder buff = new StringBuilder(256);
-//            buff.append("map{");
-//            Iterator<Tuple2<AtomicMatchKey, KeyValuePair>> iter = imap.iterator();
-//            while (iter.hasNext()) {
-//                Tuple2<AtomicMatchKey, KeyValuePair> entry = iter.next();
-//                AtomicMatchKey k1 = entry._1;
-//                AtomicValue k2 = entry._2.key;
-//                Sequence v = entry._2.value;
-//                buff.append(k2.toShortString());
-//                buff.append(':');
-//                buff.append(Err.depictSequence(v).toString().trim());
-//                buff.append(", ");
-//            }
-//            if (size == 1) {
-//                buff.append("}");
-//            } else {
-//                buff.setCharAt(buff.length() - 2, '}');
-//            }
-//            return buff.toString().trim();
-//        }
-//    }
 
     public String toString() {
         return MapItem.mapToString(this);

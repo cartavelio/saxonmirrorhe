@@ -188,7 +188,7 @@ public class SingleEntryMap extends MapItem {
     }
 
     public String toString() {
-        return "map{" + key.toString() + ":" + value.toString() + "}";
+        return "{" + key.toString() + ":" + value.toString() + "}";
     }
 }
 

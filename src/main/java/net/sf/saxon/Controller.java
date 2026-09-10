@@ -1396,14 +1396,14 @@ public class Controller implements ContextOriginator {
     @SuppressWarnings("Java8MapApi")
     public synchronized void registerGlobalVariableDependency(GlobalVariable one, GlobalVariable two) throws XPathException {
         if (one == two) {
-            throw new XPathException.Circularity("Circular dependency among global variables: "
+            throw new XPathException.Circularity("Circular dependency among global variables: $"
                                                          + one.getVariableQName().getDisplayName() + " depends on its own value");
         }
         Set<GlobalVariable> transitiveDependencies = globalVariableDependencies.get(two);
         if (transitiveDependencies != null) {
             if (transitiveDependencies.contains(one)) {
-                throw new XPathException.Circularity("Circular dependency among variables: "
-                                                             + one.getVariableQName().getDisplayName() + " depends on the value of "
+                throw new XPathException.Circularity("Circular dependency among variables: $"
+                                                             + one.getVariableQName().getDisplayName() + " depends on the value of $"
                                                              + two.getVariableQName().getDisplayName() + ", which depends directly or indirectly on the value of "
                                                              + one.getVariableQName().getDisplayName());
             }

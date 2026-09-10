@@ -335,8 +335,8 @@ public class XdmValue implements Iterable<XdmItem> {
     public String toString() {
         try {
             // To get a serializer we need a Configuration. If the sequence contains any nodes,
-            // we can get the associated configuration from the node. If not, we create a brand
-            // new configuration for the purpose.
+            // we can get the associated configuration from the node. If not, we create a brand-new
+            // Configuration for the purpose.
             Configuration config = null;
             SequenceIterator iter = value.iterate();
             for (Item item; (item = iter.next()) != null; ) {

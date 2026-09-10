@@ -514,7 +514,7 @@ public abstract class MapItem implements FunctionItem {
 
     public static String mapToString(MapItem map) {
         StringBuilder buffer = new StringBuilder(256);
-        buffer.append("map{");
+        buffer.append("{");
         for (KeyValuePair pair : map.keyValuePairs()) {
             if (buffer.length() > 4) {
                 buffer.append(",");

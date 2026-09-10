@@ -21,6 +21,7 @@ import net.sf.saxon.tree.iter.SequenceIteratorOverJavaIterator;
 import net.sf.saxon.z.IntSet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -64,6 +65,11 @@ public class SimpleArrayItem extends AbstractArrayItem {
         SimpleArrayItem result = new SimpleArrayItem(members);
         result.knownToBeGrounded = true;
         return result;
+    }
+
+    public static SimpleArrayItem of(GroundedValue... members) {
+        List<GroundedValue> list = Arrays.asList(members);
+        return new SimpleArrayItem(list);
     }
 
     /**
