@@ -19,6 +19,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.function.Predicate;
 
@@ -526,6 +527,30 @@ public class TestDocumentBuilder {
 
         } catch (SaxonApiException e) {
             fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void TestCustomWhitespacePolicyWithXmlSpace() {
+        try {
+            Processor proc = new Processor(false);
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            builder.setBaseURI(new URI("http://example.com"));
+            StringReader xml = new StringReader("<doc><b> <i> </i></b> <i xml:space='preserve'><sup><i> </i></sup> </i> </doc>");
+            builder.setWhitespaceStrippingPolicy(WhitespaceStrippingPolicy.makeCustomPolicy(
+                    value -> value.getLocalName().equals("doc") || value.getLocalName().equals("i")));
+
+            XdmNode node = builder.build(new StreamSource(xml));
+
+            Serializer ss = proc.newSerializer();
+            ss.setOutputProperty(Serializer.Property.METHOD, "xml");
+            ss.setOutputProperty(Serializer.Property.INDENT, "no");
+            StringWriter writer = new StringWriter();
+            ss.setOutputWriter(writer);
+            ss.serializeXdmValue(node);
+            assertTrue(writer.toString().contains("<doc><b> <i/></b><i xml:space=\"preserve\"><sup><i> </i></sup> </i></doc>"));
+        } catch (Exception ex) {
+            fail(ex.getMessage());
         }
     }
 
