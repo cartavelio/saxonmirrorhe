@@ -219,11 +219,6 @@ public class FocusTrackingIterator
         base.close();
     }
 
-    @Override
-    public void discharge() {
-        base.discharge();
-    }
-
     public boolean isActuallyGrounded() {
         return (base instanceof GroundedIterator && ((GroundedIterator)base).isActuallyGrounded());
     }

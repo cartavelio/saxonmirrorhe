@@ -7,23 +7,27 @@
 
 package net.sf.saxon.tree.iter;
 
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.UnparsedTextFunction;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.Reader;
+import java.lang.ref.Cleaner;
 import java.net.URI;
 
 /**
  * An iterator that iterates over a file line by line, returning each line as a {@link StringValue}
  */
+@CSharpInjectMembers(code={"~TextLinesIterator() { reader.Close(); /* finalizer */ }"})
 public abstract class TextLinesIterator implements SequenceIterator {
 
     protected LineNumberReader reader;
@@ -32,43 +36,15 @@ public abstract class TextLinesIterator implements SequenceIterator {
     int position = 0;
     protected Location location;
     protected URI uri;
-    private SequenceIterator dischargedIterator;
-
+    //#if CSHARP==false
+    private Cleaner.Cleanable cleanable;
+    //#endif
     protected TextLinesIterator() {
-
     }
-
-    /**
-     * Create a TextLinesIterator over a given reader
-     *
-     * @param reader   the reader that reads the file
-     * @param checker  checks that the characters in the file are legal XML characters
-     * @param location the location of the instruction being executed, for diagnostics. May be null.
-     * @param uri      the URI of the file being read, for diagnostics
-     * @throws net.sf.saxon.trans.XPathException
-     *          if a dynamic error occurs
-     */
-
-    public TextLinesIterator(LineNumberReader reader, Location location, URI uri, IntPredicateProxy checker) throws XPathException {
-        this.reader = reader;
-        this.location = location;
-        this.uri = uri;
-        this.checker = checker;
-    }
-
-//    public TextLinesIterator(File file, String encoding) throws IOException {
-//        this.file = file;
-//        this.encoding = encoding;
-//        this.reader = new LineNumberReader(new InputStreamReader(new FileInputStream(file), encoding));
-//        this.checker = Name11Checker.getInstance();
-//    }
 
     /*@Nullable*/
     @Override
     public StringValue next() {
-        if (dischargedIterator != null) {
-            return (StringValue)dischargedIterator.next();
-        }
         if (position < 0) {
             // input already exhausted
             close();
@@ -113,12 +89,11 @@ public abstract class TextLinesIterator implements SequenceIterator {
         } catch (IOException err) {
             //
         }
-    }
-
-    @Override
-    public void discharge() {
-        dischargedIterator = SequenceTool.toGroundedValue(this).iterate();
-        close();
+        //#if CSHARP==false
+        if (cleanable != null) {
+            cleanable.clean();
+        }
+        //#endif
     }
 
 
@@ -138,5 +113,20 @@ public abstract class TextLinesIterator implements SequenceIterator {
             }
         }
     }
+
+    protected void arrangeCleanup(Reader reader, XPathContext context) {
+        //#if CSHARP==false
+        Cleaner cleaner = context.getConfiguration().getCleaner();
+        cleanable = cleaner.register(this, () -> {
+            try {
+                reader.close();
+            } catch (Exception err) {
+                // no action
+            }
+        });
+        //#endif
+    }
+
+
 }
 

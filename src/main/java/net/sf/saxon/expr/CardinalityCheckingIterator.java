@@ -108,11 +108,6 @@ public final class CardinalityCheckingIterator implements SequenceIterator {
         base.close();
     }
 
-    @Override
-    public void discharge() {
-        base.discharge();
-    }
-
 
     private void typeError(String message, String errorCode) throws XPathException {
         XPathException e = new XPathException(message, errorCode, locator);

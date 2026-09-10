@@ -22,6 +22,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.tree.iter.ManualIterator;
@@ -272,7 +273,8 @@ public class ValidationStack extends ValidatingFilter {
 
                 if (initial instanceof SimpleContentValidator && initialSchemaType.isIdType()) {
                     pipe.getErrorReporter().report(
-                            new XmlProcessingIncident("During validation, using an ID element at the outermost level has no effect").asWarning());
+                            new XmlProcessingIncident("During validation, using an ID element at the outermost level has no effect",
+                                                      SaxonErrorCode.SXWN9048).asWarning());
                 }
 
                 ConstraintChecker constraintChecker = getConstraintChecker();

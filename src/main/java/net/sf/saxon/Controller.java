@@ -130,6 +130,7 @@ public class Controller implements ContextOriginator {
 
     private Function<SequenceIterator, FocusTrackingIterator> multiThreadedFocusTrackerFactory;
 
+
     /**
      * Create a Controller and initialise variables. Note: XSLT applications should
      * create the Controller by using the JAXP newTransformer() method, or in S9API

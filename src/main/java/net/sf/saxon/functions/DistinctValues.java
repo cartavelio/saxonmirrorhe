@@ -114,11 +114,6 @@ public class DistinctValues extends CollatingFunctionFixed {
             base.close();
         }
 
-        @Override
-        public void discharge() {
-            base.discharge();
-        }
-
         public void notifyDuplicates(Action onDuplicates) {
             this.onDuplicates = onDuplicates;
         }

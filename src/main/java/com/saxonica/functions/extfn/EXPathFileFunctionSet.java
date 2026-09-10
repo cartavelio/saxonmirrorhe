@@ -875,7 +875,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                 encoding = arguments[1].head().getStringValue();
             }
             return new LazySequence(
-                    new TextFileLinesIterator(file, encoding));
+                    new TextFileLinesIterator(file, encoding, context));
 
         }
     }
@@ -1277,7 +1277,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
         File file;
         String encoding;
 
-        public TextFileLinesIterator(File file, String encoding) throws XPathException {
+        public TextFileLinesIterator(File file, String encoding, XPathContext context) throws XPathException {
             this.encoding = encoding;
             this.file = file;
             reader = new LineNumberReader(
@@ -1285,6 +1285,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
                             getInputStreamReader(file, encoding)));
             uri = file.toURI();
             checker = IntPredicateLambda.of(CSharp.methodRef(XMLCharacterData::isValid11));
+            arrangeCleanup(reader, context);
         }
 
     }

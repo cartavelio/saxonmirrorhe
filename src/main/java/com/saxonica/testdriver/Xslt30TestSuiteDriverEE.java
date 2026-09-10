@@ -178,6 +178,7 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
 
     @Override
     public void runStreamabilityTests(XPathCompiler xpc, XdmNode testCase) {
+        Processor testProcessor = null;
         try {
             String //contextPostureStr = xpc.evaluateSingle("test/posture-and-sweep/@context-posture", testCase).getStringValue();
                 contextPostureStr = testCase.select(
@@ -192,7 +193,7 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
             ContextItemStaticInfoEE info = new ContextItemStaticInfoEE(AnyItemType.getInstance(), true, contextPosture);
             XPathSelector tests = xpc.compile("test/posture-and-sweep/xpath").load();
             tests.setContextItem(testCase);
-            Processor testProcessor = new Processor(true);
+            testProcessor = new Processor(true);
             XPathCompiler testCompiler = testProcessor.newXPathCompiler();
             testCompiler.declareNamespace("ex", "http://www.example.com");
             List<String> reasons = new ArrayList<String>();
@@ -234,6 +235,10 @@ public class Xslt30TestSuiteDriverEE extends Xslt30TestSuiteDriverPE {
         } catch (SaxonApiException err) {
             resultsDoc.writeTestcaseElement(testCase.attribute("name"), "crashed", err.toString());
             err.printStackTrace();
+        } finally {
+            if (testProcessor != null) {
+                testProcessor.getUnderlyingConfiguration().close();
+            }
         }
     }
 

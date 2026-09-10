@@ -93,9 +93,6 @@ public class MemoClosure extends Closure implements ContextOriginator {
     private void makeSequence() throws XPathException {
         if (sequence == null) {
             inputIterator = inputEvaluator.iterate(savedXPathContext);
-            inputIterator.discharge();
-//                // Bug 5177. If the input iterator holds resources and must be closed, then we read it to
-//                // completion now, because there's no guarantee we will be able to close it later.
             if (inputIterator instanceof GroundedIterator && ((GroundedIterator)inputIterator).isActuallyGrounded()) {
                 sequence = ((GroundedIterator)inputIterator).materialize();
                 // If we find that the input iterator is grounded, this means there was no point

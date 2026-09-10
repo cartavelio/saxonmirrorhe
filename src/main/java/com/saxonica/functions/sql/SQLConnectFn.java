@@ -34,7 +34,8 @@ public class SQLConnectFn extends SystemFunction {
             context.getController().getErrorReporter().report(
                     new XmlProcessingIncident("SQL JDBC Connections are not thread-safe, "
                                          + "so Saxon multithreading should be disabled by setting "
-                                         + "Feature.ALLOW_MULTITHREADING to false").asWarning());
+                                         + "Feature.ALLOW_MULTITHREADING to false",
+                                              SaxonErrorCode.SXSQ0005).asWarning());
 
         }
 

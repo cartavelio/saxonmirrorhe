@@ -103,11 +103,6 @@ public abstract class ItemsStarting extends SystemFunction {
             baseIterator.close();
         }
 
-        @Override
-        public void discharge() {
-            baseIterator.discharge();
-        }
-
     }
 
 }

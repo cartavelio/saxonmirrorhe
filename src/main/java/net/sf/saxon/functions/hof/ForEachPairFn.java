@@ -98,12 +98,6 @@ public class ForEachPairFn extends SystemFunction {
             seq1.close();
         }
 
-        @Override
-        public void discharge() {
-            seq0.discharge();
-            seq1.discharge();
-        }
-
     }
 
 }

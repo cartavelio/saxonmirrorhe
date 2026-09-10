@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -83,8 +84,8 @@ public class TestCanonicalSerializer {
     @Test
     public void testCanonicalization2() {
         File dir = new File (configTest.getDataDir() + "collection");
-        for (File file : dir.listFiles()) {
-            if (!file.isDirectory() && !file.getName().endsWith("atrs15.xml")) {
+        for (File file : Objects.requireNonNull(dir.listFiles())) {
+            if (!file.isDirectory() && !file.getName().endsWith("atrs15.xml") && !file.getName().endsWith(".DS_Store")) {
                 System.err.println("Processing " + file);
                 compareCanonical(file);
             }

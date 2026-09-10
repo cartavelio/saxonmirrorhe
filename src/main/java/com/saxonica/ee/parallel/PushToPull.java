@@ -17,6 +17,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.StringValue;
 
 import java.io.Closeable;
+import java.lang.ref.Cleaner;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -64,9 +65,9 @@ public class PushToPull {
 
         @Override
         public void write(Item item) throws XPathException {
-            //System.err.println("In thread " + Thread.currentThread().getName() + " + Provider.write " + item);
+            System.err.println("In thread " + Thread.currentThread().getName() + " + Provider.write " + item);
             if (Thread.currentThread().isInterrupted()) {
-                //System.err.println("Already interrupted");
+                System.err.println("Already interrupted");
                 throw new QuitParsingException(true);
             }
             try {
@@ -79,8 +80,9 @@ public class PushToPull {
         public void notify(XPathException exception) {
             try {
                 queue.clear();
-                queue.put(new Outcome<Item>(exception));
+                queue.put(new Outcome<>(exception));
             } catch (InterruptedException e) {
+                System.err.println("Caught interruption");
                 //throw new IllegalStateException("Interrupted while trying to notify exception");
             }
         }
@@ -141,7 +143,7 @@ public class PushToPull {
         EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
         final Thread provider = config.getMultithreadingFactory().makeThread(new Provider(expression, queue, context));
         provider.start();
-        return new PushToPullIterator(provider, queue);
+        return new PushToPullIterator(provider, queue, context);
     }
 
     private static class PushToPullIterator implements SequenceIterator, Closeable {
@@ -149,10 +151,14 @@ public class PushToPull {
         private final Thread provider;
         private final BlockingQueue<Outcome<Item>> queue;
         private boolean allDone = false;
+        private Cleaner.Cleanable cleanable;
 
-        public PushToPullIterator(Thread provider, BlockingQueue<Outcome<Item>> queue) {
+        public PushToPullIterator(Thread provider, BlockingQueue<Outcome<Item>> queue, XPathContext context) {
             this.provider = provider;
             this.queue = queue;
+
+            Cleaner cleaner = context.getConfiguration().getCleaner();
+            cleanable = cleaner.register(provider, getCleaningAction(provider));
         }
 
         @Override
@@ -194,13 +200,15 @@ public class PushToPull {
         //@CSharpModifiers(code = {"public", "override"})
         public void close() {
             allDone = true;
-            provider.interrupt();
+            if (cleanable != null) {
+                cleanable.clean();
+            } else if (provider != null) {
+                provider.interrupt();
+            }
         }
 
-        @Override
-        public void discharge() {
-            throw new UnsupportedOperationException();
-            // TODO: implement me?
+        private static Runnable getCleaningAction(final Thread provider) {
+            return () -> provider.interrupt();
         }
     }
 

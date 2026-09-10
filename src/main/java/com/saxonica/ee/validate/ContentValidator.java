@@ -16,6 +16,7 @@ import net.sf.saxon.sxpath.XPathDynamicContext;
 import net.sf.saxon.sxpath.XPathExpression;
 import net.sf.saxon.sxpath.XPathVariable;
 import net.sf.saxon.trans.Err;
+import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
@@ -437,7 +438,8 @@ public abstract class ContentValidator extends ValidatingFilter {
                     // the error listener bombs out)
                     PipelineConfiguration pipe = startTagBuffer.getPipelineConfiguration();
                     XmlProcessingIncident warning = new XmlProcessingIncident(
-                        "Dynamic error occurred during evaluation of Conditional Type Alternative test: " + err.getMessage()).asWarning();
+                            "Dynamic error occurred during evaluation of Conditional Type Alternative test: "
+                                + err.getMessage(), SaxonErrorCode.SXWN9047).asWarning();
                     warning.setCause(err);
                     pipe.getErrorReporter().report(warning);
                 }

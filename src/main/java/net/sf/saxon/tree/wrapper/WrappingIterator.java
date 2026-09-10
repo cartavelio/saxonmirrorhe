@@ -67,10 +67,5 @@ public class WrappingIterator implements AxisIterator {
         base.close();
     }
 
-    @Override
-    public void discharge() {
-        base.discharge();
-    }
-
 }
 

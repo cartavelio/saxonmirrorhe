@@ -12,6 +12,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.tree.iter.ManualIterator;
 
+import java.lang.ref.Cleaner;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
@@ -36,6 +37,8 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     private final ExecutorService service;
     private final BlockingQueue<Future<GroundedValue>> resultQueue = new LinkedBlockingQueue<>();
     private SequenceIterator dischargedIterator;
+    private Cleaner cleaner;
+    private Cleaner.Cleanable cleanable;
 
     /**
      * Construct an Iterator that will apply a specified action expression to
@@ -77,6 +80,10 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
             close();
             throw e.getXPathException();
         }
+
+        // This code modelled on https://howtodoinjava.com/java/basics/java-cleaners/
+        cleaner = config.getCleaner();
+        cleanable = cleaner.register(this, getCleaningAction(service));
     }
 
     @Override
@@ -139,13 +146,15 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     @Override
     public void close() {
         base.close();
-        service.shutdown();
+        if (cleanable != null) {
+            cleanable.clean();
+        } else if (service != null) {
+            service.shutdown();
+        }
     }
 
-    @Override
-    public void discharge() {
-        dischargedIterator = SequenceTool.toGroundedValue(this).iterate();
-        close();
+    private static Runnable getCleaningAction(final ExecutorService service) {
+        return service::shutdown;
     }
 
 

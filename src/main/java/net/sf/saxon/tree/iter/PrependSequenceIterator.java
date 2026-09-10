@@ -48,12 +48,6 @@ public class PrependSequenceIterator implements SequenceIterator {
         base.close();
     }
 
-    @Override
-    public void discharge() {
-        base.discharge();
-    }
-
-
 
 }
 

@@ -19,6 +19,7 @@ import net.sf.saxon.str.StringView;
 import net.sf.saxon.style.StylesheetPackage;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpInjectMembers;
 import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 import net.sf.saxon.type.Type;
@@ -26,6 +27,7 @@ import net.sf.saxon.value.ObjectValue;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.ref.Cleaner;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -138,16 +140,38 @@ public class CollectionFn extends SystemFunction implements Callable {
             final ResourceCollection collection, final XPathContext context) throws XPathException {
 
         final Iterator<? extends Resource> sources = collection.getResources(context);
-        return new CollectionIterator(sources);
+        return new CollectionIterator(sources, context);
     }
 
+    @CSharpInjectMembers(code={"~CollectionIterator(){sources.Dispose();} // finalizer"})
     private static class CollectionIterator implements SequenceIterator {
 
         private final Iterator<? extends Resource> sources;
+        //#if CSHARP==false
+        private Cleaner.Cleanable cleanable;
+        //#endif
 
-        public CollectionIterator(Iterator<? extends Resource> sources) {
+        public CollectionIterator(Iterator<? extends Resource> sources, XPathContext context) {
             this.sources = sources;
+            //#if CSHARP==false
+            if (sources instanceof Closeable) {
+                Cleaner cleaner = context.getConfiguration().getCleaner();
+                cleanable = cleaner.register(this, getCleaningAction((Closeable)sources));
+            }
+            //#endif
         }
+
+        //#if CSHARP==false
+        private static Runnable getCleaningAction(final Closeable sources) {
+            return () -> {
+                try {
+                    sources.close();
+                } catch (IOException err) {
+                    // ignore the exception
+                }
+            };
+        }
+        //#endif
 
         @Override
         public Item next() {
@@ -161,7 +185,9 @@ public class CollectionFn extends SystemFunction implements Callable {
         @Override
         @CSharpReplaceBody(code="sources.Dispose();")
         public void close() {
-            if (sources instanceof Closeable) {
+            if (cleanable != null) {
+                cleanable.clean();
+            } else if (sources instanceof Closeable) {
                 try {
                     ((Closeable) sources).close();
                 } catch (IOException e) {
@@ -169,8 +195,6 @@ public class CollectionFn extends SystemFunction implements Callable {
                 }
             }
         }
-
-        // TODO: implement discharge()
     }
 
     /**

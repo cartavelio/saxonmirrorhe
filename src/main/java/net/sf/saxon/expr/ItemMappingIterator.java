@@ -176,11 +176,6 @@ public class ItemMappingIterator
     }
 
     @Override
-    public void discharge() {
-        base.discharge();
-    }
-
-    @Override
     public boolean supportsGetLength() {
         return oneToOne && SequenceTool.supportsGetLength(base);
     }

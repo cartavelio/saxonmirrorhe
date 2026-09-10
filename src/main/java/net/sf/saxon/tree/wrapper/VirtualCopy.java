@@ -775,11 +775,6 @@ public class VirtualCopy implements NodeInfo {
             base.close();
         }
 
-        @Override
-        public void discharge() {
-            base.discharge();
-        }
-
 
     }
 }

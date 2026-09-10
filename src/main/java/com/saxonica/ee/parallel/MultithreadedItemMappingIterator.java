@@ -5,7 +5,6 @@ import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.ItemMappingIterator;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.value.ObjectValue;
@@ -109,15 +108,6 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
         super.close();
         getBaseIterator().close();
         service.shutdown();
-    }
-
-    @Override
-    public void discharge() {
-        // This reads the rest of the sequence into an in-memory list, so that the concurrent threads
-        // can be released. This is necessary because the caller is telling us there is no guarantee that
-        // close() will be called to tidy up.
-        dischargedIterator = SequenceTool.toGroundedValue(this).iterate();
-        close();
     }
 
     private void mapOneItem(Item in) {

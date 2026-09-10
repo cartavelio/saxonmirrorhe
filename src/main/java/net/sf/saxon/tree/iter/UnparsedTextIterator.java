@@ -24,6 +24,7 @@ public class UnparsedTextIterator extends TextLinesIterator {
     XPathContext context;
     String encoding = null;
 
+
     /**
      * Create a UnparsedTextIterator over a given file
      *
@@ -46,6 +47,7 @@ public class UnparsedTextIterator extends TextLinesIterator {
         this.checker = context.getConfiguration().getValidCharacterChecker();
         this.encoding = encoding;
         this.location = location;
+        arrangeCleanup(reader, context);
     }
 
     public UnparsedTextIterator(LineNumberReader reader, URI absoluteURI, /*@NotNull*/ XPathContext context, String encoding) throws XPathException {
@@ -55,7 +57,7 @@ public class UnparsedTextIterator extends TextLinesIterator {
         this.checker = context.getConfiguration().getValidCharacterChecker();
         this.encoding = encoding;
         this.location = null;
+        arrangeCleanup(reader, context);
     }
-
 }
 
