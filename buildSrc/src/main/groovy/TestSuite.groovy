@@ -124,6 +124,7 @@ class TestSuite {
     Task run = project.task("run__${testTaskName}", type: JavaExec) {
       inputs.files project.fileTree(dir: "${project.projectDir}/src")
       outputs.file "${options['report']}.xml"
+      outputs.upToDateWhen { false }
 
       doFirst {
         project.mkdir options["reportDirectory"]
