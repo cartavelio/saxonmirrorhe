@@ -10,6 +10,7 @@ import net.sf.saxon.type.EnumerationUnionType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.ValidationFailure;
+import net.sf.saxon.value.AnyURIValue;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.StringValue;
 
@@ -49,7 +50,7 @@ public class EnumUnionCoercionPlan extends UnionCoercionPlan {
         if (requiredType.matches(item, th)) {
             return item;
         }
-        if (item instanceof StringValue) {
+        if (item instanceof StringValue && !(item instanceof AnyURIValue)) {
             return reqType.getTypedValue(item.getUnicodeStringValue(), null, null);
         }
         RoleDiagnostic role = request.roleSupplier.get();
