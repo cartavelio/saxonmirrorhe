@@ -1443,74 +1443,32 @@ namespace SaxonCS_NUnit {
                 Assert.Fail(err.Message);
             }
         }
+        
+        [Test]
+        public void testBug4509a() {
+            try {
+                Processor proc = new();
+                DocumentBuilder builder = proc.NewDocumentBuilder();
+                XdmNode input = builder.Build(new StringReader("<root xmlns='http://foo'><a/><b/></root>"));
+                DomDestination dest = new DomDestination();
+                proc.WriteXdmValue(input, dest);
+                XmlDocument doc = dest.XmlDocument;
+                XmlElement root = doc.DocumentElement;
+                Assert.That(root.HasAttribute("xmlns"));
+                XmlElement a = (XmlElement) root.ChildNodes[0];
+                Assert.False(a.HasAttribute("xmlns"));
+                Assert.AreEqual(0, a.Attributes.Count);
+                XmlElement b = (XmlElement) root.ChildNodes[1];
+                Assert.False(b.HasAttribute("xmlns"));
+                Assert.AreEqual(0, b.Attributes.Count);
+            }
+            catch (SaxonApiException err) {
+                Assert.Fail(err.Message);
+            }
+        }
 
-        // [Test]
-        // public void testBug4509a() {
-        //     try {
-        //         Processor proc = new Processor(false);
-        //         net.sf.saxon.s9api.DocumentBuilder builder = proc.newDocumentBuilder();
-        //         XdmNode tree = builder.build(new StreamSource(new StringReader("<root xmlns='namespace'><a/><b/></root>")));
-        //         XmlDocument doc = (DocumentOverNodeInfo) DocumentOverNodeInfo.wrap(tree.getUnderlyingNode());
-        //         XmlElement root = doc.DocumentElement;
-        //         Assert.That(root.HasAttribute("xmlns"));
-        //         XmlElement a = (XmlElement) root.ChildNodes[0];
-        //         Assert.False(a.HasAttribute("xmlns"));
-        //         Assert.AreEqual(0, a.Attributes.Count);
-        //         XmlElement b = (XmlElement) root.ChildNodes[1];
-        //         Assert.False(b.HasAttribute("xmlns"));
-        //         Assert.AreEqual(0, b.Attributes.Count);
-        //     } catch (SaxonApiException err) {
-        //         Assert.Fail(err.getMessage());
-        //     }
-        // }
 
-
-        // [Test]
-        // public void testBug4509b() {
-        //     try {
-        //         Processor processor = new Processor(false);
-        //         Saxon.Api.DocumentBuilder documentBuilder = processor.NewDocumentBuilder();
-        //         string xml = "<root xmlns='namespace' abc='100'><element0 def='200'/><element1 ghi='300'/></root>";
-        //         XdmNode node = documentBuilder.build(new StringReader(xml));
-        //         XmlDocument document = (DocumentOverNodeInfo) DocumentOverNodeInfo.wrap(node.getUnderlyingNode());
-        //         XmlElement root = document.DocumentElement;
-        //         XmlElement element0 = (XmlElement) root.ChildNodes().item(0);
-        //         Console.WriteLine(string.format("%s", element0.getNodeName()));
-        //         for (int i = 0; i < element0.Attributes.getLength(); i++) {
-        //             Console.WriteLine(string.format("element0 attribute[%d] %s=%s", i, element0.Attributes.item(i).getNodeName(), element0.Attributes.item(i).getNodeValue()));
-        //         }
-        //         Console.WriteLine();
-        //         XmlElement element1 = (XmlElement) root.ChildNodes[1];
-        //         Console.WriteLine(string.format("%s", element1.getNodeName()));
-        //         for (int i = 0; i < element1.Attributes.Count; i++) {
-        //             Console.WriteLine(string.format("element1 attribute[%d] %s=%s", i, element1.Attributes.item(i).getNodeName(), element1.Attributes.item(i).getNodeValue()));
-        //         }
-        //         Console.WriteLine();
-        //         Console.WriteLine(string.format("treeModel=%s", documentBuilder.getTreeModel().getClass().getName()));
-        //         Console.WriteLine("java -cp 'SaxonHE9-9-17J\\saxon9he.jar';. TEST");
-        //         Console.WriteLine("ACTUAL OUTPUT ON MY PC");
-        //         Console.WriteLine("element0");
-        //         Console.WriteLine("element0 attribute[0] xmlns:xml=http://www.w3.org/XML/1998/namespace");
-        //         Console.WriteLine("element0 attribute[1] def=200");
-        //         Console.WriteLine("element1");
-        //         Console.WriteLine("element1 attribute[0] xmlns:xml=http://www.w3.org/XML/1998/namespace");
-        //         Console.WriteLine("element1 attribute[1] ghi=300");
-        //         Console.WriteLine("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
-        //         Console.WriteLine();
-        //         Console.WriteLine("java -cp 'SaxonHE10-0J\\saxon-he-10.0.jar';. TEST");
-        //         Console.WriteLine("ACTUAL OUTPUT ON MY PC");
-        //         Console.WriteLine("element0");
-        //         Console.WriteLine("element0 attribute[0] xmlns=namespace");
-        //         Console.WriteLine("element0 attribute[1] def=200");
-        //         Console.WriteLine("element1");
-        //         Console.WriteLine("element1 attribute[0] xmlns=namespace");
-        //         Console.WriteLine("element1 attribute[1] ghi=300");
-        //         Console.WriteLine("treeModel=net.sf.saxon.om.TreeModel$TinyTree");
-        //         Console.WriteLine();
-        //     } catch (Exception e) {
-        //     }
-        // }
-
+        
 
         /**
      * Test that namespaces are copied OK by an identity transform
@@ -1545,11 +1503,11 @@ namespace SaxonCS_NUnit {
                 });
                 XsltExecutable templates = proc.NewXsltCompiler().Compile(new StringReader(xslt));
                 Xslt30Transformer transformer = templates.Load30();
-                StringWriter sw = new StringWriter();
+                StringWriter sw = new ();
 
                 transformer.ApplyTemplates(new StringReader("<a/>"), proc.NewSerializer(sw));
                 Console.Error.WriteLine(sw.ToString());
-                Assert.That(sw.ToString().Contains("<xhtml:body><xhtml:p>Lorem Ipsum</xhtml:p></xhtml:body>"));
+                Assert.That(sw.ToString().Contains("<xhtml:body xmlns:xhtml=\"http://www.w3.org/1999/xhtml\"><xhtml:p>Lorem Ipsum</xhtml:p></xhtml:body>"));
             }
             catch (Exception e) {
                 //e.printStackTrace();
