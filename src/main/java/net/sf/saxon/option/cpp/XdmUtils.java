@@ -1372,18 +1372,17 @@ public class XdmUtils {
     public static long getChild(IsolateThread thread, ObjectHandle nodeRef, int i) {
         
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
-
-
-        XdmSequenceIterator iter = node.axisIterator(Axis.CHILD);
         int pos = 0;
-        while (iter.hasNext()) {
+
+        for(XdmNode child : node.children()){
             if(pos == i) {
-                 XdmNode childi = (XdmNode) iter.next();
-                 ObjectHandle handle = SaxonCAPI.createHandle(childi);
+                 ObjectHandle handle = SaxonCAPI.createHandle(child);
                  return handle.rawValue();
             }
             pos++ ;
+
         }
+
         return -1;
     }
 
