@@ -67,7 +67,7 @@ public class Evaluate extends SystemFunction {
         IndependentContext env = makeStaticContext(context, namespaceOrigin, baseUri);
         Executable exec = context.getController().getExecutable();
         env.setExecutable(exec);
-        env.setXPathLanguageLevel(30);
+        env.setXPathLanguageLevel(31);
         env.setAllowUndeclaredVariables(true);
         PreparedExpression pexpr = new PreparedExpression();
         pexpr.expStaticContext = env;

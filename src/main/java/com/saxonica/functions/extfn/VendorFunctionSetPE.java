@@ -177,13 +177,30 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("escape-NCName", 1, e -> e.populate( EscapeNCName::new, BuiltInAtomicType.NCNAME, ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, EMPTY));
 
-        registerVariadic("eval", 2, e -> e.populate(Eval::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
+        register("eval", 1, 10, e -> e.populate(Eval::new, AnyItemType.getInstance(), STAR, CITEM)
                 .arg(0, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null));
+                .arg(1, AnyItemType.getInstance(), STAR, null)
+                .arg(2, AnyItemType.getInstance(), STAR, null)
+                .arg(3, AnyItemType.getInstance(), STAR, null)
+                .arg(4, AnyItemType.getInstance(), STAR, null)
+                .arg(5, AnyItemType.getInstance(), STAR, null)
+                .arg(6, AnyItemType.getInstance(), STAR, null)
+                .arg(7, AnyItemType.getInstance(), STAR, null)
+                .arg(8, AnyItemType.getInstance(), STAR, null)
+                .arg(9, AnyItemType.getInstance(), STAR, null));
 
-        registerVariadic("evaluate", 2, e -> e.populate(Evaluate::new, AnyItemType.getInstance(), STAR, SEQV | CITEM)
+
+        register("evaluate", 1, 10, e -> e.populate(Evaluate::new, AnyItemType.getInstance(), STAR, CITEM)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null)
-                .arg(1, AnyItemType.getInstance(), STAR, null));
+                .arg(1, AnyItemType.getInstance(), STAR, null)
+                .arg(2, AnyItemType.getInstance(), STAR, null)
+                .arg(3, AnyItemType.getInstance(), STAR, null)
+                .arg(4, AnyItemType.getInstance(), STAR, null)
+                .arg(5, AnyItemType.getInstance(), STAR, null)
+                .arg(6, AnyItemType.getInstance(), STAR, null)
+                .arg(7, AnyItemType.getInstance(), STAR, null)
+                .arg(8, AnyItemType.getInstance(), STAR, null)
+                .arg(9, AnyItemType.getInstance(), STAR, null));
 
         register("expression", 1, e -> e.populate( ExpressionFn::new, JavaExternalObjectType.of(Evaluate.PreparedExpression.class), ONE, 0)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null));
@@ -506,6 +523,8 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
     public String getConventionalPrefix() {
         return "saxon";
     }
+
+
 
     public static class AdjustToCivilTime extends SystemFunction {
         @Override
