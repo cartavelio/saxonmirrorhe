@@ -425,7 +425,10 @@ namespace Saxon.Api {
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public void ApplyTemplates(Stream input, IDestination destination) {
             s9Transformer.applyTemplates(new StreamSource(input), destination.UnderlyingDestination);
@@ -446,7 +449,10 @@ namespace Saxon.Api {
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public void ApplyTemplates(Stream input, Uri baseUri, IDestination destination) {
             StreamSource streamSource =
@@ -466,7 +472,10 @@ namespace Saxon.Api {
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
       
         public void ApplyTemplates(TextReader input, IDestination destination) {
@@ -488,7 +497,10 @@ namespace Saxon.Api {
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public void ApplyTemplates(TextReader input, Uri baseUri, IDestination destination) {
             StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
@@ -507,7 +519,12 @@ namespace Saxon.Api {
         /// If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
-        /// <remarks>since 9.9.1.5</remarks>
+        /// <remarks>
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
+        /// </remarks>
         public void Transform(Stream input, IDestination destination) {
             s9Transformer.transform(new StreamSource(input), destination.UnderlyingDestination);
         }
@@ -526,7 +543,12 @@ namespace Saxon.Api {
         /// If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
-        /// <remarks>since 9.9.1.5</remarks>
+        /// <remarks>
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
+        /// </remarks>
         public void Transform(Stream input, Uri baseUri, IDestination destination) {
             StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
             s9Transformer.transform(streamSource, destination.UnderlyingDestination);
@@ -545,7 +567,10 @@ namespace Saxon.Api {
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public XdmValue ApplyTemplates(Stream input, Uri baseUri) {
             StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
@@ -564,7 +589,10 @@ namespace Saxon.Api {
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public XdmValue ApplyTemplates(TextReader input, Uri baseUri) {
             StreamSource streamSource = new (input, Uri.EscapeUriString(baseUri.ToString()));
@@ -584,7 +612,10 @@ namespace Saxon.Api {
         /// then the serialization parameters set in the serializer are combined with those defined in the 
         /// stylesheet (the parameters set in the serializer take precedence).</param>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
       
         public void ApplyTemplates(XmlReader input, IDestination destination) {
@@ -603,7 +634,10 @@ namespace Saxon.Api {
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
         /// <remarks>
-        /// If the initial mode is declared streamable, this will perform a streamed transformation.
+        /// <para>If the initial mode is declared streamable, this will perform a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
         /// </remarks>
         public XdmValue ApplyTemplates(XmlReader input) {
             return s9Transformer.applyTemplates(makePullSource(input));
@@ -630,6 +664,12 @@ namespace Saxon.Api {
         /// call in a document node.  If the destination is a <see cref="Serializer"/>, then the serialization
         /// parameters set in the serializer are combined with those defined in the stylesheet
         /// (the parameters set in the serializer take precedence).</param>
+        /// <remarks>
+        /// <para>This method is unsuitable for performing a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
+        /// </remarks>
         public void ApplyTemplates(XdmValue selection, IDestination destination) {
             s9Transformer.applyTemplates(selection, destination.UnderlyingDestination);
         }
@@ -645,6 +685,13 @@ namespace Saxon.Api {
         /// <returns>the raw result of applying templates to the supplied selection value, without wrapping in
         /// a document node or serializing the result. If there is more than one item in the selection, the result
         /// is the concatenation of the results of applying templates to each item in turn.</returns>
+        /// <remarks>
+        /// <para>This method is unsuitable for performing a streamed transformation.</para>
+        /// <para>Note that this method does not cause the supplied input to become the global context item
+        /// (that is, to be available as the value of "." when evaluating global variables). For this, the
+        /// <code>GlobalContextItem</code> property should be set.</para>
+        /// </remarks>
+        /// 
         public XdmValue ApplyTemplates(XdmValue selection) {
             return s9Transformer.applyTemplates(selection);
         }
