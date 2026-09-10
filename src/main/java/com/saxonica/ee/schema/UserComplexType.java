@@ -3399,6 +3399,51 @@ public class UserComplexType extends UserDefinedType
         });
         return new CallableFunction(1, callable, SpecificFunctionType.COMPONENT_FUNCTION_TYPE);
     }
+
+    /**
+     * Decide what kind of layout to use when formatting an element of this type using the
+     * xdm-to-json function. The result is a layout name, such as "record", "list", "mixed", "sequence"
+     */
+
+    public String getPreferredJsonLayout() {
+        if (isSimpleContent()) {
+            return "simple-plus";
+        } else if (isEmptyContent()) {
+            if (allowsAttributes()) {
+                return "empty-plus";
+            } else {
+                return "empty";
+            }
+        } else if (isAllContent()) {
+            return "record";
+        } else if (isMixedContent()) {
+            return "mixed";
+        } else if (containsElementWildcard()
+                || openContentMode == OpenContentVariety.SUFFIX
+                || openContentMode == OpenContentVariety.INTERLEAVE) {
+            return "sequence";
+        } else {
+            IntHashSet children = new IntHashSet();
+            try {
+                gatherAllPermittedChildren(children, false);
+            } catch (SchemaException e) {
+                return "mixed";
+            }
+            if (children.size() == 1) {
+                IntIterator iter = children.iterator();
+                iter.hasNext();
+                int fp = iter.next();
+                int card = getElementParticleCardinality(fp, true);
+                if (Cardinality.allowsMany(card)) {
+                    return (allowsAttributes() ? "list-plus" : "list") + "/" + getNamePool().getEQName(fp);
+                } else {
+                    return "record";
+                }
+            } else {
+                return "sequence";
+            }
+        }
+    }
 }
 
 // Copyright (c) 2004-2023 Saxonica Limited

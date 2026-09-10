@@ -23,6 +23,7 @@ import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntToIntHashMap;
 
 import javax.xml.transform.OutputKeys;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class XdmToJsonFn extends SystemFunction {
             outputProperties.setProperty(SaxonOutputKeys.ESCAPE_SOLIDUS, "no");
         }
         JSONEmitter emitter = new JSONEmitter(pipe, builder, outputProperties);
-        emitSequence(val, checkedOptions, emitter);
+        emitSequence(val, checkedOptions, false, emitter);
         return new StringValue(builder.toUnicodeString());
     }
 
@@ -102,10 +103,18 @@ public class XdmToJsonFn extends SystemFunction {
         }
     }
 
-    public void emitSequence(GroundedValue val, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        if (val.getLength() == 0) {
+    /**
+     * Output the JSON representation of a sequence
+     * @param val the value to be output
+     * @param options the top-level options to the call
+     * @param forceArray if an array is to be used even if the size is zero or one
+     * @param emitter the output destination
+     * @throws XPathException if anything goes wrong
+     */
+    public void emitSequence(GroundedValue val, Map<String, Sequence> options, boolean forceArray, JSONEmitter emitter) throws XPathException {
+        if (val.getLength() == 0 && !forceArray) {
             emitter.writeAtomicValue(null);
-        } else if (val.getLength() == 1) {
+        } else if (val.getLength() == 1 && !forceArray) {
             emitItem(val.head(), options, emitter);
         } else {
             emitter.startArray(true);
@@ -152,7 +161,8 @@ public class XdmToJsonFn extends SystemFunction {
                         attKey = "@" + name.getEQName();
                     }
                     emitter.writeKey(attKey);
-                    emitSequence(item.atomize(), options, emitter);
+                    SchemaType type = ((NodeInfo) item).getSchemaType();
+                    emitSequence(item.atomize(), options, ((SimpleType)type).isListType(), emitter);
                     emitter.endMap();
                     break;
                 case Type.COMMENT:
@@ -198,15 +208,28 @@ public class XdmToJsonFn extends SystemFunction {
         } else if (item instanceof ArrayItem) {
             emitter.startArray(true);
             for (GroundedValue member : ((ArrayItem)item).members()) {
-                emitSequence(member, options, emitter);
+                emitSequence(member, options, false, emitter);
             }
             emitter.endArray();
         } else if (item instanceof MapItem) {
             emitter.startMap(true);
             for (KeyValuePair pair : ((MapItem)item).keyValuePairs()) {
                 emitter.writeKey(pair.key.getStringValue());
-                emitSequence(pair.value, options, emitter);
+                emitSequence(pair.value, options, false, emitter);
             }
+            emitter.endMap();
+        } else if (item instanceof FunctionItem) {
+            emitter.startMap(true);
+            emitter.writeKey("#function");
+            emitter.startMap(true);
+            StructuredQName name = ((FunctionItem)item).getFunctionName();
+            if (name != null && !name.hasURI(NamespaceUri.ANONYMOUS)) {
+                emitter.writeKey("#name");
+                emitter.writeStringValue(name.getEQName());
+            }
+            emitter.writeKey("#arity");
+            emitter.writeStringValue(((FunctionItem) item).getArity() + "");
+            emitter.endMap();
             emitter.endMap();
         }
     }
@@ -227,7 +250,16 @@ public class XdmToJsonFn extends SystemFunction {
         elementNameStack.pop();
     }
 
+    /**
+     * Output the content of an element (excluding the element name) using a layout chosen
+     * for the particular element
+     * @param element the element to output
+     * @param options the original options
+     * @param emitter the output destination
+     * @throws XPathException in the event of failure
+     */
     private void emitElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
+        // First see if an explicit layout has been chosen for this element in the supplied options
         String explicitLayout = layoutMap.get(element.getFingerprint());
         if (explicitLayout != null) {
             switch (explicitLayout) {
@@ -244,7 +276,10 @@ public class XdmToJsonFn extends SystemFunction {
                     emitSimplePlusElementContent(element, options, emitter);
                     break;
                 case "list":
-                    emitListElementContent(element, options, emitter);
+                    emitListElementContent(element, options, emitter, null);
+                    break;
+                case "list-plus":
+                    emitListPlusElementContent(element, options, emitter, null);
                     break;
                 case "record":
                     emitRecordElementContent(element, options, emitter);
@@ -253,103 +288,109 @@ public class XdmToJsonFn extends SystemFunction {
                     emitMixedElementContent(element, options, false, emitter);
                     break;
                 case "mixed":
-                    emitMixedElementContent(element, options, true, emitter);
+                    emitMixedElementContent(element, options, false, emitter);
                     break;
             }
         } else {
+            // If the element is schema-validated, use schema information
             SchemaType type = element.getSchemaType();
             if (!(type == AnyType.getInstance() || type == Untyped.getInstance())) {
-                // TODO: skeleton code here
                 if (type instanceof SimpleType) {
                     emitSimpleElementContent(element, options, emitter);
                 } else {
                     ComplexType cType = (ComplexType) type;
-                    if (cType.isSimpleContent() && cType.allowsAttributes()) {
-                        emitSimplePlusElementContent(element, options, emitter);
-                    } else if (cType.isEmptyContent()) {
-                        if (cType.allowsAttributes()) {
-                            emitEmptyPlusElementContent(element, options, emitter);
-                        } else {
-                            emitEmptyElementContent(element, options, emitter);
-                        }
-                    } else {
-                        emitMixedElementContent(element, options, true, emitter);
+                    String layout = cType.getPreferredJsonLayout();
+                    String suffix = "";
+                    int sep = layout.indexOf("/");
+                    if (sep > 0) {
+                        suffix = layout.substring(sep + 1);
+                        layout = layout.substring(0, sep);
                     }
-                }
-            } else {
-                if (element.hasChildNodes()) {
-                    if (hasSingleTextNodeChild(element)) {
-                        if (element.attributes().size() == 0) {
-                            emitSimpleElementContent(element, options, emitter);
-                        } else {
+                    switch (layout) {
+                        case "simple-plus":
                             emitSimplePlusElementContent(element, options, emitter);
-                        }
-                    } else if (hasListContentModel(element)) {
-                        emitListElementContent(element, options, emitter);
-                    } else if (hasRecordContentModel(element)) {
-                        emitMixedElementContent(element, options, true, emitter);
-                    } else {
-                        emitMixedElementContent(element, options, false, emitter);
+                            break;
+                        case "empty":
+                            emitEmptyElementContent(element, options, emitter);
+                            break;
+                        case "empty-plus":
+                            emitEmptyPlusElementContent(element, options, emitter);
+                            break;
+                        case "list":
+                            emitListElementContent(element, options, emitter, suffix);
+                            break;
+                        case "list-plus":
+                            emitListPlusElementContent(element, options, emitter, suffix);
+                            break;
+                        case "record":
+                            emitRecordElementContent(element, options, emitter);
+                            break;
+                        case "sequence":
+                            emitSequenceElementContent(element, options, emitter);
+                            break;
+                        case "mixed":
+                            emitMixedElementContent(element, options, false, emitter);
+                            break;
+                        default:
+                            throw new IllegalStateException();
+
                     }
-                } else if (element.attributes().size() == 0) {
-                    emitEmptyElementContent(element, options, emitter);
-                } else {
-                    emitEmptyPlusElementContent(element, options, emitter);
                 }
-            }
-        }
-    }
-
-    private boolean hasSingleTextNodeChild(NodeInfo element) {
-        boolean foundText = false;
-        for (NodeInfo child : element.children()) {
-            if (child.getNodeKind() == Type.TEXT) {
-                if (foundText) {
-                    return false;
-                }
-                foundText = true;
             } else {
-                return false;
+                int nonWhiteTextNodeCounter = 0;
+                int whiteTextNodeCounter = 0;
+                int childElementCounter = 0;
+                IntHashSet distinctFingerprints = new IntHashSet();
+                for (NodeInfo child : element.children()) {
+                    if (child.getNodeKind() == Type.ELEMENT) {
+                        int fp = child.getFingerprint();
+                        childElementCounter++;
+                        distinctFingerprints.add(fp);
+                    } else if (child.getNodeKind() == Type.TEXT) {
+                        if (Whitespace.isAllWhite(child.getUnicodeStringValue())) {
+                            whiteTextNodeCounter++;
+                        } else {
+                            nonWhiteTextNodeCounter++;
+                        }
+                    }
+                }
+
+                if (nonWhiteTextNodeCounter == 0 && whiteTextNodeCounter == 0 && childElementCounter == 0) {
+                    // Empty content
+                    if (element.attributes().size() == 0) {
+                        emitEmptyElementContent(element, options, emitter);
+                    } else {
+                        emitEmptyPlusElementContent(element, options, emitter);
+                    }
+                } else if (childElementCounter == 0) {
+                    // Simple content
+                    if (element.attributes().size() == 0) {
+                        emitSimpleElementContent(element, options, emitter);
+                    } else {
+                        emitSimplePlusElementContent(element, options, emitter);
+                    }
+                } else if (nonWhiteTextNodeCounter == 0) {
+                    // Element-only content
+                    if (childElementCounter == 1) {
+                        emitRecordElementContent(element, options, emitter);
+                    } else if (distinctFingerprints.size() == 1 && childElementCounter >= 2) {
+                        if (element.attributes().size() == 0) {
+                            emitListElementContent(element, options, emitter, null);
+                        } else {
+                            emitListPlusElementContent(element, options, emitter, null);
+                        }
+                    } else if (childElementCounter == distinctFingerprints.size()) {
+                        emitRecordElementContent(element, options, emitter);
+                    } else {
+                        emitSequenceElementContent(element, options, emitter);
+                    }
+                } else {
+                    emitMixedElementContent(element, options, false, emitter);
+                }
             }
         }
-        return foundText;
     }
 
-    private boolean hasListContentModel(NodeInfo element) {
-        int count = 0;
-        int lastFingerprint = -1;
-        for (NodeInfo child : element.children()) {
-            if (child.getNodeKind() == Type.ELEMENT) {
-                if (lastFingerprint != -1 && child.getFingerprint() != lastFingerprint) {
-                    return false;
-                }
-                lastFingerprint = child.getFingerprint();
-            }
-            count++;
-            if (child.getNodeKind() == Type.TEXT && !Whitespace.isAllWhite(child.getUnicodeStringValue())) {
-                return false;
-            }
-        }
-        return count >= 2;
-    }
-
-    private boolean hasRecordContentModel(NodeInfo element) {
-        int count = 0;
-        IntHashSet fingerprints = new IntHashSet();
-        for (NodeInfo child : element.children()) {
-            if (child.getNodeKind() == Type.ELEMENT) {
-                if (fingerprints.contains(element.getFingerprint())) {
-                    return false;
-                }
-                fingerprints.add(element.getFingerprint());
-            }
-            count++;
-            if (child.getNodeKind() == Type.TEXT && !Whitespace.isAllWhite(child.getUnicodeStringValue())) {
-                return false;
-            }
-        }
-        return count >= 2;
-    }
 
 
     public void emitEmptyElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
@@ -363,88 +404,180 @@ public class XdmToJsonFn extends SystemFunction {
     }
 
     public void emitSimpleElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        emitSequence(element.atomize(), options, emitter);
+        SchemaType type = element.getSchemaType();
+        boolean asList = type instanceof SimpleType && ((SimpleType)type).isListType();
+        emitSequence(element.atomize(), options, asList, emitter);
     }
 
     public void emitSimplePlusElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
         emitter.startMap(false);
         emitAttributes(element, options, emitter);
         emitter.writeKey("#content");
-        emitSequence(element.atomize(), options, emitter);
+        SchemaType type = element.getSchemaType();
+        boolean asList = type instanceof SimpleType && ((SimpleType) type).isListType();
+        emitSequence(element.atomize(), options, asList, emitter);
         emitter.endMap();
     }
 
-    public void emitListElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        NodeInfo firstChild = element.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
-        if (firstChild != null) {
-            emitter.startMap(false);
-            emitAttributes(element, options, emitter);
-            emitter.writeKey(firstChild.getLocalPart());
-            emitter.startArray(false);
-            for (NodeInfo child : element.children()) {
-                if (child.getNodeKind() == Type.ELEMENT) {
-                    emitElementContent(child, options, emitter);
-                }
+    public void emitListElementContent(NodeInfo element,
+                                       Map<String, Sequence> options,
+                                       JSONEmitter emitter,
+                                       String childEQName) throws XPathException {
+
+        String key;
+        if (childEQName == null) {
+            NodeInfo firstChild = element.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+            assert firstChild != null;
+            if (firstChild.getNamespaceUri().equals(element.getNamespaceUri())) {
+                key = firstChild.getLocalPart();
+            } else {
+                key = "Q{" + firstChild.getNamespaceUri() + "}" + firstChild.getLocalPart();
             }
-            emitter.endArray();
-            emitter.endMap();
+        } else {
+            StructuredQName qn = StructuredQName.fromEQName(childEQName);
+            if (qn.getNamespaceUri().equals(element.getNamespaceUri())) {
+                key = qn.getLocalPart();
+            } else {
+                key = childEQName;
+            }
         }
 
+        emitter.startArray(false);
+        for (NodeInfo child : element.children()) {
+            if (child.getNodeKind() == Type.ELEMENT) {
+                emitElementContent(child, options, emitter);
+            }
+        }
+        emitter.endArray();
     }
+
+
+    public void emitListPlusElementContent(NodeInfo element,
+                                       Map<String, Sequence> options,
+                                       JSONEmitter emitter,
+                                       String childEQName) throws XPathException {
+
+        String key;
+        if (childEQName == null) {
+            NodeInfo firstChild = element.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
+            assert firstChild != null;
+            if (firstChild.getNamespaceUri().equals(element.getNamespaceUri())) {
+                key = firstChild.getLocalPart();
+            } else {
+                key = "Q{" + firstChild.getNamespaceUri() + "}" + firstChild.getLocalPart();
+            }
+        } else {
+            StructuredQName qn = StructuredQName.fromEQName(childEQName);
+            if (qn.getNamespaceUri().equals(element.getNamespaceUri())) {
+                key = qn.getLocalPart();
+            } else {
+                key = childEQName;
+            }
+        }
+
+        emitter.startMap(false);
+        emitAttributes(element, options, emitter);
+        emitter.writeKey(key);
+        emitter.startArray(false);
+        for (NodeInfo child : element.children()) {
+            if (child.getNodeKind() == Type.ELEMENT) {
+                emitElementContent(child, options, emitter);
+            }
+        }
+        emitter.endArray();
+        emitter.endMap();
+    }
+
 
     public void emitRecordElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
         emitter.startMap(false);
         emitAttributes(element, options, emitter);
-        emitter.writeKey("#content");
-        emitter.startArray(false);
-        // TODO: handle element names that appear more than once
-        for (NodeInfo child : element.children()) {
-            if (child.getNodeKind() == Type.ELEMENT) {
-                emitElement(child, options, emitter);
+        if (element.isNilled()) {
+            emitter.writeKey("#content");
+            emitter.writeAtomicValue(null);
+        } else {
+            boolean containsDuplicates = false;
+            IntToIntHashMap counters = new IntToIntHashMap();
+            for (NodeInfo child : element.children()) {
+                if (child.getNodeKind() == Type.ELEMENT) {
+                    int fp = child.getFingerprint();
+                    if (counters.contains(fp)) {
+                        containsDuplicates = true;
+                        counters.put(fp, counters.get(fp) + 1);
+                    } else {
+                        counters.put(fp, 1);
+                    }
+                }
+            }
+            IntToIntHashMap indexes = null;
+            if (containsDuplicates) {
+                indexes = new IntToIntHashMap();
+            }
+            for (NodeInfo child : element.children()) {
+                if (child.getNodeKind() == Type.ELEMENT) {
+                    String key = child.getNamespaceUri().equals(element.getNamespaceUri())
+                            ? child.getLocalPart()
+                            : "Q{" + child.getNamespaceUri() + "}" + child.getLocalPart();
+                    if (containsDuplicates) {
+                        int fp = child.getFingerprint();
+                        if (counters.get(fp) > 1) {
+                            int seq = indexes.contains(fp) ? indexes.get(fp) + 1 : 1;
+                            indexes.put(fp, seq);
+                            key += ("[" + seq + "]");
+                        }
+                    }
+                    emitter.writeKey(key);
+                    emitElementContent(child, options, emitter);
+                }
             }
         }
-        emitter.endArray();
         emitter.endMap();
     }
-    
 
+    public void emitSequenceElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
+        emitMixedElementContent(element, options, true, emitter);
+    }
     public void emitMixedElementContent(NodeInfo element, Map<String, Sequence> options, boolean stripSpace, JSONEmitter emitter) throws XPathException {
         emitter.startMap(false);
         emitAttributes(element, options, emitter);
         emitter.writeKey("#content");
-        emitter.startArray(false);
-        for (NodeInfo child : element.children()) {
-            switch(child.getNodeKind()) {
-                case Type.TEXT:
-                    if (!stripSpace && Whitespace.isAllWhite(child.getUnicodeStringValue())) {
+        if (element.isNilled()) {
+            emitter.writeAtomicValue(null);
+        } else {
+            emitter.startArray(false);
+            for (NodeInfo child : element.children()) {
+                switch (child.getNodeKind()) {
+                    case Type.TEXT:
+                        if (!(stripSpace && Whitespace.isAllWhite(child.getUnicodeStringValue()))) {
+                            emitter.writeStringValue(child.getStringValue());
+                        }
+                        break;
+                    case Type.COMMENT:
+                        emitter.startMap(true);
+                        emitter.writeKey("#comment");
                         emitter.writeStringValue(child.getStringValue());
-                    }
-                    break;
-                case Type.COMMENT:
-                    emitter.startMap(true);
-                    emitter.writeKey("#comment");
-                    emitter.writeStringValue(child.getStringValue());
-                    emitter.endMap();
-                    break;
-                case Type.PROCESSING_INSTRUCTION:
-                    emitter.startMap(true);
-                    emitter.writeKey("#processing-instruction");
-                    emitter.startMap(true);
-                    emitter.writeKey("#name");
-                    emitter.writeStringValue(child.getDisplayName());
-                    emitter.writeKey("#data");
-                    emitter.writeStringValue(child.getStringValue());
-                    emitter.endMap();
-                    emitter.endMap();
-                    break;
-                case Type.ELEMENT:
-                    emitElement(child, options, emitter);
-                    break;
-                default:
-                    throw new IllegalStateException();
+                        emitter.endMap();
+                        break;
+                    case Type.PROCESSING_INSTRUCTION:
+                        emitter.startMap(true);
+                        emitter.writeKey("#processing-instruction");
+                        emitter.startMap(true);
+                        emitter.writeKey("#name");
+                        emitter.writeStringValue(child.getDisplayName());
+                        emitter.writeKey("#data");
+                        emitter.writeStringValue(child.getStringValue());
+                        emitter.endMap();
+                        emitter.endMap();
+                        break;
+                    case Type.ELEMENT:
+                        emitElement(child, options, emitter);
+                        break;
+                    default:
+                        throw new IllegalStateException();
+                }
             }
+            emitter.endArray();
         }
-        emitter.endArray();
         emitter.endMap();
     }
 
@@ -453,86 +586,23 @@ public class XdmToJsonFn extends SystemFunction {
         SequenceIterator iter = element.iterateAxis(AxisInfo.ATTRIBUTE);
         while ((att = (NodeInfo)iter.next()) != null) {
             NamespaceUri ns = att.getNamespaceUri();
-            String attKey;
-            if (ns.equals(NamespaceUri.NULL)) {
-                attKey = "@" + att.getLocalPart();
-            } else if (ns.equals(NamespaceUri.XML)) {
-                attKey = "@xml:" + att.getLocalPart();
-            } else {
-                attKey = "@Q{" + att.getNamespaceUri() + "}" + att.getLocalPart();
+            if (!ns.equals(NamespaceUri.SCHEMA_INSTANCE)) {
+                String attKey;
+                if (ns.equals(NamespaceUri.NULL)) {
+                    attKey = "@" + att.getLocalPart();
+                } else if (ns.equals(NamespaceUri.XML)) {
+                    attKey = "@xml:" + att.getLocalPart();
+                } else {
+                    attKey = "@Q{" + att.getNamespaceUri() + "}" + att.getLocalPart();
+                }
+                emitter.writeKey(attKey);
+                AtomicSequence val = att.atomize();
+                SchemaType type = att.getSchemaType();
+                boolean asList = ((SimpleType) type).isListType();
+                emitSequence(val, options, asList, emitter);
             }
-            emitter.writeKey(attKey);
-            emitSequence(att.atomize(), options, emitter);
         }
     }
-
-//        )
-//        switch (explicitLayout) {
-//
-//        }
-//        char format = 'A';
-//        if (valueElements.contains(name)) {
-//            format = 'V';
-//        } else if (mapElements.contains(name)) {
-//            format = 'M';
-//        } else if (arrayElements.contains(name)) {
-//            format = 'A';
-//        } else if (!element.hasChildNodes()) {
-//            format = 'E';
-//        } else if (isSimpleContent(element)) {
-//            format = 'V';
-//        }
-//        switch (format) {
-//            case 'E':
-//                // Empty format
-//                break;
-//            case 'V':
-//                // Value format
-//                emitter.writeKey("#value");
-//                emitSequence(element.atomize(), options, emitter);
-//                break;
-//            case 'A':
-//                // Array format
-//                emitter.writeKey("#content");
-//                emitter.startArray(true);
-//                for (NodeInfo child : element.children()) {
-//                    emitItem(child, options, emitter);
-//                }
-//                emitter.endArray();
-//                break;
-//            case 'M':
-//                Map<QNameValue, Integer> counters = new HashMap<>();
-//                for (NodeInfo child : element.children()) {
-//                    // initialise the counters table to the total count of elements, negated
-//                    if (child.getNodeKind() == Type.ELEMENT) {
-//                        QNameValue childName = NodeName_1.nodeName(child);
-//                        if (counters.containsKey(childName)) {
-//                            counters.put(childName, counters.get(childName) - 1);
-//                        } else {
-//                            counters.put(childName, -1);
-//                        }
-//                    }
-//                }
-//                for (NodeInfo child : element.children()) {
-//                    if (child.getNodeKind() == Type.ELEMENT) {
-//                        QNameValue childName = NodeName_1.nodeName(child);
-//                        int counter = counters.get(childName);
-//                        if (counter == -1) {
-//                            emitter.writeKey(childName.getLocalName()); // TODO: namespaces
-//                        } else {
-//                            if (counter < 0) {
-//                                counter = 1;
-//                            }
-//                            emitter.writeKey(childName.getLocalName() + "[" + counter + "]");
-//                            counters.put(childName, counter++);
-//                        }
-//                        emitItem(child, options, emitter);
-//                    }
-//                }
-//                break;
-//            default:
-//                throw new IllegalStateException("Bad format code");
-//        }
 
 
     private boolean isSimpleContent(NodeInfo element) {
