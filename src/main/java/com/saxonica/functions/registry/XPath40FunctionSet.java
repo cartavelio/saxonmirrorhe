@@ -361,7 +361,10 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
                 .arg(0, AnyItemType.getInstance(), STAR, null)
                 .arg(1, AnyItemType.getInstance(), STAR, null));
 
-        register("invisible-xml", 1, 2, e -> e.populate(InvisibleXmlFn::new, AnyItemType.getInstance(), OPT, 0)
+        SpecificFunctionType ixmlFunctionType = new SpecificFunctionType(
+                new SequenceType[]{SequenceType.SINGLE_STRING}, NodeKindTest.DOCUMENT.one());
+
+        register("invisible-xml", 1, 2, e -> e.populate(InvisibleXmlFn::new, ixmlFunctionType, OPT, 0)
                 .arg(0, AnyItemType.getInstance(), OPT, null)
                 .arg(1, MapType.ANY_MAP_TYPE, OPT, null)
                 .setOptionDetails(InvisibleXmlFn.getOptionDetails()));
