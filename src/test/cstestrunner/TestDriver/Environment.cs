@@ -29,6 +29,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.resource;
 using Saxon.Hej.style;
 using Saxon.Callbacks;
+using Saxon.Ejava.util;
 using Saxon.Impl.Helpers;
 using TestRunner;
 using DocumentBuilder = Saxon.Api.DocumentBuilder;
@@ -50,10 +51,9 @@ namespace TestDriver {
     public class Environment : XmlUrlResolver {
 
         public Processor processor;
-        public SysCollGen.Dictionary<string, XdmNode> sourceDocs = new SysCollGen.Dictionary<string, XdmNode>();
-
-        public SysCollGen.Dictionary<string, string>
-            streamedSecondaryDocs = new SysCollGen.Dictionary<string, string>();
+        public SysCollGen.Dictionary<string, XdmNode> sourceDocs = new();
+        private readonly SysCollGen.Dictionary<string, string> streamedSecondaryDocs = new();
+        private readonly SysCollGen.Dictionary<Uri, SysCollGen.List<IResource>> collections = new(); 
 
         public string streamedPath;
         public string streamedContent;
@@ -62,7 +62,7 @@ namespace TestDriver {
         public XsltCompiler xsltCompiler;
         public XsltExecutable xsltExecutable;
         public XdmItem contextItem;
-        public SysCollGen.Dictionary<QName, XdmValue> params1 = new SysCollGen.Dictionary<QName, XdmValue>();
+        public SysCollGen.Dictionary<QName, XdmValue> params1 = new();
         public bool xml11 = false;
         public bool usable = true;
         public StringBuilder paramDeclarations = new StringBuilder(256);
@@ -102,8 +102,7 @@ namespace TestDriver {
             if (unfolded) {
                 // environment.xqueryCompiler.Implementation.setCodeInjector(new LazyLiteralInjector()); //TODO
             }
-
-            environment.processor.Implementation.setDefaultCollection(null);
+            
             return environment;
         }
 
@@ -694,8 +693,7 @@ namespace TestDriver {
                     driver.println("Registering collection URI: " + collectionURI);
                 }
         
-                ExplicitResourceCollection collection = new ExplicitResourceCollection(collectionURI, resourceList);
-                environment.processor.RegisterCollection(collectionURI, collection);
+                environment.collections.Add(u, resourceList);
         
                 foreach (XdmNode source in coll.Children("source")) {
                     string href = source.GetAttributeValue(new QName("file"));
@@ -708,9 +706,10 @@ namespace TestDriver {
         
                     FileStream file = new FileStream(res.ResolveUri(env.BaseUri, href).AbsolutePath,
                         FileMode.Open, FileAccess.Read);
-        
-                    string uriStr = res.ResolveUri(env.BaseUri, href).AbsoluteUri;
-                    builder.BaseUri = new Uri(uriStr);
+
+                    Uri resourceUri = res.ResolveUri(env.BaseUri, href);
+                    string uriStr = resourceUri.AbsoluteUri;
+                    builder.BaseUri = resourceUri;
                     XdmNode doc = builder.Build(file);
                     
                     if (frag != null) {
@@ -721,10 +720,10 @@ namespace TestDriver {
                             break;
                         }
         
-                        resourceList.Add(Saxon.Api.Resource.XmlResource(uriStr, selected));
+                        resourceList.Add(new XdmNodeResource(resourceUri, selected));
                     }
                     else {
-                        resourceList.Add(Saxon.Api.Resource.XmlResource(uriStr, doc));
+                        resourceList.Add(new XdmNodeResource(resourceUri, doc));
                     }
 
                     if (!environment.sourceDocs.ContainsKey(uriStr)) {
@@ -737,13 +736,15 @@ namespace TestDriver {
                     XQueryEvaluator evaluator = environment.xqueryCompiler.Compile(queryExpr).Load();
                     XdmValue result = evaluator.Evaluate();
 
+                    int counter = 0;
                     foreach (XdmItem itemi in result) {
-                        resourceList.Add(new AtomicResource(null, itemi));
+                        resourceList.Add(new AtomicResource(u.ToString() + "/" + (counter++), itemi));
                     }
                 }
 
             }
-
+            //environment.processor.Implementation.setDefaultCollection(null);
+            environment.processor.CollectionFinder = uri => environment.collections[uri];
             
         }
 
@@ -752,11 +753,11 @@ namespace TestDriver {
             private readonly XdmItem value;
 
             public AtomicResource(string uri, XdmItem value) {
-                this.ResourceURI = uri;
+                ResourceUri = new Uri(uri);
                 this.value = value;
             }
 
-            public string ResourceURI { get; }
+            public Uri ResourceUri { get; }
 
             public XdmItem GetXdmItem(DynamicContext context) {
                 return value;
@@ -983,143 +984,25 @@ namespace TestDriver {
                 }
             }
         }
-
-        // public class JAbstractResourceCollection : ResourceCollection {
-        //     private String cURI;
-        //     private List<Resource> resourcesOrig;
-        //     private java.util.List resourcesi = new java.util.ArrayList();
-        //
-        //     public JAbstractResourceCollection(String uri, List<Resource> ri) {
-        //         resourcesOrig = ri;
-        //         cURI = uri;
-        //     }
-        //
-        //     public IEnumerator<Resource> getResources(XPathContext value) {
-        //         resourcesi.clear();
-        //         foreach (Resource r in resourcesOrig) {
-        //             resourcesi.add(r);
-        //         }
-        //
-        //         return resourcesi.iterator();
-        //     }
-        //
-        //     public IEnumerator<string> getResourceURIs(XPathContext value) {
-        //         SysCollGen.IList<string> resourceUris = SysCollGen.ArrayList<string>();
-        //         foreach (Resource r in resourcesOrig) {
-        //             resourcesi.add(r.getResourceURI());
-        //         }
-        //
-        //         return resourcesi.iterator();
-        //     }
-        //
-        //     string ResourceCollection.getCollectionURI() {
-        //         return cURI;
-        //     }
-        //
-        //     Iterator ResourceCollection.getResources(XPathContext xpc) {
-        //         SysCollGen.List<string> resourceUris = new SysCollGen.List<string>();
-        //         foreach (Resource r in resourcesOrig) {
-        //             resourcesi.add(r);
-        //         }
-        //
-        //         return resourcesi.iterator();
-        //     }
-        //
-        //     Iterator ResourceCollection.getResourceURIs(XPathContext xpc) {
-        //         SysCollGen.List<string> resourceUris = new SysCollGen.List<string>();
-        //         foreach (Resource r in resourcesOrig) {
-        //             resourcesi.add(r.getResourceURI());
-        //         }
-        //
-        //         return resourcesi.iterator();
-        //     }
-        //
-        //     bool ResourceCollection.isStable(XPathContext xpc) {
-        //         return false;
-        //     }
-        //
-        //     bool ResourceCollection.stripWhitespace(SpaceStrippingRule ssr) {
-        //         throw new NotImplementedException();
-        //     }
-        //
-        //     internal Resource MakeResource(JConfiguration config, AbstractResourceCollection.InputDetails details,
-        //         string absolutePath) {
-        //         Saxon.Hej.lib.ResourceFactory factory = null;
-        //         String contentType = details.contentType;
-        //         if (contentType != null) {
-        //             factory = config.getResourceFactoryForMediaType(contentType);
-        //         }
-        //
-        //         if (factory == null) {
-        //             factory = BinaryResource.FACTORY;
-        //         }
-        //
-        //         return factory.makeResource(config, details);
-        //     }
-        // }
-
-
-        // public class CollectionFinder : Saxon.Hej.lib.CollectionFinder {
-        //     SysCollGen.Dictionary<Uri, ResourceCollection> collections;
-        //
-        //     public CollectionFinder(SysCollGen.Dictionary<Uri, ResourceCollection> collections) {
-        //         this.collections = collections;
-        //     }
-        //
-        //     public ResourceCollection findCollection(XPathContext xpc, string str) {
-        //         if (str == null) {
-        //             str = "";
-        //         }
-        //
-        //         return (ResourceCollection) collections[new Uri(str)];
-        //     }
-        // }
-
-
-        // public class CollectionResolver /*:Saxon.Hej.lib.CollectionURIResolver */ {
-        //     System.Collections.Hashtable collections;
-        //
-        //     public CollectionResolver(System.Collections.Hashtable collections) {
-        //         this.collections = collections;
-        //     }
-        //
-        //     public Saxon.Hej.om.SequenceIterator resolve(string href, string baseStr,
-        //         Saxon.Hej.expr.XPathContext context) {
-        //         try {
-        //             List<Uri> docs;
-        //             if (href == null) {
-        //                 docs = (List<Uri>) collections[new Uri("http://www.saxonica.com/defaultCollection")];
-        //             }
-        //             else {
-        //                 XmlUrlResolver res = new XmlUrlResolver();
-        //                 Uri abs = res.ResolveUri(new Uri(baseStr), href);
-        //                 try {
-        //                     docs = (List<Uri>) collections[abs];
-        //                 }
-        //                 catch (Exception) {
-        //                     docs = null;
-        //                 }
-        //             }
-        //
-        //             if (docs == null) {
-        //                 return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
-        //             }
-        //             else {
-        //                 SysCollGen.List<string> list = new SysCollGen.List<string>();
-        //                 foreach (Uri uri in docs) {
-        //                     list.Add(new Saxon.Hej.value.AnyURIValue(uri.ToString()));
-        //                 }
-        //
-        //                 return new Saxon.Hej.tree.iter.ListIterator(list);
-        //             }
-        //         }
-        //         catch (java.net.URISyntaxException e) {
-        //             System.Console.WriteLine("** Invalid Uri: " + e.Message);
-        //             return Saxon.Hej.tree.iter.EmptyIterator.getInstance();
-        //         }
-        //     }
-        // }
+        
         
         public delegate void ResetAction(Environment env);
+
+        public class XdmNodeResource : IResource {
+            private readonly XdmNode node;
+
+            public XdmNodeResource(Uri uri, XdmNode node) {
+                ResourceUri = uri;
+                this.node = node;
+            }
+
+            public Uri ResourceUri { get; }
+
+            public XdmItem GetXdmItem(DynamicContext context) {
+                return node;
+            }
+
+            public string ContentType => "application/xml";
+        }
     }
 }
