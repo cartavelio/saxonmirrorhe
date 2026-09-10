@@ -641,6 +641,19 @@ public:
     static sxnc_environment *sxn_environ;/*!< Environment to captures the jni, JVM and handler to the cross compiled SaxonC library. */
     std::string cwd; /*!< current working directory */
 
+    //! Utility method required for python extension to delete string created in the C++ code-base
+    static void deleteString(const char * data){
+        if(data != nullptr){
+            //std::cerr<<"static method SaxonProcessor.deleteString - deleting string data"<<std::endl;
+            delete [] data;
+            data = nullptr;
+
+        }
+    }
+
+
+    //! Internal method for diagnostics
+    void createHeapDump(bool live);
 
 
 /**

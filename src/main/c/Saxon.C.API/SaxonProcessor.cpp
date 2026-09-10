@@ -340,12 +340,21 @@ SaxonProcessor::SaxonProcessor(const char *configFile) {
 SaxonProcessor::~SaxonProcessor() {
     //SaxonProcessor::attachCurrentThread();
     clearConfigurationProperties();
+            if(getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"~SaxonProcessor destructor:"<<" proc ref="<<((long)procRef)<<std::endl;
+
+            }
     if(procRef != -1) {
+            if(getenv("SAXONC_DEBUG_FLAG")) {
+                std::cerr<<"~SaxonProcessor destructor called with destroy:"<<" ob ref="<<(this)<<std::endl;
+
+            }
     	//SaxonProcessor::sxn_environ->env->DeleteGlobalRef(proc);
     	j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)procRef);
 	    procRef = -1;
     }
     if (!versionStr.empty()) {
+
         versionStr.clear();
     }
     //exceptionClear();
@@ -649,10 +658,7 @@ SchemaValidator *SaxonProcessor::newSchemaValidator() {
 const char *SaxonProcessor::version() {
 
     if (versionStr.empty()) {
-
-        char * resultStr = getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef);
-
-        versionStr += resultStr;
+        versionStr = std::string(j_c_getProductVersion(SaxonProcessor::sxn_environ->thread, (void *)procRef));
 
     }
     return versionStr.c_str();
@@ -776,6 +782,11 @@ void SaxonProcessor::clearConfigurationProperties() {
 }
 
 
+void SaxonProcessor::createHeapDump(bool live){
+       j_createHeapDump(sxn_environ->thread, (int)live);
+}
+
+
 void SaxonProcessor::release() {
     if (SaxonProcessor::jvmCreatedCPP != 0) {
         SaxonProcessor::jvmCreatedCPP = 0;
@@ -889,7 +900,8 @@ XdmAtomicValue *SaxonProcessor::makeAtomicValue(const char *typei, const char *s
     }
 
 const char *SaxonProcessor::getStringValue(XdmItem *item) {
-    const char *result = j_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue());
+    allocFn fn = operator new;
+    const char *result = j_cpp_getStringValue(SaxonProcessor::sxn_environ->thread, (void *)item->getUnderlyingValue(), (void *)fn);
 #ifdef DEBUG
     if(result == nullptr) {
         std::cerr<<"getStringValue of XdmItem is nullptr"<<std::endl;

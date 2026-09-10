@@ -6,11 +6,11 @@
 #define new new(__FILE__, __LINE__)
 #endif
 
-XdmNode::XdmNode(int64_t obj): XdmItem(obj), baseURI(nullptr), nodeName(nullptr),localName(nullptr), childCount(-1), children(nullptr),parent(nullptr), typedValue(nullptr), attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN){
+XdmNode::XdmNode(int64_t obj): XdmItem(obj), baseURI(nullptr), nodeName(nullptr),localName(nullptr), childCount(-1), children(nullptr),parent(nullptr), typedValue(nullptr), attrValues(nullptr), attrCount(-1), nodeKind(UNKNOWN), nodeToString(nullptr){
 
 }
 
-XdmNode::XdmNode(XdmNode * p, int64_t obj, XDM_NODE_KIND kind): XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),  childCount(-1), children(nullptr), parent(p), typedValue(nullptr), attrValues(nullptr),  attrCount(-1), nodeKind(kind){
+XdmNode::XdmNode(XdmNode * p, int64_t obj, XDM_NODE_KIND kind): XdmItem(obj), baseURI(nullptr), nodeName(nullptr), localName(nullptr),  childCount(-1), children(nullptr), parent(p), typedValue(nullptr), attrValues(nullptr),  attrCount(-1), nodeKind(kind), nodeToString(nullptr){
 
 }
 
@@ -25,6 +25,7 @@ XdmNode::XdmNode(const XdmNode &other) {
     typedValue = other.typedValue;
     attrCount = other.attrCount;
     nodeKind = other.nodeKind;
+    nodeToString = other.nodeToString;
 }
 
 bool XdmNode::isAtomic() {
@@ -41,6 +42,10 @@ bool XdmNode::isAtomic() {
     }
 
     XdmNode::~XdmNode() {
+        if(getenv("SAXONC_DEBUG_FLAG")) {
+            std::cerr<<"~XdmNode destructor called:"<<refCount<<" ob ref="<<(this)<<std::endl;
+
+        }
        // if(getRefCount() <= 1) {
        if(baseURI != nullptr) {
         delete baseURI;
@@ -53,6 +58,11 @@ bool XdmNode::isAtomic() {
        if(localName != nullptr) {
          delete localName;
          localName = nullptr;
+       }
+
+       if(nodeToString != nullptr) {
+           delete [] nodeToString;
+           nodeToString = nullptr;
        }
 
            /* if (children != nullptr) {
@@ -155,12 +165,15 @@ return this;}
     }
 
     const char * XdmNode::toString(){
-        allocFn fn = operator new;
-        const char * str = xdmNodeToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
-        if(str == nullptr) {
-            throw SaxonApiException();
+        if(nodeToString == nullptr){
+            allocFn fn = operator new;
+            nodeToString = xdmNodeToString(SaxonProcessor::sxn_environ->thread, (void *)fn,(void *)value);
+            if(nodeToString == nullptr) {
+                throw SaxonApiException();
+            }
+
         }
-        return str;
+        return nodeToString;
         	
     }
 
@@ -197,9 +210,9 @@ return this;}
     
     const char* XdmNode::getAttributeValue(const char *str){
 
-	if(str == nullptr) { return nullptr;}
-
-		const char * stri = j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)str);
+	    if(str == nullptr) { return nullptr;}
+        allocFn fn = operator new;
+		const char * stri = j_getAttributeValue(SaxonProcessor::sxn_environ->thread, (void *)value, (char *)str, (void *)fn);
 
 		return stri;
 

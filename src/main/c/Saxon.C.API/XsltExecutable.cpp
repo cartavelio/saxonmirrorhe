@@ -331,7 +331,7 @@ void XsltExecutable::clearProperties() {
     
     properties.clear();
     if(selectionRef != -1) {
-        j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)selectionRef);
+        //j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)selectionRef);
         selectionRef = -1;
     }
 

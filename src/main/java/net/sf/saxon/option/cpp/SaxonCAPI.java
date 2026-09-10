@@ -32,6 +32,7 @@ import net.sf.saxon.value.*;
 import org.graalvm.nativeimage.IsolateThread;
 import org.graalvm.nativeimage.ObjectHandle;
 import org.graalvm.nativeimage.ObjectHandles;
+import org.graalvm.nativeimage.VMRuntime;
 import org.graalvm.nativeimage.c.function.CEntryPoint;
 import org.graalvm.nativeimage.c.function.CFunctionPointer;
 import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
@@ -126,6 +127,7 @@ public class SaxonCAPI {
         String debugFlag  = System.getenv("SAXONC_DEBUG_FLAG");
         if(debugFlag != null && debugFlag.equals("true")) {
             SaxonCAPI.debug = true;
+            //com.oracle.svm.core.SubstrateGCOptions.VerboseGC.update(true);
         }
         if (debug && licensei) {
             System.err.println("Flag is true to create SaxonProcessor with license");
@@ -221,6 +223,9 @@ public class SaxonCAPI {
     @CEntryPoint(name = "j_handles_destroy")
     public static void destroy(IsolateThread thread, ObjectHandle handle) {
         if (handle != WordFactory.nullPointer()) {
+            if (debug) {
+                System.err.println("destroy method Class to be deleted= " + ((Object) objectHandles.get(handle)).getClass().getName());
+            }
             objectHandles.destroy(handle);
             if (debug) {
                 objHandlesCreated--;
@@ -228,6 +233,19 @@ public class SaxonCAPI {
             }
         } else if (SaxonCAPI.debug) {
             System.err.println("ObjectHandle not destroyed: Null found");
+        }
+    }
+
+    @CEntryPoint(name = "j_createHeapDump")
+    public static void createHeapDump(IsolateThread thread, int live) {
+        try {
+            File file = File.createTempFile("SVMHeapDump-", ".hprof");
+            VMRuntime.dumpHeap(file.getAbsolutePath(), CTypeConversion.toBoolean(live));
+            System.out.println("  Heap dump created " + file.getAbsolutePath() + ", size: " + file.length());
+        } catch (UnsupportedOperationException unsupported) {
+            System.out.println("  Heap dump creation failed." + unsupported.getMessage());
+        } catch (IOException ioe) {
+            System.out.println("IO went wrong: " + ioe.getMessage());
         }
     }
 
@@ -408,7 +426,7 @@ public class SaxonCAPI {
             }
         }
     };   */
-    @CEntryPoint(name = "getProductVersion")
+    @CEntryPoint(name = "j_c_getProductVersion")
     public static CCharPointer getProductVersion(IsolateThread thread, ObjectHandle processorRef) {
         if (processorRef == WordFactory.nullPointer()) {
             return WordFactory.nullPointer();
@@ -416,6 +434,17 @@ public class SaxonCAPI {
         Processor processor = objectHandles.get(processorRef);
         final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(processor.getUnderlyingConfiguration().getProductTitle());
         return holder.get();
+    }
+
+    @CEntryPoint(name = "j_cpp_getProductVersion")
+    public static CCharPointer getProductVersion(IsolateThread thread, ObjectHandle processorRef, SaxonCAPI.AllocatorCCharFn alloc) {
+        if (processorRef == WordFactory.nullPointer()) {
+            return WordFactory.nullPointer();
+        }
+        Processor processor = objectHandles.get(processorRef);
+        String title = processor.getUnderlyingConfiguration().getProductTitle();
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, title);
+        return a;
     }
 
     /* @CEntryPoint(name = "j_testProg")
@@ -961,6 +990,7 @@ public class SaxonCAPI {
                 System.err.println("XdmNode: " + System.identityHashCode(doc));
             }
         }
+        
         ObjectHandle handle = createHandle(doc);
 
         return handle.rawValue();
@@ -1035,13 +1065,28 @@ public class SaxonCAPI {
      *
      * @param thread
      * @param xdmvalueRef
-     * @return C Pointer to the string value in the C memory space
+     * @return C Pointer to the string value in the Java memory space
      */
     @CEntryPoint(name = "j_getStringValue")
     public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef) {
         XdmValue value = objectHandles.get(xdmvalueRef);
         final CTypeConversion.CCharPointerHolder holder = CTypeConversion.toCString(value.toString());
         return holder.get();
+    }
+
+
+    /**
+     * Utility method to get the String value from the XdmValue representation
+     *
+     * @param thread
+     * @param xdmvalueRef
+     * @return C Pointer to the string value in the C++ memory space
+     */
+    @CEntryPoint(name = "j_cpp_getStringValue")
+    public static CCharPointer getStringValue(IsolateThread thread, ObjectHandle xdmvalueRef, SaxonCAPI.AllocatorCCharFn alloc) {
+        XdmValue value = objectHandles.get(xdmvalueRef);
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, value.toString());
+        return a;
     }
 
 
@@ -1399,7 +1444,7 @@ public class SaxonCAPI {
         //processor.setConfigurationProperty("http://saxon.sf.net/feature/allowedProtocols", "http,https");
         processor.setConfigurationProperty(Feature.ALLOWED_PROTOCOLS, "http,https");
         Source source = SaxonCAPI.resolveFileToSource(processor, "file:///home/ond1/work/repository/temp/", "identity1.xsl", ResourceRequest.XSLT_NATURE);
-    }
+    }   
 
      /*public static void testj() throws SaxonApiException, URISyntaxException {
 

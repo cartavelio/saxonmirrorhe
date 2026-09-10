@@ -80,7 +80,7 @@ public:
      */
 	XDM_NODE_KIND getNodeKind();
 
-	//! Get the name of the node, as a string in the form of a EQName
+	//! Get the name of the node, as a string in the form of a EQName. The caller does not need to deallocate memory.
 	/**
 	 *
 	 *
@@ -91,7 +91,7 @@ public:
 
 
 
-	//! Get the local name of the node
+	//! Get the local name of the node. The caller does not need to deallocate memory.
 	/**
 	 *
 	 *
@@ -118,7 +118,7 @@ public:
      */
 	const char* getBaseUri();
 
-	//! Get the string value of the item. For a node, this gets the string value of the node.
+	//! Get the string value of the item. For a node, this gets the string value of the node.  The caller should deallocate memory using `delete`
 	/**
 	 * For an atomic value, it has the same effect as casting the value
 	 * to a string. In all cases the result is the same as applying the XPath string()
@@ -133,7 +133,8 @@ public:
 	const char * getStringValue();
 
 
-	//! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters.
+	//! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters. The caller should deallocate memory using `delete`
+
     /**
      *
      * <p>In the case of an element node, the result will be a well-formed
@@ -264,6 +265,7 @@ private:
 	const char * baseURI; /*!< The base URI of this node*/
 	const char * nodeName; /*!< The name of the node, as a clark name format*/
 	const char * localName; /*!< The local part of the name */
+	const char * nodeToString;
 	XdmNode ** children; /*!< Cached. Child nodes when getChildren method is first called; */
 	int childCount; /*!< The number of of child nodes on the current node*/
 	XdmNode * parent; /*!< Cached. The parent node of the current node.*/

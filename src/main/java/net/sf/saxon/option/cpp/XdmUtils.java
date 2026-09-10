@@ -117,8 +117,8 @@ public class XdmUtils {
             return WordFactory.nullPointer();
         }
         XdmValue item = SaxonCAPI.objectHandles.get(value);
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(item.toString());
-        return holder.get();
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, item.toString());
+        return a;
     }
 
     /**
@@ -1240,7 +1240,7 @@ public class XdmUtils {
 
     
     /**
-     * Get the string value of a named attribute of the element passed
+     * Get the string value in the C++ memory space of a named attribute of the element passed
      *
      * @param thread - Graalvm runtime data structure for the thread
      * @param nodeRef  - reference to an XdmNode object in the ObjectHandles pool
@@ -1250,7 +1250,7 @@ public class XdmUtils {
      * selected attribute node.
      */
     @CEntryPoint(name = "j_getAttributeValue")
-    public static CCharPointer getAttributeValue(IsolateThread thread, ObjectHandle nodeRef, CCharPointer c_eqname) {
+    public static CCharPointer getAttributeValue(IsolateThread thread, ObjectHandle nodeRef, CCharPointer c_eqname, SaxonCAPI.AllocatorCCharFn alloc) {
         XdmNode node = SaxonCAPI.objectHandles.get(nodeRef);
         String eqname = CTypeConversion.toJavaString(c_eqname);
         QName name = QName.fromEQName(eqname);
@@ -1258,9 +1258,12 @@ public class XdmUtils {
             System.err.println("EQName= " + eqname);
             System.err.println("Java-Call Att-name=" + name.getClarkName() + " Value=" + node.getAttributeValue(name));
         }
-
-        final CTypeConversion.CCharPointerHolder holder=CTypeConversion.toCString(node.getAttributeValue(name));
-        return holder.get();
+        String attValue = node.getAttributeValue(name);
+        if(attValue == null) {
+            return WordFactory.nullPointer();
+        }
+        CCharPointer a = SaxonCAPI.stringToNative2(alloc, attValue);
+        return a;
     }
 
     /**

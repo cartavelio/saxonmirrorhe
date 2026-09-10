@@ -126,6 +126,7 @@ public:
      */
     virtual const char * getStringValue();
 
+    //! The toString() method returns a simple XML serialization of the node with defaulted serialization parameters. The caller should deallocate memory using `delete`
     const char * toString();
 
     /**
@@ -161,7 +162,8 @@ public:
 
 protected:
     int64_t value; /*!< The Java XdmItem reference in Graalvm  */
-    char * stringValue;  /*!< Cached. String representation of the XdmValue, if available */
+    const char * stringValue;  /*!< Cached. String representation of the XdmValue, if available */
+    const char * itemToString;  /*!< Cached. String representation of the XdmValue, if available */
 };
 
 
