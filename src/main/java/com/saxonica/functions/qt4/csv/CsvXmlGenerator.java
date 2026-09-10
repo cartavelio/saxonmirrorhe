@@ -10,6 +10,7 @@ import net.sf.saxon.ma.arrays.ArrayItem;
 import net.sf.saxon.ma.map.KeyValuePair;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.type.Untyped;
@@ -230,13 +231,13 @@ public class CsvXmlGenerator extends CsvRepresentationGenerator {
         }
 
         /**
-         * Retrieves the built document. Should not be called before <code>endDocument()</code>
+         * Retrieves the outermost element of the built document. Should not be called before <code>endDocument()</code>
          *
          * @return the built document node.
          * @throws XPathException
          */
         public Item getResult() throws XPathException {
-            return builder.getCurrentRoot();
+            return builder.getCurrentRoot().iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
         }
 
         /**
