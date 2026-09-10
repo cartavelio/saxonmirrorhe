@@ -1,10 +1,9 @@
 package s9apitest;
 
-import com.saxonica.config.EnterpriseConfiguration;
-import com.saxonica.ee.optim.StaticQueryContextEE;
 import net.sf.saxon.junit.Testdata;
 import net.sf.saxon.lib.FeatureKeys;
-import net.sf.saxon.query.StaticQueryContext;
+import net.sf.saxon.s9api.Processor;
+import net.sf.saxon.s9api.XQueryCompiler;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -36,17 +35,14 @@ public class SumanGantaTest {
      * Parse and execute an expression with linked modules
      */
     public void justParse(boolean aSequential) {
-        EnterpriseConfiguration mConfig;
-        StaticQueryContextEE mStaticContext;
+        Processor proc = new Processor(true);
 
         try {
             String expression = getTestExpression();
-            mConfig = new EnterpriseConfiguration();
-            mStaticContext = new StaticQueryContextEE(mConfig);
-            // TODO: CHECK THIS ONE TOO
-            mStaticContext.setBaseURI(Testdata.file("ganta/").toURI().toString());
+            XQueryCompiler compiler = proc.newXQueryCompiler();
+            compiler.setBaseURI(Testdata.fileUri("ganta/"));
 
-            parse(mStaticContext, expression, "justParse", mIterations, aSequential);
+            parse(compiler, expression, "justParse", mIterations, aSequential);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -57,30 +53,28 @@ public class SumanGantaTest {
      * Parse and execute an expression with linked modules
      */
     public void parseWithModuleLinking(boolean aSequential) {
-        EnterpriseConfiguration mConfig;
-        StaticQueryContextEE mStaticContext;
+        Processor proc = new Processor(true);
 
         try {
             String expression = getTestExpressionSansLoc();
-            mConfig = new EnterpriseConfiguration();
-            mConfig.setConfigurationProperty(FeatureKeys.DEBUG_BYTE_CODE, true);
-            mStaticContext = new StaticQueryContextEE(mConfig);
+            proc.setConfigurationProperty(FeatureKeys.DEBUG_BYTE_CODE, true);
+            XQueryCompiler comp = proc.newXQueryCompiler();
 
             Collection<String> moduleFiles = new ArrayList<String>();
 
             moduleFiles.add(Testdata.pathString("ganta/genBPEL.xq"));
             moduleFiles.add(Testdata.pathString("ganta/hello_notworking.xq"));
             moduleFiles.add(Testdata.pathString("ganta/avoscentral.xq"));
-            addLibs(mStaticContext, moduleFiles);
+            addLibs(comp, moduleFiles);
 
-            parse(mStaticContext, expression, "justParse", mIterations, aSequential);
+            parse(comp, expression, "justParse", mIterations, aSequential);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
         }
     }
 
-    public void parse(final StaticQueryContextEE aStaticContext, final String aExpression, String aTestName, int aTimes, boolean aSequential) {
+    public void parse(XQueryCompiler compiler, final String aExpression, String aTestName, int aTimes, boolean aSequential) {
         try {
             long start = System.currentTimeMillis();
             List<Exception> errors = new ArrayList<>();
@@ -88,7 +82,7 @@ public class SumanGantaTest {
                 @Override
                 public void run() {
                     try {
-                        aStaticContext.compileQuery(aExpression);
+                        compiler.compile(aExpression);
                     } catch (Exception e) {
                         errors.add(e);
                         e.printStackTrace();
@@ -155,11 +149,11 @@ public class SumanGantaTest {
         return expression;
     }
 
-    private void addLibs(StaticQueryContext aStaticContext, Collection<String> aModuleFiles) {
+    private void addLibs(XQueryCompiler compiler, Collection<String> aModuleFiles) {
         try {
             for (String file : aModuleFiles) {
-                aStaticContext.setBaseURI(new File(file).toURI().toString());
-                aStaticContext.compileLibrary(new FileInputStream(file), null);
+                compiler.setBaseURI(new File(file).toURI());
+                compiler.compileLibrary(new FileInputStream(file));
             }
         } catch (Exception e) {
             e.printStackTrace();
