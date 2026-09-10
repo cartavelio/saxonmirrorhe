@@ -7,9 +7,9 @@
 
 package net.sf.saxon.expr;
 
-import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.PullElaborator;
+import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
@@ -95,8 +95,8 @@ public class TailExpression extends UnaryExpression {
     }
 
     @Override
-    protected int computeCardinality() {
-        return getBaseExpression().getCardinality() | StaticProperty.ALLOWS_ZERO;
+    protected int computeCardinality() { // bug 6313
+        return getBaseExpression().getCardinality() | StaticProperty.ALLOWS_ZERO /* | StaticProperty.ALLOWS_ONE */;
     }
 
     @Override
