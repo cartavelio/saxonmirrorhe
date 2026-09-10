@@ -34,6 +34,10 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -525,18 +529,23 @@ public class QT3TestDriverHE extends TestDriver {
         if (run && (specOpt == null || specOpt == spec)) {
             XdmValue previousResult = null;
             TestOutcome outcome = new TestOutcome(this);
-            for (XdmItem testQuery : testCase.children("test")) {
-                String exp = null;
+            for (XdmNode testQuery : testCase.children("test")) {
+                String exp;
+                URI queryBaseUri;
+                String fileName = testQuery.attribute("file");
                 try {
-                    //XdmNode testNode = (XdmNode)testCase.children("test").iterator().next();
-                    exp = xpc.evaluate("if (@file) then unparsed-text(resolve-uri(@file, base-uri(.))) else string(.)", testQuery).toString();
-                } catch (SaxonApiException err) {
-                    println("*** Failed to read query: " + err.getMessage());
-                    if (err.getErrorCode().getLocalName().equals("FOUT1190")) {
-                        outcome.setException(new QName("", NamespaceConstant.ERR, "XPST0003"));
+                    if (fileName == null) {
+                        exp = testQuery.getStringValue();
+                        queryBaseUri = testQuery.getBaseURI();
                     } else {
-                        outcome.setException(err.getErrorCode());
+                        queryBaseUri = testQuery.getBaseURI().resolve(fileName);
+                        Path queryPath = Paths.get(queryBaseUri);
+                        byte[] content = Files.readAllBytes(queryPath);
+                        exp = new String(content, StandardCharsets.UTF_8);
                     }
+                } catch (IOException err) {
+                    println("*** Failed to read external query: " + err.getMessage());
+                    outcome.setException(new QName("FOUT1190"));
                     break;
                 }
 
@@ -569,6 +578,9 @@ public class QT3TestDriverHE extends TestDriver {
                         case "XP":
                         case "XT": {
                             XPathCompiler testXpc = env.xpathCompiler;
+                            if (!env.definesStaticBaseUri) {
+                                testXpc.setBaseURI(queryBaseUri);
+                            }
                             testXpc.setLanguageVersion(langVersion);
                             testXpc.declareNamespace("fn", NamespaceConstant.FN);
                             testXpc.declareNamespace("xs", NamespaceConstant.SCHEMA);
@@ -584,14 +596,6 @@ public class QT3TestDriverHE extends TestDriver {
 
                             mr.setTestCase(testCase);
                             testXpc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
-
-                            // Is a static base URI defined? Note: the XPathCompiler returns URI("") if the
-                            // base URI is not set. This is distinct from XQueryCompiler which returns null
-                            if (env.xpathCompiler != null && EMPTY_STRING_URI.equals(env.xpathCompiler.getBaseURI())) {
-                                // If not, establish one.
-                                // This avoids a fail in qt3extra test -s:fn-doc -t:fn-doc-101
-                                testXpc.setBaseURI(testCase.getBaseURI());
-                            }
 
                             try {
                                 XPathSelector selector = testXpc.compile(exp).load();
@@ -662,19 +666,15 @@ public class QT3TestDriverHE extends TestDriver {
                             mr.setTestCase(testCase);
                             testXqc.getProcessor().getUnderlyingConfiguration().setModuleURIResolver(mr);
                             testXqc.setModuleURIResolver(mr);
-
-                            // Is a static base URI defined?
-                            if (env.xqueryCompiler != null && env.xqueryCompiler.getBaseURI() == null) {
-                                // If not, establish one.
-                                // This avoids an NPE in qt3extra test -s:fn-doc -t:fn-doc-101
-                                testXqc.setBaseURI(testCase.getBaseURI());
+                            if (!env.definesStaticBaseUri) {
+                                testXqc.setBaseURI(queryBaseUri);
                             }
 
                             try {
-                                // If for some reason there still isn't a base URI, don't NPE here...
-                                if (testXqc.getBaseURI() != null) {
+                                // If query is inline, set the baseline line number...
+                                if (fileName == null) {
                                     testXqc.getUnderlyingStaticContext().setModuleLocation(
-                                            new Loc(testXqc.getBaseURI().toString(), testCase.getLineNumber(), -1));
+                                            new Loc(queryBaseUri.toString(), testCase.getLineNumber(), -1));
                                 }
                                 XQueryExecutable q = null;
                                 try {

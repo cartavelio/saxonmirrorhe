@@ -100,6 +100,7 @@ public class JsonToXMLFn extends SystemFunction {
         } else {
             flags = JsonParser.DUPLICATES_RETAINED;
         }
+        flags |= JsonParser.NUMERIC_FORMAT_RETAINED;
         JsonHandlerXML handler = new JsonHandlerXML(context, getStaticBaseUriString(), flags);
         if (options != null) {
             handler.setFallbackFunction(checkedOptions, context);

@@ -994,7 +994,7 @@ public class XPathParser {
                         if (prec2 <= prec) {
                             break;
                         }
-                        rhs = parseBinaryExpression(rhs, prec);
+                        rhs = parseBinaryExpression(rhs, prec2);
                     }
                     if (getCurrentOperatorPrecedence() == prec && !allowMultipleOperators(operator)) {
                         String tok = t.currentToken.toString();
@@ -1988,12 +1988,13 @@ public class XPathParser {
      */
 
     public SequenceType parseSequenceType() throws XPathException {
-        boolean disallowIndicator = isKeyword("empty-sequence");
-        ItemType primaryType = parseItemType();
-        if (disallowIndicator) {
-            // No occurrence indicator allowed
-            return SequenceType.makeSequenceType(primaryType, StaticProperty.EMPTY);
+        if (isKeyword("empty-sequence")) {
+            nextToken();
+            readToken(Token.LPAREN);
+            readToken(Token.RPAREN);
+            return SequenceType.EMPTY_SEQUENCE;
         }
+        ItemType primaryType = parseItemType();
         int occurrenceFlag = parseOccurrenceIndicator();
         return SequenceType.makeSequenceType(primaryType, occurrenceFlag);
     }
@@ -2121,11 +2122,6 @@ public class XPathParser {
                 return parseRecordTest(this);
             case "enum":
                 return parseEnumType();
-            case "empty-sequence":
-                nextToken();
-                readToken(Token.LPAREN);
-                readToken(Token.RPAREN);
-                return ErrorType.getInstance();
             case "type":
                 checkLanguageVersion40("the syntax type(T)");
                 if (language != ParsedLanguage.XSLT_PATTERN) {
@@ -3046,6 +3042,10 @@ public class XPathParser {
                         // ignore these wrappers
                         nextToken();
                         readToken(Token.LCURLY);
+                        if (t.currentToken == Token.RCURLY) {
+                            nextToken();
+                            return Literal.makeEmptySequence();
+                        }
                         Expression wrapped = parseExpression();
                         readToken(Token.RCURLY);
                         return wrapped;

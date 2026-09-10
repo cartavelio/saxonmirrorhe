@@ -73,6 +73,7 @@ public class Environment implements ResourceResolver {
     public XdmItem contextItem;
     public HashMap<QName, XdmValue> params = new HashMap<>();
     public boolean usable = true;
+    public boolean definesStaticBaseUri = false;
     public boolean failedToBuild = false;
     public StringBuilder paramDeclarations = new StringBuilder(256);
     public StringBuilder paramDecimalDeclarations = new StringBuilder(256);
@@ -358,6 +359,7 @@ public class Environment implements ResourceResolver {
                     driver.println("**** invalid base URI " + uri);
                 }
             }
+            environment.definesStaticBaseUri = true;
         }
     }
 

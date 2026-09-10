@@ -38,6 +38,7 @@ public class JsonParser {
     public static final int DUPLICATES_LAST = 64;
     public static final int DUPLICATES_FIRST = 128;
     public static final int DUPLICATES_REJECTED = 256;
+    public static final int NUMERIC_FORMAT_RETAINED = 512;
 
     public static final int DUPLICATES_SPECIFIED = DUPLICATES_FIRST | DUPLICATES_LAST | DUPLICATES_RETAINED | DUPLICATES_REJECTED;
 
@@ -364,7 +365,10 @@ public class JsonParser {
             if (numberParser != null) {
                 Sequence[] args = new Sequence[1];
                 args[0] = StringValue.makeUntypedAtomic(StringTool.fromCharSequence(token));
-                return SystemFunction.dynamicCall(numberParser, context, args).head();
+                Item parserResult = SystemFunction.dynamicCall(numberParser, context, args).head();
+                return (parserResult == null && ((flags & NUMERIC_FORMAT_RETAINED) != 0)) ? StringValue.EMPTY_STRING : parserResult;
+            } else if ((flags & NUMERIC_FORMAT_RETAINED) != 0) {
+                return new StringValue(token);
             } else {
                 return new DoubleValue(StringToDouble.getInstance().stringToNumber(StringView.tidy(token)));
             }
@@ -683,14 +687,6 @@ public class JsonParser {
             Item fn = val.head();
             if (fn instanceof FunctionItem) {
                 numberParser = (FunctionItem) fn;
-//                if (numberParser.getArity() != 1) {
-//                    throw new XPathException("Number-parser function must have arity=1", "FOJS0005");
-//                }
-//                SpecificFunctionType required = new SpecificFunctionType(
-//                        new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
-//                if (!required.matches(numberParser, context.getConfiguration().getTypeHierarchy())) {
-//                    throw new XPathException("Number-parser function does not match the required type", "XPTY0004");
-//                }
             } else {
                 throw new XPathException("Value of option 'number-parser' is not a function", "XPTY0004");
             }
