@@ -9,14 +9,14 @@
    <xsl:variable name="genDate"
       select="'Resources download build date:',format-dateTime(current-dateTime(),'[D01] [MNn] [Y]')"/>
    
-   <xsl:variable name="readText">Saxon Resources Download
+   <xsl:variable name="readText">Saxon resources download
 ------------------------
 
 <xsl:value-of select="$genDate"/>
 
 This saxon-resources download contains Saxon documentation, and sample applications and drivers. 
 
-To access the documentation, open doc/index.html in a browser and follow the instructions and links
+To access the documentation, open doc/index.html in a browser and follow the instructions and links.
 
 See below for details of the download contents.
 
@@ -42,10 +42,14 @@ Sample applications relevant for all Saxon editions (Saxon-HE, Saxon-PE and Saxo
 platforms (Java and .NET). See the "Sample Saxon Applications" section of the Saxon documentation
 for details.
 
-5. use-cases
-------------
-W3C XQuery Use Cases - queries (some of which have been corrected from those published by W3C),
-together with batch scripts for running them.
+5. saxonc-userdoc
+-----------------
+Provided as a zip. Unzip to access the SaxonC documentation in directory
+saxonc-userdoc/documentation11.
+
+Like the main Saxon documentation in source-userdoc below, the SaxonC documentation supplied in this
+resources download runs as an interactive application driven by SaxonJS in the browser, which
+requires use of a localhost web-server.
 
 6. source-userdoc
 -----------------
@@ -56,14 +60,6 @@ driven by SaxonJS in the browser (a copy of SaxonJS is included in the download)
 browsers do not allow SaxonJS to run from a local file system, so the documentation application may
 not work directly. It is recommended that the HTTP protocol is used to access the resource files, so
 it may be necessary to host this directory on a localhost web-server.
-
-7. saxonc-userdoc
------------------
-Provided as a zip. Unzip to access the SaxonC documentation in directory saxonc-userdoc/documentation11.
-
-Like the main Saxon documentation in source-userdoc above, the SaxonC documentation supplied in this resources
-download runs as an interactive application driven by SaxonJS in the browser, which requires use of a
-localhost web-server.
 
 
 </xsl:variable>
