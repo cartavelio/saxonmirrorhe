@@ -184,12 +184,17 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
                 return;
             }
 
+            if (schemaImport.locationURIs.isEmpty()) {
+                throw new XPathException("Unable to locate any schema for target namespace "
+                                                 + schemaImport.namespaceURI, "XQST0059");
+            }
+
             for (String hint : schemaImport.locationURIs) {
                 if (targetNamespace.equals(NamespaceUri.XML) ||
                         targetNamespace.equals(NamespaceUri.FN) ||
                         targetNamespace.equals(NamespaceUri.SCHEMA_INSTANCE)) {
                     Schema xmlSchema = config.getSchemaForBuiltInNamespace(targetNamespace);
-                    sources.add(new CachedSchemaSource((PreparedSchema) xmlSchema));
+                    sources.add(new CachedSchemaSource(xmlSchema));
                     continue;
                 }
 

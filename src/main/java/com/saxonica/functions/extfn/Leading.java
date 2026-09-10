@@ -39,7 +39,9 @@ public class Leading extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             final XPathContext c2 = context.newCleanContext();
-            final FunctionItem function = arguments.length == 2 ? (FunctionItem) arguments[1].head() : context.getConfiguration().makeSystemFunction("data", 1);
+            final FunctionItem function = arguments.length == 2
+                    ? (FunctionItem) arguments[1].head()
+                    : context.getConfiguration().makeSystemFunction("data", 1, 40);
             return SequenceTool.toLazySequence(new LeadingIterator(arguments[0].iterate(), function, c2));
         }
 

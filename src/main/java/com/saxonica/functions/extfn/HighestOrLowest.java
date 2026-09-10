@@ -54,7 +54,7 @@ public class HighestOrLowest extends SystemFunction {
         if (arguments.length == 2) {
             function = (FunctionItem) arguments[1].head();
         } else {
-            function = config.makeSystemFunction("data", 1);
+            function = config.makeSystemFunction("data", 1, 40);
         }
         Sequence[] args = new Sequence[1];
         AtomicValue maxSoFar = null;

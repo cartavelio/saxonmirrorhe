@@ -114,6 +114,15 @@ public class LaxValidator extends ContentValidator {
                     reportValidationError(ve, false, att.getLocation());
                 }
             }
+        } else if (attributeName.hasURI(NamespaceUri.XML) && attributeName.getLocalPart().equals("id")) {
+            annotation = BuiltInAtomicType.ID;
+            ValidationFailure err = annotation.validateContent(
+                    StringView.of(att.getValue()).tidy(), getNamespaceResolver(), getConfiguration().getConversionRules());
+            if (err != null) {
+                err.setConstraintReference(1, "cvc-complex-type", "3");
+                err.setSchemaType(annotation);
+                reportValidationError(err, false, att.getLocation());
+            }
         }
         return new AttributeInfo(att.getNodeName(), annotation, value, att.getLocation(), att.getProperties());
     }

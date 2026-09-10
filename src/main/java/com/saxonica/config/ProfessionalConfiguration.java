@@ -685,22 +685,6 @@ public class ProfessionalConfiguration extends Configuration {
     }
 
     /**
-     * Make a function in the "fn" namespace
-     *
-     * @param localName the local name of the function
-     * @param arity     the arity of the function
-     * @return the function
-     */
-
-    public SystemFunction makeSystemFunction(String localName, int arity) {
-        try {
-            return getXSLTFunctionSet(40).makeFunction(localName, arity);
-        } catch (XPathException e) {
-            return null;
-        }
-    }
-
-    /**
      * Set the FunctionLibrary used to bind calls on extension functions. This allows the
      * rules for identifying extension functions to be customized (in principle, it would
      * allow support for extension functions in other languages to be provided).
