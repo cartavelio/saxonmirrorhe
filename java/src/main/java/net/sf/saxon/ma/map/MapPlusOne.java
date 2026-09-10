@@ -33,7 +33,7 @@ public class MapPlusOne extends MapItem implements Iterable<KeyValuePair>{
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        if (key.asMapKey().equals(extraKey.asMapKey())) {
+        if (key.asMapKey(getSpecVersion()).equals(extraKey.asMapKey(getSpecVersion()))) {
             return extraValue;
         } else {
             return baseMap.get(key);

@@ -85,7 +85,7 @@ public abstract class QualifiedNameValue extends AtomicValue implements AtomicMa
      * keys in maps.
      */
     @Override
-    public AtomicMatchKey asMapKey() {
+    public AtomicMatchKey asMapKey(int specVersion) {
         return this;
     }
 

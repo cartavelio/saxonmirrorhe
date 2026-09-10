@@ -440,7 +440,7 @@ public final class DoubleValue extends NumericValue {
      */
 
     @Override
-    public AtomicMatchKey asMapKey() {
+    public AtomicMatchKey asMapKey(int specVersion) {
         if (isNaN()) {
             return AtomicSortComparer.COLLATION_KEY_NaN;
         } else if (Double.isInfinite(value)) {

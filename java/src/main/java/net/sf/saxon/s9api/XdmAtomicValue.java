@@ -631,8 +631,8 @@ public class XdmAtomicValue extends XdmItem {
 
     public boolean equals(Object other) {
         if (other instanceof XdmAtomicValue) {
-            AtomicMatchKey a = getUnderlyingValue().asMapKey();
-            AtomicMatchKey b = ((XdmAtomicValue)other).getUnderlyingValue().asMapKey();
+            AtomicMatchKey a = getUnderlyingValue().asMapKey(40);
+            AtomicMatchKey b = ((XdmAtomicValue)other).getUnderlyingValue().asMapKey(40);
             return a.equals(b);
         } else {
             return false;
@@ -646,7 +646,7 @@ public class XdmAtomicValue extends XdmItem {
 
     @Override
     public int hashCode() {
-        return getUnderlyingValue().asMapKey().hashCode();
+        return getUnderlyingValue().asMapKey(40).hashCode();
     }
 }
 

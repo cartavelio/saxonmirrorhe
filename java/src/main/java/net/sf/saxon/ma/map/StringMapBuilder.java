@@ -26,6 +26,7 @@ public class StringMapBuilder {
 
     private final List<UnicodeString> keys;
     private final List<GroundedValue> values;
+    private final int specVersion;
 
     /**
      * Callback function to combine two values (for duplicate keys) into one. If
@@ -40,14 +41,16 @@ public class StringMapBuilder {
 
     private XPathContext context;
 
-    public StringMapBuilder() {
+    public StringMapBuilder(int specVersion) {
         keys = new ArrayList<>();
         values = new ArrayList<>();
+        this.specVersion = specVersion;
     }
 
-    public StringMapBuilder(int size) {
+    public StringMapBuilder(int size, int specVersion) {
         keys = new ArrayList<>(size);
         values = new ArrayList<>(size);
+        this.specVersion = specVersion;
     }
 
     /**
@@ -94,9 +97,9 @@ public class StringMapBuilder {
 
     public MapItem getCompletedMap() throws XPathException {
         if (keys.size() == 0) {
-            return EmptyMap.getInstance();
+            return EmptyMap.getInstance(specVersion);
         } else if (keys.size() == 1) {
-            return new SingleEntryMap(new StringValue(keys.get(0)), values.get(0));
+            return new SingleEntryMap(new StringValue(keys.get(0)), values.get(0), specVersion);
         }
         // quick scan for possible duplicates using a bloom filter
         boolean possibleDuplicates = hasPossibleDuplicates(keys);
@@ -114,7 +117,7 @@ public class StringMapBuilder {
                         throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
                     }
                 }
-                return new FixedMapWithStringKeys(keyArray, valueArray, index);
+                return new FixedMapWithStringKeys(keyArray, valueArray, specVersion, index);
             } else {
                 ArrayList<UnicodeString> keys2 = new ArrayList<>();
                 ArrayList<GroundedValue> values2 = new ArrayList<>();
@@ -134,7 +137,7 @@ public class StringMapBuilder {
                 }
                 UnicodeString[] keyArray = keys2.toArray(new UnicodeString[0]);
                 GroundedValue[] valueArray = values2.toArray(new GroundedValue[0]);
-                return new FixedMapWithStringKeys(keyArray, valueArray, index);
+                return new FixedMapWithStringKeys(keyArray, valueArray, specVersion, index);
             }
         } else {
             // if we are sure there are no duplicates, then we delay indexing the map entries
@@ -142,7 +145,8 @@ public class StringMapBuilder {
             // and immediately discarded or serialized without ever being queried.
 
             return new FixedMapWithStringKeys(keys.toArray(new UnicodeString[0]),
-                                              values.toArray(new GroundedValue[0]), null);
+                                              values.toArray(new GroundedValue[0]),
+                                              specVersion, null);
         }
 
 
@@ -159,12 +163,13 @@ public class StringMapBuilder {
 
     public MapItem getCompletedMapConfidently() {
         if (keys.size() == 0) {
-            return EmptyMap.getInstance();
+            return EmptyMap.getInstance(specVersion);
         } else if (keys.size() == 1) {
-            return new SingleEntryMap(new StringValue(keys.get(0)), values.get(0));
+            return new SingleEntryMap(new StringValue(keys.get(0)), values.get(0), specVersion);
         }
         return new FixedMapWithStringKeys(keys.toArray(new UnicodeString[0]),
                                           values.toArray(new GroundedValue[0]),
+                                          specVersion,
                                           null);
     }
 

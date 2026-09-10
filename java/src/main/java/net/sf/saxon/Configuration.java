@@ -215,7 +215,7 @@ public class Configuration implements SourceResolver {
     private final Set<StructuredQName> disabledFunctionNames = new HashSet<>();
     private final Map<NamespaceUri, FunctionAnnotationHandler> functionAnnotationHandlers = new HashMap<>();
     private int regexBacktrackingLimit = 10000000;
-
+    private int mapSpecVersion = 31;
     private final TreeStatistics treeStatistics = new TreeStatistics();
     //#if CSHARP==false
     private CleanerProxy cleaner = null;    // created on demand
@@ -977,6 +977,10 @@ public class Configuration implements SourceResolver {
 
     public int getXMLVersion() {
         return xmlVersion;
+    }
+
+    public int getMapSpecVersion() {
+        return mapSpecVersion;
     }
 
     /**

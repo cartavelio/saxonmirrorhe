@@ -350,7 +350,7 @@ public class FilterExpressionAM extends BinaryExpression
 
         private MapItem filteredMap(XPathContext context, MapItem input, SequenceEvaluator predicate) throws XPathException {
             int size = input.size();
-            GeneralMapBuilder result = FixedMap.getBuilder();
+            GeneralMapBuilder result = FixedMap.getBuilder(40);
             ManualIterator focus = new ManualIterator();
             XPathContext c2 = context.newMinorContext();
             c2.setCurrentIterator(focus);

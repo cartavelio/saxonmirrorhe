@@ -187,7 +187,7 @@ public abstract class AtomicValue
      * keys in maps.
      */
 
-    public AtomicMatchKey asMapKey() {
+    public AtomicMatchKey asMapKey(int specVersion) {
         return getXPathMatchKey(CodepointCollator.getInstance(), CalendarValue.NO_TIMEZONE);
     }
 

@@ -24,8 +24,7 @@ public class AtomicEqual extends SystemFunction implements Callable {
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         AtomicValue op1 = (AtomicValue) arguments[0].head();
         AtomicValue op2 = (AtomicValue) arguments[1].head();
-        //System.err.println("AtEq " + op1 + " , " + op2 + " = " + op1.asMapKey().equals(op2.asMapKey()));
-        return BooleanValue.get(op1.asMapKey().equals(op2.asMapKey()));
+        return BooleanValue.get(op1.asMapKey(40).equals(op2.asMapKey(40)));
     }
 
 }

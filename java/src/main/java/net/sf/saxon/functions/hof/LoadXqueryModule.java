@@ -86,10 +86,10 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
         Sequence contentOption = null;
         if (args.length == 2) {
             MapItem suppliedOptions = (MapItem) args[1].head();
-            if (suppliedOptions == null) {
-                suppliedOptions = EmptyMap.getInstance();
-            }
             int hostVersion = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
+            if (suppliedOptions == null) {
+                suppliedOptions = EmptyMap.getInstance(40);
+            }
             Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context, hostVersion);
             xqueryVersionOption = checkedOptions.get("xquery-version");
             if (xqueryVersionOption != null) {
@@ -230,7 +230,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         // Evaluate the global variables, and add values to the result.
 
-        GeneralMapBuilder variablesMapBuilder = AbstractFixedMap.getBuilder();
+        GeneralMapBuilder variablesMapBuilder = AbstractFixedMap.getBuilder(40);
         for (GlobalVariable var : lib.getImportedGlobalVariables()) {
             GroundedValue value;
             QNameValue qNameValue = new QNameValue(var.getVariableQName(), BuiltInAtomicType.QNAME);
@@ -260,7 +260,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         };
 
-        MapItem functionsMap = EmptyMap.getInstance();
+        MapItem functionsMap = EmptyMap.getInstance(40);
         final List<XQueryFunction> list = new ArrayList<>();
         functionLib.processAllFunctions(fn -> list.add(fn));
         for (XQueryFunction function : list) {
@@ -273,7 +273,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                 if (functionsMap.get(functionQName) != null) {
                     newMap = ((MapItem) functionsMap.get(functionQName)).put(new Int64Value(function.getNumberOfParameters()), buf);
                 } else {
-                    newMap = new SingleEntryMap(Int64Value.makeIntegerValue(function.getNumberOfParameters()), buf);
+                    newMap = new SingleEntryMap(Int64Value.makeIntegerValue(function.getNumberOfParameters()), buf, 40);
                 }
                 functionsMap = functionsMap.put(functionQName, newMap);
             }

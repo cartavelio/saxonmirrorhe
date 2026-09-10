@@ -25,6 +25,7 @@ public class GeneralMapBuilder {
 
     protected final List<AtomicValue> keys = new ArrayList<>();
     protected final List<GroundedValue> values = new ArrayList<>();
+    protected final int specVersion;
 
     /**
      * Callback function to combine two values (for duplicate keys) into one. If
@@ -38,8 +39,8 @@ public class GeneralMapBuilder {
     //  start building the final data structure as soon as we hit a potential duplicate while updating
     //  the Bloom filter.
 
-    public GeneralMapBuilder() {
-
+    public GeneralMapBuilder(int specVersion) {
+        this.specVersion = specVersion;
     }
 
     /**
@@ -108,17 +109,17 @@ public class GeneralMapBuilder {
 
     public MapItem getCompletedMap(XPathContext context) throws XPathException {
         if (keys.size() == 0) {
-            return EmptyMap.getInstance();
+            return EmptyMap.getInstance(specVersion);
         } else if (keys.size() == 1) {
-            return new SingleEntryMap(keys.get(0), values.get(0));
+            return new SingleEntryMap(keys.get(0), values.get(0), specVersion);
         }
         // quick scan for possible duplicates using a bloom filter
-        boolean possibleDuplicates = hasPossibleDuplicates(keys);
+        boolean possibleDuplicates = hasPossibleDuplicates(keys, specVersion);
         if (possibleDuplicates) {
             // If there are possible duplicates, then we build the map now, with a more thorough
             // check for duplicates as we build it.
 
-            MapItem map = new ExtensibleMap();
+            MapItem map = new ExtensibleMap(specVersion);
             Iterator<GroundedValue> valueIter = values.iterator();
             for (AtomicValue key : keys) {
                 GroundedValue value;
@@ -163,9 +164,9 @@ public class GeneralMapBuilder {
 
     public MapItem getCompletedMapConfidently() {
         if (keys.size() == 0) {
-            return EmptyMap.getInstance();
+            return EmptyMap.getInstance(specVersion);
         } else if (keys.size() == 1) {
-            return new SingleEntryMap(keys.get(0), values.get(0));
+            return new SingleEntryMap(keys.get(0), values.get(0), specVersion);
         } else if (allStrings) {
             List<UnicodeString> stringKeys = new ArrayList<>(keys.size());
             for (AtomicValue k : keys) {
@@ -173,9 +174,10 @@ public class GeneralMapBuilder {
             }
             return new FixedMapWithStringKeys(stringKeys.toArray(new UnicodeString[0]),
                                               values.toArray(new GroundedValue[0]),
+                                              specVersion,
                                               null);
         } else {
-            MapItem map = new ExtensibleMap();
+            MapItem map = new ExtensibleMap(specVersion);
             Iterator<GroundedValue> valueIter = values.iterator();
             for (AtomicValue key : keys) {
                 GroundedValue value;
@@ -191,12 +193,12 @@ public class GeneralMapBuilder {
     }
 
 
-    protected static boolean hasPossibleDuplicates(List<AtomicValue> keys) {
+    protected static boolean hasPossibleDuplicates(List<AtomicValue> keys, int specVersion) {
         int filterSize = keys.size() < 50 ? 1024 : 65536;
         int mask = filterSize - 1;
         BitSet bloom = new BitSet(filterSize);
         for (AtomicValue key : keys) {
-            AtomicMatchKey matchKey = key.asMapKey();
+            AtomicMatchKey matchKey = key.asMapKey(specVersion);
             long hash = matchKey.longHashCode();
             int hash0 = (int) (hash >> 40 & mask);
             int hash1 = (int) (hash >> 20 & mask);

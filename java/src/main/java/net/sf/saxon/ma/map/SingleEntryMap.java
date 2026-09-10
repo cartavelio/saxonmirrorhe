@@ -30,10 +30,11 @@ public class SingleEntryMap extends MapItem {
     private final GroundedValue value;
     private final AtomicMatchKey matchKey;
 
-    public SingleEntryMap(AtomicValue key, GroundedValue value) {
+    public SingleEntryMap(AtomicValue key, GroundedValue value, int specVersion) {
         this.key = key;
         this.value = value;
-        this.matchKey = key.asMapKey();
+        this.matchKey = key.asMapKey(specVersion);
+        setSpecVersion(specVersion);
     }
 
     /**
@@ -63,7 +64,7 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        return this.matchKey.equals(key.asMapKey()) ? value : null;
+        return this.matchKey.equals(key.asMapKey(getSpecVersion())) ? value : null;
     }
 
     /**
@@ -119,8 +120,9 @@ public class SingleEntryMap extends MapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        if (this.matchKey.equals(key.asMapKey())) {
-            return new SingleEntryMap(key, value);
+        int specVersion = getSpecVersion();
+        if (this.matchKey.equals(key.asMapKey(specVersion))) {
+            return new SingleEntryMap(key, value, specVersion);
         }
         return toGeneralMap().put(key, value);
     }
@@ -137,7 +139,7 @@ public class SingleEntryMap extends MapItem {
         if (get(key) == null) {
             return this;
         } else {
-            return EmptyMap.getInstance();
+            return EmptyMap.getInstance(getSpecVersion());
         }
     }
 

@@ -322,8 +322,8 @@ public class Predicates {
      */
 
     public static Predicate<XdmAtomicValue> eq(XdmAtomicValue value) {
-        AtomicMatchKey k2 = value.getUnderlyingValue().asMapKey();
-        return item -> item.getUnderlyingValue().asMapKey().equals(k2);
+        AtomicMatchKey k2 = value.getUnderlyingValue().asMapKey(40);
+        return item -> item.getUnderlyingValue().asMapKey(40).equals(k2);
     }
 
     /**

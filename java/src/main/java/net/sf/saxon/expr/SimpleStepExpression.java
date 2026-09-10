@@ -86,7 +86,7 @@ public final class SimpleStepExpression extends SlashExpression {
         NodeTest test = ((AxisExpression) getStep()).getNodeTest();
         if (test instanceof SelectorTest) {
             if (UType.JNODE.subsumes(contextItemUType)) {
-                ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asJNodeTest());
+                // TODO: ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asJNodeTest());
             } else if (UType.XNODE.subsumes(contextItemUType)) {
                 ((AxisExpression) getStep()).setNodeTest(((SelectorTest) test).asXNodeTest(getConfiguration()));
             }

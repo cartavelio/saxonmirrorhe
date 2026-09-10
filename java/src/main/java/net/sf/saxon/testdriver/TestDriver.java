@@ -187,9 +187,6 @@ public abstract class TestDriver {
             }
             if (args[i].startsWith("-lang:")) {
                 lang = argValue;
-                if (argValue.endsWith("40")) {
-                    Version.MAP_SPEC_VERSION = 40;
-                }
                 processSpec(argValue);
             }
             // Temporary for controlling test processor

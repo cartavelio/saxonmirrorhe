@@ -72,7 +72,7 @@ public class XMLToJsonFn extends SystemFunction implements PushableFunction {
         if (getArity() > 1) {
             MapItem suppliedOptions = (MapItem) arguments[1].head();
             if (suppliedOptions == null) {
-                suppliedOptions = EmptyMap.getInstance();
+                suppliedOptions = EmptyMap.getInstance(40);
             }
             int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
             Map<String, GroundedValue> options =

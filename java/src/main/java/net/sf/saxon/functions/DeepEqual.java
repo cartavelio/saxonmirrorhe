@@ -322,7 +322,7 @@ public class DeepEqual extends CollatingFunctionFixed {
         }
         switch (item.getGenre()) {
             case ATOMIC:
-                return 0x01L << 56 | (long)((AtomicValue)item).asMapKey().hashCode();
+                return 0x01L << 56 | (long)((AtomicValue)item).asMapKey(options.version).hashCode();
             case XNODE:
                 return 0x02L << 56 | (long)nodeHashCode(((NodeInfo)item), options);
             case MAP:
@@ -1104,10 +1104,12 @@ public class DeepEqual extends CollatingFunctionFixed {
         MapItem options;
         if (optionsArg == null) {
             options = new SingleEntryMap(new StringValue("collation"),
-                                         new StringValue(getRetainedStaticContext().getDefaultCollationName()));
+                                         new StringValue(getRetainedStaticContext().getDefaultCollationName()),
+                                         40);
         } else if (optionsArg instanceof StringValue) {
             options = new SingleEntryMap(new StringValue("collation"),
-                                         optionsArg);
+                                         optionsArg,
+                                         40);
         } else {
             options = (MapItem) optionsArg;
         }

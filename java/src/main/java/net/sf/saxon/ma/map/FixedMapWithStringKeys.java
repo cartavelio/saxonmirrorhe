@@ -38,11 +38,14 @@ public class FixedMapWithStringKeys extends AbstractFixedMap {
      * @param index  a hash map indexing the values
      */
 
-    protected FixedMapWithStringKeys(UnicodeString[] keys, GroundedValue[] values, HashMap<AtomicMatchKey, Integer> index) {
+    protected FixedMapWithStringKeys(
+            UnicodeString[] keys, GroundedValue[] values, int specVersion,
+            HashMap<AtomicMatchKey, Integer> index) {
         assert keys.length == values.length;
         this.keyArray = keys;
         this.values = values;
         this.index = index;
+        setSpecVersion(specVersion);
     }
 
     public static FixedMapWithStringKeys fromJavaMap(Map<UnicodeString, GroundedValue> map) {
@@ -54,6 +57,7 @@ public class FixedMapWithStringKeys extends AbstractFixedMap {
         }
         return new FixedMapWithStringKeys(keys.toArray(new UnicodeString[0]),
                                           values.toArray(new GroundedValue[0]),
+                                          40,
                                           null);
     }
 

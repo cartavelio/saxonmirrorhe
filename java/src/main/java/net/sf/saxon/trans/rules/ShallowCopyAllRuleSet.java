@@ -121,7 +121,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
                     tc = tc.processLeavingTail();
                 }
                 pipe.setXPathContext(context);
-                MapItem singletonMap = new SingleEntryMap(key, collector.getSequence());
+                MapItem singletonMap = new SingleEntryMap(key, collector.getSequence(), 40);
                 out.append(singletonMap, locationId, 0);
 
             } else if (size > 1) {
@@ -147,7 +147,7 @@ public class ShallowCopyAllRuleSet extends ShallowCopyRuleSet {
                 pipe.setXPathContext(context);
 
                 MapItem mergedMap = MapFunctionSet.MapMerge.mergeMaps(
-                        collector.iterate(), context, null);
+                        collector.iterate(), context, null, 40);
                 out.append(mergedMap, locationId, 0);
             }
 

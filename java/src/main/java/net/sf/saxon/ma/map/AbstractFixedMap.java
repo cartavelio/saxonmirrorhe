@@ -40,15 +40,16 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
 
     private static class FixedMapBuilder extends GeneralMapBuilder {
 
-        public FixedMapBuilder() {
+        public FixedMapBuilder(int specVersion) {
+            super(specVersion);
         }
 
         @Override
         public MapItem getCompletedMap() throws XPathException {
             if (keys.size() == 0) {
-                return EmptyMap.getInstance();
+                return EmptyMap.getInstance(specVersion);
             } else if (keys.size() == 1) {
-                return new SingleEntryMap(keys.get(0), values.get(0));
+                return new SingleEntryMap(keys.get(0), values.get(0), specVersion);
             }
             AtomicValue[] keyArray = keys.toArray(new AtomicValue[0]);
             GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
@@ -74,12 +75,12 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
 
         public MapItem getCompletedMap(XPathContext context) throws XPathException {
             if (keys.size() == 0) {
-                return EmptyMap.getInstance();
+                return EmptyMap.getInstance(specVersion);
             } else if (keys.size() == 1) {
-                return new SingleEntryMap(keys.get(0), values.get(0));
+                return new SingleEntryMap(keys.get(0), values.get(0), specVersion);
             }
             // quick scan for possible duplicates using a bloom filter
-            boolean possibleDuplicates = hasPossibleDuplicates(keys);
+            boolean possibleDuplicates = hasPossibleDuplicates(keys, specVersion);
             if (possibleDuplicates) {
                 // If there are possible duplicates, then we build the map now, with a more thorough
                 // check for duplicates as we build it.
@@ -139,7 +140,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
             GroundedValue[] valueArray = values.toArray(new GroundedValue[0]);
             HashMap<AtomicMatchKey, Integer> index = new HashMap<>(keyArray.length);
             for (int i = 0; i < keyArray.length; i++) {
-                index.put(keyArray[i].asMapKey(), i);
+                index.put(keyArray[i].asMapKey(specVersion), i);
             }
             return new FixedMap(keyArray, valueArray, index);
         }
@@ -151,8 +152,8 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
      *
      * @return a class for building fixed maps
      */
-    public static GeneralMapBuilder getBuilder() {
-        return new AbstractFixedMap.FixedMapBuilder();
+    public static GeneralMapBuilder getBuilder(int specVersion) {
+        return new AbstractFixedMap.FixedMapBuilder(specVersion);
     }
 
     /**
@@ -211,9 +212,10 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
      */
     protected synchronized void ensureIndexed() {
         if (index == null) {
+            int specVersion = getSpecVersion();
             index = new HashMap<>(size());
             for (int i = 0; i < size(); i++) {
-                index.put(getKey(i).asMapKey(), i);
+                index.put(getKey(i).asMapKey(specVersion), i);
             }
         }
     }
@@ -322,7 +324,7 @@ public abstract class AbstractFixedMap extends MapItem implements Iterable<KeyVa
     @Override
     public MapItem remove(AtomicValue key) {
         if (get(key) != null) {
-            return new MapMinusOne(this, key.asMapKey());
+            return new MapMinusOne(this, key.asMapKey(getSpecVersion()));
         } else {
             return this;
         }

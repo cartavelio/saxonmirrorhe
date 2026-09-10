@@ -247,7 +247,7 @@ public abstract class NumericValue extends AtomicValue
 
     @Override
     public AtomicMatchKey getXPathTransitiveMatchKey(StringCollator collator, int implicitTimezone) {
-        return asMapKey();
+        return asMapKey(40);
     }
 
     @Override

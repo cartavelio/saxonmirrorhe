@@ -48,7 +48,8 @@ public class FunctionAnnotations extends SystemFunction {
             result.add(
                     new SingleEntryMap(
                         new QNameValue(a.getAnnotationQName(), BuiltInAtomicType.QNAME),
-                        SequenceExtent.makeSequenceExtent(a.getAnnotationParameters())
+                        SequenceExtent.makeSequenceExtent(a.getAnnotationParameters()),
+                        40
             ));
         }
         return SequenceExtent.makeSequenceExtent(result);

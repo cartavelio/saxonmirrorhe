@@ -79,24 +79,6 @@ public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodeP
         return new NamedXNodeType(nodeKind, getQNameTest(), config);
     }
 
-    /**
-     * Get an equivalent node test, knowing that it will only be used to match JNodes
-     *
-     * @return an equivalent node test for XNodes
-     */
-    public JNodeSelectorTest asJNodeTest() {
-//        if (asNCName) {
-//            for (AtomicMatchKey value : keys) {
-//                // There will be exactly one key, and it will be a QNameValue
-//                String ncName = ((QNameValue)value).getLocalName();
-//                return new JNodeSelectorTest(
-//                        new SingletonSet<>(StringTool.fromCharSequence(ncName)));
-//            }
-//        } else {
-//            return new JNodeSelectorTest(keys);
-//        }
-        return null;
-    }
 
 
 

@@ -566,14 +566,15 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                                 JNode j = new JNodeForMapEntry(((JNode) origin), 1, key, val, -1);
                                 return new SingletonIterator(j);
                             }
+                            int specVersion = ((MapItem)content).getSpecVersion();
                             Set<AtomicMatchKey> matchKeys = new HashSet<>();
                             for (Item it : selection.asIterable()) {
-                                matchKeys.add(((AtomicValue) it).asMapKey());
+                                matchKeys.add(((AtomicValue) it).asMapKey(specVersion));
                             }
                             List<Item> result = new ArrayList<>();
                             int serialNr = 0;
                             for (KeyValuePair pair : ((MapItem) content).keyValuePairs()) {
-                                if (matchKeys.contains(pair.key.asMapKey())) {
+                                if (matchKeys.contains(pair.key.asMapKey(specVersion))) {
                                     result.add(new JNodeForMapEntry((JNode) origin, 1, pair.key, pair.value, serialNr));
                                 }
                                 serialNr++;
@@ -637,13 +638,13 @@ public final class AxisGetExpression extends UnaryExpression implements Generali
                 }
                 Set<AtomicMatchKey> matchKeys = new HashSet<>();
                 for (Item it : selection.asIterable()) {
-                    matchKeys.add(((AtomicValue) it).asMapKey());
+                    matchKeys.add(((AtomicValue) it).asMapKey(40));
                 }
                 if (origin instanceof JNode) {
                     SequenceIterator iter = Navigator.iterateAxis((JNode) origin, axis, AnyGNode.TEST);
                     return new ItemMappingIterator(iter, item -> {
                         JNode jnode = (JNode) item;
-                        if (jnode instanceof ChildJNode && matchKeys.contains(jnode.getSelector().asMapKey())) {
+                        if (jnode instanceof ChildJNode && matchKeys.contains(jnode.getSelector().asMapKey(40))) {
                             return jnode;
                         } else {
                             return null;

@@ -47,7 +47,7 @@ public final class MapCoercionPlan extends CoercionPlan {
             if (requiredType.matches(item, request.config.getTypeHierarchy())) {
                 return item;
             } else {
-                GeneralMapBuilder builder = item instanceof ExtensibleMap ? new GeneralMapBuilder() : FixedMap.getBuilder();
+                GeneralMapBuilder builder = item instanceof ExtensibleMap ? new GeneralMapBuilder(40) : FixedMap.getBuilder(40);
                 CoercionPlan keyPlan = requiredKeyType.getCoercionPlan(40);
                 CoercionPlan valuePlan = requiredValueType.getPrimaryType().getCoercionPlan(40);
                 if (keyPlan == null) {

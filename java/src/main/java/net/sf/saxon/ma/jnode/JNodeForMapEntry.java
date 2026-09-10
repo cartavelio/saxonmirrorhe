@@ -175,15 +175,18 @@ public class JNodeForMapEntry extends ChildJNode implements SiblingCountingNode 
     }
 
     public boolean equals(Object other) {
+        int specVersion = ((MapItem)getParent().getContent()).getSpecVersion();
         return other instanceof JNodeForMapEntry
                 && getParent().equals(((JNodeForMapEntry)other).getParent())
-                && getSelector().asMapKey().equals(((JNodeForMapEntry) other).getSelector().asMapKey())
+                && getSelector().asMapKey(specVersion)
+                   .equals(((JNodeForMapEntry) other).getSelector().asMapKey(specVersion))
                 && getPosition() == ((JNodeForMapEntry) other).getPosition();
     }
 
     public int hashCode() {
+        int specVersion = ((MapItem) getParent().getContent()).getSpecVersion();
         return getParent().hashCode()
-                ^ getSelector().asMapKey().hashCode()
+                ^ getSelector().asMapKey(specVersion).hashCode()
                 ^ getPosition();
     }
 

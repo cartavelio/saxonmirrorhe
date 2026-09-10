@@ -24,13 +24,15 @@ import java.util.Collections;
 
 public class EmptyMap extends MapItem {
 
-    private final static EmptyMap THE_INSTANCE = new EmptyMap();
+    private final static EmptyMap THE_INSTANCE_31 = new EmptyMap(31);
+    private final static EmptyMap THE_INSTANCE_40 = new EmptyMap(40);
 
-    public static EmptyMap getInstance() {
-        return THE_INSTANCE;
+    public static EmptyMap getInstance(int version) {
+        return version >= 40 ? THE_INSTANCE_40 : THE_INSTANCE_31;
     }
 
-    private EmptyMap() {
+    private EmptyMap(int specVersion) {
+        setSpecVersion(specVersion);
     }
 
     /**
@@ -95,7 +97,7 @@ public class EmptyMap extends MapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return new SingleEntryMap(key, value);
+        return new SingleEntryMap(key, value, getSpecVersion());
     }
 
     /**

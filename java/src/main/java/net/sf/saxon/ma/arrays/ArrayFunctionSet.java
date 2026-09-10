@@ -1082,7 +1082,7 @@ public class ArrayFunctionSet extends BuiltInFunctionSet {
         private boolean compareValues(GroundedValue a, GroundedValue b,
                                       String collation, XPathContext context) throws XPathException {
             SingleEntryMap optionsMap = new SingleEntryMap(
-                    new StringValue("collation"), new StringValue(collation));
+                    new StringValue("collation"), new StringValue(collation), 40);
             DeepEqual.DeepEqualOptions options = new DeepEqual.DeepEqualOptions(optionsMap, context, 40);
             return DeepEqual.deepEqual(a.iterate(), b.iterate(), context, options);
         }

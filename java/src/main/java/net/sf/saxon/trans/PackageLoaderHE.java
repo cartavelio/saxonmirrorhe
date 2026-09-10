@@ -2729,7 +2729,8 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("map", (loader, element) -> {
             List<Expression> children = getChildExpressionList(loader, element);
             AtomicValue key = null;
-            GeneralMapBuilder map = AbstractFixedMap.getBuilder();
+            int version = loader.getPackStack().peek().getHostLanguageVersion();
+            GeneralMapBuilder map = AbstractFixedMap.getBuilder(version);
             for (Expression child : children) {
                 if (key == null) {
                     key = (AtomicValue)((Literal)child).getGroundedValue();

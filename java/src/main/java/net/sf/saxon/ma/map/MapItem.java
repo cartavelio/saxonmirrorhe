@@ -60,8 +60,24 @@ import java.util.Stack;
  *     to attach labels.</li>
  *     <li>{@link RangeKey} - a sorted map used to support Saxon extensions</li>
  * </ul>
+ *
+ * <p>A {@code MapItem} has a property {@code specVersion} which determines the comparison
+ * semantics for key values. If {@code specVersion < 40}, hexBinary values are considered
+ * distinct from base64Binary values. If {@code specVersion >= 40}, the two types are
+ * mutually comparable. The value of the property depends on whether 4.0 processing was
+ * enabled for the stylesheet, query, or XPath expression that constructed the map.</p>
  */
 public abstract class MapItem extends MapOrArray implements FunctionItem {
+
+    private int specVersion = 31;
+
+    public int getSpecVersion() {
+        return specVersion;
+    }
+
+    protected void setSpecVersion(int v) {
+        this.specVersion = v;
+    }
 
     /**
      * Get an entry from the Map
@@ -150,11 +166,12 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
 
     public Iterator<KeyValuePair> followingKeyValuePairs(AtomicValue key) {
         // TODO: provide a more efficient implementation for AbstractFixedMap and ExtensibleMap
-        AtomicMatchKey matchKey = key.asMapKey();
+        int specVersion = getSpecVersion();
+        AtomicMatchKey matchKey = key.asMapKey(specVersion);
         Iterator<KeyValuePair> all = keyValuePairs().iterator();
         while (all.hasNext()) {
             KeyValuePair current = all.next();
-            if (current.key.asMapKey().equals(matchKey)) {
+            if (current.key.asMapKey(specVersion).equals(matchKey)) {
                 return all;
             }
         }
@@ -174,15 +191,16 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
 
     public Iterator<KeyValuePair> precedingKeyValuePairs(AtomicValue key) {
         // TODO: provide a more efficient implementation for AbstractFixedMap and ExtensibleMap
+        int specVersion = getSpecVersion();
         if (get(key) == null) {
             return null;
         }
-        AtomicMatchKey matchKey = key.asMapKey();
+        AtomicMatchKey matchKey = key.asMapKey(specVersion);
         Iterator<KeyValuePair> all = keyValuePairs().iterator();
         LinkedList<KeyValuePair> preceding = new LinkedList<>();
         while (all.hasNext()) {
             KeyValuePair current = all.next();
-            if (current.key.asMapKey().equals(matchKey)) {
+            if (current.key.asMapKey(specVersion).equals(matchKey)) {
                 break;
             } else {
                 preceding.addFirst(current);
@@ -198,9 +216,10 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
      * @return a {@link SequenceIterator} over the entries in the map, represented as single-entry maps
      */
     public SequenceIterator entries() {
+        int specVersion = getSpecVersion();
         return new SequenceIteratorOverJavaIterator<KeyValuePair>(
                 keyValuePairs().iterator(),
-                (entry, position) -> new SingleEntryMap(entry.key, entry.value));
+                (entry, position) -> new SingleEntryMap(entry.key, entry.value, specVersion));
     }
 
 
@@ -621,12 +640,13 @@ public abstract class MapItem extends MapOrArray implements FunctionItem {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
             if (options.mapOrderSignificant) {
+                int specVersion = getSpecVersion();
                 Iterator<KeyValuePair> it1 = keyValuePairs().iterator();
                 Iterator<KeyValuePair> it2 = ((MapItem)other).keyValuePairs().iterator();
                 while (it1.hasNext() && it2.hasNext()) {
                     KeyValuePair kvp1 = it1.next();
                     KeyValuePair kvp2 = it2.next();
-                    if (!kvp1.key.asMapKey().equals(kvp2.key.asMapKey())) {
+                    if (!kvp1.key.asMapKey(specVersion).equals(kvp2.key.asMapKey(specVersion))) {
                         return false;
                     }
                     if (!DeepEqual.deepEqual(kvp1.value.iterate(),

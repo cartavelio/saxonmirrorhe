@@ -104,7 +104,7 @@ public class JsonHandlerMap extends JsonHandler {
      */
     @Override
     public void startMap() {
-        StringMapBuilder mapBuilder = new StringMapBuilder();
+        StringMapBuilder mapBuilder = new StringMapBuilder(40);
         mapBuilder.setCombiner(duplicatesCombiner);
         stack.push(mapBuilder);
     }

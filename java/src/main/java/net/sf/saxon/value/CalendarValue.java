@@ -281,7 +281,7 @@ public abstract class CalendarValue extends AtomicValue implements AtomicMatchKe
      * keys in maps.
      */
     @Override
-    public AtomicMatchKey asMapKey() {
+    public AtomicMatchKey asMapKey(int specVersion) {
         return new CalendarValueMapKey(this);
     }
 

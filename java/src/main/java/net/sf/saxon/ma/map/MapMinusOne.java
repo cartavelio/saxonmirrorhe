@@ -31,7 +31,7 @@ public class MapMinusOne extends MapItem implements Iterable<KeyValuePair>{
      */
     @Override
     public GroundedValue get(AtomicValue key) {
-        if (key.asMapKey().equals(removedKey)) {
+        if (key.asMapKey(getSpecVersion()).equals(removedKey)) {
             return null;
         } else {
             return baseMap.get(key);
@@ -67,7 +67,7 @@ public class MapMinusOne extends MapItem implements Iterable<KeyValuePair>{
     public Iterator<KeyValuePair> iterator() {
         Iterator<KeyValuePair> baseIter = baseMap.keyValuePairs().iterator();
         java.util.function.Function<KeyValuePair, KeyValuePair> filter =
-                (kvp) -> kvp.key.asMapKey().equals(removedKey) ? null : kvp;
+                (kvp) -> kvp.key.asMapKey(getSpecVersion()).equals(removedKey) ? null : kvp;
         return new MappingJavaIterator<KeyValuePair, KeyValuePair>(baseIter, filter);
     }
 

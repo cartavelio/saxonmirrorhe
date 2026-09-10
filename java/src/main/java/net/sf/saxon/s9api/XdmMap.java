@@ -7,7 +7,6 @@
 
 package net.sf.saxon.s9api;
 
-import net.sf.saxon.Version;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.trans.XPathException;
@@ -26,6 +25,9 @@ import java.util.function.Function;
  * <p>An XdmMap is immutable.</p>
  * <p>It is possible to obtain a view of this object as an immutable Java {@link java.util.Map} by calling the
  * method {@link #asImmutableMap()}.</p>
+ * <p>An {@code XdmMap} constructed using the methods in this class will be labelled as an XDM 4.0 map,
+ * meaning that it uses the key comparison rules from the 4.0 specification. Specifically, this means
+ * that {@code hexBinary} and {@code base64Binary} keys are considered comparable.</p>
  *
  * @since 9.8
  */
@@ -37,7 +39,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public XdmMap() {
-        this(EmptyMap.getInstance());
+        this(EmptyMap.getInstance(40));
     }
 
     /**
@@ -64,7 +66,7 @@ public class XdmMap extends XdmFunctionItem {
     }
 
     private static MapItem fromJavaMap(Map<? extends XdmAtomicValue, ? extends XdmValue> map) {
-        GeneralMapBuilder val = AbstractFixedMap.getBuilder();
+        GeneralMapBuilder val = AbstractFixedMap.getBuilder(40);
         for (Map.Entry<? extends XdmAtomicValue, ? extends XdmValue> entry : map.entrySet()) {
             val.put(entry.getKey().getUnderlyingValue(), entry.getValue().getUnderlyingValue());
         }
@@ -394,12 +396,11 @@ public class XdmMap extends XdmFunctionItem {
      * @throws IllegalArgumentException if any value in the input map cannot be converted
      * to a corresponding XDM value; or if two keys in the input map, which are non-equal
      * to each other as Java values, produce XDM items that are equal to each other as
-     * XDM values. The comparison semantics used depend on the setting of the static
-     * variable {@link Version#MAP_SPEC_VERSION}.
+     * XDM values. The comparison semantics used are the XPath 4.0 semantics.
      */
 
     public static <K, V> XdmMap makeMap(Map<K, V> input) throws IllegalArgumentException {
-        GeneralMapBuilder result = AbstractFixedMap.getBuilder();
+        GeneralMapBuilder result = AbstractFixedMap.getBuilder(40);
         for (Map.Entry<K, V> entry : input.entrySet()) {
             K key = entry.getKey();
             V value = entry.getValue();

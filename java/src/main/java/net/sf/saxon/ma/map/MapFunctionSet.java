@@ -113,7 +113,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
     private void init(int version) {
 
-        register("merge", 1, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("merge", 1, e -> e.populate( () -> new MapMerge(version), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR | INS, null));
 
         SpecificFunctionType ON_DUPLICATES_CALLBACK_TYPE = new SpecificFunctionType(
@@ -136,7 +136,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         mergeOptionDetails.addAllowedOption("retain-order", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
 
 
-        register("merge", 2, e -> e.populate( MapMerge::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("merge", 2, e -> e.populate( () -> new MapMerge(version), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, STAR, null)
                 .arg(1, MapType.ANY_MAP_TYPE, version>=40 ? OPT : ONE, null)
                 .setOptionDetails(mergeOptionDetails));
@@ -160,7 +160,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         register("size", 1, e -> e.populate(MapSize::new, BuiltInAtomicType.INTEGER, ONE, 0)
                 .arg(0, MapType.ANY_MAP_TYPE, ONE | INS, null));
 
-        register("entry", 2, e -> e.populate( MapEntry::new, MapType.ANY_MAP_TYPE, ONE, 0)
+        register("entry", 2, e -> e.populate( () -> new MapEntry(version), MapType.ANY_MAP_TYPE, ONE, 0)
                 .arg(0, BuiltInAtomicType.ANY_ATOMIC, ONE | ABS, null)
                 .arg(1, AnyItemType.getInstance(), STAR | NAV, null));
 
@@ -302,7 +302,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
         public MapItem call(XPathContext context, Sequence[] arguments) throws XPathException {
             MapItem map = (MapItem) arguments[0].head();
             FunctionItem fn = (FunctionItem) arguments[1].head();
-            GeneralMapBuilder result = FixedMap.getBuilder();
+            GeneralMapBuilder result = FixedMap.getBuilder(map.getSpecVersion());
             for (KeyValuePair pair : map.keyValuePairs()) {
                 BooleanValue match = (BooleanValue)dynamicCall(fn, context, pair.key, pair.value).head();
                 if (match != null && match.getBooleanValue()) {
@@ -491,12 +491,17 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapEntry extends SystemFunction {
 
+        private final int version;
+        public MapEntry(int version) {
+            this.version = version;
+        }
+
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             AtomicValue key = (AtomicValue) arguments[0].head();
             assert key != null;
             GroundedValue value = arguments[1].materialize();
-            return new SingleEntryMap(key, value);
+            return new SingleEntryMap(key, value, version);
         }
 
         /**
@@ -613,7 +618,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 newArgs[2] = arguments[2];
             }
             if (arguments.length < 4 || arguments[3] instanceof DefaultedArgumentExpression) {
-                newArgs[3] = Literal.makeLiteral(EmptyMap.getInstance());
+                newArgs[3] = Literal.makeLiteral(EmptyMap.getInstance(40));
             } else {
                 newArgs[3] = arguments[3];
             }
@@ -623,7 +628,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
 
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            GeneralMapBuilder mapBuilder = new GeneralMapBuilder();
+            GeneralMapBuilder mapBuilder = new GeneralMapBuilder(40);
             FunctionItem keyFunction = (FunctionItem)arguments[1].head();
             FunctionItem valueFunction = (FunctionItem) arguments[2].head();
             MapItem options = (MapItem)arguments[3].head();
@@ -631,7 +636,7 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                 int version = getRetainedStaticContext().getPackageData().getHostLanguageVersion();
                 getDetails().optionDetails.processSuppliedOptions(options, context, version);
             } else {
-                options = EmptyMap.getInstance();
+                options = EmptyMap.getInstance(40);
             }
             OnDuplicatesAction action = getDuplicatesCombiner(options, "combine", "FOJS0003");
             mapBuilder.setDuplicatesAction(action);
@@ -709,8 +714,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
      */
     public static class MapMerge extends SystemFunction {
 
-        public MapMerge() {
-            super();
+        private final int version;
+        public MapMerge(int version) {
+            this.version = version;
         }
 
 
@@ -753,11 +759,11 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                     }
                 }
                 if (action == null) {
-                    action = getDuplicatesCombiner(EmptyMap.getInstance(), "use-first", "FOJS0003");
+                    action = getDuplicatesCombiner(EmptyMap.getInstance(version), "use-first", "FOJS0003");
                 }
 
                 SequenceIterator iter = arguments[0].iterate();
-                return mergeMaps(iter, context, action);
+                return mergeMaps(iter, context, action, version);
 
             } catch (UncheckedXPathException e) {
                 throw e.getXPathException();
@@ -775,10 +781,10 @@ public class MapFunctionSet extends BuiltInFunctionSet {
          * @throws XPathException if any error occurs, including detection of disallowed duplicates
          */
         public static MapItem mergeMaps(SequenceIterator iter, XPathContext context,
-                                        OnDuplicatesAction onDuplicates)
+                                        OnDuplicatesAction onDuplicates, int version)
                 throws XPathException {
             //MapBuilder mapBuilder = context.getConfiguration().makeMapBuilder(retainOrder, false);
-            GeneralMapBuilder builder = FixedMap.getBuilder();
+            GeneralMapBuilder builder = FixedMap.getBuilder(version);
             builder.setDuplicatesAction(onDuplicates);
             MapItem next;
             while ((next = (MapItem) iter.next()) != null) {
