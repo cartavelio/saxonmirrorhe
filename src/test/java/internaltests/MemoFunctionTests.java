@@ -1,149 +1,232 @@
 package internaltests;
 
-import net.sf.saxon.expr.AscendingRangeIterator;
-import net.sf.saxon.om.MemoSequence;
-import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.om.SequenceTool;
-import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.tree.iter.GroundedIterator;
+import net.sf.saxon.s9api.*;
+import net.sf.saxon.s9api.streams.Steps;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class MemoSequenceTests {
+public class MemoFunctionTests {
+
+    private XsltExecutable prepareArity1() {
+        try {
+            String xsl = "<x:transform xmlns:x='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' version='3.0'>" +
+                    "<x:function name='f:memo' cache='yes'><x:param name='p'/>"
+                    + "<x:sequence select='count($p)||Q{http://saxon.sf.net/}timestamp()'/>"
+                    + "</x:function>" +
+                    "<x:param name='p'/><x:param name='q'/>" +
+                    "<x:template name='x:initial-template'><x:sequence select='deep-equal(f:memo($p), f:memo($q))'/></x:template>" +
+                    "</x:transform>";
+            Processor proc = new Processor(true);
+            return proc.newXsltCompiler().compile(new StreamSource(new StringReader(xsl)));
+        } catch (SaxonApiException e) {
+            fail();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private XsltExecutable prepareArity2() {
+        try {
+            String xsl = "<x:transform xmlns:x='http://www.w3.org/1999/XSL/Transform' xmlns:f='f' version='3.0'>" +
+                    "<x:function name='f:memo' cache='yes'><x:param name='x'/><x:param name='y'/>"
+                    + "<x:sequence select='count($x)||count($y)||Q{http://saxon.sf.net/}timestamp()'/>"
+                    + "</x:function>" +
+                    "<x:param name='p'/><x:param name='q'/>" +
+                    "<x:param name='r'/><x:param name='s'/>" +
+                    "<x:template name='x:initial-template'><x:sequence select='deep-equal(f:memo($p, $q), f:memo($r, $s))'/></x:template>" +
+                    "</x:transform>";
+            Processor proc = new Processor(true);
+            return proc.newXsltCompiler().compile(new StreamSource(new StringReader(xsl)));
+        } catch (SaxonApiException e) {
+            fail();
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void testArity1(XsltExecutable exec, XdmValue p, XdmValue q, boolean expected) {
+        // Test whether two argument values are considered "the same value"; if they are,
+        // the cached value will be returned for the second call. To determine whether the second
+        // call gets the answer from cache, we call saxon:timestamp(), which (hopefully) produces different
+        // answers each time it is called.
+        try {
+            Xslt30Transformer trans = exec.load30();
+            Map<QName, XdmValue> params = new HashMap<>();
+            params.put(new QName("p"), p);
+            params.put(new QName("q"), q);
+            trans.setStylesheetParameters(params);
+            XdmValue result = trans.callTemplate(null);
+            assertTrue(result instanceof XdmAtomicValue);
+            assertEquals(expected, ((XdmAtomicValue) result).getBooleanValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    private void testArity2(XsltExecutable exec, XdmValue p, XdmValue q, XdmValue r, XdmValue s, boolean expected) {
+        // Test whether two argument values are considered "the same value"; if they are,
+        // the cached value will be returned for the second call. To determine whether the second
+        // call gets the answer from cache, we call saxon:timestamp(), which (hopefully) produces different
+        // answers each time it is called.
+        try {
+            Xslt30Transformer trans = exec.load30();
+            Map<QName, XdmValue> params = new HashMap<>();
+            params.put(new QName("p"), p);
+            params.put(new QName("q"), q);
+            params.put(new QName("r"), r);
+            params.put(new QName("s"), s);
+            trans.setStylesheetParameters(params);
+            XdmValue result = trans.callTemplate(null);
+            assertTrue(result instanceof XdmAtomicValue);
+            assertEquals(expected, ((XdmAtomicValue) result).getBooleanValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
 
     @Test
-    public void testItemAt() {
+    public void testStrings() {
         try {
-            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
-            MemoSequence ms = new MemoSequence(iter);
-            assertEquals("15", ms.itemAt(5).getStringValue(), "itemAtA");
-            SequenceIterator prog = ms.iterate();
-            assertEquals("10", prog.next().getStringValue(), "next1");
-            assertEquals("11", prog.next().getStringValue(), "next2");
-            assertEquals("12", prog.next().getStringValue(), "next3");
-            assertEquals("15", ms.itemAt(5).getStringValue(), "itemAtZ");
-        } catch (XPathException e) {
+            XsltExecutable exec = prepareArity1();
+            testArity1(exec, new XdmAtomicValue("fred"), new XdmAtomicValue("fred"), true);
+            testArity1(exec, new XdmAtomicValue(""), new XdmAtomicValue(""), true);
+            testArity1(exec, new XdmAtomicValue("fred"), new XdmAtomicValue("bill"), false);
+            testArity1(exec, new XdmAtomicValue("fred", ItemType.STRING), new XdmAtomicValue("fred", ItemType.UNTYPED_ATOMIC), false);
+        } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
     @Test
-    public void testMaterialize() {
+    public void testNumbers() {
         try {
-            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
-            MemoSequence ms = new MemoSequence(iter);
-            SequenceIterator prog = ms.iterate();
-
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(prog).getStringValue(), "materializeA");
-            assertEquals("10", prog.next().getStringValue(), "next1");
-            assertEquals("11", prog.next().getStringValue(), "next2");
-            assertEquals("12", prog.next().getStringValue(), "next3");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(prog).getStringValue(), "materializeB");
-            assertEquals("13", prog.next().getStringValue(), "next4");
-            assertEquals("14", prog.next().getStringValue(), "next5");
-            assertEquals("15", prog.next().getStringValue(), "next6");
-            assertEquals("16", prog.next().getStringValue(), "next7");
-            assertEquals("17", prog.next().getStringValue(), "next8");
-            assertEquals("18", prog.next().getStringValue(), "next9");
-            assertEquals("19", prog.next().getStringValue(), "next10");
-            assertEquals("20", prog.next().getStringValue(), "next11");
-            assertNull(prog.next(), "next12");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(((GroundedIterator) prog)).getStringValue(), "materializeC");
-
-        } catch (XPathException e) {
+            XsltExecutable exec = prepareArity1();
+            testArity1(exec, new XdmAtomicValue(3), new XdmAtomicValue(3), true);
+            testArity1(exec, new XdmAtomicValue(Double.NaN), new XdmAtomicValue(Double.NaN), true);
+            testArity1(exec, new XdmAtomicValue("0e0", ItemType.DOUBLE), new XdmAtomicValue("-0e0", ItemType.DOUBLE), false);
+            testArity1(exec, new XdmAtomicValue(3), new XdmAtomicValue(3.0e0), false);
+            testArity1(exec, new XdmAtomicValue(3), new XdmAtomicValue("3", ItemType.DECIMAL), false);
+        } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
     @Test
-    public void testMaterialize2() {
+    public void testQNames() {
+        // prefix is significant
+        XsltExecutable exec = prepareArity1();
+        testArity1(exec, new XdmAtomicValue(new QName("a", "b", "c")), new XdmAtomicValue(new QName("a", "b", "c")), true);
+        testArity1(exec, new XdmAtomicValue(new QName("a", "b", "c")), new XdmAtomicValue(new QName("x", "b", "c")), false);
+    }
+
+    @Test
+    public void testDateTimes() {
         try {
-            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
-            MemoSequence ms = new MemoSequence(iter);
-            SequenceIterator prog = ms.iterate();
-
-            assertEquals("10", prog.next().getStringValue(), "next1");
-            assertEquals("11", prog.next().getStringValue(), "next2");
-            assertEquals("12", prog.next().getStringValue(), "next3");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(((GroundedIterator) prog)).getStringValue(), "materializeB");
-            assertEquals("13", prog.next().getStringValue(), "next4");
-            assertEquals("14", prog.next().getStringValue(), "next5");
-            assertEquals("15", prog.next().getStringValue(), "next6");
-            assertEquals("16", prog.next().getStringValue(), "next7");
-            assertEquals("17", prog.next().getStringValue(), "next8");
-            assertEquals("18", prog.next().getStringValue(), "next9");
-            assertEquals("19", prog.next().getStringValue(), "next10");
-            assertEquals("20", prog.next().getStringValue(), "next11");
-            assertNull(prog.next(), "next12");
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", SequenceTool.toGroundedValue(((GroundedIterator) prog)).getStringValue(), "materializeC");
-
-        } catch (XPathException e) {
+            XsltExecutable exec = prepareArity1();
+            testArity1(exec,
+                       new XdmAtomicValue("2022-05-29T12:00:00Z", ItemType.DATE_TIME),
+                       new XdmAtomicValue("2022-05-29T12:00:00+00:00", ItemType.DATE_TIME), true);
+            testArity1(exec,
+                       new XdmAtomicValue("2022-05-29T12:00:00Z", ItemType.DATE_TIME),
+                       new XdmAtomicValue("2022-05-29T12:01:00+00:00", ItemType.DATE_TIME), false);
+            testArity1(exec,
+                       new XdmAtomicValue("2022-05-29T24:00:00Z", ItemType.DATE_TIME),
+                       new XdmAtomicValue("2022-05-30T00:00:00Z", ItemType.DATE_TIME), true);
+            testArity1(exec,
+                       new XdmAtomicValue("2022-05-29T12:00:00Z", ItemType.DATE_TIME),
+                       new XdmAtomicValue("2022-05-29T13:00:00+01:00", ItemType.DATE_TIME), false);
+            testArity1(exec,
+                       new XdmAtomicValue("2022-05-29T12:00:00Z", ItemType.DATE_TIME),
+                       new XdmAtomicValue("2022-05-29T13:00:00", ItemType.DATE_TIME), false);
+        } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
     @Test
-    public void testResidue() {
+    public void testNodes() {
         try {
-            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
-            MemoSequence ms = new MemoSequence(iter);
-            SequenceIterator prog = ms.iterate();
-
-            assertEquals("10 11 12 13 14 15 16 17 18 19 20", ((GroundedIterator) prog).getResidue().getStringValue(), "residueA");
-            assertEquals("10", prog.next().getStringValue(), "next1");
-            assertEquals("11", prog.next().getStringValue(), "next2");
-            assertEquals("12", prog.next().getStringValue(), "next3");
-            assertEquals("13 14 15 16 17 18 19 20", ((GroundedIterator) prog).getResidue().getStringValue(), "residueB");
-            assertEquals("13", prog.next().getStringValue(), "next4");
-            assertEquals("14", prog.next().getStringValue(), "next5");
-            assertEquals("15", prog.next().getStringValue(), "next6");
-            assertEquals("16", prog.next().getStringValue(), "next7");
-            assertEquals("17", prog.next().getStringValue(), "next8");
-            assertEquals("18", prog.next().getStringValue(), "next9");
-            assertEquals("19", prog.next().getStringValue(), "next10");
-            assertEquals("20", prog.next().getStringValue(), "next11");
-            assertNull(prog.next(), "next12");
-            assertEquals("", ((GroundedIterator) prog).getResidue().getStringValue(), "residueC");
-
-        } catch (XPathException e) {
+            XsltExecutable exec = prepareArity1();
+            Processor proc = exec.getProcessor();
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode n0 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            XdmNode e0 = n0.select(Steps.child("doc")).asNode();
+            XdmNode n1 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            XdmNode e1 = n1.select(Steps.child("doc")).asNode();
+            testArity1(exec, n0, n0, true);
+            testArity1(exec, n0, n1, false);
+            testArity1(exec, n0, e0, false);
+            testArity1(exec, e0, e1, false);
+            testArity1(exec, e1, e1, true);
+        } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
 
     @Test
-    public void testResidue2() {
+    public void testMixed() {
         try {
-            SequenceIterator iter = new AscendingRangeIterator(10, 1, 20);
-            MemoSequence ms = new MemoSequence(iter);
-            SequenceIterator prog = ms.iterate();
-
-            assertEquals("10", prog.next().getStringValue(), "next1");
-            assertEquals("11", prog.next().getStringValue(), "next2");
-            assertEquals("12", prog.next().getStringValue(), "next3");
-            assertEquals("13 14 15 16 17 18 19 20", ((GroundedIterator) prog).getResidue().getStringValue(), "residueB");
-            assertEquals("13", prog.next().getStringValue(), "next4");
-            assertEquals("14", prog.next().getStringValue(), "next5");
-            assertEquals("15", prog.next().getStringValue(), "next6");
-            assertEquals("16", prog.next().getStringValue(), "next7");
-            assertEquals("17", prog.next().getStringValue(), "next8");
-            assertEquals("18", prog.next().getStringValue(), "next9");
-            assertEquals("19", prog.next().getStringValue(), "next10");
-            assertEquals("20", prog.next().getStringValue(), "next11");
-            assertNull(prog.next(), "next12");
-            assertEquals("", ((GroundedIterator) prog).getResidue().getStringValue(), "residueC");
-
-        } catch (XPathException e) {
+            XsltExecutable exec = prepareArity1();
+            Processor proc = exec.getProcessor();
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode n0 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            XdmNode n1 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            testArity1(exec, n0.append(n1), n0.append(n1), true);
+            testArity1(exec, n0.append(n1), n1.append(n0), false);
+            testArity1(exec, XdmEmptySequence.getInstance(), XdmEmptySequence.getInstance(), true);
+            testArity1(exec, XdmEmptySequence.getInstance(), n0, false);
+            testArity1(exec, new XdmAtomicValue("a"), new XdmAtomicValue("a").append(new XdmAtomicValue("b")), false);
+            testArity1(exec, new XdmAtomicValue("a").append(new XdmAtomicValue("b")), new XdmAtomicValue("a").append(new XdmAtomicValue("b")), true);
+        } catch (SaxonApiException e) {
             e.printStackTrace();
             fail();
         }
     }
+
+    @Test
+    public void testArity2Atomic() {
+        XsltExecutable exec = prepareArity2();
+        XdmAtomicValue a = new XdmAtomicValue("aaa");
+        XdmAtomicValue b = new XdmAtomicValue("bbb");
+        testArity2(exec, a, b, a, b, true);
+        testArity2(exec, a, b, b, a, false);
+        testArity2(exec, a, b, a, XdmEmptySequence.getInstance(), false);
+        testArity2(exec, a, XdmEmptySequence.getInstance(), a, XdmEmptySequence.getInstance(), true);
+    }
+
+    @Test
+    public void testArity2Nodes() {
+        try {
+            XsltExecutable exec = prepareArity2();
+            Processor proc = exec.getProcessor();
+            DocumentBuilder builder = proc.newDocumentBuilder();
+            XdmNode n0 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            XdmNode e0 = n0.select(Steps.child("doc")).asNode();
+            XdmNode n1 = builder.build(new StreamSource(new StringReader("<doc/>")));
+            XdmNode e1 = n1.select(Steps.child("doc")).asNode();
+            testArity2(exec, n0, n1, n0, n1, true);
+            testArity2(exec, n0, n1, n0, n0, false);
+            testArity2(exec, n0, e0, n0, e0, true);
+            testArity2(exec, n0, e0, n0, e1, false);
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
 }
 
 
