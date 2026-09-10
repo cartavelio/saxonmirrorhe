@@ -99,6 +99,11 @@ TODO: rethink redefines and override
         
         <p>The <code>months</code> component is unaffected: the total number of months in a duration
         remains limited to 2^31.</p>
+        
+        <p>Similarly, the seconds value in an <code>xs:dateTime</code> or <code>xs:time</code> value is now held
+        as a <code>BigDecimal</code>, meaning there is effectively no limit on the precision of fractional
+        seconds. Previously it was held as an integer number of seconds plus an integer number of
+        nanoseconds. Again, this is reflected in changes to some low-level interfaces.</p>
  
         
     </category>
@@ -507,6 +512,7 @@ TODO: rethink redefines and override
         changes in the draft 4.0 specifications, but it has been made regardless whether 4.0 processing
         is enabled in Saxon. The change is also conformant with XPath 3.1, which states
         that the results of operations on dates that cross the year 0000 are implementation-defined.</p>
+       
         
         <p>The rules for casting from <code>xs:string</code> when 4.0 is enabled always follow the XSD 1.1 rules.
         This means that when casting to <code>xs:date</code> or <code>xs:dateTime</code>,
