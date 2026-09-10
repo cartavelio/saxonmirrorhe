@@ -251,11 +251,22 @@ abstract class TestSuiteTask  @Inject constructor(private val ex: ExecOperations
 
     @TaskAction
     fun runTests() {
+        val runner = this
+
         arguments.add(driver, suiteDir, "-o", outputDir)
         if (language.isPresent) {
-            arguments.add("-l", language)
+          runner.arguments.add("-l", language)
         }
-        val runner = this
+
+        println("Python test suite dir: ${runner.workingDir.get()}")
+        println("      test suite exec: ${runner.python.get()}")
+        val pargs = mutableListOf<String>()
+        pargs.addAll(runner.arguments.get())
+        if (testSetArg.isPresent) pargs.addAll(listOf("-s", "${testSetArg.get()}"))
+        if (testPatternArg.isPresent) pargs.addAll(listOf("-t", "${testPatternArg.get()}"))
+        if (testJitArg.isPresent) pargs.addAll(listOf("--jit", "${testJitArg.get()}"))
+        println("  Args: ${pargs.joinToString(" ")}")
+
         ex.exec {
             workingDir(runner.workingDir.get())
             executable(runner.python.get())
