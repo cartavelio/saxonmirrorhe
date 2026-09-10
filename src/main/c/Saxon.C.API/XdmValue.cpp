@@ -74,7 +74,7 @@ XdmValue::XdmValue(int64_t val, bool arr) {
     return;
   }
 
-  int xdmSizei = results[0];
+  int xdmSizei = results[0]; //first value represents the size of the results array
   values_cap = xdmSizei;
   values = new XdmItem *[values_cap];
   relinquished_values = new char[values_cap];
@@ -112,6 +112,17 @@ XdmValue::XdmValue(int64_t val, bool arr) {
     }
   }
   operator delete(results);
+}
+
+void XdmValue::resetRelinquishedItems(){
+    for (int i = 0; i < xdmSize; i++) {
+      if (relinquished_values[i] == (char)1 && values[i] != nullptr) {
+        values[i]->decrementRefCount();
+        if(values[i]->getRefCount() < 1) {
+           relinquished_values[i] == (char)0;
+        }
+      }
+    }
 }
 
 XdmValue::~XdmValue() {
@@ -178,7 +189,7 @@ void XdmValue::addXdmItem(XdmItem *val) {
     // val->incrementRefCount();
     xdmSize++;
     if (jValues >= 0) {
-      jValues = -1;
+      jValues = SXN_UNSET; // TODO clear Graalvm reference from ObjectHandles pool or block user add item if set via jValues
     }
     if (toStringValue != nullptr) {
       operator delete(toStringValue);
@@ -193,16 +204,21 @@ void XdmValue::addUnderlyingValue(int64_t val) {
   if (xdmSize == values_cap) {
     // resizing values pointer array
     XdmItem **newValues = new XdmItem *[values_cap * 2];
+    char *new_relinquish_val = new char[values_cap * 2];
+    memset(new_relinquish_val, 0,
+             sizeof(*new_relinquish_val) * values_cap * 2);
     for (int i = 0; i < values_cap; i++) {
       newValues[i] = values[i];
+      new_relinquish_val[i] = relinquished_values[i];
     }
     delete values;
     values = newValues;
+    relinquished_values = new_relinquish_val;
     values_cap *= 2;
   }
   values[xdmSize] = valuei;
   xdmSize++;
-  jValues = -1; // TODO clear Graalvm reference from ObjectHandles pool
+  jValues = SXN_UNSET; // TODO clear Graalvm reference from ObjectHandles pool or block user add item if set via jValues
 }
 
 void XdmValue::incrementRefCount() {

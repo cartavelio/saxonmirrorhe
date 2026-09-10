@@ -93,7 +93,7 @@ XdmItem::~XdmItem() {
   if (value > 0) {
     j_handles_destroy(SaxonProcessor::sxn_environ->thread, (void *)value);
   }
-  value = -1;
+  value = SXN_UNSET;
   /*else {
        decrementRefCount();
    }*/

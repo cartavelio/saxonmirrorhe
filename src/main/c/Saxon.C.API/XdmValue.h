@@ -123,7 +123,8 @@ public:
    * as item zero
    * @return the n'th item in the sequence making up the value, counting from
    * zero return nullptr  if n is less than zero or greater than or equal to the
-   * number of items in the value
+   * number of items in the value.
+   * Pointer to XdmItem objects have to be deleted in the calling program.
    */
   virtual XdmItem *itemAt(int n);
 
@@ -178,10 +179,12 @@ public:
    */
   virtual XDM_TYPE getType();
 
+  void resetRelinquishedItems();
+
 protected:
   //! initialize this XdmValue with default values
   inline void initialize() {
-    jValues = -1;
+    jValues = SXN_UNSET;
     refCount = 0;
     valueType = nullptr;
     xdmSize = 0;
