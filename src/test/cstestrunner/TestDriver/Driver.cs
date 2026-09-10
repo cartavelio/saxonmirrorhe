@@ -159,7 +159,7 @@ namespace TestDriver {
                     testSuiteDir = testSuiteDir.Substring(0, testSuiteDir.Length - 1);
                 }
 
-                System.Environment.SetEnvironmentVariable("expath.base.directory", testSuiteDir + "/expath/file");
+                System.Environment.SetEnvironmentVariable("expath.base.directory", testSuiteDir + "/file");
 
                 
 
