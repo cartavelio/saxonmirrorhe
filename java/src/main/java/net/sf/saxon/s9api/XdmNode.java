@@ -77,24 +77,16 @@ public class XdmNode extends XdmItem {
      */
 
     public XdmNodeKind getNodeKind() {
-        switch (getUnderlyingNode().getNodeKind()) {
-            case Type.DOCUMENT:
-                return XdmNodeKind.DOCUMENT;
-            case Type.ELEMENT:
-                return XdmNodeKind.ELEMENT;
-            case Type.ATTRIBUTE:
-                return XdmNodeKind.ATTRIBUTE;
-            case Type.TEXT:
-                return XdmNodeKind.TEXT;
-            case Type.COMMENT:
-                return XdmNodeKind.COMMENT;
-            case Type.PROCESSING_INSTRUCTION:
-                return XdmNodeKind.PROCESSING_INSTRUCTION;
-            case Type.NAMESPACE:
-                return XdmNodeKind.NAMESPACE;
-            default:
-                throw new IllegalStateException("nodeKind");
-        }
+        return switch (getUnderlyingNode().getNodeKind()) {
+            case Type.DOCUMENT -> XdmNodeKind.DOCUMENT;
+            case Type.ELEMENT -> XdmNodeKind.ELEMENT;
+            case Type.ATTRIBUTE -> XdmNodeKind.ATTRIBUTE;
+            case Type.TEXT -> XdmNodeKind.TEXT;
+            case Type.COMMENT -> XdmNodeKind.COMMENT;
+            case Type.PROCESSING_INSTRUCTION -> XdmNodeKind.PROCESSING_INSTRUCTION;
+            case Type.NAMESPACE -> XdmNodeKind.NAMESPACE;
+            default -> throw new IllegalStateException("nodeKind");
+        };
     }
 
     /**
