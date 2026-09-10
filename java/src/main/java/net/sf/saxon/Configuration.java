@@ -3117,6 +3117,10 @@ public class Configuration implements SourceResolver {
         return null;
     }
 
+    public ItemType getBuiltInRecordType(String localName) {
+        return null;
+    }
+
     //    /**
 //     * Import a precompiled Schema Component Model from a given Source. The schema components derived from this schema
 //     * document are added to the cache of schema components maintained by this SchemaManager

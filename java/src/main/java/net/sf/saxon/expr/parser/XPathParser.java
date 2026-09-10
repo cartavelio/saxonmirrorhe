@@ -1773,9 +1773,7 @@ public class XPathParser {
         String local = sq.getLocalPart();
         String qname = sq.getDisplayName();
 
-        boolean builtInNamespace = uri.equals(NamespaceUri.SCHEMA);
-
-        if (builtInNamespace) {
+        if (uri.equals(NamespaceUri.SCHEMA)) {
             ItemType t = Type.getBuiltInItemType(uri, local);
             if (t == null) {
                 grumble("Unknown atomic type " + qname, "XPST0051");
@@ -1790,6 +1788,13 @@ public class XPathParser {
                 grumble("The type " + qname + " is not atomic", "XPST0051");
                 assert false;
             }
+        } else if (uri.equals(NamespaceUri.FN) && allowXPath40Syntax) {
+            ItemType recordType = config.getBuiltInRecordType(local);
+            if (recordType == null) {
+                grumble("Unknown built-in record type fn:" + local, "XPST0051");
+                assert false;
+            }
+            return recordType;
 //#if CSHARP==false
         } else if (uri.equals(NamespaceUri.JAVA_TYPE)) {
             Class<?> theClass;
