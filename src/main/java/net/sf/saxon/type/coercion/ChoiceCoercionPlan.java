@@ -17,11 +17,14 @@ import java.util.List;
 public class UnionCoercionPlan extends AtomicCoercionPlan {
 
     public final static UnionCoercionPlan INSTANCE = new UnionCoercionPlan();
+
+
+
     protected ItemMappingFunction getUntypedAtomicPromoter(CoercionRequest request, UType atomizedType) {
 
         Configuration config = request.config;
         TypeHierarchy th = config.getTypeHierarchy();
-        ItemType requiredItemType = request.requiredType.getPrimaryType();
+        ItemType requiredItemType = request.requiredType;
 //        if (!atomizedType.overlaps(UType.UNTYPED_ATOMIC) &&
 //                !th.isSubType(BuiltInAtomicType.UNTYPED_ATOMIC, requiredItemType)) {
             final boolean nsSensitive = ((PlainType) requiredItemType).isNamespaceSensitive();
@@ -82,7 +85,7 @@ public class UnionCoercionPlan extends AtomicCoercionPlan {
                     }
                 }
             }
-            throw coercionError(request, item);
+            throw coercionError(item, request);
         });
     }
 
