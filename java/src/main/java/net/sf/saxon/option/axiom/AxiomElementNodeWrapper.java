@@ -10,7 +10,6 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.tree.NamespaceNode;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
@@ -19,6 +18,8 @@ import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
+import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import org.apache.axiom.om.*;
 
 import javax.xml.namespace.QName;
@@ -217,14 +218,14 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
     @Override
     protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
-            if (nodeTest == NodeTypeTest.GNODE) {
+            if (nodeTest == AnyGNodeType.getInstance()) {
                 return new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
                 return Navigator.filter(
                         new AxiomDocument.FollowingSiblingIterator((OMElement) node, parent, docWrapper), nodeTest);
             }
         } else {
-            if (nodeTest == NodeTypeTest.GNODE) {
+            if (nodeTest == AnyGNodeType.getInstance()) {
                 return new AxiomDocument.PrecedingSiblingIterator((OMElement) node, parent, docWrapper);
             } else {
                 return Navigator.filter(
@@ -343,7 +344,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
 
         public AttributeAxisIterator(AxiomElementNodeWrapper element, NodeTest test) {
             this.element = element;
-            if (test == NodeTypeTest.GNODE || test == NodeTypeTest.ATTRIBUTE) {
+            if (test == AnyGNodeType.getInstance() || test == NodeKindType.ATTRIBUTE) {
                 test = null;
             }
             base = ((OMElement) element.node).getAllAttributes();

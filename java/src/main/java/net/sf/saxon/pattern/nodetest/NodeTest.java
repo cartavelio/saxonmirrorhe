@@ -9,35 +9,31 @@ package net.sf.saxon.pattern.nodetest;
 
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.trans.Err;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.type.gnode.AnyGNodeType;
-import net.sf.saxon.z.IntSet;
-import net.sf.saxon.z.IntUniversalSet;
+import net.sf.saxon.type.gnode.GNodeType;
 
 import java.util.Optional;
 
 /**
- * A NodeTest is a simple kind of pattern that enables a context-free test of whether
- * a node matches a given node kind and name. There are several kinds of node test: a full name test, a prefix test, and an
- * "any node of a given type" test, an "any node of any type" test, a "no nodes"
- * test (used, e.g. for "@comment()").
- * <p>As well as being used to support XSLT pattern matching, NodeTests act as predicates in
- * axis steps.</p>
+ * A {@code NodeTest} represents the XPath construct of the same name: specifically,
+ * it represents what can appear after the (explicit or implicit) "::" in a step in
+ * a path expression.
+ * <p>NodeTests are also used to support XSLT pattern matching.</p>
  * <p>Node tests used in axis step overlap with node types used in ItemType syntax. In previous
  * Saxon versions, the {@code NodeTest} class served both purposes: it represented both a node
  * test used in an axis step, and a node type used in (say) an {@code as} attribute. From Saxon 13
- * these two concept are separated. In cases where the node test in an axis step is simply
- * an item type (such as {@code node()} or {@code element(e)}, the NodeTest will typically
- * be an {@code NodeTypeTest} that references the required item type. The {@code NodeTest}
- * class itself no longer implements {@code ItemType}</p>
+ * these two concept are separated. The {@code NodeTest} class has become an interface,
+ * and node tests that are also item types are represented by subclasses of {@link GNodeType}:
+ * an abstract class that implements the {@code NodeTest} interface.</p>
+ * <p>Some node tests have different semantics depending on whether they are selecting
+ * within an XTree or a JTree, and in some cases this cannot be decided until evaluation
+ * time.</p>
  */
 
-public abstract class NodeTest implements NodePredicate {
+public interface NodeTest extends NodePredicate {
 
     /**
      * Determine the default priority to use if this node-test appears as a match pattern
@@ -61,9 +57,10 @@ public abstract class NodeTest implements NodePredicate {
      * @return an item type
      */
 
-    public ItemType getItemType() {
-        return AnyGNodeType.getInstance();
-    }
+    public ItemType getItemType();
+//    {
+//        return AnyGNodeType.getInstance();
+//    }
 
 
 
@@ -72,33 +69,9 @@ public abstract class NodeTest implements NodePredicate {
      * @return a UType
      */
 
-    public UType getUType() {
-        return getItemType().getUType();
-    }
-
-    /**
-     * Get the name of the nodes matched by this nodetest, if it matches a specific name.
-     * Return null if the node test matches nodes of more than one name
-     */
-
-//    public StructuredQName getMatchingNodeName() {
-//        return null;
-//    }
-
-//    /**
-//     * Get a matching function that can be used to test whether numbered nodes in a TinyTree
-//     * or DominoTree satisfy the node test. (Calling this matcher must give the same result
-//     * as calling <code>matchesNode(tree.getNode(nodeNr))</code>, but it may well be faster).
-//     * @param tree the tree against which the returned function will operate
-//     * @return an IntPredicate; the matches() method of this predicate takes a node number
-//     * as input, and returns true if and only if the node identified by this node number
-//     * matches the node test.
-//     */
-//
-//    public IntPredicate getMatcher(final NodeVectorTree tree) {
-//        // Default implementation materialises the node
-//        return IntPredicateLambda.of(nodeNr -> tree.getNodeKind(nodeNr) != Type.PARENT_POINTER
-//                                               && test(tree.getNode(nodeNr)));
+    public UType getUType();
+//    {
+//        return getItemType().getUType();
 //    }
 
     /**
@@ -109,35 +82,8 @@ public abstract class NodeTest implements NodePredicate {
      * @return true if the node test is satisfied by the supplied node, false otherwise
      */
     
-    public abstract boolean test(GNode node);
+    public boolean test(GNode node);
 
-    /**
-     * Get the set of node names allowed by this NodeTest. This is returned as a set of Integer fingerprints.
-     * If all names are permitted (i.e. there are no constraints on the node name), returns IntUniversalSet.getInstance().
-     * The default implementation returns the universal set.
-     *
-     * @return the set of integer fingerprints of the node names that this node test can match; or absent
-     * if the set of names cannot be represented (for example, with the name tests *:xxx or xxx:*)
-     */
-
-    /*@NotNull*/
-    public Optional<IntSet> getRequiredNodeNames() {
-        return Optional.of(IntUniversalSet.getInstance());
-    }
-
-    /**
-     * Get a fingerprint that can be used to match required nodes.
-     *
-     * @param nodeKind the kind of nodes required.
-     * @return if all nodes selected by the node test are of the required nodeKind, and
-     * have the same fingerprint, then return that fingerprint; otherwise return -1. Note
-     * that it is acceptable for the node test to impose further constraints, for example
-     * on the type annotation.
-     */
-
-//    public int getRequiredFingerprint(int nodeKind) {
-//        return -1;
-//    }
 
     /**
      * Determine whether the content type (if present) is nillable
@@ -145,10 +91,7 @@ public abstract class NodeTest implements NodePredicate {
      * @return true if the content test (when present) can match nodes that are nilled
      */
 
-    public boolean isNillable() {
-        return true;
-    }
-
+    public boolean isNillable();
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this
@@ -160,25 +103,27 @@ public abstract class NodeTest implements NodePredicate {
      * @return optionally, a message explaining why the item does not match the type
      */
 
-    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        if (item instanceof NodeInfo) {
-            UType actualKind = UType.getUType(item);
-            if (!getUType().overlaps(actualKind)) {
-                return Optional.of("The supplied value is " + actualKind.toStringWithIndefiniteArticle());
-            }
-            return Optional.empty();
-        } else {
-            return Optional.of("The supplied value is " + Err.describeGenre(item.getGenre()));
-        }
-    }
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th);
+//    {
+//        if (item instanceof NodeInfo) {
+//            UType actualKind = UType.getUType(item);
+//            if (!getUType().overlaps(actualKind)) {
+//                return Optional.of("The supplied value is " + actualKind.toStringWithIndefiniteArticle());
+//            }
+//            return Optional.empty();
+//        } else {
+//            return Optional.of("The supplied value is " + Err.describeGenre(item.getGenre()));
+//        }
+//    }
 
     /**
      * Get a concise string representation of this node test for use in diagnostics
      * @return a suitably abbreviated respresention of the node test
      */
-    public String toShortString() {
-        return toString();
-    }
+    public String toShortString();
+//    {
+//        return toString();
+//    }
 
 
 }

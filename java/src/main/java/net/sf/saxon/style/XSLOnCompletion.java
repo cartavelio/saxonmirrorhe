@@ -13,8 +13,8 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.gnode.NodeKindType;
 
 /**
  * An xsl:on-completion element in the stylesheet (XSLT 3.0). <br>
@@ -70,7 +70,7 @@ public class XSLOnCompletion extends StyleElement {
         if (!(parent instanceof XSLIterate)) {
             compileError("xsl:on-completion is not allowed as a child of " + parent.getDisplayName(), "XTSE0010");
         }
-        SequenceIterator iter = iteratePrecedingSiblingAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator iter = iteratePrecedingSiblingAxis(NodeKindType.ELEMENT);
         NodeInfo sib;
         while ((sib = (NodeInfo)iter.next()) != null) {
             if (!(sib instanceof XSLFallback || sib instanceof XSLLocalParam)) {

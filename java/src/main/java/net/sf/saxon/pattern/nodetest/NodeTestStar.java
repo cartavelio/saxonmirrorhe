@@ -3,12 +3,16 @@ package net.sf.saxon.pattern.nodetest;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.ChoiceItemType;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.UType;
 import net.sf.saxon.type.gnode.NodeKindType;
+
+import java.util.Optional;
 
 /**
  * A node test representing the syntax {@code *} - meaning either all
@@ -16,16 +20,25 @@ import net.sf.saxon.type.gnode.NodeKindType;
  * in the case of an XNode
  */
 
-public class NodeTestStar extends NodeTest {
+public class NodeTestStar implements NodeTest {
 
-    private final TypeHierarchy th;
     private final int defaultNodeKind;
 
-    public NodeTestStar(int defaultNodeKind, TypeHierarchy th) {
+    /**
+     * Create the test
+     * @param defaultNodeKind the default node kind for the axis on which the node
+     *                        test appears. This is relevant only when the step
+     *                        is used to select within an XTree, but we need to
+     *                        keep the information "just in case".
+     */
+    public NodeTestStar(int defaultNodeKind) {
         this.defaultNodeKind = defaultNodeKind;
-        this.th = th;
     }
 
+    /**
+     * Get the default node kind of the axis used in the containing step.
+     * @return the default node kind (always element, attribute, or namespace)
+     */
     public int getDefaultNodeKind() {
         return defaultNodeKind;
     }
@@ -76,6 +89,50 @@ public class NodeTestStar extends NodeTest {
     @Override
     public String toString() {
         return "*";
+    }
+
+    /**
+     * Get a UType that all matching nodes must satisfy
+     *
+     * @return a UType
+     */
+    @Override
+    public UType getUType() {
+        return UType.GNODE;
+    }
+
+    /**
+     * Determine whether the content type (if present) is nillable
+     *
+     * @return true if the content test (when present) can match nodes that are nilled
+     */
+    @Override
+    public boolean isNillable() {
+        return true;
+    }
+
+    /**
+     * Get extra diagnostic information about why a supplied item does not conform to this
+     * item type, if available. If extra information is returned, it should be in the form of a complete
+     * sentence, minus the closing full stop. No information should be returned for obvious cases.
+     *
+     * @param item the item that doesn't match this type
+     * @param th   the type hierarchy cache
+     * @return optionally, a message explaining why the item does not match the type
+     */
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        return Optional.empty();
+    }
+
+    /**
+     * Get a concise string representation of this node test for use in diagnostics
+     *
+     * @return a suitably abbreviated respresention of the node test
+     */
+    @Override
+    public String toShortString() {
+        return toString();
     }
 }
 

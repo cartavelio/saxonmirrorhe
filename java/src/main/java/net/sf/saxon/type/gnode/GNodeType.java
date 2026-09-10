@@ -5,6 +5,9 @@ import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Genre;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.value.SequenceType;
@@ -17,7 +20,7 @@ import java.util.Optional;
  * item types whose instances are all nodes; they cannot be used directly as node predicates
  * in an axis step.
  */
-public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemType, NodePredicate {
+public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemType, NodeTest {
 
     private SequenceType _one;
     private SequenceType _oneOrMore;
@@ -153,7 +156,6 @@ public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemTy
         return null;
     }
 
-
     /**
      * Get the item type of the atomic values that will be produced when an item
      * of this type is atomized
@@ -190,6 +192,37 @@ public abstract class GNodeType implements ItemTypeWithSequenceTypeCache, ItemTy
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
         return Optional.empty();
+    }
+
+    /**
+     * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
+     * if it is to satisfy this NodeTest
+     *
+     * @return the strongest possible QNameTest
+     */
+    @Override
+    public QNameTest getQNameTest() {
+        return AnyQNameTest.getInstance();
+    }
+
+    /**
+     * Get an item type that all matching nodes must satisfy
+     *
+     * @return an item type
+     */
+    @Override
+    public ItemType getItemType() {
+        return this;
+    }
+
+    /**
+     * Get a concise string representation of this node test for use in diagnostics
+     *
+     * @return a suitably abbreviated respresention of the node test
+     */
+    @Override
+    public String toShortString() {
+        return toString();
     }
 
     /**

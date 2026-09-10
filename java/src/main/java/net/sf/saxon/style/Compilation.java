@@ -13,7 +13,6 @@ import net.sf.saxon.expr.PackageData;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.lib.ErrorReporter;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.s9api.XmlProcessingError;
@@ -25,6 +24,7 @@ import net.sf.saxon.trans.packages.UsePack;
 import net.sf.saxon.trans.packages.VersionedPackageName;
 import net.sf.saxon.tree.util.IndexedStack;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.NestedIntegerValue;
 
@@ -264,7 +264,7 @@ public class Compilation {
         if (root != null) {
             if (root.getNodeKind() == Type.DOCUMENT) {
                 document = root;
-                outermost = (NodeInfo)document.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+                outermost = (NodeInfo)document.iterateChildAxis(NodeKindType.ELEMENT).next();
             } else if (root.getNodeKind() == Type.ELEMENT) {
                 document = root.getRoot();
                 outermost = root;
@@ -273,7 +273,7 @@ public class Compilation {
 
         if (!(outermost instanceof XSLPackage)) {
             document = StylesheetModule.loadStylesheetModule(source, true, this, NestedIntegerValue.TWO);
-            outermost = (NodeInfo)document.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+            outermost = (NodeInfo)document.iterateChildAxis(NodeKindType.ELEMENT).next();
         }
         if (outermost == null) {
             throw new XPathException("No stylesheet element found at " + source.getSystemId(), "XPST0010");
@@ -281,7 +281,7 @@ public class Compilation {
 
         if (outermost instanceof LiteralResultElement) {
             document = ((LiteralResultElement) outermost).makeStylesheet(true);
-            outermost = (NodeInfo)document.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+            outermost = (NodeInfo)document.iterateChildAxis(NodeKindType.ELEMENT).next();
         }
 
         XSLPackage xslpackage;

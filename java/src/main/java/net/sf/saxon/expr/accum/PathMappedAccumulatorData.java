@@ -11,10 +11,10 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyNodeImpl;
 import net.sf.saxon.tree.util.Navigator;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 
 import java.util.Stack;
 
@@ -54,7 +54,7 @@ public class PathMappedAccumulatorData implements IAccumulatorData {
             Stack<Integer> path = new Stack<Integer>();
             NodeInfo ancestor = node;
             while (ancestor != null) {
-                path.push(Navigator.getSiblingPosition(ancestor, NodeTypeTest.GNODE, Integer.MAX_VALUE));
+                path.push(Navigator.getSiblingPosition(ancestor, AnyGNodeType.getInstance(), Integer.MAX_VALUE));
                 ancestor = (NodeInfo)ancestor.getParent();
             }
             NodeInfo target = origin;

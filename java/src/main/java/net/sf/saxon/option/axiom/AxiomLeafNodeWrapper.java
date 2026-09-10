@@ -10,7 +10,6 @@ package net.sf.saxon.option.axiom;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.NamespaceNode;
@@ -20,6 +19,7 @@ import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import org.apache.axiom.om.*;
 
 import java.util.Iterator;
@@ -283,14 +283,14 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
     @Override
     protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
         if (forwards) {
-            if (nodeTest == NodeTypeTest.GNODE) {
+            if (nodeTest == AnyGNodeType.getInstance()) {
                 return new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper);
             } else {
                 return Navigator.filter(
                         new AxiomDocument.FollowingSiblingIterator(node, parent, docWrapper), nodeTest);
             }
         } else {
-            if (nodeTest == NodeTypeTest.GNODE) {
+            if (nodeTest == AnyGNodeType.getInstance()) {
                 return new AxiomDocument.PrecedingSiblingIterator(node, parent, docWrapper);
             } else {
                 return Navigator.filter(

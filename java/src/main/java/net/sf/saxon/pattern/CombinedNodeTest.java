@@ -11,13 +11,13 @@ import net.sf.saxon.expr.parser.OperatorSymbol;
 import net.sf.saxon.ma.map.StringMapBuilder;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
-import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.type.ChoiceItemType;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
-import net.sf.saxon.z.IntSet;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -28,7 +28,7 @@ import java.util.Optional;
  * when optimizing a union (etc) of two path expressions using the same axis.
  */
 
-public class CombinedNodeTest extends NodeTest {
+public class CombinedNodeTest implements NodeTest {
 
     private final NodeTest nodetest1;
     private final NodeTest nodetest2;
@@ -241,37 +241,6 @@ public class CombinedNodeTest extends NodeTest {
 //    }
 
     /**
-     * Get the set of node names allowed by this NodeTest. This is returned as a set of Integer fingerprints.
-     * IntUniversalSet indicates that all names are permitted (i.e. that there are no constraints on the node name).
-     */
-
-    /*@NotNull*/
-    @Override
-    public Optional<IntSet> getRequiredNodeNames() {
-        Optional<IntSet> os1 = nodetest1.getRequiredNodeNames();
-        Optional<IntSet> os2 = nodetest2.getRequiredNodeNames();
-        if (os1.isPresent() && os2.isPresent()) {
-            IntSet s1 = os1.get();
-            IntSet s2 = os2.get();
-            switch (operator) {
-                case UNION: {
-                    return Optional.of(s1.union(s2));
-                }
-                case INTERSECT: {
-                    return Optional.of(s1.intersect(s2));
-                }
-                case EXCEPT: {
-                    return Optional.of(s1.except(s2));
-                }
-                default:
-                    throw new IllegalStateException();
-            }
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    /**
      * Extract a QNameTest (the strongest one possible) that must be satisfied by a node
      * if it is to satisfy this NodeTest
      *
@@ -303,8 +272,30 @@ public class CombinedNodeTest extends NodeTest {
         return AnyQNameTest.getInstance();
     }
 
+    /**
+     * Get an item type that all matching nodes must satisfy
+     *
+     * @return an item type
+     */
+    @Override
+    public ItemType getItemType() {
+        if (operator == OperatorSymbol.UNION) {
+            return ChoiceItemType.of(nodetest1.getItemType(), nodetest2.getItemType());
+        }
+        return nodetest1.getItemType();
+    }
 
-//    /**
+    /**
+     * Get a concise string representation of this node test for use in diagnostics
+     *
+     * @return a suitably abbreviated respresention of the node test
+     */
+    @Override
+    public String toShortString() {
+        return toString();
+    }
+
+    //    /**
 //     * Get the content type allowed by this NodeTest (that is, the type annotation of the matched nodes).
 //     * Return AnyType if there are no restrictions. The default implementation returns AnyType.
 //     */
@@ -472,18 +463,18 @@ public class CombinedNodeTest extends NodeTest {
      */
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        Optional<String> explanation = super.explainMismatch(item, th);
-        if (explanation.isPresent()) {
-            return explanation;
-        }
-        if (operator == OperatorSymbol.INTERSECT) {
-            // the most common case
-            if (!nodetest1.test((NodeInfo)item)) {
-                return nodetest1.explainMismatch(item, th);
-            } else if (!nodetest2.test((NodeInfo)item)) {
-                return nodetest2.explainMismatch(item, th);
-            }
-        }
+//        Optional<String> explanation = super.explainMismatch(item, th);
+//        if (explanation.isPresent()) {
+//            return explanation;
+//        }
+//        if (operator == OperatorSymbol.INTERSECT) {
+//            // the most common case
+//            if (!nodetest1.test((NodeInfo)item)) {
+//                return nodetest1.explainMismatch(item, th);
+//            } else if (!nodetest2.test((NodeInfo)item)) {
+//                return nodetest2.explainMismatch(item, th);
+//            }
+//        }
         return Optional.empty();
     }
 

@@ -21,7 +21,6 @@ import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryFunctionLibrary;
@@ -31,6 +30,7 @@ import net.sf.saxon.trans.Timer;
 import net.sf.saxon.trans.*;
 import net.sf.saxon.trans.rules.RuleManager;
 import net.sf.saxon.tree.linked.DocumentImpl;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Whitespace;
 import net.sf.saxon.z.IntHashMap;
 
@@ -817,7 +817,7 @@ public class PrincipalStylesheetModule extends StylesheetModule implements Globa
 
 
     private static void setLocalParamDetails(XSLTemplate source, NamedTemplate nt) {
-        SequenceIterator kids = source.iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator kids = source.iterateChildAxis(NodeKindType.ELEMENT);
         List<NamedTemplate.LocalParamInfo> details = new ArrayList<>();
         SequenceTool.supply(kids, (ItemConsumer<? super Item>) child -> {
             if (child instanceof XSLLocalParam) {

@@ -11,7 +11,6 @@ import net.sf.saxon.Configuration;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -21,6 +20,7 @@ import net.sf.saxon.tree.util.SteppingNode;
 import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.value.StringValue;
 import nu.xom.*;
 
@@ -844,7 +844,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         AttributeAxisIterator(XOMNodeWrapper start, NodeTest test) {
             // use lazy instead of eager materialization (performance)
             this.start = start;
-            if (test == NodeTypeTest.GNODE) {
+            if (test == AnyGNodeType.getInstance()) {
                 test = null;
             }
             nodeTest = test;
@@ -894,7 +894,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
         private ChildAxisIterator(XOMNodeWrapper start, boolean downwards, boolean forwards, NodeTest test) {
             this.forwards = forwards;
-            if (test == NodeTypeTest.GNODE) {
+            if (test == AnyGNodeType.getInstance()) {
                 test = null;
             }
             nodeTest = test;

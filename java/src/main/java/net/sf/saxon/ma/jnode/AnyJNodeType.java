@@ -82,5 +82,15 @@ public class AnyJNodeType extends JNodeType {
     public String toString() {
         return "jnode()";
     }
+
+    /**
+     * Determine whether the content type (if present) is nillable
+     *
+     * @return true if the content test (when present) can match nodes that are nilled
+     */
+    @Override
+    public boolean isNillable() {
+        return true;
+    }
 }
 

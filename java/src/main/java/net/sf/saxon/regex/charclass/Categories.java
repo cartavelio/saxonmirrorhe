@@ -15,12 +15,12 @@ import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.serialize.charcode.XMLCharacterData;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.tiny.TinyElementImpl;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.NamedXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.z.*;
 
 import javax.xml.transform.stream.StreamSource;
@@ -151,7 +151,7 @@ public class Categories {
         for (NodeInfo item; (item = (NodeInfo)iter.next()) != null; ) {
             String cat = ((TinyElementImpl)item).getAttributeValue(fp_name);
             IntRangeSet irs = new IntRangeSet();
-            for (NodeInfo r : item.children(NodeTypeTest.ELEMENT)) {
+            for (NodeInfo r : item.children(NodeKindType.ELEMENT)) {
                 String from = ((TinyElementImpl)r).getAttributeValue(fp_f);
                 String to = ((TinyElementImpl) r).getAttributeValue(fp_t);
                 irs.addRange(Integer.parseInt(from, 16), Integer.parseInt(to, 16));

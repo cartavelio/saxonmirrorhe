@@ -21,7 +21,7 @@ import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.SingleEntryMap;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.NodeSelector;
+import net.sf.saxon.pattern.NodePredicateLambda;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.str.StringTool;
 import net.sf.saxon.str.StringView;
@@ -722,8 +722,8 @@ public class DeepEqual extends CollatingFunctionFixed {
                 CSharp.emitCode("goto case Saxon.Hej.type.Type.DOCUMENT;");
                 // fall through
             case Type.DOCUMENT:
-                SequenceIterator c1 = n1.iterateChildAxis(NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
-                SequenceIterator c2 = n2.iterateChildAxis(NodeSelector.of(node -> !isIgnorable((NodeInfo)node, options)));
+                SequenceIterator c1 = n1.iterateChildAxis(NodePredicateLambda.of(node -> !isIgnorable((NodeInfo)node, options)));
+                SequenceIterator c2 = n2.iterateChildAxis(NodePredicateLambda.of(node -> !isIgnorable((NodeInfo)node, options)));
 
                 c1 = mergeAdjacentTextNodes(c1);
                 c2 = mergeAdjacentTextNodes(c2);

@@ -38,7 +38,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.XQueryFunctionLibrary;
 import net.sf.saxon.regex.ARegularExpression;
@@ -67,6 +66,7 @@ import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.SequenceCoercer;
 import net.sf.saxon.type.gnode.NamedXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 
@@ -212,7 +212,7 @@ public class PackageLoaderHE implements IPackageLoader {
             topLevelPackage = pack;
         }
         packStack.push(pack);
-        NodeInfo packageElement = (NodeInfo)doc.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+        NodeInfo packageElement = (NodeInfo)doc.iterateChildAxis(NodeKindType.ELEMENT).next();
         if (packageElement.getNamespaceUri() != NamespaceUri.SAXON_XSLT_EXPORT) {
             throw new XPathException("Incorrect namespace for XSLT export file", SaxonErrorCode.SXPK0002);
         }
@@ -295,7 +295,7 @@ public class PackageLoaderHE implements IPackageLoader {
         pack.setStripsTypeAnnotations("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL,"stripType")));
         pack.setKeyManager(new KeyManager(pack.getConfiguration(), pack));
         pack.setDeclaredModes("1".equals(packageElement.getAttributeValue(NamespaceUri.NULL,"declaredModes")));
-        for (NodeInfo usePack : packageElement.children(NodeSelector.of(n -> ((NodeInfo)n).getLocalPart().equals("package")))) {
+        for (NodeInfo usePack : packageElement.children(NodePredicateLambda.of(n -> ((NodeInfo)n).getLocalPart().equals("package")))) {
             StylesheetPackage subPack = config.makeStylesheetPackage();
             subPack.setRuleManager(new RuleManager(pack));
             subPack.setCharacterMapIndex(new CharacterMapIndex());
@@ -376,7 +376,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private void readGlobalContext(NodeInfo packageElement) throws XPathException {
         GlobalContextRequirement req = null;
         //NameTest condition = NameTest.make(Type.ELEMENT, NamespaceUri.SAXON_XSLT_EXPORT, "glob", config.getNamePool());
-        for (NodeInfo varElement : packageElement.children(NodeSelector.of(n -> ((NodeInfo)n).getLocalPart().equals("glob")))) {
+        for (NodeInfo varElement : packageElement.children(NodePredicateLambda.of(n -> ((NodeInfo)n).getLocalPart().equals("glob")))) {
             if (req == null) {
                 req = new GlobalContextRequirement();
                 packStack.peek().setContextItemRequirements(req);
@@ -491,7 +491,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     pack.getRuleManager().obtainMode(baseComponent.getActor().getComponentName(), true);
                 }
             } else {
-                NodeInfo grandchild = (NodeInfo)child.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+                NodeInfo grandchild = (NodeInfo)child.iterateChildAxis(NodeKindType.ELEMENT).next();
                 Actor cc;
                 String kind = grandchild.getLocalPart();
                 switch (kind) {
@@ -557,7 +557,7 @@ public class PackageLoaderHE implements IPackageLoader {
         if (slots > 0) {
             var.setContainsLocals(new SlotManager(slots));
         }
-        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis(NodeKindType.ELEMENT).next();
         if (bodyElement == null) {
             var.setBody(Literal.makeEmptySequence());
         } else {
@@ -599,7 +599,7 @@ public class PackageLoaderHE implements IPackageLoader {
         if (slots > 0) {
             var.setContainsLocals(new SlotManager(slots));
         }
-        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+        NodeInfo bodyElement = (NodeInfo)varElement.iterateChildAxis(NodeKindType.ELEMENT).next();
         if (bodyElement == null) {
             var.setBody(Literal.makeEmptySequence());
         } else {
@@ -995,7 +995,7 @@ public class PackageLoaderHE implements IPackageLoader {
     private void readSpaceStrippingRules(NodeInfo packageElement) throws XPathException {
         StylesheetPackage pack = packStack.peek();
         NodeInfo element;
-        SequenceIterator iterator = packageElement.iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator iterator = packageElement.iterateChildAxis(NodeKindType.ELEMENT);
         while ((element = (NodeInfo)iterator.next()) != null) {
             String s = element.getLocalPart();
             switch (s) {
@@ -1007,7 +1007,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     pack.setStripperRules(new NoElementsSpaceStrippingRule());
                     break;
                 case "strip":
-                    SequenceIterator iterator2 = element.iterateChildAxis(NodeTypeTest.ELEMENT);
+                    SequenceIterator iterator2 = element.iterateChildAxis(NodeKindType.ELEMENT);
                     NodeInfo element2;
                     SelectedElementsSpaceStrippingRule rules = new SelectedElementsSpaceStrippingRule(false);
                     while ((element2 = (NodeInfo)iterator2.next()) != null) {
@@ -1015,7 +1015,7 @@ public class PackageLoaderHE implements IPackageLoader {
                         String value = element2.getAttributeValue(NamespaceUri.NULL,"test");
                         NodeTest t;
                         if (value.equals("*")) {
-                            t = NodeTypeTest.ELEMENT;
+                            t = NodeKindType.ELEMENT;
                         } else {
                             // See bug 4096: this is not a true item type, it also allows *:name and name:*
                             t = (NodeTest) parseAlphaCodeForItemType(element2, "test");
@@ -1074,7 +1074,7 @@ public class PackageLoaderHE implements IPackageLoader {
      * @return the n'th child, or null if not available
      */
     public NodeInfo getChild(NodeInfo parent, int n) {
-        SequenceIterator iter = parent.iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator iter = parent.iterateChildAxis(NodeKindType.ELEMENT);
         NodeInfo node = (NodeInfo)iter.next();
         for (int i = 0; i < n; i++) {
             node = (NodeInfo)iter.next();
@@ -1083,7 +1083,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     public NodeInfo getChildWithRole(NodeInfo parent, String role) {
-        SequenceIterator iter = parent.iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator iter = parent.iterateChildAxis(NodeKindType.ELEMENT);
         NodeInfo node;
         while ((node = (NodeInfo)iter.next()) != null) {
             String roleAtt = node.getAttributeValue(NamespaceUri.NULL,"role");
@@ -1095,7 +1095,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     public Expression getFirstChildExpression(NodeInfo parent) throws XPathException {
-        NodeInfo node = (NodeInfo)parent.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+        NodeInfo node = (NodeInfo)parent.iterateChildAxis(NodeKindType.ELEMENT).next();
         return loadExpression(node);
     }
 
@@ -1214,7 +1214,7 @@ public class PackageLoaderHE implements IPackageLoader {
     }
 
     private Pattern getFirstChildPattern(NodeInfo parent) throws XPathException {
-        NodeInfo node = (NodeInfo)parent.iterateChildAxis(NodeTypeTest.ELEMENT).next();
+        NodeInfo node = (NodeInfo)parent.iterateChildAxis(NodeKindType.ELEMENT).next();
         return loadPattern(node);
     }
 
@@ -1852,7 +1852,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("choose", (loader, element) -> {
             List<Expression> conditions = new ArrayList<>();
             List<Expression> actions = new ArrayList<>();
-            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeKindType.ELEMENT);
             NodeInfo child;
             boolean odd = true;
             while ((child = (NodeInfo)iter.next()) != null) {
@@ -2062,10 +2062,10 @@ public class PackageLoaderHE implements IPackageLoader {
             Expression target = loader.getFirstChildExpression(element);
             FunctionItem targetFn = (FunctionItem) ((Literal) target).getGroundedValue();
             NodeInfo args = loader.getChild(element, 1);
-            int count = Count.count(args.iterateChildAxis(NodeTypeTest.ELEMENT));
+            int count = Count.count(args.iterateChildAxis(NodeKindType.ELEMENT));
             Sequence[] argValues = new Sequence[count];
             count = 0;
-            for (NodeInfo child : args.children(NodeTypeTest.ELEMENT)) {
+            for (NodeInfo child : args.children(NodeKindType.ELEMENT)) {
                 if (child.getLocalPart().equals("x")) {
                     argValues[count++] = null;
                 } else {
@@ -2257,7 +2257,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
             List<WithParam> nonTunnelParams = new ArrayList<>();
             int slotNumber = 0;
-            for (NodeInfo wp : element.children(NodeSelector.of(n -> ((NodeInfo)n).getLocalPart().equals("withParam")))) {
+            for (NodeInfo wp : element.children(NodePredicateLambda.of(n -> ((NodeInfo)n).getLocalPart().equals("withParam")))) {
                 WithParam withParam = new WithParam();
                 StructuredQName paramName = loader.getQNameAttribute(wp, "name");
                 withParam.setVariableQName(paramName);
@@ -2699,7 +2699,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("literal", (loader, element) -> {
             List<Item> children = new ArrayList<>();
-            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeKindType.ELEMENT);
             NodeInfo child;
             while ((child = (NodeInfo)iter.next()) != null) {
                 Expression e = loader.loadExpression(child);
@@ -2889,7 +2889,7 @@ public class PackageLoaderHE implements IPackageLoader {
                     StreamSource source = new StreamSource(new StringReader(content), baseURI);
                     node = loader.config.buildDocumentTree(source).getRootNode();
                     if (kind == Type.ELEMENT) {
-                        node = VirtualCopy.makeVirtualCopy((NodeInfo)node.iterateChildAxis(NodeTypeTest.ELEMENT).next());
+                        node = VirtualCopy.makeVirtualCopy((NodeInfo)node.iterateChildAxis(NodeKindType.ELEMENT).next());
                     }
                     break;
                 }
@@ -3033,7 +3033,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
         eMap.put("params", (loader, element) -> {
             List<LocalParam> children = new ArrayList<>();
-            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeKindType.ELEMENT);
             NodeInfo child;
             while ((child = (NodeInfo)iter.next()) != null) {
                 children.add((LocalParam) loader.loadExpression(child));
@@ -3042,11 +3042,11 @@ public class PackageLoaderHE implements IPackageLoader {
         });
 
         eMap.put("partialApply", (loader, element) -> {
-            int count = Count.count(element.iterateChildAxis(NodeTypeTest.ELEMENT));
+            int count = Count.count(element.iterateChildAxis(NodeKindType.ELEMENT));
             Expression base = null;
             Expression[] args = new Expression[count - 1];
             count = 0;
-            for (NodeInfo child : element.children(NodeTypeTest.ELEMENT)) {
+            for (NodeInfo child : element.children(NodeKindType.ELEMENT)) {
                 if (count == 0) {
                     base = loader.loadExpression(child);
                 } else if (child.getLocalPart().equals("null")) {
@@ -3108,7 +3108,7 @@ public class PackageLoaderHE implements IPackageLoader {
             Properties locals = localProps == null ? new Properties() : loader.importProperties(localProps);
             Map<StructuredQName, Expression> dynamicProperties = new HashMap<>();
             NodeInfo child;
-            SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator iter = element.iterateChildAxis(NodeKindType.ELEMENT);
             while ((child = (NodeInfo)iter.next()) != null) {
                 Expression exp = loader.loadExpression(child);
                 String role = child.getAttributeValue(NamespaceUri.NULL,"role");
@@ -3472,7 +3472,7 @@ public class PackageLoaderHE implements IPackageLoader {
 
     protected static List<Expression> getChildExpressionList(PackageLoaderHE loader, NodeInfo element) throws XPathException {
         List<Expression> children = new ArrayList<>();
-        SequenceIterator iter = element.iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator iter = element.iterateChildAxis(NodeKindType.ELEMENT);
         NodeInfo child;
         while ((child = (NodeInfo)iter.next()) != null) {
             children.add(loader.loadExpression(child));

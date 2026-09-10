@@ -18,10 +18,11 @@ import net.sf.saxon.type.gnode.XNodeType;
 import java.util.Optional;
 
 /**
- * PortableNodeTest is variant of the {@link net.sf.saxon.type.gnode.NamedXNodeType} class
+ * PortableNamedType is variant of the {@link net.sf.saxon.type.gnode.NamedXNodeType} class
  * that works across Configurations.
- * It is used in the function signatures of functions like fn:analyze-string; these signatures
- * are in Java static data, so they cannot be tied to a particular configuration.
+ * It is used in the function signatures of functions like {@code fn:analyze-string};
+ * these signatures appear in Java static data, so they cannot be tied to a particular
+ * configuration.
  */
 
 public class PortableNamedType extends XNodeType {

@@ -22,7 +22,6 @@ import net.sf.saxon.pattern.NodeTestPattern;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.pattern.SimplePositionalPattern;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.gnode.XNodeType;
@@ -102,7 +101,7 @@ public final class FirstItemExpression extends SingleItemFilter {
         Pattern basePattern = getBaseExpression().toPattern(config, false);
         ItemType type = basePattern.getItemType();
         if (type instanceof XNodeType) {
-            NodeTest test = new NodeTypeTest((XNodeType)type);
+            NodeTest test = (XNodeType)type;
             Expression baseExpr = getBaseExpression();
             if (baseExpr instanceof AxisExpression &&
                     ((AxisExpression) baseExpr).getAxis() == AxisInfo.CHILD && basePattern instanceof NodeTestPattern) {

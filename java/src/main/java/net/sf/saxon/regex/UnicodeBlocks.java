@@ -12,10 +12,10 @@ import net.sf.saxon.Version;
 import net.sf.saxon.lib.ParseOptions;
 import net.sf.saxon.lib.Validation;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.gnode.NamedXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.z.IntBlockSet;
 import net.sf.saxon.z.IntSet;
 
@@ -108,7 +108,7 @@ public class UnicodeBlocks {
             String blockName = normalizeBlockName(item.getAttributeValue(NamespaceUri.NULL, "name"));
             System.err.println("Loading " + blockName);
             IntSet range = null;
-            for (NodeInfo rangeElement : item.children(NodeTypeTest.ELEMENT)) {
+            for (NodeInfo rangeElement : item.children(NodeKindType.ELEMENT)) {
                 int from = Integer.parseInt(rangeElement.getAttributeValue(NamespaceUri.NULL, "from").substring(2), 16);
                 int to = Integer.parseInt(rangeElement.getAttributeValue(NamespaceUri.NULL, "to").substring(2), 16);
                 IntSet cr = new IntBlockSet(from, to);

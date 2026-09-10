@@ -8,6 +8,7 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -16,6 +17,7 @@ import net.sf.saxon.type.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -23,7 +25,7 @@ import java.util.function.Function;
  * node kinds, for example element and document nodes, or attribute and namespace nodes
  */
 
-public final class MultipleNodeKindTest extends NodeTest {
+public final class MultipleNodeKindTest implements NodeTest {
 
     public final static MultipleNodeKindTest PARENT_NODE =
             new MultipleNodeKindTest(UType.DOCUMENT.union(UType.ELEMENT).union(UType.JNODE));
@@ -101,37 +103,29 @@ public final class MultipleNodeKindTest extends NodeTest {
         return AnyQNameTest.getInstance();
     }
 
-//    /**
-//     * Test whether this node test is satisfied by a given node. This method is only
-//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-//     * node tests where the node kind is known to be an attribute.
-//     *
-//     * @param nodeKind   The kind of node to be matched
-//     * @param name       identifies the expanded name of the node to be matched.
-//     *                   The value should be null for a node with no name.
-//     * @param annotation The actual content type of the node
-//     */
-//    @Override
-//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-//        return (nodeKindMask & (1<<nodeKind)) != 0;
-//    }
+    /**
+     * Determine whether the content type (if present) is nillable
+     *
+     * @return true if the content test (when present) can match nodes that are nilled
+     */
+    @Override
+    public boolean isNillable() {
+        return false;
+    }
 
-//    @Override
-//    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-//        final byte[] nodeKindArray = tree.getNodeKindArray();
-//        return IntPredicateLambda.of(nodeNr -> {
-//            int nodeKind = nodeKindArray[nodeNr] & 0x0f;
-//            if (nodeKind == Type.WHITESPACE_TEXT) {
-//                nodeKind = Type.TEXT;
-//            }
-//            return (nodeKindMask & (1 << nodeKind)) != 0;
-//        });
-//    }
+    /**
+     * Get extra diagnostic information about why a supplied item does not conform to this
+     * item type, if available. If extra information is returned, it should be in the form of a complete
+     * sentence, minus the closing full stop. No information should be returned for obvious cases.
+     *
+     * @param item the item that doesn't match this type
+     * @param th   the type hierarchy cache
+     * @return optionally, a message explaining why the item does not match the type
+     */
+    @Override
+    public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
+        return Optional.empty();
+    }
 
     /**
      * Test whether this node test is satisfied by a given node. This alternative
@@ -177,13 +171,7 @@ public final class MultipleNodeKindTest extends NodeTest {
         return fsb.toString();
     }
 
-//    @Override
-//    public String toExportString() {
-//        StringBuilder fsb = new StringBuilder(64);
-//        LinkedList<PrimitiveUType> types = new LinkedList<>(uType.decompose());
-//        format(types, fsb, ItemType::toExportString);
-//        return fsb.toString();
-//    }
+
 
     private void format(LinkedList<PrimitiveUType> list, StringBuilder fsb, Function<ItemType, String> show) {
         if (list.size() == 1) {

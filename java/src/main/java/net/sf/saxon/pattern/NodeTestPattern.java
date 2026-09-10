@@ -15,7 +15,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
@@ -150,7 +149,7 @@ public class NodeTestPattern extends Pattern {
                     }
                 } else {
                     GNodeType schemaNodeTest = schema.makeSchemaElementTest(fp);
-                    return new NodeTestPattern(new NodeTypeTest(schemaNodeTest));
+                    return new NodeTestPattern(schemaNodeTest);
                 }
             }
         }

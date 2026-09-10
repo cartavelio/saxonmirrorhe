@@ -12,13 +12,13 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.value.StringValue;
 
 /**
@@ -347,7 +347,7 @@ public abstract class AbstractNodeWrapper implements VirtualNode {
     @CSharpModifiers(code={"protected", "virtual"})
     protected SequenceIterator iterateDescendants(NodePredicate predicate, boolean includeSelf) {
         SequenceIterator iter = new Navigator.DescendantIterator(this, includeSelf, true);
-        if (predicate != NodeTypeTest.GNODE) {
+        if (predicate != AnyGNodeType.getInstance()) {
             iter = Navigator.filter(iter, predicate);
         }
         return iter;

@@ -18,7 +18,7 @@ import net.sf.saxon.type.*;
 import java.util.Optional;
 
 /**
- * A NodeKindTest matches one of the seven kinds of XNode.
+ * A {@code NodeKindType} matches one of the seven kinds of XNode.
  */
 
 public class NodeKindType extends XNodeType {

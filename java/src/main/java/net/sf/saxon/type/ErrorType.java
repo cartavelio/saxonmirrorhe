@@ -742,6 +742,16 @@ public final class ErrorType extends GNodeType implements AtomicType, UnionType,
         return this;
     }
 
+    /**
+     * Determine whether the content type (if present) is nillable
+     *
+     * @return true if the content test (when present) can match nodes that are nilled
+     */
+    @Override
+    public boolean isNillable() {
+        return false;
+    }
+
     //#if SCHEMA==true
     /**
      * Get the schema component in the form of a function item. This allows schema information

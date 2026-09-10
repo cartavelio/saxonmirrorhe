@@ -105,65 +105,6 @@ public class DocumentNodeType extends XNodeType {
         return found;
     }
 
-    //    /**
-//     * Test whether this node test is satisfied by a given node. This method is only
-//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-//     * node tests where the node kind is known to be an attribute.
-//     *
-//     * @param nodeKind   The kind of node to be matched
-//     * @param name       identifies the expanded name of the node to be matched.
-//     *                   The value should be null for a node with no name.
-//     * @param annotation The actual content type of the node
-//     */
-//    @Override
-//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-//        if (nodeKind != Type.DOCUMENT) {
-//            return false;
-//        }
-//        throw new UnsupportedOperationException("DocumentNodeTest doesn't support this method");
-//    }
-
-//    /**
-//     * Determine whether this Pattern matches the given Node.
-//     *
-//     * @param node The NodeInfo representing the Element or other node to be tested against the Pattern
-//     *             uses variables, or contains calls on functions such as document() or key().
-//     * @return true if the node matches the Pattern, false otherwise
-//     */
-//
-//    @Override
-//    public boolean test(GNode node) {
-//        if (!(node instanceof NodeInfo) || ((NodeInfo)node).getNodeKind() != Type.DOCUMENT) {
-//            return false;
-//        }
-//        SequenceIterator iter = node.iterateChildAxis(null);
-//        // The match is true if there is exactly one element node child, no text node
-//        // children, and the element node matches the element test.
-//        boolean found = false;
-//        NodeInfo n;
-//        while ((n = (NodeInfo)iter.next()) != null) {
-//            int kind = n.getNodeKind();
-//            if (kind == Type.TEXT) {
-//                return false;
-//            } else if (kind == Type.ELEMENT) {
-//                if (found) {
-//                    return false;
-//                }
-//                if (elementTest.test(n)) {
-//                    found = true;
-//                } else {
-//                    return false;
-//                }
-//            }
-//        }
-//        return found;
-//    }
-
     /**
      * Determine the default priority of this node test when used on its own as a Pattern
      */

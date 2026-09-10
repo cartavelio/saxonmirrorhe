@@ -15,10 +15,16 @@ import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.Reverse;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
-import net.sf.saxon.pattern.nodetest.*;
+import net.sf.saxon.pattern.NodePredicateTest;
+import net.sf.saxon.pattern.NodeTestPattern;
+import net.sf.saxon.pattern.Pattern;
+import net.sf.saxon.pattern.nodetest.AnyGNode;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
+import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.PrependIterator;
@@ -32,7 +38,8 @@ import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.tree.wrapper.VirtualCopy;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.AnyGNodeType;
-import net.sf.saxon.type.gnode.GNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.type.gnode.XNodeType;
 
 import java.net.URI;
@@ -127,7 +134,7 @@ public final class Navigator {
 
     /*@Nullable*/
     public static NodeInfo getOutermostElement(/*@NotNull*/ TreeInfo doc) {
-        return (NodeInfo)doc.getRootNode().iterateChildAxis(NodeTypeTest.ELEMENT).next();
+        return (NodeInfo)doc.getRootNode().iterateChildAxis(NodeKindType.ELEMENT).next();
     }
 
     /**
@@ -407,25 +414,33 @@ public final class Navigator {
      * @throws XPathException when any error occurs in processing
      */
 
-    public static int getNumberSingle(/*@NotNull*/ NodeInfo node, /*@Nullable*/ Pattern count,
-                                      /*@Nullable*/ Pattern from, XPathContext context) throws XPathException {
+    public static int getNumberSingle(NodeInfo node, Pattern count,
+                                      Pattern from, XPathContext context) throws XPathException {
 
         if (count == null && from == null) {
             return getNumberSimple(node, context);
         }
 
         boolean knownToMatch = false;
-        Predicate<NodeInfo> countTest;
+        NodePredicate countTest;
         if (count == null) {
-            count = new NodeTestPattern(new SameNameTest(node));
+            countTest = n -> node.getQName().equals(((NodeInfo)n).getQName());
             knownToMatch = true;
+        } else {
+            countTest = n -> {
+                    try {
+                        return count.matches(n, context);
+                    } catch (XPathException err) {
+                        throw new UncheckedXPathException(err);
+                    }
+            };
         }
 
         NodeInfo target = node;
         // code changed in 9.5 to fix issue described in spec bug 9840
         if (!knownToMatch) {
             while (true) {
-                if (count.matches(target, context)) {
+                if (countTest.test(target)) {
                     if (from == null) {
                         break;
                     } else {
@@ -457,7 +472,7 @@ public final class Navigator {
         // we've found the ancestor to count from
 
         SequenceIterator preceding =
-                target.iteratePrecedingSiblingAxis(getNodeTestForPattern(count));
+                target.iteratePrecedingSiblingAxis(countTest);
         // pass the filter condition down to the axis enumeration where possible
         boolean alreadyChecked = count instanceof NodeTestPattern;
         int i = 1;
@@ -466,9 +481,9 @@ public final class Navigator {
             if (p == null) {
                 return i;
             }
-            if (alreadyChecked || count.matchesItem(p, context)) {
+            //if (alreadyChecked || count.matchesItem(p, context)) {
                 i++;
-            }
+            //}
         }
     }
 
@@ -515,24 +530,34 @@ public final class Navigator {
         }
 
         int num = 0;
+        NodePredicate countTest;
         if (count == null) {
-            count = new NodeTestPattern(new SameNameTest(node));
+            countTest = n -> node.getQName().equals(((NodeInfo) n).getQName());
             num = 1;
-        } else if (count.matchesItem(node, context)) {
-            num = 1;
+        } else {
+            countTest = n -> {
+                try {
+                    return count.matches(n, context);
+                } catch (XPathException err) {
+                    throw new UncheckedXPathException(err);
+                }
+            };
+            if (count.matchesItem(node, context)) {
+                num = 1;
+            }
         }
 
         // We use a special axis invented for the purpose: the union of the preceding and
         // ancestor axes, but in reverse document order
 
         // Pass part of the filtering down to the axis iterator if possible
-        NodeTest filter;
+        NodePredicate filter;
         if (from == null) {
-            filter = getNodeTestForPattern(count);
+            filter = countTest;
         } else if (from.getUType() == UType.ELEMENT && count.getUType() == UType.ELEMENT) {
-            filter = NodeTypeTest.ELEMENT;
+            filter = NodeKindType.ELEMENT;
         } else {
-            filter = NodeTypeTest.XNODE;
+            filter = AnyXNodeType.getInstance();
         }
 
         if (from != null && from.matchesItem(node, context)) {
@@ -547,7 +572,7 @@ public final class Navigator {
                 break;
             }
 
-            if (count.matchesItem(prev, context)) {
+            if (countTest.test(prev)) {
                 if (num == 1 && prev.equals(memoNode)) {
                     num = memoNumber + 1;
                     break;
@@ -597,14 +622,23 @@ public final class Navigator {
 
         ArrayList<Long> v = new ArrayList<>(5);
 
+        NodePredicate countTest;
         if (count == null) {
-            count = new NodeTestPattern(new SameNameTest(node));
+            countTest = n -> node.getQName().equals(((NodeInfo) n).getQName());
+        } else {
+            countTest = n -> {
+                try {
+                    return count.matches(n, context);
+                } catch (XPathException err) {
+                    throw new UncheckedXPathException(err);
+                }
+            };
         }
 
         NodeInfo curr = node;
 
         while (true) {
-            if (count.matchesItem(curr, context)) {
+            if (countTest.test(curr)) {
                 int num = getNumberSingle(curr, count, null, context);
                 v.add(0, (long) num);
             }
@@ -632,9 +666,9 @@ public final class Navigator {
         if (type instanceof NodeTest) {
             return (NodeTest) type;
         } else if (pattern.getUType().overlaps(UType.XNODE)) {
-            return NodeTypeTest.XNODE;
+            return AnyXNodeType.getInstance();
         } else {
-            return new NodeTypeTest(ErrorType.getInstance());
+            return ErrorType.getInstance();
         }
     }
 
@@ -1146,14 +1180,12 @@ public final class Navigator {
 
     public static NodeTest nodeTestFromPredicate(NodePredicate predicate) {
         if (predicate == null) {
-            return NodeTypeTest.GNODE;
+            return AnyGNodeType.getInstance();
         }
         if (predicate instanceof NodeTest) {
             return (NodeTest) predicate;
-        } else if (predicate instanceof GNodeType) {
-            return new NodeTypeTest((GNodeType)predicate);
         } else {
-            return NodeSelector.of(predicate::test);
+            return NodePredicateTest.of(predicate);
         }
     }
 
@@ -1311,7 +1343,7 @@ public final class Navigator {
      */
 
     public static int getSiblingPosition(NodeInfo node, NodeTest nodeTest, int max) {
-        if (node instanceof SiblingCountingNode && nodeTest == NodeTypeTest.XNODE) {
+        if (node instanceof SiblingCountingNode && nodeTest == AnyXNodeType.getInstance()) {
             return ((SiblingCountingNode)node).getSiblingPosition();
         }
         SequenceIterator prev = node.iteratePrecedingSiblingAxis(nodeTest);

@@ -16,7 +16,6 @@ import net.sf.saxon.om.Durability;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -26,6 +25,7 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 
 import java.util.Arrays;
 
@@ -137,13 +137,13 @@ public abstract class ParentNodeImpl extends NodeImpl {
             return EmptyIterator.getInstance();
         } else if (_children instanceof NodeImpl) {
             NodeImpl child = (NodeImpl) _children;
-            if (test == null || test == NodeTypeTest.GNODE) {
+            if (test == null || test == AnyGNodeType.getInstance()) {
                 return SingletonIterator.makeIterator(child);
             } else {
                 return Navigator.filteredSingleton(child, test);
             }
         } else {
-            if (test == null || test == NodeTypeTest.GNODE) {
+            if (test == null || test == AnyGNodeType.getInstance()) {
                 return new ArrayIterator.OfNodes<NodeImpl>((NodeImpl[]) _children);
             } else {
                 return new ChildEnumeration(this, test);

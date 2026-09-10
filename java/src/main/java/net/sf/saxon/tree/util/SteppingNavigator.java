@@ -11,8 +11,8 @@ import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 
 
 /**
@@ -222,7 +222,7 @@ public abstract class SteppingNavigator {
                 current = start;
             }
 
-            if (predicate == null || predicate == NodeTypeTest.GNODE) {
+            if (predicate == null || predicate == AnyGNodeType.getInstance()) {
                 stepper = new FollowingNodeStepper(start);
             } else if (predicate instanceof NamedXNodePredicate) {
                 NamedXNodePredicate fpTest = (NamedXNodePredicate) predicate;

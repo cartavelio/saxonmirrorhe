@@ -17,10 +17,10 @@ import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NameChecker;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.HashSet;
@@ -220,7 +220,7 @@ public class XSLMergeSource extends StyleElement {
 
         if (sourceName == null) {
             try {
-                sourceName = "merge-source " + (Count.count(iteratePrecedingSiblingAxis(NodeTypeTest.ELEMENT)) + 1);
+                sourceName = "merge-source " + (Count.count(iteratePrecedingSiblingAxis(NodeKindType.ELEMENT)) + 1);
             } catch (XPathException e) {
                 sourceName = "merge-source " + hashCode();
             }

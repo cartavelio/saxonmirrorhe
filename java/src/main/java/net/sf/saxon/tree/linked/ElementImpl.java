@@ -12,14 +12,14 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.*;
+import net.sf.saxon.pattern.NodePredicateLambda;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.NodeSelector;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Whitespace;
 
@@ -431,7 +431,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
         DocumentImpl root = getPhysicalRoot();
         super.delete();
         if (root != null) {
-            SequenceIterator iter = iterateDescendantOrSelfAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator iter = iterateDescendantOrSelfAxis(NodeKindType.ELEMENT);
             while (true) {
                 ElementImpl n = (ElementImpl) iter.next();
                 for (AttributeInfo att : attributeMap) {
@@ -499,7 +499,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             NamespaceMap oldMap = namespaceMap;
             namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
             if (inherit && namespaceMap != oldMap) {
-                for (NodeInfo child : children(NodeTypeTest.ELEMENT)) {
+                for (NodeInfo child : children(NodeKindType.ELEMENT)) {
                     ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
                 }
             }
@@ -514,7 +514,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             } else {
                 namespaceMap = namespaceMap.put(binding.getPrefix(), binding.getNamespaceUri());
             }
-            for (NodeInfo child : children(NodeTypeTest.ELEMENT)) {
+            for (NodeInfo child : children(NodeKindType.ELEMENT)) {
                 ((ElementImpl) child).inheritParentNamespaces(binding, oldMap, namespaceMap);
             }
         }
@@ -803,7 +803,7 @@ public class ElementImpl extends ParentNodeImpl implements NamespaceResolver {
             }
         }
         namespaceMap = childNamespaces;
-        for (NodeInfo child : children(NodeSelector.of(ElementImpl.class::isInstance))) {
+        for (NodeInfo child : children(NodePredicateLambda.of(ElementImpl.class::isInstance))) {
             ((ElementImpl) child).deepAddNamespaces(inheritedNamespaces);
         }
     }

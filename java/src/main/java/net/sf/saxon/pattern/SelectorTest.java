@@ -16,7 +16,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.nodetest.NodeVectorMatchMaker;
 import net.sf.saxon.pattern.qname.LocalQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -28,7 +27,6 @@ import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.z.IntPredicateLambda;
-import net.sf.saxon.z.IntSet;
 
 import java.util.Optional;
 import java.util.function.IntPredicate;
@@ -51,7 +49,7 @@ import java.util.function.IntPredicate;
  * relevant when selecting XNodes.</p>
  */
 
-public class SelectorTest extends NodeTest implements NodeVectorMatchMaker, NamedXNodePredicate {
+public class SelectorTest implements NodeTest, NodeVectorMatchMaker, NamedXNodePredicate {
 
     private final QNameTest key;
     private final boolean asNCName;
@@ -78,7 +76,7 @@ public class SelectorTest extends NodeTest implements NodeVectorMatchMaker, Name
      * @return an equivalent node test for XNodes
      */
     public NodeTest asXNodeTest(Configuration config) {
-        return new NodeTypeTest(new NamedXNodeType(nodeKind, getQNameTest(), config));
+        return new NamedXNodeType(nodeKind, getQNameTest(), config);
     }
 
     /**
@@ -241,18 +239,6 @@ public class SelectorTest extends NodeTest implements NodeVectorMatchMaker, Name
                 : null;
     }
 
-    /**
-     * Get the set of node names allowed by this NodeTest. This is returned as a set of Integer fingerprints.
-     * A null value indicates that all names are permitted (i.e. that there are no constraints on the node name.
-     * The default implementation returns null.
-     */
-
-    /*@NotNull*/
-    @Override
-    public Optional<IntSet> getRequiredNodeNames() {
-        return Optional.empty();
-    }
-
     public String toString() {
         return key.toString();
     }
@@ -290,10 +276,10 @@ public class SelectorTest extends NodeTest implements NodeVectorMatchMaker, Name
      */
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        Optional<String> explanation = super.explainMismatch(item, th);
-        if (explanation.isPresent()) {
-            return explanation;
-        }
+//        Optional<String> explanation = super.explainMismatch(item, th);
+//        if (explanation.isPresent()) {
+//            return explanation;
+//        }
         return Optional.of("The node has the wrong name");
     }
 
@@ -302,5 +288,14 @@ public class SelectorTest extends NodeTest implements NodeVectorMatchMaker, Name
         return toString();
     }
 
+    /**
+     * Determine whether the content type (if present) is nillable
+     *
+     * @return true if the content test (when present) can match nodes that are nilled
+     */
+    @Override
+    public boolean isNillable() {
+        return true;
+    }
 }
 

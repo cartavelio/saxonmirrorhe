@@ -12,7 +12,6 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.Stripper;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.str.UnicodeString;
@@ -22,6 +21,7 @@ import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Whitespace;
 
 
@@ -225,7 +225,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
         switch (getNodeKind()) {
             case Type.DOCUMENT:
             case Type.ELEMENT:
-                SequenceIterator iter = iterateDescendantAxis(NodeTypeTest.TEXT);
+                SequenceIterator iter = iterateDescendantAxis(NodeKindType.TEXT);
                 UnicodeBuilder sb = new UnicodeBuilder();
                 NodeInfo it;
                 while ((it = (NodeInfo)iter.next()) != null) {

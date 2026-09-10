@@ -25,7 +25,6 @@ import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -295,10 +294,9 @@ public class SlashExpression extends BinaryExpression
 
         NodeTest test = mid.getNodeTest();
         if (!(test == null
-                      || test == NodeTypeTest.GNODE
-                      || test == NodeTypeTest.JNODE
-                      || (test instanceof NodeTypeTest && ((NodeTypeTest) test).getItemType() == AnyXNodeType.getInstance())
-                      || (test instanceof NodeTypeTest && ((NodeTypeTest) test).getItemType() == AnyJNodeType.getInstance()))) {
+                      || test == AnyGNodeType.getInstance()
+                      || test == AnyJNodeType.getInstance()
+                      || test == AnyXNodeType.getInstance())) {
             return null;
         }
 
@@ -350,7 +348,7 @@ public class SlashExpression extends BinaryExpression
             // turn the expression a//@b into a/descendant-or-self::*/@b
 
             Expression newStep =
-                    new AxisExpression(AxisInfo.DESCENDANT_OR_SELF, NodeTypeTest.ELEMENT);
+                    new AxisExpression(AxisInfo.DESCENDANT_OR_SELF, NodeKindType.ELEMENT);
             ExpressionTool.copyLocationInfo(this, newStep);
             Expression e2 = ExpressionTool.makePathExpression(startPath.getStart(), newStep);
             Expression e3 = ExpressionTool.makePathExpression(e2, getStep());
@@ -559,7 +557,7 @@ public class SlashExpression extends BinaryExpression
         Expression k = new FilterExpression(y, x);
         // If we're not starting at the root, ensure we go down at least one level
         if (!th.isSubType(contextItemType.getItemType(), NodeKindType.DOCUMENT)) {
-            k = new SlashExpression(new AxisExpression(AxisInfo.CHILD, NodeTypeTest.ELEMENT), k);
+            k = new SlashExpression(new AxisExpression(AxisInfo.CHILD, NodeKindType.ELEMENT), k);
             ExpressionTool.copyLocationInfo(this, k);
             opt.trace("Rewrote descendant::X/child::Y as child::*/descendant::Y[parent::X]", k);
         } else {
@@ -843,7 +841,7 @@ public class SlashExpression extends BinaryExpression
             if (start.getActionExpression() instanceof AxisExpression) {
                 AxisExpression mid = (AxisExpression) start.getActionExpression();
                 if (mid.getAxis() == AxisInfo.DESCENDANT_OR_SELF &&
-                        (mid.getNodeTest() == null || mid.getNodeTest() == NodeTypeTest.GNODE)) {
+                        (mid.getNodeTest() == null || mid.getNodeTest() == AnyGNodeType.getInstance())) {
                     axis = AxisInfo.ANCESTOR;
                     headPattern = start.getSelectExpression().toPattern(config, false);
                 }

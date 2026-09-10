@@ -23,7 +23,6 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.HostLanguage;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
@@ -33,6 +32,7 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.NodeKindType;
 
 /**
  * A Pattern represents the result of parsing an XSLT pattern string. <p>
@@ -337,13 +337,13 @@ public abstract class Pattern extends PseudoExpression {
                 return EmptyIterator.getInstance();
             }
         } else if (UType.ATTRIBUTE.subsumes(uType)) {
-            SequenceIterator allElements = doc.iterateDescendantAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator allElements = doc.iterateDescendantAxis(NodeKindType.ELEMENT);
             SequenceIterator allAttributes =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateAttributeAxis(AnyGNode.TEST));
             return ItemMappingIterator.filter(allAttributes, item -> matchesItem(item, context));
         } else if (UType.NAMESPACE.subsumes(uType)) {
-            SequenceIterator allElements = doc.iterateDescendantAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator allElements = doc.iterateDescendantAxis(NodeKindType.ELEMENT);
             SequenceIterator allNamespaces =
                     MappingIterator.map(allElements,
                                         item -> ((NodeInfo) item).iterateNamespaceAxis(AnyGNode.TEST));
@@ -352,7 +352,7 @@ public abstract class Pattern extends PseudoExpression {
         } else if (UType.CHILD_NODE_KINDS.subsumes(uType)) {
             NodePredicate nodeTest;
             if (uType.equals(UType.ELEMENT)) {
-                nodeTest = NodeTypeTest.ELEMENT; // common case, enables use of getAllElements()
+                nodeTest = NodeKindType.ELEMENT; // common case, enables use of getAllElements()
             } else {
                 nodeTest = uType::matches;
             }

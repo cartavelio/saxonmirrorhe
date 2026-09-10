@@ -16,10 +16,7 @@ import net.sf.saxon.expr.sort.DocumentSorter;
 import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNodeType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.MultipleNodeKindTest;
-import net.sf.saxon.pattern.NodeTestPattern;
-import net.sf.saxon.pattern.Pattern;
-import net.sf.saxon.pattern.SelectorTest;
+import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.*;
 import net.sf.saxon.pattern.qname.NamespaceQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
@@ -120,7 +117,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         if (e2 != this) {
             return e2;
         }
-        if ((test == null || test == NodeTypeTest.GNODE) &&
+        if ((test == null || test == AnyGNodeType.getInstance()) &&
                 (axis == AxisInfo.PARENT || axis == AxisInfo.ANCESTOR)) {
             // get more precise type information for parent/ancestor nodes
             test = MultipleNodeKindTest.PARENT_NODE;
@@ -196,10 +193,10 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         if (contextItemType instanceof XNodeType) {
             // An axis step starting at an XNode will always return XNodes
             if (test == null) {
-                return new AxisExpression(axis, new NodeTypeTest(AnyXNodeType.getInstance()));
+                return new AxisExpression(axis, AnyXNodeType.getInstance());
             } else if (test instanceof NodeTestStar) {
                 NodeKindType kind = NodeKindType.of(((NodeTestStar)test).getDefaultNodeKind());
-                return new AxisExpression(axis, new NodeTypeTest(kind));
+                return new AxisExpression(axis, kind);
             } else if (test instanceof SelectorTest) {
                 return new AxisExpression(axis, ((SelectorTest)test).asXNodeTest(config));
             } else if (test == MultipleNodeKindTest.PARENT_NODE) {
@@ -208,7 +205,7 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         } else if (contextItemType instanceof JNodeType) {
             // An axis step starting at a JNode will always return JNodes
             if (test == null || test instanceof NodeTestStar) {
-                return new AxisExpression(axis, new NodeTypeTest(AnyJNodeType.getInstance()));
+                return new AxisExpression(axis, AnyJNodeType.getInstance());
             }
         }
 
@@ -750,13 +747,12 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         Pattern pat;
 
         if (test == null) {
-            test = NodeTypeTest.GNODE;
+            test = AnyGNodeType.getInstance();
         }
         if (test instanceof SelectorTest) {
             test = ((SelectorTest)test).asXNodeTest(config);
         }
-        if (test instanceof NodeTypeTest
-                && ((NodeTypeTest)test).getItemType() == AnyXNodeType.getInstance()
+        if (test instanceof AnyXNodeType
                 && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
             test = MultipleNodeKindTest.CHILD_NODE;
         }
@@ -766,26 +762,26 @@ public final class AxisExpression extends Expression implements GeneralizedAxisE
         } else if (axis == AxisInfo.ATTRIBUTE) {
             if (kind == Type.XNODE) {
                 // attribute::node() matches any attribute, and only an attribute
-                pat = new NodeTestPattern(NodeTypeTest.ATTRIBUTE);
+                pat = new NodeTestPattern(NodeKindType.ATTRIBUTE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
                 // for example, attribute::comment()
-                pat = new NodeTestPattern(NodeRejector.getInstance());
+                pat = new ItemTypePattern(ErrorType.getInstance());
             } else {
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.DESCENDANT_OR_SELF) {
             if (!AxisInfo.containsNodeKind(axis, kind)) {
-                pat = new NodeTestPattern(NodeRejector.getInstance());
+                pat = new ItemTypePattern(ErrorType.getInstance());
             } else {
                 pat = new NodeTestPattern(test);
             }
         } else if (axis == AxisInfo.NAMESPACE) {
             if (kind == Type.XNODE) {
                 // namespace::node() matches any attribute, and only an attribute
-                pat = new NodeTestPattern(NodeTypeTest.NAMESPACE);
+                pat = new NodeTestPattern(NodeKindType.NAMESPACE);
             } else if (!AxisInfo.containsNodeKind(axis, kind)) {
                 // for example, namespace::comment()
-                pat = new NodeTestPattern(NodeRejector.getInstance());
+                pat = new ItemTypePattern(ErrorType.getInstance());
             } else {
                 pat = new NodeTestPattern(test);
             }

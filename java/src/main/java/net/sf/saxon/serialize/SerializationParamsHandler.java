@@ -10,11 +10,11 @@ package net.sf.saxon.serialize;
 import net.sf.saxon.expr.instruct.ResultDocument;
 import net.sf.saxon.lib.SaxonOutputKeys;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.util.Navigator;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 
@@ -75,7 +75,7 @@ public class SerializationParamsHandler {
         }
         restrictAttributes(node);
         Set<NodeName> nodeNames = new HashSet<>();
-        SequenceIterator kids = node.iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator kids = node.iterateChildAxis(NodeKindType.ELEMENT);
         NodeInfo child;
         while ((child = (NodeInfo)kids.next()) != null) {
             if (!nodeNames.add(NameOfNode.makeName(child))) {
@@ -91,7 +91,7 @@ public class SerializationParamsHandler {
             }
             if (uri.isEmpty() && lname.equals("use-character-maps")) {
                 restrictAttributes(child);
-                SequenceIterator gKids = child.iterateChildAxis(NodeTypeTest.ELEMENT);
+                SequenceIterator gKids = child.iterateChildAxis(NodeKindType.ELEMENT);
                 NodeInfo gChild;
                 IntHashMap<String> map = new IntHashMap<>();
                 while ((gChild = (NodeInfo)gKids.next()) != null) {

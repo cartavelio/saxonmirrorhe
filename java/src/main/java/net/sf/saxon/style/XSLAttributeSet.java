@@ -13,10 +13,10 @@ import net.sf.saxon.expr.instruct.AttributeSet;
 import net.sf.saxon.expr.instruct.SlotManager;
 import net.sf.saxon.expr.instruct.UseAttributeSet;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.trans.SymbolicName;
 import net.sf.saxon.trans.Visibility;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Whitespace;
 
 import java.util.ArrayList;
@@ -321,7 +321,7 @@ public class XSLAttributeSet extends StyleElement implements StylesheetComponent
         }
 
         XSLAttribute node;
-        SequenceIterator iter = iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator iter = iterateChildAxis(NodeKindType.ELEMENT);
         while ((node = (XSLAttribute) iter.next()) != null) {
             Expression inst = node.compile(compilation, decl);
             inst.setRetainedStaticContext(makeRetainedStaticContext());

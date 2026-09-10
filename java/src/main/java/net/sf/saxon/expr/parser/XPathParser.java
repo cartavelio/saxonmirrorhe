@@ -40,7 +40,6 @@ import net.sf.saxon.pattern.SelectorTest;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTestStar;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.XQueryFunction;
@@ -3089,7 +3088,7 @@ public class XPathParser {
                         nextToken();
                         readToken(Token.LPAREN);
                         readToken(Token.RPAREN);
-                        AxisExpression nsExp = new AxisExpression(AxisInfo.NAMESPACE, NodeTypeTest.NAMESPACE);
+                        AxisExpression nsExp = new AxisExpression(AxisInfo.NAMESPACE, NodeKindType.NAMESPACE);
                         setLocation(nsExp);
                         return nsExp;
                     case "node":
@@ -3119,7 +3118,7 @@ public class XPathParser {
                             jType = new SpecificJNodeType(contentType, th);
                         }
                         int defaultAxis = AxisInfo.CHILD;
-                        AxisExpression ae = new AxisExpression(defaultAxis, new NodeTypeTest(jType));
+                        AxisExpression ae = new AxisExpression(defaultAxis, jType);
                         setLocation(ae);
                         return ae;
                     }
@@ -3131,7 +3130,7 @@ public class XPathParser {
                         int defaultAxis = AxisInfo.CHILD;
                         TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
                         SpecificJNodeType test = new SpecificJNodeType(SequenceType.one(AnyGNodeType.getInstance()), th);
-                        AxisExpression ae = new AxisExpression(defaultAxis, new NodeTypeTest(test));
+                        AxisExpression ae = new AxisExpression(defaultAxis, test);
                         setLocation(ae);
                         return ae;
                     }
@@ -3160,9 +3159,7 @@ public class XPathParser {
                         readToken(Token.RPAREN);
                         AxisExpression ae = new AxisExpression(
                                 AxisInfo.CHILD,
-                                new NodeTypeTest(
-                                        new SpecificJNodeType(type,
-                                                              env.getConfiguration().getTypeHierarchy())));
+                                new SpecificJNodeType(type, env.getConfiguration().getTypeHierarchy()));
                         setLocation(ae);
                         return ae;
                     }
@@ -3171,9 +3168,8 @@ public class XPathParser {
                         ItemType type = parseRecordTest(this);
                         AxisExpression ae = new AxisExpression(
                                 AxisInfo.CHILD,
-                                new NodeTypeTest(
-                                        new SpecificJNodeType(SequenceType.one(type),
-                                                              env.getConfiguration().getTypeHierarchy())));
+                                new SpecificJNodeType(SequenceType.one(type),
+                                                      env.getConfiguration().getTypeHierarchy()));
                         setLocation(ae);
                         return ae;
                     }
@@ -3185,9 +3181,8 @@ public class XPathParser {
                         ItemType type = parseItemType();
                         AxisExpression ae = new AxisExpression(
                                 AxisInfo.CHILD,
-                                new NodeTypeTest(
-                                        new SpecificJNodeType(SequenceType.one(type),
-                                                              env.getConfiguration().getTypeHierarchy())));
+                                new SpecificJNodeType(SequenceType.one(type),
+                                                      env.getConfiguration().getTypeHierarchy()));
                         setLocation(ae);
                         return ae;
                     }
@@ -3329,8 +3324,7 @@ public class XPathParser {
 
         } else if (token instanceof Token.Wildcard) {
             QNameTest test = getQNameTestForWildcard((Token.Wildcard) token, Type.ELEMENT);
-            NodeTest nodeTest = new NodeTypeTest(
-                    new NamedXNodeType(Type.ELEMENT, test, env.getConfiguration()));
+            NodeTest nodeTest = new NamedXNodeType(Type.ELEMENT, test, env.getConfiguration());
             AxisExpression ae = new AxisExpression(AxisInfo.CHILD, nodeTest);
             setLocation(ae);
             nextToken();
@@ -3356,7 +3350,7 @@ public class XPathParser {
         } else if (token == Token.STAR) {
             nextToken();
             TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-            AxisExpression ae = new AxisExpression(AxisInfo.CHILD, new NodeTestStar(Type.ELEMENT, th));
+            AxisExpression ae = new AxisExpression(AxisInfo.CHILD, new NodeTestStar(Type.ELEMENT));
             setLocation(ae);
             return ae;
 
@@ -3897,8 +3891,7 @@ public class XPathParser {
         Token tok = t.currentToken;
         if (tok instanceof Token.NameToken) {
             if (t.peekAhead() == Token.LPAREN) {
-                GNodeType type = parseKindTest();
-                return new NodeTypeTest(type);
+                return parseKindTest();
             }
             QNameTest test = makeNameTest(nodeKind, ((Token.NameToken)tok).getValue(), nodeKind == Type.ELEMENT);
             boolean asNCName = NameChecker.isValidNCName(((Token.NameToken) tok).getValue());
@@ -3906,8 +3899,7 @@ public class XPathParser {
 
             if (nodeKind == Type.ATTRIBUTE || nodeKind == Type.NAMESPACE) {
                 // these axes never select JNodes
-                GNodeType type = new NamedXNodeType(nodeKind, test, env.getConfiguration());
-                return new NodeTypeTest(type);
+                return new NamedXNodeType(nodeKind, test, env.getConfiguration());
             }
             return new SelectorTest(test, asNCName, nodeKind);
 //            GNodeType type = new NamedXNodeType(nodeKind, test, env.getConfiguration());
@@ -3916,13 +3908,11 @@ public class XPathParser {
             return parseUnionNodeTest(nodeKind);
         } else if (tok == Token.STAR) {
             nextToken();
-            TypeHierarchy th = env.getConfiguration().getTypeHierarchy();
-            return new NodeTestStar(nodeKind, th);
+            return new NodeTestStar(nodeKind);
         } else if (tok instanceof Token.Wildcard) {
             nextToken();
             QNameTest test = getQNameTestForWildcard(((Token.Wildcard) tok), nodeKind);
-            GNodeType type = new NamedXNodeType(nodeKind, test, env.getConfiguration());
-            return new NodeTypeTest(type);
+            return new NamedXNodeType(nodeKind, test, env.getConfiguration());
         } else {
             grumble("Unrecognized node test");
             return null;

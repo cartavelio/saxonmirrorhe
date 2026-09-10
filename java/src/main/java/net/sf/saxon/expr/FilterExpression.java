@@ -23,7 +23,7 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
+import net.sf.saxon.pattern.qname.LocalQNameTest;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -31,6 +31,7 @@ import net.sf.saxon.tree.iter.EmptyIterator;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.GNodeType;
+import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.*;
 
@@ -388,13 +389,13 @@ public final class FilterExpression extends BinaryExpression implements ContextS
         // rewrite axis::*[local-name() = 'literal'] as axis::*:local (people write this a lot in XSLT 1.0)
 
         if (getBase() instanceof AxisExpression
-                && ((AxisExpression)getBase()).getNodeTest() == NodeTypeTest.ELEMENT
+                && ((AxisExpression)getBase()).getNodeTest() == NodeKindType.ELEMENT
                 && getFilter() instanceof CompareToStringConstant
                 && ((CompareToStringConstant) getFilter()).getSingletonOperator() == OperatorSymbol.FEQ
                 && ((CompareToStringConstant) getFilter()).getLhsExpression().isCallOn(LocalName_1.class)
                 && ((SystemFunctionCall)((CompareToStringConstant) getFilter()).getLhsExpression()).getArg(0) instanceof ContextItemExpression) {
             AxisExpression ax2 = new AxisExpression(((AxisExpression) getBase()).getAxis(),
-                                       new LocalNameTest(Type.ELEMENT, ((CompareToStringConstant) getFilter()).getComparand().toString()));
+                                       new NamedXNodeType(Type.ELEMENT, new LocalQNameTest(((CompareToStringConstant) getFilter()).getComparand().toString()), config));
             ExpressionTool.copyLocationInfo(this, ax2);
             return ax2;
         }
@@ -1095,7 +1096,7 @@ public final class FilterExpression extends BinaryExpression implements ContextS
             } else if (base.getItemType() instanceof NodeTest) {
                 test = (NodeTest) base.getItemType();
             } else {
-                test = new NodeTypeTest((GNodeType) base.getItemType());
+                test = (GNodeType) base.getItemType();
             }
             if (basePattern instanceof NodeTestPattern &&
                     basePattern.getItemType().getGenre() == Genre.XNODE &&

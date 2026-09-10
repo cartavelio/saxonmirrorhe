@@ -12,7 +12,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -25,6 +24,7 @@ import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.NamedXNodeType;
 import org.w3c.dom.*;
 
@@ -592,7 +592,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
     @Override
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         SequenceIterator iter = new AttributeEnumeration(this);
-        if (nodeTest != null && nodeTest != NodeTypeTest.GNODE) {
+        if (nodeTest != null && nodeTest != AnyGNodeType.getInstance()) {
             iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
@@ -607,7 +607,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         boolean elementOnly = nodeTest != null && isElementOnly(nodeTest);
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, true, true, elementOnly));
-        if (nodeTest != null && nodeTest != NodeTypeTest.GNODE) {
+        if (nodeTest != null && nodeTest != AnyGNodeType.getInstance()) {
             iter = Navigator.filter(iter, nodeTest);
         }
         return iter;
@@ -618,7 +618,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
         boolean elementOnly = isElementOnly(nodeTest);
         SequenceIterator iter = new Navigator.EmptyTextFilter(
                 new ChildEnumeration(this, false, forwards, elementOnly));
-        if (nodeTest != NodeTypeTest.GNODE) {
+        if (nodeTest != AnyGNodeType.getInstance()) {
             iter = Navigator.filter(iter, nodeTest);
         }
         return iter;

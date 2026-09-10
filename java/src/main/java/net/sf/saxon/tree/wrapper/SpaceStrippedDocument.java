@@ -8,11 +8,11 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.tree.tiny.TinyTree;
 import net.sf.saxon.type.ComplexType;
 import net.sf.saxon.type.SchemaType;
+import net.sf.saxon.type.gnode.NodeKindType;
 
 import java.util.Iterator;
 
@@ -139,7 +139,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
             // Optimisation - see bug 2929. Makes a vast difference especially if there are few attributes in the tree
             return ((TinyTree) doc).hasXmlSpacePreserveAttribute();
         } else {
-            SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(NodeKindType.ELEMENT);
             NodeInfo node;
             while ((node = (NodeInfo)iter.next()) != null) {
                 String val = node.getAttributeValue(NamespaceUri.XML, "space");
@@ -161,7 +161,7 @@ public class SpaceStrippedDocument extends GenericTreeInfo {
 
     private static boolean findAssertions(/*@NotNull*/ TreeInfo doc) {
         if (doc.isTyped()) {
-            SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(NodeTypeTest.ELEMENT);
+            SequenceIterator iter = doc.getRootNode().iterateDescendantAxis(NodeKindType.ELEMENT);
             while (true) {
                 NodeInfo node = (NodeInfo)iter.next();
                 if (node == null) {

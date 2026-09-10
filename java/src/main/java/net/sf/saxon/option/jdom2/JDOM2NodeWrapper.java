@@ -11,7 +11,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.EmptyUnicodeString;
 import net.sf.saxon.str.StringView;
 import net.sf.saxon.str.UnicodeBuilder;
@@ -25,6 +24,7 @@ import net.sf.saxon.tree.wrapper.AbstractNodeWrapper;
 import net.sf.saxon.tree.wrapper.SiblingCountingNode;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import org.jdom2.*;
 import org.jdom2.filter.ElementFilter;
 import org.jdom2.located.Located;
@@ -447,7 +447,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     @Override
     protected SequenceIterator iterateAttributes(NodeTest nodeTest) {
         SequenceIterator base = new AttributeEnumeration(this);
-        if (nodeTest == NodeTypeTest.GNODE) {
+        if (nodeTest == AnyGNodeType.getInstance()) {
             return base;
         } else {
             return Navigator.filter(base, nodeTest);
@@ -458,7 +458,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
     protected SequenceIterator iterateChildren(NodeTest nodeTest) {
         if (hasChildNodes()) {
             SequenceIterator base = new ChildEnumeration(this, true, true);
-            if (nodeTest == NodeTypeTest.GNODE) {
+            if (nodeTest == AnyGNodeType.getInstance()) {
                 return base;
             } else {
                 return Navigator.filter(base, nodeTest);
@@ -470,7 +470,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     @Override
     protected SequenceIterator iterateSiblings(NodeTest nodeTest, boolean forwards) {
-        if (nodeTest == NodeTypeTest.GNODE) {
+        if (nodeTest == AnyGNodeType.getInstance()) {
             return new ChildEnumeration(this, false, forwards);
         } else {
             return Navigator.filter(
@@ -489,7 +489,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             // to achieve this is by using the recursive implementation of the descendant axis available
             // in the Navigator class, which works in terms of the child axis only. See bug #5348.
             SequenceIterator allDescendants = new Navigator.DescendantIterator(this, includeSelf, true);
-            if (predicate == NodeTypeTest.GNODE) {
+            if (predicate == AnyGNodeType.getInstance()) {
                 return allDescendants;
             } else {
                 return Navigator.filter(allDescendants, predicate);
@@ -512,7 +512,7 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
             wrappedDescendants = new PrependIterator(this, wrappedDescendants);
         }
 
-        if (predicate == NodeTypeTest.GNODE) {
+        if (predicate == AnyGNodeType.getInstance()) {
             return wrappedDescendants;
         } else {
             return Navigator.filter(wrappedDescendants, predicate);

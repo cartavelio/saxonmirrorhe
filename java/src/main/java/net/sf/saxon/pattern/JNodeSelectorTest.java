@@ -8,16 +8,18 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.expr.sort.AtomicMatchKey;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.pattern.nodetest.NodeTest;
+import net.sf.saxon.pattern.qname.AnyQNameTest;
 import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.TypeHierarchy;
 import net.sf.saxon.type.UType;
 import net.sf.saxon.value.AtomicValue;
-import net.sf.saxon.z.IntSet;
 
 import java.util.Optional;
 import java.util.Set;
@@ -27,9 +29,15 @@ import java.util.Set;
  * values.
  */
 
-public class JNodeSelectorTest extends NodeTest {
+public class JNodeSelectorTest implements NodeTest {
 
     private final Set<AtomicMatchKey> keys;
+
+    /**
+     * Create a JNode selector test
+     * @param keys the set of atomic keys: a JNode passes the test if its
+     *             selector property is equal to one of these keys.
+     */
 
     public JNodeSelectorTest(Set<AtomicMatchKey> keys) {
         this.keys = keys;
@@ -56,31 +64,6 @@ public class JNodeSelectorTest extends NodeTest {
         return UType.JNODE;
     }
 
-//    /**
-//     * Test whether this node test is satisfied by a given node. This method is only
-//     * fully supported for a subset of NodeTests, because it doesn't provide all the information
-//     * needed to evaluate all node tests. In particular (a) it can't be used to evaluate a node
-//     * test of the form element(N,T) or schema-element(E) where it is necessary to know whether the
-//     * node is nilled, and (b) it can't be used to evaluate a node test of the form
-//     * document-node(element(X)). This in practice means that it is used (a) to evaluate the
-//     * simple node tests found in the XPath 1.0 subset used in XML Schema, and (b) to evaluate
-//     * node tests where the node kind is known to be an attribute.
-//     *
-//     * @param nodeKind   The kind of node to be matched
-//     * @param name       identifies the expanded name of the node to be matched.
-//     *                   The value should be null for a node with no name.
-//     * @param annotation The actual content type of the node
-//     */
-//    @Override
-//    public boolean matches(int nodeKind, NodeName name, SchemaType annotation) {
-//        return false;
-//    }
-//
-//    @Override
-//    public IntPredicateProxy getMatcher(final NodeVectorTree tree) {
-//        return null;
-//    }
-
     /**
      * Test whether this node test is satisfied by a given node. This alternative
      * method is used in the case of nodes where calculating the fingerprint is expensive,
@@ -91,7 +74,6 @@ public class JNodeSelectorTest extends NodeTest {
 
     @Override
     public boolean test(GNode gnode) {
-
         if (gnode instanceof JNode) {
             AtomicValue actual = ((JNode)gnode).getSelector();
             if (actual == null) {
@@ -121,7 +103,27 @@ public class JNodeSelectorTest extends NodeTest {
      */
 
     public QNameTest getQNameTest() {
-        return null;
+        return AnyQNameTest.getInstance();
+    }
+
+    /**
+     * Get an item type that all matching nodes must satisfy
+     *
+     * @return an item type
+     */
+    @Override
+    public ItemType getItemType() {
+        return AnyJNodeType.getInstance();
+    }
+
+    /**
+     * Determine whether the content type (if present) is nillable
+     *
+     * @return true if the content test (when present) can match nodes that are nilled
+     */
+    @Override
+    public boolean isNillable() {
+        return false;
     }
 
     /**
@@ -134,18 +136,6 @@ public class JNodeSelectorTest extends NodeTest {
     //@Override
     public int getPrimitiveType() {
         return Type.JNODE;
-    }
-
-    /**
-     * Get the set of node names allowed by this NodeTest. This is returned as a set of Integer fingerprints.
-     * A null value indicates that all names are permitted (i.e. that there are no constraints on the node name.
-     * The default implementation returns null.
-     */
-
-    /*@NotNull*/
-    @Override
-    public Optional<IntSet> getRequiredNodeNames() {
-        return null;
     }
 
     public String toString() {
@@ -168,11 +158,6 @@ public class JNodeSelectorTest extends NodeTest {
         return other instanceof JNodeSelectorTest &&
                 ((JNodeSelectorTest) other).keys.equals(keys);
     }
-//
-//    @Override
-//    public String getFullAlphaCode() {
-//        return getBasicAlphaCode() + " n" + getMatchingNodeName().getEQName();
-//    }
 
     /**
      * Get extra diagnostic information about why a supplied item does not conform to this
@@ -185,10 +170,10 @@ public class JNodeSelectorTest extends NodeTest {
      */
     @Override
     public Optional<String> explainMismatch(Item item, TypeHierarchy th) {
-        Optional<String> explanation = super.explainMismatch(item, th);
-        if (explanation.isPresent()) {
-            return explanation;
-        }
+//        Optional<String> explanation = super.explainMismatch(item, th);
+//        if (explanation.isPresent()) {
+//            return explanation;
+//        }
         return Optional.of("The node has the wrong name");
     }
 

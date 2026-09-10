@@ -13,7 +13,6 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.pattern.qname.*;
 import net.sf.saxon.type.*;
 
@@ -85,13 +84,11 @@ public class NamedXNodeType extends XNodeType implements NamedXNodePredicate {
     }
 
     public static NodeTest make(int nodeKind, NamespaceUri uri, String localName, Configuration config) {
-        NamedXNodeType type = new NamedXNodeType(nodeKind, new StructuredQName("", uri, localName), config);
-        return new NodeTypeTest(type);
+        return new NamedXNodeType(nodeKind, new StructuredQName("", uri, localName), config);
     }
 
     public static NodeTest make(int nodeKind, int fingerprint, Configuration config) {
-        NamedXNodeType type = new NamedXNodeType(nodeKind, config.getNamePool().getStructuredQName(fingerprint), config);
-        return new NodeTypeTest(type);
+        return new NamedXNodeType(nodeKind, config.getNamePool().getStructuredQName(fingerprint), config);
     }
 
 

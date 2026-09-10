@@ -8,9 +8,8 @@
 package net.sf.saxon.pattern;
 
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.pattern.nodetest.NodeTest;
-import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.pattern.nodetest.NodePredicate;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.function.Predicate;
 
@@ -22,11 +21,11 @@ import java.util.function.Predicate;
  * therefore necessary to wrap it in a {@code NodeSelector}.</p>
  */
 
-public class NodeSelector extends NodeTest {
+public class NodePredicateLambda implements NodePredicate {
 
     private final Predicate<? super GNode> predicate;
 
-    private NodeSelector(Predicate<? super GNode> predicate) {
+    private NodePredicateLambda(Predicate<? super GNode> predicate) {
         this.predicate = predicate;
     }
 
@@ -36,8 +35,9 @@ public class NodeSelector extends NodeTest {
      * @param predicate the supplied predicate (a boolean function of a node)
      * @return a NodeTest matching the selected nodes
      */
-    public static NodeSelector of(Predicate<? super GNode> predicate) {
-        return new NodeSelector(predicate);
+    @CSharpReplaceBody(code="return new NodePredicateLambda(predicate);")
+    public static NodePredicate of(Predicate<? super GNode> predicate) {
+        return predicate::test;
     }
 
     @Override
@@ -45,19 +45,6 @@ public class NodeSelector extends NodeTest {
         return predicate.test(node);
     }
 
-    @Override
-    public double getDefaultPriority() {
-        return 0;
-    }
 
-    @Override
-    public QNameTest getQNameTest() {
-        throw new UnsupportedOperationException("NodePredicate doesn't support this method");
-    }
-
-    @Override
-    public UType getUType() {
-        return UType.ANY;
-    }
 }
 

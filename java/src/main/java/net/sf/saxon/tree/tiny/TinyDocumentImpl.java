@@ -16,7 +16,6 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NamedXNodePredicate;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.EmptyIterator;
@@ -26,6 +25,7 @@ import net.sf.saxon.type.AnyType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Type;
 import net.sf.saxon.type.Untyped;
+import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntHashMap;
 
@@ -312,7 +312,7 @@ public final class TinyDocumentImpl extends TinyParentNodeImpl {
      */
     @Override
     public SchemaType getSchemaType() {
-        SequenceIterator children = iterateChildAxis(NodeTypeTest.ELEMENT);
+        SequenceIterator children = iterateChildAxis(NodeKindType.ELEMENT);
         NodeInfo node = (NodeInfo)children.next();
         if (node == null || node.getSchemaType() == Untyped.getInstance()) {
             return Untyped.getInstance();

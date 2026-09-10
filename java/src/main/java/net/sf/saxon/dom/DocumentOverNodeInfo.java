@@ -11,8 +11,8 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.om.TreeInfo;
 import net.sf.saxon.pattern.nodetest.AnyGNode;
-import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.type.Type;
+import net.sf.saxon.type.gnode.NodeKindType;
 import org.w3c.dom.*;
 
 import java.util.ArrayList;
@@ -198,7 +198,7 @@ public class DocumentOverNodeInfo extends NodeOverNodeInfo implements Document {
             return null;
         }
         SequenceIterator children =
-                root.iterateChildAxis(NodeTypeTest.ELEMENT);
+                root.iterateChildAxis(NodeKindType.ELEMENT);
         return (Element) wrap((NodeInfo)children.next());
     }
 
