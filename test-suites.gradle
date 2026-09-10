@@ -225,15 +225,8 @@ def testSuiteMatrix = [
 
       "XP31": [
         "": [:],
-        "unfolded": ["unfolded": "on"]
-      ],
-      "XQ31": [
-        "": [:],
-        "unfolded": ["unfolded": "on"]
-      ],
-      "XP31": [
-        "": [:],
-        "unfolded": ["unfolded": "on"]
+        "unfolded": ["unfolded": "on"],
+        "linq": ["tree":"linq"]
       ],
       "XQ31": [
         "": [:],
