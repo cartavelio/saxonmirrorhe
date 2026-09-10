@@ -9,15 +9,19 @@ package net.sf.saxon.ma.map;
 
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.StaticProperty;
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.om.Genre;
+import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.MapCoercionPlan;
+import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -29,7 +33,7 @@ import java.util.function.Supplier;
  * An instance of this class represents a specific map item type, for example
  * map(x:integer, element(employee))
  */
-public class MapType extends AnyFunctionType {
+public class MapType extends AnyFunctionType implements CastingTarget {
 
     public final static MapType ANY_MAP_TYPE = new MapType(BuiltInAtomicType.ANY_ATOMIC, SequenceType.ANY_SEQUENCE);
 
@@ -157,6 +161,39 @@ public class MapType extends AnyFunctionType {
         } else {
             return ((MapItem)item).conforms(keyType, valueType);
         }
+    }
+
+    /**
+     * Cast a value to this type
+     *
+     * @param it         the value to be cast
+     * @param context    the dynamic context
+     * @param resolver   the namespace prefix resolver, for namespace-sensitive types
+     * @param allowEmpty true if the empty sequence is allowed
+     * @return the result of the cast if successful
+     * @throws XPathException if the cast is unsuccessful
+     */
+
+    @Override
+    public Item cast(Item it, XPathContext context, NamespaceResolver resolver, boolean allowEmpty) throws XPathException {
+        if (it instanceof MapItem in) {
+            GeneralMapBuilder builder = new GeneralMapBuilder(40);
+            for (KeyValuePair kvp : in.keyValuePairs()) {
+                AtomicValue k0 = kvp.key();
+                AtomicValue k1;
+                if (getKeyType().matches(k0)) {
+                    k1 = k0;
+                } else if (getKeyType() instanceof CastingTarget tgt) {
+                    k1 = (AtomicValue)tgt.cast(k0, context, resolver, allowEmpty);
+                } else {
+                    throw new AssertionError();
+                }
+                GroundedValue v1 = getValueType().castSequence(kvp.value(), context, resolver);
+                builder.put(k1, v1);
+            }
+            return builder.getCompletedMap(context);
+        }
+        throw new XPathException("Cannot cast " + Err.depict(it) + " to a map", "XPTY0004");
     }
 
     /**

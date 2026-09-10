@@ -14,40 +14,35 @@ import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.ContextItemStaticInfo;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
-import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.arrays.ArrayItemType;
+import net.sf.saxon.ma.MapOrArray;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NamespaceResolver;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
-import net.sf.saxon.type.Type;
-import net.sf.saxon.type.UType;
+import net.sf.saxon.type.*;
 import net.sf.saxon.value.Cardinality;
 
 
 /**
- * Cast Expression: implements "cast as data-type ( expression )". It also allows an internal
- * cast, which has the same semantics as a user-requested cast, but maps an empty sequence to
- * an empty sequence.
- * <p>This expression class does not handle casting to a list or union type.</p>
+ * Cast Expression: implements "cast as data-type ( expression )" where the data type is
+ * a map or array, as permitted in 4.0
  */
 
-public class CastToArrayExpr extends UnaryExpression  {
+public class CastToMapOrArrayExpr extends UnaryExpression  {
 
-    private ArrayItemType targetType;
-    private boolean allowEmpty;
+    private final AnyFunctionType targetType;
+    private final boolean allowEmpty;
 
     /**
      * Create a cast expression
      *
      * @param source     expression giving the value to be converted
-     * @param target     the type to which the value is to be converted
+     * @param target     the type to which the value is to be converted, must be an array or map type
      * @param allowEmpty true if the expression allows an empty sequence as input, producing
      *                   an empty sequence as output. If false, an empty sequence is a type error.
      */
 
-    public CastToArrayExpr(Expression source, ArrayItemType target, boolean allowEmpty) {
+    public CastToMapOrArrayExpr(Expression source, AnyFunctionType target, boolean allowEmpty) {
         super(source);
         this.targetType = target;
         this.allowEmpty = allowEmpty;
@@ -136,7 +131,7 @@ public class CastToArrayExpr extends UnaryExpression  {
     /*@NotNull*/
     @Override
     public Expression copy(RebindingMap rebindings) {
-        return new CastToArrayExpr(getBaseExpression().copy(rebindings), targetType, allowEmpty);
+        return new CastToMapOrArrayExpr(getBaseExpression().copy(rebindings), targetType, allowEmpty);
     }
 
     /**
@@ -158,8 +153,8 @@ public class CastToArrayExpr extends UnaryExpression  {
 
     /*@Nullable*/
     @Override
-    public ArrayItem evaluateItem(XPathContext context) throws XPathException {
-        return (ArrayItem) makeElaborator().elaborateForItem().eval(context);
+    public MapOrArray evaluateItem(XPathContext context) throws XPathException {
+        return (MapOrArray) makeElaborator().elaborateForItem().eval(context);
     }
 
     /**
@@ -167,7 +162,7 @@ public class CastToArrayExpr extends UnaryExpression  {
      */
 
     public boolean equals(Object other) {
-        return other instanceof CastToArrayExpr e2 &&
+        return other instanceof CastToMapOrArrayExpr e2 &&
                 getBaseExpression().isEqual(e2.getBaseExpression()) &&
                 targetType == e2.targetType &&
                 allowEmpty == e2.allowEmpty;
@@ -240,22 +235,30 @@ public class CastToArrayExpr extends UnaryExpression  {
     public static class CastToArrayElaborator extends ItemElaborator {
 
         public ItemEvaluator elaborateForItem() {
-            CastToArrayExpr exp = (CastToArrayExpr) getExpression();
+            CastToMapOrArrayExpr exp = (CastToMapOrArrayExpr) getExpression();
             Expression arg = exp.getBaseExpression();
             ItemEvaluator argEval = arg.makeElaborator().elaborateForItem();
-            ArrayItemType target = exp.targetType;
             NamespaceResolver resolver = exp.getRetainedStaticContext();
             boolean allowEmpty = exp.allowEmpty;
+            CastingTarget targetType = (CastingTarget)exp.targetType;
 
             return context -> {
                 try {
                     Item value = argEval.eval(context);
-                    return exp.targetType.cast(value, context, resolver, allowEmpty);
+                    if (value == null) {
+                        if (allowEmpty) {
+                            return null;
+                        } else {
+                            throw new XPathException("Cast expression: input is empty, but empty input is not allowed", "XPTY0004");
+                        }
+                    }
+                    return targetType.cast(value, context, resolver, allowEmpty);
                 } catch (XPathException e) {
                     throw e.maybeWithLocation(exp.getLocation())
                             .maybeWithContext(context);
                 }
             };
+
         }
 
     }

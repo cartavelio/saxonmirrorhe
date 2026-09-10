@@ -33,7 +33,7 @@ import java.util.function.Supplier;
  * An instance of this class represents a specific array item type, for example
  * array(xs:boolean)
  */
-public class ArrayItemType extends AnyFunctionType implements CastingTarget{
+public class ArrayItemType extends AnyFunctionType implements CastingTarget {
 
     public final static ArrayItemType ANY_ARRAY_TYPE = new ArrayItemType(SequenceType.ANY_SEQUENCE);
 
