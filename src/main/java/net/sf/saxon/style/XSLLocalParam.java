@@ -191,10 +191,12 @@ public class XSLLocalParam extends XSLGeneralVariable {
         if (sourceBinding.hasProperty(SourceBinding.BindingProperty.REQUIRED)) {
             if (sourceBinding.getSelectExpression() != null) {
                 // NB, we do this test before setting the default select attribute
-                compileError("The select attribute must be omitted when required='yes'", "XTSE0760");
+                String errorCode = isFunction ? "XTSE0760" : "XTSE0010";
+                compileError("The select attribute must be omitted when required='yes'", errorCode);
             }
             if (hasChildNodes()) {
-                compileError("A parameter specifying required='yes' must have empty content", "XTSE0760");
+                String errorCode = isFunction ? "XTSE0760" : "XTSE0010";
+                compileError("A parameter specifying required='yes' must have empty content", errorCode);
             }
         }
 
