@@ -248,7 +248,7 @@ public class QueryModule implements StaticContext {
         module.setBaseURI(baseURI);
         module.setExecutable(executable);
         module.setModuleNamespace(namespaceURI);
-        module.setXPathVersion(importer.getXPathVersion()); // by default, overridden by explicit version declaration
+        module.setXPathVersion(importer.getXPathVersion());
         executable.addQueryLibraryModule(module);
         XQueryParser qp = (XQueryParser) config.newExpressionParser(
                 "XQ", importer.isUpdating(), module);

@@ -517,13 +517,14 @@ public class XQueryParser extends XPathParser {
             if (Arrays.binarySearch(allowedVersions, queryVersion) < 0) {
                 grumble("Invalid XQuery version " + queryVersion, "XQST0031");
             }
-            languageVersion = switch (queryVersion) {
+            int declaredVersion = switch (queryVersion) {
                 case "1.0" -> 20;  // XQuery 1.0 == XPath 2.0
                 case "3.0" -> 30;
                 case "3.1" -> 31;
                 case "4.0" -> 40;
                 default -> 31;
             };
+            languageVersion = Integer.max(languageVersion, declaredVersion);
             env.getPackageData().setHostLanguage(HostLanguage.XQUERY, languageVersion);
             nextToken();
             if (isKeyword("encoding")) {
