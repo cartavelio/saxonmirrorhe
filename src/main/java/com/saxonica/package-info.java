@@ -1,0 +1,10 @@
+/**
+ * <p>This package together with its subpackages contains the code of Saxon-PE and Saxon-EE, other
+ * than the code that is in common with the open-source version Saxon-HE.</p>
+ * <p>Most of the code is in subsidiary packages, which are described individually.</p>
+ * <p>The classes that are directly in this package support command-line interfaces to Saxon.</p>
+ * <p align="center"><i>Michael H. Kay<br/>
+ * Saxonica Limited<br/>
+ * 30 July 2010</i></p>
+ */
+package com.saxonica;
