@@ -134,7 +134,7 @@ public class TestXQueryToSaxDestination {
     }
 
     @Test
-    public void testQueryToSaxResult() throws Exception {
+    public void testQueryToSaxResult() {
         try {
             Configuration config = new EnterpriseConfiguration();
             config.setConfigurationProperty(FeatureKeys.GENERATE_BYTE_CODE, false);
@@ -162,7 +162,7 @@ public class TestXQueryToSaxDestination {
 
             DynamicQueryContext dynamicQueryContext = new DynamicQueryContext(config);
 
-            TreeInfo document = staticQueryContext.getConfiguration().buildDocumentTree(new SAXSource(new InputSource(new StringReader(
+            TreeInfo document = config.buildDocumentTree(new SAXSource(new InputSource(new StringReader(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                             "<personnel>\n" +
                             "    <person id=\"Big.Boss\">\n" +

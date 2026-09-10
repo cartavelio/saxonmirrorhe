@@ -37,7 +37,7 @@ public class TestXQueryThreads {
                     return new StreamSource(strawberryFieldsForever());
                 }
             });
-            XdmSequenceIterator xdmSequenceIterator = xqueryEvaluator.iterator();
+            XdmSequenceIterator<?> xdmSequenceIterator = xqueryEvaluator.iterator();
             xdmSequenceIterator.next();
 
             Thread.sleep(100); // wait some time before closing
