@@ -1034,49 +1034,41 @@
    </section>
 
 	<section id="xpath40" title="XPath 4.0 conformance">
-      <h1>XPath 4.0 conformance</h1>
-      <p>Saxon partially implements the still evolving draft XPath 4.0 Recommendation.</p>
-      <aside>
-         <p>Use one of the following mechanisms to enable syntax extensions:</p>
+		<h1>XPath 4.0 conformance</h1>
+		
+		<p>Saxon partially implements the still evolving draft XPath 4.0 Recommendation.</p>
+		
+		<aside>
+			<p>Use one of the following mechanisms to enable syntax extensions:</p>
 
-         <ul>
-            <li>Set the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/>
-               (equivalently, use <code>--allowSyntaxExtensions:on</code> on the command line, or
-                  <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
-            <li>Set the language level to 4.0 in a call to an API method such as
-                  <code>XsltCompiler.setXsltLanguageVersion()</code>.</li>
-            <li>
-               <p>For XQuery, set the language level to 4.0 in the XQuery declaration in the query
-                  prolog of the main module, or use the option <code>-qversion:4.0</code> on the
-                  command line.</p>
-               <p>When processing a library module, the effective language level is either the
-                  declared version in the prolog of the library module, or the effective language
-                  level for the importing module, whichever is greater. It is generally not a good
-                  idea to mix language levels, because this causes problems with the semantics of
-                  constructs that span modules, for example the type coercions applied when code in
-                  one module makes a call on a function declared in another.</p>
-            </li>
-         </ul>
+			<ul>
+				<li>Set the configuration property <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/> (equivalently, use <code>--allowSyntaxExtensions:on</code> on the command line, or <code>global/@allowSyntaxExtensions="true"</code> in the configuration file).</li>
+				<li>Set the language level to 4.0 in a call to an API method such as <code>XsltCompiler.setXsltLanguageVersion()</code>.</li>
+				<li>
+					<p>For XQuery, set the language level to 4.0 in the XQuery declaration in the query prolog of the main module, or use the option <code>-qversion:4.0</code> on the command line.</p>
+					<p>When processing a library module, the effective language level is either the declared version in the prolog of the library module, or the effective language level for the importing module, whichever is greater. It is generally not a good idea to mix language levels, because this causes problems with the semantics of constructs that span modules, for example the type coercions applied when code in one module makes a call on a function declared in another.</p>
+				</li>
+			</ul>
 
-		 <!-- It's expected that this will be changed for Saxon 13, so that setting 4.0 in the stylesheet WILL be enough. -->
-         <p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This
-            gives you an XSLT 3.0 processor running in forwards compatibility mode, rather than an
-            XSLT 4.0 processor.</p>
+			<!-- It's expected that this will be changed for Saxon 13, so that setting 4.0 in the stylesheet WILL be enough. -->
+			<p>Note: in XSLT, setting <code>version="4.0"</code> in the stylesheet is not enough. This gives you an XSLT 3.0 processor running in forwards compatibility mode, rather than an XSLT 4.0 processor.</p>
 
-         <p>Like other Saxon extensions, these extensions all require Saxon-PE or higher. They are
-            also available in SaxonCS.</p>
-      </aside>
+			<p>Like other Saxon extensions, these extensions all require Saxon-PE or higher. They are also available in SaxonCS.</p>
+		</aside>
 
-      <p>For a list of changes introduced by XPath 4.0, see <a class="bodylink"
-            href="/conformance/xpath40/new-in-xpath40">New in XPath 4.0</a>. Saxon-specific
-         implementation details are summarised below.</p>
+		<p>For a list of changes introduced by XPath 4.0, see <a class="bodylink" href="/conformance/xpath40/new-in-xpath40">New in XPath 4.0</a>. Saxon-specific implementation details are summarised below.</p>
 
-      <section id="new-in-xpath40" title="New in XPath 4.0">
-         
-         <p>For full details of the changes in XPath 4.0, see the W3C specifications.</p>
-         
-        <ul>
-        	<!-- TODO: Are changes being made to Saxon that correspond with this change?
+		<section id="new-in-xpath40" title="New in XPath 4.0">
+			<h1>New in XPath 4.0</h1>
+
+			<p>For full details of the changes in XPath 4.0, see the W3C specifications:</p>
+			<ul>
+				<li><p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html">XQuery and XPath Data Model 4.0</a></p></li>
+				<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html">XML Path Language (XPath) 4.0</a></p></li>
+			</ul>
+
+			<ul>
+				<!-- TODO: Are changes being made to Saxon that correspond with this change?
         	     For example, renaming:
         	     - net.net.sf.saxon.value.AtomicValue
         	     - Saxon.Api.XdmAtomicValue
@@ -1087,19 +1079,49 @@
         		</ul>
         	</li>
         	-->
-        	<li>
-        		<p>Support for new item types.  See:</p>
-        		<ul>
-            		<li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
-		            <li><p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a></p></li>
-        		    <li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
-		            <li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
-		            <li><p><a class="bodylink" href="/expressions/type-system/type-aliases">Type aliases</a></p></li>
-        		</ul>   
-         	</li>
-         </ul>
-      </section>
-   </section>
+				<li><p>The rules have been relaxed regarding the use of non-XML characters in instances of <code>xs:string</code> and the function <code>fn:decode-from-uri</code> is introduced.</p></li>
+				<li><p>The term <i>atomic item</i> replaces <i>atomic value</i></p></li>
+				<li>
+					<p>It's now possible to compare and sort all types of atomic item:</p>
+					<ul>
+						<li><p>Atomic types are categorized into type families to make it clear which values are comparable.</p></li>
+						<li><p>Every atomic type has a sort order, including <code>xs:duration</code>.</p></li>
+					</ul>
+				</li>
+				<li>
+					<p>Support for new item types:</p>
+					<ul>
+						<li><p>Generic nodes (GNode)</p></li>
+						<li><p>JSON nodes (JNode)</p></li>
+						<li><p>A new name for XML nodes: XNode</p></li>
+						<li><p><a class="bodylink" href="/expressions/type-system/choice-types">Choice item types</a></p></li>
+						<li><p><a class="bodylink" href="/expressions/type-system/record-types">Record types</a></p></li>
+						<li><p><a class="bodylink" href="/expressions/type-system/enum-types">Enum types</a></p></li>
+						<li><p><a class="bodylink" href="/expressions/type-system/kindtests">KindTests and NodeTests</a></p></li>
+						<li><p><a class="bodylink" href="/expressions/types/named-item-types">Named item types</a></p></li>
+					</ul>
+				</li>
+				<li><p>Function items now have identity, impacting <code>fn:deep-equal</code>.</p></li>
+				<li>
+					<p>Changes to map items:</p>
+					<ul>
+						<li><p>constructors are added</p></li>
+						<li><p>the single accessor function is now an iterator over the key/value pairs in the map.</p></li>
+						<li><p>the items in a map are now ordered</p></li>
+					</ul>
+				</li>
+				<li>
+					<p>Changes to array items:</p>
+					<ul>
+						<li><p>constructors are added</p></li>
+						<li><p>the single accessor function is now an iterator over members of the array.</p></li>
+					</ul>
+				</li>
+				<li><p>A URIQualifiedName may now supply a prefix as well as a URI and local name.</p></li>
+			</ul>
+		</section>
+
+	</section>
   
    <section id="xquery31" title="XQuery 3.1 conformance">
       <h1>XQuery 3.1 conformance</h1>

@@ -809,8 +809,7 @@
         <p>Use of the <code>saxon:item-type</code> syntax requires Saxon-PE or higher. Use of the "type(NNN)" syntax
           in XPath expressions requires the configuration option <a class="feature" href="ALLOW_SYNTAX_EXTENSIONS"/> to be enabled.</p>
         
-        <p>For further information about the syntax extension, see <a class="bodylink"
-          href="/v4extensions/new-types/type-aliases">Type aliases</a>.</p>
+        <p>For further information about the syntax extension, see <a class="bodylink" href="/expressions/types/named-item-types">Named item types</a>.</p>
       </details>
       <examples>
         <example>

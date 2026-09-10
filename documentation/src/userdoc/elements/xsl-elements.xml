@@ -2457,8 +2457,7 @@
                         <code>type(typename)</code>; while earlier releases used the experimental
                     syntax <code>~typename</code>.</p>
                 <p>For more information, see <a class="bodylink"
-                        href="/v4extensions/new-types/type-aliases">Type aliases</a>. FIXME: or
-                    where is this information getting moved to???</p>
+                		href="/expressions/types/named-item-types">Named item types</a>.</p>
             </status>
         </xsl-element>
     </section>

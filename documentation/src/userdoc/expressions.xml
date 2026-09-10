@@ -14,22 +14,24 @@
 
 	<p>An important new feature in XPath 3.1 was the definition of maps and arrays. These features are available in all current Saxon editions, whether you are using XPath, XQuery, or XSLT. A major motivation for their introduction was to support the data structures that can be defined in JSON, but they have many other uses where more complex data structures need to be built. For more details see <a class="bodylink" href="/expressions/types/xpath30maps">Maps in XPath</a> and <a class="bodylink" href="/expressions/types/xpath31arrays">Arrays in XPath</a>.</p>
 
+	<p>For a list of changes in XPath 4.0, see <a class="bodylink" href="/conformance/xpath-40/new-in-xpath40">New in XPath 4.0</a>.</p>
+
 	<h3 class="subtitle">XPath basics</h3>
 
 	<p>In XPath 2.0 (and higher) all values are considered as sequences. A sequence consists of zero or more items; an item may be a generic node, an atomic item or (since 3.0) a function item. For more detail, see <a class="bodylink" href="/expressions/types">Types</a></p>
 
 	<p>An empty sequence is written as <code>()</code>; a singleton sequence may be written as <code>"a"</code> or <code>("a")</code>, and a general sequence is written as <code>("a", "b", "c")</code>.</p>
-	
+
 	<p>The node-sets of XPath 1.0 are replaced in XPath 2.0 by sequences of nodes. Path expressions will return node sequences whose nodes are in document order with no duplicates, but other kinds of expression may return sequences of nodes in any order, with duplicates permitted.</p>
 
 	<section id="types" title="Types" class="qt4">
 		<h1>Types</h1>
 		<?source https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types ?>
-		
+
 		<p>There are two main categories of type: schema types and item types.</p>
-		
+
 		<h2>Pre-defined types</h2>
-		
+
 		<table>
 			<thead>
 				<tr>
@@ -241,7 +243,7 @@
 					<td class="comparison-family"><p>Function</p></td>
 					<td class="notes">
 						<?source https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items ?>
-						<p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items">XDM 4.0</a> introduces the concept of function identity, an abstract property that can be used to test whether two variables refer to the same function or to different functions.  This has an impact on <code>fn:deep-equal</code> and also when establishing whether the arguments and results of a function are <i>the same</i> when deciding whether the function is deterministic.</p>
+						<p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#function-items">XDM 4.0</a> introduces the concept of function identity, an abstract property that can be used to test whether two variables refer to the same function or to different functions. This has an impact on <code>fn:deep-equal</code> and also when establishing whether the arguments and results of a function are <i>the same</i> when deciding whether the function is deterministic.</p>
 					</td>
 				</tr>
 				<tr>
@@ -534,23 +536,23 @@
 				</tr>
 			</tbody>
 		</table>
-		
+
 		<p>XQuery and XPath Data Model 4.0 introduces new types in the Item category:</p>
 		<ul>
-			<li><p>Generic node (gnode())</p> - <i></i>represents a node in a tree, regardless of whether it's a JSON tree or an XML tree.</li>
+			<li><p>Generic node (gnode())</p> - <i/>represents a node in a tree, regardless of whether it's a JSON tree or an XML tree.</li>
 			<li><p>JSON node (jnode())</p> - <i>represents a node in a JSON tree, as opposed to an XML tree</i></li>
 		</ul>
 		<p>To complement the above changes, from 4.0 onwards, a node in an XML tree is known as an XNode (node()) but remains otherwise unchanged.</p>
-		
+
 		<p>New types were also added to the Schema category in 4.0 but these are more easily considered methods for constraining how other types are used:</p>
 		<ul>
 			<li><p><a class="bodylink" href="/expressions/types/choice-types">Choice item types</a></p></li>
 			<li><p><a class="bodylink" href="/expressions/types/choice-types">Record types</a></p></li>
 			<li><p><a class="bodylink" href="/expressions/types/choice-types">Enumeration types</a></p></li>
-		</ul>		
-		
+		</ul>
+
 		<p>Since 4.0, atomic items that belong to the same comparison family are mutually comparable.</p>
-		
+
 		<p>For more detailed information about types, see:</p>
 		<ul>
 			<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-types">Types</a></p></li>
@@ -558,28 +560,28 @@
 			<li><p><a href="https://qt4cg.org/specifications/xpath-datamodel-40/Overview.html#atomic-items">Atomic Items</a></p></li>
 			<li><p><a href="https://qt4cg.org/specifications/xquery-40/xpath-40.html#id-atomic-comparisons">Atomic Comparisons: An Overview (Non-Normative)</a></p></li>
 		</ul>
-		
+
 		<nav>
 			<ul/>
 		</nav>
-		
+
 		<section id="xpath30maps" title="Maps in XPath">
 			<h1>Maps in XPath</h1>
-			
+
 			<aside>Since Saxon 9.7, maps are available in all Saxon editions.</aside>
-			
+
 			<p>An important new feature in XPath 3.1 was the definition of maps. (This feature is in fact included in the XPath 3.0 implementation in Saxon, and thus was available as an advanced feature since Saxon 9.5, before the full implementation of XPath 3.1 in Saxon 9.7).</p>
-			
+
 			<p>A map is a kind of XDM item (alongside nodes and atomic values). In fact, a map is a kind of function: you can think of it as a function defined extensionally (by tabulating the value of the function for all possible arguments) rather than intensionally (by means of an algorithm).</p>
-			
+
 			<p>A map is a set of entries. Each entry is a key-value pair. The <i>key</i> is always an atomic item. The <i>value</i> is any XDM value: a sequence of nodes, atomic item, functions, or maps.</p>
-			
+
 			<p>Maps, like sequences, are immutable. When you add an entry to a map, you get a new map; the original is unchanged. Saxon provides an efficient implementation of maps that achieves this without copying the whole map every time an entry is added.</p>
-			
-			<p>Since XDM 4.0, all the entries in map are ordered (see <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#map-ordering">Ordering of Maps</a>).  Prior to that, order was not preserved.</p>
-			
+
+			<p>Since XDM 4.0, all the entries in map are ordered (see <a href="https://qt4cg.org/specifications/xpath-functions-40/Overview.html#map-ordering">Ordering of Maps</a>). Prior to that, order was not preserved.</p>
+
 			<p>Also like sequences, maps do not have an intrinsic type of their own, but rather have a type that can be inferred from what they contain. A map conforms to the type <code>map(K, V)</code> if all the keys are of type <code>K</code> and all the values are of type <code>V</code>. For example if the keys are all strings, and the values are all <code>employee</code> elements, then the map conforms to the type <code>map(xs:string, element(employee))</code>.</p>
-			
+
 			<p>There are several ways to create a map:</p>
 			<ul>
 				<li>
@@ -593,19 +595,19 @@
 					<p>A single-entry map can also be constructed using the function <code>map:entry($key, $value)</code>.</p>
 				</li>
 			</ul>
-			
+
 			<p>It is also possible to create maps using the XSLT instructions <a class="bodylink code" href="/xsl-elements/map">xsl:map</a> and <a class="bodylink code" href="/xsl-elements/map-entry">xsl:map-entry</a>.</p>
-			
+
 			<p>Given a map <code>$M</code>, the value corresponding to a given key <code>$K</code> can be found either by invoking the map as a function: <code>$M($K)</code>, or by calling <code>map:get($M, $K)</code>.</p>
-			
+
 			<p>The summary of the full list of functions that operate on maps is as follows; for full details see the <a class="bodylink" href="/functions/map">Functions library</a>. The prefix <code>map</code> represents the namespace URI <code>http://www.w3.org/2005/xpath-functions/map</code>.</p>
-			
+
 			<ul>
 				<li>
 					<p><code>map:build</code>: returns a map that typically contains one entry for each item in a supplied input sequence. <i>New in 4.0.</i></p>
 				</li>
 				<li>
-					<p><code>map:contains</code>: returns <code>true</code> if the given key is present in the map.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:contains</code>: returns <code>true</code> if the given key is present in the map. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
 					<p><code>map:empty</code>: returns <code>true</code> if the supplied map contains no entries. <i>New in 4.0.</i></p>
@@ -614,49 +616,49 @@
 					<p><code>map:entries</code>: returns a sequence containing all the key-value pairs present in a map, each represented as a single-entry map. <i>New in 4.0.</i></p>
 				</li>
 				<li>
-					<p><code>map:entry</code>: creates a single-entry map that represents a single key-value pair. Useful as an argument to <code>map:merge()</code>.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:entry</code>: creates a single-entry map that represents a single key-value pair. Useful as an argument to <code>map:merge()</code>. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:filter</code>: Selects entries from a map, returning a new map.  <i>New in 4.0.</i></p>
+					<p><code>map:filter</code>: Selects entries from a map, returning a new map. <i>New in 4.0.</i></p>
 				</li>
 				<li>
-					<p><code>map:find</code>: searches the supplied input sequence and any contained maps and arrays for a map entry with the supplied key, and returns the corresponding values.   <i>Since XSLT 3.0 and XPath 3.1.</i></p>				
+					<p><code>map:find</code>: searches the supplied input sequence and any contained maps and arrays for a map entry with the supplied key, and returns the corresponding values. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:for-each</code>: processes every key/value pair in a map by applying the given function.  Prior to XPath 4.0, the results were returned as a sequence in unpredictable order; since XPath 4.0, the result is ordered.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>				
+					<p><code>map:for-each</code>: processes every key/value pair in a map by applying the given function. Prior to XPath 4.0, the results were returned as a sequence in unpredictable order; since XPath 4.0, the result is ordered. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:get</code>: returns the value associated with the given key if present, or the empty sequence otherwise. Equivalent to calling <code>$map($key)</code>.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:get</code>: returns the value associated with the given key if present, or the empty sequence otherwise. Equivalent to calling <code>$map($key)</code>. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:items</code>: returns a sequence containing all the values present in a map, in order.  <i>New in 4.0.</i></p>
+					<p><code>map:items</code>: returns a sequence containing all the values present in a map, in order. <i>New in 4.0.</i></p>
 				</li>
 				<li>
-					<p><code>map:keys</code>: returns the keys that are present in a map, in unpredictable order.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:keys</code>: returns the keys that are present in a map, in unpredictable order. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:keys-where</code>: returns a sequence containing selected keys present in a map.  <i>New in 4.0.</i></p>
+					<p><code>map:keys-where</code>: returns a sequence containing selected keys present in a map. <i>New in 4.0.</i></p>
 				</li>
 				<li>
-					<p><code>map:merge</code>: takes a sequence of maps as input and combines them into a single map.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:merge</code>: takes a sequence of maps as input and combines them into a single map. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:put</code>: adds an entry to a map, which replaces any existing entry for the same key, returning a new map.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:put</code>: adds an entry to a map, which replaces any existing entry for the same key, returning a new map. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:remove</code>: removes an entry from a map (if it was present), returning a new map; if not present, returns the existing map unchanged.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:remove</code>: removes an entry from a map (if it was present), returning a new map; if not present, returns the existing map unchanged. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 				<li>
-					<p><code>map:size</code>: returns the number of entries (key/value pairs) in a map.  <i>Since XSLT 3.0 and XPath 3.1.</i></p>
+					<p><code>map:size</code>: returns the number of entries (key/value pairs) in a map. <i>Since XSLT 3.0 and XPath 3.1.</i></p>
 				</li>
 			</ul>
 		</section>
-		
+
 		<section id="xpath31arrays" title="Arrays in XPath">
 			<h1>Arrays in XPath</h1>
-			
+
 			<aside>Since Saxon 9.7, arrays are available in all Saxon editions.</aside>
-			
+
 			<p>XPath 3.1 introduced arrays as a new data type. (Unlike maps, arrays are not defined for use in XSLT 3.0 unless XPath 3.1 is supported. But Saxon's XSLT 3.0 implementation always supports XPath 3.1.)</p>
 			<p>The main reason arrays were introduced was to allow JSON data structures to be represented faithfully. However there are many other ways you can take advantage of arrays.</p>
 			<p>Arrays differ from sequences in a number of ways:</p>
@@ -758,15 +760,15 @@
 			<p>Choice item types can also be used in XSLT match patterns, for example a template defined with <code>match="type(xs:date, xs:time)"</code> will match values of those types. Such a pattern is allocated a default priority designed to reflect the type hierarchy, so if U is a subtype of V, then the pattern corresponding to U will have a higher priority than the pattern corresponding to V. However, the algorithm does not ensure that ambiguous union patterns have the same priority, so ambiguities may go undetected.</p>
 
 			<p>The pattern <code>match="type(xs:date)"</code> works in the same way; it can be regarded as syntactic sugar for a choice type with only one member.</p>
-			
+
 			<p>Two additional Saxon extensions help to improve the usability of choice item types:</p>
 			<ul>
-				<li>A commonly used type can be referenced using a <b>type alias</b>, for example <code>as="type(my:date-or-time)"</code>. Type aliases are available in both XSLT and XQuery, and are described in <a class="bodylink" href="/expressions/type-system/type-aliases">Type aliases</a>. Type aliases go some way towards hiding the implementation details of the type, and allowing the implementation to be changed without affecting users of the function library; in addition they simply make the code more readable.</li>
+				<li>A commonly used type can be referenced using a <b>type alias</b>, for example <code>as="type(my:date-or-time)"</code>. Type aliases are available in both XSLT and XQuery, and are described in <a class="bodylink" href="/expressions/types/named-item-types">Named item types</a>. Type aliases go some way towards hiding the implementation details of the type, and allowing the implementation to be changed without affecting users of the function library; in addition they simply make the code more readable.</li>
 				<li>In XSLT only, elements that have an <code>as</code> attribute to define the type of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute which allows additional type information to be supplied using Saxon extension syntax. If both attributes are present, then the type specified in <code>saxon:as</code> must be a subtype of the type specified in the <code>as</code> attribute. Typical usage might be <code>&lt;xsl:param name="x" as="xs:anyAtomicType" saxon:as="union(xs:date, xs:time, xs:dateTime)"/&gt;</code>. This device allows union types to be used without compromising the portability of the stylesheet to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0 processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
 			</ul>
-			
+
 			<p>For example, the following code defines an XQuery function that formats a date, time, dateTime, or a string in the form of a date, time, or dateTime using the appropriate variant of the format-date/time function:</p>
-			
+
 			<pre><code class="language-xquery"><![CDATA[declare function local:format(
               $in as union(xs:dateTime, xs:date, xs:time, xs:string), 
               $fmt as xs:string) as xs:string {
@@ -778,9 +780,9 @@
    default return error()
    };    
 local:format("2016-10-07", $fmt)]]></code></pre>
-			
+
 		</section>
-		
+
 		<section id="record-types" title="Record types" class="qt4">
 			<h1>Record types</h1>
 			<aside>Previously referred to as "tuple types". Saxon continues to recognize the keyword <code>tuple</code> as a synonym of <code>record</code>.</aside>
@@ -848,7 +850,7 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
          </pre>
 			<p>Two additional extensions help to improve the usability of record types:</p>
 			<ul>
-				<li>A commonly used type can be referenced using a <b>type alias</b>, for example <code>as="type(cx:complex)"</code>. Type aliases are available in both XSLT and XQuery, and are described in <a class="bodylink" href="/v4extensions/new-types/type-aliases">Type aliases</a>. Type aliases go some way towards hiding the implementation details of the type, and allowing the implementation to be changed without affecting users of the function library; in addition they simply make the code more readable.</li>
+				<li>A commonly used type can be referenced using a <b>type alias</b>, for example <code>as="type(cx:complex)"</code>. Type aliases are available in both XSLT and XQuery, and are described in <a class="bodylink" href="/expressions/types/named-item-types">Named item types</a>. Type aliases go some way towards hiding the implementation details of the type, and allowing the implementation to be changed without affecting users of the function library; in addition they simply make the code more readable.</li>
 				<li>In XSLT only, elements that have an <code>as</code> attribute to define the type of a variable, function, or parameter, also have an optional <a class="bodylink code" href="/extensions/attributes/as">saxon:as</a> attribute which allows additional type information to be supplied using Saxon extension syntax. If both attributes are present, then the type specified in <code>saxon:as</code> must be a subtype of the type specified in the <code>as</code> attribute. Typical usage might be <code>&lt;xsl:param name="x" as="map(*)" saxon:as="record(r as xs:double, i as xs:double)"/&gt;</code>. This device allows record types to be used without compromising the portability of the stylesheet to an XSLT 3.0 processor that does not recognize Saxon's extension syntax (an XSLT 3.0 processor that does not recognize the <code>saxon:as</code> attribute is required to ignore it).</li>
 			</ul>
 			<h2>Recursive record types</h2>
@@ -887,16 +889,28 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 			<p>From Saxon 12, NodeTests used in steps are extended to allow, for example, <code>ancestor::(section|appendix)</code>. This will select all ancestors named <code>section</code> or <code>appendix</code>. The meaning is similar to <code>ancestor::section|ancestor::appendix</code>, except when a numeric predicate is used: because <code>ancestor</code> is a reverse axis, <code>ancestor::(section|appendix)[1]</code> selects the innermost ancestor that satisfies the node test. As well as simple names, the options used within the parentheses can include kind tests (such as <code>comment()</code> and <code>text()</code>) and wild cards (such as <code>*:code</code> and <code>ns:*</code>). There must be an explicit axis, but <code>@</code> can be used as an abbreviation for <code>attribute::</code>. For example, <code>@(name, id)</code> selects the <code>name</code> and <code>id</code> axes.</p>
 			<p>In match patterns, union node tests work like union patterns, so <code>match="@(code, ns:*)"</code> is equivalent to having two separate template rules, matching the two node tests, with different default priority.</p>
 		</section>
-		<section id="type-aliases" title="Type aliases" class="qt4">
-			<h1>Type aliases</h1>
-			<p>TODO FIXME: these are now called named item types, and the syntax has changed in the current 4.0 specs...</p>
-			<aside>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8; revised in 10 and 11.</aside>
+
+		<section id="named-item-types" title="Type aliases" class="qt4">
+			<h1>Named item types</h1>
+
+			<p>A named item type is an <code>ItemType</code> identified by an expanded <code>QName</code>: namespace-uri, namespace-prefix and local name.</p>
+
+			<aside>
+				<p>Prior to XPath 4.0, named item types were known as type aliases.</p>
+			</aside>
+
+			<aside>
+				<p>Requires Saxon-PE or Saxon-EE, with syntax extensions enabled. Available since Saxon 9.8; revised in 10 and 11.</p>
+			</aside>
+
 			<p>Wherever an <code>ItemType</code> may appear (for example in a function signature or variable declaration, or in <code>instance of</code> or <code>cast as</code> expressions), the syntax <code class="bold">type(alias)</code> is permitted, where <code>alias</code> is a name for an item type declared elsewhere. Type aliases are QNames, and prefixes are resolved in the usual way (using the default namespace for elements and types).</p>
+
 			<p>Type aliases are useful because they abstract away from the detail of how a type is implemented: for example <code>type(cx:complex)</code> is more meaningful than <code>record(r as xs:double, i as xs:double)</code>, and it creates more scope for changing the way types are represented as the software evolves. However, type aliases do not provide any real encapsulation or information hiding. Type aliases cannot be used within their own definition, and the definition of a type alias cannot be circular.</p>
+
 			<p>The mapping of type aliases to item types is an extension to the static context of an expression.</p>
+
 			<p>In XSLT, type aliases can be defined using the top-level declaration <a class="bodylink code" href="/xsl-elements/item-type">xsl:item-type</a>:</p>
-			<pre>
-            <code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
+			<pre><code class="language-xml"><![CDATA[<xsl:item-type name="cx:complex" as="record(r as xs:double, i as xs:double)"/>
 
 <xsl:function name="cx:complex" as="type(cx:complex)">
   <xsl:param name="r" as="xs:double"/>
@@ -909,21 +923,23 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
   <xsl:param name="y" as="type(cx:complex)"/>
   <xsl:sequence select="cx:complex($x?r + $y?r, $x?i + $y?i)"/>
 </xsl:function>
-]]></code>
-         </pre>
+]]></code></pre>
+
 			<p>XSLT-defined type aliases are scoped to a package. The usual rules for import precedence apply.</p>
+
 			<aside>If you want to use the same type aliases in multiple packages, define them in a module of their own, and include that module in each package using <code>xsl:include</code>.</aside>
+
 			<p>Type aliases can be used in XSLT 4.0 match patterns (see <a class="bodylink" href="/xsl-elements/patterns/patterns-30">Patterns in XSLT 4.0</a>). For example:</p>
-			<pre>
-            <code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]"&gt;{?r}&lt;/xsl:template&gt;</code>
-         </pre>
-			<pre>
-            <code class="language-xml">&lt;xsl:template match="type(cx:complex)"&gt;{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template&gt;</code>
-         </pre>
+			<pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)[?i=0]"&gt;{?r}&lt;/xsl:template&gt;</code></pre>
+			<pre><code class="language-xml">&lt;xsl:template match="type(cx:complex)"&gt;{?r}{if (?i ge 0) then '+' else ''}{?i}i&lt;/xsl:template&gt;</code></pre>
+
 			<p>The construct <code>type(T)</code> at the start of a pattern can be regarded as an abbreviation for <code>.[. instance of T]</code>.</p>
+
 			<p>In XQuery, type aliases can be declared in the query prolog. From Saxon 12.4, the syntax is <code>declare item-type QName as ItemType;</code>, for example: <code>declare item-type cx:complex as record(r as xs:double, i as xs:double);</code>. For Saxon 12.3 and earlier, the syntax was <code>declare type QName = ItemType;</code>, for example: <code>declare type cx:complex = record(r as xs:double, i as xs:double);</code>.</p>
+
 			<p>For further details see <a class="bodylink" href="/xsl-elements/item-type">xsl:item-type</a>.</p>
 		</section>
+
 	</section>
 	<h3 class="subtitle">XPath syntax</h3>
 	<p>The functions provided in the XPath function library are listed separately: see the <a class="bodylink" href="/functions">Function library</a> section. This section summarizes the following syntactic constructs and operators provided in XPath 2.0 and higher:</p>
@@ -1316,12 +1332,12 @@ declare function cx:add ($x as record(r as xs:double, i as xs:double),
 				<p>The arrow operator <code>=&gt;</code> is available to allow function chaining. The expression <code>substring-before(substring-after($in, '['), ']')</code> can now be replaced by the more legible <code>$in =&gt; substring-after('[') =&gt; substring-before(']')</code>.</p>
 			</li>
 			<li>
-				<p>Maps are available (for more details see <a class="bodylink" href="/expressions/types/xpath30maps">Maps in XPath</a>). They provide a similar capability to "objects" in Javascript, or "associative arrays" in some other languages. But as befits a function language like XPath, they are immutable. A collection of functions is available to operate on maps (see the <a class="bodylink" href="/functions/map">Function library</a>), and in addition there is new syntax for a map constructor (of the form <code>map{ key : value, key : value }</code>) where both the keys and values are arbitrary expressions. There is a sequence type for maps <code>map(K, V)</code>, defining the types of the key and value parts. Maps are functions, so given a map <code>$M</code>, the entry for a key <code>$K</code> can be obtained as the result of the function call <code>$M($K)</code>. If the key to be accessed is known statically, and if it takes the form of an <code>NCName</code>, then a lookup expression of
-					the form <code>$employee?name</code> can be used. A unary form of this operator is also available, allowing <code>$employees[?name='John']</code>.</p>
+				<p>Maps are available (for more details see <a class="bodylink" href="/expressions/types/xpath30maps">Maps in XPath</a>). They provide a similar capability to "objects" in Javascript, or "associative arrays" in some other languages. But as befits a function language like XPath, they are immutable. A collection of functions is available to operate on maps (see the <a class="bodylink" href="/functions/map">Function library</a>), and in addition there is new syntax for a map constructor (of the form <code>map{ key : value, key : value }</code>) where both the keys and values are arbitrary expressions. There is a sequence type for maps <code>map(K, V)</code>, defining the types of the key and value parts. Maps are functions, so given a map <code>$M</code>, the entry for a key <code>$K</code> can be obtained as the result of the function call <code>$M($K)</code>. If the key to be accessed is known statically, and if it takes the form of an <code>NCName</code>, then a lookup
+					expression of the form <code>$employee?name</code> can be used. A unary form of this operator is also available, allowing <code>$employees[?name='John']</code>.</p>
 			</li>
 			<li>
-				<p>Arrays are available (for more details see <a class="bodylink" href="/expressions/types/xpath31arrays">Arrays in XPath</a>). Arrays differ from the traditional sequences in that they can be nested. The members of an array can be arbitrary values, including sequences and arrays. An array is an item, so some care is needed: the syntax <code>$A[1]</code> returns the array item unchanged rather than selecting a member of the array. A library of functions is available to operate on arrays ((see the <a class="bodylink" href="/functions/array">Function library</a>). The expression <code>[1, 5, 7, (10 to 20)]</code> can be used to construct an array where the number of members is known statically (this example creates an array with four members, of which the last is a sequence of 11 items), and the expression <code>array{ 1, 5, 7, (10 to 20)}</code> can be used to construct an array with a variable number of members, provided that each member is a single item (in this case the array has 14
-					members, each a single integer). A member of an array can be accessed using the syntax <code>$A(3)</code> or <code>$A?3</code>.</p>
+				<p>Arrays are available (for more details see <a class="bodylink" href="/expressions/types/xpath31arrays">Arrays in XPath</a>). Arrays differ from the traditional sequences in that they can be nested. The members of an array can be arbitrary values, including sequences and arrays. An array is an item, so some care is needed: the syntax <code>$A[1]</code> returns the array item unchanged rather than selecting a member of the array. A library of functions is available to operate on arrays ((see the <a class="bodylink" href="/functions/array">Function library</a>). The expression <code>[1, 5, 7, (10 to 20)]</code> can be used to construct an array where the number of members is known statically (this example creates an array with four members, of which the last is a sequence of 11 items), and the expression <code>array{ 1, 5, 7, (10 to 20)}</code> can be used to construct an array with a variable number of members, provided that each member is a single item (in this case
+					the array has 14 members, each a single integer). A member of an array can be accessed using the syntax <code>$A(3)</code> or <code>$A?3</code>.</p>
 			</li>
 		</ol>
 		<p>A number of new functions are available, including <code>random-number-generator()</code>, <code>sort()</code>, <code>parse-ietf-date()</code>, and functions to read and write data in JSON format. For details see the <a class="bodylink" href="/functions">Functions library</a>.</p>

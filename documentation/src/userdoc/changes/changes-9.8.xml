@@ -480,7 +480,7 @@
         for example <code>~inventory</code>. Type aliases can be declared in XSLT using the extension element
             <code>&lt;saxon:type-alias&gt;</code>;
             they are not currently available in XQuery. More details: see <a class="bodylink"
-                href="/v4extensions/new-types/type-aliases">Type aliases</a>.</p>
+                href="/expressions/types/named-item-types">Type aliases</a>.</p>
         
         <p><b>Union Types</b>. A union type is an extension to the syntax for an <code>ItemType</code>.
             An example is <code>union(xs:dateTime, xs:date, xs:time)</code>, which denotes a union type
