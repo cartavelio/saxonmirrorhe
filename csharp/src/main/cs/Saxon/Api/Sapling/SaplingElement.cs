@@ -6,11 +6,11 @@ namespace Saxon.Api.Sapling
     /// An element node in the sapling tree.
     /// <para>The element has a name (a QName), an ordered list of children, a set of attributes,
     /// and a set of namespaces. Namespace bindings for the element name and attribute names are
-    /// managed implicitly, but additional bindings may be explicitly added.
+    /// managed implicitly, but additional bindings may be explicitly added.</para>
     /// <para>Like all sapling nodes, a <code>SaplingElement</code> is immutable. All operations, such as adding children or attributes,
     /// deliver a new element node. A sapling node generally exists only transiently during tree
     /// construction; to make use of the constructed tree, it will usually be converted to a regular tree when
-    /// construction is complete, using <see cref="ToXdmNode"/>.
+    /// construction is complete, using <see cref="ToXdmNode"/>.</para>
     /// </summary>
     public class SaplingElement: SaplingNode
     {
