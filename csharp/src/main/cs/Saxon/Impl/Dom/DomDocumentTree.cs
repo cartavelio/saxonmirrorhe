@@ -5,6 +5,7 @@ using Saxon.Hej.om;
 using Saxon.Hej.pattern;
 using Saxon.Hej.pattern.nodetest;
 using Saxon.Hej.tree.iter;
+using Saxon.Hej.type.gnode;
 
 
 namespace Saxon.Impl.Dom {
@@ -24,7 +25,7 @@ namespace Saxon.Impl.Dom {
             XmlNode node = (XmlNode)((DomNodeWrapper)getRootNode()).getUnderlyingNode();
             if (node is XmlDocument document) {
                 NodeInfo rootNode = wrap(document);
-                SequenceIterator descendants = rootNode.iterateDescendantAxis(NodeTypeTest.ELEMENT);
+                SequenceIterator descendants = rootNode.iterateDescendantAxis(NodeKindType.ELEMENT);
                 for (NodeInfo n; (n = (NodeInfo)descendants.next()) != null;) {
                     if (id.Equals(n.getAttributeValue(NamespaceUri.XML, "id"))) {
                         return n;

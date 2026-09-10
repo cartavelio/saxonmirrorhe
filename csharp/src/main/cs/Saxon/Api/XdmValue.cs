@@ -81,7 +81,7 @@ namespace Saxon.Api {
             value = SequenceExtent.makeSequenceExtent(list);
         }
 
-        protected XdmValue(GroundedValue groundedValue) {
+        public XdmValue(GroundedValue groundedValue) {
             this.value = groundedValue;
         }
 

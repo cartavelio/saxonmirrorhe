@@ -55,6 +55,18 @@ namespace Saxon.Impl.Helpers
             : this(0, comparer)
         {
         }
+        
+        /// <summary>
+        /// Create a copy of an OrderedDictionary.
+        /// </summary>
+        /// <param name="comparer">The equality comparer to use to compare keys.</param>
+        public OrderedDictionary(OrderedDictionary<TKey, TValue> input)
+            : this(0, input.Comparer)
+        {
+            foreach (KeyValuePair<TKey, TValue> kvp in input) {
+                Add(kvp.Key, kvp.Value);
+            }    
+        }
 
         /// <summary>
         /// Initializes a new instance of an OrderedDictionary.
