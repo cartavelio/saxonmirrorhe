@@ -2953,5 +2953,32 @@
                 the <link>net.sf.saxon.lib.Feature#RESOURCE_RESOLVER</link> property.</p>
         </desc>
     </feature>
+    
+    <feature>
+        <featureCode>130</featureCode>
+        <name>ALLOW_IMPLAUSIBLE_EXPRESSIONS</name>
+        <type>boolean</type>
+        <uri>http://saxon.sf.net/feature/allowImplausibleExpressions</uri>
+        <editions>HE PE EE</editions>
+        <platforms>J CS</platforms>
+        <configfile>global/@allowImplausibleExpressions</configfile>
+        <configfiledesc>
+            <p>Implausible expressions that were allowed before 4.0 are not rejected.</p>
+        </configfiledesc>
+        <desc>
+            <p>Certain expressions that were legal in prior releases are classified 
+               as "implausible" in XPath 4.0. An example is <code>@code/text()</code>,
+               which will never select anything because attributes never have text nodes.</p>
+            <p>Typically, in the past, Saxon has given a warning for such constructs.</p>
+            <p>If 4.0 is enabled, then by default Saxon rejects implausible expressions as a static
+               error. Setting this option reduces this to a warning. If the warning is ignored,
+               the expression will in most cases return an empty sequence.</p>
+            <p>A common example of an implausible expression is calling a function that expects
+               say <code>xs:integer*</code> with a value of type <code>xs:string*</code>. This
+               is not strictly an error because the call could succeed if the actual value passed
+               is an empty sequence; but it is classified as implausible because it is unlikely
+               that this is what the developer intended.</p>
+        </desc>
+    </feature>
 
 </features>

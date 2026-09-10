@@ -20,6 +20,9 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
+import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.function.Supplier;
@@ -54,7 +57,7 @@ public final class SequenceCoercer extends UnaryExpression {
 
     @Override
     protected OperandRole getOperandRole() {
-        return OperandRole.INSPECT;
+        return OperandRole.ATOMIC_SEQUENCE;
     }
 
     /**
@@ -86,27 +89,27 @@ public final class SequenceCoercer extends UnaryExpression {
     @Override
     public Expression typeCheck(ExpressionVisitor visitor, ContextItemStaticInfo contextInfo) throws XPathException {
         getOperand().typeCheck(visitor, contextInfo);
-        return this;
-//        final TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-//        // We can't dispense with function coercion just because the supplied function is an instance
-//        // of the required type, because it might not perform enough checking of arguments: see test VarDecl066.
-//        // We can only dispense with it if the argument checking and result checking is at least
-//        // as strict as the required type. For now, do coercion unless the type signatures are identical
-//
-//        // TODO: optimization
-    }
 
-//    /**
-//     * Determine the special properties of this expression
-//     *
-//     * @return {@link StaticProperty#NO_NODES_NEWLY_CREATED}.
-//     */
-//
-//    @Override
-//    protected int computeSpecialProperties() {
-//        int p = super.computeSpecialProperties();
-//        return p | StaticProperty.NO_NODES_NEWLY_CREATED;
-//    }
+        // We may now have more type information available meaning that we now know that no coercion is needed.
+
+        // If the static type of the expression already satisfies the required type, then in general
+        // no coercion is required. The exception is with functions, where function coercion is always done,
+        // to ensure that the parameters of a function call are checked against the required types even
+        // if the actual function accepts a supertype.
+
+        ItemType reqItemType = requiredType.getPrimaryType();
+        int reqCardinality = requiredType.getCardinality();
+        TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
+        Expression supplied = getOperand().getChildExpression();
+        if (Cardinality.subsumes(reqCardinality, supplied.getCardinality()) &&
+                th.isSubType(supplied.getItemType(), reqItemType) &&
+                !(reqItemType instanceof SpecificFunctionType)) {
+            return supplied;
+        }
+
+        return this;
+
+    }
 
     /**
      * Copy an expression. This makes a deep copy.
@@ -138,7 +141,7 @@ public final class SequenceCoercer extends UnaryExpression {
     }
 
     /**
-     * Iterate over the sequence of functions, wrapping each one in a CoercedFunction object
+     * Evaluate the expression as a sequence iterator
      */
 
     /*@NotNull*/
@@ -148,7 +151,7 @@ public final class SequenceCoercer extends UnaryExpression {
     }
 
     /**
-     * Evaluate as an Item. 
+     * Evaluate the expression as an Item.
      */
 
     /*@Nullable*/
@@ -159,7 +162,7 @@ public final class SequenceCoercer extends UnaryExpression {
 
 
     /**
-     * Determine the data type of the items returned by the expression, if possible
+     * Determine the data type of the items returned by the expression
      *
      * @return a value such as Type.STRING, Type.BOOLEAN, Type.NUMBER, Type.NODE,
      * or Type.ITEM (meaning not known in advance)
@@ -177,8 +180,7 @@ public final class SequenceCoercer extends UnaryExpression {
 
     @Override
     protected int computeCardinality() {
-        // TODO: cardinality can increase due to atomization
-        return getBaseExpression().getCardinality();
+        return requiredType.getCardinality();
     }
 
     /**
@@ -209,7 +211,7 @@ public final class SequenceCoercer extends UnaryExpression {
 
 
     /**
-     * Diagnostic print of expression structure. The abstract expression tree
+     * Export expression to SEF file. The abstract expression tree
      * is written to the supplied output destination.
      */
 
@@ -224,6 +226,11 @@ public final class SequenceCoercer extends UnaryExpression {
         }
         getBaseExpression().export(destination);
         destination.endElement();
+    }
+
+    @Override
+    public String getStreamerName() {
+        return "Coercer";
     }
 
     /**
@@ -250,9 +257,12 @@ public final class SequenceCoercer extends UnaryExpression {
             CoercionRequest request = new CoercionRequest(
                     suppliedType, expr.getConfiguration(), expr.roleSupplier, expr.getLocation());
             return context -> plan.coerceSequence(base.iterate(context), requiredType, request);
+
+            // TODO: isolate the case where the only thing needed is a CardinalityChecker
         }
+
 
     }
 }
 
-// Copyright (c) 2009-2023 Saxonica Limited
+// Copyright (c) 2024 Saxonica Limited

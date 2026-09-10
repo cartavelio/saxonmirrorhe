@@ -265,7 +265,7 @@ public class RoleDiagnostic {
             return s;
         }
         return composeRequiredMessage(requiredItemType) +
-                ", but the supplied expression {" + supplied.toShortString() + "} has item type " +
+                ", but the supplied expression {" + supplied.toShortString() + "} delivers items of type " +
                 supplied.getItemType();
     }
 

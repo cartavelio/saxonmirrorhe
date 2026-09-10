@@ -76,10 +76,10 @@ public abstract class CoercionPlan {
     }
 
     /**
-     * Apply the coercion rules (function conversion rules) to an item, given this target item type.
+     * Apply the coercion rules (3.1: function conversion rules) to an item, given this target item type.
      *
      * @param item         the item to be coerced
-     * @param requiredType
+     * @param requiredType the required item type
      * @param request      the input to the coercion
      * @return the converted value. We define this as a grounded value because in the vast
      * majority of cases it will be a single item, and in other cases (a typed node with a list type,

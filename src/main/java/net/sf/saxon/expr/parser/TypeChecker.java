@@ -10,6 +10,7 @@ package net.sf.saxon.expr.parser;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.*;
 import net.sf.saxon.lib.ConversionRules;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.om.*;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
@@ -77,38 +78,75 @@ public class TypeChecker {
 
         // System.err.println("Static Type Check on expression (requiredType = " + req + "):"); supplied.display(10);
 
+        // Rewritten in 13.0 to use common code with dynamic coercions, as needed for dynamic function calls.
+
+        // Some expressions have custom rules for type checking. For example if the expression (a, b) is used
+        // in a context where an atomic value is required, then a and b will be independently atomized and the
+        // results concatenated.
+
         if (supplied.implementsStaticTypeCheck()) {
             return supplied.staticTypeCheck(req, false, roleSupplier, visitor);
         }
 
+        // If the static type of the expression already satisfies the required type, then in general
+        // no coercion is required. The exception is with functions, where function coercion is always done,
+        // to ensure that the parameters of a function call are checked against the required types even
+        // if the actual function accepts a supertype.
+
         ItemType reqItemType = req.getPrimaryType();
         int reqCardinality = req.getCardinality();
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        if (Cardinality.subsumes(reqCardinality, supplied.getCardinality()) &&
-                th.isSubType(supplied.getItemType(), reqItemType) &&
+
+        if (th.isSubType(supplied.getItemType(), reqItemType) &&
                 !(reqItemType instanceof SpecificFunctionType)) {
-            return supplied;
+            // The item type is OK
+            if (Cardinality.subsumes(reqCardinality, supplied.getCardinality())) {
+                // The cardinality is OK
+                return supplied;
+            } else {
+                // return a CardinalityChecker
+                return CardinalityChecker.makeCardinalityChecker(supplied, reqCardinality, roleSupplier);
+            }
         }
 
         // Produce a static error if coercion cannot succeed or (in 4.0) is implausible
        
         if (reqCardinality != StaticProperty.ALLOWS_ZERO && supplied.getCardinality() != StaticProperty.ALLOWS_ZERO
                 && !isCoercible(supplied.getItemType(), reqItemType)) {
-            boolean isWarning = false;
-            if (Cardinality.allowsZero(reqCardinality) && Cardinality.allowsZero(supplied.getCardinality())) {
-                isWarning = visitor.getStaticContext().getXPathVersion() < 40;
-            }
+            boolean implausibility = false;
             String message = roleSupplier.get().composeErrorMessage(reqItemType, supplied, th);
-            if (isWarning) {
+            int version = visitor.getStaticContext().getXPathVersion();
+            if (Cardinality.allowsZero(reqCardinality) && Cardinality.allowsZero(supplied.getCardinality())) {
+                message += ". The only value that could succeed is therefore the empty sequence";
+                implausibility = true;
+            }
+            if (implausibility &&
+                    (version < 40
+                             || visitor.getStaticContext().getConfiguration().getBooleanProperty(Feature.ALLOW_IMPLAUSIBLE_EXPRESSIONS))) {
                 visitor.issueWarning(message, "XPTY0004", supplied.getLocation());
             } else {
+                if (implausibility) {
+                    message += ". Set Feature.ALLOW_IMPLAUSIBLE_EXPRESSIONS to suppress this 4.0 error";
+                }
                 throw new XPathException(message, "XPTY0004")
                         .asTypeError()
                         .withLocation(supplied.getLocation());
             }
         }
 
-        return new SequenceCoercer(supplied, req, roleSupplier, visitor.getStaticContext().getPackageData().getHostLanguageVersion() >= 40);
+        // Create a coercer expression wrapping the supplied expression
+
+        final int version = visitor.getStaticContext().getPackageData().getHostLanguageVersion();
+        Expression result = new SequenceCoercer(supplied, req, roleSupplier, version >= 40);
+
+        // If the supplied expression was a literal, do the coercion right now
+
+        if (supplied instanceof Literal) {
+            SequenceIterator eval = result.iterate(new EarlyEvaluationContext(visitor.getConfiguration()));
+            return Literal.makeLiteral(SequenceTool.toGroundedValue(eval), supplied);
+        }
+
+        return result;
 
 //        // If the required type is empty-sequence(), simply add a cardinality check
 //
