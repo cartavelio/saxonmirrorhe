@@ -2,10 +2,13 @@ package com.saxonica.ee.bytecode;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
-import net.sf.saxon.event.*;
+import net.sf.saxon.event.ComplexContentOutputter;
+import net.sf.saxon.event.Outputter;
+import net.sf.saxon.event.ReceiverOption;
+import net.sf.saxon.event.SequenceCollector;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.expr.parser.ExpressionTool;
+import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.ItemConsumer;
 import net.sf.saxon.om.SequenceIterator;

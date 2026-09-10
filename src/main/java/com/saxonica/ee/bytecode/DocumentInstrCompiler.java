@@ -195,7 +195,6 @@ public class DocumentInstrCompiler extends ToPushCompiler {
 
 //            SequenceReceiver out = ComplexContentOutputter.makeComplexContentReceiver(builder, getValidationOptions());
 //            context.setReceiver(out);
-
             ga.invokeStaticMethod(ComplexContentOutputter.class, "makeComplexContentReceiver", Receiver.class, ParseOptions.class);
 
             // assert stack : Builder ComplexContentOutputter

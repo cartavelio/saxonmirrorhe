@@ -186,7 +186,6 @@ public abstract class ElementCreatorCompiler extends ToPushCompiler {
 
         ga.invokeInstanceMethod(Outputter.class, "usesTypeAnnotations");
         ga.ifFalse(noStripNeeded);
-
         ga.newInstance(ComplexContentOutputter.class);
         ga.dup();
 

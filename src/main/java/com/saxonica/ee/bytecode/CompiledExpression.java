@@ -3,9 +3,7 @@ package com.saxonica.ee.bytecode;
 import net.sf.saxon.event.Outputter;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.XPathContext;
-import net.sf.saxon.expr.elab.Elaborator;
-import net.sf.saxon.expr.elab.PushElaborator;
-import net.sf.saxon.expr.elab.PushEvaluator;
+import net.sf.saxon.expr.elab.*;
 import net.sf.saxon.expr.parser.PathMap;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.om.Item;
@@ -265,6 +263,63 @@ public class CompiledExpression extends Expression {
                 try {
                     expr.byteCode.process(output, context);
                     return null;
+                } catch (XPathException e) {
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                } catch (UncheckedXPathException uxe) {
+                    XPathException e = uxe.getXPathException();
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                }
+            };
+        }
+
+        @Override
+        public ItemEvaluator elaborateForItem() {
+            CompiledExpression expr = (CompiledExpression) getExpression();
+            return context -> {
+                try {
+                    return expr.byteCode.evaluateItem(context);
+                } catch (XPathException e) {
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                } catch (UncheckedXPathException uxe) {
+                    XPathException e = uxe.getXPathException();
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                }
+            };
+        }
+
+        @Override
+        public PullEvaluator elaborateForPull() {
+            CompiledExpression expr = (CompiledExpression) getExpression();
+            return context -> {
+                try {
+                    return expr.byteCode.iterate(context);
+                } catch (XPathException e) {
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                } catch (UncheckedXPathException uxe) {
+                    XPathException e = uxe.getXPathException();
+                    e.maybeSetContext(context);
+                    e.maybeSetLocation(expr.getInterpretedExpression().getLocation());
+                    throw e;
+                }
+            };
+        }
+
+        @Override
+        public BooleanEvaluator elaborateForBoolean() {
+            CompiledExpression expr = (CompiledExpression) getExpression();
+            return context -> {
+                try {
+                    return expr.byteCode.effectiveBooleanValue(context);
                 } catch (XPathException e) {
                     e.maybeSetContext(context);
                     e.maybeSetLocation(expr.getInterpretedExpression().getLocation());

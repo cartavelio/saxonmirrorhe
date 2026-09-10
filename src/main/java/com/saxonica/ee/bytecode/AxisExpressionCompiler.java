@@ -115,12 +115,14 @@ public class AxisExpressionCompiler extends ToIteratorCompiler {
                 default:
                     throw new AssertionError();
             }
+            visitAnnotation(compiler, "AxisExpression - iterateAxis NodeKindTest");
             ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, NodePredicate.class);
 
         } else {
 
             ga.push(axis);
             allocateStatic(compiler, test);
+            visitAnnotation(compiler, "AxisExpression - iterateAxis " + test);
             ga.invokeInstanceMethod(NodeInfo.class, "iterateAxis", Integer.TYPE, NodePredicate.class);
         }
     }
