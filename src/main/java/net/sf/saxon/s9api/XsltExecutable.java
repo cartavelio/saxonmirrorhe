@@ -150,7 +150,8 @@ public class XsltExecutable {
      *                    of the compiled stylesheet. The stream will be closed when writing has finished.
      * @param target the target environment. The only value currently recognized is "JS",
      *               which exports the package for running under SaxonJS 2.
-     * @throws SaxonApiException if an error is detected
+     * @throws SaxonApiException if an error is detected, including the case where
+     *         the stylesheet was compiled with just-in-time compilation enabled.
      * @since 9.7
      */
 
@@ -158,6 +159,10 @@ public class XsltExecutable {
         Configuration config = processor.getUnderlyingConfiguration();
         try {
             StylesheetPackage topLevelPackage = preparedStylesheet.getTopLevelPackage();
+            if (topLevelPackage.isJustInTimeCompilation()) {
+                throw new SaxonApiException(
+                        "Cannot export a stylesheet compiled with just-in-time compilation enabled");
+            }
             ExpressionPresenter presenter = config.newExpressionExporter(target, destination, topLevelPackage);
             presenter.setRelocatable(topLevelPackage.isRelocatable());
             topLevelPackage.export(presenter);
