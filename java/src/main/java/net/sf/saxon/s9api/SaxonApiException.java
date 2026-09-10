@@ -7,6 +7,7 @@
 
 package net.sf.saxon.s9api;
 
+import net.sf.saxon.expr.instruct.TerminationException;
 import net.sf.saxon.om.StructuredQName;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
@@ -123,6 +124,22 @@ public class SaxonApiException extends Exception {
         } else {
             return null;
         }
+    }
+
+    /**
+     * When a transformation is terminated using <code>xsl:message</code> with
+     * <code>terminate="yes"</code>, this method provides access to the content
+     * of the final message that caused termination.
+     * @return the content of the final xsl:message that caused termination;
+     * otherwise null.
+     */
+
+    public Message getTerminatingXsltMessage() {
+        Throwable cause = getCause();
+        if (cause instanceof TerminationException) {
+            return ((TerminationException)cause).getFinalMessage();
+        }
+        return null;
     }
 }
 

@@ -7,6 +7,7 @@
 
 package net.sf.saxon.expr.instruct;
 
+import net.sf.saxon.s9api.Message;
 import net.sf.saxon.trans.XPathException;
 
 /**
@@ -15,14 +16,28 @@ import net.sf.saxon.trans.XPathException;
 
 public class TerminationException extends XPathException {
 
+    private final Message finalMessage;
+
     /**
      * Construct a TerminationException
      *
-     * @param message the text of the message to be output
+     * @param exceptionText the exception text of the message to be output (typically indicating that processing
+     *                was terminated by use of xsl:message)
+     * @param messageContent the final xsl:message content that led to termination
      */
 
-    public TerminationException(String message) {
-        super(message, "XTMM9000");
+    public TerminationException(String exceptionText, Message messageContent) {
+        super(exceptionText, "XTMM9000");
+        finalMessage = messageContent;
+    }
+
+    /**
+     * Get the Message object that resulted in this exception
+     * @return the Message
+     */
+
+    public Message getFinalMessage() {
+        return finalMessage;
     }
 
 }

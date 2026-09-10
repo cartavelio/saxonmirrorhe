@@ -368,7 +368,8 @@ public class MessageInstr extends Instruction {
                     TerminationException te = new TerminationException(
                             "Processing terminated by " + reason + StandardDiagnostics.getInstructionNameDefault(expr) +
                                     " at line " + expr.getLocation().getLineNumber() +
-                                    " in " + StandardDiagnostics.abbreviateLocationURIDefault(expr.getLocation().getSystemId()));
+                                    " in " + StandardDiagnostics.abbreviateLocationURIDefault(expr.getLocation().getSystemId()),
+                            message);
                     te.setLocation(expr.getLocation());
                     te.setErrorCodeQName(errorCode);
                     te.setErrorObject(content);

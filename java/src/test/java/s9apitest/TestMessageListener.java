@@ -11,6 +11,7 @@ import java.io.StringReader;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -328,6 +329,32 @@ public class TestMessageListener {
             throw new RuntimeException("Transform aborted by xsl:message #1");
         }
 
+    }
+
+    @Test
+    public void testFinalMessage() {
+        try {
+            String xsl =
+                    "<xsl:transform version='2.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>" +
+                            "<xsl:template name='main'>" +
+                            "<xsl:for-each select='1 to 5'>" +
+                            "<xsl:message terminate='{. eq 5}'><alpha>beta</alpha></xsl:message>" +
+                            "</xsl:for-each>" +
+                            "</xsl:template>" +
+                            "</xsl:transform>";
+            Processor p = new Processor(false);
+            XsltCompiler c = p.newXsltCompiler();
+            XsltExecutable e = c.compile(new StreamSource(new StringReader(xsl)));
+            XsltTransformer t = e.load();
+            t.setInitialTemplate(new QName("main"));
+            t.setDestination(p.newSerializer(System.out));
+            t.transform();
+            fail("Should not succeed");
+        } catch (SaxonApiException e1) {
+            assertNotNull(e1.getTerminatingXsltMessage());
+            assertEquals("beta", e1.getTerminatingXsltMessage().getStringValue());
+            assertEquals("<alpha>beta</alpha>", e1.getTerminatingXsltMessage().toString());
+        }
     }
 
 
