@@ -2749,25 +2749,18 @@ public class XPathParser {
     protected Expression parseArrowPostfix(Expression lhs) throws XPathException {
         checkLanguageVersion31();
         readToken(Token.FAT_ARROW);
+        return parseArrowRHS(lhs, Token.FAT_ARROW);
+
+    }
+
+    private Expression parseArrowRHS(Expression lhs, Token arrow) throws XPathException {
         Token token = t.currentToken;
-        if (token instanceof Token.NameToken) {
-            if (t.peekAhead() == Token.LCURLY) {
-                if (tryKeyword("function") || tryKeyword("fn")) {
-                    Expression fn = parseFocusFunction(AnnotationList.EMPTY);
-                    expect(Token.LPAREN);
-                    return parseDynamicFunctionCall(fn, lhs);
-                } else {
-                    grumble("Unexpected " + token + " after '=>'");
-                    return null;
-                }
-            } else if (t.peekAhead() == Token.LPAREN) {
-                if (isKeyword("function") || isKeyword("fn")) {
-                    Expression fn = parseInlineFunction(AnnotationList.EMPTY);
-                    return parseDynamicFunctionCall(fn, lhs);
-                }
-            }
+        if (token instanceof Token.NameToken &&
+                t.peekAhead() == Token.LPAREN &&
+                !isReservedFunctionName(t.currentName(), languageVersion)) {
             return parseFunctionCall(t.currentName(), lhs);
-        } else if (token == Token.DOLLAR) {
+        }
+        if (token == Token.DOLLAR) {
             int offset = t.currentTokenStartOffset;
             StructuredQName varName = parseVariableName();
             Expression var = resolveVariableReference(offset, varName);
@@ -2777,18 +2770,23 @@ public class XPathParser {
             Expression var = parseParenthesizedExpression();
             expect(Token.LPAREN);
             return parseDynamicFunctionCall(var, lhs);
-//        } else if (token == Token.KEYWORD_LBRA && t.currentTokenValue.equals("function")) {
-//            Expression fn = parseInlineFunction(AnnotationList.EMPTY);
-//            expect(Token.LPAREN);
-//            return parseDynamicFunctionCall(fn, lhs);
-//        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
-//            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
-//            expect(Token.LPAREN);
-//            return parseDynamicFunctionCall(fn, lhs);
-        } else {
-            grumble("Unexpected " + token + " after '=>'");
-            return null;
+        } else if (allowXPath40Syntax) {
+            // At this point, the things that are allowed in a DynamicFunctionCall, but not in
+            // a RestrictedDynamicCall or FunctionCall, are: Literal, ContextValueRef,
+            // OrderedExpr, UnorderedExpr, NodeConstructor, StringTemplate, StringConstructor,
+            // and UnaryLookup. Most of these will fail with a type error, which we accept, although
+            // it should really be a syntax error. The only ones we actually test for are those that
+            // could deliver a function item
+            if (token == Token.DOT || token == Token.QMARK || token == Token.QMARK_QMARK ||
+                    (isKeyword("ordered") || isKeyword("unordered")) && t.peekAhead() == Token.LCURLY ) {
+                grumble (token.toString() + " not allowed on RHS of " + arrow.toString());
+            }
+            Expression fn = parseBasicStep(false);
+            expect(Token.LPAREN);
+            return parseDynamicFunctionCall(fn, lhs);
         }
+        grumble("Unexpected " + token + " after " + arrow.toString());
+        return null;
     }
 
     /**
@@ -2810,51 +2808,7 @@ public class XPathParser {
         forExpr.setVariableQName(varName);
         VariableReference varRef = new LocalVariableReference(forExpr);
 
-        Token token = t.currentToken;
-        Expression rhs;
-        if (token instanceof Token.NameToken) {
-            if (t.peekAhead() == Token.LCURLY) {
-                if (tryKeyword("function") || tryKeyword("fn")) {
-                    Expression fn = parseFocusFunction(AnnotationList.EMPTY);
-                    expect(Token.LPAREN);
-                    rhs = parseDynamicFunctionCall(fn, varRef);
-                } else {
-                    grumble("Unexpected " + token + " after '=!>'");
-                    return null;
-                }
-            } else {
-                String fname = t.currentName();
-                if (isKeyword("function") || isKeyword("fn")) {
-                    Expression fn;
-                    if (t.peekAhead() == Token.LPAREN) {
-                        fn = parseInlineFunction(AnnotationList.EMPTY);
-                    } else {
-                        grumble("Unexpected " + t.peekAhead() + " after 'function'");
-                        return null;
-                    }
-                    rhs = parseDynamicFunctionCall(fn, varRef);
-                } else {
-                    rhs = parseFunctionCall(fname, varRef);
-                }
-            }
-        } else if (token == Token.DOLLAR) {
-            int offset = t.currentTokenStartOffset;
-            StructuredQName variableName = parseVariableName();
-            Expression var = resolveVariableReference(offset, variableName);
-            expect(Token.LPAREN);
-            rhs = parseDynamicFunctionCall(var, varRef);
-        } else if (token == Token.LPAREN) {
-            Expression var = parseParenthesizedExpression();
-            expect(Token.LPAREN);
-            rhs = parseDynamicFunctionCall(var, varRef);
-//        } else if (token == Token.KEYWORD_CURLY && (t.currentTokenValue.equals("function") || t.currentTokenValue.equals("fn"))) {
-//            Expression fn = parseFocusFunction(AnnotationList.EMPTY);
-//            expect(Token.LPAREN);
-//            rhs = parseDynamicFunctionCall(fn, varRef);
-        } else {
-            grumble("Unexpected " + token + " after '=!>'");
-            return null;
-        }
+        Expression rhs = parseArrowRHS(varRef, Token.MAPPING_ARROW);
         forExpr.setAction(rhs);
         return forExpr;
     }

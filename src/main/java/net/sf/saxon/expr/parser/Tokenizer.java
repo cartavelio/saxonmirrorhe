@@ -451,7 +451,7 @@ public final class Tokenizer {
                         nextToken = Token.FAT_ARROW;
                         return;
                     }
-                    if (isFollowedBy("!>")) {
+                    if (isFollowedBy("!>") || isFollowedBy("!" + FULL_WIDTH_GT)) {
                         inputOffset+=2;
                         nextToken = Token.MAPPING_ARROW;  // Accepted in 4.0 only
                         return;
