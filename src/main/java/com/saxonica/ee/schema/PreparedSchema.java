@@ -1422,10 +1422,10 @@ public class PreparedSchema implements Schema, NotationSet {
             if (errorReporter != null) {
                 compiler.setErrorReporter(errorReporter);
             }
-            final PipelineConfiguration pipe = config.makePipelineConfiguration();
-            pipe.setErrorReporter(errorReporter == null ? config.makeErrorReporter() : errorReporter);
-            pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
+//            final PipelineConfiguration pipe = config.makePipelineConfiguration();
+//            pipe.setErrorReporter(errorReporter == null ? config.makeErrorReporter() : errorReporter);
+//            pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
+            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, null);
             if (schemadoc.isCompiledSchemaDocument()) {
                 try {
                     importComponents(schemadoc.getDocument().getRootNode().asActiveSource());

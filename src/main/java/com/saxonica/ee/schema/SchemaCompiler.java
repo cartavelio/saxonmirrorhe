@@ -280,6 +280,9 @@ public class SchemaCompiler {
      */
 
     public PipelineConfiguration getPipelineConfiguration() {
+        if (pipelineConfiguration == null) {
+            pipelineConfiguration = config.makePipelineConfiguration();
+        }
         return pipelineConfiguration;
     }
 
@@ -324,7 +327,7 @@ public class SchemaCompiler {
             throw new SchemaException(
                     "No schema could be loaded at location " + schemaLocation);
         }
-        SchemaDocument schemadoc = SchemaReader.read(source, this, pipe, null);
+        SchemaDocument schemadoc = SchemaReader.read(source, this, null);
         if (schemadoc.isCompiledSchemaDocument()) {
             try {
                 getConfiguration().importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
@@ -390,17 +393,20 @@ public class SchemaCompiler {
 
     /**
      * Read schemas from a list of schema locations. Note, these must contain source XSD documents (compiled SCM
-     * documents are not acceptable)
+     * documents are not acceptable). The schema that is read from these locations is checked for consistency
+     * with the existing schema components known to the compiler
      *
-     * @param pipe            the PipelineConfiguration
-     * @param baseURI         the base URI for resolving relative URIs
-     * @param schemaLocations the list of location "hints" where to find the schema document. Must not be null.
      * @param expected        the target namespace expected in each of the schema documents; null if there is no
      *                        expected namespace
-     * @throws SchemaException if reading a schema document fails
+     * @param schemaLocations the list of location "hints" where to find the schema document. Must not be null.
+     * @param baseURI         the base URI for resolving relative URIs
+     * @return the schema that combines the schema component already known to the schema compiler
+     * with the new schema components
+     * @throws SchemaException if reading a schema document fails or if the resulting schema is incompatible
+     * with the schema components already known to the schema compiler.
      */
 
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
+    public PreparedSchema readMultipleSchemas(NamespaceUri expected, List<String> schemaLocations, String baseURI)
             throws SchemaException {
         String[] locations = new String[schemaLocations.size()];
         int loc = 0;
@@ -410,7 +416,7 @@ public class SchemaCompiler {
         Source[] sources = SchemaReader.getSources(baseURI, locations, this, expected);
         if (sources.length == 0) {
             // the requested schemas were already loaded
-            return;
+            return preparedSchema;
         }
         boolean success = false;
         SchemaException lastException = null;
@@ -423,7 +429,7 @@ public class SchemaCompiler {
                 if (source == null) {
                     throw new SchemaException("Unable to load schema at " + schemaLocations.get(i));
                 }
-                schemadoc = SchemaReader.read(source, this, pipe, null);
+                schemadoc = SchemaReader.read(source, this, null);
                 if (schemadoc.isCompiledSchemaDocument()) {
                     throw new SchemaException("Only source schema documents (not SCM compiled schemas) are accepted here");
                 }
@@ -446,7 +452,7 @@ public class SchemaCompiler {
                 if (e.getException() instanceof java.io.IOException) {
                     XmlProcessingException ee = new XmlProcessingException(e);
                     ee.setWarning(true);
-                    pipe.getErrorReporter().report(ee);
+                    getErrorReporter().report(ee);
                 } else {
                     lastException = e;
                 }
@@ -464,7 +470,7 @@ public class SchemaCompiler {
         mergedSchema.validate(this);
         makeAllAutomata();
         checkAllAutomata();
-        preparedSchema = null;
+        return preparedSchema;
 
     }
 
@@ -487,7 +493,7 @@ public class SchemaCompiler {
         PipelineConfiguration pipe = config.makePipelineConfiguration();
         pipe.setErrorReporter(listener);
         pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-        SchemaDocument schemadoc = SchemaReader.read(root.asActiveSource(), this, pipe, null);
+        SchemaDocument schemadoc = SchemaReader.read(root.asActiveSource(), this, null);
         return processSchemaDocument(schemadoc, null, expected);
     }
 

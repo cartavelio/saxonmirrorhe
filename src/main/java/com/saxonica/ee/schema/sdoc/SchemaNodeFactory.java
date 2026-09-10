@@ -43,7 +43,7 @@ public class SchemaNodeFactory implements NodeFactory {
     public SchemaNodeFactory(SchemaCompiler compiler, PipelineConfiguration pipe, SchemaElement referrer) {
         this.compiler = compiler;
         this.pipe = pipe;
-        config = (EnterpriseConfiguration) pipe.getConfiguration();
+        config = compiler.getConfiguration();
         this.referrer = referrer;
     }
 

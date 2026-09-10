@@ -91,7 +91,7 @@ public class XSDOverride extends SchemaElement {
 
         try {
             PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-            SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, pipe, this);
+            SchemaDocument schemaDoc = SchemaReader.buildSchemaDocument(source, compiler, this);
             originalSchemaDocument = schemaDoc;
             originalSchema = schemaDoc.getXSDSchema().getSchema();
             NamespaceUri originalTargetNS = schemaDoc.getXSDSchema().getTargetNamespace();

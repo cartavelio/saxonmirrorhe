@@ -207,8 +207,7 @@ public class XSDImport extends AnnotationParent {
         SchemaDocument importee = null;
         int errors;
         try {
-            PipelineConfiguration pipe = getSchemaNodeFactory().getPipelineConfiguration();
-            importee = SchemaReader.read(source, compiler, pipe, null);
+            importee = SchemaReader.read(source, compiler, null);
             XSDSchemaElement s = importee.getXSDSchema();
             errors = importee.getXSDSchema().getErrorCount();
             importedSchema = s.getSchema();

@@ -588,20 +588,6 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
     }
 
     /**
-     * Read schema documents from a list of schema locations
-     * @param pipe            the pipeline configuration
-     * @param baseURI         the base URI for resolving relative URIs
-     * @param schemaLocations the list of location "hints" where to find the schema document. Must not be null.
-     * @param expected        the target namespace expected in each of the schema documents; null if there is no
-     */
-
-    @Override
-    public void readMultipleSchemas(PipelineConfiguration pipe, String baseURI, List<String> schemaLocations, NamespaceUri expected)
-            throws SchemaException {
-        newSchemaCompiler().readMultipleSchemas(pipe, baseURI, schemaLocations, expected);
-    }
-
-    /**
      * Read an inline schema from a stylesheet
      *
      * @param root          the xs:schema element in the stylesheet
@@ -664,7 +650,7 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
             final PipelineConfiguration pipe = makePipelineConfiguration();
             pipe.setErrorReporter(errorReporter == null ? makeErrorReporter() : errorReporter);
             pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, pipe, null);
+            SchemaDocument schemadoc = SchemaReader.read(schemaSource, compiler, null);
             if (schemadoc.isCompiledSchemaDocument()) {
                 try {
                     importComponents(schemadoc.getDocument().getRootNode().asActiveSource());
@@ -1087,7 +1073,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if ("XQ".equals(language)) {
             XQueryParser parser = new XQueryParser(env);
             if (isLicensedFeature(LicenseFeature.ENTERPRISE_XQUERY)) {
-                parser.setParserExtension(new XQueryParserExtensionEE(updating));
+                SchemaCompiler schemaCompiler = env.getPackageData().isSchemaAware() ? new SchemaCompiler(this) : null;
+                parser.setParserExtension(new XQueryParserExtensionEE(updating, schemaCompiler));
             } else if (isLicensedFeature(LicenseFeature.PROFESSIONAL_EDITION)) {
                 parser.setParserExtension(new XQueryParserExtensionPE());
             }

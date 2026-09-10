@@ -1,16 +1,24 @@
 package com.saxonica.ee.update;
 
+import com.saxonica.config.EnterpriseConfiguration;
+import com.saxonica.ee.schema.PreparedSchema;
+import com.saxonica.ee.schema.SchemaCompiler;
 import com.saxonica.expr.XQueryParserExtensionPE;
+import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.parser.Token;
 import net.sf.saxon.expr.parser.Tokenizer;
 import net.sf.saxon.expr.parser.XPathParser;
 import net.sf.saxon.lib.Validation;
+import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.query.Annotation;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.QueryModule;
 import net.sf.saxon.query.XQueryParser;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.SchemaException;
+
+import java.util.List;
 
 /**
  * Parser extension for syntax in XQuery Update and/or XQuery 3.0 that is supported
@@ -21,9 +29,13 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
     private boolean acceptUpdateSyntax = false;
     private boolean foundRevalidationDeclaration = false;
 
+    private SchemaCompiler schemaCompiler;
 
-    public XQueryParserExtensionEE(boolean updating) {
+
+    public XQueryParserExtensionEE(boolean updating, com.saxonica.ee.schema.SchemaCompiler schemaCompiler) {
         acceptUpdateSyntax = updating;
+        this.schemaCompiler = schemaCompiler;
+
     }
 
 
@@ -125,7 +137,44 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
             p.grumble("XQuery update syntax encountered in a non-updating query");
         }
     }
-    
+
+    @Override
+    public void processSchemaImports(NamespaceUri targetNamespace,
+                                     List<String> locationHints,
+                                     String baseUri,
+                                     QueryModule module) throws XPathException {
+        if (schemaCompiler == null) {
+            super.processSchemaImports(targetNamespace, locationHints, baseUri, module); // causes failure
+        }
+        EnterpriseConfiguration config = schemaCompiler.getConfiguration();
+        if (!config.isSchemaAvailable(targetNamespace)) {
+            if (!locationHints.isEmpty()) {
+                try {
+                    PipelineConfiguration pipe = config.makePipelineConfiguration();
+                    PreparedSchema combined = schemaCompiler.readMultipleSchemas(targetNamespace, locationHints, baseUri);
+                    //namespacesToBeSealed.add(targetNamespace);
+                    module.getPackageData().setImportedSchema(combined);
+                } catch (SchemaException err) {
+                    throw new XPathException("Error in schema " + targetNamespace + ": " + err.getMessage(), "XQST0059");
+                }
+            } else if (targetNamespace.equals(NamespaceUri.XML) ||
+                    targetNamespace.equals(NamespaceUri.FN) ||
+                    targetNamespace.equals(NamespaceUri.SCHEMA_INSTANCE)) {
+                PreparedSchema schema = (PreparedSchema)config.getSchemaForBuiltInNamespace(targetNamespace);
+                if (schemaCompiler.getPreparedSchema() == null) {
+                    schemaCompiler.setPreparedSchema(schema);
+                } else {
+                    schema.copyTo(schemaCompiler.getPreparedSchema(), schemaCompiler);
+                }
+                module.getPackageData().setImportedSchema(schemaCompiler.getPreparedSchema());
+            } else {
+                 schemaCompiler.readMultipleSchemas(targetNamespace, locationHints, baseUri);
+            }
+//            else {
+//                throw new XPathException("Unable to locate requested schema " + targetNamespace, "XQST0059");
+//            }
+        }
+    }
 }
 
 // Copyright (c) 2008-2023 Saxonica Limited

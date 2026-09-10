@@ -1,5 +1,6 @@
 package com.saxonica.ee.schema.sdoc;
 
+import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.config.StandardSchemaResolver;
 import com.saxonica.ee.jaxp.SchemaFactoryImpl;
 import com.saxonica.ee.schema.SchemaCompiler;
@@ -122,7 +123,6 @@ public abstract class SchemaReader {
      * @param source   the JAXP Source containing the schema document. This may be either a source
      *                 XSD schema document, or a compiled SCM schema document.
      * @param compiler used for tracking source documents read, and for error reporting
-     * @param pipe     the pipeline configuration
      * @param referrer if the schema document is referenced from an xs:import, xs:include, or xs:redefined, this
      *                 parameter identifies that element; otherwise, null.
      * @return the new SchemaDocument created from the source of this SchemaReader. This may be either a source
@@ -132,24 +132,24 @@ public abstract class SchemaReader {
      */
     public static SchemaDocument read(Source source,
                                       SchemaCompiler compiler,
-                                      PipelineConfiguration pipe,
-                                      /*@Nullable*/ SchemaElement referrer)
+                                      SchemaElement referrer)
             throws SchemaException {
-        boolean tracing = pipe.getConfiguration().isTiming();
+        EnterpriseConfiguration config = compiler.getConfiguration();
+        boolean tracing = config.isTiming();
         String docId = source.getSystemId();
         if (docId == null) {
             docId = "(unknown URI)";
         }
         if (tracing) {
-            pipe.getConfiguration().getLogger().info("Loading schema document " + docId);
+            config.getLogger().info("Loading schema document " + docId);
         }
-        SchemaDocument schemaDocument = buildSchemaDocument(source, compiler, pipe, referrer);
+        SchemaDocument schemaDocument = buildSchemaDocument(source, compiler, referrer);
         AxisIterator children = schemaDocument.getDocument().getRootNode().iterateAxis(
                 AxisInfo.CHILD, NodeKindTest.makeNodeKindTest(Type.ELEMENT));
         NodeInfo top = children.next();
         if (top.getNamespaceUri().equals(NamespaceUri.SCM)) {
             if (tracing) {
-                pipe.getConfiguration().getLogger().info("Loaded compiled schema document " + docId);
+                config.getLogger().info("Loaded compiled schema document " + docId);
             }
             return schemaDocument;
         }
@@ -157,11 +157,10 @@ public abstract class SchemaReader {
             SchemaException err = new SchemaException("Outermost element of schema document must be xs:schema");
             Loc loc = new Loc(source.getSystemId(), top == null ? 1 : top.getLineNumber(), -1);
             err.setLocator(loc);
-            pipe.getErrorReporter().report(new XmlProcessingException(err));
+            compiler.getErrorReporter().report(new XmlProcessingException(err));
             throw err;
         }
 
-        compiler.setPipelineConfiguration(pipe);
         compiler.setBeingRead(source.getSystemId());
         ((XSDSchemaElement) top).processAllAttributes();
         ((XSDSchemaElement) top).validateSubtree(compiler);
@@ -174,7 +173,7 @@ public abstract class SchemaReader {
         }
 
         if (tracing) {
-            pipe.getConfiguration().getLogger().info("Finished loading schema document " + source.getSystemId());
+            config.getLogger().info("Finished loading schema document " + source.getSystemId());
         }
 
         return schemaDocument;
@@ -188,7 +187,6 @@ public abstract class SchemaReader {
      *
      * @param source   the source of the module
      * @param compiler the SchemaCompiler (holds configuration information and keeps track of errors)
-     * @param pipe     the Pipeline Configuration
      * @param referrer the xs:import or xs:include element, etc, that requested processing of this module
      * @return the root Document node of the tree containing the schema document
      * @throws SchemaException if XML parsing or tree
@@ -196,10 +194,10 @@ public abstract class SchemaReader {
      */
     public static SchemaDocument buildSchemaDocument(Source source,
                                                      SchemaCompiler compiler,
-                                                     PipelineConfiguration pipe,
                                                      SchemaElement referrer)
             throws SchemaException {
 
+        PipelineConfiguration pipe = compiler.getPipelineConfiguration();
         SchemaNodeFactory nodeFactory = new SchemaNodeFactory(compiler, pipe, referrer);
 //        System.err.println("SchemaReader#processModule source= " + source);
 //        System.err.println("pipe= " + pipe);
