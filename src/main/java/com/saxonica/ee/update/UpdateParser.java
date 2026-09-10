@@ -51,14 +51,12 @@ public class UpdateParser {
         }
 
         int modifyOffset = t.currentTokenStartOffset;
-        p.expectKeyword("modify");
-        p.nextToken();
+        p.readKeyword("modify");
         Expression updateExp = p.parseExprSingle();
         updateExp = p.makeTracer(updateExp, null);
 
         int returnOffset = t.currentTokenStartOffset;
-        p.expectKeyword("return");
-        p.nextToken();
+        p.readKeyword("return");
         Expression returnExp = p.parseExprSingle();
         returnExp = p.makeTracer(returnExp, null);
 
@@ -114,19 +112,16 @@ public class UpdateParser {
             } else {
                 clause.offset = t.currentTokenStartOffset;
             }
-            p.expect(Token.DOLLAR);
-            p.nextToken();
-            String var = p.expectName();
+            p.readToken(Token.DOLLAR);
+            String var = p.readName();
 
             LetExpression v = new LetExpression();
             StructuredQName varQName = p.makeStructuredQName(var, NamespaceUri.NULL);
             v.setRequiredType(SequenceType.SINGLE_NODE);
             v.setVariableQName(varQName);
             clause.binding = v;
-            p.nextToken();
 
-            p.expect(Token.COLON_EQUALS);
-            p.nextToken();
+            p.readToken(Token.COLON_EQUALS);
             Expression rhs = p.parseExprSingle();
             Supplier<RoleDiagnostic> role =
                     () -> new RoleDiagnostic(RoleDiagnostic.UPDATING_EXPR, "copyModify", 0, "XUTY0013");
@@ -165,30 +160,23 @@ public class UpdateParser {
         InsertExpression.InsertPosition position = InsertExpression.InsertPosition.INTO;
         if (p.isKeyword("as")) {
             p.nextToken();
-            String pos = p.expectName();
+            String pos = p.readName();
             switch (pos) {
                 case "first":
-                    p.nextToken();
-                    p.expectKeyword("into");
+                    p.readKeyword("into");
                     position = InsertExpression.InsertPosition.FIRST;
-                    p.nextToken();
                     break;
                 case "last":
-                    p.nextToken();
-                    p.expectKeyword("into");
+                    p.readKeyword("into");
                     position = InsertExpression.InsertPosition.LAST;
-                    p.nextToken();
                     break;
                 case "after":
-                    p.nextToken();
                     position = InsertExpression.InsertPosition.AFTER;
                     break;
                 case "before":
-                    p.nextToken();
                     position = InsertExpression.InsertPosition.BEFORE;
                     break;
                 case "into":
-                    p.nextToken();
                     position = InsertExpression.InsertPosition.INTO;
                     break;
                 default:
@@ -237,8 +225,7 @@ public class UpdateParser {
         int offset = p.getTokenizer().currentTokenStartOffset;
         p.nextToken();
         Expression target = p.parseExprSingle();
-        p.expectKeyword("with");
-        p.nextToken();
+        p.readKeyword("with");
         Expression replacement = p.parseExprSingle();
         final QueryModule env = (QueryModule) p.getStaticContext();
         Expression e = new ReplaceNodeExpression(target, replacement, env.getConstructionMode(), env.isInheritNamespaces());
@@ -259,8 +246,7 @@ public class UpdateParser {
         p.nextToken();
         // The tokenizer swallows the "of node"
         Expression target = p.parseExprSingle();
-        p.expectKeyword("with");
-        p.nextToken();
+        p.readKeyword("with");
         Expression replacement = p.parseExprSingle();
         Expression e = new ReplaceValueExpression(target, replacement);
         return p.makeTracer(e, null);
@@ -280,8 +266,7 @@ public class UpdateParser {
         QueryModule env = (QueryModule) p.getStaticContext();
         p.nextToken();
         Expression target = p.parseExprSingle();
-        p.expectKeyword("as");
-        p.nextToken();
+        p.readKeyword("as");
         Expression newName = p.parseExprSingle();
         boolean inherit = env.isInheritNamespaces();
         Expression e = new RenameExpression(target, newName, env.getNamespaceResolver(),

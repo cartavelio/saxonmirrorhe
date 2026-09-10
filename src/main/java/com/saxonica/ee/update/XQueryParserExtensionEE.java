@@ -60,7 +60,7 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
         }
         foundRevalidationDeclaration = true;
         p.nextToken();
-        String mode = p.expectName();
+        String mode = p.readName();
         int val;
         if ("strict".equals(mode)) {
             val = Validation.STRICT;
@@ -73,7 +73,6 @@ public class XQueryParserExtensionEE extends XQueryParserExtensionPE {
             val = Validation.SKIP;
         }
         ((QueryModule) p.getStaticContext()).setRevalidationMode(val);
-        p.nextToken();
     }
 
     /**
