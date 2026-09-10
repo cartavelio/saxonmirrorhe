@@ -1409,9 +1409,9 @@ cdef class PyXsltExecutable:
         #else:
         #raise Warning("setJustInTimeCompilation: argument must be a boolean type. JIT not set")
 
-     def set_save_result_document(self, bool value):
+     def set_capture_result_documents(self, bool value):
         """
-        set_save_result_document(self, value)
+        set_capture_result_documents(self, value)
         When the xsl:result-document is used and is evaluated this method enables handling of the documents as the destination
         via a user defined dictionary object where we have the pair document URI and XdmNode object.
         Args:
@@ -1419,7 +1419,7 @@ cdef class PyXsltExecutable:
         """
         cdef bool c_value
         c_value = value
-        self.thisxptr.setSaveResultDocument(c_value)
+        self.thisxptr.setCaptureResultDocuments(c_value)
 
      def get_result_documents(self):
          """
