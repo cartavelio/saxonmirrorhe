@@ -839,7 +839,7 @@ task gen_prod_desc_pdf(
   // Just a place to hang dependencies
 }
 
-["EE-Q", "EE-T", "EE-V", "EE", "PE", "HE"].each { ds ->
+["EE-Q", "EE-T", "EE-V", "EE", "PE", "HE", "CS"].each { ds ->
   Task t = task "gen_${ds}_desc_pdf"(
     type: JavaExec,
     dependsOn: ["setup_fop", "gen_prod_desc_fo"],

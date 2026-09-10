@@ -104,7 +104,8 @@
       'EE',
       'EE-T',
       'EE-Q',
-      'EE-V'"/>
+      'EE-V',
+      'CS'"/>
   <xsl:param name="CSS" as="xs:string">saxondocs_new.css</xsl:param>
   <xsl:variable name="CSS.URI" as="xs:anyURI" select="resolve-uri($CSS)"/>
 
