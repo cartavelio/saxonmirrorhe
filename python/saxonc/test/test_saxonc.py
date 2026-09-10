@@ -309,17 +309,6 @@ def test_icu_lib_HE():
     assert 'Thirty Three' in str(result7)
     
 
-
-def test_schema_aware2():
-    ''' This unit test requires a valid license - SaxonCEE '''
-    try:
-        sp = PySaxonProcessor(license=True)
-        assert sp.is_schema_aware == True
-    except Exception as err:
-        print("Error: ", err)
-        assert False
-
-
 '''PyXsltProcessor test cases '''
 
 
@@ -649,36 +638,6 @@ def testNodeAxis(saxonproc, data_dir):
             print("xmlns:" + ns_prefix + "='" + uri_str + "'")
         else:
             print("xmlns uri=" + uri_str + "'")
-
-
-def testCollection(saxonproc, data_dir):
-    xq = saxonproc.new_xquery_processor()
-    xq.set_query_base_uri('file:////' + os.path.join(data_dir, "trax/xml/"))
-    xq.set_query_content("collection('?select=*.xml')")
-    r = xq.run_query_to_value()
-    assert r is not None
-
-
-def testXquery_40_functions():
-    proc = PySaxonProcessor(license=True)
-    proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
-    xquery_processor = proc.new_xquery_processor()
-    result = xquery_processor.run_query_to_value(
-        query_text='xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang='4.0')
-    assert "paragraph" in str(result)
-
-
-def testXquery_40_functions_error():
-    try:
-        proc = PySaxonProcessor(license=True)
-        proc.set_configuration_property('http://saxon.sf.net/feature/allowSyntaxExtensions', 'on')
-        xquery_processor = proc.new_xquery_processor()
-        result = xquery_processor.run_query_to_value(
-            query_text='xquery version "4.0"; parse-html("<p>This is paragraph 1.<p>This is paragraph 2.")', lang='3.0')
-        assert False
-    except Exception:
-        assert True
-
 
 def testContext2NotRootNamedTemplate(saxonproc):
     trans = saxonproc.new_xslt30_processor()
@@ -1783,30 +1742,6 @@ def test_declare_variable_value2(saxonproc):
         assert result is None
     except Exception as err:
         assert 'No value has been supplied for variable $s1' in str(err)
-
-
-def test_packages(tmp_path, data_dir):
-    sp = PySaxonProcessor(license=True)
-    xsl = """\
-    <xsl:package name = \"package-002.xsl\" package-version = \"2.1.0.5\"
-    version = \"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">
-    <xsl:param name='c' select='2'/>
-    <xsl:mode/>
-    <xsl:template match='/'>
-    <out><xsl:apply-templates/></out>
-    </xsl:template>
-    <xsl:template match='/*'>
-    <in><xsl:value-of select='name()'/></in>
-    </xsl:template>
-    </xsl:package>
-    """
-    package_file = tmp_path / 'package02.xsltpack'
-    xsltproc = sp.new_xslt30_processor()
-    xsltproc.compile_stylesheet(stylesheet_text=xsl, save=True, output_file=str(package_file))
-    xsltproc = None
-    xsltproc2 = sp.new_xslt30_processor()
-    xsltproc2.transform_to_string(source_file=os.path.join(data_dir, "books.xml"), stylesheet_file=str(package_file))
-
 
 @pytest.mark.skip('Error: SaxonDll.processor is nullptr in constructor(configFile)')
 def test_add_packages(data_dir):

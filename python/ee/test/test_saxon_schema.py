@@ -56,37 +56,56 @@ def testValdiator3(data_dir, saxonproc2):
         print(e)
         assert False
 
+class TestSchemaExport:
+    schema = """<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'>
+    <xs:element name='request'>
+        <xs:complexType>
+            <xs:sequence><xs:element name='a' type='xs:string'/>
+                <xs:element name='b' type='xs:string'/>
+            </xs:sequence>
+            <xs:assert test='count(child::node()) = 3'/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
+"""
 
+    def export_schema(self, schema_path):
+        processor = PySaxonProcessor(license=True)
+        processor.set_configuration_property("xsdversion", "1.1")
+        val = processor.new_schema_validator()
+        assert val is not None
+        print(type(val))
+        print(val.exception_occurred)
+        val.register_schema(xsd_text=self.schema)
+        val.export_schema(str(schema_path))
 
-def testExportSchema(saxonproc2):
-    saxonproc2.set_cwd('.')
-    saxonproc2.set_configuration_property("xsdversion", "1.1")
-    val = saxonproc2.new_schema_validator()
-    assert val is not None
-    print(type(val))
-    print(val.exception_occurred)
-    sch1 = "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified' attributeFormDefault='unqualified'><xs:element name='request'><xs:complexType><xs:sequence><xs:element name='a' type='xs:string'/><xs:element name='b' type='xs:string'/></xs:sequence><xs:assert test='count(child::node()) = 3'/></xs:complexType></xs:element></xs:schema>"
-    val.register_schema(xsd_text=sch1)
-    val.export_schema("exportedSchema.scm")
-    assert os.path.exists("exportedSchema.scm")
+    def test_schema_export(self, tmp_path, saxonproc2):
+        schema_path = tmp_path / "exportedSchema.scm"
 
+        self.export_schema(schema_path)
 
-def testExportSchema2(saxonproc2):
-    saxonproc2.set_configuration_property("xsdversion", "1.1")
-    val = saxonproc2.new_schema_validator()
+        assert schema_path.is_file()
+        assert schema_path.stat().st_size > 0
 
-    val.register_schema(xsd_file="exportedSchema.scm")
+    def test_exported_schema_import(self, tmp_path, saxonproc2):
+        schema_path = tmp_path / "exportedSchema.scm"
+        self.export_schema(schema_path)
 
-    invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>"
-    input_ = saxonproc2.parse_xml(xml_text=invalid_xml)
-    assert input_ is not None
-    print(type(input_))
-    val.set_source_node(input_)
-    try:
-        val.validate()
-    except PySaxonApiError as e:
-        print(e)
-        assert True
+        saxonproc2.set_configuration_property("xsdversion", "1.1")
+        val = saxonproc2.new_schema_validator()
+
+        val.register_schema(xsd_file=str(schema_path))
+
+        invalid_xml = "<?xml version='1.0'?><request><a/><!--comment--></request>"
+        input_ = saxonproc2.parse_xml(xml_text=invalid_xml)
+        assert input_ is not None
+        print(type(input_))
+        val.set_source_node(input_)
+        try:
+            val.validate()
+        except PySaxonApiError as e:
+            print(e)
+            assert True
 
 def testValidatorReport(saxonproc2):
     saxonproc2.set_cwd('.')
