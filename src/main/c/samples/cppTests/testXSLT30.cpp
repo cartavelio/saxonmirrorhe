@@ -357,8 +357,29 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
 
     cout <<  "Test: testTransformToString4:" << endl;
 
-    XdmNode *input = processor->parseXmlFromString(
+    XdmNode *input = nullptr;
+
+    try {
+        input = processor->parseXmlFromString(
             "<out><person>text1</person><person>text2</person><person>text3</person></out>");
+
+    } catch(SaxonApiException &e) {
+        const char *emessage = e.getMessage();
+        const char * code = e.getErrorCode();
+        cout << "Source document is null. ====== FAIL ====== " << endl;
+        if(code != nullptr) {
+            cout<<" error code ="<<code<<endl;
+
+        }
+        if(emessage != nullptr) {
+            cout<<" message = "<<emessage<<endl;
+        }
+        sresult->failure++;
+        sresult->failureList.push_back("testTransformToString4");
+        return;
+
+    }
+
 
     if (input== nullptr) {
         cout << "Source document is null. ====== FAIL ====== " << endl;
@@ -367,7 +388,7 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
         return;
     }
 
-
+    try {
     XdmValue *values = new XdmValue();
     XdmAtomicValue * a1 = processor->makeIntegerValue(10);
     XdmAtomicValue * a2 = processor->makeIntegerValue(5);
@@ -420,6 +441,19 @@ void testTransformToString4(SaxonProcessor *processor, Xslt30Processor *trans, s
     delete executable;
     delete input;
     delete values;
+    }catch(SaxonApiException &e) {
+       const char *emessage = e.getMessage();
+       const char * code = e.getErrorCode();
+       if(code != nullptr) {
+            cout<<" error code ="<<code<<endl;
+        }
+        if(emessage != nullptr) {
+            cout<<" message = "<<emessage<<endl;
+        }
+        sresult->failure++;
+        sresult->failureList.push_back("testTransformToString4");
+        return;
+    }
 
 }
 
@@ -438,9 +472,6 @@ void testTransformFromstring(SaxonProcessor *processor, Xslt30Processor *trans, 
         sresult->failure++;
         sresult->failureList.push_back("testTransformFromstring");
         cerr << "testTransformFromstring NULL found" << endl;
-        if (trans->exceptionOccurred()) {
-            cerr <<"testTransformFromstring error: "<< trans->getErrorMessage() << endl;
-        }
         return;
     }
 
