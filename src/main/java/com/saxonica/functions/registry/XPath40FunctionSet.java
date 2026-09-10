@@ -96,9 +96,9 @@ public class XPath40FunctionSet extends BuiltInFunctionSet {
         register("characters", 1, e -> e.populate(CharactersFn::new, BuiltInAtomicType.STRING, STAR, 0)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null));
 
-        // codepoints-to-string becomes variadic in 4.0:
-        register("codepoints-to-string", 1, e -> e.populate(CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
-                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
+//        // codepoints-to-string becomes variadic in 4.0:
+//        register("codepoints-to-string", 1, e -> e.populate(CodepointsToString::new, BuiltInAtomicType.STRING, ONE, SEQV)
+//                .arg(0, BuiltInAtomicType.INTEGER, STAR, null));
 
         register("collation-key", 2, e -> e.populate(CollatingFunctionFree::new, BuiltInAtomicType.BASE64_BINARY,
                                                      ONE, DCOLL)
