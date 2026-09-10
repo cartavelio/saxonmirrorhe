@@ -32,7 +32,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.Properties;
 
-import static net.sf.saxon.pull.PullProvider.Event.START_ELEMENT;
+import static net.sf.saxon.pull.PullEvent.START_ELEMENT;
 
 /**
  * This class contains some examples of how to use the Pull interfaces
@@ -173,7 +173,7 @@ public class PullExamples {
     public void removePriceElements(PullProvider in, OutputStream out) throws XPathException {
         final NodeName priceElement = new NoNamespaceName("PRICE");
         PullFilter filter = new PullFilter(in) {
-            public PullProvider.Event next() throws XPathException {
+            public PullEvent next() throws XPathException {
                 currentEvent = super.next();
                 if (currentEvent == START_ELEMENT && getNodeName().equals(priceElement)) {
                     super.skipToMatchingEnd();
@@ -195,11 +195,11 @@ public class PullExamples {
         double total = 0;
         int count = 0;
         while (true) {
-            PullProvider.Event event = in.next();
-            if (event == PullProvider.Event.END_OF_INPUT) {
+            PullEvent event = in.next();
+            if (event == PullEvent.END_OF_INPUT) {
                 break;
             }
-            if (event == PullProvider.Event.START_ELEMENT && in.getNodeName().equals(priceElement)) {
+            if (event == PullEvent.START_ELEMENT && in.getNodeName().equals(priceElement)) {
                 double value = config.getConversionRules().getStringToDoubleConverter().stringToNumber(in.getStringValue().tidy());
                 total += value;
                 count++;
@@ -280,7 +280,7 @@ public class PullExamples {
             char ex = examples.charAt(i);
             switch (ex) {
                 case 'a': {
-                    System.out.println("\n\n=== Serialize the input to the output ===\n");
+                    System.out.println("\n\n==== Serialize the input to the output ====\n");
 
                     PullProvider p = o.getParser(input);
                     p.setPipelineConfiguration(pipe);
@@ -288,7 +288,7 @@ public class PullExamples {
                     break;
                 }
                 case 'b': {
-                    System.out.println("\n\n=== Validate the input ===\n");
+                    System.out.println("\n\n==== Validate the input ====\n");
 
                     PullProvider p = o.getParser(input);
                     p.setPipelineConfiguration(pipe);
@@ -296,14 +296,14 @@ public class PullExamples {
                     break;
                 }
                 case 'c': {
-                    System.out.println("\n\n=== Transform the input to the output ===\n");
+                    System.out.println("\n\n==== Transform the input to the output ====\n");
                     PullProvider p = o.getParser(input);
                     p.setPipelineConfiguration(pipe);
                     o.transform(p, stylesheet, output);
                     break;
                 }
                 case 'd': {
-                    System.out.println("\n\n=== Run XQuery against the input ===\n");
+                    System.out.println("\n\n==== Run XQuery against the input ====\n");
                     // Needs Saxon Professional Edition
                     if ("HE".equals(config.getEditionCode())) {
                         System.err.println("Pull-mode query requires Saxon-PE");
@@ -315,7 +315,7 @@ public class PullExamples {
                     }
                 }
                 case 'e': {
-                    System.out.println("\n\n=== Remove PRICE elements from the input ===\n");
+                    System.out.println("\n\n==== Remove PRICE elements from the input ====\n");
 
                     PullProvider p = o.getParser(input);
                     p.setPipelineConfiguration(pipe);
@@ -323,7 +323,7 @@ public class PullExamples {
                     break;
                 }
                 case 'f': {
-                    System.out.println("\n\n=== Compute average of PRICE elements in the input ===\n");
+                    System.out.println("\n\n==== Compute average of PRICE elements in the input ====\n");
 
                     PullProvider p = o.getParser(input);
                     p.setPipelineConfiguration(pipe);
@@ -331,7 +331,7 @@ public class PullExamples {
                     break;
                 }
                 case 'g': {
-                    System.out.println("\n\n=== Obtain query results using a pull iterator ===\n");
+                    System.out.println("\n\n==== Obtain query results using a pull iterator ====\n");
 
                     NodeInfo node = config.buildDocumentTree(new StreamSource(input)).getRootNode();
                     PullProvider p = o.pullQueryResults(node,
@@ -346,7 +346,7 @@ public class PullExamples {
                     break;
                 }
                 case 'h': {
-                    System.out.println("\n\n=== Obtain query results using a pull iterator on a 'standard' tree ===\n");
+                    System.out.println("\n\n==== Obtain query results using a pull iterator on a 'standard' tree ====\n");
 
                     PullProvider p1 = o.getParser(input);
                     p1.setPipelineConfiguration(pipe);
