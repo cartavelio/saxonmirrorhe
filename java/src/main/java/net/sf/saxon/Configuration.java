@@ -22,6 +22,7 @@ import net.sf.saxon.expr.sort.UnicodeCaseBlindCollator;
 import net.sf.saxon.functions.*;
 import net.sf.saxon.functions.registry.*;
 import net.sf.saxon.java.CleanerProxy;
+import net.sf.saxon.jaxp.ReusableXMLReader;
 import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.map.MapFunctionSet;
@@ -2811,7 +2812,7 @@ public class Configuration implements SourceResolver {
         }
         XMLReader parser = sourceParserPool.poll();
         if (parser != null) {
-            return parser;
+            return new ReusableXMLReader(parser);
         }
 
         //XMLReader parser;
@@ -2819,6 +2820,12 @@ public class Configuration implements SourceResolver {
             parser = makeParser(getSourceParserClass());
         } else {
             parser = loadParser();
+        }
+
+        try {
+            ActiveSAXSource.configureParser(parser);
+        } catch (XPathException err) {
+            throw new TransformerFactoryConfigurationError(err);
         }
 
         EntityResolver resolver = new EntityResolverWrappingResourceResolver(getResourceResolver());
@@ -2830,18 +2837,8 @@ public class Configuration implements SourceResolver {
         if (isTiming()) {
             reportParserDetails(parser);
         }
-        try {
-            ActiveSAXSource.configureParser(parser);
-        } catch (XPathException err) {
-            throw new TransformerFactoryConfigurationError(err);
-        }
-//        try {
-//            parser.setFeature("http://xml.org/sax/features/validation", isValidation());
-//        } catch (SAXException err) {
-//            throw new TransformerFactoryConfigurationError("The XML parser does not support validation");
-//        }
 
-        return parser;
+        return new ReusableXMLReader(parser);
     }
 
     /**
@@ -2871,27 +2868,38 @@ public class Configuration implements SourceResolver {
             sourceParserPool = new ConcurrentLinkedQueue<>();
         }
         try {
-            try {
-                // give things back to the garbage collecter
-                parser.setContentHandler(null);
-                if (parser.getEntityResolver() == defaultParseOptions.getEntityResolver()) {
-                    parser.setEntityResolver(null);
-                }
-                parser.setDTDHandler(null);
-                parser.setErrorHandler(null);
-                // Unfortunately setting the lexical handler to null doesn't work on Xerces, because
-                // it tests "value instanceof LexicalHandler". So we set it to a lexical handler that
-                // holds no references
-                parser.setProperty("http://xml.org/sax/properties/lexical-handler", dummyLexicalHandler);
-            } catch (SAXNotRecognizedException | SAXNotSupportedException err) {
-                //
+            XMLReader originalParser;
+            if (parser instanceof ReusableXMLReader rr) {
+                originalParser = rr.resetOriginal();
+            } else {
+                originalParser = parser;
             }
-            sourceParserPool.offer(parser);
-        } catch (Exception e) {
-            // setting the callbacks on an XMLReader to null doesn't always work; some parsers throw a
-            // NullPointerException. If anything goes wrong, the simplest approach is to ignore the error
-            // and not attempt to reuse the parser.
+            sourceParserPool.offer(originalParser);
+        } catch (SAXException e) {
+            getLogger().warning("Failed to return XML parser to parser pool: " + e.getMessage());
         }
+//        try {
+//            try {
+//                // give things back to the garbage collecter
+//                parser.setContentHandler(null);
+//                if (parser.getEntityResolver() == defaultParseOptions.getEntityResolver()) {
+//                    parser.setEntityResolver(null);
+//                }
+//                parser.setDTDHandler(null);
+//                parser.setErrorHandler(null);
+//                // Unfortunately setting the lexical handler to null doesn't work on Xerces, because
+//                // it tests "value instanceof LexicalHandler". So we set it to a lexical handler that
+//                // holds no references
+//                parser.setProperty("http://xml.org/sax/properties/lexical-handler", dummyLexicalHandler);
+//            } catch (SAXNotRecognizedException | SAXNotSupportedException err) {
+//                //
+//            }
+//            sourceParserPool.offer(parser);
+//        } catch (Exception e) {
+//            // setting the callbacks on an XMLReader to null doesn't always work; some parsers throw a
+//            // NullPointerException. If anything goes wrong, the simplest approach is to ignore the error
+//            // and not attempt to reuse the parser.
+//        }
     }
 
     /**
@@ -2921,7 +2929,7 @@ public class Configuration implements SourceResolver {
         }
         XMLReader parser = styleParserPool.poll();
         if (parser != null) {
-            return parser;
+            return new ReusableXMLReader(parser);
         }
 
         if (getStyleParserClass() != null) {
@@ -2942,18 +2950,7 @@ public class Configuration implements SourceResolver {
         } catch (SAXNotRecognizedException | SAXNotSupportedException e) {
             throw new TransformerFactoryConfigurationError(e);
         }
-        // Following code attempts to bypass attribute value normalization for stylesheets: see bug 2445.
-        // It works (the XercesAdapter has been dropped, but will be found somewhere in Subversion) but
-        // there are question marks over conformance, as there will be incompatibilities in edge cases
-        // for example when newlines appear within string literals within XPath expressions.
-//        if (parser.getClass().getCanonicalName().equals("org.apache.xerces.jaxp.SAXParserImpl.JAXPSAXParser")) {
-//            try {
-//                parser = new net.sf.saxon.event.XercesAdapter(parser);
-//            } catch (ClassNotFoundException err) {
-//                // ignore the error;
-//            }
-//        }
-        return parser;
+        return new ReusableXMLReader(parser);
     }
 
     private static final LexicalHandler dummyLexicalHandler = new DefaultHandler2();

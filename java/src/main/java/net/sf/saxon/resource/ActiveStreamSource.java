@@ -49,6 +49,7 @@ public class ActiveStreamSource extends StreamSource implements ActiveSource {
      */
     @Override
     public void deliver(Receiver receiver, ParseOptions options) throws XPathException {
+        // TODO: use the ReusableXMLReader class to reset any parser properties that are modified
         Configuration config = receiver.getPipelineConfiguration().getConfiguration();
         String url = getSystemId();
         InputSource is = new InputSource(url);
