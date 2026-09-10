@@ -56,16 +56,13 @@
   ...
   $result = $query->runQueryToString();
   if($result == NULL) {
-    $errCount = $query->getExceptionCount();
-    if($errCount > 0 ){
-      for ($i = 0; $i &lt; $errCount; $i++) {
-        $errC = $query->getErrorCode(intval(i));
-        $errMessage = $query->getErrorMessage(intval(i));
+    if($query->exceptionOccurred()){
+        $errC = $query->getErrorCode();
+        $errMessage = $query->getErrorMessage();
         if($errC != NULL) {
           echo 'Error found: '. $errC.' :'.$errMessage;
         }
         $query->exceptionClear();
-      }
     }
   }
   ...
