@@ -971,7 +971,7 @@ namespace SaxonCS_NUnit {
                                 Configuration config = proc.Implementation;
                                 SchemaType parentType = parent.Implementation.getSchemaType();
                                 int fp = config.getNamePool().allocateFingerprint(NamespaceUri.of(qName.Uri), qName.LocalName);
-                                int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, true);
+                                int cardinality = ((ComplexType) parentType).getElementParticleCardinality(fp, schema, true);
                                 return new XdmAtomicValue(Cardinality.allowsZero(cardinality));
                             });
                 XsltCompiler comp = proc.NewXsltCompiler();
