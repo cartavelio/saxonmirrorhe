@@ -305,12 +305,17 @@ public class MemoFunction extends UserFunction {
         // Surrogates are only needed to ensure that temporary nodes are eligible
         // for garbage collection. We therefore don't use them for lasting nodes
         // (nodes that are likely to remain in memory for the duration of a transformation)
-        switch (node.getTreeInfo().getDurability()) {
+        Durability durability = node.getTreeInfo().getDurability();
+        //#if CSHARP==false
+        if (durability == null) {
+            durability = Durability.LASTING;
+        }
+        //#endif
+        switch (durability) {
             case LASTING:
-                //Instrumentation.count("Durable nodes");
+            case UNDEFINED:
                 return node;
             case TEMPORARY:
-                //Instrumentation.count("Temporary nodes");
                 return new NodeSurrogate(node);
             default:
                 return null;

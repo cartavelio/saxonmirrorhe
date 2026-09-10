@@ -135,6 +135,11 @@ public class XOMDocumentWrapper extends XOMNodeWrapper implements TreeInfo {
         return documentNumber;
     }
 
+    @Override
+    public Durability getDurability() {
+        return Durability.LASTING;
+    }
+
     /**
      * Get the element with a given ID, if any
      *

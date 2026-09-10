@@ -36,7 +36,11 @@ public enum Durability {
      * over any modification, and external changes are not allowed even though Saxon cannot prevent them
      * happening.
      */
-    MUTABLE
+    MUTABLE,
+    /**
+     * Durability undefined means we don't know
+     */
+    UNDEFINED
 
 }
 

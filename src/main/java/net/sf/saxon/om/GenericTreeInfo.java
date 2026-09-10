@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static net.sf.saxon.om.Durability.UNDEFINED;
+
 /**
  * A generic (model-independent) implementation of the TreeInfo interface, suitable for use with all
  * tree models where the object representing the document node does not itself act as the TreeInfo
@@ -33,7 +35,7 @@ public class GenericTreeInfo implements TreeInfo
     private Map<String, Object> userData;
     private long documentNumber = -1;
     private SpaceStrippingRule spaceStrippingRule = NoElementsSpaceStrippingRule.getInstance();
-    private Durability durability;
+    private Durability durability = UNDEFINED;
 
     /**
      * Create the TreeInfo
@@ -185,12 +187,23 @@ public class GenericTreeInfo implements TreeInfo
         return null;
     }
 
+    /**
+     * Set the durability property of this node tree
+     * @param durability the durability. This (a) indicates how long the node is expected to remain in memory,
+     *                   and (b) whether the node is mutable. This information is used when the node appears
+     *                   in the arguments to a memo function.
+     *
+     */
     public void setDurability(Durability durability) {
         this.durability = durability;
     }
 
     public Durability getDurability() {
-        return durability;
+        if (durability == UNDEFINED) {
+            return isMutable() ? Durability.MUTABLE : Durability.LASTING;
+        } else {
+            return durability;
+        }
     }
 
     public boolean isMutable() {
