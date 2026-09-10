@@ -33,36 +33,55 @@ if test "$PHP_SAXONC" != "no"; then
 
   dnl --with-saxonc -> check with-path
   SEARCH_PATH="/opt/saxonica /usr/local /usr" # If SaxonC has been installed
-  SEARCH_FOR="/include/saxonc/SaxonProcessor.h"
-  if test -r $PHP_SAXONC/$SEARCH_FOR; then # path given as parameter
-    SAXONC_DIR=$PHP_SAXONC
-    SAXONC_CORE_DIR=$PHP_SAXONC
+  SEARCH_FOR="include/saxonc/SaxonProcessor.h"
+  if test "$PHP_SAXONC" != "yes"; then
+    AC_MSG_CHECKING([for libsaxonc files in $PHP_SAXON])
+    if test -r "$PHP_SAXONC/$SEARCH_FOR"; then # path given as parameter
+      SAXONC_DIR="$PHP_SAXONC"
+      SAXONC_CORE_DIR="$PHP_SAXONC"
+      AC_MSG_RESULT(found in $PHP_SAXON)
+    fi
   else # search default path list
-    AC_MSG_CHECKING([for Saxon files in default path])
+    AC_MSG_CHECKING([for SaxonC files in default path])
+    echo "SEARCH PATH: $SEARCH_PATH"
     for i in $SEARCH_PATH ; do
-      if test -r $i/$SEARCH_FOR; then
-        SAXONC_DIR=$i
+      echo "\$i: $i"
+      echo "$i/$SEARCH_FOR"
+      if test -r "$i/$SEARCH_FOR"; then
+        SAXONC_DIR="$i"
+        SAXONC_CORE_DIR="$i"
         AC_MSG_RESULT(found in $i)
       fi
     done
   fi
 
   if test -z "$SAXONC_DIR"; then
-    AC_MSG_RESULT([$SAXONC_DIR not found])
+    AC_MSG_RESULT([$SAXONC_DIR/$SEARCH_FOR not found])
     AC_MSG_ERROR([Please reinstall the SaxonC distribution])
   fi
 fi
 
 if test "$PHP_SAXONC_CORE" != "no"; then
-  dnl Write more examples of tests here...
-
   dnl --with-saxonc-core -> check with-path
-  SEARCH_FOR="/include/saxonc-core-$SAXON_EDITION.h"
-  if test -r $PHP_SAXONC_CORE/$SEARCH_FOR; then # path given as parameter
-    SAXONC_CORE_DIR=$PHP_SAXONC_CORE
-  else # search default path list
-    AC_MSG_RESULT([$SAXONC_CORE_DIR not found])
-    AC_MSG_ERROR([Please reinstall the SaxonC distribution])
+  SEARCH_FOR="include/saxonc-core-$SAXON_EDITION.h"
+
+  if test "$PHP_SAXONC_CORE" != "yes"; then
+    AC_MSG_CHECKING([for libsaxonc-core files in $PHP_SAXONC_CORE])
+    SAXONC_CORE_DIR=""
+    if test -r "$PHP_SAXONC_CORE/$SEARCH_FOR"; then # path given as parameter
+      SAXONC_CORE_DIR="$PHP_SAXONC_CORE"
+      AC_MSG_RESULT(found in $PHP_SAXONC_CORE)
+    fi
+
+    if test -z "$SAXONC_CORE_DIR"; then
+      AC_MSG_RESULT([$PHP_SAXONC_CORE/$SEARCH_FOR not found])
+      AC_MSG_ERROR([Please reinstall the SaxonC distribution])
+    fi
+  else
+    if ! test -r "$SAXONC_CORE_DIR/$SEARCH_FOR"; then # use previously set default
+      AC_MSG_RESULT([$SEARCH_FOR not found])
+      AC_MSG_ERROR([Please reinstall the SaxonC distribution])
+    fi
   fi
 fi
 
