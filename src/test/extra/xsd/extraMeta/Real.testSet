@@ -294,10 +294,10 @@
                 to MHK on 2 Sept 2008. Complains that it is rejected by Saxon but accepted by other processors.
             </documentation>
         </annotation>
-        <saxon:Configuration xmlns:saxon="http://saxon.sf.net/">
+        <!--<saxon:Configuration xmlns:saxon="http://saxon.sf.net/">
           <feature name="http://saxon.sf.net/feature/multipleSchemaImports" value="true"/>
-          <!--<feature name="http://saxon.sf.net/feature/schemaURIResolverClass" value="com.saxonica.testdriver.SchemaTestSuiteDriver$NonStandardXLinkResolver"/>-->
-        </saxon:Configuration>  
+          <!-\-<feature name="http://saxon.sf.net/feature/schemaURIResolverClass" value="com.saxonica.testdriver.SchemaTestSuiteDriver$NonStandardXLinkResolver"/>-\->
+        </saxon:Configuration>  -->
         <documentationReference xlink:href="http://www.w3.org/TR/2001/REC-xmlschema-1-20010502"/>
         <schemaTest name="real005.xsd">
 		        <annotation>
