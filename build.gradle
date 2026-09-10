@@ -1346,6 +1346,8 @@ task eej_compile_junit_tests(
                             "s9apitest/*.java",
                             "sorttests/*.java",
                             // "tools/*.java",    // Not tests
+                            "xqjtck/testcases/*.java",
+                            "xqjtck/*.java",
                             "xqjtests/*.java"])
   destinationDirectory = new File("${buildDir}/test_classes/eej")
 }
