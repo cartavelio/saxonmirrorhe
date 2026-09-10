@@ -14,7 +14,6 @@
     lineNumbering="true"
     optimizationLevel="10"
     preEvaluateDocFunction="false"
-    preferJaxpParser="true"
     recognizeUriQueryParameters="true"
     schemaValidation="strict"
     serializerFactory=""
