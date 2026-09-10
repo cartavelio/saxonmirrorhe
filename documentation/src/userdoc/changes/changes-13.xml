@@ -200,13 +200,15 @@ TODO: rethink redefines and override
         <p>When <code>xsl:message</code> is evaluated with <code>terminate="yes"</code>, the final
         <code>TerminationException</code> that is thrown now includes the content of that final
         message as a <code>Message</code> object. The <code>TerminationException</code> is available
-        using <code>SaxonApiException.getCause()</code>.</p>
+        using <code>SaxonApiException.getCause()</code>. This also applies to transformations
+        terminated using <code>xsl:assert</code></p>
         
         <p>The <code>Configuration</code> class now provides a method <code>disableFunction()</code>
         that allows use of any function name to be disabled. This can be a core function, a Saxon-supplied
         extension function, a user-registered extension function, a constructor function: anything. The
         method disables static function calls (such as <code>fn:contains()</code>), named function
-        references (<code>fn:contains#2</code>) and dynamic access using <code>function-lookup</code>.</p>
+        references (<code>fn:contains#2</code>) and dynamic access using <code>function-lookup</code>.
+        If it is set for a function, <code>function-available</code> returns false.</p>
         
         
    
