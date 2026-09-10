@@ -2106,14 +2106,13 @@ public class TestValidator {
     }
 
 
-    private void assertionCallingDoc(boolean allow) { // bug 6878
+    private void assertionCallingDoc(String assertion, boolean allow) {
 
-        String href = Testdata.fileUriString("books.xml");
         String xsd = "<xsd:schema saxon:extensions='any-xpath-version' xmlns:saxon='http://saxon.sf.net/'\n"
                 + "elementFormDefault='qualified'\n"
                 + "xmlns:xsd='http://www.w3.org/2001/XMLSchema'>\n"
                 + "<xsd:element name='AAA'><xsd:complexType><xsd:sequence><xsd:element ref='BBB'/></xsd:sequence>\n"
-                + "<xsd:assert test='doc(\"" + href + "\", {\"xsd-validation\":\"skip\"})//ITEM'/></xsd:complexType></xsd:element>\n"
+                + "<xsd:assert test=\"" + assertion + "\"/></xsd:complexType></xsd:element>\n"
                 + "<xsd:element name='BBB'/>\n"
                 + "</xsd:schema>";
         final List<XmlProcessingError> errorList = new ArrayList<>();
@@ -2132,7 +2131,7 @@ public class TestValidator {
             if (allow) {
                 assertTrue(errorList.isEmpty());
             } else  {
-                assertFalse(errorList.isEmpty());
+                assertFalse(errorList.isEmpty(), "No error detected for " + assertion);
             }
         } catch (SaxonApiException sapie) {
             if (allow) {
@@ -2143,12 +2142,24 @@ public class TestValidator {
 
     @Test
     public void testAssertionCallingDocAllowed() {
-        assertionCallingDoc(true);
+        String xmlDoc = Testdata.fileUriString("books.xml");
+        String jsonDoc = Testdata.fileUriString("sample.json");
+        assertionCallingDoc("doc('" + xmlDoc + "', {'xsd-validation':'skip'})//ITEM", true);
+        assertionCallingDoc("doc-available('" + xmlDoc + "', {'xsd-validation':'skip'})", true);
+        assertionCallingDoc("unparsed-text('" + xmlDoc + "')", true);
+        assertionCallingDoc("unparsed-text-available('" + xmlDoc + "')", true);
+        assertionCallingDoc("json-doc('" + jsonDoc + "') instance of map(*)", true);
     }
 
     @Test
     public void testAssertionCallingDocNotAllowed() {
-        assertionCallingDoc(false);
+        String xmlDoc = Testdata.fileUriString("books.xml");
+        String jsonDoc = Testdata.fileUriString("sample.json");
+        assertionCallingDoc("doc('" + xmlDoc + "', {'xsd-validation':'skip'})//ITEM", false);
+        assertionCallingDoc("doc-available('" + xmlDoc + "', {'xsd-validation':'skip'})", false);
+        assertionCallingDoc("unparsed-text('" + xmlDoc + "')", false);
+        assertionCallingDoc("unparsed-text-available('" + xmlDoc + "')", false);
+        assertionCallingDoc("json-doc('" + jsonDoc + "') instance of map(*)", false);
     }
 
     /**
