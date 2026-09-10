@@ -65,7 +65,7 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
         if (key == null) {
             key = new CallableDelegate((cxt, args) -> Atomizer.atomize(((Parcel)args[0].head()).getValue()));
         }
-        GroundedValue sortedParcels = 
+        GroundedValue sortedParcels =
                 SortBy.sort(parcels, SortBy.listOfOne(key), SortBy.listOfOne(comparer), context);
 
         List<GroundedValue> members = new ArrayList<>(expectedSize());
