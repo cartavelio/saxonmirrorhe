@@ -16,7 +16,7 @@ public class ICUNumbererEnUnhyphenated extends ICUNumbererPE {
      */
     @Override
     public String postProcess(String s) {
-        return s.replaceAll("-", " ");
+        return s.replace("-", " ");
     }
 }
 

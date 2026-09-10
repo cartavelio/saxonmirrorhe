@@ -1050,7 +1050,7 @@ public class EXPathFileFunctionSet extends BuiltInFunctionSet {
             }
             boolean maybeURI = path.startsWith("file:");
             if (maybeURI) {
-                URI uri = new URI(path.replaceAll("\\\\", "/"));
+                URI uri = new URI(path.replace("\\", "/"));
                 return new File(uri.getPath());
             } else {
                 String dir = System.getProperty("expath.base.directory");

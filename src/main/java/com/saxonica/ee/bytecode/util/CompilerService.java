@@ -1068,7 +1068,7 @@ public class CompilerService implements ICompilerService {
      */
 
     public String makeValidJavaName(String name) {
-        name = name.replaceAll(" ", "");
+        name = name.replace(" ", "");
         if (name.length() > 256) {
             name = name.substring(0, 256);
         }

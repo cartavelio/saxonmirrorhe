@@ -462,51 +462,51 @@ public class ICUNumbererPE extends AbstractNumberer {
             String lang = locale.getLanguage();
             switch (lang) {
                 case "en":
-                    result = new StringBuilder(result.toString().replaceAll("And", "and"));
+                    result = new StringBuilder(result.toString().replace("And", "and"));
                     break;
                 case "de":
-                    result = new StringBuilder(result.toString().replaceAll("Und", "und"));
+                    result = new StringBuilder(result.toString().replace("Und", "und"));
                     break;
                 case "nl":
-                    result = new StringBuilder(result.toString().replaceAll("Ën", "ën"));
+                    result = new StringBuilder(result.toString().replace("Ën", "ën"));
                     break;
                 case "af":
-                    result = new StringBuilder(result.toString().replaceAll("En", "en"));
+                    result = new StringBuilder(result.toString().replace("En", "en"));
                     break;
                 case "da":
                 case "fo":
                 case "is":
                 case "nb":
                 case "nn":
-                    result = new StringBuilder(result.toString().replaceAll("Og", "og"));
+                    result = new StringBuilder(result.toString().replace("Og", "og"));
                     break;
                 case "ga":
-                    result = new StringBuilder(result.toString().replaceAll("A ", "a "));
+                    result = new StringBuilder(result.toString().replace("A ", "a "));
                     break;
                 case "hr":
                 case "ca":
-                    result = new StringBuilder(result.toString().replaceAll("I", "i"));
+                    result = new StringBuilder(result.toString().replace("I", "i"));
                     break;
                 case "bg":
                 case "mk":
                 case "sr":
-                    result = new StringBuilder(result.toString().replaceAll("И ", "и "));
+                    result = new StringBuilder(result.toString().replace("И ", "и "));
                     break;
                 case "mt":
-                    result = new StringBuilder(result.toString().replaceAll("U", "u"));
+                    result = new StringBuilder(result.toString().replace("U", "u"));
                     break;
                 case "pt":
                 case "sq":
-                    result = new StringBuilder(result.toString().replaceAll("E", "e"));
+                    result = new StringBuilder(result.toString().replace("E", "e"));
                     break;
                 case "ro":
-                    result = new StringBuilder(result.toString().replaceAll("Şi", "şi"));
+                    result = new StringBuilder(result.toString().replace("Şi", "şi"));
                     break;
                 case "ee":
-                    result = new StringBuilder(result.toString().replaceAll("Vɔ", "vɔ"));
+                    result = new StringBuilder(result.toString().replace("Vɔ", "vɔ"));
                     break;
                 case "fi":
-                    result = new StringBuilder(result.toString().replaceAll("At", "at"));
+                    result = new StringBuilder(result.toString().replace("At", "at"));
                     break;
             }
             return result.toString();
