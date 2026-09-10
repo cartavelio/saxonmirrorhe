@@ -429,7 +429,7 @@ public class DocumentFn extends SystemFunction implements Callable {
             }
             return source;
         } catch (XPathException err) {
-            err.setErrorCode("FODC0005");
+            err.maybeSetErrorCode("FODC0005");
             err.maybeSetContext(context);
             throw err;
         } catch (Exception ex) {
