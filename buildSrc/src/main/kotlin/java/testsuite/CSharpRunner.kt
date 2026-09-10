@@ -1,5 +1,6 @@
 package com.saxonica.build.java.testsuite
 
+import com.saxonica.build.csharp.MSBuildConventions
 import java.io.File
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
@@ -19,7 +20,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
-abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations): DefaultTask() {
+abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations): MSBuildConventions() {
   override fun getGroup(): String {
     return "Testsuite"
   }
@@ -39,15 +40,11 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
   @get:Internal
   abstract val reportingRootDir: DirectoryProperty
   @get:Internal
-  abstract val arch: Property<String>
-  @get:Internal
   abstract val netver: Property<String>
   @get:Internal
   abstract val dotnet: Property<String>
   @get:Internal
   abstract val dotnetBuildType: Property<String>
-  @get:Internal
-  abstract val platform: Property<String>
   @get:Internal
   abstract val testargs: ListProperty<String>
 
@@ -85,8 +82,8 @@ abstract class CSharpRunner @Inject constructor(private val ex: ExecOperations):
     val stdOutput = ByteArrayOutputStream()
     val errOutput = ByteArrayOutputStream()
 
-    val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
-    val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
+    val relprefix = "${msbuildArch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
+    val relarch = "${netver.get()}/${msbuildPlatform.get()}-${msbuildArch.get()}/TestDrivers.dll"
     val testDrivers = project.layout.buildDirectory.file("${relprefix}/${relarch}")
 
     // This makes the report name match what the regression report builder

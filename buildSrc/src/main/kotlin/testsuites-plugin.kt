@@ -36,8 +36,8 @@ abstract class TestSuitesExtension
   abstract val testclasspath: Property<FileCollection>
   abstract val propertyOptions: MapProperty<String,String>
   abstract val product: Property<String>
-  abstract val platform: Property<String>
-  abstract val arch: Property<String>
+  abstract val platform: Property<Platforms>
+  abstract val arch: Property<Architectures>
   abstract val edition: Property<String>
   abstract val dotnet: Property<String>
   abstract val dotnetBuildType: Property<String>
@@ -297,10 +297,10 @@ abstract class TestSuitesExtension
 
     val reportDir = layout.buildDirectory.file("test-results/${suite}/${dateStamp}").get()
 
-    val relprefix = "${arch.get()}/TestDrivers/bin/${dotnetBuildType.get()}"
-    val relarch = "${netver.get()}/${platform.get()}-${arch.get()}/TestDrivers.dll"
+    val relprefix = "${arch.get().msbuild}/TestDrivers/bin/${dotnetBuildType.get()}"
+    val relarch = "${netver.get()}/${platform.get().msbuild}-${arch.get().msbuild}"
 
-    val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}")
+    val testDrivers = layout.buildDirectory.file("${relprefix}/${relarch}/TestDrivers.dll")
 
     val driverargs = mutableListOf<String>("${dotnet.get()}",
                                            "${testDrivers.get().asFile}",
@@ -371,8 +371,8 @@ class TestSuitesPlugin : Plugin<Project> {
     }
     extension.propertyOptions.convention(pmap)
     extension.product.convention("")
-    extension.platform.convention(saxonBuild.platform.get())
-    extension.arch.convention(if (saxonBuild.arch.get() == "aarch64") "arm64" else "x64")
+    extension.platform.convention(saxonBuild.targetHost.map { it.platformConst })
+    extension.arch.convention(saxonBuild.targetHost.map { it.architectureConst })
     extension.edition.convention("")
     extension.dotnet.convention(saxonBuild.dotnet.get())
     extension.netver.convention("net${saxonBuild.dotnetversion.get()}")

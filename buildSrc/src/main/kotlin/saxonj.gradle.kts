@@ -20,7 +20,6 @@ val testSuites = the<TestSuitesExtension>()
 val extension = project.extensions.create<SaxonJExtension>("saxonj")
 
 configure<TestSuitesExtension> {
-    platform = "java"
     edition = extension.edition
 }
 
