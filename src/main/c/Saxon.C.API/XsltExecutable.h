@@ -48,7 +48,7 @@ public:
 
       //! Set the base output URI.
           /**
-        <p> The base output URI is used for resolving relative URIs in the <code>href</code> attribute
+           * <p> The base output URI is used for resolving relative URIs in the <code>href</code> attribute
            * of the <code>xsl:result-document</code> instruction; it is accessible to XSLT stylesheet
            * code using the XPath current-output-uri() function</p>
            *
