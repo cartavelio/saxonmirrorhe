@@ -14,6 +14,8 @@ import net.sf.saxon.expr.*;
 import net.sf.saxon.expr.sort.DocumentOrderIterator;
 import net.sf.saxon.expr.sort.GlobalOrderComparer;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.ma.map.EmptyMap;
+import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.StylesheetPackage;
@@ -21,7 +23,11 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.trans.XsltController;
 import net.sf.saxon.tree.tiny.TinyBuilder;
+import net.sf.saxon.type.EnumerationUnionType;
+import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.Cardinality;
+import net.sf.saxon.value.SequenceType;
+import net.sf.saxon.value.StringValue;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.SourceLocator;
@@ -29,6 +35,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 
 /**
@@ -36,6 +43,21 @@ import java.net.URISyntaxException;
  */
 
 public class DocumentFn extends SystemFunction implements Callable {
+
+    public static OptionsParameter makeOptionsParameter() {
+        OptionsParameter docOptions = new OptionsParameter(40);
+        docOptions.addAllowedOption("base-uri", SequenceType.SINGLE_ANY_URI);
+        docOptions.addAllowedOption("dtd-validation", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("schema", SequenceType.SINGLE_STRING);
+        docOptions.addAllowedOption("stable", SequenceType.SINGLE_BOOLEAN, BooleanValue.TRUE);
+        // Temporary, anticipate resolution of QT4 spec issue #2684
+        docOptions.addAllowedOption("strip-space-2684", SequenceType.one(EnumerationUnionType.of("all", "none", "conditional")), new StringValue("conditional"));
+        docOptions.addAllowedOption("trusted", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("use-xsi-schema-location", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        docOptions.addAllowedOption("xsd-validation", SequenceType.SINGLE_STRING, StringValue.bmp("skip"));
+        docOptions.addAllowedOption("xinclude", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        return docOptions;
+    }
 
     private Location location;
 
@@ -107,29 +129,85 @@ public class DocumentFn extends SystemFunction implements Callable {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         int numArgs = getArity();
-
+        Item arg1 = numArgs > 1 ? arguments[1].head() : null;
         SequenceIterator hrefSequence = arguments[0].iterate();
         String baseURI = null;
-        if (numArgs == 2) {
-            NodeInfo base = (NodeInfo) arguments[1].head();
-            if (base != null) {
-                // empty sequence is allowed in 4.0; type checking prevents it if 4.0 not enabled
-                baseURI = base.getBaseURI();
-                if (baseURI == null) {
-                    throw new XPathException("The second argument to document() is a node with no base URI", "XTDE1162");
+        MapItem options = EmptyMap.getInstance(40);
+        ParseOptions parseOptions = context.getConfiguration().getParseOptions();
+        if (arg1 instanceof NodeInfo node) {
+            // empty sequence is allowed in 4.0; type checking prevents it if 4.0 not enabled
+            baseURI = node.getBaseURI();
+            if (baseURI == null) {
+                throw new XPathException("The second argument to document() is a node with no base URI", "XTDE1162");
+            }
+        } else if (arg1 instanceof MapItem mapItem) {
+            options = mapItem;
+        }
+
+        if (options != null && !options.isEmpty()) {
+            // 4.0 spec provides an options parameter. For this case we create a clean
+            // XML parser rather than using one from the pool. This is (a) to avoid the problems
+            // of resetting it to a virgin state before returning it to the pool, and (b)
+            // to ensure we get the default JDK parser implementation, rather than picking a parser
+            // off the classpath.
+
+            Map<String, GroundedValue> checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context, 40);
+            parseOptions = Doc.processOptions(checkedOptions, getRetainedStaticContext());
+            GroundedValue b = checkedOptions.get("base-uri");
+            if (b != null) {
+                baseURI = b.getStringValue();
+            }
+
+            GroundedValue strip = checkedOptions.get("strip-space-2684"); // See issue 2684
+            if (strip != null) {
+                SpaceStrippingRule rule;
+                GroundedValue dtdVal = checkedOptions.get("dtd-validation");
+                boolean dtdValidating = dtdVal != null && dtdVal.effectiveBooleanValue();
+                int xsdValidation = parseOptions.getSchemaValidationMode();
+                boolean xsdValidating = xsdValidation == Validation.STRICT || xsdValidation == Validation.LAX;
+                if (xsdValidating || dtdValidating) {
+                    rule = IgnorableSpaceStrippingRule.INSTANCE;
+                } else if (strip.getStringValue().equals("all")) {
+                    rule = AllElementsSpaceStrippingRule.INSTANCE;
+                } else if (strip.getStringValue().equals("conditional")) {
+                    rule = ((StylesheetPackage) getRetainedStaticContext().getPackageData()).getSpaceStrippingRule();
+                } else {
+                    rule = NoElementsSpaceStrippingRule.INSTANCE;
                 }
+                parseOptions = parseOptions.withSpaceStrippingRule(rule);
+            } else {
+                parseOptions = parseOptions.withSpaceStrippingRule(
+                        ((StylesheetPackage)getRetainedStaticContext().getPackageData()).getSpaceStrippingRule());
+            }
+
+        } else {
+
+            PackageData pd = getRetainedStaticContext().getPackageData();
+            if (pd instanceof StylesheetPackage) {
+                parseOptions = parseOptions.withSpaceStrippingRule(((StylesheetPackage) pd).getSpaceStrippingRule());
+            } else {
+                parseOptions = parseOptions.withSpaceStrippingRule(IgnorableSpaceStrippingRule.INSTANCE);
+            }
+
+            if (parseOptions.getSchemaValidationMode() != Validation.STRIP && parseOptions.getSchema() == null) {
+                parseOptions = parseOptions.withSchema(pd.getImportedSchema(""));
             }
         }
+        if (getRetainedStaticContext().getPackageData().getHostLanguageVersion() < 40) {
+            parseOptions = parseOptions.withTrusted(true);
+        }
+
 
         DocumentMappingFunction map = new DocumentMappingFunction(context);
         map.baseURI = baseURI;
         map.stylesheetURI = getStaticBaseUriString();
         map.packageData = getRetainedStaticContext().getPackageData();
         map.locator = location;
-        if (map.packageData instanceof StylesheetPackage) {
-            map.parseOptions = map.parseOptions.withSpaceStrippingRule(
-                    ((StylesheetPackage) map.packageData).getSpaceStrippingRule());
-        }
+        map.parseOptions = parseOptions;
+//        if (map.packageData instanceof StylesheetPackage) {
+//            map.parseOptions = map.parseOptions.withSpaceStrippingRule(
+//                    ((StylesheetPackage) map.packageData).getSpaceStrippingRule());
+//        }
 
         ItemMappingIterator iter = new ItemMappingIterator(hrefSequence, map);
 
