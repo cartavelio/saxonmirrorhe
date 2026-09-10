@@ -7,6 +7,7 @@ import net.sf.saxon.expr.ItemMappingFunction;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,6 +65,7 @@ public class MultithreadingFactory {
      * @param threads the required number of threads
      */
 
+    @CSharpReplaceBody(code="return null;") // temporary until we know whether we need this
     public ExecutorService makeExecutorService(int threads) {
         return Executors.newFixedThreadPool(threads);
     }

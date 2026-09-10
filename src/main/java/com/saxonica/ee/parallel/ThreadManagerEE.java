@@ -4,6 +4,7 @@ import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.ee.trans.Outcome;
 import net.sf.saxon.expr.XPathContextMajor;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -64,12 +65,14 @@ public class ThreadManagerEE extends XPathContextMajor.ThreadManager {
                 threads = 1;
             }
             executorService = config.getMultithreadingFactory().makeExecutorService(threads);
+            //#if CSHARP==false
             // Following line ensures that if the queue gets too long, an xsl:result-document request is executed
             // in the caller thread, which gives the worker threads some respite from new submissions
             if (executorService instanceof ThreadPoolExecutor) {
                 ((ThreadPoolExecutor) executorService).setRejectedExecutionHandler(
                         new ThreadPoolExecutor.CallerRunsPolicy());
             }
+            //#endif
 
             completionService = new CountingCompletionService<>(executorService);
         }
@@ -132,7 +135,7 @@ public class ThreadManagerEE extends XPathContextMajor.ThreadManager {
             try {
                 // At this point everything should have finished, because we know the completion service has no uncompleted
                 // tasks. So the timeout here should be a formality.
-                finished = executorService.awaitTermination(10, TimeUnit.SECONDS);
+                finished = awaitTermination();
                 if (!finished) {
                     System.err.println("Some child xsl:result-document threads have not finished");
                 }
@@ -142,6 +145,11 @@ public class ThreadManagerEE extends XPathContextMajor.ThreadManager {
         }
 
 
+    }
+
+    @CSharpReplaceBody(code="return executorService.awaitTermination();")
+    private boolean awaitTermination() throws InterruptedException {
+        return executorService.awaitTermination(10, TimeUnit.SECONDS);
     }
 }
 

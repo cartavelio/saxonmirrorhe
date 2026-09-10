@@ -33,7 +33,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
     private SequenceIterator stepIterator = null;
     private final Supplier<Integer> lastPositionFinder;
     private final ExecutorService service;
-    private final BlockingQueue<Future<Sequence>> resultQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Future<GroundedValue>> resultQueue = new LinkedBlockingQueue<>();
 
     /**
      * Construct an Iterator that will apply a specified action expression to
@@ -57,7 +57,8 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         // Don't pre-calculate last(); get it on demand. The focus tracking iterator is synchronised so that
         // if two threads both try to calculate last(), one of them will do the work, and the other
         // will take advantage of the known answer.
-        lastPositionFinder = context::getLast;
+        //noinspection Convert2MethodRef
+        lastPositionFinder = () -> context.getLast();
         EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
         service = config.getMultithreadingFactory().makeExecutorService(threads);
         // prime the queue
@@ -91,7 +92,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
             }
 
             // Get the next stepIterator off the queue
-            Future<Sequence> future = resultQueue.poll();
+            Future<GroundedValue> future = resultQueue.poll();
             if (future == null) {
                 close();
                 return null;
@@ -152,7 +153,7 @@ public final class MultithreadedContextMappingIterator implements SequenceIterat
         //c3.setReceiver(new ComplexContentOutputter(outputter));
 
         int attempts = 0;
-        Future<Sequence> future = null;
+        Future<GroundedValue> future;
         while (true) {
             try {
                 future = service.submit(

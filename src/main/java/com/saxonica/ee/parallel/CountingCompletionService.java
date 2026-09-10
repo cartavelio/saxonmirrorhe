@@ -1,7 +1,8 @@
 package com.saxonica.ee.parallel;
 
+import net.sf.saxon.om.AtomicCounter;
+
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Extension of ExecutorCompletionService to count the number of tasks submitted
@@ -13,8 +14,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 
 public class CountingCompletionService<V> extends ExecutorCompletionService<V> {
-    private final AtomicLong submittedTasks = new AtomicLong();
-    private final AtomicLong completedTasks = new AtomicLong();
+    private final AtomicCounter submittedTasks = new AtomicCounter(0);
+    private final AtomicCounter completedTasks = new AtomicCounter(0);
 
     public CountingCompletionService(Executor executor) {
         super(executor);
@@ -57,6 +58,7 @@ public class CountingCompletionService<V> extends ExecutorCompletionService<V> {
         return future;
     }
 
+    //#if CSHARP==false
     @Override
     public Future<V> poll(long timeout, TimeUnit unit) throws InterruptedException {
         Future<V> future = super.poll(timeout, unit);
@@ -66,6 +68,7 @@ public class CountingCompletionService<V> extends ExecutorCompletionService<V> {
         }
         return future;
     }
+    //#endif
 
     public long getNumberOfCompletedTasks() {
         return completedTasks.get();

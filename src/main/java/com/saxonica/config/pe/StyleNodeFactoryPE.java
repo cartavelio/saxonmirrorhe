@@ -13,13 +13,11 @@ import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.style.*;
-import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.trans.SaxonErrorCode;
+import net.sf.saxon.trans.XmlProcessingIncident;
 import net.sf.saxon.tree.linked.ElementImpl;
 import net.sf.saxon.tree.linked.NodeFactory;
 import net.sf.saxon.type.SchemaType;
-
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 
 /**
@@ -72,7 +70,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
                     pipe, location, sequence);
         }
 
-        Class extensionClass = null;
+        Class<? extends StyleElement> extensionClass = null;
         String uri = elementName.getURI();
         ExtensionElementFactory eef = ((ProfessionalConfiguration) config).getExtensionElementFactory(uri);
         if (eef != null) {
@@ -104,18 +102,13 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
 
         String localname = elementName.getLocalPart();
         StyleElement temp;
-        Class requiredClass = extensionClass;
+        Class<? extends StyleElement> requiredClass = extensionClass;
 
         if (allowExtensions) {
             // We can't work out the final class of the node until we've examined its attributes
             // such as version and extension-element-prefixes; but we can have a good guess, and
             // change it later if need be.
-            try {
-                temp = (StyleElement) extensionClass.newInstance();
-                temp.setCompilation(getCompilation());
-            } catch (InstantiationException | IllegalAccessException e1) {
-                throw new IllegalStateException(e1);
-            }
+            temp = super.makeStyleElement(extensionClass);
         } else {
             temp = new AbsentExtensionElement();
             XmlProcessingIncident reason = new XmlProcessingIncident("Extension instructions are disabled");
@@ -148,15 +141,7 @@ public class StyleNodeFactoryPE extends StyleNodeFactory implements NodeFactory 
         if (requiredClass.equals(temp.getClass())) {
             node = temp;    // the original element will do the job
         } else {
-            try {
-                node = (StyleElement) requiredClass.newInstance();
-            } catch (InstantiationException err1) {
-                throw new TransformerFactoryConfigurationError(err1,
-                        "Failed to create instance of " + requiredClass.getName());
-            } catch (IllegalAccessException err2) {
-                throw new TransformerFactoryConfigurationError(err2,
-                        "Failed to access class " + requiredClass.getName());
-            }
+            node = makeStyleElement(requiredClass);
             node.substituteFor(temp);   // replace temporary node with the new one
         }
         return node;

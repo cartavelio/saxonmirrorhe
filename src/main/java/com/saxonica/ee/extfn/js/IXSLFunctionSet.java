@@ -16,6 +16,7 @@ import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeKindTest;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.tree.iter.AtomicIterator;
 import net.sf.saxon.type.AnyItemType;
 import net.sf.saxon.type.BuiltInAtomicType;
@@ -130,6 +131,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         return "ixsl";
     }
 
+    //#if CSHARP==false
     public static ScriptEngine engine = null;
 
     public synchronized static ScriptEngine obtainEngine() throws XPathException {
@@ -141,6 +143,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         }
         return engine;
     }
+    //#endif
 
 
     /**
@@ -156,8 +159,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     public static class Source extends SystemFunction {
         @Override
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
-            Item source = context.getController().getGlobalContextItem();
-            return new ZeroOrOne(source);
+            return context.getController().getGlobalContextItem();
         }
     }
 
@@ -169,7 +171,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
         public Expression makeFunctionCall(Expression... arguments) {
             // The "action" argument must not be pre-evaluated. Wrap it in an ObjectValue
             Expression[] copiedArgs = Arrays.copyOf(arguments, arguments.length);
-            copiedArgs[2] = Literal.makeLiteral(new ObjectValue<>(arguments[2]));
+            copiedArgs[2] = Literal.makeLiteral(new ObjectValue<Expression>(arguments[2]));
             ExpressionTool.copyLocationInfo(arguments[2], copiedArgs[2]);
             location = arguments[0].getLocation();
             return super.makeFunctionCall(copiedArgs);
@@ -204,6 +206,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     public static class Call extends SystemFunction {
 
         @Override
+        @CSharpReplaceBody(code="return net.sf.saxon.value.EmptySequence.getInstance();")
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
             Object target = convertToJavaScript(arguments[0]);
@@ -227,6 +230,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
     public static class Eval extends SystemFunction {
 
         @Override
+        @CSharpReplaceBody(code = "return net.sf.saxon.value.EmptySequence.getInstance();")
         public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
             ScriptEngine engine = obtainEngine();
             try {
@@ -240,6 +244,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
 
     }
 
+    //#if CSHARP==false
     private static Sequence convertFromJavaScript(Object result) throws XPathException {
         //try {
             if (result instanceof String) {
@@ -282,7 +287,7 @@ public class IXSLFunctionSet extends BuiltInFunctionSet {
             }
         }
     }
-
+    //#endif
 }
 
 // Copyright (c) 2018-2020 Saxonica Limited

@@ -275,8 +275,10 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(2, BuiltInAtomicType.STRING, OPT, null)
                 .arg(3, BuiltInAtomicType.STRING, OPT, null);
 
+        //#if CSHARP==false
         register("last-modified", 1, LastModified.class, BuiltInAtomicType.DATE_TIME, OPT, BASE)
                 .arg(0, BuiltInAtomicType.STRING, OPT, EMPTY);
+        //#endif
 
         register("leading", 1, Leading.class, AnyItemType.getInstance(), STAR, 0)
                 .arg(0, AnyItemType.getInstance(), STAR, EMPTY);
@@ -345,9 +347,11 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
         register("new-text", 1, NewText.class, NodeKindTest.TEXT, ONE, LATE | SIDE | NEW)
                 .arg(0, BuiltInAtomicType.STRING, OPT, null);
 
+        //#if CSHARP==false
         register("object-map", 1, ObjectMap.class, new MapType(BuiltInAtomicType.STRING, SequenceType.ANY_SEQUENCE), ONE, 0)
                 .arg(0, AnyExternalObjectType.THE_INSTANCE, ONE, null);
-        
+        //#endif
+
         register("octets-to-base64Binary", 1, OctetsToBase64Binary.class, BuiltInAtomicType.BASE64_BINARY, ONE, 0)
                 .arg(0, BuiltInAtomicType.INTEGER, STAR, null);
 
@@ -397,9 +401,11 @@ public class VendorFunctionSetPE extends BuiltInFunctionSet {
                 .arg(1, AnyItemType.getInstance(), ONE, null)
                 .arg(2, AnyNodeTest.getInstance(), STAR, null);
 
+        //#if CSHARP==false
         register("read-binary-resource", 1, ReadBinaryResource.class, BuiltInAtomicType.BASE64_BINARY, ONE, LATE)
                 .arg(0, BuiltInAtomicType.STRING, ONE, null);
-
+        //#endif
+        
         FunctionItemType stringReplacer = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING},
                 SequenceType.SINGLE_STRING);

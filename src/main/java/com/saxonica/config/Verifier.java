@@ -213,6 +213,7 @@ public class Verifier {
      * @param filename the name or URI of the license file
      */
 
+    @CSharpModifiers(code={"internal"})
     synchronized void loadLicense(String filename) {
         InputStream is;
         boolean exists = false;

@@ -41,13 +41,13 @@ final public class AttributeIterator implements AxisIterator, LookaheadIterator 
 
 
     /**
-     * Test if there are mode nodes still to come.
+     * Test if there are more nodes still to come.
      * ("elements" is used here in the sense of the Java enumeration class, not in the XML sense)
      */
 
     @Override
     public boolean hasNext() {
-        return position < attributeList.size() - 1;
+        return position < attributeList.size();
     }
 
     /**

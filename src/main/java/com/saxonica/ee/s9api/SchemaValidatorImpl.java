@@ -13,23 +13,24 @@ import net.sf.saxon.expr.instruct.GlobalParam;
 import net.sf.saxon.expr.instruct.GlobalParameterSet;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.*;
+import net.sf.saxon.om.Action;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.transpile.CSharpReplaceBody;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.Untyped;
 import net.sf.saxon.type.ValidationParams;
+import org.jetbrains.annotations.NotNull;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
-
-import static net.sf.saxon.s9api.streams.Steps.child;
 
 /**
  * A <tt>SchemaValidator</tt> is an object that is used for validating instance documents against a schema.
@@ -392,82 +393,84 @@ public class SchemaValidatorImpl extends SchemaValidator {
         return value ==  null ? null : XdmValue.wrap(value);
     }
 
-    /**
-     * A task to be performed when validation completes
-     */
+//    /**
+//     * A task to be performed when validation completes
+//     */
 
-    interface ValidationCompletionAction {
-        void finish() throws SaxonApiException;
-    }
+//    @FunctionalInterface
+//    @CSharpDelegate
+//    interface ValidationCompletionAction {
+//        void finish() throws SaxonApiException;
+//    }
 
-    class ValidationTask implements java.util.concurrent.Callable<Outcome<Boolean>> {
-        private final Source source;
-        private ValidationCompletionAction action = null;
-        private InvalidityHandler handler = null;
-
-        public ValidationTask(Source s, InvalidityHandler handler, ValidationCompletionAction action) {
-            source = s;
-            this.handler = handler;
-            this.action = action;
-        }
-
-        /**
-         * Computes a result, or throws an exception if unable to do so.
-         *
-         * @return computed result
-         * @throws Exception if unable to compute a result
-         */
-        @Override
-        public Outcome<Boolean> call() throws Exception {
-            Configuration config = processor.getUnderlyingConfiguration();
-
-            try {
-                Controller controller = new Controller(config);
-                controller.getExecutable().setSchemaAware(true);
-                PipelineConfiguration pipe = controller.makePipelineConfiguration();
-                pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
-                pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
-
-                ParseOptions options = new ParseOptions();
-
-                options.setCheckEntityReferences(true);
-                options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
-                options.setInvalidityHandler(handler);
-
-
-                options.setCheckEntityReferences(true);
-                options.setExpandAttributeDefaults(expandAttributeDefaults);
-                options.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
-                options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
-                options.setTopLevelType(documentElementType);
-                if (documentElementName != null) {
-                    options.setTopLevelElement(new StructuredQName(
-                            documentElementName.getPrefix(), documentElementName.getNamespaceURI(), documentElementName.getLocalName()));
-                }
-
-                Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
-                output.setPipelineConfiguration(pipe);
-
-                Receiver receiver = config.getDocumentValidator(output, source.getSystemId(), options, null);
-
-                /*if (keepStatistics) {
-                    latestStatistics = new ValidationStatistics();
-                    options.setValidationStatisticsRecipient(latestStatistics.recipient);
-                } */
-                Sender.send(source, receiver, options);
-            } catch (XPathException | SaxonApiException e1) {
-                //e1.printStackTrace();
-                return new Outcome<>(e1);
-            } finally {
-                if (action != null) {
-                    action.finish();
-                }
-
-            }
-            return new Outcome<>(true);
-        }
-
-    }
+//    class ValidationTask implements java.util.concurrent.Callable<Outcome<Boolean>> {
+//        private final Source source;
+//        private ValidationCompletionAction action = null;
+//        private InvalidityHandler handler = null;
+//
+//        public ValidationTask(Source s, InvalidityHandler handler, ValidationCompletionAction action) {
+//            source = s;
+//            this.handler = handler;
+//            this.action = action;
+//        }
+//
+//        /**
+//         * Computes a result, or throws an exception if unable to do so.
+//         *
+//         * @return computed result
+//         * @throws Exception if unable to compute a result
+//         */
+//        @Override
+//        public Outcome<Boolean> call() throws Exception {
+//            Configuration config = processor.getUnderlyingConfiguration();
+//
+//            try {
+//                Controller controller = new Controller(config);
+//                controller.getExecutable().setSchemaAware(true);
+//                PipelineConfiguration pipe = controller.makePipelineConfiguration();
+//                pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
+//                pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
+//
+//                ParseOptions options = new ParseOptions();
+//
+//                options.setCheckEntityReferences(true);
+//                options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
+//                options.setInvalidityHandler(handler);
+//
+//
+//                options.setCheckEntityReferences(true);
+//                options.setExpandAttributeDefaults(expandAttributeDefaults);
+//                options.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
+//                options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+//                options.setTopLevelType(documentElementType);
+//                if (documentElementName != null) {
+//                    options.setTopLevelElement(new StructuredQName(
+//                            documentElementName.getPrefix(), documentElementName.getNamespaceURI(), documentElementName.getLocalName()));
+//                }
+//
+//                Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
+//                output.setPipelineConfiguration(pipe);
+//
+//                Receiver receiver = config.getDocumentValidator(output, source.getSystemId(), options, null);
+//
+//                /*if (keepStatistics) {
+//                    latestStatistics = new ValidationStatistics();
+//                    options.setValidationStatisticsRecipient(latestStatistics.recipient);
+//                } */
+//                Sender.send(source, receiver, options);
+//            } catch (XPathException | SaxonApiException e1) {
+//                //e1.printStackTrace();
+//                return new Outcome<>(e1);
+//            } finally {
+//                if (action != null) {
+//                    action.finish();
+//                }
+//
+//            }
+//            return new Outcome<>(true);
+//        }
+//
+//    }
 
 
     public void setThreadCount(int tc) {
@@ -500,16 +503,16 @@ public class SchemaValidatorImpl extends SchemaValidator {
             throw new IllegalStateException("Cannot validate multiple documents when destination is set externally");
         }
         Destination reportDestination = null;
-        final List<XdmNode> reportDocs = Collections.synchronizedList(new ArrayList<>());
+        final ReportList reportDocs = new ReportList();
         if (invalidityHandler instanceof InvalidityReportGeneratorEE) {
             reportDestination = ((InvalidityReportGeneratorEE) invalidityHandler).getDestination();
         }
 
         InvalidityHandler singleTaskHandler = null;
-        ValidationCompletionAction completionAction = null;
+        Action completionAction = null;
         BlockingQueue<Future<Outcome<Boolean>>> queue = new LinkedBlockingQueue<>();
 
-        for (Source s : sources) {
+        for (Source source : sources) {
             if (invalidityHandler != null) {
                 XdmDestination dest = new XdmDestination();
 
@@ -518,33 +521,71 @@ public class SchemaValidatorImpl extends SchemaValidator {
                 final InvalidityReportGeneratorEE singleReportHandler = (InvalidityReportGeneratorEE) singleTaskHandler;
                 singleReportHandler.setXsdVersion(processor.getUnderlyingConfiguration().getXsdVersion() == Configuration.XSD11 ? "1.1" : "1.0");
                 try {
-                    singleReportHandler.startReporting(s.getSystemId());
+                    singleReportHandler.startReporting(source.getSystemId());
 
                 } catch (XPathException e) {
                     e.printStackTrace();
                 }
 
                 completionAction = () -> {
-                    try {
-                        singleReportHandler.endReporting();
-                        reportDocs.add(((XdmDestination) singleReportHandler.getDestination()).getXdmNode());
-                    } catch (XPathException e1) {
-                        throw new SaxonApiException(e1);
-                    }
+                    singleReportHandler.endReporting();
+                    reportDocs.add(((XdmDestination) singleReportHandler.getDestination()).getXdmNode());
                 };
             }
-            Future<Outcome<Boolean>> result = executorService.submit(new ValidationTask(s, singleTaskHandler, completionAction));
+            final Action action = completionAction;
+            final InvalidityHandler handler = singleTaskHandler;
+            //Future<Outcome<Boolean>> result = executorService.submit(new ValidationTask(s, singleTaskHandler, completionAction));
+            Future<Outcome<Boolean>> result = executorService.submit(() -> {
+                //Configuration config = processor.getUnderlyingConfiguration();
+                Outcome<Boolean> outcome = new Outcome<Boolean>(true);
+                try {
+                    Controller controller = new Controller(config);
+                    controller.getExecutable().setSchemaAware(true);
+                    PipelineConfiguration pipe = controller.makePipelineConfiguration();
+                    pipe.setUseXsiSchemaLocation(useXsiSchemaLocation);
+                    pipe.setHostLanguage(HostLanguage.XML_SCHEMA);
+
+                    ParseOptions options = new ParseOptions();
+
+                    options.setCheckEntityReferences(true);
+                    options.setValidationParams(convertParams(suppliedParams, config.getDeclaredSchemaParameters()));
+                    options.setInvalidityHandler(handler);
+
+
+                    options.setCheckEntityReferences(true);
+                    options.setExpandAttributeDefaults(expandAttributeDefaults);
+                    options.setSchemaValidationMode(lax ? Validation.LAX : Validation.STRICT);
+                    options.setSpaceStrippingRule(NoElementsSpaceStrippingRule.getInstance());
+                    options.setTopLevelType(documentElementType);
+                    if (documentElementName != null) {
+                        options.setTopLevelElement(new StructuredQName(
+                                documentElementName.getPrefix(), documentElementName.getNamespaceURI(), documentElementName.getLocalName()));
+                    }
+
+                    Receiver output = destination == null ? new Sink(pipe) : destination.getReceiver(pipe, null);
+                    output.setPipelineConfiguration(pipe);
+
+                    Receiver receiver = config.getDocumentValidator(output, source.getSystemId(), options, null);
+                    Sender.send(source, receiver, options);
+                } catch (XPathException | SaxonApiException e1) {
+                    //e1.printStackTrace();
+                    outcome = new Outcome<Boolean>(e1);
+                } finally {
+                    if (action != null) {
+                        try {
+                            action.doAction();
+                        } catch (XPathException e) {
+                            outcome = new Outcome<Boolean>(e);
+                        }
+                    }
+                }
+                return outcome;
+            });
             queue.add(result);
         }
 
         executorService.shutdown();
-        boolean finish = false;
-        try {
-            finish = executorService.awaitTermination(24, TimeUnit.HOURS);
-        } catch (InterruptedException e) {
-            executorService.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
+        boolean finish = tryToFinish(executorService);
         if (!finish) {
             throw new SaxonApiException("Some validation task(s) failed to complete within 24 hours");
         }
@@ -575,7 +616,7 @@ public class SchemaValidatorImpl extends SchemaValidator {
                                       loc, ReceiverOption.NONE);
 
                 for (XdmNode node : reportDocs) {
-                    for (XdmNode de : node.select(child()).asListOfNodes()) {
+                    for (XdmNode de : node.children()) {
                         de.getUnderlyingNode().copy(receiver, 0, loc);
                     }
                 }
@@ -586,6 +627,33 @@ public class SchemaValidatorImpl extends SchemaValidator {
             } catch (XPathException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private static class ReportList implements Iterable<XdmNode> {
+
+        private final List<XdmNode> backing = new ArrayList<>();
+
+        public synchronized void add(XdmNode node) {
+            backing.add(node);
+        }
+
+        @NotNull
+        @Override
+        public Iterator<XdmNode> iterator() {
+            return backing.iterator();
+        }
+    }
+
+
+    @CSharpReplaceBody(code="return false;") // TODO: implement me
+    private boolean tryToFinish(ExecutorService executorService) {
+        try {
+            return executorService.awaitTermination(24, TimeUnit.HOURS);
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+            return false;
         }
     }
 

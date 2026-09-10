@@ -78,6 +78,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -1989,7 +1990,8 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
         if (context.getCurrentIterator() != null) {
             ManualIterator manualIterator =
                     new ManualIterator(context.getContextItem(), context.getCurrentIterator().position());
-            manualIterator.setLengthFinder(context::getLast);
+            //noinspection Convert2MethodRef
+            manualIterator.setLengthFinder(() -> context.getLast());
             c3.setCurrentIterator(manualIterator);
         }
 
@@ -2011,14 +2013,14 @@ public final class EnterpriseConfiguration extends ProfessionalConfiguration {
 
         // Now create a task to execute the instruction, in the form of a Callable
 
-        java.util.concurrent.Callable<Outcome<Boolean>> task = () -> {
+        Callable<Outcome<Boolean>> task = () -> {
             try {
                 //System.err.println("Processing xsl:result-document at " + instruction.getLineNumber());
                 instruction.processInstruction(content, c3);
-                return new Outcome<>(true);
+                return new Outcome<Boolean>(true);
             } catch (Exception e) {
                 //e.printStackTrace();
-                return new Outcome<>(e);
+                return new Outcome<Boolean>(e);
                 //manager.notifyException(e);
             }
         };

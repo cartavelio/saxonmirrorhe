@@ -295,24 +295,32 @@ public class Validate {
                     }
                 } else if (schemaFileName.equals("-")) {
                     // take input from stdin
+                    //#if CSHARP==false
                     if (Version.platform.isJava()) {
                         final InputSource inputSource = new InputSource(System.in);
                         inputSource.setSystemId(new File(System.getProperty("user.dir")).toURI().toASCIIString());
                         schemaSource = new SAXSource(config.getStyleParser(), inputSource);
                     } else {
+                        //#endif
                         schemaSource = new StreamSource(System.in);
+                        //#if CSHARP==false
                     }
+                    //#endif
                 } else {
                     File schemaFile = new File(schemaFileName);
                     if (!schemaFile.exists()) {
                         return quit("Schema file " + schemaFile + " does not exist", 2);
                     }
+                    //#if CSHARP==false
                     if (Version.platform.isJava()) {
                         InputSource eis = new InputSource(schemaFile.toURI().toString());
                         schemaSource = new SAXSource(config.getStyleParser(), eis);
                     } else {
+                        //#endif
                         schemaSource = new StreamSource(schemaFile.toURI().toString());
+                        //#if CSHARP==false
                     }
+                    //#endif
                 }
 
                 if (schemaSource == null) {
@@ -352,7 +360,8 @@ public class Validate {
             }
 
             if (options.definesParameterValues()) {
-                options.setParams(processor, validator::setParameter);
+                //noinspection Convert2MethodRef
+                options.setParams(processor, (name, val) -> validator.setParameter(name, val));
             }
 
             Serializer statsSerializer = null;
@@ -410,12 +419,14 @@ public class Validate {
                             config.getLogger().info("Validation successful");
                         }
                         validCount++;
+                        //#if CSHARP==false
                         if (source instanceof SAXSource) {
                             XMLReader parser = ((SAXSource) source).getXMLReader();
                             if (parser != null) {
                                 config.reuseSourceParser(parser);
                             }
                         }
+                        //#endif
                     } catch (SaxonApiException e) {
                         if (e.getCause() instanceof ValidationException) {
                             if (showTime) {
@@ -562,6 +573,7 @@ public class Validate {
                 sourceInput = config.getSystemURIResolver().resolve(sourceFileName, null);
             }
         } else if (sourceFileName.equals("-")) {
+            //#if CSHARP==false
             // take input from stdin
             if (Version.platform.isJava()) {
                 String sysId = new File(System.getProperty("user.dir")).toURI().toASCIIString();
@@ -569,19 +581,26 @@ public class Validate {
                 inputSource.setSystemId(sysId);
                 sourceInput = new SAXSource(inputSource);
             } else {
+                //#endif
                 sourceInput = new StreamSource(System.in);
+                //#if CSHARP==false
             }
+            //#endif
         } else {
             File sourceFile = new File(sourceFileName);
             if (!sourceFile.exists()) {
                 throw new XPathException("Source file " + sourceFile + " does not exist");
             }
+            //#if CSHARP==false
             if (Version.platform.isJava()) {
                 InputSource eis = new InputSource(sourceFile.toURI().toString());
                 sourceInput = new SAXSource(eis);
             } else {
+                //#endif
                 sourceInput = new StreamSource(sourceFile.toURI().toString());
+                //#if CSHARP==false
             }
+            //#endif
         }
         return sourceInput;
     }

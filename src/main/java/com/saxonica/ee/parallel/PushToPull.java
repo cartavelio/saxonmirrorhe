@@ -12,7 +12,6 @@ import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.trans.QuitParsingException;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharpModifiers;
 import net.sf.saxon.value.StringValue;
 
 import java.io.Closeable;
@@ -35,7 +34,7 @@ public class PushToPull {
     private final Pusher expression;
     private final XPathContext context;
     private final BlockingQueue<Outcome<Item>> queue = new ArrayBlockingQueue<>(50);
-    private final Item stopper = StringValue.bmp("finished");
+    private final static Item STOPPER = StringValue.bmp("finished");
 
     public PushToPull(Pusher expression, XPathContext context) {
         this.expression = expression;
@@ -66,10 +65,13 @@ public class PushToPull {
      * can hold either an Item or an exception.
      */
 
-    private class QueueWriter extends SequenceWriter {
+    private static class QueueWriter extends SequenceWriter {
 
-        public QueueWriter(PipelineConfiguration pipe) {
+        private final BlockingQueue<Outcome<Item>> queue;
+
+        public QueueWriter(BlockingQueue<Outcome<Item>> queue, PipelineConfiguration pipe) {
             super(pipe);
+            this.queue = queue;
         }
 
         @Override
@@ -80,7 +82,7 @@ public class PushToPull {
                 throw new QuitParsingException(true);
             }
             try {
-                queue.put(new Outcome<>(item));
+                queue.put(new Outcome<Item>(item));
             } catch (InterruptedException e) {
                 throw new QuitParsingException(true);
             }
@@ -89,7 +91,7 @@ public class PushToPull {
         public void notify(XPathException exception) {
             try {
                 queue.clear();
-                queue.put(new Outcome<>(exception));
+                queue.put(new Outcome<Item>(exception));
             } catch (InterruptedException e) {
                 //throw new IllegalStateException("Interrupted while trying to notify exception");
             }
@@ -102,21 +104,32 @@ public class PushToPull {
      * shared BlockingQueue.
      */
 
-    private class Provider implements Runnable {
+    private static class Provider implements Runnable {
+
+        private final XPathContext context;
+        private final BlockingQueue<Outcome<Item>> queue;
+        private final Pusher expression;
+
+        public Provider(Pusher expression, BlockingQueue<Outcome<Item>> queue, XPathContext context) {
+            this.expression = expression;
+            this.queue = queue;
+            this.context = context;
+        }
+
         @Override
         public void run() {
             PipelineConfiguration pipe = context.getController().makePipelineConfiguration();
             pipe.setXPathContext(context);
-            QueueWriter q = new QueueWriter(pipe);
+            QueueWriter q = new QueueWriter(queue, pipe);
             try {
                 expression.push(new ComplexContentOutputter(q), context);
                 // On completion, write a stopper item which the consumer recognizes as representing
                 // the end of the sequence.
-                q.write(stopper);
+                q.write(STOPPER);
             } catch (QuitParsingException quit) {
                 if (!quit.isNotifiedByConsumer()) {
                     try {   // Bug 2934, 3080
-                        q.write(stopper);
+                        q.write(STOPPER);
                     } catch (XPathException e) {
                         e.printStackTrace();
                     }
@@ -137,22 +150,24 @@ public class PushToPull {
 
     public SequenceIterator getIterator() {
         EnterpriseConfiguration config = (EnterpriseConfiguration) context.getConfiguration();
-        final Thread provider = config.getMultithreadingFactory().makeThread(new Provider());
+        final Thread provider = config.getMultithreadingFactory().makeThread(new Provider(expression, queue, context));
         provider.start();
-        return new PushToPullIterator(provider);
+        return new PushToPullIterator(provider, queue);
     }
 
-    private class PushToPullIterator implements SequenceIterator, Closeable {
+    private static class PushToPullIterator implements SequenceIterator, Closeable {
 
-        Thread provider;
-        boolean allDone = false;
+        private final Thread provider;
+        private final BlockingQueue<Outcome<Item>> queue;
+        private boolean allDone = false;
 
-        public PushToPullIterator(Thread provider) {
+        public PushToPullIterator(Thread provider, BlockingQueue<Outcome<Item>> queue) {
             this.provider = provider;
+            this.queue = queue;
         }
 
         @Override
-        @CSharpModifiers(code = {"public", "override"})
+        //@CSharpModifiers(code = {"public", "override"})
         public Item next() {
             //System.err.println("Consumer.read()");
             if (allDone) {
@@ -163,7 +178,7 @@ public class PushToPull {
                 Outcome<Item> next = queue.take();
                 if (next.isSuccess()) {
                     Item item = next.getResult();
-                    if (item == stopper) {
+                    if (item == STOPPER) {
                         // this is a special item indicating the end of the sequence
                         allDone = true;
                         return null;
@@ -187,7 +202,7 @@ public class PushToPull {
          */
 
         @Override
-        @CSharpModifiers(code = {"public", "override"})
+        //@CSharpModifiers(code = {"public", "override"})
         public void close() {
             allDone = true;
             provider.interrupt();

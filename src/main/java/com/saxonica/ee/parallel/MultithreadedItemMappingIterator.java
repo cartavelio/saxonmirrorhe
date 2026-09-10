@@ -107,23 +107,11 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
     }
 
     private void mapOneItem(Item in) {
-        Future<Item> future = service.submit(new CallableAction(getMappingFunction(), in));
-        resultQueue.add(future);
-    }
-
-    private class CallableAction<F extends Item, T extends Item> implements Callable<Item> {
-        private ItemMappingFunction action;
-        private F input;
-
-        public CallableAction(ItemMappingFunction action, F input) {
-            this.action = action;
-            this.input = input;
-        }
-
-        @Override
-        public Item call() throws XPathException {
+        //Future<Item> future = service.submit(new CallableAction(getMappingFunction(), in, service));
+        ItemMappingFunction action = getMappingFunction();
+        Future<Item> future = service.submit(() -> {
             try {
-                Item out = action.mapItem(input);
+                Item out = action.mapItem(in);
                 if (out == null) {
                     return new NullItem(true);
                 } else {
@@ -133,8 +121,36 @@ public class MultithreadedItemMappingIterator extends ItemMappingIterator {
                 service.shutdown();
                 throw e;
             }
-        }
+        });
+        resultQueue.add(future);
     }
+
+//    private static class CallableAction<F extends Item, T extends Item> implements Callable<Item> {
+//        private final ItemMappingFunction action;
+//        private final F input;
+//        private final ExecutorService service;
+//
+//        public CallableAction(ItemMappingFunction action, F input, ExecutorService service) {
+//            this.action = action;
+//            this.input = input;
+//            this.service = service;
+//        }
+//
+//        @Override
+//        public Item call() throws XPathException {
+//            try {
+//                Item out = action.mapItem(input);
+//                if (out == null) {
+//                    return new NullItem(true);
+//                } else {
+//                    return out;
+//                }
+//            } catch (XPathException e) {
+//                service.shutdown();
+//                throw e;
+//            }
+//        }
+//    }
 
     /**
      * An {@link ItemMappingFunction} returns zero or one items in the output corresponding to each item

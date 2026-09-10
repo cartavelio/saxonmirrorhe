@@ -749,9 +749,11 @@ public class ProfessionalConfiguration extends Configuration {
             builtInExtensionLibraryList.addFunctionLibrary(EXPathBinaryFunctionSet.getInstance());
             if (getBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS)) {
                 builtInExtensionLibraryList.addFunctionLibrary(EXPathFileFunctionSet.getInstance());
+                //#if CSHARP==false
                 OnDemandFunctionSet sql = new OnDemandFunctionSet(
                         this, NamespaceConstant.SQL, "com.saxonica.functions.sql.SQLFunctionSet");
                 builtInExtensionLibraryList.addFunctionLibrary(sql);
+                //#endif
             }
         }
         return builtInExtensionLibraryList;
@@ -863,6 +865,7 @@ public class ProfessionalConfiguration extends Configuration {
         return jeot;
     }
 
+    //#if CSHARP==false
     /**
      * Make a map representing the methods defined in a class. This map is specific to the class, not to
      * a particular instance. The functions present in this map take an extra first argument representing
@@ -881,7 +884,9 @@ public class ProfessionalConfiguration extends Configuration {
     public Map<String, Function> makeMethodMap(Class javaClass, String required) {
         return ObjectMap.makeMethodMap(this, javaClass, required);
     }
+    //#endif
 
+    //#if CSHARP==false
     /**
      * Convert a Java object to a map
      *
@@ -897,6 +902,7 @@ public class ProfessionalConfiguration extends Configuration {
     public MapItem externalObjectAsMap(ObjectValue value, String required) {
         return ObjectMap.toMap(this, value, required);
     }
+    //#endif
 
     //#if CSHARP==false
     /**

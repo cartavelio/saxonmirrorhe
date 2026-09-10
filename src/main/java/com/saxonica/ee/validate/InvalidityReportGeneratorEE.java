@@ -207,7 +207,7 @@ public class InvalidityReportGeneratorEE  extends InvalidityReportGenerator {
     }
 
     private String ifPositive(int value) {
-        return value < 0 ? null : String.valueOf(value);
+        return value < 0 ? null : "" + value;
     }
 
     public Destination getDestination() {

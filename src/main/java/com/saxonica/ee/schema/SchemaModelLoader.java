@@ -210,7 +210,7 @@ public class SchemaModelLoader extends ProxyReceiver {
         
         // The design here is distorted by the constraints of inner classes in C#
         protected SchemaModelLoader loader;
-        
+
         public void setSchemaModelLoader(SchemaModelLoader loader) {
             this.loader = loader;
         }
@@ -911,9 +911,15 @@ public class SchemaModelLoader extends ProxyReceiver {
 
     private static class AttributeGroupHandler extends SCMNodeHandler {
 
-        final AttributeGroupDecl group;
+        private AttributeGroupDecl group;
 
         public AttributeGroupHandler() {
+
+        }
+
+        @Override
+        public void setSchemaModelLoader(SchemaModelLoader loader) {
+            super.setSchemaModelLoader(loader);
             group = new AttributeGroupDecl(loader.config);
         }
 

@@ -7,6 +7,7 @@ import com.saxonica.ee.stream.watch.WatchManager;
 import com.saxonica.ee.trans.ContextItemStaticInfoEE;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.Controller;
+import net.sf.saxon.event.Outputter;
 import net.sf.saxon.event.PipelineConfiguration;
 import net.sf.saxon.event.Receiver;
 import net.sf.saxon.expr.*;
@@ -131,33 +132,7 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             options.setApplicableAccumulators(ms.accumulators);
 
             final String href = uri.getStringValue();
-            PushToPull.Pusher pusher = (output, context) -> {
-                Controller controller = context.getController();
-                XPathContextMajor c2 = context.newContext();
-                c2.setCurrentTemplateRule(null);
-                PipelineConfiguration pipe = controller.makePipelineConfiguration();
-                pipe.setXPathContext(context);
-
-                WatchManager wm = new WatchManager(pipe);
-                wm.setXPathContext(context);
-                wm.setOutputter(output);
-
-                AccumulatorRegistryEE am = (AccumulatorRegistryEE) pd.getAccumulatorRegistry();
-
-                if (am != null && ms.accumulators != null) {
-                    AccumulatorRegistryEE.registerSelectedAccumulators(wm, ms.accumulators);
-                }
-
-                Receiver out = wm; //new ContentDetector(stb);
-
-                if (pd instanceof StylesheetPackage && ((StylesheetPackage) pd).isStripsTypeAnnotations()) {
-                    out = pd.getConfiguration().getAnnotationStripper(out);
-                }
-
-                wm.addWatch(new StreamWatch((Inversion) ms.invertedAction, wm, c2), true);
-
-                DocumentFn.sendDoc(href, ms.baseURI, context, ms.location, out, options);
-            };
+            PushToPull.Pusher pusher = new MergePusher(ms, pd, href, options);
 
             SequenceIterator iter = new PushToPull(pusher, c1).getIterator();
             XPathContext c2 = c1.newMinorContext();
@@ -168,6 +143,49 @@ public class MergeInstrAdjunct extends StreamingAdjunct {
             result.add(iter3);
         }
         return result;
+    }
+
+    public static class MergePusher implements PushToPull.Pusher {
+        private final MergeInstr.MergeSource ms;
+        private final PackageData pd;
+        private final String href;
+        private final ParseOptions options;
+
+        public MergePusher(MergeInstr.MergeSource ms, PackageData pd, String href, ParseOptions options) {
+            this.ms = ms;
+            this.pd = pd;
+            this.href = href;
+            this.options = options;
+        }
+
+        public void push (Outputter output, XPathContext context) throws XPathException {
+            Controller controller = context.getController();
+            XPathContextMajor c2 = context.newContext();
+            c2.setCurrentTemplateRule(null);
+            PipelineConfiguration pipe = controller.makePipelineConfiguration();
+            pipe.setXPathContext(context);
+
+            WatchManager wm = new WatchManager(pipe);
+            wm.setXPathContext(context);
+            wm.setOutputter(output);
+
+            AccumulatorRegistryEE am = (AccumulatorRegistryEE) pd.getAccumulatorRegistry();
+
+            if (am != null && ms.accumulators != null) {
+                AccumulatorRegistryEE.registerSelectedAccumulators(wm, ms.accumulators);
+            }
+
+            Receiver out = wm; //new ContentDetector(stb);
+
+            if (pd instanceof StylesheetPackage && ((StylesheetPackage) pd).isStripsTypeAnnotations()) {
+                out = pd.getConfiguration().getAnnotationStripper(out);
+            }
+
+            wm.addWatch(new StreamWatch((Inversion) ms.invertedAction, wm, c2), true);
+
+            DocumentFn.sendDoc(href, ms.baseURI, context, ms.location, out, options);
+        }
+
     }
 
 }

@@ -75,7 +75,7 @@ public class ObjectMap extends SystemFunction {
      * available in the object, to the extent that they have unique names.
      */
 
-    public static MapItem toMap(Configuration config, ObjectValue value, String required) {
+    public static MapItem toMap(Configuration config, ObjectValue<?> value, String required) {
         Object obj = value.getObject();
         DictionaryMap mapView = new DictionaryMap();
         if (!config.isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION) ||
