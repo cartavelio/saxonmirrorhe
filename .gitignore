@@ -1,5 +1,7 @@
 /.gradle/
 /build/
+/buildSrc/build/
+/buildSrc/.gradle/
 /out/
 java_*.hprof
 /.idea/

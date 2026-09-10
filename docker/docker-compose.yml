@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+    sqlserver:
+      image: az82/docker-derby
+      container_name: sqlserver
+      ports:
+        - 1527:1527
+      volumes:
+        - ../build/derby/data:/dbs
+      networks:
+        - external_net
+
+networks:
+  external_net: {}
