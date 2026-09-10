@@ -154,7 +154,13 @@
             <li><p><code>saxon:parse-html</code> is superseded by <code>fn:parse-html</code>.</p></li>
         </ul>
         
- 
+        <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
+        the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the
+        way the output of <code>xsl:result-document</code> instructions is handled. Instead of
+        being returned in the result map returned by <code>fn:transform</code>, they are handled
+        by the result document handler registered with the primary transformation, or the default
+        result document handler otherwise: this has the effect of writing the secondary results
+        directly to filestore.</p>
 
     
     </category>

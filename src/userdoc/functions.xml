@@ -4270,36 +4270,49 @@
       <status>
         <p>Available since Saxon 9.7. The input options available are listed in the
           specification, with the additions and caveats noted below.</p>
-        <p>Prior to Saxon 9.8.0.8, the <code>vendor-options</code>
-          parameter allowed entries of the form <code>"vendor-options": map {
-            QName('http://saxon.sf.net/feature/', 'defaultLanguage'): 'de'}</code> to set
-        configuration options for the transformation. This feature has been withdrawn (see bug 3624)
-        because the configuration options were set globally (affecting the caller's configuration 
-        as well as that of the target transformation) which could cause obscure failures.</p>
-        <p>From Saxon 9.8.0.8, the <code>vendor-options</code> parameter allows an entry of the form
-          <code>"vendor-options": map {QName('http://saxon.sf.net/', 'configuration'): $config}</code>
-          where <code>$config</code> is the root node of a configuration file expressed as an XML tree.
-          If this option is present, the target transformation is run in a different configuration from
-          the calling application, so that settings in the configuration file do not affect the environment
-          of the caller. The calling and called configurations share the same <code>NamePool</code> and document number pool,
-          so that XDM nodes can be safely passed from one environment to the other; however they do not
-          share the same schema components, so typed (schema-validated) documents cannot be passed.</p>
-        <p>Options that can usefully be set in the target configuration file include the URIs and locations
-          of schema documents and of XSLT library packages.</p>
-        <p>An additional top-level option <code>source-location</code> is available. This has the
-        same effect as <code>source-node</code> except that it supplies the location of a source (lexical XML)
-        document rather than a parsed XDM tree. This option is useful if the target transformation is streamed;
-        it has been added as an extension to the spec because there is no other way of executing a stylesheet
-        that expects a streamed input document.</p>
-        <p>Validation of source documents may be requested either (a) by supplying a configuration file in which the
-        option <code><![CDATA[<global schemaValidation="strict"/>]]></code> has been set, or (b) by setting the option
-          <code>"vendor-options": map {QName('http://saxon.sf.net/', 'schema-validation'): 'strict'}</code>. (The 
-          value <code>'lax'</code> can also be used.)
-          Either option affects documents supplied using the <code>source-node</code>, <code>source-location</code>,
-          or <code>global-context-item</code> options. Setting the option in the configuration file also affects
-          documents read using the <code>doc()</code> or <code>document()</code> functions.
-          Neither option affects documents supplied in the <code>initial-match-selection</code> option, 
-        or in any of the <code>xxx-params</code> options (such as <code>stylesheet-params</code>).</p>
+        <p>The following options are available:</p>
+        <ul>
+          <li><p><b>source-location</b>. Since 9.8.0.8.</p>
+            <p>The top-level option <code>source-location</code> has the
+              same effect as <code>source-node</code> except that it supplies the location of a source (lexical XML)
+              document rather than a parsed XDM tree. This option is useful if the target transformation is streamed;
+              it has been added as an extension to the spec because there is no other way of executing a stylesheet
+              that expects a streamed input document.</p></li>
+          <li><p><b>vendor-options/saxon:configuration</b>. Since 9.8.0.8</p>. 
+            <p>The <code>vendor-options</code> parameter allows an entry of the form
+            <code>"vendor-options": map {QName('http://saxon.sf.net/', 'configuration'): $config}</code>
+            where <code>$config</code> is the root node of a configuration file expressed as an XML tree.
+            If this option is present, the target transformation is run in a different configuration from
+            the calling application, so that settings in the configuration file do not affect the environment
+            of the caller. The calling and called configurations share the same <code>NamePool</code> and document number pool,
+            so that XDM nodes can be safely passed from one environment to the other; however they do not
+            share the same schema components, so typed (schema-validated) documents cannot be passed.</p>
+            <p>Options that can usefully be set in the target configuration file include the URIs and locations
+              of schema documents and of XSLT library packages.</p></li>
+          <li><p><b>vendor-options/saxon:schema-validation</b></p>
+            <p>Validation of source documents may be requested either (a) by supplying a configuration file in which the
+              option <code><![CDATA[<global schemaValidation="strict"/>]]></code> has been set, or (b) by setting the option
+              <code>"vendor-options": map {QName('http://saxon.sf.net/', 'schema-validation'): 'strict'}</code>. (The 
+              value <code>'lax'</code> can also be used.)
+              Either option affects documents supplied using the <code>source-node</code>, <code>source-location</code>,
+              or <code>global-context-item</code> options. Setting the option in the configuration file also affects
+              documents read using the <code>doc()</code> or <code>document()</code> functions.
+              Neither option affects documents supplied in the <code>initial-match-selection</code> option, 
+              or in any of the <code>xxx-params</code> options (such as <code>stylesheet-params</code>).</p>
+           </li>
+          <li><p><b>vendor-options/saxon:write-result-documents</b>. Since 13.0.</p>
+            <p>The vendor option <code>map {QName('http://saxon.sf.net/', 'write-result-documents'): true()}</code>
+              may be set to cause <code>xsl:result-document</code> instructions to write output directly to filestore, rather
+              than returning them in the <code>fn:transform</code> result map. More specifically, if <code>fn:transform</code>
+              is called from XSLT, then result documents produced by the target stylesheet are handled using the
+              result document handler registered for the primary transformation; if it is invoked from XQuery, they
+              are output using the default result document handler, which writes to filestore.</p>
+            <p>Note that the default value of <code>base-output-uri</code> for the target transformation is
+            taken from the current output base URI of the invoking transformation, assuming the invocation is
+            from XSLT.</p>
+          </li>
+        </ul>
+        
         <p>To enable use of XSLT 4.0 features in the called stylesheet, it is not enough simply to set 
           <code>xsl:stylesheet/@version="4.0"</code> in the called stylesheet module. Instead, you need to do two things:</p>
         <ol>
