@@ -17,6 +17,7 @@ using Saxon.Callbacks;
 using Saxon.Ejava.lang;
 using Saxon.Hej.expr;
 using Saxon.Hej.expr.parser;
+using Saxon.Hej.om;
 using Saxon.Hej.sxpath;
 using Saxon.Hej.type;
 using Saxon.Hej.value;
@@ -648,7 +649,7 @@ namespace Saxon.Api {
                 XPathParser parser = new ();
                 IndependentContext env = new IndependentContext(Implementation);
                 env.setXPathLanguageLevel(40);
-                env.declareNamespace("xs", NamespaceConstant.SCHEMA);
+                env.declareNamespace("xs", NamespaceUri.SCHEMA);
                 parser.setLanguage(XPathParser.ParsedLanguage.SEQUENCE_TYPE, 40);
                 SequenceType st = parser.parseSequenceType(input, env);
                 if (st.getCardinality() != StaticProperty.EXACTLY_ONE) {

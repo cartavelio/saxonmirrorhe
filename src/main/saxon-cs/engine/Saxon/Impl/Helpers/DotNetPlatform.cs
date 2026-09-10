@@ -14,7 +14,10 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Org.XmlResolver.Features;
+using Saxon.Hej.om;
 using Saxon.Hej.trans;
+using Saxon.Hej.type;
+using Type = System.Type;
 
 
 namespace Saxon.Impl.Helpers {
@@ -158,7 +161,7 @@ namespace Saxon.Impl.Helpers {
             }
         }
 
-        public Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, string uri,
+        public Saxon.Hej.type.ExternalObjectType getExternalObjectType(Saxon.Hej.Configuration config, NamespaceUri uri,
                     string localName) {
             // if (uri.Equals(Saxon.Hej.lib.NamespaceConstant.DOT_NET_TYPE))
             //     return new DotNetExternalObjectType(System.Type.GetType(localName), config);
@@ -267,7 +270,7 @@ namespace Saxon.Impl.Helpers {
                 //         new TracingXmlResolver(new Uri(source.getSystemId(), UriKind.RelativeOrAbsolute));
                 // }
             
-                XmlReader xmlReader = null;
+                XmlReader xmlReader;
                 if (inputStream != null) {
                     xmlReader = XmlReader.Create(inputStream, settings,source.getSystemId());
                 }
@@ -319,10 +322,6 @@ namespace Saxon.Impl.Helpers {
 
         public TracingXmlResolver(Uri baseURI) {
             this.baseUri = baseURI;
-        }
-        public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
-            //Console.Error.WriteLine("GetEntity " + absoluteUri);
-            return base.GetEntity(absoluteUri, role, ofObjectToReturn);
         }
 
         public override Uri ResolveUri(Uri baseUri, string relativeUri) {

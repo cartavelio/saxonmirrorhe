@@ -456,7 +456,7 @@ namespace Saxon.Api {
             }
 
             NamePool pool = ((NodeInfo) value).getConfiguration().getNamePool();
-            NameTest test = new NameTest(kind, nodeName.Uri, nodeName.LocalName, pool);
+            NameTest test = new NameTest(kind, nodeName.NamespaceUri, nodeName.LocalName, pool);
             return new SequenceEnumerator<XdmNode>(((NodeInfo) value).iterateAxis(GetAxisNumber(axis), test));
         }
 
