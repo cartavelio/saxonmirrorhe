@@ -187,7 +187,7 @@ public class StyleNodeFactory implements NodeFactory {
                         temp = new AbsentExtensionElement();
                         temp.setCompilation(compilation);
                         temp.setValidationError(new XmlProcessingIncident(
-                                "Unknown top-level XSLT declaration " + elemName.getDisplayName(), "XTSE0010", location),
+                                "Unknown top-level XSLT declaration " + elemName.getDisplayName(), "XTSE0010", location.saveLocation()),
                                 StyleElement.OnFailure.REPORT_UNLESS_FORWARDS_COMPATIBLE);
                     }
                 } else {
@@ -197,7 +197,7 @@ public class StyleNodeFactory implements NodeFactory {
                     temp.setCompilation(compilation);
                     temp.processStandardAttributes(NamespaceUri.NULL);
                     temp.setValidationError(
-                            new XmlProcessingIncident("Unknown XSLT instruction " + elemName.getDisplayName(), "XTSE0010", location),
+                            new XmlProcessingIncident("Unknown XSLT instruction " + elemName.getDisplayName(), "XTSE0010", location.saveLocation()),
                             temp.getEffectiveVersion() > processorVersion
                                     ? StyleElement.OnFailure.REPORT_STATICALLY_UNLESS_FALLBACK_AVAILABLE
                                     : StyleElement.OnFailure.REPORT_ALWAYS);
@@ -249,10 +249,14 @@ public class StyleNodeFactory implements NodeFactory {
                 // save the reason for failure just in case there is no xsl:fallback
 
                 if (NamespaceUri.isReserved(uri)) {
-                    reason = new XmlProcessingIncident("Cannot use a reserved namespace for extension instructions", "XTSE0800");
+                    reason = new XmlProcessingIncident(
+                            "Cannot use a reserved namespace for extension instructions",
+                            "XTSE0800", location.saveLocation());
                     temp.setValidationError(reason, StyleElement.OnFailure.REPORT_ALWAYS);
                 } else {
-                    reason = new XmlProcessingIncident("Unknown extension instruction " + Err.wrap(elemName.getDisplayName(), Err.ELEMENT), "XTDE1450");
+                    reason = new XmlProcessingIncident(
+                            "Unknown extension instruction " + Err.wrap(elemName.getDisplayName(), Err.ELEMENT),
+                            "XTDE1450", location.saveLocation());
                     temp.setValidationError(reason, StyleElement.OnFailure.REPORT_DYNAMICALLY_UNLESS_FALLBACK_AVAILABLE);
                 }
 
