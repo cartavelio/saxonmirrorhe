@@ -533,6 +533,11 @@ public final class SequenceType {
 
     public boolean matches(GroundedValue value, TypeHierarchy th) {
         int count = 0;
+
+        if (value instanceof Item it) {
+            return primaryType.matches(it, th);
+        }
+
         SequenceIterator iter = value.iterate();
         for (Item item; (item = iter.next()) != null; ) {
             count++;
