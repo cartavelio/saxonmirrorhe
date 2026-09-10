@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using Saxon.Ejava.lang;
 
-/**
- * A C# emulation of Saxon.Ejava.util.Properties, incomplete but sufficient for use in Saxon
- */
+// C# emulation of Saxon.Ejava.util.Properties, incomplete but sufficient for use in Saxon
  
 namespace Saxon.Ejava.util {
     public sealed class Properties {
