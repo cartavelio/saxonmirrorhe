@@ -11,9 +11,7 @@ import net.sf.saxon.expr.Callable;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.functions.hof.CurriedFunction;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapItem;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -43,10 +41,12 @@ public class RegexGroup extends ContextAccessorFunction {
             throw new XPathException("There is no current group", "XTDE1061");
         }
         int groups = ri.getNumberOfGroups();
-        MapItem map = new HashTrieMap();
+
+        MapBuilder builder = SimpleMap.getBuilder();
         for (int i=0; i<=groups; i++) {
-            map = map.put(Int64Value.makeIntegerValue(i), new StringValue(ri.getRegexGroup(i)));
+            builder.put(Int64Value.makeIntegerValue(i), new StringValue(ri.getRegexGroup(i)));
         }
+        MapItem map = builder.getCompletedMap();
         final StructuredQName mapGetName = new StructuredQName("map", NamespaceUri.MAP_FUNCTIONS, "get");
         BuiltInFunctionSet lib = MapFunctionSet.getInstance(40);
 

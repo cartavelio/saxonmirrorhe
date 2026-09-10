@@ -44,25 +44,9 @@ public class OrderedMap extends MapItem {
          * @param key   the key
          * @param value the corresponding value
          */
-        @Override
+
         public void put(String key, GroundedValue value) {
             put(new StringValue(key), value);
-        }
-
-        /**
-         * Ask whether the map under construction contains a given key
-         */
-
-        public boolean contains(String key) {
-            return get(key) != null;
-        }
-
-        /**
-         * Get a value from the map under construction
-         */
-
-        public GroundedValue get(String key) {
-            return get(new StringValue(key));
         }
 
         /**
@@ -92,6 +76,24 @@ public class OrderedMap extends MapItem {
 
     public static MapBuilder getBuilder() {
         return new OrderedMapBuilder();
+    }
+
+    /**
+     * Create a map whose entries are copies of the entries in an existing MapItem
+     *
+     * @param map the existing map to be copied
+     * @return the new map
+     */
+
+    public static OrderedMap copy(MapItem map) {
+        if (map instanceof OrderedMap) {
+            return (OrderedMap) map;
+        }
+        OrderedMap m2 = new OrderedMap();
+        for (net.sf.saxon.ma.map.KeyValuePair pair : map.keyValuePairs()) {
+            m2 = (OrderedMap)m2.put(pair.key, pair.value);
+        }
+        return m2;
     }
 
 

@@ -34,6 +34,36 @@ import java.util.Stack;
 
 /**
  * Interface supported by different implementations of an XDM map item
+ *
+ * <p>The main implementations of {@code MapItem} are as follows:</p>
+ *
+ * <ul>
+ *     <li>{@link EmptyMap} - an empty map</li>
+ *     <li>{@link SingleEntryMap} - a map with exactly one entry</li>
+ *     <li>{@link OrderedMap} - a fully "functional" map implementation of ordered maps,
+ *     with constant-time {@code put} and {@code remove} operations, based on the
+ *     CHAMP fork of the VAVR library LinkedHashMap</li>
+ *     <li>{@link OrderedStringMap} - a fully "functional" map implementation of ordered maps,
+ *     with constant-time {@code put} and {@code remove} operations, based on the
+ *     CHAMP fork of the VAVR library LinkedHashMap; but confined to keys whose type
+ *     annotation is xs:string. Useful, for example, for the output of JSON or CSV parsing.</li>
+ *     <li>{@link SimpleMap} - an implementation backed by a Java {@code HashMap}. Can
+ *     handle any keys and values, but a {@code put} or {@code remove} operation causes
+ *     the data to be bulk-copied to a more flexible structure. Useful when changes to
+ *     the map (after initial building) are unlikely, and when there is no requirement
+ *     to maintain order.</li>
+ *     <li>{@link ShapedMap} - used for record structures where many map instances use the
+ *     same set of string-valued keys; the record type is represented by a {@link Shape}
+ *     object, and the instance stores data in fixed numbered slots in an array.</li>
+ *     <li>{@link com.saxonica.xsltextn.pedigree.DelegatingMapItem} - a map that
+ *     augments an underlying map with additional functinolity, such as the ability
+ *     to attach labels.</li>
+ *     <li>{@link LazyStringMap} - a simple list of key/value pairs with no indexing.
+ *     Indexing is deferred until the first call on {@code get()}. Useful for example
+ *     when parsing JSON, when it's likely that many maps will either be serialized
+ *     unchanged, or discarded, but never queried.</li>
+ *     <li>{@link RangeKey} - a sorted map used to support Saxon extensions</li>
+ * </ul>
  */
 public abstract class MapItem implements FunctionItem {
 
@@ -125,7 +155,6 @@ public abstract class MapItem implements FunctionItem {
 
     /**
      * Remove an entry from the map
-     *
      *
      * @param key     the key of the entry to be removed
      * @return a new map in which the requested entry has been removed; or this map
@@ -528,7 +557,7 @@ public abstract class MapItem implements FunctionItem {
         if (other instanceof MapItem &&
                 ((MapItem) other).size() == size()) {
             for (KeyValuePair kvp : keyValuePairs()) {
-                Sequence otherValue = ((MapItem) other).get(kvp.key);
+                GroundedValue otherValue = ((MapItem) other).get(kvp.key);
                 if (otherValue == null) {
                     return false;
                 }

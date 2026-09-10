@@ -61,12 +61,12 @@ public class XdmMap extends XdmFunctionItem {
         this(fromJavaMap(map));
     }
 
-    private static HashTrieMap fromJavaMap(Map<? extends XdmAtomicValue, ? extends XdmValue> map) {
-        MapBuilder val = HashTrieMap.getBuilder();
+    private static MapItem fromJavaMap(Map<? extends XdmAtomicValue, ? extends XdmValue> map) {
+        MapBuilder val = SimpleMap.getBuilder();
         for (Map.Entry<? extends XdmAtomicValue, ? extends XdmValue> entry : map.entrySet()) {
             val.put(entry.getKey().getUnderlyingValue(), entry.getValue().getUnderlyingValue());
         }
-        return (HashTrieMap)val.getCompletedMap();
+        return val.getCompletedMap();
     }
 
     /**
@@ -379,7 +379,7 @@ public class XdmMap extends XdmFunctionItem {
      */
 
     public static <K, V> XdmMap makeMap(Map<K, V> input) throws IllegalArgumentException {
-        MapBuilder result = HashTrieMap.getBuilder();
+        MapBuilder result = SimpleMap.getBuilder();
         for (Map.Entry<K, V> entry : input.entrySet()) {
             K key = entry.getKey();
             V value = entry.getValue();

@@ -227,7 +227,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
 
         // Evaluate the global variables, and add values to the result.
 
-        MapItem variablesMap = new HashTrieMap();
+        MapBuilder variablesMapBuilder = SimpleMap.getBuilder();
         for (GlobalVariable var : lib.getImportedGlobalVariables()) {
             GroundedValue value;
             QNameValue qNameValue = new QNameValue(var.getVariableQName(), BuiltInAtomicType.QNAME);
@@ -238,9 +238,11 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
                     e.setIsGlobalError(false);  // to make it catchable
                     throw e.replacingErrorCode("XPTY0004", "FOQM0005"); // catches when external variables have wrong type
                 }
-                variablesMap = variablesMap.put(qNameValue, value);
+                variablesMapBuilder.put(qNameValue, value);
             }
         }
+        MapItem variablesMap = variablesMapBuilder.getCompletedMap();
+
         // Add functions to the result.
         XQueryFunctionLibrary functionLib = lib.getGlobalFunctionLibrary();
 
@@ -255,7 +257,7 @@ public class LoadXqueryModule extends SystemFunction implements Callable {
             }
         };
 
-        MapItem functionsMap = new HashTrieMap();
+        MapItem functionsMap = EmptyMap.getInstance();
         final List<XQueryFunction> list = new ArrayList<>();
         functionLib.processAllFunctions(fn -> list.add(fn));
         for (XQueryFunction function : list) {

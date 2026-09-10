@@ -94,7 +94,7 @@ public class OrderedStringMap extends StringMapItem {
         if (key.getItemType() == BuiltInAtomicType.STRING) {
             return putU(key.getUnicodeStringValue(), value);
         }
-        return toGeneralMap().put(key, value);
+        return OrderedMap.copy(this).put(key, value);
     }
 
     /**
@@ -111,17 +111,6 @@ public class OrderedStringMap extends StringMapItem {
         } else {
             return this;
         }
-    }
-
-    /**
-     * Convert to an OrderedMap
-     */
-
-    private MapItem toGeneralMap() {
-        //System.err.println("Dictionary rewrite!!!!");
-        GeneralMapBuilder target = new GeneralMapBuilder();
-        target.copy(this);
-        return target.getCompletedMapConfidently();
     }
 
 }

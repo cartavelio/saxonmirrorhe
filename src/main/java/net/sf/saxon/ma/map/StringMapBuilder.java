@@ -1,5 +1,6 @@
 package net.sf.saxon.ma.map;
 
+import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiFunction;
 
 /**
  * Builder class for constructing ordered maps, where the keys are all known in advance to have
@@ -30,7 +30,14 @@ public class StringMapBuilder {
      * Callback function to combine two values (for duplicate keys) into one. If
      * null, duplicates are rejected as an error.
      */
-    private BiFunction<GroundedValue, GroundedValue, GroundedValue> combiner;
+    private MapFunctionSet.OnDuplicatesAction combiner;
+
+    /**
+     * XPath dynamic context for evaluating the combiner function. Needed if and only
+     * if the combiner invokes a user-defined XDM function
+     */
+
+    private XPathContext context;
 
     private boolean ordered = true;
 
@@ -47,15 +54,25 @@ public class StringMapBuilder {
     }
 
     /**
-     * Set a combiner function for combining entries with duplicate keys. If no combiner
+     * Supply a combiner function for combining entries with duplicate keys. If no combiner
      * is set, duplicate keys result in a dynamic error.
      * @param combiner a function that will be called with two grounded values (representing
      *                 two values for the same key) and returns a single grounded value to
      *                 be used in the result map.
      */
 
-    public void setCombiner(BiFunction<GroundedValue, GroundedValue, GroundedValue> combiner) {
+    public void setCombiner(MapFunctionSet.OnDuplicatesAction combiner) {
         this.combiner = combiner;
+    }
+
+    /**
+     * Supply a dynamic evaluation context for evaluating the combiner function. Needed if
+     * and only if the combiner calls a user-defined XDM function
+     * @param context the XPath evaluation context
+     */
+
+    public void setContext(XPathContext context) {
+        this.context = context;
     }
 
     /**
@@ -122,7 +139,7 @@ public class StringMapBuilder {
                 } else if (combiner == null) {
                     throw new XPathException("Duplicate key " + Err.wrap(key) + " in map");
                 } else {
-                    GroundedValue newVal = combiner.apply(existing, value);
+                    GroundedValue newVal = combiner.combine(existing, value, context);
                     map = (OrderedStringMap)map.putU(key, newVal);
                 }
             }

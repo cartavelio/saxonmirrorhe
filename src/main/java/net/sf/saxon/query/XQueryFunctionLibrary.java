@@ -15,10 +15,6 @@ import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.functions.FunctionLibrary;
 import net.sf.saxon.functions.hof.UnresolvedXQueryFunctionItem;
 import net.sf.saxon.functions.hof.UserFunctionReference;
-import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
-import net.sf.saxon.ma.trie.ImmutableList;
-import net.sf.saxon.ma.trie.ImmutableMap;
-import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.Sequence;
@@ -33,7 +29,6 @@ import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.value.SequenceType;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -58,8 +53,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
     // sharing in the common case where all the functions with a given namespace are in the
     // same library module.
 
-    private HashMap<NamespaceUri, ImmutableMap<String, ImmutableList<XQueryFunction>>>
-            functionsByNamespace = new HashMap<>(20);
+    private java.util.HashMap<NamespaceUri, io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>>>
+            functionsByNamespace = new java.util.HashMap<>(20);
 
     /**
      * Create an XQueryFunctionLibrary
@@ -101,15 +96,16 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
 
     public void declareFunction(/*@NotNull*/ XQueryFunction function) throws XPathException {
         StructuredQName functionName = function.getFunctionName();
-        ImmutableMap<String, ImmutableList<XQueryFunction>> localMap = functionsByNamespace.get(functionName.getNamespaceUri());
+        io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>> localMap = functionsByNamespace.get(functionName.getNamespaceUri());
         if (localMap == null) {
-            ImmutableList<XQueryFunction> list = makeEmptyList();
+            io.vavr.collection.List<XQueryFunction> list = makeEmptyList();
             list = list.prepend(function);
             localMap = makeEmptyMap();
             localMap = localMap.put(functionName.getLocalPart(),list);
         } else {
             // Test if the arity range of this function overlaps the arity range of another function
-            ImmutableList<XQueryFunction> existingFunctions = localMap.get(functionName.getLocalPart());
+            io.vavr.collection.List<XQueryFunction> existingFunctions =
+                    localMap.get(functionName.getLocalPart()).orNull();
             if (existingFunctions == null) {
                 existingFunctions = makeEmptyList();
             }
@@ -124,20 +120,20 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
                             .withErrorCode("XQST0034").asStaticError().withLocation(function);
                 }
             }
-            ImmutableList<XQueryFunction> newList = existingFunctions.prepend(function);
+            io.vavr.collection.List<XQueryFunction> newList = existingFunctions.prepend(function);
             localMap = localMap.put(functionName.getLocalPart(), newList);
         }
         functionsByNamespace.put(functionName.getNamespaceUri(), localMap);
     }
 
     @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableList<Saxon.Hej.query.XQueryFunction>.Empty;")
-    private static ImmutableList<XQueryFunction> makeEmptyList() {
-        return ImmutableList.empty();
+    private static io.vavr.collection.List<XQueryFunction> makeEmptyList() {
+        return io.vavr.collection.List.empty();
     }
 
     @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<string,System.Collections.Immutable.ImmutableList<Saxon.Hej.query.XQueryFunction>>.Empty;")
-    private static ImmutableMap<String, ImmutableList<XQueryFunction>> makeEmptyMap() {
-        return ImmutableHashTrieMap.empty();
+    private static io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>> makeEmptyMap() {
+        return io.vavr.collection.HashMap.empty();
     }
 
     private static boolean hasOverlappingArity(XQueryFunction f1, XQueryFunction f2) {
@@ -235,19 +231,18 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
         return functionsByNamespace.keySet();
     }
 
-    public ImmutableMap<String, ImmutableList<XQueryFunction>> getFunctionsForNamespace(NamespaceUri ns) {
+    public io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>> getFunctionsForNamespace(NamespaceUri ns) {
         return functionsByNamespace.get(ns);
     }
 
     public void addFunctions(NamespaceUri ns,
-                             ImmutableMap<String, ImmutableList<XQueryFunction>> functions)
+                             io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>> functions)
     throws XPathException {
-        ImmutableMap<String, ImmutableList<XQueryFunction>> localMap = functionsByNamespace.get(ns);
+        io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>> localMap = functionsByNamespace.get(ns);
         if (localMap == null) {
             functionsByNamespace.put(ns, functions);
         } else {
-            for (TrieKVP<String, ImmutableList<XQueryFunction>> stringImmutableListTrieKVP : localMap) {
-                ImmutableList<XQueryFunction> list = stringImmutableListTrieKVP.getValue();
+            for (io.vavr.collection.List<XQueryFunction> list : localMap.values()) {
                 for (XQueryFunction fn : list) {
                     declareFunction(fn);
                 }
@@ -374,12 +369,12 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
 
     @Override
     public XQueryFunction getDeclaration(StructuredQName functionName, int staticArgs) {
-        ImmutableMap<String, ImmutableList<XQueryFunction>> localMap =
+        io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>> localMap =
                 functionsByNamespace.get(functionName.getNamespaceUri());
         if (localMap == null) {
             return null;
         }
-        ImmutableList<XQueryFunction> homonyms = localMap.get(functionName.getLocalPart());
+        io.vavr.collection.List<XQueryFunction> homonyms = localMap.get(functionName.getLocalPart()).orNull();
         if (homonyms != null) {
             for (XQueryFunction f : homonyms) {
                 if (f.getMinimumArity() <= staticArgs && f.getNumberOfParameters() >= staticArgs) {
@@ -483,9 +478,8 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
      */
 
     public void processAllFunctions(Consumer<XQueryFunction> action) throws XPathException {
-        for (ImmutableMap<String, ImmutableList<XQueryFunction>> localMap : functionsByNamespace.values()) {
-            for (TrieKVP<String, ImmutableList<XQueryFunction>> kvp : localMap) {
-                ImmutableList<XQueryFunction> list = kvp.getValue();
+        for (io.vavr.collection.HashMap<String, io.vavr.collection.List<XQueryFunction>> localMap : functionsByNamespace.values()) {
+            for (io.vavr.collection.List<XQueryFunction> list : localMap.values()) {
                 for (XQueryFunction fn : list) {
                     try {
                         action.accept(fn);
@@ -601,7 +595,7 @@ public class XQueryFunctionLibrary implements FunctionLibrary, XQueryFunctionBin
     @Override
     public FunctionLibrary copy() {
         XQueryFunctionLibrary qfl = new XQueryFunctionLibrary(config);
-        qfl.functionsByNamespace = new HashMap<>(functionsByNamespace);
+        qfl.functionsByNamespace = new java.util.HashMap<>(functionsByNamespace);
         return qfl;
     }
 

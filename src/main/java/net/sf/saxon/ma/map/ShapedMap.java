@@ -233,7 +233,7 @@ public class ShapedMap extends StringMapItem {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return HashTrieMap.copy(this).remove(key);
+        return OrderedMap.copy(this).remove(key);
     }
 
 

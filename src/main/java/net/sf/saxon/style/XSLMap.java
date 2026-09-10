@@ -7,24 +7,21 @@
 
 package net.sf.saxon.style;
 
-import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.Literal;
 import net.sf.saxon.expr.instruct.SequenceInstr;
 import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.lib.Feature;
-import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
 import net.sf.saxon.ma.map.MapType;
+import net.sf.saxon.ma.map.SimpleMap;
 import net.sf.saxon.om.AttributeInfo;
 import net.sf.saxon.om.NamespaceUri;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.NodeName;
-import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.type.ItemType;
 import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
@@ -32,7 +29,7 @@ import net.sf.saxon.value.StringValue;
 import java.util.function.Supplier;
 
 /**
- * Handler for xsl:map instructions in an XSLT 3.0 stylesheet. <br>
+ * Handler for xsl:map instructions in an XSLT 3.0 or 4.0 stylesheet.
  */
 
 public class XSLMap extends StyleElement {
@@ -41,8 +38,7 @@ public class XSLMap extends StyleElement {
     private Expression onDuplicates = null;
 
     /**
-     * Determine whether this node is an instruction.
-     *
+     * Ask whether this node is an instruction.
      * @return true - it is an instruction
      */
 
@@ -50,18 +46,7 @@ public class XSLMap extends StyleElement {
     public boolean isInstruction() {
         return true;
     }
-
-    /**
-     * Determine the type of item returned by this instruction (only relevant if
-     * it is an instruction).
-     *
-     * @return the item type returned
-     */
-
-    protected ItemType getReturnedItemType() {
-        return MapType.ANY_MAP_TYPE;
-    }
-
+    
     /**
      * Determine whether this type of element is allowed to contain a sequence constructor
      *
@@ -80,20 +65,12 @@ public class XSLMap extends StyleElement {
             String f = attName.getDisplayName();
             String value = att.getValue();
             if (f.equals("select")) {
-                requireXslt40Attribute("select");
-                select = makeExpression(value, att);
-            } else if (attName.getLocalPart().equals("on-duplicates")) {
-                if (attName.getNamespaceUri().isEmpty()) {
-                    if (requireXslt40Attribute("on-duplicates")) {
-                        onDuplicates = makeExpression(value, att);
-                    }
-                } else if (attName.hasURI(NamespaceUri.SAXON)) {
-                    if (getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
-                        onDuplicates = makeExpression(value, att);
-                    } else {
-                        issueWarning("saxon:on-duplicates ignored - requires Saxon-PE license",
-                                       SaxonErrorCode.SXWN9013);
-                    }
+                if (requireXslt40Attribute("select")) {
+                    select = makeExpression(value, att);
+                }
+            } else if (f.equals("on-duplicates")) {
+                if (requireXslt40Attribute("on-duplicates")) {
+                    onDuplicates = makeExpression(value, att);
                 }
             } else {
                 checkUnknownAttribute(attName);
@@ -136,8 +113,8 @@ public class XSLMap extends StyleElement {
                     Literal.makeLiteral(new QNameValue("", NamespaceUri.SAXON, "on-duplicates")),
                     onDuplicates);
         } else {
-            MapBuilder options = HashTrieMap.getBuilder();
-            options.put("duplicates", StringValue.bmp("reject"));
+            MapBuilder options = SimpleMap.getBuilder();
+            options.put(StringValue.bmp("duplicates"), StringValue.bmp("reject"));
             options.put(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"),
                                StringValue.bmp("XTDE3365"));
             optionsExp = Literal.makeLiteral(options.getCompletedMap(), select);

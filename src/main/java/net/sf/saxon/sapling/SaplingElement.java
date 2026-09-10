@@ -7,6 +7,7 @@
 
 package net.sf.saxon.sapling;
 
+import io.vavr.Tuple2;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.Builder;
 import net.sf.saxon.event.PipelineConfiguration;
@@ -14,10 +15,6 @@ import net.sf.saxon.event.Receiver;
 import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.ma.trie.ImmutableHashTrieMap;
-import net.sf.saxon.ma.trie.ImmutableList;
-import net.sf.saxon.ma.trie.ImmutableMap;
-import net.sf.saxon.ma.trie.TrieKVP;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.trans.XPathException;
@@ -57,13 +54,13 @@ import java.util.Objects;
 public class SaplingElement extends SaplingNode {
 
     private final StructuredQName nodeName;
-    private ImmutableList<SaplingNode> reversedChildren;
-    private ImmutableMap<StructuredQName, String> attributes = emptyAttributes();
+    private io.vavr.collection.List<SaplingNode> reversedChildren;
+    private io.vavr.collection.HashMap<StructuredQName, String> attributes = emptyAttributes();
     private NamespaceMap namespaces = NamespaceMap.emptyMap();
 
     @CSharpReplaceBody(code="return System.Collections.Immutable.ImmutableDictionary<Saxon.Hej.om.StructuredQName, string>.Empty;")
-    private static ImmutableMap<StructuredQName, String> emptyAttributes() {
-        return ImmutableHashTrieMap.empty();
+    private static io.vavr.collection.HashMap<StructuredQName, String> emptyAttributes() {
+        return io.vavr.collection.HashMap.empty();
     }
 
     /**
@@ -251,10 +248,10 @@ public class SaplingElement extends SaplingNode {
             ns = ns.put(nodeName.getPrefix(), nodeName.getNamespaceUri());
         }
         AttributeMap atts = EmptyAttributeMap.getInstance();
-        for (TrieKVP<StructuredQName, String> attribute : attributes) {
-            StructuredQName qName = attribute.getKey();
+        for (Tuple2<StructuredQName, String> attribute : attributes) {
+            StructuredQName qName = attribute._1;
             atts = atts.put(new AttributeInfo(new FingerprintedQName(qName, namePool), BuiltInAtomicType.UNTYPED_ATOMIC,
-                                              attribute.getValue(), Loc.NONE, ReceiverOption.NONE));
+                                              attribute._2, Loc.NONE, ReceiverOption.NONE));
             if (!qName.hasURI(NamespaceUri.NULL)) {
                 ns = ns.put(qName.getPrefix(), qName.getNamespaceUri());
             }
@@ -263,7 +260,7 @@ public class SaplingElement extends SaplingNode {
                               atts, ns,
                               Loc.NONE, ReceiverOption.NONE);
 
-        ImmutableList<SaplingNode> children = reversedChildren.reverse();
+        io.vavr.collection.List<SaplingNode> children = reversedChildren.reverse();
         for (SaplingNode node : children) {
             node.deliver(receiver, null);
         }

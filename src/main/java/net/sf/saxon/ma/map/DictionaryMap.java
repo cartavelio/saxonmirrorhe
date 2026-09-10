@@ -248,11 +248,7 @@ public class DictionaryMap extends StringMapItem {
 
     private MapItem toGeneralMap() {
         //System.err.println("Dictionary rewrite!!!!");
-        MapBuilder target = HashTrieMap.getBuilder();
-        for (Map.Entry<String, GroundedValue> entry : map.entrySet()) {
-            target.put(new StringValue(entry.getKey()), entry.getValue());
-        }
-        return target.getCompletedMap();
+        return OrderedMap.copy(this);
     }
 
     protected static class KeyIteratorImpl implements AtomicIterator {

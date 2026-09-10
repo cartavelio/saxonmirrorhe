@@ -4119,7 +4119,7 @@ public class XPathParser {
                                  .makeFunction("entry", 2).makeFunctionCall(keys.get(i), values.get(i));
                     }
                     Block block = new Block(entriesArray);
-                    MapBuilder options = HashTrieMap.getBuilder();
+                    MapBuilder options = SimpleMap.getBuilder();
                     options.put(new StringValue("duplicates"), new StringValue("reject"));
                     options.put(new QNameValue("", NamespaceUri.SAXON, "duplicates-error-code"), new StringValue("XQDY0137"));
                     result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)

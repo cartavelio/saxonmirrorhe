@@ -126,7 +126,7 @@ public class RangeKey extends MapItem {
      */
     @Override
     public MapItem remove(AtomicValue key) {
-        return HashTrieMap.copy(this).remove(key);
+        return OrderedMap.copy(this).remove(key);
     }
 
     /**
@@ -151,7 +151,7 @@ public class RangeKey extends MapItem {
      */
     @Override
     public MapItem put(AtomicValue key, GroundedValue value) {
-        return HashTrieMap.copy(this).put(key, value);
+        return OrderedMap.copy(this).put(key, value);
     }
 
     /**

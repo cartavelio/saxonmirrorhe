@@ -3,9 +3,11 @@ package net.sf.saxon.ma.map;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicMatchKey;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.str.UnicodeString;
 import net.sf.saxon.trace.Instrumentation;
 import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
+import net.sf.saxon.type.BuiltInAtomicType;
 import net.sf.saxon.value.AtomicValue;
 
 import java.util.ArrayList;
@@ -28,9 +30,13 @@ public class GeneralMapBuilder {
      * Callback function to combine two values (for duplicate keys) into one. If
      * null, duplicates are rejected as an error.
      */
-    private MapFunctionSet.MapMerge.OnDuplicatesAction combiner;
+    private MapFunctionSet.OnDuplicatesAction combiner;
 
+    private boolean allStrings = true;
 
+    // TODO: this design is not ideal for the case where there are many duplicates. Perhaps we should
+    //  start building the final data structure as soon as we hit a potential duplicate while updating
+    //  the Bloom filter.
 
     public GeneralMapBuilder() {
 
@@ -44,7 +50,7 @@ public class GeneralMapBuilder {
      *                 be used in the result map.
      */
 
-    public void setDuplicatesAction(MapFunctionSet.MapMerge.OnDuplicatesAction combiner) {
+    public void setDuplicatesAction(MapFunctionSet.OnDuplicatesAction combiner) {
         this.combiner = combiner;
     }
 
@@ -58,6 +64,9 @@ public class GeneralMapBuilder {
     public void put(AtomicValue key, GroundedValue value) {
         keys.add(key);
         values.add(value);
+        if (allStrings && key.getItemType() != BuiltInAtomicType.STRING) {
+            allStrings = false;
+        }
     }
 
     /**
@@ -74,6 +83,8 @@ public class GeneralMapBuilder {
     /**
      * Get the constructed map. This method must only be called once, because the
      * lists of keys and values are used within the constructed map and are mutable.
+     * This method cannot be called if there is a combiner function, because calling
+     * the function potentially requires a run-time context.
      *
      * @return the constructed map
      * @throws XPathException if duplicate keys were found, and not detected earlier
@@ -89,7 +100,8 @@ public class GeneralMapBuilder {
     /**
      * Get the constructed map. This method must only be called once, because the
      * lists of keys and values are used within the constructed map and are mutable.
-     *
+     * @param context The dynamic context: needed only when calling a combiner function
+     *                to combine duplicate entries
      * @return the constructed map
      * @throws XPathException if duplicate keys were found, and not detected earlier
      */
@@ -102,7 +114,7 @@ public class GeneralMapBuilder {
         }
         // quick scan for possible duplicates using a bloom filter
         boolean possibleDuplicates = hasPossibleDuplicates(keys);
-        if (possibleDuplicates || true) {
+        if (possibleDuplicates) {
             // If there are possible duplicates, then we build the map now, with a more thorough
             // check for duplicates as we build it.
 
@@ -146,6 +158,12 @@ public class GeneralMapBuilder {
             return EmptyMap.getInstance();
         } else if (keys.size() == 1) {
             return new SingleEntryMap(keys.get(0), values.get(0));
+        } else if (allStrings) {
+            List<UnicodeString> stringKeys = new ArrayList<>(keys.size());
+            for (AtomicValue k : keys) {
+                stringKeys.add(k.getUnicodeStringValue());
+            }
+            return new LazyStringMap(stringKeys, values);
         } else {
             MapItem map = new OrderedMap();
             Iterator<GroundedValue> valueIter = values.iterator();

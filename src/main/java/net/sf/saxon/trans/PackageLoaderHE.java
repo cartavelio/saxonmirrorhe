@@ -31,9 +31,9 @@ import net.sf.saxon.lib.*;
 import net.sf.saxon.ma.arrays.ArrayFunctionSet;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
-import net.sf.saxon.ma.map.HashTrieMap;
 import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
+import net.sf.saxon.ma.map.SimpleMap;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.qname.*;
@@ -2715,7 +2715,7 @@ public class PackageLoaderHE implements IPackageLoader {
         eMap.put("map", (loader, element) -> {
             List<Expression> children = getChildExpressionList(loader, element);
             AtomicValue key = null;
-            MapBuilder map = HashTrieMap.getBuilder();
+            MapBuilder map = SimpleMap.getBuilder();
             for (Expression child : children) {
                 if (key == null) {
                     key = (AtomicValue)((Literal)child).getGroundedValue();

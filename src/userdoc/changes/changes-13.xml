@@ -354,6 +354,7 @@
             near-identical XPath 4.0 functions are dropped:</p>
         
         <ul>
+            <li><p><code>saxon:index</code> is superseded by <code>map:build</code>.</p></li>
             <li><p><code>saxon:index-where</code> is superseded by <code>fn:index-where</code>.</p></li>
             <li><p><code>saxon:highest</code> and <code>saxon:lowest</code> are superseded by 
                 <code>fn:highest</code> and <code>fn:lowest</code>.</p></li>
@@ -364,6 +365,9 @@
         
         <p>The <code>saxon:array</code> and <code>saxon:array-member</code> instructions are dropped
         in favour of their XSLT 4.0 counterparts, <code>xsl:array</code> and <code>xsl:array-member</code>.</p>
+        
+        <p>The <code>xsl:map/saxon:on-duplicates</code> extension attribute is no longer supported, it is 
+        replaced by the regular XSLT 4.0 attribute <code>xsl:map/on-duplicates.</code></p>
         
         <p>A new vendor option has been added to the <code>fn:transform</code> function. Setting
         the option <code>saxon:write-result-documents</code> to <code>true()</code> changes the

@@ -9,11 +9,10 @@ package net.sf.saxon.sapling;
 
 import net.sf.saxon.Configuration;
 import net.sf.saxon.event.*;
+import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.lib.ParseOptions;
-import net.sf.saxon.ma.trie.ImmutableList;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.TreeModel;
-import net.sf.saxon.lib.ActiveSource;
 import net.sf.saxon.s9api.*;
 import net.sf.saxon.serialize.SerializationProperties;
 import net.sf.saxon.trans.XPathException;
@@ -60,7 +59,7 @@ import javax.xml.transform.Source;
 public class SaplingDocument extends SaplingNode implements ActiveSource {
 
     private String baseUri;
-    private ImmutableList<SaplingNode> reversedChildren;
+    private io.vavr.collection.List<SaplingNode> reversedChildren;
 
     /**
      * Create a sapling document node with no children and no base URI
@@ -149,7 +148,7 @@ public class SaplingDocument extends SaplingNode implements ActiveSource {
         receiver.open();
         receiver.setSystemId(baseUri);
         receiver.startDocument(ReceiverOption.NONE);
-        ImmutableList<SaplingNode> children = reversedChildren.reverse();
+        io.vavr.collection.List<SaplingNode> children = reversedChildren.reverse();
         for (SaplingNode node : children) {
             node.deliver(receiver, options);
         }
