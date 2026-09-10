@@ -3,7 +3,7 @@
    <h1>Using XPath</h1>
 
 
-   <p>This section describes how to use Saxon as a Java class library for XPath processing, without
+   <p>This section describes how to use Saxon as a class library for XPath processing from Java or C#, without
       making any use of XSLT stylesheets. It includes information on the XPath API, and the API for
       the Saxon implementation of the XPath object model. On other pages you will find the <a
          class="bodylink" href="/using-xsl/embedding">API for XSLT transformation</a>, the <a
@@ -14,7 +14,8 @@
    <p>For information about the different ways of loading source documents, see <a class="bodylink"
          href="/sourcedocs">Handling XML Documents</a>.</p>
 
-   <p>Saxon supports three Java APIs for XPath processing, as follows:</p>
+   <div class="javaonly">
+   <p>Saxon supports two public Java APIs for XPath processing, as follows:</p>
    <ul>
       <li>
          <p>The preferred interface for XPath processing is Saxon's <strong>s9api</strong> interface
@@ -33,26 +34,204 @@
             models, not only DOM; some are for backwards compatibility; and some are provided to
             allow applications a finer level of control if required.</p>
       </li>
+   </ul>
+   </div>
+   
+   <div class="csonly">
+      
+   <ul>
       <li>
-         <p>For historical reasons Saxon continues to support a legacy XPath API in package <a
-               class="javalink" href="net.sf.saxon.sxpath">net.sf.saxon.sxpath</a>. This is
-            documented only in the Javadoc specifications. It is a lower-level API, so as well as
-            being retained for backwards compatibility, it may also be appropriate for applications
-            that require a very intimate level of integration with Saxon internals.</p>
+         <p>On .NET, XPath processing is available via classes in the Saxon.Api namespace,
+            as described at <a
+               class="bodylink" href="dotnet-xpath">Evaluating XPath Expressions from C#</a></p>
       </li>
    </ul>
+   </div>
    
    <p>Saxon allows XPath expressions to be evaluated either against its own native tree models of
-      XML (the tiny tree and linked tree), and also against trees built using the DOM, JDOM, JDOM2,
-      DOM4J, XOM, or AXIOM tree models. (It's also possible to build adapters for other tree models,
-      though this is not for the faint-hearted.)</p>
+      XML (the tiny tree and linked tree), and also against trees built using external third-party libraries:</p>
+   
+   <ul>
+      <li><p class="javaonly">On the Java platform, the supported tree models are DOM, JDOM, JDOM2,
+         DOM4J, XOM, or AXIOM.</p></li>
+      <li><p class="csonly">On .NET, the DOM implementation provided by the System.Xml.XmlDocument class
+         is supported.</p></li>
+   </ul>
+   
+   <p>Note that use of a third party tree implementation may have a significant performance overhead compared
+      with Saxon's native tree models; furthermore, most of these implementations are not thread-safe, which
+      can cause problems when Saxon's multithreading capability comes into play.</p>
+   
+   <aside>It's also possible to build adapters for other tree models,
+      though this is not for the faint-hearted.</aside>
+   
+   <h2>Namespaces</h2>
+   
+   <p>When XPath expressions use prefixed element or attribute names (such as <code>p:foo//p:bar</code>) it is
+   necessary to declare the prefix (here <code>p</code>) so that the XPath processor knows which namespace it
+   refers to. It's irrelevant what prefix is used in the source document: the vital thing is that the prefix used
+   in the XPath expression maps to the same namespace as the prefix (or defaulted prefix) used in the source document.</p>
+   
+   <p>All the APIs therefore provide a mechanism for binding prefixes to namespaces. Because Saxon supports XPath 3.1,
+   it's also possible to use alternative mechanisms to refer to namespaced elements:</p>
+   
+   <ul>
+      <li>To match elements regardless what namespace they are in, you can write <code>*:foo//*:bar</code>.</li>
+      <li>To match elements in namespace <code>http://foobar.com/</code> without declaring a prefix, you can use
+         the notation <code>Q{http://foobar.com/}foo//Q{http://foobar.com/}bar</code>.</li>
+   </ul>
+   
+   <p>In XPath 1.0, an unprefixed name in an XPath expression was defined to match no-namespace elements in the source
+   document. If the source document uses a namespace (even if it's the default namespace, used with no prefix), then
+   the corresponding names in the XPath expression need to be prefixed.</p>
+   
+   <p>XPath 2.0 introduced the idea of a <i>default namespace for elements and types</i>, allowing you to declare
+   that unprefixed element names in the XPath expression refer to some specific namespace in the source document.
+   This isn't supported in the JAXP API (which was never updated to handle XPath 2.0), but it's supported in the
+   Saxon APIs: binding the zero-length prefix to a namespace URI has the effect of making that the default namespace
+   for element and type names.</p>
+   
+   <p>Saxon (from 11.0) goes a step further and allows you to declare an <i>unprefixed element matching policy</i>
+   that determines how unprefixed element names are handled. The possible values are:</p>
+   
+   <ul>
+      <li><b>DefaultNamespace</b>: this corresponds to the XPath 2.0 situation, where an unprefixed element name
+      matches a specific default namespace, or no-namespace elements if no default has been declared.</li>
+      <li><b>AnyNamespace</b>: with this policy, writing <code>foo//bar</code> is equivalent to writing
+      <code>*:foo//*:bar</code>: names are matched by local name alone, ignoring the namespace.</li>
+      <li><b>DefaultNamespaceOrNone</b>: with this policy, an unprefixed name such as <code>foo</code> matches an
+      element with local name <code>foo</code> if it either (a) is in no namespace, or (b) is in the declared default
+      namespace. This policy is expressly intended for processing (X)HTML documents, where it can be rather unpredictable
+      (depending on the parser) whether elements are treated as being in no namespace or as being in the XHTML namespace.
+      By using this policy, with the XHTML namespace as the default, you can use HTML element names such as <code>div</code>
+      without worrying too much about what namespace they are in.</li>
+   </ul>
+   
+   <h2>XPath Versions</h2>
+   
+   <p>W3C has published four versions of XPath: 1.0, 2.0, 3.0, and 3.1. In addition, there is a W3C Community Group,
+   led by Saxonica, working on ideas for a version 4.0, some of which are implemented experimentally in Saxon 11.</p>
+   
+   <ul>
+      <li><p>Saxon claims 100% conformance with XPath 3.1.</p></li>
+      <li><p>The XSLT 3.0 specification gives implementations the option of supporting XPath 3.0 with selected
+         features from XPath 3.1, or full XPath 3.1. The Saxon XPath processor only offers 3.1 (it offers neither
+         pure XPath 3.0, nor XPath 3.0 plus these selected extensions).</p></li>
+      <li><p>The XSD 1.1 specification requires conformance with XPath 2.0, and the Saxon XPath engine therefore
+      offers a mode of operation that aims at 2.0 conformance. This is primarily a question of blocking constructs
+      that only became available in later versions. Generally (in this mode) Saxon achieves conformance with the 2.0
+      specifications where the differences can be detected statically, but it does not attempt to reproduce differences
+      of run-time behavior. For example, the <code>string-join()</code> function in 3.1 is more flexible than 2.0 in what
+      arguments it will accept, and Saxon implements the 3.1 rules in all cases.</p></li>
+      <li>XPath 2.0, 3.0, and 3.1 have all defined a <i>backwards compatibility mode</i> where some of the behavior
+      defined in XPath 1.0 is retained. For example, in this mode strings are always compared as numbers, so the string
+      "10" is greater than the string "2" (except when sorting). Saxon allows you to select backwards compatibility mode.
+      Note that this doesn't prevent you using features of the XPath language defined in later versions; it merely affects
+      the outcome of some functions and operators that had different behavior in 1.0.</li>
+      <li>The experimental features of early 4.0 drafts are not available unless you explicitly enable them.</li>
+   </ul>
+   
+   <h2>XPath Variables</h2>
+   
+   <p>Very often you will want to execute the same XPath expression repeatedly, but with some parameter taking
+   different values: for example <code>//person[@id='A1234']</code> where the required ID changes each time.</p>
+   
+   <p>Constructing an XPath expression by string concatenation, for example <code>"//person[@id=' + id + "']"</code> is bad
+   practice for two reasons:</p>
+   
+   <ul>
+      <li><p>Compiling an XPath expression often takes much longer than executing it; with this approach, you
+      have to compile the expression every time it is used.</p></li>
+      <li><p>The code is open to injection attacks. Suppose the required ID is entered by an end user in a web form,
+      and suppose the ID they enter is the string <code>']|doc('secret.xml')//person[@id='A1234</code>. Then the actual
+         expression evaluated will be <code>"//person[@id='']|doc('secret.xml')//person[@id='A1234']"</code>, which will
+      return data from an external document that you never intended the user to see.</p></li>
+   </ul>
+   
+   <p>Instead, write the expression to contain a variable reference: <code>"//person[@id=$requiredId']"</code>,
+   compile it once, and then execute it repeatedly binding different values to the variable <code>$requiredId</code>
+   All the XPath APIs provide a mechanism for doing this.</p>
+   
+   <section id="xdm-values" title="Representation of XDM values">
+      <h1>Representation of XDM values</h1>
+      
+      <p>The result of an XPath expression is a value in the XDM data model.</p>
+      
+      <p class="javaonly">The JAXP API was designed for XPath 1.0, which only has a very limited number of data types (numbers, strings,
+      booleans, and node-sets). These have close equivalents in Java, so JAXP converts the result of an expression to 
+      the corresponding Java types. This makes the JAXP API problematic when executing expressions that take advantage of the
+      richer type system introduced in XPath 2.0 and subsequently 3.0 and 3.1: JAXP simply doesn't define what happens if an
+      XPath expression returns an xs:dateTime value or a map or array derived from a JSON query. For these reasons, use of
+      the JAXP API is discouraged.</p>
+      
+      <p>The native Saxon APIs for Java and C# both have classes that represent the XDM data model more accurately. The
+      Java and C# implementations are essentially identical in structure so a single description will suffice for both.</p>
+      
+      <aside>Note however, that the links in this section take you to the Java version.</aside>
+      
+      <p>Values returned by XPath expressions are represented as instances of the
+         class <code java="net.sf.saxon.s9api.XdmValue">XdmValue</code>.
+         The <code>XdmValue</code> class is also used to supply parameters to stylesheets and transformations,
+         and to return the results of XSLT or XQuery evaluation.</p>
+      
+      <p>The subclasses of <code>XdmValue</code> directly reflect the XDM model:</p>
+      
+      <samp><![CDATA[XdmValue (any sequence)
+   XdmItem (any single item, that is, a sequence of length one)
+      XdmNode (any node)
+      XdmAtomicValue (any atomic value)
+      XdmFunctionItem (a function item)
+         XdmMap (a map)
+         XdmArray (an array)
+      XdmExternalObject (an item that encapsulates a Java or .NET object)   
+   XdmEmptySequence (a sequence containing no items)      
+]]></samp>
+      
+      <p>These objects are generally immutable: at any rate, the API offers no methods to modify them. (It is possible
+         to subvert this, for example by having an XdmNode that wraps a DOM node, and then modifying the DOM node: this
+         is strongly discouraged.)</p>
+      
+      <p>A variety of methods are provided to convert between these classes and "ordinary" Java or C# equivalents. For example:</p>
+      <ul>
+         <li><p class="javaonly">In Java, an <code>XdmAtomicValue</code> can be constructed directly from a Java C# <code>boolean</code>, <code>String</code>, <code>long</code>, 
+            <code>BigDecimal</code>, or <code>Instant</code> (inter alia), and methods such as <code>getBooleanValue()</code>
+            and <code>getStringValue()</code> are available to convert in the other direction.</p></li>
+         <li><p class="csonly">In C#, an <code>XdmAtomicValue</code> can be constructed directly from a C# <code>bool</code>, <code>string</code>, <code>long</code>, 
+            <code>decimal</code>, or <code>DateTime</code> (inter alia), and methods such as <code>AsBoolean()</code>
+            and <code>AsDouble()</code> are available to convert in the other direction.</p></li>
+      </ul>
+         
+      
+      <p>As an alternative to use of XPath, the <code>select()</code> (or <code>Select()</code>) 
+         method on <code>XdmValue</code> provides powerful
+         navigation capability around XDM trees. This method takes as argument a
+         <code java="net.sf.saxon.s9api.streams.Step">Step</code> (which is
+         a function from one node to related nodes) and returns a sequence of nodes as a result. There
+         is a library (<code java="net.sf.saxon.s9api.streams.Steps">Steps</code>)
+         of <code>Step</code> functions corresponding to all the XPath axes, and the results of applying a <code>Step</code>
+         can be filtered using predicates: there is also a library (<code
+            java="net.sf.saxon.s9api.streams.Predicates">Predicates</code>) of commonly-used
+         <code>Predicate</code>s.</p>
+      
+      <p class="javaonly">A Java example: if <code>root</code> is a document node, then <code>root.select(descendant("p")).asXdmValue()</code>
+         selects all the descendant elements with local name "p" in the form of an <code>XdmValue</code>.</p>
+      
+      <p class="csonly">A C# example: if <code>root</code> is a document node, then <code>new XdmValue(root.Select(Descendant("p")))</code>
+         selects all the descendant elements with local name "p" in the form of an <code>XdmValue</code>.</p>
+      
+      <p>The <code java="net.sf.saxon.s9api.XdmNode">XdmNode</code> class in this hierarchy is implemented as a wrapper around the lower-level <code>NodeInfo</code>
+         interface which provides more detailed access to information associated with nodes. The <code>NodeInfo</code> interface
+         is designed primarily for internal use within Saxon, whereas <code>XdmNode</code> is designed for application use.</p>
+   </section>
+   
    <section id="s9api-xpath" title="Evaluating XPath Expressions using s9api">
+      <div class="javaonly">
       <h1>Evaluating XPath Expressions using s9api</h1>
+      
 
 
       <p>The s9api interface is a custom-designed API for Saxon, allowing integrated access to all
-         Saxon's XML processing capabilities in a uniform way, taking advantage of the type safety
-         offered by generics in Java 5.</p>
+         Saxon's XML processing capabilities in a uniform way.</p>
 
       <p>You can evaluate an XPath expression using the s9api interface in a number of ways, for
          instance as follows:</p>
@@ -83,7 +262,7 @@
          <li>
             <p>To evaluate the expression, call the <code>load()</code> method on the
                   <code>XPathExecutable</code>. This creates an <a class="javalink"
-                  href="net.sf.saxon.s9api.Processor">XPathSelector</a>. The
+                  href="net.sf.saxon.s9api.XPathSelector">XPathSelector</a>. The
                   <code>XPathSelector</code> can be serially reused, but it must not be shared
                across multiple threads. Set any options required for the specific XPath execution
                (for example, the initial context node, the values of any variables referenced in the
@@ -126,54 +305,11 @@
          to find a specific element within a document, it is possible to use the Java expression
          <code>node.select(descendant("chapter").where(eq(attribute("title"),"Introduction)")).asNode()</code>.</p>
       </aside>
+      </div>
    </section>
-   <section id="xdm-values" title="Representation of XDM values">
-      <h1>Representation of XDM values</h1>
-      
-      <p>Values returned by XPath expressions in the s9api interface are represented as instances of the
-         class <code java="net.sf.saxon.s9api.XdmValue">net.sf.saxon.s9api.XdmValue</code>.
-      The <code>XdmValue</code> class is also used to supply parameters to stylesheets and transformations,
-      and to return the results of XSLT or XQuery evaluation.</p>
-      
-      <p>The subclasses of <code>XdmValue</code> directly reflect the XDM model:</p>
-      
-      <samp><![CDATA[XdmValue (any sequence)
-   XdmItem (any single item, that is, a sequence of length one)
-      XdmNode (any node)
-      XdmAtomicValue (any atomic value)
-      XdmFunctionItem (a function item)
-         XdmMap (a map)
-         XdmArray (an array)
-      XdmExternalObject (an item that encapsulates a Java or .NET object)   
-   XdmEmptySequence (a sequence containing no items)      
-]]></samp>
-      
-      <p>These objects are generally immutable.</p>
-      
-      <p>A variety of methods are provided to convert between these classes and "ordinary" Java equivalents. For example
-      an <code>XdmAtomicValue</code> can be constructed directly from a Java <code>boolean</code>, <code>String</code>, <code>long</code>, 
-         <code>BigDecimal</code>, or <code>Instant</code> (inter alia), and methods such as <code>getBooleanValue()</code>
-      and <code>getStringValue()</code> are available to convert in the other direction.</p>
-      
-      <p>As an alternative to use of XPath, the <code>select()</code> method on <code>XdmValue</code> provides powerful
-      navigation capability around XDM trees. The <code>select()</code> method takes as argument a
-         <code java="net.sf.saxon.s9api.streams.Step">Step</code> (which is
-         a function from one node to related nodes) and returns an <code
-            java="net.sf.saxon.s9api.streams.XdmStream">XdmStream</code> of nodes as a result. There
-         is a library (<code java="net.sf.saxon.s9api.streams.Steps">Steps</code>)
-      of <code>Step</code> functions corresponding to all the XPath axes, and the results of applying a <code>Step</code>
-         can be filtered using predicates: there is also a library (<code
-            java="net.sf.saxon.s9api.streams.Predicates">Predicates</code>) of commonly-used
-         <code>Predicate</code>s.</p>
-      
-      <p>For example, if <code>root</code> is a document node, then <code>root.select(descendant("p")).asXdmValue()</code>
-      selects all the descendant elements with local name "p" in the form of an <code>XdmValue</code>.</p>
-      
-      <p>The <code java="net.sf.saxon.s9api.XdmNode">XdmNode</code> class in this hierarchy is implemented as a wrapper around the lower-level <code>NodeInfo</code>
-      interface which provides more detailed access to information associated with nodes. The <code>NodeInfo</code> interface
-      is designed primarily for internal use within Saxon, whereas <code>XdmNode</code> is designed for application use.</p>
-   </section>
+   
    <section id="jaxp-xpath" title="JAXP XPath API">
+      <div class="javaonly">
       <h1>JAXP XPath API</h1>
 
 
@@ -217,8 +353,9 @@
       <nav>
          <ul/>
       </nav>
-
+      </div>
       <section id="factory" title="Selecting the XPath implementation">
+         <div class="javaonly">
          <h1>Selecting the XPath implementation</h1>
          
          <aside><p>The JAXP API is designed on the basis that when your application invokes
@@ -272,10 +409,14 @@ XPath xpath = xpathFactory.newXPath();
             further details, see the Javadoc specifications and the supplied example applications
             (as described in <a class="bodylink" href="/xpath-api/jaxp-xpath">JAXP XPath
             API</a>).</p>
+         </div>
       </section>
+      
+
 
       <section id="context-node" title="Setting the context item">
-         <h1>Setting the context item</h1>
+         <div class="javaonly">
+         <h1>Setting the JAXP context item</h1>
 
 
          <p>Many of the methods in the JAXP interface take an argument to represent the "context
@@ -294,9 +435,11 @@ XPath xpath = xpathFactory.newXPath();
             to create, given that Saxon supports multiple object models. Instead, if null is
             supplied, the expression is evaluated with the context item undefined (which will cause
             a dynamic error if the expression actually refers to the context item).</p>
+         </div>
       </section>
       
       <section id="setting-xpath-variables" title="Setting XPath Variables">
+         <div class="javaonly">
          <h1>Setting XPath Variables</h1>
          
          <p>An XPath expression supplied to the JAXP XPath API can contain undeclared variables, for 
@@ -310,10 +453,11 @@ XPath xpath = xpathFactory.newXPath();
          <p>The Java value returned by the <code>VariableResolver</code> is converted to an XDM
             value using the rules described at <a class="bodylink"
                href="/extensibility/java-to-xdm-conversion">Converting Java values to XDM values</a>.</p>
-         
+         </div>
       </section>
 
       <section id="return-types" title="Return types">
+         <div class="javaonly">
          <h1>Return types</h1>
 
 
@@ -355,7 +499,7 @@ XPath xpath = xpathFactory.newXPath();
                <p>If the return type is <code>XPathConstants.NODESET</code>, the result will in
                   general be a Java <code>List</code> containing node objects in the selected object
                   model. It may also contain non-node objects if that's what the XPath expression
-                  returned. As a special case, if the supplied context node is a DOM node, and if
+                  returned. As a special case, however, if the supplied context node is a DOM node, and if
                   the results are all DOM nodes, then they will be returned in the form of a DOM
                      <code>NodeList</code> object.</p>
             </li>
@@ -363,14 +507,16 @@ XPath xpath = xpathFactory.newXPath();
 
          <p>Saxon does not recognize additional values for the return type other than the values
             defined in JAXP. If you want to return a different result type, for example a list of
-            integers or a date, then it is probably best not to use this API; if you must, however,
+            integers, a date, or a map, then it is probably best not to use this API; if you must, however,
             then use one of the methods in which the result type is unspecified. If any conversions
             are necessary, do them within the XPath expression itself, using casts or constructor
             functions. The Java object that is returned will be a representation of the XPath value,
             converted in the same way as arguments to a extension functions.</p>
+         </div>
       </section>
 
       <section id="saxon-additions" title="Additional Saxon methods">
+         <div class="javaonly">
          <h1>Additional Saxon methods</h1>
 
 
@@ -393,9 +539,11 @@ XPath xpath = xpathFactory.newXPath();
             display, and <code>getStringValue()</code> gets the string value of the node, as defined
             in the XPath data model. You can also use the node as the context node for evaluation of
             subsequent expressions.</p>
+         </div>
       </section>
 
       <section id="jaxp-xpath-extension-functions" title="Calling JAXP XPath extension functions">
+         <div class="javaonly">
          <h1>Calling JAXP XPath extension functions</h1>
 
 
@@ -415,12 +563,91 @@ XPath xpath = xpathFactory.newXPath();
             argument. The rules applied to convert arguments from XDM values to Java objects are the
             same as the rules for Java extension functions described at 
             <a class="bodylink" href="/extensibility/extension-functions-J/reflexive-functions/converting-args">Converting Arguments to
-            Java Extension Functions</a>. Similarly, the return value is converted to an XDM value
+            Java Extension Functions</a>.</p> 
+         
+         <p>Similarly, the return value is converted to an XDM value
             using the rules given at <a class="bodylink" href="/extensibility/java-to-xdm-conversion">Converting Java values to
                XDM values</a>.</p>
          
-
+         </div>
       </section>
+   </section>
+   
+   <section id="dotnet-xpath" title="Evaluating XPath Expressions from C#">
+      <div class="csonly">
+         <h1>Evaluating XPath Expressions from C#</h1>
+         
+         
+         
+         <p>The Saxon.Api interface is a custom-designed API for Saxon, allowing integrated access to all
+            Saxon's XML processing capabilities in a uniform way.</p>
+         
+         <p>You can evaluate an XPath expression using the Saxon.Api interface in a number of ways, for
+            instance as follows:</p>
+         <ol>
+            <li>
+               <p>Create a <a class="cslink" href="Saxon.Api.Processor">Processor</a> and
+                  set any global configuration options on the <code>Processor</code>.</p>
+            </li>
+            <li>
+               <p>Build the source document by calling <code>NewDocumentBuilder()</code> to create a
+                  document builder, setting appropriate options, and then calling one of the various
+                  <code>Build()</code> methods. This returns an <a class="cslink"
+                     href="Saxon.Api.XdmNode">XdmNode</a> which can be supplied as the context
+                  item to the XPath expression.</p>
+            </li>
+            <li>
+               <p>Call <code>NewXPathCompiler()</code> to create an <a class="cslink"
+                  href="Saxon.Api.XPathCompiler">XPathCompiler</a>, and set any options
+                  that are local to a specific compilation (notably declaring namespace prefixes that
+                  are used in the XPath expression).</p>
+            </li>
+            <li>
+               <p>Call the <code>Compile()</code> method to compile an expression. The result is an <a
+                  class="cslink" href="Saxon.Api.XPathExecutable">XPathExecutable</a>,
+                  which can be used as often as you like in the same thread or in different
+                  threads.</p>
+            </li>
+            <li>
+               <p>To evaluate the expression, call the <code>Load()</code> method on the
+                  <code>XPathExecutable</code>. This creates an <a class="cslink"
+                     href="Saxon.Api.XPathSelector">XPathSelector</a>. The
+                  <code>XPathSelector</code> can be serially reused, but it must not be shared
+                  across multiple threads. Set any options required for the specific XPath execution
+                  (for example, the initial context node, the values of any variables referenced in the
+                  expression), and then call one of the methods <code>GetEnumerator()</code>,
+                  <code>Evaluate()</code>, or <code>EvaluateSingle()</code> to execute the XPath
+                  expression.</p>
+            </li>
+            <li>
+               <p>Because the <code>XPathSelector</code> is an <code>IEnumerable</code>, it is possible to
+                  iterate over the results directly using the C# "foreach" construct.</p>
+            </li>
+            <li>
+               <p>The result of an XPath expression is in general an <a class="cslink"
+                  href="Saxon.Api.XdmValue">XdmValue</a>, representing a value as defined
+                  in the XDM data model (that is, a sequence of nodes and/or atomic values). Subclasses
+                  of <code>XdmValue</code> include <a class="cslink"
+                     href="Saxon.Api.XdmItem">XdmItem</a>, <a class="cslink"
+                        href="Saxon.Api.XdmNode">XdmNode</a>, and <a class="cslink"
+                           href="Saxon.Api.XdmAtomicValue">XdmAtomicValue</a>, and these relate
+                  directly to the corresponding concepts in XDM. Various methods are available to
+                  translate between this model and native C# data types.</p>
+            </li>
+         </ol>
+         
+         <!--<p>The <a class="cslink" href="Saxon.Api.XPathCompiler">XPathCompiler</a> also has
+               compile-and-go methods <code>evaluate()</code> and <code>evaluateSingle()</code> to execute
+               an expression directly without going through an explicit compilation process. This provides
+               a simpler approach if the expression is only evaluated once. The <code>XPathCompiler</code>
+               also has the option of caching compiled expressions, so that if the same expression is
+               evaluated repeatedly, the compiled form of the expression is re-used.</p>-->
+         
+         <p>Examples of the use of Saxon.Api to evaluate XPath expressions are included in the
+            <code>saxon-resources</code> file, see module <code>Examples.cs</code>.</p>
+         
+         
+      </div>
    </section>
    
    
@@ -428,7 +655,8 @@ XPath xpath = xpathFactory.newXPath();
       <h1>NodeInfo interface</h1>
 
 
-      <p>The <a class="javalink" href="net.sf.saxon.om.NodeInfo">NodeInfo</a> object represents a
+      <p>The <code>NodeInfo</code> interface (<a class="javalink" href="net.sf.saxon.om.NodeInfo">net.sf.saxon.om.NodeInfo</a> on Java,
+         or <a class="cslink" href="Saxon.Hej.om.NodeInfo">Saxon.Hej.om.NodeInfo</a> on C#) represents a
          node of an XML document. The methods on this class follow the XPath data
          model closely.</p>
       
@@ -436,10 +664,12 @@ XPath xpath = xpathFactory.newXPath();
       which means it is available for use by applications that require a close level of integration with Saxon, but
       it is not guaranteed to be 100% stable between releases. For a higher level of stability, use the 
          <a class="javalink" href="net.sf.saxon.s9api.XdmNode">XdmNode</a> interface.</aside>
+      
+      <aside>Because the interface is intended primarily for internal use, it is essentially the same across Java and C#:
+      in particular it uses Java coding conventions such as methods with names like <code>getSomeProperty()</code>.</aside>
 
       
-      <p>The <a class="javalink" href="net.sf.saxon.om.NodeInfo">NodeInfo</a> object provides the
-         application with information about the node. The most commonly used methods include:</p>
+      <p>The most commonly used methods on <code>NodeInfo</code> include:</p>
       <table>
          <tr>
             <td>
@@ -457,7 +687,7 @@ XPath xpath = xpathFactory.newXPath();
                <p>getDisplayName(), getLocalPart(), getPrefix(), getURI()</p>
             </td>
             <td>
-               <p>These methods get the name of the element, or its various parts. The
+               <p>These methods get the name of an element or attribute, or its various parts. The
                      <code>getDisplayName()</code> method returns the QName as used in the original
                   source XML.</p>
             </td>
@@ -476,6 +706,16 @@ XPath xpath = xpathFactory.newXPath();
             </td>
             <td>
                <p>Gets the string value of a node, as defined in the XPath data model.</p>
+            </td>
+         </tr>
+         <tr>
+            <td>
+               <p>getUnicodeStringValue()</p>
+            </td>
+            <td>
+               <p>Gets the string value of a node, as a <code>UnicodeString</code>. This is a Saxon-specific string
+               representation designed to be more efficient that the system <code>String</code> class for many
+               common operations, especially when it contains characters with codepoints above 65535.</p>
             </td>
          </tr>
          <tr>
@@ -521,11 +761,19 @@ XPath xpath = xpathFactory.newXPath();
 
       <p>For other methods, see the <a class="javalink" href="net.sf.saxon.om.NodeInfo">NodeInfo</a>
          JavaDoc documentation.</p>
+      
+      <aside>C# interface documentation is not published for internal interfaces such as <code>NodeInfo</code>.
+      The Java documentation of the corresponding class will usually give a reliable guide to the methods available,
+      since the two products are based on the same source code. There are some differences, however: for example,
+      the Java version of <code>NodeInfo</code> implements the super-interface <code>ActiveSource</code> and
+      therefore implements the method <code>deliver()</code>; neither the super-interface nor the method is
+      available in the C# version. For an accurate description of the class and its methods, navigate to the
+      class in an IDE such as Visual Studio.</aside>
 
       <p>It is possible (though not easy) to provide your own implementation of the
             <code>NodeInfo</code> interface, perhaps allowing Saxon queries to run directly against
          some non-XML data source. There are helper methods in the <a class="javalink"
-            href="net.sf.saxon.tree.util.Navigator">net.sf.saxon.tree.util.Navigator</a> class that
+            href="net.sf.saxon.tree.util.Navigator">Navigator</a> class that
          reduce the amount of code you need to write to achieve this. See the implementations that
          map <code>NodeInfo</code> to DOM, DOM4J, JDOM or XOM to see how it is done.</p>
    </section>
