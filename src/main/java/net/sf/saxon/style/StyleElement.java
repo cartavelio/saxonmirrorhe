@@ -2376,7 +2376,7 @@ public abstract class StyleElement extends ElementImpl {
         // Set the location of the error if there is no current location information,
         // or if the current location information is local to an XPath expression, unless we are
         // positioned on an xsl:function or xsl:template, in which case this would lose too much information
-        if (error.getLocation() == null ||
+        if (error.getLocation() == null || error.getLocation() == Loc.NONE ||
                 ((error.getLocation() instanceof Loc ||
                           error.getLocation() instanceof Expression) && !(this instanceof StylesheetComponent))) {
             XmlProcessingIncident.maybeSetLocation(error, this);
