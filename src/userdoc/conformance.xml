@@ -120,8 +120,8 @@
       
       <p>SaxonCS corresponds to Saxon-EE on Java.</p>
 
-      <p>For information on streaming, see <a class="bodylink" href="/sourcedocs/streaming"
-            >Streaming of Large Documents</a>.</p>
+      <p>For information on streaming, see <a class="bodylink" href="/streaming"
+            >Streaming XML Documents</a>.</p>
 
       <p>For information on using packages, see <a class="bodylink" href="/using-xsl/compiling">Compiling a Stylesheet</a>.</p>
 
@@ -1184,7 +1184,7 @@
             </p>
             <p>
                ► Saxon gives the user the choice: see
-               <a class="bodylink" href="/sourcedocs/xml11">Saxon and XML 1.1</a>. Note that since Saxon allows the user to select which XML parser to use on a per-document basis, achievement of consistency across "all aspects of the implementation" is in part a user responsibility. Saxon will not reject any attempt to use an XML 1.1 parser in a 1.0 configuration, or vice versa.
+               <a class="bodylink" href="/sourcedocs/xml-parsing/xml11">Saxon and XML 1.1</a>. Note that since Saxon allows the user to select which XML parser to use on a per-document basis, achievement of consistency across "all aspects of the implementation" is in part a user responsibility. Saxon will not reject any attempt to use an XML 1.1 parser in a 1.0 configuration, or vice versa.
             </p>
          </li>
          <li>

@@ -51,7 +51,8 @@
       
       <p>When Saxon (either XSLT or XQuery) is invoked from the command line, the primary source will
         normally be an XML document, and is supplied using the <code>-s</code> option (for example,
-        <code>-s:books.xml</code>. Normally this will be XML 1.0: for XML 1.1, see <a class="bodylink" href="../xml11">XML 1.1</a>.
+        <code>-s:books.xml</code>. Normally this will be XML 1.0: for XML 1.1, see <a class="bodylink"
+          href="/sourcedocs/xml-parsing/xml11">XML 1.1</a>.
       </p>
       
       <p>If the primary source is JSON, use the <code>-json</code> option (for example,
@@ -60,7 +61,7 @@
       <p>The command line argument is assumed to be a filename (interpreted relative to the current
       directory) unless (a) it starts with <code>file:</code>, <code>http:</code>, or <code>https:</code>,
       or (b) the <code>-u</code> option is supplied. If either of these conditions is true, it is
-      interpreted as a URI, and is handled as described in <a href="resolving-uris" class="bodylink">Resolving URIs</a>.
+      interpreted as a URI, and is handled as described in <a href="../resolving-uris" class="bodylink">Resolving URIs</a>.
       The current working directory is used as the base URI for resolving the location of the stylesheet or query unless otherwise
       specified: this affects the interpretation of relative URIs contained within the stylesheet or
       query.</p>
@@ -132,7 +133,7 @@
     <p>URIs used within an XML document to refer to external entities (including the DTD) are
       a little different since they are generally handled by the XML parser, and not by Saxon itself.
       Nevertheless, Saxon attempts to offer an integrated approach. For more information on this, 
-      see <a href="resolving-entities" class="bodylink">Resolving Entities</a>.</p>
+      see <a href="../resolving-entities" class="bodylink">Resolving Entities</a>.</p>
   </section>
     
     <section id="xml-catalogs" title="Using XML Catalogs">
@@ -1954,7 +1955,7 @@
       obvious is the representation of namespaces.</aside>
       
       <p>In Saxon, all XDM nodes are represented internally using the interface 
-        <a href="xpath-api/NodeInfo" class="bodylink">NodeInfo</a>, which is exposed
+        <a href="/xpath-api/nodeinfo" class="bodylink">NodeInfo</a>, which is exposed
         in the public API using the class <code>XdmNode</code>. Saxon provides a number
       of implementations of the <code>NodeInfo</code> interface, including implementations 
         that wrap third-party tree models.</p>
@@ -2023,7 +2024,7 @@
     </p>
 
     <p>In the case of DOM, all Saxon editions support DOM access "out of the box", and no special
-      configuration action is necessary. See also <a class="bodylink" href="/sourcedocs/domino">The Domino Tree Model</a>.</p>
+      configuration action is necessary. See also <a class="bodylink" href="/sourcedocs/tree-models/domino">The Domino Tree Model</a>.</p>
 
     <p>Support for Axiom, JDOM2, XOM, and DOM4J is not available "out of the box" with
       Saxon-HE, but the source code is open source (in sub-packages of

@@ -706,11 +706,12 @@
                       documents such as the DTD for XHTML. The W3C web server is routinely rejecting such requests, causing
                       parsing failures. In response to this, Saxon now includes copies of these documents within the issued
                       JAR file, and recognizes requests for these documents, satisfying the request using the local copy.
-                      For details see <xref section="sourcedocs" page="w3c-dtds">References to W3C DTDs</xref>.</p>
+                      For details see <xref section="sourcedocs" page="resources-and-uris" subpage="w3c-dtds">References to W3C DTDs</xref>.</p>
              
              <p xmlns="">In addition, Saxon 9.4 command line interfaces have been enhanced with a new option,
                       <code>-catalog:filename</code> that causes URIs and public identifiers to be resolved by reference
-                      to an OASIS catalog. For details see <xref section="sourcedocs" page="xml-catalogs">Using XML Catalogs</xref>.</p>
+                to an OASIS catalog. For details see <xref section="sourcedocs"
+                   page="resources-and-uris" subpage="xml-catalogs">Using XML Catalogs</xref>.</p>
              
              
              
@@ -1206,7 +1207,7 @@ same way as a zero-length string.</p>
       <category name="streaming">
 
          <p xmlns="">Many more constructs are now acceptable in streaming templates. For full details see 
-                  <xref section="sourcedocs" page="streaming" subpage="streaming-templates">Streaming Templates</xref>.</p>
+                  <xref section="streaming" page="streaming-templates">Streaming Templates</xref>.</p>
 
          <p xmlns="">Explicit support for streaming is available for the functions <code>data()</code>, <code>avg()</code>, <code>count()</code>, 
                   <code>distinct-values()</code>, <code>empty()</code>, <code>exists()</code>, <code>min()</code>, <code>max()</code>, <code>string()</code>,
@@ -2179,7 +2180,7 @@ The templates, of course, have to conform to strict rules to make them streamabl
 can be implemented this way: for example, renaming elements, deleting selected elements, computing new attribute values,
 and so on.</p>
 
-         <p xmlns="">For more details see <xref section="sourcedocs" page="streaming" subpage="streaming-templates">Streaming Templates</xref>.</p>
+         <p xmlns="">For more details see <xref section="streaming" page="streaming-templates">Streaming Templates</xref>.</p>
       </category>
       <category name="functions20">
 
@@ -2640,7 +2641,7 @@ an intrinsic part of the Saxon product, but can be downloaded as a separate pack
 doubled curly braces ("{{" or "}}") to represent single curly braces, and must not contain curly braces unless they are
 so doubled.</p>
 
-         <p xmlns="">The <xref section="sourcedocs" page="streaming">streaming copy</xref> optimization, previously available only with XSLT, is now
+         <p xmlns="">The <xref section="streaming">streaming copy</xref> optimization, previously available only with XSLT, is now
 available also with XQuery. This allows a subset of XQuery expressions to be evaluated in streaming mode, that is, without building
 the tree representation of the source document in memory. The facility is available only in Saxon-SA. It can be invoked either
 using the extension function <code>saxon:stream()</code> or by means of the pragma <code>(# saxon:stream #){ expr }</code>. 

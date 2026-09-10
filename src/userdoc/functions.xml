@@ -9812,7 +9812,7 @@ return saxon:serialize($x, <xsl:output method="xml"
               <code>doc('employees.xml')/*/employee)</code> is evaluated in streamed mode - which
             means that it must conform to a subset of the XPath syntax which Saxon can evaluate in
             streamed mode. For more information, see <a class="bodylink"
-              href="/sourcedocs/streaming/streamed-query">Streaming in XQuery</a>.</p>
+              href="/streaming/streamed-query">Streaming in XQuery</a>.</p>
 
           <p>The facility should not be used if the source document is read more than once in the
             course of the query/transformation. There are two reasons for this: firstly, if it is
@@ -9836,12 +9836,8 @@ return saxon:serialize($x, <xsl:output method="xml"
             <a class="feature" href="STREAMING_FALLBACK"/> is set,
             in which case it is executed in non-streaming mode (that is, the result is simply
             the result of evaluating the argument to the function).</p>
-
           
-
-
-          <p>For further details see <a href="/sourcedocs/streaming">Streaming of Large
-              Documents</a>.</p>
+          <p>For further details see <a href="/streaming">Streaming XML Documents</a>.</p>
         </div>
       </details>
     </function>

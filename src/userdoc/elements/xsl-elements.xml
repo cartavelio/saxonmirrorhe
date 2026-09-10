@@ -2145,7 +2145,7 @@
                         user-written <code>URIResolver</code> can be supplied. Note that it is the
                         compile-time <code>URIResolver</code> that is used, not the run-time
                             <code>URIResolver</code>. See also <a class="bodylink"
-                            href="/sourcedocs/xml-catalogs">Using XML Catalogs</a>.</p>
+                                href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML Catalogs</a>.</p>
                     <p>If the URI is relative, then it is interpreted relative to the base URI of
                         the <code>xsl:import</code> element itself, which normally is the location
                         of the file containing the source stylesheet module. If the stylesheet is
@@ -2233,7 +2233,7 @@
                             <code>XMLResolver</code>). Note that it is the compile-time
                             <code>URIResolver</code> that is used, not the run-time
                             <code>URIResolver</code>. See also <a class="bodylink"
-                            href="/sourcedocs/xml-catalogs">Using XML Catalogs</a>.</p>
+                                href="/sourcedocs/resources-and-uris/xml-catalogs">Using XML Catalogs</a>.</p>
 
                     <p>If the URI is relative, then it is interpreted relative to the base URI of
                         the <code>xsl:include</code> element itself, which normally is the location
@@ -2354,7 +2354,7 @@
                 <p>The <code>xsl:iterate</code> instruction is motivated by use-cases for streaming,
                     but it can also be used profitably in non-streaming situations. For more
                     information see <a class="bodylink"
-                        href="/sourcedocs/streaming/stream-with-iterate">Streaming with
+                        href="/streaming/stream-with-iterate">Streaming with
                         xsl:iterate</a>.</p>
 
                 <p>The instruction allows a child element <a class="bodylink code"
@@ -2710,7 +2710,7 @@
                     snapshots (as defined by the <code>snapshot()</code> function). This means that
                     ancestors of the selected nodes, and attributes of ancestors, are not available.
                     For more information see <a class="bodylink"
-                        href="/sourcedocs/streaming/stream-with-merge">Streaming with
+                        href="/streaming/stream-with-merge">Streaming with
                     xsl:merge</a>.</p>
                 <p>Streamed processing requires Saxon-EE, but the instruction is implemented without streaming
                 in Saxon-PE and Saxon-HE.</p>
@@ -2838,7 +2838,7 @@
                 <p>The implementation of streaming uses one thread for each input document. The
                     configuration option to allow multi-threaded execution must not be disabled.</p>
                 <p>For more information see <a class="bodylink"
-                        href="/sourcedocs/streaming/stream-with-merge">Streaming with xsl:merge</a>.
+                        href="/streaming/stream-with-merge">Streaming with xsl:merge</a>.
                     Streamed merging requires Saxon-EE.</p>
                 <p>The <code>use-accumulators</code> attribute is first implemented in Saxon 9.8.</p>
             </status>
@@ -2949,7 +2949,7 @@
                     that template rules using this mode must be capable of being evaluated in a
                         <dfn>streaming</dfn> manner. This imposes restrictions on the content of the
                     template rules. For details, see <a class="bodylink"
-                        href="/sourcedocs/streaming">Streaming of Large Documents</a>. Requires
+                        href="/streaming">Streaming XML Documents</a>. Requires
                     Saxon-EE.</attribute>
                 <attribute name="use-accumulators" use="optional">Relevant only when this mode is
                     the initial mode of the transformation. Defines the set of accumulators
@@ -4649,7 +4649,7 @@
                 
                 
                 <p>For more details on streaming, see <a class="bodylink"
-                    href="/sourcedocs/streaming">Streaming of Large Documents</a>.</p>
+                    href="/streaming">Streaming XML Documents</a>.</p>
             </details>
             <examples>
                 <example>

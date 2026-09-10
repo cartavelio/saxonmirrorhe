@@ -1225,15 +1225,15 @@
                 default is false.</p>
  
             <p>The allowed parameters are: <code>validation=strict|lax|strip</code> to perform schema
-                validation (see <a class="bodylink" href="/sourcedocs/validation">Validation of
+                validation (see <a class="bodylink" href="/sourcedocs/beyond-parsing/validation">Validation of
                     Source Documents</a>); <code>strip-space=yes|ignorable|no</code> to control whitespace
-                stripping (see <a class="bodylink" href="/sourcedocs/whitespace">Whitespace
+                stripping (see <a class="bodylink" href="/sourcedocs/beyond-parsing/whitespace">Whitespace
                     Stripping in Source Documents</a>); <code>parser=full.class.name</code> to
                 determine the name of the parser (XMLReader) to be used (see <a class="bodylink"
-                    href="/sourcedocs/controlling-parsing">Controlling Parsing of Source
+                    href="/sourcedocs/xml-parsing/controlling-parsing">Controlling Parsing of Source
                     Documents</a>); and <code>xinclude=yes|no</code> to control whether XInclude
                 processing takes place, assuming the XML parser supports it (see <a class="bodylink"
-                    href="/sourcedocs/XInclude">XInclude processing</a>).</p>
+                    href="/sourcedocs/beyond-parsing/XInclude">XInclude processing</a>).</p>
         </desc>
     </feature>
     <feature>
