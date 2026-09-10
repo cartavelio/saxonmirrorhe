@@ -18,11 +18,10 @@ import java.util.stream.Collectors;
 public class CsvContentHandler {
     private List<GroundedValue> currentRow;
     private final List<List<GroundedValue>> rows = new ArrayList<>();
-    private boolean trimWhitespace;
+    private final boolean trimWhitespace;
 
     public CsvContentHandler(Map<String, GroundedValue> options) {
         currentRow = new ArrayList<>();
-
         trimWhitespace = ((BooleanValue) options.get("trim-whitespace")).getBooleanValue();
     }
     /**
