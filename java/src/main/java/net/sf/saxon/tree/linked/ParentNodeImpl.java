@@ -142,10 +142,11 @@ public abstract class ParentNodeImpl extends NodeImpl {
         } else if (_children instanceof NodeImpl child) {
             return SingletonIterator.makeIterator(child);
         } else {
-            return new ArrayIterator.OfNodes<>((NodeImpl[]) _children);
+            NodeImpl[] childArray = (NodeImpl[]) _children;
+            return new ArrayIterator.Of<>(childArray);
         }
     }
-
+    
     /**
      * Get an enumeration of the _children of this node
      *

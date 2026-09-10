@@ -33,7 +33,6 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.JNodeSequenceConverter;
 import net.sf.saxon.type.coercion.SequenceCoercer;
@@ -1201,7 +1200,7 @@ public class SlashExpression extends BinaryExpression
             }
             if (expr.getStart().getItemType() instanceof XNodeType) {
                 PullEvaluator action = expr.getStep().makeElaborator().elaborateForPull();
-                ContextMappingFunction mapper = CSharp.methodRef(action::iterate);
+                ContextMappingFunction mapper = cxt -> action.iterate(cxt);
                 return context -> {
                     XPathContextMinor c2 = context.newMinorContext();
                     c2.trackFocus(select.iterate(context));
@@ -1240,7 +1239,7 @@ public class SlashExpression extends BinaryExpression
                     GroundedValue rhs = action.evaluate(context).materialize();
                     NodePredicate[] predicate = new NodePredicate[1]; // set on first use
 
-                    MappingFunction mapper = item -> {
+                    MappingFunction mapper = SequenceMapper.of(item -> {
                         if (item instanceof NodeInfo x) {
                             return rhs.iterate();
                         } else if (item instanceof JNode j) {
@@ -1249,7 +1248,7 @@ public class SlashExpression extends BinaryExpression
                                     throw new UncheckedXPathException("RHS of '/' must be all atomic items", "XPTY0018");
                                 }
                                 AtomicSequence rhsData = Atomizer.atomize(rhs);
-                                predicate[0] = node -> {
+                                predicate[0] = NodePredicateLambda.of(node -> {
                                     // TODO: use direct addressing for a map or array if only one key given
                                     AtomicMatchKey key = ((JNode) node).getSelector().asMapKey(40);
                                     for (AtomicValue it : rhsData) {
@@ -1258,13 +1257,13 @@ public class SlashExpression extends BinaryExpression
                                         }
                                     }
                                     return false;
-                                };
+                                });
                             }
                             return j.iterateChildAxis(predicate[0]);
                         } else {
                             throw new UncheckedXPathException("LHS of '/' is not a GNode", "XPTY0004");
                         }
-                    };
+                    });
                     return new MappingIterator(select.iterate(context), mapper);
                 };
 
