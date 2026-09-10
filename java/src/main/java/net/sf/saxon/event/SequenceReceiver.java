@@ -10,6 +10,7 @@ package net.sf.saxon.event;
 import net.sf.saxon.Configuration;
 import net.sf.saxon.expr.parser.Loc;
 import net.sf.saxon.ma.arrays.ArrayItem;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.*;
 import net.sf.saxon.s9api.Location;
@@ -193,7 +194,6 @@ public abstract class SequenceReceiver implements Receiver {
                         throw new XPathException("Cannot add a " + thing + " to an XDM node tree", errorCode, locationId);
                     }
                 case XNODE:
-                default:
                     NodeInfo node = (NodeInfo) item;
                     int kind = node.getNodeKind();
                     if (node instanceof Orphan && ((Orphan) node).isDisableOutputEscaping()) {
@@ -221,6 +221,14 @@ public abstract class SequenceReceiver implements Receiver {
                         ((NodeInfo) item).copy(this, copyOptions, locationId);
                         previousAtomic = false;
                     }
+                    break;
+                case JNODE:
+                    // default is to unwrap the JNode
+                    for (Item it : ((JNode)item).getContent().asIterable()) {
+                        append(it);
+                    }
+                    break;
+                default:
                     break;
             }
         }

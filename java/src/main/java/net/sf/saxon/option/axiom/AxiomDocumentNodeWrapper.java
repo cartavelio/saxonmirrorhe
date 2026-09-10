@@ -267,7 +267,7 @@ public class AxiomDocumentNodeWrapper extends AxiomParentNodeWrapper {
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         return other == this ? 0 : -1;
     }
 

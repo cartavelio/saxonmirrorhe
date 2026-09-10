@@ -24,7 +24,7 @@ public enum OperatorSymbol {
     NEGATE,
     EQUALS, NE, LT, LE, GT, GE,
     FEQ, FNE, FLT, FLE, FGT, FGE,
-    IS, PRECEDES, FOLLOWS,
+    IS, IS_NOT, PRECEDES, FOLLOWS,
     UNION, INTERSECT, EXCEPT,
     OTHERWISE, CONCAT, TO,
     CAST_AS, CASTABLE_AS, TREAT_AS, INSTANCE_OF,
@@ -60,6 +60,7 @@ public enum OperatorSymbol {
             case FGT: return "gt";
             case FGE: return "ge";
             case IS: return "is";
+            case IS_NOT: return "is-not";
             case PRECEDES: return "<<";
             case FOLLOWS: return ">>";
             case UNION: return "union";

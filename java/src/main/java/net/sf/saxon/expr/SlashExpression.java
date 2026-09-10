@@ -21,6 +21,7 @@ import net.sf.saxon.functions.Doc;
 import net.sf.saxon.functions.DocumentFn;
 import net.sf.saxon.functions.KeyFn;
 import net.sf.saxon.ma.arrays.SquareArrayConstructor;
+import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
@@ -29,6 +30,9 @@ import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
+import net.sf.saxon.type.coercion.SequenceCoercer;
+import net.sf.saxon.type.gnode.AnyGNodeType;
+import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -187,6 +191,12 @@ public class SlashExpression extends BinaryExpression
                 () -> new RoleDiagnostic(RoleDiagnostic.BINARY_EXPR, "/", 0, "XPTY0019");
         setStart(tc.staticTypeCheck(getStart(), SequenceType.GNODE_SEQUENCE, roleSupplier, visitor));
 
+//        if (visitor.getStaticContext().getXPathVersion() >= 40
+//                && !(getStart().getItemType() instanceof GNodeType)) {
+//            setStart(SequenceCoercer.makeSequenceCoercer(
+//                    getStart(), AnyGNodeType.getInstance().zeroOrMore(), roleSupplier, true));
+//        }
+
         // Now check the second operand
 
         ItemType startType = getStart().getItemType();
@@ -250,30 +260,30 @@ public class SlashExpression extends BinaryExpression
             underlyingStep = ((FilterExpression) underlyingStep).getSelectExpression();
         }
 
-        if (!(underlyingStep instanceof AxisExpression)) {
+        if (!(underlyingStep instanceof GeneralizedAxisExpression)) {
             return null;
         }
 
-        Expression st = getStart();
+        Expression start = getStart();
 
         // detect .//x as a special case; this will appear as descendant-or-self::node()/x
 
-        if (st instanceof AxisExpression) {
-            AxisExpression stax = (AxisExpression) st;
+        if (start instanceof GeneralizedAxisExpression) {
+            GeneralizedAxisExpression stax = (GeneralizedAxisExpression) start;
             if (stax.getAxis() != AxisInfo.DESCENDANT_OR_SELF) {
                 return null;
             }
             ContextItemExpression cie = new ContextItemExpression();
             ExpressionTool.copyLocationInfo(this, cie);
-            st = ExpressionTool.makePathExpression(cie, stax.copy(new RebindingMap()));
-            ExpressionTool.copyLocationInfo(this, st);
+            start = ExpressionTool.makePathExpression(cie, ((Expression)stax).copy(new RebindingMap()));
+            ExpressionTool.copyLocationInfo(this, start);
         }
 
-        if (!(st instanceof SlashExpression)) {
+        if (!(start instanceof SlashExpression)) {
             return null;
         }
 
-        SlashExpression startPath = (SlashExpression) st;
+        SlashExpression startPath = (SlashExpression) start;
         if (!(startPath.getStep() instanceof AxisExpression)) {
             return null;
         }
@@ -284,20 +294,30 @@ public class SlashExpression extends BinaryExpression
         }
 
         NodeTest test = mid.getNodeTest();
-        if (!(test == null || test == NodeTypeTest.GNODE)) {
+        if (!(test == null
+                      || test == NodeTypeTest.GNODE
+                      || test == NodeTypeTest.JNODE
+                      || (test instanceof NodeTypeTest && ((NodeTypeTest) test).getItemType() == AnyXNodeType.getInstance())
+                      || (test instanceof NodeTypeTest && ((NodeTypeTest) test).getItemType() == AnyJNodeType.getInstance()))) {
             return null;
         }
 
 
 
-        int underlyingAxis = ((AxisExpression) underlyingStep).getAxis();
+        int underlyingAxis = ((GeneralizedAxisExpression) underlyingStep).getAxis();
         if (underlyingAxis == AxisInfo.CHILD ||
                 underlyingAxis == AxisInfo.DESCENDANT ||
                 underlyingAxis == AxisInfo.DESCENDANT_OR_SELF) {
             int newAxis = underlyingAxis == AxisInfo.DESCENDANT_OR_SELF ? AxisInfo.DESCENDANT_OR_SELF : AxisInfo.DESCENDANT;
-            Expression newStep =
-                    new AxisExpression(newAxis,
-                            ((AxisExpression) underlyingStep).getNodeTest());
+            Expression newStep;
+            if (underlyingStep instanceof AxisExpression) {
+                newStep = new AxisExpression(newAxis,
+                                             ((AxisExpression) underlyingStep).getNodeTest());
+            } else if (underlyingStep instanceof AxisGetExpression) {
+                newStep = new AxisGetExpression(newAxis, ((AxisGetExpression)underlyingStep).getBaseExpression());
+            } else {
+                throw new IllegalStateException();
+            }
             ExpressionTool.copyLocationInfo(this, newStep);
 
             underlyingStep = getStep();
@@ -675,14 +695,20 @@ public class SlashExpression extends BinaryExpression
      *         if no additional sort is required
      */
 
+//    private boolean testNaturallySorted(int startProperties, int stepProperties) {
+//        boolean result = testNaturallySorted0(startProperties, stepProperties);
+//        if (!result) {
+//            // do it again for diagnostics
+//            ExpressionTool.resetPropertiesWithinSubtree(this);
+//            simplifyDescendantPath(new IndependentContext(getConfiguration()));
+//            startProperties = getLhsExpression().computeSpecialProperties();
+//            result = testNaturallySorted0(startProperties, stepProperties);
+//        }
+//        //System.err.println(this + " is " + (result ? "" : "not ") + "ordered");
+//        return result;
+//    }
+
     private boolean testNaturallySorted(int startProperties, int stepProperties) {
-
-        // System.err.println("**** Testing pathExpression.isNaturallySorted()");
-        // display(20);
-        // System.err.println("Start is ordered node-set? " + start.isOrderedNodeSet());
-        // System.err.println("Start is naturally sorted? " + start.isNaturallySorted());
-        // System.err.println("Start is singleton? " + start.isSingleton());
-
         if ((stepProperties & StaticProperty.ORDERED_NODESET) == 0) {
             return false;
         }
@@ -775,6 +801,10 @@ public class SlashExpression extends BinaryExpression
     @Override
     public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
         Expression head = getLeadingSteps();
+        if (head instanceof SequenceCoercer
+                && ((SequenceCoercer)head).getRequiredType().getPrimaryType() == AnyGNodeType.getInstance()) {
+            head = ((SequenceCoercer)head).getBaseExpression();
+        }
         Expression tail = getLastStep();
         if (head instanceof ItemChecker) {
             // No need to type check the context item
@@ -803,7 +833,7 @@ public class SlashExpression extends BinaryExpression
                 return tailPattern;
             }
         } else if (tailPattern instanceof GeneralNodePattern) {
-            return new GeneralNodePattern(this, (NodeTest)tailPattern.getItemType());
+            return new GeneralNodePattern(this, ((GeneralNodePattern)tailPattern).getNodeTest());
         }
 
         int axis = AxisInfo.PARENT;

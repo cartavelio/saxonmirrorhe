@@ -230,7 +230,7 @@ public abstract class AbstractVirtualNode implements VirtualNode {
      */
 
     @Override
-    public int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public int compareOrder(/*@NotNull*/ GNode other) {
         if (other instanceof AbstractVirtualNode) {
             return node.compareOrder(((AbstractVirtualNode) other).node);
         } else {

@@ -2,6 +2,7 @@ package net.sf.saxon.type.coercion;
 
 import net.sf.saxon.functions.hof.CoercedFunction;
 import net.sf.saxon.functions.hof.FunctionSequenceCoercer;
+import net.sf.saxon.ma.jnode.JNode;
 import net.sf.saxon.om.FunctionItem;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
@@ -40,6 +41,12 @@ public class FunctionItemCoercionPlan extends CoercionPlan {
     @Override
     public GroundedValue coerceItem(Item item, ItemType requiredType, CoercionRequest request) throws XPathException {
         boolean is40 = version >= 40;
+        if (item instanceof JNode) {
+            GroundedValue val = ((JNode)item).getContent();
+            if (val instanceof FunctionItem) {
+                item = ((FunctionItem)val);
+            }
+        }
         if (item instanceof FunctionItem) {
             FunctionSequenceCoercer.checkAnnotations((FunctionItem) item,
                                                      (FunctionItemType) requiredType,

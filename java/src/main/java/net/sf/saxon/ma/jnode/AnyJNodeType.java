@@ -80,7 +80,7 @@ public class AnyJNodeType extends JNodeType {
      */
     @Override
     public String toString() {
-        return "jnode-type()";
+        return "jnode()";
     }
 }
 

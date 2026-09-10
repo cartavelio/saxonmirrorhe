@@ -340,6 +340,10 @@ public final class GeneralNodePattern extends Pattern {
      * Get a NodeTest that all the nodes matching this pattern must satisfy
      */
 
+    public NodeTest getNodeTest() {
+        return nodeTest;
+    }
+
     @Override
     public ItemType getItemType() {
         return nodeTest.getItemType();

@@ -246,23 +246,23 @@ public interface NodeInfo extends GNode, Location
         return -1;
     }
     
-    /**
-     * Determine the relative position of this node and another node, in document order.
-     * <p>The other node must always be in the same tree; the effect of calling this method
-     * when the two nodes are in different trees is undefined. To obtain a global ordering
-     * of nodes, the application should first compare the result of getDocumentNumber(),
-     * and only if the document number is the same should compareOrder() be called.</p>
-     *
-     * @param other The other node, whose position is to be compared with this
-     *              node
-     * @return -1 if this node precedes the other node, +1 if it follows the
-     *         other node, or 0 if they are the same node. (In this case,
-     *         isSameNode() will always return true, and the two nodes will
-     *         produce the same result for generateId())
-     * @since 8.4
-     */
-
-    int compareOrder(NodeInfo other);
+//    /**
+//     * Determine the relative position of this node and another node, in document order.
+//     * <p>The other node must always be in the same tree; the effect of calling this method
+//     * when the two nodes are in different trees is undefined. To obtain a global ordering
+//     * of nodes, the application should first compare the result of getDocumentNumber(),
+//     * and only if the document number is the same should compareOrder() be called.</p>
+//     *
+//     * @param other The other node, whose position is to be compared with this
+//     *              node
+//     * @return -1 if this node precedes the other node, +1 if it follows the
+//     *         other node, or 0 if they are the same node. (In this case,
+//     *         isSameNode() will always return true, and the two nodes will
+//     *         produce the same result for generateId())
+//     * @since 8.4
+//     */
+//
+    int compareOrder(GNode other);
 
     /**
      * Ask whether this NodeInfo implementation holds a fingerprint identifying the name of the

@@ -206,7 +206,7 @@ public class DOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         // Use the DOM Level-3 compareDocumentPosition() method
         if (other instanceof DOMNodeWrapper && docWrapper.domLevel3) {
             if (equals(other)) {

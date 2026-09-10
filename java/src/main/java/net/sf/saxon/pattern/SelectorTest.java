@@ -22,6 +22,8 @@ import net.sf.saxon.tree.tiny.NodeVectorTree;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.gnode.NamedXNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
+import net.sf.saxon.value.AtomicValue;
+import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.z.IntPredicateLambda;
 import net.sf.saxon.z.IntPredicateProxy;
 import net.sf.saxon.z.IntSet;
@@ -160,7 +162,8 @@ public class SelectorTest extends NodeTest {
                 String mapKey = ((SpecificQNameTest)key).getStructuredQName().getLocalPart();
                 return (((JNode)gnode).getSelector().getStringValue().equals(mapKey));
             } else {
-                throw new UnsupportedOperationException();
+                AtomicValue actual = ((JNode) gnode).getSelector();
+                return actual instanceof QNameValue && key.matches(((QNameValue)actual).getStructuredQName());
             }
         } else {
             NodeInfo node = (NodeInfo)gnode;

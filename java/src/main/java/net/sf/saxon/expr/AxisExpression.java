@@ -50,7 +50,7 @@ import java.util.function.Supplier;
  * should be wrapped in a call on reverse().</p>
  */
 
-public final class AxisExpression extends Expression {
+public final class AxisExpression extends Expression implements GeneralizedAxisExpression {
 
     private int axis;
     /*@Nullable*/
@@ -201,6 +201,8 @@ public final class AxisExpression extends Expression {
                 return new AxisExpression(axis, new NodeTypeTest(kind));
             } else if (test instanceof SelectorTest) {
                 return new AxisExpression(axis, ((SelectorTest)test).asXNodeTest(config));
+            } else if (test == MultipleNodeKindTest.PARENT_NODE) {
+                return new AxisExpression(axis, MultipleNodeKindTest.PARENT_XNODE);
             }
         } else if (contextItemType instanceof JNodeType) {
             // An axis step starting at a JNode will always return JNodes
@@ -725,6 +727,9 @@ public final class AxisExpression extends Expression {
 
         if (test == null) {
             test = NodeTypeTest.GNODE;
+        }
+        if (test instanceof SelectorTest) {
+            test = ((SelectorTest)test).asXNodeTest(config);
         }
         if (test == NodeTypeTest.GNODE && (axis == AxisInfo.CHILD || axis == AxisInfo.DESCENDANT || axis == AxisInfo.SELF)) {
             test = MultipleNodeKindTest.CHILD_NODE;

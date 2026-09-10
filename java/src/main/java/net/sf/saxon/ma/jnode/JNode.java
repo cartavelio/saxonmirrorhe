@@ -61,6 +61,19 @@ public abstract class JNode implements GNode {
     public abstract JNode getParent();
 
     /**
+     * Get the root of this JTree
+     * @return the root of the tree
+     */
+
+    public RootJNode getRoot() {
+        JNode j = this;
+        while (!(j instanceof RootJNode)) {
+            j = j.getParent();
+        }
+        return (RootJNode)j;
+    }
+
+    /**
      * Get the node kind
      * @return {@link Type#JNODE}
      */

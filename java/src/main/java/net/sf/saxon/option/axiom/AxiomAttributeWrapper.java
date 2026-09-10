@@ -260,7 +260,7 @@ public class AxiomAttributeWrapper implements NodeInfo, VirtualNode, SiblingCoun
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         if (other instanceof AxiomAttributeWrapper) {
             AxiomAttributeWrapper otherAtt = (AxiomAttributeWrapper) other;
             if (this.node == otherAtt.node) {

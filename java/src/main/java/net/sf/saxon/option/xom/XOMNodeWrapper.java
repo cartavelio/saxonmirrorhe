@@ -251,7 +251,7 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         if (other instanceof XOMNodeWrapper) {
             return compareOrderFast(node, ((XOMNodeWrapper) other).node);
         } else {

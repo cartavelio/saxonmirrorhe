@@ -206,7 +206,7 @@ public class SpaceStrippedNode extends AbstractVirtualNode implements WrappingFu
      */
 
     @Override
-    public int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public int compareOrder(/*@NotNull*/ GNode other) {
         if (other instanceof SpaceStrippedNode) {
             return node.compareOrder(((SpaceStrippedNode) other).node);
         } else {

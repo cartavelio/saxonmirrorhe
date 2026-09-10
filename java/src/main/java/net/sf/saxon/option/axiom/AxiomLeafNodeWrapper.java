@@ -7,10 +7,7 @@
 
 package net.sf.saxon.option.axiom;
 
-import net.sf.saxon.om.NamespaceBinding;
-import net.sf.saxon.om.NamespaceUri;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
 import net.sf.saxon.str.StringView;
@@ -138,7 +135,7 @@ public class AxiomLeafNodeWrapper extends AbstractNodeWrapper implements Sibling
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         if (other instanceof AxiomDocument) {
             return +1;
         } else if (other instanceof AxiomAttributeWrapper) {

@@ -13,7 +13,7 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
 
 /**
- * XPath 2.0 unordered() function
+ * XPath 2.0 unordered() function. The Saxon implementation does nothing.
  */
 
 public class Unordered extends SystemFunction {

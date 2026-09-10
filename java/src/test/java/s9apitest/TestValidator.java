@@ -1941,4 +1941,44 @@ public class TestValidator {
             assert (report.toString().contains("path=\"/Q{}PIM[1]/Q{}nonsense[1]\""));
         }
     }
+
+    @Test
+    public void testParseXmlNoValidation() { // bug 6878
+
+        // Change so that parse-xml does no validation by default even if the config is schema-aware
+
+        String xsd = "<xsd:schema\n"
+                + "elementFormDefault='qualified'\n"
+                + "xmlns:xsd='http://www.w3.org/2001/XMLSchema'>\n"
+                + "<xsd:element name='AAA'/>\n"
+                + "<xsd:element name='BBB'/>\n"
+                + "<xsd:element name='CCC'/>\n"
+                + "<xsd:element name='DDD'/>\n"
+                + "</xsd:schema>";
+        final List<XmlProcessingError> errorList = new ArrayList<>();
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.SCHEMA_VALIDATION_MODE, "strict");
+            SchemaManager sm = proc.getSchemaManager();
+            StreamSource source_xsd = new StreamSource(new StringReader(xsd));
+            sm.setErrorReporter(err -> {
+                err.setTerminationMessage("Far too many errors");
+                errorList.add(err);
+            });
+
+            sm.load(source_xsd);
+
+            XPathCompiler xpc = proc.newXPathCompiler();
+            xpc.setSchemaAware(true);
+
+            XPathExecutable exec = xpc.compile("parse-xml('<p:para xmlns:p=\"http://whatever/\"/>')");
+            exec.load().evaluateSingle();
+
+        } catch (SaxonApiException sapie) {
+            fail(sapie.getMessage());
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
 }

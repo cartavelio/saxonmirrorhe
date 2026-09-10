@@ -241,7 +241,7 @@ public abstract class TinyNodeImpl implements NodeInfo {
      */
 
     @Override
-    public final int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public final int compareOrder(/*@NotNull*/ GNode other) {
         long a = getSequenceNumber();
         if (other instanceof TinyNodeImpl) {
             long b = ((TinyNodeImpl) other).getSequenceNumber();

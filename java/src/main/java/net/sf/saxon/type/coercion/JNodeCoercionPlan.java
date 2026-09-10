@@ -11,7 +11,7 @@ import net.sf.saxon.type.ItemType;
 /**
  * A coercion plan represents a process for implementing the coercion rules for converting
  * a supplied value to a given required type. This class handles the case where the required
- * type is jnode-type().
+ * type is jnode().
  */
 public final class JNodeCoercionPlan extends CoercionPlan {
 

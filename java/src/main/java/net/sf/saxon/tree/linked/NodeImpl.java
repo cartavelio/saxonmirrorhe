@@ -298,7 +298,7 @@ public abstract class NodeImpl
      */
 
     @Override
-    public final int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public final int compareOrder(/*@NotNull*/ GNode other) {
         if (other instanceof NamespaceNode) {
             return 0 - other.compareOrder(this);
         }

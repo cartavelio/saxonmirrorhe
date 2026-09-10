@@ -33,7 +33,10 @@ import net.sf.saxon.ma.jnode.AnyJNodeType;
 import net.sf.saxon.ma.jnode.SpecificJNodeType;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.*;
+import net.sf.saxon.pattern.CombinedNodeTest;
+import net.sf.saxon.pattern.MultipleNodeKindTest;
+import net.sf.saxon.pattern.SelectorTest;
+import net.sf.saxon.pattern.UnionQNameTest;
 import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.nodetest.NodeTestStar;
 import net.sf.saxon.pattern.nodetest.NodeTypeTest;
@@ -1014,12 +1017,18 @@ public class XPathParser {
         return lhs;
     }
 
-    private int getCurrentOperatorPrecedence() {
+    private int getCurrentOperatorPrecedence() throws XPathException {
         return OperatorInfo.operatorPrecedence(getCurrentOperatorSymbol());
     }
 
-    private OperatorSymbol getCurrentOperatorSymbol() {
+    private OperatorSymbol getCurrentOperatorSymbol() throws XPathException {
         OperatorSymbol op = t.currentToken.getOperatorSymbol();
+        if (!allowXPath40Syntax && t.currentToken instanceof Token.NameToken) {
+            String tok = ((Token.NameToken) t.currentToken).getValue();
+            if (tok.equals("precedes") || tok.equals("follows") || tok.equals("is-not")) {
+                grumble("Operator '" + t.currentToken.toString() + "' requires 4.0 to be enabled");
+            }
+        }
         if (op != OperatorSymbol.NOT_AN_OPERATOR) {
             return op;
         }
@@ -1079,6 +1088,7 @@ public class XPathParser {
             case GE:
             case GT:
             case IS:
+            case IS_NOT:
             case PRECEDES:
             case FOLLOWS:
             case TO:
@@ -1111,6 +1121,7 @@ public class XPathParser {
             case GT:
                 return env.getConfiguration().getTypeChecker(env.isInBackwardsCompatibleMode()).makeGeneralComparison(lhs, operator, rhs);
             case IS:
+            case IS_NOT:
             case PRECEDES:
             case FOLLOWS:
                 return new IdentityComparison(lhs, operator, rhs);
@@ -2137,8 +2148,8 @@ public class XPathParser {
             case "schema-element":
             case "schema-attribute":
                 return parseKindTest();
-            case "jnode-type":
-                checkLanguageVersion40("jnode-type() item type");
+            case "jnode":
+                checkLanguageVersion40("jnode() item type");
                 nextToken();
                 readToken(Token.LPAREN);
                 if (t.currentToken == Token.RPAREN) {
@@ -3030,7 +3041,7 @@ public class XPathParser {
                         setLocation(ae);
                         return ae;
                     }
-                    case "jnode-type":
+                    case "jnode":
                     case "gnode": {
                         checkLanguageVersion40("nodeTest " + name);
                         NodeTest nodeTest = parseNodeTest(Type.ELEMENT);
@@ -3047,15 +3058,28 @@ public class XPathParser {
                         return ae;
                     }
                     case "get": {
-                        throw new UnsupportedOperationException("temporarily not implemented");
-//                        nextToken();
-//                        readToken(Token.LPAREN);
-//                        Expression selector = parseExpression();
-//                        readToken(Token.RPAREN);
-//                        NodeTest test = new RawSelectorNodeTest(selector, Type.ELEMENT);
-//                        AxisExpression ae = new AxisExpression(AxisInfo.CHILD, test);
-//                        setLocation(ae);
-//                        return ae;
+                        checkLanguageVersion40("nodeTest get()");
+                        nextToken();
+                        readToken(Token.LPAREN);
+                        Expression selector = parseExpression();
+                        readToken(Token.RPAREN);
+                        AxisGetExpression ae = new AxisGetExpression(AxisInfo.CHILD, selector);
+                        setLocation(ae);
+                        return ae;
+                    }
+                    case "type": {
+                        checkLanguageVersion40("nodeTest type()");
+                        nextToken();
+                        readToken(Token.LPAREN);
+                        SequenceType type = parseSequenceType();
+                        readToken(Token.RPAREN);
+                        AxisExpression ae = new AxisExpression(
+                                AxisInfo.CHILD,
+                                new NodeTypeTest(
+                                        new SpecificJNodeType(type,
+                                                              env.getConfiguration().getTypeHierarchy())));
+                        setLocation(ae);
+                        return ae;
                     }
                     case "function":
                     case "fn":
@@ -3127,6 +3151,16 @@ public class XPathParser {
                 short principalNodeType = AxisInfo.principalNodeType[axis];
                 nextToken();
                 readToken(Token.COLON_COLON);
+                if (isKeyword("get") && t.peekAhead() == Token.LPAREN) {
+                    checkLanguageVersion40("nodeTest get()");
+                    nextToken();
+                    readToken(Token.LPAREN);
+                    Expression selector = parseExpression();
+                    readToken(Token.RPAREN);
+                    AxisGetExpression ae = new AxisGetExpression(axis, selector);
+                    setLocation(ae);
+                    return ae;
+                }
                 NodeTest nodeTest = parseNodeTest(principalNodeType);
                 AxisExpression ae = new AxisExpression(axis, nodeTest);
                 setLocation(ae);
@@ -4002,7 +4036,6 @@ public class XPathParser {
                 return new NamedXNodeType(Type.PROCESSING_INSTRUCTION, qName, config);
 
             case "schema-attribute":
-
                 if (empty) {
                     grumble("schema-attribute() requires a name to be supplied");
                     return null;
@@ -4094,13 +4127,25 @@ public class XPathParser {
                     grumble("Expected ')' or ',' in SequenceType");
                 }
                 return null;
-            case "jnode-type":
-                checkLanguageVersion40("NodeTest jnode-type()");
+            case "jnode":
+                checkLanguageVersion40("NodeTest jnode()");
                 // TODO: allow parameterisation by content type
                 return AnyJNodeType.getInstance();
             case "gnode":
                 checkLanguageVersion40("NodeTest gnode()");
                 return AnyGNodeType.getInstance();
+
+            case "type": {
+                checkLanguageVersion40("nodeTest type()");
+                nextToken();
+                readToken(Token.LPAREN);
+                SequenceType type = parseSequenceType();
+                readToken(Token.RPAREN);
+                new NodeTypeTest(
+                        new SpecificJNodeType(type,
+                                              env.getConfiguration().getTypeHierarchy()));
+
+            }
             default:
                 // can't happen!
                 grumble("Unknown node kind " + kind);

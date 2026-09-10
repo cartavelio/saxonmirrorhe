@@ -354,7 +354,7 @@ public final class Orphan implements MutableNodeInfo {
      */
 
     @Override
-    public int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public int compareOrder(/*@NotNull*/ GNode other) {
 
         // are they the same node?
         if (this.equals(other)) {

@@ -7,8 +7,11 @@
 
 package net.sf.saxon.expr.sort;
 
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.ma.jnode.RootJNode;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
+import org.nineml.coffeefilter.model.XNode;
 
 import java.util.Comparator;
 
@@ -45,10 +48,15 @@ public final class GlobalOrderComparer implements Comparator<GNode> {
                 return ((NodeInfo) a).compareOrder(((NodeInfo) b));
             }
             return (int) Long.signum(d1 - d2);
-        } else {
-            // TODO: this is temporary
-            return System.identityHashCode(a) - System.identityHashCode(b);
-        }
+        } else if (a instanceof JNode && b instanceof JNode) {
+            RootJNode rootA = ((JNode) a).getRoot();
+            RootJNode rootB = ((JNode) b).getRoot();
+            if (rootA == rootB) {
+                return a.compareOrder(b);
+            } else {
+                return System.identityHashCode(a) - System.identityHashCode(b);
+            }
+        } else return a instanceof XNode ? -1 : +1;
     }
 }
 

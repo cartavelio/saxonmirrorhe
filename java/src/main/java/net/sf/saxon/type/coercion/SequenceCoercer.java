@@ -94,6 +94,9 @@ public final class SequenceCoercer extends UnaryExpression {
         return OperandRole.ATOMIC_SEQUENCE;
     }
 
+    public SequenceType getRequiredType() {
+        return requiredType;
+    }
     /**
      * Simplify an expression
      *

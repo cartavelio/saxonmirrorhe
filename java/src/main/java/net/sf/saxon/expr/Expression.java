@@ -21,7 +21,6 @@ import net.sf.saxon.lib.Logger;
 import net.sf.saxon.lib.StandardDiagnostics;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.NodeSetPattern;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.str.EmptyUnicodeString;
@@ -34,6 +33,7 @@ import net.sf.saxon.tree.jiter.MonoIterator;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SchemaType;
 import net.sf.saxon.type.UType;
+import net.sf.saxon.type.gnode.XNodeType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.Int64Value;
 import net.sf.saxon.value.IntegerValue;
@@ -1402,7 +1402,7 @@ public abstract class Expression implements IdentityComparable, ExportAgent, Loc
     public Pattern toPattern(Configuration config, boolean topLevel) throws XPathException {
         ItemType type = getItemType();
         if (((getDependencies() & StaticProperty.DEPENDS_ON_NON_DOCUMENT_FOCUS) == 0) &&
-                (type instanceof NodeTest || this instanceof VariableReference)) {
+                (type instanceof XNodeType || this instanceof VariableReference)) {
             return new NodeSetPattern(this);
         }
         if (isCallOn(KeyFn.class) || isCallOn(SuperId.class)) {

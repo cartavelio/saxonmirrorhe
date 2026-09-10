@@ -645,6 +645,7 @@ public class ExpressionTool {
         Genre genre = first.getGenre();  // Variable introduced for C# type checking
         switch (genre) {
             case XNODE:
+            case JNODE:
                 iterator.close();
                 return true;
             case ATOMIC: {
@@ -1278,7 +1279,7 @@ public class ExpressionTool {
         // the expression /.. is sometimes used to represent the empty node-set. Applying this simplification
         // now avoids generating warnings for this case.
         if (start instanceof RootExpression &&
-                step instanceof AxisExpression && ((AxisExpression) step).getAxis() == AxisInfo.PARENT) {
+                step instanceof GeneralizedAxisExpression && ((GeneralizedAxisExpression) step).getAxis() == AxisInfo.PARENT) {
             return Literal.makeEmptySequence();
         }
 
@@ -1331,7 +1332,7 @@ public class ExpressionTool {
      */
 
     private static boolean isFilteredAxisPath(Expression exp) {
-        return unfilteredExpression(exp, true) instanceof AxisExpression;
+        return unfilteredExpression(exp, true) instanceof GeneralizedAxisExpression;
     }
 
     /**

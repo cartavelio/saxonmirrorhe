@@ -8,10 +8,7 @@
 package net.sf.saxon.tree.wrapper;
 
 import net.sf.saxon.event.Receiver;
-import net.sf.saxon.om.AtomicSequence;
-import net.sf.saxon.om.CopyOptions;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.SequenceIterator;
+import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
 import net.sf.saxon.s9api.Location;
 import net.sf.saxon.trans.XPathException;
@@ -145,7 +142,7 @@ public class TypeStrippedNode extends AbstractVirtualNode implements WrappingFun
      */
 
     @Override
-    public int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public int compareOrder(/*@NotNull*/ GNode other) {
         if (other instanceof TypeStrippedNode) {
             return node.compareOrder(((TypeStrippedNode) other).node);
         } else {

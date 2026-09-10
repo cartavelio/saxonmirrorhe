@@ -28,6 +28,9 @@ public final class MultipleNodeKindTest extends NodeTest {
     public final static MultipleNodeKindTest PARENT_NODE =
             new MultipleNodeKindTest(UType.DOCUMENT.union(UType.ELEMENT).union(UType.JNODE));
 
+    public final static MultipleNodeKindTest PARENT_XNODE =
+            new MultipleNodeKindTest(UType.DOCUMENT.union(UType.ELEMENT));
+
     public final static MultipleNodeKindTest DOC_ELEM_ATTR =
         new MultipleNodeKindTest(UType.DOCUMENT.union(UType.ELEMENT).union(UType.ATTRIBUTE));
 

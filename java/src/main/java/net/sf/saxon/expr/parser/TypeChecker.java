@@ -14,12 +14,12 @@ import net.sf.saxon.lib.Feature;
 import net.sf.saxon.ma.arrays.ArrayItemType;
 import net.sf.saxon.ma.map.MapType;
 import net.sf.saxon.om.*;
-import net.sf.saxon.pattern.nodetest.NodeTest;
 import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.*;
 import net.sf.saxon.type.coercion.CoercionPlan;
 import net.sf.saxon.type.coercion.SequenceCoercer;
+import net.sf.saxon.type.gnode.GNodeType;
 import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
@@ -190,7 +190,7 @@ public class TypeChecker {
             return true;
         }
         if ((supplied instanceof ArrayItemType || supplied instanceof MapType) &&
-                required instanceof NodeTest) {
+                required instanceof GNodeType) {
             return true;
         }
         if (uRequired.overlaps(UType.ANY_ATOMIC)) {

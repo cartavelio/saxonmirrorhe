@@ -174,7 +174,7 @@ public class NamedXNodeType extends XNodeType {
         return nillable;
     }
 
-    public SchemaType getSchemaType() {
+    public SchemaType getContentType() {
         return schemaType;
     }
 

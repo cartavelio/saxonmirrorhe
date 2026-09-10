@@ -99,7 +99,7 @@ public class AxiomElementNodeWrapper extends AxiomParentNodeWrapper {
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         if (other instanceof AxiomDocument) {
             return +1;
         } else if (other instanceof AxiomAttributeWrapper) {

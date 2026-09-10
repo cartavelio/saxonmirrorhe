@@ -7,6 +7,7 @@
 
 package net.sf.saxon.tree.wrapper;
 
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
 import net.sf.saxon.pattern.nodetest.NodePredicate;
@@ -134,7 +135,7 @@ public class RebasedNode extends AbstractVirtualNode implements WrappingFunction
      */
 
     @Override
-    public int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public int compareOrder(/*@NotNull*/ GNode other) {
         if (other instanceof RebasedNode) {
             return node.compareOrder(((RebasedNode) other).node);
         } else {

@@ -219,7 +219,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         if (this == other) {
             return 0;
         }
@@ -657,7 +657,7 @@ public final class TextFragmentValue implements NodeInfo, SourceLocator {
          */
 
         @Override
-        public int compareOrder(NodeInfo other) {
+        public int compareOrder(GNode other) {
             if (this == other) {
                 return 0;
             }

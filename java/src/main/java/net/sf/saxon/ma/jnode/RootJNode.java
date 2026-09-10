@@ -121,10 +121,37 @@ public class RootJNode extends JNode {
         return EmptyIterator.getInstance();
     }
 
+    /**
+     * Compare document order of this node against another node.
+     * <p>The other node must always be in the same tree; the effect of calling this method
+     * when the two nodes are in different trees is undefined. To obtain a global ordering
+     * of nodes, the application should first compare the result of getDocumentNumber(),
+     * and only if the document number is the same should compareOrder() be called.</p>
+     *
+     * @param other the other node
+     * @return -1 if this node precedes the other, 0 if they are the same node, +1 if
+     * this node follows the other
+     */
+    @Override
+    public int compareOrder(GNode other) {
+        if (!(other instanceof JNode)) {
+            throw new IllegalArgumentException("Trying to compare JNodes and XNodes");
+        }
+        if (other instanceof RootJNode) {
+            return System.identityHashCode(this) - System.identityHashCode(other);
+        }
+        RootJNode otherRoot = ((JNode)other).getRoot();
+        if (otherRoot == this) {
+            return -1;
+        }
+        return compareOrder(otherRoot);
+    }
+
     private static class JNodeMapIterator implements SequenceIterator {
 
         private final RootJNode origin;
         private final Iterator<KeyValuePair> mapEntryIterator;
+        private int serialNr = 0;
 
         public JNodeMapIterator(RootJNode origin) {
             this.origin = origin;
@@ -138,7 +165,7 @@ public class RootJNode extends JNode {
         public GNode next() {
             if (mapEntryIterator.hasNext()) {
                 KeyValuePair nextItem = mapEntryIterator.next();
-                return new ChildJNode(origin, 1, nextItem.key, nextItem.value);
+                return new ChildJNode(origin, 1, nextItem.key, nextItem.value, serialNr++);
             } else {
                 return null;
             }
@@ -163,7 +190,9 @@ public class RootJNode extends JNode {
         public GNode next() {
             if (arrayEntryIterator.hasNext()) {
                 GroundedValue nextItem = arrayEntryIterator.next();
-                return new ChildJNode(origin, 1, Int64Value.makeIntegerValue(index++), nextItem);
+                ChildJNode j = new ChildJNode(origin, 1, Int64Value.makeIntegerValue(index), nextItem, index-1);
+                index++;
+                return j;
             } else {
                 return null;
             }

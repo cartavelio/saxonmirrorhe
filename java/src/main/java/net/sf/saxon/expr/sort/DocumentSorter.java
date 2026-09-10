@@ -17,12 +17,12 @@ import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.om.AxisInfo;
 import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.type.gnode.AnyXNodeType;
 import net.sf.saxon.pattern.Pattern;
 import net.sf.saxon.trace.ExpressionPresenter;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.Affinity;
 import net.sf.saxon.type.TypeHierarchy;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.value.Cardinality;
 import net.sf.saxon.value.SequenceType;
 
@@ -98,12 +98,12 @@ public class DocumentSorter extends UnaryExpression {
             return e2;
         }
         TypeHierarchy th = visitor.getConfiguration().getTypeHierarchy();
-        if (th.relationship(getBaseExpression().getItemType(), AnyXNodeType.getInstance()) == Affinity.DISJOINT) {
+        if (th.relationship(getBaseExpression().getItemType(), AnyGNodeType.getInstance()) == Affinity.DISJOINT) {
             return getBaseExpression();
         }
         Supplier<RoleDiagnostic> role = () -> new RoleDiagnostic(RoleDiagnostic.MISC, "document-order sorter", 0);
         Expression operand = visitor.getConfiguration().getTypeChecker(false).staticTypeCheck(
-                getBaseExpression(), SequenceType.NODE_SEQUENCE, role, visitor);
+                getBaseExpression(), SequenceType.GNODE_SEQUENCE, role, visitor);
         setBaseExpression(operand);
         return this;
     }

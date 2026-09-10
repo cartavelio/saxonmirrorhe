@@ -169,6 +169,8 @@ public final class IdentityComparison extends BinaryExpression {
     protected String tag() {
         switch (operator) {
             case IS: return "is";
+            case IS_NOT:
+                return "is-not";
             case PRECEDES: return "precedes";
             case FOLLOWS: return "follows";
             default: return "?";
@@ -218,6 +220,8 @@ public final class IdentityComparison extends BinaryExpression {
         switch (operator) {
             case IS:
                 return node0.equals(node1);
+            case IS_NOT:
+                return !node0.equals(node1);
             case PRECEDES:
                 return GlobalOrderComparer.getInstance().compare((NodeInfo)node0, (NodeInfo)node1) < 0;
             case FOLLOWS:
@@ -331,6 +335,19 @@ public final class IdentityComparison extends BinaryExpression {
                     } else {
                         return context -> p0.eval(context).equals(p1.eval(context));
                     }
+                case IS_NOT:
+                    if (nullable0 || nullable1) {
+                        return context -> {
+                            NodeInfo v0 = (NodeInfo) p0.eval(context);
+                            NodeInfo v1 = (NodeInfo) p1.eval(context);
+                            if (v0 == null || v1 == null) {
+                                return false;
+                            }
+                            return !v0.equals(v1);
+                        };
+                    } else {
+                        return context -> !p0.eval(context).equals(p1.eval(context));
+                    }
                 case PRECEDES:
                     return context -> {
                         NodeInfo v0 = (NodeInfo) p0.eval(context);
@@ -398,6 +415,22 @@ public final class IdentityComparison extends BinaryExpression {
                         }
                     } else {
                         return context -> BooleanValue.get(p0.eval(context).equals(p1.eval(context)));
+                    }
+                case IS_NOT:
+                    if (nullable0 || nullable1) {
+                        return context -> {
+                            NodeInfo v0 = (NodeInfo) p0.eval(context);
+                            if (v0 == null) {
+                                return null;
+                            }
+                            NodeInfo v1 = (NodeInfo) p1.eval(context);
+                            if (v1 == null) {
+                                return null;
+                            }
+                            return BooleanValue.get(!v0.equals(v1));
+                        };
+                    } else {
+                        return context -> BooleanValue.get(!p0.eval(context).equals(p1.eval(context)));
                     }
                 case PRECEDES:
                     return context -> {

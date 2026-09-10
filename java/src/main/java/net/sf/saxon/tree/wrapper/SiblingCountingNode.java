@@ -7,14 +7,14 @@
 
 package net.sf.saxon.tree.wrapper;
 
-import net.sf.saxon.om.NodeInfo;
+import net.sf.saxon.om.GNode;
 
 /**
- * Interface that extends NodeInfo by providing a method to get the position
+ * Interface that extends GNode by providing a method to get the position
  * of a node relative to its siblings.
  */
 
-public interface SiblingCountingNode extends NodeInfo {
+public interface SiblingCountingNode extends GNode {
 
     /**
      * Get the index position of this node among its siblings (starting from 0)

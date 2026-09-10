@@ -52,6 +52,8 @@ public class OperatorInfo {
                 return "ge";
             case IS:
                 return "is";
+            case IS_NOT:
+                return "is-not";
             case PRECEDES:
                 return "<<";
             case FOLLOWS:
@@ -123,6 +125,7 @@ public class OperatorInfo {
             case GT: return ( 6);
             case GE: return ( 6);
             case IS: return ( 6);
+            case IS_NOT: return (6);
             case PRECEDES: return ( 6);
             case FOLLOWS: return ( 6);
             case OTHERWISE: return ( 7);

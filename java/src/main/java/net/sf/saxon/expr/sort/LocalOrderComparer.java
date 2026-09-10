@@ -8,7 +8,6 @@
 package net.sf.saxon.expr.sort;
 
 import net.sf.saxon.om.GNode;
-import net.sf.saxon.om.NodeInfo;
 
 import java.util.Comparator;
 
@@ -35,12 +34,7 @@ public final class LocalOrderComparer implements Comparator<GNode> {
 
     @Override
     public int compare(GNode a, GNode b) {
-        if (a instanceof NodeInfo && b instanceof NodeInfo) {
-            return ((NodeInfo) a).compareOrder((NodeInfo) b);
-        } else {
-            // TODO: this is temporary
-            return System.identityHashCode(a) - System.identityHashCode(b);
-        }
+        return a.compareOrder(b);
     }
 }
 

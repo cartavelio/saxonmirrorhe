@@ -12,6 +12,8 @@ import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.elab.ItemElaborator;
 import net.sf.saxon.expr.elab.ItemEvaluator;
 import net.sf.saxon.expr.parser.*;
+import net.sf.saxon.ma.jnode.JNode;
+import net.sf.saxon.om.GNode;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NodeInfo;
 import net.sf.saxon.om.SequenceIterator;
@@ -22,7 +24,7 @@ import net.sf.saxon.trans.SaxonErrorCode;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.tree.iter.SingletonIterator;
 import net.sf.saxon.type.*;
-import net.sf.saxon.type.gnode.AnyXNodeType;
+import net.sf.saxon.type.gnode.AnyGNodeType;
 import net.sf.saxon.type.gnode.NodeKindType;
 
 
@@ -66,7 +68,7 @@ public class RootExpression extends Expression {
             return cie;
         }
 
-        Affinity relation = th.relationship(contextInfo.getItemType(), AnyXNodeType.getInstance());
+        Affinity relation = th.relationship(contextInfo.getItemType(), AnyGNodeType.getInstance());
         if (relation == Affinity.DISJOINT) {
             throw new XPathException(noContextMessage() + ": the context item is not a node")
                     .withErrorCode("XPTY0020")
@@ -201,7 +203,7 @@ public class RootExpression extends Expression {
      */
 
     /*@Nullable*/
-    public NodeInfo getNode(XPathContext context) throws XPathException {
+    public GNode getNode(XPathContext context) throws XPathException {
         Item current = context.getContextItem();
         if (current == null) {
             dynamicError("Finding root of tree: the context item is absent", "XPDY0002", context);
@@ -212,6 +214,8 @@ public class RootExpression extends Expression {
                 dynamicError("The root of the tree containing the context item is not a document node", "XPDY0050", context);
             }
             return doc;
+        } else if (current instanceof JNode) {
+            return ((JNode) current).getRoot();
         }
         typeError("Finding root of tree: the context item is not a node", "XPTY0020", context);
         // dummy return; we never get here
@@ -297,7 +301,7 @@ public class RootExpression extends Expression {
     }
 
     @Override
-    public NodeInfo evaluateItem(XPathContext context) throws XPathException {
+    public GNode evaluateItem(XPathContext context) throws XPathException {
         return getNode(context);
     }
 

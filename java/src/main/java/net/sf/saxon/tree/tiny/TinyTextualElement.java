@@ -270,7 +270,7 @@ public class TinyTextualElement extends TinyElementImpl {
          */
 
         @Override
-        public int compareOrder(NodeInfo other) {
+        public int compareOrder(GNode other) {
             if (other.equals(this)) {
                 return 0;
             } else if (other.equals(getParent())) {

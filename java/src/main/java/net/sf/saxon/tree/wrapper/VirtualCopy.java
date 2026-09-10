@@ -304,7 +304,7 @@ public class VirtualCopy implements NodeInfo {
      */
 
     @Override
-    public int compareOrder(/*@NotNull*/ NodeInfo other) {
+    public int compareOrder(/*@NotNull*/ GNode other) {
         if (other instanceof VirtualCopy) {
             int c = root.compareOrder(((VirtualCopy) other).root);
             if (c == 0) {

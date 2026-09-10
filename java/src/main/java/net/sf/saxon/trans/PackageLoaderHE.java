@@ -2647,6 +2647,12 @@ public class PackageLoaderHE implements IPackageLoader {
             return comp;
         });
 
+        eMap.put("is-not", (loader, element) -> {
+            Expression lhs = loader.getFirstChildExpression(element);
+            Expression rhs = loader.getSecondChildExpression(element);
+            return new IdentityComparison(lhs, OperatorSymbol.IS_NOT, rhs);
+        });
+
         eMap.put("isLast", (loader, element) -> {
             boolean cond = element.getAttributeValue(NamespaceUri.NULL,"test").equals("1");
             return new IsLastExpression(cond);

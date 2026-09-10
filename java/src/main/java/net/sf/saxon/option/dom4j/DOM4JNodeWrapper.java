@@ -178,7 +178,7 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
      */
 
     @Override
-    public int compareOrder(NodeInfo other) {
+    public int compareOrder(GNode other) {
         if (other instanceof SiblingCountingNode) {
             return Navigator.compareOrder(this, (SiblingCountingNode) other);
         } else {

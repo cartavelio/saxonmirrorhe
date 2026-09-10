@@ -7,6 +7,11 @@ import net.sf.saxon.value.SequenceType;
 
 import java.util.Optional;
 
+/**
+ * Represents the type jnode(T) where T is a sequence type giving the type
+ * of the JNode content.
+ */
+
 public class SpecificJNodeType extends JNodeType {
 
     private final SequenceType valueType;
@@ -79,7 +84,7 @@ public class SpecificJNodeType extends JNodeType {
      */
     @Override
     public String toString() {
-        return "jnode-type(" + valueType.toString() + ")";
+        return "jnode(" + valueType.toString() + ")";
     }
 }
 

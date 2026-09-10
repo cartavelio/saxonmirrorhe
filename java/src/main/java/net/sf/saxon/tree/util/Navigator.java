@@ -836,13 +836,13 @@ public final class Navigator {
             return 0;
         }
 
-        NodeInfo firstParent = first.getParent();
+        GNode firstParent = first.getParent();
         if (firstParent == null) {
             // first node is the root
             return -1;
         }
 
-        NodeInfo secondParent = second.getParent();
+        GNode secondParent = second.getParent();
         if (secondParent == null) {
             // second node is the root
             return +1;
@@ -862,8 +862,8 @@ public final class Navigator {
         // find the depths of both nodes in the tree
         int depth1 = 0;
         int depth2 = 0;
-        NodeInfo p1 = first;
-        NodeInfo p2 = second;
+        GNode p1 = first;
+        GNode p2 = second;
         while (p1 != null) {
             depth1++;
             p1 = p1.getParent();
@@ -896,8 +896,8 @@ public final class Navigator {
 
         // now move up both branches in sync until we find a common parent
         while (true) {
-            NodeInfo par1 = p1.getParent();
-            NodeInfo par2 = p2.getParent();
+            GNode par1 = p1.getParent();
+            GNode par2 = p2.getParent();
             if (par1 == null || par2 == null) {
                 throw new NullPointerException("Node order comparison - internal error");
             }
@@ -1037,10 +1037,10 @@ public final class Navigator {
     public static void appendSequentialKey(/*@NotNull*/ SiblingCountingNode node, /*@NotNull*/ StringBuilder sb, boolean addDocNr) {
         if (addDocNr) {
             sb.append('w');
-            sb.append(node.getTreeInfo().getDocumentNumber());
+            sb.append(((NodeInfo)node).getTreeInfo().getDocumentNumber());
         }
         if (node.getNodeKind() != Type.DOCUMENT) {
-            NodeInfo parent = node.getParent();
+            GNode parent = node.getParent();
             if (parent != null) {
                 appendSequentialKey((SiblingCountingNode) parent, sb, false);
             }
