@@ -137,6 +137,15 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     /**
+     * Ask whether the element is in the XSLT namespace
+     * @return true if the element is in the XSLT namespace
+     */
+
+    public boolean isInXsltNamespace() {
+        return true; // unless specified otherwise in a subclass
+    }
+
+    /**
      * Get the base URI of the element, which acts as the static base URI for XPath expressions defined
      * on this element. This is an expensive operation so the result is cached
      *
@@ -613,7 +622,6 @@ public abstract class StyleElement extends ElementImpl {
     protected void checkUnknownAttribute(NodeName nc) {
 
         String attributeURI = nc.getURI();
-        String elementURI = getURI();
         String clarkName = nc.getStructuredQName().getClarkName();
 
         if (forwardsCompatibleModeIsEnabled()) {
@@ -625,7 +633,7 @@ public abstract class StyleElement extends ElementImpl {
 
         if (isInstruction() &&
                 attributeURI.equals(NamespaceConstant.XSLT) &&
-                !elementURI.equals(NamespaceConstant.XSLT) &&
+                !isInXsltNamespace() &&
                 (clarkName.endsWith("}default-collation") ||
                          clarkName.endsWith("}default-mode") ||
                          clarkName.endsWith("}xpath-default-namespace") ||
@@ -640,7 +648,7 @@ public abstract class StyleElement extends ElementImpl {
 
         // allow standard attributes on an XSLT element
 
-        if (elementURI.equals(NamespaceConstant.XSLT) &&
+        if (isInXsltNamespace() &&
                 (clarkName.equals("default-collation") ||
                          clarkName.equals("default-mode") ||
                          clarkName.equals("expand-text") ||
@@ -1102,7 +1110,7 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     void processDefaultCollationAttribute() {
-        String ns = getURI().equals(NamespaceConstant.XSLT) ? "" : NamespaceConstant.XSLT;
+        String ns = isInXsltNamespace() ? "" : NamespaceConstant.XSLT;
         String v = getAttributeValue(ns, "default-collation");
         StringBuilder reasons = new StringBuilder();
         if (v != null) {
@@ -1199,7 +1207,7 @@ public abstract class StyleElement extends ElementImpl {
      */
 
     void processDefaultMode() {
-        String ns = getURI().equals(NamespaceConstant.XSLT) ? "" : NamespaceConstant.XSLT;
+        String ns = isInXsltNamespace() ? "" : NamespaceConstant.XSLT;
         String v = getAttributeValue(ns, "default-mode");
         if (v != null) {
             if (v.equals("#unnamed")) {
@@ -1945,7 +1953,7 @@ public abstract class StyleElement extends ElementImpl {
     }
 
     protected boolean isWithinDeclaredStreamableConstruct() {
-        if (getURI().equals(NamespaceConstant.XSLT)) {
+        if (isInXsltNamespace()) {
             String streamableAtt = getAttributeValue("streamable");
             if (streamableAtt != null) {
                 return processStreamableAtt(streamableAtt);

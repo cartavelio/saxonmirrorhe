@@ -28,6 +28,16 @@ public class XSLArray extends XSLSequence {
 
     private boolean composite;
 
+    /**
+     * Ask whether the element is in the XSLT namespace
+     *
+     * @return true if the element is in the XSLT namespace
+     */
+    @Override
+    public boolean isInXsltNamespace() {
+        return getNodeName().hasURI(NamespaceConstant.XSLT);
+    }
+
     @Override
     protected void prepareAttributes() {
 
@@ -47,7 +57,7 @@ public class XSLArray extends XSLSequence {
 
     @Override
     public Expression compile(Compilation exec, ComponentDeclaration decl) throws XPathException {
-        if (getURI().equals(NamespaceConstant.XSLT)) {
+        if (isInXsltNamespace()) {
             requireXslt40(null);
         } else if (!getConfiguration().isLicensedFeature(Configuration.LicenseFeature.PROFESSIONAL_EDITION)) {
             compileError("saxon:array requires a Saxon-PE or -EE license");
