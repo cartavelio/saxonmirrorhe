@@ -415,6 +415,11 @@ public final class Atomizer extends UnaryExpression {
         return getAtomizedItemType(getBaseExpression(), untyped, th);
     }
 
+    @Override
+    public UType getStaticUType(UType contextItemType) {
+        return UType.ANY_ATOMIC.intersection(getItemType().getUType());
+    }
+
     /**
      * Compute the type that will result from atomizing the result of a given expression
      *
