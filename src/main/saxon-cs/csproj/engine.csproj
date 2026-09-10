@@ -88,6 +88,7 @@ latest W3C specifications (notably XSLT 3.0, XQuery 3.1, and XPath 3.1).</Descri
       <PackageReference Include="Singulink.Numerics.BigIntegerExtensions" Version="2.1.0" />
       <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
       <PackageReference Include="StringComparer" Version="1.0.1"/>
+      <PackageReference Include="System.IO.Hashing" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.0" />
