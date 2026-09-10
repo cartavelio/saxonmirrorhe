@@ -197,6 +197,8 @@ public class Transform {
         options.setPermittedValues("Tlevel", new String[]{"none", "low", "normal", "high"}, "normal");
         options.addRecognizedOption("Tout", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "File for trace listener output");
+        options.addRecognizedOption("TC", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
+                                    "Write coverage data to specified output file");
         //#if CSHARP==false
         options.addRecognizedOption("TP", CommandLineOptions.TYPE_FILENAME | CommandLineOptions.VALUE_REQUIRED,
                                     "Use profiling trace listener, with specified output file");
@@ -552,6 +554,19 @@ public class Transform {
                             injector.setTraceLevel(TraceLevel.HIGH);
                             break;
                     }
+                }
+            }
+
+            value = options.getOptionValue("TC");
+            if (value != null) {
+                traceListener = new CoverageTraceListener();
+                processor.setConfigurationProperty(Feature.TRACE_LISTENER, traceListener);
+                processor.setConfigurationProperty(Feature.LINE_NUMBERING, true);
+                compiler.setJustInTimeCompilation(false);
+                compiler.getUnderlyingCompilerInfo().setCodeInjector(new XSLTTraceCodeInjector());
+                if (!value.isEmpty()) {
+                    traceListener.setOutputDestination(
+                            new StandardLogger(new File(value)));
                 }
             }
 
