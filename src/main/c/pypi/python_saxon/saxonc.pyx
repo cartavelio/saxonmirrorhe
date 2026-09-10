@@ -1006,10 +1006,12 @@ cdef class PyXslt30Processor:
         '''make_c_str(name)'''
         py_name_string = name.encode('UTF-8') if name is not None else None
         c_str = py_name_string if name is not None else ""
+        if value is None:
+            return
         if c_str is not NULL:
             value.thisvptr.incrementRefCount()
-            '''print("set_parameter called")'''
             self.thisxptr.setParameter(c_str, value.thisvptr)
+
      def get_parameter(self, name):
         """
         get_parameter(self, name)
@@ -1683,6 +1685,8 @@ cdef class PyXsltExecutable:
         cdef PyXdmItem ivalue_
         cdef PyXdmNode nvalue_
         cdef PyXdmValue value_
+        if value is None:
+            return
         if c_str is not NULL:
             if  isinstance(value, PyXdmAtomicValue):
                 avalue_ = value
