@@ -2,6 +2,7 @@ package com.saxonica.ee.config;
 
 import com.saxonica.config.EnterpriseConfiguration;
 import com.saxonica.config.pe.DynamicLoaderPE;
+import com.saxonica.ee.domino.DominoNode;
 
 /**
  * Specialization of DynamicLoader for use in Saxon-EE
@@ -18,6 +19,7 @@ public class DynamicLoaderEE extends DynamicLoaderPE {
     protected void registerKnownClasses() {
         super.registerKnownClasses();
         knownClasses.put("com.saxonica.config.EnterpriseConfiguration", EnterpriseConfiguration.class);
+        knownClasses.put("com.saxonica.ee.domino.DominoNode", DominoNode.class);
     }
 }
 

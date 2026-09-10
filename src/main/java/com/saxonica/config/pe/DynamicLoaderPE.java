@@ -21,8 +21,7 @@ public class DynamicLoaderPE extends DynamicLoader {
         super.registerKnownClasses();
         knownClasses.put("com.saxonica.config.ProfessionalConfiguration", ProfessionalConfiguration.class);
         knownClasses.put("com.saxonica.config.Verifier", Verifier.class);
-        //knownClasses.put("com.saxonica.config.JavaPlatformPE", JavaPlatformPE.class);
-
+        knownClasses.put("org.w3c.dom.Document", org.w3c.dom.Document.class);
         knownClasses.put("net.sf.saxon.expr.number.Numberer_en", Numberer_en.class);
 
     }
