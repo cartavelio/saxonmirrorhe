@@ -6,6 +6,7 @@ using System.Xml;
 using System.IO;
 using System.Globalization;
 using System.Net;
+using System.Xml.Linq;
 using JConfiguration = Saxon.Hej.Configuration;
 using JPreparedStylesheet = Saxon.Hej.PreparedStylesheet;
 using JClause = Saxon.Hej.expr.flwor.Clause;
@@ -154,7 +155,7 @@ namespace TestDriver {
 
             DocumentBuilder builder = environment.processor.NewDocumentBuilder();
             builder.LineNumbering = true;
-            builder.TreeModel = driver.TreeModel;
+            //builder.TreeModel = driver.TreeModel;
             environment.sourceDocs = new SysCollGen.Dictionary<string, XdmNode>();
             if (environments != null && name != null) {
                 try {
@@ -855,6 +856,10 @@ namespace TestDriver {
                     validation = "skip";
                 }
 
+                string useTreeModel = driver.TreeModel;
+                if (validation != "skip") {
+                    useTreeModel = "tiny";
+                }
                 string streaming = ((XdmNode)source).GetAttributeValue(new QName("", "streaming"));
                 if (!validateSources && validation.Equals("skip")) {
                     builder.SchemaValidationMode = SchemaValidationMode.None;
@@ -927,7 +932,30 @@ namespace TestDriver {
                             Uri absUri = builder.BaseUri =
                                 new Uri(res.ResolveUri(((XdmNode)env).BaseUri, uri).AbsoluteUri);
                             try {
-                                doc = builder.Build(ss);
+                                switch (useTreeModel) {
+                                    case "condensed":
+                                        builder.TreeModel = TreeModel.TinyTreeCondensed;
+                                        doc = builder.Build(ss);
+                                        break;
+                                    case "linked":
+                                        builder.TreeModel = TreeModel.LinkedTree;
+                                        doc = builder.Build(ss);
+                                        break;
+                                    case "dom":
+                                        XmlDocument dom = new();
+                                        dom.Load(ss);
+                                        doc = builder.Wrap(dom);
+                                        break;
+                                    case "linq":
+                                        XDocument linq = XDocument.Load(ss, LoadOptions.PreserveWhitespace);
+                                        doc = builder.Wrap(linq);
+                                        break;
+                                    default:
+                                        builder.TreeModel = TreeModel.TinyTree;
+                                        doc = builder.Build(ss);
+                                        break;
+                                    
+                                }
                                 environment.sourceDocs.Add(absUri.OriginalString, doc);
                             }
                             catch (Exception e) {
