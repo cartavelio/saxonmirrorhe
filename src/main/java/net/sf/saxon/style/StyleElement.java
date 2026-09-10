@@ -2587,45 +2587,47 @@ public abstract class StyleElement extends ElementImpl {
 
         // first search for a local variable declaration
         if (!isTopLevel()) {
-            if (seesAvuncularVariables()) {
-                AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
-                while (true) {
-                    curr = preceding.next();
-                    while (curr == null) {
-                        curr = prev.getParent();
-                        if (curr instanceof StyleElement) {
-                            implicit = ((StyleElement) curr).hasImplicitBinding(qName);
-                            if (implicit != null) {
-                                return implicit;
-                            }
+            while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
+                // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
+                curr = curr.getParent();
+            }
+            AxisIterator preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+            while (true) {
+                curr = preceding.next();
+                while (curr == null) {
+                    curr = prev.getParent();
+                    if (curr instanceof StyleElement) {
+                        implicit = ((StyleElement) curr).hasImplicitBinding(qName);
+                        if (implicit != null) {
+                            return implicit;
                         }
-                        while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
-                            // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
-                            curr = curr.getParent();
-                        }
-                        prev = curr;
-                        if (curr.getParent() instanceof XSLModuleRoot) {
-                            break;   // top level
-                        }
-                        preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
-                        curr = preceding.next();
                     }
+                    while (curr instanceof StyleElement && !((StyleElement) curr).seesAvuncularVariables()) {
+                        // a local variable is not visible within a sibling xsl:fallback or xsl:catch element
+                        curr = curr.getParent();
+                    }
+                    prev = curr;
                     if (curr.getParent() instanceof XSLModuleRoot) {
-                        break;
+                        break;   // top level
                     }
-                    if (curr instanceof XSLGeneralVariable) {
-                        SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);
-                        if (sourceBinding != null) {
-                            return sourceBinding;
-                        }
-                    }
-
+                    preceding = curr.iterateAxis(AxisInfo.PRECEDING_SIBLING);
+                    curr = preceding.next();
                 }
+                if (curr.getParent() instanceof XSLModuleRoot) {
+                    break;
+                }
+                if (curr instanceof XSLGeneralVariable) {
+                    SourceBinding sourceBinding = ((XSLGeneralVariable) curr).getBindingInformation(qName);
+                    if (sourceBinding != null) {
+                        return sourceBinding;
+                    }
+                }
+
             }
         }
         return null;
     }
-
+    
     /**
      * Ask whether variables declared in an "uncle" element are visible.
      *
