@@ -149,9 +149,9 @@ public class Bug6225 {
                     if (item == null) {
                         break;
                     }
-                    String code = item.getAttributeValue("", "n");
+                    String code = item.getAttributeValue(NamespaceUri.NULL, "n");
                     int icode = Integer.parseInt(code, 16);
-                    String variants = item.getAttributeValue("", "v");
+                    String variants = item.getAttributeValue(NamespaceUri.NULL, "v");
                     String[] vhex = variants.split(",");
                     int[] vint = new int[vhex.length];
                     for (int i = 0; i < vhex.length; i++) {
@@ -262,9 +262,9 @@ public class Bug6225 {
                 if (item == null) {
                     break;
                 }
-                String code = item.getAttributeValue("", "n");
+                String code = item.getAttributeValue(NamespaceUri.NULL, "n");
                 int icode = Integer.parseInt(code, 16);
-                String variants = item.getAttributeValue("", "v");
+                String variants = item.getAttributeValue(NamespaceUri.NULL, "v");
                 String[] vhex = variants.split(",");
                 int[] vint = new int[vhex.length];
                 for (int i = 0; i < vhex.length; i++) {
