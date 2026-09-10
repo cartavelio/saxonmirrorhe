@@ -258,6 +258,36 @@ public class TinyBuilder extends Builder {
         assert tt != null;
         textualElementEligibilityState = Eligibility.INELIGIBLE;
 
+        startElementSetupNamespaces(namespaces);
+
+        startElementSetupSiblings(tt);
+
+        startElementAddNode(elemName, type, tt, properties);
+
+        startElementCalculateDepth(tt);
+
+        startElementLocalSystemId(tt, location);
+
+        if (lineNumbering) {
+            tt.setLineNumber(nodeNr, location.getLineNumber(), location.getColumnNumber());
+        }
+        //#if CSHARP==false
+        if (location instanceof ReceivingContentHandler.LocalLocator &&
+                ((ReceivingContentHandler.LocalLocator)location).levelInEntity == 0 && currentDepth >= 1) {
+            tt.markTopWithinEntity(nodeNr);
+        }
+        //#endif
+        for (AttributeInfo att : attributes) {
+            attribute2(att.getNodeName(), att.getType(),
+                      getAttValue(att), location, att.getProperties());
+        }
+        textualElementEligibilityState = noNewNamespaces ? Eligibility.PRIMED : Eligibility.INELIGIBLE;
+        tree.addNamespaces(nodeNr, namespaceStack.peek());
+        nodeNr++;
+    }
+
+    private void startElementSetupNamespaces(NamespaceMap namespaces)
+    {
         noNewNamespaces = true;
         if (namespaceStack.isEmpty()) {
             noNewNamespaces = false;
@@ -266,7 +296,10 @@ public class TinyBuilder extends Builder {
             noNewNamespaces = namespaces == namespaceStack.peek();
             namespaceStack.push(namespaces);
         }
+    }
 
+    private void startElementSetupSiblings(TinyTree tt)
+    {
         if (siblingsAtDepth[currentDepth] > PARENT_POINTER_INTERVAL) {
             nodeNr = tt.addNode(Type.PARENT_POINTER, currentDepth, prevAtDepth[currentDepth - 1], 0, 0);
             int prev = prevAtDepth[currentDepth];
@@ -277,7 +310,10 @@ public class TinyBuilder extends Builder {
             prevAtDepth[currentDepth] = nodeNr;
             siblingsAtDepth[currentDepth] = 0;
         }
+    }
 
+    private void startElementAddNode(NodeName elemName, SchemaType type, TinyTree tt, int properties)
+    {
         // now add the element node itself
         int fp = elemName.obtainFingerprint(namePool);
         int prefixCode = tree.prefixPool.obtainPrefixCode(elemName.getPrefix());
@@ -296,7 +332,10 @@ public class TinyBuilder extends Builder {
                 isIDElement = true;
             }
         }
+    }
 
+    private void startElementCalculateDepth(TinyTree tt)
+    {
         if (currentDepth == 0) {
             prevAtDepth[0] = nodeNr;
             prevAtDepth[1] = -1;
@@ -318,7 +357,10 @@ public class TinyBuilder extends Builder {
         }
         prevAtDepth[currentDepth] = -1;
         siblingsAtDepth[currentDepth] = 0;
+    }
 
+    private void startElementLocalSystemId(TinyTree tt, Location location)
+    {
         String localSystemId = location.getSystemId();
         if (isUseEventLocation() && localSystemId != null) {
             tt.setSystemId(nodeNr, localSystemId);
@@ -329,24 +371,8 @@ public class TinyBuilder extends Builder {
             uniformBaseURI = false;
             tt.setUniformBaseUri(null);
         }
-
-        if (lineNumbering) {
-            tt.setLineNumber(nodeNr, location.getLineNumber(), location.getColumnNumber());
-        }
-        //#if CSHARP==false
-        if (location instanceof ReceivingContentHandler.LocalLocator &&
-                ((ReceivingContentHandler.LocalLocator)location).levelInEntity == 0 && currentDepth >= 1) {
-            tt.markTopWithinEntity(nodeNr);
-        }
-        //#endif
-        for (AttributeInfo att : attributes) {
-            attribute2(att.getNodeName(), att.getType(),
-                      getAttValue(att), location, att.getProperties());
-        }
-        textualElementEligibilityState = noNewNamespaces ? Eligibility.PRIMED : Eligibility.INELIGIBLE;
-        tree.addNamespaces(nodeNr, namespaceStack.peek());
-        nodeNr++;
     }
+
 
     protected String getAttValue(AttributeInfo att) {
         return att.getValue();
