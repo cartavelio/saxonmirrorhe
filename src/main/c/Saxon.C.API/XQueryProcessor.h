@@ -73,6 +73,14 @@ public:
      */
     void setParameter(const char * name, XdmValue*value);
 
+    //! Set XQuery language version
+    /**
+     * Say which version of XQuery should be used
+     *
+     * @param version "3.1" or "4.0" in the current Saxon release.
+     */
+    void setLanguageVersion(const char * version);
+
     //! Say whether the query should be compiled and evaluated to use streaming.
     /**
     * This affects subsequent calls on the compile() methods. This option requires Saxon-EE.

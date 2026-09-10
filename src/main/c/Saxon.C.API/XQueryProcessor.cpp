@@ -341,6 +341,10 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
         return streaming;
     }
 
+    void XQueryProcessor::setLanguageVersion(const char * version){
+        setProperty("-lang-version", version);
+    }
+
 
    void XQueryProcessor::setQueryContent(const char* content){
 	  // outputfile1 = std::string(content); 

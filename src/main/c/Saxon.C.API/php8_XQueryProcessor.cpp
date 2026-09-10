@@ -400,6 +400,29 @@ PHP_METHOD(XQueryProcessor, setParameter)
     }
 }
 
+PHP_METHOD(XQueryProcessor, setLanguageVersion){
+    XQueryProcessor *xqueryProcessor;
+    char * str;
+    size_t len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() , "s", &str, &str) == FAILURE) {
+        RETURN_NULL();
+    }
+
+    zend_object* pobj = Z_OBJ_P(getThis());
+    xqueryProcessor_object * obj = (xqueryProcessor_object *)((char *)pobj - XtOffsetOf(xqueryProcessor_object, std));
+    xqueryProcessor = obj->xqueryProcessor;
+    if (xqueryProcessor != nullptr) {
+
+        if(str != nullptr) {
+            xqueryProcessor->setLanguageVersion(str);
+        }
+    }
+
+
+
+}
+
 
 
 
@@ -510,6 +533,7 @@ zend_function_entry XQueryProcessor_methods[] = {
     PHP_ME(XQueryProcessor,  setQueryContent,      arginfo_saxonc_XQueryProcessor_setQueryContent, ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor,  setStreaming,      arginfo_saxonc_XQueryProcessor_setStreaming, ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor,  isStreaming,      arginfo_saxonc_XQueryProcessor_isStreaming, ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor,  setLanguageVersion,      arginfo_saxonc_XQueryProcessor_setLanguageVersion, ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor,  setContextItem,      arginfo_saxonc_XQueryProcessor_setContextItem, ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor,  setContextItemFromFile,      arginfo_saxonc_XQueryProcessor_setContextItemFromFile, ZEND_ACC_PUBLIC)
     PHP_ME(XQueryProcessor,  setParameter,      arginfo_saxonc_XQueryProcessor_setParameter, ZEND_ACC_PUBLIC)

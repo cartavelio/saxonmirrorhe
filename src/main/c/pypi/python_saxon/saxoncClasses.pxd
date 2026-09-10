@@ -487,7 +487,9 @@ cdef extern from "../../Saxon.C.API/SaxonProcessor.h":
 
         void setOutputFile(const char* outfile)
 
-        void setContextItemFromFile(const char * filename) 
+        void setContextItemFromFile(const char * filename)
+
+        void setLanguageVersion(const char * version)
 
         void setParameter(const char * name, XdmValue*value)
 

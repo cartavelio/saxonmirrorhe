@@ -1591,6 +1591,36 @@
                   <code>void</code>
                </td>
                <td>
+                  <span class="signature">setLanguageVersion(string $version)</span>
+                  <div class="fcomment">Say which version of XQuery should be used.
+                     Version - "3.1" or "4.0" in the current Saxon release.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">setStreaming(boolean $flag)</span>
+                  <div class="fcomment">Say which version of XQuery should be used.
+                     Version - "3.1" or "4.0" in the current Saxon release.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>boolean</code>
+               </td>
+               <td>
+                  <span class="signature">isStreaming()</span>
+                  <div class="fcomment">Ask whether the streaming option has been set, that is, whether
+                     subsequent calls on compile() will compile queries to be capable of executing in streaming mode.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
                   <span class="signature">setQueryContent(string $str)</span>
                   <div class="fcomment">Query supplied as a string.</div>
                </td>
@@ -2009,6 +2039,17 @@
                       declaration can be located for the outermost element. With lax validation, the absence of an
                       element declaration results in the content being considered valid. If the argument $lax
                       is true then validation is to be lax, if false then validation is strict.</div>
+               </td>
+            </tr>
+            <tr>
+               <td>
+                  <code>void</code>
+               </td>
+               <td>
+                  <span class="signature">registerSchemaFromNode(<a class="bodylink code"
+                                          href="../saxon_c_php_xdmnode">XdmNode</a> $node)</span>
+                  <div class="fcomment">Register the schema supplied as an Xdm Node Object.
+                     The schema document supplied as an XdmNode object</div>
                </td>
             </tr>
             <tr>

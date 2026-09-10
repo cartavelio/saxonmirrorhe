@@ -2714,6 +2714,7 @@ cdef class PyXQueryProcessor:
         Args:
             **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
                 supply the input; query_file (str) or query_text (str) can be used to supply the query.
+                lang (str) Say which version of XQuery should be used, options: '3.1' or '4.0'
         Returns:
             PyXdmValue: Output result as a PyXdmValue
         """
@@ -2726,6 +2727,12 @@ cdef class PyXQueryProcessor:
         cdef PyXdmArray aaval = None
         cdef PyXdmValue val = None
         if not len(kwds) == 0:
+
+            if "lang" in kwds:
+                py_lang_string = kwds["lang"]
+                py_ta_string = py_lang_string.encode('UTF-8') if py_lang_string is not None else None
+                c_lang = py_ta_string if py_lang_string is not None else ""
+                self.thisxqptr.setLanguageVersion(c_lang)
 
             if "input_file_name" in kwds:
                 self.set_context(file_name=kwds["input_file_name"])
@@ -2775,6 +2782,7 @@ cdef class PyXQueryProcessor:
         Args:
             **kwds: Possible keyword arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
                 supply the input; query_file (str) or query_text (str) can be used to supply the query.
+                lang (str) Say which version of XQuery should be used, options: '3.1' or '4.0'
         Returns:
             str: Output result as a string
         """
@@ -2782,6 +2790,12 @@ cdef class PyXQueryProcessor:
         if len(kwds) == 0:
           ustring = make_py_str(self.thisxqptr.runQueryToString())
           return ustring
+        if "lang" in kwds:
+          py_lang_string = kwds["lang"]
+          py_ta_string = py_lang_string.encode('UTF-8') if py_lang_string is not None else None
+          c_lang = py_ta_string if py_lang_string is not None else ""
+          self.thisxqptr.setLanguageVersion(c_lang)
+
         if "input_file_name" in kwds:
           self.set_context(file_name=kwds["input_file_name"])
         elif "input_xdm_item" in kwds:
@@ -2802,9 +2816,16 @@ cdef class PyXQueryProcessor:
             **kwds: Required keyword argument: output_file_name (str) to specify the output file.
                 Possible arguments: input_file_name (str) or input_xdm_item (PyXdmItem) can be used to
                 supply the input; query_file (str) or query_text (str) can be used to supply the query.
+                lang (str) Say which version of XQuery should be used, options: '3.1' or '4.0'
         """
         if len(kwds) == 0:
           self.thisxqptr.runQueryToFile()
+
+        if "lang" in kwds:
+          py_lang_string = kwds["lang"]
+          py_ta_string = py_lang_string.encode('UTF-8') if py_lang_string is not None else None
+          c_lang = py_ta_string if py_lang_string is not None else ""
+          self.thisxqptr.setLanguageVersion(c_lang)
         if "input_file_name" in kwds:
           self.set_context(file_name=(kwds["input_file_name"]))
         elif "input_xdm_item" in kwds:

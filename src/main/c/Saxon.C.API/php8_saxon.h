@@ -327,6 +327,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XQueryProcessor,  setContextItemFromFile);
     PHP_METHOD(XQueryProcessor,  setParameter);
     PHP_METHOD(XQueryProcessor,  setProperty);
+    PHP_METHOD(XQueryProcessor,  setLanguageVersion);
     PHP_METHOD(XQueryProcessor,  setStreaming);
     PHP_METHOD(XQueryProcessor,  isStreaming);
     PHP_METHOD(XQueryProcessor,  clearParameters);
@@ -347,14 +348,14 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XPathProcessor,  __destruct);
     PHP_METHOD(XPathProcessor,  setContextItem);
     PHP_METHOD(XPathProcessor,  setContextFile);
-    PHP_METHOD(XQueryProcessor, setBaseURI);
+    PHP_METHOD(XPathProcessor, setBaseURI);
     PHP_METHOD(XPathProcessor,  effectiveBooleanValue);
     PHP_METHOD(XPathProcessor,  evaluate);
     PHP_METHOD(XPathProcessor,  evaluateSingle);
     PHP_METHOD(XPathProcessor, declareNamespace);
-    PHP_METHOD(XPathProcessor, setBackwardsCompatible); //new
-    PHP_METHOD(XPathProcessor, setCaching); //new
-    PHP_METHOD(XPathProcessor, importSchemaNamespace);      //new
+    PHP_METHOD(XPathProcessor, setBackwardsCompatible);
+    PHP_METHOD(XPathProcessor, setCaching);
+    PHP_METHOD(XPathProcessor, importSchemaNamespace);
     PHP_METHOD(XPathProcessor,  setParameter);
     PHP_METHOD(XPathProcessor,  setProperty);
     PHP_METHOD(XPathProcessor,  clearParameters);
