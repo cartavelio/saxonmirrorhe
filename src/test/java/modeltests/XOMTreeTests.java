@@ -1,6 +1,5 @@
 package modeltests;
 
-import jaxptest.ConfigTest;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.option.xom.XOMObjectModel;
 import net.sf.saxon.s9api.DocumentBuilder;
@@ -26,13 +25,28 @@ public class XOMTreeTests extends ObjectModelTests {
     XdmNode buildExternalDocument(Processor processor, String fileName) {
         try {
             Builder xomBuilder = new Builder();
-            Document jdomDocument = xomBuilder.build(new File(configTest.getDataDir() + fileName).toURI().toString());
+            Document xomDocument = xomBuilder.build(new File(configTest.getDataDir() + fileName).toURI().toString());
             DocumentBuilder builder = processor.newDocumentBuilder();
-            return builder.wrap(jdomDocument);
+            return builder.wrap(xomDocument);
         } catch (IOException | ParsingException e) {
             fail();
             return null;
         }
+    }
+
+    /**
+     * To be implemented in each subclass - supply an XPath extension function call that finds
+     * the string value of the first author in the document
+     *
+     * @return an XPath expression
+     */
+    @Override
+    public String getExtensionFunctionCall() {
+        return "Q{java:modeltests.XOMTreeTests}firstAuthor(/)";
+    }
+
+    public static String firstAuthor(Document doc) {
+        return doc.getRootElement().getFirstChildElement("BOOKS").getFirstChildElement("ITEM").getFirstChildElement("AUTHOR").getValue();
     }
 }
 

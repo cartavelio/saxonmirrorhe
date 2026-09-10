@@ -1,6 +1,7 @@
 package modeltests;
 
 import jaxptest.ConfigTest;
+import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.NamespaceConstant;
 import net.sf.saxon.om.TreeModel;
 import net.sf.saxon.s9api.*;
@@ -274,6 +275,50 @@ public abstract class ObjectModelTests {
             e.printStackTrace();
         }
 
+    }
+
+    @Test
+    public void testXPath() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XdmNode doc = buildExternalDocument(proc, "books.xml");
+            XPathCompiler xpc = proc.newXPathCompiler();
+            XPathSelector xp = xpc.compile(getExtensionFunctionCall()).load();
+            xp.setContextItem(doc);
+            XdmValue result = xp.evaluate();
+            assertEquals("Jane Austen", ((XdmAtomicValue) result).getStringValue());
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testReflexiveExtension() {
+        try {
+            Processor proc = new Processor(true);
+            proc.setConfigurationProperty(Feature.TRACE_EXTERNAL_FUNCTIONS, true);
+            XdmNode doc = buildExternalDocument(proc, "books.xml");
+            XPathCompiler xpc = proc.newXPathCompiler();
+            XPathSelector xp = xpc.compile("string((//AUTHOR)[1])").load();
+            xp.setContextItem(doc);
+            XdmValue result = xp.evaluate();
+            assertEquals("Jane Austen", ((XdmAtomicValue)result).getStringValue() );
+        } catch (SaxonApiException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * To be implemented in each subclass - supply an XPath extension function call that finds
+     * the string value of the first author in the document
+     * @return an XPath expression
+     */
+    public String getExtensionFunctionCall() {
+        // default implementation
+        return "string((//AUTHOR)[1])";
     }
 
 
