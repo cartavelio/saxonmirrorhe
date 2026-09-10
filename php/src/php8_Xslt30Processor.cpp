@@ -453,6 +453,47 @@ PHP_METHOD(Xslt30Processor, compileFromValue) {
   }
 }
 
+PHP_METHOD(Xslt30Processor, setSchemaAware) {
+  Xslt30Processor *xslt30Processor;
+  bool flag = false;
+  size_t len1;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &flag) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xslt30Processor_object *obj =
+      (xslt30Processor_object *)((char *)pobj -
+                                 XtOffsetOf(xslt30Processor_object, std));
+  xslt30Processor = obj->xslt30Processor;
+  if (xslt30Processor != nullptr) {
+    xslt30Processor->setSchemaAware(flag);
+  }
+}
+
+
+PHP_METHOD(Xslt30Processor, isSchemaAware) {
+  Xslt30Processor *xslt30Processor;
+
+  if (ZEND_NUM_ARGS() > 0) {
+    WRONG_PARAM_COUNT;
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xslt30Processor_object *obj =
+      (xslt30Processor_object *)((char *)pobj -
+                                 XtOffsetOf(xslt30Processor_object, std));
+  xslt30Processor = obj->xslt30Processor;
+  if (xslt30Processor != nullptr) {
+    bool sa = xslt30Processor->isSchemaAware();
+    RETURN_BOOL(sa);
+  }
+  RETURN_BOOL(false);
+}
+
+
+
 PHP_METHOD(Xslt30Processor, setJustInTimeCompilation) {
   Xslt30Processor *xslt30Processor;
   bool jit = false;
@@ -663,6 +704,8 @@ zend_function_entry Xslt30Processor_methods[] = {
                                             ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, compileFromFileAndSave,arginfo_saxonc_xp_compileFromFileAndSave,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor,compileFromAssociatedFile,arginfo_saxonc_xp_compileFromAssociatedFile,ZEND_ACC_PUBLIC)
+  PHP_ME(Xslt30Processor, setSchemaAware,arginfo_saxonc_xp_setSchemaAware,ZEND_ACC_PUBLIC)
+  PHP_ME(Xslt30Processor, isSchemaAware,arginfo_saxonc_xp_isSchemaAware,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, setJustInTimeCompilation,arginfo_saxonc_xp_setJustInTimeCompilation,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, getJustInTimeCompilation,arginfo_saxonc_xp_getJustInTimeCompilation,ZEND_ACC_PUBLIC)
   PHP_ME(Xslt30Processor, setcwd,arginfo_saxonc_xp_setcwd,ZEND_ACC_PUBLIC)

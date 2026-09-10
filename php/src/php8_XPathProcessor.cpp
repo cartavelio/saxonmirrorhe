@@ -191,6 +191,46 @@ PHP_METHOD(XPathProcessor, declareNamespace) {
   }
 }
 
+
+PHP_METHOD(XPathProcessor, setSchemaAware) {
+
+  XPathProcessor *xpathProcessor;
+  bool allow = false;
+  size_t len1;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &allow) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xpathProcessor_object *obj =
+      (xpathProcessor_object *)((char *)pobj -
+                                XtOffsetOf(xpathProcessor_object, std));
+  xpathProcessor = obj->xpathProcessor;
+  if (xpathProcessor != nullptr) {
+    xpathProcessor->setSchemaAware(allow);
+  }
+}
+
+PHP_METHOD(XPathProcessor, isSchemaAware) {
+  XPathProcessor *xpathProcessor;
+  zval *oth;
+  if (ZEND_NUM_ARGS() != 0) {
+    RETURN_BOOL(false);
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xpathProcessor_object *obj =
+      (xpathProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xpathProcessor_object, std));
+  xpathProcessor = obj->xpathProcessor;
+  if (xpathProcessor != nullptr) {
+
+    bool result = xpathProcessor->isSchemaAware();
+    RETURN_BOOL(result);
+  }
+}
+
+
 PHP_METHOD(XPathProcessor, setBackwardsCompatible) {
 
   XPathProcessor *xpathProcessor;
@@ -652,21 +692,12 @@ zend_function_entry XPathProcessor_methods[] = {
 
                     PHP_ME(XPathProcessor, setcwd,arginfo_saxonc_xpath_setcwd,ZEND_ACC_PUBLIC)
                     PHP_ME(XPathProcessor,getcwd,arginfo_saxonc_xpath_getcwd,ZEND_ACC_PUBLIC)
-                                        PHP_ME(
-                                            XPathProcessor, declareNamespace,
-                                            arginfo_saxonc_xpath_declareNamespace,
-                                            ZEND_ACC_PUBLIC)
-                                            PHP_ME(
-                                                XPathProcessor,
-                                                setBackwardsCompatible,
-                                                arginfo_saxonc_xpath_setBackwardsCompatible,
-                                                ZEND_ACC_PUBLIC)
-                                                PHP_ME(
-                                                    XPathProcessor, setCaching,
-                                                    arginfo_saxonc_xpath_setCaching,
-                                                    ZEND_ACC_PUBLIC)
-                                                    PHP_ME(
-                                                        XPathProcessor,
+                    PHP_ME(XPathProcessor, declareNamespace,arginfo_saxonc_xpath_declareNamespace,ZEND_ACC_PUBLIC)
+                    PHP_ME(XPathProcessor,setBackwardsCompatible,arginfo_saxonc_xpath_setBackwardsCompatible,ZEND_ACC_PUBLIC)
+                    PHP_ME(XPathProcessor,setSchemaAware,arginfo_saxonc_xpath_setSchemaAware,ZEND_ACC_PUBLIC)
+                    PHP_ME(XPathProcessor,isSchemaAware,arginfo_saxonc_xpath_isSchemaAware,ZEND_ACC_PUBLIC)
+                    PHP_ME(XPathProcessor, setCaching,arginfo_saxonc_xpath_setCaching,ZEND_ACC_PUBLIC)
+                    PHP_ME(XPathProcessor,
                                                         importSchemaNamespace,
                                                         arginfo_saxonc_xpath_importSchemaNamespace,
                                                         ZEND_ACC_PUBLIC)

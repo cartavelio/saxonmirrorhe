@@ -351,6 +351,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_getcwd, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setSchemaAware, 0, 0, 1)
+ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_isSchemaAware, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xp_setJustInTimeCompilation, 0, 0, 1)
 ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -522,6 +529,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setQueryContent, 0, 0, 1)
 ZEND_ARG_INFO(0, query)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setSchemaAware, 0, 0, 1)
+ZEND_ARG_INFO(0, item)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_isSchemaAware, 0, 0, 0)
+ZEND_ARG_INFO(0, item)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_XQueryProcessor_setStreaming, 0, 0, 1)
 ZEND_ARG_INFO(0, item)
 ZEND_END_ARG_INFO()
@@ -660,6 +675,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setBackwardsCompatible, 0, 0, 1)
 ZEND_ARG_INFO(0, flag)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setSchemaAware, 0, 0, 1)
+ZEND_ARG_INFO(0, flag)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_isSchemaAware, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_saxonc_xpath_setCaching, 0, 0, 1)

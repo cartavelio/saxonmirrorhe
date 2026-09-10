@@ -256,6 +256,45 @@ PHP_METHOD(XQueryProcessor, declareNamespace) {
   }
 }
 
+PHP_METHOD(XQueryProcessor, setSchemaAware) {
+  XQueryProcessor *xqueryProcessor;
+  bool sa = false;
+
+  if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &sa) == FAILURE) {
+    RETURN_NULL();
+  }
+
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xqueryProcessor_object *obj =
+      (xqueryProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xqueryProcessor_object, std));
+  xqueryProcessor = obj->xqueryProcessor;
+  if (xqueryProcessor != nullptr) {
+    xqueryProcessor->setSchemaAware(sa);
+  }
+}
+
+
+PHP_METHOD(XQueryProcessor, isSchemaAware) {
+  XQueryProcessor *xqueryProcessor;
+  zval *oth;
+  size_t len1, myint;
+  if (ZEND_NUM_ARGS() != 0) {
+    RETURN_BOOL(false);
+  }
+  zend_object *pobj = Z_OBJ_P(getThis());
+  xqueryProcessor_object *obj =
+      (xqueryProcessor_object *)((char *)pobj -
+                                 XtOffsetOf(xqueryProcessor_object, std));
+  xqueryProcessor = obj->xqueryProcessor;
+  if (xqueryProcessor != nullptr) {
+
+    bool result = xqueryProcessor->isSchemaAware();
+    RETURN_BOOL(result);
+  }
+}
+
+
 PHP_METHOD(XQueryProcessor, setStreaming) {
   XQueryProcessor *xqueryProcessor;
   bool isStreaming = false;
@@ -276,7 +315,6 @@ PHP_METHOD(XQueryProcessor, setStreaming) {
 
 PHP_METHOD(XQueryProcessor, isStreaming) {
   XQueryProcessor *xqueryProcessor;
-  char *xpathStr;
   zval *oth;
   size_t len1, myint;
   if (ZEND_NUM_ARGS() != 0) {
@@ -532,41 +570,23 @@ zend_function_entry XQueryProcessor_methods[] = {
            ZEND_ACC_PUBLIC)
     // PHP_ME(XQueryProcessor,  getErrorCode,
     // arginfo_saxonc_XQueryProcessor_getErrorCode, ZEND_ACC_PUBLIC)
-    PHP_ME(
-        XQueryProcessor, setQueryContent,
-        arginfo_saxonc_XQueryProcessor_setQueryContent,
-        ZEND_ACC_PUBLIC) PHP_ME(XQueryProcessor, setStreaming,
-                                arginfo_saxonc_XQueryProcessor_setStreaming,
-                                ZEND_ACC_PUBLIC) PHP_ME(XQueryProcessor,
-                                                        isStreaming,
-                                                        arginfo_saxonc_XQueryProcessor_isStreaming,
-                                                        ZEND_ACC_PUBLIC)
-        PHP_ME(
-            XQueryProcessor, setLanguageVersion,
-            arginfo_saxonc_XQueryProcessor_setLanguageVersion,
-            ZEND_ACC_PUBLIC) PHP_ME(XQueryProcessor, setContextItem,
-                                    arginfo_saxonc_XQueryProcessor_setContextItem,
-                                    ZEND_ACC_PUBLIC)
-            PHP_ME(XQueryProcessor, setContextItemFromFile,arginfo_saxonc_XQueryProcessor_setContextItemFromFile,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, setQueryContent,arginfo_saxonc_XQueryProcessor_setQueryContent,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, setSchemaAware,arginfo_saxonc_XQueryProcessor_setSchemaAware,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, isSchemaAware,arginfo_saxonc_XQueryProcessor_isSchemaAware,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, setStreaming,arginfo_saxonc_XQueryProcessor_setStreaming,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, isStreaming,arginfo_saxonc_XQueryProcessor_isStreaming,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, setLanguageVersion,arginfo_saxonc_XQueryProcessor_setLanguageVersion,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, setContextItem,arginfo_saxonc_XQueryProcessor_setContextItem,ZEND_ACC_PUBLIC)
+    PHP_ME(XQueryProcessor, setContextItemFromFile,arginfo_saxonc_XQueryProcessor_setContextItemFromFile,ZEND_ACC_PUBLIC)
             PHP_ME(XQueryProcessor, setParameter,arginfo_saxonc_XQueryProcessor_setParameter,ZEND_ACC_PUBLIC)
             PHP_ME(XQueryProcessor, setProperty,arginfo_saxonc_XQueryProcessor_setProperty,ZEND_ACC_PUBLIC)
             PHP_ME(XQueryProcessor, clearParameters,arginfo_saxonc_XQueryProcessor_clearParameters, ZEND_ACC_PUBLIC)
             PHP_ME(XQueryProcessor,setcwd,arginfo_saxonc_XQueryProcessor_setcwd,ZEND_ACC_PUBLIC)
             PHP_ME(XQueryProcessor,getcwd,arginfo_saxonc_XQueryProcessor_getcwd,ZEND_ACC_PUBLIC)
-                    PHP_ME(
-                        XQueryProcessor, clearProperties,
-                        arginfo_saxonc_XQueryProcessor_clearProperties,
-                        ZEND_ACC_PUBLIC) PHP_ME(XQueryProcessor,
-                                                runQueryToValue,
-                                                arginfo_saxonc_XQueryProcessor_runQueryToValue,
-                                                ZEND_ACC_PUBLIC)
-                        PHP_ME(XQueryProcessor, runQueryToString,
-                               arginfo_saxonc_XQueryProcessor_runQueryToString,
-                               ZEND_ACC_PUBLIC)
-                            PHP_ME(
-                                XQueryProcessor, runQueryToFile,
-                                arginfo_saxonc_XQueryProcessor_runQueryToFile,
-                                ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor, clearProperties,arginfo_saxonc_XQueryProcessor_clearProperties,ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor,runQueryToValue,arginfo_saxonc_XQueryProcessor_runQueryToValue,ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor, runQueryToString,arginfo_saxonc_XQueryProcessor_runQueryToString,ZEND_ACC_PUBLIC)
+            PHP_ME(XQueryProcessor, runQueryToFile,arginfo_saxonc_XQueryProcessor_runQueryToFile,ZEND_ACC_PUBLIC)
                                 PHP_ME(
                                     XQueryProcessor, setQueryFile,
                                     arginfo_saxonc_XQueryProcessor_setQueryFile,
