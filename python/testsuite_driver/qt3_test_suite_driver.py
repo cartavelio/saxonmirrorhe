@@ -913,8 +913,9 @@ def main(argv):
     global spec
     global test_report
     global saxon_version
+    global driver_proc
 
-
+    saxon_version = driver_proc.version
 
     print("W3 QT3 Test Suite")
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")

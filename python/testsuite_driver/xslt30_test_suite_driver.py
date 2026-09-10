@@ -818,6 +818,9 @@ def main(argv):
     global results_path
     global schemaValidator
     global saxon_version
+    global driver_proc
+
+    saxon_version = driver_proc.version
 
     print("W3 XSLT 3.0 Test Suite")
     print("(Python Test Harness. Version: 1.0. SaxonC Python API, Saxon product version:" + saxon_version + ")")
