@@ -1,17 +1,17 @@
 package com.saxonica.ee.bytecode;
 
 import com.saxonica.ee.bytecode.util.*;
-import net.sf.saxon.event.ComplexContentOutputter;
 import net.sf.saxon.event.Outputter;
-import net.sf.saxon.event.ReceiverOption;
 import net.sf.saxon.expr.Expression;
 import net.sf.saxon.expr.SystemFunctionCall;
+import net.sf.saxon.expr.XPathContext;
+import net.sf.saxon.functions.PushableFunction;
 import net.sf.saxon.functions.StringJoin;
 import net.sf.saxon.om.Item;
+import net.sf.saxon.om.Sequence;
 import net.sf.saxon.om.SequenceIterator;
-import net.sf.saxon.s9api.Location;
-
-import net.sf.saxon.value.StringItem;
+import net.sf.saxon.om.SequenceTool;
+import org.objectweb.asm.Type;
 
 public class StringJoinCompiler extends ToStringCompiler {
 
@@ -19,138 +19,37 @@ public class StringJoinCompiler extends ToStringCompiler {
     public void compileToPush(CompilerService compiler, Expression expression)
             throws CannotCompileException {
         SystemFunctionCall fnc = (SystemFunctionCall) expression;
-        Expression expr0 = fnc.getArg(0);
         Generator ga = compiler.getCurrentGenerator();
         GeneratedMethodInfo methodInfo = compiler.getCurrentMethod();
-        visitAnnotation(compiler, "StringJoin-push");
-        LabelInfo notInstanceOf = methodInfo.newLabel("notInstanceOf");
-        LabelInfo end = methodInfo.newLabel("endSJ");
-        LabelInfo notNull = methodInfo.newLabel("strJnotNull");
-        //if (out instanceOf ComplexContentOutputter)
+
+        // Generate call on ((PushableFunction)target).process(output, context, actualArgs);
+
+        ga.push(2);
+        ga.newArray(Type.getType(Sequence.class));
+        int arrVar = methodInfo.allocateLocal(Sequence[].class);
+        ga.storeLocal(arrVar);
+
+        ga.loadLocal(arrVar);
+        ga.push(0);
+        compiler.compileToIterator(fnc.getArg(0));
+        ga.invokeStaticMethod(SequenceTool.class, "toLazySequence", SequenceIterator.class);
+        ga.arrayStore(Type.getType(Sequence.class));
+
+        ga.loadLocal(arrVar);
+        ga.push(1);
+        compiler.compileToItem(fnc.getArg(1));
+        ga.arrayStore(Type.getType(Sequence.class));
+
+        allocateStatic(compiler, fnc.getTargetFunction());
+        ga.checkClass(PushableFunction.class);
         compiler.generateGetOutputter();
-        ga.ifNotInstance(ComplexContentOutputter.class, notInstanceOf);
-        compiler.generateGetOutputter();
-        ga.getStaticField(StringItem.class, "EMPTY_STRING", StringItem.class);
-        allocateStatic(compiler, expression.getLocation());
-        ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
-        visitAnnotation(compiler, "StringJoin-iterate-first-arg-enter");
-        compiler.compileToIterator(expr0);
-        visitAnnotation(compiler, "StringJoin-iterate-first-arg-exit");
-        int iterVar = methodInfo.allocateLocal(SequenceIterator.class);
-        ga.storeLocal(iterVar);
-        visitLineNumber(compiler, ga, expression);
-        ga.loadLocal(iterVar);
-        ga.showObject(compiler, "SequenceIterator (SJ arg 0) A: ");
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
-        int itVar = methodInfo.allocateLocal(Item.class);
-        ga.storeLocal(itVar);
-        ga.loadLocal(itVar);
-        ga.ifNull(end.label());
-        ga.loadLocal(itVar);
+        compiler.generateGetContext();
+        ga.loadLocal(arrVar);
 
-        visitAnnotation(compiler, "StringJoin-process-first");
-        ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-        int firstVar = methodInfo.allocateLocal(CharSequence.class);
-        ga.storeLocal(firstVar);
-        compiler.generateGetOutputter();
-        ga.loadLocal(firstVar);
-        allocateStatic(compiler, expression.getLocation());
-        ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
+        ga.invokeInstanceMethod(PushableFunction.class, "process",
+                                Outputter.class, XPathContext.class, Sequence[].class);
 
-        ga.loadLocal(iterVar);
-        ga.showObject(compiler, "SequenceIterator (SJ arg 0) B: ");
-        ga.invokeInstanceMethod(SequenceIterator.class, "next");
-        ga.storeLocal(itVar);
-        ga.loadLocal(itVar);
-        ga.ifNonNull(notNull.label());
-        visitAnnotation(compiler, "StringJoin-second-item-is-null");
-        compiler.generateGetOutputter();
-        ga.getStaticField(StringItem.class, "EMPTY_STRING", StringItem.class);
-        allocateStatic(compiler, expression.getLocation());
-        ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
-        ga.goTo(end);
-
-        methodInfo.placeLabel(notNull);
-        visitAnnotation(compiler, "StringJoin-process-second");
-        if (fnc.getArity() == 1) {
-            ga.loadLocal(itVar);
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            compiler.generateGetOutputter();
-            ga.swap();
-            allocateStatic(compiler, expression.getLocation());
-            ga.push(ReceiverOption.NONE);
-            ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
-
-            LabelInfo loop = methodInfo.placeNewLabel("loop");
-            ga.loadLocal(iterVar);
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
-            ga.storeLocal(itVar);
-            ga.loadLocal(itVar);
-            ga.ifNull(end.label());
-            visitAnnotation(compiler, "StringJoin-process-next");
-            ga.loadLocal(itVar);
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            compiler.generateGetOutputter();
-            ga.swap();
-            allocateStatic(compiler, expression.getLocation());
-            ga.push(ReceiverOption.NONE);
-            ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
-            ga.goTo(loop);
-        } else {
-            compiler.compileToPrimitive(fnc.getArg(1), CharSequence.class, OnEmpty.RETURN_EMPTY_STRING);
-            visitAnnotation(compiler, "StringJoin-push-else");
-            int sepVar = methodInfo.allocateLocal(CharSequence.class);
-            ga.storeLocal(sepVar);
-            compiler.generateGetOutputter();
-            ga.loadLocal(sepVar);
-            allocateStatic(compiler, expression.getLocation());
-            ga.push(ReceiverOption.NONE);
-            ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
-            compiler.generateGetOutputter();
-            ga.loadLocal(itVar);
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            allocateStatic(compiler, expression.getLocation());
-            ga.push(ReceiverOption.NONE);
-            ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
-
-
-            LabelInfo loop = methodInfo.placeNewLabel("loop");
-            ga.loadLocal(iterVar);
-            ga.invokeInstanceMethod(SequenceIterator.class, "next");
-            ga.storeLocal(itVar);
-            ga.loadLocal(itVar);
-            ga.ifNull(end.label());
-            compiler.generateGetOutputter();
-            ga.loadLocal(sepVar);
-            allocateStatic(compiler, expression.getLocation());
-            ga.push(ReceiverOption.NONE);
-            ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
-            compiler.generateGetOutputter();
-            ga.loadLocal(itVar);
-            ga.invokeInstanceMethod(Item.class, "getStringValueCS");
-            allocateStatic(compiler, expression.getLocation());
-            ga.push(ReceiverOption.NONE);
-            ga.invokeInstanceMethod(Outputter.class, "characters", CharSequence.class, Location.class, Integer.TYPE);
-            ga.goTo(loop);
-
-            methodInfo.releaseLocal(sepVar);
-
-        }
-        methodInfo.placeLabel(notInstanceOf);
-        compiler.generateGetOutputter();
-        compileToItem(compiler, expression);
-        allocateStatic(compiler, expression.getLocation());
-        ga.push(ReceiverOption.NONE);
-        ga.invokeInstanceMethod(Outputter.class, "append", Item.class, Location.class, Integer.TYPE);
-
-        methodInfo.placeLabel(end);
-
-        methodInfo.releaseLocal(iterVar);
-        methodInfo.releaseLocal(itVar);
-        methodInfo.releaseLocal(firstVar);
+        methodInfo.releaseLocal(arrVar);
 
     }
 
