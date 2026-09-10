@@ -1677,7 +1677,7 @@ Console.WriteLine("\nOutput written to " + outfile + "\n");]]></code></pre>
          
          <p>The SaxonC C API can be used to invoke transformations from your own C application. Functions are
             provided to perform XSLT transformations in <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
+               href="https://www.saxonica.com/saxon-c/doc13/html/SaxonCProcessor_8h.html"
                >SaxonCProcessor.h</a>. Note that this API is more basic than the C++ version, in particular,
             with the C API the compile and run phases happen together within the same function call.</p>
          
@@ -1702,12 +1702,12 @@ Console.WriteLine("\nOutput written to " + outfile + "\n");]]></code></pre>
                      <code>Processor</code> object in Java.</li>
                   <li>parameters - The <code>sxnc_parameter</code> struct (an array) is used to represent the
                      stylesheet parameters supplied to the XSLT transform. For further details see the <a
-                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        href="https://www.saxonica.com/saxon-c/documentation13/index.html#!configuration"
                         class="bodylink">Configuration</a> section in the SaxonC documentation.</li>
                   <li>properties - The <code>sxnc_property</code> struct (an array) is used to represent the
                      required configuration properties and options for the processor. For a full list of the
                      available properties see the <a class="bodylink"
-                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        href="https://www.saxonica.com/saxon-c/documentation13/index.html#!configuration"
                         >Configuration</a> section in the SaxonC documentation.</li>
                </ul>
                
@@ -1770,14 +1770,14 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html" >SaxonProcessor</a>
+                  href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html" >SaxonProcessor</a>
                   and set any global configuration options on the <code>SaxonProcessor</code> object. If your
                   stylesheet uses any features that require SaxonC-PE or SaxonC-EE, be sure to use the
                   constructor <code>new SaxonProcessor(true)</code>.</p>
             </li>
             <li>
                <p>Call <code>newXslt30Processor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/classXslt30Processor.html"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/classXslt30Processor.html"
                   >Xslt30Processor</a>, and set any options that are local to a specific compilation (for
                   example, the destination of error messages).</p>
                <aside><p>Error messages that occur during the compile phase are handled internally in SaxonC and
@@ -1790,7 +1790,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
                <p>Call one of the methods <code>compileFromFile()</code>, <code>compileFromString()</code> or
                   <code>compileFromAssociatedFile()</code> to compile a stylesheet. The result is a pointer to
                   the <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/classXsltExecutable.html"
+                     href="https://www.saxonica.com/saxon-c/doc13/html/classXsltExecutable.html"
                      >XsltExecutable</a> object, which can be used as often as you like, in the same thread or in
                   different threads.</p>
                <p>The <code>XsltExecutable</code> class was introduced in SaxonC 11.1, and provides new ways of
@@ -1832,12 +1832,12 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
                </ul>
                <p>For more details about the configuration options available, and how to set these properties and
                   parameters, see <a class="bodylink"
-                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                     href="https://www.saxonica.com/saxon-c/documentation13/index.html#!configuration"
                      >Configuration</a> in the SaxonC documentation.</p>
             </li>
             <li>
                <p>To run a transformation, there are several methods available on the <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/classXsltExecutable.html"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/classXsltExecutable.html"
                   >XsltExecutable</a> to execute the compiled stylesheet. For example, to evaluate a stylesheet
                   using apply-templates invocation there are three methods available:
                   <code>applyTemplatesReturningString()</code>, <code>applyTemplatesReturningValue()</code> and
@@ -1866,7 +1866,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySaxonProcessor"
                   >PySaxonProcessor</a> and
                   set any global configuration options on the <code>PySaxonProcessor</code> object. If your stylesheet
                   uses any features that require saxoncpe or saxoncee, be sure to use the constructor <code>proc
@@ -1874,7 +1874,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             </li>
             <li>
                <p>Call <code>new_xslt30_processor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXslt30Processor">PyXslt30Processor</a>,
+                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXslt30Processor">PyXslt30Processor</a>,
                   and set any options that are local to a specific compilation (for example, the destination of error
                   messages).</p>
                <aside>Error messages that occur during the compile phase are handled internally in SaxonC and
@@ -1885,7 +1885,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
             <li>
                <p>Call the <code>compile_stylesheet()</code> method to compile a stylesheet. The result is a
                   pointer to the <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXsltExecutable"
+                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXsltExecutable"
                      >PyXsltExecutable</a> object, which can be used as often as you like, in the same thread or
                   in different threads.</p>
                <p>The <code>PyXsltExecutable</code> class was introduced in SaxonC 11.1, and provides new ways of
@@ -1927,12 +1927,12 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
                </ul>
                <p>For more details about the configuration options available, and how to set these properties and
                   parameters, see <a class="bodylink"
-                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                     href="https://www.saxonica.com/saxon-c/documentation13/index.html#!configuration"
                      >Configuration</a> in the SaxonC documentation.</p>
             </li>
             <li>
                <p>To run a transformation, there are several methods available on the <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXsltExecutable"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXsltExecutable"
                   >PyXsltExecutable</a> to execute the compiled stylesheet. For example, to evaluate a stylesheet
                   using apply-templates invocation there are three methods available:
                   <code>apply_templates_returning_string()</code>, <code>apply_templates_returning_value()</code>
@@ -1961,14 +1961,14 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
+                  href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
                   >SaxonProcessor</a> and set any global configuration options on the <code>SaxonProcessor</code>
                   object. If your stylesheet uses any features that require SaxonC-PE or SaxonC-EE, be sure to
                   use the constructor <code>new SaxonProcessor(true)</code>.</p>
             </li>
             <li>
                <p>Call <code>newXslt30Processor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
+                  href="https://www.saxonica.com/saxon-c/documentation13/index.html#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
                   >Xslt30Processor</a>, and set any options that are local to a specific compilation (for
                   example, the destination of error messages).</p>
                <aside><p>Error messages that occur during the compile phase are handled internally in SaxonC and
@@ -1980,7 +1980,7 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
                <p>Call one of the methods <code>compileFromFile()</code>, <code>compileFromString()</code> or
                   <code>compileFromAssociatedFile()</code> to compile a stylesheet. The result is a pointer to
                   the <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_xsltexecutable"
+                     href="https://www.saxonica.com/saxon-c/documentation13/index.html#!api/saxon_c_php_api/saxon_c_php_xsltexecutable"
                      >XsltExecutable</a> object, which can be used as often as you like, in the same thread or in
                   different threads.</p>
                <p>The <code>XsltExecutable</code> class was introduced in SaxonC 11.1, and provides new ways of
@@ -2022,12 +2022,12 @@ freeSaxonc(&environi, &processor, &parameters, &properties);]]></code></pre>
                </ul>
                <p>For more details about the configuration options available, and how to set these properties and
                   parameters, see <a class="bodylink"
-                     href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                     href="https://www.saxonica.com/saxon-c/documentation13/index.html#!configuration"
                      >Configuration</a> in the SaxonC documentation.</p>
             </li>
             <li>
                <p>To run a transformation, there are several methods available on the <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_xsltexecutable"
+                  href="https://www.saxonica.com/saxon-c/documentation13/index.html#!api/saxon_c_php_api/saxon_c_php_xsltexecutable"
                   >XsltExecutable</a> to execute the compiled stylesheet. For example, to evaluate a stylesheet
                   using apply-templates invocation there are three methods available:
                   <code>applyTemplatesReturningString()</code>, <code>applyTemplatesReturningValue()</code> and

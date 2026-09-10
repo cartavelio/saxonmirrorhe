@@ -984,8 +984,6 @@
       <aside>The same classes and methods can be used from .NET languages other than C#, but
       all the examples here are written in C# terms.</aside>
       
-      <p>Note that the current version of SaxonCS offers "enterprise edition" capability only.</p>
-      
       <p>You can perform a query using the Saxon.Api interface as follows:</p>
       <ol>
          <li>
@@ -1084,7 +1082,7 @@
          
          <p>The SaxonC C API can be used to run queries from your own C application. Functions are
             provided to perform XQuery queries in <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/SaxonCProcessor_8h.html"
+               href="https://www.saxonica.com/saxon-c/doc13/html/SaxonCProcessor_8h.html"
                >SaxonCProcessor.h</a>.</p>
          
          <p>For these XQuery functions, the XML document source and XQuery string or file (and other
@@ -1108,14 +1106,14 @@
                      <code>Processor</code> object in Java.</li>
                   <li>parameters - The <code>sxnc_parameter</code> struct (an array) is used to represent the
                      external variables supplied to the XQuery query. For further details see the <a
-                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        href="https://www.saxonica.com/saxon-c/documentation13/index.html#!configuration"
                         class="bodylink">Configuration</a> section in the SaxonC documentation.</li>
                   <li>properties - The <code>sxnc_property</code> struct (an array) is used to represent the
                      required configuration properties and options for the processor. These properties are set
                      using the <code>setProperty()</code> function. For instance, property 'q' is used to
                      specify the file name of the query, or property 'qs' is used to pass the query as string.
                      For a full list of the available properties see the <a class="bodylink"
-                        href="https://www.saxonica.com/saxon-c/documentation12/index.html#!configuration"
+                        href="https://www.saxonica.com/saxon-c/documentation13/index.html#!configuration"
                         >Configuration</a> section in the SaxonC documentation.</li>
                </ul>
                
@@ -1186,7 +1184,7 @@
          
          <ol>
             <li>Create a <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html" >SaxonProcessor</a>
+               href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html" >SaxonProcessor</a>
                and set any global configuration options on the <code>SaxonProcessor</code> object. If your
                query uses any features that require SaxonC-PE or SaxonC-EE, be sure to use the constructor
                <code>new SaxonProcessor(true)</code>.
@@ -1196,13 +1194,13 @@
                   a document builder, setting appropriate options, and then calling the
                   <code>parseXmlFromFile()</code> or <code>parseXmlFromString()</code> methods. This
                   returns an <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/classXdmNode.html">XdmNode</a> which can
+                     href="https://www.saxonica.com/saxon-c/doc13/html/classXdmNode.html">XdmNode</a> which can
                   be supplied as input to the query either as the context item, or as the value of an external
                   variable.</p>
             </li>
             <li>
                <p>Call <code>newXQueryProcessor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/classXQueryProcessor.html"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/classXQueryProcessor.html"
                   >XQueryProcessor</a>. Then set any options required for the specific query execution (for
                   example, the initial context item, the base URI, the values of external variables and the
                   parameters of the query). The query can be supplied as a string using the
@@ -1240,7 +1238,7 @@
          
          <ol>
             <li>Create a <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor" >PySaxonProcessor</a>
+               href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySaxonProcessor" >PySaxonProcessor</a>
                and set any global configuration options on the <code>PySaxonProcessor</code> object. If your
                query uses any features that require saxoncpe or saxoncee, be sure to use the constructor
                <code>proc = PySaxonProcessor(license=True)</code>.
@@ -1249,13 +1247,13 @@
                <p>Optionally, build the source document by calling <code>new_document_builder()</code> to create
                   a document builder, setting appropriate options, and then calling the
                   <code>parse_xml()</code> method. This returns a <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXdmNode">PyXdmNode</a> which can
+                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXdmNode">PyXdmNode</a> which can
                   be supplied as input to the query either as the context item, or as the value of an external
                   variable.</p>
             </li>
             <li>
                <p>Call <code>new_xquery_processor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyXQueryProcessor"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyXQueryProcessor"
                   >PyXQueryProcessor</a>. Then set any options required for the specific query execution (for
                   example, the initial context item, the base URI, the values of external variables and the
                   parameters of the query). The query can be supplied as a string using the
@@ -1286,7 +1284,7 @@
          
          <ol>
             <li>Create a <a class="bodylink code"
-               href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
+               href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_xslt30processor"
                >SaxonProcessor</a> and set any global configuration options on the <code>SaxonProcessor</code>
                object. If your query uses any features that require SaxonC-PE or SaxonC-EE, be sure to use the
                constructor <code>new SaxonProcessor(true)</code>.
@@ -1296,13 +1294,13 @@
                   a document builder, setting appropriate options, and then calling the
                   <code>parseXmlFromFile()</code> or <code>parseXmlFromString()</code> methods. This
                   returns an <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xdmnode"
+                     href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_xdmnode"
                      >XdmNode</a> which can be supplied as input to the query either as the context item, or
                   as the value of an external variable.</p>
             </li>
             <li>
                <p>Call <code>newXQueryProcessor()</code> to create an <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_xqueryprocessor"
+                  href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_xqueryprocessor"
                   >XQueryProcessor</a>. Then set any options required for the specific query execution (for
                   example, the initial context item, the base URI, the values of external variables and the
                   parameters of the query). The query can be supplied as a string using the

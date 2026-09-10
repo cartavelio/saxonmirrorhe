@@ -20,7 +20,7 @@
             <p>In this section you will find a complete list of changes made to the Saxon product since release 7.0, organized in reverse
                 order of releases.</p>
             <p class="conly">For changes specific to the SaxonC product, please also see the <a
-                href="https://www.saxonica.com/saxon-c/documentation12/index.html#!changes" class="bodylink">SaxonC Change history</a>
+                href="https://www.saxonica.com/saxon-c/documentation13/index.html#!changes" class="bodylink">SaxonC Change history</a>
                 documentation.</p>
             <nav>
                 <ul/>

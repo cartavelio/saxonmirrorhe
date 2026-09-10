@@ -72,6 +72,15 @@ TODO: rethink redefines and override
     
     <category name="installation">
         
+        <div class="javaonly">
+            <p>SaxonJ 13 is built and tested using Java 21, but is supported with Java 17 or
+                later.</p>
+        </div>
+        
+        <div class="csonly">
+            <p>SaxonCS 13 is targeted at .NET 10.</p>
+        </div>
+        
        <p>The XPath parser and tokenizer have changed beyond all recognition in the 25 years since they were
        first forked from James Clark's xt implementation. The open-source license terms relating to these
        components have therefore been removed.</p>

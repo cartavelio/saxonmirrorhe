@@ -124,8 +124,6 @@
                the ability to export packages in compiled form, and multi-threaded execution. </p>
          </li>
       </ul>
-      
-      <p>SaxonCS corresponds to Saxon-EE on Java.</p>
 
       <p>For information on streaming, see <a class="bodylink" href="/streaming"
             >Streaming XML documents</a>.</p>

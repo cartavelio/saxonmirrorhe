@@ -880,7 +880,7 @@
             interface upon which the Python and PHP APIs are built.</p>
          
          <p>The C++ interface allows schemas to be loaded into a <a class="bodylink code"
-            href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html">SchemaValidator</a>,
+            href="https://www.saxonica.com/saxon-c/doc13/html/classSchemaValidator.html">SchemaValidator</a>,
             and then to be used for validating instances, or for schema-aware XSLT and XQuery processing.</p>
          
          <p>The main steps are:</p>
@@ -888,11 +888,11 @@
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/classSaxonProcessor.html"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/classSaxonProcessor.html"
                   >SaxonProcessor</a> using the constructor <code>new SaxonProcessor(true)</code> (schema
                   processing requires SaxonC-EE). Then call the method <code>newSchemaValidator()</code>
                   to create a new <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/classSchemaValidator.html"
+                     href="https://www.saxonica.com/saxon-c/doc13/html/classSchemaValidator.html"
                      >SchemaValidator</a>.</p>
             </li>
             <li>
@@ -944,7 +944,7 @@
             validation you will need to install saxoncee.</p>
          
          <p>The Python interface allows schemas to be loaded into a <a class="bodylink code"
-            href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator"
+            href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySchemaValidator"
             >PySchemaValidator</a>, and then to be used for validating instances, or for schema-aware XSLT and
             XQuery processing.</p>
          
@@ -953,11 +953,11 @@
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySaxonProcessor"
+                  href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySaxonProcessor"
                   >PySaxonProcessor</a> using the constructor <code>proc =
                      PySaxonProcessor(license=True)</code> (schema processing requires SaxonC-EE). Then call
                   the method <code>new_schema_validator()</code> to create a new <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PySchemaValidator"
+                     href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PySchemaValidator"
                      >PySchemaValidator</a>.</p>
             </li>
             <li>
@@ -1007,7 +1007,7 @@
          <p>Schema validation can be controlled using the SaxonC PHP interface.</p>
          
          <p>The PHP interface allows schemas to be loaded into a <a class="bodylink code"
-            href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_schemavalidator"
+            href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_schemavalidator"
             >SchemaValidator</a>, and then to be used for validating instances, or for schema-aware XSLT and
             XQuery processing.</p>
          
@@ -1016,11 +1016,11 @@
          <ol>
             <li>
                <p>Create a <a class="bodylink code"
-                  href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor"
+                  href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_saxonprocessor"
                   >SaxonProcessor</a> using the constructor <code>new SaxonProcessor(true)</code> (schema
                   processing requires SaxonC-EE). Then call the method <code>newSchemaValidator()</code>
                   to create a new <a class="bodylink code"
-                     href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_schemavalidator"
+                     href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_schemavalidator"
                      >SchemaValidator</a>.</p>
             </li>
             <li>

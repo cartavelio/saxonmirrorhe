@@ -1323,13 +1323,13 @@
       <p>On C++, Python and PHP, source XML documents can be parsed from file or lexical string using methods on the
         <code>DocumentBuilder</code>:</p>
       <ul>
-        <li>In C++, <a href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html"
+        <li>In C++, <a href="https://www.saxonica.com/saxon-c/doc13/html/classDocumentBuilder.html"
           class="bodylink code">DocumentBuilder</a> provides the methods: <code>parseXmlFromFile()</code>,
           <code>parseXmlFromUri()</code>, and <code>parseXmlFromString()</code>.</li>
-        <li>In Python, <a href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder"
+        <li>In Python, <a href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyDocumentBuilder"
           class="bodylink code">PyDocumentBuilder</a> provides the method <code>parse_xml()</code> with
           which different keywords are used to supply the input from file, URI or lexical string.</li>
-        <li>In PHP, <a href="https://www.saxonica.com/saxon-c/documentation12/index.html#!api/saxon_c_php_api/saxon_c_php_documentBuilder"
+        <li>In PHP, <a href="https://www.saxonica.com/saxon-c/documentation13/index.html#!api/saxon_c_php_api/saxon_c_php_documentBuilder"
           class="bodylink code">Saxon\DocumentBuilder</a> provides the methods: <code>parseXmlFromFile()</code>,
           <code>parseXmlFromUri()</code>, and <code>parseXmlFromString()</code>.</li>
       </ul>
@@ -1935,11 +1935,11 @@ documentBuilder.build(as);]]></code></pre>
 
       <p class="conly">Similarly on SaxonC, validation may be controlled by setting the appropriate options on
         the <a class="bodylink code"
-          href="https://www.saxonica.com/saxon-c/doc12/html/classDocumentBuilder.html">DocumentBuilder</a> in
+          href="https://www.saxonica.com/saxon-c/doc13/html/classDocumentBuilder.html">DocumentBuilder</a> in
         the C++ interface, the <a class="bodylink code"
-          href="https://www.saxonica.com/saxon-c/documentation12/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a>
+          href="https://www.saxonica.com/saxon-c/documentation13/#!api/saxon_c_php_api/saxon_c_php_documentBuilder">Saxon\DocumentBuilder</a>
         in the PHP interface, or the <a class="bodylink code"
-          href="https://www.saxonica.com/saxon-c/doc12/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a>
+          href="https://www.saxonica.com/saxon-c/doc13/html/saxonc.html#PyDocumentBuilder">PyDocumentBuilder</a>
         in the Python interface.</p>
       
       <p class="javaonly">On Java interfaces that expect a JAXP <code>Source</code> object it is possible to request

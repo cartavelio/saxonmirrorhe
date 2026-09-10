@@ -40,7 +40,7 @@
         <p>Details of changes in all Saxon releases since 7.0 are available here.</p>
         
         <p class="conly">For changes specific to the SaxonC product, please also see the <a
-            href="https://www.saxonica.com/saxon-c/documentation12/index.html#!changes" class="bodylink">SaxonC Change history</a>
+            href="https://www.saxonica.com/saxon-c/documentation13/index.html#!changes" class="bodylink">SaxonC Change history</a>
             documentation.</p>
         
 

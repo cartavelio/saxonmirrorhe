@@ -7,11 +7,11 @@
     required <dfn>notices</dfn> for open-source <dfn>components</dfn> that have been incorporated
     into Saxon, and acknowledgments of contributors.</p>
 
-  <p>This documentation relates both to the open source SaxonJ-HE product and to the commercial
-    products (SaxonJ-PE, SaxonJ-EE, SaxonCS). The conditions of use are of course different in the two cases;
+  <p>This documentation relates both to the open source Saxon-HE product and to the commercial
+    products (Saxon-PE and Saxon-EE). The conditions of use are of course different in the two cases;
     there are also differences in the third-party components that are included.</p>
 
-  <p>The information in this section applies to both SaxonJ and SaxonCS, unless
+  <p>The information in this section applies to SaxonJ, SaxonCS and SaxonC unless
     otherwise specified.</p>
   
   <p>The source code of Saxon can be considered for <dfn>licensing</dfn> purposes as having four
@@ -140,8 +140,8 @@
         components gives you additional rights, which are described above.</p>
   </div>
   <div class="csonly">
-    <h2 class="subtitle">SaxonCS</h2>
-    <p>SaxonCS is a commercial Saxonica product built from the following components:</p>
+    <h2 class="subtitle">SaxonCS-EE</h2>
+    <p>SaxonCS-EE is a commercial Saxonica product built from the following components:</p>
     
     <ol>
       <li><p>The Java source code of SaxonJ-EE (see above), converted to C# using a Saxonica-produced transpiler.
@@ -220,7 +220,7 @@
       users know that they are running Saxon.</p>
   </div>
 
-  <p>Redistribution of commercial Saxonica products (SaxonJ-PE, SaxonJ-EE, SaxonCS) as a component of a commercial application is possible
+  <p>Redistribution of commercial Saxonica products (Saxon-PE and Saxon-EE) as a component of a commercial application is possible
     under commercial terms; prices are published in the Saxonica online store, and a specimen
     contract will be supplied on request.</p>
 
