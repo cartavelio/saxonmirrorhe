@@ -19,17 +19,16 @@ import net.sf.saxon.serialize.JSONEmitter;
 import net.sf.saxon.str.UnicodeBuilder;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharpModifiers;
+import net.sf.saxon.tree.iter.AxisIterator;
 import net.sf.saxon.type.*;
 import net.sf.saxon.value.*;
 import net.sf.saxon.z.IntHashMap;
 import net.sf.saxon.z.IntHashSet;
+import net.sf.saxon.z.IntSet;
 import net.sf.saxon.z.IntToIntHashMap;
 
 import javax.xml.transform.OutputKeys;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Implementation of the fn:xdm-to-json function proposed for 4.0
@@ -46,16 +45,28 @@ public class XdmToJsonFn extends SystemFunction {
     static {
         OptionsParameter parseJsonOptions = new OptionsParameter();
         parseJsonOptions.addAllowedOption("indent", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
+        parseJsonOptions.addAllowedOption("uniform", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("escape-solidus", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("layouts", layoutMapType, new HashTrieMap());
         OPTION_DETAILS = parseJsonOptions;
     }
 
-    private final IntHashMap<String> layoutMap = new IntHashMap<>();
-    private Stack<StructuredQName> elementNameStack = new Stack<>();
+    /**
+     * A bundle of context data that is passed down the recursive calls
+     */
+
+    private static class JsonConversionContext {
+        public Configuration config;
+        public JSONEmitter emitter;
+        public IntToIntHashMap uniformityData = null;
+        public IntHashMap<String> layoutMap = new IntHashMap<>();
+        private Stack<StructuredQName> elementNameStack = new Stack<>();
+    }
+
+
 
     /**
-     * Evaluate the expression
+     * Evaluate the function call
      *
      * @param context   the dynamic evaluation context
      * @param arguments the values of the arguments, supplied as Sequences
@@ -66,66 +77,244 @@ public class XdmToJsonFn extends SystemFunction {
     @Override
     public Sequence call(XPathContext context, Sequence[] arguments) throws XPathException {
         GroundedValue val = arguments[0].materialize();
+        JsonConversionContext jcc = new JsonConversionContext();
+        jcc.config = context.getConfiguration();
         // Initialise the element name stack with a dummy no-namespace name
-        elementNameStack.add(new StructuredQName("", NamespaceUri.NULL, "dummy"));
+        jcc.elementNameStack.add(new StructuredQName("", NamespaceUri.NULL, "dummy"));
         // Process the supplied options
-        Map<String, Sequence> checkedOptions = null;
-        if (getArity() == 2) {
-            MapItem options = (MapItem) arguments[1].head();
-            checkedOptions = getDetails().optionDetails.processSuppliedOptions(options, context);
-            initLayoutMap(checkedOptions, context.getConfiguration());
-        }  else {
-            checkedOptions = new HashMap<>();
+        Map<String, Sequence> checkedOptions = new HashMap<>();
+        boolean indent = false;
+        boolean escapeSolidus = false;
+        boolean uniform = false;
+        if (arguments.length > 1) {
+            MapItem suppliedOptions = (MapItem) arguments[1].head();
+            checkedOptions = getDetails().optionDetails.processSuppliedOptions(suppliedOptions, context);
+            indent = ((BooleanValue) checkedOptions.get("indent")).getBooleanValue();
+            escapeSolidus = ((BooleanValue) checkedOptions.get("escape-solidus")).getBooleanValue();
+            uniform = ((BooleanValue) checkedOptions.get("uniform")).getBooleanValue();
+            initLayoutMap(jcc, checkedOptions, context.getConfiguration());
         }
+
         PipelineConfiguration pipe = context.getConfiguration().makePipelineConfiguration();
         UnicodeBuilder builder = new UnicodeBuilder();
         Properties outputProperties = new Properties();
         outputProperties.setProperty(SaxonOutputKeys.UNFAILING, "yes");
-        if (checkedOptions.containsKey(OutputKeys.INDENT) && ((BooleanValue)checkedOptions.get(OutputKeys.INDENT)).getBooleanValue()) {
-            outputProperties.setProperty(OutputKeys.INDENT,"yes");
+        outputProperties.setProperty(OutputKeys.INDENT, indent ? "yes" : "no");
+        outputProperties.setProperty(SaxonOutputKeys.ESCAPE_SOLIDUS, escapeSolidus ? "yes": "no");
+
+        if (uniform) {
+            jcc.uniformityData = gatherUniformityData(val);
         }
-        if (checkedOptions.containsKey(SaxonOutputKeys.ESCAPE_SOLIDUS) && ((BooleanValue) checkedOptions.get(SaxonOutputKeys.ESCAPE_SOLIDUS)).getBooleanValue()) {
-            outputProperties.setProperty(SaxonOutputKeys.ESCAPE_SOLIDUS, "yes");
-        } else {
-            outputProperties.setProperty(SaxonOutputKeys.ESCAPE_SOLIDUS, "no");
-        }
-        JSONEmitter emitter = new JSONEmitter(pipe, builder, outputProperties);
-        emitSequence(val, checkedOptions, false, emitter);
+        jcc.emitter = new JSONEmitter(pipe, builder, outputProperties);
+        emitSequence(val, jcc, false);
         return new StringValue(builder.toUnicodeString());
     }
 
-    private void initLayoutMap(Map<String, Sequence> checkedOptions, Configuration config) {
+    /**
+     * Process the supplied value of the {@code layouts} option: a map of specific layouts
+     * chosen for specific element names
+     * @param jcc the conversion context
+     * @param checkedOptions the supplied options to the function, after validation and expansion of defaults
+     * @param config the Saxon configuration
+     */
+    private void initLayoutMap(JsonConversionContext jcc, Map<String, Sequence> checkedOptions, Configuration config) {
         MapItem val = (MapItem)checkedOptions.get("layouts").materialize();
         for (KeyValuePair pair : val.keyValuePairs()) {
              StructuredQName qn = ((QNameValue)pair.key).getStructuredQName();
              int fp = config.getNamePool().allocateFingerprint(qn.getNamespaceUri(), qn.getLocalPart());
-             layoutMap.put(fp, ((StringValue)pair.value).getStringValue());
+             jcc.layoutMap.put(fp, ((StringValue)pair.value).getStringValue());
         }
+    }
+
+    /**
+     * Examine all the items in the input sequence, together with their descendants in the
+     * case of document or element nodes, to gather for each distinct element name, the properties
+     * that are common to all the elements of any given name
+     * @param input the input sequence to the function
+     * @return a hash map, indexed by element name fingerprint, containing the properties
+     * applicable to each element name encountered.
+     */
+
+    private IntToIntHashMap gatherUniformityData(GroundedValue input) {
+        IntToIntHashMap data = new IntToIntHashMap();
+        for (Item it : input.asIterable()) {
+            if (it instanceof NodeInfo) {
+                if (((NodeInfo)it).getNodeKind() == Type.DOCUMENT) {
+                    AxisIterator iter = ((NodeInfo)it).iterateAxis(AxisInfo.DESCENDANT, NodeKindTest.ELEMENT);
+                    NodeInfo element;
+                    while ((element = iter.next()) != null) {
+                        updateUniformityData(element, data);
+                    }
+                } else if (((NodeInfo) it).getNodeKind() == Type.ELEMENT) {
+                    AxisIterator iter = ((NodeInfo) it).iterateAxis(AxisInfo.DESCENDANT_OR_SELF, NodeKindTest.ELEMENT);
+                    NodeInfo element;
+                    while ((element = iter.next()) != null) {
+                        updateUniformityData(element, data);
+                    }
+                }
+            }
+        }
+        return data;
+    }
+
+    /**
+     * Property indicating that an element has one or more attributes
+     */
+    private final static int HAS_ATTRIBUTES = 1 << 30;
+
+    /**
+     * Property indicating that an element has one or more child elements
+     */
+    private final static int HAS_CHILD_ELEMENTS = 1 << 29;
+
+    /**
+     * Property indicating that an element has one or more non-whitespace text node children
+     */
+
+    private final static int HAS_NON_WHITESPACE_TEXT_NODES = 1 << 28;
+
+    /**
+     * Property indicating that an element has one or more text node children consisting entirely of whitespace
+     */
+    private final static int HAS_WHITESPACE_TEXT_NODES = 1 << 27;
+
+    /**
+     * Property indicating that there are at least two children of an element having different names
+     */
+
+    private final static int HAS_DIVERSE_CHILD_ELEMENTS = 1 << 26;
+
+    /**
+     * Property indicating that all the element node children of an element have the same name, and that
+     * there are at least two such children
+     */
+    private final static int HAS_REPEATED_CHILD_ELEMENTS = 1 << 25;
+
+    /**
+     * Property indicating that all the element node children of an element have different names
+     */
+
+    private final static int HAS_UNIQUE_CHILD_ELEMENTS = 1 << 24;
+
+    /**
+     * Get the properties of an element node, and add the details to
+     * a hashmap containing details for all element nodes, to support
+     * the uniform=yes option
+     * @param element the element node
+     * @param data the hash map to be updated
+     */
+
+    private void updateUniformityData(NodeInfo element, IntToIntHashMap data) {
+        int fp = element.getFingerprint();
+        boolean existing = data.contains(fp);
+        int properties = existing ? data.get(fp) : 0;
+        int newProperties = getElementProperties(element, properties);
+        if (newProperties != properties || !existing) {
+            data.put(fp, newProperties);
+        }
+    }
+
+    /**
+     * Get the properties of an element node.
+     * @param element The element node.
+     * @param properties Zero if evaluating for this element on its own. Otherwise, when
+     *                   looking for common properties of all elements sharing the same name,
+     *                   the properties already gathered for other elements having the same name.
+     * @return the properties of this element, or, the properties shared by this element
+     * and others having the same element name. The returned value consists of a set of
+     * flags in the top 10 bits indicating for example whether the element has attributes,
+     * child element nodes, whitespace and/or non-whitespace text nodes; and in the bottom
+     * 20 bits, where all the children of an element have the same name, the fingerprint of the
+     * child element name.
+     */
+
+    private int getElementProperties(NodeInfo element, int properties) {
+        if ((properties & HAS_ATTRIBUTES) == 0 && element.attributes().size() > 0) {
+            properties |= HAS_ATTRIBUTES;
+        }
+        if ((properties & (HAS_CHILD_ELEMENTS | HAS_NON_WHITESPACE_TEXT_NODES | HAS_DIVERSE_CHILD_ELEMENTS)) == 0
+                && element.hasChildNodes()) {
+            int firstChild = -1;
+            int countChildElements = 0;
+            boolean hasDuplicates = false;
+            IntSet fingerprints = new IntHashSet();
+            for (NodeInfo child : element.children()) {
+                if (child.getNodeKind() == Type.TEXT) {
+                    if (Whitespace.isAllWhite(child.getUnicodeStringValue())) {
+                        properties |= HAS_WHITESPACE_TEXT_NODES;
+                    } else {
+                        properties |= HAS_NON_WHITESPACE_TEXT_NODES;
+                    }
+                } else if (child.getNodeKind() == Type.ELEMENT) {
+                    int childFingerprint = child.getFingerprint();
+                    if (fingerprints.contains(childFingerprint)) {
+                        hasDuplicates = true;
+                    }
+                    countChildElements++;
+                    properties |= HAS_CHILD_ELEMENTS;
+                    fingerprints.add(childFingerprint);
+                    if (firstChild != -1) {
+                        if (firstChild != childFingerprint) {
+                            properties |= HAS_DIVERSE_CHILD_ELEMENTS;
+                        } else {
+                            properties |= HAS_REPEATED_CHILD_ELEMENTS;
+                        }
+                    } else {
+                        firstChild = child.getFingerprint();
+                    }
+                }
+            }
+            if (firstChild != -1 && ((properties & HAS_DIVERSE_CHILD_ELEMENTS) == 0)) {
+                if ((properties & NamePool.FP_MASK) == 0) {
+                    properties |= (firstChild & NamePool.FP_MASK);
+                } else {
+                    properties |= HAS_DIVERSE_CHILD_ELEMENTS;
+                }
+            }
+            if (countChildElements == 1) {
+                properties |= HAS_DIVERSE_CHILD_ELEMENTS;  // there's only one, so they are all different
+            }
+            if (!hasDuplicates) {
+                properties |= HAS_UNIQUE_CHILD_ELEMENTS;
+            }
+        }
+        return properties;
     }
 
     /**
      * Output the JSON representation of a sequence
      * @param val the value to be output
-     * @param options the top-level options to the call
+     * @param jcc the context information for the call
      * @param forceArray if an array is to be used even if the size is zero or one
-     * @param emitter the output destination
      * @throws XPathException if anything goes wrong
      */
-    public void emitSequence(GroundedValue val, Map<String, Sequence> options, boolean forceArray, JSONEmitter emitter) throws XPathException {
+    public void emitSequence(GroundedValue val,
+                             JsonConversionContext jcc,
+                             boolean forceArray) throws XPathException {
         if (val.getLength() == 0 && !forceArray) {
-            emitter.writeAtomicValue(null);
+            jcc.emitter.writeAtomicValue(null);
         } else if (val.getLength() == 1 && !forceArray) {
-            emitItem(val.head(), options, emitter);
+            emitItem(val.head(), jcc);
         } else {
-            emitter.startArray(true);
+            jcc.emitter.startArray(true);
             for (Item it : val.asIterable()) {
-                emitItem(it, options, emitter);
+                emitItem(it, jcc);
             }
-            emitter.endArray();
+            jcc.emitter.endArray();
         }
     }
 
-    private void emitItem(Item item, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
+    /**
+     * Output the JSON represention of an item
+     * @param item the item in question
+     * @param jcc the conversion context
+     * @throws XPathException if anything goes wong
+     */
+
+    private void emitItem(Item item,
+                          JsonConversionContext jcc) throws XPathException {
+
+        JSONEmitter emitter = jcc.emitter;
         if (item instanceof AtomicValue) {
             if (item instanceof NumericValue) {
                 if (((NumericValue)item).isNaN()) {
@@ -144,7 +333,7 @@ public class XdmToJsonFn extends SystemFunction {
                     emitter.startMap(true);
                     emitter.writeKey("#document");
                     if (((NodeInfo) item).hasChildNodes()) {
-                        emitMixedElementContent((NodeInfo)item, options, true, emitter);
+                        emitMixedElementContent((NodeInfo)item, jcc, true);
                     }
                     emitter.endMap();
                     break;
@@ -162,7 +351,7 @@ public class XdmToJsonFn extends SystemFunction {
                     }
                     emitter.writeKey(attKey);
                     SchemaType type = ((NodeInfo) item).getSchemaType();
-                    emitSequence(item.atomize(), options, ((SimpleType)type).isListType(), emitter);
+                    emitSequence(item.atomize(), jcc, ((SimpleType)type).isListType());
                     emitter.endMap();
                     break;
                 case Type.COMMENT:
@@ -189,7 +378,7 @@ public class XdmToJsonFn extends SystemFunction {
                     emitter.endMap();
                     break;
                 case Type.ELEMENT:
-                    emitElement((NodeInfo)item, options, emitter);
+                    emitElement((NodeInfo)item, jcc);
                     break;
                 case Type.NAMESPACE:
                     emitter.startMap(true);
@@ -208,14 +397,14 @@ public class XdmToJsonFn extends SystemFunction {
         } else if (item instanceof ArrayItem) {
             emitter.startArray(true);
             for (GroundedValue member : ((ArrayItem)item).members()) {
-                emitSequence(member, options, false, emitter);
+                emitSequence(member, jcc, false);
             }
             emitter.endArray();
         } else if (item instanceof MapItem) {
             emitter.startMap(true);
             for (KeyValuePair pair : ((MapItem)item).keyValuePairs()) {
                 emitter.writeKey(pair.key.getStringValue());
-                emitSequence(pair.value, options, false, emitter);
+                emitSequence(pair.value, jcc, false);
             }
             emitter.endMap();
         } else if (item instanceof FunctionItem) {
@@ -234,61 +423,77 @@ public class XdmToJsonFn extends SystemFunction {
         }
     }
 
-    private void emitElement(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        StructuredQName name = NodeName_1.nodeName(element).getStructuredQName();
+    /**
+     * Output an element node
+     * @param element the element node
+     * @param jcc the conversion context
+     * @throws XPathException if anything goes wrong
+     */
+    private void emitElement(NodeInfo element,
+                             JsonConversionContext jcc) throws XPathException {
+        StructuredQName name = Objects.requireNonNull(
+                NodeName_1.nodeName(element)).getStructuredQName();
         String tag;
-        if (name.hasURI(elementNameStack.peek().getNamespaceUri())) {
+        if (name.hasURI(jcc.elementNameStack.peek().getNamespaceUri())) {
             tag = name.getLocalPart();
         } else {
             tag = name.getEQName();
         }
-        elementNameStack.push(name);
-        emitter.startMap(true);
-        emitter.writeKey(tag);
-        emitElementContent(element, options, emitter);
-        emitter.endMap();
-        elementNameStack.pop();
+        jcc.elementNameStack.push(name);
+        jcc.emitter.startMap(true);
+        jcc.emitter.writeKey(tag);
+        emitElementContent(element, jcc);
+        jcc.emitter.endMap();
+        jcc.elementNameStack.pop();
     }
 
     /**
      * Output the content of an element (excluding the element name) using a layout chosen
      * for the particular element
      * @param element the element to output
-     * @param options the original options
-     * @param emitter the output destination
+     * @param jcc the context for the operation
      * @throws XPathException in the event of failure
      */
-    private void emitElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
+    private void emitElementContent(NodeInfo element,
+                                    JsonConversionContext jcc) throws XPathException {
         // First see if an explicit layout has been chosen for this element in the supplied options
-        String explicitLayout = layoutMap.get(element.getFingerprint());
+        String explicitLayout = jcc.layoutMap.get(element.getFingerprint());
         if (explicitLayout != null) {
             switch (explicitLayout) {
                 case "empty":
-                    emitEmptyElementContent(element, options, emitter);
+                    emitEmptyElementContent(element, jcc);
                     break;
                 case "empty-plus":
-                    emitEmptyPlusElementContent(element, options, emitter);
+                    emitEmptyPlusElementContent(element, jcc);
                     break;
                 case "simple":
-                    emitSimpleElementContent(element, options, emitter);
+                    emitSimpleElementContent(element, jcc);
                     break;
                 case "simple-plus":
-                    emitSimplePlusElementContent(element, options, emitter);
+                    emitSimplePlusElementContent(element, jcc);
                     break;
                 case "list":
-                    emitListElementContent(element, options, emitter, null);
+                    if (isSuitableAsList(element)) {
+                        emitListElementContent(element, jcc);
+                    } else {
+                        emitMixedElementContent(element, jcc, false);
+                    }
                     break;
                 case "list-plus":
-                    emitListPlusElementContent(element, options, emitter, null);
+                    if (isSuitableAsList(element)) {
+                        emitListPlusElementContent(element, jcc, -1);
+                    } else {
+                        emitMixedElementContent(element, jcc, false);
+                    }
                     break;
                 case "record":
-                    emitRecordElementContent(element, options, emitter);
+                    emitRecordElementContent(element, jcc);
                     break;
                 case "sequence":
-                    emitMixedElementContent(element, options, false, emitter);
+                    emitMixedElementContent(element, jcc, false);
                     break;
                 case "mixed":
-                    emitMixedElementContent(element, options, false, emitter);
+                    emitMixedElementContent(element, jcc, false);
                     break;
             }
         } else {
@@ -296,7 +501,7 @@ public class XdmToJsonFn extends SystemFunction {
             SchemaType type = element.getSchemaType();
             if (!(type == AnyType.getInstance() || type == Untyped.getInstance())) {
                 if (type instanceof SimpleType) {
-                    emitSimpleElementContent(element, options, emitter);
+                    emitSimpleElementContent(element, jcc);
                 } else {
                     ComplexType cType = (ComplexType) type;
                     String layout = cType.getPreferredJsonLayout();
@@ -308,28 +513,28 @@ public class XdmToJsonFn extends SystemFunction {
                     }
                     switch (layout) {
                         case "simple-plus":
-                            emitSimplePlusElementContent(element, options, emitter);
+                            emitSimplePlusElementContent(element, jcc);
                             break;
                         case "empty":
-                            emitEmptyElementContent(element, options, emitter);
+                            emitEmptyElementContent(element, jcc);
                             break;
                         case "empty-plus":
-                            emitEmptyPlusElementContent(element, options, emitter);
+                            emitEmptyPlusElementContent(element, jcc);
                             break;
                         case "list":
-                            emitListElementContent(element, options, emitter, suffix);
+                            emitListElementContent(element, jcc);
                             break;
                         case "list-plus":
-                            emitListPlusElementContent(element, options, emitter, suffix);
+                            emitListPlusElementContent(element, jcc, Integer.parseInt(suffix));
                             break;
                         case "record":
-                            emitRecordElementContent(element, options, emitter);
+                            emitRecordElementContent(element, jcc);
                             break;
                         case "sequence":
-                            emitSequenceElementContent(element, options, emitter);
+                            emitSequenceElementContent(element, jcc);
                             break;
                         case "mixed":
-                            emitMixedElementContent(element, options, false, emitter);
+                            emitMixedElementContent(element, jcc, false);
                             break;
                         default:
                             throw new IllegalStateException();
@@ -337,128 +542,172 @@ public class XdmToJsonFn extends SystemFunction {
                     }
                 }
             } else {
-                int nonWhiteTextNodeCounter = 0;
-                int whiteTextNodeCounter = 0;
-                int childElementCounter = 0;
-                IntHashSet distinctFingerprints = new IntHashSet();
-                for (NodeInfo child : element.children()) {
-                    if (child.getNodeKind() == Type.ELEMENT) {
-                        int fp = child.getFingerprint();
-                        childElementCounter++;
-                        distinctFingerprints.add(fp);
-                    } else if (child.getNodeKind() == Type.TEXT) {
-                        if (Whitespace.isAllWhite(child.getUnicodeStringValue())) {
-                            whiteTextNodeCounter++;
-                        } else {
-                            nonWhiteTextNodeCounter++;
-                        }
-                    }
+                int properties;
+                if (jcc.uniformityData != null) {
+                    assert jcc.uniformityData.contains(element.getFingerprint());
+                    properties = jcc.uniformityData.get(element.getFingerprint());
+                } else {
+                    properties = getElementProperties(element, 0);
                 }
-
-                if (nonWhiteTextNodeCounter == 0 && whiteTextNodeCounter == 0 && childElementCounter == 0) {
-                    // Empty content
-                    if (element.attributes().size() == 0) {
-                        emitEmptyElementContent(element, options, emitter);
-                    } else {
-                        emitEmptyPlusElementContent(element, options, emitter);
-                    }
-                } else if (childElementCounter == 0) {
-                    // Simple content
-                    if (element.attributes().size() == 0) {
-                        emitSimpleElementContent(element, options, emitter);
-                    } else {
-                        emitSimplePlusElementContent(element, options, emitter);
-                    }
-                } else if (nonWhiteTextNodeCounter == 0) {
-                    // Element-only content
-                    if (childElementCounter == 1) {
-                        emitRecordElementContent(element, options, emitter);
-                    } else if (distinctFingerprints.size() == 1 && childElementCounter >= 2) {
-                        if (element.attributes().size() == 0) {
-                            emitListElementContent(element, options, emitter, null);
+                // TODO: there must be a simpler way of expressing the following tortuous logic...
+                if ((properties & HAS_NON_WHITESPACE_TEXT_NODES) == 0) {
+                    if ((properties & HAS_CHILD_ELEMENTS) == 0) {
+                        if ((properties & HAS_WHITESPACE_TEXT_NODES) == 0) {
+                            if ((properties & HAS_ATTRIBUTES) == 0) {
+                                emitEmptyElementContent(element, jcc);
+                            } else {
+                                emitEmptyPlusElementContent(element, jcc);
+                            }
                         } else {
-                            emitListPlusElementContent(element, options, emitter, null);
+                            if ((properties & HAS_ATTRIBUTES) == 0) {
+                                emitSimpleElementContent(element, jcc);
+                            } else {
+                                emitSimplePlusElementContent(element, jcc);
+                            }
                         }
-                    } else if (childElementCounter == distinctFingerprints.size()) {
-                        emitRecordElementContent(element, options, emitter);
                     } else {
-                        emitSequenceElementContent(element, options, emitter);
+                        if ((properties & HAS_WHITESPACE_TEXT_NODES) != 0 && (properties & HAS_CHILD_ELEMENTS) == 0) {
+                            if ((properties & HAS_ATTRIBUTES) == 0) {
+                                emitSimpleElementContent(element, jcc);
+                            } else {
+                                emitSimplePlusElementContent(element, jcc);
+                            }
+                        } else if ((properties & HAS_DIVERSE_CHILD_ELEMENTS) == 0
+                                && ((properties & HAS_REPEATED_CHILD_ELEMENTS) != 0)) {
+                            if ((properties & HAS_ATTRIBUTES) == 0) {
+                                emitListElementContent(element, jcc);
+                            } else {
+                                emitListPlusElementContent(element, jcc, properties & NamePool.FP_MASK);
+                            }
+                        } else if ((properties & HAS_UNIQUE_CHILD_ELEMENTS) != 0) {
+                            emitRecordElementContent(element, jcc);
+                        } else {
+                            emitSequenceElementContent(element, jcc);
+                        }
+                    }
+                } else if ((properties & HAS_CHILD_ELEMENTS) == 0) {
+                    if ((properties & HAS_ATTRIBUTES) == 0) {
+                        emitSimpleElementContent(element, jcc);
+                    } else {
+                        emitSimplePlusElementContent(element, jcc);
                     }
                 } else {
-                    emitMixedElementContent(element, options, false, emitter);
+                    emitMixedElementContent(element, jcc, false);
                 }
             }
         }
     }
 
-
-
-    public void emitEmptyElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        emitter.writeStringValue("");
+    /**
+     * Ask whether list representation is possible for an element. This method
+     * is called when list layout is chosen explicitly by the user; if it is
+     * chosen inappropriately, we call back to mixed content representation
+     * @param element the element in question
+     * @return true if it is possible to use list layout for this element
+     */
+    private boolean isSuitableAsList(NodeInfo element) {
+        int props = getElementProperties(element, 0);
+        return (props & HAS_DIVERSE_CHILD_ELEMENTS) == 0
+                && (props & HAS_CHILD_ELEMENTS) != 0
+                && (props & HAS_NON_WHITESPACE_TEXT_NODES) == 0
+                && (props & NamePool.FP_MASK) != 0;
     }
 
-    public void emitEmptyPlusElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        emitter.startMap(false);
-        emitAttributes(element, options, emitter);
-        emitter.endMap();
+    /**
+     * Element formatter for empty elements. Element {@code <e/>} becomes JSON <code>{"e":""}</code>
+     * @param element the element to be formatted
+     * @param jcc the conversion context
+     * @throws XPathException if anything goes wrong
+     */
+    public void emitEmptyElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+        jcc.emitter.writeStringValue("");
     }
 
-    public void emitSimpleElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
+    /**
+     * Element formatter for empty elements with attributes.
+     * Element {@code <e id="x"/>} becomes JSON <code>{"e":{"@id":"x"}}</code>
+     *
+     * @param element the element to be formatted
+     * @param jcc     the conversion context
+     * @throws XPathException if anything goes wrong
+     */
+    public void emitEmptyPlusElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+        jcc.emitter.startMap(false);
+        emitAttributes(element, jcc, false);
+        jcc.emitter.endMap();
+    }
+
+    /**
+     * Element formatter for elements with simple content.
+     * Element {@code <e>xx</e>} becomes JSON <code>{"e":"xx"}</code>
+     *
+     * @param element the element to be formatted
+     * @param jcc     the conversion context
+     * @throws XPathException if anything goes wrong
+     */
+
+    public void emitSimpleElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
         SchemaType type = element.getSchemaType();
         boolean asList = type instanceof SimpleType && ((SimpleType)type).isListType();
-        emitSequence(element.atomize(), options, asList, emitter);
+        emitSequence(element.atomize(), jcc, asList);
     }
 
-    public void emitSimplePlusElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        emitter.startMap(false);
-        emitAttributes(element, options, emitter);
-        emitter.writeKey("#content");
+    /**
+     * Element formatter for elements with simple content plus attributes.
+     * Element {@code <e id="aa">xx</e>} becomes JSON <code>{"e":{"@id":"aa","#content":"xx"}}</code>
+     *
+     * @param element the element to be formatted
+     * @param jcc     the conversion context
+     * @throws XPathException if anything goes wrong
+     */
+
+    public void emitSimplePlusElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+        jcc.emitter.startMap(false);
+        emitAttributes(element, jcc, false);
+        jcc.emitter.writeKey("#content");
         SchemaType type = element.getSchemaType();
         boolean asList = type instanceof SimpleType && ((SimpleType) type).isListType();
-        emitSequence(element.atomize(), options, asList, emitter);
-        emitter.endMap();
+        emitSequence(element.atomize(), jcc, asList);
+        jcc.emitter.endMap();
     }
+
+    /**
+     * Element formatter for elements with list content.
+     * Element {@code <e><x>3<x/><x>4<x/><x>5<x/></e>} becomes
+     * JSON <code>{"e":["3","4","5"]}.</code> The child
+     * element name is dropped.
+     *
+     * @param element the element to be formatted
+     * @param jcc     the conversion context
+     * @throws XPathException if anything goes wrong
+     */
 
     public void emitListElementContent(NodeInfo element,
-                                       Map<String, Sequence> options,
-                                       JSONEmitter emitter,
-                                       String childEQName) throws XPathException {
+                                       JsonConversionContext jcc) throws XPathException {
 
-        String key;
-        if (childEQName == null) {
-            NodeInfo firstChild = element.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
-            assert firstChild != null;
-            if (firstChild.getNamespaceUri().equals(element.getNamespaceUri())) {
-                key = firstChild.getLocalPart();
-            } else {
-                key = "Q{" + firstChild.getNamespaceUri() + "}" + firstChild.getLocalPart();
-            }
-        } else {
-            StructuredQName qn = StructuredQName.fromEQName(childEQName);
-            if (qn.getNamespaceUri().equals(element.getNamespaceUri())) {
-                key = qn.getLocalPart();
-            } else {
-                key = childEQName;
-            }
+        jcc.emitter.startArray(false);
+        for (NodeInfo child : element.children(NodeKindTest.ELEMENT)) {
+            emitElementContent(child, jcc);
         }
-
-        emitter.startArray(false);
-        for (NodeInfo child : element.children()) {
-            if (child.getNodeKind() == Type.ELEMENT) {
-                emitElementContent(child, options, emitter);
-            }
-        }
-        emitter.endArray();
+        jcc.emitter.endArray();
     }
 
-
+    /**
+     * Element formatter for elements with list content plus attributes
+     * Element {@code <e id="aa"><x>3<x/><x>4<x/><x>5<x/></e>} becomes
+     * JSON <code>{"e":{"@id":"aa","x":["3","4","5"]}}</code>.
+     * The child element name is retained.
+     *
+     * @param element the element to be formatted
+     * @param jcc     the conversion context
+     * @throws XPathException if anything goes wrong
+     */
     public void emitListPlusElementContent(NodeInfo element,
-                                       Map<String, Sequence> options,
-                                       JSONEmitter emitter,
-                                       String childEQName) throws XPathException {
+                                           JsonConversionContext jcc,
+                                           int childFingerprint) throws XPathException {
 
         String key;
-        if (childEQName == null) {
+        if (childFingerprint == -1) {
             NodeInfo firstChild = element.iterateAxis(AxisInfo.CHILD, NodeKindTest.ELEMENT).next();
             assert firstChild != null;
             if (firstChild.getNamespaceUri().equals(element.getNamespaceUri())) {
@@ -467,31 +716,42 @@ public class XdmToJsonFn extends SystemFunction {
                 key = "Q{" + firstChild.getNamespaceUri() + "}" + firstChild.getLocalPart();
             }
         } else {
-            StructuredQName qn = StructuredQName.fromEQName(childEQName);
+            StructuredQName qn = jcc.config.getNamePool().getStructuredQName(childFingerprint);
             if (qn.getNamespaceUri().equals(element.getNamespaceUri())) {
                 key = qn.getLocalPart();
             } else {
-                key = childEQName;
+                key = qn.getEQName();
             }
         }
 
+        JSONEmitter emitter = jcc.emitter;
         emitter.startMap(false);
-        emitAttributes(element, options, emitter);
+        emitAttributes(element, jcc, false);
         emitter.writeKey(key);
         emitter.startArray(false);
         for (NodeInfo child : element.children()) {
             if (child.getNodeKind() == Type.ELEMENT) {
-                emitElementContent(child, options, emitter);
+                emitElementContent(child, jcc);
             }
         }
         emitter.endArray();
         emitter.endMap();
     }
 
-
-    public void emitRecordElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
+    /**
+     * Element formatter for elements with record content (with or without attributes)
+     * Element {@code <e id="aa"><x>3<x/><y>4<x/><z>5<x/></e>} becomes
+     * JSON <code>{"e":{"@id":"aa","x":"3","y":"4","z":"5"}}</code>.
+     * The child element name is retained.
+     *
+     * @param element the element to be formatted
+     * @param jcc     the conversion context
+     * @throws XPathException if anything goes wrong
+     */
+    public void emitRecordElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+        JSONEmitter emitter = jcc.emitter;
         emitter.startMap(false);
-        emitAttributes(element, options, emitter);
+        emitAttributes(element, jcc, false);
         if (element.isNilled()) {
             emitter.writeKey("#content");
             emitter.writeAtomicValue(null);
@@ -527,24 +787,24 @@ public class XdmToJsonFn extends SystemFunction {
                         }
                     }
                     emitter.writeKey(key);
-                    emitElementContent(child, options, emitter);
+                    emitElementContent(child, jcc);
                 }
             }
         }
         emitter.endMap();
     }
 
-    public void emitSequenceElementContent(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
-        emitMixedElementContent(element, options, true, emitter);
+    public void emitSequenceElementContent(NodeInfo element, JsonConversionContext jcc) throws XPathException {
+        emitMixedElementContent(element, jcc, true);
     }
-    public void emitMixedElementContent(NodeInfo element, Map<String, Sequence> options, boolean stripSpace, JSONEmitter emitter) throws XPathException {
-        emitter.startMap(false);
-        emitAttributes(element, options, emitter);
-        emitter.writeKey("#content");
+    public void emitMixedElementContent(NodeInfo element, JsonConversionContext jcc, boolean stripSpace) throws XPathException {
+
+        JSONEmitter emitter = jcc.emitter;
+        emitter.startArray(false);
+        emitAttributes(element, jcc, true);
         if (element.isNilled()) {
             emitter.writeAtomicValue(null);
         } else {
-            emitter.startArray(false);
             for (NodeInfo child : element.children()) {
                 switch (child.getNodeKind()) {
                     case Type.TEXT:
@@ -570,23 +830,25 @@ public class XdmToJsonFn extends SystemFunction {
                         emitter.endMap();
                         break;
                     case Type.ELEMENT:
-                        emitElement(child, options, emitter);
+                        emitElement(child, jcc);
                         break;
                     default:
                         throw new IllegalStateException();
                 }
             }
-            emitter.endArray();
         }
-        emitter.endMap();
+        emitter.endArray();
     }
 
-    public void emitAttributes(NodeInfo element, Map<String, Sequence> options, JSONEmitter emitter) throws XPathException {
+    public void emitAttributes(NodeInfo element, JsonConversionContext jcc, boolean individual) throws XPathException {
         NodeInfo att;
         SequenceIterator iter = element.iterateAxis(AxisInfo.ATTRIBUTE);
         while ((att = (NodeInfo)iter.next()) != null) {
             NamespaceUri ns = att.getNamespaceUri();
             if (!ns.equals(NamespaceUri.SCHEMA_INSTANCE)) {
+                if (individual) {
+                    jcc.emitter.startMap(true);
+                }
                 String attKey;
                 if (ns.equals(NamespaceUri.NULL)) {
                     attKey = "@" + att.getLocalPart();
@@ -595,34 +857,16 @@ public class XdmToJsonFn extends SystemFunction {
                 } else {
                     attKey = "@Q{" + att.getNamespaceUri() + "}" + att.getLocalPart();
                 }
-                emitter.writeKey(attKey);
+                jcc.emitter.writeKey(attKey);
                 AtomicSequence val = att.atomize();
                 SchemaType type = att.getSchemaType();
                 boolean asList = ((SimpleType) type).isListType();
-                emitSequence(val, options, asList, emitter);
+                emitSequence(val, jcc, asList);
+                if (individual) {
+                    jcc.emitter.endMap();
+                }
             }
         }
-    }
-
-
-    private boolean isSimpleContent(NodeInfo element) {
-        SchemaType type = element.getSchemaType();
-        if (type instanceof SimpleType) {
-            return true;
-        }
-        if (((ComplexType)type).isSimpleContent()) {
-            return true;
-        }
-        int textCount = 0;
-        int otherCount = 0;
-        for (NodeInfo child : element.children()) {
-            if (child.getNodeKind() == Type.TEXT) {
-                textCount++;
-            } else {
-                otherCount++;
-            }
-        }
-        return textCount == 1 && otherCount == 0;
     }
 
 
