@@ -7,8 +7,8 @@
 
 package net.sf.saxon.functions;
 
-import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.*;
+import net.sf.saxon.expr.elab.Elaborator;
 import net.sf.saxon.expr.instruct.Block;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.functions.registry.BuiltInFunctionSet;
@@ -463,11 +463,6 @@ public abstract class SystemFunction extends AbstractFunction {
      */
 
     public static Sequence dynamicCall(FunctionItem f, XPathContext context, Sequence... args) throws XPathException {
-        context = f.makeNewContext(context, null);
-        context.setCurrentOutputUri(null);
-        if (context instanceof XPathContextMajor) {
-            ((XPathContextMajor) context).setCurrentRegexIterator(null);
-        }
         return f.call(context, args);
     }
 
