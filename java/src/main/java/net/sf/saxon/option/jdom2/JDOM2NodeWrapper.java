@@ -445,11 +445,15 @@ public class JDOM2NodeWrapper extends AbstractNodeWrapper implements SiblingCoun
 
     @Override
     protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-        SequenceIterator base = new AttributeEnumeration(this);
-        if (nodeTest == AnyGNodeType.getInstance()) {
-            return base;
+        if (getNodeKind() == Type.ELEMENT) {
+            SequenceIterator base = new AttributeEnumeration(this);
+            if (nodeTest == AnyGNodeType.getInstance()) {
+                return base;
+            } else {
+                return Navigator.filter(base, nodeTest);
+            }
         } else {
-            return Navigator.filter(base, nodeTest);
+            return EmptyIterator.INSTANCE;
         }
     }
 

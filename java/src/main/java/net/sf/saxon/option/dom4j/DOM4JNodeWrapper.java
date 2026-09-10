@@ -392,124 +392,15 @@ public class DOM4JNodeWrapper extends AbstractNodeWrapper implements SiblingCoun
         return index;
     }
 
-    /**
-     * Return an iteration over the nodes reached by the given axis from this node
-     *
-     * //@param axisNumber the axis to be used
-     * @param nodeTest A pattern to be matched by the returned nodes
-     * @return a SequenceIterator that scans the nodes reached by the axis in turn.
-     */
-
-//    public AxisIterator iterateAxis(byte axisNumber, NodeTest nodeTest) {
-//        switch (axisNumber) {
-//            case AxisInfo.ANCESTOR:
-//                if (nodeKind == Type.DOCUMENT) {
-//                    return EmptyIterator.getInstance();
-//                }
-//                return Navigator.filter(
-//                        new Navigator.AncestorEnumeration(this, false),
-//                        nodeTest);
-//
-//            case AxisInfo.ANCESTOR_OR_SELF:
-//                if (nodeKind == Type.DOCUMENT) {
-//                    return Navigator.filteredSingleton(this, nodeTest);
-//                }
-//                return Navigator.filter(
-//                        new Navigator.AncestorEnumeration(this, true),
-//                        nodeTest);
-//
-//            case AxisInfo.ATTRIBUTE:
-//                if (nodeKind != Type.ELEMENT) {
-//                    return EmptyIterator.getInstance();
-//                }
-//                return Navigator.filter(
-//                        new AttributeEnumeration(this),
-//                        nodeTest);
-//
-//            case AxisInfo.CHILD:
-//                if (hasChildNodes()) {
-//                    return Navigator.filter(
-//                            new ChildEnumeration(this, true, true),
-//                            nodeTest);
-//                } else {
-//                    return EmptyIterator.getInstance();
-//                }
-//
-//            case AxisInfo.DESCENDANT:
-//                if (hasChildNodes()) {
-//                    return Navigator.filter(
-//                            (new TreeWalker()).newDescendantAxisIterator(this, false, nodeTest),//new Navigator.DescendantEnumeration(this, false, true),
-//                            nodeTest);
-//                } else {
-//                    return EmptyIterator.getInstance();
-//                }
-//
-//            case AxisInfo.DESCENDANT_OR_SELF:
-//                return Navigator.filter(
-//                        (new TreeWalker()).newDescendantAxisIterator(this, true, nodeTest),//new Navigator.DescendantEnumeration(this, true, true),
-//                        nodeTest);
-//
-//            case AxisInfo.FOLLOWING:
-//                return Navigator.filter(
-//                        new Navigator.FollowingEnumeration(this),
-//                        nodeTest);
-//
-//            case AxisInfo.FOLLOWING_SIBLING:
-//                switch (nodeKind) {
-//                    case Type.DOCUMENT:
-//                    case Type.ATTRIBUTE:
-//                    case Type.NAMESPACE:
-//                        return EmptyIterator.getInstance();
-//                    default:
-//                        return Navigator.filter(
-//                                new ChildEnumeration(this, false, true),
-//                                nodeTest);
-//                }
-//
-//            case AxisInfo.NAMESPACE:
-//                if (nodeKind != Type.ELEMENT) {
-//                    return EmptyIterator.getInstance();
-//                }
-//                return NamespaceNode.makeIterator(this, nodeTest);
-//
-//            case AxisInfo.PARENT:
-//                getParent();
-//                return Navigator.filteredSingleton(parent, nodeTest);
-//
-//            case AxisInfo.PRECEDING:
-//                return Navigator.filter(
-//                        new Navigator.PrecedingEnumeration(this, false),
-//                        nodeTest);
-//
-//            case AxisInfo.PRECEDING_SIBLING:
-//                switch (nodeKind) {
-//                    case Type.DOCUMENT:
-//                    case Type.ATTRIBUTE:
-//                    case Type.NAMESPACE:
-//                        return EmptyIterator.getInstance();
-//                    default:
-//                        return Navigator.filter(
-//                                new ChildEnumeration(this, false, false),
-//                                nodeTest);
-//                }
-//
-//            case AxisInfo.SELF:
-//                return Navigator.filteredSingleton(this, nodeTest);
-//
-//            case AxisInfo.PRECEDING_OR_ANCESTOR:
-//                return Navigator.filter(
-//                        new Navigator.PrecedingEnumeration(this, true),
-//                        nodeTest);
-//
-//            default:
-//                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-//        }
-//    }
     @Override
     protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-        return Navigator.filter(
-                new AttributeEnumeration(this),
-                nodeTest);
+        if (getNodeKind() == Type.ELEMENT) {
+            return Navigator.filter(
+                    new AttributeEnumeration(this),
+                    nodeTest);
+        } else {
+            return EmptyIterator.INSTANCE;
+        }
     }
 
     @Override

@@ -623,9 +623,13 @@ public class XOMNodeWrapper extends AbstractNodeWrapper implements SiblingCounti
 
     @Override
     protected SequenceIterator iterateAttributes(NodePredicate nodeTest) {
-        return Navigator.filter(
-                new AttributeAxisIterator(this, nodeTest),
-                nodeTest);
+        if (getNodeKind() == Type.ELEMENT) {
+            return Navigator.filter(
+                    new AttributeAxisIterator(this, nodeTest),
+                    nodeTest);
+        } else {
+            return EmptyIterator.INSTANCE;
+        }
     }
 
     @Override

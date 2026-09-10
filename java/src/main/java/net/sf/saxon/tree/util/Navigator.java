@@ -1267,62 +1267,26 @@ public final class Navigator {
         if (predicate == null) {
             predicate = AnyGNode.TEST;
         }
-        switch (axisNumber) {
-            case AxisInfo.ANCESTOR:
-                return origin.iterateAncestorAxis(predicate);
-
-            case AxisInfo.ANCESTOR_OR_SELF:
-                return origin.iterateAncestorOrSelfAxis(predicate);
-
-            case AxisInfo.ATTRIBUTE:
-                return origin.iterateAttributeAxis(predicate);
-
-            case AxisInfo.CHILD:
-                return origin.iterateChildAxis(predicate);
-
-            case AxisInfo.DESCENDANT:
-                return origin.iterateDescendantAxis(predicate);
-
-            case AxisInfo.DESCENDANT_OR_SELF:
-                return origin.iterateDescendantOrSelfAxis(predicate);
-
-            case AxisInfo.FOLLOWING:
-                return origin.iterateFollowingAxis(predicate);
-
-            case AxisInfo.FOLLOWING_OR_SELF:
-                return origin.iterateFollowingOrSelfAxis(predicate);
-
-            case AxisInfo.FOLLOWING_SIBLING:
-                return origin.iterateFollowingSiblingAxis(predicate);
-
-            case AxisInfo.FOLLOWING_SIBLING_OR_SELF:
-                return origin.iterateFollowingSiblingOrSelfAxis(predicate);
-
-            case AxisInfo.NAMESPACE:
-                return origin.iterateNamespaceAxis(predicate);
-
-            case AxisInfo.PARENT:
-                return origin.iterateParentAxis(predicate);
-
-            case AxisInfo.PRECEDING:
-                return origin.iteratePrecedingAxis(predicate);
-
-            case AxisInfo.PRECEDING_OR_SELF:
-                return origin.iteratePrecedingOrSelfAxis(predicate);
-
-            case AxisInfo.PRECEDING_SIBLING:
-                return origin.iteratePrecedingSiblingAxis(predicate);
-
-            case AxisInfo.PRECEDING_SIBLING_OR_SELF:
-                return origin.iteratePrecedingSiblingOrSelfAxis(predicate);
-
-            case AxisInfo.SELF:
-                return origin.iterateSelfAxis(predicate);
-
-            default:
-                throw new IllegalArgumentException("Unknown axis number " + axisNumber);
-
-        }
+        return switch (axisNumber) {
+            case AxisInfo.ANCESTOR -> origin.iterateAncestorAxis(predicate);
+            case AxisInfo.ANCESTOR_OR_SELF -> origin.iterateAncestorOrSelfAxis(predicate);
+            case AxisInfo.ATTRIBUTE -> origin.iterateAttributeAxis(predicate);
+            case AxisInfo.CHILD -> origin.iterateChildAxis(predicate);
+            case AxisInfo.DESCENDANT -> origin.iterateDescendantAxis(predicate);
+            case AxisInfo.DESCENDANT_OR_SELF -> origin.iterateDescendantOrSelfAxis(predicate);
+            case AxisInfo.FOLLOWING -> origin.iterateFollowingAxis(predicate);
+            case AxisInfo.FOLLOWING_OR_SELF -> origin.iterateFollowingOrSelfAxis(predicate);
+            case AxisInfo.FOLLOWING_SIBLING -> origin.iterateFollowingSiblingAxis(predicate);
+            case AxisInfo.FOLLOWING_SIBLING_OR_SELF -> origin.iterateFollowingSiblingOrSelfAxis(predicate);
+            case AxisInfo.NAMESPACE -> origin.iterateNamespaceAxis(predicate);
+            case AxisInfo.PARENT -> origin.iterateParentAxis(predicate);
+            case AxisInfo.PRECEDING -> origin.iteratePrecedingAxis(predicate);
+            case AxisInfo.PRECEDING_OR_SELF -> origin.iteratePrecedingOrSelfAxis(predicate);
+            case AxisInfo.PRECEDING_SIBLING -> origin.iteratePrecedingSiblingAxis(predicate);
+            case AxisInfo.PRECEDING_SIBLING_OR_SELF -> origin.iteratePrecedingSiblingOrSelfAxis(predicate);
+            case AxisInfo.SELF -> origin.iterateSelfAxis(predicate);
+            default -> throw new IllegalArgumentException("Unknown axis number " + axisNumber);
+        };
     }
 
     /**

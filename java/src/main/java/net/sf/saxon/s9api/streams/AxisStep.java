@@ -14,7 +14,7 @@ import net.sf.saxon.s9api.XdmNode;
 import java.util.stream.Stream;
 
 /**
- * An AxisStep is a {@link Step} that implements one of the 13 XPath Axes.
+ * An AxisStep is a {@link Step} that implements one of the XPath Axes.
  */
 class AxisStep extends Step<XdmNode> {
 
