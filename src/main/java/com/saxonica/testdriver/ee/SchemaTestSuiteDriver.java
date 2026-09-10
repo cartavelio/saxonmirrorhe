@@ -509,7 +509,7 @@ public class SchemaTestSuiteDriver {
                                         //                                        t.setTraceListener(new XSLTTraceListener());
                                         //                                    }
                                         Map<QName, XdmValue> params = new HashMap<QName, XdmValue>();
-                                        params.put(new QName("", "scm"), scmTree);
+                                        params.put(new QName(NamespaceUri.NULL, "scm"), scmTree);
                                         t.setStylesheetParameters(params);
                                         t.setGlobalContextItem(instance);
                                         XdmNode report = (XdmNode) t.applyTemplates(instance);
