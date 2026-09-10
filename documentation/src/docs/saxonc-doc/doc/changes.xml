@@ -65,6 +65,8 @@
          </ul>
          <p>From SaxonC 12.6:</p>
          <ul>
+            <li><p>Updated to GraalVM for JDK 21 Community 21.0.2, used to compile SaxonC to a
+               native executable.</p></li>
             <li><p>Added documentation on <a href="/technical/memory">Memory management in
                C++</a>, and improved the C++ API documentation for relevant methods when the caller
                must deallocate the memory used.</p></li>
