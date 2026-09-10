@@ -16,9 +16,10 @@ import net.sf.saxon.trans.Err;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.transpile.CSharp;
 import net.sf.saxon.transpile.CSharpSimpleEnum;
-import net.sf.saxon.type.SpecificFunctionType;
 import net.sf.saxon.type.StringToDouble;
-import net.sf.saxon.value.*;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.DoubleValue;
+import net.sf.saxon.value.StringValue;
 
 import java.util.Map;
 
@@ -190,8 +191,10 @@ public class JsonParser {
 
             case NUMERIC_LITERAL:
                 String lexical = tokenizer.currentTokenValue.toString();
-                AtomicValue d = parseNumericLiteral(lexical, flags, tokenizer.lineNumber, context);
-                handler.writeNumeric(lexical, d);
+                Item d = parseNumericLiteral(lexical, flags, tokenizer.lineNumber, context);
+                if (d != null) {
+                    handler.writeNumeric(lexical, d);
+                }
                 break;
 
             case TRUE:
@@ -332,7 +335,7 @@ public class JsonParser {
      * @throws net.sf.saxon.trans.XPathException if a dynamic error occurs (such as invalid JSON input)
      */
 
-    private AtomicValue parseNumericLiteral(String token, int flags, int lineNumber, XPathContext context) throws XPathException {
+    private Item parseNumericLiteral(String token, int flags, int lineNumber, XPathContext context) throws XPathException {
         try {
             if ((flags & LIBERAL) == 0) {
                 // extra checks on the number disabled by choosing spec="liberal"
@@ -359,7 +362,7 @@ public class JsonParser {
                 Sequence[] args = new Sequence[1];
                 args[0] = new StringValue(token);
                 Sequence result = SystemFunction.dynamicCall(numberParser, context, args).head();
-                return (AtomicValue)result.head();
+                return result.head();
             } else {
                 return new DoubleValue(StringToDouble.getInstance().stringToNumber(StringView.tidy(token)));
             }
@@ -678,14 +681,14 @@ public class JsonParser {
             Item fn = val.head();
             if (fn instanceof FunctionItem) {
                 numberParser = (FunctionItem) fn;
-                if (numberParser.getArity() != 1) {
-                    throw new XPathException("Number-parser function must have arity=1", "FOJS0005");
-                }
-                SpecificFunctionType required = new SpecificFunctionType(
-                        new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
-                if (!required.matches(numberParser, context.getConfiguration().getTypeHierarchy())) {
-                    throw new XPathException("Number-parser function does not match the required type", "XPTY0004");
-                }
+//                if (numberParser.getArity() != 1) {
+//                    throw new XPathException("Number-parser function must have arity=1", "FOJS0005");
+//                }
+//                SpecificFunctionType required = new SpecificFunctionType(
+//                        new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
+//                if (!required.matches(numberParser, context.getConfiguration().getTypeHierarchy())) {
+//                    throw new XPathException("Number-parser function does not match the required type", "XPTY0004");
+//                }
             } else {
                 throw new XPathException("Value of option 'number-parser' is not a function", "XPTY0004");
             }

@@ -13,9 +13,9 @@ import net.sf.saxon.ma.arrays.SimpleArrayItem;
 import net.sf.saxon.ma.map.DictionaryMap;
 import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.om.GroundedValue;
+import net.sf.saxon.om.Item;
 import net.sf.saxon.om.Sequence;
 import net.sf.saxon.trans.XPathException;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.BooleanValue;
 import net.sf.saxon.value.EmptySequence;
 import net.sf.saxon.value.StringValue;
@@ -138,7 +138,7 @@ public class JsonHandlerMap extends JsonHandler {
      * @param parsedValue the double representation of the value
      */
     @Override
-    public void writeNumeric(String asString, AtomicValue parsedValue) {
+    public void writeNumeric(String asString, Item parsedValue) {
         writeItem(parsedValue);
     }
 

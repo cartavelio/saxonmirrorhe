@@ -33,7 +33,7 @@ public class ParseJsonFn extends JsonToXMLFn {
         SpecificFunctionType fallbackType = new SpecificFunctionType(
                 new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_STRING);
         SpecificFunctionType parserType = new SpecificFunctionType(
-                new SequenceType[]{SequenceType.SINGLE_STRING}, SequenceType.SINGLE_ATOMIC);
+                new SequenceType[]{SequenceType.SINGLE_UNTYPED_ATOMIC}, SequenceType.OPTIONAL_ITEM);
         OptionsParameter parseJsonOptions = new OptionsParameter(version);
         parseJsonOptions.addAllowedOption("liberal", SequenceType.SINGLE_BOOLEAN, BooleanValue.FALSE);
         parseJsonOptions.addAllowedOption("duplicates", SequenceType.SINGLE_STRING, StringValue.bmp("use-first"));

@@ -16,7 +16,6 @@ import net.sf.saxon.om.Sequence;
 import net.sf.saxon.serialize.charcode.UTF16CharacterSet;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.SpecificFunctionType;
-import net.sf.saxon.value.AtomicValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 import net.sf.saxon.z.IntPredicateProxy;
@@ -96,7 +95,7 @@ public class JsonHandler {
      * @param parsedValue the parsed representation of the value, typically an xs:double, but under user control
      * @throws XPathException if any error occurs
      */
-    public void writeNumeric(String asString, AtomicValue parsedValue) throws XPathException {}
+    public void writeNumeric(String asString, Item parsedValue) throws XPathException {}
 
     /**
      * Write a string value
