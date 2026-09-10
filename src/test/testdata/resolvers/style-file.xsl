@@ -17,7 +17,7 @@
     <xsl:copy>
       <xsl:apply-templates select="@*, node()"/>
       <meta name="stylesheet" content="resolved"/>
-      <xsl:variable name="doc" select="doc('src/test/testdata/resolvers/style.xsl')"/>
+      <xsl:variable name="doc" select="doc('../src/test/testdata/resolvers/style.xsl')"/>
       <meta xmlns="" name="resolved" content="{count($doc//*)}"/>
     </xsl:copy>
   </xsl:template>
