@@ -888,7 +888,7 @@ def test_document_builder(saxonproc):
     builder.set_base_uri("file:/tmp")
     node = builder.parse_xml(xml_text="<foo xmlns='http://one.uri/'><bar/></foo>")
     assert node is not None
-    assert node.base_uri is "file:/tmp"
+    assert node.base_uri == "file:/tmp"
 
 def test_default_namespace2(saxonproc):
     query_proc = saxonproc.new_xquery_processor()
