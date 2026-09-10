@@ -355,6 +355,7 @@ PHP_RINIT_FUNCTION(saxon);
     PHP_METHOD(XPathProcessor, declareNamespace);
     PHP_METHOD(XPathProcessor, setBackwardsCompatible);
     PHP_METHOD(XPathProcessor, setCaching);
+    PHP_METHOD(XPathProcessor,  setLanguageVersion);
     PHP_METHOD(XPathProcessor, importSchemaNamespace);
     PHP_METHOD(XPathProcessor,  setParameter);
     PHP_METHOD(XPathProcessor,  setProperty);

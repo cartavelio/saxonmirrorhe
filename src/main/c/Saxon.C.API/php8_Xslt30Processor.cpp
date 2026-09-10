@@ -87,16 +87,12 @@ PHP_METHOD(Xslt30Processor, transformFileToFile)
     xsltProcessor = obj->xslt30Processor;
 
     if (xsltProcessor != nullptr) {
-        xsltProcessor->exceptionClear();
-        xsltProcessor->transformFileToFile(infilename, styleFileName, outfileName);
-        if(xsltProcessor->exceptionOccurred()) {
-          SaxonApiException * exception = xsltProcessor->getException();
-          if(exception != nullptr) {
-            zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-            delete exception;
-            }
-
+        try {
+            xsltProcessor->transformFileToFile(infilename, styleFileName, outfileName);
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
+
     }
 }
 
@@ -117,16 +113,13 @@ PHP_METHOD(Xslt30Processor, transformFileToString)
     xslt30Processor = obj->xslt30Processor;
 
     if (xslt30Processor != nullptr) {
-        xslt30Processor->exceptionClear();
-        const char * result = xslt30Processor->transformFileToString(infilename, styleFileName);
-        if(result != nullptr) {
-            //char *str = estrdup(result);
-            _RETURN_STRING(result);
-        } else if(xslt30Processor->exceptionOccurred()){
-            SaxonApiException * exception = xslt30Processor->getException();
-            if(exception != nullptr) {
-                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
+        try {
+            const char * result = xslt30Processor->transformFileToString(infilename, styleFileName);
+            if(result != nullptr) {
+                _RETURN_STRING(result);
             }
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
     }
 }
@@ -147,26 +140,20 @@ PHP_METHOD(Xslt30Processor, transformFileToValue)
     xslt30Processor = obj->xslt30Processor;
 
     if (xslt30Processor != nullptr) {
-        xslt30Processor->exceptionClear();
-        XdmValue * node = xslt30Processor->transformFileToValue(infilename, styleFileName);
-        if(node != nullptr) {
-            if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
+        try{
+            XdmValue * node = xslt30Processor->transformFileToValue(infilename, styleFileName);
+            if(node != nullptr) {
+              if (object_init_ex(return_value, xdmValue_ce) != SUCCESS) {
                 RETURN_NULL();
-            } else {
-                //struct xdmValue_object* vobj = (struct xdmValue_object *)Z_OBJ_P(return_value TSRMLS_CC);
+              } else {
                 zend_object *ooth =  Z_OBJ_P(return_value);
                 xdmValue_object* vobj  = (xdmValue_object *)((char *)ooth - XtOffsetOf(xdmValue_object, std));
                 assert (vobj != nullptr);
                 vobj->xdmValue = node;
+              }
             }
-        } else {
-            if(obj->xslt30Processor->exceptionOccurred()){
-                SaxonApiException * exception = xslt30Processor->getException();
-                if(exception != nullptr) {
-                    zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-                }
-
-            }
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
     }else {
         RETURN_NULL();
@@ -243,25 +230,23 @@ PHP_METHOD(Xslt30Processor, compileFromFile)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
-        xslt30Processor->exceptionClear();
-        XsltExecutable * executable = xslt30Processor->compileFromFile(name);
-        if(executable != nullptr) {
-            if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
-                RETURN_NULL();
-            } else {
-                zend_object *ooth = Z_OBJ_P(return_value);
-                xsltExecutable_object *vobj = (xsltExecutable_object * )((char *) ooth - XtOffsetOf(xsltExecutable_object, std));
-                assert (vobj!= nullptr);
-                vobj->xsltExecutable = executable;
+        try {
+            XsltExecutable * executable = xslt30Processor->compileFromFile(name);
+            if(executable != nullptr) {
+                if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
+                    RETURN_NULL();
+                } else {
+                    zend_object *ooth = Z_OBJ_P(return_value);
+                    xsltExecutable_object *vobj = (xsltExecutable_object * )((char *) ooth - XtOffsetOf(xsltExecutable_object, std));
+                    assert (vobj!= nullptr);
+                    vobj->xsltExecutable = executable;
+                }
             }
-
-        } else if(xslt30Processor->exceptionOccurred()){
-            SaxonApiException * exception = xslt30Processor->getException();
-            if(exception != nullptr) {
-                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-            }
-
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
+    } else {
+        RETURN_NULL();
     }
 }
 
@@ -279,19 +264,17 @@ PHP_METHOD(Xslt30Processor, compileFromAssociatedFile)
     xslt30Processor = obj->xslt30Processor;
 
     if (xslt30Processor != nullptr) {
-        xslt30Processor->exceptionClear();
-        XsltExecutable * executable = xslt30Processor->compileFromAssociatedFile(name);
-        if(executable != nullptr) {
-            zend_object *ooth =  Z_OBJ_P(return_value);
-            xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
-            assert (vobj != nullptr);
-            vobj->xsltExecutable = executable;
-        } else if(xslt30Processor->exceptionOccurred()){
-            SaxonApiException * exception = xslt30Processor->getException();
-            if(exception != nullptr) {
-                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-            }
+        try {
+            XsltExecutable * executable = xslt30Processor->compileFromAssociatedFile(name);
+                zend_object *ooth =  Z_OBJ_P(return_value);
+                xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+                assert (vobj != nullptr);
+                vobj->xsltExecutable = executable;
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
+    } else {
+        RETURN_NULL();
     }
 }
 
@@ -309,10 +292,9 @@ PHP_METHOD(Xslt30Processor, compileFromString)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
-        xslt30Processor->exceptionClear();
-
+        try {
         XsltExecutable * executable = xslt30Processor->compileFromString(stylesheetStr);
-        if(executable != nullptr) {
+
             if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
                 RETURN_NULL();
             } else {
@@ -325,13 +307,12 @@ PHP_METHOD(Xslt30Processor, compileFromString)
                 vobj->xsltExecutable = executable;
 
             }
-        } else if(xslt30Processor->exceptionOccurred()){
-            SaxonApiException * exception = xslt30Processor->getException();
-            if(exception != nullptr) {
-                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-            }
-        }
 
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
+        }
+    } else {
+        RETURN_NULL();
     }
 }
 
@@ -348,12 +329,10 @@ PHP_METHOD(Xslt30Processor, compileFromStringAndSave)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
-        xslt30Processor->compileFromStringAndSave(stylesheetStr, filename);
-        if(xslt30Processor->exceptionOccurred()){
-            SaxonApiException * exception = xslt30Processor->getException();
-            if(exception != nullptr) {
-                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-            }
+        try {
+            xslt30Processor->compileFromStringAndSave(stylesheetStr, filename);
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
     }
 }
@@ -371,13 +350,10 @@ PHP_METHOD(Xslt30Processor, compileFromFileAndSave)
     xslt30Processor_object *obj = (xslt30Processor_object *)((char *)pobj - XtOffsetOf(xslt30Processor_object, std));
     xslt30Processor = obj->xslt30Processor;
     if (xslt30Processor != nullptr) {
-        xslt30Processor->exceptionClear();
-        xslt30Processor->compileFromStringAndSave(stylesheetFilename, filename);
-        if(xslt30Processor->exceptionOccurred()){
-            SaxonApiException * exception = xslt30Processor->getException();
-            if(exception != nullptr) {
-                zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-            }
+        try {
+            xslt30Processor->compileFromStringAndSave(stylesheetFilename, filename);
+        } catch(SaxonApiException &e) {
+            zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
         }
     }
 }
@@ -401,23 +377,23 @@ PHP_METHOD(Xslt30Processor, compileFromValue)
         if(ooth != nullptr) {
             XdmValue * value = ooth->xdmValue;
             if(value != nullptr && value->size() == 1 && (value->getHead())->getType() == 3) {
-                xslt30Processor->exceptionClear();
-                XsltExecutable * executable = xslt30Processor->compileFromXdmNode((XdmNode*)(value->getHead()));
-                if(executable != nullptr) {
-                    if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
-                        RETURN_NULL();
-                    } else {
-                        zend_object *ooth =  Z_OBJ_P(return_value);
-                        xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
-                        assert (vobj != nullptr);
-                        vobj->xsltExecutable = executable;
+                try {
+                    XsltExecutable * executable = xslt30Processor->compileFromXdmNode((XdmNode*)(value->getHead()));
+                    if(executable != nullptr) {
+                        if (object_init_ex(return_value, xsltExecutable_ce) != SUCCESS) {
+                            RETURN_NULL();
+                        } else {
+                            zend_object *ooth =  Z_OBJ_P(return_value);
+                            xsltExecutable_object* vobj  = (xsltExecutable_object *)((char *)ooth - XtOffsetOf(xsltExecutable_object, std));
+                            assert (vobj != nullptr);
+                            vobj->xsltExecutable = executable;
+                        }
                     }
-                } else if(xslt30Processor->exceptionOccurred()){
-                    SaxonApiException * exception = xslt30Processor->getException();
-                    if(exception != nullptr) {
-                        zend_throw_exception(zend_ce_exception,exception->getMessage(), 0);
-                    }
+                } catch(SaxonApiException &e) {
+                    zend_throw_exception(zend_ce_exception, e.getMessageWithErrorCode(), 0);
                 }
+            } else {
+                zend_throw_exception(zend_ce_exception, "XdmValue is not an XdmNode", 0);
             }
         }
     }

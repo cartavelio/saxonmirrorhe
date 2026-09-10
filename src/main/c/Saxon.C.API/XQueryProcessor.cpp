@@ -142,7 +142,6 @@ std::map<std::string,std::string>& XQueryProcessor::getProperties(){
      * Set the output file where the result is sent
     */
     void XQueryProcessor::setOutputFile(const char* ofile){
-      // outputfile1 = std::string(ofile); 
        setProperty("o", ofile);
     }
 
