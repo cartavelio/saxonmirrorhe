@@ -53,7 +53,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
     private static NamespaceMap makeStandardXQueryNamespaces() {
         NamespaceMap m = new NamespaceMap();
         // The list must be in alphabetical order of prefixes
-        m.prefixes = new String[]{"array", "err", "fn", "local", "map", "math", "output", "xq", "xs", "xsi"};
+        m.prefixes = new String[]{"array", "err", "fn", "local", "map", "math", "output", "saxon", "xq", "xs", "xsi"};
         m.uris = new NamespaceUri[]{
                 NamespaceUri.ARRAY_FUNCTIONS,
                 NamespaceUri.ERR,
@@ -62,6 +62,7 @@ public class NamespaceMap implements NamespaceBindingSet, NamespaceResolver {
                 NamespaceUri.MAP_FUNCTIONS,
                 NamespaceUri.MATH,
                 NamespaceUri.OUTPUT,
+                NamespaceUri.SAXON,
                 NamespaceUri.XQUERY,
                 NamespaceUri.SCHEMA,
                 NamespaceUri.SCHEMA_INSTANCE};

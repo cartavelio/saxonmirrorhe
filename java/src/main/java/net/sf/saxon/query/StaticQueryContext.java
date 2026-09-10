@@ -32,7 +32,10 @@ import javax.xml.transform.ErrorListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * StaticQueryContext contains information used to build a StaticContext for use when processing XQuery
@@ -67,7 +70,7 @@ public class StaticQueryContext {
     private Configuration config;
     private NamePool namePool;
     private String baseURI;
-    private HashMap<String, NamespaceUri> userDeclaredNamespaces;
+    private NamespaceMap predeclaredNamespaces = NamespaceMap.STANDARD_QUERY_NAMESPACES;
     /*@Nullable*/ private Set<GlobalVariable> userDeclaredVariables;
     private boolean inheritNamespaces = true;
     private boolean preserveNamespaces = true;
@@ -88,8 +91,6 @@ public class StaticQueryContext {
     private UnprefixedElementMatchingPolicy unprefixedElementMatchingPolicy
             = UnprefixedElementMatchingPolicy.DEFAULT_NAMESPACE;
     private Schema preLoadedSchema = null;
-
-    public static NamespaceMap globalNamespaces = NamespaceMap.STANDARD_QUERY_NAMESPACES;
 
 
     /**
@@ -126,7 +127,7 @@ public class StaticQueryContext {
         if (initialize) {
             copyFrom(config.getDefaultStaticQueryContext());
         } else {
-            userDeclaredNamespaces = new HashMap<>();
+            predeclaredNamespaces = NamespaceMap.STANDARD_QUERY_NAMESPACES;
             userDeclaredVariables = new HashSet<>();
             optimizerOptions = config.getOptimizerOptions();
             clearNamespaces();
@@ -154,8 +155,8 @@ public class StaticQueryContext {
         namePool = c.namePool;
         baseURI = c.baseURI;
         moduleURIResolver = c.moduleURIResolver;
-        if (c.userDeclaredNamespaces != null) {
-            userDeclaredNamespaces = new HashMap<>(c.userDeclaredNamespaces);
+        if (c.predeclaredNamespaces != null) {
+            predeclaredNamespaces = c.predeclaredNamespaces;
         }
         if (c.userDeclaredVariables != null) {
             userDeclaredVariables = new HashSet<>(c.userDeclaredVariables);
@@ -183,7 +184,7 @@ public class StaticQueryContext {
      */
 
     public void reset() {
-        userDeclaredNamespaces = new HashMap<>(10);
+        predeclaredNamespaces = NamespaceMap.emptyMap();
         errorReporter = config.makeErrorReporter();
         constructionMode = getConfiguration().isLicensedFeature(Configuration.LicenseFeature.ENTERPRISE_XQUERY) ?
                 Validation.PRESERVE : Validation.STRIP;
@@ -699,7 +700,9 @@ public class StaticQueryContext {
 
     /**
      * Declare a namespace whose prefix can be used in expressions. This is
-     * equivalent to declaring a prefix in the Query prolog.
+     * equivalent to declaring a prefix in the Query prolog. It is not necessary
+     * to declare the standard namespaces that are present in every XQuery module
+     * by definition.
      * Any namespace declared in the Query prolog overrides a namespace declared using
      * this API.
      *
@@ -731,17 +734,11 @@ public class StaticQueryContext {
             defaultElementNamespace = uri;
         }
         if (uri.isEmpty()) {
-            userDeclaredNamespaces.remove(prefix);
-            globalNamespaces = globalNamespaces.remove(prefix);
+            predeclaredNamespaces = predeclaredNamespaces.remove(prefix);
         } else {
-            userDeclaredNamespaces.put(prefix, uri);
-            globalNamespaces = globalNamespaces.put(prefix, uri);
+            predeclaredNamespaces = predeclaredNamespaces.put(prefix, uri);
         }
 
-    }
-
-    public NamespaceMap getGlobalNamespaces() {
-        return globalNamespaces;
     }
 
     /**
@@ -751,20 +748,20 @@ public class StaticQueryContext {
      */
 
     public void clearNamespaces() {
-        userDeclaredNamespaces.clear();
-        declareNamespace("xml", NamespaceUri.XML);
-        declareNamespace("xs", NamespaceUri.SCHEMA);
-        declareNamespace("xsi", NamespaceUri.SCHEMA_INSTANCE);
-        declareNamespace("fn", NamespaceUri.FN);
-        declareNamespace("math", NamespaceUri.MATH);
-        declareNamespace("map", NamespaceUri.MAP_FUNCTIONS);
-        declareNamespace("array", NamespaceUri.ARRAY_FUNCTIONS);
-        declareNamespace("local", NamespaceUri.LOCAL);
-        declareNamespace("err", NamespaceUri.ERR);
-        declareNamespace("output", NamespaceUri.OUTPUT);
-        declareNamespace("xq", NamespaceUri.XQUERY);
-        declareNamespace("saxon", NamespaceUri.SAXON);
-        declareNamespace("", NamespaceUri.NULL);
+        predeclaredNamespaces = NamespaceMap.STANDARD_QUERY_NAMESPACES;
+//        declareNamespace("xml", NamespaceUri.XML);
+//        declareNamespace("xs", NamespaceUri.SCHEMA);
+//        declareNamespace("xsi", NamespaceUri.SCHEMA_INSTANCE);
+//        declareNamespace("fn", NamespaceUri.FN);
+//        declareNamespace("math", NamespaceUri.MATH);
+//        declareNamespace("map", NamespaceUri.MAP_FUNCTIONS);
+//        declareNamespace("array", NamespaceUri.ARRAY_FUNCTIONS);
+//        declareNamespace("local", NamespaceUri.LOCAL);
+//        declareNamespace("err", NamespaceUri.ERR);
+//        declareNamespace("output", NamespaceUri.OUTPUT);
+//        declareNamespace("xq", NamespaceUri.XQUERY);
+//        declareNamespace("saxon", NamespaceUri.SAXON);
+//        declareNamespace("", NamespaceUri.NULL);
 
     }
 
@@ -774,8 +771,8 @@ public class StaticQueryContext {
      * @return the user-declared namespaces
      */
 
-    protected HashMap<String, NamespaceUri> getUserDeclaredNamespaces() {
-        return userDeclaredNamespaces;
+    protected NamespaceMap getPredeclaredNamespaces() {
+        return predeclaredNamespaces;
     }
 
     /**
@@ -787,7 +784,7 @@ public class StaticQueryContext {
      */
 
     public Iterator<String> iterateDeclaredPrefixes() {
-        return userDeclaredNamespaces.keySet().iterator();
+        return predeclaredNamespaces.iteratePrefixes();
     }
 
     /**
@@ -800,7 +797,7 @@ public class StaticQueryContext {
      */
 
     public NamespaceUri getNamespaceForPrefix(String prefix) {
-        return userDeclaredNamespaces.get(prefix);
+        return predeclaredNamespaces.getNamespaceUri(prefix);
     }
 
     /**

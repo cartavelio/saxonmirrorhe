@@ -69,7 +69,6 @@ public class QueryModule implements StaticContext {
     private XQueryFunctionLibrary globalFunctionLibrary;      // used only on a top-level module
     private int localFunctionLibraryNr;
     private int importedFunctionLibraryNr;
-    private int unboundFunctionLibraryNr;
     private Set<NamespaceUri> importedModuleNamespaces;
     private boolean inheritNamespaces = true;
     private boolean preserveNamespaces = true;
@@ -1434,12 +1433,12 @@ public class QueryModule implements StaticContext {
 
     /*@Nullable*/
     public NamespaceUri checkURIForPrefix(/*@NotNull*/ String prefix) {
-        // Search the active namespaces first, then the passive ones.
+        // Search the active (local) namespaces first, then the module-level namespaces, then the global namespaces.
         if (!activeNamespaces.isEmpty()) {
             NamespaceMap nsMap = activeNamespaces.peek();
             NamespaceUri ns = nsMap.getNamespaceUri(prefix);
             if (ns != null) {
-                if (ns.isEmpty() && !prefix.equals("")) {
+                if (ns.isEmpty() && !prefix.isEmpty()) {
                     // the namespace is undeclared
                     return null;
                 }
@@ -1456,7 +1455,7 @@ public class QueryModule implements StaticContext {
         }
 
         if (userQueryContext != null) {
-            uri = userQueryContext.getNamespaceForPrefix(prefix);
+            uri = userQueryContext.getPredeclaredNamespaces().getNamespaceUri(prefix);
             if (uri != null) {
                 return uri;
             }
@@ -1574,10 +1573,10 @@ public class QueryModule implements StaticContext {
     public NamespaceResolver getNamespaceResolver() {
         NamespaceMap result = NamespaceMap.emptyMap();
 
-        HashMap<String, NamespaceUri> userDeclaredNamespaces = userQueryContext.getUserDeclaredNamespaces();
+        NamespaceMap predeclaredNamespaces = userQueryContext.getPredeclaredNamespaces();
 
-        for (Map.Entry<String, NamespaceUri> e : userDeclaredNamespaces.entrySet()) {
-            result = result.put(e.getKey(), e.getValue());
+        for (NamespaceBinding e : predeclaredNamespaces.getNamespaceBindings()) {
+            result = result.put(e.getPrefix(), e.getNamespaceUri());
         }
         for (Map.Entry<String, NamespaceUri> e : explicitPrologNamespaces.entrySet()) {
             result = result.put(e.getKey(), e.getValue());

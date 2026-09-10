@@ -940,6 +940,9 @@ public class MapFunctionSet extends BuiltInFunctionSet {
                         return cxt -> {
                             SequenceIterator maps = input.iterate(cxt);
                             MapItem options = (MapItem) optionsEval.eval(cxt);
+                            if (options == null) {
+                                options = EmptyMap.INSTANCE_40;
+                            }
                             details.processSuppliedOptions(options, cxt, version);
                             OnDuplicatesAction action = getDuplicatesCombiner(options, "use-first", "FOJS0003");
                             return mergeMaps(maps, cxt, action, version);
