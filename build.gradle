@@ -33,8 +33,8 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 compileJava {
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
+  sourceCompatibility = JavaVersion.VERSION_18
+  targetCompatibility = JavaVersion.VERSION_18
 }
 
 project.extensions.create("testSuite", SaxonTestSuite, project)
