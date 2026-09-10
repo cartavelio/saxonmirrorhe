@@ -13,6 +13,7 @@ import net.sf.saxon.expr.CallableDelegate;
 import net.sf.saxon.expr.XPathContext;
 import net.sf.saxon.expr.sort.AtomicComparer;
 import net.sf.saxon.expr.sort.AtomicSortComparer;
+import net.sf.saxon.expr.sort.DescendingComparer;
 import net.sf.saxon.functions.SortBy;
 import net.sf.saxon.lib.StringCollator;
 import net.sf.saxon.ma.Parcel;
@@ -95,10 +96,10 @@ public class ArraySort extends ArrayFunctionSet.ArrayGeneratingFunction {
                     return 0;
                 }
                 else {
-                    return -1;
+                    return comparer instanceof DescendingComparer ? +1 : -1;
                 }
             } else if (b0 == null) {
-                return +1;
+                return comparer instanceof DescendingComparer ? -1 : +1;
             } else {
                 int first = comparer.compareAtomicValues(a0, b0);
                 if (first != 0) {
