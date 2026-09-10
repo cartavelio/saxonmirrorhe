@@ -31,7 +31,7 @@
   </exception>
   
    
-   <!--<exception test-set="fn-graphemes" 
+   <exception test-set="fn-graphemes" 
       test-case="
       graphemes-1172 
       graphemes-1173 
@@ -44,7 +44,7 @@
       graphemes-1189" run="false" report="known bug in ICU4N">
       <created by="Michael Kay" on="2024-06-27"/>
       <reason>ICU4N bug https://github.com/NightOwl888/ICU4N/issues/70 - confirmed 2026-01-23</reason>
-   </exception>-->
+   </exception>
    
  
 
@@ -143,6 +143,11 @@
    <exception test-set="app-CatalogCheck" test-case="Catalog011" run="false" report="disputed">
       <created by="Michael Kay" on="2023-01-03"/>
       <reason>Coverage analysis test fails because there is currently insufficient QT4 test coverage</reason>
+   </exception>
+
+   <exception test-set="app-CatalogCheck" test-case="Catalog014" run="false" report="disputed">
+      <created by="Michael Kay" on="2023-01-03"/>
+      <reason>QT4 40-specific tests are missing covers-40 attribute</reason>
    </exception>
    
  
@@ -269,7 +274,15 @@
       <reason>Functionality not yet implemented</reason>
    </exception>
    
- 
+ <exception test-set="misc-BuiltInKeywords" 
+      test-case=" Keywords-fn-scan-left-1
+                  Keywords-fn-scan-right-1
+                  Keywords-fn-invisible-xml-1
+                  " 
+      run="false" report="n/a">
+      <created by="Michael Kay" on="2026-01-05"/>
+      <reason>Functionality not yet implemented</reason>
+   </exception>
  
    
 
