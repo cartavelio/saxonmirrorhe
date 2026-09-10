@@ -102,7 +102,8 @@ public class GeneralComparisonInequalityFeed extends AtomicItemFeed {
                 while ((val = (AtomicValue) comparand.next()) != null) {
                     existsUnstreamed = true;
                     if (!Type.isGenerallyComparable(matchType, val.getPrimitiveType(), false)) {
-                        throw new XPathException("Cannot compare " + matchType + " to " + val.getPrimitiveType(), "FORG0001");
+                        throw new XPathException("Comparison between " + matchType + " and " + val.getPrimitiveType() + " is not allowed",
+                                                 "XPTY0004", getExpression().getLocation());
                     }
                     if (val.isUntypedAtomic()) {
                         firstUntypedUnstreamed = (StringValue) val;
