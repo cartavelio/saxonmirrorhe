@@ -212,7 +212,7 @@ public class DeepUpdate2 extends Instruction {
                         }
                         // TODO: test if it belongs to the right tree
                         GroundedValue replacementValue = actionEval.evaluate(c3).materialize();
-                        Item parent = (Item)label.get(LabelTool.PARENT_KEY);
+                        Item parent = (Item)label.getU(LabelTool.PARENT_KEY);
                         GroundedValue val = replacementValue;
                         while (parent != null) {
                             Item latestParent = parent;
@@ -222,27 +222,27 @@ public class DeepUpdate2 extends Instruction {
                             if (containerSubstitutions.containsKey(parent)) {
                                 latestParent = containerSubstitutions.get(parent);
                             }
-                            int position = ((IntegerValue) label.get(LabelTool.POSITION_KEY)).asSubscript();
+                            int position = ((IntegerValue) label.getU(LabelTool.POSITION_KEY)).asSubscript();
                             if (latestParent instanceof ArrayItem) {
-                                int arrayPos = ((IntegerValue) label.get(LabelTool.KEY_KEY)).asSubscript() - 1;
+                                int arrayPos = ((IntegerValue) label.getU(LabelTool.KEY_KEY)).asSubscript() - 1;
                                 GroundedValue oldMember = ((ArrayItem) latestParent).get(arrayPos);
                                 GroundedValue newMember = replaceItem(oldMember, position, val);
                                 val = ((ArrayItem) latestParent).put(
-                                            ((IntegerValue) label.get(LabelTool.KEY_KEY)).asSubscript() - 1, newMember);
+                                        ((IntegerValue) label.getU(LabelTool.KEY_KEY)).asSubscript() - 1, newMember);
 
                             } else if (latestParent instanceof MapItem) {
-                                AtomicValue keyVal = (AtomicValue) label.get(LabelTool.KEY_KEY);
+                                AtomicValue keyVal = (AtomicValue) label.getU(LabelTool.KEY_KEY);
                                 GroundedValue oldMember = ((MapItem) latestParent).get(keyVal);
                                 GroundedValue newMember = replaceItem(oldMember, position, val);
                                 val = ((MapItem) latestParent).addEntry(
-                                        ((AtomicValue) label.get(LabelTool.KEY_KEY)), newMember);
+                                        ((AtomicValue) label.getU(LabelTool.KEY_KEY)), newMember);
                             } else {
                                 assert false;
                             }
                             containerSubstitutions.put(parent, (Item) val);
                             containerSubstitutions.put(latestParent, (Item) val);
                             label = parent.getLabel();
-                            parent = (Item)label.get(LabelTool.PARENT_KEY);
+                            parent = (Item)label.getU(LabelTool.PARENT_KEY);
                             finalRoot = (Item)val;
                         }
 

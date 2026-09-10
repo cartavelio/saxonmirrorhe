@@ -16,6 +16,7 @@ import net.sf.saxon.expr.parser.ExpressionTool;
 import net.sf.saxon.expr.parser.ExpressionVisitor;
 import net.sf.saxon.expr.parser.RebindingMap;
 import net.sf.saxon.ma.arrays.SimpleArrayItem;
+import net.sf.saxon.ma.map.Shape;
 import net.sf.saxon.ma.map.ShapedMap;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.SequenceIterator;
@@ -237,7 +238,7 @@ public class DeepLookupAllExpression extends UnaryExpression {
             TypeHierarchy th = getConfiguration().getTypeHierarchy();
             Predicate<Item> filter = expr.requiredType.equals(SequenceType.ANY_SEQUENCE)
                     ? item -> true
-                    : item -> expr.requiredType.matches(((ShapedMap)item).get("value"), th);
+                    : item -> expr.requiredType.matches(((ShapedMap)item).getU(Shape.VALUE), th);
             return context -> {
                 List<Item> result = new ArrayList<>();
                 SequenceIterator lhsIter = lhs.iterate(context);
@@ -260,16 +261,16 @@ public class DeepLookupAllExpression extends UnaryExpression {
             case KEY:
                 return new ItemMappingIterator(
                         entryIterator,
-                        item -> (AtomicValue) ((ShapedMap) item).get("key"));
+                        item -> (AtomicValue) ((ShapedMap) item).getU(Shape.KEY));
             case VALUE:
                 return new ItemMappingIterator(
                         entryIterator,
-                        item -> SimpleArrayItem.makeSimpleArrayItem(((ShapedMap) item).get("value").iterate()));
+                        item -> SimpleArrayItem.makeSimpleArrayItem(((ShapedMap) item).getU(Shape.VALUE).iterate()));
             case CONTENT:
             default:
                 return new MappingIterator(
                         entryIterator,
-                        item -> ((ShapedMap) item).get("value").iterate());
+                        item -> ((ShapedMap) item).getU(Shape.VALUE).iterate());
         }
     }
 

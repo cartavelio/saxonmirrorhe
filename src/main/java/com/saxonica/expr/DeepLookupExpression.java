@@ -16,10 +16,7 @@ import net.sf.saxon.expr.elab.PullElaborator;
 import net.sf.saxon.expr.elab.PullEvaluator;
 import net.sf.saxon.expr.parser.*;
 import net.sf.saxon.ma.arrays.ArrayItem;
-import net.sf.saxon.ma.map.HashTrieMap;
-import net.sf.saxon.ma.map.MapItem;
-import net.sf.saxon.ma.map.ShapedMap;
-import net.sf.saxon.ma.map.SingleEntryMap;
+import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.GroundedValue;
 import net.sf.saxon.om.Item;
 import net.sf.saxon.om.NameChecker;
@@ -303,7 +300,7 @@ public class DeepLookupExpression extends BinaryExpression {
                             lhsItem = LabeledMapItem.makePinnedMapItem((MapItem) lhsItem);
                         }
                         gatherRecursiveContent(lhsItem, content,
-                                               item -> finalKeySet.get((AtomicValue)((ShapedMap) item).get("key")) != null);
+                                               item -> finalKeySet.get((AtomicValue)((ShapedMap) item).getU(Shape.KEY)) != null);
                     }
                     SequenceIterator selectedEntries = new ListIterator.Of<>(content);
                     return DeepLookupAllExpression.modifiedIterator(selectedEntries, expr.modifier);
@@ -325,7 +322,7 @@ public class DeepLookupExpression extends BinaryExpression {
                     Item lhsItem;
                     while ((lhsItem = lhsIter.next()) != null) {
                         gatherRecursiveContent(lhsItem, content,
-                                               item -> finalKeySet.get((AtomicValue)((ShapedMap) item).get("key")) != null);
+                                               item -> finalKeySet.get((AtomicValue)((ShapedMap) item).getU(Shape.KEY)) != null);
                     }
                     SequenceIterator selectedEntries = new ListIterator.Of<>(content);
                     return DeepLookupAllExpression.modifiedIterator(selectedEntries, expr.modifier);
@@ -367,7 +364,7 @@ public class DeepLookupExpression extends BinaryExpression {
             if (matcher.test(child)) {
                 result.add(child);
             }
-            for (Item childItem : ((ShapedMap)child).get("value").asIterable()) {
+            for (Item childItem : ((ShapedMap)child).getU(Shape.VALUE).asIterable()) {
                 gatherRecursiveContent(childItem, result, matcher);
             }
         }

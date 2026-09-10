@@ -316,7 +316,7 @@ public class LookupAllExpression40 extends LookupAllExpression {
                 });
                 if (req != SequenceType.ANY_SEQUENCE) {
                     entries = new ItemMappingIterator(entries, entry ->
-                            req.matches(((ShapedMap) entry).get("value"), th) ? entry : null
+                            req.matches(((ShapedMap) entry).getU(Shape.VALUE), th) ? entry : null
                     );
                 }
                 switch (expr.modifier) {
@@ -324,14 +324,14 @@ public class LookupAllExpression40 extends LookupAllExpression {
                         return entries;
                     case KEY:
                         return new ItemMappingIterator(entries, item ->
-                                (AtomicValue) ((ShapedMap) item).get("key"));
+                                (AtomicValue) ((ShapedMap) item).getU(Shape.KEY));
                     case VALUE:
                         return new ItemMappingIterator(entries, item ->
-                                SimpleArrayItem.makeSimpleArrayItem(((ShapedMap) item).get("value").iterate()));
+                                SimpleArrayItem.makeSimpleArrayItem(((ShapedMap) item).getU(Shape.VALUE).iterate()));
                     case CONTENT:
                     default:
                         return new MappingIterator(entries, item ->
-                                ((ShapedMap) item).get("value").iterate());
+                                ((ShapedMap) item).getU(Shape.VALUE).iterate());
                 }
             };
         }
