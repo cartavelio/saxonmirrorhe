@@ -15,18 +15,17 @@ import net.sf.saxon.expr.parser.RoleDiagnostic;
 import net.sf.saxon.expr.parser.TypeChecker;
 import net.sf.saxon.functions.CallableFunction;
 import net.sf.saxon.lib.Feature;
+import net.sf.saxon.ma.map.MapBuilder;
 import net.sf.saxon.ma.map.MapFunctionSet;
-import net.sf.saxon.ma.map.MapItem;
 import net.sf.saxon.ma.map.MapType;
-import net.sf.saxon.ma.map.SingleEntryMap;
-import net.sf.saxon.om.AttributeInfo;
-import net.sf.saxon.om.FunctionItem;
-import net.sf.saxon.om.NodeInfo;
-import net.sf.saxon.om.NodeName;
+import net.sf.saxon.ma.map.SimpleMap;
+import net.sf.saxon.om.*;
 import net.sf.saxon.trans.UncheckedXPathException;
 import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.type.ItemType;
 import net.sf.saxon.type.SpecificFunctionType;
+import net.sf.saxon.value.BooleanValue;
+import net.sf.saxon.value.QNameValue;
 import net.sf.saxon.value.SequenceType;
 import net.sf.saxon.value.StringValue;
 
@@ -126,8 +125,10 @@ public class XSLMap extends StyleElement implements AutoDocumentInhibitor {
             optionsExp = MapFunctionSet.getInstance(31).makeFunction("entry", 2).makeFunctionCall(
                     new StringLiteral("duplicates"), onDuplicates);
         } else {
-            MapItem options = new SingleEntryMap(new StringValue("duplicates"), mapConstructorDuplicatesAction);
-            optionsExp = Literal.makeLiteral(options, select);
+            MapBuilder optionsBuilder = SimpleMap.getBuilder();
+            optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
+            optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
+            optionsExp = Literal.makeLiteral(optionsBuilder.getCompletedMap());
         }
 
         Expression exp = MapFunctionSet.getInstance(40).makeFunction("merge", 2)

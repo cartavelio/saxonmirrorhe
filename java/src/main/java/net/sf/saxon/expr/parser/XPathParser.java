@@ -32,10 +32,10 @@ import net.sf.saxon.ma.arrays.SquareArrayConstructor;
 import net.sf.saxon.ma.map.*;
 import net.sf.saxon.om.*;
 import net.sf.saxon.pattern.*;
-import net.sf.saxon.pattern.qname.QNameTest;
-import net.sf.saxon.pattern.qname.NamespaceQNameTest;
-import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.pattern.qname.LocalQNameTest;
+import net.sf.saxon.pattern.qname.NamespaceQNameTest;
+import net.sf.saxon.pattern.qname.QNameTest;
+import net.sf.saxon.pattern.qname.SpecificQNameTest;
 import net.sf.saxon.query.AnnotationList;
 import net.sf.saxon.query.XQueryFunction;
 import net.sf.saxon.query.XQueryParser;
@@ -4097,8 +4097,10 @@ public class XPathParser {
                     if (allLiteralKeys) {
                         optionsMap = EmptyMap.getInstance();
                     } else {
-                        optionsMap = new SingleEntryMap(new StringValue("duplicates"),
-                                                        mapConstructorDuplicatesAction);
+                        MapBuilder optionsBuilder = SimpleMap.getBuilder();
+                        optionsBuilder.put(new StringValue("duplicates"), mapConstructorDuplicatesAction);
+                        optionsBuilder.put(new QNameValue("", NamespaceUri.SAXON, "allow-streaming"), BooleanValue.TRUE);
+                        optionsMap = optionsBuilder.getCompletedMap();
                     }
                     result = MapFunctionSet.getInstance(31).makeFunction("merge", 2)
                         .makeFunctionCall(block, Literal.makeLiteral(optionsMap));
