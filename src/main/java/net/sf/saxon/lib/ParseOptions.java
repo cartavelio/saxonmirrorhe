@@ -135,9 +135,7 @@ public class ParseOptions {
      */
 
     public ParseOptions(/*@NotNull*/ ParseOptions p) {
-        initDefaults();
-
-        //ExitCounter.countCaller();
+        super();
 
         schemaValidation = p.schemaValidation;
         validationParams = p.validationParams;

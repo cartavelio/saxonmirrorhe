@@ -366,7 +366,7 @@ public class DocumentInstr extends ParentNodeConstructor {
                 return context -> {
                     try {
                         Controller controller = context.getController();
-                        PipelineConfiguration pipe = controller.makePipelineConfiguration();
+                        PipelineConfiguration pipe = controller.makePipelineConfiguration(true);
                         pipe.setXPathContext(context);
 
                         Builder builder;

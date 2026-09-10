@@ -53,6 +53,11 @@ public class PipelineConfiguration {
         parseOptions = new ParseOptions();
     }
 
+    public PipelineConfiguration(/*@NotNull*/ Configuration config, ParseOptions parseOptions) {
+        this.config = config;
+        this.parseOptions = parseOptions;
+    }
+
     /**
      * Create a PipelineConfiguration as a copy of an existing
      * PipelineConfiguration

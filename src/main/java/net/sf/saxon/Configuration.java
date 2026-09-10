@@ -3929,8 +3929,7 @@ public class Configuration implements SourceResolver, NotationSet {
      */
 
     public PipelineConfiguration makePipelineConfiguration() {
-        PipelineConfiguration pipe = new PipelineConfiguration(this);
-        pipe.setParseOptions(new ParseOptions(defaultParseOptions));
+        PipelineConfiguration pipe = new PipelineConfiguration(this, new ParseOptions(defaultParseOptions));
         pipe.setErrorReporter(makeErrorReporter());
         return pipe;
     }
