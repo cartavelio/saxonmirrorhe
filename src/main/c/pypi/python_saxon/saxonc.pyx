@@ -3060,7 +3060,7 @@ cdef class PyXPathProcessor:
         Returns:
             PyXdmValue: the result of evaluating the XPath expression
         Raises:
-            PySaxonApiError: Error if failure to evaluate XPATH
+            PySaxonApiError: Error if failure to evaluate XPath expression
         """
         '''c_xpath = make_c_str(xpath_str)'''
         py_value_string = xpath_str.encode('utf-8') if xpath_str is not None else None
@@ -3194,7 +3194,7 @@ cdef class PyXPathProcessor:
         Args:
             xpath_str (str): XPath expression supplied as a string
         Returns:
-            boolean: The result is a boolean value. 4
+            boolean: The result is a boolean value.
         Raises:
             PySaxonApiError: Error if failure to evaluate XPath expression
         """
@@ -3471,11 +3471,11 @@ cdef class PySchemaValidator:
         validate(self, **kwds)
         Validate an instance document by a registered schema.
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (file_name|xml_text|xdm_node).
+            **kwds: Possible keyword arguments: must be one of the following (file_name|xdm_node|xml_text).
                 Specifies the source file to be validated. Allow None when source document is
                 supplied using the set_source_node method
         Raises:
-            Exception: Error if incorrect keyword used - Option available file_name|xdm_node|xml_text
+            Exception: Error if incorrect keyword used, options available: file_name|xdm_node|xml_text
             PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
             that prevented validation from taking place (such as failure to read or parse the input document)
         """
@@ -3503,13 +3503,13 @@ cdef class PySchemaValidator:
         validate_to_node(self, **kwds)
         Validate an instance document by a registered schema, returning the validated document.
         Args:
-            **kwds: Possible keyword arguments: must be one of the following (file_name|xml_text|xdm_node).
+            **kwds: Possible keyword arguments: must be one of the following (file_name|xdm_node|xml_text).
                 Specifies the source file to be validated. Allow None when source document is supplied
                 using the set_source_node method.
         Returns:
             PyXdmNode: The validated document returned to the calling program as a PyXdmNode
         Raises:
-            Exception: Error if incorrect keyword used - Option available file_name|xdm_node|xml_text
+            Exception: Error if incorrect keyword used, options available: file_name|xdm_node|xml_text
             PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
             that prevented validation from taking place (such as failure to read or parse the input document)
         """
@@ -3559,7 +3559,7 @@ cdef class PySchemaValidator:
         Returns:
             PyXdmNode: The Validation report result from the Schema validator
         Raises:
-            Exception: Error if incorrect keyword used - Option available file_name|xdm_node|xml_text
+            Exception: Error if incorrect keyword used, option available: file_name|xdm_node|xml_text
             PySaxonApiError: if the source document is found to be invalid, or if error conditions occur
             that prevented validation from taking place (such as failure to read or parse the input document)
         """
