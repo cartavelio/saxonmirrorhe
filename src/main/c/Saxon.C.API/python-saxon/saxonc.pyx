@@ -4008,7 +4008,7 @@ cdef class PyXdmItem(PyXdmValue):
         """
         cdef PyXdmNode val = None
         if self.is_node == False:
-          raise Exception("The PyXdmItem is not an PyXdmNode therefore cannot be sub-classed to a PyXdmNode")
+          raise Exception("The PyXdmItem is not a PyXdmNode therefore cannot be sub-classed to a PyXdmNode")
         val = PyXdmNode()
         val.derivednptr = val.derivedptr = <saxoncClasses.XdmNode*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
@@ -4023,7 +4023,7 @@ cdef class PyXdmItem(PyXdmValue):
         """
         cdef PyXdmMap val = None
         if self.is_map == False:
-          raise Exception("The PyXdmItem is not an PyXdmMap therefore cannot be sub-classed to a PyXdmMap")
+          raise Exception("The PyXdmItem is not a PyXdmMap therefore cannot be sub-classed to a PyXdmMap")
         val = PyXdmMap()
         val.derivedmmptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmMap*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
@@ -4038,7 +4038,7 @@ cdef class PyXdmItem(PyXdmValue):
         """
         cdef PyXdmFunctionItem val = None
         if self.is_function == False:
-          raise Exception("The PyXdmItem is not an PyXdmFunctionItem therefore cannot be sub-classed to a PyXdmFunctionItem")
+          raise Exception("The PyXdmItem is not a PyXdmFunctionItem therefore cannot be sub-classed to a PyXdmFunctionItem")
         val = PyXdmFunctionItem()
         val.derivedfptr = val.derivedptr = <saxoncClasses.XdmFunctionItem*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
@@ -4053,7 +4053,7 @@ cdef class PyXdmItem(PyXdmValue):
         """
         cdef PyXdmArray val = None
         if self.is_array == False:
-          raise Exception("The PyXdmItem is not an PyXdmArray therefore cannot be sub-classed to a PyXdmArray")
+          raise Exception("The PyXdmItem is not a PyXdmArray therefore cannot be sub-classed to a PyXdmArray")
         val = PyXdmArray()
         val.derivedaaptr = val.derivedfptr = val.derivedptr = <saxoncClasses.XdmArray*> self.derivedptr
         '''val.derivednptr.incrementRefCount()'''
