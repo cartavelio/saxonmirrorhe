@@ -164,7 +164,7 @@ public class NativeCall implements ExtensionFunction {
 
     // Declare a native method _native()
     @CFunction
-    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer func, CLongPointer addr);
+    public static native ObjectHandle c_nativeCall(CCharPointer c_funcName, CFunctionPointer func, int length, CLongPointer addr);
 
 
     @Override
@@ -204,10 +204,12 @@ public class NativeCall implements ExtensionFunction {
                 addr = SaxonCAPI.longArrayToNative(alloc, argumentRefs);
             }
 
+            System.err.println("Java SaxonC Debug NativeCall.call= " + arguments.length);
 
-            ObjectHandle valueRef = c_nativeCall(holder.get(), func, addr); // pass arguments as an array
 
+            ObjectHandle valueRef = c_nativeCall(holder.get(), func, arguments.length, addr); // pass arguments as an array
 
+             // get info on the return type
             if (valueRef != WordFactory.nullPointer()) {
                 XdmAtomicValue xdmValue = SaxonCAPI.objectHandles.get(valueRef);
 
